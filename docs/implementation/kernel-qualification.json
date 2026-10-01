@@ -7,14 +7,15 @@
   "restore": "locked-mode passed",
   "build": "passed with zero warnings",
   "unitTests": {
-    "passed": 26,
+    "passed": 42,
     "failed": 0
   },
   "recoveryTests": {
-    "passed": 43,
+    "passed": 50,
     "failed": 0,
     "seededProcessCrashes": 1000,
     "checkpointPublicationCrashes": 8,
+    "subscriptionProcessingCrashes": 7,
     "nativeRaftAcknowledgementCrashes": 4,
     "nativeSnapshotTests": 2,
     "peerSecurityTests": 6,
@@ -34,11 +35,14 @@
       "leader process kill",
       "same-command outcome retry",
       "atomic inbox/effects/ACK",
+      "retained topics and contiguous subscription ACK after leader loss",
+      "subscription inbox replay without duplicate effects",
       "minority read/write rejection",
       "voter restart",
       "unsigned peer RPC rejection",
       "empty-replica native snapshot catch-up",
-      "command outcome preserved across snapshot installation"
+      "command outcome preserved across snapshot installation",
+      "topic events, group checkpoints and inbox receipts preserved across snapshot installation"
     ]
   },
   "durability": [
@@ -47,5 +51,10 @@
   ],
   "powerLoss": "not qualified",
   "endurance72Hours": "pending",
-  "crossPlatformCI": "pending"
+  "crossPlatformCI": {
+    "qualifiedCommit": "2bc7ccc93997a36555c71553403d5539d64b90d7",
+    "run": "https://github.com/managedcode/KeyLoad/actions/runs/36885624099",
+    "platforms": ["Linux", "macOS", "Windows"],
+    "currentTopicSubscriptionChanges": "pending"
+  }
 }

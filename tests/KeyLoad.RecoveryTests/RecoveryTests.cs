@@ -5,7 +5,7 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests;
 
-public sealed class RecoveryTests
+public sealed partial class RecoveryTests
 {
     public static TheoryData<int> Batches => new(Enumerable.Range(0, 20));
     [Theory]

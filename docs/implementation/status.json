@@ -595,6 +595,7 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Contracts.cs",
+      "src/KeyLoad.Abstractions/Subscriptions.cs",
       "docs/implementation/durability-audit.md"
     ]
   },
@@ -603,6 +604,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Events.cs",
+      "src/KeyLoad.Core/EventSources.cs",
+      "src/KeyLoad.Core/SubscriptionGroups.cs",
       "tests/KeyLoad.UnitTests/TransactionTests.cs"
     ]
   },
@@ -611,7 +614,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Events.cs",
-      "tests/KeyLoad.UnitTests/TransactionTests.cs"
+      "tests/KeyLoad.UnitTests/TransactionTests.cs",
+      "tests/KeyLoad.UnitTests/SubscriptionTests.cs"
     ]
   },
   "KL-084": {
@@ -619,7 +623,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Events.cs",
-      "tests/KeyLoad.UnitTests/TransactionTests.cs"
+      "src/KeyLoad.Core/EventSources.cs",
+      "tests/KeyLoad.UnitTests/TransactionTests.cs",
+      "tests/KeyLoad.UnitTests/SubscriptionTests.cs"
     ]
   },
   "KL-085": {
@@ -656,16 +662,24 @@
   },
   "KL-089": {
     "title": "Durable groups і contiguous checkpoints",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/SubscriptionGroups.cs",
+      "tests/KeyLoad.UnitTests/SubscriptionTests.cs",
+      "tests/KeyLoad.RecoveryTests/SubscriptionRecoveryTests.cs",
+      "tests/KeyLoad.IntegrationTests/ClusterTests.cs"
+    ]
   },
   "KL-090": {
     "title": "Inbox і CommitProcessing",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Messaging.cs",
+      "src/KeyLoad.Core/SubscriptionGroups.cs",
+      "src/KeyLoad.Core/MutationAuthorization.cs",
       "tests/KeyLoad.UnitTests/MessagingTests.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/SubscriptionRecoveryTests.cs"
     ]
   },
   "KL-091": {
@@ -708,7 +722,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "src/KeyLoad.Core/MutationAuthorization.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.UnitTests/SubscriptionTests.cs",
       "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
     ]
   },
@@ -722,6 +738,7 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
+      "src/KeyLoad.Core/EventSources.cs",
       "src/KeyLoad.Artifacts/BackupArtifact.cs",
       "tests/KeyLoad.UnitTests/ArtifactTests.cs"
     ]
@@ -732,7 +749,8 @@
     "evidence": [
       "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
       "tests/KeyLoad.IntegrationTests/ClusterTests.cs",
-      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+      "tests/KeyLoad.RecoveryTests/SubscriptionRecoveryTests.cs"
     ]
   },
   "KL-100": {

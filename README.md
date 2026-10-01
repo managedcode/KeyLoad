@@ -1,6 +1,6 @@
 # KeyLoad
 
-KeyLoad is a .NET database built around atomic transaction domains, durable ordered storage, and an RF3 Raft cluster. Documents, event streams, work queues, graph edges, samples and vector sidecars share the same transactional command path. Orleans provides the routing layer; each node owns its ZoneTree materialization and journals.
+KeyLoad is a .NET database built around atomic transaction domains, durable ordered storage, and an RF3 Raft cluster. Documents, event streams, retained topics, subscription groups, work queues, graph edges, samples and vector sidecars share the same transactional command path. Orleans provides the routing layer; each node owns its ZoneTree materialization and journals.
 
 The original load-testing prototype has been replaced. This repository implements the new [architecture and development plan](docs/design/architecture-v0.3.uk.md), with the [original HTML edition](docs/design/architecture-v0.3.uk.html) preserved alongside it.
 
@@ -8,9 +8,9 @@ The original load-testing prototype has been replaced. This repository implement
 
 This is an early implementation of the clustered kernel. The default server topology has three persistent voting nodes and requires a majority for writes and strong reads. It needs no external database, Redis or message broker.
 
-Implemented surfaces include document CRUD and field patches, partition-scoped unique/composite equality indexes, command deduplication, stream expected-revision append/read, scheduled work queues with fenced leases and retry/DLQ, atomic inbox completion, bounded property-graph traversal, ordered samples, exact vector search, BM25 and weighted reciprocal-rank fusion, a bounded read-only Q1 SQL dialect, API keys, field omission and field-use policies, verified backups, native Raft snapshots and empty-replica catch-up, offline journal compaction, a .NET SDK and CLI.
+Implemented surfaces include document CRUD and field patches, partition-scoped unique/composite equality indexes, command deduplication, stream expected-revision append/read, retained topics, per-source durable subscriptions with bounded delivery windows and contiguous checkpoints, scheduled work queues with fenced leases and retry/DLQ, atomic inbox completion, bounded property-graph traversal, ordered samples, exact vector search, BM25 and weighted reciprocal-rank fusion, a bounded read-only Q1 SQL dialect, API keys, field omission and field-use policies, verified backups, native Raft snapshots and empty-replica catch-up, offline journal compaction, a .NET SDK and CLI.
 
-The [104-task implementation tracker](docs/implementation/status.json) records the remaining work. Automatic canonical journal maintenance, large and interrupted snapshot transfer qualification, shard movement, distributed multi-shard query planning, managed HNSW, topics and subscription groups, CDC, retention, schema migrations, external backup stores and full release qualification remain under development. The current server uses one replicated physical shard which contains many independent atomic partitions.
+The [104-task implementation tracker](docs/implementation/status.json) records the remaining work. Automatic canonical journal maintenance, large and interrupted snapshot transfer qualification, shard movement, distributed multi-shard query planning, managed HNSW, subscription coverage discovery across partitions and rebalance, CDC, retention, schema migrations, external backup stores and full release qualification remain under development. The current server uses one replicated physical shard which contains many independent atomic partitions.
 
 The advertised profiles are `ProcessDurable` for embedded storage and `QuorumProcessDurable` for the cluster. The kernel has process-kill recovery tests and the cluster has real leader-loss and minority tests. Power-loss qualification, broader platform qualification and the 72-hour endurance gate are still required before advertising `LocalDurable`, `QuorumDurable` or production readiness.
 
@@ -85,6 +85,42 @@ foreach (var delivery in received.Value.Deliveries)
 
 `CommitProcessing` atomically stores the same-partition effects, inbox receipt and ACK. A stale lease cannot acknowledge a later delivery. External side effects need their own idempotency or outbox integration.
 
+## Retained topics and subscriptions
+
+Topics retain events once per source. Each durable group owns its delivery window, attempts, leases and checkpoint. Groups can also subscribe to one stream generation using `EventSourceKind.Stream` and a stream ID. Source identity includes the atomic partition; cross-partition coverage is still being developed.
+
+```csharp
+await client.ConfigureResourceAsync(Guid.NewGuid(), new("acme", "shop",
+    new ResourceDefinition("activity", ResourceKind.Topic, "order-processing")));
+var source = new EventSourceRef(partition, "activity", EventSourceKind.Topic);
+var group = new SubscriptionRef(source, "projection");
+await client.ConfigureSubscriptionAsync(new(Guid.NewGuid(), group,
+    new SubscriptionDefinition("root"), SubscriptionStart.FromBeginning));
+
+var publish = new CommandRequest(Guid.NewGuid(), partition,
+    [new PublishTopic("activity", [new("activity-1", "OrderCreated", "{\"number\":1}")])]);
+(await client.CommitAsync(publish)).ThrowIfFail();
+
+var groupReceived = await client.ReceiveSubscriptionAsync(new(Guid.NewGuid(), group, MaxEvents: 10));
+groupReceived.ThrowIfFail();
+foreach (var delivery in groupReceived.Value.Deliveries)
+{
+    var processing = new SubscriptionProcessingRequest(Guid.NewGuid(), group, delivery.Token,
+        "order-projection", ExecutionGeneration: 1,
+        [new PutDocument("orders", "projection-" + delivery.Event.Data.EventId,
+            delivery.Event.Data.PayloadJson, ExpectedRevision: 0)]);
+    (await client.CommitSubscriptionProcessingAsync(processing)).ThrowIfFail();
+}
+```
+
+Use the application's data principal for a deployed group; `root` above is the local development principal. Delivery projects the intersection of that data principal's and the worker's current field permissions. A missing required input grant stops delivery. Revocation or a policy epoch change invalidates old payload retries and acknowledgement tokens.
+
+Keep publish, receive and processing IDs stable while resolving an uncertain outcome. Event IDs are unique within a retained topic or stream generation: identical reuse returns `DuplicateEventId`, and changed content returns `Conflict`. Subscription processing stores effects, inbox and ACK in one commit. Replay of the same handler/input returns `AlreadyProcessed` and `OriginalEffectsToken`; a newly leased replay is acknowledged without applying those effects again. A different authorized worker can recover the same inbox outcome after current effect permissions are checked.
+
+ACK only advances a contiguous prefix. ACKs for positions 1 and 3 leave checkpoint 1 until position 2 finishes. `MaxWindow` bounds gaps and active deliveries. NACK uses bounded exponential backoff; exhausted attempts park the unresolved position and pause the group. `SeekSubscriptionAsync` advances its generation, fences previous leases and pauses the group until an explicit resume through `SetSubscriptionPausedAsync`.
+
+`FromNow` records the current source tail inside the creation commit. `FromCursor` uses a signed, principal-bound cursor from `ReadEventSourceAsync`; even an empty page at the tail returns a cursor for later catch-up. Topics enforce retained event/byte quotas and reject the entire producer batch when full. Retention reclamation, group deletion/filter migration and completion-audit compaction remain tracked work.
+
 ## Queries and search
 
 ```csharp
@@ -143,7 +179,7 @@ dotnet test --project tests/KeyLoad.RecoveryTests --no-build --no-restore
 dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore
 ```
 
-Tests use xUnit and Microsoft.Testing.Platform. Recovery qualification runs 1000 seeded real-process kills, checks complete-frame corruption and verifies a clean backup restore. Additional process kills cover checkpoint publication and all native Raft append paths immediately after acknowledgement. Integration tests own the Aspire lifecycle and use three independent server processes with isolated persistent directories. They kill the elected leader, retry the same command, verify atomic effects on surviving voters, reject a minority write and erase/restart one replica to require snapshot catch-up. No manually running AppHost is needed for tests.
+Tests use xUnit and Microsoft.Testing.Platform. Recovery qualification runs 1000 seeded real-process kills, checks complete-frame corruption and verifies a clean backup restore. Additional process kills cover checkpoint publication, native Raft append acknowledgement and subscription effects/inbox/checkpoint publication. Integration tests own the Aspire lifecycle and use three independent server processes with isolated persistent directories. They kill the elected leader, retry the same command, verify atomic effects and topic delivery on surviving voters, reject a minority write and erase/restart one replica to require snapshot catch-up of documents, group checkpoints and inbox outcomes. No manually running AppHost is needed for tests.
 
 Benchmarks can be started with `dotnet run -c Release --project benchmarks/KeyLoad.Benchmarks`. Comparative PostgreSQL/Marten/Wolverine and multi-node scaling qualification are part of the development plan; no comparative performance claims are made yet.
 

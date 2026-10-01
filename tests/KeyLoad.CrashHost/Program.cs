@@ -1,6 +1,9 @@
+using KeyLoad;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Replication;
+using KeyLoad.Core;
+using KeyLoad.Security;
 using DotNext.IO.Log;
 using DotNext.Net.Cluster.Consensus.Raft;
 using DotNext.Net.Cluster.Consensus.Raft.StateMachine;
@@ -30,17 +33,43 @@ var stage = Enum.Parse<CommitStage>(args[1]);
 var mutationIndex = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
 var mode = args.Length > 3 ? args[3] : "commit";
 var armed = mode == "commit";
+var crashPosition = 2L;
 using var store = new ZoneTreeStore(new(directory)
 {
     FaultObserver = (observed, position, index) =>
     {
-        if (armed && position == 2 && observed == stage && (stage != CommitStage.MutationApplied || index == mutationIndex))
+        if (armed && position == crashPosition && observed == stage && (stage != CommitStage.MutationApplied || index == mutationIndex))
         {
             Console.WriteLine("crash-point"); Console.Out.Flush();
             Thread.Sleep(Timeout.Infinite);
         }
     }
 });
+if (mode == "subscription-processing")
+{
+    var database = new DatabaseEngine(store, new AuthorizationPolicy());
+    database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
+        DatabaseEngine.Credential("root", "root", "root.crash-test-credential-32-characters"));
+    OperationResult Submit<T>(OperationKind kind, T payload, Guid id) => database.Apply(new(id, kind, "root", DateTimeOffset.UtcNow,
+        System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options)));
+    var partition = SubscriptionCrashScenario.Partition; var subscription = SubscriptionCrashScenario.Subscription;
+    foreach (var resource in new[] { new ResourceDefinition("orders", ResourceKind.Collection, "orders"), new("topic", ResourceKind.Topic, "orders") })
+        Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource), Guid.NewGuid()).Get<ResourceDefinition>();
+    var configure = Guid.NewGuid(); Submit(OperationKind.ConfigureSubscription,
+        new ConfigureSubscriptionRequest(configure, subscription, new("root")), configure).Get<SubscriptionInfo>();
+    var publish = Guid.NewGuid(); Submit(OperationKind.Batch,
+        new CommandRequest(publish, partition, [new PublishTopic("topic", [new("input", "Created", "{}")])]), publish).Get<CommitReceipt>();
+    var receive = Guid.NewGuid(); var delivery = Submit(OperationKind.ReceiveSubscription,
+        new ReceiveSubscriptionRequest(receive, subscription, LeaseSeconds: 300), receive).Get<ReceiveSubscriptionResult>().Deliveries.Single();
+    var request = new SubscriptionProcessingRequest(SubscriptionCrashScenario.CommandId, subscription, delivery.Token, "handler", 1,
+        [new PutDocument("orders", "effect", "{\"complete\":true}", 0)]);
+    var operation = new ReplicatedOperation(request.CommandId, OperationKind.SubscriptionProcessing, "root", DateTimeOffset.UtcNow,
+        System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
+    File.WriteAllBytes(Path.Combine(directory, "processing-command.json"), JsonDefaults.Serialize(operation));
+    crashPosition = store.Position + 1; armed = true;
+    database.Apply(operation).Get<SubscriptionProcessingResult>();
+    Console.WriteLine("ack"); Console.Out.Flush(); Thread.Sleep(Timeout.Infinite); return;
+}
 store.Commit((tx, _) => { for (var i = 0; i < 3; i++) tx.PutRecord(KeyCodec.Encode("item", (long)i), 0);
     if (mode == "install") tx.PutRecord(KeyCodec.Encode("obsolete"), true); return true; });
 store.Commit((tx, _) => { for (var i = 0; i < 3; i++) tx.PutRecord(KeyCodec.Encode("item", (long)i), 1); return true; });
@@ -61,3 +90,9 @@ else if (mode == "install")
 Console.WriteLine("ack"); Console.Out.Flush();
 Thread.Sleep(Timeout.Infinite);
 public sealed class CrashHostMarker;
+public static class SubscriptionCrashScenario
+{
+    public static PartitionRef Partition { get; } = new("tenant", "database", "orders", "partition");
+    public static SubscriptionRef Subscription { get; } = new(new(Partition, "topic", EventSourceKind.Topic), "group");
+    public static Guid CommandId { get; } = new("cd8b971e-e8ee-4c83-bace-1c30954d097b");
+}

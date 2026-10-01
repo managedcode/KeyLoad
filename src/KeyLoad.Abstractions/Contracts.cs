@@ -112,6 +112,7 @@ public sealed record ResourceDefinition(string Name, ResourceKind Kind, string T
     public SensitiveFieldPolicy[] FieldPolicies { get; init; } = [];
     public SensitiveFieldPolicy[] HeaderPolicies { get; init; } = [];
     public QueuePolicy QueuePolicy { get; init; } = new();
+    public EventRetentionPolicy EventRetention { get; init; } = new();
     public DocumentAuthority Authority { get; init; }
     public long SchemaVersion { get; init; } = 1;
     public bool Paused { get; init; }
@@ -125,7 +126,9 @@ public enum Capability : long
     DeadLettersRedrive = 1L << 11, SubscriptionsManage = 1L << 12, GraphRead = 1L << 13,
     GraphWrite = 1L << 14, SeriesRead = 1L << 15, SeriesAppend = 1L << 16, VectorSearch = 1L << 17,
     VectorRaw = 1L << 18, SchemaManage = 1L << 19, SecurityManage = 1L << 20, BackupManage = 1L << 21,
-    BackupRestore = 1L << 22, Diagnose = 1L << 23, DataExport = 1L << 24, All = (1L << 25) - 1
+    BackupRestore = 1L << 22, Diagnose = 1L << 23, DataExport = 1L << 24,
+    TopicsPublish = 1L << 25, TopicsRead = 1L << 26, SubscriptionsConsume = 1L << 27,
+    SubscriptionsAck = 1L << 28, All = (1L << 29) - 1
 }
 public sealed record ScopeGrant(string Database, string Resource, Capability Capabilities);
 public sealed record PrincipalRecord(string Id, string TenantId, ScopeGrant[] Grants, string[] FieldGrants)
@@ -153,6 +156,7 @@ public sealed record StreamPage(StreamRef Stream, StreamHead Head, EventRecord[]
 [JsonDerivedType(typeof(PatchDocument), "patchDocument")]
 [JsonDerivedType(typeof(DeleteDocument), "deleteDocument")]
 [JsonDerivedType(typeof(AppendEvents), "appendEvents")]
+[JsonDerivedType(typeof(PublishTopic), "publishTopic")]
 [JsonDerivedType(typeof(EnqueueMessage), "enqueue")]
 [JsonDerivedType(typeof(UpsertEdge), "upsertEdge")]
 [JsonDerivedType(typeof(DeleteEdge), "deleteEdge")]
@@ -214,7 +218,8 @@ public sealed record VectorRecord(string DocumentId, string Field, VectorSpace S
 public sealed record RankedDocument(DocumentResult Document, double Score);
 
 // Only the trusted server constructs this envelope. Caller roles and timestamps never come from public JSON.
-public enum OperationKind { Batch, Receive, Delivery, Processing, ConfigureResource, ConfigurePrincipal, ConfigureApiKey, SetDispatch, Membership }
+public enum OperationKind { Batch, Receive, Delivery, Processing, ConfigureResource, ConfigurePrincipal, ConfigureApiKey, SetDispatch, Membership,
+    ConfigureSubscription, SeekSubscription, ReceiveSubscription, SubscriptionDelivery, SubscriptionProcessing, SetSubscriptionPaused }
 public sealed record ReplicatedOperation(Guid Id, OperationKind Kind, string PrincipalId, DateTimeOffset EvaluatedAt, string PayloadJson);
 public sealed record OperationResult(string? Json, ErrorCode? Error = null, string? SafeDetail = null)
 {

@@ -140,6 +140,21 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
         if (operation.Kind == OperationKind.Receive && previous.Result.Error is null)
             foreach (var delivery in previous.Result.Get<ReceiveResult>().Deliveries)
                 Lease(view, principal, Payload<ReceiveRequest>(operation).Lane, delivery.Token, operation.EvaluatedAt);
+        if (operation.Kind == OperationKind.ReceiveSubscription && previous.Result.Error is null)
+        {
+            var cached = previous.Result.Get<ReceiveSubscriptionResult>();
+            var state = Group(view, Payload<ReceiveSubscriptionRequest>(operation).Subscription);
+            if (cached.Status.Generation != state.Generation || cached.Status.OwnershipEpoch != state.OwnershipEpoch)
+                throw Errors.Fail(ErrorCode.TokenInvalidated, "The cached receive belongs to an earlier subscription generation.");
+            foreach (var delivery in cached.Deliveries)
+                SubscriptionLease(view, principal, Payload<ReceiveSubscriptionRequest>(operation).Subscription, delivery.Token, operation.EvaluatedAt);
+        }
+        if (operation.Kind == OperationKind.SubscriptionProcessing && previous.Result.Error is null)
+        {
+            var processing = Payload<SubscriptionProcessingRequest>(operation);
+            ValidateGroupClaims(view, principal, processing.Subscription, processing.Token, operation.EvaluatedAt);
+            ReauthorizeEffects(view, principal, processing.Subscription.Source.Partition, processing.Effects);
+        }
     }
     private static T Payload<T>(ReplicatedOperation operation) => JsonDefaults.Deserialize<T>(Encoding.UTF8.GetBytes(operation.PayloadJson));
     private static OperationResult Result<T>(T value) => new(JsonSerializer.Serialize(value, JsonDefaults.Options));
@@ -162,18 +177,39 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
             case OperationKind.Processing:
                 var processing = Payload<ProcessingRequest>(operation);
                 Authorization.Require(principal, processing.Lane.Partition, processing.Lane.Queue, Capability.QueueAck);
-                AuthorizeBatch(view, principal, new(processing.CommandId, processing.Lane.Partition, processing.Effects));
+                AuthorizeBatch(view, principal, new(processing.CommandId, processing.Lane.Partition, processing.Effects), allowEmpty: true);
+                break;
+            case OperationKind.ConfigureSubscription:
+                AuthorizeSubscription(view, principal, Payload<ConfigureSubscriptionRequest>(operation).Subscription,
+                    Capability.SubscriptionsManage, operation.EvaluatedAt); break;
+            case OperationKind.SeekSubscription:
+                AuthorizeSubscription(view, principal, Payload<SeekSubscriptionRequest>(operation).Subscription,
+                    Capability.SubscriptionsManage, operation.EvaluatedAt); break;
+            case OperationKind.SetSubscriptionPaused:
+                AuthorizeSubscription(view, principal, Payload<SetSubscriptionPausedRequest>(operation).Subscription,
+                    Capability.SubscriptionsManage, operation.EvaluatedAt); break;
+            case OperationKind.ReceiveSubscription:
+                AuthorizeSubscription(view, principal, Payload<ReceiveSubscriptionRequest>(operation).Subscription,
+                    Capability.SubscriptionsConsume, operation.EvaluatedAt, requireDataPrincipal: true); break;
+            case OperationKind.SubscriptionDelivery:
+                AuthorizeSubscription(view, principal, Payload<SubscriptionDeliveryCommand>(operation).Subscription,
+                    Capability.SubscriptionsAck, operation.EvaluatedAt, requireDataPrincipal: true); break;
+            case OperationKind.SubscriptionProcessing:
+                var subscriptionProcessing = Payload<SubscriptionProcessingRequest>(operation);
+                AuthorizeSubscription(view, principal, subscriptionProcessing.Subscription, Capability.SubscriptionsAck,
+                    operation.EvaluatedAt, requireDataPrincipal: true);
+                AuthorizeBatch(view, principal, new(subscriptionProcessing.CommandId, subscriptionProcessing.Subscription.Source.Partition, subscriptionProcessing.Effects), allowEmpty: true);
                 break;
             default:
                 if (!principal.ClusterAdministrator) throw Errors.Fail(ErrorCode.PermissionDenied, "Cluster administration is required.");
                 break;
         }
     }
-    private void AuthorizeBatch(IKeyValueView view, PrincipalRecord principal, CommandRequest request)
+    private void AuthorizeBatch(IKeyValueView view, PrincipalRecord principal, CommandRequest request, bool allowEmpty = false)
     {
         ValidatePartition(request.Partition);
         if (request.OwnershipEpoch != 1) throw Errors.Fail(ErrorCode.OwnershipLost, "The partition ownership epoch is stale.");
-        if (request.Mutations.Length is 0 || request.Mutations.Length > Limits.MaxBatchMutations)
+        if (!allowEmpty && request.Mutations.Length == 0 || request.Mutations.Length > Limits.MaxBatchMutations)
             throw Errors.Fail(ErrorCode.ResourceExhausted, "The mutation count exceeds its budget.");
         foreach (var mutation in request.Mutations)
         {
@@ -181,7 +217,7 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
             var capability = mutation switch
             {
                 PutDocument or PatchDocument or DeleteDocument => Capability.DocumentsWrite,
-                AppendEvents => Capability.EventsAppend, EnqueueMessage => Capability.QueuePublish,
+                AppendEvents => Capability.EventsAppend, PublishTopic => Capability.TopicsPublish, EnqueueMessage => Capability.QueuePublish,
                 UpsertEdge or DeleteEdge => Capability.GraphWrite, AppendSamples => Capability.SeriesAppend,
                 PutVector => Capability.DocumentsWrite, _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, "This mutation is unsupported.")
             };
@@ -207,6 +243,24 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
             case OperationKind.Receive: return Result(Receive(tx, principal, Payload<ReceiveRequest>(operation), operation.EvaluatedAt, position));
             case OperationKind.Delivery: return Result(CompleteDelivery(tx, principal, Payload<DeliveryCommand>(operation), operation.EvaluatedAt, position));
             case OperationKind.Processing: return Result(CompleteProcessing(tx, principal, Payload<ProcessingRequest>(operation), operation.EvaluatedAt, position));
+            case OperationKind.ConfigureSubscription:
+                var subscription = Payload<ConfigureSubscriptionRequest>(operation); RequireEnvelopeId(operation, subscription.CommandId);
+                return Result(ConfigureSubscription(tx, principal, subscription, operation.EvaluatedAt));
+            case OperationKind.SeekSubscription:
+                var seek = Payload<SeekSubscriptionRequest>(operation); RequireEnvelopeId(operation, seek.CommandId);
+                return Result(SeekSubscription(tx, principal, seek, operation.EvaluatedAt));
+            case OperationKind.SetSubscriptionPaused:
+                var paused = Payload<SetSubscriptionPausedRequest>(operation); RequireEnvelopeId(operation, paused.CommandId);
+                return Result(SetSubscriptionPaused(tx, paused));
+            case OperationKind.ReceiveSubscription:
+                var subscriptionReceive = Payload<ReceiveSubscriptionRequest>(operation); RequireEnvelopeId(operation, subscriptionReceive.RequestId);
+                return Result(ReceiveSubscription(tx, principal, subscriptionReceive, operation.EvaluatedAt, position));
+            case OperationKind.SubscriptionDelivery:
+                var subscriptionDelivery = Payload<SubscriptionDeliveryCommand>(operation); RequireEnvelopeId(operation, subscriptionDelivery.CommandId);
+                return Result(CompleteSubscriptionDelivery(tx, principal, subscriptionDelivery, operation.EvaluatedAt, position));
+            case OperationKind.SubscriptionProcessing:
+                var subscriptionProcess = Payload<SubscriptionProcessingRequest>(operation); RequireEnvelopeId(operation, subscriptionProcess.CommandId);
+                return Result(CompleteSubscriptionProcessing(tx, principal, subscriptionProcess, operation.EvaluatedAt, position));
             case OperationKind.ConfigureResource:
                 var config = Payload<ConfigureResourceRequest>(operation);
                 ValidateResource(config);
@@ -260,6 +314,8 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
         }
         foreach (var policy in definition.FieldPolicies.Concat(definition.HeaderPolicies)) JsonData.PathSegments(policy.Path);
         var q = definition.QueuePolicy;
+        if (definition.EventRetention.MaxEvents < 1 || definition.EventRetention.MaxBytes < 1)
+            throw Errors.Fail(ErrorCode.Validation, "The retained event quota is invalid.");
         if (q.MaxAttempts < 1 || q.MaxLeaseSeconds is < 1 or > 3_600 || q.MaxStoredMessages < 1 || q.MaxStoredBytes < 1
             || q.MaxInFlightMessages < 1 || q.MaxInFlightBytes < 1 || q.RetryBaseMilliseconds < 1 || q.RetryMaxMilliseconds < q.RetryBaseMilliseconds)
             throw Errors.Fail(ErrorCode.Validation, "The queue policy is invalid.");
@@ -276,6 +332,7 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
                 PatchDocument patch => Patch(tx, principal, partition, patch, now),
                 DeleteDocument delete => Delete(tx, principal, partition, delete, now),
                 AppendEvents events => Append(tx, principal, partition, events, now),
+                PublishTopic topic => Publish(tx, principal, partition, topic, now),
                 EnqueueMessage message => Enqueue(tx, principal, partition, message, now),
                 UpsertEdge edge => Upsert(tx, principal, partition, edge),
                 DeleteEdge edge => RemoveEdge(tx, principal, partition, edge),
@@ -285,6 +342,10 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
             });
         }
         return receipts.ToArray();
+    }
+    private static void RequireEnvelopeId(ReplicatedOperation operation, Guid id)
+    {
+        if (id != operation.Id) throw Errors.Fail(ErrorCode.Validation, "The envelope and request IDs differ.");
     }
 }
 public sealed record MembershipMutation(string Key, long ExpectedVersion, string Json);

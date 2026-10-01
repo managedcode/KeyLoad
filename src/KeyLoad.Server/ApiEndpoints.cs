@@ -21,6 +21,22 @@ public static class ApiEndpoints
             database.GetDocument(Principal(context), request.Reference));
         app.MapPost("/v1/streams/read", (ReadStreamRequest request, DatabaseEngine database, HttpContext context) =>
             database.ReadStream(Principal(context), request.Stream, request.AfterRevision, request.Limit));
+        app.MapPost("/v1/events/read", (ReadEventSourceRequest request, DatabaseEngine database, HttpContext context) =>
+            database.ReadEventSource(Principal(context), request));
+        app.MapPost("/v1/subscriptions/configure", (ConfigureSubscriptionRequest request, HttpContext context) =>
+            Submit<SubscriptionInfo, ConfigureSubscriptionRequest>(context, OperationKind.ConfigureSubscription, request.CommandId, request));
+        app.MapPost("/v1/subscriptions/seek", (SeekSubscriptionRequest request, HttpContext context) =>
+            Submit<SubscriptionInfo, SeekSubscriptionRequest>(context, OperationKind.SeekSubscription, request.CommandId, request));
+        app.MapPost("/v1/subscriptions/pause", (SetSubscriptionPausedRequest request, HttpContext context) =>
+            Submit<SubscriptionInfo, SetSubscriptionPausedRequest>(context, OperationKind.SetSubscriptionPaused, request.CommandId, request));
+        app.MapPost("/v1/subscriptions/receive", (ReceiveSubscriptionRequest request, HttpContext context) =>
+            Submit<ReceiveSubscriptionResult, ReceiveSubscriptionRequest>(context, OperationKind.ReceiveSubscription, request.RequestId, request));
+        app.MapPost("/v1/subscriptions/delivery", (SubscriptionDeliveryCommand request, HttpContext context) =>
+            Submit<CommitReceipt, SubscriptionDeliveryCommand>(context, OperationKind.SubscriptionDelivery, request.CommandId, request));
+        app.MapPost("/v1/subscriptions/process", (SubscriptionProcessingRequest request, HttpContext context) =>
+            Submit<SubscriptionProcessingResult, SubscriptionProcessingRequest>(context, OperationKind.SubscriptionProcessing, request.CommandId, request));
+        app.MapPost("/v1/subscriptions/status", (GetSubscriptionRequest request, DatabaseEngine database, HttpContext context) =>
+            database.GetSubscription(Principal(context), request.Subscription));
         app.MapPost("/v1/queues/receive", (ReceiveRequest request, HttpContext context) => Submit<ReceiveResult, ReceiveRequest>(context, OperationKind.Receive, request.RequestId, request));
         app.MapPost("/v1/queues/delivery", (DeliveryCommand request, HttpContext context) => Submit<CommitReceipt, DeliveryCommand>(context, OperationKind.Delivery, request.CommandId, request));
         app.MapPost("/v1/queues/process", (ProcessingRequest request, HttpContext context) => Submit<CommitReceipt, ProcessingRequest>(context, OperationKind.Processing, request.CommandId, request));
