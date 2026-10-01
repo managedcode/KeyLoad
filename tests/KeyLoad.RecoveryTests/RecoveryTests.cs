@@ -15,7 +15,8 @@ public sealed partial class RecoveryTests
         var random = new Random(1701 + batch);
         var repository = new DirectoryInfo(AppContext.BaseDirectory);
         while (repository.Parent is not null && !File.Exists(Path.Combine(repository.FullName, "KeyLoad.slnx"))) repository = repository.Parent;
-        var reports = Path.Combine(repository.FullName, "artifacts", "qualification");
+        var reports = Path.Combine(File.Exists(Path.Combine(repository.FullName, "KeyLoad.slnx"))
+            ? repository.FullName : AppContext.BaseDirectory, "artifacts", "qualification");
         Directory.CreateDirectory(reports);
         using var evidence = new StreamWriter(Path.Combine(reports, $"crash-trials-{batch:D2}.jsonl"), false);
         for (var trial = 0; trial < 50; trial++)

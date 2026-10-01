@@ -7,7 +7,7 @@
   "restore": "locked-mode passed",
   "build": "passed with zero warnings",
   "unitTests": {
-    "passed": 84,
+    "passed": 94,
     "failed": 0
   },
   "recoveryTests": {
@@ -17,6 +17,7 @@
     "checkpointPublicationCrashes": 8,
     "subscriptionProcessingCrashes": 7,
     "projectionProcessingCrashes": 7,
+    "projectionProgressReserveCrashes": 7,
     "nativeRaftAcknowledgementCrashes": 4,
     "nativeSnapshotTests": 2,
     "peerSecurityTests": 6,
@@ -59,9 +60,9 @@
   "powerLoss": "not qualified",
   "endurance72Hours": "pending",
   "crossPlatformCI": {
-    "qualifiedCommit": "76a99d3519fa531aed9935891f023ff20ca3dc0d",
-    "run": "https://github.com/managedcode/KeyLoad/actions/runs/36901356001",
+    "qualifiedCommit": "4dd4369b8cde399dfcbbcc3fc538aec1768dc0d9",
+    "run": "https://github.com/managedcode/KeyLoad/actions/runs/36911698298",
     "platforms": ["Linux", "macOS", "Windows"],
-    "currentOutboxChangeFeedChanges": "pending"
+    "currentProjectionProgressChanges": "pending"
   }
 }

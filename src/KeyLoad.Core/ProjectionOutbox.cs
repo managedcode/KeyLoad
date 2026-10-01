@@ -11,11 +11,13 @@ public sealed partial class DatabaseEngine
     private static byte[] ConsumerKey(ProjectionConsumerRef consumer) => KeySpace.Partition("projection-consumer", consumer.Partition, consumer.Name);
     public OutboxHead ReadOutboxHead(IKeyValueView view, PartitionRef partition)
         => view.GetRecord<OutboxHead>(KeySpace.Partition("outbox-head", partition)) ?? new(0, 1, 0, 0);
-    private void AppendOutbox(IAtomicTransaction tx, PartitionRef partition, OutboxEntry entry)
+    private void AppendOutbox(IAtomicTransaction tx, PartitionRef partition, OutboxEntry entry, bool allowProgressReserve)
     {
         var head = ReadOutboxHead(tx, partition); entry = entry with { Sequence = checked(head.Tail + 1) };
         var payload = JsonDefaults.Serialize(entry);
-        if (head.StoredRecords >= Limits.MaxOutboxRecords || payload.Length > Limits.MaxOutboxBytes - head.StoredBytes)
+        var maxRecords = checked(Limits.MaxOutboxRecords + (allowProgressReserve ? Limits.ReservedOutboxRecords : 0));
+        var maxBytes = checked(Limits.MaxOutboxBytes + (allowProgressReserve ? Limits.ReservedOutboxBytes : 0));
+        if (head.StoredRecords >= maxRecords || payload.Length > maxBytes - head.StoredBytes)
             throw Errors.Fail(ErrorCode.ResourceExhausted, "The committed outbox quota is exhausted; advance consumers and reclaim retained entries.");
         tx.Put(OutboxKey(partition, entry.Sequence), payload);
         tx.PutRecord(KeySpace.Partition("outbox-head", partition), head with
@@ -146,9 +148,13 @@ public sealed partial class DatabaseEngine
             if (request.Effects.Length != 0) throw Errors.Fail(ErrorCode.Validation, "An empty projection batch cannot produce effects.");
             return new(new(request.CommandId, Token(request.Consumer.Partition, position), [], Durability), false, state.Checkpoint);
         }
-        var effects = ApplyMutations(tx, principal, request.Consumer.Partition, request.Effects, now, position);
+        var effects = ApplyMutations(tx, principal, request.Consumer.Partition, request.Effects, now, position,
+            allowOutboxProgressReserve: state.LastProgressReservationCut != head.FirstAvailable);
         var receipt = new CommitReceipt(request.CommandId, Token(request.Consumer.Partition, position), effects, Durability);
-        tx.PutRecord(ConsumerKey(request.Consumer), state with { Checkpoint = claims.Through });
+        var after = ReadOutboxHead(tx, request.Consumer.Partition);
+        var usedReserve = effects.Length > 0 && (after.StoredRecords > Limits.MaxOutboxRecords || after.StoredBytes > Limits.MaxOutboxBytes);
+        tx.PutRecord(ConsumerKey(request.Consumer), state with { Checkpoint = claims.Through,
+            LastProgressReservationCut = usedReserve ? head.FirstAvailable : state.LastProgressReservationCut });
         tx.PutRecord(key, new ProjectionReceipt(fingerprint, receipt, claims.Through));
         return new(receipt, false, claims.Through);
     }

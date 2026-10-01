@@ -91,6 +91,8 @@ public sealed record DatabaseLimits
     public long MaxQueryReadBytes { get; init; } = 67_108_864;
     public long MaxOutboxRecords { get; init; } = 100_000;
     public long MaxOutboxBytes { get; init; } = 1_073_741_824;
+    public long ReservedOutboxRecords { get; init; } = 16_384;
+    public long ReservedOutboxBytes { get; init; } = 2_147_483_648;
     public int MaxProjectionConsumers { get; init; } = 64;
     public int MaxProjectionBatchBytes { get; init; } = 16_777_216;
 }

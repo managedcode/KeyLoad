@@ -309,7 +309,8 @@
     "evidence": [
       "src/KeyLoad.Query/QueryEngine.cs",
       "src/KeyLoad.Core/ProjectionOutbox.cs",
-      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs"
+      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
+      "tests/KeyLoad.UnitTests/ProjectionProgressTests.cs"
     ]
   },
   "KL-041": {

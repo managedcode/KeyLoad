@@ -47,7 +47,7 @@ using var store = new ZoneTreeStore(new(directory)
 });
 if (mode == "projection-processing")
 {
-    var database = new DatabaseEngine(store, new AuthorizationPolicy());
+    var database = new DatabaseEngine(store, new AuthorizationPolicy(), new() { MaxOutboxRecords = 1 });
     database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
         DatabaseEngine.Credential("root", "root", "root.crash-test-credential-32-characters"));
     OperationResult Submit<T>(OperationKind kind, T payload, Guid id) => database.Apply(new(id, kind, "root", DateTimeOffset.UtcNow,

@@ -7,7 +7,11 @@ public sealed record OutboxHead(long Tail, long FirstAvailable, long StoredRecor
 public sealed record ProjectionConsumerRef(PartitionRef Partition, string Name);
 public sealed record ProjectionConsumerDefinition(long IndexGeneration, string[] Resources, string[] MutationKinds);
 public sealed record ProjectionConsumerInfo(ProjectionConsumerRef Consumer, ProjectionConsumerDefinition Definition,
-    long Checkpoint, bool Released);
+    long Checkpoint, bool Released)
+{
+    // One reserve-using commit per consumer until the retained prefix advances; this fence is canonical state.
+    public long LastProgressReservationCut { get; init; } = -1;
+}
 public sealed record ConfigureProjectionConsumerRequest(Guid CommandId, ProjectionConsumerRef Consumer,
     ProjectionConsumerDefinition Definition, long? StartAfter = null);
 public sealed record ReadProjectionBatchRequest(ProjectionConsumerRef Consumer, int Limit = 100, int MaxBytes = 4_194_304);

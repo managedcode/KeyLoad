@@ -11,10 +11,10 @@ public sealed class TestDatabase : IDisposable
     public ZoneTreeStore Store { get; }
     public DatabaseEngine Database { get; }
     public PartitionRef Partition { get; } = new("tenant", "database", "orders", "customer-1");
-    public TestDatabase()
+    public TestDatabase(DatabaseLimits? limits = null)
     {
         Store = new(new(Directory));
-        Database = new(Store, new AuthorizationPolicy());
+        Database = new(Store, new AuthorizationPolicy(), limits);
         Database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
             DatabaseEngine.Credential("root", "root", "root.unit-test-credential-32-characters"));
     }

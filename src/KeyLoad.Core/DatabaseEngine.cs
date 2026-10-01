@@ -359,7 +359,8 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
             throw Errors.Fail(ErrorCode.Validation, "The queue policy is invalid.");
     }
 
-    private MutationReceipt[] ApplyMutations(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, Mutation[] mutations, DateTimeOffset now, long position)
+    private MutationReceipt[] ApplyMutations(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, Mutation[] mutations,
+        DateTimeOffset now, long position, bool allowOutboxProgressReserve = false)
     {
         var receipts = new List<MutationReceipt>();
         foreach (var mutation in mutations)
@@ -382,7 +383,7 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
             };
             receipts.Add(receipt);
             var after = documentId is null ? null : tx.GetRecord<DocumentRecord>(DocumentKey(partition, mutation.Resource, documentId));
-            AppendOutbox(tx, partition, new(0, receipts.Count - 1, Token(partition, position), now, mutation, receipt, before, after));
+            AppendOutbox(tx, partition, new(0, receipts.Count - 1, Token(partition, position), now, mutation, receipt, before, after), allowOutboxProgressReserve);
             if (before is not null && after is not null && before.Access != after.Access)
                 AdvanceVisibilityEpoch(tx, partition, mutation.Resource);
         }

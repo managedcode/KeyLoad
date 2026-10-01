@@ -28,11 +28,12 @@ public sealed partial class RecoveryTests
         {
             Assert.Equal("crash-point", await process.StandardOutput.ReadLineAsync(timeout.Token));
             process.Kill(); await process.WaitForExitAsync(timeout.Token); await WaitForKilledProcessFilesAsync(root, timeout.Token);
-            using var store = new ZoneTreeStore(new(root)); var database = new DatabaseEngine(store, new AuthorizationPolicy());
+            using var store = new ZoneTreeStore(new(root)); var database = new DatabaseEngine(store, new AuthorizationPolicy(), new() { MaxOutboxRecords = 1 });
             var status = database.GetOutboxStatus("root", ProjectionCrashScenario.Partition); var checkpoint = status.Consumers.Single().Checkpoint;
             var effect = database.GetDocument("root", new(ProjectionCrashScenario.Partition, "projection", "effect"));
             Assert.True(checkpoint is 0 or 1); Assert.Equal(checkpoint == 0, effect is null); Assert.Equal(checkpoint + 1, status.Head.Tail);
             Assert.Equal(checkpoint == 0, database.Outcome("root", ProjectionCrashScenario.CommandId) is null);
+            Assert.Equal(checkpoint == 0 ? -1 : 1, status.Consumers.Single().LastProgressReservationCut);
             if (stage >= CommitStage.JournalFlushed) Assert.Equal(1, checkpoint);
             var original = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(Path.Combine(root, "processing-command.json"), timeout.Token));
             var recovered = database.Apply(original with { EvaluatedAt = DateTimeOffset.UtcNow }).Get<ProjectionBatchResult>();
@@ -41,6 +42,7 @@ public sealed partial class RecoveryTests
                 JsonSerializer.Serialize(request with { CommandId = retryId }, JsonDefaults.Options))).Get<ProjectionBatchResult>();
             Assert.True(retried.AlreadyProcessed); Assert.Equal(recovered.Receipt.Token, retried.Receipt.Token);
             Assert.Equal(1, database.GetOutboxStatus("root", ProjectionCrashScenario.Partition).Consumers.Single().Checkpoint);
+            Assert.Equal(1, database.GetOutboxStatus("root", ProjectionCrashScenario.Partition).Consumers.Single().LastProgressReservationCut);
             Assert.Equal(2, database.GetOutboxStatus("root", ProjectionCrashScenario.Partition).Head.Tail);
             Assert.Equal(1, database.GetDocument("root", new(ProjectionCrashScenario.Partition, "projection", "effect"))!.Revision);
         }
