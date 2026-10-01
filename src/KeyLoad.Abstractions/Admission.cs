@@ -22,4 +22,7 @@ public sealed record CommandAdmissionLimits
 }
 public sealed record CommandAdmissionSnapshot(int Commands, long RetainedBytes, int ControlCommands, long ControlRetainedBytes,
     int ActiveTenantScopes, int ActivePrincipalScopes);
-public sealed record NodeAdmissionStatus(CommandAdmissionLimits Limits, CommandAdmissionSnapshot Usage);
+public sealed record NodeAdmissionStatus(CommandAdmissionLimits Limits, CommandAdmissionSnapshot Usage)
+{
+    public HttpAdmissionStatus? Http { get; init; }
+}

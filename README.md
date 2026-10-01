@@ -37,6 +37,8 @@ The default peer connection/RPC/request timeouts are 500/1500/2000 milliseconds,
 
 Command admission bounds queued and active commands by node count/bytes and verified tenant/principal counts. The default data lane has 256 slots and 128 MiB of retained payload accounting; ACK/renew, membership and dispatch commands have a separate bounded control reserve. A full lane returns `ResourceExhausted` before this attempt's Raft acceptance. Configure `KeyLoad:CommandAdmission` and inspect `AdmissionStatusAsync` as a cluster administrator. See the [admission contract](docs/design/command-admission.md) for defaults, scheduling and the remaining memory/disk qualification work.
 
+Public HTTP admission reserves capacity before JSON deserialization and shares a modeled working budget across query, search and graph reads. Verified tenant/principal counts and a separate delivery/dispatch reserve apply through response processing. Data/control bodies default to 8 MiB/64 KiB; declared and chunked oversize requests return typed `ResourceExhausted`. Configure `KeyLoad:HttpAdmission`; administrator admission status includes its counters. These reservations do not establish a process RSS limit. A voter joining during temporary quorum loss keeps its Raft endpoint available and retries Orleans startup until consensus returns.
+
 ## .NET client
 
 The SDK uses `ManagedCode.Communication.Result<T>` and typed protocol records. Supply an API key in application configuration. Keep command IDs stable across retries: an interrupted write response has an unknown outcome.

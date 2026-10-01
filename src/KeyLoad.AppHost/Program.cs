@@ -45,6 +45,11 @@ foreach (var resource in nodes)
         "ReservedControlBytes", "MaxControlPayloadBytes", "MaxTenantControlCommands", "MaxPrincipalControlCommands" })
         if (builder.Configuration[$"KeyLoad:CommandAdmission:{option}"] is { } value)
             resource.WithEnvironment($"KeyLoad__CommandAdmission__{option}", value);
+    foreach (var option in new[] { "MaxRequests", "MaxReservedBytes", "MaxTenantRequests", "MaxPrincipalRequests", "ReservedControlRequests",
+        "ReservedControlBytes", "MaxTenantControlRequests", "MaxPrincipalControlRequests", "MaxBodyBytes", "MaxControlBodyBytes",
+        "HeavyReadReservedBytes", "OtherReservedBytes" })
+        if (builder.Configuration[$"KeyLoad:HttpAdmission:{option}"] is { } value)
+            resource.WithEnvironment($"KeyLoad__HttpAdmission__{option}", value);
     for (var index = 0; index < nodes.Length; index++) resource.WithEnvironment($"KeyLoad__Peers__{index}", nodes[index].GetEndpoint("http"));
 }
 if (benchmarkMode) BenchmarkResources.Add(builder, nodes, admin, benchmarkRoot);

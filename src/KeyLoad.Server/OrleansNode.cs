@@ -6,11 +6,39 @@ using Orleans.Configuration;
 
 namespace KeyLoad.Server;
 
-public sealed class OrleansNode(DatabaseEngine database, ICommitCoordinator coordinator, NodeOptions options)
+public sealed class OrleansNode(DatabaseEngine database, ICommitCoordinator coordinator, NodeOptions options, ILogger<OrleansNode> logger)
 {
     private IHost? host;
     public IGrainFactory? Grains { get; private set; }
     public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                await coordinator.ReadBarrierAsync(cancellationToken);
+                await StartAttemptAsync(cancellationToken);
+                return;
+            }
+            catch (KeyLoadException exception) when (exception.Code is ErrorCode.OwnershipLost or ErrorCode.UnknownWriteOutcome or ErrorCode.ResourceExhausted)
+            {
+                logger.LogWarning("Orleans startup is waiting for consensus: {ErrorCode}", exception.Code);
+                var failed = host; host = null; Grains = null;
+                if (failed is not null)
+                {
+                    using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    try { await failed.StopAsync(cleanup.Token); }
+                    catch (OperationCanceledException) { }
+                    catch (KeyLoadException cleanupFailure) when (cleanupFailure.Code is ErrorCode.OwnershipLost or ErrorCode.UnknownWriteOutcome or ErrorCode.ResourceExhausted)
+                    { logger.LogWarning("Failed Orleans startup cleanup is waiting for consensus: {ErrorCode}", cleanupFailure.Code); }
+                    finally { failed.Dispose(); }
+                }
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+            }
+        }
+    }
+    private async Task StartAttemptAsync(CancellationToken cancellationToken)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Logging.SetMinimumLevel(LogLevel.Warning);
@@ -38,6 +66,11 @@ public sealed class OrleansNode(DatabaseEngine database, ICommitCoordinator coor
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         Grains = null;
-        if (host is not null) { await host.StopAsync(cancellationToken); host.Dispose(); }
+        var stopping = host; host = null;
+        if (stopping is not null)
+        {
+            try { await stopping.StopAsync(cancellationToken); }
+            finally { stopping.Dispose(); }
+        }
     }
 }

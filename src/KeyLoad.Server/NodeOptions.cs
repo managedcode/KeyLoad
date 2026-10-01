@@ -20,9 +20,11 @@ public sealed record NodeOptions
     public int RaftRpcTimeoutMilliseconds { get; init; } = 1_500;
     public int RaftRequestTimeoutMilliseconds { get; init; } = 2_000;
     public CommandAdmissionLimits CommandAdmission { get; init; } = new();
+    public HttpAdmissionLimits HttpAdmission { get; init; } = new();
     public void Validate()
     {
         CommandAdmission.Validate();
+        HttpAdmission.Validate();
         if (Peers.Length < 3 || Peers.Length % 2 == 0 || Peers.Distinct(StringComparer.Ordinal).Count() != Peers.Length)
             throw new InvalidOperationException("Cluster configuration requires an odd number of at least three distinct voters.");
         if (!Peers.Contains(PublicEndpoint, StringComparer.Ordinal)) throw new InvalidOperationException("The public endpoint must be in the voter list.");

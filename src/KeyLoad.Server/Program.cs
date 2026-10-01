@@ -34,6 +34,7 @@ builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
     ["partitioning"] = "false"
 });
 builder.WebHost.ConfigureKestrel(server => server.Limits.MaxRequestBodySize = 33_554_432);
+builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNameCaseInsensitive = false;
@@ -45,6 +46,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 builder.Services.AddSingleton(node);
 builder.Services.AddSingleton(new CommandAdmissionGovernor(node.CommandAdmission));
+builder.Services.AddSingleton(new HttpAdmissionGovernor(node.HttpAdmission));
 builder.Services.AddSingleton<IAtomicStore>(_ => new ZoneTreeStore(new(directory + "/database")
 { Incarnation = node.Incarnation, SigningKey = Convert.FromBase64String(node.SigningKey) }));
 builder.Services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();
@@ -82,6 +84,12 @@ app.Use(async (context, next) =>
 {
     try
     {
+        var peer = context.Request.Path.StartsWithSegments("/raft") || context.Request.Path.StartsWithSegments("/internal");
+        using var incoming = peer || context.Request.Path.StartsWithSegments("/health") ? null
+            : context.RequestServices.GetRequiredService<HttpAdmissionGovernor>().Begin(context.Request.Path.Value ?? "",
+                context.Request.ContentLength, context.RequestAborted);
+        if (incoming is not null && context.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>() is { IsReadOnly: false } publicBody)
+            publicBody.MaxRequestBodySize = incoming.MaxBodyBytes;
         if (context.Request.Path.StartsWithSegments("/raft") || context.Request.Path.StartsWithSegments("/internal"))
         {
             var bodyBudget = context.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>();
@@ -92,12 +100,21 @@ app.Use(async (context, next) =>
         else if (!context.Request.Path.StartsWithSegments("/health"))
         {
             // Authenticate from a trusted verifier after a quorum read; client claims are never accepted.
-            await context.RequestServices.GetRequiredService<ICommitCoordinator>().ReadBarrierAsync(context.RequestAborted);
             var key = context.Request.Headers.Authorization.ToString();
             if (!key.StartsWith("Bearer ", StringComparison.Ordinal)) throw Errors.Fail(ErrorCode.Unauthenticated, "An API key is required.");
-            context.Items["principal"] = database.Authenticate(key[7..], DateTimeOffset.UtcNow);
+            await context.RequestServices.GetRequiredService<ICommitCoordinator>().ReadBarrierAsync(context.RequestAborted);
+            var principalId = database.Authenticate(key[7..], DateTimeOffset.UtcNow);
+            context.Items["principal"] = principalId;
+            incoming!.Bind(database.Store.Read(view => database.Principal(view, principalId, DateTimeOffset.UtcNow)), context.RequestAborted);
         }
         await next(context);
+        // Minimal API binding handles a Kestrel body limit internally; keep its rejection in the typed public protocol.
+        if (incoming is not null && context.Response.StatusCode == StatusCodes.Status413PayloadTooLarge && !context.Response.HasStarted)
+        {
+            context.Response.StatusCode = Errors.Status(ErrorCode.ResourceExhausted);
+            await context.Response.WriteAsJsonAsync(Errors.Problem(ErrorCode.ResourceExhausted, "The request body exceeds its byte budget."),
+                JsonDefaults.Options, context.RequestAborted);
+        }
     }
     catch (KeyLoadException exception)
     {
@@ -107,8 +124,10 @@ app.Use(async (context, next) =>
     }
     catch (Exception exception) when (exception is JsonException or BadHttpRequestException)
     {
-        context.Response.StatusCode = 400;
-        await context.Response.WriteAsJsonAsync(Errors.Problem(ErrorCode.Validation, "The request contains invalid protocol JSON."), JsonDefaults.Options, context.RequestAborted);
+        var tooLarge = exception is BadHttpRequestException { StatusCode: StatusCodes.Status413PayloadTooLarge };
+        context.Response.StatusCode = Errors.Status(tooLarge ? ErrorCode.ResourceExhausted : ErrorCode.Validation);
+        await context.Response.WriteAsJsonAsync(Errors.Problem(tooLarge ? ErrorCode.ResourceExhausted : ErrorCode.Validation,
+            tooLarge ? "The request body exceeds its byte budget." : "The request contains invalid protocol JSON."), JsonDefaults.Options, context.RequestAborted);
     }
 });
 app.UseConsensusProtocolHandler();
@@ -141,14 +160,20 @@ while (!app.Lifetime.ApplicationStopping.IsCancellationRequested)
     { await Task.Delay(250, app.Lifetime.ApplicationStopping); }
 }
 var orleansNode = app.Services.GetRequiredService<OrleansNode>();
-await orleansNode.StartAsync(app.Lifetime.ApplicationStopping);
-try { await app.WaitForShutdownAsync(); }
+try
+{
+    await orleansNode.StartAsync(app.Lifetime.ApplicationStopping);
+    await app.WaitForShutdownAsync();
+}
 finally
 {
     using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-    await orleansNode.StopAsync(timeout.Token);
-    await app.StopAsync(timeout.Token);
-    await app.DisposeAsync();
+    try { await orleansNode.StopAsync(timeout.Token); }
+    finally
+    {
+        try { await app.StopAsync(timeout.Token); }
+        finally { await app.DisposeAsync(); }
+    }
 }
 
 public partial class Program;

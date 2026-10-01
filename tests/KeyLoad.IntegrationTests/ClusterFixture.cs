@@ -12,8 +12,10 @@ namespace KeyLoad.IntegrationTests;
 public sealed class ClusterFixture : IAsyncLifetime
 {
     private readonly long? commandBytes;
+    private readonly HttpAdmissionLimits? httpAdmission;
     public ClusterFixture() { }
     internal ClusterFixture(long commandBytes) => this.commandBytes = commandBytes;
+    internal ClusterFixture(HttpAdmissionLimits httpAdmission) => this.httpAdmission = httpAdmission;
     public string Root { get; } = Path.Combine(Path.GetTempPath(), "keyload-cluster-" + Guid.NewGuid().ToString("N"));
     public DistributedApplication App { get; private set; } = null!;
     public string AdminKey { get; private set; } = "";
@@ -31,6 +33,13 @@ public sealed class ClusterFixture : IAsyncLifetime
             foreach (var number in Enumerable.Range(1, 3))
                 builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>().Single(resource => resource.Name == $"node{number}"))
                     .WithEnvironment("KeyLoad__CommandAdmission__MaxRetainedBytes", bytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        if (httpAdmission is { } httpLimits)
+            foreach (var number in Enumerable.Range(1, 3))
+            {
+                var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>().Single(resource => resource.Name == $"node{number}"));
+                node.WithEnvironment("KeyLoad__HttpAdmission__MaxBodyBytes", httpLimits.MaxBodyBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                node.WithEnvironment("KeyLoad__HttpAdmission__MaxControlBodyBytes", httpLimits.MaxControlBodyBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
         builder.Services.AddLogging(logging =>
         {
             logging.ClearProviders(); logging.AddConsole(); logging.SetMinimumLevel(LogLevel.Warning);

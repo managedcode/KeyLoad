@@ -321,6 +321,8 @@
       "tests/KeyLoad.UnitTests/CommandAdmissionTests.cs",
       "tests/KeyLoad.UnitTests/CommandQueueTests.cs",
       "tests/KeyLoad.IntegrationTests/AdmissionClusterTests.cs",
+      "src/KeyLoad.Core/HttpAdmissionGovernor.cs",
+      "tests/KeyLoad.UnitTests/HttpAdmissionTests.cs",
       "docs/design/command-admission.md"
     ]
   },
@@ -438,6 +440,9 @@
       "src/KeyLoad.Query/QueryAst.cs",
       "src/KeyLoad.Query/QueryValidation.cs",
       "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
+      "src/KeyLoad.Core/HttpAdmissionGovernor.cs",
+      "tests/KeyLoad.UnitTests/HttpAdmissionTests.cs",
+      "tests/KeyLoad.IntegrationTests/AdmissionClusterTests.cs",
       "src/KeyLoad.Query/SqlParser.cs",
       "src/KeyLoad.Query/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"

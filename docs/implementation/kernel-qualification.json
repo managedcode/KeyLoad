@@ -7,7 +7,7 @@
   "restore": "locked-mode passed",
   "build": "passed with zero warnings",
   "unitTests": {
-    "passed": 104,
+    "passed": 112,
     "failed": 0
   },
   "recoveryTests": {
@@ -31,7 +31,7 @@
     "evidence": "CI retains artifacts/qualification/crash-trials-*.jsonl"
   },
   "rf3Integration": {
-    "passed": 5,
+    "passed": 6,
     "failed": 0,
     "scenarios": [
       "leader process kill",
@@ -52,7 +52,8 @@
       "outbox entries, projection checkpoints and receipts preserved across snapshot installation",
       "protected document change-feed and live-query HTTP projection",
       "data admission exhaustion rejects before canonical acceptance",
-      "reserved dispatch control and Orleans routing with exhausted data admission"
+      "reserved dispatch control and Orleans routing with exhausted data admission",
+      "declared and chunked HTTP body limits reject with typed ResourceExhausted before command ID acceptance"
     ]
   },
   "durability": [
@@ -64,7 +65,11 @@
   "crossPlatformCI": {
     "qualifiedCommit": "c226ee0c0659be1045b6b151d796cd4c2ae5cf93",
     "run": "https://github.com/managedcode/KeyLoad/actions/runs/36915868306",
-    "platforms": ["Linux", "macOS", "Windows"],
-    "currentCommandAdmissionChanges": "pending"
+    "platforms": [
+      "Linux",
+      "macOS",
+      "Windows"
+    ],
+    "currentCommandAdmissionChanges": "Windows voter startup failed during temporary quorum loss in run 36918608250; startup retry and HTTP admission changes await CI"
   }
 }
