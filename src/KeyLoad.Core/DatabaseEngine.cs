@@ -341,6 +341,9 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
                 _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, "The mutation is unsupported.")
             });
         }
+        foreach (var collection in mutations.Where(mutation => mutation is PutDocument or PatchDocument or DeleteDocument)
+            .Select(mutation => mutation.Resource).Distinct(StringComparer.Ordinal))
+            tx.PutRecord(KeySpace.Partition("document-epoch", partition, collection), checked(DocumentEpoch(tx, partition, collection) + 1));
         return receipts.ToArray();
     }
     private static void RequireEnvelopeId(ReplicatedOperation operation, Guid id)

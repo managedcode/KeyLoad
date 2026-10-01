@@ -7,7 +7,7 @@
   "restore": "locked-mode passed",
   "build": "passed with zero warnings",
   "unitTests": {
-    "passed": 42,
+    "passed": 52,
     "failed": 0
   },
   "recoveryTests": {
@@ -29,7 +29,7 @@
     "evidence": "CI retains artifacts/qualification/crash-trials-*.jsonl"
   },
   "rf3Integration": {
-    "passed": 3,
+    "passed": 4,
     "failed": 0,
     "scenarios": [
       "leader process kill",
@@ -42,7 +42,9 @@
       "unsigned peer RPC rejection",
       "empty-replica native snapshot catch-up",
       "command outcome preserved across snapshot installation",
-      "topic events, group checkpoints and inbox receipts preserved across snapshot installation"
+      "topic events, group checkpoints and inbox receipts preserved across snapshot installation",
+      "SQL, JSON AST and C# query parity through authenticated HTTP",
+      "SQL-to-JSON cursor continuation and protected predicate rejection"
     ]
   },
   "durability": [
@@ -52,9 +54,9 @@
   "powerLoss": "not qualified",
   "endurance72Hours": "pending",
   "crossPlatformCI": {
-    "qualifiedCommit": "2bc7ccc93997a36555c71553403d5539d64b90d7",
-    "run": "https://github.com/managedcode/KeyLoad/actions/runs/36885624099",
+    "qualifiedCommit": "cabf43986dfbf6b8f78e7aaa5fbfa5e4fc62321f",
+    "run": "https://github.com/managedcode/KeyLoad/actions/runs/36893476976",
     "platforms": ["Linux", "macOS", "Windows"],
-    "currentTopicSubscriptionChanges": "pending"
+    "currentQueryAdapterChanges": "pending"
   }
 }

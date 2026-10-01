@@ -47,6 +47,8 @@ public static class ApiEndpoints
         app.MapPost("/v1/series/read", (ReadSamplesRequest request, DatabaseEngine database, HttpContext context) =>
             database.ReadSamples(Principal(context), request.Partition, request.Set, request.SeriesId, request.From, request.Until, request.Limit));
         app.MapPost("/v1/query", (QueryRequest request, QueryEngine queries, HttpContext context) => queries.Execute(Principal(context), request));
+        app.MapPost("/v1/query/ast", (AstQueryRequest request, QueryEngine queries, HttpContext context) => queries.ExecuteAst(Principal(context), request));
+        app.MapGet("/v1/query/capabilities", (QueryEngine queries) => queries.Capabilities);
         app.MapPost("/v1/search", (SearchRequest request, SearchEngine search, HttpContext context) => search.Search(Principal(context), request));
         app.MapPost("/v1/admin/resources", (ConfigureResourceRequest request, HttpContext context) =>
             Submit<ResourceDefinition, ConfigureResourceRequest>(context, OperationKind.ConfigureResource, CommandId(context), request));

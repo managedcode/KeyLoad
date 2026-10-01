@@ -4,6 +4,7 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.Client;
+using KeyLoad.Query;
 using ManagedCode.Communication;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +13,7 @@ namespace KeyLoad.IntegrationTests;
 [Collection("rf3")]
 public sealed class ClusterTests(ClusterFixture fixture)
 {
+    private sealed record QueryOrder(decimal Number, string Status);
     private static T Success<T>(Result<T> result) { Assert.True(result.IsSuccess, result.Problem?.Detail); return result.Value!; }
     [Fact]
     public async Task ReplicatedAtomicBatchSurvivesLeaderProcessKillAndMinorityRejectsWrites()
@@ -165,6 +167,49 @@ public sealed class ClusterTests(ClusterFixture fixture)
             var replayed = Success(await RetryDuringElectionAsync(() => clients[follower].CommitSubscriptionProcessingAsync(groupReplay, timeout.Token), timeout.Token));
             Assert.True(replayed.AlreadyProcessed); Assert.Equal(effect.OriginalEffectsToken, replayed.OriginalEffectsToken);
             Assert.Equal(1, Success(await clients[follower].GetAsync(new(partition, "snapshots", "projection"), timeout.Token))!.Revision);
+        }
+        catch { await fixture.SaveFailureDiagnosticsAsync(); throw; }
+    }
+    [Fact]
+    public async Task SqlJsonAndCSharpUseTheSameAuthorizedHttpQueryContract()
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        try
+        {
+            var administrator = fixture.Client("node1");
+            var partition = new PartitionRef("integration", "database", "query-adapters", Guid.NewGuid().ToString("N"));
+            var configure = Guid.NewGuid();
+            Success(await RetryDuringElectionAsync(() => administrator.ConfigureResourceAsync(configure,
+                new(partition.TenantId, partition.DatabaseId, new("query-adapters", ResourceKind.Collection, "query-adapters")
+                    { Indexes = [new("status", ["/status"])], FieldPolicies = [new("/secret", "pii")] }), timeout.Token), timeout.Token));
+            var command = new CommandRequest(Guid.NewGuid(), partition,
+                [new PutDocument("query-adapters", "a", "{\"number\":1,\"status\":\"open\",\"secret\":\"CANARY\"}", 0),
+                 new PutDocument("query-adapters", "b", "{\"number\":2,\"status\":\"open\",\"secret\":\"CANARY\"}", 0),
+                 new PutDocument("query-adapters", "c", "{\"number\":3,\"status\":\"closed\",\"secret\":\"CANARY\"}", 0)]);
+            Success(await RetryDuringElectionAsync(() => administrator.CommitAsync(command, timeout.Token), timeout.Token));
+            var principal = new PrincipalRecord("query-reader", "integration",
+                [new("database", "query-adapters", Capability.DocumentsRead | Capability.Query)], []);
+            var principalCommand = Guid.NewGuid(); Success(await RetryDuringElectionAsync(() => administrator.ConfigurePrincipalAsync(principalCommand, principal, timeout.Token), timeout.Token));
+            var secret = "query-reader." + Guid.NewGuid().ToString("N");
+            var credential = new ApiKeyRecord("query-reader", principal.Id,
+                Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(secret))));
+            var keyCommand = Guid.NewGuid(); Success(await RetryDuringElectionAsync(() => administrator.ConfigureApiKeyAsync(keyCommand, credential, timeout.Token), timeout.Token));
+            var client = fixture.Client("node2", secret);
+            var manifest = Success(await client.QueryCapabilitiesAsync(timeout.Token));
+            Assert.Equal(1, manifest.AstVersion); Assert.True(manifest.ReadOnly); Assert.Contains("JSON", manifest.Adapters);
+            const string sql = "SELECT * FROM \"query-adapters\" q WHERE q.status = 'open' ORDER BY q.number LIMIT 1";
+            var first = Success(await client.QueryAsync(new QueryRequest(partition, sql), timeout.Token));
+            Assert.Equal("a", Assert.Single(first.Rows).EntityId); Assert.DoesNotContain("CANARY", first.Rows[0].Json);
+            var ast = new SelectQuery("query-adapters", null, [new("*", "*")],
+                new Comparison(new FieldOperand("/status"), "=", new ValueOperand("open")), [new("/number", false)], 1);
+            var second = Success(await client.QueryAstAsync(new(partition, ast, Cursor: first.Cursor), timeout.Token));
+            Assert.Equal("b", Assert.Single(second.Rows).EntityId); Assert.Null(second.Cursor); Assert.DoesNotContain("CANARY", second.Rows[0].Json);
+            var csharp = KeyLoadQuery<QueryOrder>.From(partition, "query-adapters").Where(row => row.Status == "open").OrderBy(row => row.Number).Take(1);
+            var typed = Success(await client.QueryAsync(csharp, cancellationToken: timeout.Token));
+            Assert.Equal(JsonDefaults.Serialize(first.Rows), JsonDefaults.Serialize(typed.Rows));
+            var denied = await client.QueryAstAsync(new(partition, ast with
+                { Filter = new Comparison(new FieldOperand("/secret"), "=", new ValueOperand("CANARY")) }), timeout.Token);
+            Assert.Equal(nameof(ErrorCode.PermissionDenied), denied.Problem?.ErrorCode);
         }
         catch { await fixture.SaveFailureDiagnosticsAsync(); throw; }
     }

@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using KeyLoad.Query;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
@@ -63,6 +64,12 @@ public sealed class KeyLoadClient(HttpClient http, string apiKey)
         => Send<MessageInspection?>("/v1/queues/inspect", request, false, null, cancellationToken);
     public Task<Result<QueryPage>> QueryAsync(QueryRequest request, CancellationToken cancellationToken = default)
         => Send<QueryPage>("/v1/query", request, false, null, cancellationToken);
+    public Task<Result<QueryPage>> QueryAstAsync(AstQueryRequest request, CancellationToken cancellationToken = default)
+        => Send<QueryPage>("/v1/query/ast", request, false, null, cancellationToken);
+    public Task<Result<QueryPage>> QueryAsync<T>(KeyLoadQuery<T> query, bool allowFullScan = false, string? cursor = null, CancellationToken cancellationToken = default)
+        => QueryAstAsync(query.ToRequest(allowFullScan, cursor), cancellationToken);
+    public Task<Result<QueryCapabilityManifest>> QueryCapabilitiesAsync(CancellationToken cancellationToken = default)
+        => Send<QueryCapabilityManifest>("/v1/query/capabilities", null, false, null, cancellationToken);
     public Task<Result<RankedDocument[]>> SearchAsync(SearchRequest request, CancellationToken cancellationToken = default)
         => Send<RankedDocument[]>("/v1/search", request, false, null, cancellationToken);
     public Task<Result<GraphTraversal>> TraverseAsync(TraverseRequest request, CancellationToken cancellationToken = default)

@@ -6,6 +6,8 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private static byte[] DocumentKey(PartitionRef partition, string collection, string id) => KeySpace.Partition("document", partition, collection, id);
+    public long DocumentEpoch(IKeyValueView view, PartitionRef partition, string collection)
+        => view.Get(KeySpace.Partition("document-epoch", partition, collection)) is { } bytes ? JsonDefaults.Deserialize<long>(bytes) : 0;
     private MutationReceipt Put(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, PutDocument put, DateTimeOffset now)
     {
         JsonData.Identifier(put.Id);

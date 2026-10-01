@@ -10,14 +10,21 @@ public sealed class QueryEngine(DatabaseEngine database)
 {
     private readonly SemaphoreSlim admission = new(database.Limits.MaxConcurrentQueries);
     private sealed record CursorClaims(string Purpose, Guid Incarnation, Guid NodeId, long ReadGeneration, string PrincipalId, long PolicyEpoch,
-        long SchemaVersion, string QueryHash, long CutPosition, int Offset, DateTimeOffset ExpiresAt);
+        long SchemaVersion, string QueryHash, long CutPosition, long SourceEpoch, int Offset, DateTimeOffset ExpiresAt);
     public QueryPage Execute(string principalId, QueryRequest request)
+        => Execute(principalId, () => new(request.Partition, new SqlParser(request.Sql, database.Limits).Parse(), request.Parameters,
+            request.AllowFullScan, request.Cursor));
+    public QueryPage ExecuteAst(string principalId, AstQueryRequest request) => Execute(principalId, () => request);
+    public QueryCapabilityManifest Capabilities => new(1, 1, "Q1", "atomicPartition", "decimal", "distinctFromNull",
+        ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "IS NULL", "IS MISSING"],
+        database.Limits.MaxResults, database.Limits.MaxScanRecords, database.Limits.MaxQueryBytes, database.Limits.MaxQueryDepth, true, true);
+    private QueryPage Execute(string principalId, Func<AstQueryRequest> adapt)
     {
         if (!admission.Wait(0)) throw Errors.Fail(ErrorCode.ResourceExhausted, "The query concurrency budget is exhausted.");
         try
         {
-            var query = new SqlParser(request.Sql, database.Limits).Parse();
-            var hash = JsonData.Fingerprint(new { request.Partition, request.Sql, request.Parameters, request.AllowFullScan });
+            var request = QueryValidation.Normalize(adapt(), database.Limits); var query = request.Query;
+            var hash = JsonData.Fingerprint(new { request.Partition, Query = query with { Explain = false }, request.Parameters, request.AllowFullScan, request.AstVersion });
             var started = Stopwatch.StartNew();
             return database.WithQueryView(principalId, request.Partition, query.Collection, (view, principal, resource) =>
             {
@@ -25,21 +32,26 @@ public sealed class QueryEngine(DatabaseEngine database)
                 foreach (var field in PredicateEvaluator.Fields(query.Filter).Concat(query.Order.Select(o => o.Path)))
                     database.Authorization.RequireFieldUse(principal, resource, field);
                 CheckParameters(query.Filter, request.Parameters);
-                var (documents, accessPath) = Candidates(view, principal, resource, request, query);
-                var cursorOffset = 0;
+                var cursorOffset = 0; var cut = database.Store.Position;
+                var sourceEpoch = database.DocumentEpoch(view, request.Partition, query.Collection);
                 if (request.Cursor is { } cursor)
                 {
-                    var claims = database.Verify<CursorClaims>(cursor);
+                    CursorClaims claims;
+                    try { claims = database.Verify<CursorClaims>(cursor); }
+                    catch (KeyLoadException exception) when (exception.Code == ErrorCode.TokenInvalidated)
+                    { throw Errors.Fail(ErrorCode.CursorExpired, "The query cursor is invalid."); }
                     if (claims.Purpose != "query-page" || claims.Incarnation != database.Store.Identity.Incarnation
                         || claims.NodeId != database.Store.Identity.NodeId || claims.ReadGeneration != database.Store.Identity.ReadGeneration
                         || claims.PrincipalId != principal.Id || claims.PolicyEpoch != principal.PolicyEpoch || claims.SchemaVersion != resource.SchemaVersion
-                        || claims.QueryHash != hash || claims.CutPosition != database.Store.Position || claims.ExpiresAt < DateTimeOffset.UtcNow
+                        || claims.QueryHash != hash || claims.SourceEpoch != sourceEpoch || claims.CutPosition < 0 || claims.CutPosition > database.Store.Position
+                        || claims.ExpiresAt < DateTimeOffset.UtcNow
                         || claims.Offset < 0 || claims.Offset > database.Limits.MaxScanRecords)
                         throw Errors.Fail(ErrorCode.CursorExpired, "The query cursor no longer has a valid authorized read cut.");
-                    cursorOffset = claims.Offset;
+                    cursorOffset = claims.Offset; cut = claims.CutPosition;
                 }
+                var (documents, accessPath) = Candidates(view, principal, resource, request, query);
                 if (query.Explain) return new QueryPage([new("explain", 0, JsonSerializer.Serialize(new { AccessPath = accessPath,
-                    AtomicPartition = request.Partition.AtomicPartitionId, ScanBudget = database.Limits.MaxScanRecords }, JsonDefaults.Options))], null, database.Store.Position, accessPath);
+                    AtomicPartition = request.Partition.AtomicPartitionId, ScanBudget = database.Limits.MaxScanRecords }, JsonDefaults.Options))], null, cut, accessPath);
                 var eligible = new List<DocumentRecord>();
                 foreach (var document in documents)
                 {
@@ -56,14 +68,14 @@ public sealed class QueryEngine(DatabaseEngine database)
                 var next = cursorOffset + page.Length;
                 var token = next < eligible.Count ? database.Sign(new CursorClaims("query-page", database.Store.Identity.Incarnation,
                     database.Store.Identity.NodeId, database.Store.Identity.ReadGeneration, principal.Id,
-                    principal.PolicyEpoch, resource.SchemaVersion, hash, database.Store.Position, next, DateTimeOffset.UtcNow.AddMinutes(5))) : null;
-                return new QueryPage(page, token, database.Store.Position, accessPath);
+                    principal.PolicyEpoch, resource.SchemaVersion, hash, cut, sourceEpoch, next, DateTimeOffset.UtcNow.AddMinutes(5))) : null;
+                return new QueryPage(page, token, cut, accessPath);
             });
         }
         finally { admission.Release(); }
     }
     private (DocumentRecord[] Records, string Path) Candidates(IKeyValueView view, PrincipalRecord principal,
-        ResourceDefinition resource, QueryRequest request, SelectQuery query)
+        ResourceDefinition resource, AstQueryRequest request, SelectQuery query)
     {
         var equality = Equalities(query.Filter, request.Parameters).GroupBy(p => p.Key, StringComparer.Ordinal)
             .ToDictionary(group => group.Key, group => group.First().Value, StringComparer.Ordinal);
@@ -95,7 +107,7 @@ public sealed class QueryEngine(DatabaseEngine database)
     {
         if (predicate is Logical { Operator: "AND" } and)
         { foreach (var pair in Equalities(and.Left, parameters).Concat(Equalities(and.Right, parameters))) yield return pair; }
-        else if (predicate is Comparison { Operator: "=", Left: FieldOperand field, Right: ValueOperand value }) yield return new(field.Path, value.Value);
+        else if (predicate is Comparison { Operator: "=", Left: FieldOperand field, Right: ValueOperand value }) yield return new(field.Path, JsonData.Scalar(value.Value, ""));
         else if (predicate is Comparison { Operator: "=", Left: FieldOperand parameterField, Right: ParameterOperand parameter }
             && parameters?.TryGetValue(parameter.Name, out var literal) == true) yield return new(parameterField.Path, JsonData.Scalar(literal, ""));
     }

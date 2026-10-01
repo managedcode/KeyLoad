@@ -4,21 +4,6 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Query;
 
-public sealed record SelectQuery(string Collection, string? Alias, Selection[] Projection, Predicate? Filter,
-    Ordering[] Order, int Limit, bool Explain = false);
-public sealed record Selection(string Path, string Alias);
-public sealed record Ordering(string Path, bool Descending);
-public abstract record Operand;
-public sealed record FieldOperand(string Path) : Operand;
-public sealed record ValueOperand(object? Value) : Operand;
-public sealed record ParameterOperand(string Name) : Operand;
-public abstract record Predicate;
-public sealed record Comparison(Operand Left, string Operator, Operand Right) : Predicate;
-public sealed record Logical(Predicate Left, string Operator, Predicate Right) : Predicate;
-public sealed record Negation(Predicate Inner) : Predicate;
-public sealed record NullTest(Operand Value, bool Negated, bool Missing) : Predicate;
-public sealed record InPredicate(Operand Value, Operand[] Values, bool Negated) : Predicate;
-
 public static class PredicateEvaluator
 {
     public static object? Value(Operand operand, DocumentRecord document, JsonElement json, Dictionary<string, JsonElement>? parameters)
@@ -27,7 +12,7 @@ public static class PredicateEvaluator
             FieldOperand { Path: "/@id" } => document.Reference.Id,
             FieldOperand { Path: "/@revision" } => (decimal)document.Revision,
             FieldOperand field => JsonData.Scalar(json, field.Path),
-            ValueOperand literal => literal.Value,
+            ValueOperand literal => JsonData.Scalar(literal.Value, ""),
             ParameterOperand parameter when parameters?.TryGetValue(parameter.Name, out var value) == true => JsonData.Scalar(value, ""),
             ParameterOperand => throw Errors.Fail(ErrorCode.Validation, "A required query parameter is missing."),
             _ => throw Errors.Fail(ErrorCode.Validation, "An operand is invalid.")

@@ -131,7 +131,23 @@ page.ThrowIfFail();
 
 Q1 supports projections and aliases, scalar parameters, comparisons, `AND`/`OR`/`NOT`, `IN`, `IS NULL`, `IS MISSING`, `ORDER BY`, `LIMIT` and `EXPLAIN`. Identifiers containing dots need double quotes. `id` and `revision` refer to canonical document identity/revision. Parameters use `@name`. JSON numbers use the decimal scalar policy. SQL is read-only; unsupported statements fail explicitly.
 
-Queries require a matching point/equality index or explicit `AllowFullScan`. Scans, parser depth, tokens, rows, bytes and execution time have budgets. Cursor tokens bind the principal, policy epoch, schema, query, node identity, read generation and current storage cut. Writes, policy changes or snapshot installation can expire a cursor; compaction preserves its cut. Sensitive predicates and sorting require a field-use grant. Returned documents omit protected paths, including classified values nested in arrays.
+SQL, version 1 JSON AST and the C# expression builder normalize into the same typed AST and use the same planner, permissions and execution path. `GET /v1/query/capabilities` (SDK: `QueryCapabilitiesAsync`) reports that contract and the configured limits. JSON requests use `POST /v1/query/ast` or `QueryAstAsync`. See the [Q1 protocol and expression subset](docs/design/query-q1.md).
+
+```csharp
+var query = KeyLoadQuery<Order>.From(partition, "orders")
+    .Where(order => order.Number == 1m)
+    .OrderBy(order => QueryFunctions.DocumentId(order))
+    .Select(order => new { Id = QueryFunctions.DocumentId(order), order.Status })
+    .Take(20);
+var typedPage = await client.QueryAsync(query);
+typedPage.ThrowIfFail();
+
+public sealed record Order(decimal Number, string Status);
+```
+
+The builder supports scalar comparisons, Boolean composition, constant-array/list `Contains`, null/missing markers, field projections and ordering. It translates expression trees without invoking application delegates or getters. Unsupported methods and lossy casts fail explicitly. It has independent immutable query branches and provides no implicit client evaluation.
+
+Queries require a matching point/equality index or explicit `AllowFullScan`. Scans, parser depth, nodes, parameters, rows, bytes and execution time have budgets. Cursor tokens bind the principal, policy epoch, schema, normalized query, node identity, read generation and persisted collection data version. Equivalent SQL/JSON/C# forms can continue the same cursor. A write to that collection, a principal policy change or snapshot installation can expire it; catalog heartbeats, unrelated collection writes and compaction preserve its cut. Sensitive predicates and sorting require a field-use grant. Returned documents omit protected paths, including classified values nested in arrays.
 
 Search accepts typed vector spaces and explicit text/vector fields. Both branches use one authorized read cut. Exact vector scores and BM25 ranks are combined with weighted RRF using one-based ranks. The managed ANN and graph retrieval extensions are tracked separately.
 

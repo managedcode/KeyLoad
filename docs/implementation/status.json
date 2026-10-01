@@ -333,6 +333,8 @@
     "title": "Query capability manifest і AST version",
     "status": "in_progress",
     "evidence": [
+      "src/KeyLoad.Abstractions/QueryAst.cs",
+      "docs/design/query-q1.md",
       "src/KeyLoad.Query/QueryAst.cs",
       "src/KeyLoad.Query/SqlParser.cs",
       "src/KeyLoad.Query/QueryEngine.cs",
@@ -364,6 +366,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/QueryAst.cs",
+      "src/KeyLoad.Query/QueryValidation.cs",
+      "src/KeyLoad.Client/KeyLoadQuery.cs",
       "src/KeyLoad.Query/SqlParser.cs",
       "src/KeyLoad.Query/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
@@ -391,14 +395,22 @@
   },
   "KL-051": {
     "title": "SQL/JSON/C# equivalence",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Abstractions/QueryAst.cs",
+      "src/KeyLoad.Query/QueryValidation.cs",
+      "src/KeyLoad.Client/KeyLoadQuery.cs",
+      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
+      "tests/KeyLoad.IntegrationTests/ClusterTests.cs"
+    ]
   },
   "KL-052": {
     "title": "Ранній admission control",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/QueryAst.cs",
+      "src/KeyLoad.Query/QueryValidation.cs",
+      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
       "src/KeyLoad.Query/SqlParser.cs",
       "src/KeyLoad.Query/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
@@ -406,13 +418,21 @@
   },
   "KL-053": {
     "title": "Session facade та independent query contexts",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Client/KeyLoadQuery.cs",
+      "src/KeyLoad.Query/QueryEngine.cs",
+      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs"
+    ]
   },
   "KL-054": {
     "title": "SQL differential і metamorphic suite",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "docs/design/query-q1.md"
+    ]
   },
   "KL-055": {
     "title": "GraphScope / GraphRetriever / GraphExpansion",

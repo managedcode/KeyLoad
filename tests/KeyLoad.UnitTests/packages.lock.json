@@ -285,6 +285,12 @@
           "ManagedCode.Storage.FileSystem": "[10.0.13, )"
         }
       },
+      "keyload.client": {
+        "type": "Project",
+        "dependencies": {
+          "KeyLoad.Abstractions": "[0.1.0-dev, )"
+        }
+      },
       "keyload.core": {
         "type": "Project",
         "dependencies": {
