@@ -11,6 +11,9 @@ namespace KeyLoad.IntegrationTests;
 
 public sealed class ClusterFixture : IAsyncLifetime
 {
+    private readonly long? commandBytes;
+    public ClusterFixture() { }
+    internal ClusterFixture(long commandBytes) => this.commandBytes = commandBytes;
     public string Root { get; } = Path.Combine(Path.GetTempPath(), "keyload-cluster-" + Guid.NewGuid().ToString("N"));
     public DistributedApplication App { get; private set; } = null!;
     public string AdminKey { get; private set; } = "";
@@ -24,6 +27,10 @@ public sealed class ClusterFixture : IAsyncLifetime
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
             [$"--KeyLoad:DataRoot={Root}", "--KeyLoad:Ephemeral=true", "--KeyLoad:SnapshotThreshold=16"], timeout.Token);
+        if (commandBytes is { } bytes)
+            foreach (var number in Enumerable.Range(1, 3))
+                builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>().Single(resource => resource.Name == $"node{number}"))
+                    .WithEnvironment("KeyLoad__CommandAdmission__MaxRetainedBytes", bytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
         builder.Services.AddLogging(logging =>
         {
             logging.ClearProviders(); logging.AddConsole(); logging.SetMinimumLevel(LogLevel.Warning);

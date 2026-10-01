@@ -310,7 +310,13 @@
       "src/KeyLoad.Query/QueryEngine.cs",
       "src/KeyLoad.Core/ProjectionOutbox.cs",
       "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
-      "tests/KeyLoad.UnitTests/ProjectionProgressTests.cs"
+      "tests/KeyLoad.UnitTests/ProjectionProgressTests.cs",
+      "src/KeyLoad.Core/CommandAdmissionGovernor.cs",
+      "src/KeyLoad.Core/AdmittedCommandQueue.cs",
+      "tests/KeyLoad.UnitTests/CommandAdmissionTests.cs",
+      "tests/KeyLoad.UnitTests/CommandQueueTests.cs",
+      "tests/KeyLoad.IntegrationTests/AdmissionClusterTests.cs",
+      "docs/design/command-admission.md"
     ]
   },
   "KL-041": {

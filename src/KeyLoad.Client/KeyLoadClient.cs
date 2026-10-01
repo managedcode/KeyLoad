@@ -102,4 +102,6 @@ public sealed class KeyLoadClient(HttpClient http, string apiKey)
         => Send<bool>("/v1/admin/api-keys", new ConfigureApiKeyRequest(key), true, commandId, cancellationToken);
     public Task<Result<NodeStatus>> StatusAsync(CancellationToken cancellationToken = default)
         => Send<NodeStatus>("/v1/status", null, false, null, cancellationToken);
+    public Task<Result<NodeAdmissionStatus>> AdmissionStatusAsync(CancellationToken cancellationToken = default)
+        => Send<NodeAdmissionStatus>("/v1/admin/admission", null, false, null, cancellationToken);
 }

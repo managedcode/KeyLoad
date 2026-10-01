@@ -7,7 +7,7 @@
   "restore": "locked-mode passed",
   "build": "passed with zero warnings",
   "unitTests": {
-    "passed": 94,
+    "passed": 104,
     "failed": 0
   },
   "recoveryTests": {
@@ -31,7 +31,7 @@
     "evidence": "CI retains artifacts/qualification/crash-trials-*.jsonl"
   },
   "rf3Integration": {
-    "passed": 4,
+    "passed": 5,
     "failed": 0,
     "scenarios": [
       "leader process kill",
@@ -50,7 +50,9 @@
       "cross-voter live-query continuation after leader loss",
       "generation-pinned outbox effects and checkpoint replay after leader loss",
       "outbox entries, projection checkpoints and receipts preserved across snapshot installation",
-      "protected document change-feed and live-query HTTP projection"
+      "protected document change-feed and live-query HTTP projection",
+      "data admission exhaustion rejects before canonical acceptance",
+      "reserved dispatch control and Orleans routing with exhausted data admission"
     ]
   },
   "durability": [
@@ -60,9 +62,9 @@
   "powerLoss": "not qualified",
   "endurance72Hours": "pending",
   "crossPlatformCI": {
-    "qualifiedCommit": "4dd4369b8cde399dfcbbcc3fc538aec1768dc0d9",
-    "run": "https://github.com/managedcode/KeyLoad/actions/runs/36911698298",
+    "qualifiedCommit": "c226ee0c0659be1045b6b151d796cd4c2ae5cf93",
+    "run": "https://github.com/managedcode/KeyLoad/actions/runs/36915868306",
     "platforms": ["Linux", "macOS", "Windows"],
-    "currentProjectionProgressChanges": "pending"
+    "currentCommandAdmissionChanges": "pending"
   }
 }

@@ -44,6 +44,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
 });
 builder.Services.AddSingleton(node);
+builder.Services.AddSingleton(new CommandAdmissionGovernor(node.CommandAdmission));
 builder.Services.AddSingleton<IAtomicStore>(_ => new ZoneTreeStore(new(directory + "/database")
 { Incarnation = node.Incarnation, SigningKey = Convert.FromBase64String(node.SigningKey) }));
 builder.Services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();

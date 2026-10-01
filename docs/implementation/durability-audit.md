@@ -28,6 +28,8 @@ The committed system outbox stores accepted mutations and document before/after 
 
 Strong reads on a leader force a quorum barrier tied to that leadership term. Followers request this barrier through an authenticated peer endpoint and wait for local application of the returned committed position. The provider's follower synchronization API alone is not used as KeyLoad's strong-read acknowledgement. Text and vector search, SQL predicates, row authorization and returned field projection each stay within one storage read gate.
 
+The cluster coordinator reserves bounded command count and retained payload bytes before enqueueing, scoped by verified tenant/principal. Short delivery, membership and dispatch commands have a separate control reserve and bounded priority. Accepted commands retain their reservation across caller cancellation until the worker finishes; shutdown releases queued reservations with an unknown-outcome response. Local admission configuration does not alter canonical apply decisions. An RF3 test exhausts data admission and verifies unpublished catalog writes, unclaimed rejected IDs, continued dispatch commits and ready Orleans routing on all voters. Request-body allocations before deserialization and total native/RSS/disk budgets remain separate pending qualification.
+
 Orleans membership is a replicated catalog record, bootstrapped through consensus before Orleans starts. Grains route commands; they do not own files or durability. The first topology contains one physical shard and many separately scoped atomic partitions.
 
 ## Verified and outstanding qualification

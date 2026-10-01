@@ -76,6 +76,11 @@ public static class ApiEndpoints
             Submit<bool, ConfigureApiKeyRequest>(context, OperationKind.ConfigureApiKey, CommandId(context), request));
         app.MapPost("/v1/admin/dispatch", (bool paused, HttpContext context) =>
             Submit<bool, bool>(context, OperationKind.SetDispatch, CommandId(context), paused));
+        app.MapGet("/v1/admin/admission", (DatabaseEngine database, CommandAdmissionGovernor governor, HttpContext context) =>
+        {
+            RequireAdministrator(database, context);
+            return new NodeAdmissionStatus(governor.Limits, governor.Snapshot());
+        });
         app.MapPost("/v1/admin/backup", (DatabaseEngine database, NodeOptions options, HttpContext context) =>
         {
             RequireAdministrator(database, context);

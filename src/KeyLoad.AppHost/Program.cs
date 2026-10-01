@@ -41,6 +41,10 @@ var nodes = Enumerable.Range(1, 3).Select(number => builder.AddProject<Projects.
 foreach (var resource in nodes)
 {
     resource.WithEnvironment("KeyLoad__PublicEndpoint", resource.GetEndpoint("http"));
+    foreach (var option in new[] { "MaxCommands", "MaxRetainedBytes", "MaxTenantCommands", "MaxPrincipalCommands", "ReservedControlCommands",
+        "ReservedControlBytes", "MaxControlPayloadBytes", "MaxTenantControlCommands", "MaxPrincipalControlCommands" })
+        if (builder.Configuration[$"KeyLoad:CommandAdmission:{option}"] is { } value)
+            resource.WithEnvironment($"KeyLoad__CommandAdmission__{option}", value);
     for (var index = 0; index < nodes.Length; index++) resource.WithEnvironment($"KeyLoad__Peers__{index}", nodes[index].GetEndpoint("http"));
 }
 if (benchmarkMode) BenchmarkResources.Add(builder, nodes, admin, benchmarkRoot);
