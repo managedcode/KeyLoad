@@ -11,7 +11,7 @@
     "failed": 0
   },
   "recoveryTests": {
-    "passed": 57,
+    "passed": 70,
     "failed": 0,
     "seededProcessCrashes": 1000,
     "checkpointPublicationCrashes": 8,
@@ -28,7 +28,10 @@
       "JournalFlushed": 193,
       "ApplyCompleted": 207
     },
-    "evidence": "CI retains artifacts/qualification/crash-trials-*.jsonl"
+    "evidence": "CI retains artifacts/qualification/crash-trials-*.jsonl",
+    "snapshotTransferRejections": 4,
+    "snapshotInstallCrashes": 5,
+    "snapshotCorruptionAndIntentChecks": 4
   },
   "rf3Integration": {
     "passed": 6,
@@ -63,13 +66,13 @@
   "powerLoss": "not qualified",
   "endurance72Hours": "pending",
   "crossPlatformCI": {
-    "qualifiedCommit": "c226ee0c0659be1045b6b151d796cd4c2ae5cf93",
-    "run": "https://github.com/managedcode/KeyLoad/actions/runs/36915868306",
+    "qualifiedCommit": "67c5bbc1e387fb5b402c78c9d74094ed34fad519",
+    "run": "https://github.com/managedcode/KeyLoad/actions/runs/36923853260",
     "platforms": [
       "Linux",
       "macOS",
       "Windows"
     ],
-    "currentCommandAdmissionChanges": "Windows voter startup failed during temporary quorum loss in run 36918608250; startup retry and HTTP admission changes await CI"
+    "currentSnapshotInstallChanges": "pending"
   }
 }

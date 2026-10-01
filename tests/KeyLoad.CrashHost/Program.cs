@@ -9,6 +9,11 @@ using DotNext.Net.Cluster.Consensus.Raft;
 using DotNext.Net.Cluster.Consensus.Raft.StateMachine;
 
 var directory = args[0];
+if (args[1] == "raft-snapshot-install")
+{
+    await NativeSnapshotCrashScenario.RunAsync(directory, args[2]);
+    return;
+}
 if (args[1] == "raft-append")
 {
     await using var log = new DurableRaftLog(new WriteAheadLog.Options

@@ -284,6 +284,9 @@
       "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
       "tests/KeyLoad.UnitTests/CheckpointTests.cs",
       "tests/KeyLoad.RecoveryTests/RaftSnapshotTests.cs",
+      "tests/KeyLoad.RecoveryTests/InterruptedSnapshotTests.cs",
+      "tests/KeyLoad.RecoveryTests/SnapshotInstallRecoveryTests.cs",
+      "docs/design/replica-snapshots.md",
       "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
       "tests/KeyLoad.IntegrationTests/ClusterTests.cs"
     ]
