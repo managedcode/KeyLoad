@@ -17,6 +17,8 @@ public sealed class ClusterTests(ClusterFixture fixture)
     public async Task ReplicatedAtomicBatchSurvivesLeaderProcessKillAndMinorityRejectsWrites()
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        try
+        {
         var clients = Enumerable.Range(1, 3).Select(i => fixture.Client($"node{i}")).ToArray();
         var partition = new PartitionRef("integration", "database", "orders", Guid.NewGuid().ToString("N"));
         Success(await clients[0].ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId,
@@ -61,6 +63,8 @@ public sealed class ClusterTests(ClusterFixture fixture)
         await EventuallyAsync(async () => (await surviving.StatusAsync(timeout.Token)).IsSuccess, timeout.Token);
         Assert.Null(Success(await surviving.GetAsync(new(partition, "orders", "minority"), timeout.Token)));
         foreach (var index in Enumerable.Range(0, 3)) await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync($"node{index + 1}", timeout.Token);
+        }
+        catch { await fixture.SaveFailureDiagnosticsAsync(); throw; }
     }
     [Fact]
     public async Task UnsignedPeerRequestsAndClientSuppliedPrincipalAreRejected()

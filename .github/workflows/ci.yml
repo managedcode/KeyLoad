@@ -25,8 +25,8 @@ jobs:
       - run: dotnet restore KeyLoad.slnx --locked-mode
       - run: dotnet build KeyLoad.slnx --no-restore --configuration Release
       - run: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release
-      - run: dotnet test --project tests/KeyLoad.RecoveryTests --no-build --no-restore --configuration Release
       - run: dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore --configuration Release
+      - run: dotnet test --project tests/KeyLoad.RecoveryTests --no-build --no-restore --configuration Release
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:

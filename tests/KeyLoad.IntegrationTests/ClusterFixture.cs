@@ -1,4 +1,5 @@
 using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,12 +26,41 @@ public sealed class ClusterFixture : IAsyncLifetime
         await App.StartAsync(timeout.Token);
         using var profile = System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(Path.Combine(Root, "local-profile.json")));
         AdminKey = profile.RootElement.GetProperty("AdminKey").GetString()!;
-        await Task.WhenAll(Enumerable.Range(1, 3).Select(i => App.ResourceNotifications.WaitForResourceHealthyAsync($"node{i}", timeout.Token)));
+        try { await Task.WhenAll(Enumerable.Range(1, 3).Select(i => App.ResourceNotifications.WaitForResourceHealthyAsync($"node{i}", timeout.Token))); }
+        catch { await SaveFailureDiagnosticsAsync(); throw; }
     }
     public KeyLoadClient Client(string node, string? key = null)
     {
         var http = App.CreateHttpClient(node, "http"); http.Timeout = TimeSpan.FromSeconds(30);
         return new(http, key ?? AdminKey);
+    }
+    public async Task SaveFailureDiagnosticsAsync()
+    {
+        var repository = new DirectoryInfo(AppContext.BaseDirectory);
+        while (repository.Parent is not null && !File.Exists(Path.Combine(repository.FullName, "KeyLoad.slnx"))) repository = repository.Parent;
+        var output = Path.Combine(repository.FullName, "artifacts", "qualification"); Directory.CreateDirectory(output);
+        var logs = App.Services.GetRequiredService<ResourceLoggerService>();
+        foreach (var number in Enumerable.Range(1, 3))
+        {
+            var name = $"node{number}";
+            try
+            {
+                using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var lines = new Queue<string>();
+                await foreach (var batch in logs.GetAllAsync(name).WithCancellation(deadline.Token))
+                {
+                    foreach (var line in batch)
+                    {
+                        lines.Enqueue(line.Content);
+                        if (lines.Count > 120) lines.Dequeue();
+                    }
+                }
+                var tail = lines.ToArray();
+                File.WriteAllLines(Path.Combine(output, "rf3-failure-" + name + ".log"), tail);
+                foreach (var line in tail) TestContext.Current.TestOutputHelper?.WriteLine($"{name}: {line}");
+            }
+            catch (OperationCanceledException) { TestContext.Current.TestOutputHelper?.WriteLine($"{name}: log retrieval timed out."); }
+        }
     }
     public async ValueTask DisposeAsync()
     {
