@@ -3,6 +3,7 @@ using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using System.Collections.Concurrent;
 using KeyLoad.Client;
+using KeyLoad.Replication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -13,6 +14,7 @@ public sealed class ClusterFixture : IAsyncLifetime
     public string Root { get; } = Path.Combine(Path.GetTempPath(), "keyload-cluster-" + Guid.NewGuid().ToString("N"));
     public DistributedApplication App { get; private set; } = null!;
     public string AdminKey { get; private set; } = "";
+    private byte[] peerSecret = [];
     private readonly CancellationTokenSource loggingLifetime = new();
     private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> nodeLogs = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, Task> logCapture = new(StringComparer.Ordinal);
@@ -21,7 +23,7 @@ public sealed class ClusterFixture : IAsyncLifetime
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
-            [$"--KeyLoad:DataRoot={Root}", "--KeyLoad:Ephemeral=true"], timeout.Token);
+            [$"--KeyLoad:DataRoot={Root}", "--KeyLoad:Ephemeral=true", "--KeyLoad:SnapshotThreshold=16"], timeout.Token);
         builder.Services.AddLogging(logging =>
         {
             logging.ClearProviders(); logging.AddConsole(); logging.SetMinimumLevel(LogLevel.Warning);
@@ -33,6 +35,7 @@ public sealed class ClusterFixture : IAsyncLifetime
         await App.StartAsync(timeout.Token);
         using var profile = System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(Path.Combine(Root, "local-profile.json")));
         AdminKey = profile.RootElement.GetProperty("AdminKey").GetString()!;
+        peerSecret = Convert.FromBase64String(profile.RootElement.GetProperty("PeerSecret").GetString()!);
         try { await Task.WhenAll(Enumerable.Range(1, 3).Select(i => App.ResourceNotifications.WaitForResourceHealthyAsync($"node{i}", timeout.Token))); }
         catch { await SaveFailureDiagnosticsAsync(); throw; }
     }
@@ -66,7 +69,7 @@ public sealed class ClusterFixture : IAsyncLifetime
         }
         catch (OperationCanceledException) when (loggingLifetime.IsCancellationRequested) { }
     }
-    public Task SaveFailureDiagnosticsAsync()
+    public async Task SaveFailureDiagnosticsAsync()
     {
         var repository = new DirectoryInfo(AppContext.BaseDirectory);
         while (repository.Parent is not null && !File.Exists(Path.Combine(repository.FullName, "KeyLoad.slnx"))) repository = repository.Parent;
@@ -77,10 +80,18 @@ public sealed class ClusterFixture : IAsyncLifetime
             var tail = nodeLogs.TryGetValue(name, out var buffer) ? buffer.ToArray() : [];
             var state = App.ResourceNotifications.TryGetCurrentState(name, out var current)
                 ? $"Resource {current.ResourceId}, state {current.Snapshot.State?.Text}, exit {current.Snapshot.ExitCode}, health {current.Snapshot.HealthStatus}" : "Resource state unavailable";
-            File.WriteAllLines(Path.Combine(output, "rf3-failure-" + name + ".log"), new[] { state }.Concat(tail));
+            var consensus = "Consensus diagnostics unavailable";
+            try
+            {
+                using var http = new HttpClient(new PeerSecurity(peerSecret).CreateHandler()) { Timeout = TimeSpan.FromSeconds(3) };
+                using var response = await http.GetAsync(new Uri(App.GetEndpoint(name, "http"), "/internal/state"));
+                if (response.IsSuccessStatusCode) consensus = await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or InvalidOperationException) { }
+            File.WriteAllLines(Path.Combine(output, "rf3-failure-" + name + ".log"), new[] { state, consensus }.Concat(tail));
+            TestContext.Current.TestOutputHelper?.WriteLine($"{name}: {consensus}");
             foreach (var line in tail) TestContext.Current.TestOutputHelper?.WriteLine($"{name}: {line}");
         }
-        return Task.CompletedTask;
     }
     public async ValueTask DisposeAsync()
     {

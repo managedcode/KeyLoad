@@ -12,6 +12,10 @@ try
         case "backup" when args.Length == 3:
             using (var store = new ZoneTreeStore(new(Path.GetFullPath(args[1])))) store.CreateBackup(Path.GetFullPath(args[2]));
             Console.WriteLine("Backup verified at creation."); break;
+        case "compact" when args.Length == 2:
+            using (var store = new ZoneTreeStore(new(Path.GetFullPath(args[1]))))
+                Console.WriteLine(JsonSerializer.Serialize(store.Compact(), JsonDefaults.Options));
+            break;
         case "restore" when args.Length == 3:
             var identity = ZoneTreeStore.Restore(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]));
             Console.WriteLine(JsonSerializer.Serialize(new { identity.NodeId, identity.Incarnation, identity.DispatchPaused }, JsonDefaults.Options)); break;
@@ -46,6 +50,7 @@ static void Help() => Console.WriteLine("""
 KeyLoad CLI
   status <node-url> [local-profile.json]
   backup <offline-database-directory> <empty-backup-directory>
+  compact <offline-database-directory>
   restore <backup-directory> <empty-database-directory>
   pack-backup <backup-directory> <new-artifact-file>
   inspect-artifact <artifact-file>

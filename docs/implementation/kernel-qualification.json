@@ -7,13 +7,17 @@
   "restore": "locked-mode passed",
   "build": "passed with zero warnings",
   "unitTests": {
-    "passed": 22,
+    "passed": 26,
     "failed": 0
   },
   "recoveryTests": {
-    "passed": 25,
+    "passed": 43,
     "failed": 0,
     "seededProcessCrashes": 1000,
+    "checkpointPublicationCrashes": 8,
+    "nativeRaftAcknowledgementCrashes": 4,
+    "nativeSnapshotTests": 2,
+    "peerSecurityTests": 6,
     "stages": {
       "PayloadWritten": 201,
       "MutationApplied": 200,
@@ -24,7 +28,7 @@
     "evidence": "CI retains artifacts/qualification/crash-trials-*.jsonl"
   },
   "rf3Integration": {
-    "passed": 2,
+    "passed": 3,
     "failed": 0,
     "scenarios": [
       "leader process kill",
@@ -32,7 +36,9 @@
       "atomic inbox/effects/ACK",
       "minority read/write rejection",
       "voter restart",
-      "unsigned peer RPC rejection"
+      "unsigned peer RPC rejection",
+      "empty-replica native snapshot catch-up",
+      "command outcome preserved across snapshot installation"
     ]
   },
   "durability": [

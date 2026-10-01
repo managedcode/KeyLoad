@@ -17,4 +17,5 @@ public sealed record SearchRequest(PartitionRef Partition, string Collection, st
     string? VectorField = null, float[]? Vector = null, VectorSpace? Space = null, int Limit = 10,
     double TextWeight = 1, double VectorWeight = 1, int FusionConstant = 60);
 public sealed record BackupReceipt(string Id, long Position);
-public sealed record NodeStatus(string NodeId, Guid Incarnation, long Applied, string? Leader, int Voters, DurabilityProfile Durability, bool RoutingReady, int ProcessId);
+public sealed record NodeStatus(string NodeId, Guid Incarnation, long Applied, string? Leader, int Voters, DurabilityProfile Durability, bool RoutingReady, int ProcessId,
+    long ReadGeneration = 0);

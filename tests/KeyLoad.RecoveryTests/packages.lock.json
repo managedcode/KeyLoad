@@ -349,6 +349,7 @@
       "keyload.crashhost": {
         "type": "Project",
         "dependencies": {
+          "KeyLoad.Replication": "[0.1.0-dev, )",
           "KeyLoad.Security": "[0.1.0-dev, )",
           "KeyLoad.Storage.ZoneTree": "[0.1.0-dev, )"
         }

@@ -9,7 +9,7 @@ namespace KeyLoad.Query;
 public sealed class QueryEngine(DatabaseEngine database)
 {
     private readonly SemaphoreSlim admission = new(database.Limits.MaxConcurrentQueries);
-    private sealed record CursorClaims(string Purpose, Guid Incarnation, string PrincipalId, long PolicyEpoch,
+    private sealed record CursorClaims(string Purpose, Guid Incarnation, Guid NodeId, long ReadGeneration, string PrincipalId, long PolicyEpoch,
         long SchemaVersion, string QueryHash, long CutPosition, int Offset, DateTimeOffset ExpiresAt);
     public QueryPage Execute(string principalId, QueryRequest request)
     {
@@ -31,6 +31,7 @@ public sealed class QueryEngine(DatabaseEngine database)
                 {
                     var claims = database.Verify<CursorClaims>(cursor);
                     if (claims.Purpose != "query-page" || claims.Incarnation != database.Store.Identity.Incarnation
+                        || claims.NodeId != database.Store.Identity.NodeId || claims.ReadGeneration != database.Store.Identity.ReadGeneration
                         || claims.PrincipalId != principal.Id || claims.PolicyEpoch != principal.PolicyEpoch || claims.SchemaVersion != resource.SchemaVersion
                         || claims.QueryHash != hash || claims.CutPosition != database.Store.Position || claims.ExpiresAt < DateTimeOffset.UtcNow
                         || claims.Offset < 0 || claims.Offset > database.Limits.MaxScanRecords)
@@ -53,7 +54,8 @@ public sealed class QueryEngine(DatabaseEngine database)
                 if (page.Sum(row => System.Text.Encoding.UTF8.GetByteCount(row.Json)) > database.Limits.MaxBatchBytes)
                     throw Errors.Fail(ErrorCode.BudgetExceeded, "The query result byte budget is exceeded.");
                 var next = cursorOffset + page.Length;
-                var token = next < eligible.Count ? database.Sign(new CursorClaims("query-page", database.Store.Identity.Incarnation, principal.Id,
+                var token = next < eligible.Count ? database.Sign(new CursorClaims("query-page", database.Store.Identity.Incarnation,
+                    database.Store.Identity.NodeId, database.Store.Identity.ReadGeneration, principal.Id,
                     principal.PolicyEpoch, resource.SchemaVersion, hash, database.Store.Position, next, DateTimeOffset.UtcNow.AddMinutes(5))) : null;
                 return new QueryPage(page, token, database.Store.Position, accessPath);
             });

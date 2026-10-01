@@ -51,7 +51,8 @@ public static class ApiEndpoints
         {
             RequireAdministrator(database, context);
             return new NodeStatus(database.Store.Identity.NodeId.ToString(), database.Store.Identity.Incarnation, database.LastApplied,
-                cluster.Leader?.EndPoint.ToString(), cluster.Members.Count, database.Durability, orleans.Grains is not null, Environment.ProcessId);
+                cluster.Leader?.EndPoint.ToString(), cluster.Members.Count, database.Durability, orleans.Grains is not null, Environment.ProcessId,
+                database.Store.Identity.ReadGeneration);
         });
         return app;
     }

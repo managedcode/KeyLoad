@@ -9,29 +9,31 @@ using ZoneTree.WAL;
 
 namespace KeyLoad.Storage.ZoneTree;
 
-public enum CommitStage { HeaderWritten, PayloadWritten, JournalFlushed, MutationApplied, ApplyCompleted }
+public enum CommitStage { HeaderWritten, PayloadWritten, JournalFlushed, MutationApplied, ApplyCompleted,
+    SnapshotWritten, SnapshotFlushed, InstallPrepared, JournalSwapped }
 public sealed record ZoneTreeStoreOptions(string Directory)
 {
     public Guid? Incarnation { get; init; }
     public byte[]? SigningKey { get; init; }
     public Action<CommitStage, long, int>? FaultObserver { get; init; }
     public int MaxFrameBytes { get; init; } = 33_554_432;
+    public long MaxSnapshotBytes { get; init; } = 4_294_967_296;
 }
 
 /// <summary>
 /// The checksummed redo journal is canonical. ZoneTree is its ordered materialization.
 /// The gate prevents readers from seeing a partially applied transaction. No network work runs inside it.
 /// </summary>
-public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
+public sealed partial class ZoneTreeStore : IAtomicStore, IKeyValueView
 {
     private const ulong Magic = 0x314C4157444C4BUL;
     private const int HeaderLength = 52;
     private readonly ZoneTreeStoreOptions options;
     private readonly ReaderWriterLockSlim gate = new();
     private readonly FileStream ownership;
-    private readonly FileStream journal;
-    private readonly IZoneTree<Memory<byte>, Memory<byte>> tree;
-    private readonly IMaintainer maintainer;
+    private FileStream journal = null!;
+    private IZoneTree<Memory<byte>, Memory<byte>> tree = null!;
+    private IMaintainer maintainer = null!;
     private bool poisoned;
     private bool disposed;
     private long position;
@@ -53,28 +55,34 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
             Identity = File.Exists(manifest) ? ReadIdentity(manifest) : new(1, KeyCodec.Version, Guid.NewGuid(),
                 options.Incarnation ?? Guid.NewGuid(), options.SigningKey?.ToArray() ?? RandomNumberGenerator.GetBytes(32),
                 DurabilityProfile.ProcessDurable);
-            if (Identity.FormatVersion != 1 || Identity.KeyCodecVersion != KeyCodec.Version)
+            if (Identity.FormatVersion is not (1 or 2) || Identity.KeyCodecVersion != KeyCodec.Version)
                 throw Errors.Fail(ErrorCode.FormatUnsupported, "This database requires a different storage format.");
             if (Identity.SigningKey.Length != 32 || options.Incarnation is { } incarnation && incarnation != Identity.Incarnation
                 || options.SigningKey is { } signingKey && !CryptographicOperations.FixedTimeEquals(signingKey, Identity.SigningKey))
                 throw Errors.Fail(ErrorCode.TokenInvalidated, "The configured cluster identity does not match this database.");
             if (!File.Exists(manifest)) WriteIdentity(manifest, Identity);
-            tree = new ZoneTreeFactory<Memory<byte>, Memory<byte>>()
-                .SetDataDirectory(Path.Combine(options.Directory, "tree"))
-                .SetComparer(new KeyComparer())
-                .SetKeySerializer(new ByteArraySerializer()).SetValueSerializer(new ByteArraySerializer())
-                .SetIsDeletedDelegate(static (in Memory<byte> key, in Memory<byte> value) => value.Span[0] == 0)
-                .SetMarkValueDeletedDelegate(static (ref Memory<byte> value) => value = new byte[] { 0 })
-                .ConfigureWriteAheadLogOptions(o => { o.WriteAheadLogMode = WriteAheadLogMode.Sync; o.CompressionMethod = CompressionMethod.None; })
-                .ConfigureDiskSegmentOptions(o => o.CompressionMethod = CompressionMethod.None)
-                .OpenOrCreate();
-            journal = new FileStream(Path.Combine(options.Directory, "commands.wal"), FileMode.OpenOrCreate,
-                FileAccess.ReadWrite, FileShare.Read, 65_536, FileOptions.WriteThrough);
+            tree = OpenTree();
+            journal = OpenJournal();
             Recover();
             maintainer = tree.CreateMaintainer();
+            ReclaimInterruptedCheckpoints();
         }
-        catch { journal?.Dispose(); tree?.Dispose(); ownership.Dispose(); throw; }
+        catch
+        {
+            try { maintainer?.Dispose(); }
+            finally { try { journal?.Dispose(); } finally { try { tree?.Dispose(); } finally { ownership.Dispose(); } } }
+            throw;
+        }
     }
+    private IZoneTree<Memory<byte>, Memory<byte>> OpenTree() => new ZoneTreeFactory<Memory<byte>, Memory<byte>>()
+        .SetDataDirectory(Path.Combine(options.Directory, "tree")).SetComparer(new KeyComparer())
+        .SetKeySerializer(new ByteArraySerializer()).SetValueSerializer(new ByteArraySerializer())
+        .SetIsDeletedDelegate(static (in Memory<byte> key, in Memory<byte> value) => value.Span[0] == 0)
+        .SetMarkValueDeletedDelegate(static (ref Memory<byte> value) => value = new byte[] { 0 })
+        .ConfigureWriteAheadLogOptions(o => { o.WriteAheadLogMode = WriteAheadLogMode.Sync; o.CompressionMethod = CompressionMethod.None; })
+        .ConfigureDiskSegmentOptions(o => o.CompressionMethod = CompressionMethod.None).OpenOrCreate();
+    private FileStream OpenJournal() => new(Path.Combine(options.Directory, "commands.wal"), FileMode.OpenOrCreate,
+        FileAccess.ReadWrite, FileShare.Read, 65_536, FileOptions.WriteThrough);
 
     private static StoreIdentity ReadIdentity(string path)
     {
@@ -98,6 +106,16 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     {
         var header = new byte[HeaderLength];
         long validLength = 0;
+        if (journal.Length >= HeaderLength)
+        {
+            journal.ReadExactly(header); journal.Position = 0;
+            if (BinaryPrimitives.ReadUInt64LittleEndian(header) == CheckpointMagic)
+            {
+                var checkpoint = ReadCheckpoint(journal, Apply);
+                position = checkpoint.Position;
+                validLength = journal.Position;
+            }
+        }
         while (journal.Position < journal.Length)
         {
             var remaining = journal.Length - journal.Position;
@@ -332,10 +350,12 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
         {
             if (disposed) return;
             disposed = true;
-            maintainer.Dispose();
-            tree.Dispose();
-            journal.Dispose();
-            ownership.Dispose();
+            try { maintainer?.Dispose(); }
+            finally
+            {
+                try { tree?.Dispose(); }
+                finally { try { journal?.Dispose(); } finally { ownership.Dispose(); } }
+            }
         }
         finally { gate.ExitWriteLock(); }
     }

@@ -52,6 +52,23 @@ public sealed class SecurityAndQueryTests
             new(db.Partition with { TenantId = "other" }, "orders", "mine"))).Code);
     }
     [Fact]
+    public void CompactionPreservesCursorAndReplicaInstallInvalidatesItsGeneration()
+    {
+        using var db = new TestDatabase(); db.Configure("orders", ResourceKind.Collection);
+        db.Commit(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}"));
+        var engine = new QueryEngine(db.Database);
+        var request = new QueryRequest(db.Partition, "SELECT * FROM orders LIMIT 1", AllowFullScan: true);
+        var first = engine.Execute("root", request);
+        Assert.NotNull(first.Cursor);
+        var path = Path.Combine(db.Directory, "replica.snapshot");
+        db.Store.CreateSnapshot(path);
+        db.Store.Compact();
+        Assert.Equal("b", Assert.Single(engine.Execute("root", request with { Cursor = first.Cursor }).Rows).EntityId);
+        db.Store.InstallSnapshot(path, 0);
+        Assert.Equal(first.CutPosition, db.Store.Position);
+        Assert.Equal(ErrorCode.CursorExpired, Assert.Throws<KeyLoadException>(() => engine.Execute("root", request with { Cursor = first.Cursor })).Code);
+    }
+    [Fact]
     public void SqlUsesTypedParametersThreeValuedNullAndDeterministicOrdering()
     {
         using var db = new TestDatabase(); db.Configure("orders", ResourceKind.Collection, indexes: [new("status", ["/status"])]);

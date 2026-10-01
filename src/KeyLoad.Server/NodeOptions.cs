@@ -13,6 +13,12 @@ public sealed record NodeOptions
     public int SiloPort { get; init; } = 11111;
     public string SiloAddress { get; init; } = "127.0.0.1";
     public bool AllowLoopbackHttp { get; init; }
+    public int SnapshotThreshold { get; init; } = 1_024;
+    public int LowerElectionTimeoutMilliseconds { get; init; } = 4_000;
+    public int UpperElectionTimeoutMilliseconds { get; init; } = 8_000;
+    public int PeerConnectTimeoutMilliseconds { get; init; } = 500;
+    public int RaftRpcTimeoutMilliseconds { get; init; } = 1_500;
+    public int RaftRequestTimeoutMilliseconds { get; init; } = 2_000;
     public void Validate()
     {
         if (Peers.Length < 3 || Peers.Length % 2 == 0 || Peers.Distinct(StringComparer.Ordinal).Count() != Peers.Length)
@@ -28,8 +34,12 @@ public sealed record NodeOptions
             || siloAddress.Equals(System.Net.IPAddress.Any) || siloAddress.Equals(System.Net.IPAddress.IPv6Any)
             || Peers.Any(peer => !new Uri(peer).IsLoopback) && System.Net.IPAddress.IsLoopback(siloAddress))
             throw new InvalidOperationException("SiloAddress must be a routable advertised IP address when using remote peers.");
+        if (PeerConnectTimeoutMilliseconds < 1 || PeerConnectTimeoutMilliseconds >= RaftRpcTimeoutMilliseconds
+            || RaftRpcTimeoutMilliseconds >= RaftRequestTimeoutMilliseconds || RaftRequestTimeoutMilliseconds >= LowerElectionTimeoutMilliseconds
+            || LowerElectionTimeoutMilliseconds >= UpperElectionTimeoutMilliseconds)
+            throw new InvalidOperationException("Peer connect, RPC and request timeouts must be shorter than the lower election timeout; the election range must be ordered.");
         if (Incarnation == Guid.Empty || Convert.FromBase64String(SigningKey).Length != 32
             || Convert.FromBase64String(PeerSecret).Length != 32 || AdminKey.Length < 32 || !AdminKey.StartsWith("root.", StringComparison.Ordinal)
-            || SiloPort is < 1 or > 65535) throw new InvalidOperationException("Cluster identity, secrets or silo port are missing or invalid.");
+            || SiloPort is < 1 or > 65535 || SnapshotThreshold < 2) throw new InvalidOperationException("Cluster identity, secrets, silo port or snapshot threshold are missing or invalid.");
     }
 }

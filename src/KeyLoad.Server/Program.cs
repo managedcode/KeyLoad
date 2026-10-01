@@ -23,11 +23,15 @@ var node = builder.Configuration.GetSection("KeyLoad").Get<NodeOptions>() ?? new
 node.Validate();
 var directory = Path.GetFullPath(node.DataDirectory);
 Directory.CreateDirectory(directory);
+if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(directory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
 builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
 {
     ["publicEndPoint"] = node.PublicEndpoint.TrimEnd('/') + "/raft", ["coldStart"] = "false",
-    ["lowerElectionTimeout"] = "750", ["upperElectionTimeout"] = "1500", ["requestTimeout"] = "00:00:05",
-    ["rpcTimeout"] = "00:00:03", ["partitioning"] = "false"
+    ["lowerElectionTimeout"] = node.LowerElectionTimeoutMilliseconds.ToString(System.Globalization.CultureInfo.InvariantCulture),
+    ["upperElectionTimeout"] = node.UpperElectionTimeoutMilliseconds.ToString(System.Globalization.CultureInfo.InvariantCulture),
+    ["requestTimeout"] = TimeSpan.FromMilliseconds(node.RaftRequestTimeoutMilliseconds).ToString("c", System.Globalization.CultureInfo.InvariantCulture),
+    ["rpcTimeout"] = TimeSpan.FromMilliseconds(node.RaftRpcTimeoutMilliseconds).ToString("c", System.Globalization.CultureInfo.InvariantCulture),
+    ["partitioning"] = "false"
 });
 builder.WebHost.ConfigureKestrel(server => server.Limits.MaxRequestBodySize = 33_554_432);
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -46,14 +50,16 @@ builder.Services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();
 builder.Services.AddSingleton<DatabaseEngine>();
 builder.Services.AddSingleton<KeyLoad.Query.QueryEngine>();
 builder.Services.AddSingleton<KeyLoad.Query.SearchEngine>();
-builder.Services.AddSingleton(new PeerSecurity(Convert.FromBase64String(node.PeerSecret)));
+builder.Services.AddSingleton(sp => new PeerSecurity(Convert.FromBase64String(node.PeerSecret),
+    connectTimeout: TimeSpan.FromMilliseconds(node.PeerConnectTimeoutMilliseconds), logger: sp.GetRequiredService<ILogger<PeerSecurity>>()));
 builder.Services.AddSingleton<IHttpMessageHandlerFactory>(sp => sp.GetRequiredService<PeerSecurity>());
 builder.Services.UsePersistentConfigurationStorage(directory + "/voters.bin");
-builder.Services.AddSingleton<ReplicatedStateMachine>();
+builder.Services.AddSingleton(sp => new ReplicatedStateMachine(sp.GetRequiredService<DatabaseEngine>(),
+    new DirectoryInfo(directory + "/snapshots"), node.SnapshotThreshold));
 builder.Services.AddSingleton<IStateMachine>(sp => sp.GetRequiredService<ReplicatedStateMachine>());
 builder.Services.AddSingleton<IPersistentState>(sp => new DurableRaftLog(new WriteAheadLog.Options
 {
-    Location = directory + "/raft", FlushInterval = TimeSpan.Zero, FlushOnCommit = true,
+    Location = directory + "/raft", FlushInterval = Timeout.InfiniteTimeSpan,
     HashAlgorithm = WriteAheadLog.IntegrityHashAlgorithm.Crc64
 }, sp.GetRequiredService<IStateMachine>()));
 builder.Services.AddSingleton<IAuditTrail<IRaftLogEntry>>(sp => sp.GetRequiredService<IPersistentState>());
@@ -70,12 +76,15 @@ await ClusterBootstrap.SeedAsync(voters, node.Peers);
 var database = app.Services.GetRequiredService<DatabaseEngine>();
 database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
     DatabaseEngine.Credential("root", "root", node.AdminKey));
+await app.Services.GetRequiredService<ReplicatedStateMachine>().RestoreAsync(app.Lifetime.ApplicationStopping);
 app.Use(async (context, next) =>
 {
     try
     {
         if (context.Request.Path.StartsWithSegments("/raft") || context.Request.Path.StartsWithSegments("/internal"))
         {
+            var bodyBudget = context.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>();
+            if (bodyBudget is { IsReadOnly: false }) bodyBudget.MaxRequestBodySize = context.RequestServices.GetRequiredService<PeerSecurity>().MaxBodyBytes;
             if (!await context.RequestServices.GetRequiredService<PeerSecurity>().ValidateAsync(context.Request, context.RequestAborted))
             { context.Response.StatusCode = 401; return; }
         }
@@ -91,6 +100,7 @@ app.Use(async (context, next) =>
     }
     catch (KeyLoadException exception)
     {
+        if (context.Request.Path.StartsWithSegments("/raft")) app.Logger.LogWarning("Raft request rejected: {ErrorCode}", exception.Code);
         context.Response.StatusCode = exception.StatusCode;
         await context.Response.WriteAsJsonAsync(exception.ToProblem(), JsonDefaults.Options, context.RequestAborted);
     }
@@ -112,6 +122,13 @@ app.MapPost("/internal/commands", (ReplicatedOperation operation, ClusterCoordin
     => coordinator.AcceptForwardedAsync(operation, cancellationToken));
 app.MapGet("/internal/read-barrier", (ClusterCoordinator coordinator, CancellationToken cancellationToken)
     => coordinator.LeaderReadBarrierAsync(cancellationToken));
+app.MapGet("/internal/state", (DatabaseEngine database, IRaftCluster cluster, ReplicatedStateMachine stateMachine, OrleansNode orleans) => new
+{
+    NodeId = database.Store.Identity.NodeId, cluster.AuditTrail.Term, cluster.AuditTrail.LastCommittedEntryIndex,
+    cluster.AuditTrail.LastEntryIndex, cluster.AuditTrail.Version, MaterializedPosition = database.LastApplied,
+    database.Store.Identity.ReadGeneration, SnapshotIndex = ((IStateMachine)stateMachine).Snapshot?.Index,
+    Leader = cluster.Leader?.EndPoint.ToString(), RoutingReady = orleans.Grains is not null
+});
 app.MapKeyLoadApi();
 await app.StartAsync();
 var consensus = app.Services.GetRequiredService<IRaftCluster>();

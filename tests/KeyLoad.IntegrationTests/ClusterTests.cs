@@ -62,7 +62,12 @@ public sealed class ClusterTests(ClusterFixture fixture)
             await fixture.App.Services.GetRequiredService<ResourceCommandService>().ExecuteCommandAsync($"node{index + 1}", "resource-start", timeout.Token);
         await EventuallyAsync(async () => (await surviving.StatusAsync(timeout.Token)).IsSuccess, timeout.Token);
         Assert.Null(Success(await surviving.GetAsync(new(partition, "orders", "minority"), timeout.Token)));
-        foreach (var index in Enumerable.Range(0, 3)) await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync($"node{index + 1}", timeout.Token);
+        foreach (var index in Enumerable.Range(0, 3))
+        {
+            await EventuallyAsync(async () => { var current = await clients[index].StatusAsync(timeout.Token);
+                return current.IsSuccess && current.Value!.RoutingReady; }, timeout.Token);
+            await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync($"node{index + 1}", timeout.Token);
+        }
         }
         catch { await fixture.SaveFailureDiagnosticsAsync(); throw; }
     }
@@ -76,6 +81,49 @@ public sealed class ClusterTests(ClusterFixture fixture)
         Assert.Equal(System.Net.HttpStatusCode.Unauthorized, unsignedBarrier.StatusCode);
         var invalid = fixture.Client("node1", "root.invalid-untrusted-credential-long-enough");
         Assert.True((await invalid.StatusAsync(TestContext.Current.CancellationToken)).IsFailed);
+    }
+    [Fact]
+    public async Task FreshReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes()
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+        try
+        {
+            var clients = Enumerable.Range(1, 3).Select(i => fixture.Client($"node{i}")).ToArray();
+            var partition = new PartitionRef("integration", "database", "snapshot", Guid.NewGuid().ToString("N"));
+            var configureId = Guid.NewGuid();
+            Success(await RetryDuringElectionAsync(() => clients[0].ConfigureResourceAsync(configureId, new(partition.TenantId, partition.DatabaseId,
+                new("snapshots", ResourceKind.Collection, "snapshot")), timeout.Token), timeout.Token));
+            CommandRequest? last = null; CommitReceipt? committed = null;
+            for (var index = 0; index < 40; index++)
+            {
+                last = new(Guid.NewGuid(), partition, [new PutDocument("snapshots", "doc-" + index, "{\"n\":" + index + "}", 0)]);
+                committed = Success(await RetryDuringElectionAsync(() => clients[index % clients.Length].CommitAsync(last, timeout.Token), timeout.Token));
+            }
+            foreach (var number in Enumerable.Range(1, 3))
+                await EventuallyAsync(() => Task.FromResult(Directory.EnumerateFiles(Path.Combine(fixture.Root, $"node{number}", "snapshots"), "*-*").Any()), timeout.Token);
+            var statuses = (await Task.WhenAll(clients.Select(client => client.StatusAsync(timeout.Token)))).Select(Success).ToArray();
+            var leaderPort = new Uri(statuses[0].Leader!).Port;
+            var follower = Enumerable.Range(0, 3).First(index => fixture.App.GetEndpoint($"node{index + 1}", "http").Port != leaderPort);
+            using (var process = Process.GetProcessById(statuses[follower].ProcessId))
+            { process.Kill(); await process.WaitForExitAsync(timeout.Token); }
+            var directory = Path.Combine(fixture.Root, $"node{follower + 1}");
+            var elapsed = Stopwatch.StartNew();
+            while (true)
+            {
+                try { Directory.Delete(directory, true); break; }
+                catch (IOException) when (elapsed.Elapsed < TimeSpan.FromSeconds(5)) { await Task.Delay(25, timeout.Token); }
+            }
+            await fixture.App.Services.GetRequiredService<ResourceCommandService>().ExecuteCommandAsync($"node{follower + 1}", "resource-start", timeout.Token);
+            await EventuallyAsync(async () => { var status = await clients[follower].StatusAsync(timeout.Token);
+                return status.IsSuccess && status.Value!.RoutingReady; }, timeout.Token);
+            var recovered = Success(await clients[follower].StatusAsync(timeout.Token));
+            Assert.NotEqual(statuses[follower].NodeId, recovered.NodeId);
+            Assert.Equal(statuses[follower].Incarnation, recovered.Incarnation);
+            Assert.Equal(1, Success(await clients[follower].GetAsync(new(partition, "snapshots", "doc-39"), timeout.Token))!.Revision);
+            Assert.Equal(committed!.Token, Success(await RetryDuringElectionAsync(() => clients[follower].CommitAsync(last!, timeout.Token), timeout.Token)).Token);
+            Assert.True(recovered.ReadGeneration > 0, "The empty replica must install a native snapshot rather than replay every historical command.");
+        }
+        catch { await fixture.SaveFailureDiagnosticsAsync(); throw; }
     }
     private static async Task EventuallyAsync(Func<Task<bool>> predicate, CancellationToken cancellationToken)
     {

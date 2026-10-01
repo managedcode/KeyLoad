@@ -8,9 +8,9 @@ The original load-testing prototype has been replaced. This repository implement
 
 This is an early implementation of the clustered kernel. The default server topology has three persistent voting nodes and requires a majority for writes and strong reads. It needs no external database, Redis or message broker.
 
-Implemented surfaces include document CRUD and field patches, partition-scoped unique/composite equality indexes, command deduplication, stream expected-revision append/read, scheduled work queues with fenced leases and retry/DLQ, atomic inbox completion, bounded property-graph traversal, ordered samples, exact vector search, BM25 and weighted reciprocal-rank fusion, a bounded read-only Q1 SQL dialect, API keys, field omission and field-use policies, verified backups, a .NET SDK and CLI.
+Implemented surfaces include document CRUD and field patches, partition-scoped unique/composite equality indexes, command deduplication, stream expected-revision append/read, scheduled work queues with fenced leases and retry/DLQ, atomic inbox completion, bounded property-graph traversal, ordered samples, exact vector search, BM25 and weighted reciprocal-rank fusion, a bounded read-only Q1 SQL dialect, API keys, field omission and field-use policies, verified backups, native Raft snapshots and empty-replica catch-up, offline journal compaction, a .NET SDK and CLI.
 
-The [104-task implementation tracker](docs/implementation/status.json) records the remaining work. Raft snapshot compaction, shard movement, distributed multi-shard query planning, managed HNSW, topics and subscription groups, CDC, retention, schema migrations, external backup stores and full release qualification remain under development. The current server uses one replicated physical shard which contains many independent atomic partitions.
+The [104-task implementation tracker](docs/implementation/status.json) records the remaining work. Automatic canonical journal maintenance, large and interrupted snapshot transfer qualification, shard movement, distributed multi-shard query planning, managed HNSW, topics and subscription groups, CDC, retention, schema migrations, external backup stores and full release qualification remain under development. The current server uses one replicated physical shard which contains many independent atomic partitions.
 
 The advertised profiles are `ProcessDurable` for embedded storage and `QuorumProcessDurable` for the cluster. The kernel has process-kill recovery tests and the cluster has real leader-loss and minority tests. Power-loss qualification, broader platform qualification and the 72-hour endurance gate are still required before advertising `LocalDurable`, `QuorumDurable` or production readiness.
 
@@ -31,7 +31,9 @@ dotnet run --project src/KeyLoad.Cli -- status \
   http://localhost:5101 data/cluster/local-profile.json
 ```
 
-The standalone server requires explicit cluster identity, voter endpoints, shared peer authentication secrets, an administrator credential and a silo port through `KeyLoad` configuration. Set `KeyLoad:SiloAddress` to each node's advertised IP address for a cluster across hosts. HTTPS is required for cluster endpoints; the AppHost explicitly enables loopback HTTP for development. Peer RPCs and forwarding requests are signed for their recipient, path, query and body, timestamped and replay checked. Public HTTP requests authenticate against the replicated credential catalog. Client-supplied roles are never trusted.
+The standalone server requires explicit cluster identity, voter endpoints, shared peer authentication secrets, an administrator credential and a silo port through `KeyLoad` configuration. Set `KeyLoad:SiloAddress` to each node's advertised IP address for a cluster across hosts. HTTPS is required for cluster endpoints; the AppHost explicitly enables loopback HTTP for development. Peer RPCs and forwarding requests are signed for their recipient, path, query, body and Raft protocol headers, timestamped and replay checked. Large peer bodies use bounded temporary files. Public HTTP requests authenticate against the replicated credential catalog. Client-supplied roles are never trusted.
+
+The default peer connection/RPC/request timeouts are 500/1500/2000 milliseconds, below the 4000–8000 millisecond election range. These values are configurable through the corresponding `KeyLoad` options; validation requires that ordering. Native snapshots are produced every `KeyLoad:SnapshotThreshold` committed entries (default 1024). Small snapshot catch-up is tested; large transfers still need qualification against the configured RPC deadline.
 
 ## .NET client
 
@@ -93,16 +95,17 @@ page.ThrowIfFail();
 
 Q1 supports projections and aliases, scalar parameters, comparisons, `AND`/`OR`/`NOT`, `IN`, `IS NULL`, `IS MISSING`, `ORDER BY`, `LIMIT` and `EXPLAIN`. Identifiers containing dots need double quotes. `id` and `revision` refer to canonical document identity/revision. Parameters use `@name`. JSON numbers use the decimal scalar policy. SQL is read-only; unsupported statements fail explicitly.
 
-Queries require a matching point/equality index or explicit `AllowFullScan`. Scans, parser depth, tokens, rows, bytes and execution time have budgets. Cursor tokens bind the principal, policy epoch, schema, query and current storage cut; writes or policy changes can expire a cursor. Sensitive predicates and sorting require a field-use grant. Returned documents omit protected paths, including classified values nested in arrays.
+Queries require a matching point/equality index or explicit `AllowFullScan`. Scans, parser depth, tokens, rows, bytes and execution time have budgets. Cursor tokens bind the principal, policy epoch, schema, query, node identity, read generation and current storage cut. Writes, policy changes or snapshot installation can expire a cursor; compaction preserves its cut. Sensitive predicates and sorting require a field-use grant. Returned documents omit protected paths, including classified values nested in arrays.
 
 Search accepts typed vector spaces and explicit text/vector fields. Both branches use one authorized read cut. Exact vector scores and BM25 ranks are combined with weighted RRF using one-based ranks. The managed ANN and graph retrieval extensions are tracked separately.
 
 ## Backups and Cartograph
 
-The canonical backup includes the checksummed redo journal, database identity and a SHA-256 manifest. Domain data, schemas, credentials, outcomes and inbox receipts are journaled together. ZoneTree files can be rebuilt from that canonical journal. Restore validates every manifest file, creates a new incarnation, resets consensus routing metadata and leaves queue dispatch paused.
+The canonical backup includes the checksummed redo journal, database identity and a SHA-256 manifest. Domain data, schemas, credentials, outcomes and inbox receipts are journaled together. The journal can begin with a verified checkpoint followed by newer transaction frames. ZoneTree files can be rebuilt from that canonical history. Restore validates every manifest file, creates a new incarnation, resets consensus routing metadata and leaves queue dispatch paused.
 
 ```sh
 # Stop the node before using the offline CLI.
+dotnet run --project src/KeyLoad.Cli -- compact data/cluster/node1/database
 dotnet run --project src/KeyLoad.Cli -- backup data/cluster/node1/database backups/snapshot
 dotnet run --project src/KeyLoad.Cli -- restore backups/snapshot data/restored
 
@@ -140,7 +143,7 @@ dotnet test --project tests/KeyLoad.RecoveryTests --no-build --no-restore
 dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore
 ```
 
-Tests use xUnit and Microsoft.Testing.Platform. Recovery qualification runs 1000 seeded real-process kills, checks complete-frame corruption and verifies a clean backup restore. Integration tests own the Aspire lifecycle and use three independent server processes with isolated persistent directories. They kill the elected leader, retry the same command, verify atomic effects on surviving voters and reject a minority write. No manually running AppHost is needed for tests.
+Tests use xUnit and Microsoft.Testing.Platform. Recovery qualification runs 1000 seeded real-process kills, checks complete-frame corruption and verifies a clean backup restore. Additional process kills cover checkpoint publication and all native Raft append paths immediately after acknowledgement. Integration tests own the Aspire lifecycle and use three independent server processes with isolated persistent directories. They kill the elected leader, retry the same command, verify atomic effects on surviving voters, reject a minority write and erase/restart one replica to require snapshot catch-up. No manually running AppHost is needed for tests.
 
 Benchmarks can be started with `dotnet run -c Release --project benchmarks/KeyLoad.Benchmarks`. Comparative PostgreSQL/Marten/Wolverine and multi-node scaling qualification are part of the development plan; no comparative performance claims are made yet.
 

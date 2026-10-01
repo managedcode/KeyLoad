@@ -75,6 +75,46 @@ public sealed class RecoveryTests
             { await Task.Delay(25, cancellationToken); }
         }
     }
+    [Theory]
+    [InlineData("compact", CommitStage.SnapshotWritten)]
+    [InlineData("compact", CommitStage.SnapshotFlushed)]
+    [InlineData("compact", CommitStage.InstallPrepared)]
+    [InlineData("compact", CommitStage.JournalSwapped)]
+    [InlineData("install", CommitStage.SnapshotWritten)]
+    [InlineData("install", CommitStage.SnapshotFlushed)]
+    [InlineData("install", CommitStage.InstallPrepared)]
+    [InlineData("install", CommitStage.JournalSwapped)]
+    public async Task ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration(string mode, CommitStage stage)
+    {
+        var root = Path.Combine(Path.GetTempPath(), "keyload-checkpoint-crash-" + Guid.NewGuid().ToString("N"));
+        var start = new ProcessStartInfo("dotnet") { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(), "0", mode }) start.ArgumentList.Add(argument);
+        using var process = Process.Start(start)!;
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        timeout.CancelAfter(TimeSpan.FromSeconds(20));
+        try
+        {
+            Assert.Equal("crash-point", await process.StandardOutput.ReadLineAsync(timeout.Token));
+            process.Kill(); await process.WaitForExitAsync(timeout.Token);
+            await WaitForKilledProcessFilesAsync(root, timeout.Token);
+            using var store = new ZoneTreeStore(new(root));
+            var values = store.Read(view => Enumerable.Range(0, 3).Select(i => JsonDefaults.Deserialize<int>(view.Get(KeyCodec.Encode("item", (long)i))!)).ToArray());
+            var installed = mode == "install" && stage == CommitStage.JournalSwapped;
+            Assert.All(values, value => Assert.Equal(installed ? 2 : 1, value));
+            Assert.Equal(2, store.Position);
+            if (mode == "install")
+            {
+                Assert.Equal(!installed, store.Read(view => view.Get(KeyCodec.Encode("obsolete")) is not null));
+                Assert.Equal(installed ? 9 : 0, store.Read(view => view.Get(KeyCodec.Encode("system", "last-applied")) is { } bytes ? JsonDefaults.Deserialize<long>(bytes) : 0));
+            }
+            store.Commit((tx, position) => { Assert.Equal(3, position); tx.PutRecord(KeyCodec.Encode("after"), true); return true; });
+        }
+        finally
+        {
+            if (!process.HasExited) { process.Kill(); await process.WaitForExitAsync(TestContext.Current.CancellationToken); }
+            if (Directory.Exists(root)) await DeleteTrialAsync(root, TestContext.Current.CancellationToken);
+        }
+    }
     private static async Task DeleteTrialAsync(string root, CancellationToken cancellationToken)
     {
         var started = Stopwatch.StartNew();

@@ -3,6 +3,7 @@ namespace KeyLoad.Storage;
 public sealed record KeyValueRecord(byte[] Key, byte[] Value);
 public sealed record StorageMutation(byte[] Key, byte[]? Value);
 public sealed record ScanPage(KeyValueRecord[] Records, bool HasMore);
+public sealed record StorageSnapshot(Guid Incarnation, long Position, long AppliedPosition, long RecordCount);
 public interface IKeyValueView
 {
     byte[]? Get(byte[] key);
@@ -15,7 +16,7 @@ public interface IAtomicTransaction : IKeyValueView
     void Reset();
 }
 public sealed record StoreIdentity(int FormatVersion, int KeyCodecVersion, Guid NodeId, Guid Incarnation,
-    byte[] SigningKey, DurabilityProfile Durability, bool DispatchPaused = false);
+    byte[] SigningKey, DurabilityProfile Durability, bool DispatchPaused = false, long ReadGeneration = 0);
 public interface IAtomicStore : IDisposable
 {
     StoreIdentity Identity { get; }
@@ -24,6 +25,10 @@ public interface IAtomicStore : IDisposable
     T Commit<T>(Func<IAtomicTransaction, long, T> compile);
     void SetDispatchPaused(bool paused);
     long CreateBackup(string directory);
+    StorageSnapshot CreateSnapshot(string path, long? expectedAppliedPosition = null);
+    StorageSnapshot VerifySnapshot(string path);
+    StorageSnapshot InstallSnapshot(string path, long expectedAppliedPosition);
+    StorageSnapshot Compact();
 }
 public static class StorageRecords
 {

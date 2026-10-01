@@ -16,6 +16,7 @@ public sealed class ArtifactTests
             using (var store = new ZoneTreeStore(new(Path.Combine(root, "source"))))
             {
                 store.Commit((tx, _) => { tx.PutRecord(KeyLoad.Storage.KeyCodec.Encode("large"), new string('a', 10_000)); return true; });
+                store.Compact();
                 store.CreateBackup(Path.Combine(root, "backup"));
             }
             var artifact = Path.Combine(root, "backup.ctg");

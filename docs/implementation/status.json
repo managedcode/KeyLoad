@@ -262,8 +262,15 @@
   },
   "KL-035": {
     "title": "Replica snapshot і installation",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Storage.ZoneTree/Checkpoints.cs",
+      "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
+      "tests/KeyLoad.UnitTests/CheckpointTests.cs",
+      "tests/KeyLoad.RecoveryTests/RaftSnapshotTests.cs",
+      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+      "tests/KeyLoad.IntegrationTests/ClusterTests.cs"
+    ]
   },
   "KL-036": {
     "title": "Controlled partition movement",

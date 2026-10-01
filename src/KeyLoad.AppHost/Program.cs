@@ -29,8 +29,10 @@ var nodes = Enumerable.Range(1, 3).Select(number => builder.AddProject<Projects.
     .WithEnvironment("KeyLoad__Incarnation", profile.Incarnation.ToString())
     .WithEnvironment("KeyLoad__SigningKey", signing).WithEnvironment("KeyLoad__PeerSecret", peerSecret)
     .WithEnvironment("KeyLoad__AdminKey", admin).WithEnvironment("KeyLoad__AllowLoopbackHttp", "true")
+    .WithEnvironment("KeyLoad__SnapshotThreshold", builder.Configuration["KeyLoad:SnapshotThreshold"] ?? "1024")
     .WithEnvironment("Logging__LogLevel__Default", "Warning")
     .WithEnvironment("Logging__LogLevel__DotNext.Net.Cluster.Consensus.Raft", "Information")
+    .WithEnvironment("Logging__LogLevel__KeyLoad.Replication.PeerSecurity", "Information")
     .WithHttpHealthCheck("/health/ready", endpointName: "http")).ToArray();
 foreach (var resource in nodes)
 {

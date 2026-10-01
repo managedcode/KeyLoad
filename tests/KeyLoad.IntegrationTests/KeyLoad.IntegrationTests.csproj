@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
