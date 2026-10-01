@@ -1,0 +1,4 @@
+* text=auto eol=lf
+docs/design/*.md whitespace=-blank-at-eol
+*.ctg binary
+*.wal binary

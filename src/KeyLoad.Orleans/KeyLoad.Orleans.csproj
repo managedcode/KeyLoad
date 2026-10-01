@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
+    <ProjectReference Include="../KeyLoad.Security/KeyLoad.Security.csproj" />
+    <PackageReference Include="Microsoft.Orleans.Server" />
+    <PackageReference Include="ManagedCode.Communication.Orleans" />
+    <PackageReference Include="ManagedCode.Orleans.Graph" />
+  </ItemGroup>
+</Project>

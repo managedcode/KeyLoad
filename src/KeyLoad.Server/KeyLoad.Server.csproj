@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="../KeyLoad.Replication/KeyLoad.Replication.csproj" />
+    <ProjectReference Include="../KeyLoad.Orleans/KeyLoad.Orleans.csproj" />
+    <ProjectReference Include="../KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
+    <ProjectReference Include="../KeyLoad.Query/KeyLoad.Query.csproj" />
+    <ProjectReference Include="../KeyLoad.ServiceDefaults/KeyLoad.ServiceDefaults.csproj" />
+    <PackageReference Include="ManagedCode.Communication.AspNetCore" />
+  </ItemGroup>
+</Project>

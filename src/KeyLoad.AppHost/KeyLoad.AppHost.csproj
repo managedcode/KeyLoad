@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="Aspire.AppHost.Sdk" />
+  <PropertyGroup>
+    <IsAspireHost>true</IsAspireHost>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../KeyLoad.Server/KeyLoad.Server.csproj" />
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+  </ItemGroup>
+</Project>

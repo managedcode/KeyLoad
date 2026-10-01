@@ -1,0 +1,35 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="DotNext.AspNetCore.Cluster" Version="6.8.1" />
+    <PackageVersion Include="DotNext.Net.Cluster" Version="6.8.1" />
+    <PackageVersion Include="Cartograph" Version="0.1.0-alpha" />
+    <PackageVersion Include="Cartograph.Catalog" Version="0.1.0-alpha" />
+    <PackageVersion Include="ZoneTree" Version="1.9.8" />
+    <PackageVersion Include="ManagedCode.Communication" Version="10.2.6" />
+    <PackageVersion Include="ManagedCode.Communication.AspNetCore" Version="10.2.6" />
+    <PackageVersion Include="ManagedCode.Communication.Orleans" Version="10.2.6" />
+    <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.0.13" />
+    <PackageVersion Include="ManagedCode.Storage.Orleans" Version="10.0.13" />
+    <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.3.1" />
+    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.3.1" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.6.0" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.10.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.19.0" />
+    <PackageVersion Include="xunit.v3" Version="4.0.1" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageVersion Include="Npgsql" Version="10.0.3" />
+  </ItemGroup>
+</Project>

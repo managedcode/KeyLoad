@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
+  </ItemGroup>
+</Project>

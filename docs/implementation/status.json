@@ -1,0 +1,768 @@
+{
+  "KL-001": {
+    "title": "Версії, ліцензії та platform matrix",
+    "status": "in_progress",
+    "evidence": [
+      "Directory.Packages.props",
+      "global.json",
+      "docs/implementation/dependency-survey.json",
+      ".github/workflows/ci.yml"
+    ]
+  },
+  "KL-002": {
+    "title": "Формальні API та consistency contracts",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Abstractions/Contracts.cs",
+      "docs/implementation/durability-audit.md"
+    ]
+  },
+  "KL-003": {
+    "title": "ZoneTree durability audit і crash harness",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
+      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+      "docs/implementation/durability-audit.md"
+    ]
+  },
+  "KL-004": {
+    "title": "Transactional read view spike",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
+      "src/KeyLoad.Query/SearchEngine.cs"
+    ]
+  },
+  "KL-005": {
+    "title": "Backup/restore spike",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
+      "src/KeyLoad.Artifacts/BackupArtifact.cs",
+      "tests/KeyLoad.UnitTests/ArtifactTests.cs"
+    ]
+  },
+  "KL-006": {
+    "title": "Benchmark harness і PostgreSQL methodology",
+    "status": "in_progress",
+    "evidence": [
+      "benchmarks/KeyLoad.Benchmarks/Program.cs"
+    ]
+  },
+  "KL-007": {
+    "title": "KeyCodec і storage envelopes",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Abstractions/Storage/KeyCodec.cs",
+      "tests/KeyLoad.UnitTests/KeyCodecTests.cs"
+    ]
+  },
+  "KL-008": {
+    "title": "Storage adapter і lifetime",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
+      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+      "docs/implementation/durability-audit.md"
+    ]
+  },
+  "KL-009": {
+    "title": "Partition writer і command envelope",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Replication/ClusterCoordinator.cs",
+      "src/KeyLoad.Core/DatabaseEngine.cs"
+    ]
+  },
+  "KL-010": {
+    "title": "Document CRUD та CAS",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Documents.cs",
+      "src/KeyLoad.Core/DatabaseEngine.cs",
+      "tests/KeyLoad.UnitTests/TransactionTests.cs"
+    ]
+  },
+  "KL-011": {
+    "title": "Strict indexes і unique scope",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Documents.cs",
+      "src/KeyLoad.Core/DatabaseEngine.cs",
+      "tests/KeyLoad.UnitTests/TransactionTests.cs"
+    ]
+  },
+  "KL-012": {
+    "title": "Batch і persisted idempotency",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Documents.cs",
+      "src/KeyLoad.Core/DatabaseEngine.cs",
+      "tests/KeyLoad.UnitTests/TransactionTests.cs"
+    ]
+  },
+  "KL-013": {
+    "title": "Query AST, planner і cursors",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/QueryAst.cs",
+      "src/KeyLoad.Query/SqlParser.cs",
+      "src/KeyLoad.Query/QueryEngine.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-014": {
+    "title": "Standalone server і C# SDK",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Server/ApiEndpoints.cs",
+      "src/KeyLoad.Client/KeyLoadClient.cs"
+    ]
+  },
+  "KL-015": {
+    "title": "Security і telemetry baseline",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "src/KeyLoad.ServiceDefaults/Extensions.cs"
+    ]
+  },
+  "KL-016": {
+    "title": "Committed projection outbox",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-017": {
+    "title": "Consensus provider qualification",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Replication/DurableRaftLog.cs",
+      "tests/KeyLoad.RecoveryTests/RaftLogTests.cs"
+    ]
+  },
+  "KL-018": {
+    "title": "Metadata bootstrap",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Replication/ClusterBootstrap.cs",
+      "src/KeyLoad.Server/Program.cs"
+    ]
+  },
+  "KL-019": {
+    "title": "Orleans membership і ownership adapter",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Orleans/ConsensusMembershipTable.cs",
+      "src/KeyLoad.Orleans/CommandRouterGrain.cs"
+    ]
+  },
+  "KL-020": {
+    "title": "Три-вузловий replicated apply",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
+      "tests/KeyLoad.IntegrationTests/ClusterTests.cs",
+      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+    ]
+  },
+  "KL-021": {
+    "title": "Strong read і session tokens",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Replication/ClusterCoordinator.cs",
+      "src/KeyLoad.Core/DatabaseEngine.cs"
+    ]
+  },
+  "KL-022": {
+    "title": "Graph storage",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/GraphAndSeries.cs",
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+    ]
+  },
+  "KL-023": {
+    "title": "Bounded graph traversal",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/GraphAndSeries.cs",
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+    ]
+  },
+  "KL-024": {
+    "title": "Time-series core",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/GraphAndSeries.cs",
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+    ]
+  },
+  "KL-025": {
+    "title": "Time-series range і aggregates",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/GraphAndSeries.cs",
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+    ]
+  },
+  "KL-026": {
+    "title": "Retention, expiry і rollups",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-027": {
+    "title": "Canonical vectors і exact search",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/GraphAndSeries.cs",
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+    ]
+  },
+  "KL-028": {
+    "title": "Text index provider audit",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-029": {
+    "title": "Text projection і rebuild",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-030": {
+    "title": "ANN provider qualification",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-031": {
+    "title": "ANN projection lifecycle",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-032": {
+    "title": "Filtered vector planner",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-033": {
+    "title": "Hybrid rank і Explain",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/SearchEngine.cs",
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+    ]
+  },
+  "KL-034": {
+    "title": "Search freshness contract",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/GraphAndSeries.cs",
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+    ]
+  },
+  "KL-035": {
+    "title": "Replica snapshot і installation",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-036": {
+    "title": "Controlled partition movement",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-037": {
+    "title": "Distributed query execution",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-038": {
+    "title": "Cross-partition graph edges",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-039": {
+    "title": "Online index generation swap",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-040": {
+    "title": "Resource governor",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-041": {
+    "title": "Chaos і corruption suite",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
+      "tests/KeyLoad.IntegrationTests/ClusterTests.cs",
+      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+    ]
+  },
+  "KL-042": {
+    "title": "Cluster backup і restore drills",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
+      "src/KeyLoad.Artifacts/BackupArtifact.cs",
+      "tests/KeyLoad.UnitTests/ArtifactTests.cs"
+    ]
+  },
+  "KL-043": {
+    "title": "Upgrade і format compatibility",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-044": {
+    "title": "Release gate і operational handbook",
+    "status": "in_progress",
+    "evidence": [
+      "README.md",
+      ".github/workflows/ci.yml",
+      "docs/implementation/durability-audit.md"
+    ]
+  },
+  "KL-045": {
+    "title": "Query capability manifest і AST version",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/QueryAst.cs",
+      "src/KeyLoad.Query/SqlParser.cs",
+      "src/KeyLoad.Query/QueryEngine.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-046": {
+    "title": "SQL dialect semantics",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/QueryAst.cs",
+      "src/KeyLoad.Query/SqlParser.cs",
+      "src/KeyLoad.Query/QueryEngine.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-047": {
+    "title": "SQL parser adapter і diagnostics",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/QueryAst.cs",
+      "src/KeyLoad.Query/SqlParser.cs",
+      "src/KeyLoad.Query/QueryEngine.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-048": {
+    "title": "Binder і field lineage",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/QueryAst.cs",
+      "src/KeyLoad.Query/SqlParser.cs",
+      "src/KeyLoad.Query/QueryEngine.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-049": {
+    "title": "Rule-based optimizer",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/QueryAst.cs",
+      "src/KeyLoad.Query/SqlParser.cs",
+      "src/KeyLoad.Query/QueryEngine.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-050": {
+    "title": "Batch executor і secure operator boundaries",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/QueryAst.cs",
+      "src/KeyLoad.Query/SqlParser.cs",
+      "src/KeyLoad.Query/QueryEngine.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-051": {
+    "title": "SQL/JSON/C# equivalence",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-052": {
+    "title": "Ранній admission control",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/QueryAst.cs",
+      "src/KeyLoad.Query/SqlParser.cs",
+      "src/KeyLoad.Query/QueryEngine.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-053": {
+    "title": "Session facade та independent query contexts",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-054": {
+    "title": "SQL differential і metamorphic suite",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-055": {
+    "title": "GraphScope / GraphRetriever / GraphExpansion",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-056": {
+    "title": "Three-way hybrid retrieval",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-057": {
+    "title": "Global branch ranking",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-058": {
+    "title": "BM25 corpus і statistics epochs",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/SearchEngine.cs",
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+    ]
+  },
+  "KL-059": {
+    "title": "Managed ANN implementation qualification",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-060": {
+    "title": "Adaptive filtered retrieval",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-061": {
+    "title": "Principals, API keys і RBAC",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+    ]
+  },
+  "KL-062": {
+    "title": "Sensitive field catalog",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+    ]
+  },
+  "KL-063": {
+    "title": "Sensitive expression usage enforcement",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+    ]
+  },
+  "KL-064": {
+    "title": "Єдиний safe projector",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+    ]
+  },
+  "KL-065": {
+    "title": "Row ACL planner і graph enforcement",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+    ]
+  },
+  "KL-066": {
+    "title": "Revocation epochs і cursor reauthorization",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+    ]
+  },
+  "KL-067": {
+    "title": "Classification lineage у search projections",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/GraphAndSeries.cs",
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+    ]
+  },
+  "KL-068": {
+    "title": "Security adversarial matrix",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+    ]
+  },
+  "KL-069": {
+    "title": "Atomic/physical partition contracts",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Abstractions/Contracts.cs",
+      "docs/implementation/durability-audit.md"
+    ]
+  },
+  "KL-070": {
+    "title": "Placement і tenant packing",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Orleans/ConsensusMembershipTable.cs",
+      "src/KeyLoad.Orleans/CommandRouterGrain.cs"
+    ]
+  },
+  "KL-071": {
+    "title": "Physical shard split/merge",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-072": {
+    "title": "Token migration lineage",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-073": {
+    "title": "PostgreSQL baseline kit",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-074": {
+    "title": "Hybrid quality/performance benchmark",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-075": {
+    "title": "Scaling benchmark і fair deployment arms",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-076": {
+    "title": "Multi-tenant resource governor",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Abstractions/Contracts.cs",
+      "src/KeyLoad.Core/Messaging.cs"
+    ]
+  },
+  "KL-077": {
+    "title": "Hot-path allocation і SIMD оптимізація",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/SearchEngine.cs",
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+    ]
+  },
+  "KL-078": {
+    "title": "Time-series chunk qualification",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-079": {
+    "title": "Resumable change feed і обмежені live queries",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-080": {
+    "title": "Integrated feature і performance release gate",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-081": {
+    "title": "Eventing contracts і shared TransactionDomain",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Abstractions/Contracts.cs",
+      "docs/implementation/durability-audit.md"
+    ]
+  },
+  "KL-082": {
+    "title": "Event/queue keyspace і state envelopes",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Events.cs",
+      "tests/KeyLoad.UnitTests/TransactionTests.cs"
+    ]
+  },
+  "KL-083": {
+    "title": "AppendEvents, expected revision та dedup",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Events.cs",
+      "tests/KeyLoad.UnitTests/TransactionTests.cs"
+    ]
+  },
+  "KL-084": {
+    "title": "ReadStream, feed cursors і catch-up",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Events.cs",
+      "tests/KeyLoad.UnitTests/TransactionTests.cs"
+    ]
+  },
+  "KL-085": {
+    "title": "Aggregate snapshots, schemas та replay",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-086": {
+    "title": "Durable enqueue і queue-lane state",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Messaging.cs",
+      "tests/KeyLoad.UnitTests/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-087": {
+    "title": "Claim, ACK, renew і delivery fencing",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Messaging.cs",
+      "tests/KeyLoad.UnitTests/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-088": {
+    "title": "Retry, DLQ, cancellation та expiry",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Messaging.cs",
+      "tests/KeyLoad.UnitTests/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-089": {
+    "title": "Durable groups і contiguous checkpoints",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-090": {
+    "title": "Inbox і CommitProcessing",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Messaging.cs",
+      "tests/KeyLoad.UnitTests/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-091": {
+    "title": "Document + event + queue atomic batch",
+    "status": "in_progress",
+    "evidence": [
+      "tests/KeyLoad.UnitTests/TransactionTests.cs",
+      "tests/KeyLoad.IntegrationTests/ClusterTests.cs"
+    ]
+  },
+  "KL-092": {
+    "title": "Persisted scheduler і clock contract",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Messaging.cs",
+      "tests/KeyLoad.UnitTests/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-093": {
+    "title": "Orleans coordinators і worker SDK",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Orleans/ConsensusMembershipTable.cs",
+      "src/KeyLoad.Orleans/CommandRouterGrain.cs"
+    ]
+  },
+  "KL-094": {
+    "title": "Cross-partition transfer outbox",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-095": {
+    "title": "Event SQL, queue views та protocol",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-096": {
+    "title": "Event/message RBAC і sensitive schemas",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+    ]
+  },
+  "KL-097": {
+    "title": "Event-driven projections і search lineage",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-098": {
+    "title": "Eventing retention, purge і backup state",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
+      "src/KeyLoad.Artifacts/BackupArtifact.cs",
+      "tests/KeyLoad.UnitTests/ArtifactTests.cs"
+    ]
+  },
+  "KL-099": {
+    "title": "Eventing replication і migration",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
+      "tests/KeyLoad.IntegrationTests/ClusterTests.cs",
+      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+    ]
+  },
+  "KL-100": {
+    "title": "Delayed jobs, recurring occurrences і saga state",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-101": {
+    "title": "Eventing benchmark kit і .NET baselines",
+    "status": "pending",
+    "evidence": []
+  },
+  "KL-102": {
+    "title": "Eventing failure і state-machine suite",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Messaging.cs",
+      "tests/KeyLoad.UnitTests/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-103": {
+    "title": "Eventing adversarial security suite",
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Messaging.cs",
+      "tests/KeyLoad.UnitTests/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+    ]
+  },
+  "KL-104": {
+    "title": "All-in-one release manifest і runbooks",
+    "status": "in_progress",
+    "evidence": [
+      "README.md",
+      ".github/workflows/ci.yml",
+      "docs/implementation/durability-audit.md"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+name: KeyLoad CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: keyload-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet restore KeyLoad.slnx --locked-mode
+      - run: dotnet build KeyLoad.slnx --no-restore --configuration Release
+      - run: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release
+      - run: dotnet test --project tests/KeyLoad.RecoveryTests --no-build --no-restore --configuration Release
+      - run: dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore --configuration Release
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}
+          path: |
+            **/TestResults/**
+            artifacts/qualification/**
+          if-no-files-found: ignore

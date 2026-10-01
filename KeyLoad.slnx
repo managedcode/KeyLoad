@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/KeyLoad.Artifacts/KeyLoad.Artifacts.csproj" />
+    <Project Path="src/KeyLoad.Replication/KeyLoad.Replication.csproj" />
+    <Project Path="src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
+    <Project Path="src/KeyLoad.Core/KeyLoad.Core.csproj" />
+    <Project Path="src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
+    <Project Path="src/KeyLoad.Query/KeyLoad.Query.csproj" />
+    <Project Path="src/KeyLoad.Security/KeyLoad.Security.csproj" />
+    <Project Path="src/KeyLoad.Orleans/KeyLoad.Orleans.csproj" />
+    <Project Path="src/KeyLoad.Server/KeyLoad.Server.csproj" />
+    <Project Path="src/KeyLoad.Client/KeyLoad.Client.csproj" />
+    <Project Path="src/KeyLoad.Cli/KeyLoad.Cli.csproj" />
+    <Project Path="src/KeyLoad.ServiceDefaults/KeyLoad.ServiceDefaults.csproj" />
+    <Project Path="src/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj" />
+    <Project Path="tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj" />
+    <Project Path="tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj" />
+    <Project Path="tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj" />
+  </Folder>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/KeyLoad.Benchmarks/KeyLoad.Benchmarks.csproj" />
+  </Folder>
+</Solution>

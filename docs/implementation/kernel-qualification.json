@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-10-01",
+  "sdk": "10.0.401",
+  "os": "macOS",
+  "architecture": "arm64",
+  "configuration": "Release",
+  "restore": "locked-mode passed",
+  "build": "passed with zero warnings",
+  "unitTests": {
+    "passed": 22,
+    "failed": 0
+  },
+  "recoveryTests": {
+    "passed": 25,
+    "failed": 0,
+    "seededProcessCrashes": 1000,
+    "stages": {
+      "PayloadWritten": 201,
+      "MutationApplied": 200,
+      "HeaderWritten": 199,
+      "JournalFlushed": 193,
+      "ApplyCompleted": 207
+    },
+    "evidence": "CI retains artifacts/qualification/crash-trials-*.jsonl"
+  },
+  "rf3Integration": {
+    "passed": 2,
+    "failed": 0,
+    "scenarios": [
+      "leader process kill",
+      "same-command outcome retry",
+      "atomic inbox/effects/ACK",
+      "minority read/write rejection",
+      "voter restart",
+      "unsigned peer RPC rejection"
+    ]
+  },
+  "durability": [
+    "ProcessDurable",
+    "QuorumProcessDurable"
+  ],
+  "powerLoss": "not qualified",
+  "endurance72Hours": "pending",
+  "crossPlatformCI": "pending"
+}

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../KeyLoad.Artifacts/KeyLoad.Artifacts.csproj" />
+    <ProjectReference Include="../KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
+    <ProjectReference Include="../KeyLoad.Client/KeyLoad.Client.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,230 @@
+{
+  "checkedAt": "2026-10-01",
+  "sdk": "10.0.401",
+  "zoneTreeSourceCommit": "13ee11e19007301fdea72b9210de62f6257f4929",
+  "feed": "https://api.nuget.org/v3/index.json",
+  "packages": [
+    {
+      "id": "DotNext.AspNetCore.Cluster",
+      "version": "6.8.1",
+      "latest": "6.8.1",
+      "license": "MIT",
+      "source": "https://github.com/dotnet/dotNext.git",
+      "sourceCommit": "34ebb0cdb7e12ff8f2986f3ffcb74256013d7143"
+    },
+    {
+      "id": "DotNext.Net.Cluster",
+      "version": "6.8.1",
+      "latest": "6.8.1",
+      "license": "MIT",
+      "source": "https://github.com/dotnet/dotNext.git",
+      "sourceCommit": "34ebb0cdb7e12ff8f2986f3ffcb74256013d7143"
+    },
+    {
+      "id": "Cartograph",
+      "version": "0.1.0-alpha",
+      "latest": "0.1.0-alpha",
+      "license": "MIT",
+      "source": "https://github.com/angelhernandezm/Cartograph",
+      "sourceCommit": "f17a57349ce36dca65dc37d8186d2a943c033030"
+    },
+    {
+      "id": "Cartograph.Catalog",
+      "version": "0.1.0-alpha",
+      "latest": "0.1.0-alpha",
+      "license": "MIT",
+      "source": "https://github.com/angelhernandezm/Cartograph",
+      "sourceCommit": "f17a57349ce36dca65dc37d8186d2a943c033030"
+    },
+    {
+      "id": "ZoneTree",
+      "version": "1.9.8",
+      "latest": "1.9.8",
+      "license": "MIT",
+      "source": "https://github.com/ZoneTree/ZoneTree",
+      "sourceCommit": "13ee11e19007301fdea72b9210de62f6257f4929"
+    },
+    {
+      "id": "ManagedCode.Communication",
+      "version": "10.2.6",
+      "latest": "10.2.6",
+      "license": "MIT",
+      "source": "https://github.com/managedcode/Communication",
+      "sourceCommit": "112f6ac47d5b54c40939ec7192cb20b6b54f3e97"
+    },
+    {
+      "id": "ManagedCode.Communication.AspNetCore",
+      "version": "10.2.6",
+      "latest": "10.2.6",
+      "license": "MIT",
+      "source": "https://github.com/managedcode/Communication",
+      "sourceCommit": "112f6ac47d5b54c40939ec7192cb20b6b54f3e97"
+    },
+    {
+      "id": "ManagedCode.Communication.Orleans",
+      "version": "10.2.6",
+      "latest": "10.2.6",
+      "license": "MIT",
+      "source": "https://github.com/managedcode/Communication",
+      "sourceCommit": "112f6ac47d5b54c40939ec7192cb20b6b54f3e97"
+    },
+    {
+      "id": "ManagedCode.Storage.FileSystem",
+      "version": "10.0.13",
+      "latest": "10.0.13",
+      "license": "MIT",
+      "source": "https://github.com/managedcode/Storage",
+      "sourceCommit": "de3193ea4079ade6747a281d0bfaa65e2ad9d1e6"
+    },
+    {
+      "id": "ManagedCode.Storage.Orleans",
+      "version": "10.0.13",
+      "latest": "10.0.13",
+      "license": "MIT",
+      "source": "https://github.com/managedcode/Storage",
+      "evaluation": "Surveyed; not referenced by the initial kernel"
+    },
+    {
+      "id": "ManagedCode.Orleans.Graph",
+      "version": "10.0.5",
+      "latest": "10.0.5",
+      "license": "MIT",
+      "source": "https://github.com/managedcode/Orleans.Graph",
+      "sourceCommit": "fcc4cb7cd8a1f5a30bfd067b9a4d1d819424a0df"
+    },
+    {
+      "id": "Microsoft.Orleans.Server",
+      "version": "10.3.1",
+      "latest": "10.3.1",
+      "license": "MIT",
+      "sourceCommit": "137d9acc17830f15b13a4eb0058d6cee633cad5e"
+    },
+    {
+      "id": "Microsoft.Orleans.Sdk",
+      "version": "10.3.1",
+      "latest": "10.3.1",
+      "license": "MIT",
+      "sourceCommit": "137d9acc17830f15b13a4eb0058d6cee633cad5e"
+    },
+    {
+      "id": "Aspire.Hosting.AppHost",
+      "version": "13.6.0",
+      "latest": "13.6.0",
+      "license": "MIT",
+      "source": "https://github.com/microsoft/aspire",
+      "sourceCommit": "56f3e9c0d216c0c7069dabb49dd0464e4827744f"
+    },
+    {
+      "id": "Aspire.Hosting.Testing",
+      "version": "13.6.0",
+      "latest": "13.6.0",
+      "license": "MIT",
+      "source": "https://github.com/microsoft/aspire",
+      "sourceCommit": "56f3e9c0d216c0c7069dabb49dd0464e4827744f"
+    },
+    {
+      "id": "Microsoft.Extensions.Http.Resilience",
+      "version": "10.10.0",
+      "latest": "10.10.0",
+      "license": "MIT",
+      "source": "https://github.com/dotnet/extensions",
+      "sourceCommit": "02107c65bab30aad9e35b5133ed643eaa77bccd8"
+    },
+    {
+      "id": "Microsoft.Extensions.ServiceDiscovery",
+      "version": "10.10.0",
+      "latest": "10.10.0",
+      "license": "MIT",
+      "source": "https://github.com/dotnet/extensions",
+      "sourceCommit": "02107c65bab30aad9e35b5133ed643eaa77bccd8"
+    },
+    {
+      "id": "OpenTelemetry.Extensions.Hosting",
+      "version": "1.19.1",
+      "latest": "1.19.1",
+      "license": "Apache-2.0",
+      "source": "https://github.com/open-telemetry/opentelemetry-dotnet",
+      "sourceCommit": "5fbeba3a3d8bbd4f4235170ddeb6329fe0b8b86e"
+    },
+    {
+      "id": "OpenTelemetry.Exporter.OpenTelemetryProtocol",
+      "version": "1.19.1",
+      "latest": "1.19.1",
+      "license": "Apache-2.0",
+      "source": "https://github.com/open-telemetry/opentelemetry-dotnet",
+      "sourceCommit": "5fbeba3a3d8bbd4f4235170ddeb6329fe0b8b86e"
+    },
+    {
+      "id": "OpenTelemetry.Instrumentation.AspNetCore",
+      "version": "1.19.0",
+      "latest": "1.19.0",
+      "license": "Apache-2.0",
+      "source": "https://github.com/open-telemetry/opentelemetry-dotnet-contrib",
+      "sourceCommit": "dda21df71c8ccd247ab1051760b13f1db9353cfa"
+    },
+    {
+      "id": "OpenTelemetry.Instrumentation.Http",
+      "version": "1.19.0",
+      "latest": "1.19.0",
+      "license": "Apache-2.0",
+      "source": "https://github.com/open-telemetry/opentelemetry-dotnet-contrib",
+      "sourceCommit": "295327c4352523fbc4f4c8b182f09ae8794cc65e"
+    },
+    {
+      "id": "OpenTelemetry.Instrumentation.Runtime",
+      "version": "1.19.0",
+      "latest": "1.19.0",
+      "license": "Apache-2.0",
+      "source": "https://github.com/open-telemetry/opentelemetry-dotnet-contrib",
+      "sourceCommit": "a14fa97f08b38c032dba44197f17e5cea78afe6f"
+    },
+    {
+      "id": "xunit.v3",
+      "version": "4.0.1",
+      "latest": "4.0.1",
+      "license": "Apache-2.0",
+      "source": "https://github.com/xunit/xunit",
+      "sourceCommit": "8ed8aa354c7298e157a0fc2dcd61b95df345256a"
+    },
+    {
+      "id": "xunit.runner.visualstudio",
+      "version": "4.0.0",
+      "latest": "4.0.0",
+      "license": "Apache-2.0",
+      "source": "https://github.com/xunit/visualstudio.xunit",
+      "sourceCommit": "05679a7ab5ca2461d06880faaefe26770e0fdf77"
+    },
+    {
+      "id": "Microsoft.NET.Test.Sdk",
+      "version": "18.10.1",
+      "latest": "18.10.1",
+      "license": "MIT",
+      "source": "https://github.com/microsoft/vstest",
+      "sourceCommit": "87dfd4b2d2bacd91ad69e009ade6f4715b3b46ec"
+    },
+    {
+      "id": "BenchmarkDotNet",
+      "version": "0.15.8",
+      "latest": "0.16.0-preview.2",
+      "license": "MIT",
+      "source": "https://github.com/dotnet/BenchmarkDotNet",
+      "sourceCommit": "1e8238ef6c08e18821edae83ac8d6b0a2bb1bb98"
+    },
+    {
+      "id": "Npgsql",
+      "version": "10.0.3",
+      "latest": "10.0.3",
+      "license": "PostgreSQL",
+      "source": "https://github.com/npgsql/npgsql",
+      "sourceCommit": "d3768398c17877b3a916c3c4d87e8e11698991fc"
+    }
+  ],
+  "dotNextSourceCommit": "34ebb0cdb7e12ff8f2986f3ffcb74256013d7143",
+  "cartographSourceCommit": "f17a57349ce36dca65dc37d8186d2a943c033030",
+  "platformQualification": {
+    "macOS-arm64": "local kernel checks",
+    "linux-x64": "CI pending",
+    "windows-x64": "CI pending",
+    "powerLoss": "pending"
+  }
+}

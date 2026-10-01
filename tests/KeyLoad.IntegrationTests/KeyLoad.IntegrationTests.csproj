@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
+    <PackageReference Include="Aspire.Hosting.Testing" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

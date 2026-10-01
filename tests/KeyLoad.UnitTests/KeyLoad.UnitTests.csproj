@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/KeyLoad.Artifacts/KeyLoad.Artifacts.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Query/KeyLoad.Query.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Security/KeyLoad.Security.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>
