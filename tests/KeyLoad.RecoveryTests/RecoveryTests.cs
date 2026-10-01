@@ -29,11 +29,13 @@ public sealed class RecoveryTests
             using var process = Process.Start(start)!;
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(15));
+            Exception? originalFailure = null;
             try
             {
                 var line = await process.StandardOutput.ReadLineAsync(timeout.Token);
                 Assert.Equal("crash-point", line);
                 process.Kill(); await process.WaitForExitAsync(timeout.Token);
+                await WaitForKilledProcessFilesAsync(root, timeout.Token);
                 using var store = new ZoneTreeStore(new(root));
                 var values = store.Read(view => Enumerable.Range(0, 3).Select(i => JsonDefaults.Deserialize<int>(view.Get(KeyCodec.Encode("item", (long)i))!)).ToArray());
                 await evidence.WriteLineAsync(JsonSerializer.Serialize(new { Seed = 1701 + batch, Trial = trial, Stage = stage.ToString(),
@@ -43,11 +45,44 @@ public sealed class RecoveryTests
                 Assert.True(values.All(v => v == 0) || values.All(v => v == 1), $"Non-atomic recovery at seed {batch}, trial {trial}, stage {stage}.");
                 if (stage >= CommitStage.JournalFlushed) Assert.All(values, value => Assert.Equal(1, value));
             }
+            catch (Exception exception)
+            {
+                originalFailure = exception;
+                TestContext.Current.TestOutputHelper?.WriteLine($"Seed {1701 + batch}, trial {trial}, stage {stage}: {exception}");
+                throw;
+            }
             finally
             {
                 if (!process.HasExited) { process.Kill(); await process.WaitForExitAsync(TestContext.Current.CancellationToken); }
-                if (Directory.Exists(root)) Directory.Delete(root, true);
+                try { if (Directory.Exists(root)) await DeleteTrialAsync(root, TestContext.Current.CancellationToken); }
+                catch (IOException exception) when (originalFailure is not null)
+                { TestContext.Current.TestOutputHelper?.WriteLine($"Cleanup after the original failure: {exception.Message}"); }
             }
+        }
+    }
+    private static async Task WaitForKilledProcessFilesAsync(string root, CancellationToken cancellationToken)
+    {
+        var started = Stopwatch.StartNew();
+        while (true)
+        {
+            try
+            {
+                foreach (var name in new[] { "owner.lock", "commands.wal" })
+                    using (File.Open(Path.Combine(root, name), FileMode.Open, FileAccess.ReadWrite, FileShare.None)) { }
+                return;
+            }
+            catch (IOException) when (started.Elapsed < TimeSpan.FromSeconds(5))
+            { await Task.Delay(25, cancellationToken); }
+        }
+    }
+    private static async Task DeleteTrialAsync(string root, CancellationToken cancellationToken)
+    {
+        var started = Stopwatch.StartNew();
+        while (true)
+        {
+            try { Directory.Delete(root, true); return; }
+            catch (IOException) when (started.Elapsed < TimeSpan.FromSeconds(5))
+            { await Task.Delay(25, cancellationToken); }
         }
     }
     [Fact]
