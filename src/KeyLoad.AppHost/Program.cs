@@ -30,6 +30,7 @@ var nodes = Enumerable.Range(1, 3).Select(number => builder.AddProject<Projects.
     .WithEnvironment("KeyLoad__SigningKey", signing).WithEnvironment("KeyLoad__PeerSecret", peerSecret)
     .WithEnvironment("KeyLoad__AdminKey", admin).WithEnvironment("KeyLoad__AllowLoopbackHttp", "true")
     .WithEnvironment("Logging__LogLevel__Default", "Warning")
+    .WithEnvironment("Logging__LogLevel__DotNext.Net.Cluster.Consensus.Raft", "Information")
     .WithHttpHealthCheck("/health/ready", endpointName: "http")).ToArray();
 foreach (var resource in nodes)
 {
