@@ -7,15 +7,16 @@
   "restore": "locked-mode passed",
   "build": "passed with zero warnings",
   "unitTests": {
-    "passed": 52,
+    "passed": 84,
     "failed": 0
   },
   "recoveryTests": {
-    "passed": 50,
+    "passed": 57,
     "failed": 0,
     "seededProcessCrashes": 1000,
     "checkpointPublicationCrashes": 8,
     "subscriptionProcessingCrashes": 7,
+    "projectionProcessingCrashes": 7,
     "nativeRaftAcknowledgementCrashes": 4,
     "nativeSnapshotTests": 2,
     "peerSecurityTests": 6,
@@ -44,7 +45,11 @@
       "command outcome preserved across snapshot installation",
       "topic events, group checkpoints and inbox receipts preserved across snapshot installation",
       "SQL, JSON AST and C# query parity through authenticated HTTP",
-      "SQL-to-JSON cursor continuation and protected predicate rejection"
+      "SQL-to-JSON cursor continuation and protected predicate rejection",
+      "cross-voter live-query continuation after leader loss",
+      "generation-pinned outbox effects and checkpoint replay after leader loss",
+      "outbox entries, projection checkpoints and receipts preserved across snapshot installation",
+      "protected document change-feed and live-query HTTP projection"
     ]
   },
   "durability": [
@@ -54,9 +59,9 @@
   "powerLoss": "not qualified",
   "endurance72Hours": "pending",
   "crossPlatformCI": {
-    "qualifiedCommit": "cabf43986dfbf6b8f78e7aaa5fbfa5e4fc62321f",
-    "run": "https://github.com/managedcode/KeyLoad/actions/runs/36893476976",
+    "qualifiedCommit": "76a99d3519fa531aed9935891f023ff20ca3dc0d",
+    "run": "https://github.com/managedcode/KeyLoad/actions/runs/36901356001",
     "platforms": ["Linux", "macOS", "Windows"],
-    "currentQueryAdapterChanges": "pending"
+    "currentOutboxChangeFeedChanges": "pending"
   }
 }

@@ -153,6 +153,28 @@ public sealed class QueryAdapterTests
         Assert.Equal(ErrorCode.BudgetExceeded, Assert.Throws<KeyLoadException>(() => engine.ExecuteAst("root", request with { Cursor = null })).Code);
     }
     [Fact]
+    public void IndexedDocumentLookupsChargeTheirBytesBeforeMaterializingTheCandidateSet()
+    {
+        using var db = new TestDatabase(); db.Configure("orders", ResourceKind.Collection, indexes: [new("status", ["/status"])]);
+        db.Commit(Enumerable.Range(0, 6).Select(index => (Mutation)new PutDocument("orders", "order-" + index,
+            JsonSerializer.Serialize(new { status = "open", payload = new string('x', 500) }))).ToArray());
+        var engine = new QueryEngine(new DatabaseEngine(db.Store, new AuthorizationPolicy(), new() { MaxQueryReadBytes = 1_500 }));
+        var query = KeyLoadQuery<Order>.From(db.Partition, "orders").Where(row => row.Status == "open").ToRequest();
+        Assert.Equal(ErrorCode.BudgetExceeded, Assert.Throws<KeyLoadException>(() => engine.ExecuteAst("root", query)).Code);
+        var point = KeyLoadQuery<Order>.From(db.Partition, "orders").Where(row => QueryFunctions.DocumentId(row) == "order-0").ToRequest();
+        Assert.Single(engine.ExecuteAst("root", point).Rows);
+        Assert.Equal(ErrorCode.BudgetExceeded, Assert.Throws<KeyLoadException>(() => engine.StartLiveQuery("root", new(query))).Code);
+    }
+    [Fact]
+    public void QueryResultByteBudgetIncludesIdentityAndRedactionMetadata()
+    {
+        using var db = new TestDatabase(); db.Configure("orders", ResourceKind.Collection, fields: [new("/secret", "pii")]);
+        db.Commit(new PutDocument("orders", new string('a', 200), "{\"secret\":\"CANARY\"}"));
+        var engine = new QueryEngine(new DatabaseEngine(db.Store, new AuthorizationPolicy(), new() { MaxBatchBytes = 100 }));
+        var query = KeyLoadQuery<Order>.From(db.Partition, "orders").ToRequest(true);
+        Assert.Equal(ErrorCode.BudgetExceeded, Assert.Throws<KeyLoadException>(() => engine.ExecuteAst("root", query)).Code);
+    }
+    [Fact]
     public void CatalogAndOtherCollectionWritesPreserveTheCursorButSourceWritesInvalidateIt()
     {
         using var db = new TestDatabase(); db.Configure("orders", ResourceKind.Collection); db.Configure("other", ResourceKind.Collection);

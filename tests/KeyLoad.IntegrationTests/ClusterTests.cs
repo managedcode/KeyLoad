@@ -28,6 +28,9 @@ public sealed class ClusterTests(ClusterFixture fixture)
         Success(await clients[1].ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, new("events", ResourceKind.StreamSet, "orders")), timeout.Token));
         Success(await clients[2].ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, new("jobs", ResourceKind.WorkQueue, "orders")), timeout.Token));
         Success(await clients[0].ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, new("activity", ResourceKind.Topic, "orders")), timeout.Token));
+        Success(await clients[0].ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, new("materialized", ResourceKind.Collection, "orders")), timeout.Token));
+        var projectionConsumer = new ProjectionConsumerRef(partition, "outbox-v1");
+        Success(await clients[0].ConfigureProjectionAsync(new(Guid.NewGuid(), projectionConsumer, new(1, ["orders"], [])), timeout.Token));
         var subscription = new SubscriptionRef(new(partition, "activity", EventSourceKind.Topic), "projection");
         Success(await clients[1].ConfigureSubscriptionAsync(new(Guid.NewGuid(), subscription, new("root")), timeout.Token));
         var commandId = Guid.NewGuid();
@@ -42,6 +45,8 @@ public sealed class ClusterTests(ClusterFixture fixture)
             Assert.Single(Success(await client.ReadStreamAsync(new(new(partition, "events", "o1")), timeout.Token)).Events);
             Assert.Equal(3, Success(await client.ReadEventSourceAsync(new(subscription.Source), timeout.Token)).Events.Length);
         }
+        var liveRequest = new AstQueryRequest(partition, new("orders", null, [new("*", "*")], null, [], 100), AllowFullScan: true);
+        var liveSnapshot = Success(await clients[1].StartLiveQueryAsync(new(liveRequest), timeout.Token));
         var statuses = await Task.WhenAll(clients.Select(c => c.StatusAsync(timeout.Token)));
         var status = statuses.Select(Success).ToArray();
         var leader = new Uri(status[0].Leader!);
@@ -75,6 +80,15 @@ public sealed class ClusterTests(ClusterFixture fixture)
         var replayed = Success(await RetryDuringElectionAsync(() => surviving.CommitSubscriptionProcessingAsync(replay, timeout.Token), timeout.Token));
         Assert.True(replayed.AlreadyProcessed); Assert.Equal(projected.OriginalEffectsToken, replayed.OriginalEffectsToken);
         Assert.Equal(3, Success(await clients[survivors[1]].SubscriptionStatusAsync(subscription, timeout.Token)).Checkpoint);
+        var liveChanges = Success(await clients[survivors[1]].ReadLiveQueryAsync(new(liveRequest, liveSnapshot.Cursor), timeout.Token));
+        Assert.Equal(new long[] { 2, 3 }, liveChanges.Changes.Select(change => change.Revision));
+        var projectionBatch = Success(await clients[survivors[1]].ReadProjectionAsync(new(projectionConsumer), timeout.Token));
+        Assert.Equal(3, projectionBatch.Entries.Length);
+        var projectionRequest = new CommitProjectionBatchRequest(Guid.NewGuid(), projectionConsumer, projectionBatch.Token,
+            [new PutDocument("materialized", "o1", "{\"projected\":true}", 0)]);
+        var outboxEffect = Success(await RetryDuringElectionAsync(() => surviving.CommitProjectionAsync(projectionRequest, timeout.Token), timeout.Token));
+        var duplicateEffect = Success(await surviving.CommitProjectionAsync(projectionRequest with { CommandId = Guid.NewGuid() }, timeout.Token));
+        Assert.True(duplicateEffect.AlreadyProcessed); Assert.Equal(outboxEffect.Receipt.Token, duplicateEffect.Receipt.Token);
         var secondStatus = Success(await clients[survivors[1]].StatusAsync(timeout.Token));
         using (var process = Process.GetProcessById(secondStatus.ProcessId)) { process.Kill(); await process.WaitForExitAsync(timeout.Token); }
         await Task.Delay(TimeSpan.FromSeconds(3), timeout.Token);
@@ -92,6 +106,8 @@ public sealed class ClusterTests(ClusterFixture fixture)
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync($"node{index + 1}", timeout.Token);
             Assert.Equal(3, Success(await clients[index].SubscriptionStatusAsync(subscription, timeout.Token)).Checkpoint);
             Assert.Equal(3, Success(await clients[index].GetAsync(new(partition, "orders", "o1"), timeout.Token))!.Revision);
+            Assert.Equal(projectionBatch.ThroughSequence, Success(await clients[index].OutboxStatusAsync(partition, timeout.Token)).Consumers.Single().Checkpoint);
+            Assert.Equal(1, Success(await clients[index].GetAsync(new(partition, "materialized", "o1"), timeout.Token))!.Revision);
         }
         }
         catch { await fixture.SaveFailureDiagnosticsAsync(); throw; }
@@ -123,6 +139,9 @@ public sealed class ClusterTests(ClusterFixture fixture)
             var subscription = new SubscriptionRef(new(partition, "snapshot-activity", EventSourceKind.Topic), "projection");
             var groupConfig = new ConfigureSubscriptionRequest(Guid.NewGuid(), subscription, new("root"));
             Success(await RetryDuringElectionAsync(() => clients[0].ConfigureSubscriptionAsync(groupConfig, timeout.Token), timeout.Token));
+            var projectionConsumer = new ProjectionConsumerRef(partition, "snapshot-outbox-v1");
+            var projectionConfig = new ConfigureProjectionConsumerRequest(Guid.NewGuid(), projectionConsumer, new(1, ["snapshots"], []));
+            Success(await RetryDuringElectionAsync(() => clients[0].ConfigureProjectionAsync(projectionConfig, timeout.Token), timeout.Token));
             var producer = new CommandRequest(Guid.NewGuid(), partition,
                 [new PublishTopic("snapshot-activity", [new("input", "Created", "{}")])]);
             Success(await RetryDuringElectionAsync(() => clients[1].CommitAsync(producer, timeout.Token), timeout.Token));
@@ -131,6 +150,9 @@ public sealed class ClusterTests(ClusterFixture fixture)
             var processing = new SubscriptionProcessingRequest(Guid.NewGuid(), subscription, input.Token, "projection", 1,
                 [new PutDocument("snapshots", "projection", "{\"done\":true}", 0)]);
             var effect = Success(await RetryDuringElectionAsync(() => clients[0].CommitSubscriptionProcessingAsync(processing, timeout.Token), timeout.Token));
+            var projectionBatch = Success(await clients[0].ReadProjectionAsync(new(projectionConsumer), timeout.Token));
+            var projectionRequest = new CommitProjectionBatchRequest(Guid.NewGuid(), projectionConsumer, projectionBatch.Token, []);
+            var outboxEffect = Success(await RetryDuringElectionAsync(() => clients[0].CommitProjectionAsync(projectionRequest, timeout.Token), timeout.Token));
             CommandRequest? last = null; CommitReceipt? committed = null;
             for (var index = 0; index < 40; index++)
             {
@@ -162,6 +184,10 @@ public sealed class ClusterTests(ClusterFixture fixture)
             Assert.True(recovered.ReadGeneration > 0, "The empty replica must install a native snapshot rather than replay every historical command.");
             Assert.Equal(1, Success(await clients[follower].SubscriptionStatusAsync(subscription, timeout.Token)).Checkpoint);
             Assert.Equal(1, Success(await clients[follower].GetAsync(new(partition, "snapshots", "projection"), timeout.Token))!.Revision);
+            Assert.Equal(projectionBatch.ThroughSequence, Success(await clients[follower].OutboxStatusAsync(partition, timeout.Token)).Consumers.Single().Checkpoint);
+            var outboxReplay = Success(await clients[follower].CommitProjectionAsync(projectionRequest with { CommandId = Guid.NewGuid() }, timeout.Token));
+            Assert.True(outboxReplay.AlreadyProcessed); Assert.Equal(outboxEffect.Receipt.Token, outboxReplay.Receipt.Token);
+            Assert.Equal(41, Success(await clients[follower].ReadChangesAsync(new(partition, "snapshots"), timeout.Token)).Changes.Length);
             Assert.Single(Success(await clients[follower].ReadEventSourceAsync(new(subscription.Source), timeout.Token)).Events);
             var groupReplay = processing with { CommandId = Guid.NewGuid() };
             var replayed = Success(await RetryDuringElectionAsync(() => clients[follower].CommitSubscriptionProcessingAsync(groupReplay, timeout.Token), timeout.Token));
@@ -188,7 +214,7 @@ public sealed class ClusterTests(ClusterFixture fixture)
                  new PutDocument("query-adapters", "c", "{\"number\":3,\"status\":\"closed\",\"secret\":\"CANARY\"}", 0)]);
             Success(await RetryDuringElectionAsync(() => administrator.CommitAsync(command, timeout.Token), timeout.Token));
             var principal = new PrincipalRecord("query-reader", "integration",
-                [new("database", "query-adapters", Capability.DocumentsRead | Capability.Query)], []);
+                [new("database", "query-adapters", Capability.DocumentsRead | Capability.Query | Capability.ChangesRead)], []);
             var principalCommand = Guid.NewGuid(); Success(await RetryDuringElectionAsync(() => administrator.ConfigurePrincipalAsync(principalCommand, principal, timeout.Token), timeout.Token));
             var secret = "query-reader." + Guid.NewGuid().ToString("N");
             var credential = new ApiKeyRecord("query-reader", principal.Id,
@@ -210,6 +236,19 @@ public sealed class ClusterTests(ClusterFixture fixture)
             var denied = await client.QueryAstAsync(new(partition, ast with
                 { Filter = new Comparison(new FieldOperand("/secret"), "=", new ValueOperand("CANARY")) }), timeout.Token);
             Assert.Equal(nameof(ErrorCode.PermissionDenied), denied.Problem?.ErrorCode);
+            var liveRequest = new AstQueryRequest(partition, ast with { Order = [], Limit = 100 });
+            var snapshot = Success(await client.StartLiveQueryAsync(new(liveRequest), timeout.Token)); Assert.Equal(2, snapshot.Rows.Length);
+            var update = new CommandRequest(Guid.NewGuid(), partition, [new PatchDocument("query-adapters", "c", [new("/status", PatchKind.Set, "\"open\"")], 1)]);
+            Success(await administrator.CommitAsync(update, timeout.Token));
+            var live = Success(await client.ReadLiveQueryAsync(new(liveRequest, snapshot.Cursor), timeout.Token));
+            Assert.Equal("c", Assert.Single(live.Changes).Reference.Id); Assert.DoesNotContain("CANARY", live.Changes[0].Row!.Json);
+            var feed = Success(await client.ReadChangesAsync(new(partition, "query-adapters"), timeout.Token));
+            Assert.Equal(4, feed.Changes.Length); Assert.DoesNotContain("CANARY", System.Text.Json.JsonSerializer.Serialize(feed, JsonDefaults.Options));
+            var malformed = new CommandRequest(Guid.NewGuid(), partition, [null!]);
+            var rejection = await administrator.CommitAsync(malformed, timeout.Token);
+            Assert.Equal(nameof(ErrorCode.Validation), rejection.Problem?.ErrorCode);
+            Assert.Equal(4, Success(await client.ReadChangesAsync(new(partition, "query-adapters"), timeout.Token)).Changes.Length);
+            Assert.True((await administrator.StatusAsync(timeout.Token)).IsSuccess);
         }
         catch { await fixture.SaveFailureDiagnosticsAsync(); throw; }
     }

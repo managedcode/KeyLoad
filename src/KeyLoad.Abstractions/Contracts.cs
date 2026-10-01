@@ -88,6 +88,11 @@ public sealed record DatabaseLimits
     public int MaxQueryDepth { get; init; } = 32;
     public int MaxQueryTokens { get; init; } = 2_048;
     public int QueryDeadlineSeconds { get; init; } = 30;
+    public long MaxQueryReadBytes { get; init; } = 67_108_864;
+    public long MaxOutboxRecords { get; init; } = 100_000;
+    public long MaxOutboxBytes { get; init; } = 1_073_741_824;
+    public int MaxProjectionConsumers { get; init; } = 64;
+    public int MaxProjectionBatchBytes { get; init; } = 16_777_216;
 }
 
 public enum ResourceKind { Collection, StreamSet, WorkQueue, Topic, Graph, TimeSeries }
@@ -128,7 +133,7 @@ public enum Capability : long
     VectorRaw = 1L << 18, SchemaManage = 1L << 19, SecurityManage = 1L << 20, BackupManage = 1L << 21,
     BackupRestore = 1L << 22, Diagnose = 1L << 23, DataExport = 1L << 24,
     TopicsPublish = 1L << 25, TopicsRead = 1L << 26, SubscriptionsConsume = 1L << 27,
-    SubscriptionsAck = 1L << 28, All = (1L << 29) - 1
+    SubscriptionsAck = 1L << 28, ChangesRead = 1L << 29, All = (1L << 30) - 1
 }
 public sealed record ScopeGrant(string Database, string Resource, Capability Capabilities);
 public sealed record PrincipalRecord(string Id, string TenantId, ScopeGrant[] Grants, string[] FieldGrants)
@@ -219,7 +224,8 @@ public sealed record RankedDocument(DocumentResult Document, double Score);
 
 // Only the trusted server constructs this envelope. Caller roles and timestamps never come from public JSON.
 public enum OperationKind { Batch, Receive, Delivery, Processing, ConfigureResource, ConfigurePrincipal, ConfigureApiKey, SetDispatch, Membership,
-    ConfigureSubscription, SeekSubscription, ReceiveSubscription, SubscriptionDelivery, SubscriptionProcessing, SetSubscriptionPaused }
+    ConfigureSubscription, SeekSubscription, ReceiveSubscription, SubscriptionDelivery, SubscriptionProcessing, SetSubscriptionPaused,
+    ConfigureProjectionConsumer, CommitProjectionBatch, ReleaseProjectionConsumer, PurgeOutbox }
 public sealed record ReplicatedOperation(Guid Id, OperationKind Kind, string PrincipalId, DateTimeOffset EvaluatedAt, string PayloadJson);
 public sealed record OperationResult(string? Json, ErrorCode? Error = null, string? SafeDetail = null)
 {

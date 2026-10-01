@@ -45,6 +45,30 @@ using var store = new ZoneTreeStore(new(directory)
         }
     }
 });
+if (mode == "projection-processing")
+{
+    var database = new DatabaseEngine(store, new AuthorizationPolicy());
+    database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
+        DatabaseEngine.Credential("root", "root", "root.crash-test-credential-32-characters"));
+    OperationResult Submit<T>(OperationKind kind, T payload, Guid id) => database.Apply(new(id, kind, "root", DateTimeOffset.UtcNow,
+        System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options)));
+    var partition = ProjectionCrashScenario.Partition; var consumer = ProjectionCrashScenario.Consumer;
+    foreach (var resource in new[] { new ResourceDefinition("orders", ResourceKind.Collection, "orders"), new("projection", ResourceKind.Collection, "orders") })
+        Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource), Guid.NewGuid()).Get<ResourceDefinition>();
+    var configure = Guid.NewGuid(); Submit(OperationKind.ConfigureProjectionConsumer,
+        new ConfigureProjectionConsumerRequest(configure, consumer, new(1, ["orders"], [])), configure).Get<ProjectionConsumerInfo>();
+    var producer = Guid.NewGuid(); Submit(OperationKind.Batch,
+        new CommandRequest(producer, partition, [new PutDocument("orders", "input", "{}", 0)]), producer).Get<CommitReceipt>();
+    var batch = database.ReadProjectionBatch("root", new(consumer));
+    var request = new CommitProjectionBatchRequest(ProjectionCrashScenario.CommandId, consumer, batch.Token,
+        [new PutDocument("projection", "effect", "{\"complete\":true}", 0)]);
+    var operation = new ReplicatedOperation(request.CommandId, OperationKind.CommitProjectionBatch, "root", DateTimeOffset.UtcNow,
+        System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
+    File.WriteAllBytes(Path.Combine(directory, "processing-command.json"), JsonDefaults.Serialize(operation));
+    crashPosition = store.Position + 1; armed = true;
+    database.Apply(operation).Get<ProjectionBatchResult>();
+    Console.WriteLine("ack"); Console.Out.Flush(); Thread.Sleep(Timeout.Infinite); return;
+}
 if (mode == "subscription-processing")
 {
     var database = new DatabaseEngine(store, new AuthorizationPolicy());
@@ -95,4 +119,10 @@ public static class SubscriptionCrashScenario
     public static PartitionRef Partition { get; } = new("tenant", "database", "orders", "partition");
     public static SubscriptionRef Subscription { get; } = new(new(Partition, "topic", EventSourceKind.Topic), "group");
     public static Guid CommandId { get; } = new("cd8b971e-e8ee-4c83-bace-1c30954d097b");
+}
+public static class ProjectionCrashScenario
+{
+    public static PartitionRef Partition { get; } = new("tenant", "database", "orders", "partition");
+    public static ProjectionConsumerRef Consumer { get; } = new(Partition, "projection-v1");
+    public static Guid CommandId { get; } = new("a64f0bcf-93ca-4c6e-a1ca-6f97e1ddbb66");
 }

@@ -8,9 +8,9 @@ The original load-testing prototype has been replaced. This repository implement
 
 This is an early implementation of the clustered kernel. The default server topology has three persistent voting nodes and requires a majority for writes and strong reads. It needs no external database, Redis or message broker.
 
-Implemented surfaces include document CRUD and field patches, partition-scoped unique/composite equality indexes, command deduplication, stream expected-revision append/read, retained topics, per-source durable subscriptions with bounded delivery windows and contiguous checkpoints, scheduled work queues with fenced leases and retry/DLQ, atomic inbox completion, bounded property-graph traversal, ordered samples, exact vector search, BM25 and weighted reciprocal-rank fusion, a bounded read-only Q1 SQL dialect, API keys, field omission and field-use policies, verified backups, native Raft snapshots and empty-replica catch-up, offline journal compaction, a .NET SDK and CLI.
+Implemented surfaces include document CRUD and field patches, partition-scoped unique/composite equality indexes, command deduplication, stream expected-revision append/read, retained topics, per-source durable subscriptions with bounded delivery windows and contiguous checkpoints, scheduled work queues with fenced leases and retry/DLQ, atomic inbox completion, a committed projection outbox with generation pins, protected resumable document changes and scalar live queries, bounded property-graph traversal, ordered samples, exact vector search, BM25 and weighted reciprocal-rank fusion, a bounded read-only Q1 SQL dialect, API keys, field omission and field-use policies, verified backups, native Raft snapshots and empty-replica catch-up, offline journal compaction, a .NET SDK and CLI.
 
-The [104-task implementation tracker](docs/implementation/status.json) records the remaining work. Automatic canonical journal maintenance, large and interrupted snapshot transfer qualification, shard movement, distributed multi-shard query planning, managed HNSW, subscription coverage discovery across partitions and rebalance, CDC, retention, schema migrations, external backup stores and full release qualification remain under development. The current server uses one replicated physical shard which contains many independent atomic partitions.
+The [104-task implementation tracker](docs/implementation/status.json) records the remaining work. Automatic canonical journal maintenance, large and interrupted snapshot transfer qualification, shard movement, distributed multi-shard query planning, managed HNSW, subscription coverage discovery across partitions and rebalance, automatic retention and generation cleanup, schema migrations, external backup stores and full release qualification remain under development. The current server uses one replicated physical shard which contains many independent atomic partitions.
 
 The advertised profiles are `ProcessDurable` for embedded storage and `QuorumProcessDurable` for the cluster. The kernel has process-kill recovery tests and the cluster has real leader-loss and minority tests. Power-loss qualification, broader platform qualification and the 72-hour endurance gate are still required before advertising `LocalDurable`, `QuorumDurable` or production readiness.
 
@@ -151,6 +151,26 @@ Queries require a matching point/equality index or explicit `AllowFullScan`. Sca
 
 Search accepts typed vector spaces and explicit text/vector fields. Both branches use one authorized read cut. Exact vector scores and BM25 ranks are combined with weighted RRF using one-based ranks. The managed ANN and graph retrieval extensions are tracked separately.
 
+## Change feeds and live queries
+
+Every successful mutation appends to a private, per-partition system outbox in the same transaction as its canonical effects and outcome. This is separate from business event streams and retained topics. Public `ReadChangesAsync` returns projected document before/after images and deletion metadata; it requires `ChangesRead` and `DocumentsRead`. Current principal, row visibility and sensitive-field policies are checked on every page.
+
+```csharp
+var liveQuery = KeyLoadQuery<Order>.From(partition, "orders")
+    .Where(order => order.Status == "new").Take(100).ToRequest(allowFullScan: true);
+var initial = await client.StartLiveQueryAsync(new(liveQuery));
+initial.ThrowIfFail();
+var next = await client.ReadLiveQueryAsync(new(liveQuery, initial.Value.Cursor));
+next.ThrowIfFail();
+// Apply Upsert/Remove by canonical document ID; retain next.Value.Cursor after applying its page.
+```
+
+The initial complete snapshot and change cursor share one read gate. Live predicates use Q1's same validator, field-use binder and scalar evaluator. Deltas are unordered result-set upserts/removals; ranking, top-k, graph and ANN subscriptions are separate profiles. The initial result must fit its row and byte budgets. Delta pages have examined-position and output-byte budgets; the caller bounds its maintained result set. Re-reading a cursor can repeat changes, so apply them by ID/revision. Continue while `HasMore` even if a filtered page is empty.
+
+Cursors bind incarnation, tenant/partition, collection, principal/policy and schema; live cursors also bind the normalized query. A row ACL change requires a fresh snapshot. Lost retention returns `HistoryUnavailable`; invalid policy/scope returns `TokenInvalidated`. Clear the old result set and take a new snapshot in either case. These cursors can continue on another caught-up RF3 voter.
+
+System projection APIs require cluster administration. A consumer defines its index generation and resource/mutation filter. `ReadProjectionAsync` issues a signed contiguous batch; `CommitProjectionAsync` atomically stores same-partition effects, a replay receipt and its checkpoint. Failed effects leave the checkpoint unchanged. A released generation rejects old batch tokens. Active consumer/rebuild checkpoints pin history against `PurgeOutboxAsync`; public stateless cursors do not pin it. Quotas stop producers before partial publication. Projection effects also consume that quota, so capacity must be available before processing; reserved progress capacity and automatic cleanup are still part of governor qualification. See the [change-feed and outbox contract](docs/design/change-feeds.md).
+
 ## Backups and Cartograph
 
 The canonical backup includes the checksummed redo journal, database identity and a SHA-256 manifest. Domain data, schemas, credentials, outcomes and inbox receipts are journaled together. The journal can begin with a verified checkpoint followed by newer transaction frames. ZoneTree files can be rebuilt from that canonical history. Restore validates every manifest file, creates a new incarnation, resets consensus routing metadata and leaves queue dispatch paused.
@@ -174,12 +194,12 @@ dotnet run --project src/KeyLoad.Cli -- copy-artifact backups/snapshot.ctg archi
 | Project | Responsibility |
 | --- | --- |
 | `KeyLoad.Abstractions` | Typed protocol, identities, limits, errors and ordered key codec |
-| `KeyLoad.Core` | Catalog, atomic mutation compilation, documents, streams, queues, graph and samples |
+| `KeyLoad.Core` | Catalog, atomic mutation compilation, documents, outbox/change feeds, streams, queues, graph and samples |
 | `KeyLoad.Storage.ZoneTree` | File ownership, redo recovery, consistent apply gate and verified backups |
 | `KeyLoad.Replication` | Durable Raft append barrier, state-machine apply and bounded writer coordination |
 | `KeyLoad.Orleans` | Physical-shard command facade and consensus-backed membership |
 | `KeyLoad.Security` | Scope, row and sensitive-field policies |
-| `KeyLoad.Query` | Bounded SQL, exact vectors, BM25 and fusion |
+| `KeyLoad.Query` | Shared SQL/JSON/C# queries, scalar live queries, exact vectors, BM25 and fusion |
 | `KeyLoad.Server` | HTTP API, authenticated peer transport and bootstrap |
 | `KeyLoad.Client` / `KeyLoad.Cli` | .NET SDK and administrative commands |
 | `KeyLoad.Artifacts` | Optional Cartograph archive and ManagedCode storage transport |
@@ -195,7 +215,7 @@ dotnet test --project tests/KeyLoad.RecoveryTests --no-build --no-restore
 dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore
 ```
 
-Tests use xUnit and Microsoft.Testing.Platform. Recovery qualification runs 1000 seeded real-process kills, checks complete-frame corruption and verifies a clean backup restore. Additional process kills cover checkpoint publication, native Raft append acknowledgement and subscription effects/inbox/checkpoint publication. Integration tests own the Aspire lifecycle and use three independent server processes with isolated persistent directories. They kill the elected leader, retry the same command, verify atomic effects and topic delivery on surviving voters, reject a minority write and erase/restart one replica to require snapshot catch-up of documents, group checkpoints and inbox outcomes. No manually running AppHost is needed for tests.
+Tests use xUnit and Microsoft.Testing.Platform. Recovery qualification runs 1000 seeded real-process kills, checks complete-frame corruption and verifies a clean backup restore. Additional process kills cover checkpoint publication, native Raft append acknowledgement, subscription effects/inbox/checkpoint publication and projection effects/outbox/checkpoint publication. Integration tests own the Aspire lifecycle and use three independent server processes with isolated persistent directories. They kill the elected leader, retry the same command, verify atomic effects, live-query continuation and topic delivery on surviving voters, reject a minority write and erase/restart one replica to require snapshot catch-up of documents, outbox entries, generation checkpoints and inbox outcomes. No manually running AppHost is needed for tests.
 
 Benchmarks can be started with `dotnet run -c Release --project benchmarks/KeyLoad.Benchmarks`. Comparative PostgreSQL/Marten/Wolverine and multi-node scaling qualification are part of the development plan; no comparative performance claims are made yet.
 

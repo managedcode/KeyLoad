@@ -14,6 +14,8 @@ public interface IAtomicTransaction : IKeyValueView
     void Put(byte[] key, byte[] value);
     void Delete(byte[] key);
     void Reset();
+    // Throws before any durable write; callers can roll back staged effects and persist a bounded rejection outcome.
+    void ValidateCommit();
 }
 public sealed record StoreIdentity(int FormatVersion, int KeyCodecVersion, Guid NodeId, Guid Incarnation,
     byte[] SigningKey, DurabilityProfile Durability, bool DispatchPaused = false, long ReadGeneration = 0);

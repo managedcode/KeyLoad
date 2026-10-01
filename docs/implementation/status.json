@@ -130,8 +130,14 @@
   },
   "KL-016": {
     "title": "Committed projection outbox",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Abstractions/ChangeFeeds.cs",
+      "src/KeyLoad.Core/ProjectionOutbox.cs",
+      "docs/design/change-feeds.md",
+      "tests/KeyLoad.UnitTests/ChangeFeedTests.cs",
+      "tests/KeyLoad.RecoveryTests/ProjectionRecoveryTests.cs"
+    ]
   },
   "KL-017": {
     "title": "Consensus provider qualification",
@@ -294,8 +300,12 @@
   },
   "KL-040": {
     "title": "Resource governor",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Query/QueryEngine.cs",
+      "src/KeyLoad.Core/ProjectionOutbox.cs",
+      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs"
+    ]
   },
   "KL-041": {
     "title": "Chaos і corruption suite",
@@ -602,8 +612,14 @@
   },
   "KL-079": {
     "title": "Resumable change feed і обмежені live queries",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/ChangeFeeds.cs",
+      "src/KeyLoad.Query/LiveQueries.cs",
+      "docs/design/change-feeds.md",
+      "tests/KeyLoad.UnitTests/LiveQueryTests.cs",
+      "tests/KeyLoad.IntegrationTests/ClusterTests.cs"
+    ]
   },
   "KL-080": {
     "title": "Integrated feature і performance release gate",

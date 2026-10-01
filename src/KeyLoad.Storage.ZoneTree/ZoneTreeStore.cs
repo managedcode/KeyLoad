@@ -163,9 +163,7 @@ public sealed partial class ZoneTreeStore : IAtomicStore, IKeyValueView
             var result = compile(tx, nextPosition);
             var changes = tx.Changes.Select(p => new StorageMutation(p.Key, p.Value)).ToArray();
             if (changes.Length == 0) return result;
-            var payload = JsonDefaults.Serialize(changes);
-            if (payload.Length > options.MaxFrameBytes)
-                throw Errors.Fail(ErrorCode.ResourceExhausted, "The compiled transaction exceeds the journal frame limit.");
+            var payload = tx.PreparePayload();
             var header = new byte[HeaderLength];
             BinaryPrimitives.WriteUInt64LittleEndian(header, Magic);
             BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(8), payload.Length);
@@ -239,10 +237,32 @@ public sealed partial class ZoneTreeStore : IAtomicStore, IKeyValueView
     private sealed class Transaction(ZoneTreeStore store) : IAtomicTransaction
     {
         internal SortedDictionary<byte[], byte[]?> Changes { get; } = new(BinaryKeyComparer.Instance);
+        private byte[]? preparedPayload;
+        private long stagedBytes = 2; // JSON array brackets; byte arrays use the canonical base64 converter.
         public byte[]? Get(byte[] key) => Changes.TryGetValue(key, out var value) ? value?.ToArray() : store.Get(key);
-        public void Put(byte[] key, byte[] value) => Changes[key.ToArray()] = value.ToArray();
-        public void Delete(byte[] key) => Changes[key.ToArray()] = null;
-        public void Reset() => Changes.Clear();
+        private static long MutationBytes(byte[] key, byte[]? value)
+            => 21 + 4 * ((key.LongLength + 2) / 3) + (value is null ? 2 : 4 * ((value.LongLength + 2) / 3));
+        private void Stage(byte[] key, byte[]? value)
+        {
+            var replacing = Changes.TryGetValue(key, out var oldValue);
+            var bytes = stagedBytes - (replacing ? MutationBytes(key, oldValue) : 0)
+                + MutationBytes(key, value) + (replacing || Changes.Count == 0 ? 0 : 1);
+            if (bytes > store.options.MaxFrameBytes)
+                throw Errors.Fail(ErrorCode.ResourceExhausted, "The compiled transaction exceeds the journal frame limit.");
+            preparedPayload = null; stagedBytes = bytes; Changes[key.ToArray()] = value?.ToArray();
+        }
+        public void Put(byte[] key, byte[] value) => Stage(key, value);
+        public void Delete(byte[] key) => Stage(key, null);
+        public void Reset() { preparedPayload = null; stagedBytes = 2; Changes.Clear(); }
+        public void ValidateCommit() => _ = PreparePayload();
+        internal byte[] PreparePayload()
+        {
+            if (preparedPayload is not null) return preparedPayload;
+            var payload = JsonDefaults.Serialize(Changes.Select(pair => new StorageMutation(pair.Key, pair.Value)).ToArray());
+            if (payload.Length > store.options.MaxFrameBytes)
+                throw Errors.Fail(ErrorCode.ResourceExhausted, "The compiled transaction exceeds the journal frame limit.");
+            return preparedPayload = payload;
+        }
         public ScanPage Scan(byte[] prefix, int maxRecords, byte[]? afterKey = null)
         {
             var capacity = checked(maxRecords + Changes.Count + 1);

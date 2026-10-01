@@ -49,6 +49,24 @@ public static class ApiEndpoints
         app.MapPost("/v1/query", (QueryRequest request, QueryEngine queries, HttpContext context) => queries.Execute(Principal(context), request));
         app.MapPost("/v1/query/ast", (AstQueryRequest request, QueryEngine queries, HttpContext context) => queries.ExecuteAst(Principal(context), request));
         app.MapGet("/v1/query/capabilities", (QueryEngine queries) => queries.Capabilities);
+        app.MapPost("/v1/changes/read", (ReadChangeFeedRequest request, DatabaseEngine database, HttpContext context) =>
+            database.ReadChangeFeed(Principal(context), request));
+        app.MapPost("/v1/query/live/start", (StartLiveQueryRequest request, QueryEngine queries, HttpContext context) =>
+            queries.StartLiveQuery(Principal(context), request));
+        app.MapPost("/v1/query/live/read", (ReadLiveQueryRequest request, QueryEngine queries, HttpContext context) =>
+            queries.ReadLiveQuery(Principal(context), request));
+        app.MapPost("/v1/admin/outbox/status", (GetOutboxStatusRequest request, DatabaseEngine database, HttpContext context) =>
+            database.GetOutboxStatus(Principal(context), request.Partition));
+        app.MapPost("/v1/admin/outbox/purge", (PurgeOutboxRequest request, HttpContext context) =>
+            Submit<OutboxHead, PurgeOutboxRequest>(context, OperationKind.PurgeOutbox, request.CommandId, request));
+        app.MapPost("/v1/admin/projections/configure", (ConfigureProjectionConsumerRequest request, HttpContext context) =>
+            Submit<ProjectionConsumerInfo, ConfigureProjectionConsumerRequest>(context, OperationKind.ConfigureProjectionConsumer, request.CommandId, request));
+        app.MapPost("/v1/admin/projections/read", (ReadProjectionBatchRequest request, DatabaseEngine database, HttpContext context) =>
+            database.ReadProjectionBatch(Principal(context), request));
+        app.MapPost("/v1/admin/projections/commit", (CommitProjectionBatchRequest request, HttpContext context) =>
+            Submit<ProjectionBatchResult, CommitProjectionBatchRequest>(context, OperationKind.CommitProjectionBatch, request.CommandId, request));
+        app.MapPost("/v1/admin/projections/release", (ReleaseProjectionConsumerRequest request, HttpContext context) =>
+            Submit<ProjectionConsumerInfo, ReleaseProjectionConsumerRequest>(context, OperationKind.ReleaseProjectionConsumer, request.CommandId, request));
         app.MapPost("/v1/search", (SearchRequest request, SearchEngine search, HttpContext context) => search.Search(Principal(context), request));
         app.MapPost("/v1/admin/resources", (ConfigureResourceRequest request, HttpContext context) =>
             Submit<ResourceDefinition, ConfigureResourceRequest>(context, OperationKind.ConfigureResource, CommandId(context), request));

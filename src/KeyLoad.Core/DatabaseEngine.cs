@@ -111,6 +111,18 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
             if (replicationIndex > 0) tx.PutRecord(KeySpace.Applied, replicationIndex);
             if (tx.Get(KeySpace.Clock) is not { } oldClock || operation.EvaluatedAt >= JsonDefaults.Deserialize<DateTimeOffset>(oldClock))
                 tx.PutRecord(KeySpace.Clock, operation.EvaluatedAt);
+            try { tx.ValidateCommit(); }
+            catch (KeyLoadException exception) when (exception.Code == ErrorCode.ResourceExhausted)
+            {
+                // Compilation can expand a small request through indexes, before/after images and the outbox.
+                // Reject it inside the same apply position instead of leaving a committed Raft entry unapplicable.
+                tx.Reset(); result = new(null, exception.Code, exception.Message);
+                if (tx.Get(resultKey) is null) tx.PutRecord(resultKey, new StoredOutcome(fingerprint, Store.Identity.Incarnation, policyEpoch, result));
+                if (replicationIndex > 0) tx.PutRecord(KeySpace.Applied, replicationIndex);
+                if (tx.Get(KeySpace.Clock) is not { } clock || operation.EvaluatedAt >= JsonDefaults.Deserialize<DateTimeOffset>(clock))
+                    tx.PutRecord(KeySpace.Clock, operation.EvaluatedAt);
+                tx.ValidateCommit();
+            }
             return result;
         });
     }
@@ -154,6 +166,12 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
             var processing = Payload<SubscriptionProcessingRequest>(operation);
             ValidateGroupClaims(view, principal, processing.Subscription, processing.Token, operation.EvaluatedAt);
             ReauthorizeEffects(view, principal, processing.Subscription.Source.Partition, processing.Effects);
+        }
+        if (operation.Kind == OperationKind.CommitProjectionBatch && previous.Result.Error is null)
+        {
+            var projection = Payload<CommitProjectionBatchRequest>(operation);
+            ProjectionClaims(view, projection, operation.EvaluatedAt, allowExpiredReceipt: true);
+            ReauthorizeEffects(view, principal, projection.Consumer.Partition, projection.Effects);
         }
     }
     private static T Payload<T>(ReplicatedOperation operation) => JsonDefaults.Deserialize<T>(Encoding.UTF8.GetBytes(operation.PayloadJson));
@@ -213,6 +231,7 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
             throw Errors.Fail(ErrorCode.ResourceExhausted, "The mutation count exceeds its budget.");
         foreach (var mutation in request.Mutations)
         {
+            ValidateMutationStructure(mutation);
             JsonData.Identifier(mutation.Resource);
             var capability = mutation switch
             {
@@ -239,7 +258,7 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
                 var batch = Payload<CommandRequest>(operation);
                 if (batch.CommandId != operation.Id) throw Errors.Fail(ErrorCode.Validation, "The envelope and command IDs differ.");
                 return Result(new CommitReceipt(batch.CommandId, Token(batch.Partition, position),
-                    ApplyMutations(tx, principal, batch.Partition, batch.Mutations, operation.EvaluatedAt), Durability));
+                    ApplyMutations(tx, principal, batch.Partition, batch.Mutations, operation.EvaluatedAt, position), Durability));
             case OperationKind.Receive: return Result(Receive(tx, principal, Payload<ReceiveRequest>(operation), operation.EvaluatedAt, position));
             case OperationKind.Delivery: return Result(CompleteDelivery(tx, principal, Payload<DeliveryCommand>(operation), operation.EvaluatedAt, position));
             case OperationKind.Processing: return Result(CompleteProcessing(tx, principal, Payload<ProcessingRequest>(operation), operation.EvaluatedAt, position));
@@ -261,6 +280,18 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
             case OperationKind.SubscriptionProcessing:
                 var subscriptionProcess = Payload<SubscriptionProcessingRequest>(operation); RequireEnvelopeId(operation, subscriptionProcess.CommandId);
                 return Result(CompleteSubscriptionProcessing(tx, principal, subscriptionProcess, operation.EvaluatedAt, position));
+            case OperationKind.ConfigureProjectionConsumer:
+                var consumer = Payload<ConfigureProjectionConsumerRequest>(operation); RequireEnvelopeId(operation, consumer.CommandId);
+                return Result(ConfigureProjectionConsumer(tx, consumer));
+            case OperationKind.CommitProjectionBatch:
+                var projection = Payload<CommitProjectionBatchRequest>(operation); RequireEnvelopeId(operation, projection.CommandId);
+                return Result(CommitProjectionBatch(tx, principal, projection, operation.EvaluatedAt, position));
+            case OperationKind.ReleaseProjectionConsumer:
+                var release = Payload<ReleaseProjectionConsumerRequest>(operation); RequireEnvelopeId(operation, release.CommandId);
+                return Result(ReleaseProjectionConsumer(tx, release));
+            case OperationKind.PurgeOutbox:
+                var purge = Payload<PurgeOutboxRequest>(operation); RequireEnvelopeId(operation, purge.CommandId);
+                return Result(PurgeOutbox(tx, purge));
             case OperationKind.ConfigureResource:
                 var config = Payload<ConfigureResourceRequest>(operation);
                 ValidateResource(config);
@@ -272,6 +303,7 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
                 return Result(config.Definition);
             case OperationKind.ConfigurePrincipal:
                 var target = Payload<ConfigurePrincipalRequest>(operation).Principal;
+                ValidatePrincipalStructure(target);
                 JsonData.Identifier(target.Id); JsonData.Identifier(target.TenantId);
                 var old = tx.GetRecord<PrincipalRecord>(KeySpace.Principal(target.Id));
                 if (old is not null && target.PolicyEpoch <= old.PolicyEpoch)
@@ -280,6 +312,8 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
                 return Result(target);
             case OperationKind.ConfigureApiKey:
                 var apiKey = Payload<ConfigureApiKeyRequest>(operation).ApiKey;
+                if (apiKey.Verifier.Length != 64 || !apiKey.Verifier.All(char.IsAsciiHexDigit))
+                    throw Errors.Fail(ErrorCode.Validation, "An API key requires a SHA-256 verifier.");
                 JsonData.Identifier(apiKey.Id); Principal(tx, apiKey.PrincipalId, operation.EvaluatedAt);
                 if (apiKey.Verifier.Length != 64 || !apiKey.Verifier.All(Uri.IsHexDigit)) throw Errors.Fail(ErrorCode.Validation, "The credential verifier is invalid.");
                 tx.PutRecord(KeySpace.ApiKey(apiKey.Id), apiKey);
@@ -302,6 +336,10 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
         JsonData.Identifier(request.TenantId); JsonData.Identifier(request.DatabaseId);
         JsonData.Identifier(request.Definition.Name); JsonData.Identifier(request.Definition.TransactionDomainId);
         var definition = request.Definition;
+        if (!Enum.IsDefined(definition.Kind) || !Enum.IsDefined(definition.Authority)
+            || definition.Indexes.Any(index => index is null || index.Fields.Any(string.IsNullOrEmpty))
+            || definition.FieldPolicies.Concat(definition.HeaderPolicies).Any(policy => policy is null || string.IsNullOrEmpty(policy.Path)))
+            throw Errors.Fail(ErrorCode.Validation, "The resource schema contains an invalid entry.");
         if (definition.Indexes.Length > 32 || definition.FieldPolicies.Length > 256 || definition.HeaderPolicies.Length > 256)
             throw Errors.Fail(ErrorCode.ResourceExhausted, "The resource schema exceeds its budget.");
         if (definition.Indexes.Select(i => i.Name).Distinct(StringComparer.Ordinal).Count() != definition.Indexes.Length)
@@ -321,12 +359,14 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
             throw Errors.Fail(ErrorCode.Validation, "The queue policy is invalid.");
     }
 
-    private MutationReceipt[] ApplyMutations(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, Mutation[] mutations, DateTimeOffset now)
+    private MutationReceipt[] ApplyMutations(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, Mutation[] mutations, DateTimeOffset now, long position)
     {
         var receipts = new List<MutationReceipt>();
         foreach (var mutation in mutations)
         {
-            receipts.Add(mutation switch
+            var documentId = mutation switch { PutDocument put => put.Id, PatchDocument patch => patch.Id, DeleteDocument delete => delete.Id, _ => null };
+            var before = documentId is null ? null : tx.GetRecord<DocumentRecord>(DocumentKey(partition, mutation.Resource, documentId));
+            var receipt = mutation switch
             {
                 PutDocument put => Put(tx, principal, partition, put, now),
                 PatchDocument patch => Patch(tx, principal, partition, patch, now),
@@ -339,7 +379,12 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
                 AppendSamples samples => Append(tx, principal, partition, samples),
                 PutVector vector => Upsert(tx, principal, partition, vector),
                 _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, "The mutation is unsupported.")
-            });
+            };
+            receipts.Add(receipt);
+            var after = documentId is null ? null : tx.GetRecord<DocumentRecord>(DocumentKey(partition, mutation.Resource, documentId));
+            AppendOutbox(tx, partition, new(0, receipts.Count - 1, Token(partition, position), now, mutation, receipt, before, after));
+            if (before is not null && after is not null && before.Access != after.Access)
+                AdvanceVisibilityEpoch(tx, partition, mutation.Resource);
         }
         foreach (var collection in mutations.Where(mutation => mutation is PutDocument or PatchDocument or DeleteDocument)
             .Select(mutation => mutation.Resource).Distinct(StringComparer.Ordinal))

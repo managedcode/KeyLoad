@@ -36,4 +36,4 @@ public sealed record AstQueryRequest(PartitionRef Partition, SelectQuery Query, 
     bool AllowFullScan = false, string? Cursor = null, int AstVersion = 1);
 public sealed record QueryCapabilityManifest(int ProtocolVersion, int AstVersion, string SqlDialect, string Scope,
     string NumericPolicy, string MissingPolicy, string[] Adapters, string[] Predicates, int MaxRows, int MaxCandidates,
-    int MaxBytes, int MaxDepth, bool FullScanRequiresOptIn, bool ReadOnly);
+    int MaxBytes, int MaxDepth, bool FullScanRequiresOptIn, bool ReadOnly, long MaxCandidateBytes, string[] ReadProfiles);

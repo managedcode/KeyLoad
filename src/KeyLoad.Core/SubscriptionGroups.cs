@@ -226,7 +226,7 @@ public sealed partial class DatabaseEngine
             return new(acknowledgement, true, completed.Receipt.Token);
         }
         var ack = CompleteSubscriptionDelivery(tx, principal, new(request.CommandId, request.Subscription, request.Token, DeliveryAction.Ack), now, position);
-        var effects = ApplyMutations(tx, principal, request.Subscription.Source.Partition, request.Effects, now);
+        var effects = ApplyMutations(tx, principal, request.Subscription.Source.Partition, request.Effects, now, position);
         var receipt = ack with { Mutations = effects.Concat(ack.Mutations).ToArray() };
         tx.PutRecord(inboxKey, new InboxRecord(fingerprint, receipt));
         return new(receipt, false, receipt.Token);

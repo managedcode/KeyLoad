@@ -237,7 +237,7 @@ public sealed partial class DatabaseEngine
         }
         Lease(tx, principal, request.Lane, request.Token, now);
         var ack = CompleteDelivery(tx, principal, new(request.CommandId, request.Lane, request.Token, DeliveryAction.Ack), now, position);
-        var effects = ApplyMutations(tx, principal, request.Lane.Partition, request.Effects, now);
+        var effects = ApplyMutations(tx, principal, request.Lane.Partition, request.Effects, now, position);
         var receipt = ack with { Mutations = effects.Concat(ack.Mutations).ToArray() };
         tx.PutRecord(inboxKey, new InboxRecord(fingerprint, receipt));
         return receipt;
