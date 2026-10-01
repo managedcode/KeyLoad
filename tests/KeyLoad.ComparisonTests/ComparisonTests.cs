@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
@@ -34,7 +35,8 @@ public sealed class ComparisonTests
             $"--Benchmarks:Output={output}", $"--Benchmarks:Documents={options.Documents}", $"--Benchmarks:Operations={options.Operations}", $"--Benchmarks:Warmup={options.Warmup}",
             $"--Benchmarks:Repetitions={options.Repetitions}", $"--Benchmarks:Concurrency={options.Concurrency}", $"--Benchmarks:Dimensions={options.Dimensions}",
             $"--Benchmarks:TopK={options.TopK}", $"--Benchmarks:PayloadBytes={options.PayloadBytes}", $"--Benchmarks:Seed={options.Seed}",
-            $"--Benchmarks:TimeoutSeconds={options.TimeoutSeconds}"], timeout.Token);
+            $"--Benchmarks:TimeoutSeconds={options.TimeoutSeconds}",
+            $"--Benchmarks:SourceRevision={Environment.GetEnvironmentVariable("GITHUB_SHA") ?? "unrecorded"}"], timeout.Token);
         builder.Services.AddLogging(logging =>
         {
             logging.ClearProviders(); logging.AddConsole(); logging.SetMinimumLevel(LogLevel.Warning);
@@ -105,8 +107,40 @@ public sealed class ComparisonTests
             await captureLifetime.CancelAsync(); await capture; await Task.WhenAll(logCaptures.Values);
             Directory.CreateDirectory(evidence);
             await File.WriteAllLinesAsync(Path.Combine(evidence, "runner.log"), lines, CancellationToken.None);
+            var redis = app.Services.GetRequiredService<DistributedApplicationModel>().Resources
+                .OfType<ContainerResource>().Single(resource => resource.Name == "benchmark-redis");
             await app.StopAsync(CancellationToken.None);
-            if (Directory.Exists(root)) Directory.Delete(root, true);
+            await DeleteDataAsync(root, redis);
         }
+    }
+
+    private static async Task DeleteDataAsync(string root, ContainerResource redis)
+    {
+        if (!Directory.Exists(root)) return;
+        try { Directory.Delete(root, true); return; }
+        catch (UnauthorizedAccessException) when (OperatingSystem.IsLinux()) { }
+
+        // Native Linux bind mounts retain container UIDs. Use the already pinned image to remove
+        // only this test's external data after all resources have stopped; never prune Docker data.
+        var external = Path.Combine(root, "external");
+        if (!Directory.Exists(external) || !redis.TryGetContainerImageName(out var image))
+            throw new IOException("Cannot clean the comparison run's container-owned data.");
+        var start = new ProcessStartInfo("docker") { RedirectStandardError = true, RedirectStandardOutput = true };
+        foreach (var argument in new[]
+        {
+            "run", "--rm", "--pull", "never", "--network", "none", "--read-only", "--user", "0:0",
+            "--cap-drop", "ALL", "--cap-add", "DAC_OVERRIDE", "--entrypoint", "/bin/sh",
+            "--mount", $"type=bind,source={external},target=/data", image!, "-c", "rm -rf /data/*"
+        }) start.ArgumentList.Add(argument);
+        using var process = Process.Start(start) ?? throw new IOException("Cannot start comparison data cleanup.");
+        var error = process.StandardError.ReadToEndAsync();
+        var output = process.StandardOutput.ReadToEndAsync();
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        try { await process.WaitForExitAsync(timeout.Token); }
+        catch (OperationCanceledException) { process.Kill(entireProcessTree: true); throw; }
+        await output;
+        if (process.ExitCode != 0) throw new IOException($"Comparison data cleanup failed: {await error}");
+        await error;
+        Directory.Delete(root, true);
     }
 }
