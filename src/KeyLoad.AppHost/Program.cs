@@ -4,8 +4,12 @@ using Aspire.Hosting.ApplicationModel;
 using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
-var root = Path.GetFullPath(builder.Configuration["KeyLoad:DataRoot"] ?? Path.Combine(builder.AppHostDirectory, "../../data/cluster"));
-var ephemeral = builder.Configuration.GetValue<bool>("KeyLoad:Ephemeral");
+var benchmarkMode = builder.Configuration.GetValue<bool>("Benchmarks:Enabled");
+var benchmarkRoot = Path.GetFullPath(builder.Configuration["Benchmarks:DataRoot"]
+    ?? Path.Combine(builder.AppHostDirectory, "../../artifacts/comparisons", Guid.NewGuid().ToString("N")));
+var root = Path.GetFullPath(builder.Configuration["KeyLoad:DataRoot"] ?? (benchmarkMode
+    ? Path.Combine(benchmarkRoot, "cluster") : Path.Combine(builder.AppHostDirectory, "../../data/cluster")));
+var ephemeral = builder.Configuration.GetValue("KeyLoad:Ephemeral", benchmarkMode);
 if (!Directory.Exists(root) && !OperatingSystem.IsWindows()) Directory.CreateDirectory(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
 else Directory.CreateDirectory(root);
 var profilePath = Path.Combine(root, "local-profile.json");
@@ -39,5 +43,6 @@ foreach (var resource in nodes)
     resource.WithEnvironment("KeyLoad__PublicEndpoint", resource.GetEndpoint("http"));
     for (var index = 0; index < nodes.Length; index++) resource.WithEnvironment($"KeyLoad__Peers__{index}", nodes[index].GetEndpoint("http"));
 }
+if (benchmarkMode) BenchmarkResources.Add(builder, nodes, admin, benchmarkRoot);
 await builder.Build().RunAsync();
 public sealed record LocalProfile(Guid Incarnation, string SigningKey, string PeerSecret, string AdminKey);

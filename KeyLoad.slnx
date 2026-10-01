@@ -19,8 +19,10 @@
     <Project Path="tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj" />
     <Project Path="tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj" />
     <Project Path="tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj" />
+    <Project Path="tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj" />
   </Folder>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/KeyLoad.Benchmarks/KeyLoad.Benchmarks.csproj" />
+    <Project Path="benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" />
   </Folder>
 </Solution>

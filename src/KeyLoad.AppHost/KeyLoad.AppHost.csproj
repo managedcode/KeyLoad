@@ -8,6 +8,11 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../KeyLoad.Server/KeyLoad.Server.csproj" />
+    <ProjectReference Include="../../benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" />
     <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    <PackageReference Include="Aspire.Hosting.Qdrant" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" />
+    <PackageReference Include="Aspire.Hosting.Redis" />
   </ItemGroup>
 </Project>

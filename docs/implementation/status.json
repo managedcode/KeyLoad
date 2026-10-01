@@ -47,7 +47,12 @@
     "title": "Benchmark harness і PostgreSQL methodology",
     "status": "in_progress",
     "evidence": [
-      "benchmarks/KeyLoad.Benchmarks/Program.cs"
+      "benchmarks/KeyLoad.Benchmarks/Program.cs",
+      "benchmarks/KeyLoad.Comparisons/ComparisonRunner.cs",
+      "src/KeyLoad.AppHost/BenchmarkResources.cs",
+      "tests/KeyLoad.UnitTests/ComparisonHarnessTests.cs",
+      "tests/KeyLoad.ComparisonTests/ComparisonTests.cs",
+      "docs/implementation/comparative-benchmarks.md"
     ]
   },
   "KL-007": {
@@ -576,8 +581,11 @@
   },
   "KL-073": {
     "title": "PostgreSQL baseline kit",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "benchmarks/KeyLoad.Comparisons/Targets/PostgresTarget.cs",
+      "docs/implementation/comparative-benchmarks.md"
+    ]
   },
   "KL-074": {
     "title": "Hybrid quality/performance benchmark",
@@ -796,8 +804,14 @@
   },
   "KL-101": {
     "title": "Eventing benchmark kit і .NET baselines",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "benchmarks/KeyLoad.Comparisons/Targets/KeyLoadTarget.cs",
+      "benchmarks/KeyLoad.Comparisons/Targets/PostgresTarget.cs",
+      "benchmarks/KeyLoad.Comparisons/Targets/RabbitTarget.cs",
+      "tests/KeyLoad.ComparisonTests/ComparisonTests.cs",
+      "docs/implementation/comparative-benchmarks.md"
+    ]
   },
   "KL-102": {
     "title": "Eventing failure і state-machine suite",
