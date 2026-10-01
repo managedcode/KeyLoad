@@ -16,7 +16,11 @@ public sealed class CommandRouterGrain(DatabaseEngine database, ICommitCoordinat
     public async Task<string> ExecuteAsync(string envelope)
     {
         if (this.GetPrimaryKeyString() != "shard:0") throw Errors.Fail(ErrorCode.OwnershipLost, "The physical shard route is unavailable.");
-        var command = database.Verify<GrainCommandEnvelope>(envelope);
+        // Commands carry their JSON payload inside a signed JSON string. Account for escaping,
+        // base64 and bounded envelope metadata rather than applying the small cursor-token budget.
+        var maximumEnvelopeBytes = checked((long)database.Limits.MaxBatchBytes * 2 + 4_096);
+        var maximumCharacters = checked((int)((maximumEnvelopeBytes + 2) / 3 * 4 + 44));
+        var command = database.Verify<GrainCommandEnvelope>(envelope, maximumCharacters);
         if (command.Purpose != "grain-command" || command.ExpiresAt < DateTimeOffset.UtcNow || command.ExpiresAt > DateTimeOffset.UtcNow.AddMinutes(2))
             throw Errors.Fail(ErrorCode.TokenInvalidated, "The internal command envelope has expired or has a different purpose.");
         var result = await coordinator.SubmitAsync(command.Kind, command.Id, command.PrincipalId, command.PayloadJson);

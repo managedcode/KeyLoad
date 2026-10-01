@@ -19,3 +19,5 @@ backups/
 .azure/
 .env
 .env.*
+.playwright-cli/
+output/playwright/

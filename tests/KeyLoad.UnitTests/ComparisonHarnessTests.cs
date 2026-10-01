@@ -1,4 +1,6 @@
 using KeyLoad.Comparisons;
+using KeyLoad.Comparisons.Targets;
+using System.Net;
 
 namespace KeyLoad.UnitTests;
 
@@ -31,6 +33,37 @@ public sealed class ComparisonHarnessTests
         Assert.Equal(3, result.Attempts); Assert.Equal(2, result.Successes); Assert.Equal(1, result.Failures);
         Assert.Equal(1, result.UsefulOperationsPerSecond); Assert.Equal(100, result.Latency.P99Ms);
         Assert.Equal(2, result.UniqueCompletedMessages); Assert.NotNull(result.Enqueue);
+    }
+
+    [Fact]
+    public void GraphOracleHandlesCyclesDepthAndDisconnectedComponents()
+    {
+        var data = new BenchmarkDataset(Small);
+        Assert.Equal(data.Documents[1..4].Select(document => document.Id), data.Reachable(data.Documents[0], 1));
+        Assert.Equal(data.Documents[1..7].Select(document => document.Id), data.Reachable(data.Documents[0], 2));
+        Assert.Equal(data.Documents[1..8].Select(document => document.Id), data.Reachable(data.Documents[0], 5));
+        Assert.DoesNotContain(data.Reachable(data.Documents[0], 5), id => id == data.Documents[8].Id);
+        Assert.NotEqual(data.Sha256, new BenchmarkDataset(Small with { GraphFanOut = 2 }).Sha256);
+        Assert.Empty(new BenchmarkDataset(Small with { Documents = 1, TopK = 1 }).Edges);
+    }
+
+    [Fact]
+    public async Task Neo4jQueryErrorsFailEvenWhenHttpStatusIsAccepted()
+    {
+        var http = new HttpClient(new QueryFailureHandler()) { BaseAddress = new Uri("http://localhost/") };
+        var target = new Neo4jTarget(http, Guid.NewGuid().ToString("N"), "test-image");
+        var error = await Assert.ThrowsAsync<ComparisonFailure>(() => target.InitializeAsync(new BenchmarkDataset(Small), TestContext.Current.CancellationToken));
+        Assert.Equal("Neo4j:Neo.ClientError.Statement.SyntaxError", error.Message);
+        Assert.DoesNotContain("sensitive-query", error.Message);
+        http.Dispose();
+    }
+
+    private sealed class QueryFailureHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            => Task.FromResult(new HttpResponseMessage(HttpStatusCode.Accepted) { Content = new StringContent("""
+                {"errors":[{"code":"Neo.ClientError.Statement.SyntaxError","message":"sensitive-query"}]}
+                """) });
     }
 
     [Fact]

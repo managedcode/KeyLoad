@@ -1,0 +1,61 @@
+name: KeyLoad website
+on:
+  workflow_run:
+    workflows: [KeyLoad CI]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: keyload-pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request' && github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Select successful evidence run
+        id: evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          COMPLETED_RUN: ${{ github.event.workflow_run.id }}
+        shell: bash
+        run: |
+          run_id="$COMPLETED_RUN"
+          if [ -z "$run_id" ]; then
+            run_id=$(gh run list --workflow ci.yml --branch main --event push --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          fi
+          test -n "$run_id" && test "$run_id" != "null"
+          revision=$(gh api "repos/$GH_REPO/actions/runs/$run_id" --jq '.head_sha')
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.evidence.outputs.revision }}
+      - name: Build from verified comparison reports
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EVIDENCE_RUN: ${{ steps.evidence.outputs.run_id }}
+          EVIDENCE_REVISION: ${{ steps.evidence.outputs.revision }}
+        shell: bash
+        run: |
+          gh run download "$EVIDENCE_RUN" --name comparison-suite --dir artifacts/comparisons
+          node --test site/scripts/measurements.test.mjs
+          node site/scripts/build.mjs --reports=artifacts/comparisons --output=_site --revision="$EVIDENCE_REVISION" --evidence-url="https://github.com/$GH_REPO/actions/runs/$EVIDENCE_RUN"
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: _site
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

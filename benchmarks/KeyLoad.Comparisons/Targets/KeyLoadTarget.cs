@@ -10,26 +10,31 @@ public sealed class KeyLoadTarget(HttpClient http, string apiKey, string runId) 
     private readonly PartitionRef partition = new("benchmark-" + runId, "comparison", "workload", "shared");
     private VectorSpace space = null!;
     private int topK;
+    private int graphDepth, graphVertices, graphEdges;
     public TargetProfile Profile { get; private set; } = new("KeyLoad", "0.1.0-dev", "3 voters, RF3, one physical shard; all processes on one host",
-        "QuorumProcessDurable; process-kill qualified, power-loss unqualified", "strong quorum barrier", "HTTP JSON", "authenticated root, all grants", null);
+        "QuorumProcessDurable; process-kill qualified, power-loss unqualified", "strong quorum barrier; graph returns vertices and edges, projected to IDs", "HTTP JSON", "authenticated root, all grants", null);
     public bool Supports(Scenario scenario) => true;
-    private static T Success<T>(Result<T> result)
+    private static T Success<T>(Result<T> result, string? stage = null)
     {
-        if (!result.IsSuccess) throw new ComparisonFailure("KeyLoad:" + result.Problem?.ErrorCode);
+        if (!result.IsSuccess) throw new ComparisonFailure("KeyLoad:" + result.Problem?.ErrorCode + (stage is null ? "" : ":" + stage));
         return result.Value!;
     }
     public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
     {
-        var status = Success(await client.StatusAsync(cancellationToken));
+        var status = Success(await client.StatusAsync(cancellationToken), "Status");
         if (status.Voters != 3 || status.Durability != DurabilityProfile.QuorumProcessDurable)
             throw new ComparisonFailure("KeyLoadRf3Required");
         space = new("comparison", dataset.Options.Dimensions, DistanceMetric.Cosine, "seeded-float32", "1");
         topK = dataset.Options.TopK;
-        foreach (var (name, kind) in new[] { ("documents", ResourceKind.Collection), ("jobs", ResourceKind.WorkQueue) })
-            Success(await client.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, new(name, kind, partition.TransactionDomainId)), cancellationToken));
+        graphDepth = dataset.Options.GraphDepth; graphVertices = dataset.GraphVertexCount; graphEdges = Math.Max(1, dataset.Edges.Length);
+        foreach (var (name, kind) in new[] { ("documents", ResourceKind.Collection), ("jobs", ResourceKind.WorkQueue), ("links", ResourceKind.Graph) })
+            Success(await client.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, new(name, kind, partition.TransactionDomainId)), cancellationToken), "Configure:" + name);
         foreach (var document in dataset.Documents)
             Success(await client.CommitAsync(new(Guid.NewGuid(), partition,
-                [new PutDocument("documents", document.Id, document.Json, 0), new PutVector("documents", document.Id, "/embedding", document.Vector, space, 1)]), cancellationToken));
+                [new PutDocument("documents", document.Id, document.Json, 0), new PutVector("documents", document.Id, "/embedding", document.Vector, space, 1)]), cancellationToken), "SeedDocuments");
+        foreach (var batch in dataset.Edges.Chunk(100))
+            Success(await client.CommitAsync(new(Guid.NewGuid(), partition, batch.Select(edge => (Mutation)new UpsertEdge("links", edge.Id,
+                new(partition, "documents", edge.From), new(partition, "documents", edge.To), "links", ExpectedRevision: 0)).ToArray()), cancellationToken), "SeedGraph");
     }
     public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken) => Task.FromResult<IComparisonSession>(new Session(this));
     public ValueTask DisposeAsync() { http.Dispose(); return ValueTask.CompletedTask; }
@@ -55,6 +60,12 @@ public sealed class KeyLoadTarget(HttpClient http, string apiKey, string runId) 
                     var neighbors = Success(await target.client.SearchAsync(new(target.partition, "documents", VectorField: "/embedding",
                         Vector: document.Vector, Space: target.space, Limit: target.topK), cancellationToken));
                     return new(Neighbors: neighbors.Select(item => new FoundDocument(item.Document.Reference.Id, item.Document.Json)).ToArray());
+                case Scenario.GraphNeighbors:
+                case Scenario.GraphTraverse:
+                    var graph = Success(await target.client.TraverseAsync(new(target.partition, "links",
+                        new(target.partition, "documents", document.Id), scenario == Scenario.GraphNeighbors ? 1 : target.graphDepth,
+                        target.graphVertices, target.graphEdges, ["links"]), cancellationToken));
+                    return new(Vertices: graph.Vertices.Where(vertex => vertex.Id != document.Id).Select(vertex => vertex.Id).Order(StringComparer.Ordinal).ToArray());
                 case Scenario.QueueCycle:
                     var lane = new QueueLaneRef(target.partition, "jobs");
                     var begin = Stopwatch.GetTimestamp();

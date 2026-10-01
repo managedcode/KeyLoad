@@ -10,12 +10,14 @@ public sealed class PostgresTarget(string connectionString, string runId, string
     private readonly string schema = "bench_" + Guid.Parse(runId).ToString("N");
     private NpgsqlDataSource source = null!;
     private int topK;
+    private int graphDepth;
     public TargetProfile Profile { get; private set; } = new("PostgreSQL + pgvector", "unverified", "single primary, no replicas",
         "fsync=on, synchronous_commit=on; local WAL flush", "READ COMMITTED on primary", "pooled prepared SQL/TCP", "database owner; no RLS/masking", image);
     public bool Supports(Scenario scenario) => true;
     public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
     {
         topK = dataset.Options.TopK;
+        graphDepth = dataset.Options.GraphDepth;
         var settings = new NpgsqlConnectionStringBuilder(connectionString) { MaxAutoPrepare = 32, AutoPrepareMinUsages = 1,
             MaxPoolSize = Math.Max(10, dataset.Options.Concurrency), SearchPath = schema + ",public" };
         source = NpgsqlDataSource.Create(settings.ConnectionString);
@@ -29,6 +31,7 @@ public sealed class PostgresTarget(string connectionString, string runId, string
                 CREATE TABLE {schema}.queue(id text COLLATE "C" PRIMARY KEY, body jsonb NOT NULL, state text NOT NULL DEFAULT 'ready',
                     lease_owner uuid, lease_until timestamptz, attempts integer NOT NULL DEFAULT 0);
                 CREATE INDEX queue_ready ON {schema}.queue(state, id);
+                CREATE TABLE {schema}.edges(source text COLLATE "C", target text COLLATE "C", PRIMARY KEY(source,target));
                 """;
             await ddl.ExecuteNonQueryAsync(cancellationToken);
         }
@@ -49,12 +52,22 @@ public sealed class PostgresTarget(string connectionString, string runId, string
             insert.Parameters.AddWithValue(VectorLiteral(document.Vector));
             await insert.ExecuteNonQueryAsync(cancellationToken);
         }
-        await using var analyze = connection.CreateCommand(); analyze.CommandText = "ANALYZE documents; ANALYZE queue";
+        await using (var copy = await connection.BeginBinaryImportAsync("COPY edges(source,target) FROM STDIN (FORMAT BINARY)", cancellationToken))
+        {
+            foreach (var edge in dataset.Edges)
+            {
+                await copy.StartRowAsync(cancellationToken);
+                await copy.WriteAsync(edge.From, NpgsqlDbType.Text, cancellationToken);
+                await copy.WriteAsync(edge.To, NpgsqlDbType.Text, cancellationToken);
+            }
+            await copy.CompleteAsync(cancellationToken);
+        }
+        await using var analyze = connection.CreateCommand(); analyze.CommandText = "ANALYZE documents; ANALYZE queue; ANALYZE edges";
         await analyze.ExecuteNonQueryAsync(cancellationToken);
     }
     private static string VectorLiteral(float[] vector) => "[" + string.Join(",", vector.Select(value => value.ToString("R", CultureInfo.InvariantCulture))) + "]";
     public async Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
-        => new Session(await source.OpenConnectionAsync(cancellationToken), topK);
+        => new Session(await source.OpenConnectionAsync(cancellationToken), topK, graphDepth);
     public async ValueTask DisposeAsync()
     {
         if (source is null) return;
@@ -66,7 +79,7 @@ public sealed class PostgresTarget(string connectionString, string runId, string
         }
         finally { await source.DisposeAsync(); }
     }
-    private sealed class Session(NpgsqlConnection connection, int topK) : IComparisonSession
+    private sealed class Session(NpgsqlConnection connection, int topK, int graphDepth) : IComparisonSession
     {
         public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         {
@@ -132,6 +145,23 @@ public sealed class PostgresTarget(string connectionString, string runId, string
                     }
                     return new(Message: message, Queue: new(Stopwatch.GetElapsedTime(begin, enqueued).TotalMilliseconds,
                         Stopwatch.GetElapsedTime(enqueued, received).TotalMilliseconds, Stopwatch.GetElapsedTime(received).TotalMilliseconds));
+                case Scenario.GraphNeighbors:
+                case Scenario.GraphTraverse:
+                    await using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = scenario == Scenario.GraphNeighbors ? "SELECT target FROM edges WHERE source=$1 ORDER BY target" : """
+                            WITH RECURSIVE reachable(id,depth) AS (
+                                SELECT $1::text COLLATE "C",0
+                                UNION SELECT e.target,r.depth+1 FROM reachable r JOIN edges e ON e.source=r.id WHERE r.depth<$2)
+                            SELECT DISTINCT id FROM reachable WHERE id<>$1 ORDER BY id
+                            """;
+                        command.Parameters.AddWithValue(document.Id);
+                        if (scenario == Scenario.GraphTraverse) command.Parameters.AddWithValue(graphDepth);
+                        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+                        var vertices = new List<string>();
+                        while (await reader.ReadAsync(cancellationToken)) vertices.Add(reader.GetString(0));
+                        return new(Vertices: vertices.ToArray());
+                    }
                 default: throw new NotSupportedException();
             }
         }

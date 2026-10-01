@@ -52,7 +52,12 @@
       "src/KeyLoad.AppHost/BenchmarkResources.cs",
       "tests/KeyLoad.UnitTests/ComparisonHarnessTests.cs",
       "tests/KeyLoad.ComparisonTests/ComparisonTests.cs",
-      "docs/implementation/comparative-benchmarks.md"
+      "docs/implementation/comparative-benchmarks.md",
+      "benchmarks/KeyLoad.Comparisons/Targets/Neo4jTarget.cs",
+      "benchmarks/KeyLoad.Comparisons/ClientResourceSampler.cs",
+      "site/index.html",
+      ".github/workflows/pages.yml",
+      "docs/implementation/website.md"
     ]
   },
   "KL-007": {

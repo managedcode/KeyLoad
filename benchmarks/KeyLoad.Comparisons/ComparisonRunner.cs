@@ -15,7 +15,11 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
         var cases = new List<ComparisonCase>();
         // Precompute once, before timing and before concurrent workers access the immutable oracle.
         for (var i = 0; i < Math.Max(options.Operations, options.Warmup); i++)
+        {
             dataset.ExactNeighbors(dataset.Input(Scenario.VectorExact, 0, i, false));
+            var root = dataset.Input(Scenario.GraphTraverse, 0, i, false);
+            dataset.Reachable(root, 1); dataset.Reachable(root, options.GraphDepth);
+        }
         for (var repetition = 0; repetition < options.Repetitions; repetition++)
         {
             // Rotate order to avoid always giving one engine the coldest machine/cache.
@@ -50,7 +54,7 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
                 }
             }
         }
-        return new(1, Guid.NewGuid(), started, options, dataset.Sha256, "closed-loop; setup, oracle, validation and warmup excluded",
+        return new(2, Guid.NewGuid(), started, options, dataset.Sha256, "closed-loop; setup, oracle, validation and warmup excluded",
             RuntimeInformation.OSDescription, RuntimeInformation.ProcessArchitecture.ToString(), Environment.ProcessorCount,
             RuntimeInformation.FrameworkDescription, storage, sourceRevision, targets.Select(target => target.Profile).ToArray(), cases.ToArray());
     }
@@ -76,6 +80,7 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
             var samples = new OperationSample[options.Operations];
             var outputs = new OperationResult?[options.Operations];
             var next = -1;
+            await using var resources = new ClientResourceSampler();
             var clock = Stopwatch.StartNew();
             await Task.WhenAll(sessions.Select(async (session, worker) =>
             {
@@ -96,6 +101,7 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
                 }
             }));
             clock.Stop();
+            var clientResources = await resources.StopAsync();
             // Correctness is outside the timer; an incorrect/duplicate result becomes a failed measured attempt.
             var expectedMessages = scenario == Scenario.QueueCycle ? inputs.ToDictionary(document => document.Id, StringComparer.Ordinal) : [];
             var completedMessages = new HashSet<string>(StringComparer.Ordinal);
@@ -124,7 +130,7 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
                 catch (Exception error) when (!cancellationToken.IsCancellationRequested)
                 { samples[i] = samples[i] with { Success = false, Error = SafeError(error) }; }
             }
-            var measurement = Summarize(samples, clock.Elapsed.TotalSeconds);
+            var measurement = Summarize(samples, clock.Elapsed.TotalSeconds) with { ClientResources = clientResources };
             return new(target.Profile.Name, scenario, repetition, measurement.Failures == 0 ? "measured" : "failed",
                 measurement.Failures == 0 ? null : "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.", measurement, samples);
         }
@@ -143,6 +149,12 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
             if (output.Neighbors is null || !output.Neighbors.Select(item => item.Id).SequenceEqual(expected.Select(item => item.Id))
                 || output.Neighbors.Where((document, i) => !BenchmarkDataset.SameJson(document.Json, expected[i].Json)).Any())
                 throw new ComparisonFailure("ExactRecallOrProjectionMismatch");
+        }
+        if (scenario is Scenario.GraphNeighbors or Scenario.GraphTraverse)
+        {
+            var expected = dataset.Reachable(input, scenario == Scenario.GraphNeighbors ? 1 : dataset.Options.GraphDepth);
+            if (output.Vertices is null || !output.Vertices.SequenceEqual(expected, StringComparer.Ordinal))
+                throw new ComparisonFailure("GraphReachabilityMismatch");
         }
     }
 
@@ -168,5 +180,6 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
     }
 
     // Exception messages from drivers can contain connection strings or credentials.
-    private static string SafeError(Exception error) => error is ComparisonFailure ? error.Message : error.GetType().Name;
+    private static string SafeError(Exception error) => error is ComparisonFailure ? error.Message
+        : $"{error.GetType().Name} at {error.TargetSite?.DeclaringType?.Name}.{error.TargetSite?.Name}";
 }

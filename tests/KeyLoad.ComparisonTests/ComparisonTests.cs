@@ -35,6 +35,7 @@ public sealed class ComparisonTests
             $"--Benchmarks:Output={output}", $"--Benchmarks:Documents={options.Documents}", $"--Benchmarks:Operations={options.Operations}", $"--Benchmarks:Warmup={options.Warmup}",
             $"--Benchmarks:Repetitions={options.Repetitions}", $"--Benchmarks:Concurrency={options.Concurrency}", $"--Benchmarks:Dimensions={options.Dimensions}",
             $"--Benchmarks:TopK={options.TopK}", $"--Benchmarks:PayloadBytes={options.PayloadBytes}", $"--Benchmarks:Seed={options.Seed}",
+            $"--Benchmarks:GraphVertices={options.GraphVertices}", $"--Benchmarks:GraphFanOut={options.GraphFanOut}", $"--Benchmarks:GraphDepth={options.GraphDepth}",
             $"--Benchmarks:TimeoutSeconds={options.TimeoutSeconds}",
             $"--Benchmarks:SourceRevision={Environment.GetEnvironmentVariable("GITHUB_SHA") ?? "unrecorded"}"], timeout.Token);
         builder.Services.AddLogging(logging =>
@@ -86,12 +87,14 @@ public sealed class ComparisonTests
             }
             Assert.Equal(0, state.Snapshot.ExitCode);
             var report = JsonSerializer.Deserialize<ComparisonReport>(File.ReadAllText(Path.Combine(output, "results.json")), ReportWriter.JsonOptions)!;
-            Assert.Equal(5, report.Targets.Length); Assert.Equal(20 * options.Repetitions, report.Cases.Length);
+            Assert.Equal(2, report.SchemaVersion);
+            Assert.Equal(6, report.Targets.Length); Assert.Equal(36 * options.Repetitions, report.Cases.Length);
             Assert.DoesNotContain(report.Cases, item => item.Status == "failed");
-            Assert.Equal(12 * options.Repetitions, report.Cases.Count(item => item.Status == "measured"));
+            Assert.Equal(20 * options.Repetitions, report.Cases.Count(item => item.Status == "measured"));
             Assert.All(report.Cases.Where(item => item.Status == "measured"), item =>
             {
                 Assert.Equal(options.Operations, item.Measurement!.Successes);
+                Assert.NotNull(item.Measurement.ClientResources);
                 if (item.Scenario == Scenario.QueueCycle)
                 {
                     Assert.Equal(options.Operations, item.Measurement.UniqueCompletedMessages);
@@ -99,8 +102,10 @@ public sealed class ComparisonTests
                 }
             });
             Assert.Contains(report.Targets, target => target.Name == "KeyLoad" && target.Topology.Contains("RF3", StringComparison.Ordinal));
+            Assert.Contains(report.Targets, target => target.Name == "Neo4j" && target.Version != "unverified");
+            Assert.Equal(3 * options.Repetitions, report.Cases.Count(item => item.Scenario == Scenario.GraphTraverse && item.Status == "measured"));
             Assert.All(report.Targets.Where(target => target.Name != "KeyLoad"), target => Assert.Contains("@sha256:", target.Image));
-            Assert.Equal(1 + 12 * options.Repetitions * options.Operations, File.ReadAllLines(Path.Combine(output, "samples.csv")).Length);
+            Assert.Equal(1 + 20 * options.Repetitions * options.Operations, File.ReadAllLines(Path.Combine(output, "samples.csv")).Length);
         }
         finally
         {

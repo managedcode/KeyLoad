@@ -10,7 +10,10 @@ public sealed class BenchmarkDataset
 {
     private readonly ComparisonOptions options;
     private readonly Dictionary<int, FoundDocument[]> neighbors = [];
+    private readonly Dictionary<(int Number, int Depth), string[]> reachable = [];
     public BenchmarkDocument[] Documents { get; }
+    public BenchmarkEdge[] Edges { get; }
+    public int GraphVertexCount => Math.Min(options.GraphVertices, Documents.Length);
     public string Sha256 { get; }
     public ComparisonOptions Options => options;
 
@@ -19,6 +22,18 @@ public sealed class BenchmarkDataset
         options.Validate();
         this.options = options;
         Documents = Enumerable.Range(0, options.Documents).Select(CreateDocument).ToArray();
+        // Two disconnected components, each with directed cycles and deterministic fan-out.
+        var split = (GraphVertexCount + 1) / 2;
+        Edges = Enumerable.Range(0, GraphVertexCount).SelectMany(number =>
+        {
+            var first = number < split ? 0 : split;
+            var count = number < split ? split : GraphVertexCount - split;
+            return Enumerable.Range(1, Math.Min(options.GraphFanOut, count - 1)).Select(offset =>
+            {
+                var to = first + (number - first + offset) % count;
+                return new BenchmarkEdge($"e{number:D6}-{to:D6}", Documents[number].Id, Documents[to].Id);
+            });
+        }).ToArray();
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         Span<byte> bytes = stackalloc byte[4];
         foreach (var document in Documents)
@@ -30,6 +45,7 @@ public sealed class BenchmarkDataset
                 hash.AppendData(bytes);
             }
         }
+        foreach (var edge in Edges) hash.AppendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(edge)));
         Sha256 = Convert.ToHexStringLower(hash.GetHashAndReset());
     }
 
@@ -55,8 +71,26 @@ public sealed class BenchmarkDataset
         if (scenario is Scenario.DocumentWrite or Scenario.QueueCycle)
             return CreateDocument(options.Documents + repetition * (options.Operations + options.Warmup)
                 + (warmup ? operation : options.Warmup + operation));
-        var index = (int)((unchecked((uint)options.Seed) + (uint)operation * 2654435761u) % (uint)Documents.Length);
+        var count = scenario is Scenario.GraphNeighbors or Scenario.GraphTraverse ? GraphVertexCount : Documents.Length;
+        var index = (int)((unchecked((uint)options.Seed) + (uint)operation * 2654435761u) % (uint)count);
         return Documents[index];
+    }
+
+    public string[] Reachable(BenchmarkDocument start, int depth)
+    {
+        if (reachable.TryGetValue((start.Number, depth), out var cached)) return cached;
+        var adjacency = Edges.ToLookup(edge => edge.From, edge => edge.To, StringComparer.Ordinal);
+        var visited = new HashSet<string>(StringComparer.Ordinal) { start.Id };
+        var frontier = new Queue<(string Id, int Depth)>();
+        frontier.Enqueue((start.Id, 0));
+        while (frontier.TryDequeue(out var item))
+            if (item.Depth < depth)
+                foreach (var next in adjacency[item.Id])
+                    if (visited.Add(next)) frontier.Enqueue((next, item.Depth + 1));
+        visited.Remove(start.Id);
+        cached = visited.Order(StringComparer.Ordinal).ToArray();
+        reachable.Add((start.Number, depth), cached);
+        return cached;
     }
 
     public FoundDocument[] ExactNeighbors(BenchmarkDocument query)

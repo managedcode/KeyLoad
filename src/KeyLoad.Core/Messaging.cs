@@ -144,11 +144,12 @@ public sealed partial class DatabaseEngine
         var bytes = JsonDefaults.Serialize(claims);
         return Base64Url(bytes) + "." + Base64Url(HMACSHA256.HashData(Store.Identity.SigningKey, bytes));
     }
-    public T Verify<T>(string token)
+    public T Verify<T>(string token, int maximumCharacters = 8_192)
     {
+        if (maximumCharacters < 1) throw new ArgumentOutOfRangeException(nameof(maximumCharacters));
         try
         {
-            if (token.Length > 8_192) throw new FormatException();
+            if (token.Length > maximumCharacters) throw new FormatException();
             var parts = token.Split('.');
             if (parts.Length != 2) throw new FormatException();
             var bytes = Convert.FromBase64String(Pad(parts[0]));

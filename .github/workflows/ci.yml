@@ -46,9 +46,36 @@ jobs:
       - run: dotnet restore KeyLoad.slnx --locked-mode
       - run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release
+      - name: Measure 1 KiB documents, eight clients and three graph hops
+        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release
+        env:
+          KEYLOAD_COMPARISON_DOCUMENTS: 128
+          KEYLOAD_COMPARISON_OPERATIONS: 60
+          KEYLOAD_COMPARISON_WARMUP: 5
+          KEYLOAD_COMPARISON_REPETITIONS: 3
+          KEYLOAD_COMPARISON_CONCURRENCY: 8
+          KEYLOAD_COMPARISON_DIMENSIONS: 32
+          KEYLOAD_COMPARISON_TOPK: 10
+          KEYLOAD_COMPARISON_GRAPHVERTICES: 128
+          KEYLOAD_COMPARISON_GRAPHDEPTH: 3
+          KEYLOAD_COMPARISON_REPORT_NAME: json-1k-c8
+      - name: Measure 16 KiB documents, four clients and five graph hops
+        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release
+        env:
+          KEYLOAD_COMPARISON_DOCUMENTS: 128
+          KEYLOAD_COMPARISON_OPERATIONS: 60
+          KEYLOAD_COMPARISON_WARMUP: 5
+          KEYLOAD_COMPARISON_REPETITIONS: 3
+          KEYLOAD_COMPARISON_CONCURRENCY: 4
+          KEYLOAD_COMPARISON_PAYLOADBYTES: 16384
+          KEYLOAD_COMPARISON_DIMENSIONS: 32
+          KEYLOAD_COMPARISON_TOPK: 10
+          KEYLOAD_COMPARISON_GRAPHVERTICES: 128
+          KEYLOAD_COMPARISON_GRAPHDEPTH: 5
+          KEYLOAD_COMPARISON_REPORT_NAME: json-16k-c4
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: comparison-smoke
-          path: artifacts/comparisons/smoke/**
+          name: comparison-suite
+          path: artifacts/comparisons/**
           if-no-files-found: warn

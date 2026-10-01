@@ -2,7 +2,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.Comparisons;
 
-public enum Scenario { PointRead, DocumentWrite, VectorExact, QueueCycle }
+public enum Scenario { PointRead, DocumentWrite, VectorExact, QueueCycle, GraphNeighbors, GraphTraverse }
 
 public sealed record ComparisonOptions
 {
@@ -16,6 +16,9 @@ public sealed record ComparisonOptions
     public int Dimensions { get; init; } = 32;
     public int TopK { get; init; } = 10;
     public int TimeoutSeconds { get; init; } = 30;
+    public int GraphVertices { get; init; } = 256;
+    public int GraphFanOut { get; init; } = 3;
+    public int GraphDepth { get; init; } = 3;
 
     public static ComparisonOptions Read(IConfiguration configuration)
     {
@@ -29,16 +32,17 @@ public sealed record ComparisonOptions
         if (Documents is < 1 or > 1_000_000 || Operations is < 1 or > 1_000_000 || Warmup is < 0 or > 100_000
             || Repetitions is < 1 or > 20 || Concurrency is < 1 or > 128 || PayloadBytes is < 128 or > 65_536
             || Dimensions is < 2 or > 1_024 || TopK < 1 || TopK > Math.Min(Documents, 100)
-            || TimeoutSeconds is < 1 or > 120)
+            || TimeoutSeconds is < 1 or > 120 || GraphVertices is < 1 or > 512 || GraphFanOut is < 1 or > 8 || GraphDepth is < 1 or > 5)
             throw new ArgumentOutOfRangeException(nameof(ComparisonOptions), "The benchmark configuration exceeds its budgets.");
     }
 }
 
 public sealed record BenchmarkDocument(int Number, string Id, string Json, float[] Vector);
+public sealed record BenchmarkEdge(string Id, string From, string To);
 public sealed record FoundDocument(string Id, string Json);
 public sealed record QueueTimings(double EnqueueMs, double ReceiveMs, double AckMs);
 public sealed record OperationResult(FoundDocument? Document = null, FoundDocument[]? Neighbors = null,
-    FoundDocument? Message = null, QueueTimings? Queue = null);
+    FoundDocument? Message = null, QueueTimings? Queue = null, string[]? Vertices = null);
 public sealed record TargetProfile(string Name, string Version, string Topology, string WriteAcknowledgement,
     string ReadContract, string Transport, string Authorization, string? Image);
 
@@ -63,9 +67,10 @@ public sealed record OperationSample(int Operation, int Worker, double StartedMs
 }
 
 public sealed record Latencies(double P50Ms, double P95Ms, double P99Ms);
+public sealed record ClientResources(double CpuSeconds, long AllocatedBytes, long PeakObservedWorkingSetBytes, int SamplingIntervalMs);
 public sealed record Measurement(int Attempts, int Successes, int Failures, double ElapsedSeconds,
     double UsefulOperationsPerSecond, Latencies Latency, int UniqueCompletedMessages,
-    Latencies? Enqueue, Latencies? Receive, Latencies? Ack);
+    Latencies? Enqueue, Latencies? Receive, Latencies? Ack, ClientResources? ClientResources = null);
 public sealed record ComparisonCase(string Target, Scenario Scenario, int Repetition, string Status,
     string? Detail, Measurement? Measurement, OperationSample[] Samples);
 public sealed record ComparisonReport(int SchemaVersion, Guid RunId, DateTimeOffset StartedAt,
