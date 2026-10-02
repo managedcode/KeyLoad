@@ -68,6 +68,8 @@ export function detailButton(json) {
     return button;
 }
 export function resetTable() {
+    el(Id.dialog).close();
+    el(Id.dialog).querySelector(Dom.pre).textContent = Text.empty;
     table([], []);
     write(Id.dataTitle, Text.select);
     write(Id.dataDescription, Text.browseHint);

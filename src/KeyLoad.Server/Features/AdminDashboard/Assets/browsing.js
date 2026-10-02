@@ -78,9 +78,14 @@ function validScope() {
     return true;
 }
 export async function loadResources(next = false) {
-    if (!validScope())return;
-    cancel();
     const afterName = next?resourceAfter:null;
+    cancel();
+    resetBrowsing();
+    if (activeView === View.files)physicalFiles();
+    el(Id.resourceList).replaceChildren(make(Dom.p, Text.resourcesPending));
+    if (!validScope())return;
+    if (!canBrowse())return;
+    status(Text.resourcesLoading);
     const result = await call(Api.resources, {
         ...scope(),
         afterName,
@@ -88,14 +93,16 @@ export async function loadResources(next = false) {
     });
     if (!result)return;
     resourceAfter = result.nextAfterName;
-    resource = null;
-    dataAfter = null;
-    resetTable();
-    if (activeView === View.files)physicalFiles();
     const items = result.items.filter(item => kindName(item.kind) === expectedKind());
     renderResources(items);
     el(Id.resourcesNext).disabled = !resourceAfter;
     el(Id.resourcesFirst).disabled = afterName === null;
+    status(Text.resourcesReady);
+}
+function canBrowse() {
+    if (!el(Id.disconnect).disabled)return true;
+    status(Text.disconnectedHint);
+    return false;
 }
 function renderResources(items) {
     const list = el(Id.resourceList);
@@ -124,20 +131,29 @@ async function chooseResource(item, button) {
     await loadData();
 }
 export async function loadData(next = false) {
-    if (!resource || !validScope())return;
-    cancel();
     const selected = resource;
-    const kind = kindName(selected.kind);
     const cursor = next?dataAfter:null;
+    cancel();
+    resetTable();
+    dataAfter = null;
+    if (!selected || !validScope())return;
+    if (!canBrowse())return;
+    const kind = kindName(selected.kind);
+    write(Id.dataTitle, selected.name);
+    write(Id.dataEmpty, Text.recordsPending);
+    status(Text.recordsLoading);
     const result = await fetchData(kind, cursor);
     if (!result)return;
-    write(Id.dataTitle, selected.name);
     if (kind === Kind.collection)documents(result);
     else if (kind === Kind.queue)queue(result);
     else if (kind === Kind.blob)blobs(result);
-    else status(Text.unsupported, true);
+    else {
+        status(Text.unsupported, true);
+        return;
+    }
     el(Id.dataNext).disabled = !dataAfter;
     el(Id.dataFirst).disabled = cursor === null;
+    status(Text.recordsReady);
 }
 function fetchData(kind, cursor) {
     const scopePartition = partition();

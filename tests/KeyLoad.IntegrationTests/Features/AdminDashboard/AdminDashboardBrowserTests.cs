@@ -37,6 +37,7 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
         await browser.Cdp.WaitAsync(RowsLoaded, deadline.Token);
         await Assert.That((await browser.Cdp.EvaluateAsync(InjectionAbsent, deadline.Token)).GetBoolean()).IsTrue();
         await Assert.That((await browser.Cdp.EvaluateAsync(FocusVisible, deadline.Token)).GetBoolean()).IsTrue();
+        await AdminBrowserScopeAssertions.VerifyEmptyScopeAndReconnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
         await AdminBrowserAssertions.DetailsAndNavigationAsync(browser.Cdp, deadline.Token);
         await AdminBrowserAssertions.CheckViewportAsync(browser.Cdp, AdminBrowserProtocol.DesktopWidth, "desktop", deadline.Token);
         await AdminBrowserAssertions.CheckViewportAsync(browser.Cdp, AdminBrowserProtocol.MobileWidth, "mobile", deadline.Token);

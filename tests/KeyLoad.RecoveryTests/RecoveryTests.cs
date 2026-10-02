@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using KeyLoad.CrashHost;
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
@@ -127,29 +128,8 @@ internal sealed class StorageRecoveryProcessTests
             await StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken);
         }
     }
-    internal static async Task WaitForKilledProcessFilesAsync(string root, CancellationToken cancellationToken)
-    {
-        var started = Stopwatch.StartNew();
-        while (true)
-        {
-            try
-            {
-                EnsureKilledProcessFilesUnlocked(root);
-                return;
-            }
-            catch (IOException) when (started.Elapsed < TimeSpan.FromSeconds(5))
-            { await Task.Delay(25, cancellationToken); }
-        }
-    }
-
-    private static void EnsureKilledProcessFilesUnlocked(string root)
-    {
-        foreach (var name in new[] { "owner.lock", "commands.wal" })
-        {
-            using (File.Open(Path.Combine(root, name), FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-            { }
-        }
-    }
+    internal static Task WaitForKilledProcessFilesAsync(string root, CancellationToken cancellationToken) =>
+        KilledProcessFileReadiness.WaitAsync(root, cancellationToken);
 
     private sealed class SeededCrashChoice(int seed)
     {

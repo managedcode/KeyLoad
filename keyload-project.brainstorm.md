@@ -41,6 +41,17 @@ Windows recovery failures identify a still-shared metadata WAL after child exit.
 The current readiness probe omits that file. The handle owner is unknown; do not
 edit ZoneTree or classify an owned dependency defect without more evidence.
 
+### Main delivery follow-up
+
+All accumulated source is delivered on main through49a5b605. Its canonical run
+37029344985 is pending; this is delivery evidence, not qualification. Keep the
+Windows readiness repair confined to RecoveryTests, with actual locked-store
+regressions before the shared wrapper join. Independently recheck whether a
+published compatible Aspire patch contains the native executable-watch fix and
+research the already pinned MTP collector for full-solution coverage. Both
+research packets are read-only: neither an unpublished dependency nor an
+untested coverage script may stand in for the required exact-SHA gates.
+
 ### Runtime checkpoint ad594642 diagnostic refinement
 
 Run37015193756 leaves four distinct unit failures, seventeen official MCP

@@ -1,6 +1,6 @@
 # StorageRecovery
 
-REQ-STORAGE-011 / AC-STORAGE-011 (TASK-RUNTIME-WINDOWS-RECOVERY-W3) preserves
+REQ-STORAGE-012 / AC-STORAGE-012 (TASK-RUNTIME-WINDOWS-RECOVERY-W3) preserves
 the existing killed-child filesystem readiness bound. After actual process exit,
 exclusive readiness covers owner.lock, commands.wal and the actual ZoneTree
 tree/0.meta.wal which failed to reopen in Windows CI37021991878. The prior receipt
@@ -52,6 +52,7 @@ new scoped-read contract; ADR-032 records existing layout migration debt.
 | REQ-STORAGE-008: cohesive private provider owners meet numeric gates without changing storage/caller contracts | AC-SQ-001..008 in storage-quality.acceptance.md | ADR-046 TASK-MP-010AF-R/T/C/L/B; source join and real lifetime test source exist; enabled provider development build clean, complete exact-SHA runtime qualification pending |
 | REQ-STORAGE-009: validation and apply share one private mutation projection per staged generation | AC-PSW-001..004, AC-MP-006/012 | ADR-035 TASK-MP-016P-W/L; first-authored PreparedTransactionTests plus existing FrameBudget/recovery/RF3 proof; source and qualification pending |
 | REQ-STORAGE-011: startup identity metadata is finite and failed read releases physical ownership | AC-BSM-001/003/005 | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), Metadata* real-file constructor/restore/reopen checks under BackupRestore; complete source and GitHub execution pending |
+| REQ-STORAGE-012: killed-child readiness includes the real metadata WAL and preserves cancellation and the original failure bound | AC-STORAGE-012 | `tests/KeyLoad.RecoveryTests/Features/StorageRecovery/KilledProcessFileReadinessTests.cs`: actual closed-store pending/release, cancellation, pre-cancellation and permanent-lock cases; `RecoveryTests.cs` retains every process-kill scenario; TASK-RUNTIME-WINDOWS-RECOVERY-W3, full three-OS GitHub recovery qualification pending |
 
 Ownership: common public storage contracts stay in Abstractions/Storage;
 provider helpers in Storage.ZoneTree/Features/StorageRecovery, tests mirror that

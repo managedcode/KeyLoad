@@ -1,0 +1,73 @@
+using System.Diagnostics;
+
+namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
+
+internal sealed class KilledProcessFileReadinessTests
+{
+    private const string MetadataWalPath = "tree/0.meta.wal";
+    private const int ReadinessBoundSeconds = 5;
+    private static readonly TimeSpan ReadinessBound = TimeSpan.FromSeconds(ReadinessBoundSeconds);
+    private static readonly TimeSpan ObservationBound = ReadinessBound + TimeSpan.FromSeconds(1);
+
+    [Test]
+    [Arguments("owner.lock")]
+    [Arguments("commands.wal")]
+    [Arguments(MetadataWalPath)]
+    public async Task AcStorage012_WaitsUntilEachRealStoreFileHolderReleases(string relativePath)
+    {
+        await using var fixture = new KilledProcessFileReadinessFixture();
+        await fixture.RunAsync(async fixture =>
+        {
+            fixture.HoldFile(relativePath);
+            var readiness = fixture.StartReadiness();
+            await Assert.That(readiness.IsCompleted).IsFalse();
+            fixture.ReleaseFile();
+            await readiness.WaitAsync(ReadinessBound);
+            fixture.MarkReadinessObserved();
+        });
+    }
+
+    [Test]
+    public async Task AcStorage012_CancellationWhileMetadataWalIsHeldStopsReadinessWait()
+    {
+        await using var fixture = new KilledProcessFileReadinessFixture();
+        await fixture.RunAsync(async fixture =>
+        {
+            fixture.HoldFile(MetadataWalPath);
+            var readiness = fixture.StartReadiness();
+            await Assert.That(readiness.IsCompleted).IsFalse();
+            await fixture.CancelAsync();
+            await Assert.ThrowsAsync<OperationCanceledException>(() => readiness);
+            fixture.MarkReadinessObserved();
+        });
+    }
+
+    [Test]
+    public async Task AcStorage012_PreCancelledTokenStopsBeforeAnyFileProbe()
+    {
+        await using var fixture = new KilledProcessFileReadinessFixture();
+        await fixture.RunAsync(async fixture =>
+        {
+            await fixture.CancelAsync();
+            var readiness = fixture.StartReadiness();
+            await Assert.ThrowsAsync<OperationCanceledException>(() => readiness);
+            fixture.MarkReadinessObserved();
+        });
+    }
+
+    [Test]
+    public async Task AcStorage012_PermanentMetadataWalLockFailsWithinReadinessBound()
+    {
+        await using var fixture = new KilledProcessFileReadinessFixture();
+        await fixture.RunAsync(async fixture =>
+        {
+            fixture.HoldFile(MetadataWalPath);
+            var started = Stopwatch.StartNew();
+            var readiness = fixture.StartReadiness();
+            await Assert.ThrowsExactlyAsync<IOException>(() => readiness);
+            fixture.MarkReadinessObserved();
+            await Assert.That(started.Elapsed).IsGreaterThanOrEqualTo(ReadinessBound);
+            await Assert.That(started.Elapsed).IsLessThanOrEqualTo(ObservationBound);
+        });
+    }
+}

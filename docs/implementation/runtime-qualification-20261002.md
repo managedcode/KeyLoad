@@ -1,5 +1,11 @@
 # Runtime qualification, 2026-10-02
 
+## Main build baseline:49a5b605
+
+[Run37029344985](https://github.com/managedcode/KeyLoad/actions/runs/37029344985) completed failed at the matrix/RF3/comparison build gates after the all-source main checkpoint. The standalone analyzer suite passes; unit, process-recovery, RF3 and comparison suites were not executed. [Native reports, compiler diagnostics and artifact receipts](runtime-qualification-37029344985.json) retain the exact source and job scope. This does not supersede the prior full runtime evidence below.
+
+The joined correction preserves the admin dashboard clock/comparison/async policy and adds the real metadata-WAL readiness probe under [REQ/AC-STORAGE-012](../Features/StorageRecovery.md). Six real-file cases cover all three holder paths, cancellation, pre-cancellation and the unchanged five-second permanent-lock bound. Every original recovery caller,50 trials and15-second deadline remains. [The tests-first source receipt](recovery-readiness-w3.json) records the hashes and source join. All25 projects compile with0warnings/0errors in a development build; full corrected-source GitHub qualification remains pending.
+
 ## Latest completed candidate: fa80c701
 
 [Run37021991878](https://github.com/managedcode/KeyLoad/actions/runs/37021991878) completed with required failures. Full solution build/format/governance and118/118 analyzer regressions pass on all three OSes. Unit suites are787/788 each; all four prior W2 failures now pass. Ubuntu search stored bytes, macOS exact topic-read bytes and Windows concurrent native logging capture fail independently. [Complete native reports, hashes, jobs and archive receipts](runtime-qualification-37021991878.json) retain precise cases. The historical53-case ledger now has52 exact cases passing on all OSes and one corrected fixture method with all current cases passing; the retired argument is not claimed executed.

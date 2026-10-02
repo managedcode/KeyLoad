@@ -53,11 +53,12 @@ function cancelPending() {
     controller?.abort();
     controller = null;
     inFlight = false;
-    stopPolling();
+    schedule();
 }
 function disconnect(message = Text.disconnectedHint, resetScope = true) {
     cancelPending();
     credential = Text.empty;
+    stopPolling();
     el(Id.key).value = Text.empty;
     if (resetScope) {
         el(Id.tenant).value = Text.defaultTenant;

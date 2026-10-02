@@ -1138,6 +1138,32 @@
         "formatterCommand": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
         "formatterLog": "/private/tmp/keyload-runtime-w2-format-20261002.log",
         "localTestsExecuted": false
+      },
+      "latestMainCi": {
+        "runId": 37029344985,
+        "sha": "49a5b6054843800e20e333ddaa28fa96d79dd294",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37029344985",
+        "conclusion": "failure",
+        "build": "failed_matrix_RF3_and_comparison_builds",
+        "analyzerTests": {
+          "total": 118,
+          "passed": 118,
+          "failed": 0
+        },
+        "unitRecoveryRf3Comparison": "not_executed_after_failed_builds",
+        "receipt": "docs/implementation/runtime-qualification-37029344985.json"
+      },
+      "recoveryReadiness": {
+        "requirement": "REQ-STORAGE-012",
+        "acceptance": "AC-STORAGE-012",
+        "source": "metadata_WAL_added_to_existing_bounded_killed_child_file_readiness",
+        "tests": "six_real_file_cases_source_present",
+        "originalReadinessSeconds": 5,
+        "originalPollMilliseconds": 25,
+        "originalSeededTrials": 50,
+        "originalTrialDeadlineSeconds": 15,
+        "verification": "development_build_and_formatter_pass_GitHub_recovery_pending",
+        "receipt": "docs/implementation/recovery-readiness-w3.json"
       }
     },
     "ownerPriorities": {
