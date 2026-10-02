@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "date": "2026-10-02",
   "scope": "REQ/AC-BC-011..018 and BC-024/025/027/028; website_only_publication",
-  "status": "implementation_in_progress",
+  "status": "website_qualified_and_published",
   "feature": "docs/Features/BenchmarkComparisons.md",
   "decision": "docs/ADR/ADR-040-static-site-threejs-evidence.md",
   "acceptance": "site-design.acceptance.md",
@@ -52,23 +52,23 @@
       ]
     },
     "scene": "complete_joined_root_review_with_real_constructor_and_tile_corrections",
-    "tests": "complete_original_TEST004_source_packet_joined; GitHub_execution_pending",
+    "tests": "complete_original_TEST004_source_packet_joined; GitHub_execution_passed; verified_exact_H_118_analyzer_70_site_no_skips_and_native_browser_coverage_in_37011817610_37013009381_37014111869",
     "evidence": "complete_EVIDENCE005_source_packet_joined",
-    "integration": "in_progress",
-    "finalReview": "pending_required_packets_and_integrated_evidence",
-    "coverage": "TASK013_COMPLETE_strongest_source_approval_ae21793f1c58424a507dbeb2b8bdf4b227cd84821f4034b7d576966d6e5ad352; integrated_development_build_passed; real_GitHub_native_numeric_qualification_pending",
+    "integration": "complete_qualified_H_and_ordinary_main_delivery",
+    "finalReview": "TASK-SITE-REVIEW-007 COMPLETE strongest gpt-6-astra ultra; exact_H_source_qualification_both_automatic_triggers_provider_live_evidence_and_five_doc_join_independently_reviewed; mechanical_scoped_closure_approved",
+    "coverage": "TASK013_COMPLETE_strongest_source_approval_ae21793f1c58424a507dbeb2b8bdf4b227cd84821f4034b7d576966d6e5ad352; integrated_development_build_passed; real_GitHub_native_numeric_qualification_passed; verified_exact_H_118_analyzer_70_site_no_skips_and_native_browser_coverage_in_37011817610_37013009381_37014111869",
     "browser": "TASK012_COMPLETE_strongest_source_approval_7424fb8d25f303c3c94ca95870de76431de473e5317a76654e028a8b23bf1082; preserved_otherchat_KL-SITE-BUILD-003A_handoff; integrated_build_and_format_passed",
-    "candidateAudit": "TASK-SITE-CANDIDATE-AUDIT-010_COMPLETE; repair source-preparation review COMPLETE, all required joins still pending",
+    "candidateAudit": "TASK-SITE-CANDIDATE-AUDIT-010_COMPLETE; repair source-preparation review COMPLETE, all required source_and_evidence_joins_complete; verified_exact_H_118_analyzer_70_site_no_skips_and_native_browser_coverage_in_37011817610_37013009381_37014111869",
     "analyzerCoverage": "TASK011_COMPLETE_strongest_source_approval; native_boolean_BigInteger_checked_sum_physical_line_gate_and_complete_12_pipeline_oracles_joined; nesting3; integrated_build_and_format_passed",
     "nativeFormatRepair": "TASK014_COMPLETE_source_and_GitHub_36991420593_all3real_process_cases_passed",
     "numericRepair": "TASK015_COMPLETE_source_and_GitHub_36991420593_original4failures_plus_all17registrations_and_numeric_selfinventory_passed",
-    "diagnosticFlows": "TASK016_COMPLETE_root_and_strongest_4file_source_join_213298217ea9f5309765bb41eca581062cc1ca78ef45abd4cd4715dd26cd41cb; retainedregressionbytepreserved; integrateddevelopmentbuild_and_formatpass; runtime_pending",
-    "argumentRoleRepair": "TASK018_FIX_COMPLETE_root_and_strongest_twofile_source_join_6daafb389c2caca0976ea7c8530cae37a6ba033f5fb3001171a2489bfeef1218_bf33778bb16a12d04b07a88d535a516d004957592a2aba9d5b91845e2e0de5fc; enabledbuild0warnings0errors_and_analyzerformatpass; realGitHub_pending",
-    "browserDeltaProtocol": "TASK036_SOURCE_COMPLETE_strongest_threefile_review; authentic_browser_empty_delta_retained_and_per_session_mapped_evidence_required; real_GitHub_pending",
-    "browserDeltaRegressions": "TASK037_SOURCE_COMPLETE_strongest_fourfile_semantic_review; two_actual_build_style_errors_repaired; enabled_development_build0warnings0errors; real_GitHub_pending"
+    "diagnosticFlows": "TASK016_COMPLETE_root_and_strongest_4file_source_join_213298217ea9f5309765bb41eca581062cc1ca78ef45abd4cd4715dd26cd41cb; retainedregressionbytepreserved; integrateddevelopmentbuild_and_formatpass; runtime_qualified_exact_H; verified_exact_H_118_analyzer_70_site_no_skips_and_native_browser_coverage_in_37011817610_37013009381_37014111869",
+    "argumentRoleRepair": "TASK018_FIX_COMPLETE_root_and_strongest_twofile_source_join_6daafb389c2caca0976ea7c8530cae37a6ba033f5fb3001171a2489bfeef1218_bf33778bb16a12d04b07a88d535a516d004957592a2aba9d5b91845e2e0de5fc; enabledbuild0warnings0errors_and_analyzerformatpass; realGitHub_passed; verified_exact_H_118_analyzer_70_site_no_skips_and_native_browser_coverage_in_37011817610_37013009381_37014111869",
+    "browserDeltaProtocol": "TASK036_SOURCE_COMPLETE_strongest_threefile_review; authentic_browser_empty_delta_retained_and_per_session_mapped_evidence_required; real_GitHub_passed; verified_exact_H_118_analyzer_70_site_no_skips_and_native_browser_coverage_in_37011817610_37013009381_37014111869",
+    "browserDeltaRegressions": "TASK037_SOURCE_COMPLETE_strongest_fourfile_semantic_review; two_actual_build_style_errors_repaired; enabled_development_build0warnings0errors; real_GitHub_passed; verified_exact_H_118_analyzer_70_site_no_skips_and_native_browser_coverage_in_37011817610_37013009381_37014111869"
   },
   "verification": {
-    "source": "Joined bounded website publication source and strongest task reviews; exact next candidate cut and actual full qualification pending; no runtime qualification claimed",
+    "source": "Exact H source and complete95path integration reviewed; all1053 unrelated parent blobs preserved; independently verified immutable qualification and Pages bytes. Runtime/database qualification is separate.",
     "staticBuild": {
       "state": "development_build_passed",
       "profiles": 3,
@@ -109,10 +109,67 @@
         "/private/tmp/keyload-site-mobile-20261002.jpg",
         "/private/tmp/keyload-site-benchmarks-20261002.jpg",
         "/private/tmp/keyload-site-desktop-1440-20261002.jpg"
-      ]
+      ],
+      "liveInspection": {
+        "observedAtUtc": "2026-10-02T13:46:20.644339+00:00",
+        "sourceRevision": "6a82c86d0113270335368bbfbff0080ea1c1800a",
+        "url": "https://www.keyload.cloud/",
+        "kind": "manual_live_CUA_inspection",
+        "qualification": false,
+        "viewports": [
+          {
+            "width": 1280,
+            "height": 720,
+            "hero": "rendered",
+            "benchmarkTable": "readable"
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "documentWidth": 390,
+            "hero": "rendered",
+            "graphChart": "readable"
+          },
+          {
+            "width": 320,
+            "height": 844,
+            "documentWidth": 320,
+            "hero": "rendered"
+          }
+        ],
+        "controls": {
+          "initial": "json-16k-c4 PointRead median ops/s",
+          "changed": "json-1k-c8 GraphTraverse repetition2 p99",
+          "provenance": "website6a82/measured9c570/run36926803549 visibly distinct",
+          "downloads": [
+            "JSON",
+            "CSV",
+            "Markdown"
+          ],
+          "unsupported": "Qdrant/RabbitMQ/Redis visibly unavailable for graph traversal"
+        },
+        "graphics": {
+          "backend": "webgpu",
+          "canvasCount": 1,
+          "sceneState": "ready",
+          "frameState": "rendered",
+          "drawCalls": 17,
+          "triangles": 183,
+          "390pxBufferPixels": 106684,
+          "320pxBufferPixels": 69120
+        },
+        "console": {
+          "errors": [],
+          "warnings": []
+        },
+        "viewportOverride": "reset_after_inspection",
+        "physicalDeviceLoss": "not_exercised; retained ADR040 manual boundary",
+        "sourceQualification": "actual GitHub TUnit/full Chrome, not manual CUA",
+        "receiptSha256": "3884df7bbd0417fd678eeed97453829ca8ea57f77cdfb5313913d9b453530ce5"
+      }
     },
     "githubSiteSuite": {
-      "state": "actual_G_all70_functional_tests_passed; full_gate_failed_on_valid_empty_browser_delta; complete_qualification_pending",
+      "state": "completed_success_exact_H_full_suites_no_skips",
       "attempts": [
         {
           "run": 36987695573,
@@ -393,14 +450,426 @@
             "log": "/private/tmp/keyload-site-run-37008674643-failed.log"
           },
           "cause": "Native parser rejects valid initial blank-page CDP result:[]; all prior functional failures repaired, numeric97/86 and all9critical pass but retained error fails full gate. TASK036/037 reader/protocol regressions pending."
+        },
+        {
+          "run": 37011817610,
+          "sourceRevision": "6a82c86d0113270335368bbfbff0080ea1c1800a",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37011817610",
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37011817610/job/110853101258",
+          "purpose": "complete_website_validation_before_main_delivery",
+          "state": "completed_success",
+          "conclusion": "success",
+          "publication": "correctly_skipped_validation_only",
+          "tests": [
+            {
+              "suite": "analyzer-tests",
+              "total": 118,
+              "executed": 118,
+              "passed": 118,
+              "sha256": "29c31aefcf6805d260d03756f99f9c097790bdc29810b64a0e8d03f7e636d0fc"
+            },
+            {
+              "suite": "site-tests",
+              "total": 70,
+              "executed": 70,
+              "passed": 70,
+              "sha256": "3fd344e86d0b6cf7bfacc69f91754b4c708af2aadb801d7ab8afa7afc4e85ffa"
+            }
+          ],
+          "nativeModule": {
+            "linesCovered": 935,
+            "linesValid": 981,
+            "branchesCovered": 528,
+            "branchesValid": 612
+          },
+          "javascriptTotals": {
+            "executableLines": 2399,
+            "coveredLines": 2351,
+            "aggregateLinesPercent": 97,
+            "blockOutcomes": 626,
+            "coveredBlockOutcomes": 540,
+            "aggregateBranchesPercent": 86
+          },
+          "artifactReceipt": {
+            "id": 11228492509,
+            "name": "site-qualification-6a82c86d0113270335368bbfbff0080ea1c1800a-1",
+            "size_in_bytes": 23208213,
+            "digest": "sha256:c2c7e7b1ea5324d1a81e875a511cc13a966b6b3d75c35d046bba44224e2f0c66"
+          }
+        },
+        {
+          "run": 37013009381,
+          "event": "push",
+          "sourceRevision": "6a82c86d0113270335368bbfbff0080ea1c1800a",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37013009381",
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37013009381/job/110857016010",
+          "deployJobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37013009381/job/110858886444",
+          "purpose": "automatic_independent_website_publication",
+          "state": "completed_success",
+          "conclusion": "success",
+          "publication": "provider_success",
+          "tests": [
+            {
+              "suite": "analyzer-tests",
+              "total": 118,
+              "executed": 118,
+              "passed": 118,
+              "sha256": "c469969d823be2b2ed88dc3ce1b3775fb4ce409d4efecc7dd729d87d23d39d7e"
+            },
+            {
+              "suite": "site-tests",
+              "total": 70,
+              "executed": 70,
+              "passed": 70,
+              "sha256": "ccc8f6bf6841f80d64289adb807b9e6074f72fb61e6570884969d27534bca947"
+            }
+          ],
+          "nativeModule": {
+            "linesCovered": 935,
+            "linesValid": 981,
+            "branchesCovered": 528,
+            "branchesValid": 612
+          },
+          "javascriptTotals": {
+            "executableLines": 2399,
+            "coveredLines": 2351,
+            "aggregateLinesPercent": 97,
+            "blockOutcomes": 623,
+            "coveredBlockOutcomes": 537,
+            "aggregateBranchesPercent": 86
+          },
+          "nativeCriticalPipelines": 12,
+          "javascriptSources": 17,
+          "javascriptCriticalSources": 9,
+          "nativeReceiptCounts": {
+            "browser": 8,
+            "node": 922
+          },
+          "artifacts": [
+            {
+              "id": 11228842026,
+              "name": "github-pages",
+              "bytes": 1122241,
+              "sha256": "ffa7540985aea6e87530da3251e999be82d200e9b41326ee51d1475e0900c22d",
+              "verifiedRegularFiles": 1
+            },
+            {
+              "id": 11228827408,
+              "name": "site-publication-37013009381-1",
+              "bytes": 27921,
+              "sha256": "92cc146fafb33674dbca2caf5354d82466728e032fd16d210b3ce730deab1b29",
+              "verifiedRegularFiles": 17
+            },
+            {
+              "id": 11228792900,
+              "name": "site-qualification-6a82c86d0113270335368bbfbff0080ea1c1800a-1",
+              "bytes": 23215969,
+              "sha256": "54a9cc31d87628a4ee45f27980b5210b724ce550d91bc0c83ca9df64f79e9920",
+              "verifiedRegularFiles": 1123
+            }
+          ],
+          "publicationSha256": "d01755d538bb641a8b96cddc0bfefb76badefb407ef532f035324f9bd437b192",
+          "nativeGateReportSha256": "9482a22d5e415c8248715dbf3ac69f2d12efc0d2ef7ff14b3b9aeb40d561c3a6",
+          "siteGateReportSha256": "1b2ded26b7d7bd4586b613091d8182d3018114eaa0bd39b76fceebf9896a3edc",
+          "predeployProofSha256": "c1e30504cb4b20762eeb82385de39477bca37f0509e72ee1c5f70c97637f07e3",
+          "deploymentReceiptSha256": "24aaec6e5830cea3cbe623861f30f892e3b25cf7be86f0d830480a9ef18119da",
+          "pagesRegularFilesCompared": 35,
+          "originalArchiveRegularFiles": 12,
+          "publishedRawReports": 9
+        },
+        {
+          "run": 37014111869,
+          "event": "workflow_run",
+          "sourceRevision": "6a82c86d0113270335368bbfbff0080ea1c1800a",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37014111869",
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37014111869/job/110860653164",
+          "deployJobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37014111869/job/110862734504",
+          "purpose": "automatic_independent_website_publication",
+          "state": "completed_success",
+          "conclusion": "success",
+          "publication": "provider_success",
+          "tests": [
+            {
+              "suite": "analyzer-tests",
+              "total": 118,
+              "executed": 118,
+              "passed": 118,
+              "sha256": "0b672e2edc833680b9d7c3131eafbca88e5188d03ba19f496ce8d44ff5b73704"
+            },
+            {
+              "suite": "site-tests",
+              "total": 70,
+              "executed": 70,
+              "passed": 70,
+              "sha256": "6dcc3af617f490f0cc6339e62ba028c1e0906fd4bedb4127471ea0382a18a3d1"
+            }
+          ],
+          "nativeModule": {
+            "linesCovered": 935,
+            "linesValid": 981,
+            "branchesCovered": 528,
+            "branchesValid": 612
+          },
+          "javascriptTotals": {
+            "executableLines": 2399,
+            "coveredLines": 2351,
+            "aggregateLinesPercent": 97,
+            "blockOutcomes": 624,
+            "coveredBlockOutcomes": 538,
+            "aggregateBranchesPercent": 86
+          },
+          "nativeCriticalPipelines": 12,
+          "javascriptSources": 17,
+          "javascriptCriticalSources": 9,
+          "nativeReceiptCounts": {
+            "browser": 8,
+            "node": 922
+          },
+          "artifacts": [
+            {
+              "id": 11229471143,
+              "name": "site-publication-37014111869-1",
+              "bytes": 27944,
+              "sha256": "be299cd3ece95ee132c52202d2535f452e2e29867f34aa4427e380e911dd2182",
+              "verifiedRegularFiles": 17
+            },
+            {
+              "id": 11229331802,
+              "name": "github-pages",
+              "bytes": 1122236,
+              "sha256": "e331e646e1f3cafbaa15b808a948268e94d0b59e08b0936837223572d4717cdd",
+              "verifiedRegularFiles": 1
+            },
+            {
+              "id": 11228953709,
+              "name": "site-qualification-6a82c86d0113270335368bbfbff0080ea1c1800a-1",
+              "bytes": 23217407,
+              "sha256": "44e54d3f553c07268ad0dfa78eb6b26009bb24123c9e941543f0774eb4d778e7",
+              "verifiedRegularFiles": 1123
+            }
+          ],
+          "publicationSha256": "7ef4bfde82b4a3a83601f6e9461715fe2c2a9e921b226307f3f17c53bfc0b369",
+          "nativeGateReportSha256": "06bb60d14d87520910d9a05a92d5dde0ac8c6c0bcc66e2dc4018985d554f4a98",
+          "siteGateReportSha256": "6cff215151c64ea06529e46a4d5f02508681ea5b412e5dcfc4d41de9aa2beafd",
+          "predeployProofSha256": "c1e30504cb4b20762eeb82385de39477bca37f0509e72ee1c5f70c97637f07e3",
+          "deploymentReceiptSha256": "1b8b30b2628c4f26ca677b06cf6ff8a81793469e3f48413ccdadfa859b21c64c",
+          "pagesRegularFilesCompared": 35,
+          "originalArchiveRegularFiles": 12,
+          "publishedRawReports": 9,
+          "producerCompletionObservation": {
+            "run": 37013008931,
+            "conclusion": "failure",
+            "comparisonJobConclusion": "failure",
+            "associationEvidence": "actual workflow_run event after same-H main KeyLoad CI completion; versioned trigger names KeyLoad CI. REST does not expose a triggering-run-id field."
+          }
         }
       ]
     },
-    "coverage": "native_Node_browser_and_MTP_analyzer_gates_in_progress; exact_candidate_GitHub_numeric_pass_pending",
+    "coverage": {
+      "state": "passed_exact_H_GitHub_only",
+      "nativeModule": {
+        "linesCovered": 935,
+        "linesValid": 981,
+        "branchesCovered": 528,
+        "branchesValid": 612
+      },
+      "nativeCriticalPipelines": 12,
+      "javascriptTotals": {
+        "executableLines": 2399,
+        "coveredLines": 2351,
+        "aggregateLinesPercent": 97,
+        "blockOutcomes": 624,
+        "coveredBlockOutcomes": 538,
+        "aggregateBranchesPercent": 86
+      },
+      "javascriptSources": 17,
+      "javascriptCriticalSources": 9,
+      "nativeReceiptCounts": {
+        "browser": 8,
+        "node": 922
+      },
+      "thresholds": {
+        "aggregateLinePercent": 80,
+        "aggregateBranchPercent": 70,
+        "criticalLinePercent": 90
+      },
+      "sourceInventories": "unchanged and all hash-bound; each browser session requires its own mapped authored evidence",
+      "rawEvidence": "all original native files retained, including legitimate zero-delta browser receipt; no Node-empty waiver",
+      "broaderDatabaseCoverage": "not_qualified_by_site_gate",
+      "baseline": "first configured qualified website baseline; root no-decrease policy remains mandatory; exact-source native V8 snapshot inventories retained separately per run"
+    },
     "databaseQualification": "not_part_of_site_gate",
-    "publicPublication": "owner_authorized_separate_workflow_implemented_qualification_and_provider_proof_pending",
+    "publicPublication": {
+      "state": "completed_success_both_automatic_triggers",
+      "siteSourceRevision": "6a82c86d0113270335368bbfbff0080ea1c1800a",
+      "workflow": ".github/workflows/pages.yml",
+      "triggers": [
+        "main push changing site/**",
+        "KeyLoad CI workflow_run completed",
+        "manual validate/publish with main-only unpinned publication"
+      ],
+      "automaticRuns": [
+        {
+          "run": 37013009381,
+          "event": "push",
+          "evidence": "verification.githubSiteSuite.attempts[run=37013009381]"
+        },
+        {
+          "run": 37014111869,
+          "event": "workflow_run",
+          "evidence": "verification.githubSiteSuite.attempts[run=37014111869]"
+        }
+      ],
+      "measuredEvidence": {
+        "run": {
+          "id": 36926803549,
+          "number": 15,
+          "attempt": 1,
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/36926803549"
+        },
+        "comparisonJob": {
+          "id": 110586038011,
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/36926803549/job/110586038011",
+          "startedAt": "2026-10-01T21:10:04Z",
+          "completedAt": "2026-10-01T21:14:11Z",
+          "steps": [
+            {
+              "name": "Run dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release",
+              "number": 6
+            },
+            {
+              "name": "Measure 1 KiB documents, eight clients and three graph hops",
+              "number": 7
+            },
+            {
+              "name": "Measure 16 KiB documents, four clients and five graph hops",
+              "number": 8
+            }
+          ]
+        },
+        "artifact": {
+          "id": 11193564650,
+          "name": "comparison-suite",
+          "sizeBytes": 357910,
+          "digest": "sha256:82aa46027dd143e3da6678e81ac881511068ac2329074ce59640952ad43ffdb2",
+          "createdAt": "2026-10-01T21:14:07Z"
+        },
+        "archive": {
+          "bytes": 357910,
+          "sha256": "82aa46027dd143e3da6678e81ac881511068ac2329074ce59640952ad43ffdb2"
+        }
+      },
+      "provider": {
+        "cname": "www.keyload.cloud",
+        "httpsEnforced": true,
+        "certificate": {
+          "state": "approved",
+          "description": "The certificate has been approved.",
+          "domains": [
+            "www.keyload.cloud",
+            "keyload.cloud"
+          ],
+          "expires_at": "2026-12-30"
+        },
+        "postUpdateGetSha256": "d5202e1ccb28d32a1ae1f4efb108fb5c974fcd103d75a9997e9c19bb845b57bd",
+        "authorizedUpdate": "HTTP204; no DNS changes"
+      },
+      "live": {
+        "wwwHttpStatus": 200,
+        "apexHttpStatus": 301,
+        "apexLocation": "https://www.keyload.cloud/",
+        "htmlBytes": 17415,
+        "htmlSha256": "373345e6c7bad13ba7344e95ea9802a13a3392fafb55b1f25d7a60af84dd146a",
+        "pushPublicationSha256": "d01755d538bb641a8b96cddc0bfefb76badefb407ef532f035324f9bd437b192",
+        "callbackPublicationSha256": "7ef4bfde82b4a3a83601f6e9461715fe2c2a9e921b226307f3f17c53bfc0b369",
+        "catalogAndReports": [
+          {
+            "url": "https://www.keyload.cloud/data/catalog.json",
+            "path": "data/catalog.json",
+            "bytes": 1719,
+            "sha256": "067d1fbd07a66b844a74ecde4a141c8c958eebf9252f7885b4d58c4aa662ae2f",
+            "exactQualifiedBytes": true
+          },
+          {
+            "url": "https://www.keyload.cloud/data/runs/json-16k-c4/results.json",
+            "path": "data/runs/json-16k-c4/results.json",
+            "bytes": 1293724,
+            "sha256": "01ee78bad3e7f9257a72e87ce5cf2fa813e75e20b1825f0be6252b7ad0bea814",
+            "exactQualifiedBytes": true
+          },
+          {
+            "url": "https://www.keyload.cloud/data/runs/json-16k-c4/results.md",
+            "path": "data/runs/json-16k-c4/results.md",
+            "bytes": 17512,
+            "sha256": "fc26897bb3b59b8f967c86ab21aceb5460d42d00188d24a0b4264f7f34d5e460",
+            "exactQualifiedBytes": true
+          },
+          {
+            "url": "https://www.keyload.cloud/data/runs/json-16k-c4/samples.csv",
+            "path": "data/runs/json-16k-c4/samples.csv",
+            "bytes": 278391,
+            "sha256": "644af25ed8a856f18910e22715c2b208676f7ea472a2bd1a68ff3a946f38552a",
+            "exactQualifiedBytes": true
+          },
+          {
+            "url": "https://www.keyload.cloud/data/runs/json-1k-c8/results.md",
+            "path": "data/runs/json-1k-c8/results.md",
+            "bytes": 17515,
+            "sha256": "2f07da5ef41cc3a1618a7418dcf33f7d9da0637606e0465d1195f3d0e6de4035",
+            "exactQualifiedBytes": true
+          },
+          {
+            "url": "https://www.keyload.cloud/data/runs/json-1k-c8/results.json",
+            "path": "data/runs/json-1k-c8/results.json",
+            "bytes": 1283895,
+            "sha256": "88c96ae99beebdb293190f78bf2a83f05395ba946619457694eabf85b86cb073",
+            "exactQualifiedBytes": true
+          },
+          {
+            "url": "https://www.keyload.cloud/data/runs/json-1k-c8/samples.csv",
+            "path": "data/runs/json-1k-c8/samples.csv",
+            "bytes": 273071,
+            "sha256": "765744ee8327d1b1ae39e12b69f4fb3f876a1ddc92d52d29d481a30774578e2f",
+            "exactQualifiedBytes": true
+          },
+          {
+            "url": "https://www.keyload.cloud/data/runs/smoke/results.json",
+            "path": "data/runs/smoke/results.json",
+            "bytes": 207210,
+            "sha256": "037e738c8418a5b86e65ba4b45bb4e3f1936bf8c635a4390d25c866691869bf8",
+            "exactQualifiedBytes": true
+          },
+          {
+            "url": "https://www.keyload.cloud/data/runs/smoke/results.md",
+            "path": "data/runs/smoke/results.md",
+            "bytes": 13271,
+            "sha256": "e13eee014144e878cad32e1563766f182943e3e8a3e94bc5f4694fbcb70b1b52",
+            "exactQualifiedBytes": true
+          },
+          {
+            "url": "https://www.keyload.cloud/data/runs/smoke/samples.csv",
+            "path": "data/runs/smoke/samples.csv",
+            "bytes": 35883,
+            "sha256": "5f1739da5f4026342549195f66379aebce5d0608e04f40de41f0f941046a6b49",
+            "exactQualifiedBytes": true
+          }
+        ],
+        "allQualifiedByteEqual": true,
+        "manualBrowserReceiptSha256": "3884df7bbd0417fd678eeed97453829ca8ea57f77cdfb5313913d9b453530ce5",
+        "catalogAndReportsObservedRun": 37013009381,
+        "callbackCatalog": {
+          "observedRun": 37014111869,
+          "url": "https://www.keyload.cloud/data/catalog.json?publication=37014111869",
+          "bytes": 1719,
+          "sha256": "20bf8ec98d739eb01e57c0ca33c6412640b7c811be062f403cdfeb9f182a3dee",
+          "exactQualifiedBytes": true
+        },
+        "rawReportsEqualBothPublicationRuns": true
+      },
+      "asOf": "immutable_H_publication_evidence_2026-10-02; later documentation-only descendants are not inferred H-tested"
+    },
     "dns": "unchanged",
-    "developmentBuild": "Integrated SiteTests H Release build passed0warnings0errors after bounded two-line fixture style repair; AnalyzerTests prior development build passed; no_local_tests; exact_H_format/static/sourcecut/GitHub_qualification_pending",
+    "developmentBuild": "H enabled Release development build0warnings0errors, focused formatter diagnostics0bytes and static governance25projects/4modules passed; actual GitHub receipts above establish qualification; no local tests.",
     "githubAccess": "Authenticated_read_verified_live_2026-10-02; repository_push_permission_true; no_credentials_changed",
     "governance": {
       "state": "passed_static_workspace_validation",
@@ -436,7 +905,7 @@
       "fullAnalyzerTests": "112executed112passed0failed0skipped",
       "globalProductAndNoDecreaseCoverage": "separate_unqualified"
     },
-    "publicationPreflight": "Authenticated metadata and same-ZIP preparation plus all70functionalSiteTests passed in actual G; full gate failed on valid empty browser delta; protocol/source qualification and provider/live proof pending",
+    "publicationPreflight": "COMPLETE authenticated highest-successful comparison selection, unchanged-source inventory, one original12file ZIP,9 exact emitted reports, full real GitHub tests/native gates, current-main/evidence predeploy freshness, provider success and live bytes. Newer failed comparison37013008931 was not used.",
     "latestSiteCoverageFailure": {
       "run": 37008674643,
       "sourceRevision": "cc99e9c2814a9bd6c26dc44661ac3ee82a4f0e64",
@@ -452,24 +921,45 @@
       "errors": [
         "Initial real Chrome blank-page delta rejected as empty native script records"
       ],
-      "passed": false
+      "passed": false,
+      "resolvedBy": {
+        "sourceRevision": "6a82c86d0113270335368bbfbff0080ea1c1800a",
+        "runs": [
+          37011817610,
+          37013009381,
+          37014111869
+        ],
+        "tasks": [
+          "TASK036",
+          "TASK037"
+        ],
+        "result": "full_gate_passed; original failed G receipt retained"
+      }
     }
   },
   "delivery": {
-    "candidate": "ordinary_joined_source_descendant_pushed_and_dispatched",
+    "candidate": "exact_H_qualified_before_ordinary_fast_forward_main_delivery",
     "branch": "codex/site-publication-20261002",
     "initialCandidateRevision": "f56d511b4a343eff99d3117e9414490a05cfb8ae",
-    "qualifiedRevision": null,
+    "qualifiedRevision": "6a82c86d0113270335368bbfbff0080ea1c1800a",
     "sourceSnapshotReceiptSha256": "271d8415d29c69e8af84f604858079ed6effd4ce586d06220237ff9ac57b9684",
     "workspace": "shared_dirty_checkout_preserved",
-    "main": "preserved_by_site_composer; advanced_by_concurrent_runtime_owner",
-    "currentCandidateRevision": "cc99e9c2814a9bd6c26dc44661ac3ee82a4f0e64",
+    "main": "H ordinary fast-forward3559225a5→6a82c86d0 delivered with fresh protections; later docs-only descendant retains historical H evidence without attributing H tests to that descendant",
+    "currentCandidateRevision": "6a82c86d0113270335368bbfbff0080ea1c1800a",
     "descendantReceipt": "/private/tmp/keyload-site-candidate-20261002-b.delivery.json",
     "redSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-c.delivery.json",
     "sharedHeadAtRedComposition": "3559225a5f918160e46e32c9a812c3f71790e382",
     "joinedSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-d.delivery.json",
     "portableSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-e.delivery.json",
     "governanceSnapshotReceipt": "/private/tmp/keyload-site-candidate-f4b-20261002.delivery.json",
-    "protocolSourceReceipt": "/private/tmp/keyload-site-candidate-g2-20261002.delivery.json"
+    "protocolSourceReceipt": "/private/tmp/keyload-site-candidate-g2-20261002.delivery.json",
+    "finalSourceReceipt": {
+      "path": "/private/tmp/keyload-site-candidate-h-20261002.delivery.json",
+      "reviewSha256": "ccb0ac02320e0036d2a79f746dbea615f43628c48b495bbc2e8114b4b36fb6ba",
+      "cumulativeMainReviewSha256": "04cb5816e14e2925ca74d32b42729ec8656743c2cc267055f76e80dd69e3d9b9",
+      "unrelatedParentBlobsPreserved": 1053,
+      "sharedHeadPreserved": "3559225a5f918160e46e32c9a812c3f71790e382",
+      "sharedIndexSha256Preserved": "67897132a94dac17bdd09d8936ae908c8de585a155a0a50d7e0962cec22e914b"
+    }
   }
 }

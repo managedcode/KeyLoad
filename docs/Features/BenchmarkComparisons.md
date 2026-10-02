@@ -111,14 +111,14 @@ The owner requested a proper product design and Three.js. [ADR-040](../ADR/ADR-0
 
 | Requirement | Measurable acceptance | Test or review mapping |
 |---|---|---|
-| REQ-BC-011: product-first responsive design | AC-BC-011: purpose/status/navigation visible at1440/768/390/320px, no page overflow or clipped controls; labelled table scroll only | Planned SiteBuildTests plus explicit real-browser desktop/mobile visual review |
-| REQ-BC-012: bounded conceptual Three RF3 | AC-BC-012: Three0.186.1 native backend recorded; one renderer/canvas, correct cancellation/disposal/resize/pause; DPR≤1.5,≤1M pixels,≤30 calls,≤5K triangles, no idle loop | Planned vendor/build TUnit contracts; explicit real-browser graphics lifecycle/device evidence exception |
-| REQ-BC-013: accessible independent content | AC-BC-013: semantic labels/focus/tabs and no-JS/reduced/coarse/unavailable-graphics retain text/poster/evidence access | Planned SiteBuildTests plus required keyboard/no-JS/reduced-motion browser review |
-| REQ-BC-014: unchanged historical arithmetic and controls | AC-BC-014: all6 scenarios/11 metrics/profile/repetition/log/whiskers/table/downloads match independent oracle over authentic successful-CI reports | Planned SiteMeasurementTests/SiteMeasurementOracle using actual JS child process; real browser control review |
-| REQ-BC-015: atomic validated report state | AC-BC-015: invalid/path/hash/rapid/error loads never mix data/provenance/downloads; abort and stale generation fencing | Planned SiteEvidenceValidationTests over real production validators and controlled corrupt inputs; required rapid/error browser review |
-| REQ-BC-016: canonical complete asset/build migration | AC-BC-016: feature-owned assets, exact verified vendor/raw bytes and clean isolated output; authored JS≤40KiB gzip/CSS≤20KiB gzip; vendor lazy and separately recorded | Planned SiteBuildTests and source/static/vendor/size/raw-byte checks |
-| REQ-BC-017: GitHub TUnit site qualification | AC-BC-017: independent centrally pinned TUnit/MTP/net10 suite, real bounded Node probe, preserved old edge intentions; only exact GitHub run qualifies | Planned KeyLoad.SiteTests full suite in GitHub; explicit visual/lifecycle review exception; numeric coverage remains pending |
-| REQ-BC-018: honest source/evidence/delivery | AC-BC-018: site/measured revisions, successful run and hashes distinct; no historical→current/schema3/publication/CLI-model inference | Planned SiteEvidenceValidationTests and strongest complete source/evidence review |
+| REQ-BC-011: product-first responsive design | AC-BC-011: purpose/status/navigation visible at1440/768/390/320px, no page overflow or clipped controls; labelled table scroll only | Qualified H: SiteBuildTests plus explicit real-browser desktop/mobile visual review |
+| REQ-BC-012: bounded conceptual Three RF3 | AC-BC-012: Three0.186.1 native backend recorded; one renderer/canvas, correct cancellation/disposal/resize/pause; DPR≤1.5,≤1M pixels,≤30 calls,≤5K triangles, no idle loop | Qualified H: vendor/build TUnit contracts; explicit real-browser graphics lifecycle/device evidence exception |
+| REQ-BC-013: accessible independent content | AC-BC-013: semantic labels/focus/tabs and no-JS/reduced/coarse/unavailable-graphics retain text/poster/evidence access | Qualified H: SiteBuildTests plus required keyboard/no-JS/reduced-motion browser review |
+| REQ-BC-014: unchanged historical arithmetic and controls | AC-BC-014: all6 scenarios/11 metrics/profile/repetition/log/whiskers/table/downloads match independent oracle over authentic successful-CI reports | Qualified H: SiteMeasurementTests/SiteMeasurementOracle using actual JS child process; real browser control review |
+| REQ-BC-015: atomic validated report state | AC-BC-015: invalid/path/hash/rapid/error loads never mix data/provenance/downloads; abort and stale generation fencing | Qualified H: SiteEvidenceValidationTests over real production validators and controlled corrupt inputs; required rapid/error browser review |
+| REQ-BC-016: canonical complete asset/build migration | AC-BC-016: feature-owned assets, exact verified vendor/raw bytes and clean isolated output; authored JS≤40KiB gzip/CSS≤20KiB gzip; vendor lazy and separately recorded | Qualified H: SiteBuildTests and source/static/vendor/size/raw-byte checks |
+| REQ-BC-017: GitHub TUnit site qualification | AC-BC-017: independent centrally pinned TUnit/MTP/net10 suite, real bounded Node probe, preserved old edge intentions; only exact GitHub run qualifies | Qualified H: KeyLoad.SiteTests full suite in GitHub; explicit visual/lifecycle review exception; numeric coverage is recorded in the scoped website closure below |
+| REQ-BC-018: honest source/evidence/delivery | AC-BC-018: site/measured revisions, successful run and hashes distinct; no historical→current/schema3/publication/CLI-model inference | Qualified H: SiteEvidenceValidationTests and strongest complete source/evidence review |
 
 Canonical site files, mounts, TUnit project, limits, task ownership and terminal joins are frozen in ADR-040 and the site plan before coding. Positive flow: read product→inspect actual report→download raw data. Negative/error: corrupt/unavailable report clears all dependent state; GPU failure stops decoration only. Edge: rapid profile changes cannot reintroduce stale data; reduced motion and narrow/no-JS views remain readable. No source/module name is a passing test or public publication result.
 
@@ -176,7 +176,8 @@ spec here. Backend/contracts/database persistence N/A: no runtime/data API chang
 Actors, public receipt schema, positive/negative/edge/error flows, tests, exact
 worker ownership and terminal joins are frozen in acceptance/ADR/plan before
 writes. Pure controlled metadata/ZIP tests are not fake API transport evidence.
-Real workflow/provider/live evidence remains mandatory and currently pending.
+Real workflow/provider/live evidence remains mandatory and is fulfilled for exact
+H by the scoped website closure below.
 
 AC-BC-024/025 additionally retains actual CDP blank/no-script empty deltas with
 their raw hashes and zero line/branch contribution. Each session must independently
@@ -197,7 +198,9 @@ module80% line/70% branch and each of12 critical diagnostic pipelines90% line
 coverage from integer counts. Missing, malformed, ambiguous, changed or empty
 evidence fails. Retain raw XML, exact source/runtime hashes, derived report and
 pure gate boundary/error regressions. This establishes only the first analyzer
-module baseline; broader AC-CQ-009, RF3 and no-decrease qualification stay pending.
+module baseline; broader AC-CQ-009, RF3 and broader repository no-decrease
+qualification stay pending. Mandatory website no-decrease coverage is retained in
+the scoped closure below.
 
 Concurrent TimeSeries already owns stable REQ/AC-BC-026. The analyzer substage's
 initial draft collision was corrected to BC-027 before candidate delivery;
@@ -225,3 +228,11 @@ artifacts cannot refresh the site. Its three profile folders and measurement-ste
 names still match the publication transport contract. The current schema2 queue
 phase→PointRead control regression is TASK032 under REQ/AC-BC-014/025; complete
 real Chrome evidence is required, with every existing oracle and numeric gate.
+
+## Qualified website delivery, 2026-10-02
+
+**Website scope only: REQ/AC-BC-011–018/024/025/027/028.** Exact H `6a82c86d0113270335368bbfbff0080ea1c1800a` passed complete GitHub validation37011817610 and both separate automatic Pages publications: site-path push37013009381 and producer-completion workflow_run37014111869. Full118 analyzer and70 site tests pass without skips, together with all required native/JavaScript thresholds and source inventories. [Canonical immutable evidence](../implementation/site-design.json), [design closure](../../site-design.plan.md) and [publication closure](../../site-publication.plan.md) map criteria, tasks, exact artifacts and actual provider/live proof; strongest TASK-SITE-REVIEW-007 documentation/evidence review is COMPLETE.
+
+The live responsive product page includes the bounded independent Three.js scene, accessible charts/tables, workload/metric/repetition controls and exact JSON/CSV/Markdown downloads. Current published measurements are the authentic successful comparison36926803549 at9c570f8c33a7a9667507a8e1c0ca68860de3be45; failed current producer37013008931 supplies no new results. Website/control/measured revisions and run/job/artifact hashes remain distinct. Every performance number is derived from these raw reports; unsupported values stay unavailable.
+
+Pages at https://www.keyload.cloud/ uses enforced HTTPS; live apex redirects301 to www. Both automatic triggers, current-main/evidence freshness, immutable Pages35-file output and all9 raw-report bytes were verified. Manual mobile/desktop/WebGPU review complements real Chrome qualification; physical GPU-loss qualification remains explicitly unexercised. The feature's global status, BC001–010/019–023/026, schema3/advanced profiles and database/endurance/readiness qualification remain unchanged.

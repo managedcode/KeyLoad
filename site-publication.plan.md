@@ -1,5 +1,7 @@
 # Fresh evidence publication execution plan
 
+Current as-of evidence: exact H source `6a82c86d0113270335368bbfbff0080ea1c1800a` passed complete GitHub qualification and both automatic Pages triggers. [Canonical receipts](docs/implementation/site-design.json) retain every earlier failed attempt. Historical pending/source-only descriptions below record their original stage; current website gates are resolved by the closure section. Strongest TASK-SITE-REVIEW-007 integrated review is COMPLETE.
+
 [Brainstorm](site-publication.brainstorm.md) → [acceptance](site-publication.acceptance.md)
 → [BenchmarkComparisons](docs/Features/BenchmarkComparisons.md) →
 [ADR-040](docs/ADR/ADR-040-static-site-threejs-evidence.md). REQ/AC-BC-028.
@@ -30,32 +32,32 @@ ownership or coverage issue. States complete/blocked/failed/cancelled with evide
  12-file ZIP; retain all12 hashes, publish only9 JSON/CSV/MD reports.
 - [x] Strongest approves exact023 recorded contracts;021/022 released with disjoint
  ownership and authentic capture/ZIP inputs. Approved acceptance f6cda42e867e6cc6c3e21837da9a254ce33085d057c1cd773318676fa71c985a.
-- [ ] Baseline after plan: use actual existing full site run36994330874 (21pass/
+- [x] Baseline after plan: use actual existing full site run36994330874 (21pass/
   7fail, vendor root cause tracked in site-design.plan) and read real latest
   producer run19cancelled/success15. Dispatch the complete relevant candidate gate
   at each new coherent source cut; no local test execution or skipped-suite pass.
-- [ ] Join019/020 source repairs and exact real GitHub site regression result;
+- [x] Join019/020 source repairs and exact real GitHub site regression result;
   preserve each failing case/root cause/fix evidence in site-design.plan.
-- [ ]021 writes positive/rejection tests before gates and returns complete packet.
-- [ ]022 writes real ZIP/corruption tests before preparation and returns packet.
-- [ ] Root inspects every module/test/receipt diff; strongest source review.
-- [ ] Root wires actual source environment, adds every new critical90 production
+- [x]021 writes positive/rejection tests before gates and returns complete packet.
+- [x]022 writes real ZIP/corruption tests before preparation and returns packet.
+- [x] Root inspects every module/test/receipt diff; strongest source review.
+- [x] Root wires actual source environment, adds every new critical90 production
   module without removing sources, and mandatory archive before/after hooks.
-- [ ] Root024 owns new SiteQualificationSource.cs, SiteQualificationSourceTests.cs,
+- [x] Root024 owns new SiteQualificationSource.cs, SiteQualificationSourceTests.cs,
  SitePublicationTokens.cs and existing shared source/coverage/build helpers. Write
  real-git source success/mismatch/malformed tests first; verify actual checkout SHA
  before mandatory archive preparation and immutable source capture. No global test
  environment mutation or database checkout qualification.
-- [ ] Root replaces duplicate workflow with trusted select/fullqualify/deploy chain;
+- [x] Root replaces duplicate workflow with trusted select/fullqualify/deploy chain;
   one verified ZIP, exact successful-attempt comparison steps, fresh website/evidence tuple, permissions.
-- [ ] Root compares extracted and final raw bytes and writes publication.json with
+- [x] Root compares extracted and final raw bytes and writes publication.json with
   actual run/job/artifact/source identity; no handwritten performance numbers.
-- [ ] Enabled Release dev builds, scoped format/static governance pass; no localtests.
-- [ ] Ordinary bounded candidate, full GitHub Analyzer/native/Site/realChrome/JS gates;
+- [x] Enabled Release dev builds, scoped format/static governance pass; no localtests.
+- [x] Ordinary bounded candidate, full GitHub Analyzer/native/Site/realChrome/JS gates;
   inspect every TRX/XML/native receipt/report and repair each actual failed test.
-- [ ] Actual successful MAIN comparison job plus automatic consumer/provider/
+- [x] Actual successful MAIN comparison job plus automatic consumer/provider/
   live evidence. Until then record exact blocker; do not mark028/007 complete.
-- [ ] Strongest full integrated review, traceability and truthful final evidence.
+- [x] Strongest full integrated review, traceability and truthful final evidence.
 
 Selected validation skill: existing Three/WebGPU guidance only when graphics
 changes require review; no graphics changes are planned. Concrete final actions:
@@ -64,9 +66,9 @@ source/contract review → enabled build → format/governance → full GitHub q
 
 ## Tracked failures and rollback
 
-- [ ] Shared builder-gzip failure and six caller failures + session coverage failure:
+- [x] Shared builder-gzip failure and six caller failures + session coverage failure:
   root cause/fix/TASK019/020 tracked individually in site-design.plan.
-- [ ] Legacy publish path lacks browser/coverage and strict job/artifact gates:
+- [x] Legacy publish path lacks browser/coverage and strict job/artifact gates:
   replace its complete route under024; never skip required tests.
 - [x] Earlier conservative-B/whole-workflow/equal-source restriction superseded by
   owner's explicit website-only direction. Recorded policy conflict in ADR-040;
@@ -186,7 +188,7 @@ current website or database qualification from a failed artifact.
   F4 tracks the required plan directly. That borrowed plan's `.gitignore`
   preparation statements describe the other owner's shared-workspace changes;
   F4 retains its parent's `.gitignore` bytes and includes no such config change.
-- [ ] TASK030/032 production repair remains blocked until the corresponding
+- [x] TASK030/032 production repair remains blocked until the corresponding
   real Site regression failures are recorded; this governance failure does not
   count as their red baseline. No deployment occurred.
 
@@ -203,24 +205,24 @@ Immutable artifact11226745015:21060275bytes, SHA256
 downloaded and inspected. No Pages deployment occurred.033 static gate is closed;
 this actual full-suite baseline now unblocks the previously recorded030/032 fixes.
 
-- [ ] `AC_BC_028_RejectsZeroAndMissingNonselectedInventoryIds`: actual CLI
+- [x] `AC_BC_028_RejectsZeroAndMissingNonselectedInventoryIds`: actual CLI
   accepted invalid nonselected IDs;030 validates every flattened identity.
-- [ ] `AC_BC_028_RejectsDuplicateNonselectedJobAndArtifactIdentities`: actual
+- [x] `AC_BC_028_RejectsDuplicateNonselectedJobAndArtifactIdentities`: actual
   CLI accepted duplicates;030 uses one complete-page identity inventory.
-- [ ] `AC_BC_028_RejectsStructurallyInvalidButMatchingFreshnessReceipts`:
+- [x] `AC_BC_028_RejectsStructurallyInvalidButMatchingFreshnessReceipts`:
   stripped matching receipts passed;030 validates both receipt contracts first.
-- [ ] `AC_BC_028_RejectsMalformedStepAndMetadataReceiptsBeforeArchiveProof`:
+- [x] `AC_BC_028_RejectsMalformedStepAndMetadataReceiptsBeforeArchiveProof`:
   incomplete receipt passed;030 enforces required steps/captures/trails/times/bounds.
-- [ ] `AC_BC_025_RealChromeControlsMatchAuthenticReportsAndRetainNativeCoverage`:
+- [x] `AC_BC_025_RealChromeControlsMatchAuthenticReportsAndRetainNativeCoverage`:
   new Queue ACK→PointRead regression reached disabled-metric mismatch at helper112;
  032 repairs undefined metric symbol with existing default, retaining all assertions.
-- [ ] `AC_BC_016_RealBuilderEmitsCompletePreviewWithAuthenticRawBytesAndNoScriptEvidence`:
+- [x] `AC_BC_016_RealBuilderEmitsCompletePreviewWithAuthenticRawBytesAndNoScriptEvidence`:
   emitted-asset oracle reused the repository `site/` prefix. TASK-SITE-ASSET-PATH-
   ORACLE-034 (gpt-6-luna high) owns only SiteAssetTokens.cs + SiteBuildArtifacts.cs;
   add named emitted prefix and replace exactly three output uses. Strongest
   independently approved root cause and exact contract before worker release.
   No source path, asset/vendor assertion, builder or inventory change.
-- [ ] `AfterTestSession coverage failure`: browser flow stopped before its native
+- [x] `AfterTestSession coverage failure`: browser flow stopped before its native
   coverage receipt; actual JS aggregate1214/2329lines52%,305/388block outcomes78%,
   zero browser receipts. Four new metadata modules already exceed critical90.
   Fix the caller/control causes above and require the full real Chrome flow and
@@ -284,11 +286,11 @@ No deployment; numeric thresholds alone do not close the failed gate.
   Node-empty and missing per-session authored evidence fail. Do not edit Chrome,
   Session, gate/report/schema/inventory, thresholds or root-owned integration.
   Terminal source hashes/full diff/limits packet joins037/root.
-- [ ] Root serial development build before GitHub qualification, focused format,
+- [x] Root serial development build before GitHub qualification, focused format,
   static governance and exact source composition; strongest inspects every diff.
-- [ ] Complete exact-SHA GitHub Analyzer/native/Site/real-Chrome/JS gate, immutable
+- [x] Complete exact-SHA GitHub Analyzer/native/Site/real-Chrome/JS gate, immutable
   artifact/TRX inspection, then strongest conditional main-delivery review.
-- [ ] Ordinary protected-policy-compliant main delivery, separate automatic push
+- [x] Ordinary protected-policy-compliant main delivery, separate automatic push
   and producer-completion workflows, actual provider/live JSON/UI proof and final
   strongest acceptance join. No failed/partial worker or local build closes this.
 
@@ -307,3 +309,20 @@ lines; complete rebuild passed0warnings/0errors. Final fixture SHA256
 9d8dea918f5554b95c9dedc3534d283e188e7d311391ee352db8f5889b5ba0de.
 All four037 and three036 source packets are terminal COMPLETE and independently
 reviewed; source completion is distinct from the pending exact-SHA GitHub gate.
+
+## Website qualification and publication closure, 2026-10-02
+
+Exact H validation [37011817610](https://github.com/managedcode/KeyLoad/actions/runs/37011817610), automatic site-path push [37013009381](https://github.com/managedcode/KeyLoad/actions/runs/37013009381) and natural producer-completion callback [37014111869](https://github.com/managedcode/KeyLoad/actions/runs/37014111869) each passed all118 analyzer and70 site tests without skips. This closes the individually tracked source, vendor, diagnostic, argument-role, control/oracle and zero-delta failures above; original failed evidence is retained. Native module, all12 diagnostic pipelines, all17 JavaScript sources and9 critical modules pass unchanged80/70/90 gates. Numeric and artifact receipts are canonical in `docs/implementation/site-design.json`.
+
+The automatic consumer uses genuine successful comparison36926803549, job110586038011 and immutable artifact11193564650, because current producer37013008931 failed. Actual callback event is workflow_run after that same-H producer completion; the versioned trigger names KeyLoad CI, while REST has no triggering-run-id field. This is an enclosing-workflow completion trigger. Failed or invalid evidence never becomes a current measurement. The35-file deployed Pages tar matches qualified output; original12 inputs and all9 public reports are byte-identical.
+
+Authorized Pages provider update returned204: www.keyload.cloud, enforced HTTPS, approved certificate for www/apex. Live www returns200, apex301 redirects to www, and actual HTML, publication receipts, catalog and all9 reports match qualified bytes. Manual live desktop1280/mobile390/320 review shows readable controls/graphs, correct profile/p99/repetition changes and WebGPU scene within geometry/buffer limits, with no captured console warnings/errors. Existing desktop/tablet/no-JS/reduced/coarse/lifecycle evidence and the explicit physically unexercised GPU-loss boundary remain in force. Manual inspection is not test qualification.
+
+One documentation-only descendant may preserve this immutable H as-of record. It must not claim H tests qualify its own SHA; normal CI and Pages automation remain unchanged and any subsequent result is retained in Actions. No self-referential evidence commit is required. Unrelated database, schema3/advanced profiles, endurance/power-loss, broader repository coverage qualification and production-readiness gates remain outside this completed website scope. DNS is unchanged.
+
+- [x] All required bounded source-worker packets terminal COMPLETE and full diff/hash/source joins reviewed.
+- [x] Development build/format/static governance separated from actual full GitHub qualification.
+- [x] Both automatic triggers, immutable outputs, predeploy freshness, actual Pages provider and live JSON/UI evidence inspected.
+- [x] TASK-SITE-REVIEW-007 strongest final integrated acceptance and documentation join.
+
+Website coverage policy, including the root no-decrease requirement, remains mandatory. The three independent exact-H runs retain identical hashed authored sources and2351/2399 covered/executable lines. Their genuine native V8 block inventories are540/626 in validation37011817610,537/623 in push37013009381 and538/624 in callback37014111869; all report86% under the unchanged gate semantics. Native analyzer counts are935/981 lines and528/612 branches in each run. No source, threshold, raw snapshot or outcome is removed to make these counts agree; all17 authored sources,9 critical JavaScript modules and12 analyzer pipelines remain mandatory. This is the first configured qualified website baseline, with broader repository coverage separately unqualified.
