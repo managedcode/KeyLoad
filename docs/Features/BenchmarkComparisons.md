@@ -290,6 +290,13 @@ Pages at https://www.keyload.cloud/ uses enforced HTTPS; live apex redirects301 
 
 ## REQ-BC-029: shared KeyLoad visual identity
 
+### AC-BC-029 owner revision, 2026-10-02
+
+- **Positioning.** The landing presents KeyLoad as the database for AI agents. It covers documents with SQL queries, graphs, events, queues, vectors, time series and blobs in one transactional engine, plus the built-in MCP server and the .NET SDK on .NET 10 and Orleans. The early-development and open-qualification statements stay visible.
+- **3D scene.** A conceptual glass engine contains each data shape, and three agents connect to it. It is labelled as not live data. Limits: 12 draw calls, about 2,100 triangles, no idle loop. The poster is a pre-rendered frame of the same scene embedded in the SVG.
+- **Comparable engines only.** The chart and table show only engines that implement the selected workload, with KeyLoad highlighted in lime. Unsupported adapters remain in the DOM rows, the raw JSON/CSV/report downloads and the recorded engine count, so no measurement is hidden or invented. Only the comparison view omits them.
+
+
 - **AC-BC-029:** the public site uses the shared light identity from [ADR-053](../ADR/ADR-053-unified-visual-identity.md):
   - the same logo, tokens and sans display type, plus cards, buttons, tabs, bars and tables;
   - brand-palette engine colours and scene colours.

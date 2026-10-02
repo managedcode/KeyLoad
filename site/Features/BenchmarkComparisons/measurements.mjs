@@ -12,12 +12,12 @@ const SCENARIO_DESCRIPTIONS = Object.freeze({
 export const scenarios = SCENARIO_DESCRIPTIONS;
 
 export const colors = Object.freeze({
-  KeyLoad: '#111214',
-  'PostgreSQL + pgvector': '#2a78d6',
-  Qdrant: '#e0569a',
-  RabbitMQ: '#e8743b',
-  Redis: '#e34948',
-  Neo4j: '#12a37f',
+  KeyLoad: '#c6f24e',
+  'PostgreSQL + pgvector': '#8e96a3',
+  Qdrant: '#6f7682',
+  RabbitMQ: '#a9b0bb',
+  Redis: '#7c8490',
+  Neo4j: '#5d636e',
 });
 
 const VALUE_FIELDS = Object.freeze({ throughput: 'usefulOperationsPerSecond', p50: 'p50Ms', p95: 'p95Ms', p99: 'p99Ms' });
