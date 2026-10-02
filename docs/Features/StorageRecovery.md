@@ -239,13 +239,13 @@ post-cleanup receipt cancellation risk without altering production data.
 
 ## Orleans binary atomic WAL
 
-[ADR-057](../ADR/ADR-057-orleans-atomic-wal.md) accepts owner-directed REQ-STORAGE-015..019 and AC-WAL-001..005. New commands.wal mutation payloads use generated Orleans binary serialization, versioned magic2 and identity3. Native ZoneTree raw-byte Sync WAL, checkpoint2 and replication journals retain their own contracts. Offline upgrade requires old-binary Compact and a verified backup on every stopped RF3 node; a remaining JSON frame refuses with FormatUnsupported instead of a fallback reader. Exact-source source/runtime qualification remains pending.
+[ADR-057](../ADR/ADR-057-orleans-atomic-wal.md) accepts owner-directed REQ-STORAGE-015..019 and AC-WAL-001..005. New commands.wal mutation payloads use generated Orleans binary serialization, versioned magic3 and identity4. Native ZoneTree raw-byte Sync WAL, checkpoint2 and replication journals retain their own contracts. Offline upgrade requires old-binary Compact and a verified backup on every stopped RF3 node; a remaining JSON frame1 or prior binary frame2 refuses with FormatUnsupported instead of a fallback reader. The closed native ReadOnlyMemoryOfByteCodec registration keeps nullable value bytes raw rather than using the generic per-byte codec. Final exact-source runtime qualification remains pending.
 
 |Requirement|Acceptance/test trace|
 |---|---|
 |REQ-STORAGE-015 binary mutation codec|AC-WAL-001 real-store binary/empty/delete roundtrip and reopen|
 |REQ-STORAGE-016 exact bounded payload|AC-WAL-002 FrameBudgetTests plus PreparedTransactionTests cache/replacement/reset/rejected-stage|
-|REQ-STORAGE-017 safe replay|AC-WAL-003 checksum/full-consumption/shape/order/legacy rejection and existing real commit crash cuts|
+|REQ-STORAGE-017 safe replay|AC-WAL-003 checksum/full-consumption/shape/order/legacy rejection; OrleansWalSuccessorTests verifies last legal sequence, terminal overflow rejection, unchanged journal/identity, no premature apply and released ownership; existing real commit crash cuts remain mandatory|
 |REQ-STORAGE-018 version fence and offline upgrade|AC-WAL-004 legacy checkpoint/empty/refusal, Compact/InstallSnapshot/restore identity preservation|
 |REQ-STORAGE-019 authentic qualification|AC-WAL-005 full Release/formatter/governance and exact-SHA GitHub unit/process-recovery/RF3 SDK+MCP; speed and power-loss unclaimed|
 

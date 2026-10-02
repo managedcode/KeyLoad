@@ -14,7 +14,7 @@ internal sealed class TombstoneValueTests
     private const int ChecksumOffset = 20;
     private const int ChecksumLength = 32;
     private const long EmptyJournalLength = 0;
-    private const ulong JournalMagic = 0x324C4157444C4BUL;
+    private const ulong JournalMagic = 0x334C4157444C4BUL;
     private const string JournalFileName = "commands.wal";
 
     [Test]
@@ -65,11 +65,7 @@ internal sealed class TombstoneValueTests
         var root = CreateDirectory();
         var emptyKey = new byte[] { 0x10 };
         var deletedKey = new byte[] { 0x20 };
-        var payload = ZoneTreeJournalCodec.Serialize(new StorageMutation[]
-        {
-            new(emptyKey, Array.Empty<byte>()),
-            new(deletedKey, (ReadOnlyMemory<byte>?)null)
-        }, int.MaxValue);
+        var payload = CreateBinaryEmptyDeletePayload(emptyKey, deletedKey);
         try
         {
             var directory = Path.Combine(root, "exact");
@@ -105,6 +101,13 @@ internal sealed class TombstoneValueTests
             Directory.Delete(root, recursive: true);
         }
     }
+
+    private static byte[] CreateBinaryEmptyDeletePayload(byte[] emptyKey, byte[] deletedKey)
+        => ZoneTreeJournalCodec.Serialize(new StorageMutation[]
+        {
+            new(emptyKey, Array.Empty<byte>()),
+            new(deletedKey, (ReadOnlyMemory<byte>?)null)
+        }, int.MaxValue);
 
     private static async Task AssertBinaryEmptyAndDeletePayload(byte[] payload, byte[] emptyKey, byte[] deletedKey)
     {

@@ -13,7 +13,7 @@ internal static class KeyLoadStreamPublicRegression
     private const int FollowingStreamOffset = 22;
     private const ulong ExpectedRevision = 1;
     private const string ConflictingJson = "{\"payload\":\"conflict\"}";
-    private const string ConflictCode = "KeyLoad:Conflict";
+    private const string ConflictCode = "KeyLoad:RevisionConflict";
 
     internal static async Task VerifyAsync(DistributedApplication app, string adminKey,
         CancellationToken cancellationToken)

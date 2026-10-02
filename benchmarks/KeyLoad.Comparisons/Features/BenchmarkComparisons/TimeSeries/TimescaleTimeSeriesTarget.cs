@@ -8,7 +8,7 @@ internal sealed class TimescaleTimeSeriesTarget(string connectionString, string?
 {
     private const string TargetName = "TimescaleDB TimeSeries";
     private const string StorageGuarantee =
-        "Container-lifetime TimescaleDB hypertable; no cross-run volume and no replica guarantee";
+        "Container-lifetime single-node TimescaleDB hypertable; no cross-run volume and no replica guarantee";
     private const string AcknowledgementGuarantee = "PostgreSQL transaction commit acknowledged by one server";
     private static readonly TimeSpan CleanupTimeout = TimeSpan.FromSeconds(15);
     private readonly Guid ownerId = Guid.NewGuid();

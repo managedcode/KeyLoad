@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 using Orleans.Serialization.Buffers;
+using Orleans.Serialization.Codecs;
 using Orleans.Serialization.Session;
 
 namespace KeyLoad.Storage.ZoneTree;
@@ -57,6 +58,7 @@ internal static class ZoneTreeJournalCodec
     private static ServiceProvider CreateServices()
     {
         var services = new ServiceCollection();
+        services.AddSingleton<IFieldCodec<ReadOnlyMemory<byte>>, ReadOnlyMemoryOfByteCodec>();
         services.AddSerializer(builder => builder.AddAssembly(typeof(ZoneTreeJournalMutation).Assembly));
         return services.BuildServiceProvider();
     }

@@ -11,8 +11,10 @@ internal sealed class OrleansWalUpgradeTests
     [Test]
     [Arguments(1, false)]
     [Arguments(2, false)]
+    [Arguments(3, false)]
     [Arguments(1, true)]
     [Arguments(2, true)]
+    [Arguments(3, true)]
     public async Task AcWal004LegacyEmptyOrVerifiedCheckpointPromotesIdentityWithoutChangingScope(
         int version, bool checkpoint)
     {
@@ -62,6 +64,7 @@ internal sealed class OrleansWalUpgradeTests
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
+    [Arguments(4)]
     public async Task AcWal003And004CompleteLegacyJsonJournalIsRefusedWithoutChangingAuthoritativeFiles(int version)
     {
         using var files = new WalFileFixture();
@@ -76,6 +79,7 @@ internal sealed class OrleansWalUpgradeTests
     [Test]
     [Arguments(1)]
     [Arguments(2)]
+    [Arguments(3)]
     public async Task AcWal004LegacyIdentityCannotAcceptFullBinaryJournalOrPromoteBeforeRecovery(int version)
     {
         using var files = new WalFileFixture();
@@ -92,6 +96,7 @@ internal sealed class OrleansWalUpgradeTests
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
+    [Arguments(4)]
     public async Task AcWal004LegacyJsonAfterVerifiedCheckpointRefusesUpgradeWithoutRewritingJournal(int version)
     {
         using var files = new WalFileFixture();
@@ -115,6 +120,7 @@ internal sealed class OrleansWalUpgradeTests
     [Test]
     [Arguments(1)]
     [Arguments(2)]
+    [Arguments(3)]
     public async Task AcWal004InvalidLegacyCheckpointFailsWithoutPromotingIdentity(int version)
     {
         using var files = new WalFileFixture();
@@ -136,9 +142,11 @@ internal sealed class OrleansWalUpgradeTests
     [Arguments(1, true)]
     [Arguments(2, true)]
     [Arguments(3, true)]
+    [Arguments(4, true)]
     [Arguments(1, false)]
     [Arguments(2, false)]
     [Arguments(3, false)]
+    [Arguments(4, false)]
     public async Task AcWal003And004FullLegacyHeaderWithMissingOrTornPayloadFailsWithoutTruncation(
         int version, bool missingPayload)
     {
@@ -157,7 +165,7 @@ internal sealed class OrleansWalUpgradeTests
 
     [Test]
     [Arguments(0)]
-    [Arguments(4)]
+    [Arguments(5)]
     public async Task AcWal004UnsupportedIdentityVersionFailsBeforeJournalMutation(int version)
     {
         using var files = new WalFileFixture();

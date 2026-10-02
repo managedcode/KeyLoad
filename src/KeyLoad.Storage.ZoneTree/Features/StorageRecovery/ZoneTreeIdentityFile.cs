@@ -35,7 +35,8 @@ internal static class ZoneTreeIdentityFile
 
     private static void Validate(StoreIdentity identity, ZoneTreeStoreOptions options)
     {
-        if (identity.FormatVersion is not (InitialIdentityVersion or CheckpointVersion or BinaryJournalIdentityVersion)
+        if (identity.FormatVersion is not (InitialIdentityVersion or CheckpointVersion or LegacyBinaryJournalIdentityVersion
+            or BinaryJournalIdentityVersion)
             || identity.KeyCodecVersion != KeyCodec.Version)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);

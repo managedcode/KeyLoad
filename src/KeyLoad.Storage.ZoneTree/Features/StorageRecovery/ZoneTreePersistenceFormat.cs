@@ -3,7 +3,8 @@ namespace KeyLoad.Storage.ZoneTree;
 internal static class ZoneTreePersistenceFormat
 {
     internal const ulong LegacyJournalMagic = 0x314C4157444C4BUL;
-    internal const ulong JournalMagic = 0x324C4157444C4BUL;
+    internal const ulong LegacyBinaryJournalMagic = 0x324C4157444C4BUL;
+    internal const ulong JournalMagic = 0x334C4157444C4BUL;
     internal const ulong CheckpointMagic = 0x32545043444C4BUL;
     internal const ulong CheckpointDataMagic = 0x32415444444C4BUL;
     internal const ulong CheckpointEndMagic = 0x32444E45444C4BUL;
@@ -14,7 +15,8 @@ internal static class ZoneTreePersistenceFormat
     internal const int ChecksumLength = 32;
     internal const int CheckpointVersion = 2;
     internal const int InitialIdentityVersion = 1;
-    internal const int BinaryJournalIdentityVersion = 3;
+    internal const int LegacyBinaryJournalIdentityVersion = 3;
+    internal const int BinaryJournalIdentityVersion = 4;
     internal const int BackupManifestVersion = 1;
     internal const int FileBufferBytes = 65_536;
     internal const int IdentityBufferBytes = 4_096;

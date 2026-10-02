@@ -407,7 +407,7 @@ flowchart LR
 
 ## Atomic WAL binary serialization
 
-[ADR-057](ADR/ADR-057-orleans-atomic-wal.md) scopes native generated Orleans serialization to StorageRecovery commands.wal payloads. Private stable mutation DTOs and a cached typed serializer join the existing ordered atomic journal; native ZoneTree bytes/Sync WAL, replication journal, checkpoint2 and Orleans routing stay under their existing owners. Identity3 fences old writers; only offline verified checkpoint-only/empty legacy stores may promote. Source/GitHub qualification pending.
+[ADR-057](ADR/ADR-057-orleans-atomic-wal.md) scopes native generated Orleans serialization to StorageRecovery commands.wal payloads. Private stable mutation DTOs and a cached typed serializer join the existing ordered atomic journal; native ZoneTree bytes/Sync WAL, replication journal, checkpoint2 and Orleans routing stay under their existing owners. Identity4 fences old writers; only offline verified checkpoint-only/empty legacy identities1/2/3 may promote. The closed native byte-memory codec writes nullable values as raw byte blocks; complete legacy frame1/2 headers refuse before truncation. Source/GitHub qualification pending.
 
 ```mermaid
 classDiagram
@@ -415,5 +415,5 @@ classDiagram
     ZoneTreeJournalPublication --> ZoneTreeJournalCodec : validated payload
     ZoneTreeJournalRecovery --> ZoneTreeJournalCodec : complete checked decode
     ZoneTreeJournalCodec --> ZoneTreeJournalMutation : stable generated fields
-    ZoneTreeStoreInitializer --> ZoneTreeIdentityFile : format3 writer fence
+    ZoneTreeStoreInitializer --> ZoneTreeIdentityFile : format4 writer fence
 ```

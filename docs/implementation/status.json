@@ -23,10 +23,23 @@
     "atomicWalSerialization": {
       "status": "source_implemented_qualification_pending",
       "decision": "docs/ADR/ADR-057-orleans-atomic-wal.md",
-      "source": "generated_Orleans10.3.1_binary_mutations_explicit_kind_full_consumption_frame2_identity3_native_ZoneTree_unchanged",
+      "source": "generated_Orleans10.3.1_binary_mutations_closed_native_ReadOnlyMemoryOfByteCodec_explicit_kind_full_consumption_frame3_identity4_native_ZoneTree_unchanged",
       "upgrade": "offline_old_binary_compact_verified_backup_homogeneous_RF3_no_JSON_fallback",
-      "verification": "restore_governance_pass_no_final_WAL_compiler_analyzer_diagnostics_dirty_tree_build_blocked_by_111_concurrent_comparison_diagnostics_exact_committed_GitHub_full_build_format_unit_process_recovery_RF3_pending",
-      "performance": "encoded_size_regression_authored_no_acceleration_power_loss_or_endurance_claim"
+      "verification": "native_storage_Release_build_and_scoped_final_formatter_pass_dirty_combined_solution_blocked_by59_unrelated_comparison_diagnostics_final_exact_source_GitHub_unit_process_RF3_comparison_qualification_pending_prior6ad_failures_preserved",
+      "performance": "encoded_size_regression_authored_no_acceleration_power_loss_or_endurance_claim",
+      "successorSequenceRepair": "source_guard_rejects_terminal_MaxValue_successor_before_decode_apply_or_truncation_real_checkpoint_legal_limit_wrapped_negative_unchanged_authority_and_ownership_regressions_GitHub_pending",
+      "sourceReviewGaps": [
+        "decoded_memory_and_work_preallocation_contract_open",
+        "independent_frozen_binary_legacy_backup_and_old_executable_rollback_proof_open",
+        "additional_complete_length_and_short_header_corruption_cases_open"
+      ],
+      "decodedMemory": "native_remaining_input_checks_verified_source_only_recomputed_checksum_malformed_array_amplification_not_runtime_qualified_no_invented_count_cap_or_custom_wire_decoder",
+      "firstRun": {
+        "sourceRevision": "6ad4741a713ac3376868aef146ed60a199e97b93",
+        "runId": 37077856823,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823",
+        "conclusion": "failure"
+      }
     },
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",

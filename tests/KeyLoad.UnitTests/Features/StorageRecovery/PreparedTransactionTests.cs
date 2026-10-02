@@ -13,7 +13,7 @@ internal sealed class PreparedTransactionTests
     private const int SequenceOffset = 12;
     private const int ChecksumOffset = 20;
     private const int JournalPayloadOffset = 52;
-    private const ulong JournalMagic = 0x324C4157444C4BUL;
+    private const ulong JournalMagic = 0x334C4157444C4BUL;
     private const string JournalFileName = "commands.wal";
     private const string TemporaryDirectoryPrefix = "keyload-prepared-transaction-";
 

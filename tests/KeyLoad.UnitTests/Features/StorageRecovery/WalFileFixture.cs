@@ -8,10 +8,10 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal sealed class WalFileFixture : IDisposable
 {
-    internal const ulong CurrentMagic = 0x324C4157444C4BUL;
+    internal const ulong CurrentMagic = 0x334C4157444C4BUL;
     internal const ulong LegacyMagic = 0x314C4157444C4BUL;
     internal const int HeaderBytes = 52;
-    internal const int CurrentIdentityVersion = 3;
+    internal const int CurrentIdentityVersion = 4;
     private const int PayloadLengthOffset = 8;
     private const int SequenceOffset = 12;
     private const int ChecksumOffset = 20;

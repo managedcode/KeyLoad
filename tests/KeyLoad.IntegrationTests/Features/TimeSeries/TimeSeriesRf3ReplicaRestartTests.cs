@@ -37,9 +37,11 @@ internal sealed class TimeSeriesRf3ReplicaRestartTests(ClusterFixture fixture)
 
             var survivorIndex = Enumerable.Range(0, NodeCount).First(index => index != followerIndex);
             var late = TimeSeriesRf3Scenario.Data(LateSampleId, TimeSeriesRf3Scenario.Start.AddMinutes(1), -7);
-            var committed = await clients[survivorIndex].CommitAsync(new(Guid.NewGuid(), scenario.Partition,
+            var command = new CommandRequest(Guid.NewGuid(), scenario.Partition,
                 [new AppendSamples(TimeSeriesRf3Scenario.Set, TimeSeriesRf3Scenario.Series, [late],
-                    TimeSeriesRf3Scenario.PublicTags)]), deadline.Token);
+                    TimeSeriesRf3Scenario.PublicTags)]);
+            var committed = await ClusterReplicationTestSupport.RetryDuringElectionAsync(
+                () => clients[survivorIndex].CommitAsync(command, deadline.Token), deadline.Token);
             await Assert.That(committed.IsSuccess).IsTrue();
 
             foreach (var index in Enumerable.Range(0, NodeCount).Where(index => index != followerIndex))

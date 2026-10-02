@@ -18,7 +18,7 @@ internal sealed class OrleansWalLifecycleTests
     private const string LastAppliedKey = "last-applied";
 
     [Test]
-    public async Task AcWal004CompactionKeepsCheckpointTwoAndIdentityThreeAfterBinaryWrites()
+    public async Task AcWal004CompactionKeepsCheckpointTwoAndIdentityFourAfterBinaryWrites()
     {
         using var files = new WalFileFixture();
         StoreIdentity original;
