@@ -157,3 +157,35 @@ strict unsupported-schema rejection and previous verified public output; do not
 silently reinterpret, fabricate stream measurements or fall back after selected
 success. Producer/schema3 migration is independently scoped and cannot establish
 current website or database qualification from a failed artifact.
+
+## Actual candidate F governance baseline, 2026-10-02
+
+- [x] Candidate `a3bc3adb8974bd1c7e14431ad3f1c6c9f60a707d`,
+  [run37005652004](https://github.com/managedcode/KeyLoad/actions/runs/37005652004),
+  [qualify job110833177216](https://github.com/managedcode/KeyLoad/actions/runs/37005652004/job/110833177216)
+  completed with failure at static governance: the required canonical
+  `mcaf-governance.plan.md` was absent from the scoped committed snapshot.
+  Three focused formatter checks passed, with empty retained diagnostics.
+  Native Analyzer TUnit ran118/118 passing,0 skipped; TRX SHA256
+  `52d2215d36895a8189141b500700846a2bfc1ed55fa01d0bfebe1e016630f5a2`.
+  Numeric native gate passed, report SHA256
+  `9d8cb1a5aea3745037950428f8fdba1c9855620aaa8ae8ffcf885e8389743573`.
+  Full Site TUnit/Chrome/JS gates were skipped and remain unqualified.
+- [x] Immutable qualification artifact11225886317 was downloaded and inspected:
+ 865524 bytes, SHA256
+ `6c86e543fbcbee47da1cec43e5ffa909acf62100795ce12179ab75a796994064`.
+ This is failure evidence, not publication or a green suite receipt.
+- [ ] TASK-SITE-GOVERNANCE-SNAPSHOT-033: root adds the existing unchanged
+  required governance plan to the next ordinary descendant candidate, with this
+  execution record. Strongest reviews the exact two-file diff and parent/blob
+  inventory. Do not edit the validator, other chat's plan, `.gitignore`, runtime,
+  README or global status. Repeat the complete GitHub gate with the same authentic
+  comparison input. No source test exists for adding an unchanged required
+  documentation artifact; static governance and the real full workflow are the
+  direct positive/negative evidence. This does not waive any acceptance criterion.
+  F4 tracks the required plan directly. That borrowed plan's `.gitignore`
+  preparation statements describe the other owner's shared-workspace changes;
+  F4 retains its parent's `.gitignore` bytes and includes no such config change.
+- [ ] TASK030/032 production repair remains blocked until the corresponding
+  real Site regression failures are recorded; this governance failure does not
+  count as their red baseline. No deployment occurred.
