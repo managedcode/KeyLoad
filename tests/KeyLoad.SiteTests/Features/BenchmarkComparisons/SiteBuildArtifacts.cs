@@ -23,7 +23,7 @@ internal static class SiteBuildArtifacts
         foreach (var relative in FeatureAssets)
         {
             var source = Path.Combine(inputs.Repository, SiteAssetTokens.FeatureRelativePath, relative);
-            var emitted = Path.Combine(output, SiteAssetTokens.FeatureRelativePath, relative);
+            var emitted = Path.Combine(output, SiteAssetTokens.EmittedFeatureRelativePath, relative);
             await Assert.That(File.Exists(emitted)).IsTrue();
             var emittedBytes = await File.ReadAllBytesAsync(emitted, token);
             var sourceBytes = await File.ReadAllBytesAsync(source, token);
@@ -33,7 +33,7 @@ internal static class SiteBuildArtifacts
         foreach (var relative in VendorFiles)
         {
             var source = Path.Combine(inputs.Repository, SiteAssetTokens.FeatureRelativePath, SiteAssetTokens.ThreeVendorRelativePath, relative);
-            var emitted = Path.Combine(output, SiteAssetTokens.FeatureRelativePath, SiteAssetTokens.ThreeVendorRelativePath, relative);
+            var emitted = Path.Combine(output, SiteAssetTokens.EmittedFeatureRelativePath, SiteAssetTokens.ThreeVendorRelativePath, relative);
             await Assert.That(File.Exists(emitted)).IsTrue();
             var emittedBytes = await File.ReadAllBytesAsync(emitted, token);
             var sourceBytes = await File.ReadAllBytesAsync(source, token);
@@ -53,7 +53,7 @@ internal static class SiteBuildArtifacts
 
     public static async Task CompareVendorManifest(SiteTestInputs inputs, string output, CancellationToken token)
     {
-        var manifestPath = Path.Combine(output, SiteAssetTokens.FeatureRelativePath, SiteAssetTokens.ThreeVendorRelativePath, SiteAssetTokens.ThreeManifestFile);
+        var manifestPath = Path.Combine(output, SiteAssetTokens.EmittedFeatureRelativePath, SiteAssetTokens.ThreeVendorRelativePath, SiteAssetTokens.ThreeManifestFile);
         using var manifest = JsonDocument.Parse(await File.ReadAllBytesAsync(manifestPath, token));
         foreach (var entry in manifest.RootElement.GetProperty(SiteAssetTokens.Files).EnumerateArray())
         {

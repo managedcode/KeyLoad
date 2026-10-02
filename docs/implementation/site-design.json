@@ -66,7 +66,7 @@
     "argumentRoleRepair": "TASK018_FIX_COMPLETE_root_and_strongest_twofile_source_join_6daafb389c2caca0976ea7c8530cae37a6ba033f5fb3001171a2489bfeef1218_bf33778bb16a12d04b07a88d535a516d004957592a2aba9d5b91845e2e0de5fc; enabledbuild0warnings0errors_and_analyzerformatpass; realGitHub_pending"
   },
   "verification": {
-    "source": "All_bounded_worker_packets_complete_joined_full_root_and_strongest_review; 51_source_manifest_98c457ee0333c816795665f742101989b9a0638b2382372313afefd823de4617; source_only_not_runtime_qualification",
+    "source": "Joined bounded website publication source and strongest task reviews; exact next candidate cut and actual full qualification pending; no runtime qualification claimed",
     "staticBuild": {
       "state": "development_build_passed",
       "profiles": 3,
@@ -110,7 +110,7 @@
       ]
     },
     "githubSiteSuite": {
-      "state": "actual_E_failure_repaired_source_awaiting_full_site_publication_candidate_gate",
+      "state": "actual_F4_full_suite_red_repaired_source_pending_complete_GitHub_join",
       "attempts": [
         {
           "run": 36987695573,
@@ -291,6 +291,69 @@
             "log": "/private/tmp/keyload-site-run-36999295427-failed.log"
           },
           "cause": "Preview catalog assumes smoke-first instead of actual large/small/smoke; C# display oracle rounds intermediate p50 incorrectly to 0.48 instead of correct 0.47; browser stops before native receipt and coverage fails as a secondary effect. Portable vendor raw identity/compression tests pass."
+        },
+        {
+          "run": 37005652004,
+          "sourceRevision": "a3bc3adb8974bd1c7e14431ad3f1c6c9f60a707d",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37005652004",
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37005652004/job/110833177216",
+          "purpose": "website_only_publication_tests_first_candidate",
+          "state": "completed_failure",
+          "conclusion": "failure",
+          "publication": "skipped",
+          "analyzerTests": {
+            "total": 118,
+            "executed": 118,
+            "passed": 118,
+            "failed": 0,
+            "skipped": 0
+          },
+          "siteTests": "skipped_not_passing",
+          "nativeReportSha256": "b4486bf99a6e0f99410f88345aaf4aae169927976698bea1ef55d69ec6fd2a1f",
+          "artifactReceipt": {
+            "id": 11225886317,
+            "bytes": 865524,
+            "digest": "sha256:6c86e543fbcbee47da1cec43e5ffa909acf62100795ce12179ab75a796994064",
+            "localEvidence": "/private/tmp/keyload-site-run-37005652004",
+            "log": "/private/tmp/keyload-site-run-37005652004-failed.log"
+          },
+          "cause": "Required canonical mcaf-governance.plan.md omitted from bounded committed snapshot; three focused formatter files have zero diagnostics.",
+          "nativeGateReportSha256": "9d8cb1a5aea3745037950428f8fdba1c9855620aaa8ae8ffcf885e8389743573"
+        },
+        {
+          "run": 37006688275,
+          "sourceRevision": "81d5cc02f10bd6f53b73bcc07b28a6e996a91936",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37006688275",
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37006688275/job/110836514616",
+          "purpose": "website_only_publication_tests_first_candidate",
+          "state": "completed_failure",
+          "conclusion": "failure",
+          "publication": "skipped",
+          "analyzerTests": {
+            "total": 118,
+            "executed": 118,
+            "passed": 118,
+            "failed": 0,
+            "skipped": 0
+          },
+          "siteTests": {
+            "total": 71,
+            "executed": 71,
+            "passed": 64,
+            "failed": 7,
+            "skipped": 0,
+            "trxSha256": "2386bb0ef1bd15499ae7aff3919375531fa8a66c70a7389964c2f7e506242924"
+          },
+          "nativeReportSha256": "f65a47eca30589c484e9ff4a24561c10dbfd62cadfe7805ab600d0ff1992ffec",
+          "artifactReceipt": {
+            "id": 11226745015,
+            "bytes": 21060275,
+            "digest": "sha256:9145f519fa0cdc9723303a289ce2e5946e9f5d6298eaffecaed2f10126fc0f7f",
+            "localEvidence": "/private/tmp/keyload-site-run-37006688275",
+            "log": "/private/tmp/keyload-site-run-37006688275-failed.log"
+          },
+          "cause": "Four real-CLI malformed metadata regressions accepted invalid receipts/IDs; real Chrome Queue ACK to PointRead reaches undefined metric symbol; emitted-asset test oracle wrongly prefixes output with site/. Missing browser receipt fails numeric coverage. All source repairs await next complete GitHub gate.",
+          "nativeGateReportSha256": "3c239c4384e94c31ad48179e62da11fb20e8c4b4706d5ded4ea653b8338fdf2b"
         }
       ]
     },
@@ -334,21 +397,35 @@
       "fullAnalyzerTests": "112executed112passed0failed0skipped",
       "globalProductAndNoDecreaseCoverage": "separate_unqualified"
     },
-    "publicationPreflight": "separate_BC028_source_job_artifact_digest_archive_and_freshness_gates_under_final_source_review"
+    "publicationPreflight": "authenticated metadata selection and immutable same-ZIP setup ran in GitHub F4; current validator/control/caller repairs pending next complete native/Site/Chrome/coverage qualification and provider proof",
+    "latestSiteCoverageFailure": {
+      "run": 37006688275,
+      "sourceRevision": "81d5cc02f10bd6f53b73bcc07b28a6e996a91936",
+      "reportSha256": "76a668b80376f905b4e0a939ccef67c9f0c8d8584f7699afe7fad5a3a3bbfda5",
+      "sources": 17,
+      "criticalSources": 9,
+      "coveredLines": 1214,
+      "executableLines": 2329,
+      "coveredBlockOutcomes": 305,
+      "blockOutcomes": 388,
+      "completedBrowserReceipts": 0,
+      "passed": false
+    }
   },
   "delivery": {
     "candidate": "ordinary_joined_source_descendant_pushed_and_dispatched",
-    "branch": "codex/site-qualification-20261002-a",
+    "branch": "codex/site-publication-20261002",
     "initialCandidateRevision": "f56d511b4a343eff99d3117e9414490a05cfb8ae",
     "qualifiedRevision": null,
     "sourceSnapshotReceiptSha256": "271d8415d29c69e8af84f604858079ed6effd4ce586d06220237ff9ac57b9684",
     "workspace": "shared_dirty_checkout_preserved",
     "main": "preserved_by_site_composer; advanced_by_concurrent_runtime_owner",
-    "currentCandidateRevision": "c203860ac4f489debe6a5daad09d8942415e54b6",
+    "currentCandidateRevision": "81d5cc02f10bd6f53b73bcc07b28a6e996a91936",
     "descendantReceipt": "/private/tmp/keyload-site-candidate-20261002-b.delivery.json",
     "redSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-c.delivery.json",
     "sharedHeadAtRedComposition": "3559225a5f918160e46e32c9a812c3f71790e382",
     "joinedSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-d.delivery.json",
-    "portableSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-e.delivery.json"
+    "portableSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-e.delivery.json",
+    "governanceSnapshotReceipt": "/private/tmp/keyload-site-candidate-f4b-20261002.delivery.json"
   }
 }

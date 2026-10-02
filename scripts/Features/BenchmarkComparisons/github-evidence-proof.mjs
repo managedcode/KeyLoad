@@ -152,18 +152,80 @@ function validMetadataReceipt(receipt, state = C.stateMetadata) {
     object(receipt[F.workflowKey]) && positiveInteger(receipt[F.workflowKey][F.id]) && receipt[F.workflowKey][F.path] === C.workflowPath &&
     object(receipt[F.jobKey]) && positiveInteger(receipt[F.jobKey][F.jobId]) &&
     receipt[F.jobKey][F.url] === `${C.repoWebBase}/actions/runs/${receipt[F.runKey][F.id]}/job/${receipt[F.jobKey][F.jobId]}` &&
-    typeof receipt[F.jobKey][F.jobStartedAt] === C.valueTypes.string && typeof receipt[F.jobKey][F.jobCompletedAt] === C.valueTypes.string && Array.isArray(receipt[F.jobKey][F.comparisonSteps]) &&
+    validReceiptTimes(receipt[F.jobKey], receipt[F.artifactKey]) && validReceiptSteps(receipt[F.jobKey][F.comparisonSteps]) &&
     object(receipt[F.artifactKey]) && positiveInteger(receipt[F.artifactKey][F.id]) &&
     receipt[F.artifactKey][F.artifactName] === C.artifactName && positiveInteger(receipt[F.artifactKey][F.sizeBytes]) &&
+    receipt[F.artifactKey][F.sizeBytes] <= C.maxArchiveBytes &&
     validDigest(receipt[F.artifactKey][F.artifactDigest]) && typeof receipt[F.artifactKey][F.artifactCreatedAt] === C.valueTypes.string &&
-    Array.isArray(receipt[F.metadataFiles]);
+    validMetadataFiles(receipt[F.metadataFiles], receipt[F.runKey]);
 }
 
 function validArchiveReceipt(receipt) {
   return validMetadataReceipt(receipt, C.stateArchive) && object(receipt[F.archiveKey]) &&
     validDigest(`${C.digestPrefix}${receipt[F.archiveKey][F.sha]}`) && positiveInteger(receipt[F.archiveKey][F.bytes]) &&
+    receipt[F.archiveKey][F.bytes] <= C.maxArchiveBytes &&
     receipt[F.archiveKey][F.bytes] === receipt[F.artifactKey][F.sizeBytes] &&
     `${C.digestPrefix}${receipt[F.archiveKey][F.sha]}` === receipt[F.artifactKey][F.artifactDigest];
+}
+
+function validReceiptTimes(job, artifact) {
+  if (typeof job?.[F.jobStartedAt] !== C.valueTypes.string ||
+      typeof job?.[F.jobCompletedAt] !== C.valueTypes.string ||
+      typeof artifact?.[F.artifactCreatedAt] !== C.valueTypes.string) return false;
+  const start = Date.parse(job[F.jobStartedAt]);
+  const created = Date.parse(artifact[F.artifactCreatedAt]);
+  const completed = Date.parse(job[F.jobCompletedAt]);
+  return Number.isFinite(start) && Number.isFinite(created) && Number.isFinite(completed) &&
+    start <= created && created <= completed;
+}
+
+function validReceiptSteps(steps) {
+  if (!Array.isArray(steps) || steps.length !== C.steps.length) return false;
+  const names = new Set();
+  const numbers = new Set();
+  for (const step of steps) {
+    if (!object(step) || !C.steps.includes(step[F.name]) || names.has(step[F.name]) ||
+        !positiveInteger(step[F.number]) || numbers.has(step[F.number])) return false;
+    names.add(step[F.name]);
+    numbers.add(step[F.number]);
+  }
+  return names.size === C.steps.length && numbers.size === C.steps.length;
+}
+
+function validMetadataFiles(files, run) {
+  if (!Array.isArray(files) || !object(run)) return false;
+  const paths = new Set();
+  const expected = new Set(C.files);
+  const attempts = new Map();
+  const selectedRun = run[F.id];
+  const selectedAttempt = run[F.attempt];
+  let selectedPairValid = false;
+  for (const file of files) {
+    if (!object(file) || typeof file[F.path] !== C.valueTypes.string ||
+        typeof file[F.sha256] !== C.valueTypes.string || !C.metadataShaPattern.test(file[F.sha256]) ||
+        paths.has(file[F.path])) return false;
+    const filePath = file[F.path];
+    paths.add(filePath);
+    if (expected.has(filePath)) continue;
+    const match = C.attemptMetadataPattern.exec(filePath);
+    if (!match || String(Number(match[1])) !== match[1] || String(Number(match[2])) !== match[2]) return false;
+    const attemptRun = Number(match[1]);
+    const attempt = Number(match[2]);
+    if (!positiveInteger(attemptRun) || !positiveInteger(attempt)) return false;
+    const kind = match[3];
+    const key = `${attemptRun}/${attempt}`;
+    const pair = attempts.get(key) ?? new Set();
+    if (pair.has(kind)) return false;
+    pair.add(kind);
+    attempts.set(key, pair);
+    if (attemptRun === selectedRun && attempt === selectedAttempt) selectedPairValid = true;
+    expected.add(filePath);
+  }
+  if (C.files.some(filePath => !paths.has(filePath)) || !selectedPairValid || attempts.size > C.maxPairs) return false;
+  for (const pair of attempts.values()) {
+    if (pair.size !== C.attemptFilesPerPair) return false;
+  }
+  return files.length === expected.size;
 }
 
 function validGitHubRunUrl(value, runId) {

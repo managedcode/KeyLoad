@@ -175,7 +175,7 @@ current website or database qualification from a failed artifact.
  865524 bytes, SHA256
  `6c86e543fbcbee47da1cec43e5ffa909acf62100795ce12179ab75a796994064`.
  This is failure evidence, not publication or a green suite receipt.
-- [ ] TASK-SITE-GOVERNANCE-SNAPSHOT-033: root adds the existing unchanged
+- [x] TASK-SITE-GOVERNANCE-SNAPSHOT-033: root adds the existing unchanged
   required governance plan to the next ordinary descendant candidate, with this
   execution record. Strongest reviews the exact two-file diff and parent/blob
   inventory. Do not edit the validator, other chat's plan, `.gitignore`, runtime,
@@ -189,3 +189,62 @@ current website or database qualification from a failed artifact.
 - [ ] TASK030/032 production repair remains blocked until the corresponding
   real Site regression failures are recorded; this governance failure does not
   count as their red baseline. No deployment occurred.
+
+## Actual F4 full-suite red baseline and bounded repairs
+
+Candidate `81d5cc02f10bd6f53b73bcc07b28a6e996a91936`,
+[run37006688275](https://github.com/managedcode/KeyLoad/actions/runs/37006688275),
+[qualify job110836514616](https://github.com/managedcode/KeyLoad/actions/runs/37006688275/job/110836514616)
+passed format/governance, native118/118 tests and all native numeric thresholds.
+Site TRX executed71/71,64passed,7failed,0skipped; SHA256
+`2386bb0ef1bd15499ae7aff3919375531fa8a66c70a7389964c2f7e506242924`.
+Immutable artifact11226745015:21060275bytes, SHA256
+`9145f519fa0cdc9723303a289ce2e5946e9f5d6298eaffecaed2f10126fc0f7f`;
+downloaded and inspected. No Pages deployment occurred.033 static gate is closed;
+this actual full-suite baseline now unblocks the previously recorded030/032 fixes.
+
+- [ ] `AC_BC_028_RejectsZeroAndMissingNonselectedInventoryIds`: actual CLI
+  accepted invalid nonselected IDs;030 validates every flattened identity.
+- [ ] `AC_BC_028_RejectsDuplicateNonselectedJobAndArtifactIdentities`: actual
+  CLI accepted duplicates;030 uses one complete-page identity inventory.
+- [ ] `AC_BC_028_RejectsStructurallyInvalidButMatchingFreshnessReceipts`:
+  stripped matching receipts passed;030 validates both receipt contracts first.
+- [ ] `AC_BC_028_RejectsMalformedStepAndMetadataReceiptsBeforeArchiveProof`:
+  incomplete receipt passed;030 enforces required steps/captures/trails/times/bounds.
+- [ ] `AC_BC_025_RealChromeControlsMatchAuthenticReportsAndRetainNativeCoverage`:
+  new Queue ACK→PointRead regression reached disabled-metric mismatch at helper112;
+ 032 repairs undefined metric symbol with existing default, retaining all assertions.
+- [ ] `AC_BC_016_RealBuilderEmitsCompletePreviewWithAuthenticRawBytesAndNoScriptEvidence`:
+  emitted-asset oracle reused the repository `site/` prefix. TASK-SITE-ASSET-PATH-
+  ORACLE-034 (gpt-6-luna high) owns only SiteAssetTokens.cs + SiteBuildArtifacts.cs;
+  add named emitted prefix and replace exactly three output uses. Strongest
+  independently approved root cause and exact contract before worker release.
+  No source path, asset/vendor assertion, builder or inventory change.
+- [ ] `AfterTestSession coverage failure`: browser flow stopped before its native
+  coverage receipt; actual JS aggregate1214/2329lines52%,305/388block outcomes78%,
+  zero browser receipts. Four new metadata modules already exceed critical90.
+  Fix the caller/control causes above and require the full real Chrome flow and
+  deterministic seventeen-source/nine-critical numeric gate; never lower thresholds.
+
+030 owns four tooling modules;032 owns one production lab line;034 owns two C#
+caller files. Start034 only after this acceptance/ADR contract is approved. Root
+owns documentation, serialized enabled development build/format/static checks and
+final source composition. Join every terminal packet and full strongest diff
+review, then dispatch the complete GitHub gate. All failures remain open until
+actual exact-source green receipts exist; source fixes alone do not close them.
+
+TASK-SITE-RECEIPT-BOUNDARY-REGRESSION-035 (gpt-6-sol high, the previously
+escalated capable C# caller owner) writes only SiteGitHubEvidenceDigestTests.cs.
+Add one controlled malformed-receipt mutation with10001 complete canonical
+attempt pairs, preserving required captures/selected pair, unique positive IDs,
+valid lowercase hashes and all other authentic receipt fields. The real bounded
+Node `verify-archive` must reject it specifically as E_ARCHIVE; it is rejection
+data, not authenticated history or a measurement. Reuse existing named MaxPairs
+and canonical path helper, retain every existing assertion, and keep400file/
+50function/3depth limits. This completes the existing AC028 history-bound edge
+matrix after the actual malformed-receipt RED, with no additional production
+contract or source exclusion. Strongest requested this direct boundary proof;
+root joins the diff, repeats serialized development build/format and full GitHub
+qualification. No worker test execution, shared/config edit or commit is allowed.
+030's initial temporary task diff predated its final pair-count guard; root's
+joined source diff and final proof hash a4de9b1d... are authoritative for review.

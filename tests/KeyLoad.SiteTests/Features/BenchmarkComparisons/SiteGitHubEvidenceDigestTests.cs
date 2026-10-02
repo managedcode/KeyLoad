@@ -108,6 +108,7 @@ internal sealed class SiteGitHubReceiptShapeTests
             receipt => RemoveSelectedAttemptMetadata(receipt, scope, SiteGitHubEvidenceTokens.SelectedRunCapture),
             receipt => RemoveSelectedAttemptMetadata(receipt, scope, SiteGitHubEvidenceTokens.JobsCapture),
             receipt => AddUnmatchedMetadataPair(receipt, scope),
+            receipt => AddTooManyCompleteAttemptPairs(receipt, scope),
             receipt => receipt[SiteGitHubEvidenceTokens.ComparisonJob]![SiteGitHubEvidenceTokens.StartedAt] = SiteGitHubEvidenceTokens.InvalidDate,
             receipt => receipt[SiteGitHubEvidenceTokens.ComparisonJob]![SiteGitHubEvidenceTokens.CompletedAt] =
                 SiteGitHubJobArtifactOracle.BeforeJob(scope.Expected),
@@ -158,6 +159,31 @@ internal sealed class SiteGitHubReceiptShapeTests
             .GetValue<string>() == existingPath)!.DeepClone().AsObject();
         extra[SiteGitHubEvidenceTokens.FilePath] = extraPath;
         metadata.Add(extra);
+    }
+
+    private static void AddTooManyCompleteAttemptPairs(JsonObject receipt, SiteGitHubEvidenceScope scope)
+    {
+        var selectedId = scope.Expected.Run.GetProperty(SiteGitHubEvidenceTokens.ArtifactId).GetInt64();
+        var selectedAttempt = scope.Expected.Run.GetProperty(SiteGitHubEvidenceTokens.RunAttemptField).GetInt32();
+        var files = Metadata(receipt);
+        var runPath = SiteGitHubRunSelectionMutations.AttemptRelativePath(selectedId, selectedAttempt,
+            SiteGitHubEvidenceTokens.SelectedRunCapture);
+        var jobsPath = SiteGitHubRunSelectionMutations.AttemptRelativePath(selectedId, selectedAttempt,
+            SiteGitHubEvidenceTokens.JobsCapture);
+        var runTemplate = files.Single(file => file![SiteGitHubEvidenceTokens.FilePath]!.GetValue<string>() == runPath)!;
+        var jobsTemplate = files.Single(file => file![SiteGitHubEvidenceTokens.FilePath]!.GetValue<string>() == jobsPath)!;
+        for (var offset = SiteGitHubEvidenceTokens.One; offset <= SiteGitHubEvidenceTokens.MaxPairs; offset++)
+        {
+            var runId = selectedId > SiteGitHubEvidenceTokens.MaxPairs ? selectedId - offset : selectedId + offset;
+            var run = runTemplate.DeepClone().AsObject();
+            run[SiteGitHubEvidenceTokens.FilePath] = SiteGitHubRunSelectionMutations.AttemptRelativePath(
+                runId, SiteGitHubEvidenceTokens.One, SiteGitHubEvidenceTokens.SelectedRunCapture);
+            var jobs = jobsTemplate.DeepClone().AsObject();
+            jobs[SiteGitHubEvidenceTokens.FilePath] = SiteGitHubRunSelectionMutations.AttemptRelativePath(
+                runId, SiteGitHubEvidenceTokens.One, SiteGitHubEvidenceTokens.JobsCapture);
+            files.Add(run);
+            files.Add(jobs);
+        }
     }
 }
 

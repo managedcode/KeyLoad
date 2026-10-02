@@ -103,7 +103,7 @@ function setError(state, message) {
 
 function updateMetricAvailability(state) {
   if (metrics[state.metric].queue && state.scenario !== CONFIG.queueScenario) {
-    state.metric = METRIC_ID.throughput;
+    state.metric = CONFIG.defaultMetric;
     state.ui.metric.value = state.metric;
   }
   for (const option of state.ui.metric.options) {

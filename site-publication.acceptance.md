@@ -257,3 +257,14 @@ metrics, and render the independent actual PointRead oracle without browser
 exceptions. TASK032 adds the regression before the exact-SHA red GitHub run and
 repairs the existing undefined-symbol reference afterwards. Every earlier browser
 assertion and source/coverage threshold remains mandatory.
+
+AC-BC-016 emitted-asset identity distinguishes the repository source prefix
+`site/Features/BenchmarkComparisons` from the public output prefix
+`Features/BenchmarkComparisons`. TASK034 repairs only the caller's three emitted
+feature/vendor/manifest paths, using a separate named constant. Source paths,
+the complete fifteen-asset and four-vendor inventories, existence/byte/hash
+assertions, builder output and all seventeen coverage sources remain unchanged.
+The actual F4 failing complete-preview regression is the tests-first baseline;
+the same real builder/raw-report/asset/vendor flow must pass in the next full
+GitHub suite. This is a test-oracle correction under existing architecture, not
+permission to remove an asset or publish qualification tooling as website assets.

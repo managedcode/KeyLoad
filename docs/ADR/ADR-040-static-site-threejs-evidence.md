@@ -384,3 +384,28 @@ the independent throughput oracle and disabled queue metrics. Replace the
 undefined reference with existing CONFIG.defaultMetric. No arithmetic, renderer,
 vendor, source inventory, threshold or deployment boundary changes. Root and
 strongest join exact source/build/format and full GitHub browser evidence.
+
+TASK034 is a test-oracle correction under REQ/AC-BC-016. Actual F4 full-suite
+regression looks for `output/site/Features/...`, but the accepted builder emits
+`output/Features/...`. Ordered implementation contract: root records real failing
+TRX and this contract; economical worker owns only SiteAssetTokens.cs and
+SiteBuildArtifacts.cs, adds a distinct named emitted-feature prefix and changes
+exactly three output-path uses; root inspects source/byte/vendor assertions and
+serial development build/format; strongest reviews the two-file diff; complete
+GitHub native/Site/Chrome/coverage qualification joins before delivery. Keep all
+repository source prefixes, fifteen authored assets, four vendor files, raw
+report/hash checks and seventeen-source/nine-critical coverage inventory. No
+builder, API, dependency, data, renderer or deployment migration; rollback is the
+coherent two-file caller restoration with failure evidence retained. Existing
+complete-preview test is the positive regression; no helper-mirroring test or
+qualification waiver is added. Other implementation owners remain disjoint.
+
+TASK035 completes AC-BC-028's existing bounded history rejection matrix. The
+capable caller worker owns only SiteGitHubEvidenceDigestTests.cs and adds a
+controlled10001-complete-pair receipt case to the real archive CLI regressions,
+keeping required original captures/selected pair and every existing assertion.
+Reuse MaxPairs and canonical path helpers; E_ARCHIVE rejection proves the
+receipt's structural bound without fake transport or performance data. Root
+reviews the single-file diff, serialized development build/format, strongest
+source join and complete real GitHub gates in that order. No data/contract/API/
+deployment migration or threshold change; production ownership stays with030.

@@ -124,12 +124,19 @@ export function validateSuccessfulJob(job, run, attempt) {
 export function flattenPages(pages, property, errorCode) {
   if (!Array.isArray(pages) || pages.length === 0) fail(errorCode, C.messages.paginationInvalid);
   const flattened = [];
+  const identities = new Set();
   let count = null;
   for (const page of pages) {
     if (!object(page) || !Array.isArray(page[property]) || !nonnegativeInteger(page[F.totalCount])) fail(errorCode, C.messages.paginationPageInvalid);
     if (count !== null && page[F.totalCount] !== count) fail(errorCode, C.messages.paginationCountsDisagree);
     count = page[F.totalCount];
-    flattened.push(...page[property]);
+    for (const item of page[property]) {
+      if (!object(item) || !positiveInteger(item[F.id]) || identities.has(item[F.id])) {
+        fail(errorCode, C.messages.paginationIdentityInvalid);
+      }
+      identities.add(item[F.id]);
+      flattened.push(item);
+    }
   }
   if (flattened.length !== count) fail(errorCode, C.messages.paginationIncomplete);
   return flattened;
