@@ -10,9 +10,9 @@ public enum RelationalColumnType
     /// <summary>A JSON boolean.</summary>
     Boolean,
     /// <summary>An exact signed 64-bit JSON integer.</summary>
-    Int64,
+    WholeNumber,
     /// <summary>A JSON number representable as a CLR decimal.</summary>
-    Decimal,
+    FixedPoint,
     /// <summary>An ISO timestamp with an explicit UTC offset.</summary>
     UtcTimestamp
 }

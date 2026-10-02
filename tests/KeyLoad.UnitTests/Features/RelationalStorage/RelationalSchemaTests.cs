@@ -34,7 +34,7 @@ internal sealed class RelationalSchemaTests
             definition with { RelationalSchema = new(RelationalTestData.Key, []) },
             definition with { RelationalSchema = new(MissingColumn, RelationalTestData.Columns) },
             definition with { RelationalSchema = new(RelationalTestData.Key, [new(RelationalTestData.Key, RelationalColumnType.Text, true)]) },
-            definition with { RelationalSchema = new(RelationalTestData.Key, [new(RelationalTestData.Key, RelationalColumnType.Int64)]) },
+            definition with { RelationalSchema = new(RelationalTestData.Key, [new(RelationalTestData.Key, RelationalColumnType.WholeNumber)]) },
             definition with { RelationalSchema = new(RelationalTestData.Key, [.. RelationalTestData.Columns, RelationalTestData.Columns[0]]) },
             definition with { RelationalSchema = new(RelationalTestData.Key, [new(RelationalTestData.Key, (RelationalColumnType)int.MaxValue)]) },
             definition with { RelationalSchema = new(InvalidName, [new(InvalidName, RelationalColumnType.Text)]) },

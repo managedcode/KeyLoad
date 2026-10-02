@@ -55,3 +55,7 @@ precede implementations; execution and baseline happen in GitHub Actions. Source
 coverage thresholds remain mandatory and unqualified while collector is absent.
 
 Schema-name clarification before source join: Q1 metadata names `revision`, `*` and names starting `@` are reserved; `id` is allowed only as the primary key. AC-AISQL-002/003 includes explicit reserved-name rejection and valid id-primary SQL parity tests. PATCH uses raw typed SET scalar preflight before one final-image check; byte/depth caps apply before parsing.
+
+Pre-delivery public enum spelling is WholeNumber for signed Int64 and FixedPoint
+for exact decimal, with unchanged ordinal/range/scale contracts. The initial
+candidate's CA1720 failures are tracked in the plan and repaired without suppression.

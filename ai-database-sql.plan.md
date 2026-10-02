@@ -113,6 +113,19 @@ Reports are retained locally under /tmp/keyload-baseline-37065200835-artifacts;
 GitHub job artifacts remain the durable authority. These failures are tracked
 independently from new SQL correctness; candidate gates must still include them.
 
+## Candidate qualification loop
+
+Candidate6cfdadf38ec527472ef51aadf1ffe8b716a41587 was scoped-committed and pushed to
+codex/ai-database-sql-20261002; [run37068157832](https://github.com/managedcode/KeyLoad/actions/runs/37068157832)
+is the exact first-source qualification. Comparison build job111041008847 and RF3
+build failed before test execution on public RelationalColumnType member names:
+
+- [ ] CA1720 Int64 identifier: rename to WholeNumber preserving signed64 ordinal/contract, update actual validator/test callers; repeat exact-SHA build/complete gates.
+- [ ] CA1720 Decimal identifier: rename to FixedPoint preserving exact decimal ordinal/contract, update actual validator/test callers; repeat exact-SHA build/complete gates.
+
+ADR-055 and acceptance are refined before the naming implementation. No analyzer
+suppression, existing-test weakening, local test run or result inference.
+
 ## Joined-source review findings
 
 - Fixed stale nullable-result assertion to include the dynamic SQL adapter while

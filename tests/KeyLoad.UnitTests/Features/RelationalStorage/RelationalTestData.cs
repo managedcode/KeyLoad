@@ -27,7 +27,7 @@ internal static class RelationalTestData
     internal static ImmutableArray<RelationalColumn> Columns =>
     [
         new(Key, RelationalColumnType.Text), new(Name, RelationalColumnType.Text),
-        new(Count, RelationalColumnType.Int64), new(Amount, RelationalColumnType.Decimal),
+        new(Count, RelationalColumnType.WholeNumber), new(Amount, RelationalColumnType.FixedPoint),
         new(Active, RelationalColumnType.Boolean), new(Timestamp, RelationalColumnType.UtcTimestamp),
         new(Note, RelationalColumnType.Text, Nullable: true)
     ];

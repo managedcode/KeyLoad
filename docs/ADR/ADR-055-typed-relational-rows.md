@@ -2,6 +2,12 @@
 
 Status: Accepted under owner direction2026-10-02; implementation/qualification pending.
 
+Pre-delivery naming refinement: CA1720 rejected the new public enum members
+Int64/Decimal in candidate6cfdadf38. Use WholeNumber (signed 64-bit integer) and
+FixedPoint (exact .NET decimal range/scale). Preserve their ordinal values and
+all scalar correctness contracts; no published/live typed schema migration is
+claimed. This fixes the public identifiers rather than suppressing the analyzer.
+
 ## Decision
 
 Add optional null-omitted RelationalSchema metadata to Collection resources.

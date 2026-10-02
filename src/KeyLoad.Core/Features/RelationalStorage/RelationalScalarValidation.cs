@@ -18,8 +18,8 @@ internal static class RelationalScalarValidation
         {
             RelationalColumnType.Text => value.ValueKind == JsonValueKind.String,
             RelationalColumnType.Boolean => value.ValueKind is JsonValueKind.True or JsonValueKind.False,
-            RelationalColumnType.Int64 => value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out _),
-            RelationalColumnType.Decimal => value.ValueKind == JsonValueKind.Number && RelationalDecimalValidation.IsExact(value),
+            RelationalColumnType.WholeNumber => value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out _),
+            RelationalColumnType.FixedPoint => value.ValueKind == JsonValueKind.Number && RelationalDecimalValidation.IsExact(value),
             RelationalColumnType.UtcTimestamp => IsUtcTimestamp(value),
             _ => false
         };

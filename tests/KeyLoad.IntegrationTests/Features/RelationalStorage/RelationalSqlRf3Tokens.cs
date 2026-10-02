@@ -61,5 +61,5 @@ internal static class RelationalSqlRf3Tokens
     internal const double SampleValue = 5;
     internal static readonly DateTimeOffset SampleAt = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
     internal static ImmutableArray<RelationalColumn> Columns =>
-    [new(Key, RelationalColumnType.Text), new(Title, RelationalColumnType.Text), new(Count, RelationalColumnType.Int64)];
+    [new(Key, RelationalColumnType.Text), new(Title, RelationalColumnType.Text), new(Count, RelationalColumnType.WholeNumber)];
 }
