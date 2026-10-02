@@ -13,7 +13,7 @@ internal sealed class PreparedTransactionTests
     private const int SequenceOffset = 12;
     private const int ChecksumOffset = 20;
     private const int JournalPayloadOffset = 52;
-    private const ulong JournalMagic = 0x314C4157444C4BUL;
+    private const ulong JournalMagic = 0x324C4157444C4BUL;
     private const string JournalFileName = "commands.wal";
     private const string TemporaryDirectoryPrefix = "keyload-prepared-transaction-";
 
@@ -145,7 +145,7 @@ internal sealed class PreparedTransactionTests
 
     private static byte[] CreateExpectedFrame(StorageMutation[] mutations, long position)
     {
-        var payload = JsonDefaults.Serialize(mutations);
+        var payload = ZoneTreeJournalCodec.Serialize(mutations, int.MaxValue);
         var frame = new byte[HeaderLength + payload.Length];
         BinaryPrimitives.WriteUInt64LittleEndian(frame, JournalMagic);
         BinaryPrimitives.WriteInt32LittleEndian(frame.AsSpan(PayloadLengthOffset), payload.Length);

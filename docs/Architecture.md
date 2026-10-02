@@ -43,7 +43,7 @@ flowchart LR
 
 Read the root and nearest project-local AGENTS.md before changing this solution. The product specification is [architecture v0.3](design/architecture-v0.3.uk.md). This document is a navigation map, not a replacement specification or a readiness claim.
 
-The [documentation index](README.md) is the complete entry point for 22 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 55 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
+The [documentation index](README.md) is the complete entry point for 22 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 56 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
 
 Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
 
@@ -403,4 +403,17 @@ flowchart LR
     RF3 --> Oracle[Separate result and guarantees]
     Timescale --> Oracle
     MCTS --> Oracle
+```
+
+## Atomic WAL binary serialization
+
+[ADR-057](ADR/ADR-057-orleans-atomic-wal.md) scopes native generated Orleans serialization to StorageRecovery commands.wal payloads. Private stable mutation DTOs and a cached typed serializer join the existing ordered atomic journal; native ZoneTree bytes/Sync WAL, replication journal, checkpoint2 and Orleans routing stay under their existing owners. Identity3 fences old writers; only offline verified checkpoint-only/empty legacy stores may promote. Source/GitHub qualification pending.
+
+```mermaid
+classDiagram
+    ZoneTreeTransaction --> ZoneTreeJournalCodec : prepares binary payload
+    ZoneTreeJournalPublication --> ZoneTreeJournalCodec : validated payload
+    ZoneTreeJournalRecovery --> ZoneTreeJournalCodec : complete checked decode
+    ZoneTreeJournalCodec --> ZoneTreeJournalMutation : stable generated fields
+    ZoneTreeStoreInitializer --> ZoneTreeIdentityFile : format3 writer fence
 ```

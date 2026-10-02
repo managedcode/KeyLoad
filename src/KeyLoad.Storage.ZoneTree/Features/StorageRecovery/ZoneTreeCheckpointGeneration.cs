@@ -28,7 +28,7 @@ internal static class ZoneTreeCheckpointGeneration
     {
         runtime.Identity = runtime.Identity with
         {
-            FormatVersion = CheckpointVersion,
+            FormatVersion = BinaryJournalIdentityVersion,
             ReadGeneration = replaceTree ? checked(runtime.Identity.ReadGeneration + 1) : runtime.Identity.ReadGeneration
         };
         ZoneTreeIdentityFile.Write(Path.Combine(runtime.Options.Directory, IdentityFileName), runtime.Identity);

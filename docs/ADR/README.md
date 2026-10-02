@@ -98,3 +98,5 @@ and GitHub TUnit/Dry qualification; implementation and exact-SHA proof are pendi
 - configured voter membership for the console's node view.
 
 REQ/AC-AD-008..010 and REQ/AC-BC-029 apply. Exact-SHA qualification is pending.
+
+[ADR-057](ADR-057-orleans-atomic-wal.md) accepts private Orleans binary atomic WAL payloads with format3 fencing and offline checkpoint-only upgrades; source and exact-SHA qualification pending.

@@ -14,8 +14,7 @@ internal static class ZoneTreeBackupRestoreRestore
         ZoneTreeStoreFiles.CreatePrivateDirectory(destination);
         File.Copy(Path.Combine(backup, JournalFileName), Path.Combine(destination, JournalFileName));
         ZoneTreeIdentityFile.Write(Path.Combine(destination, IdentityFileName), identity);
-        ApplyRestoreAuthorityState(destination);
-        return identity;
+        return ApplyRestoreAuthorityState(destination);
     }
 
     private static void EnsureDestinationIsEmpty(string destination)
@@ -38,7 +37,7 @@ internal static class ZoneTreeBackupRestoreRestore
         };
     }
 
-    private static void ApplyRestoreAuthorityState(string destination)
+    private static StoreIdentity ApplyRestoreAuthorityState(string destination)
     {
         using var restored = new ZoneTreeStore(new(destination));
         restored.Commit((tx, _) =>
@@ -49,5 +48,6 @@ internal static class ZoneTreeBackupRestoreRestore
             tx.PutRecord(KeyCodec.Encode(SystemNamespace, DispatchPausedKey), true);
             return true;
         });
+        return restored.Identity;
     }
 }

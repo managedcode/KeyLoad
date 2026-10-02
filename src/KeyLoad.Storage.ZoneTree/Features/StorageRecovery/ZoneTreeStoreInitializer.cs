@@ -15,6 +15,7 @@ internal static class ZoneTreeStoreInitializer
             runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options);
             runtime.Journal = ZoneTreeStoreFiles.OpenJournal(runtime.Options);
             ZoneTreeJournalRecovery.Recover(runtime);
+            runtime.Identity = ZoneTreeIdentityFile.Promote(runtime.Options.Directory, runtime.Identity);
             runtime.Maintainer = runtime.Tree.CreateMaintainer();
             ZoneTreeCheckpointReclaimer.Reclaim(runtime.Options.Directory);
         }

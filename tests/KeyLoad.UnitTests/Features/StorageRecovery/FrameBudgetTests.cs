@@ -23,13 +23,13 @@ internal sealed class FrameBudgetTests
     private const int ChecksumLength = 32;
     private const int EmptyJournalBytes = 0;
     private const long JournalPosition = 1;
-    private const ulong JournalMagic = 0x314C4157444C4BUL;
+    private const ulong JournalMagic = 0x324C4157444C4BUL;
     private const string TemporaryDirectoryPrefix = "keyload-frame-accounting-";
     private const string JournalFileName = "commands.wal";
     private const string OneByteShortDirectorySuffix = "-one-byte-short";
 
     [Test]
-    public async Task IncrementalFrameAccountingMatchesCanonicalJsonAtExactBase64Boundaries()
+    public async Task AcWal002IncrementalFrameAccountingMatchesBinaryPayloadAtExactLimits()
     {
         var root = Path.Combine(Path.GetTempPath(), TemporaryDirectoryPrefix + Guid.NewGuid().ToString("N"));
         try
@@ -55,7 +55,7 @@ internal sealed class FrameBudgetTests
         byte[] valueKey = [0xFB, 0xFF];
         byte[] tombstoneKey = [0xFF, 0xFB];
         StorageMutation[] final = [new(valueKey, last), new(tombstoneKey, null)];
-        var payload = JsonDefaults.Serialize(final);
+        var payload = ZoneTreeJournalCodec.Serialize(final, int.MaxValue);
         var directory = Path.Combine(root, trial.ToString(System.Globalization.CultureInfo.InvariantCulture));
         using var store = new ZoneTreeStore(new(directory) { MaxFrameBytes = payload.Length });
         CommitBoundaryMutations(store, valueKey, first, last, tombstoneKey);

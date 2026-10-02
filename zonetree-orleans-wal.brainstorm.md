@@ -1,0 +1,9 @@
+# Orleans binary atomic WAL
+
+The owner requests Orleans serialization for WAL in ZoneTree with efficient execution and reliable recovery. ZoneTree's native WAL already stores Memory<byte> via ByteArraySerializer, with Sync and no compression. The opportunity is commands.wal: JSON encodes StorageMutation[] and Base64 expands keys/values. The node-local host remains physical owner; no grain/state/caching topology changes.
+
+Options: wrapping native raw bytes adds cost without removing JSON; replacing payload JSON with generated Orleans codecs removes Base64; replacing replication journals or typed value formats expands the fault boundary and is excluded. Choose generated private stable DTOs, one cached typed serializer, bounded binary output, versioned frame magic and identity3. Keep SHA256/sequence/length checks and Flush(true) before apply/ACK.
+
+Existing JSON WAL must never be interpreted as binary. Avoid a dual reader: offline old-binary Compact produces the existing verified checkpoint2; only empty/checkpoint-only legacy stores can promote to identity3 after recovery. A legacy JSON frame fails with explicit upgrade guidance and keeps its authoritative bytes. Stop all RF3 writers and preserve a verified pre-upgrade backup. Old binaries reject identity3; rollback requires the pre-upgrade backup or a compatible binary. No format conversion of replication records, checkpoints or model values.
+
+Risks: serializer full-consumption validation; malformed/null/duplicate mutation arrays; JSON-specific stage budget; identity downgrade in checkpoint replacement; repeated validation cache and rejected-stage preservation. Tests must cover each with real store/files. Benchmarks and process-kill/RF3 evidence run only in GitHub, and cannot establish power-loss durability. Shared checkout contains unrelated comparison changes; preserve them and do not publish them as this repair.

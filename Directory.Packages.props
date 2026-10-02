@@ -18,6 +18,8 @@
     <PackageVersion Include="ModelContextProtocol.Core" Version="2.2.0" />
     <PackageVersion Include="Microsoft.Orleans.Server" Version="10.3.1" />
     <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.3.1" />
+    <PackageVersion Include="Microsoft.Orleans.Serialization" Version="10.3.1" />
+    <PackageVersion Include="Microsoft.Orleans.CodeGenerator" Version="10.3.1" />
     <!-- Orleans' existing Roslyn dependency; analyzer tests select SDK compiler assets. -->
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />

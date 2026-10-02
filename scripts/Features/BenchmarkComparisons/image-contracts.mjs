@@ -77,6 +77,7 @@ export const dockerArgument = Object.freeze({
   context: 'context',
   show: 'show',
   contextInspect: 'inspect',
+  format: '--format',
   contextEndpointTemplate: '{{(index .Endpoints "docker").Host}}',
   version: '--version',
   info: 'info',

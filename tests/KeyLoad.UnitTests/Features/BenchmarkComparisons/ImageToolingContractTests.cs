@@ -175,6 +175,7 @@ internal sealed class ImageToolingEvidenceContractTests
     private const string ManifestDigestProperty = "manifestDigest";
     private const string RegistryDigestProperty = "registryDigest";
     private const string ConfigIdProperty = "configId";
+    private const string MetadataConfigIdProperty = "configImageId";
     private const string SourceRevisionProperty = "sourceRevision";
     private const string RevisionLabelProperty = "revisionLabel";
     private const string FinalReferenceProperty = "finalReference";
@@ -193,7 +194,7 @@ internal sealed class ImageToolingEvidenceContractTests
             expectedRevision = SourceSha,
         });
         await Assert.That(valid.Succeeded).IsTrue();
-        await Assert.That(valid.Value.GetProperty(ConfigIdProperty).GetString()).IsEqualTo(ConfigId);
+        await Assert.That(valid.Value.GetProperty(MetadataConfigIdProperty).GetString()).IsEqualTo(ConfigId);
         await Assert.That(valid.Value.GetProperty(SourceRevisionProperty).GetString()).IsEqualTo(SourceSha);
 
         var wrongRevision = await RunAsync(new

@@ -5,15 +5,9 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomicTransaction
 {
-    private const int ArrayBracketsBytes = 2;
-    private const int MutationPropertyBytes = 21;
-    private const int Base64InputBytes = 3;
-    private const int Base64OutputBytes = 4;
-    private const int Base64RoundingBytes = 2;
-    private const int NullValueOverheadBytes = 2;
     private StorageMutation[]? preparedChanges;
     private byte[]? preparedPayload;
-    private long stagedBytes = ArrayBracketsBytes;
+    private long stagedBytes;
 
     internal SortedSet<ZoneTreeStagedEntry> Changes { get; } = new(ZoneTreeStagedEntryComparer.Instance);
 
@@ -51,14 +45,13 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
     }
 
     private static long MutationBytes(byte[] key, byte[]? value)
-        => MutationPropertyBytes + Base64OutputBytes * ((key.LongLength + Base64RoundingBytes) / Base64InputBytes)
-            + (value is null ? NullValueOverheadBytes : Base64OutputBytes * ((value.LongLength + Base64RoundingBytes) / Base64InputBytes));
+        => key.LongLength + (value?.LongLength ?? 0);
 
     private void Stage(byte[] key, byte[]? value)
     {
         var replacing = Changes.TryGetValue(new(key, null), out var previous);
         var bytes = stagedBytes - (replacing ? MutationBytes(key, previous!.Value) : 0)
-            + MutationBytes(key, value) + (replacing || Changes.Count == 0 ? 0 : 1);
+            + MutationBytes(key, value);
         if (bytes > runtime.Options.MaxFrameBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, TransactionFrameLimitExceeded);
@@ -82,7 +75,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
     {
         preparedPayload = null;
         preparedChanges = null;
-        stagedBytes = ArrayBracketsBytes;
+        stagedBytes = 0;
         Changes.Clear();
     }
 
@@ -99,13 +92,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
             return preparedPayload;
         }
 
-        var payload = JsonDefaults.Serialize(PrepareChanges());
-        if (payload.Length > runtime.Options.MaxFrameBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, TransactionFrameLimitExceeded);
-        }
-
-        return preparedPayload = payload;
+        return preparedPayload = ZoneTreeJournalCodec.Serialize(PrepareChanges(), runtime.Options.MaxFrameBytes);
     }
 
     public ScanPage Scan(byte[] prefix, int maxRecords, byte[]? afterKey = null)

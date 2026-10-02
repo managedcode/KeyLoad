@@ -51,7 +51,7 @@ internal static class ZoneTreeJournalRecovery
         }
 
         journal.ReadExactly(header);
-        var (length, sequence) = ValidateHeader(header, runtime.Position, runtime.Options.MaxFrameBytes);
+        var (length, sequence) = ValidateHeader(header, runtime.Position, runtime.Options.MaxFrameBytes, runtime.Identity.FormatVersion);
         if (journal.Length - journal.Position < length)
         {
             journal.SetLength(validLength);
@@ -65,7 +65,7 @@ internal static class ZoneTreeJournalRecovery
             throw Errors.Fail(ErrorCode.Corruption, JournalChecksumInvalid);
         }
 
-        foreach (var mutation in JsonDefaults.Deserialize<StorageMutation[]>(payload))
+        foreach (var mutation in ZoneTreeJournalCodec.Deserialize(payload))
         {
             runtime.Apply(mutation);
         }
@@ -75,9 +75,15 @@ internal static class ZoneTreeJournalRecovery
         return true;
     }
 
-    private static (int Length, long Sequence) ValidateHeader(byte[] header, long position, int maxFrameBytes)
+    private static (int Length, long Sequence) ValidateHeader(byte[] header, long position, int maxFrameBytes, int identityVersion)
     {
-        if (BinaryPrimitives.ReadUInt64LittleEndian(header) != JournalMagic)
+        var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
+        if (magic == LegacyJournalMagic || magic == JournalMagic && identityVersion != BinaryJournalIdentityVersion)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, JournalFormatUpgradeRequired);
+        }
+
+        if (magic != JournalMagic)
         {
             throw Errors.Fail(ErrorCode.Corruption, JournalHeaderInvalid);
         }

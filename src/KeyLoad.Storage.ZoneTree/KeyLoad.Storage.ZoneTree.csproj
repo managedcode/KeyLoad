@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
+    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <PackageReference Include="Microsoft.Orleans.Serialization" />
+    <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
     <PackageReference Include="ZoneTree" />
     <PackageReference Include="ManagedCode.Storage.FileSystem" />
   </ItemGroup>

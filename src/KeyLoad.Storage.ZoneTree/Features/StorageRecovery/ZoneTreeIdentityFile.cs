@@ -8,7 +8,7 @@ internal static class ZoneTreeIdentityFile
     internal static StoreIdentity Open(ZoneTreeStoreOptions options)
     {
         var path = Path.Combine(options.Directory, IdentityFileName);
-        var identity = File.Exists(path) ? Read(path) : new(InitialIdentityVersion, KeyCodec.Version,
+        var identity = File.Exists(path) ? Read(path) : new(BinaryJournalIdentityVersion, KeyCodec.Version,
             Guid.NewGuid(), options.Incarnation ?? Guid.NewGuid(),
             options.SigningKey is { } configuredKey ? configuredKey.ToArray() : RandomNumberGenerator.GetBytes(SigningKeyBytes),
             DurabilityProfile.ProcessDurable);
@@ -21,9 +21,21 @@ internal static class ZoneTreeIdentityFile
         return identity;
     }
 
+    internal static StoreIdentity Promote(string directory, StoreIdentity identity)
+    {
+        if (identity.FormatVersion == BinaryJournalIdentityVersion)
+        {
+            return identity;
+        }
+
+        var promoted = identity with { FormatVersion = BinaryJournalIdentityVersion };
+        Write(Path.Combine(directory, IdentityFileName), promoted);
+        return promoted;
+    }
+
     private static void Validate(StoreIdentity identity, ZoneTreeStoreOptions options)
     {
-        if (identity.FormatVersion is not (InitialIdentityVersion or CheckpointVersion)
+        if (identity.FormatVersion is not (InitialIdentityVersion or CheckpointVersion or BinaryJournalIdentityVersion)
             || identity.KeyCodecVersion != KeyCodec.Version)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);

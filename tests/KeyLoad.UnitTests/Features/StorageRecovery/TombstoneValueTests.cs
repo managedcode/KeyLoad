@@ -14,7 +14,7 @@ internal sealed class TombstoneValueTests
     private const int ChecksumOffset = 20;
     private const int ChecksumLength = 32;
     private const long EmptyJournalLength = 0;
-    private const ulong JournalMagic = 0x314C4157444C4BUL;
+    private const ulong JournalMagic = 0x324C4157444C4BUL;
     private const string JournalFileName = "commands.wal";
 
     [Test]
@@ -65,11 +65,11 @@ internal sealed class TombstoneValueTests
         var root = CreateDirectory();
         var emptyKey = new byte[] { 0x10 };
         var deletedKey = new byte[] { 0x20 };
-        var payload = JsonDefaults.Serialize(new StorageMutation[]
+        var payload = ZoneTreeJournalCodec.Serialize(new StorageMutation[]
         {
             new(emptyKey, Array.Empty<byte>()),
             new(deletedKey, (ReadOnlyMemory<byte>?)null)
-        });
+        }, int.MaxValue);
         try
         {
             var directory = Path.Combine(root, "exact");
@@ -84,9 +84,7 @@ internal sealed class TombstoneValueTests
 
                 var expectedFrame = CreateFrame(payload, 1);
                 await AssertJournalEquals(Path.Combine(directory, JournalFileName), expectedFrame);
-                await Assert.That(payload).IsEquivalentTo(
-                    "[{\"key\":\"EA==\",\"value\":\"\"},{\"key\":\"IA==\",\"value\":null}]"u8.ToArray(),
-                    CollectionOrdering.Matching);
+                await AssertBinaryEmptyAndDeletePayload(payload, emptyKey, deletedKey);
             }
 
             using var tooSmall = new ZoneTreeStore(new(Path.Combine(root, "short"))
@@ -106,6 +104,20 @@ internal sealed class TombstoneValueTests
         {
             Directory.Delete(root, recursive: true);
         }
+    }
+
+    private static async Task AssertBinaryEmptyAndDeletePayload(byte[] payload, byte[] emptyKey, byte[] deletedKey)
+    {
+        using var serializer = new WalSerializerFixture();
+        var decoded = serializer.Deserialize(payload);
+        await Assert.That(decoded.Length).IsEqualTo(2);
+        await Assert.That(decoded[0].Key.Span.SequenceEqual(emptyKey)).IsTrue();
+        await Assert.That(decoded[0].Kind).IsEqualTo(ZoneTreeJournalMutation.PutKind);
+        await Assert.That(decoded[0].Value.HasValue).IsTrue();
+        await Assert.That(decoded[0].Value!.Value.Length).IsEqualTo(0);
+        await Assert.That(decoded[1].Key.Span.SequenceEqual(deletedKey)).IsTrue();
+        await Assert.That(decoded[1].Kind).IsEqualTo(ZoneTreeJournalMutation.DeleteKind);
+        await Assert.That(decoded[1].Value.HasValue).IsFalse();
     }
 
     private static async Task AssertCommittedView(ZoneTreeStore store, byte[] prefix,

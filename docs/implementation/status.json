@@ -20,6 +20,14 @@
   "KL-003": {
     "title": "ZoneTree durability audit і crash harness",
     "status": "in_progress",
+    "atomicWalSerialization": {
+      "status": "source_implemented_qualification_pending",
+      "decision": "docs/ADR/ADR-057-orleans-atomic-wal.md",
+      "source": "generated_Orleans10.3.1_binary_mutations_explicit_kind_full_consumption_frame2_identity3_native_ZoneTree_unchanged",
+      "upgrade": "offline_old_binary_compact_verified_backup_homogeneous_RF3_no_JSON_fallback",
+      "verification": "restore_governance_pass_no_final_WAL_compiler_analyzer_diagnostics_dirty_tree_build_blocked_by_111_concurrent_comparison_diagnostics_exact_committed_GitHub_full_build_format_unit_process_recovery_RF3_pending",
+      "performance": "encoded_size_regression_authored_no_acceleration_power_loss_or_endurance_claim"
+    },
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",

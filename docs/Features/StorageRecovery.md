@@ -236,3 +236,26 @@ and1000success receipts perOS. Existing ADR-035 lifetime/test contracts suffice;
 ADR:N/A for additional architecture because this is test-harness ordering only,
 with no product/wire/persistence/topology change. Rollback reintroduces the
 post-cleanup receipt cancellation risk without altering production data.
+
+## Orleans binary atomic WAL
+
+[ADR-057](../ADR/ADR-057-orleans-atomic-wal.md) accepts owner-directed REQ-STORAGE-015..019 and AC-WAL-001..005. New commands.wal mutation payloads use generated Orleans binary serialization, versioned magic2 and identity3. Native ZoneTree raw-byte Sync WAL, checkpoint2 and replication journals retain their own contracts. Offline upgrade requires old-binary Compact and a verified backup on every stopped RF3 node; a remaining JSON frame refuses with FormatUnsupported instead of a fallback reader. Exact-source source/runtime qualification remains pending.
+
+|Requirement|Acceptance/test trace|
+|---|---|
+|REQ-STORAGE-015 binary mutation codec|AC-WAL-001 real-store binary/empty/delete roundtrip and reopen|
+|REQ-STORAGE-016 exact bounded payload|AC-WAL-002 FrameBudgetTests plus PreparedTransactionTests cache/replacement/reset/rejected-stage|
+|REQ-STORAGE-017 safe replay|AC-WAL-003 checksum/full-consumption/shape/order/legacy rejection and existing real commit crash cuts|
+|REQ-STORAGE-018 version fence and offline upgrade|AC-WAL-004 legacy checkpoint/empty/refusal, Compact/InstallSnapshot/restore identity preservation|
+|REQ-STORAGE-019 authentic qualification|AC-WAL-005 full Release/formatter/governance and exact-SHA GitHub unit/process-recovery/RF3 SDK+MCP; speed and power-loss unclaimed|
+
+```mermaid
+flowchart LR
+    Transaction[Owned ordered transaction] --> Codec[Orleans generated binary payload]
+    Codec --> Commit[Checksum and disk flush]
+    Commit --> Native[Native ZoneTree Sync WAL]
+    Reopen[Journal recovery] --> Validate[Version checksum complete decode and ordered keys]
+    Validate --> Apply[Apply verified mutations]
+```
+
+See root zonetree-orleans-wal.acceptance.md and .plan.md for precise pass/fail conditions, disjoint agent scopes, rollout/rollback and verification. No new UI/API/model format; no local tests; all runtime evidence comes from GitHub.
