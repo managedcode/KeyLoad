@@ -4,6 +4,7 @@ namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 
 internal sealed class KilledProcessFileReadinessTests
 {
+    private const string TreeDirectoryName = "tree";
     private const string MetadataWalPath = "tree/0.meta.wal";
     private const int ReadinessBoundSeconds = 5;
     private static readonly TimeSpan ReadinessBound = TimeSpan.FromSeconds(ReadinessBoundSeconds);
@@ -56,6 +57,7 @@ internal sealed class KilledProcessFileReadinessTests
     }
 
     [Test]
+    [NotInParallel]
     public async Task AcStorage012_PermanentMetadataWalLockFailsWithinReadinessBound()
     {
         await using var fixture = new KilledProcessFileReadinessFixture();
@@ -68,6 +70,56 @@ internal sealed class KilledProcessFileReadinessTests
             fixture.MarkReadinessObserved();
             await Assert.That(started.Elapsed).IsGreaterThanOrEqualTo(ReadinessBound);
             await Assert.That(started.Elapsed).IsLessThanOrEqualTo(ObservationBound);
+        });
+    }
+
+    [Test]
+    public async Task AcStorage012_MissingTreeDirectoryIsReadyWithoutCreatingMetadata()
+    {
+        await using var fixture = new KilledProcessFileReadinessFixture();
+        await fixture.RunAsync(async fixture =>
+        {
+            fixture.MoveTreeAside();
+            await KilledProcessFileReadiness.WaitAsync(fixture.Root, CancellationToken.None);
+            await Assert.That(Directory.Exists(Path.Combine(fixture.Root, TreeDirectoryName))).IsFalse();
+            await Assert.That(File.Exists(Path.Combine(fixture.Root, MetadataWalPath))).IsFalse();
+            fixture.RestoreTree();
+            await Assert.That(fixture.ReopenAndCommit()).IsTrue();
+        });
+    }
+
+    [Test]
+    public async Task AcStorage012_MissingMetadataFileIsReadyWithoutCreatingIt()
+    {
+        await using var fixture = new KilledProcessFileReadinessFixture();
+        await fixture.RunAsync(async fixture =>
+        {
+            fixture.MoveMetadataWalAside();
+            await KilledProcessFileReadiness.WaitAsync(fixture.Root, CancellationToken.None);
+            await Assert.That(Directory.Exists(Path.Combine(fixture.Root, TreeDirectoryName))).IsTrue();
+            await Assert.That(File.Exists(Path.Combine(fixture.Root, MetadataWalPath))).IsFalse();
+            fixture.RestoreMetadataWal();
+            await Assert.That(fixture.ReopenAndCommit()).IsTrue();
+        });
+    }
+
+    [Test]
+    [Arguments("owner.lock")]
+    [Arguments("commands.wal")]
+    public async Task AcStorage012_MissingRequiredOwnershipFileStillFails(string relativePath)
+    {
+        await using var fixture = new KilledProcessFileReadinessFixture();
+        await fixture.RunAsync(async fixture =>
+        {
+            var missingPath = Path.Combine(fixture.Root, relativePath);
+            File.Delete(missingPath);
+            var started = Stopwatch.StartNew();
+            var readiness = fixture.StartReadiness();
+            await Assert.ThrowsExactlyAsync<FileNotFoundException>(() => readiness);
+            fixture.MarkReadinessObserved();
+            await Assert.That(started.Elapsed).IsGreaterThanOrEqualTo(ReadinessBound);
+            await Assert.That(started.Elapsed).IsLessThanOrEqualTo(ObservationBound);
+            await Assert.That(File.Exists(missingPath)).IsFalse();
         });
     }
 }

@@ -109,6 +109,59 @@ and exact-SHA GitHub first-failure/report/recovery artifacts supplement those
 assertions. Environmental watch/runner failures
 must not be replaced by mocks or counted as green qualification.
 
+TASK-RUNTIME-RESTART-RECEIPT-W4 refines REQ/AC-TEST-007 after exact main
+b533c80 / CI37032546228. The failed native restart attempt is currently missing
+its container generation: the first receipt shows the killed old node and later
+receipts show a successful restoration. Capture the public Aspire current
+ResourceId, closed state/health, exit code and creation/start/stop timestamps
+before Start, after its successful command and immediately after an existing
+restart failure. These are sampled snapshots, not a native snapshot version or
+proof of the transition which caused the failure. Native Version and readiness
+internals are unavailable and must not be reflected or inferred.
+
+The failure receipt includes the existing verified pre-kill Docker ID/start time,
+closed failure stage/type, Start success and one immediate read-only Docker
+inspection of ID/status/exit/OOM/start/finish/error-present. No Docker error text,
+environment, properties, endpoints, credentials, arbitrary method/type text or
+payload is included. Only validated native identifiers and timestamps are
+retained; unknown states/types become a fixed unavailable/other marker. At most
+32 earliest restart receipts plus one latest view are retained, with80-line/8KiB
+UTF-8 bounds and filenames containing only the local sequence. The diagnostic
+has its own three-second native-inspection deadline after the original failure.
+Every path after process creation owns termination, reaping and observation of
+both redirected readers, including setup, wait and reader faults. Mandatory
+cleanup can extend wall time if operating-system termination is delayed; no
+hard end-to-end three-second return or detached process/reader claim is allowed.
+Termination checks an exit race and retries a failed live-child tree kill once;
+a final live-child kill error is retained through mandatory task joining. If
+the operating system permanently refuses termination, finite cleanup cannot be
+guaranteed. This environmental branch needs native CI evidence or source review,
+never a synthetic process failure or a passing lifecycle claim.
+It releases/awaits its actual CLI process and redirected readers on cancellation,
+then rethrows the original restart exception even if diagnostic inspection or
+file writing fails. Existing synchronous whole-file persistence keeps its
+80-line/8KiB limit; no hard three-second filesystem-latency claim or detached
+writer task is allowed.
+No Start, health, runtime identity, zero-exit, cancellation, timeout, retry count,
+quorum, atomicity, data or cleanup assertion changes.
+
+Root owns ContainerRuntimeControl and the closed receipt-kind join in
+ClusterFailureReceipts; one disjoint worker owns only new ClusterReplication
+failure-capture/projection/CLI-lifetime helpers and real temporary-file tests.
+Tests first prove only selected native public snapshot fields survive with
+canary properties/env/URL/state/identifier/type rejected, whole valid bounded
+files preserve the first failed generation across later receipts, and32-file
+retention remains exact. Native-shaped Docker records cover valid identities,
+safe error-presence projection and malformed ID/state/exit/OOM/timestamp fields;
+actual stream readers prove output is drained after its retained prefix is full.
+Do not fake native services, Docker or process failures.
+The original RF3 leader-loss/minority scenario remains the real lifecycle test;
+an environmental failure branch additionally requires exact-SHA GitHub artifact
+review and source lifetime/predicate comparison. If the next run succeeds, do
+not claim its unexecuted failure path qualified. ADR-035/036/039 existing
+privacy/lifetime contracts suffice; no product/public/dependency boundary changes.
+Rollback reverts only this additive diagnostic join and its helpers/tests.
+
 ## Platform, dependency та release qualification
 
 B3 keeps the exact task lifetime above while satisfying enabled CA1031: a private

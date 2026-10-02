@@ -1,0 +1,1500 @@
+{
+  "runId": 37032546228,
+  "sha": "b533c80a128a85c6e2072de3bc011a09d4a97cc7",
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37032546228",
+  "branch": "main",
+  "status": "completed",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 110923013856,
+      "name": "verify (macos-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37032546228/job/110923013856",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify EditorConfig and analyzer fixes",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify repository governance",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify source-owned Roslyn rules",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Qualify real process recovery after a successful build",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain compiler diagnostic reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110923013875,
+      "name": "docker-rf3",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37032546228/job/110923013875",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require the actual Docker runtime",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require the actual administration browser",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Qualify RF3 through the real SDK clients",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Retain real topology and fault receipts",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain RF3 compiler diagnostic reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110923014024,
+      "name": "comparison-smoke",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37032546228/job/110923014024",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Measure 1 KiB documents, eight clients and three graph hops",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Measure 16 KiB documents, four clients and five graph hops",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain comparison test result reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain comparison compiler diagnostic reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110923014105,
+      "name": "analyzer-rules",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37032546228/job/110923014105",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain rule regression and diagnostic evidence",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110923014152,
+      "name": "verify (windows-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37032546228/job/110923014152",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify EditorConfig and analyzer fixes",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify repository governance",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify source-owned Roslyn rules",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Qualify real process recovery after a successful build",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain compiler diagnostic reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110923014197,
+      "name": "verify (ubuntu-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37032546228/job/110923014197",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify EditorConfig and analyzer fixes",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify repository governance",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify source-owned Roslyn rules",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Qualify real process recovery after a successful build",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain compiler diagnostic reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "nativeReports": [
+    {
+      "relativePath": "analyzer-rule-evidence/TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "8db2202be13ad57c5ba8d7638a5d617ecad0fcbd269ef1f1a1f3d9b599a75c8f",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": []
+    },
+    {
+      "relativePath": "comparison-test-results/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "sha256": "70d64c3dc9023b2674a4959b38b3a1640abc7cf2da70ad73f4591d1e8dbbf916",
+      "assembly": "KeyLoad.ComparisonTests",
+      "summary": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": [
+        {
+          "id": "KeyLoad.ComparisonTests.RealComparisonSuite.1.1.AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines.1.1.0",
+          "method": "AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.ComparisonTests/ComparisonTests.cs",
+          "exceptionType": "System.OperationCanceledException",
+          "message": "Resource 'comparisons' failed to meet the predicate condition before the operation was cancelled.\n- Current State: Waiting\n- Creation Time: (null)\n- Current Health: (null)"
+        },
+        {
+          "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.1.1.AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema.1.1.0",
+          "method": "AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/TimeSeriesAspireProfileTests.cs",
+          "exceptionType": "System.OperationCanceledException",
+          "message": "Resource 'comparisons' failed to meet the predicate condition before the operation was cancelled.\n- Current State: Waiting\n- Creation Time: (null)\n- Current Health: (null)"
+        }
+      ]
+    },
+    {
+      "relativePath": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "sha256": "781e50825cbfbc1d06ea858a9977426efb52c18b17e3eb7abe4d3e4b202d43ac",
+      "assembly": "KeyLoad.IntegrationTests",
+      "summary": {
+        "total": 36,
+        "passed": 27,
+        "failed": 9,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": [
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpDiscoveryTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints.1.1.0",
+          "method": "AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClientApi/McpDiscoveryTests.cs",
+          "exceptionType": "System.InvalidOperationException",
+          "message": "Sequence contains no elements"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd001CredentialFreeShellNeverExemptsDataOrUnknownAssets.1.1.0",
+          "method": "AcAd001CredentialFreeShellNeverExemptsDataOrUnknownAssets",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/AdminDashboard/AdminDashboardRf3Tests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected to be equal to OK\nbut received InternalServerError\n\nat Assert.That(shell.StatusCode).IsEqualTo(HttpStatusCode.OK)"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd001CurrentPersistedAdministratorRevocationOrExpiryRejectsLaterReads(System.Boolean).1.1.0",
+          "method": "AcAd001CurrentPersistedAdministratorRevocationOrExpiryRejectsLaterReads",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/AdminDashboard/AdminDashboardRf3Tests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected to be true\nbut found False\n\nat Assert.That(result.IsSuccess).IsTrue()"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd001CurrentPersistedAdministratorRevocationOrExpiryRejectsLaterReads(System.Boolean).2.1.0",
+          "method": "AcAd001CurrentPersistedAdministratorRevocationOrExpiryRejectsLaterReads",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/AdminDashboard/AdminDashboardRf3Tests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected to be true\nbut found False\n\nat Assert.That(result.IsSuccess).IsTrue()"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.EventStreams.McpEventStreamTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp007SdkAndOfficialClientReturnIdenticalBoundedReplayPages.1.1.0",
+          "method": "AcMcp007SdkAndOfficialClientReturnIdenticalBoundedReplayPages",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/EventStreams/McpEventStreamTests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected to be true\nbut found False\n\nat Assert.That(mcpPage.Events.Select(record => record.Data).SequenceEqual(expectedEvents)).IsTrue()"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.EventStreams.McpEventStreamTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp005SdkAppendAndMcpRetryReturnOneCommittedEventBatch.1.1.0",
+          "method": "AcMcp005SdkAppendAndMcpRetryReturnOneCommittedEventBatch",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/EventStreams/McpEventStreamTests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected to be true\nbut found False\n\nat Assert.That(mcpPage.Events.Select(record => record.Data).SequenceEqual(expectedEvents)).IsTrue()"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.EventStreams.McpEventStreamTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002ScopedEventReadDeniesForeignTenantAndStaleGenerationWithoutLeakingData.1.1.0",
+          "method": "AcMcp002ScopedEventReadDeniesForeignTenantAndStaleGenerationWithoutLeakingData",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/EventStreams/McpEventStreamTests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected to be true\nbut found False\n\nat Assert.That(mcpPage.Events.Select(record => record.Data).SequenceEqual(expectedEvents)).IsTrue()"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.ClusterTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites.1.1.0",
+          "method": "ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/ClusterTests.cs",
+          "exceptionType": "Aspire.Hosting.DistributedApplicationException",
+          "message": "Stopped waiting for resource 'node2' to become healthy because it failed to start."
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardBrowserTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd006RealChromeBrowsesSeededRf3DataAndDisconnectClearsSession.1.1.0",
+          "method": "AcAd006RealChromeBrowsesSeededRf3DataAndDisconnectClearsSession",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/AdminDashboard/AdminDashboardBrowserTests.cs",
+          "exceptionType": "System.Threading.Tasks.TaskCanceledException",
+          "message": "A task was canceled."
+        }
+      ]
+    },
+    {
+      "relativePath": "test-results-macos-latest/TestResults/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json",
+      "sha256": "4a86d63ca24dcd13f915eb8209b33ea6105a09e02a5091961293324cda86dae3",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": []
+    },
+    {
+      "relativePath": "test-results-macos-latest/TestResults/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+      "sha256": "988b7bb14497ff6de89b7a7b1d63378f2bdfa04e5bb9d90fb4487f70f2f3c5cc",
+      "assembly": "KeyLoad.RecoveryTests",
+      "summary": {
+        "total": 121,
+        "passed": 119,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": [
+        {
+          "id": "KeyLoad.RecoveryTests.StoragePublicationRecoveryTests.1.1.ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration(System.String, KeyLoad.Storage.ZoneTree.CommitStage).8.1.0",
+          "method": "ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+          "exceptionType": "System.IO.DirectoryNotFoundException",
+          "message": "Could not find a part of the path '/var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T/keyload-checkpoint-crash-de5b12f29504498789f6612d9a413a24/tree/0.meta.wal'."
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StoragePublicationRecoveryTests.1.1.ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration(System.String, KeyLoad.Storage.ZoneTree.CommitStage).7.1.0",
+          "method": "ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+          "exceptionType": "System.IO.DirectoryNotFoundException",
+          "message": "Could not find a part of the path '/var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T/keyload-checkpoint-crash-bbb6506598534b0fb5b8014488506fb6/tree/0.meta.wal'."
+        }
+      ]
+    },
+    {
+      "relativePath": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "sha256": "01ee8fac462e0e5a6178b1e69923dc280f9757a52fad2ead93464fd1d307b458",
+      "assembly": "KeyLoad.UnitTests",
+      "summary": {
+        "total": 804,
+        "passed": 800,
+        "failed": 4,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": [
+        {
+          "id": "KeyLoad.UnitTests.Features.AdminDashboard.AdminCatalogTests.1.1.AcAd001OrdinaryPrincipalAndRevokedAdministratorCannotReadCatalog.1.1.0",
+          "method": "AcAd001OrdinaryPrincipalAndRevokedAdministratorCannotReadCatalog",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/AdminDashboard/AdminCatalogTests.cs",
+          "exceptionType": "KeyLoad.KeyLoadException",
+          "message": "A policy update must advance its epoch."
+        },
+        {
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpToolCursorTests.1.1.MalformedCursorUsesOneFixedSafeValidation(System.String).12.1.0",
+          "method": "MalformedCursorUsesOneFixedSafeValidation",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ClientApi/McpToolPaginationTests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown"
+        },
+        {
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpTransportDiagnosticsTests.1.1.KnownMethodCategoryIsClosed.1.1.0",
+          "method": "KnownMethodCategoryIsClosed",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportDiagnosticsTests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected to contain \"ToolsCall\"\nbut received \"\"\n\nat Assert.That(capture.Text).Contains(CategoryToolsCall)"
+        },
+        {
+          "id": "KeyLoad.UnitTests.Features.AdminDashboard.AdminQueueTests.1.1.AcAd005PaginationNeverConsumesOrSweepsPersistedMessages.1.1.0",
+          "method": "AcAd005PaginationNeverConsumesOrSweepsPersistedMessages",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/AdminDashboard/AdminQueueTests.cs",
+          "exceptionType": "KeyLoad.KeyLoadException",
+          "message": "The leader clock is behind the committed clock."
+        }
+      ]
+    },
+    {
+      "relativePath": "test-results-ubuntu-latest/TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "e6f1d180b4c047d0d83d6ab08d8c6ca3c6b842b4a647ac2ed1b34b2b9e2ebb31",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": []
+    },
+    {
+      "relativePath": "test-results-ubuntu-latest/TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "sha256": "0a784248c4e5d0eb22ba0c0a9661c8523688a01c351f8571ff04688400743d49",
+      "assembly": "KeyLoad.RecoveryTests",
+      "summary": {
+        "total": 121,
+        "passed": 119,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": [
+        {
+          "id": "KeyLoad.RecoveryTests.StoragePublicationRecoveryTests.1.1.ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration(System.String, KeyLoad.Storage.ZoneTree.CommitStage).8.1.0",
+          "method": "ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+          "exceptionType": "System.IO.DirectoryNotFoundException",
+          "message": "Could not find a part of the path '/tmp/keyload-checkpoint-crash-277afe9b9a86488f831beec8708c9dd9/tree/0.meta.wal'."
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StoragePublicationRecoveryTests.1.1.ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration(System.String, KeyLoad.Storage.ZoneTree.CommitStage).7.1.0",
+          "method": "ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+          "exceptionType": "System.IO.DirectoryNotFoundException",
+          "message": "Could not find a part of the path '/tmp/keyload-checkpoint-crash-4b270f942f31468abae4711c2a541d34/tree/0.meta.wal'."
+        }
+      ]
+    },
+    {
+      "relativePath": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "5205eca7144a5b470bd5f82669775e72aa004e382d027d75896237bfd5434495",
+      "assembly": "KeyLoad.UnitTests",
+      "summary": {
+        "total": 804,
+        "passed": 800,
+        "failed": 4,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": [
+        {
+          "id": "KeyLoad.UnitTests.Features.AdminDashboard.AdminCatalogTests.1.1.AcAd001OrdinaryPrincipalAndRevokedAdministratorCannotReadCatalog.1.1.0",
+          "method": "AcAd001OrdinaryPrincipalAndRevokedAdministratorCannotReadCatalog",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/AdminDashboard/AdminCatalogTests.cs",
+          "exceptionType": "KeyLoad.KeyLoadException",
+          "message": "A policy update must advance its epoch."
+        },
+        {
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpToolCursorTests.1.1.MalformedCursorUsesOneFixedSafeValidation(System.String).12.1.0",
+          "method": "MalformedCursorUsesOneFixedSafeValidation",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ClientApi/McpToolPaginationTests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown"
+        },
+        {
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpTransportDiagnosticsTests.1.1.KnownMethodCategoryIsClosed.1.1.0",
+          "method": "KnownMethodCategoryIsClosed",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportDiagnosticsTests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected to contain \"ToolsCall\"\nbut received \"\"\n\nat Assert.That(capture.Text).Contains(CategoryToolsCall)"
+        },
+        {
+          "id": "KeyLoad.UnitTests.Features.AdminDashboard.AdminQueueTests.1.1.AcAd005PaginationNeverConsumesOrSweepsPersistedMessages.1.1.0",
+          "method": "AcAd005PaginationNeverConsumesOrSweepsPersistedMessages",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/AdminDashboard/AdminQueueTests.cs",
+          "exceptionType": "KeyLoad.KeyLoadException",
+          "message": "The leader clock is behind the committed clock."
+        }
+      ]
+    },
+    {
+      "relativePath": "test-results-windows-latest/TestResults/KeyLoad.Analyzers.Tests-windows-net10.0.tunit-report.json",
+      "sha256": "5c9018e00a0daa673a5edcf8244b588e8db608f30b1a02f5a0723da32bec31ec",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": []
+    },
+    {
+      "relativePath": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+      "sha256": "cd879722bc24acb1cbc1e6e69a2b8c73f2eee4601a77a1f1a77ed788ba2d62c4",
+      "assembly": "KeyLoad.RecoveryTests",
+      "summary": {
+        "total": 121,
+        "passed": 118,
+        "failed": 3,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": [
+        {
+          "id": "KeyLoad.RecoveryTests.StoragePublicationRecoveryTests.1.1.ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration(System.String, KeyLoad.Storage.ZoneTree.CommitStage).8.1.0",
+          "method": "ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+          "exceptionType": "System.IO.DirectoryNotFoundException",
+          "message": "Could not find a part of the path 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-checkpoint-crash-daef207b00a84a1a837cf9a000f45ad3\\tree\\0.meta.wal'."
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StoragePublicationRecoveryTests.1.1.ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration(System.String, KeyLoad.Storage.ZoneTree.CommitStage).7.1.0",
+          "method": "ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+          "exceptionType": "System.IO.DirectoryNotFoundException",
+          "message": "Could not find a part of the path 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-checkpoint-crash-33e2bb6ef8b34eb8836879d7216f12c9\\tree\\0.meta.wal'."
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests.1.1.KillAtVerifiedSnapshotBoundaryRecoversExactCutAndOrderedTail(KeyLoad.Replication.ReplicaCrashBoundary).2.1.0",
+          "method": "KillAtVerifiedSnapshotBoundaryRecoversExactCutAndOrderedTail",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaProcessRecoveryTests.cs",
+          "exceptionType": "System.IO.IOException",
+          "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-replica-process-24fd212b87df4af296eeab25b26a9092\\target\\database\\tree\\0.meta.wal' because it is being used by another process."
+        }
+      ]
+    },
+    {
+      "relativePath": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+      "sha256": "14ae6f00608f842d5d9a1100430a5e068f7b5511557b3adb5d29c793166a06ef",
+      "assembly": "KeyLoad.UnitTests",
+      "summary": {
+        "total": 804,
+        "passed": 800,
+        "failed": 4,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failures": [
+        {
+          "id": "KeyLoad.UnitTests.Features.AdminDashboard.AdminCatalogTests.1.1.AcAd001OrdinaryPrincipalAndRevokedAdministratorCannotReadCatalog.1.1.0",
+          "method": "AcAd001OrdinaryPrincipalAndRevokedAdministratorCannotReadCatalog",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/AdminDashboard/AdminCatalogTests.cs",
+          "exceptionType": "KeyLoad.KeyLoadException",
+          "message": "A policy update must advance its epoch."
+        },
+        {
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpToolCursorTests.1.1.MalformedCursorUsesOneFixedSafeValidation(System.String).12.1.0",
+          "method": "MalformedCursorUsesOneFixedSafeValidation",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ClientApi/McpToolPaginationTests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown"
+        },
+        {
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpTransportDiagnosticsTests.1.1.KnownMethodCategoryIsClosed.1.1.0",
+          "method": "KnownMethodCategoryIsClosed",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportDiagnosticsTests.cs",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected to contain \"ToolsCall\"\nbut received \"\"\n\nat Assert.That(capture.Text).Contains(CategoryToolsCall)"
+        },
+        {
+          "id": "KeyLoad.UnitTests.Features.AdminDashboard.AdminQueueTests.1.1.AcAd005PaginationNeverConsumesOrSweepsPersistedMessages.1.1.0",
+          "method": "AcAd005PaginationNeverConsumesOrSweepsPersistedMessages",
+          "status": "error",
+          "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/AdminDashboard/AdminQueueTests.cs",
+          "exceptionType": "KeyLoad.KeyLoadException",
+          "message": "The leader clock is behind the committed clock."
+        }
+      ]
+    }
+  ],
+  "previousBaseline": {
+    "runId": 37021991878,
+    "sha": "fa80c701475d8faf65bb43b49b6e1c7afb33979a",
+    "caseResults": [
+      {
+        "report": "comparison-test-results/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.ComparisonTests",
+        "id": "KeyLoad.ComparisonTests.RealComparisonSuite.1.1.AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines.1.1.0",
+        "method": "AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines",
+        "currentStatus": "error"
+      },
+      {
+        "report": "comparison-test-results/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.ComparisonTests",
+        "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.1.1.AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema.1.1.0",
+        "method": "AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema",
+        "currentStatus": "error"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentParityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp005StableDocumentCommandHasTheSameOutcomeAcrossBothRealClients.1.1.0",
+        "method": "AcMcp005StableDocumentCommandHasTheSameOutcomeAcrossBothRealClients",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentParityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp005ConflictingCommandIsRejectedByBothClientsWithoutChangingTheDocument.1.1.0",
+        "method": "AcMcp005ConflictingCommandIsRejectedByBothClientsWithoutChangingTheDocument",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentParityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp007MissingDocumentIsCanonicalNullWithFreshNativeExecutionIds.1.1.0",
+        "method": "AcMcp007MissingDocumentIsCanonicalNullWithFreshNativeExecutionIds",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.EventStreams.McpEventStreamTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002ScopedEventReadDeniesForeignTenantAndStaleGenerationWithoutLeakingData.1.1.0",
+        "method": "AcMcp002ScopedEventReadDeniesForeignTenantAndStaleGenerationWithoutLeakingData",
+        "currentStatus": "error"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.EventStreams.McpEventStreamTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp005SdkAppendAndMcpRetryReturnOneCommittedEventBatch.1.1.0",
+        "method": "AcMcp005SdkAppendAndMcpRetryReturnOneCommittedEventBatch",
+        "currentStatus": "error"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.EventStreams.McpEventStreamTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp007SdkAndOfficialClientReturnIdenticalBoundedReplayPages.1.1.0",
+        "method": "AcMcp007SdkAndOfficialClientReturnIdenticalBoundedReplayPages",
+        "currentStatus": "error"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpCredentialLifecycleTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002PersistedCredentialChangesRejectTheClientAfterDiscovery(System.Boolean).2.1.0",
+        "method": "AcMcp002PersistedCredentialChangesRejectTheClientAfterDiscovery",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpCredentialLifecycleTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002PersistedCredentialChangesRejectTheClientAfterDiscovery(System.Boolean).1.1.0",
+        "method": "AcMcp002PersistedCredentialChangesRejectTheClientAfterDiscovery",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpCanonicalInputRejectionTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp003InvalidCanonicalBodyHasNoExecutionIdentity(System.Boolean).1.1.0",
+        "method": "AcMcp003InvalidCanonicalBodyHasNoExecutionIdentity",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpCanonicalInputRejectionTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp003InvalidCanonicalBodyHasNoExecutionIdentity(System.Boolean).2.1.0",
+        "method": "AcMcp003InvalidCanonicalBodyHasNoExecutionIdentity",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpConcurrentIdentityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002DistinctOfficialClientsKeepTheirOwnTenantsDuringConcurrentCalls.1.1.0",
+        "method": "AcMcp002DistinctOfficialClientsKeepTheirOwnTenantsDuringConcurrentCalls",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpDiscoveryTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall.1.1.0",
+        "method": "AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpDiscoveryTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints.1.1.0",
+        "method": "AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints",
+        "currentStatus": "error"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpDiscoveryTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp007OfficialClientReceivesCanonicalCapabilitiesAndFreshExecutionIds.1.1.0",
+        "method": "AcMcp007OfficialClientReceivesCanonicalCapabilitiesAndFreshExecutionIds",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpFieldAuthorizationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002FieldProjectionAndDeniedPatchHaveTheSameCanonicalAuthorityAcrossClients.1.1.0",
+        "method": "AcMcp002FieldProjectionAndDeniedPatchHaveTheSameCanonicalAuthorityAcrossClients",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpPersistedAuthorizationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002CurrentPersistedPrincipalControlsEachCallAfterDiscovery.1.1.0",
+        "method": "AcMcp002CurrentPersistedPrincipalControlsEachCallAfterDiscovery",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.IntegrationTests",
+        "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpPersistedAuthorizationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002CrossTenantAndForgedAuthorityAreDeniedWithoutChangingTheDocument.1.1.0",
+        "method": "AcMcp002CrossTenantAndForgedAuthorityAreDeniedWithoutChangingTheDocument",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.UnitTests",
+        "id": "KeyLoad.UnitTests.Features.Messaging.SourceReadBudgetTests.1.1.AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails.1.1.0",
+        "method": "AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.UnitTests",
+        "id": "KeyLoad.UnitTests.Features.Search.SearchResourceTests.1.1.AcMp003LargeNonmatchingPayloadsDoNotAllocateRawCorpusCopies.1.1.0",
+        "method": "AcMp003LargeNonmatchingPayloadsDoNotAllocateRawCorpusCopies",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.RecoveryTests",
+        "id": "KeyLoad.RecoveryTests.StoragePublicationRecoveryTests.1.1.ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration(System.String, KeyLoad.Storage.ZoneTree.CommitStage).6.1.0",
+        "method": "ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.RecoveryTests",
+        "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.19.0",
+        "method": "FiftySeededRealProcessCrashesPreserveAtomicTransactions",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.RecoveryTests",
+        "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.17.0",
+        "method": "FiftySeededRealProcessCrashesPreserveAtomicTransactions",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.RecoveryTests",
+        "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.15.0",
+        "method": "FiftySeededRealProcessCrashesPreserveAtomicTransactions",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.RecoveryTests",
+        "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.12.0",
+        "method": "FiftySeededRealProcessCrashesPreserveAtomicTransactions",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.RecoveryTests",
+        "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.11.0",
+        "method": "FiftySeededRealProcessCrashesPreserveAtomicTransactions",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.RecoveryTests",
+        "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.9.0",
+        "method": "FiftySeededRealProcessCrashesPreserveAtomicTransactions",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.RecoveryTests",
+        "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.7.0",
+        "method": "FiftySeededRealProcessCrashesPreserveAtomicTransactions",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.RecoveryTests",
+        "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.5.0",
+        "method": "FiftySeededRealProcessCrashesPreserveAtomicTransactions",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.RecoveryTests",
+        "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.14.0",
+        "method": "FiftySeededRealProcessCrashesPreserveAtomicTransactions",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.RecoveryTests",
+        "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.2.0",
+        "method": "FiftySeededRealProcessCrashesPreserveAtomicTransactions",
+        "currentStatus": "passed"
+      },
+      {
+        "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+        "assembly": "KeyLoad.UnitTests",
+        "id": "KeyLoad.UnitTests.Features.ClientApi.McpTransportDiagnosticsTests.1.1.KnownMethodCategoryIsClosed.1.1.0",
+        "method": "KnownMethodCategoryIsClosed",
+        "currentStatus": "error"
+      }
+    ]
+  },
+  "preservedRecoveryCases": [
+    {
+      "report": "test-results-macos-latest/TestResults/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+      "readiness": [
+        {
+          "total": 6,
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        }
+      ],
+      "seededCases": [
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.11.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.12.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.2.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.13.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.14.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.15.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.17.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.16.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.18.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.19.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.1.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.10.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.20.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.8.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.7.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.6.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.5.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.4.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.3.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.9.0",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "report": "test-results-ubuntu-latest/TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "readiness": [
+        {
+          "total": 6,
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        }
+      ],
+      "seededCases": [
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.11.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.12.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.2.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.13.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.14.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.15.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.16.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.17.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.18.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.19.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.1.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.10.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.20.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.8.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.7.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.6.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.5.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.4.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.3.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.9.0",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "report": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+      "readiness": [
+        {
+          "total": 6,
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        }
+      ],
+      "seededCases": [
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.17.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.1.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.2.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.3.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.4.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.5.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.6.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.7.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.8.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.9.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.10.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.19.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.11.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.12.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.13.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.14.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.20.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.15.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.18.0",
+          "status": "passed"
+        },
+        {
+          "id": "KeyLoad.RecoveryTests.StorageRecoveryProcessTests.1.1.FiftySeededRealProcessCrashesPreserveAtomicTransactions(System.Int32).1.16.0",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "partialComparisonReports": [
+    {
+      "relativePath": "comparison-suite/smoke/results.json",
+      "sha256": "db3608d2ff2d05417b75d9cae88790cdf2adda60cc9dc6c7f758b0940d41a76b",
+      "schemaVersion": 3,
+      "sourceRevision": "b533c80a128a85c6e2072de3bc011a09d4a97cc7",
+      "targets": [
+        "KeyLoad",
+        "PostgreSQL + pgvector",
+        "Qdrant",
+        "RabbitMQ",
+        "Redis",
+        "Neo4j"
+      ],
+      "qualified": false,
+      "limitation": "Native completion/zero-exit gate failed; measured profiles were skipped and foreign-schema assertion was not reached."
+    },
+    {
+      "relativePath": "comparison-suite/timeseries/timeseries-results.json",
+      "sha256": "4cc4d6154320ee42f1168b52550a38be970889d83fc4bdea410a92f0cfccfb7c",
+      "schemaVersion": 1,
+      "sourceRevision": "b533c80a128a85c6e2072de3bc011a09d4a97cc7",
+      "targets": [
+        "TimescaleDB TimeSeries",
+        "KeyLoad TimeSeries",
+        "ManagedCode.TimeSeries"
+      ],
+      "sampleCount": 48,
+      "attempts": 20,
+      "correctnessChecks": 20,
+      "qualified": false,
+      "limitation": "Native completion/zero-exit gate failed; measured profiles were skipped and foreign-schema assertion was not reached."
+    }
+  ],
+  "artifactReceipts": [
+    {
+      "id": 11238847316,
+      "name": "code-quality-comparisons",
+      "digest": "sha256:d234e2f904a102cb2b57662e6759518d2d42168804be300047d5a5ba06db01aa",
+      "expired": false,
+      "sizeBytes": 675729,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11238737511,
+      "name": "test-results-windows-latest",
+      "digest": "sha256:3b338af5153f06b78c36a0d7aa5dd1968a9abbbec77acc7932266e082d430615",
+      "expired": false,
+      "sizeBytes": 737647,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11238647637,
+      "name": "code-quality-windows-latest",
+      "digest": "sha256:573ba8833d55bf930e87e58c40b3b6c8c8f1f17ebd692498e1a2a07776e35b0f",
+      "expired": false,
+      "sizeBytes": 1315367,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11238591807,
+      "name": "docker-rf3-qualification",
+      "digest": "sha256:5ff33549b5dd0b95da389670bdf3811d45790f96f554b7b3c59a7a16128ba10a",
+      "expired": false,
+      "sizeBytes": 150536,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11238481926,
+      "name": "code-quality-docker-rf3",
+      "digest": "sha256:cdace8790f582911c20a4ae97cfb23622355d6a10473eca2b8ab8617971acf8d",
+      "expired": false,
+      "sizeBytes": 678179,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11238442761,
+      "name": "comparison-test-results",
+      "digest": "sha256:84227fcb2a33ffd5119d7e1294282ef70719d5693056d541b7c169a65c49a132",
+      "expired": false,
+      "sizeBytes": 111937,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11238303102,
+      "name": "comparison-suite",
+      "digest": "sha256:923c9cc723d3d9595394a61c5b7c8b7d4e9ae43ce6d747df3ebd01e6949aa8e1",
+      "expired": false,
+      "sizeBytes": 26282,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11238217881,
+      "name": "code-quality-ubuntu-latest",
+      "digest": "sha256:7af4524c8bfc865125fc7e6fcac5ee923c8d320e3323d33ed7f90c16576388f2",
+      "expired": false,
+      "sizeBytes": 1315234,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11238197316,
+      "name": "analyzer-rule-evidence",
+      "digest": "sha256:f468e4e14abdce25db0817ca5516b77c0aa229ed2a9aed6175cf36b55b900b69",
+      "expired": false,
+      "sizeBytes": 207211,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11238003208,
+      "name": "test-results-ubuntu-latest",
+      "digest": "sha256:9d444d13ba381153dab8fcb88c21380b9be0054ee5518132139e15df983043e5",
+      "expired": false,
+      "sizeBytes": 729668,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11237713865,
+      "name": "test-results-macos-latest",
+      "digest": "sha256:1faa09e1f10e33b961419c425ff956293a0dee4f511198e11e99b20af962d19d",
+      "expired": false,
+      "sizeBytes": 724015,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11237698759,
+      "name": "code-quality-macos-latest",
+      "digest": "sha256:d7a0b18660f4beacc249c65fc85d4a9d1b72980a48419cc5ae4906e2b13f440b",
+      "expired": false,
+      "sizeBytes": 1308715,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    }
+  ],
+  "qualification": "failed_runtime_gates_build_format_governance_and_analyzers_passed_all_three_OSes",
+  "notes": [
+    "All native reports and their exact source SHA were checked and hashed. Archive digests are GitHub metadata, not independently verified download hashes.",
+    "Twenty parameterized seeded process-crash cases and six real-file readiness cases pass on each OS; missing checkpoint tree and one separate Windows replica caller remain failures.",
+    "W3 official MCP admission framing no longer blocks discovery/initialize. Current RF3 failures include assertion/catalog and admin regressions plus one native node restart.",
+    "Counts qualify only this exact source. They do not qualify later source fixes, coverage, activation movement, power-loss durability, endurance or production readiness."
+  ]
+}

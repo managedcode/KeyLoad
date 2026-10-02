@@ -42,9 +42,7 @@ internal static class ReplicaCrashScenario
             }
         });
         physicalNode = target;
-        if (boundary is ReplicaCrashBoundary.SnapshotVerified or ReplicaCrashBoundary.SnapshotInstalled
-            or ReplicaCrashBoundary.SnapshotTransferBegun or ReplicaCrashBoundary.SnapshotChunkAcknowledged
-            or ReplicaCrashBoundary.SnapshotRejected or ReplicaCrashBoundary.SnapshotPublished)
+        if (ReplicaCrashNode.RequiresSourceStores(boundary))
         {
             armed = true;
             ReplicaCrashTransfer.Run(root, incarnation, target, boundary);

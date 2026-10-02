@@ -63,7 +63,7 @@ internal sealed class ReplicaProcessTrial : IAsyncDisposable
         }
         process.Kill(entireProcessTree: true);
         await process.WaitForExitAsync(cancellationToken);
-        await ReplicaProcessFiles.WaitForOwnershipAsync(DirectoryPath, cancellationToken);
+        await ReplicaProcessFiles.WaitForOwnershipAsync(DirectoryPath, cancellationToken, boundary);
         ReplicaProcessFiles.WriteEvidence(Ready, process.Id, process.ExitCode);
     }
 

@@ -2,6 +2,7 @@ using System.Globalization;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Microsoft.Extensions.DependencyInjection;
+using static KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterReplicationTestSupport;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
@@ -15,6 +16,8 @@ internal sealed class ContainerRuntimeControl(
     string repositoryRoot)
 {
     private readonly Dictionary<string, ContainerRuntimeKillReceipt> pendingReceipts = new(StringComparer.Ordinal);
+    private readonly ClusterFailureReceipts restartFailureReceipts = new(ClusterFailureReceiptKind.Restart);
+    private const string RestartDiagnosticsFailureKey = "KeyLoad.Rf3RestartDiagnosticsFailure";
 
     /// <summary>Kills the inspected full container ID and waits until the same named container is exited.</summary>
     /// <param name="resourceName">The actual Aspire resource to kill.</param>
@@ -50,6 +53,24 @@ internal sealed class ContainerRuntimeControl(
                 ContainerRuntimeProtocol.MissingKillFailure, resourceName));
         }
 
+        var capture = new ContainerRestartFailureCapture(app, receipt, repositoryRoot, restartFailureReceipts);
+        var progress = new RestartProgress();
+        try
+        {
+            await RestartAndRecordAsync(receipt, capture, progress, cancellationToken);
+            pendingReceipts.Remove(resourceName);
+        }
+        catch (Exception failure) when (IsNonFatalCleanupFailure(failure))
+        {
+            await SaveRestartFailureAsync(capture, progress.Stage, failure);
+            throw;
+        }
+    }
+
+    private async Task RestartAndRecordAsync(ContainerRuntimeKillReceipt receipt,
+        ContainerRestartFailureCapture capture, RestartProgress progress, CancellationToken cancellationToken)
+    {
+        var resourceName = receipt.ResourceName;
         var commands = app.Services.GetRequiredService<ResourceCommandService>();
         var command = await commands.ExecuteCommandAsync(resourceName, KnownResourceCommands.StartCommand, cancellationToken);
         if (!command.Success)
@@ -58,8 +79,12 @@ internal sealed class ContainerRuntimeControl(
                 ContainerRuntimeProtocol.StartFailure, resourceName, command.Message ?? ContainerRuntimeProtocol.UnknownCommandFailure));
         }
 
+        capture.StartSucceeded();
+        progress.Stage = ContainerRestartStage.HealthWait;
         await app.ResourceNotifications.WaitForResourceHealthyAsync(resourceName, cancellationToken);
+        progress.Stage = ContainerRestartStage.RuntimeInspection;
         var after = await ContainerRuntimeDocker.InspectRunningAsync(receipt.ContainerName, resourceName, cancellationToken);
+        progress.Stage = ContainerRestartStage.IdentityValidation;
         var startedAtChanged = !string.Equals(receipt.Before.StartedAt, after.StartedAt, StringComparison.Ordinal);
         if (!startedAtChanged)
         {
@@ -67,17 +92,31 @@ internal sealed class ContainerRuntimeControl(
                 ContainerRuntimeProtocol.UnchangedStartFailure, resourceName));
         }
 
+        progress.Stage = ContainerRestartStage.SourceReceipt;
         var sourceSha = await ContainerRuntimeReceiptStore.ReadSourceShaAsync(repositoryRoot, cancellationToken);
         var completed = new ContainerRuntimeRestartReceipt(receipt.Scenario, resourceName, receipt.ContainerName, receipt.Before.Id,
             receipt.Before.ConfigImage, receipt.Before.ImageId, receipt.Before.State, receipt.KillExitCode, receipt.KillOutput, receipt.KillError,
             receipt.Stopped.State, after.Id, after.ConfigImage, after.ImageId, after.State, receipt.Before.StartedAt,
             after.StartedAt, startedAtChanged, true, command.Message, sourceSha, repositoryRoot);
         await ContainerRuntimeReceiptStore.WriteAsync(completed, cancellationToken);
-        pendingReceipts.Remove(resourceName);
+    }
+
+    private static async Task SaveRestartFailureAsync(ContainerRestartFailureCapture capture,
+        ContainerRestartStage stage, Exception failure)
+    {
+        try
+        { await capture.SaveAsync(stage, failure); }
+        catch (Exception diagnosticFailure) when (IsNonFatalCleanupFailure(diagnosticFailure))
+        { failure.Data[RestartDiagnosticsFailureKey] = diagnosticFailure; }
     }
 
     private string GetContainerName(string resourceName) => containerNames.TryGetValue(resourceName, out var name)
         ? name
         : throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture,
             ContainerRuntimeProtocol.MissingContainerFailure, resourceName));
+
+    private sealed class RestartProgress
+    {
+        internal ContainerRestartStage Stage { get; set; } = ContainerRestartStage.StartCommand;
+    }
 }

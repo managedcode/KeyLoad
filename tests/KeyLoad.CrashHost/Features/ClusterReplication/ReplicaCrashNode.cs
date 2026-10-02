@@ -81,6 +81,18 @@ internal sealed class ReplicaCrashNode : IDisposable
     public static string[] TargetStoreDirectories(string root)
         => [Path.Combine(root, TargetDirectory, CanonicalDirectory), Path.Combine(root, TargetDirectory, ReplicaDirectory)];
 
+    /// <summary>The source directories owned by snapshot-transfer crash scenarios.</summary>
+    /// <param name="root">The owning trial's physical root.</param>
+    public static string[] SourceStoreDirectories(string root)
+        => [Path.Combine(root, SourceDirectory, CanonicalDirectory), Path.Combine(root, SourceDirectory, ReplicaDirectory)];
+
+    /// <summary>Whether the exact crash scenario opens its independent source node.</summary>
+    /// <param name="boundary">The already validated physical crash boundary.</param>
+    public static bool RequiresSourceStores(ReplicaCrashBoundary boundary)
+        => boundary is ReplicaCrashBoundary.SnapshotVerified or ReplicaCrashBoundary.SnapshotInstalled
+            or ReplicaCrashBoundary.SnapshotTransferBegun or ReplicaCrashBoundary.SnapshotChunkAcknowledged
+            or ReplicaCrashBoundary.SnapshotRejected or ReplicaCrashBoundary.SnapshotPublished;
+
     /// <summary>Builds a genuine committed canonical prefix from database operations.</summary>
     /// <param name="cut">The final deterministic operation to append, commit and apply.</param>
     public void Populate(int cut)

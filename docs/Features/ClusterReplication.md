@@ -24,6 +24,51 @@ Slice map: `src/KeyLoad.Replication/Features/ClusterReplication/` owns protocol/
 
 Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [execution plan](../implementation/orleans-foundation.plan.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.
 
+TASK-RUNTIME-REPLICA-READINESS-W4 maps REQ-REP-004 / AC-REP-004 and
+REQ/AC-STORAGE-012. Exact main b533c80 / CI37032546228 fails the Windows
+SnapshotInstalled reopen on target/database/tree/0.meta.wal; the prior two-store
+barrier probes only owner.lock and commands.wal. Root replaces each store's
+probe with the shared StorageRecovery exclusive-file probe, including metadata
+when present, inside the existing single five-second/25ms loop. Cancellation
+stops before another probe. No file creation, recovery retry, timeout increase,
+weakened snapshot/tail/receipt predicate or attribution of the unknown holder
+is permitted. A disjoint test worker owns new ClusterReplication real-file
+barrier cases: hold canonical or replica metadata exclusively, verify pending
+then release and success; cancel a held wait and pre-cancel an unlocked wait;
+assert a permanent holder still fails under the unchanged bound. Use actual
+closed CrashHost target stores and observe/dispose pending tasks and holders
+before deleting their root. Existing native SnapshotInstalled process-kill and
+ordered-tail tests are the primary regression. ADR-035/036/041 ownership and
+lifetime contracts suffice; public/data/dependency boundaries are unchanged.
+Root reviews both helper/caller scopes together, development-builds/formats,
+and qualifies the full three-OS recovery suite in GitHub at the delivered SHA.
+
+The same W4 criterion includes exact1bee2609 / CI37036628601's source-store
+reopen failures. For the six typed snapshot/transfer crash boundaries, the child
+also opened `source/database` and `source/replica`. Enumerate these exact owned
+stores alongside the target stores inside the same single five-second/25ms loop.
+Use the crash boundary's explicit source-ownership contract, never filesystem
+existence to decide whether required ownership/journal files are optional. Other
+boundaries retain their target-only path and must not create source storage.
+Root owns the CrashHost store-path/source-boundary helpers, preserving the
+existing scenario predicate, and ReplicaProcessTrial/ReplicaProcessFiles join.
+The disjoint readiness test worker extends only its real-store fixture and cases:
+each source canonical/replica owner, journal and metadata holder keeps the actual
+combined wait pending until released. Existing source snapshot import and private
+transfer crash cases remain the primary regression and retain all assertions.
+
+The two permanent-holder elapsed checks retain their five-second lower and
+six-second upper observation bounds. Run only those individual wall-clock
+measurement cases with TUnit's keyless method-level `NotInParallel`, which the
+pinned1.72.10 package documents as exclusive execution. Exact Windows evidence
+shows the failed check overlapped74 distinct cases with16 active at peak; timer
+or continuation delay is a supported inference, without a threadpool trace.
+No class/assembly serialization, retry or timeout increase is allowed. Other
+holder-release/cancellation tests and every real process crash remain parallel.
+This is intrinsic readiness timing qualification, not a loaded-system latency
+claim. Source review, native case discovery and full exact-SHA CI must verify
+that the same bounds and all original crash cases remain.
+
 ## Actors, entry points and failure boundaries
 
 Actors are authenticated SDK/MCP callers, the node-local replica host, fixed voters, the membership provider and the recovery operator. Current source is composed by [ServerApplication](../../src/KeyLoad.Server/Features/ClientApi/ServerApplication.cs): it starts the node-local [PartitionHost](../../src/KeyLoad.Server/Features/StorageRecovery/PartitionHost.cs) and Orleans silo, whose [replica service](../../src/KeyLoad.Orleans/Features/ClusterReplication/PartitionReplicaGrainService.cs) routes peer operations. Aspire declares three Docker nodes with separate data mounts. This source is not yet qualified as a delivered RF3 deployment: current tests do not force request-activation migration and then verify storage ownership and a durable caller-visible outcome. Public HTTP/.NET transport belongs to ClientApi; required official MCP parity is pending. Frontend is N/A because replica consensus has no independent UI. Shared contracts stay in Abstractions and the exact ClusterReplication/StorageRecovery slice owners above.

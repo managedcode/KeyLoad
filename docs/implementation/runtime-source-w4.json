@@ -1,0 +1,186 @@
+{
+  "stage": "source_join_all25_development_build_full_formatter_and_static_governance_pass_runtime_unqualified",
+  "mainParent": "8b475d4d6bd7bb2024b259a4a10ad36c83c35bbd",
+  "tasks": [
+    {
+      "id": "TASK-RUNTIME-RECOVERY-W4",
+      "owner": "runtime_storage_research",
+      "requirements": [
+        "REQ-STORAGE-012"
+      ],
+      "acceptance": [
+        "AC-STORAGE-012"
+      ]
+    },
+    {
+      "id": "TASK-RUNTIME-REPLICA-READINESS-W4",
+      "owner": "runtime_cancel_review",
+      "requirements": [
+        "REQ-REP-004",
+        "REQ-STORAGE-012"
+      ],
+      "acceptance": [
+        "AC-REP-004",
+        "AC-STORAGE-012"
+      ]
+    },
+    {
+      "id": "TASK-RUNTIME-RESTART-RECEIPT-W4",
+      "owner": "runtime_mcp_diagnostics",
+      "requirements": [
+        "REQ-TEST-007"
+      ],
+      "acceptance": [
+        "AC-TEST-007"
+      ]
+    },
+    {
+      "id": "TASK-RUNTIME-W4-JOIN",
+      "owner": "root",
+      "responsibility": "serialized existing caller/helper integration, lifetime/compiler corrections, source review, docs, all-source main delivery and exact GitHub qualification"
+    }
+  ],
+  "contracts": [
+    "docs/Features/StorageRecovery.md",
+    "docs/Features/ClusterReplication.md",
+    "docs/Features/TestInfrastructure.md"
+  ],
+  "decisions": [
+    "docs/ADR/ADR-035-memory-performance.md",
+    "docs/ADR/ADR-036-orleans-foundation.md",
+    "docs/ADR/ADR-039-official-mcp-agent-api.md"
+  ],
+  "sourceFiles": [
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/ClusterReplication/ReplicaCrashNode.cs",
+      "sha256": "3132ad7fd3041aafeb6bcd075dc57eed3d39a30ef1ff4a440e2350d9d4ce52df"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/ClusterReplication/ReplicaCrashScenario.cs",
+      "sha256": "7355f16a2781eb0bbd510c1a396cae337ed988297ab1ca91a9e3f94cfcfefbdf"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/ClusterFailureReceiptKind.cs",
+      "sha256": "ec8809c1863026b096282ce2207187386a8c8ca0b79cead426a9f9e7a7e59142"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/ClusterFailureReceipts.cs",
+      "sha256": "68fd93d017ba2e0b2d975a9f08dee21e9fe388446891dd93c7e4639eba1efabe"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/ContainerRestartDockerInspection.cs",
+      "sha256": "bccb4ba43289a0489e94bc44c0174820d79e61b9b741625539b89e7c5565ddc4"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/ContainerRestartFailureCapture.cs",
+      "sha256": "4cbb490f9052af9cdd473897aed0644dd81d19899489b11ef00177571a40d7ff"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/ContainerRestartFailureCaptureTests.cs",
+      "sha256": "ac9ade262a5d873123901da6f59a0da6a9ab8f32ff522b771d080947f0b29540"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/ContainerRestartNativeDiagnosticsTests.cs",
+      "sha256": "f5b4d32fca3edeafc3a3a51fa6289810578a4b3742e61550f77f0ff7acece665"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/ContainerRestartProcessIo.cs",
+      "sha256": "e45ec0fbe2277d2f2c1c1b31b237223c1382031c0fa8fcb078a5c38c57aa4445"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/ContainerRuntimeControl.cs",
+      "sha256": "1cf59612ea3d7811815ce23c7b4d69aa8fea9ade89f1e6534db7207d28489e75"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaFileReadinessFixture.cs",
+      "sha256": "bb5e59f95cc8303cf946151ca7f7516e5c2346c140ea27461e19f72684846efe"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaFileReadinessStores.cs",
+      "sha256": "1f6eda5c1ef4c8e77a028be0adc6404b0f15815c71249ac2775101798c0f932c"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaFileReadinessTests.cs",
+      "sha256": "08a97a9a6ec7a0c7bb94f5d1e38bb562f94706d3a368ae0e6b174b8eff29e102"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaProcessFiles.cs",
+      "sha256": "ee36f132099d2d999f1ec95478d4056acb7ccff0e7db48c229c2c8b56f848839"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaProcessTrial.cs",
+      "sha256": "cace7be806c33a2e5b819fc1b8f0764b23bccaf44d6ad463d5ffad4a306aea60"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/KilledProcessFileReadiness.cs",
+      "sha256": "2dda8514a10a3105500c40a6aa22efb17f69bb4a2bc9dbbe676a5fa87c47f671"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/KilledProcessFileReadinessFixture.cs",
+      "sha256": "78a22bb400b4ac4d397b24525d5b49c42952a80b3cb8bdd49d46cf5268a90390"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/KilledProcessFileReadinessTests.cs",
+      "sha256": "5548279dfbdcb72d8c0ccb8212757ae714a9d14880e1cec141ce27c5d816ea34"
+    }
+  ],
+  "developmentChecks": {
+    "source": "joined_W4_on_main_8b475d4d6bd7bb2024b259a4a10ad36c83c35bbd_source_hashes_retained_runtime_CI_pending",
+    "buildCommand": "dotnet build KeyLoad.slnx --no-restore --configuration Release -m:1 -nr:false -p:UseSharedCompilation=false",
+    "buildLog": "/private/tmp/keyload-w4-development-build-clean.log",
+    "buildLogSha256": "560cf6b2f60a17cda3b3087a42c9a47ad5ae18867b7b7d09e19fc5e195c2035e",
+    "build": "all25_projects_0_warnings_0_errors",
+    "postBuildEdit": "whitespace_only_SnapshotState_indentation",
+    "governanceCommand": "node scripts/Features/RepositoryGovernance/verify.mjs",
+    "governanceLog": "/private/tmp/keyload-w4-governance-final.log",
+    "governanceLogSha256": "593031891681215141daa839ed5e34cc70f33c27b46d6abb2be7911ec96571ef",
+    "governance": "passed_25_projects_4_modules",
+    "formatterCommand": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+    "formatterLog": "/private/tmp/keyload-w4-format-final.log",
+    "formatter": "passed_full_solution_final_verification_exit0_after_whitespace_correction",
+    "localTestsExecuted": false,
+    "formatterLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "formatterExitCode": 0
+  },
+  "preservedBounds": {
+    "readinessSeconds": 5,
+    "pollMilliseconds": 25,
+    "seededTrials": 50,
+    "trialDeadlineSeconds": 15,
+    "permanentLockObservationSeconds": 6,
+    "diagnosticInspectionSeconds": 3,
+    "receiptLines": 80,
+    "receiptUtf8Bytes": 8192,
+    "earliestRestartReceipts": 32,
+    "latestRestartReceipts": 1
+  },
+  "review": [
+    "Only precise FileNotFound/DirectoryNotFound for optional metadata means absent; required owner/journal remain exclusive and no probe creates files.",
+    "One existing deadline probes both target stores and the two source stores for the six already defined transfer boundaries; no existence bypass or second deadline.",
+    "Only the two intrinsic permanent-lock timing methods receive unkeyed TUnit exclusive scheduling; all elapsed assertions and other process concurrency remain.",
+    "Restart capture is additive, sampled and allowlisted; original failure/predicates remain. Docker inspection joins its process and readers on all cleanup paths; mandatory cleanup may extend the inspection deadline. No finite cleanup bound is claimed for permanent OS kill refusal.",
+    "Fixture ownership cleanup and actual current public Aspire API compiler compatibility were repaired without warning suppression or dependency workaround."
+  ],
+  "regressionInventory": {
+    "storageReadinessCases": 10,
+    "replicaReadinessCases": 11,
+    "restartProjectionFileAndStreamCases": 5,
+    "expectedRecoverySuiteCases": 136,
+    "expectedRf3SuiteCases": 41,
+    "executedAtThisSource": false
+  },
+  "chronology": {
+    "failedNativeBaselines": [
+      37032546228,
+      37036628601,
+      37038422388,
+      37042082081
+    ],
+    "storageCopies": "/private/tmp/keyload-w4-readiness-first",
+    "replicaBaselineCopies": "/private/tmp/keyload-w4-replica-readiness-first",
+    "sourceCaseBaselineCopies": "/private/tmp/keyload-w4-source-readiness-first",
+    "restartAuthoredCopies": "/private/tmp/keyload-w4-restart-receipt-review-first",
+    "limitation": "Native failures preceded the repair. Baseline copies and authored source regressions are source evidence; replica baseline copies do not contain authored new tests, source-case copies precede those cases only, and tests-first before every root caller edit is not claimed. No local runtime tests ran."
+  },
+  "requiredQualification": "Deliver source to main, retain exact new SHA/run/job URLs and all native TUnit reports; pass unit/recovery/RF3/comparison and remaining numeric coverage/endurance/fault gates before complete product claims."
+}

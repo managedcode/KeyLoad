@@ -7,6 +7,11 @@ namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
 {
     private const string ReadinessKey = "killed-process-readiness";
+    private const string ReopenedKey = "killed-process-readiness-reopened";
+    private const string TreeDirectoryName = "tree";
+    private const string ParkedTreeDirectoryName = "tree-readiness-parked";
+    private const string MetadataWalName = "0.meta.wal";
+    private const string ParkedMetadataWalName = "0.meta.wal-readiness-parked";
     private readonly CancellationTokenSource cancellation = new();
     private FileStream? heldFile;
     private Task? readiness;
@@ -46,6 +51,33 @@ internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
         StorageRecoveryProcessTests.WaitForKilledProcessFilesAsync(Root, cancellation.Token);
 
     internal Task CancelAsync() => cancellation.CancelAsync();
+
+    internal void MoveTreeAside() => Directory.Move(
+        Path.Combine(Root, TreeDirectoryName), Path.Combine(Root, ParkedTreeDirectoryName));
+
+    internal void RestoreTree() => Directory.Move(
+        Path.Combine(Root, ParkedTreeDirectoryName), Path.Combine(Root, TreeDirectoryName));
+
+    internal void MoveMetadataWalAside() => File.Move(
+        Path.Combine(Root, TreeDirectoryName, MetadataWalName),
+        Path.Combine(Root, TreeDirectoryName, ParkedMetadataWalName));
+
+    internal void RestoreMetadataWal() => File.Move(
+        Path.Combine(Root, TreeDirectoryName, ParkedMetadataWalName),
+        Path.Combine(Root, TreeDirectoryName, MetadataWalName));
+
+    internal bool ReopenAndCommit()
+    {
+        using var store = new ZoneTreeStore(new(Root));
+        var originalRecordExists = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(ReadinessKey)) is not null);
+        store.Commit((transaction, _) =>
+        {
+            transaction.PutRecord(KeyCodec.Encode(ReopenedKey), true);
+            return true;
+        });
+        var reopenedRecordExists = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(ReopenedKey)) is not null);
+        return originalRecordExists && reopenedRecordExists;
+    }
 
     internal void ReleaseFile()
     {

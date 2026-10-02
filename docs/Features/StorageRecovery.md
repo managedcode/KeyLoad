@@ -3,12 +3,36 @@
 REQ-STORAGE-012 / AC-STORAGE-012 (TASK-RUNTIME-WINDOWS-RECOVERY-W3) preserves
 the existing killed-child filesystem readiness bound. After actual process exit,
 exclusive readiness covers owner.lock, commands.wal and the actual ZoneTree
-tree/0.meta.wal which failed to reopen in Windows CI37021991878. The prior receipt
+tree/0.meta.wal when present, which failed to reopen in Windows CI37021991878. The prior receipt
 does not identify the sharing holder; this is a test-fixture observation gap,
 not proof of a storage/dependency defect. Keep the five-second bound and25ms poll,
 all50 seeded trials, original trial deadlines, WAL/snapshot/atomic assertions and
 permanent sharing failure. Cancellation stops before another probe; no retry of
 the recovery operation, default timeout increase or filesystem bypass is allowed.
+
+TASK-RUNTIME-RECOVERY-W4 refines this same criterion using exact main
+b533c80 / CI37032546228. During checkpoint installation the disposed live tree
+is moved aside before InstallPrepared and JournalSwapped callbacks; the child
+can therefore exit with no tree directory. Only FileNotFoundException and
+DirectoryNotFoundException while opening the optional metadata WAL mean that
+this file has no holder. owner.lock and commands.wal remain required exclusive
+probes; sharing violations and all other I/O errors retain the original bound.
+No readiness probe creates files or directories. Real missing-directory and
+missing-metadata-file regressions assert successful readiness without recreating
+either path, then restore the actual store files and prove subsequent reopen
+and commit. Missing required ownership/journal files must still fail, and the
+existing held-file/cancel/pre-cancel/permanent-lock tests remain intact.
+
+The common synchronous probe is internal test infrastructure shared with
+ClusterReplication's existing store barrier. That caller retains one
+five-second deadline across target stores and, only at typed snapshot/transfer
+boundaries, both source stores, with its25ms poll; it does not perform consecutive
+independently bounded waits. Root owns that caller join;
+the StorageRecovery worker owns only the existing helper, real-file tests and
+fixture. All checkpoint process-kill, seeded trials and replica snapshot/tail
+assertions remain unchanged. Tests-first source hashes, numeric/lifetime review,
+enabled development build/format and full exact-SHA GitHub recovery all OSes
+are the join; rollback reverts only the preserving helper/caller/test refinement.
 
 New real-file tests first hold the metadata WAL exclusively after an actual
 ZoneTree store closes: the shared barrier must remain pending, complete only
@@ -52,7 +76,7 @@ new scoped-read contract; ADR-032 records existing layout migration debt.
 | REQ-STORAGE-008: cohesive private provider owners meet numeric gates without changing storage/caller contracts | AC-SQ-001..008 in storage-quality.acceptance.md | ADR-046 TASK-MP-010AF-R/T/C/L/B; source join and real lifetime test source exist; enabled provider development build clean, complete exact-SHA runtime qualification pending |
 | REQ-STORAGE-009: validation and apply share one private mutation projection per staged generation | AC-PSW-001..004, AC-MP-006/012 | ADR-035 TASK-MP-016P-W/L; first-authored PreparedTransactionTests plus existing FrameBudget/recovery/RF3 proof; source and qualification pending |
 | REQ-STORAGE-011: startup identity metadata is finite and failed read releases physical ownership | AC-BSM-001/003/005 | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), Metadata* real-file constructor/restore/reopen checks under BackupRestore; complete source and GitHub execution pending |
-| REQ-STORAGE-012: killed-child readiness includes the real metadata WAL and preserves cancellation and the original failure bound | AC-STORAGE-012 | `tests/KeyLoad.RecoveryTests/Features/StorageRecovery/KilledProcessFileReadinessTests.cs`: actual closed-store pending/release, cancellation, pre-cancellation and permanent-lock cases; `RecoveryTests.cs` retains every process-kill scenario; TASK-RUNTIME-WINDOWS-RECOVERY-W3, full three-OS GitHub recovery qualification pending |
+| REQ-STORAGE-012: killed-child readiness includes the real metadata WAL when present, permits only precise sanctioned metadata absence, and preserves cancellation and the original failure bound | AC-STORAGE-012 | `tests/KeyLoad.RecoveryTests/Features/StorageRecovery/KilledProcessFileReadinessTests.cs`: actual closed-store pending/release, cancellation, pre-cancellation, permanent-lock, missing optional directory/file without creation and missing required file cases; `RecoveryTests.cs` retains every process-kill scenario; TASK-RUNTIME-WINDOWS-RECOVERY-W3 and TASK-RUNTIME-RECOVERY-W4, full three-OS GitHub recovery qualification pending |
 
 Ownership: common public storage contracts stay in Abstractions/Storage;
 provider helpers in Storage.ZoneTree/Features/StorageRecovery, tests mirror that

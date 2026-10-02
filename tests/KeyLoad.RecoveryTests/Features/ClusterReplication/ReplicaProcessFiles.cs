@@ -1,11 +1,12 @@
 using KeyLoad.CrashHost;
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.Replication;
 
 namespace KeyLoad.RecoveryTests;
 
 internal static class ReplicaProcessFiles
 {
     internal const string Journal = "commands.wal";
-    private const string Ownership = "owner.lock";
     private const string Solution = "KeyLoad.slnx";
     private const string Artifacts = "artifacts";
     private const string Qualification = "qualification";
@@ -15,14 +16,16 @@ internal static class ReplicaProcessFiles
     private static readonly TimeSpan RetryWindow = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan RetryDelay = TimeSpan.FromMilliseconds(25);
 
-    internal static async Task WaitForOwnershipAsync(string root, CancellationToken cancellationToken)
+    internal static async Task WaitForOwnershipAsync(string root, CancellationToken cancellationToken,
+        ReplicaCrashBoundary boundary = ReplicaCrashBoundary.TermSaved)
     {
         var started = TimeProvider.System.GetTimestamp();
         while (true)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                EnsureTargetFilesReleased(root);
+                EnsureOwnedFilesReleased(root, boundary, cancellationToken);
                 return;
             }
             catch (IOException) when (TimeProvider.System.GetElapsedTime(started) < RetryWindow)
@@ -32,19 +35,22 @@ internal static class ReplicaProcessFiles
         }
     }
 
-    private static void EnsureTargetFilesReleased(string root)
+    private static void EnsureOwnedFilesReleased(string root, ReplicaCrashBoundary boundary,
+        CancellationToken cancellationToken)
     {
         foreach (var directory in ReplicaCrashNode.TargetStoreDirectories(root))
         {
-            EnsureOwnershipFilesReleased(directory);
+            cancellationToken.ThrowIfCancellationRequested();
+            KilledProcessFileReadiness.EnsureFilesUnlocked(directory);
         }
-    }
 
-    private static void EnsureOwnershipFilesReleased(string directory)
-    {
-        foreach (var name in new[] { Ownership, Journal })
+        if (ReplicaCrashNode.RequiresSourceStores(boundary))
         {
-            using var released = File.Open(Path.Combine(directory, name), FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            foreach (var directory in ReplicaCrashNode.SourceStoreDirectories(root))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                KilledProcessFileReadiness.EnsureFilesUnlocked(directory);
+            }
         }
     }
 
