@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClientApi;
 

@@ -10,7 +10,7 @@ internal sealed record RelationalSqlRf3Scenario(PartitionRef Partition, Resource
     internal EntityRef First => new(Partition, RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.FirstId);
     internal EntityRef Second => new(Partition, RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.SecondId);
     internal StreamRef Stream => new(Partition, RelationalSqlRf3Tokens.Streams, RelationalSqlRf3Tokens.StreamId);
-    internal VectorSpace Space => new(RelationalSqlRf3Tokens.VectorSpace, RelationalSqlRf3Tokens.Dimension,
+    private static VectorSpace Space => new(RelationalSqlRf3Tokens.VectorSpace, RelationalSqlRf3Tokens.Dimension,
         DistanceMetric.DotProduct, RelationalSqlRf3Tokens.VectorModel, RelationalSqlRf3Tokens.VectorVersion);
 
     internal static async Task<RelationalSqlRf3Scenario> CreateAsync(KeyLoadClient administrator, CancellationToken cancellationToken)

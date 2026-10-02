@@ -1925,12 +1925,26 @@
         "run": 37068458582,
         "conclusion": "failure",
         "scope": "build_CA1062_blob_null_KLD0031_client_aggregate_KLD0033_query_nesting_no_product_runtime_execution"
+      },
+      {
+        "sha": "af9e0d16b6fdc781f7d4b9b54cd56fec152cfc56",
+        "run": 37069241980,
+        "conclusion": "failure",
+        "scope": "build_IDE0005_redundant_Server_import_no_product_runtime_execution"
+      },
+      {
+        "sha": "9f3acf5b9af39ad5d8f818039b22eb8ce1b0463e",
+        "run": 37069574976,
+        "conclusion": "in_progress",
+        "scope": "Server_ComparisonTests_build_pass_Unit_Integration_compile_failed_no_unit_RF3_execution_comparisons_pending"
       }
     ],
     "sourceRepairsAwaitingQualification": [
       "feature_owned_typed_blob_extensions_shared_transport_null_guards",
       "symmetric_native_equality_early_iterator_exits",
-      "initial_native_Orleans_RPC_read_ownership_write_unknown_outcome_mapping"
+      "initial_native_Orleans_RPC_read_ownership_write_unknown_outcome_mapping",
+      "per_node_RF3_caller_disposal_and_deadline_after_readiness",
+      "test_static_TUnit_namespace_cached_format_native_async_cancel_unused_import_repairs"
     ],
     "evidence": [
       "docs/Features/QueryExecution.md",

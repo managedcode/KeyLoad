@@ -26,6 +26,9 @@ no reliable cheaper-tier correctness/routing evidence is available in this run.
 | TASK-AISQL-011; exact baseline finding and Accepted ADR-036 contract | SQL worker; OrleansNode.cs, NEW Server/Features/ClusterRouting/OrleansRpcFailure.cs and UnitTests/Features/ClusterRouting/OrleansRpcFailureTests.cs only; root owns trusted gateway/auth caller joins and docs | 011,009 | Native-exception regression sources, narrow initial-RPC classification, no retry/suppression/domain recoding; root reviews then exact-SHA build/unit/RF3 catch-up proof |
 | TASK-AISQL-012A; Accepted ADR-054 integration repair | models worker; Client/Features/BlobStorage/BlobClient.cs and NEW UnitTests/Features/BlobStorage/BlobSdkArgumentTests.cs only; root owns Send access join | 012,006,009 | Tests-first public null guards, source-compatible feature extension methods, same transport/IDs; root review + exact build/RF3 |
 | TASK-AISQL-012B; Accepted ADR-054 integration repair | gates worker; QueryCandidateReader.cs only | 008,009 | Remove depth4 nesting without new allocations/semantic changes; existing25 real-store regression cases + exact build |
+| TASK-AISQL-015; exact UnitTests compiler diagnostics | models worker; RelationalLinkageTests.cs, RelationalTestData.cs and RelationalRowTests.cs only | 002–004,009 | Correct actual ordered TUnit collection comparison and cache CompositeFormat without altering exact raw decimal fixtures or assertions; exact-SHA compiler/units join |
+| TASK-AISQL-016; exact UnitTests compiler diagnostics | SQL worker; OrleansRpcFailureTests.cs, SqlOperationBudgetTests.cs and SqlOperationCompilerTests.cs only | 005,007,011,009 | Await native CancelAsync before cancellation assertions and remove imports proven redundant by actual compiler; same errors and test coverage, no suppression |
+| TASK-AISQL-014; exact RF3 compiler diagnostics | gates worker; SqlRf3AdmissionTests.cs only, root owns static scenario member | 004,007,009 | Isolate existing per-node using/await-using ownership in VerifyNodeAsync outside fixture try/finally/loop analysis; start caller deadline after separately bounded fixture readiness; preserve all3 real-node assertions, same-ID control progress and schema/linkage contracts; no suppression/test weakening |
 
 No worker may expand scope, change contracts/policy, install tools/dependencies,
 stash, weaken diagnostics/assertions, test locally or commit/push. Escalate any
@@ -107,7 +110,7 @@ build/format/governance/unit/scalar/recovery and analyzer jobs passed. Required
 runtime failures remain:
 
 - [ ] RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes:
-  [RF3 job111033735266](https://github.com/managedcode/KeyLoad/actions/runs/37065200835/job/111033735266),45/46 passing, no skips. RecoveryRequired after stopped replica; actual node1 logs show distributed-directory/placement connection rejection to node2. Inspect transport failure classification; do not broaden accepted retry errors to hide genuine recovery damage.
+  [RF3 job111033735266](https://github.com/managedcode/KeyLoad/actions/runs/37065200835/job/111033735266),45/46 passing, no skips. RecoveryRequired after stopped replica; node1 logs also contain distributed-directory/placement connection rejection to node2, but the exact failed request dispatch phase and native exception class were not captured. The narrow native RPC repair is a contract correction, not proof of that failure's root cause; qualify the unchanged catch-up test and preserve genuine recovery damage.
 - [ ] AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines:
   [comparison job111033735452](https://github.com/managedcode/KeyLoad/actions/runs/37065200835/job/111033735452), resource Waiting with no creation/health; lifecycle timed out. Concurrent comparison work is outside this scoped source commit.
 - [ ] AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema:
@@ -157,3 +160,19 @@ reached Server build after those repairs and stopped on one unnecessary import:
   settings into the dedicated fixture so SDK/MCP SQL rejection and direct-control
   progress can be deterministic. Concurrent occupied-lane saturation stays a
   separate qualifier; AC007 stays open until actual GitHub runtime evidence.
+
+Candidate9f3acf5b9af39ad5d8f818039b22eb8ce1b0463e / [37069574976](https://github.com/managedcode/KeyLoad/actions/runs/37069574976) repeats the full gates after the IDE0005 repair. Outcome is pending; no runtime result is inferred from source review.
+
+RF3 build job111045550869 reached IntegrationTests and exposed:
+
+- [ ] CA1822 RelationalSqlRf3Scenario.Space: make the constant-only helper static; linked graph/vector semantics remain identical.
+- [ ] CA2000 SqlRf3AdmissionTests caller allocation: the committed loop already uses using/await-using, but analyzer reports both declarations within fixture try/finally. Extract an explicit per-node disposal scope into VerifyNodeAsync; retain unconditional disposal, all three node assertions and original control semantics. Start the caller deadline after the independent bounded fixture initialization so cold startup cannot consume it. Repeat exact-SHA build and real RF3 tests.
+
+The same candidate Ubuntu job111045551116 exposed additional unit source failures before any units could execute:
+
+- [ ] CS0103 RelationalLinkageTests.CollectionOrdering: bind the actual ordered TUnit comparison API; preserve sequence equality.
+- [ ] CA1863 RelationalTestData/RelationalRowTests string.Format: cache CompositeFormat preserving byte-for-byte numeric JSON fixture contents.
+- [ ] CA1849 OrleansRpcFailureTests/SqlOperationBudgetTests cancellation: await native CancelAsync before exercising the pre-cancelled boundary.
+- [ ] IDE0005 unused UnitTests imports in OrleansRpcFailureTests/SqlOperationCompilerTests: remove only compiler-identified redundant imports.
+
+TASK-AISQL-014/015/016 are complete source artifacts, reviewed and joined by root. Per-node disposal extraction, static vector-space helper, actual TUnit namespace, cached invariant formatting, awaited cancellation and unused-import removals retain every contract/assertion. Exact-SHA build/tests remain pending.

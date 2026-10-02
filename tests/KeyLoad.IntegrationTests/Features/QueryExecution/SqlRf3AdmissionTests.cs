@@ -24,23 +24,29 @@ internal sealed class SqlRf3AdmissionTests
     {
         var fixture = new ClusterFixture(new HttpAdmissionLimits
         { MaxReservedBytes = DataBytes, HeavyReadReservedBytes = HeavyReadBytes });
-        using var deadline = McpCallerDeadline.Create();
         try
         {
             await fixture.InitializeAsync();
+            using var deadline = McpCallerDeadline.Create();
             var partition = new PartitionRef(TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
                 Database, Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
             foreach (var node in new[] { McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3 })
             {
-                using var http = McpCallerHttp.Create(fixture, node);
-                var sdk = new KeyLoadClient(http, fixture.AdminKey);
-                await using var mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, deadline.Token);
-                await VerifySdkRejectionAsync(http, sdk, fixture.AdminKey, partition, deadline.Token);
-                await VerifyOfficialRejectionAsync(mcp, partition, deadline.Token);
-                await VerifyHealthyAsync(sdk, deadline.Token);
+                await VerifyNodeAsync(fixture, node, partition, deadline.Token);
             }
         }
         finally { await fixture.DisposeAsync(); }
+    }
+
+    private static async Task VerifyNodeAsync(ClusterFixture fixture, string node, PartitionRef partition,
+        CancellationToken cancellationToken)
+    {
+        using var http = McpCallerHttp.Create(fixture, node);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, cancellationToken);
+        await VerifySdkRejectionAsync(http, sdk, fixture.AdminKey, partition, cancellationToken);
+        await VerifyOfficialRejectionAsync(mcp, partition, cancellationToken);
+        await VerifyHealthyAsync(sdk, cancellationToken);
     }
 
     private static async Task VerifySdkRejectionAsync(HttpClient http, KeyLoadClient sdk, string administratorKey,

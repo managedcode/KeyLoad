@@ -2,7 +2,6 @@ using System.Text.Json;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.TestInfrastructure;
 using Microsoft.Extensions.Logging;
-using global::Orleans.Runtime;
 using global::Orleans.Runtime.Messaging;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -66,7 +65,7 @@ internal sealed class OrleansRpcFailureTests
     public async Task AcRoute009CallerCancellationWinsOverANativeFailureAndProducesNoFailureLog(bool command)
     {
         using var cancellation = new CancellationTokenSource();
-        cancellation.Cancel();
+        await cancellation.CancelAsync();
         using var capture = new EventSourceLogCapture();
         using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
         var logger = factory.CreateLogger(nameof(GrainFailureDiagnosticsTests));

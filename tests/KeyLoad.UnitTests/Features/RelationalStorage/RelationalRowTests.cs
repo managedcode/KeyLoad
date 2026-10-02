@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using System.Text.Json;
 
 namespace KeyLoad.UnitTests.Features.RelationalStorage;
@@ -29,6 +30,7 @@ internal sealed class RelationalRowTests
     private const string DecimalMaximum = "79228162514264337593543950335";
     private const string DecimalMinimumQuantum = "0.0000000000000000000000000001";
     private const string ValidTrailingZeros = "1.25000000000000000000000000000";
+    private static readonly CompositeFormat ParsedPropertyFormat = CompositeFormat.Parse(PropertyFormat);
 
     [Test]
     public async Task AcAisql003ValidScalarLimitsUtcAndNullableAbsenceCommitWithoutCoercion()
@@ -113,8 +115,8 @@ internal sealed class RelationalRowTests
     private static string Replace(string row, string column, string value)
     {
         using var document = JsonDocument.Parse(row);
-        var before = string.Format(CultureInfo.InvariantCulture, PropertyFormat, column, document.RootElement.GetProperty(column).GetRawText());
-        var after = string.Format(CultureInfo.InvariantCulture, PropertyFormat, column, value);
+        var before = string.Format(CultureInfo.InvariantCulture, ParsedPropertyFormat, column, document.RootElement.GetProperty(column).GetRawText());
+        var after = string.Format(CultureInfo.InvariantCulture, ParsedPropertyFormat, column, value);
         return row.Replace(before, after, StringComparison.Ordinal);
     }
 }

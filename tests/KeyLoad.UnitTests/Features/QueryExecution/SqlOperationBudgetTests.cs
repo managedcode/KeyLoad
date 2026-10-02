@@ -60,7 +60,7 @@ internal sealed class SqlOperationBudgetTests
     public async Task AcAiSql007CancellationWinsBeforeMalformedInputOrPayloadAllocation()
     {
         using var cancellation = new CancellationTokenSource();
-        cancellation.Cancel();
+        await cancellation.CancelAsync();
         var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities) with { Sql = null! };
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
             SqlOperationTestData.Compile(request, cancellationToken: cancellation.Token));

@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Globalization;
+using System.Text;
 
 namespace KeyLoad.UnitTests.Features.RelationalStorage;
 
@@ -24,6 +25,7 @@ internal static class RelationalTestData
     internal const string IndexName = "by-name";
     internal const string RowTemplate = "{{\"key\":\"{0}\",\"name\":\"alpha\",\"count\":1,\"amount\":1.25,\"active\":true,\"at\":\"2026-10-02T12:00:00Z\"}}";
     internal const string EmptyJson = "{}";
+    private static readonly CompositeFormat RowFormat = CompositeFormat.Parse(RowTemplate);
     internal static ImmutableArray<RelationalColumn> Columns =>
     [
         new(Key, RelationalColumnType.Text), new(Name, RelationalColumnType.Text),
@@ -45,7 +47,7 @@ internal static class RelationalTestData
         => database.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition));
 
-    internal static string Row(string id = First) => string.Format(CultureInfo.InvariantCulture, RowTemplate, id);
+    internal static string Row(string id = First) => string.Format(CultureInfo.InvariantCulture, RowFormat, id);
 
     internal static OperationResult Submit(TestDatabase database, params Mutation[] mutations)
     {

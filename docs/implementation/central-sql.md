@@ -48,7 +48,9 @@ Required baseline dispatched after planning:
 was cancelled before any job executed. The original37065200835 later completed
 failure: all three OS build/format/governance/unit/scalar/recovery jobs and analyzer
 rules passed; RF3 passed45/46 and comparisons2/4. The remaining snapshot/catch-up
-failure shows Orleans directory/placement connection rejection to a stopped node.
+failure returned a generic recovery error. Node logs also show Orleans directory/placement
+connection rejection to a stopped node; the request dispatch phase and exact exception
+were not retained, so a causal attribution remains unproven.
 Comparisons lifecycle remained Waiting, and two retained StreamAppend smoke cases
 failed with unsupported ReadEventAsync. The root plan tracks exact jobs and cases.
 Exact new-source qualification is pending; no test count or speed result is
@@ -91,3 +93,7 @@ initial native Orleans/timeout RPC faults map to read OwnershipLost or uncertain
 command UnknownWriteOutcome. Genuine domain RecoveryRequired and caller
 cancellation retain their contracts; no extra dispatch/retry is introduced.
 Independent join review is complete; the next exact-SHA CI is the authority.
+
+Candidateaf9e0d16b / [37069241980](https://github.com/managedcode/KeyLoad/actions/runs/37069241980) stopped on one redundant namespace import before product tests. Candidate9f3acf5b9 / [37069574976](https://github.com/managedcode/KeyLoad/actions/runs/37069574976) removes it and repeats complete qualification; results remain pending.
+
+Candidate9f3acf5b9 passed Server/ComparisonTests compilation and reached comparison tests, but IntegrationTests/UnitTests compilation failed on CA1822/CA2000, missing TUnit enum namespace, repeated-format caching, synchronous cancellation and redundant imports. Bounded source repairs preserve the existing assertions and are awaiting a fresh complete CI; RF3 and units did not execute in that candidate.
