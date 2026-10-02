@@ -14,14 +14,21 @@ internal static class AdminBrowserAssertions
     private const string InvalidCredential = "root.invalid-untrusted-credential-long-enough";
     private const string RejectCredentialScript = "(()=>{document.getElementById('api-key').value=VALUE;document.getElementById('connect-form').requestSubmit();return true;})()";
     private const string Unauthorized = "document.getElementById('status-message').textContent.includes('Administrator authorization failed')";
+    private const string ApiKeyId = "api-key";
+    private const string TenantId = "tenant-id";
+    private const string DatabaseId = "database-id";
+    private const string PartitionKeyId = "partition-key";
+    private const string ScreenshotData = "data";
 
     internal static async Task ConnectAsync(AdminBrowserCdp browser, ClusterFixture fixture,
         AdminDashboardScenario scenario, CancellationToken cancellationToken)
     {
         var values = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["api-key"] = fixture.AdminKey, ["tenant-id"] = scenario.Partition.TenantId,
-            ["database-id"] = scenario.Partition.DatabaseId, ["partition-key"] = scenario.Partition.PartitionKey
+            [ApiKeyId] = fixture.AdminKey,
+            [TenantId] = scenario.Partition.TenantId,
+            [DatabaseId] = scenario.Partition.DatabaseId,
+            [PartitionKeyId] = scenario.Partition.PartitionKey
         };
         var script = ConnectScript.Replace("VALUE", JsonSerializer.Serialize(values), StringComparison.Ordinal);
         await browser.EvaluateAsync(script, cancellationToken);
@@ -40,7 +47,7 @@ internal static class AdminBrowserAssertions
         Directory.CreateDirectory(AdminBrowserProtocol.EvidenceDirectory);
         var reply = await browser.CommandAsync(AdminBrowserProtocol.CaptureScreenshot, new { format = "png" }, cancellationToken);
         await File.WriteAllBytesAsync(Path.Combine(AdminBrowserProtocol.EvidenceDirectory, name + ".png"),
-            Convert.FromBase64String(reply.GetProperty("data").GetString()!), cancellationToken);
+            Convert.FromBase64String(reply.GetProperty(ScreenshotData).GetString()!), cancellationToken);
     }
 
     internal static async Task DisconnectAsync(AdminBrowserCdp browser, ClusterFixture fixture,

@@ -6,7 +6,7 @@ The intended cluster foundation is Orleans, with separate request grains, a dist
 
 The original load-testing prototype has been replaced. This repository implements the new [architecture and development plan](docs/design/architecture-v0.3.uk.md), with the [original HTML edition](docs/design/architecture-v0.3.uk.html) preserved alongside it.
 
-The [documentation index](docs/README.md) covers all 20 Feature specifications with requirements, acceptance criteria, source/test boundaries and diagrams. The ADR catalog (docs/ADR/README.md) records architectural decisions and implementation contracts; the [coverage map](docs/implementation/documentation-coverage.json) links every KL task to its owning Feature and ADR without changing qualification status.
+The [documentation index](docs/README.md) covers all 21 Feature specifications with requirements, acceptance criteria, source/test boundaries and diagrams. The ADR catalog (docs/ADR/README.md) records architectural decisions and implementation contracts; the [coverage map](docs/implementation/documentation-coverage.json) links every KL task to its owning Feature and ADR without changing qualification status.
 
 ## Development status
 
@@ -44,6 +44,10 @@ Incoming snapshots have a flushed installation intent and complete-image validat
 Command admission bounds queued and active commands by node count/bytes and verified tenant/principal counts. The default data lane has 256 slots and 128 MiB of retained payload accounting; ACK/renew, membership and dispatch commands have a separate bounded control reserve. A full lane returns `ResourceExhausted` before this attempt's Raft acceptance. Configure `KeyLoad:CommandAdmission` and inspect `AdmissionStatusAsync` as a cluster administrator. See the [admission contract](docs/design/command-admission.md) for defaults, scheduling and the remaining memory/disk qualification work.
 
 Public HTTP admission reserves capacity before JSON deserialization and shares a modeled working budget across query, search and graph reads. Verified tenant/principal counts and a separate delivery/dispatch reserve apply through response processing. Data/control bodies default to 8 MiB/64 KiB; declared and chunked oversize requests return typed `ResourceExhausted`. Configure `KeyLoad:HttpAdmission`; administrator admission status includes its counters. These reservations do not establish a process RSS limit. A voter joining during temporary quorum loss keeps its Raft endpoint available and retries Orleans startup until consensus returns.
+
+## Administration console
+
+The runtime console is served at `/admin` on each database HTTP endpoint, for example `http://localhost:5101/admin` with the local Aspire profile. Connect with a persisted administrator API key, then enter the tenant, database and atomic partition key when browsing collections, queues or published blob metadata. The read-only console shows physical canonical/replica/backup file lengths, node status, admission occupancy and measured process HTTP throughput. It never receives or acknowledges queue messages, and credentials remain only in tab memory. See [AdminDashboard](docs/Features/AdminDashboard.md) for the contract and current qualification gates; source implementation and visual review are present, while exact-source GitHub RF3/browser and numeric coverage qualification remain pending.
 
 ## .NET client
 

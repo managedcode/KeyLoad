@@ -66,7 +66,7 @@ internal sealed class AdminCatalogTests
         db.Configure(First, ResourceKind.Collection);
         var position = db.Database.LastApplied;
         using var cancelled = new CancellationTokenSource();
-        cancelled.Cancel();
+        await cancelled.CancelAsync();
         Assert.ThrowsExactly<OperationCanceledException>(() => new AdminCatalogReader(db.Database).Read(Administrator,
             new(db.Partition.TenantId, db.Partition.DatabaseId), cancelled.Token));
         await Assert.That(db.Database.LastApplied).IsEqualTo(position);

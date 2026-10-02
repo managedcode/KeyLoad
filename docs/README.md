@@ -26,13 +26,14 @@ KeyLoad поєднує документи, історію подій, надій
 | [ClusterRouting](Features/ClusterRouting.md) | Distinct request grain, distributed directory/repartitioning, membership, atomic identity/physical placement і planned movement |
 | [StorageRecovery](Features/StorageRecovery.md) | Node-local stores/journals/locks/apply/read lifetime, codec/checkpoints/corruption і process recovery |
 | [ClientApi](Features/ClientApi.md) | Typed .NET/CLI transport і retries/errors; required official MCP/simple agent parity з Proposed mapping |
+| [AdminDashboard](Features/AdminDashboard.md) | Захищена read-only адмінпанель: фізичні розміри файлів, фактичний HTTP throughput, каталог/документи/blob metadata та черги без споживання; GitHub qualification pending |
 | [ResourceExecution](Features/ResourceExecution.md) | Bounded work/memory/lifetimes, multi-tenant admission/control reserve та honest metrics/telemetry |
 | [BenchmarkComparisons](Features/BenchmarkComparisons.md) | Same-corpus correctness, Docker/Aspire native topologies, free-engine scope та graphs тільки з successful GitHub JSON |
 | [CodeQuality](Features/CodeQuality.md) | Central SDK/style/Roslyn analysis, named-symbol/SOLID limits та retained diagnostics |
 | [TestInfrastructure](Features/TestInfrastructure.md) | TUnit/MTP, actual process recovery і Docker RF3 .NET/MCP suites, versions/platforms та release gates |
 | [RepositoryGovernance](Features/RepositoryGovernance.md) | MCAF policy preservation, local ownership, REQ/AC/ADR, bounded agent tasks і documentation coverage |
 
-Рівно 20 owning Feature-специфікацій. Кожна містить requirements/acceptance, applicable ADRs, current/target slice map, positive/negative/edge/error flows та test/evidence boundaries. Frontend або інші N/A surfaces мають конкретну причину; required future capability не зникає з контракту через відсутність source.
+Рівно 21 owning Feature-специфікація. Кожна містить requirements/acceptance, applicable ADRs, current/target slice map, positive/negative/edge/error flows та test/evidence boundaries. Frontend або інші N/A surfaces мають конкретну причину; required future capability не зникає з контракту через відсутність source.
 
 ```mermaid
 flowchart LR

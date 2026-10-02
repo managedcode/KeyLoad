@@ -46,7 +46,7 @@ internal sealed class AdminStorageObservationTests
             await Assert.That(snapshot.ObservedFiles).IsLessThanOrEqualTo(2_048);
             await Assert.That(string.IsNullOrWhiteSpace(snapshot.Notice)).IsFalse();
             using var cancelled = new CancellationTokenSource();
-            cancelled.Cancel();
+            await cancelled.CancelAsync();
             Assert.ThrowsExactly<OperationCanceledException>(() => AdminStorageObserver.Read(root, cancelled.Token));
         }
         finally { if (Directory.Exists(root)) { Directory.Delete(root, recursive: true); } }
@@ -72,8 +72,10 @@ internal sealed class AdminStorageObservationTests
         }
         finally
         {
-            if (Directory.Exists(root)) { Directory.Delete(root, recursive: true); }
-            if (Directory.Exists(external)) { Directory.Delete(external, recursive: true); }
+            if (Directory.Exists(root))
+            { Directory.Delete(root, recursive: true); }
+            if (Directory.Exists(external))
+            { Directory.Delete(external, recursive: true); }
         }
     }
 }

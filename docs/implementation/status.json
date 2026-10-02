@@ -1181,5 +1181,34 @@
       "queueReadWork": "bounded_ready_visitor_one_claim_FIFO_expiry_and256_ceiling_cases_pass_all_three_OSes_exactfa80c701",
       "timeSeriesPartialEvidence": "20_attempts_and20_checks_in_retainedfa80c701_report_native_exit_failed_not_qualified"
     }
+  },
+  "AdminDashboard": {
+    "title": "Read-only адміністративна панель бази даних",
+    "status": "in_progress",
+    "source": "implemented",
+    "route": "/admin",
+    "evidence": [
+      "docs/Features/AdminDashboard.md",
+      "docs/ADR/ADR-051-admin-dashboard.md",
+      "src/KeyLoad.Server/Features/AdminDashboard/",
+      "tests/KeyLoad.UnitTests/Features/AdminDashboard/",
+      "tests/KeyLoad.IntegrationTests/Features/AdminDashboard/"
+    ],
+    "manualDesignReview": "desktop_1280x720_and_mobile_390x844_disconnected_real_shell_inspected_2026_10_02_only_subjective_design",
+    "localTestsExecuted": false,
+    "qualification": "exact_source_GitHub_build_unit_recovery_RF3_SDK_MCP_browser_and_coverage_pending",
+    "coverage": "required_thresholds_preserved_collector_and_actual_result_not_yet_available",
+    "candidateRun": {
+      "id": 37029344985,
+      "sha": "49a5b6054843800e20e333ddaa28fa96d79dd294",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37029344985",
+      "conclusion": "failure_dashboard_compiler_analyzer_errors_runtime_not_executed_later_repairs_unqualified"
+    },
+    "baselineRun": {
+      "id": 37028314087,
+      "sha": "0eb772cbf6976284ee2b628400a3ad20f89388fc",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37028314087",
+      "conclusion": "failure"
+    }
   }
 }

@@ -48,7 +48,8 @@ internal sealed class AdminBrowserProcess : IAsyncDisposable
         var endpointFile = Path.Combine(profile, AdminBrowserProtocol.EndpointFile);
         while (!File.Exists(endpointFile))
         {
-            if (process.HasExited) { throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure); }
+            if (process.HasExited)
+            { throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure); }
             await Task.Delay(AdminBrowserProtocol.PollMilliseconds, cancellationToken);
         }
         var lines = await File.ReadAllLinesAsync(endpointFile, cancellationToken);
@@ -65,7 +66,8 @@ internal sealed class AdminBrowserProcess : IAsyncDisposable
         await Cdp.DisposeAsync();
         try
         {
-            if (!process.HasExited) { process.Kill(entireProcessTree: true); }
+            if (!process.HasExited)
+            { process.Kill(entireProcessTree: true); }
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             await process.WaitForExitAsync(timeout.Token);
             await Task.WhenAll(errors, output);
@@ -73,7 +75,8 @@ internal sealed class AdminBrowserProcess : IAsyncDisposable
         finally
         {
             process.Dispose();
-            if (Directory.Exists(profile)) { Directory.Delete(profile, recursive: true); }
+            if (Directory.Exists(profile))
+            { Directory.Delete(profile, recursive: true); }
         }
     }
 

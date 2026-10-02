@@ -111,6 +111,7 @@ function renderResources(items) {
         const button = make(Dom.button, item.name);
         button.type = Dom.buttonType;
         button.append(make(Dom.small,`${kindName(item.kind)}${Text.dot}${item.transactionDomainId}`));
+        button.append(make(Dom.small, `${Text.schema}${item.schemaVersion}${Text.dot}${item.indexCount}${Text.indexes}${item.paused?Text.dot+Text.paused:Text.empty}`));
         button.addEventListener(Dom.click, () => chooseResource(item, button));
         list.append(button);
     });

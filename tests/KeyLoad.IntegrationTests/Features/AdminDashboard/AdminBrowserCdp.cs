@@ -7,6 +7,7 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
 {
     private readonly ClientWebSocket socket = new();
     private int requestId;
+    internal AdminBrowserNetwork Network { get; } = new();
 
     internal async Task ConnectAsync(Uri endpoint, CancellationToken cancellationToken)
         => await socket.ConnectAsync(endpoint, cancellationToken);
@@ -20,7 +21,7 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
         {
             using var response = JsonDocument.Parse(await ReceiveAsync(cancellationToken));
             if (!response.RootElement.TryGetProperty(AdminBrowserProtocol.IdProperty, out var actual) || actual.GetInt32() != id)
-            { continue; }
+            { Network.Observe(response.RootElement); continue; }
             if (response.RootElement.TryGetProperty(AdminBrowserProtocol.ErrorProperty, out _))
             { throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure); }
             return response.RootElement.GetProperty(AdminBrowserProtocol.ResultProperty).Clone();
@@ -42,6 +43,18 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
         { await Task.Delay(AdminBrowserProtocol.PollMilliseconds, cancellationToken); }
     }
 
+    internal async Task WaitForNetworkIdleAsync(CancellationToken cancellationToken)
+    {
+        const string Probe = "true";
+        do
+        {
+            await EvaluateAsync(Probe, cancellationToken);
+            if (Network.ActiveRequests == 0)
+            { return; }
+            await Task.Delay(AdminBrowserProtocol.PollMilliseconds, cancellationToken);
+        } while (true);
+    }
+
     private async Task<byte[]> ReceiveAsync(CancellationToken cancellationToken)
     {
         using var output = new MemoryStream();
@@ -52,7 +65,7 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
             result = await socket.ReceiveAsync(buffer.AsMemory(), cancellationToken);
             if (result.MessageType == WebSocketMessageType.Close || output.Length + result.Count > AdminBrowserProtocol.MaximumReplyBytes)
             { throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure); }
-            output.Write(buffer, 0, result.Count);
+            await output.WriteAsync(buffer.AsMemory(0, result.Count), cancellationToken);
         } while (!result.EndOfMessage);
         return output.ToArray();
     }

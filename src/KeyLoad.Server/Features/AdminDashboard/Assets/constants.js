@@ -78,7 +78,6 @@ export const Text  =  Object.freeze({
     browseHint:'Metadata and records are read without changing stored data.',
     physical:'Physical node files',
     physicalHint:'Bounded file metadata; node-local physical lengths, not unique logical database size.',
-    unavailable:'Unavailable',
     partial:'Partial observation',
     complete:'Complete observation',
     awaiting:'No observation yet',
@@ -89,13 +88,11 @@ export const Text  =  Object.freeze({
     routingPending:'ROUTING NOT READY',
     storageWaiting:'Storage observations appear after connection.',
     twoSamples:'Two live observations unlock the chart.',
-    samples:'Measured session observations',
     unsupported:'This resource kind has no record browser in the read-only console.',
     scopeRequired:'Enter a tenant, database and partition key.',
     page:'Bounded page',
     cut:'Read cut',
     details:'View JSON',
-    invalidJson:'Stored document is not valid JSON.',
     bytes:['B',
     'KiB',
     'MiB',
@@ -111,10 +108,12 @@ export const Text  =  Object.freeze({
     captured:'Captured ',
     stored:'stored',
     inFlight:'in flight',
-    published:'Published logical length',
     queueHint:'Persisted metadata only. Inspection never receives or acknowledges messages.',
     blobHint:'Published object metadata · logical lengths.',
     documentHint:'Authorized document rows · 25 per page.',
+    schema:'schema ',
+    indexes:' indexes',
+    paused:'paused',
     resourceSuffix:' on this page',
     httpError:'Request failed (HTTP ',
     closeParen:').',
@@ -134,7 +133,6 @@ export const Text  =  Object.freeze({
     }
 });
 export const Dom  =  Object.freeze({
-    idPrefix:'#',
     nav:'nav button[data-view]',
     current:'aria-current',
     page:'page',
@@ -157,7 +155,6 @@ export const Dom  =  Object.freeze({
     pre:'pre',
     polylinePoints:'points',
     emptyClass:'empty',
-    type:'type',
     buttonType:'button'
 });
 export const Id  =  Object.freeze({

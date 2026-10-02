@@ -56,6 +56,7 @@ internal sealed class AdminStorageScan(string rootPath, CancellationToken cancel
         directories.Push(root);
         while (directories.Count > 0 && WithinBudget())
         { VisitDirectory(directories.Pop()); }
+        _ = WithinBudget();
     }
 
     private bool WithinBudget()
@@ -110,9 +111,15 @@ internal sealed class AdminStorageScan(string rootPath, CancellationToken cancel
         observedFiles++;
         switch (category)
         {
-            case Canonical: canonicalBytes = checked(canonicalBytes + length); break;
-            case Replica: replicaBytes = checked(replicaBytes + length); break;
-            case Backup: backupBytes = checked(backupBytes + length); break;
+            case Canonical:
+                canonicalBytes = checked(canonicalBytes + length);
+                break;
+            case Replica:
+                replicaBytes = checked(replicaBytes + length);
+                break;
+            case Backup:
+                backupBytes = checked(backupBytes + length);
+                break;
         }
         if (files.Count < AdminStorageObserver.MaximumFiles)
         { files.Add(new(relative, category, length)); }
@@ -120,7 +127,7 @@ internal sealed class AdminStorageScan(string rootPath, CancellationToken cancel
 
     private static string Category(string relative)
     {
-        var separator = relative.IndexOf('/');
+        var separator = relative.IndexOf('/', StringComparison.Ordinal);
         var parent = separator < 0 ? relative : relative[..separator];
         return parent switch
         {

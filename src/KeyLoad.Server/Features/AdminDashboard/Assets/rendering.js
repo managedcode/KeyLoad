@@ -1,6 +1,5 @@
 import {
     ClusterLabels,
-    Config,
     Dom,
     Headers,
     Id,
@@ -20,9 +19,6 @@ import {
     resetMetrics
 } from './metrics.js';
 let snapshot = null;
-export function currentSnapshot() {
-    return snapshot;
-}
 export function renderSnapshot(value) {
     snapshot = value;
     measure(value);

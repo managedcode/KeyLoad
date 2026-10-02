@@ -52,7 +52,8 @@ internal static class AdminStaticAssets
     {
         var asset = Assets[context.Request.Path.Value!];
         var content = typeof(AdminStaticAssets).Assembly.GetManifestResourceStream(ResourcePrefix + asset.File);
-        if (content is null) { return Results.NotFound(); }
+        if (content is null)
+        { return Results.NotFound(); }
         context.Response.Headers.CacheControl = NoStore;
         context.Response.Headers.XContentTypeOptions = NoSniff;
         context.Response.Headers[CspHeader] = ContentPolicy;

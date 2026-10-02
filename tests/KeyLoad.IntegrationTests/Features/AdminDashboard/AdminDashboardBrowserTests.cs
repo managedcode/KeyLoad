@@ -25,9 +25,12 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
         using var http = fixture.App.CreateHttpClient(McpCallerProtocol.Node1, McpCallerProtocol.HttpEndpoint);
         var url = new Uri(http.BaseAddress!, AdminPath).AbsoluteUri;
         await using var browser = await AdminBrowserProcess.StartAsync(deadline.Token);
+        await AdminBrowserLifecycleAssertions.BeginNetworkAsync(browser.Cdp, deadline.Token);
         await browser.Cdp.CommandAsync(AdminBrowserProtocol.PageNavigate, new { url }, deadline.Token);
         await browser.Cdp.WaitAsync(Ready, deadline.Token);
         await AdminBrowserAssertions.ConnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
+        await AdminBrowserLifecycleAssertions.VerifyRefreshAndMotionAsync(browser.Cdp, deadline.Token);
+        await AdminBrowserLifecycleAssertions.VerifyBackgroundSuspensionAsync(browser.Cdp, deadline.Token);
         await browser.Cdp.EvaluateAsync(SelectCollections, deadline.Token);
         await browser.Cdp.WaitAsync(ResourcesLoaded, deadline.Token);
         await browser.Cdp.EvaluateAsync(SelectResource, deadline.Token);

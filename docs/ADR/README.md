@@ -56,6 +56,7 @@
 | [ADR-049 genuine Neo4j harness and cleanup](ADR-049-genuine-neo4j-harness.md) | Accepted, implementation and qualification pending | BenchmarkComparisons |
 | [ADR-040 static website/Three.js evidence](ADR-040-static-site-threejs-evidence.md) | Accepted, implementation in progress | BenchmarkComparisons |
 | [ADR-050 TimeSeries and Timescale comparison](ADR-050-timeseries-timescale-comparison.md) | Accepted, implementation and qualification pending | TimeSeries, BenchmarkComparisons |
+| [ADR-051 read-only administration console](ADR-051-admin-dashboard.md) | Accepted, source implemented; GitHub qualification pending | AdminDashboard |
 
 ## Ідентичність і пріоритет
 

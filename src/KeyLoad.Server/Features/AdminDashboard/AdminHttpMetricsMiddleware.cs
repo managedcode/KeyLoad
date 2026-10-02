@@ -26,7 +26,8 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next)
     }
 
     internal static bool Included(PathString path) =>
-        (path.StartsWithSegments(ApiPrefix) || path.StartsWithSegments(McpPrefix))
-        && !path.StartsWithSegments(AdminDashboardProtocol.SnapshotPath)
-        && !path.Equals(new PathString(AdmissionPath)) && !path.Equals(new PathString(StatusPath));
+        (path.StartsWithSegments(ApiPrefix, StringComparison.OrdinalIgnoreCase) || path.StartsWithSegments(McpPrefix, StringComparison.OrdinalIgnoreCase))
+        && !path.StartsWithSegments(AdminDashboardProtocol.SnapshotPath, StringComparison.OrdinalIgnoreCase)
+        && !path.Equals(new PathString(AdmissionPath), StringComparison.OrdinalIgnoreCase)
+        && !path.Equals(new PathString(StatusPath), StringComparison.OrdinalIgnoreCase);
 }

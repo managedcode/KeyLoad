@@ -1,9 +1,9 @@
 namespace KeyLoad.Server;
 
-internal sealed class AdminHttpMetrics
+internal sealed class AdminHttpMetrics(TimeProvider? clock = null)
 {
     private readonly object gate = new();
-    private readonly DateTimeOffset startedAt = DateTimeOffset.UtcNow;
+    private readonly DateTimeOffset startedAt = (clock ?? TimeProvider.System).GetUtcNow();
     private readonly Guid processInstance = Guid.NewGuid();
     private long completed;
     private long failed;
