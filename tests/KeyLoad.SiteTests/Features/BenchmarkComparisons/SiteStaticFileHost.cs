@@ -42,7 +42,9 @@ internal sealed class SiteStaticFileHost : IAsyncDisposable
             }
             catch (HttpListenerException)
             {
-                // Retry the bounded native port-binding race after closing this listener.
+                // Retry the bounded native port-binding race after discarding this listener.
+                DiscardUnstartedListener(untransferred);
+                untransferred = null;
             }
             finally
             {
@@ -51,6 +53,22 @@ internal sealed class SiteStaticFileHost : IAsyncDisposable
         }
 
         throw new InvalidOperationException(SiteTokens.StaticHostBindFailure);
+    }
+
+    /// <summary>
+    /// The managed (non-Windows) listener re-resolves its endpoint while releasing a failed bind and can raise the same
+    /// address-in-use failure. The port was never served, so that release failure must not escape the bounded retry.
+    /// </summary>
+    private static void DiscardUnstartedListener(HttpListener? listener)
+    {
+        try
+        {
+            listener?.Abort();
+        }
+        catch (HttpListenerException)
+        {
+            // The failed endpoint was never bound for this listener; nothing remains to release.
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -63,20 +81,15 @@ internal sealed class SiteStaticFileHost : IAsyncDisposable
         try
         {
             await cancellation.CancelAsync();
-            listener.Stop();
+            // Release exactly once: on the managed (non-Windows) listener, Close() after Stop() re-binds the port that
+            // Stop() already released, racing parallel tests for it ("Address already in use", website run 37074632196).
+            listener.Close();
             using var timeout = new CancellationTokenSource(SiteTokens.StaticHostTimeoutMilliseconds);
             await serving.WaitAsync(timeout.Token);
         }
         finally
         {
-            try
-            {
-                listener.Close();
-            }
-            finally
-            {
-                cancellation.Dispose();
-            }
+            cancellation.Dispose();
         }
     }
 

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Sockets;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
@@ -28,6 +29,55 @@ internal sealed class SiteBrowserStaticHostTests
         await AssertContentType(client, baseUri, SiteBrowserTokens.ProbeStylesheetFileName, SiteBrowserTokens.CssContentType);
         await AssertContentType(client, baseUri, SiteBrowserTokens.ProbeModuleFileName, SiteBrowserTokens.JavaScriptContentType);
         await AbortResponseAndFetchAgain(client, baseUri);
+    }
+
+    /// <summary>
+    /// AC-BC-025 regression for website run 37074632196. On the managed (non-Windows) listener, Close() after Stop()
+    /// re-binds the port Stop() already released, so a concurrent owner of that port turns teardown into
+    /// "Address already in use". The static host releases its listener once and leaves the port free.
+    /// </summary>
+    [Test]
+    public async Task AC_BC_025_StaticHostReleasesItsListenerOnceBecauseStopThenCloseRebindsThePort()
+    {
+        var rebindFailed = StopThenCloseFailsWhileThePortIsTaken(ReserveEphemeralPort());
+        await Assert.That(rebindFailed).IsEqualTo(!OperatingSystem.IsWindows());
+
+        await using var temporary = SiteTempDirectory.Create();
+        Directory.CreateDirectory(temporary.Output);
+        await using var host = SiteStaticFileHost.Start(temporary.Output);
+        var hostPort = new Uri(host.BaseUrl).Port;
+        await host.DisposeAsync();
+        using var reuse = new TcpListener(IPAddress.Loopback, hostPort);
+        reuse.Start();
+        await Assert.That(((IPEndPoint)reuse.LocalEndpoint).Port).IsEqualTo(hostPort);
+    }
+
+    private static bool StopThenCloseFailsWhileThePortIsTaken(int port)
+    {
+        using var listener = new HttpListener();
+        listener.Prefixes.Add($"{SiteTokens.StaticHostAddress}{port}{SiteTokens.UrlPathSeparator}");
+        listener.Start();
+        listener.Stop();
+        using var competitor = new TcpListener(IPAddress.Loopback, port);
+        competitor.Start();
+        try
+        {
+            listener.Close();
+            return false;
+        }
+        catch (HttpListenerException)
+        {
+            return true;
+        }
+    }
+
+    private static int ReserveEphemeralPort()
+    {
+        using var reservation = new TcpListener(IPAddress.Loopback, SiteTokens.PortZero);
+        reservation.Start();
+        var port = ((IPEndPoint)reservation.LocalEndpoint).Port;
+        reservation.Stop();
+        return port;
     }
 
     private static async Task AssertContentType(HttpClient client, Uri baseUri, string fileName, string expected)
