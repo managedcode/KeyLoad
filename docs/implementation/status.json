@@ -1220,16 +1220,38 @@
       "tests/KeyLoad.UnitTests/Features/AdminDashboard/",
       "tests/KeyLoad.IntegrationTests/Features/AdminDashboard/"
     ],
-    "manualDesignReview": "desktop_1280x720_and_mobile_390x844_disconnected_real_shell_inspected_2026_10_02_only_subjective_design",
+    "manualDesignReview": "connected_real_RF3_desktop_1440x900_and_mobile_390x900_PNGs_downloaded_and_lead_reviewed_2026_10_02_subjective_design_only",
     "localTestsExecuted": false,
-    "qualification": "all_6_RF3_admin_API_and_complete_native_Chrome_pass_all_OS_unit_steps_pass_retained_PNG_and_full_recovery_fault_comparison_coverage_gates_pending",
+    "qualification": "13_dashboard_unit_cases_pass_each_OS_36_of_36_RF3_including_6_admin_API_and_native_Chrome_pass_no_skips_retained_PNGs_reviewed_complete_recovery_comparison_numeric_coverage_open",
     "coverage": "required_thresholds_preserved_collector_and_actual_result_not_yet_available",
     "candidateRun": {
-      "id": 37038422388,
-      "sha": "aed338c6435d6edc411049e2a4052cddab5bb285",
-      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37038422388",
-      "conclusion": "RF3_failure_35_of_36_all_7_dashboard_API_and_browser_pass_no_skips_independent_node2_leader_restart_failure_PNG_root_fix_pending",
-      "artifacts": "artifacts/qualification/admin-dashboard/37038422388/"
+      "id": 37039965957,
+      "sha": "8f81c7c5bef169bb5709e9695c6662002b96ea69",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37039965957",
+      "conclusion": "failure",
+      "buildFormatGovernanceAnalyzers": "pass_all_three_OS_118_analyzer_tests_each",
+      "dashboardUnit": "13_of_13_each_OS_no_skips",
+      "fullUnit": "linux_805_of_805_macos_805_of_805_windows_801_of_805_four_independent_comparison_host_timeouts",
+      "rf3": {
+        "jobId": 110947384866,
+        "passed": 36,
+        "total": 36,
+        "skipped": 0,
+        "dashboardApiPassed": 6,
+        "nativeBrowserPassed": 1,
+        "artifactId": 11242571382
+      },
+      "unitArtifactIds": {
+        "linux": 11242626726,
+        "macos": 11242846364,
+        "windows": 11242507999
+      },
+      "remainingGates": "independent_recovery_comparison_endurance_fault_and_numeric_coverage",
+      "artifacts": "artifacts/qualification/admin-dashboard/37039965957/",
+      "browserImages": [
+        "docker-rf3/artifacts/qualification/admin-dashboard/desktop.png",
+        "docker-rf3/artifacts/qualification/admin-dashboard/mobile.png"
+      ]
     },
     "baselineRun": {
       "id": 37028314087,
