@@ -5,10 +5,6 @@ namespace KeyLoad.Server;
 internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<ServerErrorMiddleware> logger)
 {
     private const string UnexpectedFailure = "The server could not complete the database operation.";
-    private const string UnexpectedLog = "Database request failed with {ExceptionType}.";
-    private const int UnexpectedEventId = 1001;
-    private static readonly Action<ILogger, string, Exception?> LogFailure = LoggerMessage.Define<string>(LogLevel.Error,
-        new EventId(UnexpectedEventId), UnexpectedLog);
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -32,7 +28,7 @@ internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<Server
         }
         catch (Exception error) when (!context.Response.HasStarted)
         {
-            LogFailure(logger, error.GetType().FullName ?? error.GetType().Name, null);
+            RequestFailureDiagnostic.LogFailure(logger, context, error);
             await WriteAsync(context, ErrorCode.RecoveryRequired, UnexpectedFailure).ConfigureAwait(false);
         }
     }

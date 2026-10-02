@@ -1,6 +1,6 @@
 /*
- * KeyLoad brand system (ADR-053): serious Liquid Glass in monochrome Managed Code white/black and
- * Prostir graphite, with Prostir lime as the only restrained accent.
+ * KeyLoad brand system (ADR-053, design overhaul 2026-10-02): editorial paper, black display type, Prostir graphite
+ * instruments and Managed Code's pastel iridescence (peach, lilac, periwinkle) used as a marker, never as a fill wash.
  * Canonical source: src/KeyLoad.Server/Features/AdminDashboard/Assets/brand.css.
  * Byte-identical mirror: site/Features/BenchmarkComparisons/brand.css (drift test enforced).
  */
@@ -10,75 +10,83 @@
   --kl-font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", Inter, system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
   --kl-font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
 
-  --kl-page: #f2f2f4;
+  --kl-page: #f4f3ef;
+  --kl-paper: #f7f6f2;
   --kl-wallpaper:
-    radial-gradient(45% 40% at 0% 0%, rgba(198, 242, 78, .14), transparent 70%),
-    radial-gradient(40% 40% at 100% 0%, rgba(201, 180, 255, .16), transparent 70%),
-    radial-gradient(70% 55% at 50% -10%, #ffffff 0%, rgba(255, 255, 255, 0) 70%),
-    linear-gradient(180deg, #f6f6f4 0%, #ecebe7 100%);
-  --kl-surface: rgba(255, 255, 255, .58);
-  --kl-surface-solid: #fbfbfc;
-  --kl-surface-2: rgba(255, 255, 255, .42);
-  --kl-surface-3: rgba(0, 0, 0, .045);
-  --kl-glass: blur(30px) saturate(1.8);
-  --kl-sheen: linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, .12) 100%);
-  --kl-stroke: rgba(255, 255, 255, .82);
-  --kl-line: rgba(0, 0, 0, .075);
-  --kl-line-strong: rgba(0, 0, 0, .14);
+    radial-gradient(80% 50% at 50% -12%, #ffffff 0%, rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, #f7f6f2 0%, #f1f0eb 100%);
+  --kl-surface: rgba(255, 255, 255, .64);
+  --kl-surface-solid: #fcfcfb;
+  --kl-surface-2: rgba(255, 255, 255, .44);
+  --kl-surface-3: rgba(17, 18, 20, .045);
+  --kl-glass: blur(28px) saturate(1.7);
+  --kl-sheen: linear-gradient(180deg, rgba(255, 255, 255, .6) 0%, rgba(255, 255, 255, .1) 100%);
+  --kl-stroke: rgba(255, 255, 255, .86);
+  --kl-line: rgba(17, 18, 20, .08);
+  --kl-line-strong: rgba(17, 18, 20, .16);
 
-  --kl-ink: #1d1d1f;
-  --kl-ink-2: #3a3a3c;
-  --kl-muted: #6e6e73;
-  --kl-faint: #a1a1a6;
+  --kl-ink: #111214;
+  --kl-ink-2: #36373b;
+  --kl-muted: #6b6c72;
+  --kl-faint: #9d9ea4;
   --kl-graphite: #111214;
+  --kl-graphite-2: #1c1d21;
+  --kl-graphite-3: #2a2b30;
+  --kl-on-graphite: #f3f2ee;
+  --kl-on-graphite-muted: rgba(243, 242, 238, .62);
+  --kl-graphite-line: rgba(255, 255, 255, .1);
 
-  --kl-lime: #c6f24e;
-  --kl-lime-strong: #a4d82f;
-  --kl-lime-ink: #4b7300;
-  --kl-accent-ink: #5c8a00;
+  --kl-peach: #ffb08a;
+  --kl-lilac: #e3a6ff;
+  --kl-periwinkle: #9fb4ff;
+  --kl-iris: linear-gradient(100deg, #ffb08a 0%, #e3a6ff 50%, #9fb4ff 100%);
+  --kl-iris-soft: linear-gradient(100deg, rgba(255, 176, 138, .5) 0%, rgba(227, 166, 255, .5) 50%, rgba(159, 180, 255, .5) 100%);
+  --kl-accent: #8b7bf3;
+  --kl-accent-strong: #6f5cf0;
+  --kl-accent-ink: #5b48d6;
   --kl-lilac-ink: #7a5af5;
-  --kl-peach-ink: #e8743b;
+  --kl-peach-ink: #d9622b;
 
-  --kl-brand-50: rgba(198, 242, 78, .26);
-  --kl-brand-100: rgba(164, 216, 47, .4);
-  --kl-brand-200: rgba(122, 176, 24, .5);
-  --kl-brand-500: #a4d82f;
-  --kl-brand-600: #1d1d1f;
+  --kl-brand-50: rgba(139, 123, 243, .1);
+  --kl-brand-100: rgba(139, 123, 243, .2);
+  --kl-brand-200: rgba(139, 123, 243, .32);
+  --kl-brand-500: #8b7bf3;
+  --kl-brand-600: #111214;
   --kl-brand-700: #000000;
   --kl-brand-900: #111214;
-  --kl-gradient: linear-gradient(180deg, #1d1d1f 0%, #5b5b60 100%);
+  --kl-gradient: linear-gradient(180deg, #2a2b30 0%, #111214 100%);
   --kl-glow: radial-gradient(60% 70% at 50% 0%, rgba(255, 255, 255, .9) 0%, transparent 75%);
 
-  --kl-good: #34a853;
-  --kl-good-ink: #1d7a35;
-  --kl-good-bg: rgba(52, 168, 83, .12);
-  --kl-warn: #f5a524;
+  --kl-good: #2f8f5b;
+  --kl-good-ink: #1f6b42;
+  --kl-good-bg: rgba(47, 143, 91, .11);
+  --kl-warn: #e09a1f;
   --kl-warn-ink: #8a5300;
-  --kl-warn-bg: rgba(245, 165, 36, .16);
+  --kl-warn-bg: rgba(224, 154, 31, .15);
   --kl-serious: #ec835a;
   --kl-bad: #e5484d;
   --kl-bad-ink: #b42323;
   --kl-bad-bg: rgba(229, 72, 77, .1);
 
-  --kl-c1: #5c8a00;
-  --kl-c2: #7a5af5;
-  --kl-c3: #e8743b;
-  --kl-c4: #2a78d6;
-  --kl-c5: #e0569a;
-  --kl-c6: #d99a00;
-  --kl-c7: #12a37f;
+  --kl-c1: #6f5cf0;
+  --kl-c2: #e8743b;
+  --kl-c3: #5b7cf0;
+  --kl-c4: #c2549a;
+  --kl-c5: #2a2b30;
+  --kl-c6: #b8862b;
+  --kl-c7: #8a8c93;
   --kl-c8: #e34948;
-  --kl-grid: rgba(0, 0, 0, .06);
-  --kl-axis: rgba(0, 0, 0, .16);
+  --kl-grid: rgba(17, 18, 20, .06);
+  --kl-axis: rgba(17, 18, 20, .18);
 
   --kl-radius-sm: 10px;
   --kl-radius: 14px;
   --kl-radius-lg: 22px;
-  --kl-radius-xl: 30px;
-  --kl-shadow-sm: 0 1px 2px rgba(0, 0, 0, .06);
-  --kl-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -1px 0 rgba(255, 255, 255, .25), 0 1px 2px rgba(0, 0, 0, .04), 0 12px 32px rgba(0, 0, 0, .07);
-  --kl-shadow-lg: inset 0 1px 0 rgba(255, 255, 255, .95), 0 30px 80px rgba(0, 0, 0, .16);
-  --kl-focus: 0 0 0 4px rgba(0, 0, 0, .12);
+  --kl-radius-xl: 32px;
+  --kl-shadow-sm: 0 1px 2px rgba(17, 18, 20, .06);
+  --kl-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 1px 2px rgba(17, 18, 20, .04), 0 14px 36px rgba(17, 18, 20, .06);
+  --kl-shadow-lg: inset 0 1px 0 rgba(255, 255, 255, .95), 0 30px 80px rgba(17, 18, 20, .14);
+  --kl-focus: 0 0 0 4px rgba(17, 18, 20, .12);
   --kl-ease: cubic-bezier(.32, .72, 0, 1);
 }
 
@@ -94,17 +102,17 @@
   color: var(--kl-ink);
   text-decoration: none;
   font-family: var(--kl-font-display);
-  font-size: 19px;
-  font-weight: 650;
-  letter-spacing: -.025em;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -.03em;
 }
 
 .kl-brand img {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   flex: none;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .18);
+  box-shadow: 0 4px 12px rgba(17, 18, 20, .2);
 }
 
 .kl-brand b {
@@ -115,9 +123,15 @@
 .kl-eyebrow {
   margin: 0;
   color: var(--kl-muted);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .02em;
+  font: 600 11px/1.3 var(--kl-font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.kl-mark {
+  background: var(--kl-iris) no-repeat 0 92% / 100% .14em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 .kl-glass {
@@ -125,6 +139,13 @@
   background: var(--kl-sheen), var(--kl-surface);
   box-shadow: var(--kl-shadow);
   backdrop-filter: var(--kl-glass);
+}
+
+.kl-graphite {
+  border: 1px solid var(--kl-graphite-line);
+  background: linear-gradient(180deg, var(--kl-graphite-2) 0%, var(--kl-graphite) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 24px 60px rgba(17, 18, 20, .22);
+  color: var(--kl-on-graphite);
 }
 
 .kl-btn {
@@ -136,8 +157,8 @@
   padding: 0 16px;
   border: 1px solid var(--kl-stroke);
   border-radius: 999px;
-  background: var(--kl-sheen), rgba(255, 255, 255, .62);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 1px 3px rgba(0, 0, 0, .08);
+  background: var(--kl-sheen), rgba(255, 255, 255, .66);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 1px 3px rgba(17, 18, 20, .08);
   color: var(--kl-ink);
   font: 600 13px/1 var(--kl-font-sans);
   text-decoration: none;
@@ -149,7 +170,7 @@
 
 .kl-btn:hover:enabled,
 a.kl-btn:hover {
-  background: var(--kl-sheen), rgba(255, 255, 255, .9);
+  background: var(--kl-sheen), rgba(255, 255, 255, .94);
   color: var(--kl-ink);
 }
 
@@ -161,16 +182,16 @@ a.kl-btn:hover {
 }
 
 .kl-btn--primary {
-  border-color: rgba(122, 176, 24, .55);
-  background: linear-gradient(180deg, #d6f77a 0%, #c6f24e 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 6px 18px rgba(122, 176, 24, .28);
-  color: var(--kl-graphite);
+  border-color: var(--kl-graphite);
+  background: var(--kl-gradient);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 8px 22px rgba(17, 18, 20, .24);
+  color: #fff;
 }
 
 .kl-btn--primary:hover:enabled,
 a.kl-btn--primary:hover {
-  background: linear-gradient(180deg, #e0fa94 0%, #cff562 100%);
-  color: var(--kl-graphite);
+  background: linear-gradient(180deg, #3a3b41 0%, #1c1d21 100%);
+  color: #fff;
 }
 
 .kl-btn--ghost {
@@ -215,7 +236,8 @@ a.kl-btn--ghost:hover {
   border-radius: 999px;
   background: var(--kl-surface-3);
   color: var(--kl-ink-2);
-  font: 600 11.5px/1 var(--kl-font-sans);
+  font: 600 11px/1 var(--kl-font-mono);
+  letter-spacing: .02em;
   white-space: nowrap;
 }
 
@@ -228,7 +250,7 @@ a.kl-btn--ghost:hover {
 }
 
 .kl-badge--plain::before { display: none; }
-.kl-badge--brand { background: var(--kl-graphite); color: var(--kl-lime); }
+.kl-badge--brand { background: var(--kl-brand-50); color: var(--kl-accent-ink); }
 .kl-badge--good { background: var(--kl-good-bg); color: var(--kl-good-ink); }
 .kl-badge--warn { background: var(--kl-warn-bg); color: var(--kl-warn-ink); }
 .kl-badge--bad { background: var(--kl-bad-bg); color: var(--kl-bad-ink); }
@@ -241,7 +263,7 @@ a.kl-btn--ghost:hover {
   padding: 0 13px;
   border: 1px solid var(--kl-line);
   border-radius: 999px;
-  background: rgba(255, 255, 255, .55);
+  background: rgba(255, 255, 255, .6);
   color: var(--kl-ink-2);
   font: 600 12.5px/1 var(--kl-font-sans);
   cursor: pointer;
@@ -250,7 +272,7 @@ a.kl-btn--ghost:hover {
 .kl-chip[aria-pressed="true"] {
   border-color: var(--kl-graphite);
   background: var(--kl-graphite);
-  color: var(--kl-lime);
+  color: #fff;
 }
 
 .kl-chip small {

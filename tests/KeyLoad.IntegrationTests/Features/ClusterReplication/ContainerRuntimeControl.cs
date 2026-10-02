@@ -33,13 +33,19 @@ internal sealed class ContainerRuntimeControl(
                 ContainerRuntimeProtocol.BeforeKillFailure, resourceName, before.State));
         }
 
+        var killStartedAtUtc = TimeProvider.System.GetUtcNow();
         var kill = await ContainerRuntimeDocker.RunAsync(
             [ContainerRuntimeProtocol.KillCommand, ContainerRuntimeProtocol.SignalArgument,
                 ContainerRuntimeProtocol.KillSignal, before.Id], cancellationToken);
         ContainerRuntimeDocker.EnsureSuccessful(kill, ContainerRuntimeProtocol.KillOperation, resourceName);
+        var killCompletedAtUtc = TimeProvider.System.GetUtcNow();
         var stopped = await ContainerRuntimeDocker.WaitForExitedAsync(containerName, resourceName, cancellationToken);
         pendingReceipts[resourceName] = new(scenario, resourceName, containerName, before, stopped,
-            kill.ExitCode, kill.StandardOutput, kill.StandardError);
+            kill.ExitCode, kill.StandardOutput, kill.StandardError)
+        {
+            KillStartedAtUtc = killStartedAtUtc,
+            KillCompletedAtUtc = killCompletedAtUtc
+        };
     }
 
     /// <summary>Starts through Aspire, awaits healthy/running state and records a changed runtime start timestamp.</summary>
@@ -97,7 +103,11 @@ internal sealed class ContainerRuntimeControl(
         var completed = new ContainerRuntimeRestartReceipt(receipt.Scenario, resourceName, receipt.ContainerName, receipt.Before.Id,
             receipt.Before.ConfigImage, receipt.Before.ImageId, receipt.Before.State, receipt.KillExitCode, receipt.KillOutput, receipt.KillError,
             receipt.Stopped.State, after.Id, after.ConfigImage, after.ImageId, after.State, receipt.Before.StartedAt,
-            after.StartedAt, startedAtChanged, true, command.Message, sourceSha, repositoryRoot);
+            after.StartedAt, startedAtChanged, true, command.Message, sourceSha, repositoryRoot)
+        {
+            KillStartedAtUtc = receipt.KillStartedAtUtc,
+            KillCompletedAtUtc = receipt.KillCompletedAtUtc
+        };
         await ContainerRuntimeReceiptStore.WriteAsync(completed, cancellationToken);
     }
 

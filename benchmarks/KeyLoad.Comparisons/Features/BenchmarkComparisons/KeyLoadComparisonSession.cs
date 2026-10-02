@@ -42,6 +42,9 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         return found is null ? null : new(found.Reference.Id, found.Json);
     }
 
+    public Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+        => KeyLoadEventOperations.ReadAsync(client, partition, document, cancellationToken);
+
     private async Task<OperationResult> WriteDocumentAsync(BenchmarkDocument document,
         CancellationToken cancellationToken)
     {

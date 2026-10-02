@@ -66,6 +66,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
         containerRuntime = new(App, containerNames, repository.FullName);
         diagnostics = new(App);
         diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
+        await ClusterFixtureImageIdentity.VerifyAsync(App, timeout.Token);
         await App.StartAsync(timeout.Token);
         ReadPrivateProfile();
 

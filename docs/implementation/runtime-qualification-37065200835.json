@@ -1,0 +1,501 @@
+{
+  "schemaVersion": 1,
+  "kind": "exact-source-failed-runtime-baseline",
+  "sourceRevision": "b21c9eeaed701b7b2e267d4690fb3ac302c06c17",
+  "repository": "managedcode/KeyLoad",
+  "branch": "main",
+  "runId": 37065200835,
+  "attempt": 1,
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37065200835",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 111033735133,
+      "name": "analyzer-rules",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37065200835/job/111033735133",
+      "skippedMeasurementSteps": []
+    },
+    {
+      "id": 111033735189,
+      "name": "verify (macos-latest)",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37065200835/job/111033735189",
+      "skippedMeasurementSteps": []
+    },
+    {
+      "id": 111033735244,
+      "name": "verify (ubuntu-latest)",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37065200835/job/111033735244",
+      "skippedMeasurementSteps": []
+    },
+    {
+      "id": 111033735266,
+      "name": "docker-rf3",
+      "conclusion": "failure",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37065200835/job/111033735266",
+      "skippedMeasurementSteps": []
+    },
+    {
+      "id": 111033735315,
+      "name": "verify (windows-latest)",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37065200835/job/111033735315",
+      "skippedMeasurementSteps": []
+    },
+    {
+      "id": 111033735452,
+      "name": "comparison-smoke",
+      "conclusion": "failure",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37065200835/job/111033735452",
+      "skippedMeasurementSteps": [
+        "Measure 1 KiB documents, eight clients and three graph hops",
+        "Measure 16 KiB documents, four clients and five graph hops"
+      ]
+    }
+  ],
+  "archives": [
+    {
+      "file": "analyzer-rule-evidence-11252393793.zip",
+      "id": 11252393793,
+      "name": "analyzer-rule-evidence",
+      "bytes": 207372,
+      "digest": "sha256:0d6f023f2f211c9fda6a17868035683b5411f0804c6774f948b624308f0798c5"
+    },
+    {
+      "file": "comparison-suite-11252593305.zip",
+      "id": 11252593305,
+      "name": "comparison-suite",
+      "bytes": 37775,
+      "digest": "sha256:00bfd9ec943f1535d87feeaa32b62d5e0d740661dcfca1245aaf87f748792609"
+    },
+    {
+      "file": "comparison-test-results-11252613343.zip",
+      "id": 11252613343,
+      "name": "comparison-test-results",
+      "bytes": 116305,
+      "digest": "sha256:ec46d66cd71a3fc5b37e9ac2c1f79a57e79a06363f1896ff9f33a79ab709ac0d"
+    },
+    {
+      "file": "docker-rf3-artifact-11252757516.zip",
+      "id": 11252757516,
+      "name": "docker-rf3-qualification",
+      "bytes": 502417,
+      "digest": "sha256:f58c4db9f937441f6faba5549cb71671b949bd5ae62cf193f21ab39fb48d3db1"
+    },
+    {
+      "file": "test-results-macos-11252782597.zip",
+      "id": 11252782597,
+      "name": "test-results-macos-latest",
+      "bytes": 1303647,
+      "digest": "sha256:243bf607f2f993de1a381f0104ee1c8d75ff1057149fe52f525487cff220d3f8"
+    },
+    {
+      "file": "test-results-ubuntu-11252673068.zip",
+      "id": 11252673068,
+      "name": "test-results-ubuntu-latest",
+      "bytes": 1329011,
+      "digest": "sha256:680d7da689d5bc8a7ce1aab5d729726f0ae04761e2ef3dcb7c9b00d8f1195815"
+    },
+    {
+      "file": "test-results-windows-11252588201.zip",
+      "id": 11252588201,
+      "name": "test-results-windows-latest",
+      "bytes": 1334134,
+      "digest": "sha256:95c2330bf2180c718f43910f988697388bf1b0c7ed6a9393e38238cc6ec6221c"
+    }
+  ],
+  "reports": [
+    {
+      "path": "analyzer-rule-evidence/TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "1f7cbc8450e655113fd40224686b6e2038cc492e540158e6762fd1af3bc711a9",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "os": "Ubuntu 24.04.5 LTS",
+      "generation": "0bb5096ad97c44379b5145ffb7cda7d1",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "comparison-test-results/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "sha256": "510edc3ad934e783ab5a7212aff66beb51e4e21577aef5cc6cbea2ad94dac737",
+      "assembly": "KeyLoad.ComparisonTests",
+      "os": "Ubuntu 24.04.5 LTS",
+      "generation": "2e9ceed4449f454bbc17570b3a747ff9",
+      "summary": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": [
+        {
+          "id": "KeyLoad.ComparisonTests.RealComparisonSuite.1.1.AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines.1.1.0",
+          "method": "AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines",
+          "source": "tests/KeyLoad.ComparisonTests/ComparisonTests.cs",
+          "line": 24
+        },
+        {
+          "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.1.1.AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema.1.1.0",
+          "method": "AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema",
+          "source": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/TimeSeriesAspireProfileTests.cs",
+          "line": 21
+        }
+      ]
+    },
+    {
+      "path": "docker-rf3/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "sha256": "2246e36c36ca615a51f0e044041834a909e15b8f8f69b5b26b0049cbca16ef9c",
+      "assembly": "KeyLoad.IntegrationTests",
+      "os": "Ubuntu 24.04.5 LTS",
+      "generation": "a185b91171d74bf29eee261fc665ab89",
+      "summary": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": [
+        {
+          "id": "KeyLoad.IntegrationTests.ClusterTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes.1.1.0",
+          "method": "RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes",
+          "source": "tests/KeyLoad.IntegrationTests/ClusterTests.cs",
+          "line": 38
+        }
+      ]
+    },
+    {
+      "path": "test-results-macos/TestResults/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json",
+      "sha256": "17f64152067b2bb370cae1d473439f3b01d9660e9ba50f64647ac9d9967a5651",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "os": "macOS 26.6.2",
+      "generation": "d8acbfb27d2c401a9519ea0292d13b42",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "test-results-macos/TestResults/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+      "sha256": "a9d9e95884729d7d907ac0a7b834a5a6224623b39fb653876d31c7ee50bac50c",
+      "assembly": "KeyLoad.RecoveryTests",
+      "os": "macOS 26.6.2",
+      "generation": "e6380cb96df14a709a2dbe075a7fc89c",
+      "summary": {
+        "total": 136,
+        "passed": 136,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "test-results-macos/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "sha256": "a7a1c8495449b91da9bf2585a9e54b1a78e3b15982eccbdba46d762f9d2d1031",
+      "assembly": "KeyLoad.UnitTests",
+      "os": "macOS 26.6.2",
+      "generation": "14ff9c2514d14a80a6c6c2b81b9fca27",
+      "summary": {
+        "total": 885,
+        "passed": 885,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "test-results-ubuntu/TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "d1a135bdd35b10e1ce49fd93edcddcfc3133c39ab55cb735f2f280b2bebf2f4a",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "os": "Ubuntu 24.04.5 LTS",
+      "generation": "ece6d559f6ba41cdaf6896db5f968288",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "test-results-ubuntu/TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "sha256": "52ac1aef73f2d043e2209664699d3af0e9f5f137db085e14d8b519243d5990db",
+      "assembly": "KeyLoad.RecoveryTests",
+      "os": "Ubuntu 24.04.5 LTS",
+      "generation": "cf30b91320554e28ad74fa5f18ef7289",
+      "summary": {
+        "total": 136,
+        "passed": 136,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "test-results-ubuntu/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "cec351574f78470b01ffac6a3ec475c2145fc97eabb17e8cc0fb19c3441cb991",
+      "assembly": "KeyLoad.UnitTests",
+      "os": "Ubuntu 24.04.5 LTS",
+      "generation": "eb8504d09e10437d9fb6dc62e35df2c8",
+      "summary": {
+        "total": 885,
+        "passed": 885,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "test-results-windows/TestResults/KeyLoad.Analyzers.Tests-windows-net10.0.tunit-report.json",
+      "sha256": "0ce341a1fabe5ec801cfab5f856a524792115788800a527828761883c7ce53c2",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "os": "Microsoft Windows 10.0.26100",
+      "generation": "76736e9d8bd644cfaf34cfb55b1c501a",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "test-results-windows/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+      "sha256": "d1f5e0febaaa4fd4b7b658a04519fa9c1e528367d42992929cf3de7ba3bbb8bb",
+      "assembly": "KeyLoad.RecoveryTests",
+      "os": "Microsoft Windows 10.0.26100",
+      "generation": "d0fad33eb2bb43998fddd2d52bcedcca",
+      "summary": {
+        "total": 136,
+        "passed": 136,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "test-results-windows/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+      "sha256": "69e68773e575f307307bfafb904c26f71d7fb44b52219d7f698b23aeb43bcd09",
+      "assembly": "KeyLoad.UnitTests",
+      "os": "Microsoft Windows 10.0.26100",
+      "generation": "0bc475529f754a44a25e2c6aeefb8c75",
+      "summary": {
+        "total": 885,
+        "passed": 885,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "test-results-macos/TestResults/unit-scalar/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "sha256": "91ca81949569518a0f121dcc19d360977115eeab7909a31e22d90096c3cf5e6e",
+      "assembly": "KeyLoad.UnitTests",
+      "os": "macOS 26.6.2",
+      "generation": "6aee81bff0844322bafc360cd5b788c3",
+      "summary": {
+        "total": 885,
+        "passed": 885,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "test-results-ubuntu/TestResults/unit-scalar/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "0700f65197d85173ebfdb7426d369f521a7c0c7a8e379b2f6210584fa0379604",
+      "assembly": "KeyLoad.UnitTests",
+      "os": "Ubuntu 24.04.5 LTS",
+      "generation": "8a2c197c36454aedad28fdf358bb17e0",
+      "summary": {
+        "total": 885,
+        "passed": 885,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "path": "test-results-windows/TestResults/unit-scalar/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+      "sha256": "7e92c7f798adcdde53f75e87564155a665aed77dc9c5eade1039cbaaa3770d2c",
+      "assembly": "KeyLoad.UnitTests",
+      "os": "Microsoft Windows 10.0.26100",
+      "generation": "49af0d508f174a11864f0db079ccbb03",
+      "summary": {
+        "total": 885,
+        "passed": 885,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    }
+  ],
+  "totals": {
+    "total": 6240,
+    "passed": 6237,
+    "failed": 3,
+    "skipped": 0,
+    "cancelled": 0,
+    "timedOut": 0,
+    "flaky": 0
+  },
+  "scalar": [
+    {
+      "platform": "ubuntu",
+      "normalAndScalar": [
+        {
+          "path": "test-results-ubuntu/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "total": 885,
+          "generation": "eb8504d09e10437d9fb6dc62e35df2c8"
+        },
+        {
+          "path": "test-results-ubuntu/TestResults/unit-scalar/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "total": 885,
+          "generation": "8a2c197c36454aedad28fdf358bb17e0"
+        }
+      ],
+      "sameIds": true
+    },
+    {
+      "platform": "macos",
+      "normalAndScalar": [
+        {
+          "path": "test-results-macos/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "total": 885,
+          "generation": "14ff9c2514d14a80a6c6c2b81b9fca27"
+        },
+        {
+          "path": "test-results-macos/TestResults/unit-scalar/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "total": 885,
+          "generation": "6aee81bff0844322bafc360cd5b788c3"
+        }
+      ],
+      "sameIds": true
+    },
+    {
+      "platform": "windows",
+      "normalAndScalar": [
+        {
+          "path": "test-results-windows/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "total": 885,
+          "generation": "0bc475529f754a44a25e2c6aeefb8c75"
+        },
+        {
+          "path": "test-results-windows/TestResults/unit-scalar/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "total": 885,
+          "generation": "49af0d508f174a11864f0db079ccbb03"
+        }
+      ],
+      "sameIds": true
+    }
+  ],
+  "trials": [
+    {
+      "platform": "ubuntu",
+      "rows": 1000,
+      "uniqueSeedTrialPairs": 1000,
+      "stages": {
+        "MutationApplied": 206,
+        "JournalFlushed": 163,
+        "HeaderWritten": 214,
+        "ApplyCompleted": 214,
+        "PayloadWritten": 203
+      },
+      "maximumObservedStorageTrials": 4,
+      "atomicCuts": true,
+      "powerLossQualified": false,
+      "flushedAndLaterAllApplied": 583
+    },
+    {
+      "platform": "macos",
+      "rows": 1000,
+      "uniqueSeedTrialPairs": 1000,
+      "stages": {
+        "MutationApplied": 206,
+        "JournalFlushed": 163,
+        "HeaderWritten": 214,
+        "ApplyCompleted": 214,
+        "PayloadWritten": 203
+      },
+      "maximumObservedStorageTrials": 4,
+      "atomicCuts": true,
+      "powerLossQualified": false,
+      "flushedAndLaterAllApplied": 583
+    },
+    {
+      "platform": "windows",
+      "rows": 1000,
+      "uniqueSeedTrialPairs": 1000,
+      "stages": {
+        "MutationApplied": 206,
+        "JournalFlushed": 163,
+        "HeaderWritten": 214,
+        "ApplyCompleted": 214,
+        "PayloadWritten": 203
+      },
+      "maximumObservedStorageTrials": 4,
+      "atomicCuts": true,
+      "powerLossQualified": false,
+      "flushedAndLaterAllApplied": 583
+    }
+  ],
+  "limitations": [
+    "One RF3 retained-replica case and two comparison lifecycle cases failed.",
+    "Producer smoke has two KeyLoad StreamAppend readback failures; follow-on measurements were skipped.",
+    "Full native nine-engine/six-profile, numeric coverage, endurance and power-loss gates remain open.",
+    "This exact b21 evidence does not qualify newer source."
+  ]
+}

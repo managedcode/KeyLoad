@@ -48,4 +48,8 @@ internal sealed record TimeSeriesCorrectnessCheck(string Target, string Check, b
 internal sealed record TimeSeriesComparisonReport(int SchemaVersion, string SourceRevision, string RunId,
     DateTimeOffset CreatedAtUtc, string WorkloadHash, int SampleCount, TimeSpan BucketWidth,
     TimeSeriesTargetMetadata[] Targets, TimeSeriesComparisonAttempt[] Attempts,
-    TimeSeriesCorrectnessCheck[] CorrectnessChecks);
+    TimeSeriesCorrectnessCheck[] CorrectnessChecks)
+{
+    public GitHubProvenance? Provenance { get; init; }
+    public string? LoadGeneratorImage { get; init; }
+}

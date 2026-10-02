@@ -36,6 +36,11 @@ internal static class KeyLoadEventOperations
     {
         var page = KeyLoadClientResults.Success(await client.ReadStreamAsync(new(new(partition, EventsName, document.Id),
             AfterRevision: 0, Limit: 2), cancellationToken));
+        if (page.Events.Length == 0 && !page.HasMore)
+        {
+            return null;
+        }
+
         if (page.Events.Length != 1 || page.HasMore)
         {
             throw new ComparisonFailureException(CardinalityFailure);

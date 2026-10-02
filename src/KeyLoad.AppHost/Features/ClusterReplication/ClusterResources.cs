@@ -4,8 +4,6 @@ using KeyLoad.AppHost.Features.ClusterReplication;
 
 internal static class ClusterResources
 {
-    private const string RepositoryParent = "../..";
-    private const string Dockerfile = "Dockerfile";
     private const string ContainerDirectory = "/data";
     private const string HttpEndpoint = "http";
     private const string SiloEndpoint = "silo";
@@ -49,7 +47,7 @@ internal static class ClusterResources
         ClusterProfileStore.Validate(profile);
         var root = Path.GetFullPath(dataRoot);
         ClusterProfileStore.PrepareDirectory(root);
-        var repository = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, RepositoryParent));
+        var image = RuntimeContainerImage.Read(builder, RuntimeContainerImage.ServerConfiguration);
         var signing = builder.AddParameter(SigningParameter, profile.SigningKey, secret: true);
         var peer = builder.AddParameter(PeerParameter, profile.PeerSecret, secret: true);
         var admin = builder.AddParameter(AdminParameter, profile.AdminKey, secret: true);
@@ -61,7 +59,7 @@ internal static class ClusterResources
             var name = NodeNames[index];
             var directory = Path.Combine(root, name);
             ClusterProfileStore.PrepareDirectory(directory);
-            var resource = builder.AddDockerfile(name, repository, Dockerfile)
+            var resource = image.Add(builder, name)
                 .WithContainerName(string.Format(CultureInfo.InvariantCulture, ContainerNameCompositeFormat,
                     profile.Incarnation.ToString(ClusterGuidFormat), name))
                 .WithContainerNetworkAlias(name)

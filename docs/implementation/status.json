@@ -24,13 +24,15 @@
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
       "docs/implementation/durability-audit.md",
-      "docs/implementation/performance-source-r11.json"
+      "docs/implementation/performance-source-r11.json",
+      "docs/implementation/runtime-qualification-37065200835.json"
     ],
     "trialAdmission": {
       "scope": "storage_process_trial_fixtures_only",
       "source": "shared_four_slot_admission_original1000_seeded_trials_original15s20s_deadlines_success_receipt_after_atomic_assertions_cleanup",
-      "qualification": "pending_own_main_SHA_three_OS_full_recovery_and1000_seeded_rows_each_OS",
-      "evidence": "docs/implementation/performance-source-r11.json"
+      "qualification": "exact_b21_run37065200835_three_OS_136_of136_recovery_and1000_unique_atomic_trial_receipts_each_OS_no_skips_process_fault_only",
+      "evidence": "docs/implementation/performance-source-r11.json",
+      "qualificationReceipt": "docs/implementation/runtime-qualification-37065200835.json"
     }
   },
   "KL-004": {
@@ -72,8 +74,23 @@
       "docs/implementation/website.md",
       "docs/implementation/runtime-qualification-37060131271.json",
       "docs/implementation/performance-diagnosis-37060131271.json",
-      "docs/implementation/performance-source-r11.json"
-    ]
+      "docs/implementation/performance-source-r11.json",
+      "docs/implementation/runtime-qualification-37065200835.json"
+    ],
+    "latestJoinedBaseline": {
+      "sha": "b21c9eeaed701b7b2e267d4690fb3ac302c06c17",
+      "run": 37065200835,
+      "conclusion": "failure",
+      "normalUnitsEachOs": "885_of885",
+      "scalarUnitsEachOs": "885_of885",
+      "recoveryEachOs": "136_of136",
+      "rf3": "45_of46",
+      "comparison": "2_of4",
+      "measuredProfiles": "skipped_after_native_comparison_failure",
+      "receipt": "docs/implementation/runtime-qualification-37065200835.json"
+    },
+    "sourceStageAwaitingQualification": "immutable_source_bound_container_images_native_runner_provenance_bounded_RF3_diagnostics_KeyLoad_stream_readback",
+    "remainingPerformanceQualification": "complete_nine_engine_single_and_native_replicated_six_profiles_equivalent_durability_resources_repeated_exact_source_results_no_winner_claim"
   },
   "KL-007": {
     "title": "KeyCodec і storage envelopes",
@@ -255,6 +272,13 @@
       "remaining": "retention_rollups_SQL_compression_coverage_resource_performance_endurance_fault_work_not_qualified",
       "sourceRepairReceipt": "docs/implementation/qualification-source-r9.json",
       "qualificationReceipt": "docs/implementation/runtime-qualification-37060131271.json"
+    },
+    "libraryPerformance": {
+      "owner": "managedcode/TimeSeries",
+      "sourceSha": "23632b9f8d49d5a7feb337caa6cbeb5b22d7575a",
+      "stage": "read_only_arithmetic_capacity_and_summer_allocation_review_complete_no_source_or_release_change_yet",
+      "consumingVersion": "10.0.0",
+      "delivery": "owning_regressions_profile_canonical_patch_successful_release_verified_NuGet_then_consumer_join_required"
     }
   },
   "KL-026": {

@@ -42,7 +42,8 @@ internal static class BenchmarkResources
             .WithEnvironment("NEO4J_AUTH", ReferenceExpression.Create($"neo4j/{neo4jPassword}"))
             .WithEnvironment("NEO4J_server_memory_heap_initial__size", "256m").WithEnvironment("NEO4J_server_memory_heap_max__size", "512m")
             .WithEnvironment("NEO4J_server_memory_pagecache_size", "256m").WithHttpHealthCheck("/");
-        var runner = builder.AddProject<Projects.KeyLoad_ComparisonHost>("comparisons", launchProfileName: null)
+        var runner = BenchmarkRunnerContainer.Create(builder,
+                builder.Configuration[OutputConfiguration] ?? Path.Combine(root, "reports"))
             .WithReference(database).WaitFor(database).WithReference(rabbit).WaitFor(rabbit).WithReference(redis).WaitFor(redis)
             .WithReference(qdrant).WaitFor(qdrant)
             .WaitFor(neo4j)
@@ -53,7 +54,6 @@ internal static class BenchmarkResources
             .WithEnvironment("Benchmarks__Neo4jEndpoint", neo4j.GetEndpoint("http"))
             .WithEnvironment("Benchmarks__Neo4jPassword", neo4jPassword)
             .WithEnvironment("Benchmarks__Storage", "isolated host directories; containers use host bind mounts")
-            .WithEnvironment("Benchmarks__Output", Path.GetFullPath(builder.Configuration[OutputConfiguration] ?? Path.Combine(root, "reports")))
             .WithEnvironment("Benchmarks__Images__Postgres", "docker.io/pgvector/pgvector:0.8.6-pg18@" + PostgresDigest)
             .WithEnvironment("Benchmarks__Images__Qdrant", "docker.io/qdrant/qdrant:v1.17.1@" + QdrantDigest)
             .WithEnvironment("Benchmarks__Images__Rabbit", "docker.io/library/rabbitmq:4.2.4-management@" + RabbitDigest)
@@ -63,14 +63,14 @@ internal static class BenchmarkResources
         ConfigureRunner(builder, runner, nodes);
     }
 
-    private static void ConfigureRunner(IDistributedApplicationBuilder builder, IResourceBuilder<ProjectResource> runner,
+    private static void ConfigureRunner(IDistributedApplicationBuilder builder, IResourceBuilder<ContainerResource> runner,
         IResourceBuilder<ContainerResource>[] nodes)
     {
         foreach (var node in nodes)
         {
             runner.WaitFor(node);
         }
-        foreach (var setting in new[] { "Profile", "Seed", "Documents", "Operations", "Warmup", "Repetitions", "Concurrency", "PayloadBytes", "Dimensions", "TopK", "TimeoutSeconds", "SourceRevision", "GraphVertices", "GraphFanOut", "GraphDepth" })
+        foreach (var setting in new[] { "Profile", "EvidenceProfile", "Seed", "Documents", "Operations", "Warmup", "Repetitions", "Concurrency", "PayloadBytes", "Dimensions", "TopK", "TimeoutSeconds", "SourceRevision", "GraphVertices", "GraphFanOut", "GraphDepth" })
         {
             if (builder.Configuration[ConfigurationPrefix + setting] is { } value)
             {

@@ -18,6 +18,7 @@ internal static class DatabaseCredentialResolver
         var codec = context.RequestServices.GetRequiredService<GrainRequestCodec>();
         var token = codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
             JsonDefaults.Serialize(key[ServerProtocol.BearerPrefix.Length..]));
+        RequestFailureDiagnostic.MarkCredentialDispatch(context);
         var reply = await context.RequestServices.GetRequiredService<OrleansNode>()
             .ExecuteAsync(requestId, token, false, context.RequestAborted).ConfigureAwait(false);
         return reply.Payload;

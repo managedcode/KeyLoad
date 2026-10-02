@@ -96,6 +96,7 @@ internal static class SiteBrowserUiTokens
     public const string MotionEnableScript = "(()=>{const e=document.querySelector('#scene-motion');if(!e||e.disabled)return false;if(e.getAttribute('aria-pressed')!=='true')e.click();return e.getAttribute('aria-pressed')==='true'})()";
     public const string MotionDisableScript = "(()=>{const e=document.querySelector('#scene-motion');if(!e||e.disabled)return false;if(e.getAttribute('aria-pressed')==='true')e.click();return e.getAttribute('aria-pressed')==='false'})()";
     public const string MotionAvailableScript = "document.querySelector('#scene-motion')?.disabled===false";
+    public const string MotionPlayingScript = "document.querySelector('#scene-motion')?.getAttribute('aria-pressed')==='true'";
     public const string ReducedMotionScript = "matchMedia('(prefers-reduced-motion: reduce)').matches";
     public const string TableScrollLabelScript = "document.querySelector('.table-scroll')?.getAttribute('aria-label')";
     public const string ScrollLabelToken = "scroll";

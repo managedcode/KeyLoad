@@ -16,6 +16,7 @@ internal static class ComparisonTestReportAssertions
         var reportPath = Path.Combine(output, "results.json");
         var json = await File.ReadAllTextAsync(reportPath, cancellationToken);
         var report = JsonSerializer.Deserialize<ComparisonReport>(json, ReportWriter.JsonOptions)!;
+        await ComparisonReportIdentityAssertions.VerifyAsync(report, cancellationToken);
         await VerifyReportAsync(report, options);
         await VerifyCsvAsync(output, options, cancellationToken);
         return report;

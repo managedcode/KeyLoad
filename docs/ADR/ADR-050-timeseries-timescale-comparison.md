@@ -19,6 +19,20 @@ Primary source: [Aspire ContainerImageAnnotation](https://source.dot.net/Aspire.
 
 ## Decision
 
+### Accepted digest-backed execution continuation (AC-IMAGE-002/004/005)
+
+The isolated schema1 TimeSeries report adds optional GitHubProvenance and
+LoadGeneratorImage init metadata; it keeps its workload, oracle, storage and ACK
+semantics. The actual server image comes from the verified job-registry receipt.
+Root owns internal library report/runner, AppHost, real report assertions and CI.
+The bounded host identity worker owns only ComparisonExecutionIdentity helpers,
+TimeSeriesComparisonApplication and new matching CLI-negative tests. First add
+real report/CLI assertions, then source; join with ADR-034 image preparation and
+native ContainerResource lifecycle at one pushed SHA. No product/public schema
+migration occurs. Rollback stops this qualification stage while preserving raw
+evidence and cannot substitute unqualified host-process completion. Status remains
+Accepted until actual image, report, exit and full relevant GitHub gates pass.
+
 Add an isolated Aspire benchmark-mode TimescaleDB resource and a separate time-series comparison result. Run the same deterministic UTC sample workload against KeyLoad through the real RF3 .NET SDK, TimescaleDB through Npgsql and ManagedCode.TimeSeries as an explicitly in-memory aggregation primitive. Pin the Timescale image to its multi-platform digest and centrally pin the published ManagedCode package. Preserve the current nine-engine/schema3 comparison and KeyLoad's public/persisted sample contract.
 
 The ManagedCode library does not become KeyLoad's persistence layer. Each arm reports its own durability, replication, and acknowledgement semantics. No combined winner score or equivalent guarantee is inferred.

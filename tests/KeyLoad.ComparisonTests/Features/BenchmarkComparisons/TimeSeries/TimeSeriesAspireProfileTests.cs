@@ -44,6 +44,7 @@ internal sealed class TimeSeriesAspireProfileTests
         string? cleanupImage = null;
         try
         {
+            await ComparisonImageResourceAssertions.VerifyAsync(app, timeout.Token);
             cleanupImage = VerifyTimescaleImage(app);
             await app.StartAsync(timeout.Token);
             await WaitForReadyTimescaleAsync(app, timeout.Token);
@@ -231,11 +232,12 @@ internal static class TimeSeriesProfileReportAssertions
         await Assert.That(root.GetProperty(RunIdProperty).GetString() is { Length: > 0 }).IsTrue();
         await Assert.That(root.GetProperty(WorkloadHashProperty).GetString()).IsEqualTo(ExpectedWorkloadHash);
         await Assert.That(root.GetProperty(SampleCountProperty).GetInt32()).IsEqualTo(48);
-        await VerifyTargetsAsync(root.GetProperty(TargetsProperty), sourceRevision);
+        var receipt = await ComparisonReportIdentityAssertions.VerifyTimeSeriesAsync(root, cancellationToken);
+        await VerifyTargetsAsync(root.GetProperty(TargetsProperty), receipt.ServerImage);
         await VerifyAttemptsAndChecksAsync(root.GetProperty(AttemptsProperty), root.GetProperty(CorrectnessChecksProperty));
     }
 
-    private static async Task VerifyTargetsAsync(JsonElement targets, string sourceRevision)
+    private static async Task VerifyTargetsAsync(JsonElement targets, string serverImage)
     {
         await Assert.That(targets.GetArrayLength()).IsEqualTo(3);
         var keyLoad = FindTarget(targets, KeyLoadTarget);
@@ -245,7 +247,7 @@ internal static class TimeSeriesProfileReportAssertions
         await Assert.That(keyLoad.GetProperty(PersistenceGuaranteeProperty).GetString()).Contains("power-loss durability unqualified");
         await Assert.That(keyLoad.GetProperty(AcknowledgementGuaranteeProperty).GetString()).Contains("Quorum acknowledgement");
         await Assert.That(keyLoad.GetProperty(ImageProperty).GetString())
-            .IsEqualTo("KeyLoad RF3 Dockerfile build at " + sourceRevision);
+            .IsEqualTo(serverImage);
         await Assert.That(timescale.GetProperty(PersistenceGuaranteeProperty).GetString()).Contains("single-node");
         await Assert.That(timescale.GetProperty(AcknowledgementGuaranteeProperty).GetString()).Contains("one server");
         await Assert.That(timescale.GetProperty(ImageProperty).GetString()).Contains(TimescaleImageIdentity);

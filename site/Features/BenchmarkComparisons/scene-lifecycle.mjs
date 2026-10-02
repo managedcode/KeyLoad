@@ -137,9 +137,9 @@ function canRender(state) {
     && state.width > SCENE.math.zero && state.height > SCENE.math.zero;
 }
 
-function scheduleFrame(state) {
+function scheduleFrame(state, continuing = false) {
   if (state.animationFrame || !canRender(state)) return;
-  state.host.dataset[SCENE.dataset.frame] = SCENE.frame.requested;
+  if (!continuing) state.host.dataset[SCENE.dataset.frame] = SCENE.frame.requested;
   state.animationFrame = requestAnimationFrame(time => renderFrame(state, time));
 }
 
@@ -155,7 +155,8 @@ function renderFrame(state, time) {
     configureMotionControl(state);
     showPoster(state, false);
     writeStatus(state, SCENE.state.ready, SCENE_TEXT.ready);
-    if (isSettling(state, time)) scheduleFrame(state);
+    startMotionOnce(state);
+    if (state.motionEnabled || isSettling(state, time)) scheduleFrame(state, true);
   } catch {
     failScene(state, SCENE.state.error, SCENE_TEXT.error);
   }
@@ -169,6 +170,10 @@ function updateSceneMotion(state, time) {
   const fraction = Math.min(SCENE.math.one, elapsed / SCENE.world.smoothingDivisor);
   root.rotation.y += (targetYaw - root.rotation.y) * fraction;
   root.rotation.x += (targetPitch - root.rotation.x) * fraction;
+  if (state.motionEnabled) {
+    state.spinMilliseconds = (state.spinMilliseconds ?? SCENE.math.zero) + Math.min(elapsed, SCENE.limits.maxSpinStepMilliseconds);
+    state.graph.animate?.(state.spinMilliseconds / SCENE.world.millisecondsPerSecond);
+  }
   if (state.lastPointerAt > SCENE.math.zero && time - state.lastPointerAt >= SCENE.limits.settleRenderMilliseconds) {
     root.rotation.y = targetYaw;
     root.rotation.x = targetPitch;
@@ -220,9 +225,16 @@ function pauseScene(state) {
   }
 }
 
+/** The scene moves as soon as it is ready unless the visitor prefers reduced motion. */
+function startMotionOnce(state) {
+  if (state.motionStarted) return;
+  state.motionStarted = true;
+  setMotionEnabled(state, true);
+}
+
 function setMotionEnabled(state, enabled) {
   if (state.terminal) return;
-  const next = Boolean(enabled) && state.rendererReady && isFinePointer(state);
+  const next = Boolean(enabled) && state.rendererReady && motionAllowed(state);
   if (next === state.motionEnabled) return;
   state.motionEnabled = next;
   state.motionButton?.setAttribute(SCENE.attributes.ariaPressed, String(state.motionEnabled));
@@ -240,7 +252,7 @@ function setMotionEnabled(state, enabled) {
 }
 
 function configureMotionControl(state) {
-  const restricted = state.reducedMotion?.matches === true || state.coarsePointer?.matches === true;
+  const restricted = !motionAllowed(state);
   const unavailable = restricted || state.terminal;
   if (state.motionButton) state.motionButton.disabled = !state.rendererReady || unavailable;
   if (state.motionButton) {
@@ -249,6 +261,10 @@ function configureMotionControl(state) {
     state.motionButton.setAttribute(SCENE.attributes.ariaPressed, String(state.motionEnabled));
   }
   if (restricted && state.motionEnabled) setMotionEnabled(state, false);
+}
+
+function motionAllowed(state) {
+  return state.reducedMotion?.matches !== true;
 }
 
 function isFinePointer(state) {

@@ -26,7 +26,8 @@ internal sealed class ComparisonTargetOwner : IAsyncDisposable
         var neo4jClient = CreateClient(settings.Neo4jEndpoint);
         neo4jClient.DefaultRequestHeaders.Authorization = CreateNeo4jAuthorization(settings.Neo4jPassword);
 
-        pendingTarget = new KeyLoadTarget(keyLoadClient, settings.AdminKey, settings.RunId, peers: keyLoadClients);
+        pendingTarget = new KeyLoadTarget(keyLoadClient, settings.AdminKey, settings.RunId,
+            image: settings.ExecutionIdentity?.KeyLoadImage, peers: keyLoadClients);
         PublishPendingTarget(keyLoadClients);
         pendingTarget = new PostgresTarget(settings.PostgresConnection, settings.RunId, settings.PostgresImage);
         PublishPendingTarget();

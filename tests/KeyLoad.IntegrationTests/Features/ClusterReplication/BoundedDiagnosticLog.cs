@@ -12,19 +12,30 @@ internal static class BoundedDiagnosticLog
     /// <param name="source">The ordered resource, discovery and log lines.</param>
     /// <returns>A bounded sequence suitable for the RF3 diagnostic artifact.</returns>
     internal static string[] Bound(IEnumerable<string> source)
+        => BoundCore(source, MaximumLines, MaximumUtf8Bytes);
+
+    /// <summary>Reserves an equal unchanged-budget share for each RF3 node before concatenation.</summary>
+    internal static string[] BoundNodes(IEnumerable<IEnumerable<string>> nodes)
+    {
+        ArgumentNullException.ThrowIfNull(nodes);
+        return Bound(nodes.SelectMany(node => BoundCore(node, MaximumLines / ClusterFixtureProtocol.NodeCount,
+            MaximumUtf8Bytes / ClusterFixtureProtocol.NodeCount)));
+    }
+
+    private static string[] BoundCore(IEnumerable<string> source, int maximumLines, int maximumBytes)
     {
         ArgumentNullException.ThrowIfNull(source);
         var newlineBytes = Encoding.UTF8.GetByteCount(Environment.NewLine);
-        var lines = new List<string>(MaximumLines);
+        var lines = new List<string>(maximumLines);
         var bytes = 0;
         foreach (var original in source)
         {
-            if (lines.Count == MaximumLines)
+            if (lines.Count == maximumLines)
             {
                 break;
             }
 
-            var remaining = MaximumUtf8Bytes - bytes;
+            var remaining = maximumBytes - bytes;
             if (remaining <= newlineBytes)
             {
                 break;
@@ -38,7 +49,7 @@ internal static class BoundedDiagnosticLog
         return lines.ToArray();
     }
 
-    private static string ClipUtf8(string value, int maximumBytes)
+    internal static string ClipUtf8(string value, int maximumBytes)
     {
         if (Encoding.UTF8.GetByteCount(value) <= maximumBytes)
         {

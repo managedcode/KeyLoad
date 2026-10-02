@@ -25,10 +25,12 @@ internal static class TimeSeriesComparisonApplication
         var output = Path.GetFullPath(Required(configuration, OutputSetting));
         var sourceRevision = configuration[SourceRevisionSetting] ?? UnrecordedRevision;
         _ = Required(configuration, StorageSetting);
+        var executionIdentity = ComparisonExecutionIdentity.ReadTimeSeries(configuration, sourceRevision);
 
         await using var owner = new TimeSeriesComparisonTargetOwner();
         var targets = owner.CreateTargets(endpoint, adminKey, connectionString, image, keyLoadBuildIdentity);
-        return await TimeSeriesComparisonRunner.RunAsync(targets, sourceRevision, output, cancellationToken);
+        return await TimeSeriesComparisonRunner.RunAsync(targets, sourceRevision, output, cancellationToken,
+            executionIdentity?.Provenance, executionIdentity?.LoadGeneratorImage);
     }
 
     private static string Required(IConfiguration configuration, string key)

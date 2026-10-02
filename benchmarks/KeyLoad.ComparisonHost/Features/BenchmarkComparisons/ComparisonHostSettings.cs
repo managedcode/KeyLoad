@@ -53,6 +53,9 @@ internal sealed record ComparisonHostSettings(
     string Storage,
     string? SourceRevision)
 {
+    /// <summary>Gets the optional validated GitHub identity for container-backed execution.</summary>
+    internal ComparisonExecutionIdentity? ExecutionIdentity { get; init; }
+
     /// <summary>Reads configuration using the established environment then command-line precedence.</summary>
     /// <param name="configuration">Comparison host configuration.</param>
     /// <returns>Validated settings, before client allocation.</returns>
@@ -86,7 +89,10 @@ internal sealed record ComparisonHostSettings(
             keyLoadEndpoints, qdrantEndpoint, qdrantApiKey, neo4jEndpoint, neo4jPassword, adminKey, postgresConnection,
             rabbitConnection, rabbitManagementEndpoint, rabbitUser, rabbitPassword, redisConnection,
             postgresImage, qdrantImage, rabbitImage, redisImage, neo4jImage,
-            output, storage, sourceRevision);
+            output, storage, sourceRevision)
+        {
+            ExecutionIdentity = ComparisonExecutionIdentity.Read(configuration, sourceRevision, options.Topology)
+        };
     }
 
     private static Uri ReadEndpoint(IConfiguration configuration, string key)

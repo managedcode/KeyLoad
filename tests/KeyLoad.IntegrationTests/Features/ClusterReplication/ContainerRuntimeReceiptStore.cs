@@ -29,6 +29,11 @@ internal static class ContainerRuntimeReceiptStore
 
     internal static async Task WriteAsync(ContainerRuntimeRestartReceipt receipt, CancellationToken cancellationToken)
     {
+        // AC-DIAG-003: these are actual SIGKILL action times, distinct from Docker's original start time.
+        await Assert.That(receipt.KillStartedAtUtc.Offset).IsEqualTo(TimeSpan.Zero);
+        await Assert.That(receipt.KillCompletedAtUtc >= receipt.KillStartedAtUtc).IsTrue();
+        await Assert.That(receipt.KillStartedAtUtc > DateTimeOffset.Parse(receipt.BeforeStartedAt, CultureInfo.InvariantCulture)).IsTrue();
+        await Assert.That(receipt.KillCompletedAtUtc < DateTimeOffset.Parse(receipt.AfterStartedAt, CultureInfo.InvariantCulture)).IsTrue();
         var outputDirectory = Path.Combine(receipt.RepositoryRoot, ContainerRuntimeProtocol.ArtifactsDirectory,
             ContainerRuntimeProtocol.QualificationDirectory);
         Directory.CreateDirectory(outputDirectory);

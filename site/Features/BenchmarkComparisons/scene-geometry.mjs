@@ -1,27 +1,50 @@
 export const SCENE = Object.freeze({
   limits: Object.freeze({ maxDevicePixelRatio: 1.5, maxBufferPixels: 1_000_000, maxDrawCalls: 30, maxTriangles: 5_000,
-    settleMilliseconds: 500, settleRenderMilliseconds: 450 }),
-  world: Object.freeze({ cubeSize: 3, cubeY: 1.75, edgeScale: 1.001, graphY: 2.55, graphSpread: 0.95,
-    nodeRadius: 0.085, documentY: 0.62, documentWidth: 0.62, documentHeight: 0.028, documentDepth: 0.44,
-    documentGap: 0.07, documentStacks: Object.freeze([[-0.72, 0.62, 5], [-0.05, 0.75, 4], [0.66, 0.5, 3]]),
-    eventCount: 18, eventRadius: 0.055, eventArc: 1.15, eventY: 1.62, vectorCount: 110, vectorSize: 0.04,
-    vectorCenterX: 0.72, vectorCenterY: 1.35, vectorCenterZ: -0.62, vectorSpread: 0.42, seriesY: 1.95,
-    seriesPoints: 32, seriesWidth: 2.4, seriesAmplitude: 0.24, seriesZ: 1.05, agentRadius: 0.1,
-    agentPositions: Object.freeze([[-3.1, 3.3, 0.6], [3.2, 2.7, 1.4], [-1.6, 0.9, 3.1]]), seed: 7,
-    gridExtent: 9, gridStep: 0.9, gridY: 0, cameraFov: 34, cameraNear: 0.1, cameraFar: 60, cameraX: 4.2,
-    cameraY: 3.4, cameraZ: 7.4, cameraLookY: 1.6, cameraAspect: 1, pointerYaw: 0.1, pointerPitch: 0.04,
-    smoothingDivisor: 115, fogNear: 9, fogFar: 22, graphNodes: 7, graphInner: 0.55, graphJitter: 0.35,
-    graphChord: 3, documentLift: 0.38, eventSweep: 0.9, eventRise: 0.18, eventDepth: 0.55, eventOffset: 0.2,
-    vectorHeight: 1.6, seriesSlow: 9, seriesFast: 23, seriesSlowWeight: 0.5, seriesFastWeight: 0.25,
-    seriesTrend: 0.6, fullTurn: Math.PI * 2, directionalX: 4, directionalY: 8,
-    directionalZ: 6, randomModulus: 2147483647, randomMultiplier: 48271 }),
-  material: Object.freeze({ nodeRoughness: 0.35, documentRoughness: 0.6, eventRoughness: 0.4,
-    agentRoughness: 0.3, glassOpacity: 0.045, edgeOpacity: 0.38, lineOpacity: 0.5, gridOpacity: 0.5,
-    agentGlow: 1.4, beamOpacity: 0.5, hemisphereSky: 0xffffff, hemisphereGround: 0x1a1c20,
-    hemisphereIntensity: 1.3, directionalColor: 0xffffff, directionalIntensity: 2.3 }),
+    settleMilliseconds: 500, settleRenderMilliseconds: 450, maxSpinStepMilliseconds: 50 }),
+  world: Object.freeze({ ringRadius: 3.25, cardWidth: 1.2, cardHeight: 1.6, backOffset: 0.004, ringY: -0.25,
+    ringTilt: 0, spinSpeed: 0.14, coreSize: 1.15, coreY: 0.6, shadowWidth: 8.4, shadowDepth: 3.8, shadowY: -1.2,
+    cameraFov: 24, cameraNear: 0.1, cameraFar: 40, cameraX: 0, cameraY: 2.5, cameraZ: 11.2, cameraLookY: -0.32,
+    cameraAspect: 1, pointerYaw: 0.12, pointerPitch: 0.05, smoothingDivisor: 115, fogNear: 10.5, fogFar: 16.5,
+    fullTurn: Math.PI * 2, halfTurn: Math.PI / 2, millisecondsPerSecond: 1000 }),
+  canvas: Object.freeze({ element: 'canvas', context: '2d', cardWidth: 512, cardHeight: 682, coreSize: 512,
+    shadowSize: 256, radius: 56, inset: 3, border: 3, glyphX: 56, glyphY: 72, glyphSize: 132, stroke: 9,
+    labelX: 56, labelY: 600, labelSize: 52, captionY: 640, captionSize: 22, sheenStop: 0.45,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Inter, sans-serif',
+    monoFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace', bold: '700 ', medium: '600 ', px: 'px ',
+    round: 'round', ink: '#111214', soft: 'rgba(17, 18, 20, 0.55)', white: '#ffffff', sheen: 'rgba(255, 255, 255, 0.55)',
+    clear: 'rgba(255, 255, 255, 0)', borderColor: 'rgba(255, 255, 255, 0.85)', shadow: 'rgba(17, 18, 20, 0.16)',
+    graphite: '#16171a', graphiteLight: '#3a3b40', caption: 'KeyLoad' }),
+  cards: Object.freeze([
+    Object.freeze({ label: 'SQL', from: '#ffd2bd', to: '#f6c6ff', glyph: 'sql' }),
+    Object.freeze({ label: 'Documents', from: '#f6c6ff', to: '#d8ccff', glyph: 'documents' }),
+    Object.freeze({ label: 'Graphs', from: '#d8ccff', to: '#c4d3ff', glyph: 'graph' }),
+    Object.freeze({ label: 'Events', from: '#c4d3ff', to: '#d9e9ff', glyph: 'events' }),
+    Object.freeze({ label: 'Vectors', from: '#e2dcff', to: '#ffd6c6', glyph: 'vectors' }),
+    Object.freeze({ label: 'Queues', from: '#ffd6c6', to: '#ffe7d6', glyph: 'queues' }),
+    Object.freeze({ label: 'Time series', from: '#ffe2f2', to: '#e3d4ff', glyph: 'series' }),
+    Object.freeze({ label: 'Blobs', from: '#dcd2ff', to: '#ffd9cc', glyph: 'blobs' }),
+  ]),
+  glyphs: Object.freeze({
+    sql: Object.freeze({ text: 'SELECT', lines: [], circles: [], boxes: [] }),
+    documents: Object.freeze({ lines: [[0.18, 0, 0.7, 0, 0.92, 0.22, 0.92, 1, 0.18, 1, 0.18, 0], [0.34, 0.42, 0.76, 0.42],
+      [0.34, 0.62, 0.76, 0.62], [0.34, 0.82, 0.6, 0.82]], circles: [], boxes: [] }),
+    graph: Object.freeze({ lines: [[0.16, 0.22, 0.82, 0.3], [0.16, 0.22, 0.46, 0.84], [0.82, 0.3, 0.46, 0.84]],
+      circles: [[0.16, 0.22, 0.11], [0.82, 0.3, 0.11], [0.46, 0.84, 0.11]], boxes: [] }),
+    events: Object.freeze({ lines: [[0, 0.5, 1, 0.5]], circles: [[0.1, 0.5, 0.08], [0.38, 0.5, 0.08], [0.66, 0.5, 0.08],
+      [0.92, 0.5, 0.08]], boxes: [] }),
+    vectors: Object.freeze({ lines: [[0.2, 0.86, 0.9, 0.52], [0.2, 0.86, 0.5, 0.1], [0.2, 0.86, 0.86, 0.9],
+      [0.9, 0.52, 0.76, 0.44], [0.5, 0.1, 0.44, 0.24]], circles: [], boxes: [] }),
+    queues: Object.freeze({ lines: [[0.74, 0.5, 1, 0.5], [0.88, 0.38, 1, 0.5, 0.88, 0.62]], circles: [],
+      boxes: [[0, 0.1, 0.62, 0.2], [0, 0.4, 0.62, 0.2], [0, 0.7, 0.62, 0.2]] }),
+    series: Object.freeze({ lines: [[0, 0.8, 0.2, 0.55, 0.38, 0.68, 0.58, 0.24, 0.78, 0.42, 1, 0.1]], circles: [], boxes: [] }),
+    blobs: Object.freeze({ lines: [], circles: [], boxes: [[0, 0, 0.44, 0.44], [0.56, 0, 0.44, 0.44], [0, 0.56, 0.44, 0.44],
+      [0.56, 0.56, 0.44, 0.44]] }),
+  }),
+  core: Object.freeze({ blocks: Object.freeze([[10, 9], [10, 17], [10, 25]]), blockWidth: 5, blockHeight: 6, blockRadius: 2,
+    chevron: Object.freeze([29, 9.5, 19.5, 20, 29, 30.5]), chevronWidth: 4.4, viewBox: 40, tileRadius: 10,
+    iris: Object.freeze(['#ffb08a', '#e3a6ff', '#9fb4ff']) }),
+  colors: Object.freeze({ sky: 0xf2f1f2 }),
   math: Object.freeze({ zero: 0, half: 0.5, one: 1, two: 2, negativeOne: -1, epsilon: 0.001 }),
-  colors: Object.freeze({ sky: 0x0c0d10, glass: 0xffffff, edge: 0xffffff, lime: 0xc6f24e, node: 0xd9cbff,
-    document: 0xf2f2f4, event: 0xffb08a, vector: 0xb9a6ff, grid: 0x23262c, line: 0xffffff }),
   state: Object.freeze({ poster: 'poster', loading: 'loading', ready: 'ready', paused: 'paused', zeroSize: 'zero-size',
     error: 'error', deviceLost: 'device-lost', unsupported: 'unsupported', disposed: 'disposed' }),
   frame: Object.freeze({ idle: 'idle', requested: 'requested', rendered: 'rendered', paused: 'paused', error: 'error' }),
@@ -34,25 +57,25 @@ export const SCENE = Object.freeze({
   events: Object.freeze({ pointerMove: 'pointermove', click: 'click', resize: 'resize', pageHide: 'pagehide',
     pageShow: 'pageshow', visibility: 'visibilitychange', mediaChange: 'change' }),
   classes: Object.freeze({ host: 'cluster-scene-host', canvas: 'cluster-scene-canvas' }),
-  attributes: Object.freeze({ ariaHidden: 'aria-hidden', ariaPressed: 'aria-pressed', position: 'position' }),
+  attributes: Object.freeze({ ariaHidden: 'aria-hidden', ariaPressed: 'aria-pressed' }),
   observers: Object.freeze({ rootMargin: '80px', eventOptions: Object.freeze({ passive: true }) }),
   media: Object.freeze({ reducedMotion: '(prefers-reduced-motion: reduce)', coarsePointer: '(pointer: coarse)' }),
 });
 
 export const SCENE_TEXT = Object.freeze({
   poster: 'Static illustration.',
-  loading: 'Loading a conceptual cluster illustration.',
+  loading: 'Loading the illustration.',
   ready: 'Conceptual illustration · not live data.',
-  paused: 'Conceptual cluster illustration paused.',
-  zeroSize: 'Conceptual cluster illustration is waiting for visible space.',
-  error: 'The conceptual illustration is unavailable; the static illustration remains visible.',
+  paused: 'Illustration paused.',
+  zeroSize: 'The illustration is waiting for visible space.',
+  error: 'The 3D illustration is unavailable; the static illustration remains visible.',
   deviceLost: 'Graphics were lost; the static illustration remains visible.',
-  unsupported: 'This browser cannot initialize the conceptual illustration.',
-  disposed: 'Conceptual illustration stopped.',
+  unsupported: 'This browser cannot start the 3D illustration.',
+  disposed: 'Illustration stopped.',
   missingHost: 'A cluster scene host element is required.',
-  enableMotion: 'Enable motion',
-  disableMotion: 'Disable motion',
-  motionUnavailable: 'Motion unavailable',
+  enableMotion: 'Play motion',
+  disableMotion: 'Pause motion',
+  motionUnavailable: 'Motion off',
 });
 
 export function createSceneGraph(THREE) {
@@ -60,171 +83,182 @@ export function createSceneGraph(THREE) {
   const camera = new THREE.PerspectiveCamera(SCENE.world.cameraFov, SCENE.world.cameraAspect,
     SCENE.world.cameraNear, SCENE.world.cameraFar);
   const root = new THREE.Group();
-  const geometries = new Set();
-  const materials = new Set();
-  const own = { geometry: (value) => (geometries.add(value), value), material: (value) => (materials.add(value), value),
-    random: seededRandom(SCENE.world.seed) };
-  scene.background = new THREE.Color(SCENE.colors.sky);
+  const resources = new Set();
+  const own = value => (resources.add(value), value);
   scene.fog = new THREE.Fog(SCENE.colors.sky, SCENE.world.fogNear, SCENE.world.fogFar);
-  addLights(THREE, scene);
   scene.add(root);
-  addFloor(THREE, root, own);
-  addGraph(THREE, root, own);
-  addDocuments(THREE, root, own);
-  addEvents(THREE, root, own);
-  addVectors(THREE, root, own);
-  addSeries(THREE, root, own);
-  addAgents(THREE, root, own);
-  addEngine(THREE, root, own);
+  root.add(shadowMesh(THREE, own));
+  const ring = new THREE.Group();
+  ring.position.y = SCENE.world.ringY;
+  ring.rotation.x = SCENE.world.ringTilt;
+  root.add(ring);
+  const geometry = cardShape(THREE, own);
+  SCENE.cards.forEach((card, index) => ring.add(cardMesh(THREE, own, geometry, card, index)));
+  root.add(coreMesh(THREE, own));
   camera.position.set(SCENE.world.cameraX, SCENE.world.cameraY, SCENE.world.cameraZ);
   camera.lookAt(SCENE.math.zero, SCENE.world.cameraLookY, SCENE.math.zero);
-  return { scene, camera, root, dispose: () => disposeGraph(geometries, materials) };
-}
-
-function seededRandom(seed) {
-  let value = seed;
-  return () => {
-    value = value * SCENE.world.randomMultiplier % SCENE.world.randomModulus;
-    return value / SCENE.world.randomModulus;
+  return {
+    scene, camera, root,
+    animate: seconds => { ring.rotation.y = seconds * SCENE.world.spinSpeed; },
+    dispose: () => disposeGraph(resources),
   };
 }
 
-function addLights(THREE, scene) {
-  scene.add(new THREE.HemisphereLight(SCENE.material.hemisphereSky, SCENE.material.hemisphereGround,
-    SCENE.material.hemisphereIntensity));
-  const sun = new THREE.DirectionalLight(SCENE.material.directionalColor, SCENE.material.directionalIntensity);
-  sun.position.set(SCENE.world.directionalX, SCENE.world.directionalY, SCENE.world.directionalZ);
-  scene.add(sun);
+function surface(width, height) {
+  const canvas = document.createElement(SCENE.canvas.element);
+  canvas.width = width;
+  canvas.height = height;
+  return { canvas, context: canvas.getContext(SCENE.canvas.context) };
 }
 
-function lines(THREE, own, points, color, opacity) {
-  return new THREE.LineSegments(own.geometry(new THREE.BufferGeometry().setFromPoints(points)),
-    own.material(new THREE.LineBasicNodeMaterial({ color, transparent: true, opacity })));
+function texture(THREE, own, canvas) {
+  const value = own(new THREE.CanvasTexture(canvas));
+  value.colorSpace = THREE.SRGBColorSpace;
+  return value;
 }
 
-function instances(THREE, own, geometry, material, positions, scale = SCENE.math.one) {
-  const mesh = new THREE.InstancedMesh(own.geometry(geometry), own.material(material), positions.length);
-  const placement = new THREE.Object3D();
-  positions.forEach((position, index) => {
-    placement.position.copy(position);
-    placement.scale.setScalar(scale);
-    placement.updateMatrix();
-    mesh.setMatrixAt(index, placement.matrix);
+function roundedPath(context, x, y, width, height, radius) {
+  context.beginPath();
+  context.roundRect(x, y, width, height, radius);
+}
+
+function paintCard(card, withLabel) {
+  const { canvas, context } = surface(SCENE.canvas.cardWidth, SCENE.canvas.cardHeight);
+  const inset = SCENE.canvas.inset;
+  roundedPath(context, inset, inset, canvas.width - inset * SCENE.math.two, canvas.height - inset * SCENE.math.two,
+    SCENE.canvas.radius);
+  const fill = context.createLinearGradient(SCENE.math.zero, SCENE.math.zero, canvas.width, canvas.height);
+  fill.addColorStop(SCENE.math.zero, card.from);
+  fill.addColorStop(SCENE.math.one, card.to);
+  context.fillStyle = fill;
+  context.fill();
+  const sheen = context.createLinearGradient(SCENE.math.zero, SCENE.math.zero, SCENE.math.zero, canvas.height);
+  sheen.addColorStop(SCENE.math.zero, SCENE.canvas.sheen);
+  sheen.addColorStop(SCENE.canvas.sheenStop, SCENE.canvas.clear);
+  context.fillStyle = sheen;
+  context.fill();
+  context.lineWidth = SCENE.canvas.border;
+  context.strokeStyle = SCENE.canvas.borderColor;
+  context.stroke();
+  if (withLabel) paintLabel(context, card);
+  return canvas;
+}
+
+function paintLabel(context, card) {
+  context.fillStyle = SCENE.canvas.ink;
+  context.font = `${SCENE.canvas.bold}${SCENE.canvas.labelSize}${SCENE.canvas.px}${SCENE.canvas.fontFamily}`;
+  context.fillText(card.label, SCENE.canvas.labelX, SCENE.canvas.labelY);
+  context.fillStyle = SCENE.canvas.soft;
+  context.font = `${SCENE.canvas.medium}${SCENE.canvas.captionSize}${SCENE.canvas.px}${SCENE.canvas.fontFamily}`;
+  context.fillText(SCENE.canvas.caption, SCENE.canvas.labelX, SCENE.canvas.captionY);
+  paintGlyph(context, SCENE.glyphs[card.glyph]);
+}
+
+function paintGlyph(context, glyph) {
+  const size = SCENE.canvas.glyphSize;
+  const point = (x, y) => [SCENE.canvas.glyphX + x * size, SCENE.canvas.glyphY + y * size];
+  context.strokeStyle = SCENE.canvas.ink;
+  context.fillStyle = SCENE.canvas.ink;
+  context.lineWidth = SCENE.canvas.stroke;
+  context.lineCap = SCENE.canvas.round;
+  context.lineJoin = SCENE.canvas.round;
+  if (glyph.text) {
+    context.font = `${SCENE.canvas.bold}${size / SCENE.math.two}${SCENE.canvas.px}${SCENE.canvas.monoFamily}`;
+    context.fillText(glyph.text, SCENE.canvas.glyphX, SCENE.canvas.glyphY + size * SCENE.math.half);
+  }
+  for (const line of glyph.lines) {
+    context.beginPath();
+    for (let index = SCENE.math.zero; index < line.length; index += SCENE.math.two) {
+      const [x, y] = point(line[index], line[index + SCENE.math.one]);
+      if (index) context.lineTo(x, y); else context.moveTo(x, y);
+    }
+    context.stroke();
+  }
+  for (const [x, y, radius] of glyph.circles) {
+    const [cx, cy] = point(x, y);
+    context.beginPath();
+    context.arc(cx, cy, radius * size, SCENE.math.zero, SCENE.world.fullTurn);
+    context.fill();
+  }
+  for (const [x, y, width, height] of glyph.boxes) {
+    const [left, top] = point(x, y);
+    roundedPath(context, left, top, width * size, height * size, SCENE.canvas.stroke);
+    context.stroke();
+  }
+}
+
+function cardShape(THREE, own) {
+  return own(new THREE.PlaneGeometry(SCENE.world.cardWidth, SCENE.world.cardHeight));
+}
+
+function cardMesh(THREE, own, geometry, card, index) {
+  const group = new THREE.Group();
+  const angle = index / SCENE.cards.length * SCENE.world.fullTurn;
+  group.position.set(Math.sin(angle) * SCENE.world.ringRadius, SCENE.math.zero, Math.cos(angle) * SCENE.world.ringRadius);
+  group.rotation.y = angle;
+  const front = new THREE.Mesh(geometry, own(new THREE.MeshBasicNodeMaterial({
+    map: texture(THREE, own, paintCard(card, true)), transparent: true })));
+  const back = new THREE.Mesh(geometry, own(new THREE.MeshBasicNodeMaterial({
+    map: texture(THREE, own, paintCard(card, false)), transparent: true })));
+  back.rotation.y = Math.PI;
+  back.position.z = -SCENE.world.backOffset;
+  group.add(front, back);
+  return group;
+}
+
+function paintCore() {
+  const { canvas, context } = surface(SCENE.canvas.coreSize, SCENE.canvas.coreSize);
+  const scale = canvas.width / SCENE.core.viewBox;
+  roundedPath(context, SCENE.math.zero, SCENE.math.zero, canvas.width, canvas.height, SCENE.core.tileRadius * scale);
+  const fill = context.createLinearGradient(SCENE.math.zero, SCENE.math.zero, SCENE.math.zero, canvas.height);
+  fill.addColorStop(SCENE.math.zero, SCENE.canvas.graphiteLight);
+  fill.addColorStop(SCENE.math.one, SCENE.canvas.graphite);
+  context.fillStyle = fill;
+  context.fill();
+  const iris = context.createLinearGradient(SCENE.math.zero, SCENE.math.zero, canvas.width, SCENE.math.zero);
+  SCENE.core.iris.forEach((color, index) => iris.addColorStop(index / (SCENE.core.iris.length - SCENE.math.one), color));
+  SCENE.core.blocks.forEach(([x, y], index) => {
+    context.fillStyle = index === SCENE.core.blocks.length - SCENE.math.one ? iris : SCENE.canvas.white;
+    roundedPath(context, x * scale, y * scale, SCENE.core.blockWidth * scale, SCENE.core.blockHeight * scale,
+      SCENE.core.blockRadius * scale);
+    context.fill();
   });
+  const [x1, y1, x2, y2, x3, y3] = SCENE.core.chevron;
+  context.strokeStyle = SCENE.canvas.white;
+  context.lineWidth = SCENE.core.chevronWidth * scale;
+  context.lineCap = SCENE.canvas.round;
+  context.lineJoin = SCENE.canvas.round;
+  context.beginPath();
+  context.moveTo(x1 * scale, y1 * scale);
+  context.lineTo(x2 * scale, y2 * scale);
+  context.lineTo(x3 * scale, y3 * scale);
+  context.stroke();
+  return canvas;
+}
+
+function coreMesh(THREE, own) {
+  const mesh = new THREE.Mesh(own(new THREE.PlaneGeometry(SCENE.world.coreSize, SCENE.world.coreSize)),
+    own(new THREE.MeshBasicNodeMaterial({ map: texture(THREE, own, paintCore()), transparent: true, fog: false })));
+  mesh.position.y = SCENE.world.coreY;
   return mesh;
 }
 
-function addEngine(THREE, root, own) {
-  const shape = own.geometry(new THREE.BoxGeometry(SCENE.world.cubeSize, SCENE.world.cubeSize, SCENE.world.cubeSize));
-  const glass = new THREE.Mesh(shape, own.material(new THREE.MeshBasicNodeMaterial({ color: SCENE.colors.glass,
-    transparent: true, opacity: SCENE.material.glassOpacity, depthWrite: false })));
-  glass.position.y = SCENE.world.cubeY;
-  const edges = lines(THREE, own, edgePoints(THREE, shape), SCENE.colors.edge, SCENE.material.edgeOpacity);
-  edges.scale.setScalar(SCENE.world.edgeScale);
-  glass.add(edges);
-  root.add(glass);
+function shadowMesh(THREE, own) {
+  const { canvas, context } = surface(SCENE.canvas.shadowSize, SCENE.canvas.shadowSize);
+  const middle = canvas.width * SCENE.math.half;
+  const gradient = context.createRadialGradient(middle, middle, SCENE.math.zero, middle, middle, middle);
+  gradient.addColorStop(SCENE.math.zero, SCENE.canvas.shadow);
+  gradient.addColorStop(SCENE.math.one, SCENE.canvas.clear);
+  context.fillStyle = gradient;
+  context.fillRect(SCENE.math.zero, SCENE.math.zero, canvas.width, canvas.height);
+  const mesh = new THREE.Mesh(own(new THREE.PlaneGeometry(SCENE.world.shadowWidth, SCENE.world.shadowDepth)),
+    own(new THREE.MeshBasicNodeMaterial({ map: texture(THREE, own, canvas), transparent: true, depthWrite: false })));
+  mesh.rotation.x = -SCENE.world.halfTurn;
+  mesh.position.y = SCENE.world.shadowY;
+  return mesh;
 }
 
-function edgePoints(THREE, shape) {
-  const edges = new THREE.EdgesGeometry(shape);
-  const attribute = edges.getAttribute(SCENE.attributes.position);
-  const points = [];
-  for (let index = SCENE.math.zero; index < attribute.count; index += SCENE.math.one)
-    points.push(new THREE.Vector3().fromBufferAttribute(attribute, index));
-  edges.dispose();
-  return points;
-}
-
-function addGraph(THREE, root, own) {
-  const nodes = [];
-  for (let index = SCENE.math.zero; index < SCENE.world.graphNodes; index += SCENE.math.one) {
-    const angle = index / SCENE.world.graphNodes * SCENE.world.fullTurn;
-    const radius = SCENE.world.graphSpread * (index % SCENE.math.two ? SCENE.world.graphInner : SCENE.math.one);
-    nodes.push(new THREE.Vector3(Math.cos(angle) * radius, SCENE.world.graphY + (own.random() - SCENE.math.half) * SCENE.world.graphJitter,
-      Math.sin(angle) * radius));
-  }
-  const links = [];
-  nodes.forEach((node, index) => links.push(node, nodes[(index + SCENE.math.one) % nodes.length], node, nodes[(index + SCENE.world.graphChord) % nodes.length]));
-  root.add(lines(THREE, own, links, SCENE.colors.line, SCENE.material.lineOpacity));
-  root.add(instances(THREE, own, new THREE.IcosahedronGeometry(SCENE.world.nodeRadius, SCENE.math.one),
-    new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.node, roughness: SCENE.material.nodeRoughness }), nodes));
-}
-
-function addDocuments(THREE, root, own) {
-  const positions = [];
-  for (const [x, z, count] of SCENE.world.documentStacks)
-    for (let level = SCENE.math.zero; level < count; level += SCENE.math.one)
-      positions.push(new THREE.Vector3(x, SCENE.world.documentY + level * SCENE.world.documentGap - SCENE.world.documentLift, z));
-  root.add(instances(THREE, own, new THREE.BoxGeometry(SCENE.world.documentWidth, SCENE.world.documentHeight,
-    SCENE.world.documentDepth), new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.document, roughness: SCENE.material.documentRoughness }), positions));
-}
-
-function addEvents(THREE, root, own) {
-  const positions = [];
-  for (let index = SCENE.math.zero; index < SCENE.world.eventCount; index += SCENE.math.one) {
-    const t = index / (SCENE.world.eventCount - SCENE.math.one);
-    const angle = (t - SCENE.math.half) * Math.PI * SCENE.world.eventSweep;
-    positions.push(new THREE.Vector3(Math.sin(angle) * SCENE.world.eventArc, SCENE.world.eventY + t * SCENE.world.eventRise,
-      Math.cos(angle) * SCENE.world.eventArc * SCENE.world.eventDepth - SCENE.world.eventOffset));
-  }
-  root.add(instances(THREE, own, new THREE.IcosahedronGeometry(SCENE.world.eventRadius),
-    new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.event, roughness: SCENE.material.eventRoughness }), positions));
-}
-
-function addVectors(THREE, root, own) {
-  const positions = [];
-  for (let index = SCENE.math.zero; index < SCENE.world.vectorCount; index += SCENE.math.one)
-    positions.push(new THREE.Vector3(SCENE.world.vectorCenterX + (own.random() - SCENE.math.half) * SCENE.world.vectorSpread * SCENE.math.two,
-      SCENE.world.vectorCenterY + (own.random() - SCENE.math.half) * SCENE.world.vectorSpread * SCENE.world.vectorHeight,
-      SCENE.world.vectorCenterZ + (own.random() - SCENE.math.half) * SCENE.world.vectorSpread * SCENE.math.two));
-  root.add(instances(THREE, own, new THREE.TetrahedronGeometry(SCENE.world.vectorSize),
-    new THREE.MeshBasicNodeMaterial({ color: SCENE.colors.vector }), positions));
-}
-
-function addSeries(THREE, root, own) {
-  const points = [];
-  for (let index = SCENE.math.zero; index < SCENE.world.seriesPoints; index += SCENE.math.one) {
-    const t = index / (SCENE.world.seriesPoints - SCENE.math.one);
-    const wave = Math.sin(t * SCENE.world.seriesSlow) * SCENE.world.seriesSlowWeight
-      + Math.sin(t * SCENE.world.seriesFast) * SCENE.world.seriesFastWeight + t * SCENE.world.seriesTrend;
-    points.push(new THREE.Vector3((t - SCENE.math.half) * SCENE.world.seriesWidth,
-      SCENE.world.seriesY + wave * SCENE.world.seriesAmplitude, SCENE.world.seriesZ));
-  }
-  root.add(new THREE.Line(own.geometry(new THREE.BufferGeometry().setFromPoints(points)),
-    own.material(new THREE.LineBasicNodeMaterial({ color: SCENE.colors.lime }))));
-}
-
-function addAgents(THREE, root, own) {
-  const agents = SCENE.world.agentPositions.map(([x, y, z]) => new THREE.Vector3(x, y, z));
-  root.add(instances(THREE, own, new THREE.IcosahedronGeometry(SCENE.world.agentRadius, SCENE.math.two),
-    new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.lime, emissive: SCENE.colors.lime,
-      emissiveIntensity: SCENE.material.agentGlow, roughness: SCENE.material.agentRoughness }), agents));
-  const half = SCENE.world.cubeSize * SCENE.math.half;
-  const center = new THREE.Vector3(SCENE.math.zero, SCENE.world.cubeY, SCENE.math.zero);
-  const beams = agents.flatMap(agent => {
-    const direction = center.clone().sub(agent);
-    const scale = Math.max(Math.abs(direction.x), Math.abs(direction.y), Math.abs(direction.z));
-    const surface = center.clone().sub(direction.clone().multiplyScalar(half / scale));
-    return [agent, surface];
-  });
-  root.add(lines(THREE, own, beams, SCENE.colors.lime, SCENE.material.beamOpacity));
-
-}
-
-function addFloor(THREE, root, own) {
-  const points = [];
-  for (let offset = -SCENE.world.gridExtent; offset <= SCENE.world.gridExtent; offset += SCENE.world.gridStep) {
-    points.push(new THREE.Vector3(offset, SCENE.world.gridY, -SCENE.world.gridExtent),
-      new THREE.Vector3(offset, SCENE.world.gridY, SCENE.world.gridExtent),
-      new THREE.Vector3(-SCENE.world.gridExtent, SCENE.world.gridY, offset),
-      new THREE.Vector3(SCENE.world.gridExtent, SCENE.world.gridY, offset));
-  }
-  root.add(lines(THREE, own, points, SCENE.colors.grid, SCENE.material.gridOpacity));
-}
-
-function disposeGraph(geometries, materials) {
-  for (const value of geometries) value.dispose();
-  for (const value of materials) value.dispose();
-  geometries.clear();
-  materials.clear();
+function disposeGraph(resources) {
+  for (const value of resources) value.dispose();
+  resources.clear();
 }

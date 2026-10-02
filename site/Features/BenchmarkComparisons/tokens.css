@@ -1,33 +1,11 @@
-/*
- * Site layout tokens and the dark surface variant of the shared KeyLoad brand (brand.css, ADR-053).
- * The console uses the light variant of the same system; the public site renders on graphite.
- */
+/* Site layout tokens. The editorial site builds on the shared KeyLoad brand (brand.css, ADR-053). */
 :root {
-  color-scheme: dark;
-  --page: 1200px;
+  --page: 1240px;
   --gutter: clamp(1rem, 4.5vw, 3.5rem);
-  --engine-track: rgba(255, 255, 255, .07);
-  --kl-page: #0b0c0e;
-  --kl-wallpaper:
-    radial-gradient(60% 40% at 50% 0%, rgba(198, 242, 78, .08), transparent 70%),
-    linear-gradient(180deg, #121316 0%, #0b0c0e 30%, #0b0c0e 100%);
-  --kl-surface: rgba(255, 255, 255, .045);
-  --kl-surface-solid: #16171a;
-  --kl-surface-2: rgba(255, 255, 255, .03);
-  --kl-surface-3: rgba(255, 255, 255, .07);
-  --kl-sheen: linear-gradient(180deg, rgba(255, 255, 255, .07) 0%, rgba(255, 255, 255, .01) 100%);
-  --kl-stroke: rgba(255, 255, 255, .09);
-  --kl-line: rgba(255, 255, 255, .08);
-  --kl-line-strong: rgba(255, 255, 255, .16);
-  --kl-ink: #f5f5f7;
-  --kl-ink-2: #d1d1d6;
-  --kl-muted: #98989f;
-  --kl-faint: #6e6e73;
-  --kl-good-ink: #8be39a;
-  --kl-good-bg: rgba(52, 168, 83, .16);
-  --kl-warn-ink: #ffd27a;
-  --kl-bad-ink: #ff9a9a;
-  --kl-bad-bg: rgba(229, 72, 77, .16);
-  --kl-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 24px 60px rgba(0, 0, 0, .35);
-  --kl-shadow-lg: inset 0 1px 0 rgba(255, 255, 255, .08), 0 40px 100px rgba(0, 0, 0, .5);
+  --section-gap: clamp(5rem, 11vw, 9.5rem);
+  --engine-track: rgba(17, 18, 20, .06);
+  --stage: linear-gradient(180deg, #fbfaf8 0%, #efedf1 100%);
+  --tok-key: #c9b4ff;
+  --tok-str: #9fb4ff;
+  --tok-val: #ffc9ad;
 }

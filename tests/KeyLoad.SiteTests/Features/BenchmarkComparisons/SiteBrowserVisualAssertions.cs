@@ -40,7 +40,7 @@ internal static class SiteBrowserVisualAssertions
                 ? SiteBrowserSceneTokens.BrowserSceneError : SiteBrowserSceneTokens.BrowserSceneUnsupported);
         }
         await AssertRendererState(cdp, cancellationToken);
-        await AssertPointerMotionSettles(chrome, cancellationToken);
+        await AssertMotionPlaysThenSettles(chrome, cancellationToken);
         await AssertReducedMotion(cdp, rendererReady: true, cancellationToken);
         await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollAwayScript, false, cancellationToken);
         var paused = await cdp.WaitForExpressionAsync(SiteBrowserUiTokens.ScenePausedScript, cancellationToken);
@@ -90,11 +90,15 @@ internal static class SiteBrowserVisualAssertions
             .IsLessThanOrEqualTo(SiteBrowserUiTokens.RendererPixelRatioLimit);
     }
 
-    private static async Task AssertPointerMotionSettles(SiteBrowserChrome chrome, CancellationToken cancellationToken)
+    /// <summary>
+    /// AC-BC-012 as revised by the owner (2026-10-02): the scene moves as soon as it is ready at a constant draw budget,
+    /// follows the pointer, and stops rendering once motion is paused.
+    /// </summary>
+    private static async Task AssertMotionPlaysThenSettles(SiteBrowserChrome chrome, CancellationToken cancellationToken)
     {
         var cdp = chrome.Cdp;
-        var enabled = await cdp.EvaluateAsync(SiteBrowserUiTokens.MotionEnableScript, false, cancellationToken);
-        await Assert.That(enabled.GetBoolean()).IsTrue();
+        var playing = await cdp.EvaluateAsync(SiteBrowserUiTokens.MotionPlayingScript, false, cancellationToken);
+        await Assert.That(playing.GetBoolean()).IsTrue();
         var point = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneCenterScript, false, cancellationToken);
         await cdp.CommandAsync(SiteBrowserTokens.InputDispatchMouseEvent, new Dictionary<string, object?>
         {
@@ -103,15 +107,27 @@ internal static class SiteBrowserVisualAssertions
             [SiteBrowserTokens.YField] = point.GetProperty(SiteBrowserTokens.YField).GetDouble(),
         }, cancellationToken);
         await Task.Delay(SiteBrowserUiTokens.SceneSettleWaitMilliseconds, cancellationToken);
-        var snapshot = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneGeometrySnapshotScript, false, cancellationToken);
-        await Assert.That(snapshot.GetProperty(SiteBrowserUiTokens.FrameField).GetString())
+        var moving = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneGeometrySnapshotScript, false, cancellationToken);
+        await Assert.That(moving.GetProperty(SiteBrowserUiTokens.FrameField).GetString())
             .IsEqualTo(SiteBrowserUiTokens.FrameRendered);
-        var settledRenderCalls = snapshot.GetProperty(SiteBrowserUiTokens.RenderCallsField).GetInt32();
-        var metrics = snapshot.GetRawText();
+        await Task.Delay(SiteBrowserUiTokens.SceneIdleWaitMilliseconds, cancellationToken);
+        var later = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneGeometrySnapshotScript, false, cancellationToken);
+        await Assert.That(later.GetProperty(SiteBrowserUiTokens.RenderCallsField).GetInt32())
+            .IsGreaterThan(moving.GetProperty(SiteBrowserUiTokens.RenderCallsField).GetInt32());
+        await Assert.That(later.GetProperty(SiteBrowserUiTokens.DrawCallsField).GetInt32())
+            .IsEqualTo(moving.GetProperty(SiteBrowserUiTokens.DrawCallsField).GetInt32());
+        await Assert.That(later.GetProperty(SiteBrowserUiTokens.TrianglesField).GetInt32())
+            .IsEqualTo(moving.GetProperty(SiteBrowserUiTokens.TrianglesField).GetInt32());
+        var paused = await cdp.EvaluateAsync(SiteBrowserUiTokens.MotionDisableScript, false, cancellationToken);
+        await Assert.That(paused.GetBoolean()).IsTrue();
+        await Task.Delay(SiteBrowserUiTokens.SceneSettleWaitMilliseconds, cancellationToken);
+        var settled = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneGeometrySnapshotScript, false, cancellationToken);
+        var metrics = settled.GetRawText();
         await Task.Delay(SiteBrowserUiTokens.SceneIdleWaitMilliseconds, cancellationToken);
         var idle = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneGeometrySnapshotScript, false, cancellationToken);
         await Assert.That(idle.GetRawText()).IsEqualTo(metrics);
-        await Assert.That(idle.GetProperty(SiteBrowserUiTokens.RenderCallsField).GetInt32()).IsEqualTo(settledRenderCalls);
+        await Assert.That(idle.GetProperty(SiteBrowserUiTokens.RenderCallsField).GetInt32())
+            .IsEqualTo(settled.GetProperty(SiteBrowserUiTokens.RenderCallsField).GetInt32());
     }
 
     private static async Task AssertReducedMotion(SiteBrowserCdpClient cdp, bool rendererReady,

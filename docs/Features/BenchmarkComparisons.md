@@ -1,5 +1,38 @@
 # BenchmarkComparisons
 
+## Digest-backed Docker execution continuation
+
+TASK-KLEVENT-001..003 (REQ/AC-BC-005, AC-PERF-004, AC-KLEVENT-001..003)
+repairs KeyLoad's missing public session event readback seen in exact b21 JSON.
+Two source files delegate to existing SDK reads, return null for absence and
+preserve strict cardinality. A fresh actual RF3 target proves seeded/new/conflict/
+cancel/following flows; root owns the hook/docs/gates and bounded worker owns only
+those source/new helper files. Full schema3 nine-engine35+31 scope stays required.
+
+REQ-BC-001/003/005/009/019/021 and AC-PERF-006/009 now map to
+AC-IMAGE-001..007 under the Accepted [ADR-034 image stage](../ADR/ADR-034-cluster-comparisons.md).
+The sole normal/TimeSeries runner and all RF3 hosts consume real digest-backed
+images prepared once per GitHub runtime job, with actual manifest-byte/source
+label proof, owned output mount/user and native terminal exit0. Required internal
+AppHost config is `KeyLoad:ContainerImages:Server` and
+`Benchmarks:ContainerImages:LoadGenerator`; missing/invalid refs fail safely and
+cannot select a host-process fallback. Root owns shared contracts, AppHost/CI/docs
+and final source/evidence review; bounded image tooling/runner Dockerfile worker
+scope is frozen in [acceptance](../../docker-comparison-images.acceptance.md) and
+[task graph](../../docker-comparison-images.plan.md). TUnit resource/metadata
+assertions and actual registry/Aspire execution prove the criteria in GitHub only.
+No public engine API/schema/ACK change, external registry publication, local runtime,
+tool installation, secret logging or test/bound weakening. Full nine-engine,
+native Single/Replicated and six-profile scope remains required and unqualified.
+
+```mermaid
+flowchart LR
+    GitHub[Exact source runtime job] --> Images[Verified final OCI manifests]
+    Images --> Host[Aspire RF3 and runner containers]
+    Host --> Native[Real native terminal gate]
+    Native --> Artifact[Raw reports source run and image identities]
+```
+
 The site candidate's observed analyzer dependency failure loop is traced under
 REQ/AC-BC-027 in [site acceptance](../../site-design.acceptance.md) and its working
 plan. TASK014/015/016 preserve all diagnostics/tests/native thresholds while
@@ -290,12 +323,17 @@ Pages at https://www.keyload.cloud/ uses enforced HTTPS; live apex redirects301 
 
 ## REQ-BC-029: shared KeyLoad visual identity
 
-### AC-BC-029 owner revision, 2026-10-02
+### AC-BC-029 owner revision, 2026-10-03 (KeyLoad OS)
 
-- **Positioning.** The landing presents KeyLoad as the database for AI agents. It covers documents with SQL queries, graphs, events, queues, vectors, time series and blobs in one transactional engine, plus the built-in MCP server and the .NET SDK on .NET 10 and Orleans. The early-development and open-qualification statements stay visible.
-- **3D scene.** A conceptual glass engine contains each data shape, and three agents connect to it. It is labelled as not live data. Limits: 12 draw calls, about 2,100 triangles, no idle loop. The poster is a pre-rendered frame of the same scene embedded in the SVG.
-- **Comparable engines only.** The chart and table show only engines that implement the selected workload, with KeyLoad highlighted in lime. Unsupported adapters remain in the DOM rows, the raw JSON/CSV/report downloads and the recorded engine count, so no measurement is hidden or invented. Only the comparison view omits them.
-
+- **Concept.** The landing is a Liquid Glass "desktop" in the Managed Code family: menu bar, windows with title bars, widgets, a Launchpad of capabilities, a Benchmarks app window with a sidebar, a terminal window and a bottom dock for navigation. There is no green brand accent; Managed Code's pastel iridescence is the only accent. The page presents KeyLoad as the database for AI agents on .NET 10 and Orleans and keeps the early-development wording.
+- **Agent session.** The illustrative "Agent session" window shows the real MCP tools `keyload_query_execute` and `keyload_documents_commit`, plus the real .NET SDK atomic command. It is labelled as an example with no live data.
+- **3D scene motion contract (changed by owner direction).**
+  - The carousel of data-shape cards around the KeyLoad mark starts moving as soon as it is ready. It spins while visible and follows a fine pointer.
+  - It pauses offscreen, on hidden pages and when the visitor pauses it. It never moves under `prefers-reduced-motion`.
+  - `AssertMotionPlaysThenSettles` proves that render calls advance while playing and are identical after pause. Budgets are unchanged: 19 draw calls and 37 triangles.
+  - The poster is a pre-rendered frame of the same scene.
+- **Comparable engines only.** The chart and table omit engines that do not implement the selected workload, and KeyLoad is highlighted. Their DOM rows, downloads and the engine count stay intact.
+- **Attribution.** The footer reads "Developed by Managed Code" and links to https://www.managed-code.com/ with a normal followed link (no `nofollow`).
 
 - **AC-BC-029:** the public site uses the shared light identity from [ADR-053](../ADR/ADR-053-unified-visual-identity.md):
   - the same logo, tokens and sans display type, plus cards, buttons, tabs, bars and tables;

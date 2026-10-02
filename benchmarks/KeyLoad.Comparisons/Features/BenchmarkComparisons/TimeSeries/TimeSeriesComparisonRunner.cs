@@ -5,7 +5,8 @@ internal static class TimeSeriesComparisonRunner
     private const string LibraryName = "ManagedCode.TimeSeries";
 
     internal static async Task<int> RunAsync(ITimeSeriesPersistentTarget[] targets, string sourceRevision,
-        string outputDirectory, CancellationToken cancellationToken)
+        string outputDirectory, CancellationToken cancellationToken, GitHubProvenance? provenance = null,
+        string? loadGeneratorImage = null)
     {
         ArgumentNullException.ThrowIfNull(targets);
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceRevision);
@@ -20,7 +21,11 @@ internal static class TimeSeriesComparisonRunner
         recorder.AddLibraryTarget();
         await ExecuteTargetsAsync(targets, workload, recorder, cancellationToken);
         ExecuteLibraryAggregation(workload, recorder);
-        var report = recorder.CreateReport(sourceRevision);
+        var report = recorder.CreateReport(sourceRevision) with
+        {
+            Provenance = provenance,
+            LoadGeneratorImage = loadGeneratorImage
+        };
         await TimeSeriesComparisonReportWriter.WriteAsync(report, outputDirectory);
         return recorder.Passed ? 0 : 1;
     }

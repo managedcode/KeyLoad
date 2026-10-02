@@ -24,7 +24,11 @@ internal sealed record ContainerRuntimeInspection(string Id, string ConfigImage,
 /// <param name="KillOutput">The unchanged Docker kill output.</param>
 /// <param name="KillError">The unchanged Docker kill standard error.</param>
 internal sealed record ContainerRuntimeKillReceipt(string Scenario, string ResourceName, string ContainerName, ContainerRuntimeInspection Before,
-    ContainerRuntimeInspection Stopped, int KillExitCode, string KillOutput, string KillError);
+    ContainerRuntimeInspection Stopped, int KillExitCode, string KillOutput, string KillError)
+{
+    public DateTimeOffset KillStartedAtUtc { get; init; }
+    public DateTimeOffset KillCompletedAtUtc { get; init; }
+}
 
 /// <summary>Preserves the original restart receipt property names, types and declaration order.</summary>
 /// <param name="Scenario">The qualification scenario.</param>
@@ -52,4 +56,8 @@ internal sealed record ContainerRuntimeKillReceipt(string Scenario, string Resou
 internal sealed record ContainerRuntimeRestartReceipt(string Scenario, string ResourceName, string ContainerName, string BeforeContainerId,
     string BeforeImage, string BeforeImageId, string BeforeState, int DockerKillExitCode, string KillOutput, string KillError, string StoppedState,
     string AfterContainerId, string AfterImage, string AfterImageId, string AfterState, string BeforeStartedAt,
-    string AfterStartedAt, bool NewRuntimeStartConfirmed, bool AspireStartSucceeded, string? AspireStartMessage, string SourceSha, string RepositoryRoot);
+    string AfterStartedAt, bool NewRuntimeStartConfirmed, bool AspireStartSucceeded, string? AspireStartMessage, string SourceSha, string RepositoryRoot)
+{
+    public DateTimeOffset KillStartedAtUtc { get; init; }
+    public DateTimeOffset KillCompletedAtUtc { get; init; }
+}

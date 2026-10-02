@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Security.Cryptography;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
@@ -39,6 +38,7 @@ internal sealed class RealComparisonSuite
         diagnostics.Start();
         try
         {
+            await ComparisonImageResourceAssertions.VerifyAsync(app, timeout.Token);
             await VerifyPinnedContainerImagesAsync(app);
             await app.StartAsync(timeout.Token);
             await VerifyCompletedRunAsync(app, output, evidence, options, neo4jPassword, timeout.Token);
@@ -70,7 +70,7 @@ internal sealed class RealComparisonSuite
         }
         finally
         {
-            await DeleteDataAsync(root, redis);
+            await ComparisonDataCleanup.DeleteDataAsync(root, redis);
         }
     }
 
@@ -156,6 +156,12 @@ internal sealed class RealComparisonSuite
         await Assert.That(app.ResourceNotifications.TryGetCurrentState("comparisons", out var state)).IsTrue();
         ComparisonTestEvidenceFiles.CopyReportsIfPresent(output, evidence);
         await Assert.That(state!.Snapshot.ExitCode).IsEqualTo(0);
+        var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+        var adminParameter = model.Resources.OfType<ParameterResource>()
+            .Single(resource => resource.Name == "admin-key");
+        var adminKey = await adminParameter.GetValueAsync(cancellationToken)
+            ?? throw new InvalidOperationException("Comparison KeyLoad credential is unavailable.");
+        await KeyLoadStreamPublicRegression.VerifyAsync(app, adminKey, cancellationToken);
         var connectionString = await app.GetConnectionStringAsync("benchmark-postgres", cancellationToken)
             ?? throw new InvalidOperationException("Comparison PostgreSQL connection string is unavailable.");
         await PostgresSchemaRegression.VerifyAsync(connectionString, cancellationToken);
@@ -166,60 +172,4 @@ internal sealed class RealComparisonSuite
         await Neo4jHarnessMismatchRegression.VerifyAsync(neo4jEndpoint, neo4jPassword, neo4jImage, cancellationToken);
     }
 
-    private static async Task DeleteDataAsync(string root, ContainerResource redis)
-    {
-        if (!Directory.Exists(root))
-        {
-            return;
-        }
-
-        try
-        {
-            Directory.Delete(root, true);
-            return;
-        }
-        catch (UnauthorizedAccessException) when (OperatingSystem.IsLinux())
-        {
-        }
-
-        var external = Path.Combine(root, "external");
-        if (!Directory.Exists(external) || !redis.TryGetContainerImageName(out var image))
-        {
-            throw new IOException("Cannot clean the comparison run's container-owned data.");
-        }
-
-        var start = new ProcessStartInfo("docker") { RedirectStandardError = true, RedirectStandardOutput = true };
-        foreach (var argument in new[]
-        {
-            "run", "--rm", "--pull", "never", "--network", "none", "--read-only", "--user", "0:0",
-            "--cap-drop", "ALL", "--cap-add", "DAC_OVERRIDE", "--entrypoint", "/bin/sh",
-            "--mount", $"type=bind,source={external},target=/data", image!, "-c", "rm -rf /data/*"
-        })
-        {
-            start.ArgumentList.Add(argument);
-        }
-
-        using var process = Process.Start(start) ?? throw new IOException("Cannot start comparison data cleanup.");
-        var error = process.StandardError.ReadToEndAsync();
-        var output = process.StandardOutput.ReadToEndAsync();
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        try
-        {
-            await process.WaitForExitAsync(timeout.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            process.Kill(entireProcessTree: true);
-            throw;
-        }
-
-        await output;
-        if (process.ExitCode != 0)
-        {
-            throw new IOException($"Comparison data cleanup failed: {await error}");
-        }
-
-        await error;
-        Directory.Delete(root, true);
-    }
 }

@@ -680,6 +680,7 @@ BenchmarkDotNet.Artifacts/
 .env
 .env.*
 .playwright-cli/
+.claude/
 output/playwright/
 *.ctg
 *.tmp

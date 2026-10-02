@@ -33,6 +33,12 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     private readonly ClusterFailureReceipts failureReceipts = new();
     private readonly CancellationTokenSource lifetime = new();
     private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> nodeLogs = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> nodeFailures = new(StringComparer.Ordinal);
+    private const string RequestFailureMarker = "Database request failed";
+    private const string RpcFailureMarker = "Initial Orleans RPC failed";
+    private const string MaintenanceFailureMarker = "Node-owned replica maintenance failed";
+    private const int FailureLinesPerNode = 3;
+    private const int MaximumCapturedLineBytes = 1_024;
     private readonly ConcurrentDictionary<string, Task> logCapture = new(StringComparer.Ordinal);
     private Task? resourceCapture;
 
@@ -60,7 +66,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     /// <param name="cancellationToken">The caller's test deadline, linked to the diagnostic request bound.</param>
     internal async Task SaveAsync(ReadOnlyMemory<byte> peerSecret, CancellationToken cancellationToken)
     {
-        var lines = new List<string>();
+        var nodeGroups = new List<IEnumerable<string>>();
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
         {
             var name = ClusterFixtureProtocol.NodeName(number);
@@ -69,13 +75,16 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
                     current.Snapshot.State?.Text, current.Snapshot.ExitCode, current.Snapshot.HealthStatus)
                 : ResourceStateUnavailable;
             var discovery = await ReadDiscoveryAsync(name, peerSecret, cancellationToken).ConfigureAwait(false);
-            lines.Add(string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, state));
+            var lines = new List<string> { string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, state) };
+            lines.AddRange(ReadFailures(name).Select(line =>
+                string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, line)));
             lines.Add(string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, discovery));
             lines.AddRange(ReadTail(name).Select(line =>
                 string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, line)));
+            nodeGroups.Add(lines);
         }
 
-        var bounded = BoundedDiagnosticLog.Bound(lines);
+        var bounded = BoundedDiagnosticLog.BoundNodes(nodeGroups);
         var repository = FindRepositoryRoot();
         var output = Path.Combine(repository.FullName, ClusterFixtureProtocol.ArtifactDirectory,
             ClusterFixtureProtocol.QualificationDirectory);
@@ -132,13 +141,14 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     private async Task CaptureLogsAsync(ResourceLoggerService logs, string resourceId, string name)
     {
         var buffer = nodeLogs.GetOrAdd(name, _ => new());
+        var failures = nodeFailures.GetOrAdd(name, _ => new());
         try
         {
             await foreach (var batch in logs.WatchAsync(resourceId).WithCancellation(lifetime.Token).ConfigureAwait(false))
             {
                 foreach (var line in batch)
                 {
-                    AppendLogLine(buffer, line.Content);
+                    CaptureLogLine(buffer, failures, line.Content);
                 }
             }
         }
@@ -148,11 +158,24 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     }
 
     private string[] ReadTail(string name) => nodeLogs.TryGetValue(name, out var buffer) ? buffer.ToArray() : [];
+    private string[] ReadFailures(string name) => nodeFailures.TryGetValue(name, out var buffer) ? buffer.ToArray() : [];
 
-    private static void AppendLogLine(ConcurrentQueue<string> buffer, string line)
+    private static void CaptureLogLine(ConcurrentQueue<string> buffer, ConcurrentQueue<string> failures, string line)
+    {
+        var content = BoundedDiagnosticLog.ClipUtf8(line, MaximumCapturedLineBytes);
+        AppendLogLine(buffer, content, ClusterFixtureProtocol.CapturedLogLinesPerNode);
+        if (content.Contains(RequestFailureMarker, StringComparison.Ordinal)
+            || content.Contains(RpcFailureMarker, StringComparison.Ordinal)
+            || content.Contains(MaintenanceFailureMarker, StringComparison.Ordinal))
+        {
+            AppendLogLine(failures, content, FailureLinesPerNode);
+        }
+    }
+
+    private static void AppendLogLine(ConcurrentQueue<string> buffer, string line, int maximumLines)
     {
         buffer.Enqueue(line);
-        while (buffer.Count > ClusterFixtureProtocol.CapturedLogLinesPerNode)
+        while (buffer.Count > maximumLines)
         {
             buffer.TryDequeue(out _);
         }

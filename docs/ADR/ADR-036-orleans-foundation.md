@@ -42,8 +42,6 @@ flowchart LR
     Native --> Write[Command UnknownWriteOutcome]
 ```
 
-TASK-ROUTE-DIAGNOSTICS is an accepted internal observability refinement for
-
 Accepted TASK-DIAG-001..004 (REQ/AC-CLIENT-010, REQ/AC-ROUTE-008,
 AC-DIAG-001..004) supplements initial-RPC classification with closed HTTP
 dispatch phase/category, nullable operation GUID and UTC failure timestamp.
@@ -57,6 +55,7 @@ action times separately. No retry, ACK, format, topology or public API change.
 Rollback removes this source-only evidence stage together. Full exact-SHA
 GitHub unit/recovery/RF3 SDK+MCP is the join; cause and qualification stay open.
 
+TASK-ROUTE-DIAGNOSTICS is an accepted internal observability refinement for
 REQ/AC-ROUTE-008 and AC-ROUTE-001/003. Stage/category/error enums and a GUID are
 the complete log contract; never pass raw exceptions, JSON, tokens, principal IDs
 or arbitrary runtime strings. Success uses only a stack-local stage enum. Existing

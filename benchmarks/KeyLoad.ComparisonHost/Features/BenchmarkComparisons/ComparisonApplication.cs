@@ -48,6 +48,15 @@ internal static class ComparisonApplication
     {
         var runner = new KeyLoad.Comparisons.ComparisonRunner(settings.Options, Console.WriteLine);
         var report = await runner.RunAsync(targets, settings.SourceRevision, cancellationToken, settings.Storage);
+        if (settings.ExecutionIdentity is { } identity)
+        {
+            report = report with
+            {
+                Provenance = identity.Provenance,
+                LoadGeneratorImage = identity.LoadGeneratorImage
+            };
+        }
+
         await KeyLoad.Comparisons.ReportWriter.WriteAsync(report, settings.OutputDirectory, cancellationToken);
         Console.WriteLine(KeyLoad.Comparisons.ReportWriter.Markdown(report));
         Console.WriteLine(ComparisonHostConstants.ReportsPrefix + settings.OutputDirectory);

@@ -12,7 +12,7 @@ internal static class BenchmarkCallerBindings
     private const string InvalidNodeCount = "The comparison caller requires three actual RF3 nodes.";
     private const int RequiredNodeCount = 3;
 
-    internal static void Apply(IResourceBuilder<ProjectResource> runner,
+    internal static void Apply(IResourceBuilder<ContainerResource> runner,
         IResourceBuilder<ContainerResource>[] nodes, IResourceBuilder<RabbitMQServerResource> rabbit)
     {
         ArgumentNullException.ThrowIfNull(runner);

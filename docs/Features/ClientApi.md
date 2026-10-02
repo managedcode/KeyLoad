@@ -1,5 +1,14 @@
 # ClientApi
 
+REQ-CLIENT-010 / AC-CLIENT-010 / AC-DIAG-001..004 add bounded internal RF3
+dispatch evidence under [ADR-036](../ADR/ADR-036-orleans-foundation.md).
+Closed credential/read/command phases and failure categories correlate the
+existing nullable operation GUID without private values. Real middleware/provider
+TUnit tests preserve public errors. Docker artifacts retain every node fairly and
+distinguish actual SIGKILL action time from container StartedAt. Root owns markers,
+capture and shared joins; worker owns middleware/new helper/UnitTests. GitHub
+qualification is pending; native cause cannot be inferred from the generic503.
+
 Shared authenticated .NET SDK/CLI transport. [ADR-035](../ADR/ADR-035-memory-performance.md)
 and [memory/performance acceptance](../../memory-performance.acceptance.md) govern
 the current transport repair. The typed operation contracts and server authority

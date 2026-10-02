@@ -1,5 +1,13 @@
 # ADR-034: Reproducible Docker cluster comparisons and GitHub result graphs
 
+Accepted TASK-KLEVENT-001..003 maps REQ/AC-BC-005 and AC-PERF-004 to
+AC-KLEVENT-001..003. Exact b21 JSON shows missing KeyLoad public session readback;
+no timing/storage weakness is inferred. Tests first use existing actual RF3/SDK;
+two source files delegate bounded reads and return null for absence. Root owns
+ComparisonTests hook/docs/build/CI; one bounded worker owns only those source/new
+regression files. No API/durable/ACK/package migration, source-only rollback,
+immutable evidence preserved. Native nine-engine/six-profile35+31 scope remains.
+
 Identity note: ADR-034 owns comparisons. The formerly colliding Orleans foundation document is now [ADR-036](ADR-036-orleans-foundation.md); its identity-correction record explains the preserved root policy's historical “ADR-034 evidence” reference for the two Orleans experimental API calls. That rule remains mandatory and is not modified by this comparison decision.
 
 Status: Accepted. Date: 2026-10-01. Owner: benchmark lead/integrator. Related: REQ-BC-001 through009 and AC-BC-001 through009; [BenchmarkComparisons](../Features/BenchmarkComparisons.md).
@@ -67,6 +75,75 @@ Primary Kurrent sources: [26.1.2 release](https://github.com/kurrent-io/KurrentD
 Workers receive exact paths, REQ/AC IDs, constructor/result contracts, primary sources, verification commands, forbidden changes, dependencies, completion states and escalation rules. Strongest suitable planner owns architecture/integration/final review; bounded workers use the least expensive capable model. All required results must be complete and reviewed before dependent tasks start. Every gate links to exact GitHub SHA/run/job/artifacts.
 
 ## Migration, rollout and rollback
+
+### Accepted digest-backed container execution stage (2026-10-02)
+
+REQ-BC-001/003/005/009/019/021 and AC-PERF-006/009 map to AC-IMAGE-001..007 in
+[image acceptance](../../docker-comparison-images.acceptance.md), with the ordered
+[task graph](../../docker-comparison-images.plan.md). The integration lead approves
+this bounded source stage under the owner's existing full-product authorization;
+the nine-engine, native Single/Replicated and complete six-profile gates stay open.
+
+1. TASK-IMAGE-002 owns only new `scripts/Features/BenchmarkComparisons/prepare-images.mjs`,
+   `cleanup-images.mjs`, `image-*` helpers and the sole runner's feature Dockerfile.
+   Existing Docker/Buildx/Node build, load and push exact-SHA linux/amd64 product
+   images to a job-owned registry bound only to127.0.0.1:5000. No external package
+   publication, daemon configuration or tool installation. Require local Engine,
+   clean tracked source and official GitHub context before builds. Actual registry
+   manifest bytes/header/source-label proof produces immutable final digest refs;
+   never substitute config IDs, base digests or Git SHA for a manifest digest.
+2. Root owns the server Dockerfile and AppHost image/resource joins. Required
+   `KeyLoad:ContainerImages:Server` and `Benchmarks:ContainerImages:LoadGenerator`
+   full tag+sha256 refs fail safely if absent/invalid. All RF3 nodes and both normal
+   and TimeSeries runners use native AddContainer + WithImageSHA256; no ProjectResource
+   or Dockerfile fallback. Preserve node aliases/ports/data/security/readiness and
+   native runner terminal notification/exit0 under every original deadline.
+3. Root owns shared report/provenance contracts and freezes TASK-IMAGE-004's exact
+   producer packet before delegation. That packet is now frozen in image acceptance:
+   host-private optional ComparisonExecutionIdentity is read last in existing
+   settings validation and becomes required when LoadGeneratorImage is supplied;
+   it validates actual GitHub source/run/attempt/ref/workflow, accepted profile and
+   full server/runner refs before client allocation. Use KeyLoadTarget's existing
+   optional image argument and ComparisonReport's existing provenance/image init
+   properties. Direct non-container CLI/library metadata stays optional; root owns
+   separate TimeSeries producer and every shared contract/test join.
+   Forward actual GitHub source/run/attempt/ref,
+   actual server/runner refs and private host output mounted at /reports with the
+   current supported UID/GID ownership. No world-writable permission workaround.
+   Preserve optional embedded-library metadata and separate TimeSeries schema.
+4. Root joins both runtime CI jobs: docker-rf3 and comparison-smoke prepare immutable
+   images once, retain raw manifests/labels/native lifecycle/test/report artifacts
+   and always capture/remove only the owned registry. Existing permissions/actions,
+   full suites,15/60-minute job bounds and per-test bounds remain unchanged.
+5. Acceptance-derived TUnit config/resource/report assertions precede source and
+   actual GitHub registry/container proof closes the runtime criteria. Environment
+   failures require real job evidence, never a fake daemon. Root reviews all diffs,
+   runs development build/format/static governance, delivers all eligible main
+   changes and verifies exact-source full GitHub evidence before qualification.
+
+Upstream manifest bytes were independently hashed against registry digest headers:
+registry3.1.2 `ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8`,
+SDK10.0.401 `e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317`,
+ASP.NET10.0.12 `222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4`.
+These are infrastructure/base pins, not final product-image proof. Source SHA,
+actual final manifests and OCI labels are produced by the real GitHub job.
+
+```mermaid
+flowchart LR
+    Source[Exact GitHub checkout] --> Build[Existing Docker Buildx]
+    Build --> Registry[Job owned loopback registry]
+    Registry --> Digest[Manifest bytes hash and revision proof]
+    Digest --> Aspire[Aspire native containers]
+    Aspire --> RF3[Three node local RF3 hosts]
+    Aspire --> Runner[Sole comparison CLI container]
+    Runner --> Exit[Native terminal exit zero]
+    Exit --> Reports[Owned raw reports and provenance]
+```
+
+Rollback stops new qualification/publication and preserves immutable evidence;
+it cannot reintroduce a host-process measurement fallback. Hard runner loss has
+no cleanup guarantee and never counts as success. This ADR remains Accepted until
+all required native/topology/profile, coverage and actual verification work joins.
 
 ### Accepted caller-composition repair continuation (2026-10-02)
 

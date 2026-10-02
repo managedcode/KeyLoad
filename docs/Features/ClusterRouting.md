@@ -91,7 +91,9 @@ existing full RF3 failure scenarios supply operational evidence in GitHub only.
 Ownership/stages/rollback are accepted in ADR-036 and the root delivery task graph.
 
 TASK-AISQL-011 repairs the initial OrleansNode RPC boundary after exact baseline
-37065200835 exposed Orleans placement/directory rejection to a stopped node.
+37065200835 exposed a generic503 during stopped-replica writes. Native Orleans
+placement/directory rejection is a possible path; its exact class and dispatch
+phase were not captured and remain unproven.
 CanonicalOperationGateway supplies trusted command intent; DatabaseCredentialResolver
 supplies read intent. Only native OrleansException and TimeoutException map to
 fixed transport errors. No internal retry, parsing of caller roles, storage-error

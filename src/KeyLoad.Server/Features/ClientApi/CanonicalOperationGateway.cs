@@ -27,6 +27,7 @@ internal static class CanonicalOperationGateway
         var signed = readKind is { } read ? codec.CreateRead(requestId, principal.Id, read, payload)
             : codec.CreateCommand(requestId, principal.Id, commandKind!.Value, commandId, payload);
         OperationResponseHeaders.Publish(context, requestId);
+        RequestFailureDiagnostic.MarkOperationDispatch(context, commandKind.HasValue);
         var reply = await context.RequestServices.GetRequiredService<OrleansNode>()
             .ExecuteAsync(requestId, signed, commandKind.HasValue, cancellationToken).ConfigureAwait(false);
         return new(requestId, reply.Payload);
