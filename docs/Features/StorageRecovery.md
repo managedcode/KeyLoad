@@ -23,6 +23,24 @@ either path, then restore the actual store files and prove subsequent reopen
 and commit. Missing required ownership/journal files must still fail, and the
 existing held-file/cancel/pre-cancel/permanent-lock tests remain intact.
 
+TASK-RUNTIME-WIN-ELAPSED-W6 refines AC-STORAGE-012 using exact323d60499 /
+CI37044499074. Both missing-required-file arguments catch the expected exact
+FileNotFoundException, then exceed the unchanged six-second observation cap.
+They overlap the concurrent native suite; the report does not identify the
+precise scheduler delay. Apply method-level keyless TUnit NotInParallel only to
+AcStorage012_MissingRequiredOwnershipFileStillFails, preserving both arguments,
+five-second lower/six-second upper assertions,25ms polling and no-file-creation
+checks. Existing permanent-holder timing isolation and every other case remain.
+No helper, timeout, retry or product change is authorized. Root owns accepted
+criteria/evidence; the disjoint worker owns only KilledProcessFileReadinessTests.
+Both formerly red native cases and full three-OS recovery must pass at the
+delivered SHA; source isolation is not proof against external VM preemption.
+AC-REC-FUP-003 maps to these two argument cases and requires their unchanged
+exact exception/no-create/5s lower/6s upper assertions. A timing failure, broader
+serialization or weakened assertion fails this criterion.
+ADR035/036/033 lifetime/test contracts suffice; rollback removes only this
+attribute, retaining all failure evidence.
+
 The common synchronous probe is internal test infrastructure shared with
 ClusterReplication's existing store barrier. That caller retains one
 five-second deadline across target stores and, only at typed snapshot/transfer

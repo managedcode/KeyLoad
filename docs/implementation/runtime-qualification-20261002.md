@@ -1,6 +1,18 @@
 # Runtime qualification, 2026-10-02
 
-## Main runtime baseline: 8b475d4
+## Main runtime baseline: 323d60499
+
+[Run37044499074](https://github.com/managedcode/KeyLoad/actions/runs/37044499074) retains all12 source-checked native reports. Full build, formatter, governance and118 analyzer cases pass on all three OSes; units are **805/805 on each OS**. **Native Docker/Aspire RF3 passes41/41**, including real .NET/MCP clients, Chrome and five new safe-diagnostic regressions. Recovery is **136/136 Linux**,125/136 macOS and134/136 Windows. [Exact native hashes, failures, previous-case transitions, job URLs and artifact metadata](runtime-qualification-37044499074.json) retain the complete scope.
+
+Prior checkpoint stages7/8 and Windows target-WAL reopening now pass. All11 new macOS replica-readiness cases fail during fixture construction at ReplicaSnapshotFiles.RejectLinks; two Windows missing-required-file cases exceed the preserved6s observation cap. These remain real failed gates, with fixture path and scheduling review required before a preserving repair. The four prior Windows startup timeouts pass without a demonstrated source-cause repair; the additive startup diagnostic still requires its own delivered-SHA CI.
+
+Both comparison completion predicates still fail with the runner in Waiting; retained smoke/TimeSeries reports are unqualified and measured profiles skipped. Native RF3 success leaves the environmental restart failure branch unexecuted. Numeric coverage, actual activation movement, server-resource costs, endurance and power-loss gates remain open. No local runtime qualification ran.
+
+## W5/W6 source follow-up
+
+[Source join](runtime-source-w5-w6.json) retains all six source hashes, accepted feature/task ownership, native red baseline and authored source chronology. It reuses the existing physical-temp resolver for the macOS readiness fixture, isolates only two Windows intrinsic missing-file timing cases, and adds closed bounded startup exit/drain diagnostics. All25 projects pass an enabled Release development build with0warnings/0errors; canonical formatter and static governance pass. No local runtime tests ran. Four new startup projection/real-stream methods and preserved recovery cases require the next delivered-SHA GitHub run; the full goal remains in progress.
+
+## Previous main runtime baseline: 8b475d4
 
 [Run37042082081](https://github.com/managedcode/KeyLoad/actions/runs/37042082081) retains all12 source-checked native reports. Full build, formatter, governance and118 analyzer cases pass on each OS. Units are805/805 on Linux/macOS and801/805 on Windows: four real comparison-host startup cases reach their unchanged20-second deadline. Recovery remains119/121 Linux/macOS and118/121 Windows. **Native Docker/Aspire RF3 passes36/36**, including real .NET/MCP SDK calls and Chrome administration. Comparison remains2/4 with measured profiles skipped. [Exact reports, failure identities, job URLs and artifact hashes](runtime-qualification-37042082081.json) are retained.
 

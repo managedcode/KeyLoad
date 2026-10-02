@@ -162,6 +162,63 @@ not claim its unexecuted failure path qualified. ADR-035/036/039 existing
 privacy/lifetime contracts suffice; no product/public/dependency boundary changes.
 Rollback reverts only this additive diagnostic join and its helpers/tests.
 
+## Accepted comparison-host startup diagnostics
+
+AC-REC-FUP-004 records the preserving W6 fixture follow-up: the exact delivered
+SHA, complete GitHub job/report artifacts, native failure identities and report
+hashes remain in the runtime ledger. Unit/Recovery/RF3/Comparison must all execute;
+failed or unexecuted cases cannot count as green. Local development build,
+formatter and governance are source validation only. Full native artifact review
+and source lifetime/predicate audit cover environmental branches which cannot be
+injected without prohibited service doubles. StorageRecovery owns AC-REC-FUP-003;
+ClusterReplication owns AC-REC-FUP-001/002. Existing ADR035/036/033 apply.
+
+REQ-TEST-009 / AC-TEST-009 (TASK-RUNTIME-HOST-DIAGNOSTICS-W5) refines the
+private real-process AC-HOST-003/007 fixture after exact8b475d4 /
+CI37042082081 repeats four Windows20-second failures. One existing deadline
+covers both native exit and redirected-output drain; current failure evidence
+does not distinguish them. Source configuration order is not a diagnosis.
+
+Before the existing timeout cleanup, retain only a closed ProcessExit/OutputDrain
+stage, actual available exit state/code, closed capture-task states, capped
+capture lengths and boolean matches for existing static validation markers.
+The receipt is at most8KiB and keeps the original TimeoutException message
+prefix. No raw child output, exception text, arguments, environment, paths,
+endpoints, credentials or unknown values are logged. Diagnostic observation
+failure becomes a fixed unavailable marker and cannot replace the original
+startup timeout or caller cancellation.
+
+Each actual StreamReader still uses4096-character reads, retains32768 characters
+maximum and drains the remainder. Synchronize partial-buffer observation; retain
+the same20-second shared startup deadline and five-second cleanup behavior.
+Do not add retries, serialization, sleeps, client/config reorder, product changes
+or new detached work. Preserve all four configuration/ordering assertions and
+the real cleanup test. Environmental failure/cancellation additionally needs
+source lifetime review and the actual GitHub failure receipt; a successful run
+does not qualify its unexecuted failure branch.
+
+```mermaid
+flowchart LR
+    Host[Actual CLI child] --> Exit[Native exit wait]
+    Host --> Capture[Bounded readers drain to EOF]
+    Exit --> Drain[Capture completion wait]
+    Exit --> Failure[Existing startup timeout]
+    Drain --> Failure
+    Failure --> Receipt[Closed stage and pre-cleanup facts]
+    Receipt --> Cleanup[Existing owned cleanup]
+```
+
+Slice ownership: one worker owns only UnitTests/Features/BenchmarkComparisons/
+ComparisonHostProcess.cs and new cohesive capture/diagnostic/test helpers;
+root owns shared documentation and integration. New genuine native-shaped
+projection/privacy and real-stream prefix/EOF cases map AC-TEST-009.1–003;
+the existing real host cases map009.4. Exact delivered-SHA full GitHub
+unit/recovery/RF3/comparison plus native receipt review map009.5. All tests
+remain TUnit/MTP and CI-only. Existing ADR035/043 private fixture ownership,
+privacy and lifetime contracts suffice; no public/data/dependency/deployment
+migration is authorized. Rollback reverts only this additive private diagnostic
+packet and its source docs; coverage and full goal remain unqualified.
+
 ## Platform, dependency та release qualification
 
 B3 keeps the exact task lifetime above while satisfying enabled CA1031: a private

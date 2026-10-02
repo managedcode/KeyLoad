@@ -59,7 +59,7 @@ internal sealed class ReplicaFileReadinessStores : IAsyncDisposable
 
     private static (string Root, Guid Incarnation) CreateClosedStores(ReplicaCrashBoundary boundary)
     {
-        var root = Directory.CreateTempSubdirectory(DirectoryPrefix).FullName;
+        var root = ReplicaFixturePaths.NewDirectory(DirectoryPrefix);
         var incarnation = Guid.NewGuid();
         try
         {

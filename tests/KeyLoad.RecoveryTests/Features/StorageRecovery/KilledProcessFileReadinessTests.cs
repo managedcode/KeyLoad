@@ -104,6 +104,7 @@ internal sealed class KilledProcessFileReadinessTests
     }
 
     [Test]
+    [NotInParallel]
     [Arguments("owner.lock")]
     [Arguments("commands.wal")]
     public async Task AcStorage012_MissingRequiredOwnershipFileStillFails(string relativePath)

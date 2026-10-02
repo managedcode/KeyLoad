@@ -57,9 +57,10 @@ each source canonical/replica owner, journal and metadata holder keeps the actua
 combined wait pending until released. Existing source snapshot import and private
 transfer crash cases remain the primary regression and retain all assertions.
 
-The two permanent-holder elapsed checks retain their five-second lower and
-six-second upper observation bounds. Run only those individual wall-clock
-measurement cases with TUnit's keyless method-level `NotInParallel`, which the
+The two permanent-holder elapsed checks and StorageRecovery's two missing-required-
+file arguments retain their five-second lower and six-second upper observation
+bounds. Run only those individual wall-clock measurement cases with TUnit's
+keyless method-level `NotInParallel`, which the
 pinned1.72.10 package documents as exclusive execution. Exact Windows evidence
 shows the failed check overlapped74 distinct cases with16 active at peak; timer
 or continuation delay is a supported inference, without a threadpool trace.
@@ -68,6 +69,29 @@ holder-release/cancellation tests and every real process crash remain parallel.
 This is intrinsic readiness timing qualification, not a loaded-system latency
 claim. Source review, native case discovery and full exact-SHA CI must verify
 that the same bounds and all original crash cases remain.
+
+TASK-RUNTIME-MAC-FIXTURE-W6 refines AC-REP-004 / AC-STORAGE-012 after
+exact323d60499 / CI37044499074. All11 new macOS readiness cases fail during
+construction at ReplicaSnapshotFiles.RejectLinks' reparse-point rejection,
+before snapshot-data or readiness predicates. The fixture allocates an unresolved
+system temp path; macOS temp aliases are the source-supported cause, while the
+native report does not expose that run's exact TMPDIR. Reuse CrashHost's existing
+ReplicaFixturePaths.NewDirectory for the fresh owned root, as other real replica
+fixtures already do. It resolves existing directory ancestors using native .NET
+ResolveLinkTarget before the private root is created; production RejectLinks
+remains unchanged and fail-closed. Preserve one root, shared incarnation, both
+target stores and required source stores, closure order, actual exclusive holders,
+waits/assertions and owned cleanup. No second resolver, guard bypass, dependency,
+public contract or persistence migration is introduced. The worker owns only
+ReplicaFileReadinessStores; root owns contract/diff/evidence integration. All11
+formerly red native cases plus original snapshot/tail/process recovery across
+three OSes are the regression matrix. AC-REC-FUP-001 requires the existing
+physical-temp helper and unchanged fail-closed guard; AC-REC-FUP-002 requires the
+same genuine source/target stores, incarnation, holders, assertions and cleanup.
+Either criterion fails on setup rejection, changed ownership or leaked work;
+all11 native cases and original snapshot/tail cases must pass. ADR035/036/033 cover this preserving private
+fixture reuse; rollback reverts only the allocator call. Environmental path or
+cleanup failures require source lifetime review rather than a synthetic injector.
 
 ## Actors, entry points and failure boundaries
 

@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -13,9 +12,6 @@ internal sealed record ComparisonHostExit(int ExitCode, string Stdout, string St
 internal static class ComparisonHostProcess
 {
     private const string StartupFailureMessage = "The comparison host did not start.";
-    private const string TimeoutMessage = "The comparison host did not exit within its startup deadline.";
-    private const int MaximumCapturedCharacters = 32_768;
-    private const int CaptureChunkCharacters = 4_096;
     private const int StartupTimeoutSeconds = 20;
     private const int CleanupTimeoutSeconds = 5;
 
@@ -32,40 +28,31 @@ internal static class ComparisonHostProcess
 
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         using var captureLifetime = new CancellationTokenSource();
-        var stdout = CaptureAsync(process.StandardOutput, captureLifetime.Token);
-        var stderr = CaptureAsync(process.StandardError, captureLifetime.Token);
-        var captures = Task.WhenAll(stdout, stderr);
+        var stdout = new ComparisonHostOutputCapture();
+        var stderr = new ComparisonHostOutputCapture();
+        var stdoutTask = stdout.CaptureAsync(process.StandardOutput, captureLifetime.Token);
+        var stderrTask = stderr.CaptureAsync(process.StandardError, captureLifetime.Token);
+        var captures = Task.WhenAll(stdoutTask, stderrTask);
         deadline.CancelAfter(TimeSpan.FromSeconds(StartupTimeoutSeconds));
+        var stage = ComparisonHostStartupStage.Unavailable;
         try
         {
+            stage = ComparisonHostStartupStage.ProcessExit;
             await process.WaitForExitAsync(deadline.Token);
+            stage = ComparisonHostStartupStage.OutputDrain;
             var text = await captures.WaitAsync(deadline.Token);
             return new(process.ExitCode, text[0], text[1]);
         }
         catch (OperationCanceledException) when (deadline.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
         {
-            throw new TimeoutException(TimeoutMessage);
+            var diagnostics = ComparisonHostStartupDiagnostics.Create(stage, process,
+                stdout.Snapshot(), stderr.Snapshot());
+            throw ComparisonHostStartupDiagnostics.CreateTimeoutException(diagnostics);
         }
         finally
         {
             await CleanupAsync(process, captureLifetime, captures);
         }
-    }
-
-    private static async Task<string> CaptureAsync(StreamReader reader, CancellationToken cancellationToken)
-    {
-        var buffer = new char[CaptureChunkCharacters];
-        var text = new StringBuilder();
-        int count;
-        while ((count = await reader.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
-        {
-            var remaining = MaximumCapturedCharacters - text.Length;
-            if (remaining > 0)
-            {
-                text.Append(buffer, 0, Math.Min(count, remaining));
-            }
-        }
-        return text.ToString();
     }
 
     private static async Task ObserveCaptureAsync(Task capture)
