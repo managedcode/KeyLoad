@@ -47,7 +47,7 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {
-            return GrainReplyFactory.Failure(error, false, diagnostics, requestId, stage);
+            return GrainReplyFactory.Failure(error, false, diagnostics, requestId, stage, cancellationToken);
         }
         finally
         {

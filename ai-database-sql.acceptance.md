@@ -63,3 +63,28 @@ Schema-name clarification before source join: Q1 metadata names `revision`, `*` 
 Pre-delivery public enum spelling is WholeNumber for signed Int64 and FixedPoint
 for exact decimal, with unchanged ordinal/range/scale contracts. The initial
 candidate's CA1720 failures are tracked in the plan and repaired without suppression.
+
+AC-AISQL-013 / AC-ROUTE-010 refines the retained-replica failure contract: an
+OperationCanceledException inside a read actor is caller cancellation only when
+that actor's actual incoming token is cancelled. An active caller token returns
+Cancelled; an inactive/absent caller token returns OwnershipLost with fixed safe
+unavailable detail. Possibly dispatched commands retain UnknownWriteOutcome for
+both cases; typed domain errors retain exact codes/details. RequestGrain,
+DatabaseReadGrain and CommandPartitionGrain must pass their actual incoming token
+to the one reply classifier. No internal retry or accepted-error expansion.
+Automated proof: focused TUnit cases using genuine cancelled/uncancelled CTS and
+actual framework cancellation exceptions, existing domain/privacy diagnostics
+regressions, and unchanged stopped-replica RF3 catch-up through real SDK. Required
+exact-SHA build/formatter/unit/recovery/RF3 joins remain AC009. This corrects a
+concrete source classification defect; the prior RF3 causal phase is unproven.
+
+AC-AISQL-014 / existing AC-RC-003: seeded crash recovery emits the unchanged
+success receipt immediately after real atomic/durable assertions inside the
+original trial try, before unconditional cleanup. Preserve the original linked
+15s token, all20x50 native trials/fault points/assertions, actual four-slot
+occupancy and cleanup/permit exception semantics. Receipt failures receive the
+existing seed/trial/stage diagnostic catch; cleanup failures still fail the test.
+No timeout, accepted-error or fault assertion is relaxed. Automated proof is the
+unchanged genuine seeded CrashHost cases and full three-OS recovery in GitHub,
+including exact previously failing batch7 plus1000 success rows perOS; rare
+external scheduling/cancellation uses existing source/lifetime review exception.

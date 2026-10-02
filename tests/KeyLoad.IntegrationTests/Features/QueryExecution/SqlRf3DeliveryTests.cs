@@ -92,8 +92,10 @@ internal sealed class SqlRf3DeliveryTests(ClusterFixture fixture)
         var acknowledged = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(scenario.Inspect, cancellationToken));
         await Assert.That(acknowledged!.Metadata).IsEqualTo(leased with
         {
-            State = MessageState.Acked, StateVersion = leased.StateVersion + McpCallerProtocol.EpochIncrement,
-            LeaseOwner = null, LeaseUntil = null
+            State = MessageState.Acked,
+            StateVersion = leased.StateVersion + McpCallerProtocol.EpochIncrement,
+            LeaseOwner = null,
+            LeaseUntil = null
         });
         await Assert.That(acknowledged.PayloadJson).IsNull();
         await Assert.That(acknowledged.HeadersJson).IsNull();

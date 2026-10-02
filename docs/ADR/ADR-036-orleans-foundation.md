@@ -542,3 +542,36 @@ the existing evidence-directory/report-copy methods into the new internal
 ComparisonTestEvidenceFiles.cs helper under the same slice, preserving every
 path, filename and call order. These are source-quality preserving joins;
 the bounds/privacy/manual environmental evidence contract above is unchanged.
+
+### Incoming cancellation context refinement
+
+Accepted TASK-AISQL-020 under AC-AISQL-013, REQ/AC-ROUTE-010 and existing
+REQ/AC-ROUTE-008/009. A read actor must distinguish actual incoming-token
+cancellation from an internal native cancellation; the latter returns
+OwnershipLost rather than asserting that the caller cancelled. Commands retain
+UnknownWriteOutcome, and typed domain errors remain authoritative.
+
+```mermaid
+flowchart LR
+    Fault[Actor cancellation exception] --> Intent{Command}
+    Intent -->|yes| Uncertain[UnknownWriteOutcome]
+    Intent -->|no| Token{Incoming token cancelled}
+    Token -->|yes| Caller[Cancelled]
+    Token -->|no| Unavailable[OwnershipLost]
+```
+
+Implementation order: approve acceptance; author genuine cancellation and typed
+domain regression sources; extend the sole GrainReplyFactory classifier with
+incoming token context; pass each actual token from RequestGrain, DatabaseReadGrain
+and CommandPartitionGrain; root reviews then joins exact-SHA complete GitHub gates
+and the unchanged retained-replica test. SQL worker owns those four ClusterRouting
+files plus new UnitTests/Features/ClusterRouting/GrainReplyCancellationTests.cs;
+root owns docs and delivery. No other worker changes these files.
+
+Dependencies: existing native request isolation, transport and read-barrier
+contracts. No persistent schema, wire-envelope, credential, topology, retry or
+journal migration. Rollout deploys the source together; rollback reintroduces
+ambiguous cancellation classification and requires requalification. Keep the existing private closed-category logging contract; the diagnostic classifier
+must receive the same computed code as the returned reply. Internal execution
+phase of run37070004864 failure was not retained reliably, so this refinement is
+source-justified without claiming that its RF3 root cause is established.

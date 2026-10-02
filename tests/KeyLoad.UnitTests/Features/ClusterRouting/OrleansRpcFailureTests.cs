@@ -2,7 +2,6 @@ using System.Text.Json;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.TestInfrastructure;
 using Microsoft.Extensions.Logging;
-using global::Orleans.Runtime.Messaging;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -95,7 +94,7 @@ internal sealed class OrleansRpcFailureTests
     private static IEnumerable<(Exception Error, string Category)> NativeFailures()
     {
         yield return (new OrleansException(PrivateCanary), OrleansCategory);
-        yield return (new ConnectionFailedException(PrivateCanary, new IOException(PrivateCanary)), OrleansCategory);
+        yield return (new global::Orleans.Runtime.Messaging.ConnectionFailedException(PrivateCanary, new IOException(PrivateCanary)), OrleansCategory);
         yield return (new TimeoutException(PrivateCanary, new IOException(PrivateCanary)), TimeoutCategory);
     }
 

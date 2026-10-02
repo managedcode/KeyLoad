@@ -50,6 +50,8 @@ internal sealed class StorageRecoveryProcessTests
             await WaitForKilledProcessFilesAsync(root, timeout.Token);
             values = ReadRecoveredValues(root);
             await AssertAtomicCutAsync(values, batch, trial, stage);
+            await RecordCrashTrialAsync(evidence, batch, trial, stage, mutationIndex, values!,
+                StorageTrialLease.ActiveStorageTrials, StorageTrialLease.MaximumObservedStorageTrials, timeout.Token);
         }
         catch (Exception exception)
         {
@@ -68,9 +70,6 @@ internal sealed class StorageRecoveryProcessTests
                 Console.WriteLine($"Cleanup after the original failure: {error.Message}");
             }
         }
-
-        await RecordCrashTrialAsync(evidence, batch, trial, stage, mutationIndex, values!,
-            StorageTrialLease.ActiveStorageTrials, StorageTrialLease.MaximumObservedStorageTrials, timeout.Token);
     }
 
     private static ProcessStartInfo CreateCrashHostStart(string root, CommitStage stage, int mutationIndex)

@@ -219,3 +219,20 @@ alone proves no historical recovery, power-loss guarantee or performance gain.
 ProcessDurable та QuorumProcessDurable описують перевірений declared process failure model історичного коду; `LocalDurable`/`QuorumDurable`, power-loss і endurance не приймаються із process-kill source/test names. Full ACK barrier — [ADR-003](../ADR/ADR-003-durability-ack-barrier.md); committed read views — [ADR-004](../ADR/ADR-004-committed-read-views.md); versioned keyspace — [ADR-005](../ADR/ADR-005-canonical-keyspace-codec.md); backup/log retention — [ADR-008](../ADR/ADR-008-backup-log-retention.md), [BackupRestore](BackupRestore.md).
 
 Current-code journal/compaction/checkpoints і in-progress scoped visitor ремонти не є proof нового delivered SHA. Все source/recovery evidence кваліфікується тільки в GitHub TUnit, actual child-process recovery і RF3 suites. Future maintenance автоматизація, широкі upgrades та power-loss gates залишаються explicit pending. Provider/container composition — один owner; нові helper/test scopes не міняють format без ADR contract.
+
+### Seeded receipt lifetime correction
+
+REQ-STORAGE-014 / AC-RC-003 also maps AC-AISQL-014 and TASK-AISQL-023. Exact
+run37070004864 Windows job111047630131 passed135/136, no skips; batch7/seed1708
+cancelled during receipt write after atomic assertions and cleanup completed.
+The log cannot identify the trial, deadline source or storage damage. Move the
+unchanged receipt into the original trial try immediately after atomic/durable
+assertions, matching the Receipt-before-Cleanup diagram above. Keep original15s
+linked token, all20x50 faults/trials, actual four-slot ownership and unconditional
+cleanup. The existing catch then retains seed/trial/stage for receipt failures;
+any cleanup failure still fails qualification. Owner: gates worker, RecoveryTests.cs
+RunSeededCrashTrialAsync call placement only; root joins exact three-OS recovery
+and1000success receipts perOS. Existing ADR-035 lifetime/test contracts suffice;
+ADR:N/A for additional architecture because this is test-harness ordering only,
+with no product/wire/persistence/topology change. Rollback reintroduces the
+post-cleanup receipt cancellation risk without altering production data.

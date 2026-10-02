@@ -37,7 +37,7 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {
-            return GrainReplyFactory.Failure(error, command, diagnostics, requestId, stage);
+            return GrainReplyFactory.Failure(error, command, diagnostics, requestId, stage, cancellationToken);
         }
         finally
         {

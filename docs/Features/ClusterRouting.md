@@ -107,3 +107,13 @@ tracking regardless of the implementing assembly name. Replica Grain Services ru
 before membership is Active and cannot depend on ordinary graph telemetry grains.
 The owning repository's regression, patch release, GitHub publication and intended
 NuGet feed verification are mandatory before changing KeyLoad's package pin.
+
+REQ-ROUTE-010 maps to AC-ROUTE-010 / AC-AISQL-013: read cancellation replies use
+the actual incoming actor token. Only active caller cancellation returns
+Cancelled; inactive-token native cancellation returns OwnershipLost, and commands
+retain UnknownWriteOutcome. Typed domain errors, safe details and existing closed-category
+logging/privacy remain authoritative. ADR-036 TASK-AISQL-020 owns the sole
+classifier and all three actual token joins. Automated evidence: new genuine
+GrainReplyCancellationTests plus unchanged retained-replica SDK RF3 catch-up;
+exact-SHA qualification is pending. This corrects a concrete source defect without
+inferring the prior run's exact internal phase from overwritten fixture logs.

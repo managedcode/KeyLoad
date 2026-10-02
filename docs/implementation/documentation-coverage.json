@@ -7565,15 +7565,17 @@
       "docs/Features/QueryExecution.md",
       "docs/Features/RelationalStorage.md",
       "docs/Features/BlobStorage.md",
-      "docs/Features/ClusterRouting.md"
+      "docs/Features/ClusterRouting.md",
+      "docs/Features/StorageRecovery.md"
     ],
     "decisions": [
       "docs/ADR/ADR-054-central-sql.md",
-      "docs/ADR/ADR-055-typed-relational-rows.md"
+      "docs/ADR/ADR-055-typed-relational-rows.md",
+      "docs/ADR/ADR-036-orleans-foundation.md"
     ],
     "acceptanceSource": "ai-database-sql.acceptance.md",
     "planSource": "ai-database-sql.plan.md",
-    "status": "source_joining_runtime_qualification_pending",
+    "status": "source_integrated_RF3_14_new_scenarios_pass_complete_gates_pending",
     "qualificationAuthority": "docs/implementation/status.json",
     "existingCatalog": "preserved_historical_104_KL_mapping",
     "newRequirements": [
@@ -7585,12 +7587,17 @@
       "REQ-REL-003",
       "REQ-REL-004",
       "REQ-REL-005",
-      "REQ-ROUTE-009"
+      "REQ-ROUTE-009",
+      "REQ-ROUTE-010"
     ],
     "pendingProductStages": [
       "declarative_sources_JOIN_FK_integrity",
       "dedicated_comparable_RF3_SQL_measurements",
       "numeric_coverage_endurance_power_loss"
-    ]
+    ],
+    "existingRequirementsRefined": [
+      "REQ-STORAGE-014"
+    ],
+    "qualifiedPartialReceipt": "docs/implementation/ai-sql-qualification-37070004864.json"
   }
 }

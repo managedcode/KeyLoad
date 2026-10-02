@@ -1935,8 +1935,20 @@
       {
         "sha": "9f3acf5b9af39ad5d8f818039b22eb8ce1b0463e",
         "run": 37069574976,
-        "conclusion": "in_progress",
-        "scope": "Server_ComparisonTests_build_pass_Unit_Integration_compile_failed_no_unit_RF3_execution_comparisons_pending"
+        "conclusion": "cancelled",
+        "scope": "Unit_Integration_build_failures_recorded_superseded_comparisons_cancelled_no_complete_qualification"
+      },
+      {
+        "sha": "3a744d19aa4443a522d303d8d91257f2e20396da",
+        "run": 37070004864,
+        "conclusion": "failure",
+        "scope": "3OS_build_and_analyzer_rules_pass_known_formatter_fail_RF3_59_of60_all14newpass_Linux_recovery136of136_Windows135of136_comparisons2of4_units_skipped"
+      },
+      {
+        "sha": "c3eeb2b7a512f31e3489cef44b6127d9d280e836",
+        "run": 37070513242,
+        "conclusion": "cancel_requested",
+        "scope": "superseded_known_parent_formatter_and_cancellation_defects_incomplete_qualification"
       }
     ],
     "sourceRepairsAwaitingQualification": [
@@ -1944,7 +1956,10 @@
       "symmetric_native_equality_early_iterator_exits",
       "initial_native_Orleans_RPC_read_ownership_write_unknown_outcome_mapping",
       "per_node_RF3_caller_disposal_and_deadline_after_readiness",
-      "test_static_TUnit_namespace_cached_format_native_async_cancel_unused_import_repairs"
+      "test_static_TUnit_namespace_cached_format_native_async_cancel_unused_import_repairs",
+      "read_native_cancellation_vs_actual_incoming_token",
+      "seeded_crash_receipt_before_cleanup_same_original_deadline",
+      "exact_CI_formatter_diagnostics"
     ],
     "evidence": [
       "docs/Features/QueryExecution.md",
@@ -1953,7 +1968,8 @@
       "docs/ADR/ADR-055-typed-relational-rows.md",
       "docs/implementation/central-sql.md",
       "ai-database-sql.acceptance.md",
-      "ai-database-sql.plan.md"
+      "ai-database-sql.plan.md",
+      "docs/implementation/ai-sql-qualification-37070004864.json"
     ],
     "remaining": [
       "SQL_declarative_cross_model_sources_and_JOIN",

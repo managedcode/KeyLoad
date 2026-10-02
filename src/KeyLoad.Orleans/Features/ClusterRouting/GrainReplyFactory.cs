@@ -36,33 +36,43 @@ internal static class GrainReplyFactory
     }
 
     internal static GrainOperationReply Failure(Exception error, bool command, ILogger? diagnostics,
-        Guid requestId = default, GrainFailureStage stage = GrainFailureStage.EnvelopeVerification)
+        Guid requestId = default, GrainFailureStage stage = GrainFailureStage.EnvelopeVerification,
+        CancellationToken cancellationToken = default)
     {
-        GrainFailureDiagnostics.Log(diagnostics, error, requestId, stage, FailureCode(error, command));
+        var code = FailureCode(error, command, cancellationToken);
+        GrainFailureDiagnostics.Log(diagnostics, error, requestId, stage, code);
         if (error is KeyLoadException failure)
         {
-            return Rejected(failure.Code, failure.Message);
+            return Rejected(code, failure.Message);
         }
 
         if (error is OperationCanceledException)
         {
-            return Rejected(command ? ErrorCode.UnknownWriteOutcome : ErrorCode.Cancelled, command ? InterruptedWrite : Cancelled);
+            return Rejected(code, CancellationDetail(code));
         }
 
         if (error is JsonException or ArgumentException)
         {
-            return Rejected(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+            return Rejected(code, GrainRoutingProtocol.InvalidRequest);
         }
 
-        return Rejected(command ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost, Unavailable);
+        return Rejected(code, Unavailable);
     }
 
-    private static ErrorCode FailureCode(Exception error, bool command) => error switch
+    private static ErrorCode FailureCode(Exception error, bool command, CancellationToken cancellationToken) => error switch
     {
         KeyLoadException failure => failure.Code,
-        OperationCanceledException => command ? ErrorCode.UnknownWriteOutcome : ErrorCode.Cancelled,
+        OperationCanceledException when command => ErrorCode.UnknownWriteOutcome,
+        OperationCanceledException => cancellationToken.IsCancellationRequested ? ErrorCode.Cancelled : ErrorCode.OwnershipLost,
         JsonException or ArgumentException => ErrorCode.Validation,
         _ => command ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost
+    };
+
+    private static string CancellationDetail(ErrorCode code) => code switch
+    {
+        ErrorCode.Cancelled => Cancelled,
+        ErrorCode.UnknownWriteOutcome => InterruptedWrite,
+        _ => Unavailable
     };
 
     private static GrainOperationReply Rejected(ErrorCode code, string? detail) => new()

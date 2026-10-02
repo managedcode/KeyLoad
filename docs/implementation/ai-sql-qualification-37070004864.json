@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "3a744d19aa4443a522d303d8d91257f2e20396da",
+  "runId": 37070004864,
+  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37070004864",
+  "qualification": "incomplete_required_formatter_and_retained_replica_catchup_failures",
+  "rf3": {
+    "jobId": 111047630080,
+    "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37070004864/job/111047630080",
+    "artifact": "docker-rf3-qualification",
+    "report": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+    "summary": {
+      "total": 60,
+      "passed": 59,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "newScenarioGroups": [
+      {
+        "className": "SqlRf3AdmissionTests",
+        "summary": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "tests": [
+          {
+            "name": "AcAisql007InsufficientDataBytesRejectSdkAndOfficialSqlBeforeIdClaimWhileDirectControlKeepsRf3Healthy",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "className": "SqlRf3BlobParityTests(ClusterFixture)",
+        "summary": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "tests": [
+          {
+            "name": "AcAisql006SqlPublishesTwoRealPartsAndAllClientsReadTheExactCrossPartRange",
+            "status": "passed"
+          },
+          {
+            "name": "AcAisql006AbsentBlobMetadataAndEmptyListAreCanonicalAcrossSqlSdkAndMcp",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "className": "SqlRf3DeliveryTests(ClusterFixture)",
+        "summary": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "tests": [
+          {
+            "name": "AcAisql006SqlReceiveAndAckPreserveStableIdsAndRejectForgedTokensWithoutEffects",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "className": "SqlRf3ModelParityTests(ClusterFixture)",
+        "summary": {
+          "total": 3,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "tests": [
+          {
+            "name": "AcAisql006SqlAtomicCommandAndNativeRetryExposeTheSameEventsAndNonconsumingQueue",
+            "status": "passed"
+          },
+          {
+            "name": "AcAisql004SqlAndNativeClientsShareTypedTableGraphVectorsAndSamples",
+            "status": "passed"
+          },
+          {
+            "name": "AcAisql005NoBodySqlCallUsesTheEmptyCanonicalEnvelope",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "className": "RelationalSqlRf3AuthorizationTests(ClusterFixture)",
+        "summary": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "tests": [
+          {
+            "name": "AcAisql006ReadOnlyPersistedIdentityCannotWriteThroughSqlOrOfficialMcp",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "className": "RelationalSqlRf3AtomicityTests(ClusterFixture)",
+        "summary": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "tests": [
+          {
+            "name": "AcAisql004FailedSqlTableDocumentEventQueueBatchHasNoPartialEffects",
+            "status": "passed"
+          },
+          {
+            "name": "AcAisql004FailedSqlTableDocumentEventQueueBatchHasNoPartialEffects",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "className": "SqlRf3CancellationTests(ClusterFixture)",
+        "summary": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "tests": [
+          {
+            "name": "AcAisql007CancelledSdkSelectReturnsCancelledAndTheNextSqlReadReturnsThePersistedRow",
+            "status": "passed"
+          },
+          {
+            "name": "AcAisql007CancelledOfficialMcpSelectThrowsAndTheNextSqlReadReturnsThePersistedRow",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "className": "RelationalSqlRf3RowsTests(ClusterFixture)",
+        "summary": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "tests": [
+          {
+            "name": "AcAisql004SqlTypedPutRetriesAndPatchShareNativeReceiptsAndIndexedSelect",
+            "status": "passed"
+          },
+          {
+            "name": "AcAisql003SqlInvalidTypedPatchLeavesTheFinalRowAndRevisionUnchanged",
+            "status": "passed"
+          }
+        ]
+      }
+    ],
+    "failure": {
+      "test": "RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes",
+      "errorCode": "Cancelled",
+      "detail": "The database request was cancelled.",
+      "durationMilliseconds": 17976,
+      "cause": "unproven_native_read_cancellation_classification_under_review",
+      "testAcceptedErrorsPreserved": [
+        "UnknownWriteOutcome",
+        "OwnershipLost"
+      ]
+    }
+  },
+  "linux": {
+    "jobId": 111047630094,
+    "solutionBuild": "passed",
+    "formatter": "failed_two_initializer_members_and_native_import_order",
+    "unitTests": "skipped_after_formatter_failure_not_qualified",
+    "scalarDisabledUnits": "skipped_after_formatter_failure_not_qualified",
+    "processRecovery": {
+      "passed": 136,
+      "failed": 0,
+      "skipped": 0
+    },
+    "powerLoss": "not_proved"
+  },
+  "analyzerRules": {
+    "jobId": 111047629901,
+    "conclusion": "success"
+  },
+  "comparisons": {
+    "jobId": 111047630092,
+    "status": "failure",
+    "testSummary": {
+      "passed": 2,
+      "failed": 2,
+      "skipped": 0
+    },
+    "smokeCases": {
+      "total": 96,
+      "measured": 46,
+      "unsupported": 48,
+      "failed": 2
+    },
+    "smokeFailures": "KeyLoad_StreamAppend_repetitions0_1_default_ReadEventAsync_NotSupportedException",
+    "measuredSamplesSucceeded": 552,
+    "timeSeriesAttempts": {
+      "succeeded": 20,
+      "total": 20
+    },
+    "timeSeriesCorrectness": {
+      "passed": 20,
+      "total": 20
+    },
+    "lifecycle": "both_Aspire_tests_Waiting_creation_health_absent",
+    "cause": "unchanged_baseline_adapters_and_lifecycle_no_new_SQL_source_calls"
+  },
+  "nextSourceSha": "c3eeb2b7a512f31e3489cef44b6127d9d280e836",
+  "nextRunId": 37070513242,
+  "remaining": [
+    "exact_complete_gates",
+    "dedicated_SQL_table_CALL_per_server_measurements",
+    "coverage",
+    "endurance_and_power_loss"
+  ],
+  "windows": {
+    "jobId": 111047630131,
+    "solutionBuild": "passed",
+    "formatter": "failed_same_known_diagnostics",
+    "processRecovery": {
+      "passed": 135,
+      "failed": 1,
+      "skipped": 0,
+      "failedTest": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(7)",
+      "seed": 1708,
+      "phase": "receipt_write_after_completed_atomic_assertions_and_cleanup",
+      "cancellationSource": "unproven",
+      "storageDamage": "not_evidenced"
+    }
+  },
+  "nextRunStatus": "cancel_requested_superseded_before_complete_qualification"
+}
