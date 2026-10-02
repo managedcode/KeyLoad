@@ -11,7 +11,8 @@ internal static class AdminBrowserScopeAssertions
     private const string GuidFormat = "N";
     private const string ClearRows = "clearRows";
     private const string ClearResource = "clearResource";
-    private const string SubmitScope = "(()=>{const values=VALUE;for(const [id,value] of Object.entries(values)){document.getElementById(id).value=value;}document.getElementById('scope-form').requestSubmit();return {clearRows:document.querySelector('#data-table tbody').children.length===0,clearResource:!document.getElementById('resource-list').textContent.includes('dashboard-documents')};})()";
+    private const string Loading = "loading";
+    private const string SubmitScope = "(()=>{const values=VALUE;for(const [id,value] of Object.entries(values)){document.getElementById(id).value=value;}document.getElementById('scope-form').requestSubmit();return {clearRows:document.querySelector('#data-table tbody').children.length===0,clearResource:!document.getElementById('resource-list').textContent.includes('dashboard-documents'),loading:document.getElementById('status-message').textContent==='Loading resources…'};})()";
     private const string EmptyState = "document.getElementById('resource-list').textContent.includes('No matching resources on this page.')";
     private const string NoPriorData = "!document.getElementById('data-table').textContent.includes('document-1')&&document.getElementById('data-table').querySelectorAll('tbody tr').length===0&&document.getElementById('resource-list').querySelectorAll('button').length===0&&!document.getElementById('data-empty').hidden";
     private const string SelectCollections = "document.querySelector('button[data-view=collections]').click();true";
@@ -32,6 +33,7 @@ internal static class AdminBrowserScopeAssertions
             StringComparison.Ordinal), cancellationToken);
         await Assert.That(immediate.GetProperty(ClearRows).GetBoolean()).IsTrue();
         await Assert.That(immediate.GetProperty(ClearResource).GetBoolean()).IsTrue();
+        await Assert.That(immediate.GetProperty(Loading).GetBoolean()).IsTrue();
         await browser.WaitAsync(EmptyState, cancellationToken);
         await Assert.That((await browser.EvaluateAsync(NoPriorData, cancellationToken)).GetBoolean()).IsTrue();
         await AdminBrowserAssertions.DisconnectAsync(browser, fixture, cancellationToken);
