@@ -38,6 +38,14 @@ constructor, error-precedence, cancellation and budget boundary assertions.
 ADR-033/032 suffice: only test ownership/input selection changes, no production
 or public/data contract. Canonical paths/evidence are updated after the source join.
 
+TASK-QUERY-BYTE-ASSERT preserves AC-QUERY-003/005 in QueryAdapterTestSupport,
+LiveQueryTests and the RF3 AuthorizedQueryScenario. Canonical UTF8 arrays are
+compared with explicit ordered SequenceEqual, rather than array identity or an
+unordered byte comparison. The reported RF3 failure is run36988949282; UnitTests
+were blocked by governance in that run. New exact-SHA UnitTests/RF3 evidence is
+required before declaring the correction qualified. ADR: N/A, the canonical
+query/replay contract and all production boundaries are unchanged.
+
 ```mermaid
 flowchart LR
     Request[Bound SQL or AST request] --> Cut[Authorized consistent storage cut]

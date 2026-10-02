@@ -45,5 +45,5 @@ internal static class QueryAdapterTestSupport
         => JsonDefaults.Deserialize<AstQueryRequest>(JsonDefaults.Serialize(request));
 
     internal static async Task SameRows(QueryPage expected, QueryPage actual)
-        => await Assert.That(JsonDefaults.Serialize(actual.Rows)).IsEqualTo(JsonDefaults.Serialize(expected.Rows));
+        => await Assert.That(JsonDefaults.Serialize(actual.Rows).SequenceEqual(JsonDefaults.Serialize(expected.Rows))).IsTrue();
 }

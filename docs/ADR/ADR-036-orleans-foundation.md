@@ -8,6 +8,21 @@ Preserved-policy reference conflict: root `AGENTS.md` still names “ADR-034 evi
 
 Related requirements: REQ-REP-001 through 005, REQ-ROUTE-001 through 003, REQ-TEST-001 through 003; their same-numbered ACs are defined in the linked feature specs.
 
+TASK-ROUTE-DIAGNOSTICS is an accepted internal observability refinement for
+REQ/AC-ROUTE-008 and AC-ROUTE-001/003. Stage/category/error enums and a GUID are
+the complete log contract; never pass raw exceptions, JSON, tokens, principal IDs
+or arbitrary runtime strings. Success uses only a stack-local stage enum. Existing
+KeyLoadException error code/detail is retained; private stage metadata is added
+only on failures. Root owns RequestGrain, CommandPartitionGrain,
+DatabaseReadGrain, GrainCommandExecutor, GrainRequestAuthority, GrainPayloadJson and GrainReplyFactory
+joins. A bounded worker owns only new ClusterRouting diagnostic helper/enum and
+UnitTests files. Ordered stages: author actual-provider privacy/reply regressions;
+add helpers; lead joins closed stage updates and error mapping; enabled build and
+format; full GitHub UnitTests/RF3 with exact SHA and fault log artifacts. No database,
+public API or persisted-format migration; rollback removes only this metadata/log
+path while retaining the original safe replies. The stage log helps locate a
+rejection and does not by itself qualify a repaired runtime failure.
+
 Host integration contract: `Server/Features/StorageRecovery/PartitionHost` owns
 two physically separate ZoneTree stores, canonical `database` and replica
 `replica`, with one immutable voter configuration and incarnation. It constructs

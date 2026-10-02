@@ -879,7 +879,7 @@
       "status": "in_progress",
       "editorConfigSource": "Prostir/.editorconfig",
       "editorConfigSha256": "b624db78d435290ba2633a71c901797ff3d66449f76ffd91b4b81724b379b6fb",
-      "developmentBuild": "latest_enabled_unit_cut_3_protected_blob_restore_missing_databaseengine_errors_0_warnings_unit_csc_reached_all_dependency_projects_compiled_full_solution_pending",
+      "developmentBuild": "all25_projects_Release_build_passed_0_warnings_0_errors_after_EventStreams_and_private_rejection_diagnostics_source_join_not_test_execution",
       "benchmarkDriverJoin": "historical_source_cut_failed_506_analysis_style_xml_errors_0_warnings_no_type_api_binding_errors_then_private_disposal_type_fixes_public_visibility_restored",
       "comparisonHostJoin": "reviewed_enabled_host_build_passed_0_errors_0_warnings_real_cleanup_regressions_authored_exact_sha_ci_pending",
       "joinedProjectBuilds": "numeric_enabled_abstractions_core_client_storage_security_query_cli_comparison_library_comparison_host_site_tests_embedded_benchmark_host_passed_0_errors_0_warnings_not_test_execution",
@@ -888,7 +888,7 @@
       "centralConfiguration": "passed_actual_release_evaluation_25_projects_23_custom_analyzer_consumers_zero_policy_failures",
       "centralConfigurationEvidence": "artifacts/code-quality/configuration-20261002-25-projects.json",
       "centralConfigurationSha256": "bdf01a992bf1b718a56c19f20d6e71e12177404694b0a46f0ea94de413a00681",
-      "formatter": "solution_failed_new_analyzer_scope_passed",
+      "formatter": "ordinary_all25_project_solution_verify_no_changes_passed_static_source_check_not_test_execution",
       "governance": "passed_25_projects_4_modules_policy_preservation_static_only",
       "baselineCi": {
         "runId": 36930711012,
@@ -896,16 +896,40 @@
         "conclusion": "success_existing_main_only",
         "url": "https://github.com/managedcode/KeyLoad/actions/runs/36930711012"
       },
-      "delivery": "not_committed_or_pushed_solution_quality_gate_failed",
+      "delivery": "commit_3559225a5f918160e46e32c9a812c3f71790e382_on_main_exact_sha_ci_failed_repair_candidate_pending",
+      "latestCandidateCi": {
+        "runId": 36988949282,
+        "sha": "3559225a5f918160e46e32c9a812c3f71790e382",
+        "conclusion": "failure",
+        "analyzerTests": "84_pass_4_fail",
+        "comparisonTests": "2_pass_2_fail",
+        "rf3IntegrationTests": "3_pass_20_fail_most_mcp_failures_cascaded_after_shared_cluster_loss",
+        "governance": "failed_on_ubuntu_macos_and_windows_missing_ignored_mcaf_governance_plan_and_windows_agents_prefix_line_endings",
+        "unitAndRecovery": "not_run_governance_stopped_matrix_jobs_before_suites",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/36988949282",
+        "artifacts": "/private/tmp/keyload-current-ci-36988949282/"
+      },
       "analyzerRegressionQualification": "pending_exact_delivered_sha_ci",
       "coverage": "not_configured",
       "complexity": "four_source_owned_numeric_rules_configured_full_gate_and_fixture_ci_pending",
       "evidence": "docs/implementation/code-quality.md",
       "siteTestsJoin": "reviewed_enabled_site_build_passed_0_errors_0_warnings_actual_seven_parameterless_generated_creators_options_defaults_and_real_listener_regressions_authored_ci_pending",
-      "unitTestsBuild": "latest_ordinary_build_reached_unit_csc_failed_3_protected_blob_restore_cs0246_errors_0_warnings_previous_core_ca1822_cleared_all_dependencies_compiled_unit_semantic_compilation_registration_and_exact_sha_ci_pending",
-      "reviewedScopedFormatter": "host_site_prepared_storage_query_embedded_and_latest_owned_unit_source_scope_passed_exit0_protected_native_blob_and_pending_benchmark_unit_excluded_full_solution_pending",
+      "unitTestsBuild": "ordinary_full_solution_Release_build_passed_including_actual_EventSource_privacy_regressions_test_execution_GitHub_pending",
+      "reviewedScopedFormatter": "full_solution_canonical_formatter_passed_after_EventStreams_and_EventSource_diagnostic_join_all_analyzers_enabled",
       "embeddedBenchmarkJoin": "genuine_public_library_and_thin_host_source_reviewed_paired_csharp_common5_restore_and_enabled_host_build_0_errors_0_warnings_five_real_tunit_methods_authored_actual_generated_dry_and_registration_ci_pending",
       "boundedMetadataJoin": "finite_manifest16384_identity4096_bytes_single_owned_region_and_restore_identity_source_reviewed_test_corrections_build_and_exact_sha_ci_pending"
+    },
+    "ownerPriorities": {
+      "SMID": "highest_priority_scope_clarification_requested_not_defined_in_repo_or_v0_3_spec_implementation_not_started",
+      "SMIDAcceptance": "keyload-project.acceptance.md#AC-011",
+      "operationEfficiency": "system_wide_per_operation_RF3_performance_and_resource_measurements_open_under_AC-010",
+      "operationEfficiencyAcceptance": "keyload-project.acceptance.md#AC-010",
+      "orleansScale": "request_isolation_RF3_hosts_directory_and_repartitioner_configured_in_source_actual_activation_movement_and_per_operation_server_cost_not_qualified",
+      "streamBoundary": "KeyLoad_EventStreams_are_persisted_database_records_no_Orleans_runtime_provider_configured_provider_delivery_restart_backpressure_contract_open",
+      "vectorSimd": "PreparedSimilarity_uses_Vector_float_widened_double_accumulation_for_dot_cosine_euclidean_source_compiles_matched_performance_qualification_pending",
+      "activationMigrationResearch": "native_MigrateOnIdle_supports_advisory_live_silo_hint_management_observes_only_persisted_admin_public_move_contract_and_RF3_proof_pending",
+      "routingFailureDiagnostics": "private_enum_stage_category_code_and_request_GUID_source_compiled_actual_EventSource_privacy_regressions_authored_GitHub_pending",
+      "eventSdkMcpParity": "three_real_RF3_scenarios_authored_and_compiled_stable_append_retry_replay_persisted_authority_safe_failure_and_monotonic_quorum_cuts_GitHub_pending"
     },
     "memoryPerformance": {
       "status": "in_progress",
@@ -913,7 +937,7 @@
       "inventory": "docs/implementation/memory-performance.md",
       "requirements": "docs/Features/ResourceExecution.md",
       "decision": "docs/ADR/ADR-035-memory-performance.md",
-      "developmentDependencyBuild": "latest_unit_cut_3_protected_blob_restore_cs0246_errors_0_warnings_unit_csc_reached_all_dependencies_compiled_historical_full_solution19_current_combined_gate_pending",
+      "developmentDependencyBuild": "ordinary_all25_projects_Release_build_passed_0_warnings_0_errors_runtime_tests_and_measurements_GitHub_pending",
       "sourceRepairs": "storage_budget_query_search_admission_events_series_graph_queue_topic_source_reads_outbox_canonical_json_client_reports_logical_counters_authored_not_qualified",
       "contractMigration": "adr041_readonly_collections_owned_read_strict_json_source_joins_compiled_full_solution_and_exact_sha_ci_pending",
       "baselineCi": {
@@ -923,12 +947,12 @@
         "url": "https://github.com/managedcode/KeyLoad/actions/runs/36936319423",
         "artifacts": "artifacts/memory-performance/baseline-36936319423/"
       },
-      "candidateQualification": "pending_compilable_delivered_source_and_exact_sha_ci",
-      "rf3SdkMcp": "pending_docker_aspire_orleans_and_official_mcp_qualification",
+      "candidateQualification": "run_36988949282_failed_on_exact_sha_3559225a5f918160e46e32c9a812c3f71790e382_fixes_and_full_requalification_pending",
+      "rf3SdkMcp": "run_36988949282_docker_rf3_failed_3_pass_20_fail_cluster_cleanup_and_invalid_read_diagnosis_pending",
       "serverResourceMeasurement": "not_configured_load_generator_metrics_only",
       "coverage": "not_configured",
       "complexity": "four_source_owned_numeric_rules_configured_full_gate_and_fixture_ci_pending",
-      "delivery": "not_committed_or_pushed_required_gates_open",
+      "delivery": "commit_3559225a5f918160e46e32c9a812c3f71790e382_on_main_required_gates_open",
       "preparedStorageMutationJoin": "reviewed_private_projection_cache_enabled_storage_build_0_errors_0_warnings_three_real_store_tests_authored_ci_and_measured_improvement_pending"
     }
   }

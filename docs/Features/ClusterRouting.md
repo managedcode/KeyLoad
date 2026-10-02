@@ -8,6 +8,7 @@ Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../
 | REQ-ROUTE-002: distributed grain directory and activation repartitioning are enabled; routing migration never transfers node-owned file locks or journals. | AC-ROUTE-002: cluster configuration enables both services; migration followed by SDK reads/writes preserves replica identity and durable outcomes. |
 | REQ-ROUTE-003: silo membership starts without a second cluster stack or a single primary-node dependency. | AC-ROUTE-003: all three Docker silos become ready; the remaining two continue when any configured voter is killed. |
 | REQ-ROUTE-006: enforced grain-call policy permits only the declared application transitions and does not route native replica system targets through application telemetry grains. | AC-ROUTE-006: real RF3 authentication/write/read succeeds with enforcement enabled; direct capability calls remain denied; upstream Graph regression proves the default native-system-target exclusion and preserves explicit tracking. |
+| REQ-ROUTE-008: rejected requests provide bounded internal diagnostics without private data or changed public errors. | AC-ROUTE-008: actual logging provider records request GUID, closed stage/category and typed error code; malformed payload/typed decode/general JSON or argument failures omit payload, identity, credentials and raw exception text; successful calls allocate no diagnostic context; existing SDK/MCP RF3 outcomes remain unchanged. |
 
 ```mermaid
 flowchart LR
@@ -47,6 +48,14 @@ Distributed directory/repartitioning — required in-progress source migration. 
 
 Positive/negative/edge/error proof: distinct request identities, quorum/bootstrap failure, delayed/cancelled membership startup, source/owner epoch mismatch, minority, leader kill, activation move, future interrupted physical move. All tests real TUnit/recovery/Docker-Aspire SDK/MCP in GitHub, exact SHA/jobs/artifacts; current source names не проходження gates.
 
+Stream boundary: current request/response routing uses Orleans grain calls; no
+Orleans runtime Streams provider is configured. KeyLoad EventStreams are durable
+database records with cursor/replay contracts, not Orleans pub/sub. The owner has
+directed that Orleans Streams remain a first-priority architecture and
+implementation workstream. The provider, event source, delivery/restart and
+backpressure contract still needs to be pinned before source changes or claims
+that this path is implemented.
+
 TASK-ROUTE-REQUEST implements AC-ROUTE-001 using one non-reentrant GUID request
 grain per operation. It routes writes to canonical atomic-partition actors and reads
 to independent GUID read actors. The signed transport binds request ID, incarnation,
@@ -58,6 +67,18 @@ Storage remains borrowed from the physical host. Admin backup/status/admission u
 the local `INodeAdministration` interface only after a persisted admin check.
 Real-store protocol tests complement mandatory Docker SDK/MCP and activation-move
 tests; neither protocol unit tests nor a development build qualifies movement.
+
+TASK-ROUTE-DIAGNOSTICS implements AC-ROUTE-008 after run36988949282 exposed
+undifferentiated request rejections. The exact decoder/downstream branch remains
+unknown. Internal enum metadata distinguishes payload syntax, typed decode,
+required-null shape, envelope/partition, quorum, authorization, execution and reply
+stages. LoggerMessage records only a GUID and closed enums, with no exception object.
+The stage variable is a value type and success does not allocate a diagnostic
+object, callback or scope. Public error codes/details, authorization, wire/schema,
+retry identity and replica ownership remain unchanged. New UnitTests exercise the
+actual EventSource provider and caller-visible reply, including private canary omission;
+existing full RF3 failure scenarios supply operational evidence in GitHub only.
+Ownership/stages/rollback are accepted in ADR-036 and the root delivery task graph.
 
 TASK-GRAPH-EDGES permits the exact ExecuteAsync transitions from IRequestGrain to
 ICommandPartitionGrain and IDatabaseReadGrain. Clients may call only IRequestGrain;

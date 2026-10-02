@@ -50,3 +50,32 @@ framing; the native SDK still interprets their protocol type. Canonical reply
 values have at most 61 container levels so the wrapper, CallToolResult and native
 JSON-RPC envelope fit the existing depth 64. Bounded actual native serialization
 before SSE verifies the complete outgoing byte ceiling, including metadata.
+
+## TASK-MCP-EVENT-PARITY: accepted real EventStreams caller scope
+
+REQ-EVENT-004/005/006 and AC-EVENT-004/005/006 join AC-MCP-002/005/007.
+Tests append the same typed event command using the .NET SDK and official MCP
+`keyload_documents_commit`, the existing canonical batch tool. Retrying the same
+command must return the same committed outcome and leave exactly the original
+ordered events. SDK `ReadStreamAsync` and MCP `keyload_streams_read` must return
+equal canonical page content, including stream/head, event identity, payload/headers,
+recorded metadata and `HasMore`, for a limited page, its exclusive revision
+continuation and an empty tail. Independent operations have distinct nonempty
+execution GUIDs. Each real quorum read cut must cover the append receipt position,
+and sequential reads must not move backwards. Distinct calls may have different
+physical cuts because the required Orleans membership heartbeat commits every
+five seconds; compare event bytes exactly and verify each actual cut independently.
+The public request has no option to pin two independent calls to one physical cut.
+
+Persisted `EventsRead` grants scoped to the real stream set authorize reads;
+cross-tenant access is denied by both clients. Invalid page limit and stale stream
+generation return the existing typed BudgetExceeded/TokenInvalidated errors, expose
+no credential or private event payload and leave a following valid read healthy.
+Failure means a wrong event/order/head/cut, duplicate append, missing MCP call,
+authority bypass, unsafe error or a skipped/prerequisite-blocked suite.
+
+Tests live only in new `IntegrationTests/Features/EventStreams/` files. The lead
+adds one resource-scoped overload to the existing persisted-identity test helper;
+no product API, persisted format, fixture, transport or provider changes belong
+to this scope. Verification is the complete GitHub Docker/Aspire RF3 suite,
+preceded by enabled development build/format; no local tests or containers.

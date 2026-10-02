@@ -69,3 +69,40 @@ authorization and idempotency cannot be traded away for throughput. CI measureme
 must separate operations/allocations/GC/working set and cold/warm data effects;
 comparison topology and limits must be visible. Missing runtime coverage is a
 tracked task, not evidence that a defect is absent.
+
+## Owner priority and Orleans measurement boundary, 2026-10-02
+
+The owner renewed the requirement that every operation be optimized for the real
+RF3 system and that SMID remain the top product workstream. `SMID` is not defined
+in the source or v0.3 specification, so its specific implementation remains
+blocked on owner clarification while general scalability work continues.
+
+Read-only review confirms distinct request/read grains, three node-local RF3
+hosts, distributed grain directory and activation repartitioner are wired in
+source. There is no current integration test that observes an activation move,
+and current comparison resource metrics belong to the load generator. A passing
+source build cannot prove the move or measure the server-side effect.
+
+The word "streams" remains ambiguous. KeyLoad EventStreams are durable persisted
+application data. Native Orleans stream APIs/providers are absent, and the v0.3
+design warns that provider durability depends on its backing queue; memory-stream
+messages can be lost on silo restart. Official Orleans guidance confirms that
+delivery guarantees vary by provider: simple message streams are best-effort,
+while a durable queue provider can provide at-least-once delivery and runtime
+backpressure ([stream semantics](https://learn.microsoft.com/en-us/dotnet/orleans/streaming/),
+[provider behavior](https://learn.microsoft.com/en-us/dotnet/orleans/streaming/stream-providers)).
+The owner now explicitly prioritizes Orleans Streams. Keep request/response on
+direct grain calls and preserve persisted KeyLoad EventStreams as the durable
+source of truth. The implementation contract must decide whether Orleans Streams
+carry authoritative queue work or recoverable notifications from that source;
+it must define provider, ordering, delivery, replay, backpressure, cancellation
+and restart semantics before provider code is written. In-memory providers do
+not meet RF3 or production durability requirements.
+
+Recommended work is measurement-first: add a workload/budget row for each public
+operation family, attribute bounded low-cardinality timing and resource data to
+the Orleans/request/quorum/store stages, and derive numeric acceptance targets
+from a matched exact-SHA RF3 baseline/candidate pair. Do not infer numeric SLOs
+from configured limits or claim activation repartitioning improves a three-silo
+cluster before measuring stable call locality and migration overhead. See the
+[official Orleans placement guidance](https://learn.microsoft.com/en-us/dotnet/orleans/grains/grain-placement).

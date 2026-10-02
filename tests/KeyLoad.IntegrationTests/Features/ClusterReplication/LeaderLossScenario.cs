@@ -19,19 +19,22 @@ internal static class LeaderLossScenario
     internal static async Task RunAsync(ClusterFixture fixture)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        var stoppedContainers = new HashSet<string>(StringComparer.Ordinal);
+        LeaderLossRunState? state = null;
         try
         {
-            var state = await PrepareAsync(fixture, timeout.Token);
-            state = await RemoveLeaderAsync(fixture, state, timeout.Token);
+            state = await PrepareAsync(fixture, timeout.Token);
+            state = await RemoveLeaderAsync(fixture, state, stoppedContainers, timeout.Token);
             await RetryCommandAndProcessQueueAsync(state, timeout.Token);
             var projectionBatch = await ProcessSubscriptionAsync(state, timeout.Token);
             var projectionThroughSequence = await CommitProjectionAsync(state, projectionBatch, timeout.Token);
             await LeaderLossRecoveryScenario.VerifyMinorityAndRecoveryAsync(
-                fixture, state, projectionThroughSequence, timeout.Token);
+                fixture, state, projectionThroughSequence, stoppedContainers, timeout.Token);
         }
-        catch (Exception)
+        catch (Exception failure) when (IsNonFatalCleanupFailure(failure))
         {
-            await fixture.SaveFailureDiagnosticsAsync();
+            await SaveFailureDiagnosticsAsync(fixture, failure);
+            await RestoreFailedClusterAsync(fixture, state?.Clients, stoppedContainers, failure);
             throw;
         }
     }
@@ -96,18 +99,57 @@ internal static class LeaderLossScenario
     }
 
     private static async Task<LeaderLossRunState> RemoveLeaderAsync(ClusterFixture fixture, LeaderLossRunState state,
-        CancellationToken cancellationToken)
+        HashSet<string> stoppedContainers, CancellationToken cancellationToken)
     {
         var statuses = (await Task.WhenAll(state.Clients.Select(client => client.StatusAsync(cancellationToken)))).Select(Success).ToArray();
         var leader = new Uri(statuses[0].Leader!);
         var leaderIndex = Enumerable.Range(0, NodeCount).Single(index => string.Equals(leader.Host,
             NodeName(index + 1), StringComparison.Ordinal));
-        await fixture.KillContainerAsync(NodeName(leaderIndex + 1),
+        var leaderNode = NodeName(leaderIndex + 1);
+        stoppedContainers.Add(leaderNode);
+        await fixture.KillContainerAsync(leaderNode,
             LeadershipFailure, cancellationToken);
         var survivors = Enumerable.Range(0, NodeCount).Where(index => index != leaderIndex).ToArray();
         var surviving = state.Clients[survivors[0]];
         await EventuallyAsync(async () => (await surviving.StatusAsync(cancellationToken)).IsSuccess, cancellationToken);
         return state with { Survivors = survivors };
+    }
+
+    private static async Task SaveFailureDiagnosticsAsync(ClusterFixture fixture, Exception failure)
+    {
+        try
+        { await fixture.SaveFailureDiagnosticsAsync(); }
+        catch (Exception diagnosticsFailure) when (IsNonFatalCleanupFailure(diagnosticsFailure))
+        { failure.Data[Rf3DiagnosticsFailureKey] = diagnosticsFailure; }
+    }
+
+    private static async Task RestoreFailedClusterAsync(ClusterFixture fixture, KeyLoadClient[]? clients,
+        IEnumerable<string> stoppedContainers, Exception failure)
+    {
+        using var recoveryTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+        foreach (var node in stoppedContainers.Order(StringComparer.Ordinal))
+        {
+            try
+            { await fixture.RestartContainerAsync(node, recoveryTimeout.Token); }
+            catch (Exception restartFailure) when (IsNonFatalCleanupFailure(restartFailure))
+            { failure.Data[Rf3RestartFailureKeyPrefix + node] = restartFailure; }
+        }
+
+        if (clients is null)
+        { return; }
+        foreach (var client in clients)
+        {
+            try
+            {
+                await EventuallyAsync(async () =>
+                {
+                    var status = await client.StatusAsync(recoveryTimeout.Token);
+                    return status.IsSuccess && status.Value!.RoutingReady;
+                }, recoveryTimeout.Token);
+            }
+            catch (Exception readinessFailure) when (IsNonFatalCleanupFailure(readinessFailure))
+            { failure.Data[Rf3ReadinessFailureKey] = readinessFailure; }
+        }
     }
 
     private static async Task RetryCommandAndProcessQueueAsync(LeaderLossRunState state, CancellationToken cancellationToken)

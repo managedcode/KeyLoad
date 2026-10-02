@@ -22,12 +22,24 @@ internal sealed record McpPersistedIdentity(PrincipalRecord Principal, ApiKeyRec
     /// <param name="capabilities">Persisted server-granted operations.</param>
     /// <param name="cancellationToken">The bounded setup lifetime.</param>
     /// <returns>The genuinely persisted identity and its private generated secret.</returns>
-    internal static async Task<McpPersistedIdentity> CreateAsync(ClusterFixture fixture, PartitionRef partition,
+    internal static Task<McpPersistedIdentity> CreateAsync(ClusterFixture fixture, PartitionRef partition,
         Capability capabilities, CancellationToken cancellationToken)
+        => CreateAsync(fixture, partition, McpDocumentProtocol.Collection, capabilities, cancellationToken);
+
+    /// <summary>Creates a persisted principal and key scoped to the requested real database resource.</summary>
+    /// <param name="fixture">The actual RF3 application.</param>
+    /// <param name="partition">The tenant, database and atomic partition used by the scenario.</param>
+    /// <param name="resourceName">The sole resource receiving the persisted grants.</param>
+    /// <param name="capabilities">Persisted server-granted operations.</param>
+    /// <param name="cancellationToken">The bounded setup lifetime.</param>
+    /// <returns>The genuinely persisted identity and its private generated secret.</returns>
+    internal static async Task<McpPersistedIdentity> CreateAsync(ClusterFixture fixture, PartitionRef partition,
+        string resourceName, Capability capabilities, CancellationToken cancellationToken)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
         var id = PrincipalPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var principal = new PrincipalRecord(id, partition.TenantId,
-            [new(partition.DatabaseId, McpDocumentProtocol.Collection, capabilities)], []);
+            [new(partition.DatabaseId, resourceName, capabilities)], []);
         var keyId = CredentialPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var secret = keyId + Separator + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes));
         var credential = new ApiKeyRecord(keyId, id, Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));

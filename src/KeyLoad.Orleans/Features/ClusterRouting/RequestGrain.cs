@@ -15,23 +15,29 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
     public async Task<GrainOperationReply> ExecuteAsync(string signedRequest, CancellationToken cancellationToken)
     {
         var command = false;
+        var stage = GrainFailureStage.EnvelopeVerification;
+        var requestId = Guid.Empty;
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var request = codec.VerifyRequest(signedRequest, this.GetPrimaryKey());
+            requestId = this.GetPrimaryKey();
+            var request = codec.VerifyRequest(signedRequest, requestId);
             command = request.Envelope.CommandKind is not null;
             if (command)
             {
+                stage = GrainFailureStage.PartitionResolution;
                 var target = GrainFactory.GetGrain<ICommandPartitionGrain>(GrainPartitionResolver.Resolve(request));
+                stage = GrainFailureStage.CapabilityExecution;
                 return await target.ExecuteAsync(signedRequest, cancellationToken).ConfigureAwait(true);
             }
 
+            stage = GrainFailureStage.CapabilityExecution;
             var reader = GrainFactory.GetGrain<IDatabaseReadGrain>(request.Envelope.RequestId);
             return await reader.ExecuteAsync(signedRequest, cancellationToken).ConfigureAwait(true);
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {
-            return GrainReplyFactory.Failure(error, command, diagnostics);
+            return GrainReplyFactory.Failure(error, command, diagnostics, requestId, stage);
         }
         finally
         {

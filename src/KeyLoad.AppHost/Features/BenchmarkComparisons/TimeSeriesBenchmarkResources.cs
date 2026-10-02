@@ -2,7 +2,7 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class TimeSeriesBenchmarkResources
 {
-    private const string TimescaleName = "benchmark-timescale";
+    private const string TimescaleName = "benchmark-timescale-server";
     private const string DatabaseName = "benchmark-timescale";
     private const string RunnerName = "comparisons";
     private const string TimescaleImage = "timescale/timescaledb";

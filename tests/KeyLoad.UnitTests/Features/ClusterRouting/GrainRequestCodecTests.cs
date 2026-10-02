@@ -32,7 +32,7 @@ internal sealed class GrainRequestCodecTests
         var secondId = Guid.NewGuid();
         var first = codec.VerifyRead(codec.CreateRead(firstId, Principal, GrainReadKind.Document, bytes), firstId);
         var second = codec.VerifyRead(codec.CreateRead(secondId, Principal, GrainReadKind.Document, bytes), secondId);
-        await Assert.That(first.Payload).IsEqualTo(bytes);
+        await Assert.That(first.Payload.SequenceEqual(bytes)).IsTrue();
         await Assert.That(first.Envelope.RequestId).IsNotEqualTo(second.Envelope.RequestId);
         await Assert.That(first.Envelope.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
     }
@@ -46,7 +46,7 @@ internal sealed class GrainRequestCodecTests
         var bytes = JsonDefaults.Serialize(new string(Padding, fixture.Database.Limits.MaxBatchBytes - JsonStringQuoteBytes));
         var id = Guid.NewGuid();
         var signed = codec.CreateRead(id, null, GrainReadKind.Authenticate, bytes);
-        await Assert.That(codec.VerifyRead(signed, id).Payload).IsEqualTo(bytes);
+        await Assert.That(codec.VerifyRead(signed, id).Payload.SequenceEqual(bytes)).IsTrue();
         var oversized = JsonDefaults.Serialize(new string(Padding, fixture.Database.Limits.MaxBatchBytes - JsonStringQuoteBytes + AdditionalByte));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateRead(Guid.NewGuid(), null,
             GrainReadKind.Authenticate, oversized)).Code).IsEqualTo(ErrorCode.ResourceExhausted);

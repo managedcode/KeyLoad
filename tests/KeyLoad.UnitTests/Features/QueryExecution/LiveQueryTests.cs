@@ -27,7 +27,8 @@ internal sealed class LiveQueryTests
         }
     }
     private static async Task Same(IEnumerable<QueryRow> expected, IEnumerable<QueryRow> actual)
-        => await Assert.That(JsonDefaults.Serialize(actual.OrderBy(row => row.EntityId, StringComparer.Ordinal).ToArray())).IsEqualTo(JsonDefaults.Serialize(expected.OrderBy(row => row.EntityId, StringComparer.Ordinal).ToArray()));
+        => await Assert.That(JsonDefaults.Serialize(actual.OrderBy(row => row.EntityId, StringComparer.Ordinal).ToArray())
+            .SequenceEqual(JsonDefaults.Serialize(expected.OrderBy(row => row.EntityId, StringComparer.Ordinal).ToArray()))).IsTrue();
 
     private static LiveQueryExpectation CommitScheduledMutation(TestDatabase db, int index, int trial, int round,
         long[] revisions, bool[] deleted)
@@ -83,7 +84,7 @@ internal sealed class LiveQueryTests
             var expected = CommitScheduledMutation(db, index, trial, round, revisions, deleted);
             var page = engine.ReadLiveQuery("root", new(query, cursor, Limit: 3));
             var replay = engine.ReadLiveQuery("root", new(query, cursor, Limit: 3));
-            await Assert.That(JsonDefaults.Serialize(replay.Changes)).IsEqualTo(JsonDefaults.Serialize(page.Changes));
+            await Assert.That(JsonDefaults.Serialize(replay.Changes).SequenceEqual(JsonDefaults.Serialize(page.Changes))).IsTrue();
             await Assert.That(page.ThroughSequence).IsEqualTo(previousSequence + 1);
             await Assert.That(page.Changes.Length).IsEqualTo(expected.Changed ? 1 : 0);
             if (expected.Changed)

@@ -6,22 +6,40 @@ internal static class GrainRequestAuthority
 {
     internal static PrincipalRecord Reload(DatabaseEngine database, string principalId, TimeProvider clock)
     {
-        ClusterPrincipalPolicy.RequirePublicCredential(principalId);
-        return database.Store.Read(view => database.Principal(view, principalId, clock.GetUtcNow()));
+        try
+        {
+            ClusterPrincipalPolicy.RequirePublicCredential(principalId);
+            return database.Store.Read(view => database.Principal(view, principalId, clock.GetUtcNow()));
+        }
+        catch (Exception error) when (GrainBoundaryErrors.Handles(error))
+        {
+            GrainFailureDiagnostics.Mark(error, GrainFailureStage.Authorization);
+            throw;
+        }
     }
 
     internal static PrincipalRecord Authenticate(DatabaseEngine database, ReadOnlyMemory<byte> payload, TimeProvider clock)
     {
-        var secret = GrainPayloadJson.Read<string>(payload);
-        var principalId = database.Authenticate(secret, clock.GetUtcNow());
-        return Reload(database, principalId, clock);
+        try
+        {
+            var secret = GrainPayloadJson.Read<string>(payload);
+            var principalId = database.Authenticate(secret, clock.GetUtcNow());
+            return Reload(database, principalId, clock);
+        }
+        catch (Exception error) when (GrainBoundaryErrors.Handles(error))
+        {
+            GrainFailureDiagnostics.Mark(error, GrainFailureStage.Authorization);
+            throw;
+        }
     }
 
     internal static void RequireAdministrator(PrincipalRecord principal)
     {
         if (!principal.ClusterAdministrator)
         {
-            throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
+            var error = Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
+            GrainFailureDiagnostics.Mark(error, GrainFailureStage.Authorization);
+            throw error;
         }
     }
 }

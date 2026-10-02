@@ -41,3 +41,16 @@ related recovery/RF3 checks after strict build; source is not qualified delivery
 Повна resource identity включає tenant/database/atomic partition/stream set/stream/generation. Domain events є public history; CDC/outbox, consensus WAL та queue state мають власні authority/retention за [ADR-023](../ADR/ADR-023-journal-authority.md). Feed positions і revision — [ADR-025](../ADR/ADR-025-event-revision-feed-positions.md), atomic binding — [ADR-024](../ADR/ADR-024-transaction-domain-binding.md), privacy — [ADR-029](../ADR/ADR-029-event-message-classification.md), restore/retention — [ADR-030](../ADR/ADR-030-retention-paused-restore.md).
 
 Topics/group delivery належать [Messaging](Messaging.md), CDC/system projections — [ChangeFeeds](ChangeFeeds.md), uploaded user bytes — [BlobStorage](BlobStorage.md). External effects і cross-partition atomic commits не обіцяються. Target map: Abstractions/Core/Client/Server/tests `Features/EventStreams/`; shared transport/host composition мають свої owners. UI N/A, це programmable Event Store. Нові runtime tasks починаються зі своїх ADR contracts; tests тільки real GitHub TUnit/recovery/RF3 SDK/MCP. Наявні test methods — source evidence, а не passing run.
+
+TASK-MCP-EVENT-PARITY adds actual Docker RF3 .NET/official MCP evidence for
+REQ-EVENT-004/005/006 and AC-EVENT-004/005/006 under ADR-039: identical bounded
+page content and exclusive-revision replay, stable append retry with no duplicate event,
+empty tail, persisted stream-set authority, cross-tenant denial, invalid limit and
+stale generation. New tests are owned by
+`tests/KeyLoad.IntegrationTests/Features/EventStreams/McpEventStreamTests.cs` and
+cohesive scenario/tokens/assertion helpers in the same slice. Source-only status
+remains pending until the full exact-SHA GitHub RF3 suite passes. Every actual read
+cut must cover the append receipt and sequential cuts remain monotonic; independent
+cuts may advance because five-second persisted Orleans heartbeats share the physical
+store. No public pin-to-cut input exists, so byte parity applies to the exact event
+records while each returned cut is checked independently.

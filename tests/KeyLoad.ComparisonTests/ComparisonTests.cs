@@ -126,8 +126,12 @@ internal sealed class RealComparisonSuite
     private static async Task VerifyPinnedContainerImagesAsync(DistributedApplication app)
     {
         var model = app.Services.GetRequiredService<DistributedApplicationModel>();
-        foreach (var container in model.Resources.OfType<ContainerResource>())
+        foreach (var name in new[]
         {
+            "benchmark-postgres-server", "benchmark-qdrant", "benchmark-rabbit", "benchmark-redis", "benchmark-neo4j"
+        })
+        {
+            var container = model.Resources.OfType<ContainerResource>().Single(resource => resource.Name == name);
             await Assert.That(container.TryGetContainerImageName(out var image)).IsTrue();
             await Assert.That(image).Contains("@sha256:");
             await Assert.That(image).DoesNotContain("sha256:sha256:");

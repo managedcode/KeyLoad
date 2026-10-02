@@ -8,7 +8,12 @@ Deliver the v0.3 KeyLoad database as one coherent repository implementation with
 
 The product contract is `docs/design/architecture-v0.3.uk.md`; attached Markdown is identical. The v0.3 backlog KL-001…KL-104, current accepted ADRs, root `AGENTS.md`, and `docs/implementation/status.json` define sequencing and claims. The checkout already contains broad changes; preserve all unrelated work. Delivery to stable `main` is authorized by root policy. GitHub Actions remains the only qualification environment for TUnit, recovery, and integration suites.
 
-In scope: all features promised by the current capability manifest and release slice; Orleans-only RF3 topology; node-local storage authority; persisted credentials/policies; typed .NET and official MCP C# public flows; simple agent API; public chunked blob upload, range reads, authorization and restore behavior; centrally pinned .NET 10 dependencies without `packages.lock.json`; README/site/status, build/analyzer/format/governance and exact GitHub evidence; approved ManagedCode dependency releases when required; and the separately qualified TimescaleDB/ManagedCode.TimeSeries comparison profile in [its acceptance](timeseries-comparison.acceptance.md).
+The owner has identified SMID as a highest-priority system workstream. No matching
+definition appears in the checked-in or attached v0.3 specification, so its exact
+scope is an open owner clarification under AC-011. Do not guess the acronym or
+count the general performance requirement under AC-010 as implementation of SMID.
+
+In scope: all features promised by the current capability manifest and release slice; Orleans-only RF3 topology; node-local storage authority; persisted credentials/policies; typed .NET and official MCP C# public flows; simple agent API; public chunked blob upload, range reads, authorization and restore behavior; centrally pinned .NET 10 dependencies without `packages.lock.json`; README/site/status, build/analyzer/format/governance and exact GitHub evidence; system-wide operation efficiency and scale evidence under AC-010; approved ManagedCode dependency releases when required; and the separately qualified TimescaleDB/ManagedCode.TimeSeries comparison profile in [its acceptance](timeseries-comparison.acceptance.md).
 
 Out of scope: claiming every optional backlog item is production-qualified before its gate; using an in-memory/single-node replacement; client-supplied trusted roles; local tests/recovery/load runs; package substitution or a consumer workaround for an owned dependency defect; power-loss or production-readiness claims without the explicit gates.
 
@@ -95,6 +100,34 @@ Out of scope: claiming every optional backlog item is production-qualified befor
 
 **Evidence:** REQ-TSC-001..006 / AC-TSC-001..006, REQ-BC-026 / AC-BC-026, REQ-SERIES-007 / AC-SERIES-007, [ADR-050](docs/ADR/ADR-050-timeseries-timescale-comparison.md), real GitHub Aspire comparison artifact at the delivered SHA.
 
+### AC-010 — System-wide operation efficiency and cluster scalability
+
+**Pass:** every advertised public operation maps from the capability manifest to its owning feature's correctness, resource and fault budgets. Each operation family has an explicit representative workload and measurable latency, throughput, allocation, memory, contention and backlog limits where applicable; Orleans request isolation and RF3 routing/failover are measured under the real topology. Flow control is measured for the actual stream contract in use, with persisted KeyLoad EventStreams kept distinct from any Orleans runtime Streams provider. Optimization preserves results, authorization, atomic outcomes and recovery. Performance changes are compared with repeated identical inputs, topology and acknowledgement/read guarantees, and the exact delivered SHA's GitHub artifacts contain the measurements. Feature-specific numeric targets are set in their own acceptance criteria rather than inferred from one aggregate benchmark.
+
+**Fail:** an operation family has no resource/performance boundary, throughput is reported without completed-work or acknowledgement semantics, client-process metrics are labeled as server metrics, an isolated benchmark is used to imply whole-system scalability, or performance improvements are claimed without matched exact-SHA evidence.
+
+**Evidence:** [AC-MP-001..012](memory-performance.acceptance.md), each owning feature's performance and failure tests, real Docker/Aspire RF3 comparison profiles, and immutable GitHub JSON artifacts with source SHA, workload, topology and guarantee metadata. See [ADR-035](docs/ADR/ADR-035-memory-performance.md); endurance and power-loss evidence remain separate gates.
+
+### AC-011 — Owner-priority SMID scope and delivery
+
+**Pass:** the owner-defined meaning and boundary of SMID are captured in one
+canonical feature slice with stable REQ/AC criteria, an ADR or documented reason
+why existing decisions suffice, ordered implementation tasks, and a real test
+matrix. The SMID implementation preserves the one-request Orleans grain and RF3
+ownership rules, and its operation paths satisfy the per-feature resource,
+correctness and measured-scale contracts in AC-010. The exact delivered SHA has
+the required GitHub build and feature qualification.
+
+**Fail:** the acronym is expanded by guesswork, the work remains absent from the
+feature/status map, generic performance work is presented as SMID completion, or
+secondary work is counted as satisfying this owner-priority requirement.
+
+**Evidence:** owner clarification and reviewed feature/ADR/task/test traceability,
+then the exact-SHA GitHub TUnit/recovery/RF3 evidence defined by that feature.
+Automated test details are intentionally not invented before the subsystem is
+identified; AC-011 remains open until that clarification and its real test plan
+exist.
+
 ## Criterion-to-test and evidence matrix
 
 | Criterion | Automated evidence | Level and required assertions | Verification |
@@ -108,5 +141,7 @@ Out of scope: claiming every optional backlog item is production-qualified befor
 | AC-007 | Process-recovery and Docker/Aspire RF3 suites | Real process and cluster; lifecycle/failure matrix and MCP/.NET parity | GitHub `ci.yml`; preserve SHA, jobs, logs and artifacts |
 | AC-008 | Documentation/governance checks and workflow status | Static plus remote delivery/publication evidence | GitHub Actions, protected remote state, release/feed verification |
 | AC-009 | TimeSeriesComparison target/oracle/resource tests in [timeseries-comparison.acceptance.md](timeseries-comparison.acceptance.md) | Real Docker/Aspire RF3 .NET SDK, Timescale Npgsql and published ManagedCode.TimeSeries; shared timestamps, IDs and exact aggregation oracle | GitHub `ci.yml` comparison job; retain delivered SHA, run/job URLs and raw profile artifact |
+| AC-010 | Operation inventory, feature-owned resource/fault tests, and repeated RF3 comparison profiles | Every public operation family has explicit measurable budgets; exact result/authorization/fault semantics remain unchanged; same inputs/topology/acknowledgement contract | GitHub `ci.yml` exact-SHA artifacts under [memory-performance acceptance](memory-performance.acceptance.md); no local benchmark or performance claim |
+| AC-011 | Owner scope review first; after mapping, feature-owned TUnit/recovery/RF3 tests derived from the new feature acceptance | No guessed acronym; one canonical slice; correct Orleans/RF3 boundaries and scale budgets | Owner clarification plus reviewed feature/ADR/task/test map, then exact-SHA GitHub evidence; open until defined |
 
 Manual/review evidence: endurance, power-loss/total-reset, independent failure domains, broad compatibility/upgrade and production-readiness gates have no established automated collector/run in this checkout. They must remain explicitly pending until their actual environment and artifact exist.

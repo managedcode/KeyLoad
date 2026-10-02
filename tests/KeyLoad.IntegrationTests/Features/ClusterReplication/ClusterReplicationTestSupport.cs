@@ -8,7 +8,13 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class ClusterReplicationTestSupport
 {
+    internal const string Rf3DiagnosticsFailureKey = "KeyLoad.Rf3DiagnosticsFailure";
+    internal const string Rf3ReadinessFailureKey = "KeyLoad.Rf3ReadinessFailure";
+    internal const string Rf3RestartFailureKeyPrefix = "KeyLoad.Rf3RestartFailure.";
     private static readonly CompositeFormat NodeNameFormat = CompositeFormat.Parse("node{0}");
+
+    internal static bool IsNonFatalCleanupFailure(Exception error) =>
+        error is not OutOfMemoryException and not StackOverflowException and not AccessViolationException;
 
     internal static string NodeName(int number) => string.Format(CultureInfo.InvariantCulture, NodeNameFormat, number);
 
@@ -16,7 +22,7 @@ internal static class ClusterReplicationTestSupport
     {
         if (!result.IsSuccess)
         {
-            Assert.Fail(result.Problem?.Detail ?? "The client operation failed.");
+            Assert.Fail($"{result.Problem?.ErrorCode ?? "MissingProblem"}: {result.Problem?.Detail ?? "The client operation failed."}");
         }
 
         return result.Value!;
@@ -42,8 +48,9 @@ internal static class ClusterReplicationTestSupport
                 return result;
             }
 
-            await Assert.That(new[] { nameof(ErrorCode.UnknownWriteOutcome), nameof(ErrorCode.OwnershipLost) })
-                .Contains(result.Problem?.ErrorCode ?? "MissingProblem");
+            var code = result.Problem?.ErrorCode ?? "MissingProblem";
+            await Assert.That(new[] { nameof(ErrorCode.UnknownWriteOutcome), nameof(ErrorCode.OwnershipLost) }).Contains(code)
+                .Because($"Unexpected election retry result: {code}; {result.Problem?.Detail ?? "No safe detail."}");
             await Task.Delay(250, cancellationToken);
         }
     }
@@ -57,11 +64,13 @@ internal static class LeaderLossRecoveryScenario
     private const string Materialized = "materialized";
 
     internal static async Task VerifyMinorityAndRecoveryAsync(ClusterFixture fixture, LeaderLossRunState state,
-        long projectionThroughSequence, CancellationToken cancellationToken)
+        long projectionThroughSequence, ISet<string> stoppedContainers, CancellationToken cancellationToken)
     {
         var surviving = state.Clients[state.Survivors[0]];
         _ = ClusterReplicationTestSupport.Success(await state.Clients[state.Survivors[1]].StatusAsync(cancellationToken));
-        await fixture.KillContainerAsync(ClusterReplicationTestSupport.NodeName(state.Survivors[1] + 1),
+        var stoppedNode = ClusterReplicationTestSupport.NodeName(state.Survivors[1] + 1);
+        stoppedContainers.Add(stoppedNode);
+        await fixture.KillContainerAsync(stoppedNode,
             LeadershipFailure, cancellationToken);
         await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
         var denied = await surviving.CommitAsync(
@@ -70,7 +79,9 @@ internal static class LeaderLossRecoveryScenario
         await Assert.That((await surviving.GetAsync(new(state.Partition, Collection, "o1"), cancellationToken)).IsFailed).IsTrue();
         foreach (var index in Enumerable.Range(0, NodeCount).Where(index => index != state.Survivors[0]))
         {
-            await fixture.RestartContainerAsync(ClusterReplicationTestSupport.NodeName(index + 1), cancellationToken);
+            var node = ClusterReplicationTestSupport.NodeName(index + 1);
+            await fixture.RestartContainerAsync(node, cancellationToken);
+            stoppedContainers.Remove(node);
         }
 
         await ClusterReplicationTestSupport.EventuallyAsync(

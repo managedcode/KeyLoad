@@ -10,7 +10,8 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries;
 
 internal sealed class TimeSeriesAspireProfileTests
 {
-    private const string TimescaleResource = "benchmark-timescale";
+    private const string TimescaleServerResource = "benchmark-timescale-server";
+    private const string TimescaleDatabaseResource = "benchmark-timescale";
     private const string ComparisonResource = "comparisons";
     private const string TimescaleImagePrefix = "timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
     private static string SourceRevision => Environment.GetEnvironmentVariable("GITHUB_SHA")
@@ -45,7 +46,7 @@ internal sealed class TimeSeriesAspireProfileTests
             cleanupImage = VerifyTimescaleImage(app);
             await app.StartAsync(timeout.Token);
             await WaitForReadyTimescaleAsync(app, timeout.Token);
-            var connectionString = await app.GetConnectionStringAsync(TimescaleResource, timeout.Token)
+            var connectionString = await app.GetConnectionStringAsync(TimescaleDatabaseResource, timeout.Token)
                 ?? throw new InvalidOperationException("Aspire did not resolve the Timescale connection string.");
             await WaitForComparisonAsync(app, timeout.Token);
             await TimeSeriesProfileReportAssertions.VerifyAsync(output, SourceRevision, timeout.Token);
@@ -69,7 +70,7 @@ internal sealed class TimeSeriesAspireProfileTests
     private static string VerifyTimescaleImage(DistributedApplication app)
     {
         var resource = app.Services.GetRequiredService<DistributedApplicationModel>().Resources
-            .OfType<ContainerResource>().Single(item => item.Name == TimescaleResource);
+            .OfType<ContainerResource>().Single(item => item.Name == TimescaleServerResource);
         if (!resource.TryGetContainerImageName(out var image) || image is null || !image.Contains(TimescaleImagePrefix, StringComparison.Ordinal))
         {
             throw new InvalidOperationException("Aspire Timescale resource is not pinned to the accepted multi-platform digest.");
@@ -79,7 +80,7 @@ internal sealed class TimeSeriesAspireProfileTests
     }
 
     private static Task<ResourceEvent> WaitForReadyTimescaleAsync(DistributedApplication app, CancellationToken cancellationToken)
-        => app.ResourceNotifications.WaitForResourceAsync(TimescaleResource,
+        => app.ResourceNotifications.WaitForResourceAsync(TimescaleServerResource,
             resource => resource.Snapshot.State?.Text == KnownResourceStates.Running, cancellationToken);
 
     private static async Task WaitForComparisonAsync(DistributedApplication app, CancellationToken cancellationToken)

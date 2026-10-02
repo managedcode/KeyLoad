@@ -18,7 +18,7 @@ internal static class GrainPayloadJson
             var reader = new Utf8JsonReader(payload, new JsonReaderOptions { MaxDepth = Options.MaxDepth });
             if (!reader.Read())
             {
-                throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+                throw GrainFailureDiagnostics.InvalidPayload(GrainFailureStage.PayloadSyntax);
             }
 
             while (reader.Read())
@@ -27,7 +27,7 @@ internal static class GrainPayloadJson
         }
         catch (Exception error) when (error is JsonException or DecoderFallbackException)
         {
-            throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+            throw GrainFailureDiagnostics.InvalidPayload(GrainFailureStage.PayloadSyntax);
         }
     }
 
@@ -36,11 +36,11 @@ internal static class GrainPayloadJson
         try
         {
             return JsonSerializer.Deserialize<T>(payload.Span, Options)
-                ?? throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+                ?? throw GrainFailureDiagnostics.InvalidPayload(GrainFailureStage.TypedPayloadDecode);
         }
         catch (JsonException)
         {
-            throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+            throw GrainFailureDiagnostics.InvalidPayload(GrainFailureStage.TypedPayloadDecode);
         }
     }
 
@@ -48,7 +48,7 @@ internal static class GrainPayloadJson
     {
         if (!payload.Span.SequenceEqual(NullBytes))
         {
-            throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+            throw GrainFailureDiagnostics.InvalidPayload(GrainFailureStage.RequiredNullPayload);
         }
     }
 }

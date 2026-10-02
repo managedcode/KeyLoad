@@ -29,8 +29,8 @@ internal sealed class GrainRequestEnvelopeWireTests
         var original = Encoding.UTF8.GetBytes(OriginalJson);
         var envelope = JsonDefaults.Deserialize<GrainRequestEnvelope>(original);
         var encoded = JsonDefaults.Serialize(envelope);
-        await Assert.That(encoded).IsEqualTo(original);
-        await Assert.That(SHA256.HashData(encoded)).IsEqualTo(SHA256.HashData(original));
+        await Assert.That(encoded.SequenceEqual(original)).IsTrue();
+        await Assert.That(SHA256.HashData(encoded).SequenceEqual(SHA256.HashData(original))).IsTrue();
         await Assert.That(envelope.RequestId).IsEqualTo(Guid.Parse(RequestIdentifier));
         await Assert.That(envelope.Incarnation).IsEqualTo(Guid.Parse(IncarnationIdentifier));
         await Assert.That(envelope.ReadKind).IsEqualTo(GrainReadKind.Document);
@@ -51,7 +51,7 @@ internal sealed class GrainRequestEnvelopeWireTests
         var token = codec.CreateRead(requestId, Principal, GrainReadKind.Document, payload);
         var envelope = fixture.Database.Verify<GrainRequestEnvelope>(token);
         var request = codec.VerifyRead(token, requestId);
-        await Assert.That(request.Payload).IsEqualTo(payload);
+        await Assert.That(request.Payload.SequenceEqual(payload)).IsTrue();
         await Assert.That(request.Envelope.RequestId).IsEqualTo(requestId);
         await Assert.That(envelope.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
         await Assert.That(envelope.PrincipalId).IsEqualTo(Principal);

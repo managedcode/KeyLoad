@@ -659,6 +659,15 @@ _site/
 #plans
 *.plan.md
 
+# Local task scaffolding; durable specifications remain in docs/.
+/*.brainstorm.md
+/*.acceptance.md
+
+# Required source artifacts checked by RepositoryGovernance in CI.
+!/mcaf-governance.brainstorm.md
+!/mcaf-governance.acceptance.md
+!/mcaf-governance.plan.md
+
 # KeyLoad local databases, credentials and qualification artifacts
 artifacts/
 data/

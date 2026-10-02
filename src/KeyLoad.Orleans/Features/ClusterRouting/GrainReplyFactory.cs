@@ -6,14 +6,10 @@ namespace KeyLoad.Orleans;
 internal static class GrainReplyFactory
 {
     private const int MaximumDetailCharacters = 4_096;
-    private const string FailureLog = "Orleans database request failed.";
     private const string Cancelled = "The database request was cancelled.";
     private const string Unavailable = "The database request could not complete. Retry the same command ID for writes.";
     private const string InterruptedWrite = "The write outcome is unknown. Retry the same command ID.";
     private const string NullJson = "null";
-    private const int FailureEventId = 2;
-    private static readonly Action<ILogger, Exception?> LogFailure = LoggerMessage.Define(LogLevel.Error,
-        new EventId(FailureEventId), FailureLog);
 
     internal static GrainOperationReply Value(object? value, CancellationToken cancellationToken)
     {
@@ -39,8 +35,10 @@ internal static class GrainReplyFactory
         return new() { Payload = GrainPayloadJson.Utf8.GetBytes(json) };
     }
 
-    internal static GrainOperationReply Failure(Exception error, bool command, ILogger? diagnostics)
+    internal static GrainOperationReply Failure(Exception error, bool command, ILogger? diagnostics,
+        Guid requestId = default, GrainFailureStage stage = GrainFailureStage.EnvelopeVerification)
     {
+        GrainFailureDiagnostics.Log(diagnostics, error, requestId, stage, FailureCode(error, command));
         if (error is KeyLoadException failure)
         {
             return Rejected(failure.Code, failure.Message);
@@ -56,12 +54,16 @@ internal static class GrainReplyFactory
             return Rejected(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
         }
 
-        if (diagnostics is not null)
-        {
-            LogFailure(diagnostics, null);
-        }
         return Rejected(command ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost, Unavailable);
     }
+
+    private static ErrorCode FailureCode(Exception error, bool command) => error switch
+    {
+        KeyLoadException failure => failure.Code,
+        OperationCanceledException => command ? ErrorCode.UnknownWriteOutcome : ErrorCode.Cancelled,
+        JsonException or ArgumentException => ErrorCode.Validation,
+        _ => command ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost
+    };
 
     private static GrainOperationReply Rejected(ErrorCode code, string? detail) => new()
     {

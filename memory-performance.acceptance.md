@@ -104,11 +104,22 @@ scoped borrowing contract explicitly prevents escape/mutation.
   survive. Oversized operator profile reads are bounded without changing valid
   generated profiles or configuration trust boundaries.
 - AC-MP-011 / REQ-MP-005: CI evidence distinguishes server/node resources from
-  load-generator resources; measures logical reads/bytes/scans, managed allocations,
-  GC, working set and latency with exact workloads/source SHA. Physical I/O is
-  labeled only when genuinely measured. Bounded-memory and reduced-read assertions
-  use deterministic operation counters and configured budgets; timing comparisons
-  use repeated same-topology baseline/candidate runs, never fabricated speedups.
+  load-generator resources for every advertised operation family. Each profile
+  records exact workload/input/result bounds, concurrency, topology, source SHA,
+  acknowledgement/read semantics and both client and per-node resource limits.
+  Measurements include logical reads/bytes/scans, per-operation and per-hop
+  latency, throughput, managed allocations, GC, working set, admission/backpressure
+  and quorum/apply wait where applicable. Metric labels are low-cardinality and
+  exclude request IDs, tenant/user identities, credentials and payloads. Physical
+  I/O is labeled only when genuinely measured. Bounded-memory and reduced-read
+  assertions use deterministic operation counters and configured budgets. Each
+  advertised family receives explicit numeric acceptance budgets grounded in a
+  repeated exact-SHA baseline/candidate pair with identical workload, topology,
+  limits and acknowledgement/read guarantees; values must not be invented from
+  source configuration or inferred from client-only measurements. Saturation,
+  rejection, cancellation and slow-consumer/backpressure flows are covered where
+  the operation supports them. No speed or scale claim passes without the
+  immutable GitHub artifacts for that matched comparison.
 - AC-MP-012 / REQ-MP-005: development build, format/governance and all required
   TUnit/recovery/Docker-Aspire RF3 SDK/MCP gates pass for the delivered source.
   Coverage/complexity requirements receive real compatible collection/gates before
@@ -132,7 +143,7 @@ scoped borrowing contract explicitly prevents escape/mutation.
 | 008 | ClusterReplication concurrent real peer/snapshot flows | Data saturation leaves quorum traffic ready; canceled temp state reclaimed; exact concurrent snapshot cut | CI real recovery/RF3 resources |
 | 009 | ClientApi TUnit with real Kestrel plus RF3 SDK | Chunked/delayed success, bounded malformed/error body, mid-body cancellation, reuse/disposal | CI TUnit/integration only |
 | 010 | BenchmarkComparisons report validation, ClientApi profile boundary | Correct raw JSON/CSV under large allowed settings, oversized rejection before allocation, interrupted output | CI comparison/TUnit; actual artifacts |
-| 011 | Instrumented real workload profiles | Scope-labeled counters, allocation/GC/RSS and repeated latency; bounded resource assertions | GitHub JSON/artifacts with SHA/options/topology |
+| 011 | Matched, instrumented RF3 workload profiles for each advertised operation family | Numeric resource/latency/throughput budgets, per-hop/admission/quorum attribution, low-cardinality labels, exact result/fault/backpressure behavior; client metrics kept separate from each database node | Repeated GitHub baseline/candidate JSON with exact SHA, workload, limits, topology and acknowledgement/read guarantees |
 | 012 | Full configured qualification and static gates | No skipped/weakened tests or fabricated result; actual exact-SHA pass and preserved index | CI all suites, format, governance, diff review |
 
 Manual review exceptions: architecture/ownership, full operation inventory and

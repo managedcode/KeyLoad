@@ -14,16 +14,24 @@ internal static class RetainedReplicaSnapshotScenario
     internal static async Task RunAsync(ClusterFixture fixture)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+        SnapshotState? state = null;
+        StoppedReplica? replica = null;
+        var replicaRestarted = false;
         try
         {
-            var state = await ConfigureAndProduceAsync(fixture, timeout.Token);
-            var replica = await StopRetainedReplicaAsync(fixture, state, timeout.Token);
+            state = await ConfigureAndProduceAsync(fixture, timeout.Token);
+            replica = await StopRetainedReplicaAsync(fixture, state, timeout.Token);
             var final = await ReplicateWhileStoppedAsync(fixture, state, replica.Index, timeout.Token);
-            await RestartAndVerifyAsync(fixture, state, replica, final, timeout.Token);
+            await RestartAndVerifyAsync(fixture, state, replica, final, () => replicaRestarted = true, timeout.Token);
         }
-        catch (Exception)
+        catch (Exception failure) when (IsNonFatalCleanupFailure(failure))
         {
-            await fixture.SaveFailureDiagnosticsAsync();
+            try
+            { await fixture.SaveFailureDiagnosticsAsync(); }
+            catch (Exception diagnosticsFailure) when (IsNonFatalCleanupFailure(diagnosticsFailure))
+            { failure.Data[Rf3DiagnosticsFailureKey] = diagnosticsFailure; }
+            if (replica is not null && !replicaRestarted)
+            { await RestoreFailedReplicaAsync(fixture, state, replica, failure); }
             throw;
         }
     }
@@ -119,9 +127,10 @@ internal static class RetainedReplicaSnapshotScenario
     }
 
     private static async Task RestartAndVerifyAsync(ClusterFixture fixture, SnapshotState state, StoppedReplica replica,
-        FinalCommand final, CancellationToken cancellationToken)
+        FinalCommand final, Action onRestarted, CancellationToken cancellationToken)
     {
         await fixture.RestartContainerAsync(replica.Name, cancellationToken);
+        onRestarted();
         await Assert.That(Directory.Exists(replica.Directory)).IsTrue();
         await EventuallyAsync(async () =>
         {
@@ -129,6 +138,28 @@ internal static class RetainedReplicaSnapshotScenario
             return status.IsSuccess && status.Value!.RoutingReady;
         }, cancellationToken);
         await VerifyRecoveredReplicaAsync(state, replica.Index, final, cancellationToken);
+    }
+
+    private static async Task RestoreFailedReplicaAsync(ClusterFixture fixture, SnapshotState? state,
+        StoppedReplica replica, Exception failure)
+    {
+        using var recoveryTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+        try
+        { await fixture.RestartContainerAsync(replica.Name, recoveryTimeout.Token); }
+        catch (Exception restartFailure) when (IsNonFatalCleanupFailure(restartFailure))
+        { failure.Data[Rf3RestartFailureKeyPrefix + replica.Name] = restartFailure; }
+        if (state is null)
+        { return; }
+        try
+        {
+            await EventuallyAsync(async () =>
+            {
+                var status = await state.Clients[replica.Index].StatusAsync(recoveryTimeout.Token);
+                return status.IsSuccess && status.Value!.RoutingReady;
+            }, recoveryTimeout.Token);
+        }
+        catch (Exception readinessFailure) when (IsNonFatalCleanupFailure(readinessFailure))
+        { failure.Data[Rf3ReadinessFailureKey] = readinessFailure; }
     }
 
     private static async Task VerifyRecoveredReplicaAsync(SnapshotState state, int index, FinalCommand final,

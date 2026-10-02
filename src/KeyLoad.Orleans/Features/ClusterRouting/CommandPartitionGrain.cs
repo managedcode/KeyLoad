@@ -21,14 +21,24 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
     /// <returns>A safe typed reply for the committed operation or a caller-visible failure.</returns>
     public async Task<GrainOperationReply> ExecuteAsync(string signedRequest, CancellationToken cancellationToken)
     {
+        var stage = GrainFailureStage.EnvelopeVerification;
+        var requestId = Guid.Empty;
         try
         {
             var request = codec.Verify(signedRequest);
-            return await commands.ExecuteAsync(request, this.GetPrimaryKeyString(), cancellationToken).ConfigureAwait(true);
+            requestId = request.Envelope.RequestId;
+            stage = GrainFailureStage.CapabilityExecution;
+            var reply = await commands.ExecuteAsync(request, this.GetPrimaryKeyString(), cancellationToken).ConfigureAwait(true);
+            if (reply.Error is { } code)
+            {
+                GrainFailureDiagnostics.Log(diagnostics, Errors.Fail(code, GrainRoutingProtocol.InvalidRequest),
+                    requestId, stage, code);
+            }
+            return reply;
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {
-            return GrainReplyFactory.Failure(error, true, diagnostics);
+            return GrainReplyFactory.Failure(error, true, diagnostics, requestId, stage);
         }
     }
 }

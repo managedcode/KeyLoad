@@ -174,3 +174,19 @@ never an adapter-only secret store. Rollback removes the adapter but cannot undo
 committed commands. Timeout/cancellation is not rollback. Existing HTTP source
 and tests are a baseline, not official MCP evidence. All new runtime gates remain
 pending; this ADR is Accepted, not Implemented.
+
+TASK-MCP-EVENT-PARITY is an accepted test-only implementation refinement for
+REQ/AC-EVENT-004/005/006 and AC-MCP-002/005/007. The economical worker owns only
+new `IntegrationTests/Features/EventStreams/McpEventStreamTests.cs` and cohesive
+new scenario/tokens/assertion helpers. The lead owns the resource-scoped overload
+of `ClientApi/McpPersistedIdentity.cs`, docs, source review and complete GitHub RF3
+qualification. Ordered stages: public SDK setup and event/retry/replay/error tests
+first; lead helper/source join; enabled build/format; exact-SHA GitHub all-client
+RF3 run and retained artifacts. Compare canonical event bytes and explicit event
+identity/order/head/continuation. Every actual read cut covers the append receipt;
+sequential quorum cuts cannot regress. Required persisted membership heartbeats
+can advance the physical cut between independent requests, and the current public
+request cannot pin that cut. No fake transport, direct-store proof, fixture changes,
+new provider or runtime contract. This adds no persisted/public format migration;
+rollback removes only these tests/helper overload together. A failure or blocked
+cluster does not qualify the EventStreams capability.

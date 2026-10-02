@@ -560,3 +560,73 @@ in prepared-storage-write.acceptance.md and prepared-storage-write.plan.md. Roll
 the coherent cache source unit without data conversion or weakened analysis. Exact-
 SHA GitHub unit/recovery/Docker RF3 SDK/MCP remains mandatory; source is not a measured
 allocation win, numeric coverage or power-loss proof.
+
+## AC-MP-011 extension: per-operation RF3 budgets and Orleans cost
+
+Owner direction makes whole-system operation efficiency and RF3 scalability a
+first-priority requirement. REQ-MP-005 / AC-MP-011 and
+REQ-RESOURCE-002 / AC-RESOURCE-002 therefore require each advertised operation
+family to have a measured workload, explicit numeric resource/latency/throughput
+budgets, and exact read/acknowledgement semantics. Budget values are derived from
+repeated same-topology baseline/candidate runs; they are not guessed from source
+limits or client-side measurements.
+
+Ordered stages:
+
+1. After a correctness-qualified candidate SHA exists, capture the matched RF3
+   baseline for documents, events, messaging, reads/search, graph, time-series,
+   blob, and administrative operations which are actually advertised.
+2. Add bounded low-cardinality per-operation and per-hop evidence for admission,
+   request/read/command grains, quorum barrier, apply/store work and backpressure
+   where each path uses those stages. Separate load-generator resources from each
+   database node's CPU, allocations/GC and working set. Never label metrics with
+   request IDs, tenants, users, credentials, keys or payloads.
+3. Add contract tests for metric names/labels and real RF3 SDK/MCP flows covering
+   success, saturation/rejection, cancellation and slow-consumer behavior where
+   applicable. Do not use metrics doubles as runtime proof.
+4. Repeat baseline and candidate profiles with identical source-independent
+   workload inputs, topology, limits, warmup, concurrency and acknowledgement/read
+   guarantees. Record numeric thresholds and raw artifact provenance before
+   making performance claims.
+5. Update the operation matrix, README and status only from exact-SHA GitHub
+   evidence; no local test/benchmark result can qualify the feature.
+
+The implementation task is TASK-MP-011B in
+`memory-performance.plan.md`; it depends on TASK-MP-010's integrated correctness,
+build and governance joins. The lead is the sole owner of shared
+`src/KeyLoad.ServiceDefaults/` instrument registration,
+`src/KeyLoad.Orleans/Features/ClusterRouting/` hop instrumentation,
+`benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/` workload/report
+integration, shared contracts, ADR/acceptance/status evidence and final review.
+Feature owners implement their own operation budgets and correctness in the
+canonical feature slices. Planned tests are
+`tests/KeyLoad.UnitTests/Features/ResourceExecution/` for metric names, bounds and
+label privacy;
+`tests/KeyLoad.IntegrationTests/Features/ClusterRouting/ActivationMovementScenario.cs`
+for observed real RF3 movement and node-local storage identity;
+`tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/` for matched
+operation profiles; and its `TimeSeries/` slice for repeated read/append/aggregate
+comparisons. Each advertised SDK/MCP operation family must join real caller
+success, authorization, overload/rejection, cancellation and applicable
+backpressure behavior to metric assertions without changing its public contract.
+
+Persisted KeyLoad EventStreams and Orleans runtime Streams are separate contracts.
+The existing KeyLoad stream read/replay path is qualified through its persisted
+store and cursor. This amendment does not authorize a new Orleans pub/sub provider.
+That provider requires a separate REQ/AC and ADR covering provider durability,
+delivery/replay/ordering, restart, backpressure and its real RF3 tests before its
+files or task plan are added.
+
+After tests-first source integration, verification order is enabled Release
+solution build, `dotnet format KeyLoad.slnx --verify-no-changes --no-restore`,
+repository governance, then the complete GitHub `ci.yml` exact-SHA run for TUnit,
+process recovery, RF3 SDK/MCP, repeated profiles, coverage and complexity evidence.
+Keep run/job URLs and raw per-node/per-operation JSON in the workflow artifacts.
+Numeric thresholds enter the operation matrix only after matched repeated
+baseline/candidate artifacts pass correctness with the same topology and
+acknowledgement/read guarantees. Local checks are development evidence only.
+
+Rollback of instrumentation requires no persisted-data conversion and must not
+remove existing correctness budgets or request isolation. Rollback of an
+operation-level optimization is confined to that owning slice and must preserve
+its persisted format, exact outcomes and established budgets.

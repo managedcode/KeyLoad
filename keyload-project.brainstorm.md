@@ -25,12 +25,19 @@ Choose option 2. Keep the checkout's existing changes and inspect each join befo
 - Each request gets a separate Orleans request grain. The cluster enables the distributed grain directory and activation repartitioning/migration. DotNext cluster packages and runtime are prohibited.
 - Orleans calls can time out after side effects; command IDs, persisted receipts, and explicit retry outcomes remain required.
 - ManagedCode packages are owned dependencies. Any defect is repaired and released in its sibling source repository before KeyLoad changes its package pin.
-- Unit, recovery, RF3, comparison, and site test qualification is GitHub Actions only. Current GitHub authentication is invalid and network access from this checkout has failed; this is an external delivery risk, not a reason to report local build output as CI evidence.
+- Unit, recovery, RF3, comparison, and site test qualification is GitHub Actions only. The initial credential/network probe failed, but later approved GitHub access produced exact run 36988949282 without changing credentials; verify access and evidence again for each delivery operation.
 - Process termination proves process-recovery behavior only. Endurance, power-loss, total-reset, and independent failure-domain gates remain separate.
 
-## Current baseline
+## Initial baseline before first delivery
 
 - Checkout starts at `9c570f8c3` on `main`, tracking local `github/main`; 259 paths are already modified, deleted, or untracked. Preserve them while tracing ownership.
 - The first Release build completed with 97 compiler/analyzer errors, mostly in the newly integrated benchmark comparison tests, plus two CrashHost localization diagnostics, three BlobStorage test namespace errors, and two RF3 fixture disposal errors.
 - No tests have been run locally. The baseline TUnit/recovery/Aspire RF3 run is pending the authorized GitHub Actions workflow.
-- `gh auth status` reports an invalid GitHub token; the GitHub API and SSH hostname could not be reached from this environment.
+- The initial `gh auth status`/GitHub API probe reported an invalid token and unavailable network. Subsequent authorized GitHub access succeeded without changing credentials; retain this as an initial environment observation, not current remote status.
+
+## Integrated delivery and priority update, 2026-10-02
+
+- First stable foundation commit `3559225a5f918160e46e32c9a812c3f71790e382` is pushed to protected `main`. Its exact GitHub Actions run `36988949282` failed: analyzer 84/88, comparisons 2/4, RF3 3/23, and governance on all three operating systems; unit/recovery suites did not run because governance stopped their jobs. See the root project plan and implementation status for the complete failure ledger.
+- Keep the repair set coherent before the next protected-main push: Timescale resource-name/digest assertions, RF3 failure diagnostics and cluster cleanup, analyzer/source-span cases, site-builder portability, full site evidence provenance, and the missing GitHub workflow qualification. Development build/format/governance remain separate from runtime qualification.
+- The owner now requires whole-system operation efficiency and RF3 scalability, not one isolated fast path. Prefer explicit per-operation resource/fault budgets, matched workloads and honest server-versus-client measurements. The updated [AC-010](keyload-project.acceptance.md#ac-010--system-wide-operation-efficiency-and-cluster-scalability) traces this to memory-performance gates.
+- The owner-designated SMID work is a highest-priority product workstream, but `SMID` is absent from both repository and v0.3 specification. The exact meaning must be clarified and mapped to a canonical slice before implementation; the unresolved requirement is AC-011. No acronym expansion is inferred.

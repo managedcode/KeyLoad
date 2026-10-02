@@ -30,18 +30,24 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
     /// <returns>A bounded safe reply from the requested persisted-authorized capability.</returns>
     public async Task<GrainOperationReply> ExecuteAsync(string signedRequest, CancellationToken cancellationToken)
     {
+        var stage = GrainFailureStage.EnvelopeVerification;
+        var requestId = Guid.Empty;
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var request = codec.VerifyRead(signedRequest, this.GetPrimaryKey());
+            requestId = this.GetPrimaryKey();
+            var request = codec.VerifyRead(signedRequest, requestId);
+            stage = GrainFailureStage.QuorumRead;
             await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
             cancellationToken.ThrowIfCancellationRequested();
+            stage = GrainFailureStage.CapabilityExecution;
             var result = await ReadAsync(request, cancellationToken).ConfigureAwait(true);
+            stage = GrainFailureStage.ReplyEncoding;
             return GrainReplyFactory.Value(result, cancellationToken);
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {
-            return GrainReplyFactory.Failure(error, false, diagnostics);
+            return GrainReplyFactory.Failure(error, false, diagnostics, requestId, stage);
         }
         finally
         {
