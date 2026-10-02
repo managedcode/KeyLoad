@@ -47,7 +47,7 @@ Public HTTP admission reserves capacity before JSON deserialization and shares a
 
 ## Administration console
 
-The runtime console is served at `/admin` on each database HTTP endpoint, for example `http://localhost:5101/admin` with the local Aspire profile. Connect with a persisted administrator API key, then enter the tenant, database and atomic partition key when browsing collections, queues or published blob metadata. The read-only console shows physical canonical/replica/backup file lengths, node status, admission occupancy and measured process HTTP throughput. It never receives or acknowledges queue messages, and credentials remain only in tab memory. See [AdminDashboard](docs/Features/AdminDashboard.md) for the contract and current qualification gates; source implementation and visual review are present, while exact-source GitHub RF3/browser and numeric coverage qualification remain pending.
+The runtime console is served at `/admin` on each database HTTP endpoint, for example `http://localhost:5101/admin` with the local Aspire profile. Connect with a persisted administrator API key, then enter the tenant, database and atomic partition key when browsing collections, queues or published blob metadata. The read-only console shows physical canonical/replica/backup file lengths, node status, admission occupancy and measured process HTTP throughput. It never receives or acknowledges queue messages, and credentials remain only in tab memory. See [AdminDashboard](docs/Features/AdminDashboard.md) for the contract and exact GitHub evidence: its real RF3 API/native browser cases pass; retained screenshots, complete workflow and numeric coverage gates remain pending.
 
 ## .NET client
 

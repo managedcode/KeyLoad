@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
 
@@ -44,9 +45,11 @@ internal static class AdminBrowserAssertions
         await browser.CommandAsync(AdminBrowserProtocol.SetMetrics,
             new { width, height = AdminBrowserProtocol.Height, deviceScaleFactor = 1, mobile = width == AdminBrowserProtocol.MobileWidth }, cancellationToken);
         await Assert.That((await browser.EvaluateAsync(NoOverflow, cancellationToken)).GetBoolean()).IsTrue();
-        Directory.CreateDirectory(AdminBrowserProtocol.EvidenceDirectory);
+        var outputDirectory = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,
+            AdminBrowserProtocol.EvidenceDirectory);
+        Directory.CreateDirectory(outputDirectory);
         var reply = await browser.CommandAsync(AdminBrowserProtocol.CaptureScreenshot, new { format = "png" }, cancellationToken);
-        await File.WriteAllBytesAsync(Path.Combine(AdminBrowserProtocol.EvidenceDirectory, name + ".png"),
+        await File.WriteAllBytesAsync(Path.Combine(outputDirectory, name + ".png"),
             Convert.FromBase64String(reply.GetProperty(ScreenshotData).GetString()!), cancellationToken);
     }
 
