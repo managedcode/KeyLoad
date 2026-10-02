@@ -11,6 +11,8 @@ internal static class AdminStaticAssets
     private const string Html = "text/html; charset=utf-8";
     private const string Css = "text/css; charset=utf-8";
     private const string JavaScript = "text/javascript; charset=utf-8";
+    private const string Svg = "image/svg+xml";
+    private const string Logo = "logo.svg";
     private const string Index = "index.html";
     private const string NoStore = "no-store";
     private const string NoSniff = "nosniff";
@@ -20,19 +22,27 @@ internal static class AdminStaticAssets
     private const string CspHeader = "Content-Security-Policy";
     private const string ReferrerHeader = "Referrer-Policy";
     private static readonly string[] Methods = [HttpMethods.Get, HttpMethods.Head];
-    private static readonly FrozenDictionary<string, (string File, string Type)> Assets =
-        new Dictionary<string, (string, string)>(StringComparer.Ordinal)
+    private static readonly string[] Stylesheets = ["brand.css", "layout.css", "views.css"];
+    private static readonly string[] Scripts = ["constants.js", "text.js", "format.js", "dom.js", "tooltip.js", "charts.js",
+        "metrics.js", "navigation.js", "browsing.js", "catalog.js", "errors.js", "overview.js", "performance.js",
+        "nodes.js", "storage.js", "app.js"];
+    private static readonly FrozenDictionary<string, (string File, string Type)> Assets = Catalog()
+        .ToFrozenDictionary(StringComparer.Ordinal);
+
+    private static Dictionary<string, (string, string)> Catalog()
+    {
+        var assets = new Dictionary<string, (string, string)>(StringComparer.Ordinal)
         {
             [RootPath] = (Index, Html),
             [RootPath + Index] = (Index, Html),
-            [RootPath + "styles.css"] = ("styles.css", Css),
-            [RootPath + "constants.js"] = ("constants.js", JavaScript),
-            [RootPath + "dom.js"] = ("dom.js", JavaScript),
-            [RootPath + "metrics.js"] = ("metrics.js", JavaScript),
-            [RootPath + "rendering.js"] = ("rendering.js", JavaScript),
-            [RootPath + "browsing.js"] = ("browsing.js", JavaScript),
-            [RootPath + "app.js"] = ("app.js", JavaScript)
-        }.ToFrozenDictionary(StringComparer.Ordinal);
+            [RootPath + Logo] = (Logo, Svg)
+        };
+        foreach (var file in Stylesheets)
+        { assets[RootPath + file] = (file, Css); }
+        foreach (var file in Scripts)
+        { assets[RootPath + file] = (file, JavaScript); }
+        return assets;
+    }
 
     internal static bool IsPublicRequest(HttpRequest request) =>
         (HttpMethods.IsGet(request.Method) || HttpMethods.IsHead(request.Method))
