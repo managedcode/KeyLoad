@@ -5,7 +5,7 @@ import { hideTooltip, showTooltip } from './tooltip.js';
 
 const registry = new Map();
 const observer = new ResizeObserver(entries => entries.forEach(entry => draw(entry.target.id)));
-const niceSteps = [Config.one, Config.two, 2.5, 5, 10];
+const niceSteps = Config.niceSteps;
 
 function niceMax(value) {
     if (!(value > Config.zero)) return Config.one;
@@ -75,12 +75,14 @@ function axes(root, model, geometry) {
         svg(Css.line, { x1: geometry.left, x2: geometry.right, y1: y, y2: y, class: tick ? Css.empty : Css.base }, group);
         svg(Css.text, { x: geometry.left - Config.labelGap, y: y + Config.dotRadius, [Css.anchor]: Css.end }, group).textContent = model.format(value, true);
     }
-    const last = model.times.length - Config.one;
-    const steps = Math.min(Config.xTicks, last);
+    const first = model.times[Config.zero];
+    const span = model.times[model.times.length - Config.one] - first;
+    const steps = span > Config.zero ? Config.xTicks : Config.zero;
     for (let tick = Config.zero; tick <= steps; tick++) {
-        const index = steps ? Math.round(last / steps * tick) : Config.zero;
-        const anchor = tick === Config.zero ? Css.start : tick === steps ? Css.end : Css.middle;
-        svg(Css.text, { x: geometry.x(index), y: geometry.height - Config.labelGap, [Css.anchor]: anchor }, group).textContent = clock(model.times[index]);
+        const time = steps ? first + span / steps * tick : first;
+        const x = steps ? geometry.left + (geometry.right - geometry.left) / steps * tick : geometry.x(Config.zero);
+        const anchor = !steps ? Css.middle : tick === Config.zero ? Css.start : tick === steps ? Css.end : Css.middle;
+        svg(Css.text, { x, y: geometry.height - Config.labelGap, [Css.anchor]: anchor }, group).textContent = clock(time);
     }
 }
 
@@ -122,7 +124,7 @@ function draw(hostId) {
     const model = registry.get(hostId);
     if (!host || !model || !host.clientWidth || !model.times.length) return;
     const geometry = frame(host, model);
-    const root = svg(Css.svg, { viewBox: `0 0 ${geometry.width} ${geometry.height}`, [Css.ariaHidden]: Dom.true });
+    const root = svg(Css.svg, { viewBox: `${Config.zero} ${Config.zero} ${geometry.width} ${geometry.height}`, [Css.ariaHidden]: Dom.true });
     axes(root, model, geometry);
     series(root, geometry);
     hover(root, model, geometry);

@@ -49,3 +49,8 @@ export function duration(milliseconds) {
     if (minutes > Config.zero) return `${minutes}${Text.minute}`;
     return `${Math.floor(milliseconds / Config.millis)}${Text.second}`;
 }
+
+export function shortId(value) {
+    if (!value) return Text.dash;
+    return value.length > Config.longId ? value.slice(Config.zero, Config.shortId) : value;
+}

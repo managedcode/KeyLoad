@@ -26,6 +26,9 @@ export const Config = Object.freeze({
     sparkHeight: 32,
     sparkPad: 3,
     yTicks: 4,
+    niceSteps: Object.freeze([1, 2, 2.5, 5, 10]),
+    shortId: 8,
+    longId: 12,
     xTicks: 4,
     padTop: 14,
     padRight: 12,
@@ -115,6 +118,7 @@ export const Category = Object.freeze({
 export const Dom = Object.freeze({
     nav: 'nav button[data-view]',
     goto: 'button[data-goto]',
+    aside: 'aside',
     current: 'aria-current',
     page: 'page',
     pressed: 'aria-pressed',
@@ -328,6 +332,18 @@ export const Css = Object.freeze({
     brand: 'brand',
     c1: 'c1',
     c2: 'c2',
+    c3: 'c3',
+    c4: 'c4',
     c7: 'c7',
     muted: 'muted'
+});
+
+export const Sample = Object.freeze({
+    rate: 'rate',
+    okRate: 'okRate',
+    failRate: 'failRate',
+    latency: 'latency',
+    errorPct: 'errorPct',
+    canonical: 'canonical',
+    total: 'total'
 });

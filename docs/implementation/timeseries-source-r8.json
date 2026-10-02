@@ -1,5 +1,5 @@
 {
-  "stage": "all_source_joined_development_build_pass_formatter_and_exact_delivered_SHA_CI_pending",
+  "stage": "all_source_joined_development_build_formatter_governance_pass_exact_delivered_SHA_CI_pending",
   "mainParent": "3eef712517f0cfca7694e3e64970247efb770a45",
   "contracts": [
     "docs/Features/TimeSeries.md",
@@ -76,7 +76,10 @@
     },
     "formatter": {
       "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
-      "status": "final_verification_running_after_preserving_source_join"
+      "status": "passed",
+      "log": "/private/tmp/keyload-timeseries-r8-format-3.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exitCode": 0
     },
     "governance": {
       "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
@@ -86,6 +89,18 @@
     },
     "localTestsExecuted": false,
     "qualification": "development_compilation_and_static_validation_only"
+  },
+  "delivery": {
+    "branch": "main",
+    "sourceSha": "d186bb597165cfa04dd0679eec5da5fa632c367e",
+    "filesInSourceCommit": 81,
+    "originMainMerged": true,
+    "remoteMainVerified": true,
+    "ciRun": 37056851814,
+    "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37056851814",
+    "ciStatusAtReceiptUpdate": "in_progress",
+    "scope": "Complete eligible working tree at staging; subsequent independent dashboard writes require another checkpoint.",
+    "sourceManifestScope": "Historical development-build inputs; exact delivered-source runtime qualification comes from GitHub reports."
   },
   "sourceFiles": [
     {

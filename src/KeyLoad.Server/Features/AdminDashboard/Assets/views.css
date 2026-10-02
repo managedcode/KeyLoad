@@ -15,7 +15,7 @@
 .kpi-icon { width: 10px; height: 10px; border-radius: 3px; background: currentColor; }
 
 .c1 { color: var(--kl-c1); } .c2 { color: var(--kl-c2); } .c3 { color: var(--kl-c3); } .c4 { color: var(--kl-c4); }
-.c7 { color: var(--kl-c7); } .bad { color: var(--kl-bad); } .brand { color: var(--kl-brand-600); } .muted { color: var(--kl-faint); }
+.c5 { color: var(--kl-c5); } .c6 { color: var(--kl-c6); } .c7 { color: var(--kl-c7); } .bad { color: var(--kl-bad); } .brand { color: var(--kl-brand-600); } .muted { color: var(--kl-faint); }
 
 .spark path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .spark path.area { fill: currentColor; fill-opacity: .1; stroke: none; }
