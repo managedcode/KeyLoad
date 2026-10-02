@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/admin/views.css">
 <script type="module" src="/admin/app.js"></script>
 </head>
-<body>
+<body class="kl-wallpaper">
 <div class="shell">
 <aside class="sidebar">
 <div class="sidebar-top">
@@ -75,13 +75,13 @@
 </section>
 <section id="overview-view" class="view">
 <div class="kpis">
-<article class="kpi kl-card"><header><span>Throughput</span><i class="kpi-icon c1" aria-hidden="true"></i></header><strong id="throughput-value">—</strong><p>Completed API requests / s</p><svg id="spark-throughput" class="spark c1" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
-<article class="kpi kl-card"><header><span>Average latency</span><i class="kpi-icon c7" aria-hidden="true"></i></header><strong id="latency-value">—</strong><p>Mean HTTP response duration</p><svg id="spark-latency" class="spark c7" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
-<article class="kpi kl-card"><header><span>Error rate</span><i class="kpi-icon bad" aria-hidden="true"></i></header><strong id="error-rate-value">—</strong><p id="error-rate-note">Failed share of completed requests</p><svg id="spark-errors" class="spark bad" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
-<article class="kpi kl-card"><header><span>Canonical database</span><i class="kpi-icon c3" aria-hidden="true"></i></header><strong id="canonical-value">—</strong><p id="canonical-note">Physical bytes on this node</p><svg id="spark-storage" class="spark c3" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
+<article class="kpi kl-card"><header><span>Throughput</span></header><strong id="throughput-value">—</strong><p>Completed API requests / s</p><svg id="spark-throughput" class="spark accent" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
+<article class="kpi kl-card"><header><span>Average latency</span></header><strong id="latency-value">—</strong><p>Mean HTTP response duration</p><svg id="spark-latency" class="spark lilac" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
+<article class="kpi kl-card"><header><span>Error rate</span></header><strong id="error-rate-value">—</strong><p id="error-rate-note">Failed share of completed requests</p><svg id="spark-errors" class="spark bad" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
+<article class="kpi kl-card"><header><span>Canonical database</span></header><strong id="canonical-value">—</strong><p id="canonical-note">Physical bytes on this node</p><svg id="spark-storage" class="spark peach" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
 </div>
 <div class="grid-2-1">
-<article class="panel kl-card"><div class="panel-head"><div><h2>Request activity</h2><p>Requests per second on the executing node · this session</p></div><div class="legend"><span><i class="c1"></i>Succeeded</span><span><i class="bad"></i>Failed</span></div></div><div id="activity-chart" class="chart" role="img" aria-label="Measured requests per second"></div><p id="chart-empty" class="chart-empty">Two live observations unlock the chart.</p></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Request activity</h2><p>Requests per second on the executing node · this session</p></div><div class="legend"><span><i class="accent"></i>Succeeded</span><span><i class="bad"></i>Failed</span></div></div><div id="activity-chart" class="chart" role="img" aria-label="Measured requests per second"></div><p id="chart-empty" class="chart-empty">Two live observations unlock the chart.</p></article>
 <article class="panel kl-card"><div class="panel-head"><div><h2>Storage composition</h2><p>Observed physical file lengths</p></div><span id="storage-state" class="kl-badge">Waiting</span></div><div class="donut-wrap"><svg id="storage-donut" class="donut" viewBox="0 0 120 120" role="img" aria-label="Storage composition"></svg><div class="donut-center"><strong id="storage-total">—</strong><span>node total</span></div></div><dl class="split-list"><div><dt><i class="c1"></i>Canonical</dt><dd id="storage-canonical">—</dd></div><div><dt><i class="c2"></i>Replica journals</dt><dd id="storage-replica">—</dd></div><div><dt><i class="c3"></i>Backups</dt><dd id="storage-backup">—</dd></div><div><dt><i class="c4"></i>Other files</dt><dd id="storage-other">—</dd></div></dl><p class="hint" id="storage-notice">Storage observations appear after connection.</p></article>
 </div>
 <div class="grid-3">
@@ -92,7 +92,7 @@
 </section>
 <section id="performance-view" class="view" hidden>
 <div id="perf-stats" class="stat-strip kl-card"></div>
-<article class="panel kl-card"><div class="panel-head"><div><h2>Throughput</h2><p>Completed public API requests per second</p></div><div class="legend"><span><i class="c1"></i>Succeeded</span><span><i class="bad"></i>Failed</span></div></div><div id="perf-throughput" class="chart chart-lg" role="img" aria-label="Throughput history"></div></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Throughput</h2><p>Completed public API requests per second</p></div><div class="legend"><span><i class="accent"></i>Succeeded</span><span><i class="bad"></i>Failed</span></div></div><div id="perf-throughput" class="chart chart-lg" role="img" aria-label="Throughput history"></div></article>
 <div class="grid-2">
 <article class="panel kl-card"><div class="panel-head"><div><h2>Average latency</h2><p>Mean response duration per interval, ms</p></div></div><div id="perf-latency" class="chart" role="img" aria-label="Latency history"></div></article>
 <article class="panel kl-card"><div class="panel-head"><div><h2>Error rate</h2><p>Failed share of requests per interval, %</p></div></div><div id="perf-errors" class="chart" role="img" aria-label="Error rate history"></div></article>
@@ -115,7 +115,7 @@
 </section>
 <section id="cluster-view" class="view" hidden>
 <div class="grid-2-1">
-<article class="panel kl-card"><div class="panel-head"><div><h2>RF3 voters</h2><p>Observed from the executing node; peers it cannot observe are marked as such.</p></div><span class="kl-badge kl-badge--brand">Node local</span></div><svg id="topology" class="topology" viewBox="0 0 560 250" role="img" aria-label="RF3 voter topology"></svg><div class="legend legend-wide"><span><i class="brand"></i>Executing node</span><span><i class="c4"></i>Leader</span><span><i class="muted"></i>Not observed from here</span></div></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>RF3 voters</h2><p>Observed from the executing node; peers it cannot observe are marked as such.</p></div><span class="kl-badge kl-badge--brand">Node local</span></div><svg id="topology" class="topology" viewBox="0 0 560 250" role="img" aria-label="RF3 voter topology"></svg><div class="legend legend-wide"><span><i class="accent"></i>Executing node</span><span><i class="c6"></i>Leader</span><span><i class="muted"></i>Not observed from here</span></div></article>
 <article class="panel kl-card"><div class="panel-head"><div><h2>Process</h2><p>Server process serving this console</p></div></div><dl id="process-facts" class="facts"></dl></article>
 </div>
 <article class="panel kl-card"><div class="panel-head"><div><h2>Executing node</h2><p>This observation does not establish the health of every RF3 voter.</p></div></div><dl id="cluster-details" class="detail-grid"></dl></article>

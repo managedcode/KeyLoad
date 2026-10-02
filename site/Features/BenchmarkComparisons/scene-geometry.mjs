@@ -3,19 +3,22 @@ export const SCENE = Object.freeze({
     settleMilliseconds: 500, settleRenderMilliseconds: 450 }),
   world: Object.freeze({ hostCount: 3, hostSpacing: 3.1, hostY: 1.1, hostWidth: 1.55, hostHeight: 2.15,
     hostDepth: 1.05, tileWidth: 0.48, tileHeight: 0.34, tileDepth: 0.08, tileY: 0.62, tileCenterOffset: 0.31,
-    groundY: -0.08, cameraFov: 34, cameraNear: 0.1, cameraFar: 60, cameraX: 6.4, cameraY: 5.3,
-    cameraZ: 9.2, cameraLookY: 0.72, cameraAspect: 1, pointerYaw: 0.055, pointerPitch: 0.025,
+    groundY: -0.08, cameraFov: 30, cameraNear: 0.1, cameraFar: 60, cameraX: 7.2, cameraY: 6.1,
+    cameraZ: 11.6, cameraLookY: 1.45, cameraAspect: 1, pointerYaw: 0.055, pointerPitch: 0.025,
     smoothingDivisor: 115, floorDepth: 4.8, floorWidth: 10.5, frontInset: 0.05, plinthHeight: 0.12,
     plinthWidthExtra: 0.25, plinthDepthExtra: 0.2, plinthY: 0.04, railY: 1.7, railWidthFraction: 0.72,
     railHeight: 0.07, hostCenterIndex: 1, firstTileIndex: 0, halfTurn: Math.PI / 2,
-    tileDepthCenter: 2, cameraTargetX: 0, cameraTargetZ: 0 }),
-  material: Object.freeze({ hostRoughness: 0.82, hostMetalness: 0.08, baseRoughness: 0.9,
-    firstTileRoughness: 0.64, secondTileRoughness: 0.72, railRoughness: 0.7, groundRoughness: 1,
-    hemisphereSky: 0xffffff, hemisphereGround: 0x8090a8, hemisphereIntensity: 2.1,
-    directionalColor: 0xffffff, directionalIntensity: 2.2 }),
-  math: Object.freeze({ zero: 0, one: 1, two: 2, negativeOne: -1, epsilon: 0.001 }),
-  colors: Object.freeze({ host: 0x2a3d9a, base: 0x9aa6bd, partitionA: 0x4d7cf5,
-    partitionB: 0xdfe6f2, rail: 0xeda100, ground: 0xe6ebf4, sky: 0xeef2f9 }),
+    tileDepthCenter: 2, cameraTargetX: 0, cameraTargetZ: 0, tokenY: 3.55, tokenSize: 0.42, tokenTilt: 0.32,
+    beamRadius: 0.028, beamSegments: 8, beamTargetY: 2.2, discRadius: 5.1, discSegments: 48, discY: -0.06,
+    fogNear: 10, fogFar: 24 }),
+  material: Object.freeze({ hostRoughness: 0.38, hostMetalness: 0.22, baseRoughness: 0.9,
+    firstTileRoughness: 0.4, secondTileRoughness: 0.55, railRoughness: 0.5,
+    hemisphereSky: 0xffffff, hemisphereGround: 0x2a2d33, hemisphereIntensity: 1.7,
+    directionalColor: 0xffffff, directionalIntensity: 2.8, glowIntensity: 0.6, tokenGlow: 0.45, pointIntensity: 9, pointDistance: 8 }),
+  math: Object.freeze({ zero: 0, half: 0.5, one: 1, two: 2, negativeOne: -1, epsilon: 0.001 }),
+  colors: Object.freeze({ host: 0x3b3f48, base: 0x4a4f59, partitionA: 0xc6f24e,
+    partitionB: 0xc9b4ff, rail: 0xffb08a, ground: 0x0c0d10, sky: 0x0c0d10, disc: 0x15171b,
+    token: 0xc6f24e, beam: 0xa4d82f }),
   state: Object.freeze({ poster: 'poster', loading: 'loading', ready: 'ready', paused: 'paused', zeroSize: 'zero-size',
     error: 'error', deviceLost: 'device-lost', unsupported: 'unsupported', disposed: 'disposed' }),
   frame: Object.freeze({ idle: 'idle', requested: 'requested', rendered: 'rendered', paused: 'paused', error: 'error' }),
@@ -65,16 +68,16 @@ export function createSceneGraph(THREE) {
   const baseMaterial = material(new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.base,
     roughness: SCENE.material.baseRoughness }));
   const partitionMaterials = [
-    material(new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.partitionA,
-      roughness: SCENE.material.firstTileRoughness })),
+    material(new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.partitionA, emissive: SCENE.colors.partitionA,
+      emissiveIntensity: SCENE.material.glowIntensity, roughness: SCENE.material.firstTileRoughness })),
     material(new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.partitionB,
       roughness: SCENE.material.secondTileRoughness })),
   ];
   const railMaterial = material(new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.rail,
     roughness: SCENE.material.railRoughness }));
-  const groundMaterial = material(new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.ground,
-    roughness: SCENE.material.groundRoughness }));
+  const groundMaterial = material(new THREE.MeshBasicNodeMaterial({ color: SCENE.colors.ground }));
   scene.background = new THREE.Color(SCENE.colors.sky);
+  scene.fog = new THREE.Fog(SCENE.colors.sky, SCENE.world.fogNear, SCENE.world.fogFar);
   scene.add(new THREE.HemisphereLight(SCENE.material.hemisphereSky, SCENE.material.hemisphereGround,
     SCENE.material.hemisphereIntensity));
   scene.add(new THREE.DirectionalLight(SCENE.material.directionalColor, SCENE.material.directionalIntensity));
@@ -86,6 +89,8 @@ export function createSceneGraph(THREE) {
   for (let index = SCENE.math.zero; index < SCENE.world.hostCount; index += SCENE.math.one) {
     addHost(THREE, root, index, box, hostMaterial, baseMaterial, partitionMaterials, railMaterial);
   }
+  addPlatform(THREE, root, geometry, material);
+  addReplication(THREE, root, geometry, material);
   camera.position.set(SCENE.world.cameraX, SCENE.world.cameraY, SCENE.world.cameraZ);
   camera.lookAt(SCENE.world.cameraTargetX, SCENE.world.cameraLookY, SCENE.world.cameraTargetZ);
   return { scene, camera, root, dispose: () => disposeGraph(geometries, materials) };
@@ -125,6 +130,41 @@ function addRail(THREE, group, box, railMaterial) {
   rail.position.set(SCENE.math.zero, SCENE.world.railY,
     SCENE.world.hostDepth / SCENE.world.tileDepthCenter + SCENE.world.frontInset);
   group.add(rail);
+}
+
+function addPlatform(THREE, root, geometry, material) {
+  const disc = new THREE.Mesh(geometry(new THREE.CircleGeometry(SCENE.world.discRadius, SCENE.world.discSegments)),
+    material(new THREE.MeshBasicNodeMaterial({ color: SCENE.colors.disc })));
+  disc.rotation.x = -SCENE.world.halfTurn;
+  disc.position.y = SCENE.world.discY;
+  root.add(disc);
+}
+
+function addReplication(THREE, root, geometry, material) {
+  const token = new THREE.Mesh(geometry(new THREE.OctahedronGeometry(SCENE.world.tokenSize)),
+    material(new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.token, emissive: SCENE.colors.token,
+      emissiveIntensity: SCENE.material.tokenGlow, roughness: SCENE.material.firstTileRoughness })));
+  token.position.y = SCENE.world.tokenY;
+  const glow = new THREE.PointLight(SCENE.colors.token, SCENE.material.pointIntensity, SCENE.material.pointDistance);
+  glow.position.copy(token.position);
+  root.add(glow);
+  token.rotation.set(SCENE.world.tokenTilt, SCENE.world.tokenTilt * SCENE.math.two, SCENE.world.tokenTilt);
+  root.add(token);
+  const beamGeometry = geometry(new THREE.CylinderGeometry(SCENE.world.beamRadius, SCENE.world.beamRadius,
+    SCENE.math.one, SCENE.world.beamSegments, SCENE.math.one, true));
+  const beamMaterial = material(new THREE.MeshStandardNodeMaterial({ color: SCENE.colors.beam,
+    emissive: SCENE.colors.beam, emissiveIntensity: SCENE.material.tokenGlow }));
+  const up = new THREE.Vector3(SCENE.math.zero, SCENE.math.one, SCENE.math.zero);
+  for (let index = SCENE.math.zero; index < SCENE.world.hostCount; index += SCENE.math.one) {
+    const target = new THREE.Vector3((index - SCENE.world.hostCenterIndex) * SCENE.world.hostSpacing,
+      SCENE.world.beamTargetY, SCENE.math.zero);
+    const direction = target.clone().sub(token.position);
+    const beam = new THREE.Mesh(beamGeometry, beamMaterial);
+    beam.scale.y = direction.length();
+    beam.position.copy(token.position).addScaledVector(direction, SCENE.math.half);
+    beam.quaternion.setFromUnitVectors(up, direction.normalize());
+    root.add(beam);
+  }
 }
 
 function disposeGraph(geometries, materials) {

@@ -16,11 +16,18 @@ The two surfaces shared no logo, palette, typography or components, so KeyLoad r
 
 ## Decision
 
-- **One brand source.** `src/KeyLoad.Server/Features/AdminDashboard/Assets/brand.css` holds the tokens (surfaces, ink, brand blue/indigo gradient, reserved status colours, the dataviz-validated categorical chart order, radii, shadows, focus ring and system font stacks) and the shared primitives (`kl-brand`, `kl-btn`, `kl-card`, `kl-badge`, `kl-chip`, reduced motion).
-  - The logo `logo.svg` is a rounded indigo→blue tile with a "K" whose stem is three stacked replica blocks (RF3) and whose arms form a forward chevron.
-  - `site/Features/BenchmarkComparisons/brand.css` and `site/favicon.svg` are byte-identical mirrors.
-  - The SiteTests drift test `AC_VI_001` fails on any difference. Both surfaces keep their own CSP-compatible, same-origin delivery: the console whitelists embedded assets, and the site build copies listed assets.
-- **Light only.** System fonts only. No external fonts or CDNs. The console CSP is unchanged: styles and scripts are same-origin and SVG is drawn through DOM APIs. Dynamic geometry uses CSSOM properties only.
+- **One brand source.** `src/KeyLoad.Server/Features/AdminDashboard/Assets/brand.css` holds the tokens and the shared primitives (`kl-brand`, `kl-btn`, `kl-card`, `kl-glass`, `kl-badge`, `kl-chip`, reduced motion). It is mirrored byte-for-byte to `site/Features/BenchmarkComparisons/brand.css`, and `logo.svg` to `site/favicon.svg`. The SiteTests drift test `AC_VI_001` fails on any difference.
+- **Style direction (owner, 2026-10-02).** Earlier candidates were rejected: a light-blue look, pastel/rainbow glass and a plain grey version. The adopted style is serious Apple-style Liquid Glass in the sibling brands' colours:
+  - Managed Code: warm off-white, black ink and system typography.
+  - Prostir: graphite, with lime `#c6f24e` as the only brand accent.
+  - Glass: translucent surfaces with specular top edges and large blur, capsule controls and large radii.
+  - No Material Design and no decorative colour blobs.
+  - The logo is a graphite squircle with white replica blocks and chevron, plus one lime replica.
+  - Data colours come from the dataviz-validated categorical order (lime-ink, lilac, peach, sky, pink, amber, teal, red). Status colours are reserved.
+- **Surfaces.**
+  - The console is a light glass shell: transparent navigation with a lime selection indicator, an opaque glass top bar and a glass content layer.
+  - The site has a dark graphite hero with a full-width Three.js scene, followed by light glass sections.
+- **CSP and fonts.** System fonts only, no external fonts or CDNs. The console CSP is unchanged. Dynamic geometry uses CSSOM only.
 - **Console information architecture.**
   - **Monitoring:**
     - Overview: KPI tiles with sparklines, a stacked request-activity chart, a storage donut, a node card, admission and recent errors.
@@ -31,7 +38,15 @@ The two surfaces shared no logo, palette, typography or components, so KeyLoad r
   - Every original `data-view` and pinned browser hook is preserved.
 - **Real data only.** Charts plot at most 120 comparable session samples and reset on process change, failure or reconnect. The error log is a new bounded server observation: `AdminHttpSnapshot.RecentFailures`, at most 50 newest-first entries holding the route template, normalised method, status, aborted flag and duration. It never holds a raw path, query, payload or credential.
   - The voter figure uses configured membership (`AdminNodeSnapshot.LocalVoter`, `Voters`) and the reported leader. Peers are labelled as not observed from the executing node.
-- **Site.** The site gets the same tokens, logo, sans display type, cards, buttons, tabs, bars and tables. Engine colours and the Three.js scene colours move to the brand palette. All site hooks, budgets and lifecycle contracts are unchanged.
+- **Site.** The landing is a new product page, not a restyle:
+  - a floating glass capsule navigation;
+  - a graphite hero with a lime headline accent and the Three.js RF3 scene (lime logical-partition gem, replication beams to three graphite hosts with lime/lilac partition tiles; about 22 draw calls and 290 triangles, no idle loop);
+  - an architecture-facts strip;
+  - a capability grid;
+  - glass benchmark and methodology sections;
+  - a graphite reproduce panel.
+
+  Every tested hook, budget and lifecycle contract is unchanged.
 
 ```mermaid
 flowchart LR

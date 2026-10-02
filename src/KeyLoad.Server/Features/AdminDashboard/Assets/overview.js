@@ -42,9 +42,9 @@ function activity() {
     timeChart(Id.activityChart, {
         times: stamps,
         stacked: true,
-        format: (value, axis) => axis ? `${Number(value.toFixed(Config.digits))}` : rate(value),
+        format: rate,
         series: [
-            { label: Text.succeeded, cls: Css.c1, values: pick(Sample.okRate) },
+            { label: Text.succeeded, cls: Css.accent, values: pick(Sample.okRate) },
             { label: Text.failedSeries, cls: Css.bad, values: pick(Sample.failRate) }
         ]
     });

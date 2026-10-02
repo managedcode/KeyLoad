@@ -67,17 +67,27 @@ function frame(host, model) {
     };
 }
 
+function stepDecimals(step) {
+    let decimals = Config.zero;
+    while (decimals < Config.maxAxisDecimals && Math.abs(step * 10 ** decimals - Math.round(step * 10 ** decimals)) > Config.epsilon)
+        decimals += Config.one;
+    return decimals;
+}
+
 function axes(root, model, geometry) {
     const group = svg(Css.g, { class: Css.axis }, root);
+    const step = geometry.max / Config.yTicks;
+    const decimals = stepDecimals(step);
     for (let tick = Config.zero; tick <= Config.yTicks; tick++) {
-        const value = geometry.max / Config.yTicks * tick;
+        const value = step * tick;
         const y = geometry.y(value);
         svg(Css.line, { x1: geometry.left, x2: geometry.right, y1: y, y2: y, class: tick ? Css.empty : Css.base }, group);
-        svg(Css.text, { x: geometry.left - Config.labelGap, y: y + Config.dotRadius, [Css.anchor]: Css.end }, group).textContent = model.format(value, true);
+        svg(Css.text, { x: geometry.left - Config.labelGap, y: y + Config.dotRadius, [Css.anchor]: Css.end }, group).textContent = value.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
     }
     const first = model.times[Config.zero];
     const span = model.times[model.times.length - Config.one] - first;
-    const steps = span > Config.zero ? Config.xTicks : Config.zero;
+    const fit = Math.max(Config.one, Math.floor((geometry.right - geometry.left) / Config.xLabelWidth));
+    const steps = span > Config.zero ? Math.min(Config.xTicks, fit) : Config.zero;
     for (let tick = Config.zero; tick <= steps; tick++) {
         const time = steps ? first + span / steps * tick : first;
         const x = steps ? geometry.left + (geometry.right - geometry.left) / steps * tick : geometry.x(Config.zero);
@@ -111,7 +121,7 @@ function hover(root, model, geometry) {
             if (layer.top[index] === null) return;
             svg(Css.circle, { cx: geometry.x(index), cy: geometry.y(layer.top[index]), r: Config.dotRadius, class: `${Css.hoverDot} ${layer.series.cls}` }, marks);
         });
-        showTooltip(event, clock(model.times[index]), model.series.map(item => ({ label: item.label, cls: item.cls, value: model.format(item.values[index], false) })));
+        showTooltip(event, clock(model.times[index]), model.series.map(item => ({ label: item.label, cls: item.cls, value: model.format(item.values[index]) })));
     });
     hit.addEventListener(Dom.pointerLeave, () => {
         marks.replaceChildren();

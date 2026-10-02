@@ -27,8 +27,11 @@ export const Config = Object.freeze({
     yTicks: 4,
     niceSteps: Object.freeze([1, 2, 2.5, 5, 10]),
     shortId: 8,
+    maxAxisDecimals: 3,
+    epsilon: 1e-9,
     longId: 12,
     xTicks: 4,
+    xLabelWidth: 96,
     padTop: 14,
     padRight: 12,
     padBottom: 28,
@@ -324,11 +327,12 @@ export const Css = Object.freeze({
     crown: 'crown',
     sub: 'sub',
     glyph: 'glyph',
+    accent: 'accent',
+    lilac: 'lilac',
     c1: 'c1',
     c2: 'c2',
     c3: 'c3',
     c4: 'c4',
-    c7: 'c7',
     muted: 'muted'
 });
 

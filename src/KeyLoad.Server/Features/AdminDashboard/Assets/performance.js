@@ -5,8 +5,6 @@ import { el, meter, stat } from './dom.js';
 import { bytes, count, duration, ms, percent, rate } from './format.js';
 import { latest, peak, pick, sessionLatency, times } from './metrics.js';
 
-const axisNumber = value => `${Number(value.toFixed(Config.digits))}`;
-
 function stats(snapshot) {
     const http = snapshot.http;
     const lifetimeLatency = http.completedRequests > Config.zero ? http.elapsedMilliseconds / http.completedRequests : null;
@@ -27,15 +25,15 @@ function charts() {
         return;
     }
     timeChart(Id.perfThroughput, {
-        times: stamps, stacked: true, format: (value, axis) => axis ? axisNumber(value) : rate(value),
-        series: [{ label: Text.succeeded, cls: Css.c1, values: pick(Sample.okRate) }, { label: Text.failedSeries, cls: Css.bad, values: pick(Sample.failRate) }]
+        times: stamps, stacked: true, format: rate,
+        series: [{ label: Text.succeeded, cls: Css.accent, values: pick(Sample.okRate) }, { label: Text.failedSeries, cls: Css.bad, values: pick(Sample.failRate) }]
     });
     timeChart(Id.perfLatency, {
-        times: stamps, stacked: false, format: (value, axis) => axis ? axisNumber(value) : ms(value),
-        series: [{ label: Text.latency, cls: Css.c7, values: pick(Sample.latency) }]
+        times: stamps, stacked: false, format: ms,
+        series: [{ label: Text.latency, cls: Css.lilac, values: pick(Sample.latency) }]
     });
     timeChart(Id.perfErrors, {
-        times: stamps, stacked: false, format: (value, axis) => axis ? axisNumber(value) : percent(value),
+        times: stamps, stacked: false, format: percent,
         series: [{ label: Text.errorRate, cls: Css.bad, values: pick(Sample.errorPct) }]
     });
 }

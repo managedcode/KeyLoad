@@ -2,5 +2,5 @@
 :root {
   --page: 1240px;
   --gutter: clamp(1rem, 4.5vw, 3.5rem);
-  --engine-track: #eef2f8;
+  --engine-track: rgba(17, 18, 20, .06);
 }

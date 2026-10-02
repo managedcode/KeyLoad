@@ -1,8 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" role="img" aria-label="KeyLoad">
-<defs><linearGradient id="keyload-mark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d7bf7"/><stop offset="1" stop-color="#4b3bd1"/></linearGradient></defs>
-<rect width="40" height="40" rx="11" fill="url(#keyload-mark)"/>
+<defs>
+<linearGradient id="keyload-mark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a3d"/><stop offset="1" stop-color="#0d0e10"/></linearGradient>
+<linearGradient id="keyload-sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="40" height="40" rx="10" fill="url(#keyload-mark)"/>
+<rect x=".5" y=".5" width="39" height="39" rx="9.5" fill="url(#keyload-sheen)" stroke="#fff" stroke-opacity=".14"/>
 <rect x="10" y="9" width="5" height="6" rx="2" fill="#fff"/>
 <rect x="10" y="17" width="5" height="6" rx="2" fill="#fff"/>
-<rect x="10" y="25" width="5" height="6" rx="2" fill="#fff"/>
+<rect x="10" y="25" width="5" height="6" rx="2" fill="#c6f24e"/>
 <path d="M29 9.5 19.5 20 29 30.5" fill="none" stroke="#fff" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
