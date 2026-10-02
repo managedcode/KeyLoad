@@ -10,6 +10,7 @@ internal static class McpCatalogExpectations
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     internal static ImmutableArray<McpToolExpectation> Entries { get; } =
     [
+        .. McpBlobCatalogExpectations.Entries,
         Read(McpCallerTools.DocumentsGet, [McpDiscoveryProtocol.Reference]),
         Read(McpCallerTools.StreamsRead, [McpDiscoveryProtocol.Stream]),
         Read(McpCallerTools.EventsRead, [McpDiscoveryProtocol.Source]),

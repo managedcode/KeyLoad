@@ -41,16 +41,27 @@ internal static class AdminStaticAssets
 
     internal static void Map(WebApplication app)
     {
-        app.MapMethods(EntryPath, Methods, () => Results.Redirect(RootPath));
+        app.MapMethods(EntryPath, Methods, (Func<HttpContext, IResult>)ServeEntry);
         foreach (var path in Assets.Keys)
         {
+            if (string.Equals(path, RootPath, StringComparison.Ordinal))
+            { continue; }
             app.MapMethods(path, Methods, (Func<HttpContext, IResult>)Serve);
         }
     }
 
+    private static IResult ServeEntry(HttpContext context)
+    {
+        if (string.Equals(context.Request.Path.Value, EntryPath, StringComparison.Ordinal))
+        { return Results.Redirect(RootPath); }
+        return string.Equals(context.Request.Path.Value, RootPath, StringComparison.Ordinal)
+            ? Serve(context) : Results.NotFound();
+    }
+
     private static IResult Serve(HttpContext context)
     {
-        var asset = Assets[context.Request.Path.Value!];
+        if (!Assets.TryGetValue(context.Request.Path.Value ?? string.Empty, out var asset))
+        { return Results.NotFound(); }
         var content = typeof(AdminStaticAssets).Assembly.GetManifestResourceStream(ResourcePrefix + asset.File);
         if (content is null)
         { return Results.NotFound(); }

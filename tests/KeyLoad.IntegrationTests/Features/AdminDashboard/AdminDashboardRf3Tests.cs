@@ -9,7 +9,6 @@ namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
 [NotInParallel]
 internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
 {
-    private const string AdminPath = "/admin";
     private const string TraversalPath = "/admin/unknown.js";
 
     [Test]
@@ -69,8 +68,7 @@ internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = fixture.App.CreateHttpClient(McpCallerProtocol.Node1, McpCallerProtocol.HttpEndpoint);
-        using var shell = await http.GetAsync(new Uri(AdminPath, UriKind.Relative), deadline.Token);
-        await Assert.That(shell.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await AdminShellAssertions.VerifyAsync(fixture, deadline.Token);
         using var data = await http.GetAsync(new Uri(AdminDashboardProtocol.SnapshotPath, UriKind.Relative), deadline.Token);
         await Assert.That(data.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
         using var unknown = await http.GetAsync(new Uri(TraversalPath, UriKind.Relative), deadline.Token);
@@ -113,7 +111,8 @@ internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             AdminDashboardScenario.Collection, Capability.All, deadline.Token);
         var root = fixture.Client(McpCallerProtocol.Node1);
-        var administrator = identity.Principal with { ClusterAdministrator = true };
+        var administrator = identity.Principal with
+        { ClusterAdministrator = true, PolicyEpoch = identity.Principal.PolicyEpoch + 1 };
         await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), administrator, deadline.Token));
         var sdk = fixture.Client(McpCallerProtocol.Node2, identity.Secret);
         await McpCallerAssertions.SdkSuccessAsync(await sdk.ListResourcesAsync(scenario.Resources, deadline.Token));

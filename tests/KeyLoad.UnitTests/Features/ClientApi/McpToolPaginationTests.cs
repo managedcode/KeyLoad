@@ -125,7 +125,6 @@ internal sealed class McpToolCursorTests
     [Arguments(McpPaginationTestData.CaseCursor)]
     [Arguments(McpPaginationTestData.FractionCursor)]
     [Arguments(McpPaginationTestData.NonAsciiCursor)]
-    [Arguments(McpPaginationTestData.EndCursor)]
     [Arguments(McpPaginationTestData.IntegerMaximumCursor)]
     [Arguments(McpPaginationTestData.OverflowCursor)]
     [Arguments(McpPaginationTestData.MarkerCursor)]
@@ -138,4 +137,9 @@ internal sealed class McpToolCursorTests
         await Assert.That(error.Message).IsEqualTo(baseline.Message);
         await Assert.That(error.Message).DoesNotContain(McpPaginationTestData.Marker);
     }
+
+    /// <summary>The exclusive catalog end remains invalid when new public tools are appended.</summary>
+    [Test]
+    public async Task CatalogEndUsesOneFixedSafeValidation()
+        => await MalformedCursorUsesOneFixedSafeValidation(McpPaginationTestData.Cursor(McpOperationCatalog.Entries.Length));
 }

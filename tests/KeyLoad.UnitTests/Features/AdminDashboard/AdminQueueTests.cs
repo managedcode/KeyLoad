@@ -16,17 +16,7 @@ internal sealed class AdminQueueTests
     public async Task AcAd005PaginationNeverConsumesOrSweepsPersistedMessages()
     {
         using var db = new TestDatabase();
-        db.Configure(Queue, ResourceKind.WorkQueue);
-        var now = TimeProvider.System.GetUtcNow().AddSeconds(-5);
-        var commandId = Guid.NewGuid();
-        db.Submit(OperationKind.Batch, new CommandRequest(commandId, db.Partition,
-            [new EnqueueMessage(Queue, First, Payload),
-                new EnqueueMessage(Queue, Second, Payload, NotBefore: now.AddSeconds(1))]), id: commandId, time: now)
-            .Get<CommitReceipt>();
-        var lane = new QueueLaneRef(db.Partition, Queue);
-        var receiveId = Guid.NewGuid();
-        db.Submit(OperationKind.Receive, new ReceiveRequest(receiveId, lane, LeaseSeconds: 1), id: receiveId, time: now)
-            .Get<ReceiveResult>();
+        var lane = SeedOverdueQueue(db);
         var firstBefore = db.Database.InspectMessage(Administrator, lane, First);
         var secondBefore = db.Database.InspectMessage(Administrator, lane, Second);
         var position = db.Database.LastApplied;
@@ -37,10 +27,15 @@ internal sealed class AdminQueueTests
         await Assert.That(first.Items[0].State).IsEqualTo(MessageState.Leased);
         await Assert.That(next.Items[0].Id).IsEqualTo(Second);
         await Assert.That(next.Items[0].State).IsEqualTo(MessageState.Scheduled);
+        var observedAt = TimeProvider.System.GetUtcNow();
+        await Assert.That(first.Items[0].LeaseUntil is { } lease && lease < observedAt).IsTrue();
+        await Assert.That(next.Items[0].NotBefore is { } schedule && schedule < observedAt).IsTrue();
         await Assert.That(next.NextAfterId).IsNull();
         await Assert.That(first.Counters).IsEqualTo(next.Counters);
         await Assert.That(first.Counters.StoredMessages).IsEqualTo(2);
         await Assert.That(first.Counters.InFlightMessages).IsEqualTo(1);
+        await Assert.That(first.CutPosition).IsEqualTo(position);
+        await Assert.That(next.CutPosition).IsEqualTo(position);
         await Assert.That(db.Database.LastApplied).IsEqualTo(position);
         await Assert.That(db.Database.InspectMessage(Administrator, lane, First)).IsEqualTo(firstBefore);
         await Assert.That(db.Database.InspectMessage(Administrator, lane, Second)).IsEqualTo(secondBefore);
@@ -60,5 +55,23 @@ internal sealed class AdminQueueTests
         await Assert.That(page.NextAfterId).IsNull();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => reader.Read(Administrator,
             request with { Limit = 0 }, CancellationToken.None)).Code).IsEqualTo(ErrorCode.Validation);
+    }
+
+    private static QueueLaneRef SeedOverdueQueue(TestDatabase db)
+    {
+        var configuredAt = TimeProvider.System.GetUtcNow().AddMinutes(-1);
+        var resource = new ResourceDefinition(Queue, ResourceKind.WorkQueue, db.Partition.TransactionDomainId);
+        db.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(db.Partition.TenantId,
+            db.Partition.DatabaseId, resource), time: configuredAt).Get<ResourceDefinition>();
+        var commandId = Guid.NewGuid();
+        db.Submit(OperationKind.Batch, new CommandRequest(commandId, db.Partition,
+            [new EnqueueMessage(Queue, First, Payload),
+                new EnqueueMessage(Queue, Second, Payload, NotBefore: configuredAt.AddSeconds(4))]),
+            id: commandId, time: configuredAt.AddSeconds(1)).Get<CommitReceipt>();
+        var lane = new QueueLaneRef(db.Partition, Queue);
+        var receiveId = Guid.NewGuid();
+        db.Submit(OperationKind.Receive, new ReceiveRequest(receiveId, lane, LeaseSeconds: 1),
+            id: receiveId, time: configuredAt.AddSeconds(2)).Get<ReceiveResult>();
+        return lane;
     }
 }

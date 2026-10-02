@@ -54,7 +54,7 @@ internal sealed class AdminCatalogTests
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => reader.Read(Member, request, CancellationToken.None)).Code)
             .IsEqualTo(ErrorCode.PermissionDenied);
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal with
-        { ClusterAdministrator = true, Revoked = true })).Get<PrincipalRecord>();
+        { ClusterAdministrator = true, Revoked = true, PolicyEpoch = principal.PolicyEpoch + 1 })).Get<PrincipalRecord>();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => reader.Read(Member, request, CancellationToken.None)).Code)
             .IsEqualTo(ErrorCode.Unauthenticated);
     }

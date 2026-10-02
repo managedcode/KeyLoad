@@ -24,7 +24,6 @@ internal static class McpPaginationTestData
     internal const string CaseCursor = "KeyLoad-mcp-v1:1";
     internal const string FractionCursor = Prefix + "1.0";
     internal const string NonAsciiCursor = Prefix + "١";
-    internal const string EndCursor = Prefix + "47";
     internal const string IntegerMaximumCursor = Prefix + "2147483647";
     internal const string OverflowCursor = Prefix + "999999999999999999999999999999999999";
     internal const string MarkerCursor = Prefix + Marker;

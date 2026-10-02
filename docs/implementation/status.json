@@ -1222,13 +1222,14 @@
     ],
     "manualDesignReview": "desktop_1280x720_and_mobile_390x844_disconnected_real_shell_inspected_2026_10_02_only_subjective_design",
     "localTestsExecuted": false,
-    "qualification": "exact_source_GitHub_build_unit_recovery_RF3_SDK_MCP_browser_and_coverage_pending",
+    "qualification": "candidate_build_format_governance_analyzers_pass_RF3_catalog_queue_node_and_http_observation_pass_shell_browser_fixture_repairs_pending_exact_source_requalification",
     "coverage": "required_thresholds_preserved_collector_and_actual_result_not_yet_available",
     "candidateRun": {
-      "id": 37029344985,
-      "sha": "49a5b6054843800e20e333ddaa28fa96d79dd294",
-      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37029344985",
-      "conclusion": "failure_dashboard_compiler_analyzer_errors_runtime_not_executed_later_repairs_unqualified"
+      "id": 37032546228,
+      "sha": "b533c80a128a85c6e2072de3bc011a09d4a97cc7",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37032546228",
+      "conclusion": "failure_27_of_36_RF3_pass_no_skips_three_dashboard_observation_tests_pass_shell_500_browser_not_started_test_epoch_and_clock_repairs_unqualified",
+      "artifacts": "artifacts/qualification/admin-dashboard/37032546228/"
     },
     "baselineRun": {
       "id": 37028314087,

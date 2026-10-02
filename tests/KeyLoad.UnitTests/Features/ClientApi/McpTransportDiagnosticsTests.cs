@@ -39,11 +39,11 @@ internal sealed class McpTransportDiagnosticsTests
         var headers = McpTransportGuardTestData.Headers(MethodCanary + "\n" + HeaderCanary, HeaderCanary);
         headers[PrivateHeader] = HeaderCanary;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => McpTransportGuard.ReadHeaders(headers));
+        using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
         using var capture = new McpTransportEventSourceCapture();
-        using (var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger()))
-        {
-            McpTransportDiagnostics.Log(factory.CreateLogger(nameof(McpTransportDiagnosticsTests)), error, headers);
-        }
+        var logger = factory.CreateLogger(nameof(McpTransportDiagnosticsTests));
+        await Assert.That(logger.IsEnabled(LogLevel.Warning)).IsTrue();
+        McpTransportDiagnostics.Log(logger, error, headers);
 
         await Assert.That(McpTransportDiagnostics.HasStage(error)).IsTrue();
         await Assert.That(capture.Text).Contains(nameof(McpTransportStage.MethodHeaderEncoding));
@@ -62,11 +62,11 @@ internal sealed class McpTransportDiagnosticsTests
         var headers = McpTransportGuardTestData.Headers(MethodCanary, HeaderCanary);
         var error = Errors.Fail(ErrorCode.Validation, MetadataCanary);
         error.Data[McpTransportDiagnostics.StageMetadataKey] = (McpTransportStage)int.MaxValue;
+        using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
         using var capture = new McpTransportEventSourceCapture();
-        using (var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger()))
-        {
-            McpTransportDiagnostics.Log(factory.CreateLogger(nameof(McpTransportDiagnosticsTests)), error, headers);
-        }
+        var logger = factory.CreateLogger(nameof(McpTransportDiagnosticsTests));
+        await Assert.That(logger.IsEnabled(LogLevel.Warning)).IsTrue();
+        McpTransportDiagnostics.Log(logger, error, headers);
 
         await Assert.That(McpTransportDiagnostics.HasStage(error)).IsFalse();
         await Assert.That(capture.Text).Contains(nameof(McpTransportStage.Unknown));
@@ -95,17 +95,16 @@ internal sealed class McpTransportDiagnosticsTests
     {
         var error = Errors.Fail(ErrorCode.Validation, McpTransportProtocol.InvalidTransport);
         error.Data[McpTransportDiagnostics.StageMetadataKey] = McpTransportStage.BodyMethodMismatch;
+        using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
         using var capture = new McpTransportEventSourceCapture();
-        using (var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger()))
+        var logger = factory.CreateLogger(nameof(McpTransportDiagnosticsTests));
+        await Assert.That(logger.IsEnabled(LogLevel.Warning)).IsTrue();
+        foreach (var method in new[]
         {
-            var logger = factory.CreateLogger(nameof(McpTransportDiagnosticsTests));
-            foreach (var method in new[]
-            {
-                "server/discover", "initialize", RequestMethods.ToolsCall, "tools/list", MethodCanary
-            })
-            {
-                McpTransportDiagnostics.Log(logger, error, McpTransportGuardTestData.Headers(method, null));
-            }
+            "server/discover", "initialize", RequestMethods.ToolsCall, "tools/list", MethodCanary
+        })
+        {
+            McpTransportDiagnostics.Log(logger, error, McpTransportGuardTestData.Headers(method, null));
         }
 
         await Assert.That(capture.Text).Contains(CategoryToolsCall);
@@ -173,6 +172,36 @@ internal sealed class McpTransportDiagnosticsTests
         if (error.Code != ErrorCode.Validation || error.Message != McpTransportProtocol.InvalidTransport)
         {
             throw new InvalidOperationException("The original public validation reply changed.");
+        }
+    }
+}
+
+/// <summary>AC-CLIENT-008: native captures remain enabled across real provider/listener disposal and recreation.</summary>
+[NotInParallel(LoggingEventSourceIsolation.Key)]
+internal sealed class McpTransportCaptureLifecycleTests
+{
+    private const int CaptureLifetimes = 2;
+    private const string MethodCanary = "private-lifecycle-method-canary";
+
+    /// <summary>Two independently owned native capture lifetimes preserve closed categories and privacy.</summary>
+    [Test]
+    public async Task NativeProviderCaptureCanBeDisposedAndReenabled()
+    {
+        for (var lifetime = 0; lifetime < CaptureLifetimes; lifetime++)
+        {
+            using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
+            using var capture = new McpTransportEventSourceCapture();
+            var logger = factory.CreateLogger(nameof(McpTransportDiagnosticsTests));
+            await Assert.That(logger.IsEnabled(LogLevel.Warning)).IsTrue();
+            var error = Errors.Fail(ErrorCode.Validation, McpTransportProtocol.InvalidTransport);
+            error.Data[McpTransportDiagnostics.StageMetadataKey] = McpTransportStage.BodyMethodMismatch;
+            McpTransportDiagnostics.Log(logger, error, McpTransportGuardTestData.Headers(RequestMethods.ToolsCall, null));
+            McpTransportDiagnostics.Log(logger, error, McpTransportGuardTestData.Headers(MethodCanary, null));
+            await Assert.That(capture.Text).Contains(nameof(McpTransportMethodCategory.ToolsCall));
+            await Assert.That(capture.Text).Contains(nameof(McpTransportMethodCategory.Other));
+            await Assert.That(capture.Text).Contains(nameof(McpTransportStage.BodyMethodMismatch));
+            await Assert.That(capture.Text).DoesNotContain(MethodCanary);
+            await Assert.That(capture.Text).DoesNotContain(nameof(KeyLoadException));
         }
     }
 }
