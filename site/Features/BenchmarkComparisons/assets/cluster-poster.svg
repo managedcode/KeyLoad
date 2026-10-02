@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" role="img" aria-labelledby="title description">
+  <title id="title">Conceptual KeyLoad RF3 architecture</title>
+  <desc id="description">One stable logical atomic partition is shown separately from three physical hosts, each with node-local storage.</desc>
+  <defs>
+    <linearGradient id="ground" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#eff0e6"/><stop offset="1" stop-color="#dfe4d7"/></linearGradient>
+    <linearGradient id="host" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#faf9f3"/><stop offset="1" stop-color="#e3e8dc"/></linearGradient>
+    <filter id="shadow" x="-.2" y="-.2" width="1.4" height="1.5"><feGaussianBlur in="SourceAlpha" stdDeviation="12"/><feOffset dy="14"/><feComponentTransfer><feFuncA type="linear" slope=".16"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1200" height="820" fill="url(#ground)"/>
+  <path d="M0 600 600 340l600 260v220H0z" fill="#d5ddcf"/>
+  <path d="m108 581 492-214 492 214-492 214z" fill="#c7d2c2" opacity=".65"/>
+  <g fill="none" stroke="#718675" stroke-width="2" stroke-dasharray="8 11" opacity=".8">
+    <path d="M600 213 244 370M600 213 600 370M600 213 956 370"/>
+    <path d="M244 532 600 685M600 532 600 685M956 532 600 685"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="406" y="70" width="388" height="155" rx="7" fill="#183b2d"/>
+    <rect x="432" y="96" width="44" height="44" rx="4" fill="#c8f000"/>
+    <path d="M442 118h24m-12-12v24" stroke="#183b2d" stroke-width="3"/>
+    <text x="496" y="116" fill="#f3f0e7" font-family="Arial,sans-serif" font-size="16" letter-spacing="2">LOGICAL IDENTITY</text>
+    <text x="432" y="177" fill="#fff" font-family="Georgia,serif" font-size="31">Atomic partition A-17</text>
+  </g>
+  <g filter="url(#shadow)" font-family="Arial,sans-serif">
+    <g transform="translate(86 352)">
+      <rect width="316" height="222" rx="7" fill="url(#host)" stroke="#aab9a9" stroke-width="2"/>
+      <rect width="316" height="43" rx="7" fill="#183b2d"/><text x="20" y="28" fill="#f3f0e7" font-size="13" letter-spacing="2">PHYSICAL HOST 01</text>
+      <text x="22" y="82" fill="#121511" font-size="17" font-weight="700">Node-local PartitionHost</text>
+      <rect x="22" y="105" width="272" height="80" rx="4" fill="#e1e8da"/>
+      <path d="M44 127h34v16H44zm0 24h34v16H44z" fill="#315744"/><text x="94" y="139" fill="#183b2d" font-size="14">Store · journal</text><text x="94" y="164" fill="#183b2d" font-size="14">Lock · apply gate</text>
+    </g>
+    <g transform="translate(442 352)">
+      <rect width="316" height="222" rx="7" fill="url(#host)" stroke="#aab9a9" stroke-width="2"/>
+      <rect width="316" height="43" rx="7" fill="#183b2d"/><text x="20" y="28" fill="#f3f0e7" font-size="13" letter-spacing="2">PHYSICAL HOST 02</text>
+      <text x="22" y="82" fill="#121511" font-size="17" font-weight="700">Node-local PartitionHost</text>
+      <rect x="22" y="105" width="272" height="80" rx="4" fill="#e1e8da"/>
+      <path d="M44 127h34v16H44zm0 24h34v16H44z" fill="#315744"/><text x="94" y="139" fill="#183b2d" font-size="14">Store · journal</text><text x="94" y="164" fill="#183b2d" font-size="14">Lock · apply gate</text>
+    </g>
+    <g transform="translate(798 352)">
+      <rect width="316" height="222" rx="7" fill="url(#host)" stroke="#aab9a9" stroke-width="2"/>
+      <rect width="316" height="43" rx="7" fill="#183b2d"/><text x="20" y="28" fill="#f3f0e7" font-size="13" letter-spacing="2">PHYSICAL HOST 03</text>
+      <text x="22" y="82" fill="#121511" font-size="17" font-weight="700">Node-local PartitionHost</text>
+      <rect x="22" y="105" width="272" height="80" rx="4" fill="#e1e8da"/>
+      <path d="M44 127h34v16H44zm0 24h34v16H44z" fill="#315744"/><text x="94" y="139" fill="#183b2d" font-size="14">Store · journal</text><text x="94" y="164" fill="#183b2d" font-size="14">Lock · apply gate</text>
+    </g>
+  </g>
+  <g fill="#183b2d" font-family="Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="1.5">
+    <text x="88" y="630">PLACEMENT CAN MOVE</text><text x="826" y="630">LOGICAL ID STAYS</text>
+  </g>
+</svg>

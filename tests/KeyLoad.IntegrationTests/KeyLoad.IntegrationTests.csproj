@@ -9,9 +9,7 @@
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <PackageReference Include="Aspire.Hosting.Testing" />
-    <PackageReference Include="xunit.v3" />
-    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <Using Include="Xunit" />
+    <PackageReference Include="ModelContextProtocol.Core" />
+    <PackageReference Include="TUnit" />
   </ItemGroup>
 </Project>

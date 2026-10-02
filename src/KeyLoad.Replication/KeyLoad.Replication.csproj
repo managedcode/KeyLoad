@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
-    <PackageReference Include="DotNext.AspNetCore.Cluster" />
-    <PackageReference Include="DotNext.Net.Cluster" />
   </ItemGroup>
 </Project>

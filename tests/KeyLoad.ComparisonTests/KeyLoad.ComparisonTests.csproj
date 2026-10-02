@@ -8,9 +8,6 @@
     <ProjectReference Include="../../src/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
     <ProjectReference Include="../../benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" />
     <PackageReference Include="Aspire.Hosting.Testing" />
-    <PackageReference Include="xunit.v3" />
-    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <Using Include="Xunit" />
+    <PackageReference Include="TUnit" />
   </ItemGroup>
 </Project>

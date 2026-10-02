@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="KeyLoad is an early-stage .NET data engine for documents, events, graphs and search, with benchmark evidence from real workloads.">
+  <meta property="og:title" content="KeyLoad — one data engine">
+  <meta property="og:description" content="Documents. Events. Graphs. One data engine.">
+  <meta property="og:url" content="https://www.keyload.cloud/">
+  <link rel="canonical" href="https://www.keyload.cloud/">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./Features/BenchmarkComparisons/styles.css">
+  <title>KeyLoad — Documents, events and graphs</title>
+  <script type="module" src="./Features/BenchmarkComparisons/bootstrap.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#product">Skip to product</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="KeyLoad home">
+      <img src="./favicon.svg" width="34" height="34" alt="">
+      <span>KeyLoad<span class="brand-dot">.</span></span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="#product">Product</a>
+      <a href="#benchmarks">Benchmarks</a>
+      <a href="https://github.com/managedcode/KeyLoad/blob/main/docs/Architecture.md">Architecture</a>
+      <a href="https://github.com/managedcode/KeyLoad/tree/main/docs">Docs</a>
+      <a href="https://github.com/managedcode/KeyLoad" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="product" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Early development · cluster qualification in progress</p>
+        <h1 id="page-title">Documents.<br>Events.<br><em>Graphs.</em><br>One data engine.</h1>
+        <p class="hero-summary">KeyLoad is an open .NET data engine bringing transactional documents, event streams, graph traversal and search into one system.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#benchmarks">Explore benchmark evidence <span aria-hidden="true">↓</span></a>
+          <a class="text-link" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Architecture.md">Read the architecture <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="planned-note">Chunked Blob storage and the official MCP server remain planned capabilities.</p>
+      </div>
+      <figure class="architecture-figure" aria-labelledby="scene-caption">
+        <div class="scene-frame" id="cluster-scene" aria-label="Conceptual view of one logical partition placed across three physical hosts">
+          <img class="cluster-poster" src="./Features/BenchmarkComparisons/assets/cluster-poster.svg" alt="Conceptual RF3 architecture: one logical atomic partition remains distinct from three physical hosts, each with node-local storage.">
+          <span class="scene-status" data-scene-status role="status">Static conceptual view</span>
+        </div>
+        <div class="scene-caption-row">
+          <figcaption id="scene-caption"><span class="caption-kicker">RF3 architecture · conceptual view</span><span>Green tiles: one logical partition replicated across three physical hosts.</span></figcaption>
+          <button class="motion-button" id="scene-motion" type="button" aria-pressed="false" aria-controls="cluster-scene" disabled>Enable motion</button>
+        </div>
+      </figure>
+    </section>
+
+    <section class="capabilities" aria-labelledby="capabilities-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">A coherent data model</p><h2 id="capabilities-title">One engine. Clear boundaries.</h2></div>
+        <p class="section-intro">Explore the current product contracts. Each capability has its own scope, evidence and qualification gates.</p>
+      </div>
+      <div class="capability-grid">
+        <a class="capability" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Features/DocumentStorage.md"><span class="capability-index">01</span><h3>Documents</h3><p>Versioned records, conditional writes and structured queries.</p><span class="capability-link">Document storage <span aria-hidden="true">↗</span></span></a>
+        <a class="capability" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Features/EventStreams.md"><span class="capability-index">02</span><h3>Events</h3><p>Ordered streams with explicit append and read boundaries.</p><span class="capability-link">Event streams <span aria-hidden="true">↗</span></span></a>
+        <a class="capability" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Features/Messaging.md"><span class="capability-index">03</span><h3>Messaging</h3><p>Queues, topics and durable consumer progress.</p><span class="capability-link">Messaging <span aria-hidden="true">↗</span></span></a>
+        <a class="capability" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Features/GraphTraversal.md"><span class="capability-index">04</span><h3>Graphs</h3><p>Bounded traversal over directed, labeled relationships.</p><span class="capability-link">Graph traversal <span aria-hidden="true">↗</span></span></a>
+        <a class="capability" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Features/TimeSeries.md"><span class="capability-index">05</span><h3>Time series</h3><p>Time-bounded observations with explicit query budgets.</p><span class="capability-link">Time series <span aria-hidden="true">↗</span></span></a>
+        <a class="capability" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Features/Search.md"><span class="capability-index">06</span><h3>Search</h3><p>Search contracts with provider and authorization boundaries.</p><span class="capability-link">Search <span aria-hidden="true">↗</span></span></a>
+      </div>
+    </section>
+
+    <section class="benchmark-section" id="benchmarks" aria-labelledby="benchmark-title">
+      <div class="section-heading benchmark-heading">
+        <div><p class="eyebrow">Measurements, with context</p><h2 id="benchmark-title">Inspect the evidence.</h2></div>
+        <p class="section-intro">Only published successful-run reports appear here. Each result keeps its source revision, host and workload conditions attached.</p>
+      </div>
+      <div class="qualification-note"><span class="qualification-mark" aria-hidden="true">i</span><p><strong>Early development.</strong> Cluster qualification is in progress. These measurements describe the recorded run conditions; they do not establish production readiness, a winner or power-loss durability.</p></div>
+      <noscript><p>Interactive charts need JavaScript. Download the original measurements or open their successful GitHub run:</p><!-- KEYLOAD_STATIC_EVIDENCE --></noscript>
+
+      <div class="evidence-layout">
+        <aside class="control-rail" aria-label="Measurement controls and provenance">
+          <p class="rail-label">Select a published run</p>
+          <label class="control run-control" for="profile">Workload profile<select id="profile" disabled><option>Loading published runs…</option></select></label>
+          <label class="control" for="metric">Measure<select id="metric">
+            <optgroup label="Performance"><option value="throughput">Useful throughput · ops/s</option><option value="p50">Latency p50 · ms</option><option value="p95">Latency p95 · ms</option><option value="p99">Latency p99 · ms</option><option value="errors">Failed attempts · %</option></optgroup>
+            <optgroup label="Queue stages"><option value="enqueue">Enqueue p99 · ms</option><option value="receive">Receive p99 · ms</option><option value="ack">ACK p99 · ms</option></optgroup>
+            <optgroup label="Load generator"><option value="cpu">Generator CPU / attempt · ms</option><option value="alloc">Generator allocation / attempt · KiB</option><option value="rss">Generator observed peak RSS · MiB</option></optgroup>
+          </select></label>
+          <label class="control repetition-control" for="repetition">Repetition<select id="repetition"><option value="median">Median of repetitions</option></select></label>
+          <label class="scale-control" for="log-scale"><input id="log-scale" type="checkbox"> Log scale</label>
+          <div class="provenance-card">
+            <p class="rail-label">Published provenance</p>
+            <span class="tiny-label">Selected run</span><strong id="published-date">Loading measurements…</strong>
+            <span class="muted" id="host-summary">Complete run conditions will appear here.</span>
+            <span class="muted" id="revision-summary"></span>
+            <span class="muted site-revision" id="site-revision-summary"></span>
+            <a id="workflow-link" href="https://github.com/managedcode/KeyLoad/actions" target="_blank" rel="noopener">Open successful GitHub run <span aria-hidden="true">↗</span></a>
+          </div>
+          <p class="engine-count"><span id="recorded-engine-count">—</span> engines recorded in this report</p>
+        </aside>
+
+        <div class="measurement-workspace" id="results-panel" role="tabpanel" aria-labelledby="tab-PointRead" aria-busy="true">
+          <div class="scenario-heading"><div><p class="eyebrow">Shared workload</p><h3>Choose what to measure</h3></div><p class="scenario-hint">Keyboard: use the arrow keys, Home or End.</p></div>
+          <div class="scenario-tabs" role="tablist" aria-label="Benchmark scenario">
+            <button id="tab-PointRead" type="button" role="tab" aria-selected="true" aria-controls="results-panel" data-scenario="PointRead" tabindex="0">Point read</button>
+            <button id="tab-DocumentWrite" type="button" role="tab" aria-selected="false" aria-controls="results-panel" data-scenario="DocumentWrite" tabindex="-1">Document write</button>
+            <button id="tab-VectorExact" type="button" role="tab" aria-selected="false" aria-controls="results-panel" data-scenario="VectorExact" tabindex="-1">Exact vector</button>
+            <button id="tab-QueueCycle" type="button" role="tab" aria-selected="false" aria-controls="results-panel" data-scenario="QueueCycle" tabindex="-1">Queue cycle</button>
+            <button id="tab-GraphNeighbors" type="button" role="tab" aria-selected="false" aria-controls="results-panel" data-scenario="GraphNeighbors" tabindex="-1">Graph neighbors</button>
+            <button id="tab-GraphTraverse" type="button" role="tab" aria-selected="false" aria-controls="results-panel" data-scenario="GraphTraverse" tabindex="-1">Graph traversal</button>
+          </div>
+          <div class="chart-heading"><div><h3 id="chart-title">Useful throughput</h3><p id="scenario-description">Primary-key reads returning the complete document.</p></div><span id="direction">Higher is faster</span></div>
+          <div id="chart" class="chart" role="group" aria-live="polite" aria-labelledby="chart-title" aria-describedby="metric-note"><p class="empty-state">Loading published measurements…</p></div>
+          <p id="metric-note" class="metric-note">Bars show the median of per-repetition values; whiskers show their range.</p>
+          <div id="conditions" class="condition-strip" aria-label="Selected workload conditions"></div>
+          <div class="table-heading"><div><p class="eyebrow">Complete result set</p><h3>Every result, in context.</h3></div><div class="download-links" aria-label="Download selected report"><a id="json-download" href="#" download aria-disabled="true">JSON <span aria-hidden="true">↓</span></a><a id="csv-download" href="#" download aria-disabled="true">CSV <span aria-hidden="true">↓</span></a><a id="report-download" href="#" download aria-disabled="true">Report <span aria-hidden="true">↓</span></a></div></div>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Measurement results table; scroll this region horizontally on narrow screens"><table><caption class="sr-only">Per-engine benchmark results for the selected workload, metric and repetition. Failed and timed-out attempts remain in the attempt count.</caption><thead><tr><th scope="col">Engine</th><th scope="col">Useful ops/s</th><th scope="col">p50 ms</th><th scope="col">p95 ms</th><th scope="col">p99 ms</th><th scope="col">Successful / attempts</th><th scope="col">Status</th></tr></thead><tbody id="result-table"></tbody></table></div>
+          <p class="table-note">Unsupported means an adapter does not implement the shared scenario. Failed or timed-out requests remain in the denominator; they contribute no useful operations.</p>
+          <p id="load-error" class="load-error" role="alert" aria-live="assertive" hidden></p>
+          <button id="retry-measurements" class="retry-button" type="button" hidden>Retry published measurements</button>
+          <p class="sr-only" id="measurement-announcement" role="status" aria-live="polite" aria-atomic="true"></p>
+        </div>
+      </div>
+      <section class="engine-profile-section" aria-labelledby="engine-profiles-title">
+        <div class="profile-heading"><div><p class="eyebrow">Configuration follows the report</p><h3 id="engine-profiles-title">Know what each result costs.</h3></div><p class="muted">Versions, topology and guarantees from the selected run.</p></div>
+        <div id="engine-profiles" class="engine-grid" aria-live="polite"><p class="empty-state">Engine profiles will appear with the selected published report.</p></div>
+      </section>
+    </section>
+
+    <section class="methodology-section" id="methodology" aria-labelledby="methodology-title">
+      <div class="section-heading"><div><p class="eyebrow">How evidence is made</p><h2 id="methodology-title">Evidence before conclusions.</h2></div><a class="text-link" href="https://github.com/managedcode/KeyLoad/blob/main/docs/implementation/comparative-benchmarks.md">Read the benchmark methodology <span aria-hidden="true">↗</span></a></div>
+      <div class="method-grid"><article><span class="step-number">01</span><h3>Shared inputs</h3><p>A seeded corpus fixes document bytes, vectors, graph edges and request schedules. Workload conditions and corpus hash travel with each report.</p></article><article><span class="step-number">02</span><h3>Real command paths</h3><p>Clients call real services. Setup, warmup and correctness checks are outside the timer; queue cycles include enqueue, receive and ACK.</p></article><article><span class="step-number">03</span><h3>Correctness first</h3><p>Writes are read back, graph results match a reference traversal, and queue completion rejects missing, duplicate or wrong-payload messages.</p></article></div>
+      <div class="qualification-block"><div><p class="eyebrow">Qualification status</p><h3>Early development, with limits visible.</h3><p>Cluster qualification is in progress. Generator CPU, allocation and RSS describe the load generator and its sampling history, not database resource budgets. Endurance, overload and power-loss behavior remain unqualified.</p></div><a class="text-link" href="https://github.com/managedcode/KeyLoad/actions">Review current GitHub checks <span aria-hidden="true">↗</span></a></div>
+    </section>
+
+    <section class="reproduce" aria-labelledby="reproduce-title">
+      <div><p class="eyebrow">Open source, reproducible inputs</p><h2 id="reproduce-title">Inspect the code. Run the suite.</h2><p>GitHub Actions starts the RF3 cluster and comparison engines in Docker through Aspire.</p></div>
+      <div class="command-box"><code>gh workflow run ci.yml --repo managedcode/KeyLoad --ref main</code><button id="copy-command" type="button" aria-label="Copy benchmark workflow command">Copy</button></div>
+    </section>
+  </main>
+  <footer><a class="brand" href="./">KeyLoad<span class="brand-dot">.</span></a><p>A .NET data engine in early development.</p><div><a href="https://github.com/managedcode/KeyLoad/tree/main/docs">Documentation</a><a href="https://github.com/managedcode/KeyLoad" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a></div></footer>
+</body>
+</html>

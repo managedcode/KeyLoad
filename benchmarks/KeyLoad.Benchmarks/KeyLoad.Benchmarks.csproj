@@ -4,10 +4,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../src/KeyLoad.Query/KeyLoad.Query.csproj" />
-    <ProjectReference Include="../../src/KeyLoad.Security/KeyLoad.Security.csproj" />
-    <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
+    <ProjectReference Include="../KeyLoad.BenchmarkScenarios/KeyLoad.BenchmarkScenarios.csproj" />
     <PackageReference Include="BenchmarkDotNet" />
-    <PackageReference Include="Npgsql" />
   </ItemGroup>
 </Project>

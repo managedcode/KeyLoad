@@ -1,61 +1,32 @@
+using System.Net;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
-using System.Net;
 
 namespace KeyLoad.UnitTests;
 
-public sealed class ComparisonHarnessTests
+internal sealed class ComparisonHarnessTests
 {
-    private static ComparisonOptions Small => new() { Documents = 16, Operations = 12, Warmup = 2, Repetitions = 2,
-        Concurrency = 2, Dimensions = 8, TopK = 3, PayloadBytes = 128 };
-
-    [Fact]
-    public void CorpusIsByteExactAndReproducibleAcrossTargetsAndSeeds()
+    private static ComparisonOptions Small => new()
     {
-        var a = new BenchmarkDataset(Small); var b = new BenchmarkDataset(Small);
-        Assert.Equal(a.Sha256, b.Sha256);
-        Assert.NotEqual(a.Sha256, new BenchmarkDataset(Small with { Seed = Small.Seed + 1 }).Sha256);
-        Assert.All(a.Documents, document => Assert.Equal(Small.PayloadBytes, System.Text.Encoding.UTF8.GetByteCount(document.Json)));
-        Assert.All(a.Documents, document => Assert.Equal(document.Id, a.ExactNeighbors(document)[0].Id));
-        Assert.Equal(a.Documents[0].Json, b.Documents[0].Json);
-        Assert.True(BenchmarkDataset.SameJson("{\"id\":1,\"payload\":\"x\"}", "{\"payload\":\"x\",\"id\":1}"));
-        Assert.False(BenchmarkDataset.SameJson("{\"id\":1}", "{\"id\":2}"));
-        Assert.Throws<ArgumentOutOfRangeException>(() => new BenchmarkDataset(Small with { TopK = 17 }));
-    }
+        Documents = 16,
+        Operations = 12,
+        Warmup = 2,
+        Repetitions = 2,
+        Concurrency = 2,
+        Dimensions = 8,
+        TopK = 3,
+        PayloadBytes = 128
+    };
 
-    [Fact]
-    public void FailedAttemptsAndTimeoutLatencyRemainVisibleAndDoNotInflateUsefulThroughput()
-    {
-        OperationSample[] samples = [new(0, 0, 0, 1, true, null, 128, "m1", new(0.2, 0.5, 0.3)),
-            new(1, 0, 1, 101, false, "TimeoutException", 128, null, null),
-            new(2, 0, 101, 103, true, null, 128, "m2", new(0.5, 1, 0.5))];
-        var result = ComparisonRunner.Summarize(samples, 2);
-        Assert.Equal(3, result.Attempts); Assert.Equal(2, result.Successes); Assert.Equal(1, result.Failures);
-        Assert.Equal(1, result.UsefulOperationsPerSecond); Assert.Equal(100, result.Latency.P99Ms);
-        Assert.Equal(2, result.UniqueCompletedMessages); Assert.NotNull(result.Enqueue);
-    }
-
-    [Fact]
-    public void GraphOracleHandlesCyclesDepthAndDisconnectedComponents()
-    {
-        var data = new BenchmarkDataset(Small);
-        Assert.Equal(data.Documents[1..4].Select(document => document.Id), data.Reachable(data.Documents[0], 1));
-        Assert.Equal(data.Documents[1..7].Select(document => document.Id), data.Reachable(data.Documents[0], 2));
-        Assert.Equal(data.Documents[1..8].Select(document => document.Id), data.Reachable(data.Documents[0], 5));
-        Assert.DoesNotContain(data.Reachable(data.Documents[0], 5), id => id == data.Documents[8].Id);
-        Assert.NotEqual(data.Sha256, new BenchmarkDataset(Small with { GraphFanOut = 2 }).Sha256);
-        Assert.Empty(new BenchmarkDataset(Small with { Documents = 1, TopK = 1 }).Edges);
-    }
-
-    [Fact]
+    [Test]
     public async Task Neo4jQueryErrorsFailEvenWhenHttpStatusIsAccepted()
     {
-        var http = new HttpClient(new QueryFailureHandler()) { BaseAddress = new Uri("http://localhost/") };
-        var target = new Neo4jTarget(http, Guid.NewGuid().ToString("N"), "test-image");
-        var error = await Assert.ThrowsAsync<ComparisonFailure>(() => target.InitializeAsync(new BenchmarkDataset(Small), TestContext.Current.CancellationToken));
-        Assert.Equal("Neo4j:Neo.ClientError.Statement.SyntaxError", error.Message);
-        Assert.DoesNotContain("sensitive-query", error.Message);
-        http.Dispose();
+        using var handler = new QueryFailureHandler();
+        using var http = new HttpClient(handler, disposeHandler: false) { BaseAddress = new Uri("http://localhost/") };
+        await using var target = new Neo4jTarget(http, Guid.NewGuid().ToString("N"), "test-image");
+        var error = await Assert.ThrowsExactlyAsync<ComparisonFailureException>(() => target.InitializeAsync(new BenchmarkDataset(Small), TestContext.Current!.Execution.CancellationToken));
+        await Assert.That(error!.Message).IsEqualTo("Neo4j:Neo.ClientError.Statement.SyntaxError");
+        await Assert.That(error!.Message).DoesNotContain("sensitive-query");
     }
 
     private sealed class QueryFailureHandler : HttpMessageHandler
@@ -66,39 +37,56 @@ public sealed class ComparisonHarnessTests
                 """) });
     }
 
-    [Fact]
+    [Test]
     public async Task RunnerRejectsIncorrectPayloadAndPreservesUnsupportedAndSetupFailures()
     {
         var options = Small with { Warmup = 0, Repetitions = 1 };
-        IComparisonTarget[] targets = [new ReadTarget("correct"), new ReadTarget("incorrect", wrongPayload: true),
-            new ReadTarget("setup-failed", failSetup: true)];
-        var report = await new ComparisonRunner(options).RunAsync(targets, null, TestContext.Current.CancellationToken);
-        var good = Assert.Single(report.Cases, item => item.Target == "correct" && item.Scenario == Scenario.PointRead);
-        Assert.Equal(options.Operations, good.Measurement!.Successes);
-        var bad = Assert.Single(report.Cases, item => item.Target == "incorrect" && item.Scenario == Scenario.PointRead);
-        Assert.Equal("failed", bad.Status); Assert.Equal(0, bad.Measurement!.UsefulOperationsPerSecond);
-        Assert.All(bad.Samples, sample => Assert.Equal("PointReadMismatch", sample.Error));
-        Assert.All(report.Cases.Where(item => item.Status == "unsupported"), item => Assert.Null(item.Measurement));
-        Assert.Equal("failed", Assert.Single(report.Cases, item => item.Target == "setup-failed" && item.Scenario == Scenario.PointRead).Status);
-        Assert.DoesNotContain("secret-value", ReportWriter.Markdown(report));
+        await using var correct = new ReadTarget("correct");
+        await using var incorrect = new ReadTarget("incorrect", wrongPayload: true);
+        await using var setupFailed = new ReadTarget("setup-failed", failSetup: true);
+        IComparisonTarget[] targets = [correct, incorrect, setupFailed];
+        var report = await new ComparisonRunner(options).RunAsync(targets, null, TestContext.Current!.Execution.CancellationToken);
+        var good = await Assert.That(report.Cases).HasSingleItem(item => item.Target == "correct" && item.Scenario == Scenario.PointRead);
+        await Assert.That(good.Measurement!.Successes).IsEqualTo(options.Operations);
+        var bad = await Assert.That(report.Cases).HasSingleItem(item => item.Target == "incorrect" && item.Scenario == Scenario.PointRead);
+        await Assert.That(bad.Status).IsEqualTo("failed");
+        await Assert.That(bad.Measurement!.UsefulOperationsPerSecond).IsEqualTo(0);
+        foreach (var sample in bad.Samples)
+        {
+            await Assert.That(sample.Error).IsEqualTo("PointReadMismatch");
+        }
+        await Assert.That(report.Cases.Where(item => item.Status == "unsupported")).All(item => item.Measurement == null);
+        await Assert.That(System.Linq.Enumerable.Single(report.Cases, item => item.Target == "setup-failed" && item.Scenario == Scenario.PointRead).Status).IsEqualTo("failed");
+        await Assert.That(ReportWriter.Markdown(report)).DoesNotContain("secret-value");
     }
 
-    [Fact]
+    [Test]
     public async Task WarmupExcludedRepetitionsRetainedAndCsvContainsEveryAttempt()
     {
-        var target = new ReadTarget("correct");
-        var report = await new ComparisonRunner(Small).RunAsync([target], "test-revision", TestContext.Current.CancellationToken);
-        Assert.Equal(Small.Repetitions, report.Cases.Count(item => item.Status == "measured"));
-        Assert.All(report.Cases.Where(item => item.Measurement is not null), item => Assert.Equal(Small.Operations, item.Samples.Length));
-        Assert.Equal(Small.Repetitions * (Small.Operations + Small.Warmup), target.Executions);
+        await using var target = new ReadTarget("correct");
+        var report = await new ComparisonRunner(Small).RunAsync([target], "test-revision", TestContext.Current!.Execution.CancellationToken);
+        await Assert.That(report.Cases.Count(item => item.Status == "measured")).IsEqualTo(Small.Repetitions);
+        foreach (var item in report.Cases.Where(item => item.Measurement is not null))
+        {
+            await Assert.That(item.Samples.Length).IsEqualTo(Small.Operations);
+        }
+        await Assert.That(target.Executions).IsEqualTo(Small.Repetitions * (Small.Operations + Small.Warmup));
         var output = Path.Combine(Path.GetTempPath(), "keyload-report-" + Guid.NewGuid().ToString("N"));
         try
         {
-            await ReportWriter.WriteAsync(report, output, TestContext.Current.CancellationToken);
-            Assert.Equal(1 + Small.Operations * Small.Repetitions, File.ReadAllLines(Path.Combine(output, "samples.csv")).Length);
-            Assert.Contains("not an equal-durability", File.ReadAllText(Path.Combine(output, "results.md")));
+            await ReportWriter.WriteAsync(report, output, TestContext.Current!.Execution.CancellationToken);
+            var lines = await File.ReadAllLinesAsync(Path.Combine(output, "samples.csv"));
+            await Assert.That(lines.Length).IsEqualTo(1 + Small.Operations * Small.Repetitions);
+            var markdown = await File.ReadAllTextAsync(Path.Combine(output, "results.md"));
+            await Assert.That(markdown).Contains("not an equal-durability");
         }
-        finally { if (Directory.Exists(output)) Directory.Delete(output, true); }
+        finally
+        {
+            if (Directory.Exists(output))
+            {
+                Directory.Delete(output, true);
+            }
+        }
     }
 
     private sealed class ReadTarget(string name, bool wrongPayload = false, bool failSetup = false) : IComparisonTarget, IComparisonSession

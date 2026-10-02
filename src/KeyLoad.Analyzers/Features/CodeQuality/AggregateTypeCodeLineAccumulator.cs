@@ -1,0 +1,43 @@
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using Microsoft.CodeAnalysis;
+
+namespace KeyLoad.Analyzers.Features.CodeQuality;
+
+internal sealed class AggregateTypeCodeLineAccumulator
+{
+    private readonly ConcurrentDictionary<INamedTypeSymbol, AggregateTypeCodeMeasurement> measurements =
+        new(SymbolEqualityComparer.Default);
+
+    internal void Add(INamedTypeSymbol type, int codeLines, Location location)
+    {
+        measurements.AddOrUpdate(
+            type,
+            new AggregateTypeCodeMeasurement(type, codeLines, location),
+            (_, current) => new AggregateTypeCodeMeasurement(
+                type,
+                current.CodeLines + codeLines,
+                EarlierLocation(current.Location, location)));
+    }
+
+    internal AggregateTypeCodeMeasurement[] Snapshot() => measurements.Values.ToArray();
+
+    private static Location EarlierLocation(Location current, Location candidate)
+    {
+        var pathOrder = StringComparer.Ordinal.Compare(
+            current.SourceTree?.FilePath, candidate.SourceTree?.FilePath);
+        if (pathOrder < 0 || (pathOrder == 0 &&
+            current.SourceSpan.Start <= candidate.SourceSpan.Start))
+        {
+            return current;
+        }
+
+        return candidate;
+    }
+}
+
+internal sealed record AggregateTypeCodeMeasurement(
+    INamedTypeSymbol Type,
+    int CodeLines,
+    Location Location);

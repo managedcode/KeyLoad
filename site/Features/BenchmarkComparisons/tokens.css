@@ -1,0 +1,19 @@
+:root {
+  color-scheme: light;
+  --paper: #F3F0E7;
+  --paper-deep: #eae6da;
+  --ink: #121511;
+  --forest: #183b2d;
+  --forest-soft: #315744;
+  --lime: #C8F000;
+  --white: #fbfaf5;
+  --line: #d8d5ca;
+  --muted: #62665c;
+  --danger: #94372d;
+  --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --page: 1320px;
+  --gutter: clamp(1rem, 5vw, 4.25rem);
+  --radius: 4px;
+}

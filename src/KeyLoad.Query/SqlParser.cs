@@ -1,167 +1,141 @@
 using System.Globalization;
 using System.Text;
 using KeyLoad.Core;
+using KeyLoad.Query.Features.QueryExecution;
 
 namespace KeyLoad.Query;
 
 /// <summary>A bounded Q1 parser. Unsupported syntax is rejected, never passed through to storage.</summary>
 public sealed class SqlParser
 {
-    private readonly List<Token> tokens;
+    private readonly SqlTokenCursor cursor;
     private readonly DatabaseLimits limits;
-    private int offset;
-    private int depth;
     private string? alias;
-    private enum Kind { Identifier, String, Number, Parameter, Symbol, End }
-    private sealed record Token(Kind Kind, string Text, bool Quoted = false);
+
+    /// <summary>Creates a parser with the configured SQL byte and token limits.</summary>
+    /// <param name="sql">Q1 SQL text.</param>
+    /// <param name="limits">Database query limits.</param>
     public SqlParser(string sql, DatabaseLimits limits)
+        : this(sql, limits, null)
     {
-        this.limits = limits;
-        if (Encoding.UTF8.GetByteCount(sql) > limits.MaxQueryBytes) throw Errors.Fail(ErrorCode.BudgetExceeded, "The SQL byte budget is exceeded.");
-        tokens = Lex(sql, limits.MaxQueryTokens);
     }
+
+    internal SqlParser(string sql, DatabaseLimits limits, ReadExecutionBudget? budget)
+    {
+        ArgumentNullException.ThrowIfNull(sql);
+        ArgumentNullException.ThrowIfNull(limits);
+        this.limits = limits;
+        if (sql.Length > limits.MaxQueryBytes || Encoding.UTF8.GetByteCount(sql) > limits.MaxQueryBytes)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SqlSyntax.ByteBudgetDetail);
+        }
+        cursor = new(SqlTokenizer.Lex(sql, limits.MaxQueryTokens, budget));
+    }
+
+    /// <summary>Parses the SQL text into a typed, bounded query.</summary>
+    /// <returns>A select query with immutable projection and ordering.</returns>
     public SelectQuery Parse()
     {
-        var explain = Eat("EXPLAIN");
-        Need("SELECT");
-        var projection = new List<Selection>();
-        if (Eat("*")) projection.Add(new("*", "*"));
-        else do
-        {
-            var path = Path();
-            var output = Eat("AS") ? Identifier() : path.Last();
-            projection.Add(new(JsonData.Path(path.ToArray()), output));
-        } while (Eat(","));
-        Need("FROM");
-        var collection = Identifier();
-        if (Eat("AS")) alias = Identifier();
-        else if (Current.Kind == Kind.Identifier && !Is("WHERE") && !Is("ORDER") && !Is("LIMIT")) alias = Identifier();
-        string BoundPath(string path)
-        {
-            if (path == "*") return path;
-            var parts = JsonData.PathSegments(path).ToList();
-            if (alias is not null && parts.Count > 1 && parts[0] == alias) parts.RemoveAt(0);
-            return parts.Count == 1 && parts[0] is "id" or "revision" ? "/@" + parts[0] : JsonData.Path(parts.ToArray());
-        }
+        var explain = cursor.Eat(SqlSyntax.Explain);
+        cursor.Need(SqlSyntax.Select);
+        var projection = ReadProjection();
+        cursor.Need(SqlSyntax.From);
+        var collection = cursor.Identifier();
+        ReadAlias();
         projection = projection.Select(p => p with { Path = BoundPath(p.Path) }).ToList();
-        Predicate? filter = Eat("WHERE") ? Expression() : null;
-        var order = new List<Ordering>();
-        if (Eat("ORDER"))
+        var filter = cursor.Eat(SqlSyntax.Where) ? new SqlExpressionParser(cursor, limits, alias).Parse() : null;
+        var order = ReadOrder();
+        var limit = ReadLimit();
+        cursor.Eat(SqlSyntax.Semicolon);
+        if (cursor.Current.Kind != SqlTokenKind.End)
         {
-            Need("BY");
-            do { var field = BoundPath(JsonData.Path(Path().ToArray())); var descending = Eat("DESC"); if (!descending) Eat("ASC"); order.Add(new(field, descending)); } while (Eat(","));
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, SqlSyntax.UnsupportedSyntaxDetail);
         }
-        var limit = 100;
-        if (Eat("LIMIT"))
+        if (limit < 1 || limit > limits.MaxResults || projection.Count > SqlSyntax.MaximumProjection || order.Count > SqlSyntax.MaximumOrdering
+            || projection.Select(p => p.Alias).Distinct(StringComparer.Ordinal).Count() != projection.Count)
         {
-            if (Current.Kind != Kind.Number || !int.TryParse(Current.Text, NumberStyles.None, CultureInfo.InvariantCulture, out limit)) throw Syntax();
-            offset++;
+            throw SqlSyntax.Invalid();
         }
-        Eat(";");
-        if (Current.Kind != Kind.End) throw Errors.Fail(ErrorCode.UnsupportedCapability, "The SQL statement contains unsupported syntax.");
-        if (limit < 1 || limit > limits.MaxResults || projection.Count > 256 || order.Count > 16
-            || projection.Select(p => p.Alias).Distinct(StringComparer.Ordinal).Count() != projection.Count) throw Syntax();
-        return new(collection, alias, projection.ToArray(), filter, order.ToArray(), limit, explain);
+        return new(collection, alias, [.. projection], filter, [.. order], limit, explain);
     }
-    private Predicate Expression(int precedence = 0)
+
+    private List<Selection> ReadProjection()
     {
-        if (++depth > limits.MaxQueryDepth) throw Errors.Fail(ErrorCode.BudgetExceeded, "The SQL depth budget is exceeded.");
-        Predicate left;
-        if (Eat("NOT")) left = new Negation(Expression(3));
-        else if (Eat("(")) { left = Expression(); Need(")"); }
+        var projection = new List<Selection>();
+        if (cursor.Eat(SqlSyntax.Star))
+        {
+            projection.Add(new(SqlSyntax.Star, SqlSyntax.Star));
+        }
         else
         {
-            var value = Operand();
-            if (Eat("IS")) { var not = Eat("NOT"); var missing = Eat("MISSING"); if (!missing) Need("NULL"); left = new NullTest(value, not, missing); }
-            else
+            do
             {
-                var not = Eat("NOT");
-                if (Eat("IN"))
-                {
-                    Need("("); var values = new List<Operand>(); do { values.Add(Operand()); } while (Eat(",")); Need(")");
-                    if (values.Count > 256) throw Syntax(); left = new InPredicate(value, values.ToArray(), not);
-                }
-                else
-                {
-                    if (not || Current.Text is not ("=" or "!=" or "<>" or ">" or ">=" or "<" or "<=")) throw Syntax();
-                    var operation = Current.Text; offset++; left = new Comparison(value, operation, Operand());
-                }
-            }
+                var path = cursor.Path();
+                var output = cursor.Eat(SqlSyntax.As) ? cursor.Identifier() : path.Last();
+                projection.Add(new(JsonData.Path(path.ToArray()), output));
+            } while (cursor.Eat(SqlSyntax.Comma));
         }
-        while ((Is("OR") ? 1 : Is("AND") ? 2 : 0) is var priority && priority > precedence)
-        {
-            var operation = Current.Text.ToUpperInvariant(); offset++;
-            left = new Logical(left, operation, Expression(priority));
-        }
-        depth--;
-        return left;
+        return projection;
     }
-    private Operand Operand()
+
+    private void ReadAlias()
     {
-        var token = Current;
-        if (token.Kind == Kind.String) { offset++; return new ValueOperand(token.Text); }
-        if (token.Kind == Kind.Number)
+        if (cursor.Eat(SqlSyntax.As))
         {
-            offset++; if (!decimal.TryParse(token.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)) throw Syntax();
-            return new ValueOperand(value);
+            alias = cursor.Identifier();
         }
-        if (token.Kind == Kind.Parameter) { offset++; return new ParameterOperand(token.Text); }
-        if (Eat("NULL")) return new ValueOperand(null);
-        if (Eat("TRUE")) return new ValueOperand(true);
-        if (Eat("FALSE")) return new ValueOperand(false);
-        var parts = Path();
-        if (alias is not null && parts.Count > 1 && parts[0] == alias) parts.RemoveAt(0);
-        return new FieldOperand(parts.Count == 1 && parts[0] is "id" or "revision" ? "/@" + parts[0] : JsonData.Path(parts.ToArray()));
+        else if (cursor.Current.Kind == SqlTokenKind.Identifier && !cursor.Is(SqlSyntax.Where) && !cursor.Is(SqlSyntax.Order) && !cursor.Is(SqlSyntax.Limit))
+        {
+            alias = cursor.Identifier();
+        }
     }
-    private List<string> Path() { var parts = new List<string> { Identifier() }; while (Eat(".")) parts.Add(Identifier()); return parts; }
-    private string Identifier() { if (Current.Kind != Kind.Identifier) throw Syntax(); var value = Current.Text; offset++; JsonData.Identifier(value); return value; }
-    private Token Current => tokens[offset];
-    private bool Is(string text) => !Current.Quoted && string.Equals(Current.Text, text, StringComparison.OrdinalIgnoreCase);
-    private bool Eat(string text) { if (!Is(text)) return false; offset++; return true; }
-    private void Need(string text) { if (!Eat(text)) throw Syntax(); }
-    private static KeyLoadException Syntax() => Errors.Fail(ErrorCode.Validation, "The SQL statement is invalid for the supported Q1 dialect.");
-    private static List<Token> Lex(string sql, int maximum)
+
+    private string BoundPath(string path)
     {
-        var result = new List<Token>();
-        for (var i = 0; i < sql.Length;)
+        if (path == SqlSyntax.Star)
         {
-            var c = sql[i];
-            if (char.IsWhiteSpace(c)) { i++; continue; }
-            if (result.Count >= maximum) throw Errors.Fail(ErrorCode.BudgetExceeded, "The SQL token budget is exceeded.");
-            if (c is '\'' or '"')
-            {
-                var quote = c; var value = new StringBuilder(); var closed = false; i++;
-                while (i < sql.Length)
-                {
-                    if (sql[i] == quote)
-                    {
-                        i++; if (i < sql.Length && sql[i] == quote) { value.Append(quote); i++; }
-                        else { closed = true; break; }
-                    }
-                    else value.Append(sql[i++]);
-                }
-                if (!closed) throw Syntax();
-                result.Add(new(quote == '\'' ? Kind.String : Kind.Identifier, value.ToString(), quote == '"'));
-            }
-            else if (char.IsLetter(c) || c is '_' or '@')
-            {
-                var start = i++; while (i < sql.Length && (char.IsLetterOrDigit(sql[i]) || sql[i] == '_')) i++;
-                result.Add(new(c == '@' ? Kind.Parameter : Kind.Identifier, sql[(c == '@' ? start + 1 : start)..i]));
-            }
-            else if (char.IsDigit(c) || c == '-' && i + 1 < sql.Length && char.IsDigit(sql[i + 1]))
-            {
-                var start = i++; while (i < sql.Length && (char.IsDigit(sql[i]) || sql[i] is '.' or 'e' or 'E' or '+' or '-')) i++;
-                result.Add(new(Kind.Number, sql[start..i]));
-            }
-            else
-            {
-                var text = c.ToString(); i++;
-                if (i < sql.Length && (c is '>' or '<' or '!' && sql[i] == '=' || c == '<' && sql[i] == '>')) text += sql[i++];
-                if (text is not ("(" or ")" or "," or "." or "*" or ";" or "=" or "!=" or "<>" or ">" or ">=" or "<" or "<=")) throw Syntax();
-                result.Add(new(Kind.Symbol, text));
-            }
+            return path;
         }
-        result.Add(new(Kind.End, ""));
-        return result;
+        var parts = JsonData.PathSegments(path).ToList();
+        if (alias is not null && parts.Count > 1 && parts[0] == alias)
+        {
+            parts.RemoveAt(0);
+        }
+        return parts.Count == 1 && parts[0] is SqlSyntax.MetadataId or SqlSyntax.MetadataRevision ? SqlSyntax.MetadataPrefix + parts[0] : JsonData.Path(parts.ToArray());
+    }
+
+    private List<Ordering> ReadOrder()
+    {
+        var order = new List<Ordering>();
+        if (cursor.Eat(SqlSyntax.Order))
+        {
+            cursor.Need(SqlSyntax.By);
+            do
+            {
+                var field = BoundPath(JsonData.Path(cursor.Path().ToArray()));
+                var descending = cursor.Eat(SqlSyntax.Desc);
+                if (!descending)
+                {
+                    cursor.Eat(SqlSyntax.Asc);
+                }
+                order.Add(new(field, descending));
+            } while (cursor.Eat(SqlSyntax.Comma));
+        }
+        return order;
+    }
+
+    private int ReadLimit()
+    {
+        var limit = SqlSyntax.DefaultLimit;
+        if (cursor.Eat(SqlSyntax.Limit))
+        {
+            if (cursor.Current.Kind != SqlTokenKind.Number
+                || !int.TryParse(cursor.Current.Text, NumberStyles.None, CultureInfo.InvariantCulture, out limit))
+            {
+                throw SqlSyntax.Invalid();
+            }
+            cursor.Advance();
+        }
+        return limit;
     }
 }

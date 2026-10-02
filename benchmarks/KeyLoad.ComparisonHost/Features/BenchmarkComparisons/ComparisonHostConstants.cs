@@ -1,0 +1,43 @@
+namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+
+internal static class ComparisonHostConstants
+{
+    internal const string KeyLoadEndpoint = "Benchmarks:KeyLoadEndpoint";
+    internal const string Profile = "Benchmarks:Profile";
+    internal const string TimeSeriesProfile = "timeseries";
+    internal const string TimescaleConnection = "ConnectionStrings:benchmark-timescale";
+    internal const string TimescaleImage = "Benchmarks:Images:Timescale";
+    internal const string QdrantEndpoint = "Benchmarks:QdrantEndpoint";
+    internal const string QdrantApiKey = "Benchmarks:QdrantApiKey";
+    internal const string Neo4jEndpoint = "Benchmarks:Neo4jEndpoint";
+    internal const string Neo4jPassword = "Benchmarks:Neo4jPassword";
+    internal const string AdminKey = "Benchmarks:AdminKey";
+    internal const string PostgresConnection = "ConnectionStrings:benchmark-postgres";
+    internal const string RabbitConnection = "ConnectionStrings:benchmark-rabbit";
+    internal const string RedisConnection = "ConnectionStrings:benchmark-redis";
+    internal const string PostgresImage = "Benchmarks:Images:Postgres";
+    internal const string QdrantImage = "Benchmarks:Images:Qdrant";
+    internal const string RabbitImage = "Benchmarks:Images:Rabbit";
+    internal const string RedisImage = "Benchmarks:Images:Redis";
+    internal const string Neo4jImage = "Benchmarks:Images:Neo4j";
+    internal const string Output = "Benchmarks:Output";
+    internal const string Storage = "Benchmarks:Storage";
+    internal const string SourceRevision = "Benchmarks:SourceRevision";
+    internal const string MissingSettingPrefix = "Missing benchmark setting: ";
+    internal const string ReportsPrefix = "Reports: ";
+    internal const string CleanupFailureSuffix = " cleanup failed: ";
+    internal const string TargetCleanupFailedCode = "ComparisonTargetCleanupFailed";
+    internal const string UnownedClientName = "HTTP client";
+    internal const string QdrantApiKeyHeader = "api-key";
+    internal const string Neo4jUser = "neo4j";
+    internal const string BasicAuthenticationScheme = "Basic";
+    internal const string UserPasswordSeparator = ":";
+    internal const string GuidFormat = "N";
+    internal const string FailedStatus = "failed";
+    internal const int SuccessfulExitCode = 0;
+    internal const int FailedExitCode = 1;
+    internal const int LifetimeHours = 2;
+    internal const int TargetCount = 6;
+    internal const int HttpClientCount = 3;
+    internal static readonly TimeSpan InfiniteTimeout = Timeout.InfiniteTimeSpan;
+}

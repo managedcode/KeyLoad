@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-02",
+  "scope": "REQ/AC-BC-011..018 and BC-024/025/027",
+  "status": "implementation_in_progress",
+  "feature": "docs/Features/BenchmarkComparisons.md",
+  "decision": "docs/ADR/ADR-040-static-site-threejs-evidence.md",
+  "acceptance": "site-design.acceptance.md",
+  "plan": "site-design.plan.md",
+  "originalMeasuredEvidence": {
+    "run": 36926803549,
+    "sourceRevision": "9c570f8c33a7a9667507a8e1c0ca68860de3be45",
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/36926803549",
+    "conclusion": "success",
+    "event": "push",
+    "branch": "main",
+    "artifact": {
+      "id": 11193564650,
+      "name": "comparison-suite",
+      "digest": "sha256:82aa46027dd143e3da6678e81ac881511068ac2329074ce59640952ad43ffdb2",
+      "expired": false
+    },
+    "requiredJobs": [
+      "comparison-smoke",
+      "verify (ubuntu-latest)",
+      "verify (macos-latest)",
+      "verify (windows-latest)"
+    ],
+    "jobsVerified": "completed_success"
+  },
+  "consultation": {
+    "tool": "Existing Claude CLI 2.1.267, safe read-only no tools/hooks/config/session",
+    "successfulModel": "claude-opus-5",
+    "requestedModel": "claude-opus-5-5",
+    "requestedModelOutcome": "API400: CLI2.1.280+ required; no global update performed",
+    "installation": false
+  },
+  "tasks": {
+    "planning": "TASK-SITE-PLAN-001 COMPLETE strongest gpt-6-astra ultra",
+    "integrationAudit": "COMPLETE read-only; corrections joined, not final acceptance",
+    "visual": {
+      "state": "complete",
+      "paths": [
+        "site/Features/BenchmarkComparisons/index.html",
+        "site/Features/BenchmarkComparisons/styles.css",
+        "site/Features/BenchmarkComparisons/tokens.css",
+        "site/Features/BenchmarkComparisons/assets/cluster-poster.svg"
+      ],
+      "rootCorrections": [
+        "Actual no-JS evidence links from validated catalog",
+        "Public reproduction command invokes GitHub Actions"
+      ]
+    },
+    "scene": "complete_joined_root_review_with_real_constructor_and_tile_corrections",
+    "tests": "complete_original_TEST004_source_packet_joined; GitHub_execution_pending",
+    "evidence": "complete_EVIDENCE005_source_packet_joined",
+    "integration": "in_progress",
+    "finalReview": "pending_required_packets_and_integrated_evidence",
+    "coverage": "TASK013_COMPLETE_strongest_source_approval_ae21793f1c58424a507dbeb2b8bdf4b227cd84821f4034b7d576966d6e5ad352; integrated_development_build_passed; real_GitHub_native_numeric_qualification_pending",
+    "browser": "TASK012_COMPLETE_strongest_source_approval_7424fb8d25f303c3c94ca95870de76431de473e5317a76654e028a8b23bf1082; preserved_otherchat_KL-SITE-BUILD-003A_handoff; integrated_build_and_format_passed",
+    "candidateAudit": "TASK-SITE-CANDIDATE-AUDIT-010_COMPLETE; repair source-preparation review COMPLETE, all required joins still pending",
+    "analyzerCoverage": "TASK011_COMPLETE_strongest_source_approval; native_boolean_BigInteger_checked_sum_physical_line_gate_and_complete_12_pipeline_oracles_joined; nesting3; integrated_build_and_format_passed"
+  },
+  "verification": {
+    "source": "All_bounded_worker_packets_complete_joined_full_root_and_strongest_review; 51_source_manifest_98c457ee0333c816795665f742101989b9a0638b2382372313afefd823de4617; source_only_not_runtime_qualification",
+    "staticBuild": {
+      "state": "development_build_passed",
+      "profiles": 3,
+      "javascriptGzipBytes": 26112,
+      "cssGzipBytes": 4971,
+      "qualification": false
+    },
+    "manualBrowser": {
+      "state": "complete_design_inspection_at_recorded_local_source_hashes",
+      "receipt": "/private/tmp/keyload-site-manual-design-receipt.json",
+      "graphicsBackend": "webgpu",
+      "canvasCount": 1,
+      "viewports": [
+        {
+          "width": 1280,
+          "height": 720
+        },
+        {
+          "width": 390,
+          "height": 844
+        },
+        {
+          "width": 320,
+          "height": 740
+        },
+        {
+          "width": 768,
+          "height": 1024
+        },
+        {
+          "width": 1440,
+          "height": 900
+        }
+      ],
+      "qualification": false,
+      "screenshots": [
+        "/private/tmp/keyload-site-desktop-20261002.jpg",
+        "/private/tmp/keyload-site-mobile-20261002.jpg",
+        "/private/tmp/keyload-site-benchmarks-20261002.jpg",
+        "/private/tmp/keyload-site-desktop-1440-20261002.jpg"
+      ]
+    },
+    "githubSiteSuite": {
+      "state": "exact_descendant_github_qualification_in_progress",
+      "attempts": [
+        {
+          "run": 36987695573,
+          "sourceRevision": "f56d511b4a343eff99d3117e9414490a05cfb8ae",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/36987695573",
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/36987695573/job/110776384044",
+          "conclusion": "failure",
+          "cause": "Hosted runner has no rg; report-file hash enumeration failed before test builds",
+          "analyzerTests": "skipped_not_passing",
+          "siteTests": "skipped_not_passing",
+          "coverage": "missing_native_report_failed_closed",
+          "publication": "skipped",
+          "artifact": "site-qualification-f56d511b4a343eff99d3117e9414490a05cfb8ae",
+          "artifactReceipt": {
+            "id": 11218301726,
+            "digest": "sha256:be2cc09ec751e64ff51fe257ea3c91b8a90ef9331f8a7c78300fd0dfdf66ac9a",
+            "localEvidence": "/private/tmp/keyload-site-run-36987695573",
+            "log": "/private/tmp/keyload-site-run-36987695573/workflow.log"
+          }
+        },
+        {
+          "run": 36988549282,
+          "sourceRevision": "b402dc50785028cc5b09a3928c5b28ba8a721a6e",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/36988549282",
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/36988549282/job/110779101338",
+          "conclusion": null,
+          "state": "in_progress",
+          "runtimeSourceReceipt": "passed",
+          "publication": "skipped"
+        }
+      ]
+    },
+    "coverage": "native_Node_browser_and_MTP_analyzer_gates_in_progress; exact_candidate_GitHub_numeric_pass_pending",
+    "databaseQualification": "not_part_of_site_gate",
+    "publicPublication": "deferred_separate_two_revision_gate",
+    "dns": "unchanged",
+    "developmentBuild": "Integrated SiteTests_and_AnalyzerTests_Release_builds_passed_0warnings_0errors; focused_format_passed_for_all_three_dependency_projects; no_local_tests; broader_solution_qualification_separate",
+    "githubAccess": "Authenticated_read_verified_live_2026-10-02; repository_push_permission_true; no_credentials_changed",
+    "governance": {
+      "state": "passed_static_workspace_validation",
+      "projects": 25,
+      "modules": 4,
+      "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+      "qualification": false
+    },
+    "developmentFailureArtifacts": [
+      {
+        "path": "/private/tmp/KeyLoad.SiteTests.site-integration-build-failure-20261002.sarif",
+        "sha256": "49ed131a18a70e093a2850c64273de6389121e527f7a2b63ad3cf3a92100a2fb",
+        "kind": "raw_compiler_SARIF; includes suppressed/generated diagnostics; terminal error count is separate",
+        "terminalBuildErrors": 14
+      },
+      {
+        "path": "/private/tmp/KeyLoad.Analyzers.Tests.site-integration-build-failure-20261002.sarif",
+        "sha256": "079fa325b8228ae368cd3ef5e270237d1aac7f2f09dcd17df584f61cc6b121ed",
+        "kind": "raw_compiler_SARIF; includes suppressed/generated diagnostics; terminal error count is separate",
+        "terminalBuildErrors": 3
+      }
+    ]
+  },
+  "delivery": {
+    "candidate": "ordinary_descendant_validation_in_progress",
+    "branch": "codex/site-qualification-20261002-a",
+    "initialCandidateRevision": "f56d511b4a343eff99d3117e9414490a05cfb8ae",
+    "qualifiedRevision": null,
+    "sourceSnapshotReceiptSha256": "271d8415d29c69e8af84f604858079ed6effd4ce586d06220237ff9ac57b9684",
+    "workspace": "shared_dirty_checkout_preserved",
+    "main": "not_changed",
+    "currentCandidateRevision": "b402dc50785028cc5b09a3928c5b28ba8a721a6e",
+    "descendantReceipt": "/private/tmp/keyload-site-candidate-20261002-b.delivery.json"
+  }
+}

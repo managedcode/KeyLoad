@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <KeyLoadCodeQualityDirectory>$(MSBuildThisFileDirectory)artifacts/code-quality/$(MSBuildProjectName)/$(Configuration)/$(TargetFramework)</KeyLoadCodeQualityDirectory>
+    <ErrorLog Condition="'$(ErrorLog)' == ''">$(KeyLoadCodeQualityDirectory)/diagnostics.sarif,version=2.1</ErrorLog>
+  </PropertyGroup>
+  <Target Name="EnforceKeyLoadCodeQuality" BeforeTargets="CoreCompile">
+    <Error Condition="'$(TreatWarningsAsErrors)' != 'true' or '$(CodeAnalysisTreatWarningsAsErrors)' != 'true'"
+           Text="KeyLoad requires compiler and analyzer warnings to be treated as errors." />
+    <Error Condition="'$(EnableNETAnalyzers)' != 'true' or '$(EnforceCodeStyleInBuild)' != 'true' or '$(RunAnalyzers)' != 'true' or '$(RunAnalyzersDuringBuild)' != 'true' or '$(RunAnalyzersDuringLiveAnalysis)' != 'true'"
+           Text="KeyLoad requires SDK, style, build and live analyzers in every project." />
+    <Error Condition="'$(AnalysisLevel)' != 'latest-all'"
+           Text="KeyLoad requires the latest-all SDK analysis level." />
+    <Error Condition="'$(GenerateDocumentationFile)' != 'true'"
+           Text="KeyLoad requires XML documentation generation so IDE0005 runs during builds." />
+    <MakeDir Directories="$(KeyLoadCodeQualityDirectory)" />
+  </Target>
+</Project>

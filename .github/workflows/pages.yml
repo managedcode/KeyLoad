@@ -5,17 +5,136 @@ on:
     branches: [main]
     types: [completed]
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Validate website source without deployment, or publish qualified source
+        required: true
+        default: validate
+        type: choice
+        options: [validate, publish]
+      evidence_run:
+        description: Successful main push KeyLoad CI run (blank selects latest successful run)
+        required: false
+        type: string
 permissions:
   contents: read
   actions: read
-  pages: write
-  id-token: write
 concurrency:
   group: keyload-pages
   cancel-in-progress: false
 jobs:
+  validate:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'validate'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Select authenticated historical evidence
+        id: evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          REQUESTED_RUN: ${{ inputs.evidence_run }}
+        shell: bash
+        run: |
+          run_id="$REQUESTED_RUN"
+          if [ -z "$run_id" ]; then
+            run_id=$(gh run list --workflow ci.yml --branch main --event push --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          fi
+          [[ "$run_id" =~ ^[1-9][0-9]*$ ]]
+          run=$(gh api "repos/$GH_REPO/actions/runs/$run_id")
+          revision=$(jq -r --arg repo "$GH_REPO" 'select(.conclusion == "success" and .event == "push" and .head_branch == "main" and .head_repository.full_name == $repo and .path == ".github/workflows/ci.yml") | .head_sha' <<< "$run")
+          [[ "$revision" =~ ^[a-f0-9]{40}$ ]]
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+          mkdir -p artifacts/site-evidence
+          printf '%s\n' "$run" > artifacts/site-evidence/run.json
+          gh api --paginate --slurp "repos/$GH_REPO/actions/runs/$run_id/jobs?per_page=100" | jq '{total_count: .[0].total_count, jobs: [.[].jobs[]]}' > artifacts/site-evidence/jobs.json
+          jq -e '.total_count == (.jobs | length) and (.jobs | length > 0 and all(.[]; .status == "completed" and .conclusion == "success"))' artifacts/site-evidence/jobs.json
+          gh api --paginate --slurp "repos/$GH_REPO/actions/runs/$run_id/artifacts?per_page=100" | jq '{total_count: .[0].total_count, artifacts: [.[].artifacts[]]}' > artifacts/site-evidence/artifacts.json
+          jq -e '.total_count == (.artifacts | length)' artifacts/site-evidence/artifacts.json
+          jq -e '[.artifacts[] | select(.name == "comparison-suite" and .expired == false)] | length == 1' artifacts/site-evidence/artifacts.json
+          gh run download "$run_id" --name comparison-suite --dir artifacts/comparisons
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Retain candidate source and runtime versions
+        shell: bash
+        run: |
+          git rev-parse HEAD > artifacts/site-evidence/website-revision.txt
+          git ls-files -z | xargs -0 sha256sum > artifacts/site-evidence/source.sha256
+          node --version > artifacts/site-evidence/node-version.txt
+          dotnet --info > artifacts/site-evidence/dotnet-info.txt
+          find artifacts/comparisons -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum > artifacts/site-evidence/report-files.sha256
+          chrome=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          test -n "$chrome" && test -x "$chrome"
+          "$chrome" --version > artifacts/site-evidence/browser-version.txt
+          printf 'KEYLOAD_SITE_BROWSER=%s\n' "$chrome" >> "$GITHUB_ENV"
+      - name: Qualify required analyzer dependency
+        shell: bash
+        run: |
+          dotnet restore tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj
+          dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release
+          mkdir -p artifacts/site-evidence/analyzer-coverage
+          cp scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml artifacts/site-evidence/analyzer-coverage/coverage.config.xml
+          pwsh --version > artifacts/site-evidence/powershell-version.txt
+          pwsh -NoProfile -File scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Prepare -Repository "$GITHUB_WORKSPACE" -Contract "$GITHUB_WORKSPACE/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$GITHUB_WORKSPACE/artifacts/site-evidence/analyzer-coverage"
+          dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release --report-trx --results-directory artifacts/site-evidence/analyzer-tests --coverage --coverage-settings "$GITHUB_WORKSPACE/artifacts/site-evidence/analyzer-coverage/coverage.config.xml" --coverage-output-format cobertura --coverage-output "$GITHUB_WORKSPACE/artifacts/site-evidence/analyzer-coverage/coverage.cobertura.xml"
+      - name: Enforce native analyzer coverage counts
+        if: success() || failure()
+        shell: pwsh
+        run: ./scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Verify -Repository "$env:GITHUB_WORKSPACE" -Contract "$env:GITHUB_WORKSPACE/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$env:GITHUB_WORKSPACE/artifacts/site-evidence/analyzer-coverage" -CoverageReport "$env:GITHUB_WORKSPACE/artifacts/site-evidence/analyzer-coverage/coverage.cobertura.xml"
+      - name: Restore and build independent site qualification
+        run: |
+          dotnet restore tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj
+          dotnet build tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --no-restore --configuration Release
+      - name: Verify focused format
+        shell: bash
+        run: |
+          dotnet format src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > artifacts/site-evidence/format-analyzers.txt 2>&1
+          dotnet format tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > artifacts/site-evidence/format-analyzer-tests.txt 2>&1
+          dotnet format tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > artifacts/site-evidence/format-site-tests.txt 2>&1
+      - name: Validate actual candidate governance inventory
+        run: node scripts/Features/RepositoryGovernance/verify.mjs
+      - name: Run full site TUnit suite
+        env:
+          KEYLOAD_SITE_REPORTS: ${{ github.workspace }}/artifacts/comparisons
+          KEYLOAD_SITE_REPOSITORY: ${{ github.workspace }}
+          KEYLOAD_SITE_EVIDENCE_RUN: ${{ steps.evidence.outputs.run_id }}
+          KEYLOAD_SITE_MEASURED_REVISION: ${{ steps.evidence.outputs.revision }}
+          KEYLOAD_SITE_COVERAGE: ${{ github.workspace }}/artifacts/site-evidence/js-coverage
+          NODE_V8_COVERAGE: ${{ github.workspace }}/artifacts/site-evidence/js-coverage/node
+        run: |
+          mkdir -p artifacts/site-evidence/js-coverage/node
+          dotnet test --project tests/KeyLoad.SiteTests --no-build --no-restore --configuration Release --report-trx --results-directory artifacts/site-evidence/site-tests
+      - name: Build candidate review artifact
+        env:
+          EVIDENCE_RUN: ${{ steps.evidence.outputs.run_id }}
+          EVIDENCE_REVISION: ${{ steps.evidence.outputs.revision }}
+          WEBSITE_REVISION: ${{ github.sha }}
+        run: node site/scripts/build.mjs --reports=artifacts/comparisons --output=_site --revision="$EVIDENCE_REVISION" --evidence-url="https://github.com/${{ github.repository }}/actions/runs/$EVIDENCE_RUN" --site-revision="$WEBSITE_REVISION"
+      - name: Retain source, test and preview evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: site-qualification-${{ github.sha }}
+          path: |
+            _site
+            artifacts/site-evidence
+            artifacts/code-quality/KeyLoad.SiteTests
+            artifacts/code-quality/KeyLoad.Analyzers
+            artifacts/code-quality/KeyLoad.Analyzers.Tests
+            tests/KeyLoad.Analyzers.Tests/bin/Release/net10.0/KeyLoad.Analyzers.dll
+            tests/KeyLoad.Analyzers.Tests/bin/Release/net10.0/KeyLoad.Analyzers.pdb
+            tests/KeyLoad.SiteTests/**/TestResults/**
+            tests/KeyLoad.Analyzers.Tests/**/TestResults/**
   publish:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request' && github.event.workflow_run.head_repository.full_name == github.repository)
+    if: (github.event_name == 'workflow_dispatch' && inputs.mode == 'publish') || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository)
+    permissions:
+      contents: read
+      actions: read
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -28,30 +147,42 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           COMPLETED_RUN: ${{ github.event.workflow_run.id }}
+          REQUESTED_RUN: ${{ inputs.evidence_run }}
         shell: bash
         run: |
-          run_id="$COMPLETED_RUN"
+          run_id="${COMPLETED_RUN:-$REQUESTED_RUN}"
           if [ -z "$run_id" ]; then
             run_id=$(gh run list --workflow ci.yml --branch main --event push --status success --limit 1 --json databaseId --jq '.[0].databaseId')
           fi
-          test -n "$run_id" && test "$run_id" != "null"
-          revision=$(gh api "repos/$GH_REPO/actions/runs/$run_id" --jq '.head_sha')
+          [[ "$run_id" =~ ^[1-9][0-9]*$ ]]
+          run=$(gh api "repos/$GH_REPO/actions/runs/$run_id")
+          revision=$(jq -r --arg repo "$GH_REPO" 'select(.conclusion == "success" and .event == "push" and .head_branch == "main" and .head_repository.full_name == $repo and .path == ".github/workflows/ci.yml") | .head_sha' <<< "$run")
+          [[ "$revision" =~ ^[a-f0-9]{40}$ ]]
           echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
           echo "revision=$revision" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ steps.evidence.outputs.revision }}
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
       - name: Build from verified comparison reports
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           EVIDENCE_RUN: ${{ steps.evidence.outputs.run_id }}
           EVIDENCE_REVISION: ${{ steps.evidence.outputs.revision }}
+          KEYLOAD_SITE_REPORTS: ${{ github.workspace }}/artifacts/comparisons
+          KEYLOAD_SITE_REPOSITORY: ${{ github.workspace }}
+          KEYLOAD_SITE_EVIDENCE_RUN: ${{ steps.evidence.outputs.run_id }}
+          KEYLOAD_SITE_MEASURED_REVISION: ${{ steps.evidence.outputs.revision }}
         shell: bash
         run: |
           gh run download "$EVIDENCE_RUN" --name comparison-suite --dir artifacts/comparisons
-          node --test site/scripts/measurements.test.mjs
-          node site/scripts/build.mjs --reports=artifacts/comparisons --output=_site --revision="$EVIDENCE_REVISION" --evidence-url="https://github.com/$GH_REPO/actions/runs/$EVIDENCE_RUN"
+          dotnet restore tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj
+          dotnet build tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --no-restore --configuration Release
+          dotnet test --project tests/KeyLoad.SiteTests --no-build --no-restore --configuration Release
+          node site/scripts/build.mjs --reports=artifacts/comparisons --output=_site --revision="$EVIDENCE_REVISION" --evidence-url="https://github.com/$GH_REPO/actions/runs/$EVIDENCE_RUN" --site-revision="$EVIDENCE_REVISION"
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:

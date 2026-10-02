@@ -1,4 +1,1 @@
-* text=auto eol=lf
-docs/design/*.md whitespace=-blank-at-eol
-*.ctg binary
-*.wal binary
+site/Features/BenchmarkComparisons/vendor/three/0.186.1/*.js whitespace=-space-before-tab

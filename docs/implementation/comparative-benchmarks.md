@@ -7,7 +7,7 @@ The Aspire comparison profile runs the RF3 KeyLoad server topology and pinned Po
 Docker must be running. From the repository root:
 
 ```sh
-dotnet restore KeyLoad.slnx --locked-mode
+dotnet restore KeyLoad.slnx
 dotnet run -c Release --project src/KeyLoad.AppHost -- --Benchmarks:Enabled=true
 ```
 
@@ -86,3 +86,15 @@ For an automated exploratory run that exits after the suite, set test overrides 
 KL-006, KL-073 and KL-101 remain in progress. Matched PostgreSQL synchronous RF3 and RabbitMQ RF3 profiles, database resource budget measurements, non-owner/RLS/masking, common application endpoints, large/supernode graph fixtures, time-series/filtered ANN fixtures, open-loop offered load, larger-than-RAM data, Marten/Wolverine atomic workflow, optional KurrentDB stream/subscription baselines and endurance/fault qualification remain planned. No comparative gain or production-readiness gate is closed by this kit.
 
 Implementation follows the first-party [Aspire database integrations](https://aspire.dev/integrations/databases/qdrant/qdrant-host/), [pgvector exact-search contract](https://github.com/pgvector/pgvector), [RabbitMQ acknowledgements and confirms](https://www.rabbitmq.com/docs/confirms), and [Neo4j Query API](https://neo4j.com/docs/query-api/current/query/). Product methodology is defined in architecture v0.3 sections 32 and 45.
+
+## Time-series comparison profile
+
+The separately accepted [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md)
+profile adds a digest-pinned TimescaleDB hypertable and uses the published
+ManagedCode.TimeSeries library as an in-memory bucket aggregator. It compares
+identical UTC samples with KeyLoad's public RF3 SDK flow and records distinct
+persistence/acknowledgement guarantees. It does not alter the nine-engine
+schema3 matrix or publish measurements before exact-SHA GitHub CI succeeds.
+The profile implementation and TUnit cases are present and compile in the full
+Release solution. TUnit/Aspire execution and measured artifacts remain pending
+for exact-source GitHub Actions qualification.

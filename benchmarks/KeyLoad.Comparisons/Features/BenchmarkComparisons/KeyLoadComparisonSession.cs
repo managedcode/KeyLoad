@@ -1,0 +1,104 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using KeyLoad.Client;
+
+namespace KeyLoad.Comparisons.Targets;
+
+internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRef partition, VectorSpace space,
+    int topK, int graphDepth, int graphVertices, int graphEdges) : IComparisonSession
+{
+    public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document,
+        CancellationToken cancellationToken)
+    {
+        switch (scenario)
+        {
+            case Scenario.PointRead:
+                return new(Document: await ReadAsync(document, cancellationToken));
+            case Scenario.StreamRead:
+                return new(Event: await KeyLoadEventOperations.ReadAsync(client, partition, document, cancellationToken));
+            case Scenario.StreamAppend:
+                await KeyLoadEventOperations.AppendAsync(client, partition, document, cancellationToken);
+                return new();
+            case Scenario.DocumentWrite:
+                return await WriteDocumentAsync(document, cancellationToken);
+            case Scenario.VectorExact:
+                return await SearchVectorAsync(document, cancellationToken);
+            case Scenario.GraphNeighbors:
+            case Scenario.GraphTraverse:
+                return await TraverseGraphAsync(scenario, document, cancellationToken);
+            case Scenario.QueueCycle:
+                return await ExecuteQueueCycleAsync(document, cancellationToken);
+            default:
+                throw new NotSupportedException();
+        }
+    }
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+    public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    {
+        var found = KeyLoadClientResults.Success(await client.GetAsync(
+            new(partition, "documents", document.Id), cancellationToken));
+        return found is null ? null : new(found.Reference.Id, found.Json);
+    }
+
+    private async Task<OperationResult> WriteDocumentAsync(BenchmarkDocument document,
+        CancellationToken cancellationToken)
+    {
+        var receipt = KeyLoadClientResults.Success(await client.CommitAsync(new(Guid.NewGuid(), partition,
+            [new PutDocument("documents", document.Id, document.Json, 0)]), cancellationToken));
+        if (receipt.Durability != DurabilityProfile.QuorumProcessDurable)
+        {
+            throw new ComparisonFailureException(KeyLoadEventOperations.WrongWriteProfile);
+        }
+
+        return new();
+    }
+
+    private async Task<OperationResult> SearchVectorAsync(BenchmarkDocument document,
+        CancellationToken cancellationToken)
+    {
+        var neighbors = KeyLoadClientResults.Success(await client.SearchAsync(new(partition, "documents",
+            VectorField: "/embedding", Vector: document.Vector, Space: space, Limit: topK), cancellationToken));
+        var owned = neighbors.Select(item => new FoundDocument(item.Document.Reference.Id, item.Document.Json)).ToArray();
+        return new(Neighbors: ImmutableCollectionsMarshal.AsImmutableArray(owned));
+    }
+
+    private async Task<OperationResult> TraverseGraphAsync(Scenario scenario, BenchmarkDocument document,
+        CancellationToken cancellationToken)
+    {
+        var graph = KeyLoadClientResults.Success(await client.TraverseAsync(new(partition, "links",
+            new(partition, "documents", document.Id), scenario == Scenario.GraphNeighbors ? 1 : graphDepth,
+            graphVertices, graphEdges, ["links"]), cancellationToken));
+        var owned = graph.Vertices.Where(vertex => vertex.Id != document.Id).Select(vertex => vertex.Id)
+            .Order(StringComparer.Ordinal).ToArray();
+        return new(Vertices: ImmutableCollectionsMarshal.AsImmutableArray(owned));
+    }
+
+    private async Task<OperationResult> ExecuteQueueCycleAsync(BenchmarkDocument document,
+        CancellationToken cancellationToken)
+    {
+        var lane = new QueueLaneRef(partition, "jobs");
+        var begin = Stopwatch.GetTimestamp();
+        KeyLoadClientResults.Success(await client.CommitAsync(new(Guid.NewGuid(), partition,
+            [new EnqueueMessage("jobs", document.Id, document.Json)]), cancellationToken));
+        var enqueued = Stopwatch.GetTimestamp();
+        Delivery? delivery = null;
+        while (delivery is null)
+        {
+            delivery = KeyLoadClientResults.Success(await client.ReceiveAsync(new(Guid.NewGuid(), lane),
+                cancellationToken)).Deliveries.SingleOrDefault();
+            if (delivery is null)
+            {
+                await Task.Delay(1, cancellationToken);
+            }
+        }
+        var received = Stopwatch.GetTimestamp();
+        KeyLoadClientResults.Success(await client.CompleteAsync(new(Guid.NewGuid(), lane, delivery.Token,
+            DeliveryAction.Ack), cancellationToken));
+        return new(Message: new(delivery.Id, delivery.PayloadJson), Queue: new(
+            Stopwatch.GetElapsedTime(begin, enqueued).TotalMilliseconds,
+            Stopwatch.GetElapsedTime(enqueued, received).TotalMilliseconds,
+            Stopwatch.GetElapsedTime(received).TotalMilliseconds));
+    }
+}

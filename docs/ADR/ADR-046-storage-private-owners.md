@@ -1,0 +1,81 @@
+# ADR-046: Cohesive node-local storage owners under numeric gates
+
+Status: Accepted. Date: 2026-10-02. Owner: lead storage integrator.
+REQ-STORAGE-008; AC-SQ-001..008 in [acceptance](../../storage-quality.acceptance.md),
+AC-CQ-008 and AC-MP-001/002/012. [Brainstorm](../../storage-quality.brainstorm.md)
+records alternatives/risks; [plan](../../storage-quality.plan.md) is the ordered task
+graph, exact file ownership, signatures, test matrix and verification join.
+This decision remains Accepted until delivered-source qualification is complete.
+
+## Decision
+
+Preserve the public ZoneTreeStore facade and every format/caller contract. Compose
+one private runtime/handle owner with cohesive initialization/identity, journal,
+read/transaction/range, checkpoint-format/generation and BackupRestore components.
+All feature code remains in the same repository and canonical slices. No second
+gate/tree/WAL, partial-type loophole, quality exception or grain-owned storage.
+PartitionHost retains physical ownership when Orleans activations migrate.
+
+```mermaid
+flowchart TD
+    Host[Node-local PartitionHost] --> Facade[ZoneTreeStore public facade]
+    Facade --> Runtime[One runtime and physical ownership]
+    Runtime --> Gate[One read and apply gate]
+    Runtime --> Handles[Owner lock tree WAL maintainer identity position]
+    Gate --> Reads[View transaction range cursors and counters]
+    Gate --> Journal[Canonical journal publication and recovery]
+    Gate --> Generations[Checkpoint generation manager]
+    Journal --> Codec[Strict stateless checkpoint codec]
+    Generations --> Codec
+    Gate --> Backup[Local BackupRestore owner]
+```
+
+## Implementation contract
+
+1. Lead reads exact current source/policies and accepts AC-SQ criteria/signatures
+   and this ADR before delegated implementation. Read-only TASK-MP-010AF-R supplies
+   discovery; actual source governs where its proposal differs. Existing successful
+   GitHub baseline covers old SHA only, not this dirty source.
+2. TASK-MP-010AF-T first authors independent real-store facade/failed-open/lock-reuse/
+   double-dispose regressions in its one NEW StorageRecovery test file. No doubles,
+   hooks or local execution. Lead reviews first packet before runtime writes.
+3. TASK-MP-010AF-C owns only NEW checkpoint writer/reader/frame/metadata files under
+   StorageRecovery with the frozen stateless signatures/shared constants in the
+   acceptance. Preserve batches, headers, JSON/digest/modes/observers and footer
+   stop during WAL replay; source review plus existing CheckpointTests/process
+   publication/recovery cases are the proof.
+4. Lead TASK-MP-010AF-L alone owns facade, runtime/initializer/identity, handles/
+   journal, existing read/range/transaction partial conversion, generation manager,
+   shared format and every doc/config/artifact. Startup opens and replays once.
+   Preserve constructor-failure order maintainer/journal/tree/ownership and normal
+   disposal order maintainer/tree/journal/ownership, with finally-based complete
+   cleanup. Borrowed views/counters/budget timing stay exact under the same gate.
+5. TASK-MP-010AF-B owns only NEW ZoneTreeBackupRestore-prefixed files in BackupRestore
+   after runtime/identity interfaces freeze. Retain exact verified local backup,
+   clean restore/private new identity/paused authority-state recipe and one ordinary
+   restored facade. Remove old provider backup behavior in the lead's same join.
+6. Lead waits for all required full packets, reviews every diff against criteria,
+   builds actual provider/full graph with all SDK/style/XML/numeric rules, and
+   resolves genuine findings. Canonical GitHub runs real TUnit/MTP unit, process
+   recovery and Docker/Aspire RF3 .NET/MCP suites for exact delivered SHA. Retain
+   run/job/SARIF/raw artifacts; no skipped suite or worker claim is a passing gate.
+7. Run required formatter/static governance and final SOLID/single-owner/format/
+   fault-order review. Update traceability/status/README with authentic source and
+   qualification boundaries. Coverage/export/no-decrease, endurance and power-loss
+   remain incomplete until their separate real gates actually pass.
+
+Dependencies and joins: existing centrally pinned ZoneTree/.NET10/TUnit only; no
+new package/tool. The checkpoint codec has no runtime backreference; journal replay
+uses its reader once. Snapshot verification remains gate-free; installation verifies
+incoming before write lock, staged image under lock, then authoritative replacement
+and replay in original order. Checkpoint manager and backup borrow the single runtime.
+Lead joins unchanged public facade callers, unit/recovery/replica checkpoints and
+both StorageRecovery/BackupRestore feature specs. All worker write scopes are disjoint.
+
+Source-only migration: move real private responsibilities to canonical slices and
+remove replaced facade partial behavior together. No data, public or wire migration;
+identity/checkpoint/WAL/backup bytes and error codes remain exact. Rollback this
+entire private decomposition as one source unit; do not roll back enabled analysis,
+add compatibility shims or reassign node-local storage to grains. Existing unrelated
+native/website/adapter work is protected. Process kills qualify only their declared
+failure model, never power-loss durability or production readiness.

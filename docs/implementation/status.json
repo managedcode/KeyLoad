@@ -44,14 +44,19 @@
     ]
   },
   "KL-006": {
-    "title": "Benchmark harness і PostgreSQL methodology",
+    "title": "Порівняльні бенчмарки та кластерна методологія",
     "status": "in_progress",
     "evidence": [
       "benchmarks/KeyLoad.Benchmarks/Program.cs",
-      "benchmarks/KeyLoad.Comparisons/ComparisonRunner.cs",
+      "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/ComparisonRunner.cs",
+      "docs/Features/BenchmarkComparisons.md",
+      "docs/ADR/ADR-034-cluster-comparisons.md",
+      "docs/ADR/ADR-050-timeseries-timescale-comparison.md",
+      "timeseries-comparison.acceptance.md",
+      "timeseries-comparison.plan.md",
       "src/KeyLoad.AppHost/BenchmarkResources.cs",
       "tests/KeyLoad.UnitTests/ComparisonHarnessTests.cs",
-      "tests/KeyLoad.ComparisonTests/ComparisonTests.cs",
+      "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/",
       "docs/implementation/comparative-benchmarks.md",
       "benchmarks/KeyLoad.Comparisons/Targets/Neo4jTarget.cs",
       "benchmarks/KeyLoad.Comparisons/ClientResourceSampler.cs",
@@ -195,7 +200,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/GraphAndSeries.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs",
+      "timeseries-comparison.acceptance.md",
+      "docs/ADR/ADR-050-timeseries-timescale-comparison.md"
     ]
   },
   "KL-023": {
@@ -326,6 +333,9 @@
       "tests/KeyLoad.IntegrationTests/AdmissionClusterTests.cs",
       "src/KeyLoad.Core/HttpAdmissionGovernor.cs",
       "tests/KeyLoad.UnitTests/HttpAdmissionTests.cs",
+      "src/KeyLoad.Core/ReadExecutionBudget.cs",
+      "tests/KeyLoad.UnitTests/ReadExecutionTests.cs",
+      "docs/design/bounded-reads.md",
       "docs/design/command-admission.md"
     ]
   },
@@ -857,7 +867,69 @@
     "evidence": [
       "README.md",
       ".github/workflows/ci.yml",
-      "docs/implementation/durability-audit.md"
-    ]
+      "docs/implementation/durability-audit.md",
+      "docs/Features/CodeQuality.md",
+      "docs/ADR/ADR-033-code-quality.md",
+      "docs/implementation/code-quality.md",
+      "src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj",
+      "tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
+      "Directory.Build.targets"
+    ],
+    "codeQuality": {
+      "status": "in_progress",
+      "editorConfigSource": "Prostir/.editorconfig",
+      "editorConfigSha256": "b624db78d435290ba2633a71c901797ff3d66449f76ffd91b4b81724b379b6fb",
+      "developmentBuild": "latest_enabled_unit_cut_3_protected_blob_restore_missing_databaseengine_errors_0_warnings_unit_csc_reached_all_dependency_projects_compiled_full_solution_pending",
+      "benchmarkDriverJoin": "historical_source_cut_failed_506_analysis_style_xml_errors_0_warnings_no_type_api_binding_errors_then_private_disposal_type_fixes_public_visibility_restored",
+      "comparisonHostJoin": "reviewed_enabled_host_build_passed_0_errors_0_warnings_real_cleanup_regressions_authored_exact_sha_ci_pending",
+      "joinedProjectBuilds": "numeric_enabled_abstractions_core_client_storage_security_query_cli_comparison_library_comparison_host_site_tests_embedded_benchmark_host_passed_0_errors_0_warnings_not_test_execution",
+      "analyzerProjectBuild": "passed_0_errors_0_warnings",
+      "analyzerTestsProjectBuild": "passed_0_errors_0_warnings_not_test_execution",
+      "centralConfiguration": "passed_actual_release_evaluation_25_projects_23_custom_analyzer_consumers_zero_policy_failures",
+      "centralConfigurationEvidence": "artifacts/code-quality/configuration-20261002-25-projects.json",
+      "centralConfigurationSha256": "bdf01a992bf1b718a56c19f20d6e71e12177404694b0a46f0ea94de413a00681",
+      "formatter": "solution_failed_new_analyzer_scope_passed",
+      "governance": "passed_25_projects_4_modules_policy_preservation_static_only",
+      "baselineCi": {
+        "runId": 36930711012,
+        "sha": "9c570f8c33a7a9667507a8e1c0ca68860de3be45",
+        "conclusion": "success_existing_main_only",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/36930711012"
+      },
+      "delivery": "not_committed_or_pushed_solution_quality_gate_failed",
+      "analyzerRegressionQualification": "pending_exact_delivered_sha_ci",
+      "coverage": "not_configured",
+      "complexity": "four_source_owned_numeric_rules_configured_full_gate_and_fixture_ci_pending",
+      "evidence": "docs/implementation/code-quality.md",
+      "siteTestsJoin": "reviewed_enabled_site_build_passed_0_errors_0_warnings_actual_seven_parameterless_generated_creators_options_defaults_and_real_listener_regressions_authored_ci_pending",
+      "unitTestsBuild": "latest_ordinary_build_reached_unit_csc_failed_3_protected_blob_restore_cs0246_errors_0_warnings_previous_core_ca1822_cleared_all_dependencies_compiled_unit_semantic_compilation_registration_and_exact_sha_ci_pending",
+      "reviewedScopedFormatter": "host_site_prepared_storage_query_embedded_and_latest_owned_unit_source_scope_passed_exit0_protected_native_blob_and_pending_benchmark_unit_excluded_full_solution_pending",
+      "embeddedBenchmarkJoin": "genuine_public_library_and_thin_host_source_reviewed_paired_csharp_common5_restore_and_enabled_host_build_0_errors_0_warnings_five_real_tunit_methods_authored_actual_generated_dry_and_registration_ci_pending",
+      "boundedMetadataJoin": "finite_manifest16384_identity4096_bytes_single_owned_region_and_restore_identity_source_reviewed_test_corrections_build_and_exact_sha_ci_pending"
+    },
+    "memoryPerformance": {
+      "status": "in_progress",
+      "scope": "complete_current_operation_and_resource_inventory",
+      "inventory": "docs/implementation/memory-performance.md",
+      "requirements": "docs/Features/ResourceExecution.md",
+      "decision": "docs/ADR/ADR-035-memory-performance.md",
+      "developmentDependencyBuild": "latest_unit_cut_3_protected_blob_restore_cs0246_errors_0_warnings_unit_csc_reached_all_dependencies_compiled_historical_full_solution19_current_combined_gate_pending",
+      "sourceRepairs": "storage_budget_query_search_admission_events_series_graph_queue_topic_source_reads_outbox_canonical_json_client_reports_logical_counters_authored_not_qualified",
+      "contractMigration": "adr041_readonly_collections_owned_read_strict_json_source_joins_compiled_full_solution_and_exact_sha_ci_pending",
+      "baselineCi": {
+        "runId": 36936319423,
+        "sha": "9c570f8c33a7a9667507a8e1c0ca68860de3be45",
+        "conclusion": "success_all_four_jobs_existing_main_only",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/36936319423",
+        "artifacts": "artifacts/memory-performance/baseline-36936319423/"
+      },
+      "candidateQualification": "pending_compilable_delivered_source_and_exact_sha_ci",
+      "rf3SdkMcp": "pending_docker_aspire_orleans_and_official_mcp_qualification",
+      "serverResourceMeasurement": "not_configured_load_generator_metrics_only",
+      "coverage": "not_configured",
+      "complexity": "four_source_owned_numeric_rules_configured_full_gate_and_fixture_ci_pending",
+      "delivery": "not_committed_or_pushed_required_gates_open",
+      "preparedStorageMutationJoin": "reviewed_private_projection_cache_enabled_storage_build_0_errors_0_warnings_three_real_store_tests_authored_ci_and_measured_improvement_pending"
+    }
   }
 }

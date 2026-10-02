@@ -1,0 +1,150 @@
+namespace KeyLoad.Core;
+
+/// <summary>Reserves bounded node, tenant, principal, and retained-byte capacity for commands.</summary>
+public sealed class CommandAdmissionGovernor
+{
+    private readonly object gate = new();
+    private readonly Dictionary<(bool Control, string Id), int> tenants = [];
+    private readonly Dictionary<(bool Control, string Id), int> principals = [];
+    private int commands;
+    private int controlCommands;
+    private long retainedBytes;
+    private long controlRetainedBytes;
+
+    private const string ControlPayloadLimitDetail = "The control command exceeds its reserved byte budget.";
+    private const string AdmissionLimitDetail = "The node, tenant or principal command admission budget is exhausted.";
+    private const int EnvelopeOverheadBytes = 4_096;
+
+    /// <summary>Gets the immutable command admission limits used by this governor.</summary>
+    public CommandAdmissionLimits Limits { get; }
+
+    /// <summary>Creates a governor with validated limits.</summary>
+    /// <param name="limits">Optional limits; defaults are used when omitted.</param>
+    public CommandAdmissionGovernor(CommandAdmissionLimits? limits = null)
+    {
+        Limits = limits ?? new();
+        Limits.Validate();
+    }
+
+    /// <summary>Returns whether an operation uses the reserved control lane.</summary>
+    /// <param name="kind">The operation kind to classify.</param>
+    public static bool IsControl(OperationKind kind)
+        => kind is OperationKind.Delivery or OperationKind.SubscriptionDelivery or OperationKind.Membership or OperationKind.SetDispatch
+            or OperationKind.AbortBlobUpload or OperationKind.ReclaimBlob;
+
+    /// <summary>Atomically reserves command count, retained bytes, tenant, and principal capacity.</summary>
+    /// <param name="kind">The kind of operation being admitted.</param>
+    /// <param name="principal">The verified principal responsible for the operation.</param>
+    /// <param name="payloadBytes">The UTF-8 payload size.</param>
+    /// <param name="payloadCharacters">The serialized payload character count.</param>
+    /// <param name="cancellationToken">Cancels admission before a reservation is committed.</param>
+    /// <returns>An owned reservation that releases capacity when disposed.</returns>
+    public CommandAdmissionLease Reserve(OperationKind kind, PrincipalRecord principal, int payloadBytes,
+        int payloadCharacters, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ArgumentNullException.ThrowIfNull(principal);
+        ArgumentException.ThrowIfNullOrWhiteSpace(principal.Id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(principal.TenantId);
+        ArgumentOutOfRangeException.ThrowIfNegative(payloadBytes);
+        ArgumentOutOfRangeException.ThrowIfNegative(payloadCharacters);
+
+        var bytes = CalculateRetainedBytes(payloadBytes, payloadCharacters);
+        var control = IsControl(kind);
+        if (control && payloadBytes > Limits.MaxControlPayloadBytes)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ControlPayloadLimitDetail);
+        }
+
+        var tenantKey = (control, principal.TenantId);
+        var principalKey = (control, principal.Id);
+        lock (gate)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            EnsureCapacity(control, bytes, tenantKey, principalKey);
+            AddReservation(control, bytes, tenantKey, principalKey);
+            return new(this, control, principal.TenantId, principal.Id, bytes);
+        }
+    }
+
+    /// <summary>Returns a consistent snapshot of active reservations and scope entries.</summary>
+    public CommandAdmissionSnapshot Snapshot()
+    {
+        lock (gate)
+        {
+            return new(commands, retainedBytes, controlCommands, controlRetainedBytes, tenants.Count, principals.Count);
+        }
+    }
+
+    internal void Release(CommandAdmissionLease lease)
+    {
+        lock (gate)
+        {
+            RemoveReservation(lease);
+            Decrement(tenants, (lease.Control, lease.Tenant));
+            Decrement(principals, (lease.Control, lease.Principal));
+        }
+    }
+
+    private static long CalculateRetainedBytes(int payloadBytes, int payloadCharacters)
+        => checked(payloadCharacters * 2L + payloadBytes * 2L + EnvelopeOverheadBytes);
+
+    private void EnsureCapacity(bool control, long bytes, (bool Control, string Id) tenantKey,
+        (bool Control, string Id) principalKey)
+    {
+        var count = control ? controlCommands : commands;
+        var used = control ? controlRetainedBytes : retainedBytes;
+        var maxCount = control ? Limits.ReservedControlCommands : Limits.MaxCommands;
+        var maxBytes = control ? Limits.ReservedControlBytes : Limits.MaxRetainedBytes;
+        var maxTenant = control ? Limits.MaxTenantControlCommands : Limits.MaxTenantCommands;
+        var maxPrincipal = control ? Limits.MaxPrincipalControlCommands : Limits.MaxPrincipalCommands;
+        if (count >= maxCount || bytes > maxBytes - used || tenants.GetValueOrDefault(tenantKey) >= maxTenant
+            || principals.GetValueOrDefault(principalKey) >= maxPrincipal)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, AdmissionLimitDetail);
+        }
+    }
+
+    private void AddReservation(bool control, long bytes, (bool Control, string Id) tenantKey,
+        (bool Control, string Id) principalKey)
+    {
+        if (control)
+        {
+            controlCommands++;
+            controlRetainedBytes += bytes;
+        }
+        else
+        {
+            commands++;
+            retainedBytes += bytes;
+        }
+        tenants[tenantKey] = tenants.GetValueOrDefault(tenantKey) + 1;
+        principals[principalKey] = principals.GetValueOrDefault(principalKey) + 1;
+    }
+
+    private void RemoveReservation(CommandAdmissionLease lease)
+    {
+        if (lease.Control)
+        {
+            controlCommands--;
+            controlRetainedBytes -= lease.Bytes;
+        }
+        else
+        {
+            commands--;
+            retainedBytes -= lease.Bytes;
+        }
+    }
+
+    private static void Decrement(Dictionary<(bool Control, string Id), int> scopes, (bool Control, string Id) key)
+    {
+        if (scopes[key] == 1)
+        {
+            scopes.Remove(key);
+        }
+        else
+        {
+            scopes[key]--;
+        }
+    }
+}

@@ -2,53 +2,193 @@ using StackExchange.Redis;
 
 namespace KeyLoad.Comparisons.Targets;
 
-public sealed class RedisTarget(string connectionString, string runId, string image) : IComparisonTarget
+/// <summary>Compares primary key reads and writes, with optional direct-replica fsync receipts for the replicated profile.</summary>
+/// <remarks>Creates a Redis key-value target with optional direct replica endpoints for receipt verification.</remarks>
+/// <param name="connectionString">Connection settings for the single configured primary endpoint.</param>
+/// <param name="runId">Guid-formatted run identifier used to isolate benchmark keys.</param>
+/// <param name="image">Redis image reference recorded after initialization and replica verification.</param>
+/// <param name="topology">The expected single-primary or direct-replica topology; replicated mode does not imply sharding or failover.</param>
+/// <param name="replicas">Optional direct replica endpoints checked for the replicated durability receipt.</param>
+public sealed class RedisTarget(string connectionString, string runId, string image,
+    ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null) : IComparisonTarget
 {
-    private readonly string prefix = "keyload-benchmark:" + runId + ":";
+    private const string Prefix = "keyload-benchmark:";
+    private const string ClientCommand = "CLIENT";
+    private const string ClientIdSubcommand = "ID";
+    private const string WaitAofCommand = "WAITAOF";
+    private const string CreateConflictError = "RedisCreateConflict";
+    private const string WriteConnectionReplacedError = "RedisWriteConnectionReplaced";
+    private const string ReceiptConnectionReplacedError = "RedisReceiptConnectionReplaced";
+    private const string TargetName = "Redis";
+    private const string InitialVersion = "unverified";
+    private const string InitialTopology = "unverified native topology";
+    private const string InitialReadContract = "primary key reads";
+    private const string TcpTransport = "RESP/TCP multiplexed";
+    private const string TlsTransport = "RESP/TLS multiplexed";
+    private const string Authorization = "Aspire password; no row/field policy";
+    private const string ReplicatedTopology = "single primary plus two native direct replicas; no cluster sharding or automatic failover claim";
+    private const string SingleTopology = "single primary, no replicas";
+    private const string AofAcknowledgement = "AOF appendfsync=always; single-node ACK";
+    private const string ReplicatedAcknowledgement = "AOF appendfsync=always; WAITAOF 1 local + 1 replica fsync on the same primary connection (receipt RPC included)";
+    private const string TimeoutSettingError = "RedisWaitAofFailed";
+    private const int RequiredLocalFsync = 1;
+    private const int RequiredReplicaFsync = 1;
+    private const int ReceiptTimeoutMilliseconds = 3000;
+    private readonly string connectionSettings = connectionString;
+    private readonly string prefix = Prefix + Guid.Parse(runId).ToString("N") + ":";
+    private readonly string imageName = image;
+    private readonly ComparisonTopology configuredTopology = topology;
+    private readonly string[] replicaEndpoints = replicas ?? [];
     private ConnectionMultiplexer? connection;
-    public TargetProfile Profile { get; private set; } = new("Redis", "unverified", "single server, no replicas",
-        "AOF appendfsync=always; single-node ACK", "primary key reads", "RESP/TCP multiplexed", "Aspire password; no row/field policy", image);
+
+    /// <summary>Gets the observed version, direct-replica topology, fsync acknowledgement, read, transport, and authorization profile.</summary>
+    public TargetProfile Profile { get; private set; } = new(TargetName, InitialVersion, InitialTopology,
+        AofAcknowledgement, InitialReadContract, TcpTransport, Authorization, null);
+    /// <summary>Reports support for primary point reads and document writes.</summary>
+    /// <param name="scenario">The comparison scenario to check.</param>
+    /// <returns><see langword="true"/> for point read or document write; otherwise <see langword="false"/>.</returns>
     public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite;
+
+    /// <summary>Connects to the configured primary, seeds run-specific keys, and verifies native topology and fsync receipts.</summary>
+    /// <param name="dataset">The deterministic document corpus used to seed and probe the target.</param>
+    /// <param name="cancellationToken">A token that cancels connection and replica-verification operations.</param>
+    /// <returns>A task that completes after the observed Redis profile has been recorded.</returns>
     public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
     {
-        var settings = ConfigurationOptions.Parse(connectionString);
-        Profile = Profile with { Transport = settings.Ssl ? "RESP/TLS multiplexed" : "RESP/TCP multiplexed" };
+        ArgumentNullException.ThrowIfNull(dataset);
+        var settings = RedisReplicaProof.CreateOptions(connectionSettings);
+        if (settings.EndPoints.Count != 1)
+        {
+            throw new ComparisonFailureException(RedisNativeProtocol.PrimaryEndpointError);
+        }
+
+        Profile = Profile with { Transport = settings.Ssl ? TlsTransport : TcpTransport };
         connection = await ConnectionMultiplexer.ConnectAsync(settings).WaitAsync(cancellationToken);
+        var primaryEndpoint = RedisNativeProtocol.RequirePrimaryEndpoint(connection);
+        var primaryIdentity = await RedisReplicaProof.ReadIdentityAsync(connection, primaryEndpoint, cancellationToken);
         var database = connection.GetDatabase();
-        var config = (RedisResult[])(await database.ExecuteAsync("CONFIG", "GET", "appendonly", "appendfsync").WaitAsync(cancellationToken))!;
-        var values = Enumerable.Range(0, config.Length / 2).ToDictionary(i => config[2 * i].ToString(), i => config[2 * i + 1].ToString());
-        if (values.GetValueOrDefault("appendonly") != "yes" || values.GetValueOrDefault("appendfsync") != "always")
-            throw new ComparisonFailure("RedisAofAlwaysRequired");
-        var info = (await database.ExecuteAsync("INFO", "server").WaitAsync(cancellationToken)).ToString();
-        Profile = Profile with { Version = info.Split('\n').First(line => line.StartsWith("redis_version:", StringComparison.Ordinal)).Trim() };
         foreach (var document in dataset.Documents)
         {
-            RedisKey key = prefix + document.Id;
-            await database.StringSetAsync(key, document.Json).WaitAsync(cancellationToken);
+            await database.StringSetAsync(prefix + document.Id, document.Json, flags: CommandFlags.DemandMaster).WaitAsync(cancellationToken);
         }
+
+        var probeKey = prefix + Guid.NewGuid().ToString("N");
+        var evidence = await RedisReplicaProof.VerifyAsync(connection, replicaEndpoints, configuredTopology, primaryIdentity, probeKey,
+            dataset.Documents[0].Json, cancellationToken);
+        Profile = Profile with
+        {
+            Version = primaryIdentity.Version,
+            Topology = configuredTopology == ComparisonTopology.Replicated
+                ? ReplicatedTopology
+                : SingleTopology,
+            WriteAcknowledgement = configuredTopology == ComparisonTopology.Replicated ? ReplicatedAcknowledgement : AofAcknowledgement,
+            Image = imageName,
+            Cluster = evidence
+        };
     }
-    public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
-        => Task.FromResult<IComparisonSession>(new Session(connection!.GetDatabase(), prefix));
+
+    /// <summary>Opens an independent Redis connection and verifies that its worker route reaches the expected primary.</summary>
+    /// <param name="cancellationToken">A token that cancels worker connection and primary verification.</param>
+    /// <returns>A session that owns the worker connection until disposed.</returns>
+    public async Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
+    {
+        var settings = RedisReplicaProof.CreateOptions(connectionSettings);
+        if (settings.EndPoints.Count != 1)
+        {
+            throw new ComparisonFailureException(RedisNativeProtocol.PrimaryEndpointError);
+        }
+
+        var workerConnection = await ConnectionMultiplexer.ConnectAsync(settings).WaitAsync(cancellationToken);
+        try
+        { await RedisReplicaProof.VerifyWorkerPrimaryAsync(workerConnection, configuredTopology, cancellationToken); }
+        catch (Exception) { await workerConnection.DisposeAsync(); throw; }
+        return new Session(workerConnection, prefix, configuredTopology);
+    }
+
+    /// <summary>Closes and disposes the target-owned Redis connection.</summary>
+    /// <returns>A value task that completes after the connection is closed.</returns>
     public async ValueTask DisposeAsync()
     {
-        // Aspire owns and removes the isolated container, including any measured keys.
-        if (connection is not null) { await connection.CloseAsync(); connection.Dispose(); }
+        if (connection is not null)
+        { await connection.CloseAsync(); connection.Dispose(); }
     }
-    private sealed class Session(IDatabase database, string prefix) : IComparisonSession
+
+    /// <summary>Executes Redis key reads and writes on a session-owned connection.</summary>
+    private sealed class Session(ConnectionMultiplexer connection, string prefix, ComparisonTopology topology) : IComparisonSession
     {
+        private readonly IDatabase database = connection.GetDatabase();
+
         public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         {
-            var json = await database.StringGetAsync(prefix + document.Id).WaitAsync(cancellationToken);
+            var json = await database.StringGetAsync(prefix + document.Id, CommandFlags.DemandMaster).WaitAsync(cancellationToken);
             return json.IsNull ? null : new(document.Id, json.ToString());
         }
+
         public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
         {
-            if (scenario == Scenario.PointRead) return new(Document: await ReadAsync(document, cancellationToken));
-            if (scenario != Scenario.DocumentWrite) throw new NotSupportedException();
-            if (!await database.StringSetAsync(prefix + document.Id, document.Json, when: When.NotExists).WaitAsync(cancellationToken))
-                throw new ComparisonFailure("RedisCreateConflict");
+            if (scenario == Scenario.PointRead)
+            {
+                return new(Document: await ReadAsync(document, cancellationToken));
+            }
+
+            if (scenario != Scenario.DocumentWrite)
+            {
+                throw new NotSupportedException();
+            }
+
+            if (topology == ComparisonTopology.Replicated)
+            {
+                await WriteWithReplicaReceiptAsync(document, cancellationToken);
+            }
+            else
+            {
+                await WriteAsync(document, CommandFlags.DemandMaster, cancellationToken);
+            }
+
             return new();
         }
-        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+        private async Task WriteAsync(BenchmarkDocument document, CommandFlags flags, CancellationToken token)
+        {
+            if (!await database.StringSetAsync(prefix + document.Id, document.Json, when: When.NotExists, flags: flags).WaitAsync(token))
+            {
+                throw new ComparisonFailureException(CreateConflictError);
+            }
+        }
+
+        private async Task WriteWithReplicaReceiptAsync(BenchmarkDocument document, CancellationToken token)
+        {
+            var before = await ReadClientIdAsync(token);
+            await WriteAsync(document, CommandFlags.DemandMaster, token);
+            var writeId = await ReadClientIdAsync(token);
+            if (writeId != before)
+            {
+                throw new ComparisonFailureException(WriteConnectionReplacedError);
+            }
+
+            var receiptArgs = new object[] { RequiredLocalFsync, RequiredReplicaFsync, ReceiptTimeoutMilliseconds };
+            var reply = (RedisResult[])(await database.ExecuteAsync(WaitAofCommand, receiptArgs, CommandFlags.DemandMaster).WaitAsync(token))!;
+            if (reply.Length != 2 || (long)reply[0] < RequiredLocalFsync || (long)reply[1] < RequiredReplicaFsync)
+            {
+                throw new ComparisonFailureException(TimeoutSettingError);
+            }
+
+            if (await ReadClientIdAsync(token) != before)
+            {
+                throw new ComparisonFailureException(ReceiptConnectionReplacedError);
+            }
+        }
+
+        private async Task<long> ReadClientIdAsync(CancellationToken token)
+        {
+            var args = new object[] { ClientIdSubcommand };
+            return (long)await database.ExecuteAsync(ClientCommand, args, CommandFlags.DemandMaster).WaitAsync(token);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await connection.CloseAsync();
+            connection.Dispose();
+        }
     }
 }

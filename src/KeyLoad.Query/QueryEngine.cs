@@ -1,183 +1,186 @@
-using System.Diagnostics;
+using System.Collections.Immutable;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using KeyLoad.Core;
+using KeyLoad.Query.Features.ChangeFeeds;
+using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query;
 
-public sealed partial class QueryEngine(DatabaseEngine database)
+/// <summary>Executes authorized bounded SQL and AST queries.</summary>
+public sealed partial class QueryEngine
 {
-    private readonly SemaphoreSlim admission = new(database.Limits.MaxConcurrentQueries);
+    private const string CursorPurpose = "query-page";
+    private const string ExplainId = "explain";
+    private const string ResultLimitExceeded = "The query result byte budget is exceeded.";
+    private static readonly TimeSpan CursorLifetime = TimeSpan.FromMinutes(5);
     private sealed record CursorClaims(string Purpose, Guid Incarnation, Guid NodeId, long ReadGeneration, string PrincipalId, long PolicyEpoch,
         long SchemaVersion, string QueryHash, long CutPosition, long SourceEpoch, int Offset, DateTimeOffset ExpiresAt);
-    public QueryPage Execute(string principalId, QueryRequest request)
-        => Execute(principalId, () => new(request.Partition, new SqlParser(request.Sql, database.Limits).Parse(), request.Parameters,
-            request.AllowFullScan, request.Cursor));
-    public QueryPage ExecuteAst(string principalId, AstQueryRequest request) => Execute(principalId, () => request);
+    private readonly record struct CursorState(int Offset, long Cut, long SourceEpoch);
+    private readonly DatabaseEngine database;
+    private readonly LiveQueryExecutor liveQueries;
+
+    /// <summary>Creates a query engine over one node-local database.</summary>
+    /// <param name="database">Database owning query reads and admission.</param>
+    public QueryEngine(DatabaseEngine database)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        this.database = database;
+        liveQueries = new(database, this);
+    }
+
+    /// <summary>Executes a bounded SQL query against one authorized read cut.</summary>
+    /// <param name="principalId">Persisted database principal identifier.</param>
+    /// <param name="request">SQL query and optional continuation.</param>
+    /// <param name="timeProvider">Optional operation clock for deadline and cursor expiry.</param>
+    /// <param name="cancellationToken">Caller cancellation for parsing, scanning, sorting and projection.</param>
+    /// <returns>A bounded page with authorized continuation metadata.</returns>
+    public QueryPage Execute(string principalId, QueryRequest request, TimeProvider? timeProvider = null,
+        CancellationToken cancellationToken = default)
+        => Execute(principalId, budget => new(request.Partition, new SqlParser(request.Sql, database.Limits, budget).Parse(), request.Parameters,
+            request.AllowFullScan, request.Cursor), timeProvider, cancellationToken);
+    /// <summary>Executes a typed bounded query against one authorized read cut.</summary>
+    /// <param name="principalId">Persisted database principal identifier.</param>
+    /// <param name="request">Validated AST input and optional continuation.</param>
+    /// <param name="timeProvider">Optional operation clock for deadline and cursor expiry.</param>
+    /// <param name="cancellationToken">Caller cancellation for adaptation and execution.</param>
+    /// <returns>A bounded page with authorized continuation metadata.</returns>
+    public QueryPage ExecuteAst(string principalId, AstQueryRequest request, TimeProvider? timeProvider = null,
+        CancellationToken cancellationToken = default) => Execute(principalId, _ => request, timeProvider, cancellationToken);
+    /// <summary>Describes the supported query language and configured budgets.</summary>
     public QueryCapabilityManifest Capabilities => new(1, 1, "Q1", "atomicPartition", "decimal", "distinctFromNull",
         ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "IS NULL", "IS MISSING"],
         database.Limits.MaxResults, database.Limits.MaxScanRecords, database.Limits.MaxQueryBytes, database.Limits.MaxQueryDepth, true, true,
         database.Limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery"]);
-    private QueryPage Execute(string principalId, Func<AstQueryRequest> adapt)
+    private QueryPage Execute(string principalId, Func<ReadExecutionBudget, AstQueryRequest> adapt, TimeProvider? timeProvider,
+        CancellationToken cancellationToken)
     {
-        if (!admission.Wait(0)) throw Errors.Fail(ErrorCode.ResourceExhausted, "The query concurrency budget is exhausted.");
-        try
-        {
-            var request = QueryValidation.Normalize(adapt(), database.Limits); var query = request.Query;
-            var hash = QueryHash(request);
-            var started = Stopwatch.StartNew();
-            return database.WithQueryView(principalId, request.Partition, query.Collection,
-                (view, principal, resource) => ExecuteView(view, principal, resource, request, hash, started));
-        }
-        finally { admission.Release(); }
+        var budget = new ReadExecutionBudget(database.Limits, timeProvider, cancellationToken);
+        budget.Check();
+        using var reservation = database.AdmitQuery(cancellationToken);
+        budget.Check();
+        var request = QueryValidation.Normalize(adapt(budget), database.Limits);
+        var query = request.Query;
+        var hash = QueryHash(request);
+        budget.Check();
+        return database.WithQueryView(principalId, request.Partition, query.Collection,
+            (view, principal, resource) => ExecuteView(view, principal, resource, request, hash, budget,
+                timeProvider ?? TimeProvider.System));
     }
-    private static string QueryHash(AstQueryRequest request) => JsonData.Fingerprint(new
+    internal static string QueryHash(AstQueryRequest request) => JsonData.Fingerprint(new
     { request.Partition, Query = request.Query with { Explain = false }, request.Parameters, request.AllowFullScan, request.AstVersion });
-    private void Bind(PrincipalRecord principal, ResourceDefinition resource, AstQueryRequest request)
+    internal void Bind(PrincipalRecord principal, ResourceDefinition resource, AstQueryRequest request)
     {
         foreach (var field in PredicateEvaluator.Fields(request.Query.Filter).Concat(request.Query.Order.Select(o => o.Path)))
+        {
             database.Authorization.RequireFieldUse(principal, resource, field);
-        CheckParameters(request.Query.Filter, request.Parameters);
+        }
+        PredicateEvaluator.CheckParameters(request.Query.Filter, request.Parameters);
     }
-    private QueryPage ExecuteView(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
-        AstQueryRequest request, string hash, Stopwatch started)
+    internal QueryPage ExecuteView(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
+        AstQueryRequest request, string hash, ReadExecutionBudget budget, TimeProvider clock)
     {
         var query = request.Query;
-        // Bind all predicates and ordering before any index or document lookup.
+        budget.Check();
         Bind(principal, resource, request);
-        var cursorOffset = 0; var cut = database.Store.Position;
-        var sourceEpoch = database.DocumentEpoch(view, request.Partition, query.Collection);
+        var cursor = ResolveCursor(view, principal, resource, request, hash, clock);
+        var prepared = new PreparedQuery(query, cursor.Offset, database.Limits.MaxScanRecords);
+        var accessPath = new QueryCandidateReader(database, view, principal, resource, request, budget, document =>
+        {
+            budget.Check();
+            if (query.Explain)
+            {
+                return;
+            }
+            using var json = JsonDocument.Parse(document.Json);
+            if (query.Filter is null || PredicateEvaluator.Evaluate(query.Filter, document, json.RootElement,
+                    request.Parameters, prepared.Paths) == true)
+            {
+                budget.Check();
+                prepared.Consider(document, json.RootElement);
+            }
+        }).Visit();
+        if (query.Explain)
+        {
+            var explain = new QueryPage([new(ExplainId, 0, JsonSerializer.Serialize(new { AccessPath = accessPath,
+                AtomicPartition = request.Partition.AtomicPartitionId, ScanBudget = database.Limits.MaxScanRecords },
+                JsonDefaults.Options))], null, cursor.Cut, accessPath);
+            budget.CheckResult(explain);
+            return explain;
+        }
+        return BuildPage(principal, resource, request, hash, cursor, prepared, accessPath, budget, clock);
+    }
+
+    private CursorState ResolveCursor(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
+        AstQueryRequest request, string hash, TimeProvider clock)
+    {
+        var offset = 0;
+        var cut = database.Store.Position;
+        var sourceEpoch = database.DocumentEpoch(view, request.Partition, request.Query.Collection);
         if (request.Cursor is { } cursor)
         {
             CursorClaims claims;
-            try { claims = database.Verify<CursorClaims>(cursor); }
+            try
+            { claims = database.Verify<CursorClaims>(cursor); }
             catch (KeyLoadException exception) when (exception.Code == ErrorCode.TokenInvalidated)
             { throw Errors.Fail(ErrorCode.CursorExpired, "The query cursor is invalid."); }
-            if (claims.Purpose != "query-page" || claims.Incarnation != database.Store.Identity.Incarnation
+            if (claims.Purpose != CursorPurpose || claims.Incarnation != database.Store.Identity.Incarnation
                 || claims.NodeId != database.Store.Identity.NodeId || claims.ReadGeneration != database.Store.Identity.ReadGeneration
                 || claims.PrincipalId != principal.Id || claims.PolicyEpoch != principal.PolicyEpoch || claims.SchemaVersion != resource.SchemaVersion
                 || claims.QueryHash != hash || claims.SourceEpoch != sourceEpoch || claims.CutPosition < 0 || claims.CutPosition > database.Store.Position
-                || claims.ExpiresAt < DateTimeOffset.UtcNow
+                || claims.ExpiresAt < clock.GetUtcNow()
                 || claims.Offset < 0 || claims.Offset > database.Limits.MaxScanRecords)
+            {
                 throw Errors.Fail(ErrorCode.CursorExpired, "The query cursor no longer has a valid authorized read cut.");
-            cursorOffset = claims.Offset; cut = claims.CutPosition;
+            }
+            offset = claims.Offset;
+            cut = claims.CutPosition;
         }
-        var (documents, accessPath) = Candidates(view, principal, resource, request, query, started);
-        if (query.Explain) return new QueryPage([new("explain", 0, JsonSerializer.Serialize(new { AccessPath = accessPath,
-                    AtomicPartition = request.Partition.AtomicPartitionId, ScanBudget = database.Limits.MaxScanRecords }, JsonDefaults.Options))], null, cut, accessPath);
-        var eligible = new List<DocumentRecord>();
-        foreach (var document in documents)
+        return new(offset, cut, sourceEpoch);
+    }
+
+    private QueryPage BuildPage(PrincipalRecord principal, ResourceDefinition resource, AstQueryRequest request,
+        string hash, CursorState cursor, PreparedQuery prepared, string accessPath, ReadExecutionBudget budget, TimeProvider clock)
+    {
+        var query = request.Query;
+        var rows = new List<QueryRow>();
+        var minimumResultBytes = 0L;
+        foreach (var row in prepared.Page(cursor.Offset, query.Limit, budget))
         {
-            if (started.Elapsed > TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds))
-                throw Errors.Fail(ErrorCode.BudgetExceeded, "The query deadline is exceeded.");
-            using var json = JsonDocument.Parse(document.Json);
-            if (query.Filter is null || PredicateEvaluator.Evaluate(query.Filter, document, json.RootElement, request.Parameters) == true)
-                eligible.Add(document);
+            budget.Check();
+            var projected = Project(principal, resource, row.Document, query.Projection, prepared.Paths);
+            minimumResultBytes += Encoding.UTF8.GetByteCount(projected.Json);
+            if (minimumResultBytes > database.Limits.MaxBatchBytes)
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, ResultLimitExceeded);
+            }
+            rows.Add(projected);
         }
-        eligible.Sort((left, right) => CompareRows(left, right, query.Order));
-        var rows = new List<QueryRow>(); long resultBytes = 0;
-        foreach (var document in eligible.Skip(cursorOffset).Take(query.Limit))
-        {
-            var row = Project(principal, resource, document, query.Projection);
-            resultBytes += JsonDefaults.Serialize(row).Length;
-            if (resultBytes > database.Limits.MaxBatchBytes)
-                throw Errors.Fail(ErrorCode.BudgetExceeded, "The query result byte budget is exceeded.");
-            rows.Add(row);
-        }
-        var page = rows.ToArray();
-        var next = cursorOffset + page.Length;
-        var token = next < eligible.Count ? database.Sign(new CursorClaims("query-page", database.Store.Identity.Incarnation,
+        var next = cursor.Offset + rows.Count;
+        var token = next < prepared.EligibleCount ? database.Sign(new CursorClaims(CursorPurpose, database.Store.Identity.Incarnation,
             database.Store.Identity.NodeId, database.Store.Identity.ReadGeneration, principal.Id,
-            principal.PolicyEpoch, resource.SchemaVersion, hash, cut, sourceEpoch, next, DateTimeOffset.UtcNow.AddMinutes(5))) : null;
-        return new QueryPage(page, token, cut, accessPath);
+            principal.PolicyEpoch, resource.SchemaVersion, hash, cursor.Cut, cursor.SourceEpoch, next,
+            clock.GetUtcNow().Add(CursorLifetime))) : null;
+        var result = new QueryPage(rows.ToImmutableArray(), token, cursor.Cut, accessPath);
+        budget.CheckResult(result);
+        return result;
     }
-    private (DocumentRecord[] Records, string Path) Candidates(IKeyValueView view, PrincipalRecord principal,
-        ResourceDefinition resource, AstQueryRequest request, SelectQuery query, Stopwatch started)
-    {
-        long bytes = 0;
-        DocumentRecord? Candidate(byte[]? payload)
-        {
-            if (started.Elapsed > TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds))
-                throw Errors.Fail(ErrorCode.BudgetExceeded, "The query deadline is exceeded.");
-            if (payload is null) return null;
-            bytes += payload.Length;
-            if (bytes > database.Limits.MaxQueryReadBytes) throw Errors.Fail(ErrorCode.BudgetExceeded, "The query candidate byte budget is exceeded.");
-            var record = JsonDefaults.Deserialize<DocumentRecord>(payload);
-            return !record.Deleted && database.Authorization.CanReadRow(principal, record.Access) ? record : null;
-        }
-        DocumentRecord? Read(string id) => Candidate(view.Get(KeySpace.Partition("document", request.Partition, query.Collection, id)));
-        var equality = Equalities(query.Filter, request.Parameters).GroupBy(p => p.Key, StringComparer.Ordinal)
-            .ToDictionary(group => group.Key, group => group.First().Value, StringComparer.Ordinal);
-        if (equality.TryGetValue("/@id", out var identifier) && identifier is string id)
-        {
-            var record = Read(id);
-            return (record is null ? [] : [record], "point");
-        }
-        foreach (var index in resource.Indexes.OrderByDescending(i => i.Fields.Length))
-        {
-            var prefixFields = index.Fields.TakeWhile(equality.ContainsKey).ToArray();
-            if (prefixFields.Length == 0) continue;
-            var values = prefixFields.Select(f => equality[f]).ToArray();
-            if (values.Any(v => v is null || v is MissingValue)) continue;
-            var prefix = KeySpace.Partition("index", request.Partition, new object?[] { query.Collection, index.Name }.Concat(values).ToArray());
-            var matches = view.Scan(prefix, database.Limits.MaxScanRecords);
-            if (matches.HasMore) throw Errors.Fail(ErrorCode.BudgetExceeded, "The index range exceeds its candidate budget.");
-            var records = matches.Records.Select(m => Read(JsonDefaults.Deserialize<string>(m.Value))).Where(d => d is not null).Cast<DocumentRecord>().ToArray();
-            return (records, "index:" + index.Name);
-        }
-        if (!request.AllowFullScan) throw Errors.Fail(ErrorCode.UnsupportedCapability, "The query requires an index or explicit full-scan permission.");
-        var page = view.Scan(KeySpace.Partition("document", request.Partition, query.Collection), database.Limits.MaxScanRecords);
-        if (page.HasMore) throw Errors.Fail(ErrorCode.BudgetExceeded, "The full scan exceeds its candidate budget.");
-        return (page.Records.Select(m => Candidate(m.Value)).Where(d => d is not null).Cast<DocumentRecord>().ToArray(), "bounded-full-scan");
-    }
-    private static IEnumerable<KeyValuePair<string, object?>> Equalities(Predicate? predicate, Dictionary<string, JsonElement>? parameters)
-    {
-        if (predicate is Logical { Operator: "AND" } and)
-        { foreach (var pair in Equalities(and.Left, parameters).Concat(Equalities(and.Right, parameters))) yield return pair; }
-        else if (predicate is Comparison { Operator: "=", Left: FieldOperand field, Right: ValueOperand value }) yield return new(field.Path, JsonData.Scalar(value.Value, ""));
-        else if (predicate is Comparison { Operator: "=", Left: FieldOperand parameterField, Right: ParameterOperand parameter }
-            && parameters?.TryGetValue(parameter.Name, out var literal) == true) yield return new(parameterField.Path, JsonData.Scalar(literal, ""));
-    }
-    private static void CheckParameters(Predicate? predicate, Dictionary<string, JsonElement>? parameters)
-    {
-        void Check(Operand operand)
-        {
-            if (operand is ParameterOperand parameter && (parameters is null || !parameters.ContainsKey(parameter.Name)))
-                throw Errors.Fail(ErrorCode.Validation, "A required query parameter is missing.");
-        }
-        switch (predicate)
-        {
-            case Comparison comparison: Check(comparison.Left); Check(comparison.Right); break;
-            case Logical logical: CheckParameters(logical.Left, parameters); CheckParameters(logical.Right, parameters); break;
-            case Negation not: CheckParameters(not.Inner, parameters); break;
-            case NullTest test: Check(test.Value); break;
-            case InPredicate list: Check(list.Value); foreach (var operand in list.Values) Check(operand); break;
-        }
-    }
-    private static int CompareRows(DocumentRecord left, DocumentRecord right, Ordering[] order)
-    {
-        using var leftJson = JsonDocument.Parse(left.Json);
-        using var rightJson = JsonDocument.Parse(right.Json);
-        foreach (var item in order)
-        {
-            var l = PredicateEvaluator.Value(new FieldOperand(item.Path), left, leftJson.RootElement, null);
-            var r = PredicateEvaluator.Value(new FieldOperand(item.Path), right, rightJson.RootElement, null);
-            var result = KeyCodec.Encode(l).AsSpan().SequenceCompareTo(KeyCodec.Encode(r));
-            if (result != 0) return item.Descending ? -Math.Sign(result) : Math.Sign(result);
-        }
-        return KeyCodec.Encode(left.Reference.Id).AsSpan().SequenceCompareTo(KeyCodec.Encode(right.Reference.Id));
-    }
-    private QueryRow Project(PrincipalRecord principal, ResourceDefinition resource, DocumentRecord document, Selection[] selections)
+    internal QueryRow Project(PrincipalRecord principal, ResourceDefinition resource, DocumentRecord document,
+        ImmutableArray<Selection> selections,
+        IReadOnlyDictionary<string, string[]>? paths = null)
     {
         var safe = database.Project(principal, resource, document);
         if (selections.Length == 1 && selections[0].Path == "*")
+        {
             return new(document.Reference.Id, document.Revision, safe.Json, safe.Redacted, safe.RedactedFields);
+        }
         using var json = JsonDocument.Parse(safe.Json);
         var result = new JsonObject();
         foreach (var selection in selections)
         {
-            var value = PredicateEvaluator.Value(new FieldOperand(selection.Path), document, json.RootElement, null);
+            var value = PredicateEvaluator.FieldValue(selection.Path, document, json.RootElement, paths);
             result[selection.Alias] = value is MissingValue ? null : JsonSerializer.SerializeToNode(value, JsonDefaults.Options);
         }
         return new(document.Reference.Id, document.Revision, result.ToJsonString(), safe.Redacted, safe.RedactedFields);

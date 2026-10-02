@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-01",
+  "framework": "MCAF",
+  "tutorial": "https://mcaf.managed-code.com/tutorial",
+  "upstreamRevision": "edcfac048c3cb5e158e841378bd61fe457dc34e7",
+  "templateSha256": "421160c442f9c2fba52b12787995f18f524dfe09165b15b26a2c19d272b3e18c",
+  "preservedRoot": {
+    "path": "AGENTS.md",
+    "prefixBytes": 2326,
+    "sha256": "b78077c3d700f0b816471e32df0c839dee64e90ff10be022961917b9be7c3993"
+  },
+  "preservedLocal": [],
+  "projects": [
+    "benchmarks/KeyLoad.BenchmarkScenarios/KeyLoad.BenchmarkScenarios.csproj",
+    "benchmarks/KeyLoad.Benchmarks/KeyLoad.Benchmarks.csproj",
+    "benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj",
+    "benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj",
+    "src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj",
+    "src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj",
+    "src/KeyLoad.AppHost/KeyLoad.AppHost.csproj",
+    "src/KeyLoad.Artifacts/KeyLoad.Artifacts.csproj",
+    "src/KeyLoad.Cli/KeyLoad.Cli.csproj",
+    "src/KeyLoad.Client/KeyLoad.Client.csproj",
+    "src/KeyLoad.Core/KeyLoad.Core.csproj",
+    "src/KeyLoad.Orleans/KeyLoad.Orleans.csproj",
+    "src/KeyLoad.Query/KeyLoad.Query.csproj",
+    "src/KeyLoad.Replication/KeyLoad.Replication.csproj",
+    "src/KeyLoad.Security/KeyLoad.Security.csproj",
+    "src/KeyLoad.Server/KeyLoad.Server.csproj",
+    "src/KeyLoad.ServiceDefaults/KeyLoad.ServiceDefaults.csproj",
+    "src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj",
+    "tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
+    "tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj",
+    "tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj",
+    "tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj",
+    "tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj",
+    "tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj",
+    "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj"
+  ],
+  "modules": [
+    "site",
+    ".github/workflows",
+    "docs",
+    "scripts"
+  ],
+  "skillFiles": [],
+  "skillsInstalled": false,
+  "skillInstallation": "Excluded by explicit owner instruction.",
+  "runtimeBaseline": {
+    "sourceRevision": "9c570f8c33a7a9667507a8e1c0ca68860de3be45",
+    "runId": 36926803549,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/36926803549",
+    "conclusion": "success"
+  },
+  "status": "configured_locally",
+  "conflicts": [
+    "No skill installation by explicit owner direction.",
+    "No weakening/deletion exceptions to existing rules.",
+    "CI-only tests and qualification; local builds/static inspection are development evidence only.",
+    "ManagedCode dependency ownership/release workflow preserved.",
+    "Existing stable KeyLoad main commit/push authorization preserved.",
+    "Explicit owner-directed no-lock correction predates bootstrap; current written policy preserved exactly.",
+    "Existing Node test runner conflicts with TUnit-only policy; recorded as migration debt."
+  ],
+  "implementationGaps": [
+    "DotNext consensus remains in existing source.",
+    "TUnit package/test source migration is present locally but its GitHub qualification is pending.",
+    "Existing AppHost RF3 launches host processes.",
+    "Official MCP and chunked blob surfaces incomplete.",
+    "Complexity and coverage CI gates unconfigured.",
+    "Concurrent CodeQuality solution build reports 1180 errors and failed formatting; complete shared source is not qualified."
+  ],
+  "acceptance": [
+    {
+      "id": "AC-MCAF-001",
+      "state": "passed_local_configuration",
+      "evidence": "Independent full diff/source review; integrated static validator; no new runtime qualification claim."
+    },
+    {
+      "id": "AC-MCAF-002",
+      "state": "passed_local_configuration",
+      "evidence": "Independent full diff/source review; integrated static validator; no new runtime qualification claim."
+    },
+    {
+      "id": "AC-MCAF-003",
+      "state": "passed_local_configuration",
+      "evidence": "Independent full diff/source review; integrated static validator; no new runtime qualification claim."
+    },
+    {
+      "id": "AC-MCAF-004",
+      "state": "passed_local_configuration",
+      "evidence": "Independent full diff/source review; integrated static validator; no new runtime qualification claim."
+    },
+    {
+      "id": "AC-MCAF-005",
+      "state": "passed_local_configuration",
+      "evidence": "Independent full diff/source review; integrated static validator; no new runtime qualification claim."
+    },
+    {
+      "id": "AC-MCAF-006",
+      "state": "passed_local_configuration",
+      "evidence": "Independent full diff/source review; integrated static validator; no new runtime qualification claim."
+    },
+    {
+      "id": "AC-MCAF-007",
+      "state": "passed_local_configuration",
+      "evidence": "Independent full diff/source review; integrated static validator; no new runtime qualification claim."
+    }
+  ],
+  "delivery": {
+    "status": "pending",
+    "reason": "The shared checkout has concurrent CodeQuality projects and production migrations; qualification must use the complete committed source snapshot."
+  },
+  "agents": [
+    {
+      "task": "TASK-MCAF-REVIEW-001",
+      "role": "read-only architecture",
+      "model": "gpt-6-astra",
+      "effort": "ultra",
+      "state": "complete"
+    },
+    {
+      "task": "TASK-MCAF-LOCAL-002",
+      "role": "bounded documentation worker",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "state": "complete",
+      "ownedInitialProjectPolicies": 20,
+      "ownedModulePolicies": 3
+    },
+    {
+      "task": "TASK-MCAF-CHECK-003",
+      "role": "bounded static tooling worker",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "state": "complete"
+    },
+    {
+      "task": "TASK-MCAF-REVIEW-005",
+      "role": "independent final review",
+      "model": "gpt-6-astra",
+      "effort": "ultra",
+      "state": "complete"
+    }
+  ],
+  "verification": {
+    "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+    "result": "pass",
+    "projects": 22,
+    "modules": 4,
+    "preservedRootPrefixBytes": 2326,
+    "skillFiles": 0,
+    "negativeChecks": [
+      "altered root prefix rejected",
+      "missing local policy rejected",
+      "unsafe ../ record path rejected"
+    ],
+    "templatePinnedRevisionVerified": true,
+    "renderedMermaidProof": true,
+    "mermaidRender": {
+      "tool": "Existing cached Mermaid CLI 11.12.0; no installation",
+      "documents": [
+        "docs/Architecture.md",
+        "docs/Features/RepositoryGovernance.md",
+        "docs/ADR/ADR-032-mcaf-governance.md"
+      ],
+      "diagrams": 8,
+      "result": "pass",
+      "output": "artifacts/mcaf-diagrams/"
+    }
+  },
+  "inventoryUpdates": [
+    {
+      "date": "2026-10-02",
+      "task": "TASK-SITE-INTEGRATE-006",
+      "addedProject": "tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj",
+      "localPolicy": "tests/KeyLoad.SiteTests/AGENTS.md",
+      "reason": "Independent GitHub TUnit static-site qualification under ADR-040; existing policies/preserved prefix unchanged."
+    },
+    {
+      "date": "2026-10-02",
+      "task": "TASK-MP-010EM-L",
+      "addedProject": "benchmarks/KeyLoad.BenchmarkScenarios/KeyLoad.BenchmarkScenarios.csproj",
+      "localPolicy": "benchmarks/KeyLoad.BenchmarkScenarios/AGENTS.md",
+      "reason": "Accepted ADR-047 real public BenchmarkDotNet fixture library with centrally enforced analysis; source integration only, generated consumer and full GitHub qualification pending."
+    }
+  ]
+}

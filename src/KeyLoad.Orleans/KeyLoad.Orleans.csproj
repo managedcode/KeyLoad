@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
+    <ProjectReference Include="../KeyLoad.Query/KeyLoad.Query.csproj" />
+    <ProjectReference Include="../KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../KeyLoad.Security/KeyLoad.Security.csproj" />
     <PackageReference Include="Microsoft.Orleans.Server" />
     <PackageReference Include="ManagedCode.Communication.Orleans" />

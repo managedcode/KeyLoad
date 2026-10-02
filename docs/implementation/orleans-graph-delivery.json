@@ -1,0 +1,42 @@
+{
+  "status": "dependency_published_consumer_ci_pending",
+  "verifiedAtUtc": "2026-10-02T01:04:55Z",
+  "requirement": "REQ-ROUTE-006",
+  "acceptance": "AC-ROUTE-006",
+  "problem": "Native custom Grain Service system-target calls were incorrectly subjected to application grain-call graph tracking during early silo initialization.",
+  "package": {
+    "id": "ManagedCode.Orleans.Graph",
+    "version": "10.0.6",
+    "feed": "https://api.nuget.org/v3/index.json",
+    "download": "https://api.nuget.org/v3-flatcontainer/managedcode.orleans.graph/10.0.6/managedcode.orleans.graph.10.0.6.nupkg",
+    "sha256": "e7538e17f725a9a0eef9fb44d83df00dc26f16b3a204556a91233550352597f5",
+    "bytes": 117209,
+    "assemblySha256": "5231dbd1fd801c3c12b687b3e27e7c739543d3c1743652cd2bc533b8d365dd67"
+  },
+  "source": {
+    "repository": "https://github.com/managedcode/Orleans.Graph",
+    "pullRequest": "https://github.com/managedcode/Orleans.Graph/pull/3",
+    "mainCommit": "61746651f3b0da7489a1c7d03bc738bb6433b74e",
+    "release": "https://github.com/managedcode/Orleans.Graph/releases/tag/v10.0.6"
+  },
+  "owningRepositoryEvidence": {
+    "ci": "https://github.com/managedcode/Orleans.Graph/actions/runs/36948546730",
+    "codeQl": "https://github.com/managedcode/Orleans.Graph/actions/runs/36948546882",
+    "releaseWorkflow": "https://github.com/managedcode/Orleans.Graph/actions/runs/36948546753",
+    "allConclusions": "success",
+    "tests": { "total": 82, "passed": 82, "skipped": 0 },
+    "lineCoverage": 0.8517,
+    "branchCoverage": 0.7953,
+    "publishJobId": 110656480012,
+    "tagAndReleaseJobId": 110656533043,
+    "feedAssemblyMatchesReleaseArtifact": true
+  },
+  "keyLoadIntegration": {
+    "centralVersion": "10.0.6",
+    "serverAndOrleansRestore": "succeeded_from_published_feed",
+    "applicationGraph": "Client entry IRequestGrain.ExecuteAsync; explicit request-to-read and request-to-command ExecuteAsync transitions; default denial retained.",
+    "strictBuild": "pending",
+    "consumerCi": "pending",
+    "qualification": "The owning repository evidence does not qualify KeyLoad RF3, authorization, direct-call rejection, migration or shutdown."
+  }
+}

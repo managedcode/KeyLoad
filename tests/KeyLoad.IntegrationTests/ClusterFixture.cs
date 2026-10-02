@@ -1,127 +1,254 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using System.Collections.Concurrent;
 using KeyLoad.Client;
-using KeyLoad.Replication;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using TUnit.Core.Interfaces;
 
 namespace KeyLoad.IntegrationTests;
 
-public sealed class ClusterFixture : IAsyncLifetime
+/// <summary>Owns the real Aspire RF3 application shared by public SDK integration scenarios.</summary>
+internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
 {
+    private static readonly TimeSpan StartupTimeout = TimeSpan.FromMinutes(2);
     private readonly long? commandBytes;
     private readonly HttpAdmissionLimits? httpAdmission;
-    public ClusterFixture() { }
-    internal ClusterFixture(long commandBytes) => this.commandBytes = commandBytes;
-    internal ClusterFixture(HttpAdmissionLimits httpAdmission) => this.httpAdmission = httpAdmission;
-    public string Root { get; } = Path.Combine(Path.GetTempPath(), "keyload-cluster-" + Guid.NewGuid().ToString("N"));
-    public DistributedApplication App { get; private set; } = null!;
-    public string AdminKey { get; private set; } = "";
+    private ClusterFixtureDiagnostics? diagnostics;
+    private ContainerRuntimeControl? containerRuntime;
     private byte[] peerSecret = [];
-    private readonly CancellationTokenSource loggingLifetime = new();
-    private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> nodeLogs = new(StringComparer.Ordinal);
-    private readonly ConcurrentDictionary<string, Task> logCapture = new(StringComparer.Ordinal);
-    private Task? resourceCapture;
-    public async ValueTask InitializeAsync()
+
+    private const string InvalidContainerModel = "The Aspire model must expose exactly the three named RF3 container resources.";
+    private const string RuntimeControllerUnavailable = "The Aspire container runtime controller is not initialized.";
+    private const string DiagnosticsUnavailable = "The Aspire diagnostic capture is not initialized.";
+
+    /// <summary>Creates the standard RF3 fixture for the shared TUnit class data source.</summary>
+    public ClusterFixture() { }
+
+    /// <summary>Creates an RF3 fixture with a smaller command admission budget.</summary>
+    /// <param name="commandBytes">The per-node retained command byte limit.</param>
+    internal ClusterFixture(long commandBytes) => this.commandBytes = commandBytes;
+
+    /// <summary>Creates an RF3 fixture with explicit HTTP admission bounds.</summary>
+    /// <param name="httpAdmission">The HTTP body and control-body limits for each node.</param>
+    internal ClusterFixture(HttpAdmissionLimits httpAdmission)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
-            [$"--KeyLoad:DataRoot={Root}", "--KeyLoad:Ephemeral=true", "--KeyLoad:SnapshotThreshold=16"], timeout.Token);
-        if (commandBytes is { } bytes)
-            foreach (var number in Enumerable.Range(1, 3))
-                builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>().Single(resource => resource.Name == $"node{number}"))
-                    .WithEnvironment("KeyLoad__CommandAdmission__MaxRetainedBytes", bytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
-        if (httpAdmission is { } httpLimits)
-            foreach (var number in Enumerable.Range(1, 3))
-            {
-                var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>().Single(resource => resource.Name == $"node{number}"));
-                node.WithEnvironment("KeyLoad__HttpAdmission__MaxBodyBytes", httpLimits.MaxBodyBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                node.WithEnvironment("KeyLoad__HttpAdmission__MaxControlBodyBytes", httpLimits.MaxControlBodyBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            }
-        builder.Services.AddLogging(logging =>
-        {
-            logging.ClearProviders(); logging.AddConsole(); logging.SetMinimumLevel(LogLevel.Warning);
-            logging.AddFilter("Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService", LogLevel.Critical);
-        });
-        App = await builder.BuildAsync(timeout.Token);
-        var logs = App.Services.GetRequiredService<ResourceLoggerService>();
-        resourceCapture = CaptureResourcesAsync(logs);
-        await App.StartAsync(timeout.Token);
-        using var profile = System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(Path.Combine(Root, "local-profile.json")));
-        AdminKey = profile.RootElement.GetProperty("AdminKey").GetString()!;
-        peerSecret = Convert.FromBase64String(profile.RootElement.GetProperty("PeerSecret").GetString()!);
-        try { await Task.WhenAll(Enumerable.Range(1, 3).Select(i => App.ResourceNotifications.WaitForResourceHealthyAsync($"node{i}", timeout.Token))); }
-        catch { await SaveFailureDiagnosticsAsync(); throw; }
+        ArgumentNullException.ThrowIfNull(httpAdmission);
+        this.httpAdmission = httpAdmission;
     }
+
+    /// <summary>Gets the unique private host directory used by the Aspire application.</summary>
+    public string Root { get; } = Path.Combine(Path.GetTempPath(),
+        ClusterFixtureProtocol.RootDirectoryPrefix + Guid.NewGuid().ToString(ClusterFixtureProtocol.GuidFormat));
+
+    /// <summary>Gets the actual started Aspire application and its allocated endpoint model.</summary>
+    public DistributedApplication App { get; private set; } = null!;
+
+    /// <summary>Gets the administrator credential loaded from the private local profile.</summary>
+    public string AdminKey { get; private set; } = "";
+
+    /// <summary>Starts all three genuine Aspire resources and waits for their health concurrently.</summary>
+    /// <returns>A task that completes when each of the three resources is healthy.</returns>
+    public async Task InitializeAsync()
+    {
+        using var timeout = new CancellationTokenSource(StartupTimeout);
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
+            [$"{ClusterFixtureProtocol.DataRootArgument}{Root}", ClusterFixtureProtocol.EphemeralArgument,
+                ClusterFixtureProtocol.SnapshotThresholdArgument], timeout.Token);
+        ConfigureCommandAdmission(builder, commandBytes);
+        ConfigureHttpAdmission(builder);
+        var containerNames = GetContainerNames(builder);
+        var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
+        ConfigureLogging(builder);
+
+        App = await builder.BuildAsync(timeout.Token);
+        containerRuntime = new(App, containerNames, repository.FullName);
+        diagnostics = new(App);
+        diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
+        await App.StartAsync(timeout.Token);
+        ReadPrivateProfile();
+
+        try
+        {
+            await Task.WhenAll(Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
+                .Select(number => App.ResourceNotifications.WaitForResourceHealthyAsync(ClusterFixtureProtocol.NodeName(number), timeout.Token)));
+        }
+        catch (Exception)
+        {
+            var diagnosticToken = timeout.IsCancellationRequested ? CancellationToken.None : timeout.Token;
+            await SaveFailureDiagnosticsAsync(diagnosticToken);
+            throw;
+        }
+    }
+
+    /// <summary>Creates the real .NET SDK client for one Aspire node and selected credential.</summary>
+    /// <param name="node">The Aspire HTTP endpoint resource name.</param>
+    /// <param name="key">An optional database credential; null selects the fixture administrator.</param>
+    /// <returns>A client backed by Aspire's actual allocated HTTP endpoint.</returns>
     public KeyLoadClient Client(string node, string? key = null)
     {
-        var http = App.CreateHttpClient(node, "http"); http.Timeout = TimeSpan.FromSeconds(30);
-        return new(http, key ?? AdminKey);
-    }
-    private async Task CaptureResourcesAsync(ResourceLoggerService logs)
-    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(node);
+        HttpClient? pending = null;
         try
         {
-            await foreach (var change in App.ResourceNotifications.WatchAsync(loggingLifetime.Token))
-                if (change.Resource.Name is "node1" or "node2" or "node3")
-                    _ = logCapture.GetOrAdd(change.ResourceId, id => CaptureLogsAsync(logs, id, change.Resource.Name));
+            pending = RequireApp().CreateHttpClient(node, ClusterFixtureProtocol.HttpEndpointName);
+            pending.Timeout = ClusterFixtureProtocol.ClientTimeout;
+            var client = new KeyLoadClient(pending, key ?? AdminKey);
+            pending = null;
+            return client;
         }
-        catch (OperationCanceledException) when (loggingLifetime.IsCancellationRequested) { }
+        finally { pending?.Dispose(); }
     }
-    private async Task CaptureLogsAsync(ResourceLoggerService logs, string resourceId, string name)
+
+    /// <summary>Writes bounded RF3 state, signed discovery and recent node-log diagnostics.</summary>
+    /// <returns>A task that completes after the diagnostic artifact is written.</returns>
+    public Task SaveFailureDiagnosticsAsync() => SaveFailureDiagnosticsAsync(RequireDiagnostics().LifetimeToken);
+
+    /// <summary>Kills the inspected Aspire-managed Docker container for a named test scenario.</summary>
+    /// <param name="resourceName">The Aspire resource name to stop.</param>
+    /// <param name="scenario">The stable scenario identity recorded in the kill receipt.</param>
+    /// <param name="cancellationToken">The bounded test operation cancellation.</param>
+    /// <returns>The completed real Docker kill operation.</returns>
+    public Task KillContainerAsync(string resourceName, string scenario, CancellationToken cancellationToken)
     {
-        var buffer = nodeLogs.GetOrAdd(name, _ => new());
-        try
-        {
-            // A live subscription starts DCP's log forwarding even when no dashboard is connected.
-            await foreach (var batch in logs.WatchAsync(resourceId).WithCancellation(loggingLifetime.Token))
-                foreach (var line in batch)
-                {
-                    buffer.Enqueue(line.Content);
-                    while (buffer.Count > 120) buffer.TryDequeue(out _);
-                }
-        }
-        catch (OperationCanceledException) when (loggingLifetime.IsCancellationRequested) { }
+        ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(scenario);
+        return RequireContainerRuntime().KillAsync(resourceName, scenario, cancellationToken);
     }
-    public async Task SaveFailureDiagnosticsAsync()
+
+    /// <summary>Restarts a previously killed Aspire-managed container and records its actual new generation.</summary>
+    /// <param name="resourceName">The Aspire resource name to restart.</param>
+    /// <param name="cancellationToken">The bounded test operation cancellation.</param>
+    /// <returns>The completed native Aspire resource start operation.</returns>
+    public Task RestartContainerAsync(string resourceName, CancellationToken cancellationToken)
     {
-        var repository = new DirectoryInfo(AppContext.BaseDirectory);
-        while (repository.Parent is not null && !File.Exists(Path.Combine(repository.FullName, "KeyLoad.slnx"))) repository = repository.Parent;
-        var output = Path.Combine(repository.FullName, "artifacts", "qualification"); Directory.CreateDirectory(output);
-        foreach (var number in Enumerable.Range(1, 3))
-        {
-            var name = $"node{number}";
-            var tail = nodeLogs.TryGetValue(name, out var buffer) ? buffer.ToArray() : [];
-            var state = App.ResourceNotifications.TryGetCurrentState(name, out var current)
-                ? $"Resource {current.ResourceId}, state {current.Snapshot.State?.Text}, exit {current.Snapshot.ExitCode}, health {current.Snapshot.HealthStatus}" : "Resource state unavailable";
-            var consensus = "Consensus diagnostics unavailable";
-            try
-            {
-                using var http = new HttpClient(new PeerSecurity(peerSecret).CreateHandler()) { Timeout = TimeSpan.FromSeconds(3) };
-                using var response = await http.GetAsync(new Uri(App.GetEndpoint(name, "http"), "/internal/state"));
-                if (response.IsSuccessStatusCode) consensus = await response.Content.ReadAsStringAsync();
-            }
-            catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or InvalidOperationException) { }
-            File.WriteAllLines(Path.Combine(output, "rf3-failure-" + name + ".log"), new[] { state, consensus }.Concat(tail));
-            TestContext.Current.TestOutputHelper?.WriteLine($"{name}: {consensus}");
-            foreach (var line in tail) TestContext.Current.TestOutputHelper?.WriteLine($"{name}: {line}");
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
+        return RequireContainerRuntime().RestartAsync(resourceName, cancellationToken);
     }
+
+    /// <summary>Saves diagnostics, drains observers and disposes the actual Aspire application.</summary>
+    /// <returns>A task that completes after the owned test resources are disposed.</returns>
     public async ValueTask DisposeAsync()
     {
-        if (App is not null)
+        var ownedDiagnostics = diagnostics;
+        var cleanupFailures = new List<Exception>();
+        if (ownedDiagnostics is not null)
         {
-            await SaveFailureDiagnosticsAsync();
-            await loggingLifetime.CancelAsync();
-            if (resourceCapture is not null) await resourceCapture;
-            await Task.WhenAll(logCapture.Values);
-            await App.StopAsync(); await App.DisposeAsync();
+            await ClusterFixtureCleanup.CollectFailureAsync(
+                ownedDiagnostics.SaveAsync(peerSecret, ownedDiagnostics.LifetimeToken), cleanupFailures).ConfigureAwait(false);
+            await ClusterFixtureCleanup.CollectFailureAsync(
+                diagnostics!.DisposeAsync().AsTask(), cleanupFailures).ConfigureAwait(false);
+            diagnostics = null;
         }
-        loggingLifetime.Dispose();
-        if (Directory.Exists(Root)) Directory.Delete(Root, true);
+
+        var ownedApp = App;
+        App = null!;
+        if (ownedApp is not null)
+        {
+            await ClusterFixtureCleanup.CollectFailureAsync(() => ownedApp.StopAsync(), cleanupFailures).ConfigureAwait(false);
+            await ClusterFixtureCleanup.CollectFailureAsync(() => ownedApp.DisposeAsync().AsTask(), cleanupFailures).ConfigureAwait(false);
+        }
+
+        if (Directory.Exists(Root))
+        {
+            await ClusterFixtureCleanup.CollectFailureAsync(() => DeleteRootAsync(Root), cleanupFailures).ConfigureAwait(false);
+        }
+
+        if (cleanupFailures.Count > 0)
+        {
+            throw new AggregateException("Cluster fixture cleanup failed.", cleanupFailures);
+        }
     }
+
+    private static Task DeleteRootAsync(string root)
+    {
+        Directory.Delete(root, recursive: true);
+        return Task.CompletedTask;
+    }
+
+    private static void ConfigureCommandAdmission(IDistributedApplicationTestingBuilder builder, long? commandBytes)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        if (commandBytes is not { } bytes)
+        {
+            return;
+        }
+
+        foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
+        {
+            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
+                .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
+            node.WithEnvironment(ClusterFixtureProtocol.CommandBytesSetting,
+                bytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+    }
+
+    private void ConfigureHttpAdmission(IDistributedApplicationTestingBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        if (httpAdmission is not { } limits)
+        {
+            return;
+        }
+
+        foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
+        {
+            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
+                .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpBodyBytesSetting,
+                limits.MaxBodyBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpControlBodyBytesSetting,
+                limits.MaxControlBodyBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+    }
+
+    private static Dictionary<string, string> GetContainerNames(IDistributedApplicationTestingBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        var names = builder.Resources.OfType<ContainerResource>()
+            .Where(resource => ClusterFixtureProtocol.IsNodeName(resource.Name))
+            .ToDictionary(resource => resource.Name,
+                resource => resource.Annotations.OfType<ContainerNameAnnotation>().Single().Name, StringComparer.Ordinal);
+        if (names.Count != ClusterFixtureProtocol.NodeCount
+            || Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
+                .Any(number => !names.ContainsKey(ClusterFixtureProtocol.NodeName(number))))
+        {
+            throw new InvalidOperationException(InvalidContainerModel);
+        }
+
+        return names;
+    }
+
+    private static void ConfigureLogging(IDistributedApplicationTestingBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        builder.Services.AddLogging(logging =>
+        {
+            logging.ClearProviders();
+            logging.AddConsole();
+            logging.SetMinimumLevel(LogLevel.Warning);
+            logging.AddFilter(ClusterFixtureProtocol.HealthCheckLoggerCategory, LogLevel.Critical);
+        });
+    }
+
+    private void ReadPrivateProfile()
+    {
+        var profilePath = Path.Combine(Root, ClusterFixtureProtocol.ProfileFileName);
+        using var profile = System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(profilePath));
+        AdminKey = profile.RootElement.GetProperty(ClusterFixtureProtocol.AdminKeyProperty).GetString()!;
+        peerSecret = Convert.FromBase64String(profile.RootElement.GetProperty(ClusterFixtureProtocol.PeerSecretProperty).GetString()!);
+    }
+
+    private Task SaveFailureDiagnosticsAsync(CancellationToken cancellationToken) =>
+        RequireDiagnostics().SaveAsync(peerSecret, cancellationToken);
+
+    private ClusterFixtureDiagnostics RequireDiagnostics() => diagnostics
+        ?? throw new InvalidOperationException(DiagnosticsUnavailable);
+
+    private ContainerRuntimeControl RequireContainerRuntime() => containerRuntime
+        ?? throw new InvalidOperationException(RuntimeControllerUnavailable);
+
+    private DistributedApplication RequireApp() => App
+        ?? throw new InvalidOperationException(RuntimeControllerUnavailable);
 }
-[CollectionDefinition("rf3", DisableParallelization = true)]
-public sealed class ClusterCollection : ICollectionFixture<ClusterFixture>;

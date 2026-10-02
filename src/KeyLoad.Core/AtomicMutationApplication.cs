@@ -1,0 +1,59 @@
+using System.Collections.Immutable;
+using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Storage;
+
+namespace KeyLoad.Core;
+
+public sealed partial class DatabaseEngine
+{
+    private const string UnsupportedMutationMessage = "The mutation is unsupported.";
+    private const string DocumentEpochSpace = "document-epoch";
+
+    private ImmutableArray<MutationReceipt> ApplyMutations(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ImmutableArray<Mutation> mutations,
+        DateTimeOffset now, long position, bool allowOutboxProgressReserve = false)
+    {
+        var receipts = ImmutableArray.CreateBuilder<MutationReceipt>(mutations.Length);
+        foreach (var mutation in mutations)
+        {
+            var documentId = mutation switch { PutDocument put => put.Id, PatchDocument patch => patch.Id, DeleteDocument delete => delete.Id, _ => null };
+            var key = documentId is null ? null : DocumentKey(partition, mutation.Resource, documentId);
+            var before = key is null ? null : tx.GetRecord<DocumentRecord>(key);
+            var context = new DocumentMutationContext(key!, before);
+            DocumentMutationResult? image = mutation switch
+            {
+                PutDocument put => Put(tx, principal, partition, put, now, context),
+                PatchDocument patch => Patch(tx, principal, partition, patch, now, context),
+                DeleteDocument delete => Delete(tx, principal, partition, delete, now, context),
+                _ => null
+            };
+            var receipt = image?.Receipt ?? ApplyNonDocumentMutation(tx, principal, partition, mutation, now);
+            receipts.Add(receipt);
+            var after = image?.After;
+            AppendOutbox(tx, partition, new(0, receipts.Count - 1, Token(partition, position), now, mutation, receipt, before, after), allowOutboxProgressReserve);
+            if (before is not null && after is not null && before.Access != after.Access)
+            {
+                AdvanceVisibilityEpoch(tx, partition, mutation.Resource);
+            }
+        }
+        foreach (var collection in mutations.Where(mutation => mutation is PutDocument or PatchDocument or DeleteDocument)
+            .Select(mutation => mutation.Resource).Distinct(StringComparer.Ordinal))
+        {
+            tx.PutRecord(KeySpace.Partition(DocumentEpochSpace, partition, collection), checked(DocumentEpoch(tx, partition, collection) + 1));
+        }
+
+        return receipts.MoveToImmutable();
+    }
+
+    private MutationReceipt ApplyNonDocumentMutation(IAtomicTransaction tx, PrincipalRecord principal,
+        PartitionRef partition, Mutation mutation, DateTimeOffset now) => mutation switch
+        {
+            AppendEvents events => Append(tx, principal, partition, events, now),
+            PublishTopic topic => Publish(tx, principal, partition, topic, now),
+            EnqueueMessage message => Enqueue(tx, principal, partition, message, now),
+            UpsertEdge edge => Upsert(tx, principal, partition, edge),
+            DeleteEdge edge => RemoveEdge(tx, principal, partition, edge),
+            AppendSamples samples => Append(tx, principal, partition, samples),
+            PutVector vector => Upsert(tx, principal, partition, vector),
+            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedMutationMessage)
+        };
+}

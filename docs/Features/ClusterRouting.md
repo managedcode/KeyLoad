@@ -1,0 +1,70 @@
+# ClusterRouting
+
+Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
+
+| Requirement | Acceptance and observable evidence |
+|---|---|
+| REQ-ROUTE-001: every database operation runs through a distinct Orleans request grain and calls the relevant database capabilities. | AC-ROUTE-001: .NET/MCP client writes and reads reach request grains; independent concurrent requests have distinct grain keys and stable command retry IDs. |
+| REQ-ROUTE-002: distributed grain directory and activation repartitioning are enabled; routing migration never transfers node-owned file locks or journals. | AC-ROUTE-002: cluster configuration enables both services; migration followed by SDK reads/writes preserves replica identity and durable outcomes. |
+| REQ-ROUTE-003: silo membership starts without a second cluster stack or a single primary-node dependency. | AC-ROUTE-003: all three Docker silos become ready; the remaining two continue when any configured voter is killed. |
+| REQ-ROUTE-006: enforced grain-call policy permits only the declared application transitions and does not route native replica system targets through application telemetry grains. | AC-ROUTE-006: real RF3 authentication/write/read succeeds with enforcement enabled; direct capability calls remain denied; upstream Graph regression proves the default native-system-target exclusion and preserves explicit tracking. |
+
+```mermaid
+flowchart LR
+    Client[Authenticated caller] --> Request[Unique request grain]
+    Request --> Query[Query and search capabilities]
+    Request --> Replica[Node-owned replica service]
+    Directory[Distributed grain directory] --> Request
+    Migration[Activation repartitioner] --> Request
+```
+
+Slice map: `src/KeyLoad.Orleans/Features/ClusterRouting/` owns request routing/membership; Server composition wires it. ClientApi owns HTTP/MCP adapters. Tests mirror ClusterRouting in IntegrationTests. Frontend: N/A, routing has no independent UI. Credentials remain in Authorization's persisted catalog.
+
+Traceability: AC-ROUTE-001/002/003 map to client-visible RF3 scenarios and targeted migration evidence in TASK-REP-TRANSPORT/INTEGRATE/VERIFY. Existing `CommandRouterGrain` and membership files are replaced in the same migration. No result is qualified until the exact GitHub Actions SHA/run/artifacts are recorded.
+
+TASK-ROUTE-MEMBERSHIP preserves the existing database CAS membership record and
+monotonic heartbeat updates. Initial membership initialization waits for local
+`IReplicaEndpoint.TransportReady`, then retries only transient quorum failures
+with `TimeProvider.System` and the silo startup cancellation token. Later provider
+calls use independent bounded request deadlines, so cancellation of the startup
+token does not prevent membership shutdown. Membership never owns files and never
+resolves an Orleans client while constructing its provider. Source ownership is
+the new `Features/ClusterRouting/ReplicaMembershipTable.cs` and cohesive helpers;
+the lead replaces the old provider and composes the actual silo. The frozen primary
+constructor accepts database, coordinator, replica endpoint, cluster ID, internal
+principal ID, TimeProvider, and startup CancellationToken in that order.
+
+## Identity, placement та movement
+
+Актори: caller/request grain, directory/membership provider та future placement operator. Current source: [Orleans project](../../src/KeyLoad.Orleans/KeyLoad.Orleans.csproj), [partition/public contracts](../../src/KeyLoad.Abstractions/Contracts.cs), [Core domain resolution](../../src/KeyLoad.Core/DatabaseEngine.cs). Current deployment — один replicated physical shard, який містить багато незалежних atomic partitions; directory activation movement не переносить файли чи transaction identity.
+
+| Вимога | Acceptance / flows | Test mapping |
+|---|---|---|
+| REQ-ROUTE-004: atomic partition identity відокремлена від physical placement | AC-ROUTE-004: equal literal key у різних domains не створює shared transaction; server catalog resolution фіксує eligible shared resources; packing/activation placement не змінює CAS/unique/dedup scope | Existing `SameLiteralPartitionKeyCannotCrossTransactionDomains` у [TransactionTests](../../tests/KeyLoad.UnitTests/TransactionTests.cs); expanded placement fixtures PLANNED |
+| REQ-ROUTE-005: physical partition movement/split має fenced restartable protocol | AC-ROUTE-005: PLANNED prepare/copy/catch-up/validate/ownership-switch/release tests з process interruption і real RF3 доводять complete cut, stable outcomes/token lineage або explicit invalidation, без old-owner write після switch | PLANNED KL-036/069–072 suites; [ADR-016](../ADR/ADR-016-atomic-physical-placement.md), [ADR-017](../ADR/ADR-017-migration-tokens.md) unresolved token translation |
+
+Distributed directory/repartitioning — required in-progress source migration. Automatic physical split/merge, broad placement balancing і migration-aware tokens не оголошені готовими. Resource packing/placement і routing contracts freeze одним integration owner за [ADR-001](../ADR/ADR-001-partition-identity-affinity.md), [ADR-007](../ADR/ADR-007-replica-consensus-bootstrap.md). Target Abstractions/Orleans/replication host/tests mirror `Features/ClusterRouting/` для routing behavior, StorageRecovery owns files, ClientApi owns caller transport. Frontend N/A; placement/operator controls потребують власного accepted API до implementation.
+
+Positive/negative/edge/error proof: distinct request identities, quorum/bootstrap failure, delayed/cancelled membership startup, source/owner epoch mismatch, minority, leader kill, activation move, future interrupted physical move. All tests real TUnit/recovery/Docker-Aspire SDK/MCP in GitHub, exact SHA/jobs/artifacts; current source names не проходження gates.
+
+TASK-ROUTE-REQUEST implements AC-ROUTE-001 using one non-reentrant GUID request
+grain per operation. It routes writes to canonical atomic-partition actors and reads
+to independent GUID read actors. The signed transport binds request ID, incarnation,
+kind, persisted identity, stable command ID, exact base64url UTF8 payload and expiry.
+Invalid scope, stale expiry, wrong grain key, forged authority and oversized payload
+or reply fail explicitly. Each read actor obtains a quorum barrier before loading
+the current persisted principal and calling existing Core/Query/Search capabilities.
+Storage remains borrowed from the physical host. Admin backup/status/admission use
+the local `INodeAdministration` interface only after a persisted admin check.
+Real-store protocol tests complement mandatory Docker SDK/MCP and activation-move
+tests; neither protocol unit tests nor a development build qualifies movement.
+
+TASK-GRAPH-EDGES permits the exact ExecuteAsync transitions from IRequestGrain to
+ICommandPartitionGrain and IDatabaseReadGrain. Clients may call only IRequestGrain;
+the default-deny graph is retained. TASK-GRAPH-OWNING repairs the independently
+owned ManagedCode.Orleans.Graph package before consumer qualification: when
+TrackOrleansCalls is false, native system-target identity must bypass application
+tracking regardless of the implementing assembly name. Replica Grain Services run
+before membership is Active and cannot depend on ordinary graph telemetry grains.
+The owning repository's regression, patch release, GitHub publication and intended
+NuGet feed verification are mandatory before changing KeyLoad's package pin.

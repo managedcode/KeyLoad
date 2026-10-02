@@ -1,56 +1,109 @@
 using System.Diagnostics;
 using KeyLoad.Core;
+using KeyLoad.CrashHost;
 using KeyLoad.Security;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests;
 
-public sealed partial class RecoveryTests
+internal sealed class SubscriptionProcessRecoveryTests
 {
-    [Theory]
-    [InlineData(CommitStage.HeaderWritten, 0)]
-    [InlineData(CommitStage.PayloadWritten, 0)]
-    [InlineData(CommitStage.JournalFlushed, 0)]
-    [InlineData(CommitStage.MutationApplied, 0)]
-    [InlineData(CommitStage.MutationApplied, 3)]
-    [InlineData(CommitStage.MutationApplied, 6)]
-    [InlineData(CommitStage.ApplyCompleted, 0)]
+    [Test]
+    [Arguments(CommitStage.HeaderWritten, 0)]
+    [Arguments(CommitStage.PayloadWritten, 0)]
+    [Arguments(CommitStage.JournalFlushed, 0)]
+    [Arguments(CommitStage.MutationApplied, 0)]
+    [Arguments(CommitStage.MutationApplied, 3)]
+    [Arguments(CommitStage.MutationApplied, 6)]
+    [Arguments(CommitStage.ApplyCompleted, 0)]
     public async Task SubscriptionProcessingCrashRecoversEffectsInboxOutcomeAndCheckpointTogether(CommitStage stage, int index)
     {
         var root = Path.Combine(Path.GetTempPath(), "keyload-subscription-crash-" + Guid.NewGuid().ToString("N"));
-        var start = new ProcessStartInfo("dotnet") { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
-        foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(), index.ToString(System.Globalization.CultureInfo.InvariantCulture), "subscription-processing" })
-            start.ArgumentList.Add(argument);
-        using var process = Process.Start(start)!;
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        using var process = Process.Start(CreateCrashProcessStartInfo(root, stage, index))!;
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
         timeout.CancelAfter(TimeSpan.FromSeconds(20));
         try
         {
-            Assert.Equal("crash-point", await process.StandardOutput.ReadLineAsync(timeout.Token));
-            process.Kill(); await process.WaitForExitAsync(timeout.Token); await WaitForKilledProcessFilesAsync(root, timeout.Token);
-            using var store = new ZoneTreeStore(new(root)); var database = new DatabaseEngine(store, new AuthorizationPolicy());
-            var subscription = SubscriptionCrashScenario.Subscription;
-            var checkpoint = database.GetSubscription("root", subscription).Checkpoint;
-            var document = database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"));
-            Assert.True(checkpoint is 0 or 1); Assert.Equal(checkpoint == 0, document is null);
-            var outcome = database.Outcome("root", SubscriptionCrashScenario.CommandId);
-            Assert.Equal(checkpoint == 0, outcome is null);
-            if (stage >= CommitStage.JournalFlushed) Assert.Equal(1, checkpoint);
-            var original = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(Path.Combine(root, "processing-command.json"), timeout.Token));
-            var recovered = database.Apply(original with { EvaluatedAt = DateTimeOffset.UtcNow }).Get<SubscriptionProcessingResult>();
-            Assert.Equal(1, database.GetSubscription("root", subscription).Checkpoint);
-            Assert.Equal(1, database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"))!.Revision);
-            var request = JsonDefaults.Deserialize<SubscriptionProcessingRequest>(System.Text.Encoding.UTF8.GetBytes(original.PayloadJson));
-            var retryId = Guid.NewGuid(); var retry = database.Apply(new(retryId, OperationKind.SubscriptionProcessing, "root", DateTimeOffset.UtcNow,
-                System.Text.Json.JsonSerializer.Serialize(request with { CommandId = retryId }, JsonDefaults.Options))).Get<SubscriptionProcessingResult>();
-            Assert.True(retry.AlreadyProcessed); Assert.Equal(recovered.OriginalEffectsToken, retry.OriginalEffectsToken);
-            Assert.Equal(1, database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"))!.Revision);
+            await KillAtCrashPointAsync(process, root, timeout.Token);
+            await AssertRecoveredProcessingAsync(root, stage, timeout.Token);
         }
         finally
         {
-            if (!process.HasExited) { process.Kill(); await process.WaitForExitAsync(TestContext.Current.CancellationToken); }
-            if (Directory.Exists(root)) await DeleteTrialAsync(root, TestContext.Current.CancellationToken);
+            if (!process.HasExited)
+            { process.Kill(); await process.WaitForExitAsync(TestContext.Current!.Execution.CancellationToken); }
+            if (Directory.Exists(root))
+            {
+                await StoragePublicationRecoveryTests.DeleteTrialAsync(root, TestContext.Current!.Execution.CancellationToken);
+            }
         }
+    }
+
+    private static ProcessStartInfo CreateCrashProcessStartInfo(string root, CommitStage stage, int index)
+    {
+        var start = new ProcessStartInfo("dotnet")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+        foreach (var argument in new[]
+                 {
+                     typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(),
+                     index.ToString(System.Globalization.CultureInfo.InvariantCulture), "subscription-processing"
+                 })
+        {
+            start.ArgumentList.Add(argument);
+        }
+
+        return start;
+    }
+
+    private static async Task KillAtCrashPointAsync(Process process, string root, CancellationToken cancellationToken)
+    {
+        await Assert.That(await process.StandardOutput.ReadLineAsync(cancellationToken)).IsEqualTo("crash-point");
+        process.Kill();
+        await process.WaitForExitAsync(cancellationToken);
+        await StorageRecoveryProcessTests.WaitForKilledProcessFilesAsync(root, cancellationToken);
+    }
+
+    private static async Task AssertRecoveredProcessingAsync(string root, CommitStage stage,
+        CancellationToken cancellationToken)
+    {
+        using var store = new ZoneTreeStore(new(root));
+        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var subscription = SubscriptionCrashScenario.Subscription;
+        var checkpoint = database.GetSubscription("root", subscription).Checkpoint;
+        var document = database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"));
+        await Assert.That(checkpoint is 0 or 1).IsTrue();
+        await Assert.That(document is null).IsEqualTo(checkpoint == 0);
+        var outcome = database.Outcome("root", SubscriptionCrashScenario.CommandId);
+        await Assert.That(outcome is null).IsEqualTo(checkpoint == 0);
+        if (stage >= CommitStage.JournalFlushed)
+        {
+            await Assert.That(checkpoint).IsEqualTo(1);
+        }
+
+        var original = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
+            Path.Combine(root, "processing-command.json"), cancellationToken));
+        var recovered = database.Apply(original with { EvaluatedAt = TimeProvider.System.GetUtcNow() })
+            .Get<SubscriptionProcessingResult>();
+        await Assert.That(database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(1);
+        await Assert.That(database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"))!
+            .Revision).IsEqualTo(1);
+        await AssertRetryReceiptAsync(database, subscription, original, recovered);
+    }
+
+    private static async Task AssertRetryReceiptAsync(DatabaseEngine database, SubscriptionRef subscription,
+        ReplicatedOperation original, SubscriptionProcessingResult recovered)
+    {
+        var request = JsonDefaults.Deserialize<SubscriptionProcessingRequest>(System.Text.Encoding.UTF8.GetBytes(original.PayloadJson));
+        var retryId = Guid.NewGuid();
+        var retry = database.Apply(new(retryId, OperationKind.SubscriptionProcessing, "root", TimeProvider.System.GetUtcNow(),
+            System.Text.Json.JsonSerializer.Serialize(request with { CommandId = retryId }, JsonDefaults.Options)))
+            .Get<SubscriptionProcessingResult>();
+        await Assert.That(retry.AlreadyProcessed).IsTrue();
+        await Assert.That(retry.OriginalEffectsToken).IsEqualTo(recovered.OriginalEffectsToken);
+        await Assert.That(database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"))!.Revision).IsEqualTo(1);
+        await Assert.That(database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(1);
     }
 }

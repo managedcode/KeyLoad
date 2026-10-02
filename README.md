@@ -1,8 +1,12 @@
 # KeyLoad
 
-KeyLoad is a .NET database built around atomic transaction domains, durable ordered storage, and an RF3 Raft cluster. Documents, event streams, retained topics, subscription groups, work queues, graph edges, samples and vector sidecars share the same transactional command path. Orleans provides the routing layer; each node owns its ZoneTree materialization and journals.
+KeyLoad is an experimental .NET 10 database that puts JSON documents, event streams, durable work queues, graphs, time series and search behind one API and one authorization model. An atomic command can update a document, append its event and enqueue work in the same transaction domain. The first server topology has three replicated nodes; each node owns its ZoneTree storage and journals.
+
+The intended cluster foundation is Orleans, with separate request grains, a distributed grain directory and activation migration. That migration, fully containerized RF3 execution and the official MCP surface are in progress; the published comparison baseline predates them. Follow the [architecture map](docs/Architecture.md) and [qualification tracker](docs/implementation/status.json) for the actual implemented and verified boundaries.
 
 The original load-testing prototype has been replaced. This repository implements the new [architecture and development plan](docs/design/architecture-v0.3.uk.md), with the [original HTML edition](docs/design/architecture-v0.3.uk.html) preserved alongside it.
+
+The [documentation index](docs/README.md) covers all 20 Feature specifications with requirements, acceptance criteria, source/test boundaries and diagrams. The ADR catalog (docs/ADR/README.md) records architectural decisions and implementation contracts; the [coverage map](docs/implementation/documentation-coverage.json) links every KL task to its owning Feature and ADR without changing qualification status.
 
 ## Development status
 
@@ -16,10 +20,10 @@ The advertised profiles are `ProcessDurable` for embedded storage and `QuorumPro
 
 ## Run the RF3 cluster
 
-Install the .NET SDK selected in [global.json](global.json). Package versions are pinned centrally and committed lock files record the resolved dependency graph.
+Install the .NET SDK selected in [global.json](global.json). Package versions are pinned centrally in [Directory.Packages.props](Directory.Packages.props); package lock files are deliberately excluded under current repository policy.
 
 ```sh
-dotnet restore KeyLoad.slnx --locked-mode
+dotnet restore KeyLoad.slnx
 dotnet build KeyLoad.slnx --no-restore
 dotnet run --project src/KeyLoad.AppHost
 ```
@@ -140,7 +144,7 @@ Q1 supports projections and aliases, scalar parameters, comparisons, `AND`/`OR`/
 SQL, version 1 JSON AST and the C# expression builder normalize into the same typed AST and use the same planner, permissions and execution path. `GET /v1/query/capabilities` (SDK: `QueryCapabilitiesAsync`) reports that contract and the configured limits. JSON requests use `POST /v1/query/ast` or `QueryAstAsync`. See the [Q1 protocol and expression subset](docs/design/query-q1.md).
 
 ```csharp
-var query = KeyLoadQuery<Order>.From(partition, "orders")
+var query = KeyLoadQuery.From<Order>(partition, "orders")
     .Where(order => order.Number == 1m)
     .OrderBy(order => QueryFunctions.DocumentId(order))
     .Select(order => new { Id = QueryFunctions.DocumentId(order), order.Status })
@@ -157,12 +161,14 @@ Queries require a matching point/equality index or explicit `AllowFullScan`. Sca
 
 Search accepts typed vector spaces and explicit text/vector fields. Both branches use one authorized read cut. Exact vector scores and BM25 ranks are combined with weighted RRF using one-based ranks. The managed ANN and graph retrieval extensions are tracked separately.
 
+Search and graph reads share cumulative 64 MiB raw-read accounting across scans and referenced documents/edges, a 30-second execution deadline and request cancellation. Graph edge visits include filtered/hidden candidates across the whole traversal. BM25 retains counts for query terms and enforces a corpus-wide token cap; search/graph response limits include serialized protocol metadata. See the [bounded read contract](docs/design/bounded-reads.md); total process memory qualification remains pending.
+
 ## Change feeds and live queries
 
 Every successful mutation appends to a private, per-partition system outbox in the same transaction as its canonical effects and outcome. This is separate from business event streams and retained topics. Public `ReadChangesAsync` returns projected document before/after images and deletion metadata; it requires `ChangesRead` and `DocumentsRead`. Current principal, row visibility and sensitive-field policies are checked on every page.
 
 ```csharp
-var liveQuery = KeyLoadQuery<Order>.From(partition, "orders")
+var liveQuery = KeyLoadQuery.From<Order>(partition, "orders")
     .Where(order => order.Status == "new").Take(100).ToRequest(allowFullScan: true);
 var initial = await client.StartLiveQueryAsync(new(liveQuery));
 initial.ThrowIfFail();
@@ -210,22 +216,42 @@ dotnet run --project src/KeyLoad.Cli -- copy-artifact backups/snapshot.ctg archi
 | `KeyLoad.Client` / `KeyLoad.Cli` | .NET SDK and administrative commands |
 | `KeyLoad.Artifacts` | Optional Cartograph archive and ManagedCode storage transport |
 | `KeyLoad.AppHost` / `KeyLoad.ServiceDefaults` | RF3 Aspire topology, health and OpenTelemetry |
+| `KeyLoad.Analyzers` / `KeyLoad.Analyzers.Tests` | Source-owned Roslyn rules and real compiler regressions in the CodeQuality slice |
 | `tests` / `benchmarks` | Unit/property, crash recovery, real RF3 integration and benchmark workloads |
 
 ## Verification
 
 ```sh
-dotnet build KeyLoad.slnx --no-restore
-dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore
-dotnet test --project tests/KeyLoad.RecoveryTests --no-build --no-restore
-dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore
+dotnet restore KeyLoad.slnx
+dotnet build KeyLoad.slnx --no-restore --configuration Release
+dotnet format KeyLoad.slnx --verify-no-changes --no-restore
+gh workflow run ci.yml --repo managedcode/KeyLoad --ref main
+gh run view <run-id> --repo managedcode/KeyLoad
 ```
 
-Tests use xUnit and Microsoft.Testing.Platform. Recovery qualification runs 1000 seeded real-process kills, checks complete-frame corruption and verifies a clean backup restore. Additional process kills cover checkpoint publication, native Raft append acknowledgement, subscription effects/inbox/checkpoint publication and projection effects/outbox/checkpoint publication. Integration tests own the Aspire lifecycle and use three independent server processes with isolated persistent directories. They kill the elected leader, retry the same command, verify atomic effects, live-query continuation and topic delivery on surviving voters, reject a minority write and erase/restart one replica to require snapshot catch-up of documents, outbox entries, generation checkpoints and inbox outcomes. No manually running AppHost is needed for tests.
+Tests use TUnit and Microsoft.Testing.Platform and execute in GitHub Actions. Development builds and static checks are local evidence; qualification belongs to the workflow's exact SHA. Recovery qualification runs 1000 seeded real-process kills, checks complete-frame corruption and verifies a clean backup restore. Additional process kills cover checkpoint publication, native Raft append acknowledgement, subscription effects/inbox/checkpoint publication and projection effects/outbox/checkpoint publication. Integration tests own the Aspire lifecycle and use three independent server processes with isolated persistent directories. They kill the elected leader, retry the same command, verify atomic effects, live-query continuation and topic delivery on surviving voters, reject a minority write and erase/restart one replica to require snapshot catch-up of documents, outbox entries, generation checkpoints and inbox outcomes. No manually running AppHost is needed for tests.
 
-Embedded microbenchmarks can be started with `dotnet run -c Release --project benchmarks/KeyLoad.Benchmarks`. Run `dotnet run -c Release --project src/KeyLoad.AppHost -- --Benchmarks:Enabled=true` to start RF3 KeyLoad alongside PostgreSQL/pgvector, Qdrant, RabbitMQ, Redis and Neo4j. Shared scenarios cover document reads/writes, exact vectors, queue cycles, graph neighbors and bounded traversal. Reports include useful throughput, p50/p95/p99, queue stage timings, correctness, load generator CPU/allocation/RSS and raw JSON/CSV samples under `artifacts/comparisons/<run>/reports`. See the [comparison methodology and configuration](docs/implementation/comparative-benchmarks.md).
+The root `.editorconfig` is copied directly from Prostir. Every project enables SDK/static/style analysis with warnings as errors. Edit custom rules under `src/KeyLoad.Analyzers/Features/CodeQuality/` and add real-compilation cases under `tests/KeyLoad.Analyzers.Tests/Features/CodeQuality/`. They attach centrally to consumer projects and report in the IDE and build. Compiler SARIF 2.1 reports live under `artifacts/code-quality/<project>/<configuration>/<framework>/diagnostics.sarif`; CI retains them even when the build fails. See [CodeQuality](docs/Features/CodeQuality.md) for the rule catalog, authoring and applicability, and [current evidence](docs/implementation/code-quality.md) for actual gates.
+
+On the joined 2026-10-02 working tree based on `9c570f8c33a7a9667507a8e1c0ca68860de3be45`, the full 25-project Release build passed with zero warnings/errors, canonical solution formatting passed, and repository governance passed. These checks cover source and static policy only. TUnit, process-recovery, Docker/Aspire RF3, MCP, and comparison qualification have not run for this exact source tree; the earlier successful main-branch CI run does not qualify it. Numeric coverage collection and its baseline are still not configured.
+
+The comparison library/sole CLI host split under [ADR-043](docs/ADR/ADR-043-comparison-library-host.md), immutable harness under [ADR-044](docs/ADR/ADR-044-benchmark-immutable-contracts.md), owned PostgreSQL schema repair under [ADR-045](docs/ADR/ADR-045-postgres-schema-ownership.md), private storage owners under [ADR-046](docs/ADR/ADR-046-storage-private-owners.md) and genuine BenchmarkDotNet library under [ADR-047](docs/ADR/ADR-047-embedded-benchmark-host.md) are source joins awaiting qualification. The read-only product contract migration preserves JSON/base64 and fingerprints under [ADR-041](docs/ADR/ADR-041-read-only-public-collections.md). The 57 authored analyzer test methods and new resource regressions have not executed in CI for this source; numeric complexity rules are configured, while compatible coverage collection, container export and its baseline remain pending. See the [current source and gate evidence](docs/implementation/code-quality.md).
+
+Memory and read-work repairs are in progress across storage, SQL/search, events, time series, graph, messaging, replication and transport. The [located repair inventory](docs/implementation/memory-performance.md) records authored changes and remaining proof separately. [Baseline CI 36936319423](https://github.com/managedcode/KeyLoad/actions/runs/36936319423) passed on the existing main SHA; it predates these dirty changes and does not qualify their correctness or performance.
+
+All test qualification and load measurements run in GitHub Actions. The comparison harness uses deterministic JSON, float32 vectors and cyclic graphs, verifies the complete returned payload, and retains every measured attempt, including failures. Reports include useful throughput, p50/p95/p99, separate enqueue/receive/ACK timings and load-generator CPU/allocation/RSS. These resource metrics describe the client process. See the [comparison methodology](docs/implementation/comparative-benchmarks.md).
 
 The [public benchmark lab](https://www.keyload.cloud/) displays verified CI reports with workload, scenario, measure and repetition controls. CI runs a correctness smoke and two measured profiles with 1 KiB/16 KiB documents, eight/four clients and three/five graph hops. GitHub Pages publishes their reports only after the complete CI workflow succeeds; [website operations](docs/implementation/website.md) describes provenance and the custom domain. Current external baselines are single-node and contracts differ; matched-durability, database resource budgets, Marten/Wolverine and scaling qualification remain planned. These development observations do not establish an equal-durability winner or production readiness.
+
+The separate TimeSeries comparison profile is implemented under [ADR-050](docs/ADR/ADR-050-timeseries-timescale-comparison.md). Its CI test starts a digest-pinned, ephemeral TimescaleDB container, sends the same UTC samples through KeyLoad's RF3 .NET SDK and TimescaleDB's hypertable, and checks bucket results against the published `ManagedCode.TimeSeries` in-memory aggregation library. The library is not a persistence provider, and the Timescale container has no cross-run data volume; reports label each guarantee separately. The source builds, but Docker/Aspire execution and comparison artifacts remain pending exact-source GitHub Actions qualification.
+
+The product website redesign is in progress under [ADR-040](docs/ADR/ADR-040-static-site-threejs-evidence.md): a product introduction, a conceptual Three.js RF3 illustration and the complete evidence workspace. Its independent TUnit site suite runs in GitHub Actions against authentic historical reports. Website source, measured source and raw hashes stay distinct; the preview does not qualify current database changes or publish the pending nine-engine comparison profiles.
+
+The next comparison contract adds MongoDB, OpenSearch and KurrentDB, expected-no-stream append/read, and real native replicated groups. [BenchmarkComparisons](docs/Features/BenchmarkComparisons.md) records requirements and acceptance; [ADR-034](docs/ADR/ADR-034-cluster-comparisons.md) records the exact support, topology, acknowledgement and publication contracts. It is not yet a qualified nine-engine result. KurrentDB is pinned to 26.1.2 to retain free clustering; Neo4j Community clustering is unavailable without Enterprise.
+
+## Repository workflow
+
+This repository follows the [MCAF tutorial](https://mcaf.managed-code.com/tutorial). The root [AGENTS.md](AGENTS.md) is merged with the original mandatory policy, and every project/module has its own local policy. Non-trivial work starts with stable requirement and acceptance IDs plus ADR implementation contracts; bounded workers own disjoint files, and integration joins their reviewed evidence before qualification. This MCAF setup installs no skills. See [RepositoryGovernance](docs/Features/RepositoryGovernance.md) and the [installation record](docs/implementation/mcaf-installation.json).
 
 ## Dependencies and license
 

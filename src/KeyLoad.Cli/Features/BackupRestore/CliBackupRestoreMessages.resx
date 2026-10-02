@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="BackupVerified" xml:space="preserve"><value>Backup verified at creation.</value></data>
+  <data name="ArchiveCreated" xml:space="preserve"><value>Archive created.</value></data>
+  <data name="ArchiveTransferFailed" xml:space="preserve"><value>Archive transfer failed.</value></data>
+  <data name="ArchiveCopied" xml:space="preserve"><value>Archive copied through ManagedCode.Storage.</value></data>
+  <data name="BackupExtracted" xml:space="preserve"><value>Backup extracted; restore verifies its canonical checksums.</value></data>
+</root>

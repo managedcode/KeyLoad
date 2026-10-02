@@ -1,0 +1,176 @@
+# ADR-039: Official MCP SDK і agent access до canonical operations
+
+Status: Accepted for implementation; runtime and delivery qualification pending. Date: 2026-10-02. Owner: ClientApi lead / KeyLoad integration owner. Related: [ClientApi](../Features/ClientApi.md), REQ-CLIENT-004–007 / AC-CLIENT-004–007; [Authorization](../Features/Authorization.md), [BlobStorage](../Features/BlobStorage.md), [TestInfrastructure](../Features/TestInfrastructure.md).
+
+## Контекст і запропонований напрям
+
+Root policy вимагає простий agent API та інтегрований official MCP C# SDK server для всіх database/search/storage operations, з real .NET SDK і official MCP SDK клієнтами в Docker/Aspire RF3 тестах. Поточні HTTP operations у [ApiEndpoints](../../src/KeyLoad.Server/Features/ClientApi/ApiEndpoints.cs) і [KeyLoadClient](../../src/KeyLoad.Client/KeyLoadClient.cs) існують; завершеної official MCP/agent surface не знайдено.
+
+Напрям: протокольні adapters належать ClientApi, а business behavior/requirements залишаються в owning DocumentStorage/EventStreams/Messaging/GraphTraversal/TimeSeries/Search/ChangeFeeds/BlobStorage slices. Ідентичність береться з persisted server credentials; model/tool arguments не можуть підмінити trusted roles. Кожна операція викликає окремий Orleans request grain за ADR-036 і використовує ту саму canonical authorization, bounds, outcomes та unknown-write retry semantics.
+
+Прийнято official SDK 2.2.0, native stateless Streamable HTTP `/mcp`, explicit
+typed version-one catalog нижче та shared canonical Orleans gateway. Простий
+agent API — той самий discoverable tool catalog; окремого engine/session authority
+немає. Acceptance і execution graph: [acceptance](../../mcp-agent-api.acceptance.md),
+[brainstorm](../../mcp-agent-api.brainstorm.md),
+[plan](../implementation/mcp-agent-api.plan.md).
+
+У Server centrally pin `ModelContextProtocol.AspNetCore` 2.2.0; official integration
+caller uses `ModelContextProtocol.Core` 2.2.0. Source was reviewed at official tag
+[v2.2.0](https://github.com/modelcontextprotocol/csharp-sdk/releases/tag/v2.2.0),
+commit 6fa3825973949a9c4f0cd8af344e15a8db09dc35. Native public composition is
+AddMcpServer/WithHttpTransport with HttpServerSessionMode.Stateless and MapMcp.
+Use WithListToolsHandler/WithCallToolHandler and no competing reflection-discovered
+ToolCollection. The shared host registers IHttpContextAccessor explicitly.
+
+DatabaseIdentityMiddleware continues resolving the persisted bearer credential on
+every request. Its principal stays in HttpContext.Items, never caller arguments or
+captured initialization/session state. Do not add RequireAuthorization without a
+real authentication scheme. Every tool effect uses a fresh GUID request grain,
+then the existing capability/partition grain with a reloaded persisted principal.
+
+## Frozen catalog and wire contract
+
+Outer arguments are strict: a body-bearing tool accepts only `request`; the four
+header-command-ID tools additionally require nonempty GUID `commandId`. No-body
+tools accept `{}`. Write identities inside canonical DTOs remain unchanged:
+Receive/ReceiveSubscription use request.RequestId; other commands use
+request.CommandId. MCP request IDs and Orleans actor IDs never replace them.
+
+| Stable tool name | Canonical request | Result | Existing lane route / capability |
+|---|---|---|---|
+| keyload_documents_get | GetDocumentRequest | DocumentResult or null | /v1/documents/get; Document |
+| keyload_streams_read | ReadStreamRequest | StreamPage | /v1/streams/read; Stream |
+| keyload_events_read | ReadEventSourceRequest | EventSourcePage | /v1/events/read; EventSource |
+| keyload_subscriptions_status | GetSubscriptionRequest | SubscriptionInfo | /v1/subscriptions/status; Subscription |
+| keyload_messages_inspect | InspectMessageRequest | MessageInspection or null | /v1/queues/inspect; Message |
+| keyload_graph_traverse | TraverseRequest | GraphTraversal | /v1/graph/traverse; Traverse |
+| keyload_series_read | ReadSamplesRequest | SampleRecord array | /v1/series/read; Samples |
+| keyload_query_execute | QueryRequest | QueryPage | /v1/query; Query |
+| keyload_query_ast | AstQueryRequest | QueryPage | /v1/query/ast; AstQuery |
+| keyload_query_capabilities | none | QueryCapabilityManifest | /v1/query/capabilities; QueryCapabilities |
+| keyload_changes_read | ReadChangeFeedRequest | ChangeFeedPage | /v1/changes/read; ChangeFeed |
+| keyload_query_live_start | StartLiveQueryRequest | LiveQuerySnapshot | /v1/query/live/start; LiveQueryStart |
+| keyload_query_live_read | ReadLiveQueryRequest | LiveQueryPage | /v1/query/live/read; LiveQueryRead |
+| keyload_outbox_status | GetOutboxStatusRequest | OutboxStatus | /v1/admin/outbox/status; OutboxStatus |
+| keyload_projections_read | ReadProjectionBatchRequest | ProjectionBatch | /v1/admin/projections/read; ProjectionBatch |
+| keyload_search_execute | SearchRequest | RankedDocument array | /v1/search; Search |
+| keyload_admin_backup | none | BackupReceipt | /v1/admin/backup; Backup |
+| keyload_admin_admission | none | NodeAdmissionStatus | /v1/admin/admission; Admission |
+| keyload_admin_status | none | NodeStatus | /v1/status; NodeStatus |
+| keyload_documents_commit | CommandRequest | CommitReceipt | /v1/commands; Batch |
+| keyload_messages_receive | ReceiveRequest | ReceiveResult | /v1/queues/receive; Receive |
+| keyload_messages_complete | DeliveryCommand | CommitReceipt | /v1/queues/delivery; Delivery |
+| keyload_messages_process | ProcessingRequest | CommitReceipt | /v1/queues/process; Processing |
+| keyload_resources_configure | ConfigureResourceRequest + outer commandId | ResourceDefinition | /v1/admin/resources; ConfigureResource |
+| keyload_principals_configure | ConfigurePrincipalRequest + outer commandId | PrincipalRecord | /v1/admin/principals; ConfigurePrincipal |
+| keyload_credentials_configure | ConfigureApiKeyRequest + outer commandId | boolean | /v1/admin/api-keys; ConfigureApiKey |
+| keyload_admin_dispatch | boolean request + outer commandId | boolean | /v1/admin/dispatch; SetDispatch |
+| keyload_subscriptions_configure | ConfigureSubscriptionRequest | SubscriptionInfo | /v1/subscriptions/configure; ConfigureSubscription |
+| keyload_subscriptions_seek | SeekSubscriptionRequest | SubscriptionInfo | /v1/subscriptions/seek; SeekSubscription |
+| keyload_subscriptions_receive | ReceiveSubscriptionRequest | ReceiveSubscriptionResult | /v1/subscriptions/receive; ReceiveSubscription |
+| keyload_subscriptions_complete | SubscriptionDeliveryCommand | CommitReceipt | /v1/subscriptions/delivery; SubscriptionDelivery |
+| keyload_subscriptions_process | SubscriptionProcessingRequest | SubscriptionProcessingResult | /v1/subscriptions/process; SubscriptionProcessing |
+| keyload_subscriptions_pause | SetSubscriptionPausedRequest | SubscriptionInfo | /v1/subscriptions/pause; SetSubscriptionPaused |
+| keyload_projections_configure | ConfigureProjectionConsumerRequest | ProjectionConsumerInfo | /v1/admin/projections/configure; ConfigureProjectionConsumer |
+| keyload_projections_commit | CommitProjectionBatchRequest | ProjectionBatchResult | /v1/admin/projections/commit; CommitProjectionBatch |
+| keyload_projections_release | ReleaseProjectionConsumerRequest | ProjectionConsumerInfo | /v1/admin/projections/release; ReleaseProjectionConsumer |
+| keyload_outbox_purge | PurgeOutboxRequest | OutboxHead | /v1/admin/outbox/purge; PurgeOutbox |
+
+Authenticate and Membership are internal and absent. Batch retains all ten
+canonical mutation discriminators. Backup is a physical side effect, despite
+read-dispatch routing; ReadOnly/Idempotent annotations must be explicit per entry.
+Stable canonical commands are retryable only with the same ID and payload; a
+conflicting payload is rejected. Backup retries may create additional archives.
+
+Input schemas describe actual canonical JSON including nullable values, required
+constructor parameters, strict immutable arrays, base64 byte memory, enums and
+polymorphism. Decode with JsonDefaults.Options and enforce outer keys explicitly.
+Schemas do not themselves authorize or validate an operation. Custom converter
+schemas use the reviewed private schema-only options projection and native exporter
+in the plan. Runtime decoding keeps canonical options; no enum handling is narrowed.
+
+Success StructuredContent is one bounded object `{result, requestId}`: `result`
+contains the exact canonical result JSON and requestId is the new execution GUID.
+Failures use IsError=true and `{error, requestId}` with a safe Errors.Problem value;
+requestId is null if execution never started. Output schemas cover this wrapper
+and nullable/array/primitive canonical values. TextContent is a short summary,
+never a second full serialized result. The total MCP response has its own explicit
+bounded envelope limit above the existing 16 MiB canonical reply limit.
+
+## Admission, cancellation and resources
+
+Before native SDK parsing, a separate bounded ingress lease reserves the framed
+body and parse working set. A strict UTF8/JSON resource preflight bounds
+depth/tokens/properties and rejects duplicate names in a private bounded wire
+buffer; it does not implement the MCP protocol. Incoming SDK filters then acquire
+the existing HttpAdmissionGovernor using the actual catalog route and full frame
+byte count, binding the fresh principal before typed arguments allocation.
+Whitespace and RPC metadata count toward the existing body ceiling, including the
+64KiB default control-frame ceiling. A memory-only supplement covers retained
+native frame/output transformations; it adds no command/authority quotas.
+Only after canonical plus supplemental coverage replaces ingress may ingress
+release. It does not wait for database execution. Delivery/SubscriptionDelivery/
+SetDispatch preserve the control reserve and heavy reads preserve their working
+set. Control replies are bounded64KiB; data replies retain the existing16MiB
+canonical ceiling. Owned body/result documents and leases survive native
+SerializeToNode/SSE writes until the middleware pipeline and actual session drain
+finish. Exact named component accounting is in the plan; source reservations are
+not a measured heap guarantee. Ingress exhaustion fails closed for all callers;
+the control-progress guarantee applies to execution data saturation.
+
+Stateless calls pass native handler cancellation and RequestAborted. Cancellation
+notifications on another stateless HTTP request cannot target an earlier call.
+Disconnected accepted writes retain UnknownWriteOutcome/same-command retry
+semantics. SDK disposal awaits actual handlers. SDK full-JSON Trace and
+raw-exception logging are disabled for its category; safe KeyLoad diagnostics do
+not contain keys or private payloads. Error sanitization is reviewed before join.
+
+Blob resources remain gated by ADR-038 acceptance and implementation. Their URIs
+must be opaque and authorization checked on each read, with bounded range/page
+limits. Native BlobResourceContents.FromBytes receives raw bytes; official clients
+use DecodedData, avoiding double base64. Native resources/read has no IsError;
+unresolved URIs use safe protocol InvalidParams for the current revision. No
+unfinished blob tool or resource is advertised by this 37-operation catalog.
+
+```mermaid
+flowchart LR
+    DotNet[Existing typed dotnet caller] --> Gateway[Authenticated operation gateway]
+    MCP[Official stateless MCP adapter] --> Gateway
+    Agent[Same discoverable tool catalog] --> MCP
+    Gateway --> Identity[Persisted principal and grants]
+    Identity --> Grain[One Orleans request grain]
+    Grain --> Feature[Same canonical database feature]
+    Feature --> Host[Node owned RF3 execution]
+```
+
+## Альтернативи, rationale й наслідки
+
+- Окремі implementations бізнес-операцій для MCP/agent: відхилено, порушують canonical authority й parity.
+- Trusted roles із caller/tool payload: заборонено mandatory policy.
+- Саморобний MCP protocol замість official C# SDK: не відповідає requested integration.
+- Implicit tool discovery/protocol drift during implementation: rejected; the table above and the SDK compatibility review freeze this version.
+
+Єдиний набір operations спрощує AC parity і захищає від role escalation. Accepted
+means the integration owner has frozen implementation contracts; it does not
+declare MCP coverage, runtime qualification or future blobs complete.
+
+## Implementation contract
+
+1. The table freezes all current typed operations; root resolves admission/schema review findings before dependent runtime implementation. Required planned blob operations remain separate and cannot be advertised early.
+2. Shared protocol composition належить Server/ClientApi; `.NET` DTO shape не змінюється неявно. Нові helpers/tests mirror `Features/ClientApi/`, business tests — owning feature. Existing `src/KeyLoad.Server/ApiEndpoints.cs` та Client transport лишаються tracked ADR-032 layout debt, а не compliant layer-first target.
+3. AC-CLIENT-004/005 and AC-MCP-001–007 map to real operation/error/retry regressions; AC-MCP-008 retains genuine large/range storage after BlobStorage acceptance. The .NET SDK adds its missing BackupAsync and SetDispatchAsync surfaces for complete parity.
+4. Workers мають окремі adapter/schema, SDK caller/tests та owning-feature operation scopes після contracts; один lead owns shared packages/host/API docs. Новий tool contract, trust weakening, missing upstream SDK contract або overlap → stop/escalate. Join усіх complete reviewed source і evidence перед qualification.
+5. Canonical GitHub Actions build/analyze/format, TUnit, process recovery та RF3 suites використовують actual .NET/MCP clients без doubles; фіксують exact source SHA/run/jobs/artifacts і parity кожного exposed operation. Capability manifest не advertises unfinished operations.
+
+Prerequisites: ADR-036 Orleans request/host lifetime, Authorization current principal/policy epoch, ResourceExecution budgets, owning operation contracts; BlobStorage додатково ADR-038 accepted implementation.
+
+## Migration, rollout, rollback та verification
+
+This additive version-one adapter does not change database schema or existing HTTP
+JSON. Tool names and wrappers are versioned; later incompatible contracts require
+an explicit version/ADR. Credential deployment uses existing persisted API keys,
+never an adapter-only secret store. Rollback removes the adapter but cannot undo
+committed commands. Timeout/cancellation is not rollback. Existing HTTP source
+and tests are a baseline, not official MCP evidence. All new runtime gates remain
+pending; this ADR is Accepted, not Implemented.

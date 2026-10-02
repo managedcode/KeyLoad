@@ -1,91 +1,88 @@
-using System.Diagnostics;
 using KeyLoad.Client;
-using ManagedCode.Communication;
 
 namespace KeyLoad.Comparisons.Targets;
 
-public sealed class KeyLoadTarget(HttpClient http, string apiKey, string runId) : IComparisonTarget
+/// <summary>Compares the database through its authenticated HTTP client while requiring the configured three-voter RF3 cluster.</summary>
+/// <param name="http">The primary HTTP client used by the KeyLoad SDK client; target disposal disposes it.</param>
+/// <param name="apiKey">The credential passed to the KeyLoad SDK client for authenticated operations.</param>
+/// <param name="runId">Run identifier used to derive the isolated benchmark partition.</param>
+/// <param name="image">Optional database image reference included in the initial target profile.</param>
+/// <param name="peers">Optional peer HTTP clients used to observe replica copies; the target disposes distinct clients.</param>
+public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string runId, string? image = null,
+    HttpClient[]? peers = null) : IComparisonTarget
 {
+    private const string TransactionDomainId = "shared";
     private readonly KeyLoadClient client = new(http, apiKey);
-    private readonly PartitionRef partition = new("benchmark-" + runId, "comparison", "workload", "shared");
+    private readonly HttpClient[] peerClients = peers is null
+        ? [http]
+        : peers.Contains(http, ReferenceEqualityComparer.Instance) ? peers : [.. peers, http];
+    private readonly string credential = apiKey;
+    private readonly PartitionRef partition = new("benchmark-" + runId, "comparison", "workload", TransactionDomainId);
     private VectorSpace space = null!;
     private int topK;
     private int graphDepth, graphVertices, graphEdges;
+    /// <summary>Gets the declared RF3, process-durable, API, and authorization profile for this target.</summary>
     public TargetProfile Profile { get; private set; } = new("KeyLoad", "0.1.0-dev", "3 voters, RF3, one physical shard; all processes on one host",
-        "QuorumProcessDurable; process-kill qualified, power-loss unqualified", "strong quorum barrier; graph returns vertices and edges, projected to IDs", "HTTP JSON", "authenticated root, all grants", null);
-    public bool Supports(Scenario scenario) => true;
-    private static T Success<T>(Result<T> result, string? stage = null)
-    {
-        if (!result.IsSuccess) throw new ComparisonFailure("KeyLoad:" + result.Problem?.ErrorCode + (stage is null ? "" : ":" + stage));
-        return result.Value!;
-    }
+        "QuorumProcessDurable; process-kill qualified, power-loss unqualified", "strong quorum barrier; graph returns vertices and edges, projected to IDs", "HTTP JSON", "authenticated root, all grants", image);
+    /// <summary>Reports support for document, vector, queue, graph, and event-stream comparison scenarios.</summary>
+    /// <param name="scenario">The comparison scenario to check.</param>
+    /// <returns><see langword="true"/> for a scenario implemented by this target; otherwise <see langword="false"/>.</returns>
+    public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.VectorExact
+        or Scenario.QueueCycle or Scenario.GraphNeighbors or Scenario.GraphTraverse or Scenario.StreamAppend or Scenario.StreamRead;
+    /// <summary>Requires three voters and process-durable quorum writes, provisions the benchmark resources, seeds the corpus, and observes replica copies.</summary>
+    /// <param name="dataset">The deterministic documents, vectors, graph edges, and workload options to provision.</param>
+    /// <param name="cancellationToken">A token that cancels status checks and database operations.</param>
+    /// <returns>A task that completes after seeding and replica observation.</returns>
     public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
     {
-        var status = Success(await client.StatusAsync(cancellationToken), "Status");
+        ArgumentNullException.ThrowIfNull(dataset);
+        var status = KeyLoadClientResults.Success(await client.StatusAsync(cancellationToken), "Status");
         if (status.Voters != 3 || status.Durability != DurabilityProfile.QuorumProcessDurable)
-            throw new ComparisonFailure("KeyLoadRf3Required");
+        {
+            throw new ComparisonFailureException("KeyLoadRf3Required");
+        }
+
         space = new("comparison", dataset.Options.Dimensions, DistanceMetric.Cosine, "seeded-float32", "1");
         topK = dataset.Options.TopK;
-        graphDepth = dataset.Options.GraphDepth; graphVertices = dataset.GraphVertexCount; graphEdges = Math.Max(1, dataset.Edges.Length);
-        foreach (var (name, kind) in new[] { ("documents", ResourceKind.Collection), ("jobs", ResourceKind.WorkQueue), ("links", ResourceKind.Graph) })
-            Success(await client.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, new(name, kind, partition.TransactionDomainId)), cancellationToken), "Configure:" + name);
-        foreach (var document in dataset.Documents)
-            Success(await client.CommitAsync(new(Guid.NewGuid(), partition,
-                [new PutDocument("documents", document.Id, document.Json, 0), new PutVector("documents", document.Id, "/embedding", document.Vector, space, 1)]), cancellationToken), "SeedDocuments");
-        foreach (var batch in dataset.Edges.Chunk(100))
-            Success(await client.CommitAsync(new(Guid.NewGuid(), partition, batch.Select(edge => (Mutation)new UpsertEdge("links", edge.Id,
-                new(partition, "documents", edge.From), new(partition, "documents", edge.To), "links", ExpectedRevision: 0)).ToArray()), cancellationToken), "SeedGraph");
-    }
-    public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken) => Task.FromResult<IComparisonSession>(new Session(this));
-    public ValueTask DisposeAsync() { http.Dispose(); return ValueTask.CompletedTask; }
+        graphDepth = dataset.Options.GraphDepth;
+        graphVertices = dataset.GraphVertexCount;
+        graphEdges = Math.Max(1, dataset.Edges.Length);
+        foreach (var (name, kind) in new[] { ("documents", ResourceKind.Collection), ("jobs", ResourceKind.WorkQueue), ("links", ResourceKind.Graph), (KeyLoadEventOperations.EventsName, ResourceKind.StreamSet) })
+        {
+            KeyLoadClientResults.Success(await client.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, new(name, kind, partition.TransactionDomainId)), cancellationToken), "Configure:" + name);
+        }
 
-    private sealed class Session(KeyLoadTarget target) : IComparisonSession
-    {
-        public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+        foreach (var document in dataset.Documents)
         {
-            var found = Success(await target.client.GetAsync(new(target.partition, "documents", document.Id), cancellationToken));
-            return found is null ? null : new(found.Reference.Id, found.Json);
+            KeyLoadClientResults.Success(await client.CommitAsync(new(Guid.NewGuid(), partition,
+                [new PutDocument("documents", document.Id, document.Json, 0), new PutVector("documents", document.Id, "/embedding", document.Vector, space, 1)]), cancellationToken), "SeedDocuments");
         }
-        public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
+
+        foreach (var batch in dataset.Edges.Chunk(100))
         {
-            switch (scenario)
-            {
-                case Scenario.PointRead: return new(Document: await ReadAsync(document, cancellationToken));
-                case Scenario.DocumentWrite:
-                    var receipt = Success(await target.client.CommitAsync(new(Guid.NewGuid(), target.partition,
-                        [new PutDocument("documents", document.Id, document.Json, 0)]), cancellationToken));
-                    if (receipt.Durability != DurabilityProfile.QuorumProcessDurable) throw new ComparisonFailure("WrongWriteProfile");
-                    return new();
-                case Scenario.VectorExact:
-                    var neighbors = Success(await target.client.SearchAsync(new(target.partition, "documents", VectorField: "/embedding",
-                        Vector: document.Vector, Space: target.space, Limit: target.topK), cancellationToken));
-                    return new(Neighbors: neighbors.Select(item => new FoundDocument(item.Document.Reference.Id, item.Document.Json)).ToArray());
-                case Scenario.GraphNeighbors:
-                case Scenario.GraphTraverse:
-                    var graph = Success(await target.client.TraverseAsync(new(target.partition, "links",
-                        new(target.partition, "documents", document.Id), scenario == Scenario.GraphNeighbors ? 1 : target.graphDepth,
-                        target.graphVertices, target.graphEdges, ["links"]), cancellationToken));
-                    return new(Vertices: graph.Vertices.Where(vertex => vertex.Id != document.Id).Select(vertex => vertex.Id).Order(StringComparer.Ordinal).ToArray());
-                case Scenario.QueueCycle:
-                    var lane = new QueueLaneRef(target.partition, "jobs");
-                    var begin = Stopwatch.GetTimestamp();
-                    Success(await target.client.CommitAsync(new(Guid.NewGuid(), target.partition,
-                        [new EnqueueMessage("jobs", document.Id, document.Json)]), cancellationToken));
-                    var enqueued = Stopwatch.GetTimestamp();
-                    Delivery? delivery = null;
-                    while (delivery is null)
-                    {
-                        delivery = Success(await target.client.ReceiveAsync(new(Guid.NewGuid(), lane), cancellationToken)).Deliveries.SingleOrDefault();
-                        if (delivery is null) await Task.Delay(1, cancellationToken);
-                    }
-                    var received = Stopwatch.GetTimestamp();
-                    Success(await target.client.CompleteAsync(new(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack), cancellationToken));
-                    return new(Message: new(delivery.Id, delivery.PayloadJson), Queue: new(
-                        Stopwatch.GetElapsedTime(begin, enqueued).TotalMilliseconds, Stopwatch.GetElapsedTime(enqueued, received).TotalMilliseconds,
-                        Stopwatch.GetElapsedTime(received).TotalMilliseconds));
-                default: throw new NotSupportedException();
-            }
+            KeyLoadClientResults.Success(await client.CommitAsync(new(Guid.NewGuid(), partition, [.. batch.Select(edge => (Mutation)new UpsertEdge("links", edge.Id,
+                new(partition, "documents", edge.From), new(partition, "documents", edge.To), "links", ExpectedRevision: 0))]), cancellationToken), "SeedGraph");
         }
-        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+        await KeyLoadEventOperations.SeedAsync(client, partition, dataset, cancellationToken);
+        await ObserveCopiesAsync(cancellationToken);
     }
+    /// <summary>Opens a session that executes supported operations through the SDK client.</summary>
+    /// <param name="cancellationToken">A token accepted for the common target contract; this implementation creates the session without I/O.</param>
+    /// <returns>A comparison session bound to this target and its benchmark partition.</returns>
+    public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
+        => Task.FromResult<IComparisonSession>(new KeyLoadComparisonSession(client, partition, space, topK,
+            graphDepth, graphVertices, graphEdges));
+    /// <summary>Disposes the distinct HTTP clients owned by this target.</summary>
+    /// <returns>A value task that completes after client disposal.</returns>
+    public ValueTask DisposeAsync()
+    {
+        foreach (var peer in peerClients.Distinct())
+        {
+            peer.Dispose();
+        }
+
+        return ValueTask.CompletedTask;
+    }
+
 }

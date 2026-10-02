@@ -1,0 +1,39 @@
+using Npgsql;
+
+namespace KeyLoad.Comparisons.Targets;
+
+internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int topK, int graphDepth)
+    : IComparisonSession
+{
+    public Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+        => PostgresDocumentOperations.ReadAsync(connection, document, cancellationToken);
+
+    public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document,
+        CancellationToken cancellationToken)
+    {
+        switch (scenario)
+        {
+            case Scenario.PointRead:
+                return new(Document: await ReadAsync(document, cancellationToken));
+            case Scenario.DocumentWrite:
+                await PostgresDocumentOperations.WriteAsync(connection, document, cancellationToken);
+                return new();
+            case Scenario.VectorExact:
+                return new(Neighbors: await PostgresVectorOperations.SearchAsync(connection, document, topK, cancellationToken));
+            case Scenario.QueueCycle:
+                return await PostgresQueueOperations.ExecuteAsync(connection, document, cancellationToken);
+            case Scenario.GraphNeighbors:
+            case Scenario.GraphTraverse:
+                return await PostgresGraphOperations.ExecuteAsync(connection, scenario, document, graphDepth, cancellationToken);
+            case Scenario.StreamAppend:
+                await PostgresStreamOperations.AppendAsync(connection, document, cancellationToken);
+                return new();
+            case Scenario.StreamRead:
+                return new(Event: await PostgresStreamOperations.ReadAsync(connection, document, cancellationToken));
+            default:
+                throw new NotSupportedException();
+        }
+    }
+
+    public ValueTask DisposeAsync() => connection.DisposeAsync();
+}

@@ -1,0 +1,173 @@
+using System.Text.Json;
+
+namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+
+internal static class SiteCoverageTokens
+{
+    public const string CoverageRootEnvironment = "KEYLOAD_SITE_COVERAGE";
+    public const string NodeCoverageEnvironment = "NODE_V8_COVERAGE";
+    public const string NodeVersionArgument = "--version";
+    public const string NodeDirectory = "node";
+    public const string BrowserDirectory = "browser";
+    public const string SessionsDirectory = "sessions";
+    public const string MetadataFile = "metadata.json";
+    public const string SourceManifestFile = "source-manifest.json";
+    public const string ReportFile = "report.json";
+    public const string TemporaryReportSuffix = ".pending";
+    public const string JsonExtension = ".json";
+    public const string ModuleExtension = ".mjs";
+    public const string HttpScheme = "http";
+    public const string LoopbackAddress = "127.0.0.1";
+    public const string FileScheme = "file";
+    public const string FeatureUrlPrefix = "/Features/BenchmarkComparisons/";
+    public const string FeatureSourcePrefix = "site/Features/BenchmarkComparisons/";
+    public const string SiteSourcePrefix = "site/";
+    public const string VendorSourcePrefix = "site/Features/BenchmarkComparisons/vendor/";
+    public const string BuildScriptSource = "site/scripts/build.mjs";
+    public const string SchemaVersion = "schemaVersion";
+    public const string SourceRevision = "sourceRevision";
+    public const string NodeVersion = "nodeVersion";
+    public const string BrowserVersion = "browserVersion";
+    public const string Origins = "origins";
+    public const string Sources = "sources";
+    public const string CoverageFiles = "coverageFiles";
+    public const string Path = "path";
+    public const string Sha256 = "sha256";
+    public const string Bytes = "bytes";
+    public const string Result = "result";
+    public const string Timestamp = "timestamp";
+    public const string SourceMapCache = "source-map-cache";
+    public const string ScriptId = "scriptId";
+    public const string Url = "url";
+    public const string ExecutionContextId = "executionContextId";
+    public const string FunctionName = "functionName";
+    public const string IsBlockCoverage = "isBlockCoverage";
+    public const string Ranges = "ranges";
+    public const string StartOffset = "startOffset";
+    public const string EndOffset = "endOffset";
+    public const string Count = "count";
+    public const string Runtime = "runtime";
+    public const string Files = "files";
+    public const string Totals = "totals";
+    public const string Critical = "critical";
+    public const string Passed = "passed";
+    public const string Thresholds = "thresholds";
+    public const string CriticalSources = "criticalSources";
+    public const string AggregateLinesPercent = "aggregateLinesPercent";
+    public const string AggregateBranchesPercent = "aggregateBranchesPercent";
+    public const string NativeReceipts = "nativeReceipts";
+    public const string BrowserSessions = "browserSessions";
+    public const string CoveragePercent = "coveragePercent";
+    public const string CriticalLineThresholdPercent = "criticalLineThresholdPercent";
+    public const string AggregateBranchThresholdPercent = "aggregateBranchThresholdPercent";
+    public const string AggregateLineThresholdPercent = "aggregateLineThresholdPercent";
+    public const string Functions = "functions";
+    public const string NodeRuntime = "node";
+    public const string BrowserRuntime = "browser";
+    public const string BranchSemantics = "Each distinct nested V8 range keyed by source and physical function span is one block outcome; function-root ranges are excluded. Equal-span functions resolve to the last native function in each snapshot before explicit outcome checks or omitted-child inference. An explicit positive child count covers an outcome. An omitted child is covered only when the selected physical function snapshot proves positive effective execution throughout that interval.";
+    public const string LineSemantics = "A source line is executable when it contains a nonblank JavaScript token outside comments; each snapshot resolves the most-specific V8 function and range, with equal-span functions resolved to the last native function, before coverage is unioned across snapshots.";
+    public const string CoveragePathFailure = "Coverage artifact paths must remain inside the configured artifact root.";
+    public const string SourceMismatchFailure = "The source bytes changed after the immutable pre-session manifest was captured.";
+    public const string MissingCoverageFailure = "Required authored source has no mapped native V8 execution ranges.";
+    public const string InvalidCoverageFailure = "A native V8 coverage receipt is malformed or inconsistent with its source.";
+    public const string InvalidMetadataFailure = "Browser coverage metadata does not match the frozen protocol.";
+    public const string InvalidRootFailure = "Coverage requires absolute repository and artifact roots and the exact GitHub source revision.";
+    public const string ThresholdFailure = "The deterministic site coverage report did not satisfy ADR-040 thresholds.";
+    public const string NodeVersionFailure = "The configured Node runtime did not return a valid version receipt.";
+    public const string JsonFailure = "Coverage JSON is malformed or has unsupported fields.";
+    public const string InventoryFailure = "The authored production JavaScript inventory differs from the frozen 13-file set.";
+    public const string InvalidSourceFailure = "Required production source is absent, linked outside the checkout, or not valid UTF-8.";
+    public const string UnexpectedProductionScriptFailure = "An executed authored site script is absent from the frozen source inventory.";
+    public const string MissingNativeReceiptsFailure = "Coverage collection requires native Node and browser receipts.";
+    public const string ExtensionFailure = "Coverage artifact extension or basename is invalid.";
+    public const string ErrorSeparator = ": ";
+    public const string ParentSegmentMarker = "..";
+    public const string JsonGlobPrefix = "*";
+    public const string DuplicateFieldFailure = "Coverage JSON contains a duplicate field.";
+    public const string DuplicateRangeFailure = "Coverage ranges contain duplicate intervals.";
+    public const string CrossingRangeFailure = "Coverage ranges cross instead of nesting or remaining disjoint.";
+    public const string OutOfBoundsRangeFailure = "Coverage offsets exceed the source UTF-16 length.";
+    public const string EmptyNativeFileFailure = "A native coverage receipt has no script records.";
+    public const string StaleReceiptFailure = "Coverage directories contain stale files from an earlier test session.";
+    public const string SourceMapUnsupportedFailure = "Native source maps are not part of the frozen coverage contract.";
+    public const string BrowserOriginFailure = "Browser script origin is not listed in its native session metadata.";
+    public const string InvalidUrlFailure = "Coverage script URL cannot be mapped to an exact authored source file.";
+    public const string NodeCoverageFilePrefix = "coverage-";
+    public const string Wildcard = "*";
+    public const string ScriptTestFile = "range-fixture.mjs";
+    public const string FixtureRelativePath = "site/Features/BenchmarkComparisons/range-fixture.mjs";
+    public const string NativeEvidenceDirectory = "converter-fixtures";
+    public const string NativeEvidenceSourceFile = "fixture-source.mjs";
+    public const string NativeEvidenceReceiptFile = "native-receipt.json";
+    public const string NativeEvidenceOutputFile = "stdout.txt";
+    public const string NativeEvidenceMetadataFile = "receipt-metadata.json";
+    public const string FixtureTemporaryDirectoryPrefix = "keyload-site-coverage-";
+    public const string CompactGuidFormat = "N";
+    public const string NodeVersionPrefix = "v";
+    public const string TrueResultOutput = "🟩";
+    public const string FalseResultOutput = "none";
+    public const string HashDigits = "0123456789abcdef";
+    public const string Empty = "";
+    public const char RelativeSeparator = '/';
+    public const string Slash = "/";
+    public const string Colon = ":";
+    public const string Newline = "\n";
+    public const string Utf8 = "utf-8";
+    public const char Percent = '%';
+    public const char Backslash = '\\';
+    public const char QueryMarker = '?';
+    public const char FragmentMarker = '#';
+
+    public const int Schema = 1;
+    public const int ShaLength = 64;
+    public const int RevisionLength = 40;
+    public const int Zero = 0;
+    public const int One = 1;
+    public const int Two = 2;
+    public const int Three = 3;
+    public const int Four = 4;
+    public const int Five = 5;
+    public const int Six = 6;
+    public const int Seven = 7;
+    public const int Eight = 8;
+    public const int Nine = 9;
+    public const int Ten = 10;
+    public const int Fifteen = 15;
+    public const int Twenty = 20;
+    public const int TwentyFive = 25;
+    public const int MaximumNativeFileBytes = 32_000_000;
+    public const int MaximumNativeFiles = 10_000;
+    public const int MaximumNativeBytes = 1_000_000_000;
+    public const int MaximumUtf16SourceLength = 10_000_000;
+    public const int CriticalLinePercent = 90;
+    public const int AggregateLinePercent = 80;
+    public const int AggregateBranchPercent = 70;
+    public const int BytesPerMegabyte = 1_000_000;
+    public const int MaximumJsonDepth = 64;
+
+    public static readonly string[] ProductionSources =
+    [
+        $"{SiteAssetTokens.FeatureRelativePath}/measurements.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/measurement-loader.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/benchmark-lab.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/benchmark-chart.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/benchmark-profiles.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/contracts.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/bootstrap.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/build-site.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/cluster-scene.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/scene-geometry.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/scene-lifecycle.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/scene-observers.mjs",
+        BuildScriptSource,
+    ];
+
+    public static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        WriteIndented = true,
+    };
+    public static readonly JsonDocumentOptions JsonDocumentOptions = new()
+    {
+        MaxDepth = MaximumJsonDepth,
+    };
+}

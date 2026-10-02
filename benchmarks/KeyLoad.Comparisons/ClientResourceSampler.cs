@@ -6,6 +6,7 @@ namespace KeyLoad.Comparisons;
 internal sealed class ClientResourceSampler : IAsyncDisposable
 {
     private const int IntervalMs = 50;
+    private readonly object gate = new();
     private readonly Process process = Process.GetCurrentProcess();
     private readonly CancellationTokenSource lifetime = new();
     private readonly TimeSpan cpu;
@@ -29,7 +30,7 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
             while (true)
             {
                 await Task.Delay(IntervalMs, lifetime.Token);
-                lock (process)
+                lock (gate)
                 {
                     process.Refresh();
                     peak = Math.Max(peak, process.WorkingSet64);
@@ -43,7 +44,8 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
     {
         var bytes = GC.GetTotalAllocatedBytes(precise: true) - allocated;
         TimeSpan elapsedCpu;
-        lock (process) { process.Refresh(); elapsedCpu = process.TotalProcessorTime - cpu; }
+        lock (gate)
+        { process.Refresh(); elapsedCpu = process.TotalProcessorTime - cpu; }
         await lifetime.CancelAsync();
         await sampler;
         process.Refresh();
@@ -52,7 +54,9 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        await lifetime.CancelAsync(); await sampler;
-        lifetime.Dispose(); process.Dispose();
+        await lifetime.CancelAsync();
+        await sampler;
+        lifetime.Dispose();
+        process.Dispose();
     }
 }
