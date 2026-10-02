@@ -99,6 +99,7 @@ internal static class SiteCoverageArtifactReader
             SiteCoverageArtifactMetadata.ValidateSessionFiles(directory, listedNames);
             var artifactRoot = SiteCoverageArtifactFiles.RequiredCoverageRoot();
             var relativeMetadata = SiteCoverageArtifactFiles.RelativePath(artifactRoot, metadataPath);
+            var firstReceiptIndex = result.Receipts.Count;
             var receiptPaths = new List<string>();
             foreach (var name in metadata.CoverageFiles.Order(StringComparer.Ordinal))
             {
@@ -107,6 +108,13 @@ internal static class SiteCoverageArtifactReader
                     SiteCoverageTokens.BrowserRuntime, metadata.BrowserVersion, result, cancellationToken)
                     .ConfigureAwait(false);
                 receiptPaths.Add(SiteCoverageArtifactFiles.RelativePath(artifactRoot, coveragePath));
+            }
+
+            var mappedFunctions = result.Receipts.Skip(firstReceiptIndex).Sum(receipt => receipt.MappedFunctions);
+            if (mappedFunctions == SiteCoverageTokens.Zero)
+            {
+                result.Errors.Add(
+                    $"{relativeMetadata}{SiteCoverageTokens.ErrorSeparator}{SiteCoverageTokens.MissingBrowserSessionRangesFailure}");
             }
 
             result.BrowserSessions.Add(new(id, metadata.BrowserVersion, relativeMetadata,

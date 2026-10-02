@@ -248,3 +248,62 @@ root joins the diff, repeats serialized development build/format and full GitHub
 qualification. No worker test execution, shared/config edit or commit is allowed.
 030's initial temporary task diff predated its final pair-count guard; root's
 joined source diff and final proof hash a4de9b1d... are authoritative for review.
+
+## Actual G protocol baseline and final bounded repair
+
+G `cc99e9c2814a9bd6c26dc44661ac3ee82a4f0e64`,
+[run37008674643](https://github.com/managedcode/KeyLoad/actions/runs/37008674643),
+[job110842887739](https://github.com/managedcode/KeyLoad/actions/runs/37008674643/job/110842887739):
+Analyzer118/118 pass, all native thresholds pass, format/governance pass.
+Site71/71 executed,70pass,1synthetic AfterTestSession failure,0skipped;
+TRX SHA091e891b7d122aefceca527b1b6b291cbf39127a451fa0b294a2059f1c0e29b8.
+All earlier six functional caller/control/metadata failures now pass. The prior
+missing-browser cause is resolved; AfterTestSession remains failed on the empty delta.
+JS coverage reports2351/2399lines97%,537/623block outcomes86%,17sources,
+all9critical pass, but `passed:false`: first native Chrome receipt is the actual
+empty initial-blank delta. Report SHAce769fab3b0d2a4fbb1a976a94c1c56ba1c8aa068362fa64fdd74b2e77b645b6.
+Immutable artifact11226958262,22080263bytes,
+SHAfe0f1c9501afbc420425721fb2ad1ac20b9d208458491be1144fc57269aa16ec,
+downloaded/verified under `/private/tmp/keyload-site-run-37008674643`.
+No deployment; numeric thresholds alone do not close the failed gate.
+
+- [x] Record full relevant actual G red baseline and strongest protocol analysis.
+- [x] TASK-SITE-BROWSER-COVERAGE-REGRESSION-037 source packet: gpt-6-sol high, tests-first;
+  owns ONE call after existing SiteBrowserBehaviorTests.CompleteAsync plus NEW
+  SiteBrowserCoverageAssertions.cs, Fixture.cs and Tokens.cs only. Actual complete
+  Chrome/native source/manifest bytes through unchanged reader; retain zero-delta
+  receipt/hash and prove controlled empty-only/anonymous-only/malformed/foreign
+  second sessions fail beside a valid session, with empty Node rejection. Owned
+  confined converter-fixtures copies only; no env changes or fake execution.
+  Start after recorded acceptance/ADR strongest approval; terminal exact4file
+  hashes/diff/AC mappings/limits packet unblocks036.
+- [x] TASK-SITE-BROWSER-DELTA-PROTOCOL-036 source packet: gpt-6-luna high; owns ONLY
+  SiteCoverageNativeRanges.cs + SiteCoverageArtifactReader.cs + SiteCoverageTokens.cs
+  (named error if needed). Starts after037 tests-first source and actual G red
+  receipt. Browser empty array contributes zero but is retained; all malformed,
+  Node-empty and missing per-session authored evidence fail. Do not edit Chrome,
+  Session, gate/report/schema/inventory, thresholds or root-owned integration.
+  Terminal source hashes/full diff/limits packet joins037/root.
+- [ ] Root serial development build before GitHub qualification, focused format,
+  static governance and exact source composition; strongest inspects every diff.
+- [ ] Complete exact-SHA GitHub Analyzer/native/Site/real-Chrome/JS gate, immutable
+  artifact/TRX inspection, then strongest conditional main-delivery review.
+- [ ] Ordinary protected-policy-compliant main delivery, separate automatic push
+  and producer-completion workflows, actual provider/live JSON/UI proof and final
+  strongest acceptance join. No failed/partial worker or local build closes this.
+
+Root exclusively owns docs/workflow/shared integration.036/037 are serialized at
+the tests-first join because036 depends on037's realistic negative contract;
+strongest read-only review and root evidence/docs preparation run independently.
+Workers stop/escalate rather than invent contracts, filter receipts, weaken
+assertions/gates, install tools, run local tests or commit/push. States must be
+complete/blocked/failed/cancelled with source and evidence. Rollback restores the
+coherent reader/range/test set and previous verified publication; no data/API/
+runtime/dependency migration, threshold reduction or denominator exclusion.
+
+037's enabled development build exposed KLD0024 untyped catch and CA1820 empty
+string equality in its new fixture. The owning worker corrected only those two
+lines; complete rebuild passed0warnings/0errors. Final fixture SHA256
+9d8dea918f5554b95c9dedc3534d283e188e7d311391ee352db8f5889b5ba0de.
+All four037 and three036 source packets are terminal COMPLETE and independently
+reviewed; source completion is distinct from the pending exact-SHA GitHub gate.

@@ -268,3 +268,35 @@ The actual F4 failing complete-preview regression is the tests-first baseline;
 the same real builder/raw-report/asset/vendor flow must pass in the next full
 GitHub suite. This is a test-oracle correction under existing architecture, not
 permission to remove an asset or publish qualification tooling as website assets.
+
+### AC-BC-024/025 native blank-page deltas
+
+A real CDP precise-coverage browser snapshot may have a valid empty `result`
+array during a blank or no-script interval. Retain its original bytes, runtime,
+identity and hash, recording zero mapped functions and no line/branch credit.
+Do not filter or fabricate it. Non-array/malformed browser results and empty Node
+results still fail. Each individual browser session must contain mapped authored
+functions; empty-only or unmapped-only sessions fail even when another valid
+session supplies browser coverage. All earlier source/hash/origin/confinement
+checks,17 authored sources,9 critical gates and80/70/90 thresholds remain required.
+
+The authentic G full-suite failure is the tests-first baseline: run37008674643,
+site SHA cc99e9c2814a9bd6c26dc44661ac3ee82a4f0e64,71 executed/70 passed/1
+synthetic after-session failure/0 skipped. Regression evidence must exercise real
+Chrome/native bytes through the actual reader: positive complete session with its
+empty delta retained at zero credit; controlled empty-only second-session copy
+must fail despite a valid session beside it. Malformed/Node-empty rejection stays
+explicit. Isolated owned copies remain under the existing converter-fixtures
+test-infrastructure area and are removed before the full coverage join; no global
+environment mutation, fake transport/browser, authored-source exclusion or local
+test run is allowed. Automated evidence is the complete exact-SHA GitHub TUnit
+Site/Chrome/coverage workflow, followed by strongest source/evidence review.
+
+TASK036 changes only NativeRanges/ArtifactReader and a named per-session error
+token if needed. TASK037 owns one assertion call after the existing complete real
+browser flow plus SiteBrowserCoverageAssertions/Fixture/Tokens. Use unchanged
+ReadAsync with owned converter-fixtures paths, the actual source manifest, all
+actual session bytes and an actual mapped Node receipt. Controlled negative
+second sessions additionally cover anonymous-only entries, missing/non-array
+results and unknown origins; an empty Node copy remains rejected. All identities
+and hashes derive from the retained bytes, never generated execution claims.

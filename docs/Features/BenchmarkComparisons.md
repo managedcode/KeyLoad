@@ -178,6 +178,13 @@ worker ownership and terminal joins are frozen in acceptance/ADR/plan before
 writes. Pure controlled metadata/ZIP tests are not fake API transport evidence.
 Real workflow/provider/live evidence remains mandatory and currently pending.
 
+AC-BC-024/025 additionally retains actual CDP blank/no-script empty deltas with
+their raw hashes and zero line/branch contribution. Each session must independently
+map authored functions; empty-only/unmapped-only sessions and malformed/Node-empty
+receipts fail. TASK036/037's tests-first reader/protocol contract and actual G
+red baseline are in publication acceptance/plan and ADR-040. Every earlier source
+inventory, numeric threshold and complete real-browser assertion remains required.
+
 ## Required analyzer dependency for the website candidate
 
 REQ-BC-027 maps to AC-BC-027 in [site acceptance](../../site-design.acceptance.md),

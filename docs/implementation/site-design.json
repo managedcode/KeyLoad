@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "date": "2026-10-02",
-  "scope": "REQ/AC-BC-011..018 and BC-024/025/027",
+  "scope": "REQ/AC-BC-011..018 and BC-024/025/027/028; website_only_publication",
   "status": "implementation_in_progress",
   "feature": "docs/Features/BenchmarkComparisons.md",
   "decision": "docs/ADR/ADR-040-static-site-threejs-evidence.md",
@@ -63,7 +63,9 @@
     "nativeFormatRepair": "TASK014_COMPLETE_source_and_GitHub_36991420593_all3real_process_cases_passed",
     "numericRepair": "TASK015_COMPLETE_source_and_GitHub_36991420593_original4failures_plus_all17registrations_and_numeric_selfinventory_passed",
     "diagnosticFlows": "TASK016_COMPLETE_root_and_strongest_4file_source_join_213298217ea9f5309765bb41eca581062cc1ca78ef45abd4cd4715dd26cd41cb; retainedregressionbytepreserved; integrateddevelopmentbuild_and_formatpass; runtime_pending",
-    "argumentRoleRepair": "TASK018_FIX_COMPLETE_root_and_strongest_twofile_source_join_6daafb389c2caca0976ea7c8530cae37a6ba033f5fb3001171a2489bfeef1218_bf33778bb16a12d04b07a88d535a516d004957592a2aba9d5b91845e2e0de5fc; enabledbuild0warnings0errors_and_analyzerformatpass; realGitHub_pending"
+    "argumentRoleRepair": "TASK018_FIX_COMPLETE_root_and_strongest_twofile_source_join_6daafb389c2caca0976ea7c8530cae37a6ba033f5fb3001171a2489bfeef1218_bf33778bb16a12d04b07a88d535a516d004957592a2aba9d5b91845e2e0de5fc; enabledbuild0warnings0errors_and_analyzerformatpass; realGitHub_pending",
+    "browserDeltaProtocol": "TASK036_SOURCE_COMPLETE_strongest_threefile_review; authentic_browser_empty_delta_retained_and_per_session_mapped_evidence_required; real_GitHub_pending",
+    "browserDeltaRegressions": "TASK037_SOURCE_COMPLETE_strongest_fourfile_semantic_review; two_actual_build_style_errors_repaired; enabled_development_build0warnings0errors; real_GitHub_pending"
   },
   "verification": {
     "source": "Joined bounded website publication source and strongest task reviews; exact next candidate cut and actual full qualification pending; no runtime qualification claimed",
@@ -110,7 +112,7 @@
       ]
     },
     "githubSiteSuite": {
-      "state": "actual_F4_full_suite_red_repaired_source_pending_complete_GitHub_join",
+      "state": "actual_G_all70_functional_tests_passed; full_gate_failed_on_valid_empty_browser_delta; complete_qualification_pending",
       "attempts": [
         {
           "run": 36987695573,
@@ -354,6 +356,43 @@
           },
           "cause": "Four real-CLI malformed metadata regressions accepted invalid receipts/IDs; real Chrome Queue ACK to PointRead reaches undefined metric symbol; emitted-asset test oracle wrongly prefixes output with site/. Missing browser receipt fails numeric coverage. All source repairs await next complete GitHub gate.",
           "nativeGateReportSha256": "3c239c4384e94c31ad48179e62da11fb20e8c4b4706d5ded4ea653b8338fdf2b"
+        },
+        {
+          "run": 37008674643,
+          "sourceRevision": "cc99e9c2814a9bd6c26dc44661ac3ee82a4f0e64",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37008674643",
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37008674643/job/110842887739",
+          "purpose": "website_only_protocol_regression_baseline",
+          "state": "completed_failure",
+          "conclusion": "failure",
+          "publication": "skipped",
+          "analyzerTests": {
+            "total": 118,
+            "executed": 118,
+            "passed": 118,
+            "failed": 0,
+            "skipped": 0,
+            "trxSha256": "0fb59325adc559514054945346ae3c9c2179aa5fb12fe001f79795a69eda0d46"
+          },
+          "siteTests": {
+            "total": 71,
+            "executed": 71,
+            "passed": 70,
+            "failed": 1,
+            "skipped": 0,
+            "trxSha256": "091e891b7d122aefceca527b1b6b291cbf39127a451fa0b294a2059f1c0e29b8",
+            "failure": "synthetic_AfterTestSession_only; all70authored_functional_tests_pass"
+          },
+          "nativeReportSha256": "04e7f43aab20bbf3aba4e4602e8e40dfd0711caf5726b5dfc4052be6abf14d9e",
+          "nativeGateReportSha256": "7a735eb6918f31976d2a8167b8ca4404b97e083409f55565b2614e077fbf5c4a",
+          "artifactReceipt": {
+            "id": 11226958262,
+            "bytes": 22080263,
+            "digest": "sha256:fe0f1c9501afbc420425721fb2ad1ac20b9d208458491be1144fc57269aa16ec",
+            "localEvidence": "/private/tmp/keyload-site-run-37008674643",
+            "log": "/private/tmp/keyload-site-run-37008674643-failed.log"
+          },
+          "cause": "Native parser rejects valid initial blank-page CDP result:[]; all prior functional failures repaired, numeric97/86 and all9critical pass but retained error fails full gate. TASK036/037 reader/protocol regressions pending."
         }
       ]
     },
@@ -361,7 +400,7 @@
     "databaseQualification": "not_part_of_site_gate",
     "publicPublication": "owner_authorized_separate_workflow_implemented_qualification_and_provider_proof_pending",
     "dns": "unchanged",
-    "developmentBuild": "Integrated SiteTests_and_AnalyzerTests_Release_builds_passed_0warnings_0errors; focused_format_passed_for_all_three_dependency_projects; no_local_tests; broader_solution_qualification_separate",
+    "developmentBuild": "Integrated SiteTests H Release build passed0warnings0errors after bounded two-line fixture style repair; AnalyzerTests prior development build passed; no_local_tests; exact_H_format/static/sourcecut/GitHub_qualification_pending",
     "githubAccess": "Authenticated_read_verified_live_2026-10-02; repository_push_permission_true; no_credentials_changed",
     "governance": {
       "state": "passed_static_workspace_validation",
@@ -397,18 +436,22 @@
       "fullAnalyzerTests": "112executed112passed0failed0skipped",
       "globalProductAndNoDecreaseCoverage": "separate_unqualified"
     },
-    "publicationPreflight": "authenticated metadata selection and immutable same-ZIP setup ran in GitHub F4; current validator/control/caller repairs pending next complete native/Site/Chrome/coverage qualification and provider proof",
+    "publicationPreflight": "Authenticated metadata and same-ZIP preparation plus all70functionalSiteTests passed in actual G; full gate failed on valid empty browser delta; protocol/source qualification and provider/live proof pending",
     "latestSiteCoverageFailure": {
-      "run": 37006688275,
-      "sourceRevision": "81d5cc02f10bd6f53b73bcc07b28a6e996a91936",
-      "reportSha256": "76a668b80376f905b4e0a939ccef67c9f0c8d8584f7699afe7fad5a3a3bbfda5",
+      "run": 37008674643,
+      "sourceRevision": "cc99e9c2814a9bd6c26dc44661ac3ee82a4f0e64",
+      "reportSha256": "ce769fab3b0d2a4fbb1a976a94c1c56ba1c8aa068362fa64fdd74b2e77b645b6",
       "sources": 17,
       "criticalSources": 9,
-      "coveredLines": 1214,
-      "executableLines": 2329,
-      "coveredBlockOutcomes": 305,
-      "blockOutcomes": 388,
-      "completedBrowserReceipts": 0,
+      "coveredLines": 2351,
+      "executableLines": 2399,
+      "coveredBlockOutcomes": 537,
+      "blockOutcomes": 623,
+      "completedBrowserReceipts": 7,
+      "nativeBrowserFiles": 8,
+      "errors": [
+        "Initial real Chrome blank-page delta rejected as empty native script records"
+      ],
       "passed": false
     }
   },
@@ -420,12 +463,13 @@
     "sourceSnapshotReceiptSha256": "271d8415d29c69e8af84f604858079ed6effd4ce586d06220237ff9ac57b9684",
     "workspace": "shared_dirty_checkout_preserved",
     "main": "preserved_by_site_composer; advanced_by_concurrent_runtime_owner",
-    "currentCandidateRevision": "81d5cc02f10bd6f53b73bcc07b28a6e996a91936",
+    "currentCandidateRevision": "cc99e9c2814a9bd6c26dc44661ac3ee82a4f0e64",
     "descendantReceipt": "/private/tmp/keyload-site-candidate-20261002-b.delivery.json",
     "redSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-c.delivery.json",
     "sharedHeadAtRedComposition": "3559225a5f918160e46e32c9a812c3f71790e382",
     "joinedSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-d.delivery.json",
     "portableSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-e.delivery.json",
-    "governanceSnapshotReceipt": "/private/tmp/keyload-site-candidate-f4b-20261002.delivery.json"
+    "governanceSnapshotReceipt": "/private/tmp/keyload-site-candidate-f4b-20261002.delivery.json",
+    "protocolSourceReceipt": "/private/tmp/keyload-site-candidate-g2-20261002.delivery.json"
   }
 }

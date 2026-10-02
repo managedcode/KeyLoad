@@ -21,7 +21,12 @@ internal static class SiteCoverageNativeRanges
             throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidCoverageFailure);
         }
 
-        if (scripts.ValueKind != JsonValueKind.Array || scripts.GetArrayLength() == SiteCoverageTokens.Zero)
+        if (scripts.ValueKind != JsonValueKind.Array)
+        {
+            throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.EmptyNativeFileFailure);
+        }
+
+        if (scripts.GetArrayLength() == SiteCoverageTokens.Zero && runtime != SiteCoverageTokens.BrowserRuntime)
         {
             throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.EmptyNativeFileFailure);
         }

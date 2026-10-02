@@ -69,6 +69,7 @@ internal static class SiteCoverageTokens
     public const string CoveragePathFailure = "Coverage artifact paths must remain inside the configured artifact root.";
     public const string SourceMismatchFailure = "The source bytes changed after the immutable pre-session manifest was captured.";
     public const string MissingCoverageFailure = "Required authored source has no mapped native V8 execution ranges.";
+    public const string MissingBrowserSessionRangesFailure = "Browser coverage session has no mapped authored functions.";
     public const string InvalidCoverageFailure = "A native V8 coverage receipt is malformed or inconsistent with its source.";
     public const string InvalidMetadataFailure = "Browser coverage metadata does not match the frozen protocol.";
     public const string InvalidRootFailure = "Coverage requires absolute repository and artifact roots and the exact GitHub source revision.";

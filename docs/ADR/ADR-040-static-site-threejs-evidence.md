@@ -409,3 +409,31 @@ receipt's structural bound without fake transport or performance data. Root
 reviews the single-file diff, serialized development build/format, strongest
 source join and complete real GitHub gates in that order. No data/contract/API/
 deployment migration or threshold change; production ownership stays with030.
+
+### Native browser zero-delta implementation contract
+
+REQ/AC-BC-024/025/028 retain valid CDP empty browser arrays as original hashed
+zero-contribution receipts. The official Profiler array contract and actual G
+initial-blank receipt establish the source error; Node-empty/non-array/malformed
+remain rejected. Every browser session independently requires mapped authored
+functions; another valid session cannot hide an empty-only or unmapped-only one.
+All17sources,9critical gates,80/70/90 thresholds, origins/source hashes and raw
+evidence remain mandatory. No Chrome capture filtering or report-schema change.
+
+Ordered stages: root records G full-suite baseline and acceptance; strongest
+approves this contract; TASK037 gpt-6-sol high owns tests-first ONE post-Complete
+Behavior call plus NEW SiteBrowserCoverageAssertions/Fixture/Tokens; TASK036
+gpt-6-luna high then owns ONLY NativeRanges/ArtifactReader and named error token
+in CoverageTokens if needed; root joins all terminal diffs/hashes, serial build/
+format/governance; strongest source review; complete exact-source real GitHub
+Analyzer/native/Site/Chrome/coverage before main/provider/live final join.
+Tests use unchanged ReadAsync and owned converter-fixtures copies of the actual
+complete browser session, manifest and mapped Node bytes, without global env
+mutation or fake execution. Positive retains every byte/hash with zero empty
+credit; controlled second sessions prove empty-only/anonymous-only/missing/
+non-array/foreign-origin and empty Node rejection even beside valid evidence.
+Ownership, dependencies, commands, terminal states and required evidence are
+tracked in site-publication.plan.md. No public API/data/runtime/dependency
+migration. Rollback restores the coherent parser/reader/tests and previous verified
+public output, retaining failed evidence; this ADR remains Accepted until actual
+publication and complete acceptance evidence exist.

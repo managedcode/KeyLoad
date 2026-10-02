@@ -51,6 +51,7 @@ internal sealed class SiteBrowserBehaviorTests
         await SiteBrowserVisualAssertions.AssertSceneLifecycle(browser.Chrome, browser.BaseUrl, cancellationToken);
         await SiteBrowserNoScriptAssertions.AssertNoScript(browser.Chrome, browser.BaseUrl, inputs, cancellationToken);
         await browser.CompleteAsync(cancellationToken);
+        await SiteBrowserCoverageAssertions.AssertNativeConversionAsync(browser.BaseUrl, inputs, cancellationToken);
     }
 
     private static async Task VerifyProfile(SiteBrowserSession browser, SiteTestInputs inputs, string profile,

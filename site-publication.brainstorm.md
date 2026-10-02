@@ -51,3 +51,22 @@ custom ZIP parser, fake GitHub transport, credential exposure or new installatio
 Controlled metadata/corrupt archive inputs prove rejection, never API/publication
 success. Real automatic callback, complete GitHub gates, Pages provider receipt
 and live report/UI verification remain required operational evidence.
+
+## Actual G browser-coverage finding
+
+The exact G GitHub suite passed all70 authored functional tests, but its coverage
+join rejected the first real Chrome delta: `{"result":[],"timestamp":867.18667}`.
+The snapshot was taken on the initial blank page before navigation. The official
+[CDP Profiler contract](https://raw.githubusercontent.com/ChromeDevTools/devtools-protocol/master/pdl/js_protocol.pdl)
+returns an array for the current isolate and resets counters; it does not promise
+a nonempty delta. Later seven snapshots map authored website execution. Numeric
+thresholds already pass; this is a native-protocol interpretation error.
+
+Skipping startup collection or filtering empty files loses original evidence and
+does not handle other legitimate blank/no-script windows. Keep every native byte
+and hash. Accept only a structurally valid empty browser array as zero coverage;
+preserve Node-empty/malformed rejection and strengthen each browser session to
+require mapped authored functions. Empty-only or unmapped-only sessions must fail
+even beside another valid session. Root records the actual red artifact first;
+strongest review freezes disjoint converter/reader and realistic regression scopes
+before bounded workers, followed by full exact-source GitHub qualification.
