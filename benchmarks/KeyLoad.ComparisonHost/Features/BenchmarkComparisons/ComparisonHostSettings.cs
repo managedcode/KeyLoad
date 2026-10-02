@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 
@@ -7,6 +8,7 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 /// <param name="Options">Validated workload options.</param>
 /// <param name="RunId">Unique identifier used to isolate target data.</param>
 /// <param name="KeyLoadEndpoint">KeyLoad endpoint.</param>
+/// <param name="KeyLoadEndpoints">Immutable KeyLoad RF3 peer endpoints, including the primary endpoint.</param>
 /// <param name="QdrantEndpoint">Qdrant endpoint.</param>
 /// <param name="QdrantApiKey">Qdrant API key.</param>
 /// <param name="Neo4jEndpoint">Neo4j endpoint.</param>
@@ -14,6 +16,9 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 /// <param name="AdminKey">KeyLoad administrator key.</param>
 /// <param name="PostgresConnection">PostgreSQL connection string.</param>
 /// <param name="RabbitConnection">RabbitMQ connection string.</param>
+/// <param name="RabbitManagementEndpoint">RabbitMQ management API endpoint.</param>
+/// <param name="RabbitUser">RabbitMQ management API user.</param>
+/// <param name="RabbitPassword">RabbitMQ management API password.</param>
 /// <param name="RedisConnection">Redis connection string.</param>
 /// <param name="PostgresImage">PostgreSQL image label.</param>
 /// <param name="QdrantImage">Qdrant image label.</param>
@@ -27,6 +32,7 @@ internal sealed record ComparisonHostSettings(
     ComparisonOptions Options,
     string RunId,
     Uri KeyLoadEndpoint,
+    ImmutableArray<Uri> KeyLoadEndpoints,
     Uri QdrantEndpoint,
     string QdrantApiKey,
     Uri Neo4jEndpoint,
@@ -34,6 +40,9 @@ internal sealed record ComparisonHostSettings(
     string AdminKey,
     string PostgresConnection,
     string RabbitConnection,
+    Uri RabbitManagementEndpoint,
+    string RabbitUser,
+    string RabbitPassword,
     string RedisConnection,
     string PostgresImage,
     string QdrantImage,
@@ -53,6 +62,7 @@ internal sealed record ComparisonHostSettings(
         var options = ComparisonOptions.Read(configuration);
         var keyLoadEndpoint = ReadEndpoint(configuration, ComparisonHostConstants.KeyLoadEndpoint);
         var qdrantEndpoint = ReadEndpoint(configuration, ComparisonHostConstants.QdrantEndpoint);
+        var keyLoadEndpoints = ComparisonEndpointBindings.ReadKeyLoadEndpoints(configuration, keyLoadEndpoint);
         var qdrantApiKey = Required(configuration, ComparisonHostConstants.QdrantApiKey);
         var neo4jEndpoint = ReadEndpoint(configuration, ComparisonHostConstants.Neo4jEndpoint);
         var neo4jPassword = Required(configuration, ComparisonHostConstants.Neo4jPassword);
@@ -61,6 +71,10 @@ internal sealed record ComparisonHostSettings(
         var postgresImage = Required(configuration, ComparisonHostConstants.PostgresImage);
         var qdrantImage = Required(configuration, ComparisonHostConstants.QdrantImage);
         var rabbitConnection = Required(configuration, ComparisonHostConstants.RabbitConnection);
+        var rabbitManagementEndpoint = ComparisonEndpointBindings.ReadRabbitManagementEndpoint(configuration);
+        var rabbitUser = Required(configuration, ComparisonHostConstants.RabbitUser);
+        var rabbitPassword = Required(configuration, ComparisonHostConstants.RabbitPassword);
+        ComparisonEndpointBindings.ValidateRabbitCredentials(rabbitUser, rabbitPassword);
         var rabbitImage = Required(configuration, ComparisonHostConstants.RabbitImage);
         var redisConnection = Required(configuration, ComparisonHostConstants.RedisConnection);
         var redisImage = Required(configuration, ComparisonHostConstants.RedisImage);
@@ -69,14 +83,17 @@ internal sealed record ComparisonHostSettings(
         var output = Path.GetFullPath(Required(configuration, ComparisonHostConstants.Output));
         var sourceRevision = configuration[ComparisonHostConstants.SourceRevision];
         return new(options, Guid.NewGuid().ToString(ComparisonHostConstants.GuidFormat), keyLoadEndpoint,
-            qdrantEndpoint, qdrantApiKey, neo4jEndpoint, neo4jPassword, adminKey, postgresConnection,
-            rabbitConnection, redisConnection, postgresImage, qdrantImage, rabbitImage, redisImage, neo4jImage,
+            keyLoadEndpoints, qdrantEndpoint, qdrantApiKey, neo4jEndpoint, neo4jPassword, adminKey, postgresConnection,
+            rabbitConnection, rabbitManagementEndpoint, rabbitUser, rabbitPassword, redisConnection,
+            postgresImage, qdrantImage, rabbitImage, redisImage, neo4jImage,
             output, storage, sourceRevision);
     }
 
     private static Uri ReadEndpoint(IConfiguration configuration, string key)
         => new(Required(configuration, key), UriKind.Absolute);
 
-    private static string Required(IConfiguration configuration, string key)
+    internal static string RequiredValue(IConfiguration configuration, string key)
         => configuration[key] ?? throw new InvalidOperationException(ComparisonHostConstants.MissingSettingPrefix + key);
+
+    private static string Required(IConfiguration configuration, string key) => RequiredValue(configuration, key);
 }

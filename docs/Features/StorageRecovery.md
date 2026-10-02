@@ -1,5 +1,31 @@
 # StorageRecovery
 
+## Bounded real crash-trial qualification
+
+REQ-STORAGE-014 maps AC-RC-001..004 in recovery-concurrency.acceptance.md
+to TASK-REC-ADMIT-002 under [ADR-035](../ADR/ADR-035-memory-performance.md).
+Exact c486/run37060131271 Windows reports19 seeded batch errors (0..18)
+and subscription MutationApplied3 cancellation; Linux/macOS recovery passes.
+Marker/receipt/input-read cancellations do not identify a storage defect. A shared
+test-only four-slot admission bounds each storage CrashHost launch through real
+reopen, assertions and cleanup. It starts before each unchanged15s/20s trial CTS,
+preserves20x50 seeded crashes and all checkpoint/projection/subscription cases,
+and leaves native replica-process fixtures unchanged. Success receipt rows follow
+atomic/durable assertions and add measured occupancy/peak fields. No fault point,
+assertion, readiness or job bound is reduced. Real three-OS GitHub suites and
+1000successful seeded rows per OS must qualify the candidate; source/lifetime
+review explicitly covers rare exceptional permit/cleanup paths without doubles.
+
+```mermaid
+flowchart LR
+    Queue[Test cancellation aware admission] --> Pool[Four storage trial slots]
+    Pool --> Deadline[Original trial deadline]
+    Deadline --> Child[Real crash host and kill]
+    Child --> Reopen[Actual files and atomic recovery assertions]
+    Reopen --> Receipt[Success receipt with observed occupancy]
+    Receipt --> Cleanup[Cleanup then release owned slot]
+```
+
 ## Descending bounded borrowed ranges
 
 REQ-STORAGE-013 / AC-RANGE-REV-001..003 under

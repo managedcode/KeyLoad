@@ -36,18 +36,19 @@ internal sealed class StorageRecoveryProcessTests
         var root = Path.Combine(Path.GetTempPath(), $"keyload-crash-{batch}-{trial}-{Guid.NewGuid():N}");
         var stage = (CommitStage)random.Next(5);
         var mutationIndex = random.Next(3);
+        using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         using var process = Process.Start(CreateCrashHostStart(root, stage, mutationIndex))!;
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(TimeSpan.FromSeconds(15));
         Exception? originalFailure = null;
+        int[]? values = null;
         try
         {
             await Assert.That(await process.StandardOutput.ReadLineAsync(timeout.Token)).IsEqualTo("crash-point");
             process.Kill();
             await process.WaitForExitAsync(timeout.Token);
             await WaitForKilledProcessFilesAsync(root, timeout.Token);
-            var values = ReadRecoveredValues(root);
-            await RecordCrashTrialAsync(evidence, batch, trial, stage, mutationIndex, values, timeout.Token);
+            values = ReadRecoveredValues(root);
             await AssertAtomicCutAsync(values, batch, trial, stage);
         }
         catch (Exception exception)
@@ -67,6 +68,9 @@ internal sealed class StorageRecoveryProcessTests
                 Console.WriteLine($"Cleanup after the original failure: {error.Message}");
             }
         }
+
+        await RecordCrashTrialAsync(evidence, batch, trial, stage, mutationIndex, values!,
+            StorageTrialLease.ActiveStorageTrials, StorageTrialLease.MaximumObservedStorageTrials, timeout.Token);
     }
 
     private static ProcessStartInfo CreateCrashHostStart(string root, CommitStage stage, int mutationIndex)
@@ -87,7 +91,8 @@ internal sealed class StorageRecoveryProcessTests
     }
 
     private static async Task RecordCrashTrialAsync(StreamWriter evidence, int batch, int trial,
-        CommitStage stage, int mutationIndex, int[] values, CancellationToken cancellationToken)
+        CommitStage stage, int mutationIndex, int[] values, int activeStorageTrials,
+        int maximumObservedStorageTrials, CancellationToken cancellationToken)
     {
         var record = new
         {
@@ -97,7 +102,9 @@ internal sealed class StorageRecoveryProcessTests
             MutationIndex = mutationIndex,
             Values = values,
             OS = System.Runtime.InteropServices.RuntimeInformation.OSDescription,
-            Architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString()
+            Architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString(),
+            ActiveStorageTrials = activeStorageTrials,
+            MaximumObservedStorageTrials = maximumObservedStorageTrials
         };
         await evidence.WriteLineAsync(JsonSerializer.Serialize(record).AsMemory(), cancellationToken);
         await evidence.FlushAsync(cancellationToken);
@@ -162,6 +169,7 @@ internal sealed class StoragePublicationRecoveryTests
     {
         var root = Path.Combine(Path.GetTempPath(), "keyload-checkpoint-crash-" + Guid.NewGuid().ToString("N"));
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
+        using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         try
         {
             await KillCheckpointPublicationProcessAsync(root, mode, stage, cancellationToken);

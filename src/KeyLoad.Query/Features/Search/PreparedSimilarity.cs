@@ -126,9 +126,19 @@ internal sealed class PreparedSimilarity
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidVector);
         }
-        foreach (var value in values)
+        var index = 0;
+        var infinity = new Vector<float>(float.PositiveInfinity);
+        for (; Vector.IsHardwareAccelerated && index + Vector<float>.Count <= values.Length; index += Vector<float>.Count)
         {
-            if (!float.IsFinite(value))
+            var block = new Vector<float>(values[index..]);
+            if (!Vector.LessThanAll(Vector.Abs(block), infinity))
+            {
+                throw Errors.Fail(ErrorCode.Validation, InvalidVector);
+            }
+        }
+        for (; index < values.Length; index++)
+        {
+            if (!float.IsFinite(values[index]))
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidVector);
             }

@@ -105,6 +105,56 @@ Least expensive capable coding tiers must be chosen per SDK/protocol risk; ambig
 
 [Joined review record](../implementation/benchmark-source-review.json) records COMPLETE source packets for Redis-006, Kurrent-009 and Symbols-011, the highest-capability REVIEW-010, exact source manifests and the lead's integrated static/data checks. All 29 generated files match the original historical output and all three successful GitHub raw JSON files are preserved byte-for-byte. This closes the listed source findings only. Every required real-engine, Docker, delivered-source CI, publication, UI and performance acceptance gate remains explicit and pending in that record.
 
+## Actual caller composition repair (2026-10-02)
+
+REQ-BC-001/002/003/005/009/019/021 map to AC-PERF-001–009 in
+[performance acceptance](../../performance-composition.acceptance.md) and its
+[ordered task graph](../../performance-composition.plan.md). ADR-034's Accepted
+repair continuation freezes the three actual RF3 endpoint bindings, authenticated
+Rabbit management client ownership and PostgreSQL public event readback. This
+repairs located caller failures; it does not close the existing nine-engine,
+native replicated, Docker load-generator or six-profile contracts.
+
+The exact f627 run37057708780 raw smoke files contain no KeyLoad measurements:
+setup fails `KeyLoadThreeRealEndpointsRequired`. Rabbit QueueCycle fails
+`RabbitManagementClientRequired`; PostgreSQL append readback reaches the default
+interface `NotSupportedException`. Separately, native test completion fails the
+Aspire terminal predicate. One failure is not evidence for the cause of another.
+The retained 48-sample TimeSeries arm has one attempt per timed operation and a
+different external topology; its raw timings are diagnostic, not a qualified
+throughput, tail-latency or winner claim.
+
+| Task / acceptance | Owning paths | Caller-visible verification |
+|---|---|---|
+| TASK-PERF-002 / AC-PERF-004 | Harness PostgresComparisonSession; ComparisonTests PostgresStreamPublicRegression and existing PostgresSchemaPublicFlow join | Existing real Aspire PG target: seeded, absent, append, conflicting duplicate/no corruption, cancelled and healthy following event reads; no new SQL or doubles. |
+| TASK-PERF-003 / AC-PERF-002/003 | ComparisonHost settings/constants/owner and host-only validation; UnitTests real-child startup/bindings/cleanup cases | Exactly three distinct HTTP(S) peer origins with index0 matching primary; safe early invalid config; actual Basic-auth management client; all existing precedence/cleanup/secret checks retained. |
+| TASK-PERF-004 / AC-PERF-002/003 | AppHost Features/BenchmarkComparisons/BenchmarkCallerBindings and existing composition call | Actual node endpoints and broker management/user/password references; native three-copy and queue-member proofs remain mandatory. |
+| TASK-PERF-005 / AC-PERF-001/009 | Private GitHub native evidence; root-owned durable receipt/status | Exact c486 full relevant main baseline run37060131271, byte hashes/counts/failing cases; source-only builds cannot qualify tests. |
+| TASK-PERF-006/007 / AC-PERF-005–007 | Lead-owned native resource graph/registration, Docker load generator, bounded six-profile CI | Full accepted nine-engine graph and six profiles; no interim six-engine checkpoint qualifies completion. |
+| TASK-PERF-008 / AC-PERF-008 | Future owning Search/ResourceExecution/StorageRecovery/ClusterRouting contracts | Owner confirmed SIMD/.NET intrinsics first, Rust only after profiling; correct native ZoneTree APIs and bounded Orleans parallelism preserve atomic apply/read cuts/faults. |
+
+Implementation is staged: first-author real regressions, repair located bindings
+and public delegate, review each disjoint worker packet, build/format/governance,
+deliver all eligible current-main changes, then retain exact GitHub gates. No
+local tests/runtime/benchmarks, timeout increase, terminal-gate substitution,
+unpublished package, paid clustering or secret output. Numeric product coverage
+and all existing endurance/fault gates remain open until actual evidence exists.
+Product persisted schema/API N/A for this composition repair. Website delivery is
+owned separately under BC028 and retains its distinct source/evidence boundary.
+
+```mermaid
+flowchart LR
+    Aspire[Actual Aspire resources] --> Bindings[Three peers and broker references]
+    Bindings --> Host[Validated CLI composition]
+    Host --> RF3[KeyLoad SDK and three-copy proof]
+    Host --> Rabbit[Authenticated broker and queue proof]
+    Host --> PG[Public PostgreSQL event readback]
+    RF3 --> Report[Exact oracle and retained attempts]
+    Rabbit --> Report
+    PG --> Report
+    Report --> Gate[Native completion and six-profile GitHub gate]
+```
+
 ## Product website and conceptual RF3 presentation
 
 The owner requested a proper product design and Three.js. [ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md), [site acceptance](../../site-design.acceptance.md) and [ordered plan](../../site-design.plan.md) own this bounded extension. The existing BC001–010 and all product/evidence criteria remain mandatory. Reader, keyboard/screen-reader user, constrained browser and evidence publisher are the actors; generated index is the entry, with independent graphics and report mounts. Backend/public API/persistence N/A: no database behavior changes.

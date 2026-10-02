@@ -66,6 +66,22 @@ RF3/MCP public integration and measured server memory remain required join gates
 
 ## Portable SIMD validation qualification
 
+On 2026-10-02 the owner explicitly mapped the earlier SMID wording to SIMD and
+directed .NET intrinsics first, Rust only after profiling. The existing Accepted
+ADR-035 TASK-MP-006D validation stage is now executed under
+[AC-SIMD-001–004](../../simd-validation.acceptance.md) and its
+[protected-source/CI task graph](../../simd-validation.plan.md). Unchanged c486
+run37060131271 has all five first-authored public/real-ZoneTree metric regressions
+passing on every OS (normal units871/871 each), and RF3 SDK/MCP46/46. Root independently
+verified all native report byte/source/count identities in
+[the exact receipt](../implementation/runtime-qualification-37060131271.json).
+The run still fails Windows recovery and native comparison completion; it is not
+full product qualification. Full-block finite validation uses portable .NET JIT
+intrinsics; metric Vector.Widen/Vector.Dot/scalar grouping stays unchanged. Same-SHA
+normal and hardware-disabled full unit invocations retain separate native reports.
+Speed, allocations/RSS, numeric coverage and broad endurance/fault completion remain
+open until actual matching GitHub evidence exists.
+
 TASK-RUNTIME-SEARCH-BYTES-W3 preserves REQ-SR-001 / AC-MP-003/011/012 after
 Ubuntu run37021991878 atfa80c701 reports1048511 rather than1048576 added stored
 bytes. The fixture compares complete DocumentRecord encodings, including65

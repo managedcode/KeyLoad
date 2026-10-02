@@ -17,9 +17,10 @@ ManagedCode packages are our projects. Fix dependency defects in their owning si
 - When the user requests committing all current changes, commit the full requested working-tree scope on the currently checked-out branch; do not silently omit existing changes or move them to another branch.
 
 ## System-critical SMID and operation efficiency
-- Treat the owner's SMID work as a first-priority product workstream and keep it visible in implementation planning and status. The term is not defined in the current repository or v0.3 architecture documents; do not guess its expansion or begin SMID-specific implementation until its canonical slice, REQ/AC criteria and required ADRs are mapped with the owner.
+- Treat the owner's SIMD work (earlier written as SMID) as a first-priority product workstream and keep it visible in implementation planning and status. On 2026-10-02 the owner confirmed SIMD means vectorized CPU operations and directed .NET intrinsics first, with Rust considered only after profiling. Map its canonical slices, REQ/AC criteria, scalar correctness/portability contract and required ADRs before implementation; never claim acceleration without comparable GitHub measurements.
 - Orleans provides request isolation, cluster routing and activation movement. Keep the one-grain-per-request boundary and RF3 topology; treat Orleans Streams as a first-class architecture workstream to specify and qualify alongside persisted KeyLoad EventStreams. Keep their distinct delivery/restart contracts explicit, and define bounded resource, concurrency, backpressure, recovery and performance behavior for every operation.
 - Optimize each operation only against its correctness and fault contracts, using representative multi-node GitHub qualification to measure latency, throughput, allocations, memory, contention and backlog where applicable. Architecture choices or local builds alone do not prove maximum scalability or performance.
+- Use ZoneTree's native storage APIs correctly and Orleans for bounded parallel execution of independent operation work. Preserve node-local storage ownership, the ordered atomic commit/apply gate, scoped read cuts, cancellation and backpressure; qualify the resulting performance in real multi-node GitHub runs (owner direction 2026-10-02).
 
 ## MCAF repository workflow
 

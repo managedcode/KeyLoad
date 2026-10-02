@@ -53,6 +53,10 @@ jobs:
       - name: Verify source-owned Roslyn rules
         run: dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release
       - run: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release
+      - name: Qualify the full unit suite with hardware intrinsics disabled
+        run: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release --results-directory TestResults/unit-scalar
+        env:
+          DOTNET_EnableHWIntrinsic: 0
       - name: Qualify real process recovery after a successful build
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: dotnet test --project tests/KeyLoad.RecoveryTests --no-build --no-restore --configuration Release

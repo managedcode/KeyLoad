@@ -1,0 +1,615 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "c486d9ddd1fefc9284926ad449d6ebdc00ac4af8",
+  "runId": 37060131271,
+  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37060131271",
+  "rootVerifiedAt": "2026-10-02T21:00:41.625Z",
+  "qualification": "failed_native_completion_and_incomplete_smoke_not_a_performance_baseline",
+  "rawReports": {
+    "smoke": {
+      "artifact": "comparison-test-results",
+      "path": "smoke/results.json",
+      "sha256": "aaa9395469e720872ae089644a8b42d8e1580d0bd3cba0a1801608fefe56e44c",
+      "schemaVersion": 3,
+      "datasetSha256": "7ebe83ccdfa88ab3b05c3aea320ddf89a9432fa6b6a609c175424055b8febdb3",
+      "options": {
+        "topology": "Single",
+        "seed": 1729,
+        "documents": 32,
+        "operations": 12,
+        "warmup": 2,
+        "repetitions": 2,
+        "concurrency": 2,
+        "payloadBytes": 1024,
+        "dimensions": 8,
+        "topK": 3,
+        "timeoutSeconds": 30,
+        "graphVertices": 256,
+        "graphFanOut": 3,
+        "graphDepth": 3
+      },
+      "targets": 6,
+      "cases": 96,
+      "byTarget": [
+        {
+          "name": "KeyLoad",
+          "topology": "3 voters, RF3, one physical shard; all processes on one host",
+          "cases": 16,
+          "statusCounts": {
+            "failed": 16
+          },
+          "measuredCases": 0,
+          "sampleCount": 0,
+          "failureDetails": [
+            "setup:KeyLoadThreeRealEndpointsRequired",
+            "setup:PreviousSetupFailure"
+          ]
+        },
+        {
+          "name": "PostgreSQL + pgvector",
+          "topology": "single primary, no replicas",
+          "cases": 16,
+          "statusCounts": {
+            "measured": 14,
+            "failed": 2
+          },
+          "measuredCases": 14,
+          "sampleCount": 168,
+          "failureDetails": [
+            "NotSupportedException at IComparisonSession.ReadEventAsync"
+          ]
+        },
+        {
+          "name": "Qdrant",
+          "topology": "one native node; RF1, WCF1",
+          "cases": 16,
+          "statusCounts": {
+            "unsupported": 14,
+            "measured": 2
+          },
+          "measuredCases": 2,
+          "sampleCount": 24,
+          "failureDetails": []
+        },
+        {
+          "name": "RabbitMQ",
+          "topology": "unverified native topology",
+          "cases": 16,
+          "statusCounts": {
+            "unsupported": 14,
+            "failed": 2
+          },
+          "measuredCases": 0,
+          "sampleCount": 0,
+          "failureDetails": [
+            "setup:RabbitManagementClientRequired",
+            "setup:PreviousSetupFailure"
+          ]
+        },
+        {
+          "name": "Redis",
+          "topology": "single primary, no replicas",
+          "cases": 16,
+          "statusCounts": {
+            "measured": 4,
+            "unsupported": 12
+          },
+          "measuredCases": 4,
+          "sampleCount": 48,
+          "failureDetails": []
+        },
+        {
+          "name": "Neo4j",
+          "topology": "Community; single node; heap 512 MiB, page cache 256 MiB",
+          "cases": 16,
+          "statusCounts": {
+            "measured": 8,
+            "unsupported": 8
+          },
+          "measuredCases": 8,
+          "sampleCount": 96,
+          "failureDetails": []
+        }
+      ]
+    },
+    "timeSeries": {
+      "artifact": "comparison-test-results",
+      "path": "timeseries/timeseries-results.json",
+      "sha256": "dd5e7cd4a153f33eda08ed17f237d37af10fbe9037bee1a0a771885c069a48e3",
+      "schemaVersion": 1,
+      "workloadHash": "d67ed223ef6c701daaa06481aaeb83dd069133cb9fd7b7d017e380d83ef0d869",
+      "sampleCount": 48,
+      "bucketWidth": "00:05:00",
+      "targets": [
+        {
+          "name": "TimescaleDB TimeSeries",
+          "storageModel": "Persisted TimescaleDB hypertable",
+          "persistenceGuarantee": "Container-lifetime TimescaleDB hypertable; no cross-run volume and no replica guarantee",
+          "acknowledgementGuarantee": "PostgreSQL transaction commit acknowledged by one server",
+          "image": "docker.io/timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e",
+          "packageVersion": null
+        },
+        {
+          "name": "KeyLoad TimeSeries",
+          "storageModel": "Persisted RF3 time-series",
+          "persistenceGuarantee": "RF3 process-durable storage; power-loss durability unqualified",
+          "acknowledgementGuarantee": "Quorum acknowledgement through the public .NET SDK",
+          "image": "KeyLoad RF3 Dockerfile build at c486d9ddd1fefc9284926ad449d6ebdc00ac4af8",
+          "packageVersion": null
+        },
+        {
+          "name": "ManagedCode.TimeSeries",
+          "storageModel": "in-memory bucket aggregation",
+          "persistenceGuarantee": "none; no persistence, recovery, or replication",
+          "acknowledgementGuarantee": "AddNewData returns after an in-process bucket update",
+          "image": null,
+          "packageVersion": "10.0.0"
+        }
+      ],
+      "attempts": [
+        {
+          "target": "TimescaleDB TimeSeries",
+          "operation": "initialize",
+          "attempt": 1,
+          "measured": false,
+          "elapsedMilliseconds": null,
+          "succeeded": true,
+          "resultCount": null,
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "operation": "seed",
+          "attempt": 1,
+          "measured": false,
+          "elapsedMilliseconds": null,
+          "succeeded": true,
+          "resultCount": null,
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "operation": "idempotent-seed-retry",
+          "attempt": 1,
+          "measured": false,
+          "elapsedMilliseconds": null,
+          "succeeded": true,
+          "resultCount": null,
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "operation": "inclusive-full-range",
+          "attempt": 1,
+          "measured": true,
+          "elapsedMilliseconds": 22.1218,
+          "succeeded": true,
+          "resultCount": 48,
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "operation": "inclusive-boundary",
+          "attempt": 1,
+          "measured": true,
+          "elapsedMilliseconds": 2.7502,
+          "succeeded": true,
+          "resultCount": 4,
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "operation": "offset-normalized",
+          "attempt": 1,
+          "measured": true,
+          "elapsedMilliseconds": 2.0039,
+          "succeeded": true,
+          "resultCount": 4,
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "operation": "empty-range",
+          "attempt": 1,
+          "measured": true,
+          "elapsedMilliseconds": 1.9138,
+          "succeeded": true,
+          "resultCount": 0,
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "operation": "invalid-range",
+          "attempt": 1,
+          "measured": false,
+          "elapsedMilliseconds": null,
+          "succeeded": true,
+          "resultCount": 0,
+          "errorCode": "BudgetExceeded"
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "operation": "bucket-sum-oracle",
+          "attempt": 1,
+          "measured": true,
+          "elapsedMilliseconds": 7.1721,
+          "succeeded": true,
+          "resultCount": 12,
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "operation": "initialize",
+          "attempt": 1,
+          "measured": false,
+          "elapsedMilliseconds": null,
+          "succeeded": true,
+          "resultCount": null,
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "operation": "seed",
+          "attempt": 1,
+          "measured": false,
+          "elapsedMilliseconds": null,
+          "succeeded": true,
+          "resultCount": null,
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "operation": "idempotent-seed-retry",
+          "attempt": 1,
+          "measured": false,
+          "elapsedMilliseconds": null,
+          "succeeded": true,
+          "resultCount": null,
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "operation": "inclusive-full-range",
+          "attempt": 1,
+          "measured": true,
+          "elapsedMilliseconds": 89.0117,
+          "succeeded": true,
+          "resultCount": 48,
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "operation": "inclusive-boundary",
+          "attempt": 1,
+          "measured": true,
+          "elapsedMilliseconds": 22.8949,
+          "succeeded": true,
+          "resultCount": 4,
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "operation": "offset-normalized",
+          "attempt": 1,
+          "measured": true,
+          "elapsedMilliseconds": 19.3386,
+          "succeeded": true,
+          "resultCount": 4,
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "operation": "empty-range",
+          "attempt": 1,
+          "measured": true,
+          "elapsedMilliseconds": 16.3709,
+          "succeeded": true,
+          "resultCount": 0,
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "operation": "invalid-range",
+          "attempt": 1,
+          "measured": false,
+          "elapsedMilliseconds": null,
+          "succeeded": true,
+          "resultCount": 0,
+          "errorCode": "BudgetExceeded"
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "operation": "cleanup",
+          "attempt": 1,
+          "measured": false,
+          "elapsedMilliseconds": null,
+          "succeeded": true,
+          "resultCount": null,
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "operation": "cleanup",
+          "attempt": 1,
+          "measured": false,
+          "elapsedMilliseconds": null,
+          "succeeded": true,
+          "resultCount": null,
+          "errorCode": null
+        },
+        {
+          "target": "ManagedCode.TimeSeries",
+          "operation": "bucket-sum-oracle",
+          "attempt": 1,
+          "measured": true,
+          "elapsedMilliseconds": 19.882,
+          "succeeded": true,
+          "resultCount": 12,
+          "errorCode": null
+        }
+      ],
+      "correctnessChecks": [
+        {
+          "target": "TimescaleDB TimeSeries",
+          "check": "initialize",
+          "passed": true,
+          "expectedCount": 1,
+          "actualCount": 1,
+          "expectedHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "actualHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "check": "seed",
+          "passed": true,
+          "expectedCount": 1,
+          "actualCount": 1,
+          "expectedHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "actualHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "check": "idempotent-seed-retry",
+          "passed": true,
+          "expectedCount": 1,
+          "actualCount": 1,
+          "expectedHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "actualHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "check": "inclusive-full-range",
+          "passed": true,
+          "expectedCount": 48,
+          "actualCount": 48,
+          "expectedHash": "4e738a93c1693250d4461bcecf169ea1bdcebd1b59f0a71fccaa42138a443471",
+          "actualHash": "4e738a93c1693250d4461bcecf169ea1bdcebd1b59f0a71fccaa42138a443471",
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "check": "inclusive-boundary",
+          "passed": true,
+          "expectedCount": 4,
+          "actualCount": 4,
+          "expectedHash": "f68a1e9f3a15e7dd82072fd6ad3fbc007d1557f0921bc5caef84ab9506dabece",
+          "actualHash": "f68a1e9f3a15e7dd82072fd6ad3fbc007d1557f0921bc5caef84ab9506dabece",
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "check": "offset-normalized",
+          "passed": true,
+          "expectedCount": 4,
+          "actualCount": 4,
+          "expectedHash": "f68a1e9f3a15e7dd82072fd6ad3fbc007d1557f0921bc5caef84ab9506dabece",
+          "actualHash": "f68a1e9f3a15e7dd82072fd6ad3fbc007d1557f0921bc5caef84ab9506dabece",
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "check": "empty-range",
+          "passed": true,
+          "expectedCount": 0,
+          "actualCount": 0,
+          "expectedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "actualHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "check": "invalid-range",
+          "passed": true,
+          "expectedCount": 0,
+          "actualCount": 0,
+          "expectedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "actualHash": null,
+          "errorCode": "BudgetExceeded"
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "check": "bucket-sum-oracle",
+          "passed": true,
+          "expectedCount": 12,
+          "actualCount": 12,
+          "expectedHash": "b6a94041fe6ea5193c544622466bd72096d286930dc52fd5fd2a55597b3be702",
+          "actualHash": "b6a94041fe6ea5193c544622466bd72096d286930dc52fd5fd2a55597b3be702",
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "check": "initialize",
+          "passed": true,
+          "expectedCount": 1,
+          "actualCount": 1,
+          "expectedHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "actualHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "check": "seed",
+          "passed": true,
+          "expectedCount": 1,
+          "actualCount": 1,
+          "expectedHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "actualHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "check": "idempotent-seed-retry",
+          "passed": true,
+          "expectedCount": 1,
+          "actualCount": 1,
+          "expectedHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "actualHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "check": "inclusive-full-range",
+          "passed": true,
+          "expectedCount": 48,
+          "actualCount": 48,
+          "expectedHash": "4e738a93c1693250d4461bcecf169ea1bdcebd1b59f0a71fccaa42138a443471",
+          "actualHash": "4e738a93c1693250d4461bcecf169ea1bdcebd1b59f0a71fccaa42138a443471",
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "check": "inclusive-boundary",
+          "passed": true,
+          "expectedCount": 4,
+          "actualCount": 4,
+          "expectedHash": "f68a1e9f3a15e7dd82072fd6ad3fbc007d1557f0921bc5caef84ab9506dabece",
+          "actualHash": "f68a1e9f3a15e7dd82072fd6ad3fbc007d1557f0921bc5caef84ab9506dabece",
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "check": "offset-normalized",
+          "passed": true,
+          "expectedCount": 4,
+          "actualCount": 4,
+          "expectedHash": "f68a1e9f3a15e7dd82072fd6ad3fbc007d1557f0921bc5caef84ab9506dabece",
+          "actualHash": "f68a1e9f3a15e7dd82072fd6ad3fbc007d1557f0921bc5caef84ab9506dabece",
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "check": "empty-range",
+          "passed": true,
+          "expectedCount": 0,
+          "actualCount": 0,
+          "expectedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "actualHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "errorCode": null
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "check": "invalid-range",
+          "passed": true,
+          "expectedCount": 0,
+          "actualCount": 0,
+          "expectedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "actualHash": null,
+          "errorCode": "BudgetExceeded"
+        },
+        {
+          "target": "KeyLoad TimeSeries",
+          "check": "cleanup",
+          "passed": true,
+          "expectedCount": 1,
+          "actualCount": 1,
+          "expectedHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "actualHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "errorCode": null
+        },
+        {
+          "target": "TimescaleDB TimeSeries",
+          "check": "cleanup",
+          "passed": true,
+          "expectedCount": 1,
+          "actualCount": 1,
+          "expectedHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "actualHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "errorCode": null
+        },
+        {
+          "target": "ManagedCode.TimeSeries",
+          "check": "bucket-sum-oracle",
+          "passed": true,
+          "expectedCount": 12,
+          "actualCount": 12,
+          "expectedHash": "b6a94041fe6ea5193c544622466bd72096d286930dc52fd5fd2a55597b3be702",
+          "actualHash": "b6a94041fe6ea5193c544622466bd72096d286930dc52fd5fd2a55597b3be702",
+          "errorCode": null
+        }
+      ]
+    }
+  },
+  "nativeFailure": {
+    "resource": "comparisons",
+    "observedState": "Waiting",
+    "parentCreationStartStopExit": "null_in_retained_snapshot",
+    "observedExecutableWatchTimeoutSeconds": 60,
+    "childTerminalExit": "not_observed",
+    "jobLogSha256": "fb0719442ca6a3fae312819434f5f647f15de886b3ca8111951a137385aeca21",
+    "upstreamCausalAssessment": "supported_inference_DCP_Executable_watch_timeout_matches_Aspire_PR20466_not_proof_of_child_exit",
+    "officialRepair": "https://github.com/microsoft/aspire/pull/20466",
+    "pinnedVersion": "13.6.0",
+    "publishedServicingRepair": "not_available_in_observed_feed",
+    "preservedGate": "actual_native_terminal_state_and_exit_zero_and_all_report_oracles"
+  },
+  "candidateSource": {
+    "repairs": [
+      "three_actual_RF3_endpoints",
+      "authenticated_Rabbit_management_client",
+      "public_Postgres_ReadEvent_delegate",
+      "portable_SIMD_finite_validation_with_unchanged_scoring"
+    ],
+    "qualification": "pending_own_delivered_SHA",
+    "performanceGain": "not_measured",
+    "fullNineEngineDockerSixProfiles": "pending"
+  },
+  "scheduler": {
+    "sourceReceiptSha256": "83cf9a4b5a0d6733cedf2373d3e0d11920a6655ff8d8829b9d8c29c10a2cf141",
+    "observation": "The f25 workflow_dispatch run remained in progress after the c486 main push submission and completed with failure at 20:31:14Z; c486, pending since 20:22:15Z, then began jobs at 20:31:16Z or later and completed at 20:43:04Z. This observed sequence shows the earlier run survived the later queued push; f25 evidence is not evidence for c486 SHA.",
+    "runObservations": [
+      {
+        "runId": 37059757281,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37059757281",
+        "sha": "f25e1985da7c1c4defcd47865d107e4b9a5eb2f5",
+        "event": "workflow_dispatch",
+        "createdAt": "2026-10-02T20:18:48Z",
+        "firstJobStartedAt": "2026-10-02T20:18:52Z",
+        "terminalAt": "2026-10-02T20:31:14Z",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "runId": 37060131271,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37060131271",
+        "sha": "c486d9ddd1fefc9284926ad449d6ebdc00ac4af8",
+        "event": "push",
+        "createdAt": "2026-10-02T20:22:15Z",
+        "firstJobStartedAt": "2026-10-02T20:31:16Z",
+        "terminalAt": "2026-10-02T20:43:04Z",
+        "status": "completed",
+        "conclusion": "failure"
+      }
+    ],
+    "acceptance": "AC-CQ-017_actual_started_run_survived_later_main_push_pending_replacement_semantics_unchanged"
+  },
+  "limits": [
+    "one_timed_attempt_per_operation_48_samples_different_topology_and_ACK_contracts",
+    "no_throughput_p99_or_statistical_speed_winner",
+    "load_generator_metrics_not_server_resource_evidence",
+    "native_test_failure_cannot_publish_qualified_measurements",
+    "ZIP_digest_metadata_not_independently_downloaded_byte_verified"
+  ]
+}

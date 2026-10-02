@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "sourceParentRevision": "959a4c822f3102f1f322e2bd6173e45e0d8e7fba",
+  "stage": "performance_caller_SIMD_validation_storage_trial_admission_source_checkpoint",
+  "ownerDirection": "SIMD_confirmed_dotNET_intrinsics_first_Rust_only_after_profiling_ZoneTree_native_Orleans_bounded_parallelism",
+  "acceptedTasks": [
+    "TASK-PERF-002",
+    "TASK-PERF-003",
+    "TASK-PERF-004",
+    "TASK-MP-006D",
+    "TASK-REC-ADMIT-002"
+  ],
+  "sources": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "0b9b2a9e4d7dfc8f7c58fade9b278d958f6892c342faadec36a7732538decde8"
+    },
+    {
+      "path": "benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/ComparisonEndpointBindings.cs",
+      "sha256": "4760d40808369ea59f9387c73037a58bafa6593781c0c028adeff3868a92b799"
+    },
+    {
+      "path": "benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/ComparisonHostConstants.cs",
+      "sha256": "5f177762498e4714ff8cfaa9d42faf4be3abf634ea2957da7099ca7b7e21ec1d"
+    },
+    {
+      "path": "benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/ComparisonHostSettings.cs",
+      "sha256": "ab18f4b06582480a14ba5c188766e8f134407d422dbbc6c17343a80e56050791"
+    },
+    {
+      "path": "benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/ComparisonTargetOwner.cs",
+      "sha256": "3fb99f6911c0067c8120f5413f67ad93d7d399fa3fe829f77d430d142afadb0e"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/PostgresComparisonSession.cs",
+      "sha256": "cffae08f4b4ad3b8e219feab3e8a097eed6f6856c47862ae98c45a72d37a7a79"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/BenchmarkResources.cs",
+      "sha256": "c3a6e40c7b164fc51584d1c09e96446dd0bc5f40c7cf3ae9721db8bff8593fad"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/BenchmarkCallerBindings.cs",
+      "sha256": "0acb6707683a0a9bb36e67aeb8c1d88117f13a6af7fd38200fec800771411443"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/PreparedSimilarity.cs",
+      "sha256": "d746496b563e62a5c84087e4caeea17d026bc264f4d3af896661ba93d5eccfd4"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/PostgresSchemaPublicFlow.cs",
+      "sha256": "f4431e9facf1e73d108ca694b9028c4906311d229552d484f394a7b86300e691"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/PostgresStreamPublicRegression.cs",
+      "sha256": "df3ef20927c686c438f7c7bd1546b470b205619e1bc455d230c9ae081c2a9c34"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/StorageTrialAdmission.cs",
+      "sha256": "a2763d59f269e212a29f660015d456d555690ab7b07e5b30a3461dd360b6a02c"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/ProjectionRecoveryTests.cs",
+      "sha256": "5414b1f73dc319ce65c0a8dc1e33b4d918a049bd5aa7496b3d443bcf9e3c1e90"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+      "sha256": "7e5b290008f32c287e40748b8eb73fc953be2a04ebf5ae9c0afe9d201afb7f12"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/SubscriptionRecoveryTests.cs",
+      "sha256": "922df5be13008d50a6a1a7b5cdf0def28b3e55457a5b165d0e74ec815caff948"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ComparisonHostBindingsSupport.cs",
+      "sha256": "e20752f5e914aee20a88ff191e9bacbe86ab7e9aa594db4b3a75774a61039a3a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ComparisonHostBindingsTests.cs",
+      "sha256": "7f064705d4b7302317523a2d1aae14e64a7ffbff712a54c8fe42cf1c1be60f76"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ComparisonHostCleanupTests.cs",
+      "sha256": "c30695486834cd822356461750c00d5766586d093b6591b399ed585e1de607af"
+    }
+  ],
+  "developmentBuild": {
+    "parentRevision": "959a4c822f3102f1f322e2bd6173e45e0d8e7fba",
+    "inputCount": 1033,
+    "inputManifestSha256": "841c4d2e5ac0ec1cb365a565bf3ef2d0f06d51cad9513bb0873ea9b93412788f",
+    "sourceStableAfterBuild": true,
+    "projects": [
+      "KeyLoad.Analyzers",
+      "KeyLoad.Abstractions",
+      "KeyLoad.Core",
+      "KeyLoad.Query",
+      "KeyLoad.Security",
+      "KeyLoad.Storage.ZoneTree",
+      "KeyLoad.BenchmarkScenarios",
+      "KeyLoad.Benchmarks",
+      "KeyLoad.Client",
+      "KeyLoad.Comparisons",
+      "KeyLoad.ComparisonHost",
+      "KeyLoad.Replication",
+      "KeyLoad.Orleans",
+      "KeyLoad.ServiceDefaults",
+      "KeyLoad.Server",
+      "KeyLoad.AppHost",
+      "KeyLoad.Artifacts",
+      "KeyLoad.Cli",
+      "KeyLoad.Analyzers.Tests",
+      "KeyLoad.ComparisonTests",
+      "KeyLoad.CrashHost",
+      "KeyLoad.IntegrationTests",
+      "KeyLoad.RecoveryTests",
+      "KeyLoad.SiteTests",
+      "KeyLoad.UnitTests"
+    ],
+    "buildExitCode": 0,
+    "logSha256": "109b5d93b548e4ad840ae8eb13294de5ef3dd7d3067a6d361cb12d1ac90e89b6",
+    "qualifiesRuntime": false
+  },
+  "formatter": {
+    "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+    "exitCode": 0,
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "note": "canonical_read_only_formatter_MSBuild_IPC_sandbox_retry_no_runtime_tests"
+  },
+  "governance": {
+    "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+    "exitCode": 0,
+    "logSha256": "593031891681215141daa839ed5e34cc70f33c27b46d6abb2be7911ec96571ef"
+  },
+  "review": {
+    "clientLifetime": "three_KeyLoad_clients_one_authenticated_Rabbit_management_client_transferred_once_pending_and_unowned_cleanup_preserved",
+    "postgres": "public_ReadEvent_delegates_existing_native_read_no_duplicate_SQL_contract",
+    "postgresRemaining": "different_event_UUID_same_stream_NoStream_probe_not_expressible_by_current_BenchmarkDocument_public_input_full_native_probe_pending",
+    "simd": "finite_validation_Vector_blocks_and_scalar_tail_only_score_accumulation_grouping_errors_unchanged",
+    "tests": "14_new_real_CLI_binding_cases_existing_metric_goldens_public_actual_PG_stream_cancel_and_following_independent_append",
+    "recovery": "four_slot_storage_trial_pool_20x50_seeded_processes_original15s20s_deadlines_all_fault_atomic_retry_metadata_assertions_preserved_success_receipt_after_assertions_cleanup",
+    "rareExceptionalRecovery": "explicit_source_lifetime_review_no_synthetic_child"
+  },
+  "qualification": {
+    "candidate": "pending_own_main_SHA_GitHub_full_normal_and_scalar_fallback_units_recovery_RF3_comparison",
+    "localRuntime": "none",
+    "gain": "not_measured",
+    "coverage": "not_configured",
+    "remaining": [
+      "full_nine_native_engine_Docker_graph",
+      "six_comparison_profiles",
+      "server_resource_and_matched_performance",
+      "activation_movement",
+      "retention_rollups",
+      "endurance_fault_power_loss"
+    ]
+  }
+}

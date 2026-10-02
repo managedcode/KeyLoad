@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class BenchmarkResources
 {
@@ -58,6 +59,7 @@ internal static class BenchmarkResources
             .WithEnvironment("Benchmarks__Images__Rabbit", "docker.io/library/rabbitmq:4.2.4-management@" + RabbitDigest)
             .WithEnvironment("Benchmarks__Images__Redis", "docker.io/library/redis:8.4.0@" + RedisDigest)
             .WithEnvironment("Benchmarks__Images__Neo4j", "docker.io/library/neo4j:2026.09.0@" + Neo4jDigest);
+        BenchmarkCallerBindings.Apply(runner, nodes, rabbit);
         ConfigureRunner(builder, runner, nodes);
     }
 

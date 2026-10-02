@@ -8,6 +8,9 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
     public Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         => PostgresDocumentOperations.ReadAsync(connection, document, cancellationToken);
 
+    public Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+        => PostgresStreamOperations.ReadAsync(connection, document, cancellationToken);
+
     public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document,
         CancellationToken cancellationToken)
     {

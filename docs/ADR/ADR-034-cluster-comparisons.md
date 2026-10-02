@@ -68,6 +68,69 @@ Workers receive exact paths, REQ/AC IDs, constructor/result contracts, primary s
 
 ## Migration, rollout and rollback
 
+### Accepted caller-composition repair continuation (2026-10-02)
+
+Related REQ-BC-001/002/003/005/009/019/021; AC-PERF-001–009 in
+[acceptance](../../performance-composition.acceptance.md) and
+[ordered task graph](../../performance-composition.plan.md). The lead approves
+this bounded implementation packet under the existing owner-authorized product
+work. This decision remains Accepted: full nine-engine/native/full-Docker and
+six-profile qualification is still required. No new product public API, schema,
+dependency or trust-boundary decision is introduced by these caller repairs.
+
+1. Keep the full current c486 run37060131271 baseline and historical raw failures
+   distinct. Author real-child host and existing real-container PG regressions
+   before changing the failing source; no local execution.
+2. TASK-PERF-002 owns only PostgresComparisonSession.cs, new feature-owned
+   PostgresStreamPublicRegression.cs and its PostgresSchemaPublicFlow call. Public
+   ReadEventAsync delegates existing native SQL reader; seeded/new/absent/conflict,
+   cancellation and following-success assertions retain UUID/revision/cardinality/
+   JSON correctness. Root alone owns shared library contracts.
+3. TASK-PERF-003 owns host settings/constants/target owner, new host-only helpers,
+   and real-child host startup/cleanup/bindings tests. Add immutable exactly-three
+   `Benchmarks:KeyLoadEndpoints:0..2` absolute distinct HTTP(S) origins without
+   credentials/query/fragment, primary matching index0. Preserve first primary
+   then Qdrant setting order and CLI precedence. Missing keys name only their key;
+   malformed/duplicate/extra/mismatched peers return safe
+   `KeyLoadComparisonEndpointsInvalid` before allocation. Transfer three actual
+   clients to KeyLoadTarget once published; preserve partial-construction cleanup.
+4. Add `Benchmarks:RabbitManagementEndpoint`, `Benchmarks:RabbitUser`,
+   `Benchmarks:RabbitPassword`. Create one Basic-authenticated management client,
+   owned by RabbitTarget. TASK-PERF-004 (root only) owns new feature AppHost
+   BenchmarkCallerBindings plus its existing composition call, forwarding actual
+   ManagementEndpoint/UserNameReference/PasswordParameter and all three node HTTP
+   endpoints. No embedded credentials, anonymous probe or inferred native proof.
+5. Join reviewed complete disjoint source packets, actual solution Release build,
+   canonical formatter/static governance and all-current-main ordinary delivery.
+   Exact pushed-SHA GitHub real target/native terminal/full suite evidence remains
+   required; no failed or skipped result is qualification. Root reviews integration.
+6. TASK-PERF-006/007 retains the full accepted native nine-engine resource graph,
+   digest-pinned Docker runner, schema3 provenance and bounded six-profile CI join.
+   Freeze each graph/config/digest/ownership packet before its next implementation
+   stage; an intermediate six-target source checkpoint is not completion.
+7. TASK-PERF-008 maps confirmed SIMD first to .NET intrinsics with scalar correctness
+   and portability contracts in the owning slices; Rust requires measured need.
+   Native ZoneTree efficiency and bounded Orleans independent-work parallelism
+   preserve read cuts, ordered apply, cancellation/backpressure and fault contracts.
+   Publish acceleration only from comparable successful GitHub before/after data.
+
+Root owns shared architecture/configuration/CI/evidence, AppHost and integration.
+Coding workers use gpt-6-luna/high for the bounded existing C# paths; they cannot
+change contracts, add dependencies, run local tests, mutate Git, weaken bounds or
+touch other owners. Source artifacts/hash order, review and genuine GitHub tests
+are join points. Rollback preserves immutable raw failures/history and stops new
+qualification/publication until repaired. No rule, gate or full scope is waived.
+
+```mermaid
+classDiagram
+    ComparisonHostSettings --> ComparisonTargetOwner : validated bindings
+    ComparisonTargetOwner --> KeyLoadTarget : owns three clients
+    ComparisonTargetOwner --> RabbitTarget : owns authenticated management client
+    BenchmarkCallerBindings --> ComparisonHostSettings : actual resource references
+    PostgresComparisonSession --> PostgresStreamOperations : native public readback
+    PostgresStreamPublicRegression --> PostgresComparisonSession : genuine caller flow
+```
+
 ADR-043 / REQ-BC-019 accepts the preserving library/sole-host prerequisite with
 AC-HOST-001..006 and the host task graph. Keep the existing public library assembly,
 namespace/signatures, Single/Replicated configuration/wire values, registration,

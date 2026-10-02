@@ -13,7 +13,7 @@ flowchart LR
 
 Read the root and nearest project-local AGENTS.md before changing this solution. The product specification is [architecture v0.3](design/architecture-v0.3.uk.md). This document is a navigation map, not a replacement specification or a readiness claim.
 
-The [documentation index](README.md) is the complete entry point for 21 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 52 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
+The [documentation index](README.md) is the complete entry point for 21 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 53 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
 
 Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
 
@@ -23,7 +23,9 @@ Abstractions DTOs mirror Client/Server/Core TimeSeries owners and real matching
 UnitTests/IntegrationTests. Core uses the published ManagedCode.TimeSeries library
 inside one budgeted storage cut; shared StorageRecovery reverse visitors support
 bounded latest. Orleans request routing and node-local storage ownership remain.
-This contract is accepted; source and exact-SHA qualification remain pending.
+The additive source and real SDK/MCP regression paths are present; this contract
+remains Accepted while exact-SHA full qualification and broader product gates are
+retained separately in implementation status.
 
 ```mermaid
 classDiagram
@@ -244,6 +246,15 @@ classDiagram
 
 The existing flat/layered feature files are migration debt, not compliant target structure. [ADR-032](ADR/ADR-032-mcaf-governance.md) records actual paths, owners, target layout, verification and removal date. New feature-owned work must use the target convention. No runtime code is moved by the governance bootstrap.
 
+The owner's SIMD clarification maps to Search's Accepted ADR-035 validation-only
+stage: portable .NET JIT intrinsic finite-value checks, unchanged metric grouping,
+scalar tails and same-source hardware-disabled GitHub proof. ZoneTree remains the
+node-local native storage engine; Orleans remains the routing/isolation and bounded
+independent-work parallelism foundation. No Rust/FFI or unmeasured numerical/atomic
+parallel reduction is introduced. [Search](Features/Search.md) and
+[BenchmarkComparisons](Features/BenchmarkComparisons.md) keep source, correctness
+and measured performance evidence distinct.
+
 Public chunked blobs and partial reads are required in [BlobStorage](Features/BlobStorage.md), with unresolved contracts in Proposed [ADR-038](ADR/ADR-038-chunked-blob-storage.md). Required official MCP and simple agent adapters belong to [ClientApi](Features/ClientApi.md) and Proposed [ADR-039](ADR/ADR-039-official-mcp-agent-api.md); business operations retain their existing Feature owners. Private snapshot chunks and backup archive pieces do not implement public BlobStorage.
 
 ```mermaid
@@ -339,6 +350,14 @@ The product design still contains earlier DotNext-candidate and standalone-first
 The successful [GitHub CI baseline 36926803549](https://github.com/managedcode/KeyLoad/actions/runs/36926803549) measured commit 9c570f8c33a7a9667507a8e1c0ca68860de3be45. It does not qualify later uncommitted work, power-loss durability, endurance or production readiness. See [implementation status](implementation/status.json), [durability audit](implementation/durability-audit.md), [comparative benchmark contract](implementation/comparative-benchmarks.md), [RepositoryGovernance](Features/RepositoryGovernance.md) and [ADR-032](ADR/ADR-032-mcaf-governance.md).
 
 ## TimeSeries comparison boundary
+
+The Accepted [ADR-034 caller-composition continuation](ADR/ADR-034-cluster-comparisons.md)
+repairs three actual RF3 endpoint bindings, authenticated Rabbit management client
+ownership and PostgreSQL public event readback. The existing nine-engine,
+Single/Replicated, Docker load-generator and six-profile contracts remain open;
+retained failed-run raw timings do not establish a performance winner. The
+[owning feature](Features/BenchmarkComparisons.md) contains exact disjoint tasks,
+criteria, native evidence and integration boundaries.
 
 [ADR-050](ADR/ADR-050-timeseries-timescale-comparison.md) adds a separate profile
 using the real KeyLoad RF3 SDK, digest-pinned TimescaleDB, and

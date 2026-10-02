@@ -3,6 +3,8 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 internal static class ComparisonHostConstants
 {
     internal const string KeyLoadEndpoint = "Benchmarks:KeyLoadEndpoint";
+    internal const string KeyLoadEndpoints = "Benchmarks:KeyLoadEndpoints";
+    internal const string KeyLoadEndpointInvalidCode = "KeyLoadComparisonEndpointsInvalid";
     internal const string Profile = "Benchmarks:Profile";
     internal const string TimeSeriesProfile = "timeseries";
     internal const string TimescaleConnection = "ConnectionStrings:benchmark-timescale";
@@ -14,6 +16,11 @@ internal static class ComparisonHostConstants
     internal const string AdminKey = "Benchmarks:AdminKey";
     internal const string PostgresConnection = "ConnectionStrings:benchmark-postgres";
     internal const string RabbitConnection = "ConnectionStrings:benchmark-rabbit";
+    internal const string RabbitManagementEndpoint = "Benchmarks:RabbitManagementEndpoint";
+    internal const string RabbitUser = "Benchmarks:RabbitUser";
+    internal const string RabbitPassword = "Benchmarks:RabbitPassword";
+    internal const string RabbitManagementEndpointInvalidCode = "RabbitManagementEndpointInvalid";
+    internal const string RabbitManagementCredentialsInvalidCode = "RabbitManagementCredentialsInvalid";
     internal const string RedisConnection = "ConnectionStrings:benchmark-redis";
     internal const string PostgresImage = "Benchmarks:Images:Postgres";
     internal const string QdrantImage = "Benchmarks:Images:Qdrant";
@@ -38,6 +45,7 @@ internal static class ComparisonHostConstants
     internal const int FailedExitCode = 1;
     internal const int LifetimeHours = 2;
     internal const int TargetCount = 6;
-    internal const int HttpClientCount = 3;
+    internal const int KeyLoadEndpointCount = 3;
+    internal const int HttpClientCount = 6;
     internal static readonly TimeSpan InfiniteTimeout = Timeout.InfiniteTimeSpan;
 }

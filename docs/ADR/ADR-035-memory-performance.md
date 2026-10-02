@@ -448,8 +448,19 @@ multi-OS GitHub reports; source rollback restores only fixture coordination.
 
 REQ-SR-002 / AC-MP-004/011/012 / AC-SEARCH-001 add edge qualification around the
 existing public metric and persisted search behavior. The lead accepts the
-validation-only optimization under the owner's operation-efficiency objective;
-the separately undefined term SMID remains unresolved.
+validation-only optimization under the owner's operation-efficiency objective.
+On 2026-10-02 the owner confirmed the earlier SMID wording means SIMD, .NET
+intrinsics first and Rust only after profiling. The mapped owning Search stage is
+[AC-SIMD-001–004](../../simd-validation.acceptance.md) with its
+[ordered protected-source task graph](../../simd-validation.plan.md).
+Root independently verified unchanged c486 run37060131271's five metric cases
+passing on each of three OS unit suites (871/871 each), and real RF3 SDK/MCP46/46.
+Windows recovery20errors and two native comparison completion errors remain open;
+this relevant source baseline does not declare the full run green. The lead alone
+owns Validate and shared CI; other independent workers own disjoint host/PG caller
+repairs and read-only failure diagnosis. Normal and disabled-hardware invocations
+retain distinct native results directories. No accumulation, dependency, trust,
+public API or persisted-format change is accepted by this continuation.
 
 1. `simd_search_tests` owns only NEW `UnitTests/Features/Search/`
    `VectorMetricValidationTests.cs` and `VectorMetricGoldenTests.cs`; write
@@ -809,3 +820,33 @@ test proves valid, malformed, null and oversized responses over real Kestrel and
 the original write ID. Source rollback needs no data, package or public-contract
 migration. Read-only workers own independent failure families; this small shared
 transport/error join stays with the lead to serialize contract and evidence edits.
+
+## Accepted preserving storage crash-trial admission stage
+
+REQ-STORAGE-014 / AC-RC-001..004 / TASK-REC-ADMIT-002 confines the repair to
+test infrastructure. The exact c486 Windows cancellation baseline is recorded in
+[the complete native receipt](../implementation/runtime-qualification-37060131271.json).
+Ordered implementation: freeze acceptance; one bounded four-slot shared storage
+trial owner; acquire before each original15s/20s deadline; retain every real
+CrashHost stage and recovered-cut/retry/metadata assertion; release after cleanup;
+write seeded success rows only after atomic/durable assertions with actual
+occupancy evidence; root review/build/format/static join; ordinary all-scope main
+delivery; full three-OS GitHub suite and1000seeded success rows per OS.
+
+The worker owns RecoveryTests.cs, ProjectionRecoveryTests.cs,
+SubscriptionRecoveryTests.cs and new Features/StorageRecovery private helpers.
+Root owns docs/shared evidence/config/Git and final review. Replica-process
+fixtures, production APIs/data/ownership, dependencies, fault points and all
+existing bounds are preserved. No migration is needed; rollback removes only
+admission/receipt extensions together. Rare environmental admission/launch/
+cleanup failure paths require explicit lifetime review, with no synthetic process
+verification. Current artifacts establish cancellation under overlap; precise
+resource causality and candidate qualification remain pending.
+
+```mermaid
+flowchart LR
+    Owner[Root accepted contract] --> Worker[Test only storage trial scope]
+    Worker --> Review[Original scenarios and lifetime audit]
+    Review --> CI[Exact SHA real three OS recovery]
+    CI --> Evidence[Native reports and complete seeded receipts]
+```

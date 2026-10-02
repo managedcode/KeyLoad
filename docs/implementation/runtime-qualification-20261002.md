@@ -1,6 +1,53 @@
 # Runtime qualification, 2026-10-02
 
-## Main runtime baseline: f627d4b9f
+## Main runtime baseline: c486d9ddd
+
+[Run37060131271](https://github.com/managedcode/KeyLoad/actions/runs/37060131271)
+completes with failure. All12 native reports are independently source/hash/count
+verified:3543 outcomes,3521passed and22errors, with zero native skipped/cancelled/
+timed-out/flaky/in-progress cases. Full solution build, formatter, governance and
+118analyzer cases pass on each OS; unit suites pass **871/871 each OS**. Recovery
+passes **136/136 Linux/macOS** and fails **116/136 Windows**. Genuine Docker/Aspire
+RF3 passes **46/46**, including additive series SDK/MCP and Chrome cases.
+[Exact jobs, native byte hashes, case identities and process receipts](runtime-qualification-37060131271.json)
+retain this source's evidence; later candidate code inherits no qualification.
+
+Windows19 seeded batches (0..18) and one subscription MutationApplied3 case
+cancel at marker waits, receipt writes or command-file read. These errors do not
+identify a ZoneTree atomicity defect. The preserving four-slot storage-trial
+candidate retains1000trials, every fault/assertion and original15s/20s deadlines;
+its own exact-SHA full recovery proof is pending.
+
+Comparison is **2/4**, and both measured profiles are skipped. Raw smoke has six
+targets/96cases: KeyLoad has zero samples because its caller supplied no three
+RF3 endpoints; Rabbit lacks its authenticated management client; PostgreSQL event
+readback reaches the interface default. Other-engine samples are present but do
+not qualify the failed harness. The separate series raw report has48samples,
+20attempts/checks and only one timed attempt per operation; RF3 KeyLoad and one
+Timescale server have distinct acknowledgement/topology contracts. No throughput,
+p99, statistical performance winner or server-resource claim follows.
+[The byte-verified diagnostic receipt](performance-diagnosis-37060131271.json)
+records these observations and their limits.
+
+The exact comparisons parent remains Waiting with no terminal exit observation;
+the pinned Aspire13.6.0 DCP Executable watch times out after60seconds. This matches
+the upstream watch repair as a supported causal inference, not proof of child
+exit. No published servicing package carrying that fix was available in the
+observed feed. Native terminal/exit-zero/report gates remain mandatory.
+
+Main scheduling is now actually observed under AC-CQ-017: the started f25
+dispatch survived the later c486 push, ended at20:31:14Z and c486 jobs began
+at20:31:16Z or later. Pending-run replacement and PR replacement semantics remain
+unchanged; the two source revisions have independent qualification results.
+
+Owner clarified SIMD on2026-10-02: .NET intrinsics first, Rust only after profiling.
+Five existing public vector validation/golden/real-store cases pass on each OS
+atc486. Validation blocks and the full hardware-disabled CI suite are later source
+pending their own exact-SHA tests; scoring formulas/accumulation remain unchanged.
+Coverage, actual activation movement, full nine-engine Docker/six-profile graph,
+server cost, retention/rollups, endurance and power-loss gates remain open.
+
+## Previous main runtime baseline: f627d4b9f
 
 [Run37057708780](https://github.com/managedcode/KeyLoad/actions/runs/37057708780)
 retains all12 independently source/hash/count-checked native reports. Full solution

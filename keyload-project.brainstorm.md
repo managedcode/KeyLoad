@@ -110,3 +110,10 @@ Choose option 2. Keep the checkout's existing changes and inspect each join befo
 Full canonical run `37005805424` at candidate `6949fa0c3099443c6f34f91245ab8064ef22c63c` passed the matrix builds, format, governance and 88 analyzer tests, then failed unit, RF3 and comparison qualification. Recovery did not execute. The null-tombstone projection, stream fixture command IDs and official MCP negotiation repairs are source-complete and require a new exact-SHA run.
 
 Investigate the remaining independent families concurrently before authorizing writes: analytical admission and blob row authority; strict JSON/queue protocol validation; and comparison resource image/dependency orchestration. The lead owns client error decoding, evidence retention, failure inventory, shared contracts and integration. Preserve every acceptance assertion, the accepted Timescale digest and RF3 topology. Do not add timeout extensions, reader-side empty-value workarounds, protocol downgrades, or unmeasured performance claims. Portable SIMD validation remains staged behind real baseline and integrated caller correctness evidence.
+
+## Owner SIMD clarification,2026-10-02
+
+The owner confirms SIMD, .NET intrinsics first and Rust only after profiling.
+The first Search validation stage is mapped to ADR035/TASK-MP-006D and
+simd-validation acceptance/plan; earlier undefined SMID history is superseded.
+Normal/full software-fallback correctness and measured benefit remain required.

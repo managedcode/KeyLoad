@@ -7,6 +7,9 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 internal sealed class ComparisonHostCleanupTests
 {
     private const string KeyLoadEndpointKey = "Benchmarks__KeyLoadEndpoint";
+    private const string KeyLoadPeerZeroKey = "Benchmarks__KeyLoadEndpoints__" + ComparisonHostBindingsSupport.PeerZeroIndex;
+    private const string KeyLoadPeerOneKey = "Benchmarks__KeyLoadEndpoints__" + ComparisonHostBindingsSupport.PeerOneIndex;
+    private const string KeyLoadPeerTwoKey = "Benchmarks__KeyLoadEndpoints__" + ComparisonHostBindingsSupport.PeerTwoIndex;
     private const string QdrantEndpointKey = "Benchmarks__QdrantEndpoint";
     private const string QdrantApiKeySetting = "Benchmarks__QdrantApiKey";
     private const string Neo4jEndpointKey = "Benchmarks__Neo4jEndpoint";
@@ -14,6 +17,9 @@ internal sealed class ComparisonHostCleanupTests
     private const string AdminKeySetting = "Benchmarks__AdminKey";
     private const string PostgresConnectionKey = "ConnectionStrings__benchmark-postgres";
     private const string RabbitConnectionKey = "ConnectionStrings__benchmark-rabbit";
+    private const string RabbitManagementEndpointKey = "Benchmarks__RabbitManagementEndpoint";
+    private const string RabbitUserKey = "Benchmarks__RabbitUser";
+    private const string RabbitPasswordKey = "Benchmarks__RabbitPassword";
     private const string RedisConnectionKey = "ConnectionStrings__benchmark-redis";
     private const string PostgresImageKey = "Benchmarks__Images__Postgres";
     private const string QdrantImageKey = "Benchmarks__Images__Qdrant";
@@ -46,6 +52,7 @@ internal sealed class ComparisonHostCleanupTests
     private const string Neo4jPassword = "cleanup-neo4j-secret";
     private const string PostgresPassword = "cleanup-postgres-secret";
     private const string RabbitPassword = "cleanup-rabbit-secret";
+    private const string RabbitUser = "cleanup-rabbit-user";
     private const string RedisPassword = "cleanup-redis-secret";
 
     [Test]
@@ -72,6 +79,9 @@ internal sealed class ComparisonHostCleanupTests
     private static Dictionary<string, string> Settings(string outputDirectory) => new(StringComparer.OrdinalIgnoreCase)
     {
         [KeyLoadEndpointKey] = UnavailableEndpoint,
+        [KeyLoadPeerZeroKey] = UnavailableEndpoint,
+        [KeyLoadPeerOneKey] = "http://127.0.0.1:1",
+        [KeyLoadPeerTwoKey] = "http://127.0.0.1:2",
         [QdrantEndpointKey] = UnavailableEndpoint,
         [QdrantApiKeySetting] = QdrantApiKey,
         [Neo4jEndpointKey] = UnavailableEndpoint,
@@ -80,6 +90,9 @@ internal sealed class ComparisonHostCleanupTests
         [PostgresConnectionKey] = $"Host=127.0.0.1;Port=0;Username=benchmark;" +
             $"Password={PostgresPassword};Database=benchmark;Timeout=1",
         [RabbitConnectionKey] = $"amqp://benchmark:{RabbitPassword}@127.0.0.1:0/",
+        [RabbitManagementEndpointKey] = UnavailableEndpoint,
+        [RabbitUserKey] = RabbitUser,
+        [RabbitPasswordKey] = RabbitPassword,
         [RedisConnectionKey] = $"127.0.0.1:0,password={RedisPassword}," +
             $"connectTimeout=250,syncTimeout=250,abortConnect=true",
         [PostgresImageKey] = "postgres-unavailable",
@@ -127,7 +140,7 @@ internal sealed class ComparisonHostCleanupTests
     {
         foreach (var secret in new[]
                  {
-                     AdminKey, QdrantApiKey, Neo4jPassword, PostgresPassword, RabbitPassword, RedisPassword
+                     AdminKey, QdrantApiKey, Neo4jPassword, PostgresPassword, RabbitPassword, RabbitUser, RedisPassword
                  })
         {
             await Assert.That(output.Contains(secret, StringComparison.Ordinal)).IsFalse();

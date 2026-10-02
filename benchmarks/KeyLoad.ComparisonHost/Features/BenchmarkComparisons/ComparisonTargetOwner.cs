@@ -19,20 +19,25 @@ internal sealed class ComparisonTargetOwner : IAsyncDisposable
     internal IComparisonTarget[] CreateTargets(ComparisonHostSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        var keyLoadClient = CreateClient(settings.KeyLoadEndpoint);
+        var keyLoadClients = CreateClients(settings.KeyLoadEndpoints);
+        var keyLoadClient = keyLoadClients[0];
         var qdrantClient = CreateClient(settings.QdrantEndpoint);
         qdrantClient.DefaultRequestHeaders.Add(ComparisonHostConstants.QdrantApiKeyHeader, settings.QdrantApiKey);
         var neo4jClient = CreateClient(settings.Neo4jEndpoint);
         neo4jClient.DefaultRequestHeaders.Authorization = CreateNeo4jAuthorization(settings.Neo4jPassword);
 
-        pendingTarget = new KeyLoadTarget(keyLoadClient, settings.AdminKey, settings.RunId);
-        PublishPendingTarget(keyLoadClient);
+        pendingTarget = new KeyLoadTarget(keyLoadClient, settings.AdminKey, settings.RunId, peers: keyLoadClients);
+        PublishPendingTarget(keyLoadClients);
         pendingTarget = new PostgresTarget(settings.PostgresConnection, settings.RunId, settings.PostgresImage);
         PublishPendingTarget();
         pendingTarget = new QdrantTarget(qdrantClient, settings.RunId, settings.QdrantImage);
         PublishPendingTarget(qdrantClient);
-        pendingTarget = new RabbitTarget(settings.RabbitConnection, settings.RunId, settings.RabbitImage);
-        PublishPendingTarget();
+        var rabbitManagementClient = CreateClient(settings.RabbitManagementEndpoint);
+        rabbitManagementClient.DefaultRequestHeaders.Authorization =
+            ComparisonEndpointBindings.CreateRabbitAuthorization(settings.RabbitUser, settings.RabbitPassword);
+        pendingTarget = new RabbitTarget(settings.RabbitConnection, settings.RunId, settings.RabbitImage,
+            management: rabbitManagementClient);
+        PublishPendingTarget(rabbitManagementClient);
         pendingTarget = new RedisTarget(settings.RedisConnection, settings.RunId, settings.RedisImage);
         PublishPendingTarget();
         pendingTarget = new Neo4jTarget(neo4jClient, settings.RunId, settings.Neo4jImage);
@@ -187,6 +192,17 @@ internal sealed class ComparisonTargetOwner : IAsyncDisposable
         };
         unownedClients.Add(client);
         return client;
+    }
+
+    private HttpClient[] CreateClients(IReadOnlyList<Uri> endpoints)
+    {
+        var clients = new HttpClient[ComparisonHostConstants.KeyLoadEndpointCount];
+        for (var index = 0; index < clients.Length; index++)
+        {
+            clients[index] = CreateClient(endpoints[index]);
+        }
+
+        return clients;
     }
 
     private void PublishPendingTarget(params HttpClient[] transferredClients)

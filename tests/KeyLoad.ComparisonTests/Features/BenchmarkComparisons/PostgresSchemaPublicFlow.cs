@@ -156,6 +156,7 @@ internal static class PostgresSchemaPublicFlow
         var eventInput = dataset.CreateDocument(dataset.Options.Documents + 2);
         await session.ExecuteAsync(Scenario.StreamAppend, eventInput, cancellationToken);
         await Assert.That(BenchmarkDataset.SameEvent(await session.ReadEventAsync(eventInput, cancellationToken), eventInput)).IsTrue();
+        await PostgresStreamPublicRegression.VerifyAsync(session, dataset, cancellationToken);
         var written = dataset.CreateDocument(dataset.Options.Documents + 3);
         await session.ExecuteAsync(Scenario.DocumentWrite, written, cancellationToken);
         await Assert.That(BenchmarkDataset.SameDocument(await session.ReadAsync(written, cancellationToken), written)).IsTrue();

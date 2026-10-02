@@ -23,8 +23,15 @@
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
-      "docs/implementation/durability-audit.md"
-    ]
+      "docs/implementation/durability-audit.md",
+      "docs/implementation/performance-source-r11.json"
+    ],
+    "trialAdmission": {
+      "scope": "storage_process_trial_fixtures_only",
+      "source": "shared_four_slot_admission_original1000_seeded_trials_original15s20s_deadlines_success_receipt_after_atomic_assertions_cleanup",
+      "qualification": "pending_own_main_SHA_three_OS_full_recovery_and1000_seeded_rows_each_OS",
+      "evidence": "docs/implementation/performance-source-r11.json"
+    }
   },
   "KL-004": {
     "title": "Transactional read view spike",
@@ -62,7 +69,10 @@
       "benchmarks/KeyLoad.Comparisons/ClientResourceSampler.cs",
       "site/index.html",
       ".github/workflows/pages.yml",
-      "docs/implementation/website.md"
+      "docs/implementation/website.md",
+      "docs/implementation/runtime-qualification-37060131271.json",
+      "docs/implementation/performance-diagnosis-37060131271.json",
+      "docs/implementation/performance-source-r11.json"
     ]
   },
   "KL-007": {
@@ -234,15 +244,17 @@
       "tests/KeyLoad.UnitTests/Features/TimeSeries",
       "tests/KeyLoad.IntegrationTests/Features/TimeSeries",
       "docs/implementation/runtime-qualification-37057708780.json",
-      "docs/implementation/qualification-source-r9.json"
+      "docs/implementation/qualification-source-r9.json",
+      "docs/implementation/runtime-qualification-37060131271.json"
     ],
     "boundedReads": {
       "requirements": "REQ-SERIES-008..012",
       "acceptance": "AC-SERIES-008..012",
       "source": "latest_raw_half_open_aggregates_dense_UTC_windows_published_ManagedCode_TimeSeries10_0_0_SDK_HTTP_MCP_reverse_storage_shared_budgets",
-      "qualification": "exactf627_868_of870_units_each_OS_44_of46_RF3_source_oracle_repairs_reviewed_built_formatter_pass_new_exact_SHA_CI_pending",
+      "qualification": "exactc486_run37060131271_871_of871_units_each_OS_46_of46_RF3_SDK_MCP_including_additive_series_cases_no_skips",
       "remaining": "retention_rollups_SQL_compression_coverage_resource_performance_endurance_fault_work_not_qualified",
-      "sourceRepairReceipt": "docs/implementation/qualification-source-r9.json"
+      "sourceRepairReceipt": "docs/implementation/qualification-source-r9.json",
+      "qualificationReceipt": "docs/implementation/runtime-qualification-37060131271.json"
     }
   },
   "KL-026": {
@@ -656,8 +668,22 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/SearchEngine.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs",
+      "src/KeyLoad.Query/Features/Search/PreparedSimilarity.cs",
+      "docs/Features/Search.md",
+      "docs/ADR/ADR-035-memory-performance.md",
+      "tests/KeyLoad.UnitTests/Features/Search/VectorMetricValidationTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/VectorMetricGoldenTests.cs",
+      "docs/implementation/performance-source-r11.json"
+    ],
+    "simd": {
+      "ownerDirection": "confirmed_SIMD_dotNET_intrinsics_first_Rust_after_profiling",
+      "stage": "portable_Vector_finite_validation_only_existing_scoring_accumulation_unchanged",
+      "baseline": "five_public_metric_and_actual_store_tests_pass_each_OS_exactc486",
+      "candidate": "full_hardware_disabled_unit_suite_added_to_all3_OS_CI_own_SHA_execution_pending",
+      "measuredGain": "not_qualified",
+      "rust": "no_native_bridge_without_profile_evidence"
+    }
   },
   "KL-078": {
     "title": "Time-series chunk qualification",
@@ -889,7 +915,9 @@
       "docs/implementation/code-quality.md",
       "src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj",
       "tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
-      "Directory.Build.targets"
+      "Directory.Build.targets",
+      "docs/implementation/runtime-qualification-37060131271.json",
+      "docs/implementation/performance-source-r11.json"
     ],
     "codeQuality": {
       "status": "in_progress",
@@ -1147,44 +1175,19 @@
         "artifacts": "/private/tmp/keyload-runtime-ci-37015193756/"
       },
       "developmentChecks": {
-        "sourceParent": "323d60499381ec94fa2c9b4d412cb76837fd98bf",
-        "build": {
-          "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release -m:1 -nr:false -p:UseSharedCompilation=false",
-          "log": "/private/tmp/keyload-w6-development-build.log",
-          "sha256": "f9b53012086b238a65f4cf54bcde729665cf868774942f3f1b8db2a1a18a50ae",
-          "exitCode": 0,
-          "projects": 25,
-          "warnings": 0,
-          "errors": 0
-        },
-        "formatter": {
-          "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
-          "log": "/private/tmp/keyload-w6-format-final.log",
-          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-          "exitCode": 0
-        },
-        "governance": {
-          "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
-          "log": "/private/tmp/keyload-w6-governance-final.log",
-          "sha256": "593031891681215141daa839ed5e34cc70f33c27b46d6abb2be7911ec96571ef",
-          "exitCode": 0,
-          "projects": 25,
-          "modules": 4
-        },
-        "failedEarlierDevelopmentBuild": {
-          "log": "/private/tmp/keyload-w5-development-build.log",
-          "sha256": "4cb483f78cbab2eced93a6ea58900b576b8e8bfb7a8e5aa7bf873425b6401d23",
-          "exitCode": 1,
-          "errors": 26,
-          "repair": "Supported memory ReadAsync overload, unused initialization removed, independent test-local named machine keys; no suppressions."
-        },
-        "localTestsExecuted": false,
-        "qualification": "source_compilation_and_static_validation_only"
+        "stage": "performance_r11_join",
+        "projects": 25,
+        "inputs": 1033,
+        "build": "Release0_warnings0_errors_source_manifest_stable",
+        "formatter": "canonical_verify_no_changes_exit0",
+        "governance": "exit0_25_projects4_modules_preserved_policy",
+        "receipt": "docs/implementation/performance-source-r11.json",
+        "runtime": "GitHub_candidate_pending_no_local_tests"
       },
       "latestMainCi": {
-        "runId": 37057708780,
-        "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
-        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37057708780",
+        "runId": 37060131271,
+        "sha": "c486d9ddd1fefc9284926ad449d6ebdc00ac4af8",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37060131271",
         "conclusion": "failure",
         "buildFormatGovernance": "passed_full_solution_all_three_OSes",
         "analyzerTests": {
@@ -1198,27 +1201,27 @@
         },
         "unitTests": {
           "ubuntu": {
-            "total": 870,
-            "passed": 868,
-            "failed": 2,
+            "total": 871,
+            "passed": 871,
+            "failed": 0,
             "skipped": 0,
             "cancelled": 0,
             "timedOut": 0,
             "flaky": 0
           },
           "macos": {
-            "total": 870,
-            "passed": 868,
-            "failed": 2,
+            "total": 871,
+            "passed": 871,
+            "failed": 0,
             "skipped": 0,
             "cancelled": 0,
             "timedOut": 0,
             "flaky": 0
           },
           "windows": {
-            "total": 870,
-            "passed": 868,
-            "failed": 2,
+            "total": 871,
+            "passed": 871,
+            "failed": 0,
             "skipped": 0,
             "cancelled": 0,
             "timedOut": 0,
@@ -1246,8 +1249,8 @@
           },
           "windows": {
             "total": 136,
-            "passed": 136,
-            "failed": 0,
+            "passed": 116,
+            "failed": 20,
             "skipped": 0,
             "cancelled": 0,
             "timedOut": 0,
@@ -1256,8 +1259,8 @@
         },
         "rf3IntegrationTests": {
           "total": 46,
-          "passed": 44,
-          "failed": 2,
+          "passed": 46,
+          "failed": 0,
           "skipped": 0,
           "cancelled": 0,
           "timedOut": 0,
@@ -1272,8 +1275,8 @@
           "timedOut": 0,
           "flaky": 0
         },
-        "receipt": "docs/implementation/runtime-qualification-37057708780.json",
-        "remaining": "two_unit_oracle_errors_each_OS_two_RF3_oracle_errors_R9_repairs_pending_new_exact_SHA_comparison_two_native_Waiting_failures_profiles_skipped_coverage_migration_resource_endurance_power_loss_open"
+        "receipt": "docs/implementation/runtime-qualification-37060131271.json",
+        "remaining": "Windows19_seeded_batches_and_one_subscription_cancellation_comparison_native_Waiting_two_errors_profiles_skipped_coverage_migration_resource_retention_endurance_power_loss_open"
       },
       "recoveryReadiness": {
         "requirement": "REQ-STORAGE-012",
@@ -1695,22 +1698,132 @@
           },
           "receipt": "docs/implementation/runtime-qualification-37049469093.json",
           "remaining": "comparison_native_runner_Waiting_two_failures_measured_profiles_skipped_coverage_actual_migration_resource_endurance_power_loss_open"
+        },
+        {
+          "runId": 37057708780,
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37057708780",
+          "conclusion": "failure",
+          "buildFormatGovernance": "passed_full_solution_all_three_OSes",
+          "analyzerTests": {
+            "total": 118,
+            "passed": 118,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "unitTests": {
+            "ubuntu": {
+              "total": 870,
+              "passed": 868,
+              "failed": 2,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "macos": {
+              "total": 870,
+              "passed": 868,
+              "failed": 2,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "windows": {
+              "total": 870,
+              "passed": 868,
+              "failed": 2,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            }
+          },
+          "recovery": {
+            "ubuntu": {
+              "total": 136,
+              "passed": 136,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "macos": {
+              "total": 136,
+              "passed": 136,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "windows": {
+              "total": 136,
+              "passed": 136,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            }
+          },
+          "rf3IntegrationTests": {
+            "total": 46,
+            "passed": 44,
+            "failed": 2,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "comparisonTests": {
+            "total": 4,
+            "passed": 2,
+            "failed": 2,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "receipt": "docs/implementation/runtime-qualification-37057708780.json",
+          "remaining": "two_unit_oracle_errors_each_OS_two_RF3_oracle_errors_R9_repairs_pending_new_exact_SHA_comparison_two_native_Waiting_failures_profiles_skipped_coverage_migration_resource_endurance_power_loss_open"
         }
       ],
       "qualificationSourceR9": "docs/implementation/qualification-source-r9.json",
-      "mainQualificationScheduling": "PR_only_replacement_cancellation_source_reviewed_real_two_submission_observation_pending"
+      "mainQualificationScheduling": "AC-CQ-017_observed_f25_started_run_survived_c486_later_main_push_then_c486_started_without_cancelling_running_main_pending_replacement_unchanged",
+      "mainQualificationSchedulingReceipt": "docs/implementation/performance-diagnosis-37060131271.json",
+      "latestObservedRuns": [
+        {
+          "runId": 37063262333,
+          "sha": "09f87115ffe5077e515d0a5268831dd187788681",
+          "conclusion": "failure",
+          "evidence": "remote_terminal_status_only_full_artifact_join_pending"
+        },
+        {
+          "runId": 37064132315,
+          "sha": "959a4c822f3102f1f322e2bd6173e45e0d8e7fba",
+          "status": "in_progress",
+          "evidence": "remote_status_only_not_qualified"
+        }
+      ]
     },
     "ownerPriorities": {
-      "SMID": "highest_priority_scope_clarification_requested_not_defined_in_repo_or_v0_3_spec_implementation_not_started",
+      "SMID": "owner_confirmed_SIMD_2026_10_02_dotNET_intrinsics_first_Rust_only_after_profiling",
       "SMIDAcceptance": "keyload-project.acceptance.md#AC-011",
       "operationEfficiency": "system_wide_per_operation_RF3_performance_and_resource_measurements_open_under_AC-010",
       "operationEfficiencyAcceptance": "keyload-project.acceptance.md#AC-010",
       "orleansScale": "request_isolation_RF3_hosts_directory_and_repartitioner_configured_in_source_actual_activation_movement_and_per_operation_server_cost_not_qualified",
       "streamBoundary": "KeyLoad_EventStreams_are_persisted_database_records_no_Orleans_runtime_provider_configured_provider_delivery_restart_backpressure_contract_open",
-      "vectorSimd": "five_metric_validation_golden_and_real_store_cases_pass_all_three_OSes_exactad594642_validation_optimization_software_fallback_and_measured_gain_pending",
+      "vectorSimd": "five_validation_golden_real_store_cases_pass_each_OS_exactc486_existing_scoring_unchanged_new_validation_blocks_full_hardware_disabled_suite_pending",
       "activationMigrationResearch": "native_MigrateOnIdle_supports_advisory_live_silo_hint_management_observes_only_persisted_admin_public_move_contract_and_RF3_proof_pending",
       "routingFailureDiagnostics": "private_enum_stage_category_code_and_request_GUID_present_in6949fa0_exact_source_test_inventory_retained_no_payload_or_exception_text",
-      "eventSdkMcpParity": "official_initialize_discovery_all_EventStreams_and_all41_RF3_cases_pass_exact323d60499_broader_migration_endurance_pending"
+      "eventSdkMcpParity": "official_SDK_MCP_complete46_RF3_cases_pass_exactc486_migration_endurance_remain_open",
+      "SIMD": "first_Search_validation_stage_REQ_SEARCH_001_003_ADR035_TASK_MP006D_source_software_fallback_CI_authored_own_SHA_correctness_and_measured_gain_pending"
     },
     "memoryPerformance": {
       "status": "in_progress",
@@ -1728,18 +1841,18 @@
         "url": "https://github.com/managedcode/KeyLoad/actions/runs/36936319423",
         "artifacts": "artifacts/memory-performance/baseline-36936319423/"
       },
-      "candidateQualification": "run37044499074_exact323d60499_units_all_OSes_RF3_41_of41_Linux_recovery_136_of136_pass_macOS_Windows_recovery_and_comparison_fail",
-      "rf3SdkMcp": "41_of41_pass_exact323d60499_native_Docker_Aspire_real_SDK_MCP_Chrome_no_skips_environmental_restart_failure_branch_unexecuted",
+      "candidateQualification": "run37060131271_exactc486_units871_each_OS_RF3_46_and_Linux_macOS_recovery136_pass_Windows116_of136_and_comparison2_of4_fail",
+      "rf3SdkMcp": "46_of46_pass_exactc486_native_Docker_Aspire_real_SDK_MCP_Chrome_no_skips_unexecuted_environmental_failure_branches_open",
       "serverResourceMeasurement": "not_configured_load_generator_metrics_only",
       "coverage": "not_configured",
-      "complexity": "full_three_OS_build_and118_rule_cases_pass_exact323d60499",
+      "complexity": "full_three_OS_build_and118_rule_cases_pass_exactc486",
       "delivery": "W5_W6_all_authorized_source_and_evidence_prepared_for_main_commit_origin_push_exact_CI_pending",
       "preparedStorageMutationJoin": "reviewed_private_projection_cache_enabled_storage_build_0_errors_0_warnings_three_real_store_tests_authored_ci_and_measured_improvement_pending",
       "currentEvidence": "docs/implementation/runtime-qualification-20261002.md",
       "progressiveReportOutput": "actual_early_JSON_cancellation_cutoff_and_no_MD_CSV_pass_all_three_OSes_exactfa80c701",
       "tombstoneRepair": "actual_null_empty_missing_journal_snapshot_and_frame_boundaries_pass_all_three_OSes_exactad594642",
       "queueReadWork": "bounded_ready_visitor_one_claim_FIFO_expiry_and256_ceiling_cases_pass_all_three_OSes_exactfa80c701",
-      "timeSeriesPartialEvidence": "retained_exact323d60499_report_native_completion_failed_not_qualified"
+      "timeSeriesPartialEvidence": "exactc48648_samples20_attempts_checks_native_completion_failed_unqualified_one_timed_attempt_different_ACK_topologies"
     }
   },
   "AdminDashboard": {

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Security;
 using KeyLoad.Storage.ZoneTree;
 
@@ -19,8 +20,10 @@ internal sealed class SubscriptionProcessRecoveryTests
     public async Task SubscriptionProcessingCrashRecoversEffectsInboxOutcomeAndCheckpointTogether(CommitStage stage, int index)
     {
         var root = Path.Combine(Path.GetTempPath(), "keyload-subscription-crash-" + Guid.NewGuid().ToString("N"));
+        var cancellationToken = TestContext.Current!.Execution.CancellationToken;
+        using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         using var process = Process.Start(CreateCrashProcessStartInfo(root, stage, index))!;
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(TimeSpan.FromSeconds(20));
         try
         {
@@ -30,10 +33,10 @@ internal sealed class SubscriptionProcessRecoveryTests
         finally
         {
             if (!process.HasExited)
-            { process.Kill(); await process.WaitForExitAsync(TestContext.Current!.Execution.CancellationToken); }
+            { process.Kill(); await process.WaitForExitAsync(cancellationToken); }
             if (Directory.Exists(root))
             {
-                await StoragePublicationRecoveryTests.DeleteTrialAsync(root, TestContext.Current!.Execution.CancellationToken);
+                await StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken);
             }
         }
     }
