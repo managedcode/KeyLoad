@@ -138,6 +138,12 @@ reached further source compilation and exposed:
 - [ ] KLD0031 aggregate KeyLoadClient215 lines: move the feature-owned blob methods to BlobClientExtensions using one internal Send join; no partial-type splitting to evade aggregate policy.
 - [ ] KLD0033 QueryCandidateReader.Equalities depth4: early-exit iteration removes nesting with unchanged equality/filter/budget semantics and existing regressions. No limit exception or analyzer suppression.
 
+Candidateaf9e0d16b6fdc781f7d4b9b54cd56fec152cfc56 / [37069241980](https://github.com/managedcode/KeyLoad/actions/runs/37069241980)
+reached Server build after those repairs and stopped on one unnecessary import:
+
+- [ ] IDE0005 OrleansRpcFailure.cs namespace import: remove redundant using;
+  native exception scope/behavior unchanged. Repeat complete exact-SHA gates.
+
 ## Joined-source review findings
 
 - Fixed stale nullable-result assertion to include the dynamic SQL adapter while
