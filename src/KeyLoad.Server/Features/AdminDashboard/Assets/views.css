@@ -27,7 +27,8 @@
 .panel-head h2 { font: 700 16px/1.25 var(--kl-font-display); letter-spacing: -.02em; }
 .panel-head p { margin-top: 4px; color: var(--kl-muted); font-size: 12.5px; }
 
-.panel--instrument { overflow: hidden; }
+.panel--instrument { display: flex; flex-direction: column; overflow: hidden; }
+.panel--instrument > .chart { flex: 1 0 auto; }
 .panel--instrument .panel-head p, .panel--instrument .legend { color: var(--kl-on-graphite-muted); }
 .panel--instrument .panel-head h2 { color: #fff; }
 .panel--instrument .accent { color: #c9b4ff; }
@@ -176,7 +177,7 @@ td button:hover { border-color: var(--kl-graphite); background: var(--kl-graphit
 .panel--instrument .topology line { stroke: rgba(255, 255, 255, .22); }
 .panel--instrument .topology .node circle { fill: var(--kl-graphite-3); stroke: rgba(255, 255, 255, .25); }
 .panel--instrument .topology .node.self circle { fill: #2f2a45; stroke: #c9b4ff; }
-.panel--instrument .topology text { fill: #fff; }
+.panel--instrument .topology text { fill: #fff; paint-order: stroke; stroke: #16171a; stroke-width: 6px; stroke-linejoin: round; }
 .panel--instrument .topology text.sub { fill: var(--kl-on-graphite-muted); }
 .panel--instrument .topology .node.self .glyph { color: #c9b4ff; }
 .panel--instrument .topology .node.leader circle.crown { stroke: var(--kl-graphite); }

@@ -31,7 +31,7 @@ export const Config = Object.freeze({
     epsilon: 1e-9,
     longId: 12,
     xTicks: 4,
-    xLabelWidth: 96,
+    xLabelWidth: 124,
     padTop: 14,
     padRight: 12,
     padBottom: 28,

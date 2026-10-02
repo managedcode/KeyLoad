@@ -245,9 +245,12 @@ body.connected .live-dot { background: var(--kl-accent); box-shadow: 0 0 0 3px v
   .masthead p { font-size: 14px; }
   .topbar-actions { width: 100%; flex-wrap: wrap; }
   .live-pill { margin-right: auto; }
+  .topbar-actions .kl-btn { width: 38px; min-height: 38px; padding: 0; }
+  .topbar-actions .kl-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .content { padding: 0 16px 24px; }
   .connect-card { padding: 24px 20px; }
   .connect-row { flex-direction: column; }
   .statusbar { flex-wrap: wrap; gap: 4px 12px; padding: 6px 16px; }
+  .shell { padding-bottom: 92px; }
   .topology-note { display: none; }
 }

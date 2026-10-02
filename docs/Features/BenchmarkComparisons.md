@@ -323,15 +323,29 @@ Pages at https://www.keyload.cloud/ uses enforced HTTPS; live apex redirects301 
 
 ## REQ-BC-029: shared KeyLoad visual identity
 
-### AC-BC-029 owner revision, 2026-10-03 (KeyLoad OS)
+### AC-BC-029 owner revision, 2026-10-03 (design overhaul)
 
-- **Concept.** The landing is a Liquid Glass "desktop" in the Managed Code family: menu bar, windows with title bars, widgets, a Launchpad of capabilities, a Benchmarks app window with a sidebar, a terminal window and a bottom dock for navigation. There is no green brand accent; Managed Code's pastel iridescence is the only accent. The page presents KeyLoad as the database for AI agents on .NET 10 and Orleans and keeps the early-development wording.
-- **Agent session.** The illustrative "Agent session" window shows the real MCP tools `keyload_query_execute` and `keyload_documents_commit`, plus the real .NET SDK atomic command. It is labelled as an example with no live data.
+- **Concept.** The landing is an editorial product page that reads like a spec sheet, in the shared identity from [ADR-053](../ADR/ADR-053-unified-visual-identity.md):
+  - paper surfaces, oversized black display type and mono chapter eyebrows (`01 — …`);
+  - graphite instrument panels;
+  - Managed Code's iridescent marker as the only accent. There is no green or lime.
+- **Order.** The page presents KeyLoad as the database for AI agents on .NET 10 and Orleans, keeps the early-development wording, and runs in this order:
+  1. a hero with the live scene;
+  2. a fact strip;
+  3. the anatomy of one agent call;
+  4. a data-shape bento;
+  5. an engine cross-section;
+  6. the evidence instrument, with a perforated provenance receipt;
+  7. a ledger of claims that are not made yet;
+  8. the method;
+  9. reproduce;
+  10. the footer.
+- **Agent call anatomy.** A numbered timeline beside a graphite terminal shows the real MCP tool `keyload_query_execute` and the real .NET SDK atomic command. It describes the path, not live data.
 - **3D scene motion contract (changed by owner direction).**
   - The carousel of data-shape cards around the KeyLoad mark starts moving as soon as it is ready. It spins while visible and follows a fine pointer.
   - It pauses offscreen, on hidden pages and when the visitor pauses it. It never moves under `prefers-reduced-motion`.
   - `AssertMotionPlaysThenSettles` proves that render calls advance while playing and are identical after pause. Budgets are unchanged: 19 draw calls and 37 triangles.
-  - The poster is a pre-rendered frame of the same scene.
+  - The poster is a pre-rendered frame of the same scene on the stage gradient. The canvas is transparent, so the scene sits on the glass stage.
 - **Comparable engines only.** The chart and table omit engines that do not implement the selected workload, and KeyLoad is highlighted. Their DOM rows, downloads and the engine count stay intact.
 - **Attribution.** The footer reads "Developed by Managed Code" and links to https://www.managed-code.com/ with a normal followed link (no `nofollow`).
 

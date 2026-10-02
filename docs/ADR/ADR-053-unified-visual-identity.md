@@ -19,14 +19,21 @@ The two surfaces shared no logo, palette, typography or components, so KeyLoad r
 - **One brand source.** `src/KeyLoad.Server/Features/AdminDashboard/Assets/brand.css` holds the tokens and the shared primitives (`kl-brand`, `kl-btn`, `kl-card`, `kl-glass`, `kl-badge`, `kl-chip`, reduced motion). It is mirrored byte-for-byte to `site/Features/BenchmarkComparisons/brand.css`, and `logo.svg` to `site/favicon.svg`. The SiteTests drift test `AC_VI_001` fails on any difference.
 - **Style direction (owner, 2026-10-02).** Earlier candidates were rejected: a light-blue look, pastel/rainbow glass and a plain grey version. The adopted style is serious Apple-style Liquid Glass in the sibling brands' colours:
   - Managed Code: warm off-white, black ink and system typography.
-  - Prostir: graphite, with lime `#c6f24e` as the only brand accent.
+  - Prostir: graphite instrument panels (`.kl-graphite`).
+  - Accent: Managed Code's pastel iridescence (peach `#ffb08a` → lilac `#e3a6ff` → periwinkle `#9fb4ff`), used as a marker stroke, a selection edge, a status dot or the KeyLoad bar, never as a background wash. Green and lime are not brand colours (owner direction 2026-10-02; this supersedes the earlier lime accent).
   - Glass: translucent surfaces with specular top edges and large blur, capsule controls and large radii.
   - No Material Design and no decorative colour blobs.
-  - The logo is a graphite squircle with white replica blocks and chevron, plus one lime replica.
-  - Data colours come from the dataviz-validated categorical order (lime-ink, lilac, peach, sky, pink, amber, teal, red). Status colours are reserved.
+  - The logo is a graphite squircle with white replica blocks and chevron, plus one iridescent replica.
+  - Data colours: violet, peach-ink, periwinkle, orchid, graphite, amber, grey, red (`--kl-c1..c8`). There is no green data colour; the deep green `--kl-good` is reserved for semantic success status.
 - **Surfaces.**
-  - The console is a light glass shell: transparent navigation with a lime selection indicator, an opaque glass top bar and a glass content layer.
-  - The site has a dark graphite hero with a full-width Three.js scene, followed by light glass sections.
+  - Design overhaul (owner direction 2026-10-02/03: a complete re-layout, not a restyle). Both surfaces share editorial paper, oversized black display type, mono uppercase eyebrows, graphite instrument panels and the iridescent marker.
+  - The console is a "control room":
+    - a floating Liquid Glass command bar (the `<aside>`) with three segmented navigation clusters; at ≤1320 px it collapses to icons, with a label on the active view only;
+    - an editorial masthead with the view title and live controls;
+    - a pulse strip of four KPI numerals with sparklines;
+    - graphite instrument panels for request activity, throughput, console events and RF3 voters;
+    - a persistent bottom status bar, a split connect screen and a right-hand inspector sheet for JSON details.
+  - The site reads like a spec sheet. See the Site bullet below.
 - **CSP and fonts.** System fonts only, no external fonts or CDNs. The console CSP is unchanged. Dynamic geometry uses CSSOM only.
 - **Console information architecture.**
   - **Monitoring:**
@@ -38,13 +45,17 @@ The two surfaces shared no logo, palette, typography or components, so KeyLoad r
   - Every original `data-view` and pinned browser hook is preserved.
 - **Real data only.** Charts plot at most 120 comparable session samples and reset on process change, failure or reconnect. The error log is a new bounded server observation: `AdminHttpSnapshot.RecentFailures`, at most 50 newest-first entries holding the route template, normalised method, status, aborted flag and duration. It never holds a raw path, query, payload or credential.
   - The voter figure uses configured membership (`AdminNodeSnapshot.LocalVoter`, `Voters`) and the reported leader. Peers are labelled as not observed from the executing node.
-- **Site.** The landing is a new product page, not a restyle:
+- **Site.** The landing is a new product page, not a restyle. Its numbered chapters (`01 — …`) run in this order:
   - a floating glass capsule navigation;
-  - a graphite hero with a lime headline accent and the Three.js RF3 scene (lime logical-partition gem, replication beams to three graphite hosts with lime/lilac partition tiles; about 22 draw calls and 290 triangles, no idle loop);
-  - an architecture-facts strip;
-  - a capability grid;
-  - glass benchmark and methodology sections;
-  - a graphite reproduce panel.
+  - an editorial hero with an oversized black headline and an iridescent marker under "AI agents";
+  - a glass stage holding the live Three.js scene: a carousel of eight data-shape cards around the KeyLoad core, a transparent canvas over the stage gradient, 19 draw calls and 37 triangles. It moves as soon as it is ready, except under reduced motion, and settles when paused;
+  - a four-fact strip;
+  - the anatomy of one agent call: a numbered timeline beside a graphite MCP/SDK terminal;
+  - a data-shape bento of eight models with line art;
+  - a graphite engine cross-section (callers → request grain → partition grains → three PartitionHosts);
+  - the evidence instrument: a toolbar, segmented scenarios, the chart and table, and a perforated evidence receipt for provenance;
+  - a ledger of "open by default" items and items "not claimed yet";
+  - a method rail, a graphite reproduce terminal and an editorial wordmark footer with "Developed by Managed Code".
 
   Every tested hook, budget and lifecycle contract is unchanged.
 
