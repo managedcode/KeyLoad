@@ -62,3 +62,19 @@ parameter/name/recursion rejection; Q1 equality; actual SDK/MCP read/write/error
 retry/permission/cancellation/admission flows on RF3; comparison measurements.
 Integration lead joins all worker diffs and owns GitHub exact-SHA proof/artifacts.
 No acceleration, full SQL compatibility or production claim before qualification.
+
+Accepted TASK-AISQL-012 source integration repair, triggered by candidate
+b3f93431a/run37068458582: KeyLoadClient's aggregate partial type exceeded200 code
+lines after the additive blob surface; six write adapters also lacked null guards.
+Keep typed blob methods source-compatible as feature-owned public extension
+methods in BlobClientExtensions, invoking the same assembly-internal Send
+transport with unchanged route/type/command ID/write classification. Validate
+client and request before transport. No second HttpClient or retry path. Root owns
+the one private-to-internal Send join in Client/KeyLoadClient.cs; one bounded worker
+owns BlobClient.cs and new UnitTests/Features/BlobStorage/BlobSdkArgumentTests.cs.
+First author null-argument tests without network/mocks, then refactor adapters and
+use existing genuine RF3 blob lifecycle/range parity as operational regression.
+Another disjoint worker removes unnecessary equality-planner nesting, retaining
+all authored native point/index/security/budget tests and iterator semantics.
+Root joins/reviews then repeats exact-SHA build/format/full runtime gates. This is
+pre-delivery source refinement; no published binary/schema migration is claimed.

@@ -11,7 +11,7 @@ product stages. Exact source/qualification coverage is [central SQL evidence](..
 | Requirement | Acceptance | Task/test/evidence |
 |---|---|---|
 | REQ-AISQL-001: one server supports linked model operations with SQL central | AC-AISQL-001/005/006 | TASK-AISQL-004/006/008, strict compiler and real SDK/official MCP RF3 differential cases |
-| REQ-AISQL-003: versioned single-statement SQL preserves canonical authority and resources | AC-AISQL-005–007 | TASK-AISQL-006/008, rejection/ID/retry/permission/cancellation/admission/metadata cases |
+| REQ-AISQL-003: versioned single-statement SQL preserves canonical authority and resources | AC-AISQL-005–007/011 | TASK-AISQL-006/008/011, rejection/ID/retry/permission/cancellation/admission/metadata and initial-RPC native failure cases |
 | REQ-AISQL-004: native indexed work and honest comparable performance | AC-AISQL-008–010 | TASK-AISQL-007/008, reversed equality real-store regressions and exact GitHub gates |
 
 Status: Accepted repair contract; qualification pending. Requirements map to

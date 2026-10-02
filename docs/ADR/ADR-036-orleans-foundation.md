@@ -8,7 +8,55 @@ Preserved-policy reference conflict: root `AGENTS.md` still names “ADR-034 evi
 
 Related requirements: REQ-REP-001 through 005, REQ-ROUTE-001 through 003, REQ-TEST-001 through 003; their same-numbered ACs are defined in the linked feature specs.
 
+Accepted TASK-AISQL-011 initial-RPC failure classification (2026-10-02) maps
+REQ/AC-ROUTE-009 and AC-AISQL-011 to baseline37065200835/b21c9ee. Initial native
+Orleans placement/directory failures can occur outside the existing safe reply
+factory and reach generic HTTP/MCP RecoveryRequired. The baseline's exact class
+and phase were not retained, so this is not a proven attribution. Classify
+only native OrleansException/TimeoutException around the initial RPC await:
+server-derived reads -> OwnershipLost; possibly dispatched commands ->
+UnknownWriteOutcome. Preserve KeyLoadException/domain RecoveryRequired, caller
+cancellation, signed envelopes, stable IDs, one request actor and fixed safe
+details. No retry or diagnostic weakening. Root owns the two trusted intent joins
+in CanonicalOperationGateway and DatabaseCredentialResolver. One bounded worker
+owns OrleansNode.cs, a new Server/Features/ClusterRouting/OrleansRpcFailure.cs and
+UnitTests/Features/ClusterRouting/OrleansRpcFailureTests.cs. Ordered stages:
+first author actual-native-exception classification/negative/privacy cases;
+implement narrow helper and RPC catch; root joins both callers and reviews;
+GitHub full build/format/units/scalar/recovery and stopped-replica RF3/replay prove
+the exact SHA. No persisted format or wire enum migration; rollback removes this
+classification and the internal intent parameter together. Qualification pending.
+
+Failure-only diagnostics use LoggerMessage with request GUID, a closed native-RPC
+category (Orleans or timeout), and mapped ErrorCode. Never retain/log the exception
+object, exception text, signed envelope or identity. Success has no new diagnostic
+allocation. The new helper owns these constants/categories; existing protocol
+constants and global diagnostics policy remain unchanged.
+
+```mermaid
+flowchart LR
+    Caller[Trusted read or command intent] --> RPC[Initial unique request grain RPC]
+    RPC --> Reply[Existing typed reply preserved]
+    RPC --> Native[Native Orleans or timeout failure]
+    Native --> Read[Read OwnershipLost]
+    Native --> Write[Command UnknownWriteOutcome]
+```
+
 TASK-ROUTE-DIAGNOSTICS is an accepted internal observability refinement for
+
+Accepted TASK-DIAG-001..004 (REQ/AC-CLIENT-010, REQ/AC-ROUTE-008,
+AC-DIAG-001..004) supplements initial-RPC classification with closed HTTP
+dispatch phase/category, nullable operation GUID and UTC failure timestamp.
+Root owns credential/gateway markers and all IntegrationTests/CI/docs joins;
+one bounded worker owns only ServerErrorMiddleware, new ClientApi
+RequestFailureDiagnostic-prefixed helpers and new matching UnitTests. Tests
+precede implementation; actual middleware/provider checks preserve public
+domain/generic/cancellation responses and exclude raw secrets/exception text.
+Reserved per-node capture stays within80lines/8192bytes; kill receipts record
+action times separately. No retry, ACK, format, topology or public API change.
+Rollback removes this source-only evidence stage together. Full exact-SHA
+GitHub unit/recovery/RF3 SDK+MCP is the join; cause and qualification stay open.
+
 REQ/AC-ROUTE-008 and AC-ROUTE-001/003. Stage/category/error enums and a GUID are
 the complete log contract; never pass raw exceptions, JSON, tokens, principal IDs
 or arbitrary runtime strings. Success uses only a stack-local stage enum. Existing

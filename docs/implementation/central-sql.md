@@ -77,3 +77,17 @@ grouping is unchanged. Dedicated SQL/table/CALL workload and database-node
 CPU/RAM/GC/contention/backlog measurements are still required alongside existing
 client-process samples. Numeric coverage, endurance and power-loss gates remain
 open; this work does not establish production readiness or performance superiority.
+
+The first delivered candidate6cfdadf38 / [37068157832](https://github.com/managedcode/KeyLoad/actions/runs/37068157832)
+failed builds on new enum CA1720 identifiers; analyzer-rule tests passed. Candidate
+b3f93431a / [37068458582](https://github.com/managedcode/KeyLoad/actions/runs/37068458582)
+fixed those identifiers but exposed SDK null guards, aggregate type size and query
+nesting. Source repairs are joined without suppression: typed blob extensions
+share one internal transport, and equality extraction uses early iterator exits.
+Both failed before product runtime tests, so neither qualifies behavior.
+
+The baseline transport finding also has a source repair under ADR-036/REQ-ROUTE-009:
+initial native Orleans/timeout RPC faults map to read OwnershipLost or uncertain
+command UnknownWriteOutcome. Genuine domain RecoveryRequired and caller
+cancellation retain their contracts; no extra dispatch/retry is introduced.
+Independent join review is complete; the next exact-SHA CI is the authority.

@@ -66,13 +66,24 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
     /// <summary>Executes one signed operation through the corresponding GUID request actor.</summary>
     /// <param name="requestId">Fresh public request ID, distinct from the stable command ID.</param>
     /// <param name="signedRequest">Bounded trusted envelope issued by the shared request codec.</param>
+    /// <param name="command">Server-derived command intent used only to classify an uncertain RPC outcome.</param>
     /// <param name="cancellationToken">Public request cancellation propagated through Orleans.</param>
     /// <returns>Exact bounded reply, throwing only the typed public safe error locally.</returns>
-    public async Task<GrainOperationReply> ExecuteAsync(Guid requestId, string signedRequest, CancellationToken cancellationToken)
+    public async Task<GrainOperationReply> ExecuteAsync(Guid requestId, string signedRequest, bool command,
+        CancellationToken cancellationToken)
     {
         var factory = Grains ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
-        var reply = await factory.GetGrain<IRequestGrain>(requestId).ExecuteAsync(signedRequest, cancellationToken)
-            .WaitAsync(cancellationToken).ConfigureAwait(false);
+        GrainOperationReply reply;
+        try
+        {
+            reply = await factory.GetGrain<IRequestGrain>(requestId).ExecuteAsync(signedRequest, cancellationToken)
+                .WaitAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception failure) when (OrleansRpcFailure.IsNative(failure))
+        {
+            throw OrleansRpcFailure.Translate(failure, command, requestId, loggerFactory.CreateLogger<OrleansNode>(),
+                cancellationToken);
+        }
         if (reply.Error is { } error)
         { throw Errors.Fail(error, reply.SafeDetail ?? OrleansNodeProtocol.ReplyRejected); }
         return reply;

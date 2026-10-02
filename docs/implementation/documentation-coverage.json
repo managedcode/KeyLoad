@@ -7563,7 +7563,9 @@
     "ownerClarification": "one_server_linked_models_SQL_central_performance_first",
     "features": [
       "docs/Features/QueryExecution.md",
-      "docs/Features/RelationalStorage.md"
+      "docs/Features/RelationalStorage.md",
+      "docs/Features/BlobStorage.md",
+      "docs/Features/ClusterRouting.md"
     ],
     "decisions": [
       "docs/ADR/ADR-054-central-sql.md",
@@ -7582,7 +7584,8 @@
       "REQ-REL-002",
       "REQ-REL-003",
       "REQ-REL-004",
-      "REQ-REL-005"
+      "REQ-REL-005",
+      "REQ-ROUTE-009"
     ],
     "pendingProductStages": [
       "declarative_sources_JOIN_FK_integrity",

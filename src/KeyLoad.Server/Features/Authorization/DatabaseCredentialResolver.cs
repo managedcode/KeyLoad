@@ -19,7 +19,7 @@ internal static class DatabaseCredentialResolver
         var token = codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
             JsonDefaults.Serialize(key[ServerProtocol.BearerPrefix.Length..]));
         var reply = await context.RequestServices.GetRequiredService<OrleansNode>()
-            .ExecuteAsync(requestId, token, context.RequestAborted).ConfigureAwait(false);
+            .ExecuteAsync(requestId, token, false, context.RequestAborted).ConfigureAwait(false);
         return reply.Payload;
     }
 }

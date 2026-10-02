@@ -12,7 +12,7 @@ public sealed partial class KeyLoadClient(HttpClient http, string apiKey)
 {
     private const string CommandIdHeader = "X-KeyLoad-Command-Id";
 
-    private async Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken)
+    internal async Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken)
     {
         using var message = new HttpRequestMessage(request is null ? HttpMethod.Get : HttpMethod.Post, path);
         message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);

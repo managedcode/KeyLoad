@@ -28,7 +28,7 @@ internal static class CanonicalOperationGateway
             : codec.CreateCommand(requestId, principal.Id, commandKind!.Value, commandId, payload);
         OperationResponseHeaders.Publish(context, requestId);
         var reply = await context.RequestServices.GetRequiredService<OrleansNode>()
-            .ExecuteAsync(requestId, signed, cancellationToken).ConfigureAwait(false);
+            .ExecuteAsync(requestId, signed, commandKind.HasValue, cancellationToken).ConfigureAwait(false);
         return new(requestId, reply.Payload);
     }
 

@@ -103,20 +103,27 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
             {
                 yield return pair;
             }
+            yield break;
         }
-        else if (predicate is Comparison { Operator: SqlSyntax.Equals } comparison)
+        if (predicate is not Comparison { Operator: SqlSyntax.Equals } comparison)
         {
-            var field = comparison.Left as FieldOperand ?? comparison.Right as FieldOperand;
-            var operand = comparison.Left is FieldOperand ? comparison.Right : comparison.Left;
-            if (field is not null && operand is ValueOperand value)
-            {
-                yield return new(field.Path, JsonData.Scalar(value.Value, string.Empty));
-            }
-            else if (field is not null && operand is ParameterOperand parameter
-                && parameters?.TryGetValue(parameter.Name, out var literal) == true)
-            {
-                yield return new(field.Path, JsonData.Scalar(literal, string.Empty));
-            }
+            yield break;
+        }
+        var field = comparison.Left as FieldOperand ?? comparison.Right as FieldOperand;
+        if (field is null)
+        {
+            yield break;
+        }
+        var operand = comparison.Left is FieldOperand ? comparison.Right : comparison.Left;
+        if (operand is ValueOperand value)
+        {
+            yield return new(field.Path, JsonData.Scalar(value.Value, string.Empty));
+            yield break;
+        }
+        if (operand is ParameterOperand parameter
+            && parameters?.TryGetValue(parameter.Name, out var literal) == true)
+        {
+            yield return new(field.Path, JsonData.Scalar(literal, string.Empty));
         }
     }
 }

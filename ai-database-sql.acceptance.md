@@ -11,7 +11,9 @@ In scope: optional typed relational schema on canonical Collection resources;
 string primary-key column equals the canonical entity ID; mandatory/type/closed
 row checks; existing native partition-local unique indexes; final-image PUT/PATCH
 validation in the same atomic gate; unchanged document reads, graph/vector links,
-outbox and batch atomicity. New unified SQL envelope version 1 supports existing
+outbox and batch atomicity. Repair the initial Orleans RPC transport error
+classification discovered in the exact baseline, preserving genuine recovery
+errors, cancellation and stable write outcomes. New unified SQL envelope version 1 supports existing
 Q1 SELECT plus `CALL exact_public_operation(@arguments)`, where the object
 parameter is the exact existing SDK/MCP argument envelope. All currently
 catalogued public operations compile to their existing typed operation. This is
@@ -47,6 +49,8 @@ rollback to an older writer is unsafe for typed resources and must fence them.
 | AC-AISQL-008 | Reversed literal/parameter equality selects same native point/index path and exact ordered rows as ordinary equality; protected use, residual contradictory/null predicates and shared read budgets remain | First-authored QueryExecution real-store access-path/authorization/budget TUnit cases; GitHub unit suite and scalar-disabled unit pass |
 | AC-AISQL-009 | Exact delivered SHA receives complete solution build/format/analyzer/governance, TUnit units, process recovery and real Docker RF3 SDK/MCP qualification; failures tracked individually and artifacts retained | ci.yml verify/analyzer-rules/docker-rf3 jobs, exact run/job/SHA/artifacts |
 | AC-AISQL-010 | Performance priority remains explicit: native indexed access, one final-image schema check, no whole-dataset copies/new engine; comparative measurements retain latency/throughput/allocation/memory/contention/backlog and topology/guarantees | Existing GitHub comparison profiles plus future dedicated table/CALL comparisons. No new numerical speed claim until comparable raw exact-SHA evidence; coverage collector remains an explicit incomplete mandatory gate |
+| AC-AISQL-011 | Initial native Orleans RPC/timeout failures return OwnershipLost for reads and UnknownWriteOutcome for possibly dispatched writes, using only server-derived intent and fixed safe details. Preserve typed KeyLoadException errors (including genuine RecoveryRequired), caller cancellation, stable IDs and exactly one dispatch with no retry | Real native Orleans exception unit classification cases, existing genuine RF3 stopped-replica catch-up/replay, SDK/MCP regressions; source review verifies both command gateway and authentication read callers |
+| AC-AISQL-012 | All ten typed blob SDK methods preserve source call syntax, native routes/results/IDs and one transport; null client/request are rejected before any HTTP effect. Feature-owned extension class keeps aggregate type and nesting limits enforced without exceptions/suppression | New pure public null-argument TUnit cases, existing genuine RF3 blob SQL/SDK/MCP lifecycle/range/retry cases; exact-SHA analyzers/formatter |
 
 TUnit/Microsoft.Testing.Platform only. No local test/recovery/load execution,
 mocks, stubs or service doubles. Unit cases use real ZoneTree; integration uses

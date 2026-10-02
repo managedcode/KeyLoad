@@ -18,6 +18,7 @@ Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../
 | REQ-ROUTE-003: silo membership starts without a second cluster stack or a single primary-node dependency. | AC-ROUTE-003: all three Docker silos become ready; the remaining two continue when any configured voter is killed. |
 | REQ-ROUTE-006: enforced grain-call policy permits only the declared application transitions and does not route native replica system targets through application telemetry grains. | AC-ROUTE-006: real RF3 authentication/write/read succeeds with enforcement enabled; direct capability calls remain denied; upstream Graph regression proves the default native-system-target exclusion and preserves explicit tracking. |
 | REQ-ROUTE-008: rejected requests provide bounded internal diagnostics without private data or changed public errors. | AC-ROUTE-008: actual logging provider records request GUID, closed stage/category and typed error code; malformed payload/typed decode/general JSON or argument failures omit payload, identity, credentials and raw exception text; successful calls allocate no diagnostic context; existing SDK/MCP RF3 outcomes remain unchanged. |
+| REQ-ROUTE-009: initial native Orleans RPC failures retain transport/outcome semantics without claiming storage damage. | AC-ROUTE-009 / AC-AISQL-011: server-derived reads report OwnershipLost, possibly dispatched commands report UnknownWriteOutcome; native exception/timeout tests and stopped-replica RF3 replay preserve domain RecoveryRequired, caller cancellation, secret-free details and exactly one dispatch. |
 
 ```mermaid
 flowchart LR
@@ -88,6 +89,14 @@ retry identity and replica ownership remain unchanged. New UnitTests exercise th
 actual EventSource provider and caller-visible reply, including private canary omission;
 existing full RF3 failure scenarios supply operational evidence in GitHub only.
 Ownership/stages/rollback are accepted in ADR-036 and the root delivery task graph.
+
+TASK-AISQL-011 repairs the initial OrleansNode RPC boundary after exact baseline
+37065200835 exposed Orleans placement/directory rejection to a stopped node.
+CanonicalOperationGateway supplies trusted command intent; DatabaseCredentialResolver
+supplies read intent. Only native OrleansException and TimeoutException map to
+fixed transport errors. No internal retry, parsing of caller roles, storage-error
+conversion or diagnostic suppression is permitted. New pure classification tests
+use actual framework exceptions; real RF3 catch-up remains the operational gate.
 
 TASK-GRAPH-EDGES permits the exact ExecuteAsync transitions from IRequestGrain to
 ICommandPartitionGrain and IDatabaseReadGrain. Clients may call only IRequestGrain;

@@ -1912,6 +1912,26 @@
     "status": "in_progress",
     "sourceStage": "version1_SELECT_CALL_canonical_operation_adapter_typed_rows_native_equality_planning",
     "qualification": "pending_exact_delivered_SHA_GitHub_full_gates",
+    "candidateBranch": "codex/ai-database-sql-20261002",
+    "candidateRuns": [
+      {
+        "sha": "6cfdadf38ec527472ef51aadf1ffe8b716a41587",
+        "run": 37068157832,
+        "conclusion": "failure",
+        "scope": "build_CA1720_public_enum_identifiers_no_product_runtime_execution"
+      },
+      {
+        "sha": "b3f93431ad1a2c2465470884c2a1daa6528e498b",
+        "run": 37068458582,
+        "conclusion": "failure",
+        "scope": "build_CA1062_blob_null_KLD0031_client_aggregate_KLD0033_query_nesting_no_product_runtime_execution"
+      }
+    ],
+    "sourceRepairsAwaitingQualification": [
+      "feature_owned_typed_blob_extensions_shared_transport_null_guards",
+      "symmetric_native_equality_early_iterator_exits",
+      "initial_native_Orleans_RPC_read_ownership_write_unknown_outcome_mapping"
+    ],
     "evidence": [
       "docs/Features/QueryExecution.md",
       "docs/Features/RelationalStorage.md",

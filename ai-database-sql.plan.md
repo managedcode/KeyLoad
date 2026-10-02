@@ -23,6 +23,9 @@ no reliable cheaper-tier correctness/routing evidence is available in this run.
 | TASK-AISQL-008; all workers complete | root; public contracts, engine hooks, client/server/MCP/shared admission, RF3 tests | 002–009 | Disjoint diffs reviewed, integrated source, honest status and exact-SHA CI |
 | TASK-AISQL-008B; reviewed 008 source | gates worker; NEW QueryExecution/SqlRf3Delivery*, SqlRf3CancellationTests.cs, SqlRf3AdmissionTests.cs only; root owns shared ClusterFixture/protocol setting projection | 006/007 | Actual SDK/MCP SQL receive/ACK fencing, cancellation/next-call health and insufficient heavy DATA admission with direct-control progress; root reviews and joins. Concurrent saturation remains separate qualification |
 | TASK-AISQL-009; joined source | review worker; read-only high capability | all | Independent policy/security/atomicity/admission review; source findings, no local tests or mutations |
+| TASK-AISQL-011; exact baseline finding and Accepted ADR-036 contract | SQL worker; OrleansNode.cs, NEW Server/Features/ClusterRouting/OrleansRpcFailure.cs and UnitTests/Features/ClusterRouting/OrleansRpcFailureTests.cs only; root owns trusted gateway/auth caller joins and docs | 011,009 | Native-exception regression sources, narrow initial-RPC classification, no retry/suppression/domain recoding; root reviews then exact-SHA build/unit/RF3 catch-up proof |
+| TASK-AISQL-012A; Accepted ADR-054 integration repair | models worker; Client/Features/BlobStorage/BlobClient.cs and NEW UnitTests/Features/BlobStorage/BlobSdkArgumentTests.cs only; root owns Send access join | 012,006,009 | Tests-first public null guards, source-compatible feature extension methods, same transport/IDs; root review + exact build/RF3 |
+| TASK-AISQL-012B; Accepted ADR-054 integration repair | gates worker; QueryCandidateReader.cs only | 008,009 | Remove depth4 nesting without new allocations/semantic changes; existing25 real-store regression cases + exact build |
 
 No worker may expand scope, change contracts/policy, install tools/dependencies,
 stash, weaken diagnostics/assertions, test locally or commit/push. Escalate any
@@ -41,6 +44,8 @@ contract conflict. Shared contracts/configuration/docs have exactly one owner.
 - [x] Add public .NET/MCP RF3 differential/authorization/retry/linkage sources.
 - [x] Join delivery-token, pre-cancellation and insufficient-DATA-budget RF3 sources after independent/root review. In-flight cancellation and concurrent lane saturation remain separate unproved qualifiers.
 - [x] Run static governance and review combined diffs; governance and both staged/working whitespace checks pass. Independent SQL and model/SDK review complete; root reviewed the final delivery/cancellation/admission joins. No local tests.
+- [ ] Repair baseline initial Orleans RPC classification under AC-AISQL-011/ADR-036, join trusted intent and native-exception regression sources, then qualify exact SHA. Never broaden election retry acceptance to conceal storage recovery errors.
+- [x] Join reviewed TASK-AISQL-011/012A/012B source: native RPC classification, public SDK guards/feature extensions and reduced query nesting. Independent TASK-AISQL-013 source review complete; runtime/build qualification pending.
 - [ ] Commit scoped coherent code/docs/tests on current checkout; preserve unrelated
   concurrent benchmark and root-policy changes. Push an isolated candidate ref
   for exact-SHA qualification before delivery of stable changes to main; no force/protection bypass.
@@ -125,6 +130,13 @@ build failed before test execution on public RelationalColumnType member names:
 
 ADR-055 and acceptance are refined before the naming implementation. No analyzer
 suppression, existing-test weakening, local test run or result inference.
+
+Candidateb3f93431ad1a2c2465470884c2a1daa6528e498b / [37068458582](https://github.com/managedcode/KeyLoad/actions/runs/37068458582)
+reached further source compilation and exposed:
+
+- [ ] CA1062 six new BlobClient write methods: add public null guards through accepted feature extensions, author null tests first, qualify actual same-ID RF3 lifecycle.
+- [ ] KLD0031 aggregate KeyLoadClient215 lines: move the feature-owned blob methods to BlobClientExtensions using one internal Send join; no partial-type splitting to evade aggregate policy.
+- [ ] KLD0033 QueryCandidateReader.Equalities depth4: early-exit iteration removes nesting with unchanged equality/filter/budget semantics and existing regressions. No limit exception or analyzer suppression.
 
 ## Joined-source review findings
 

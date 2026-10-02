@@ -19,7 +19,7 @@ all wrong-owner/creator/revoked-principal denials and exact error codes. The wor
 owns this test file only; ADR-038 authority and all product code stay unchanged.
 Lead source review/build and full exact-SHA GitHub tests qualify the correction.
 
-Status: contract Accepted; public implementation and runtime qualification pending. Owner: BlobStorage feature lead, with the KeyLoad integrator owning shared contracts. Decision: [ADR-038](../ADR/ADR-038-chunked-blob-storage.md). Authority: [root policy](../../AGENTS.md). Detailed criteria: [acceptance](../../blob-storage.acceptance.md); execution graph: [plan](../implementation/blob-storage.plan.md).
+Status: contract Accepted; canonical engine/server/MCP and typed SDK source present, exact-SHA runtime qualification pending. Owner: BlobStorage feature lead, with the KeyLoad integrator owning shared contracts. Decision: [ADR-038](../ADR/ADR-038-chunked-blob-storage.md). Authority: [root policy](../../AGENTS.md). Detailed criteria: [acceptance](../../blob-storage.acceptance.md); execution graph: [plan](../implementation/blob-storage.plan.md).
 
 ## Призначення, актори та межі
 
@@ -59,10 +59,10 @@ flowchart LR
 | Surface | Ownership / стан |
 |---|---|
 | Public contracts | `src/KeyLoad.Abstractions/Features/BlobStorage/`; інтегратор owns DTO/enums/identity/error semantics за ADR-038 |
-| Engine/storage | Planned `src/KeyLoad.Core/Features/BlobStorage/` + node-local provider building blocks; files/locks/apply належать PartitionHost, не grains |
-| Server/.NET SDK | Planned matching `Features/BlobStorage/`; shared transport залишається [ClientApi](ClientApi.md) |
-| MCP/agent | Planned owning-operation mapping через [ADR-039](../ADR/ADR-039-official-mcp-agent-api.md), ті самі grants та semantics |
-| Tests | Planned UnitTests/RecoveryTests/IntegrationTests `Features/BlobStorage/`, реальні stores/processes/RF3, без doubles |
+| Engine/storage | Source `src/KeyLoad.Core/Features/BlobStorage/` + node-local provider building blocks; files/locks/apply належать PartitionHost, не grains |
+| Server/.NET SDK | Source matching `Features/BlobStorage/`; feature-owned BlobClientExtensions use shared [ClientApi](ClientApi.md) transport |
+| MCP/agent | Source owning-operation mapping через [ADR-039](../ADR/ADR-039-official-mcp-agent-api.md), ті самі grants та semantics; qualification pending |
+| Tests | Source unit/recovery/blob fixtures and SQL RF3 differential cases; реальні stores/processes/RF3, без doubles; exact-SHA execution remains required |
 | Frontend | N/A: required capability є програмним storage API; окремий UI не запитано |
 | Durable spec | Цей файл, ADR-038, root policy; новий KL-ID не вигадується |
 
@@ -75,3 +75,9 @@ Product verification: canonical GitHub Actions build/analyze/format, TUnit unit,
 ## Unified SQL and typed SDK join
 
 ADR-054/AC-AISQL-006 extends the existing canonical blob operations into SQL CALL; no lifecycle/atomicity/authorization/integrity change. Abstractions `Features/BlobStorage/BlobOperationProtocol.cs` owns the route constants and Client `Features/BlobStorage/BlobClient.cs` mirrors all ten HTTP/MCP operations through the existing bounded SDK transport. RF3 SQL/.NET/official MCP published-partial-read differential proof is required; this source is not a passing outcome.
+
+REQ-BLOB-006 also maps to AC-AISQL-012/TASK-AISQL-012A: feature-owned
+BlobClientExtensions retain SDK source call syntax, validate missing client/request
+before HTTP effects and call the same internal Send transport. New public argument
+tests and existing genuine RF3 lifecycle/range/retry cases qualify the pre-delivery
+refactor; source spelling changes do not establish published binary compatibility.
