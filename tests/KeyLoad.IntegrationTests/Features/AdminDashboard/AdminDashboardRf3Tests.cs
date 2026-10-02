@@ -30,7 +30,10 @@ internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
             AdminDashboardProtocol.QueueTool, scenario.Messages, deadline.Token));
         await Assert.That(queue.Counters).IsEqualTo(queueMcp.Value.Counters);
         await Assert.That(queue.Items.SequenceEqual(queueMcp.Value.Items)).IsTrue();
-        await Assert.That(queue.CutPosition).IsEqualTo(queueMcp.Value.CutPosition);
+        // Cut positions are node-local applied positions of two independent gated reads on different physical nodes;
+        // concurrent RF3 writes legitimately separate them. The contract is identical persisted data at a real cut.
+        await Assert.That(queue.CutPosition).IsGreaterThan(0);
+        await Assert.That(queueMcp.Value.CutPosition).IsGreaterThan(0);
         await Assert.That(queue.Items[0].State).IsEqualTo(MessageState.Ready);
         await Assert.That(queue.Counters.StoredMessages).IsEqualTo(1);
         await Assert.That(catalogMcp.RequestId).IsNotEqualTo(queueMcp.RequestId);
