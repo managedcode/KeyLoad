@@ -51,7 +51,7 @@ $script:CoverageTokens = [ordered]@{
     XmlBranchTrue = 'true'
     XmlBranchFalse = 'false'
     XmlConditionCoverage = 'condition-coverage'
-    BranchCoveragePattern = '\A[0-9]+% \(([0-9]+)/([0-9]+)\)\z'
+    BranchCoveragePattern = '\A(?:100(?:\.0{1,2})?|(?:0|[1-9][0-9]?)(?:\.[0-9]{1,2})?)% \(([0-9]+)/([0-9]+)\)\z'
     XmlPackageSelector = './packages/package'
     XmlSourceSelector = './sources/source'
     XmlClassSelector = './classes/class'
@@ -121,7 +121,7 @@ $script:CoverageTokens = [ordered]@{
     FailureModuleLines = 'module line threshold'
     FailureModuleBranches = 'module branch threshold'
     ErrorInvalidMode = 'Mode must be Prepare or Verify.'
-    ErrorNoRevision = 'GITHUB_SHA must be a lowercase 40-character commit SHA.'
+    ErrorNoRevision = 'Coverage source revision must be a lowercase 40-character commit SHA.'
     ErrorNoRepository = 'Repository must be an existing absolute directory.'
     ErrorNoEvidence = 'EvidenceRoot must be an absolute directory.'
     ErrorNoContract = 'Contract must be an existing absolute file.'
@@ -155,6 +155,22 @@ $script:CoverageTokens = [ordered]@{
     NativeUnverifiedRoots = 'fail-closed'
     NativeHitSemantics = 'non-negative integer; covered iff positive; source-line union across distinct class identities; conflicting identical identity fails'
     NativeCollectorVersion = '18.11.2'
+    SiteSourceRevisionVariable = 'KEYLOAD_SITE_SOURCE_REVISION'
+    GitHubRevisionVariable = 'GITHUB_SHA'
+}
+
+function Get-CoverageSourceRevision {
+    $tokens = $script:CoverageTokens
+    $environment = [Environment]::GetEnvironmentVariables()
+    if ($environment.Contains($tokens.SiteSourceRevisionVariable)) {
+        $revision = [Environment]::GetEnvironmentVariable($tokens.SiteSourceRevisionVariable)
+    }
+    else {
+        $revision = [Environment]::GetEnvironmentVariable($tokens.GitHubRevisionVariable)
+    }
+
+    if ($revision -cnotmatch $tokens.RevisionPattern) { throw $tokens.ErrorNoRevision }
+    $revision
 }
 
 function Get-CoverageSha256([string] $LiteralPath) {

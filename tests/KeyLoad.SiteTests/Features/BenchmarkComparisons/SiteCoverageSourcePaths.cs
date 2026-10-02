@@ -2,6 +2,28 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal static class SiteCoverageSourcePaths
 {
+    internal static IEnumerable<string> EnumerateModules(string repository, string prefix, string? filePrefix = null)
+    {
+        var directory = Path.Combine(repository, prefix.Replace(SiteCoverageTokens.RelativeSeparator,
+            Path.DirectorySeparatorChar));
+        if (!Directory.Exists(directory) || !PathHasNoLinks(repository, directory))
+        {
+            throw new InvalidOperationException(SiteCoverageTokens.InventoryFailure);
+        }
+
+        foreach (var file in EnumerateFilesWithoutLinks(directory))
+        {
+            var relative = Path.GetRelativePath(repository, file).Replace(Path.DirectorySeparatorChar,
+                SiteCoverageTokens.RelativeSeparator);
+            if (Path.GetExtension(file) == SiteCoverageTokens.ModuleExtension &&
+                !relative.StartsWith(SiteCoverageTokens.VendorSourcePrefix, StringComparison.Ordinal) &&
+                (filePrefix is null || Path.GetFileName(file).StartsWith(filePrefix, StringComparison.Ordinal)))
+            {
+                yield return relative;
+            }
+        }
+    }
+
     public static IEnumerable<string> EnumerateFilesWithoutLinks(string directory)
     {
         foreach (var entry in Directory.EnumerateFileSystemEntries(directory).Order(StringComparer.Ordinal))

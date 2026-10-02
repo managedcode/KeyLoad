@@ -6,6 +6,14 @@ internal static class SiteAnalyzerCoverageTokens
     internal const string ContractRelativePath = "scripts/Features/CodeQuality/site-analyzer-coverage.contract.json";
     internal const string RepositoryVariable = "GITHUB_WORKSPACE";
     internal const string GitHubRevisionVariable = "GITHUB_SHA";
+    internal const string SiteRevisionVariable = "KEYLOAD_SITE_SOURCE_REVISION";
+    internal const string SiteRevisionA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    internal const string TriggerRevisionB = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    internal const string EmptyRevision = "";
+    internal const string WhitespaceRevision = "   ";
+    internal const string MalformedRevision = "0123456789abcdef";
+    internal const string UppercaseRevision = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    internal static readonly string[] InvalidDedicatedRevisions = [EmptyRevision, WhitespaceRevision, MalformedRevision, UppercaseRevision];
     internal const string CoverageDirectoryName = "site-analyzer-coverage-tests";
     internal const string ManifestName = "source-manifest.json";
     internal const string SummaryName = "report.json";
@@ -64,6 +72,8 @@ internal static class SiteAnalyzerCoverageTokens
     internal const int ExpectedDefaultBranchesValid = 2500;
     internal const int HashLength = 64;
     internal const string JsonFailuresProperty = "failures";
+    internal const string ErrorNoRevision = "Coverage source revision must be a lowercase 40-character commit SHA.";
+    internal const string ErrorInvalidManifest = "Prepared source manifest does not match the current candidate.";
     internal const string ModuleLineFailure = "module line threshold";
     internal const string ModuleBranchFailure = "module branch threshold";
     internal const string CriticalPipelineId = "KLD0013";

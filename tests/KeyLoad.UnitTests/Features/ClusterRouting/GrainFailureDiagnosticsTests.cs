@@ -97,7 +97,7 @@ internal sealed class EventSourceLogCapture : EventListener
 {
     private const string LoggingEventSourceName = "Microsoft-Extensions-Logging";
     private const string FilterSpecsKey = "FilterSpecs";
-    private const string LoggerFilter = "GrainFailureDiagnosticsTests:Warning";
+    private const string LoggerFilter = "GrainFailureDiagnosticsTests:Warning;McpTransportDiagnosticsTests:Warning";
     private const string FormattedMessageEvent = "FormattedMessage";
     private readonly ConcurrentQueue<string> messages = new();
 

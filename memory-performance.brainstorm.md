@@ -129,3 +129,35 @@ This independently useful SIMD scope does not resolve the undefined term SMID.
 ## Runtime report streaming finding, 2026-10-02
 
 Run37005805424 exposes report cancellation scheduling drift. Read-only source review confirms the owned synchronous ImmutableArray converters also retain the entire serialized Cases/Samples payload before SerializeAsync can flush. Correct both collection levels with private write-only async-enumerable views over existing immutable arrays. Preserve public CLR types, exact schema/property order, strict reads, every attempt and all JSON/CSV/Markdown content. Reject changing the shared strict converter or adding test-only production hooks. An early real-file cancellation must leave a bounded partial JSON and no later report files; source review and actual CI evidence are separate from a measured speed or allocation claim.
+
+## Queue follow-up after exact checkpoint ad594642
+
+Run37015193756 confirms that single-message Receive still owns/copies a 256-entry
+page plus one lookahead before checking its requested count. Implement the already
+accepted TASK-MP-007F borrowed-index traversal: inspect at most256 FIFO entries,
+stop immediately after capturing the requested deliverable count, retain bounded
+transition inputs and mutate only after the visitor completes. Reject reducing
+the asserted work requirement or mutating the transaction inside the callback.
+Expired rows must consume the same ceiling and transition atomically before the
+first live delivery. This fixes observed read amplification; measured RF3 speed
+and allocation improvement remain a separate qualification.
+
+The second remaining queue failure is a negative-fixture oracle exposed by real
+tombstones. Absent-body Corruption propagates as KeyLoadException by the canonical
+atomic command contract. Assert that exact code and unchanged ready/counter/body,
+position/apply state, then retain malformed-body Validation and restored healthy
+receive. Do not map Corruption to an ordinary committed command error.
+
+## Cancellation fixture refinement after ad594642
+
+The report uses native async collection flushing now. Linux cancellation succeeds
+but its delayed observer crosses the existing quarter-output cutoff; macOS writer
+finishes before the observer cancels. Arm a dedicated real-file observer before
+starting the writer, keeping the same corpus, deadline, cutoff, cancellation and
+no-later-publication proof. Reject sleeps/hooks in product serializers or larger
+cutoffs. The macOS Kestrel timeout is the server-abort wait after the cancelled
+client result. Exercise the real abort path with one bounded, coordinated second
+partial response write after the client returns; keep the response incomplete,
+five-second waits and actual RequestAborted/client-reuse proof. Current evidence
+does not establish a production transport defect; obtain safe fixedstage evidence
+if the experiment still fails.

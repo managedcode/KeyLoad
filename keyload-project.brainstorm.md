@@ -14,6 +14,31 @@ Out of scope: changing the product contract to a demo or single node; replacing 
 
 ## Options and decision
 
+### Runtime checkpoint ad594642 diagnostic refinement
+
+Run37015193756 leaves four distinct unit failures, seventeen official MCP
+initialization failures and one retained-replica failure. The latest RF3 log
+overwrites earlier failures; the visible legacy initialize rejection is a
+fallback after an unobserved discovery failure. Widening accepted protocol
+versions would hide that missing first cause. Choose closed failure-stage and
+method-category diagnostics while preserving every guard and public error.
+Keep each bounded RF3 failure receipt, then qualify the actual initial discovery
+and replica failure on GitHub before accepting a behavioral repair.
+
+Aspire13.6.0's executable watch awaits the Kubernetes watch response under a
+one-minute Polly timeout. Upstream f48a7b1251d339b21856497f10b36d227a5e57cc fixes
+that retry behavior but no compatible patch is published. The native runner's
+exit state must remain a required gate. Preserve completed report bytes even
+when that gate fails; neither report existence nor successful engine samples
+substitute for the native zero-exit assertion. Keep recovery execution independent
+of unit failure after a successful build, with both failures retained in CI.
+
+Root owns all shared contracts/docs/workflow joins and bounded RF3/report
+retention. A disjoint worker owns only MCP guard stage metadata, its closed
+diagnostic formatter, and meaningful real-provider privacy regressions. The
+existing failed exact-SHA suite is the baseline; every repair remains pending
+until full exact-SHA GitHub qualification.
+
 1. Replace the current tree wholesale. This discards substantial in-progress work, loses its acceptance history, and makes it easy to violate the node-local storage and RF3 contracts.
 2. Integrate the existing work as ordered feature slices, repair build and contract joins, and qualify each delivered capability on GitHub. This preserves the accepted architectural decisions and gives each public claim exact evidence.
 

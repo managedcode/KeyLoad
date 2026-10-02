@@ -726,6 +726,49 @@ macOS failed run37005805424 is its tests-first baseline; source lifecycle review
 enabled build/format and full multi-OS GitHub suites qualify this fixture repair.
 No production, data or API migration; rollback changes only test coordination.
 
+### Accepted TASK-RUNTIME-QUEUE-W2 join
+
+REQ-MSG-007 and AC-MSG-001/002/004/005, AC-MP-006/011/012 retain the existing
+TASK-MP-007F borrowed ready-index contract. Run37015193756/ad594642 provides the
+failing baseline: one delivery examines257 ready-index entries, and the real
+absent-body fixture now propagates the correctly preserved Corruption exception.
+Ordered stages: tests-first actual stored expired/live/256 ceiling and missing-body
+no-effects assertions; bounded read-only visitor capture then post-visitor atomic
+transitions; lead source/numeric review; enabled solution build/formatter/static
+governance; full exact-SHA GitHub unit/recovery/RF3 suites and retained artifacts.
+runtime_storage_research owns only QueueReadyClaims.cs and a necessary new
+same-slice input helper, ReadyQueueRangeTests.cs and QueueBodyAccountingTests.cs.
+Lead alone owns docs, shared contracts and final join. No changes to256 ceiling,
+FIFO, message/byte/in-flight limits, time, counters, lease/signature/security/error
+order, persisted shapes or public APIs. Missing-body Corruption remains fail-closed;
+malformed-body Validation and healthy restoration remain tested. No migration is
+needed; source rollback reverts only this traversal/fixture repair. Runtime/perf
+qualification remains pending until the exact new SHA passes.
+
+### Accepted TASK-RUNTIME-CANCEL-W2 real fixture refinement
+
+REQ-MP-004, REQ-CLIENT-002 and AC-MP-009/010/012 use run37015193756/ad594642
+as the preserved failing baseline. Native async Cases/Samples serialization is
+already present; a delayed real-file observer starts too late to establish early
+cancellation on Linux/macOS. Arm a dedicated real-file observer before the writer
+and cancel directly on first positive file length. Preserve20000×4096 bytes,
+the10second observer deadline, OperationCanceledException, less-than-quarter raw
+output and absent Markdown/CSV. No production serializer hook, fake stream or
+corpus/cutoff/timeout change is permitted.
+
+The macOS Kestrel failure is the five-second RequestAborted wait after the client
+returns its cancelled result. Coordinate one further bounded actual response
+write/flush after that result, leaving the1MiB response incomplete, then require
+actual RequestAborted and successful same-client subsequent call. Keep first
+64KiB chunk, cancellation classification, all five-second bounds, fixed stage
+evidence and observed handler/client cleanup; no client transport defect is
+inferred from the current logs. protocol worker owns only ReportFileTests.cs,
+necessary new same-slice file observer helper, KeyLoadClientTransportTests.cs and
+MidBodyCancellationResponse.cs. Lead owns docs/integration. Ordered verification:
+failed exact-SHA baseline, scoped fixtures, source lifetime/numeric/privacy review,
+enabled solution build/formatter/governance, complete multi-OS GitHub suites and
+retained reports. No persisted/public migration; rollback is fixture-only.
+
 The enabled join found KLD0031: the transport test type includes its two nested
 fixture implementations and totals 290 code lines. Lead numeric integration owns
 new ClientApi/MidBodyCancellationResponse.cs and KeyLoadClientKestrelServer.cs,

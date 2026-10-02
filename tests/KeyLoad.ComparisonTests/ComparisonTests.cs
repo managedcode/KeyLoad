@@ -57,6 +57,19 @@ internal sealed class RealComparisonSuite
             var redis = app.Services.GetRequiredService<DistributedApplicationModel>().Resources
                 .OfType<ContainerResource>().Single(resource => resource.Name == "benchmark-redis");
             await app.StopAsync(CancellationToken.None);
+            await RetainReportsAndDeleteDataAsync(root, redis, output, evidence);
+        }
+    }
+
+    private static async Task RetainReportsAndDeleteDataAsync(string root, ContainerResource redis,
+        string output, string evidence)
+    {
+        try
+        {
+            ComparisonTestEvidenceFiles.CopyReportsIfPresent(output, evidence);
+        }
+        finally
+        {
             await DeleteDataAsync(root, redis);
         }
     }

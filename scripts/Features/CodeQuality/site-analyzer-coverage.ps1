@@ -51,9 +51,10 @@ function Write-CoverageFailureEvidence([object] $Paths, [object] $Contract, [str
 function Invoke-CoverageVerify([object] $Paths) {
     $tokens = $script:CoverageTokens
     $contract = $null
-    $revision = [string] $env:GITHUB_SHA
+    $revision = $null
     $derivedReportWritten = $false
     try {
+        $revision = Get-CoverageSourceRevision
         $contract = Read-CoverageContract $Paths[$tokens.ValueContract] $Paths[$tokens.ValueRepository]
         if ([string]::IsNullOrWhiteSpace($CoverageReport) -or -not [IO.Path]::IsPathRooted($CoverageReport)) {
             throw $tokens.ErrorInvalidReport

@@ -12,23 +12,22 @@ public sealed partial class DatabaseEngine
     private sealed class ReadyClaimState
     {
         public List<Delivery> Deliveries { get; } = [];
+        public List<ReadyClaimInput> TransitionInputs { get; } = [];
         public QueueCounters? Counters { get; set; }
         public long ReceivedBytes { get; set; }
         public bool CountersChanged { get; set; }
     }
 
+    private sealed record ReadyClaimInput(byte[] ReadyKey, byte[] MetadataKey, MessageMetadata Metadata,
+        byte[] TransitionKey, bool DeletesBody);
+
     private ReceiveResult ClaimReadyMessages(IAtomicTransaction tx, PrincipalRecord principal,
         ReceiveRequest request, ResourceDefinition resource, DateTimeOffset now, long position)
     {
         var state = new ReadyClaimState();
-        foreach (var item in tx.Scan(QueueKey(ReadyQueueSpace, request.Lane), QueueScanPageSize).Records)
-        {
-            if (state.Deliveries.Count == request.MaxMessages
-                || !ClaimReadyItem(tx, principal, request, resource, now, item, state))
-            {
-                break;
-            }
-        }
+        tx.VisitRange(QueueKey(ReadyQueueSpace, request.Lane), QueueScanPageSize,
+            (key, value) => CaptureReadyItem(tx, principal, request, resource, now, key, value, state));
+        ApplyReadyInputs(tx, state.TransitionInputs);
         if (state.CountersChanged)
         {
             tx.PutRecord(QueueKey(QueueCountersSpace, request.Lane), state.Counters!);
@@ -36,37 +35,42 @@ public sealed partial class DatabaseEngine
         return new(request.RequestId, state.Deliveries.ToImmutableArray(), Token(request.Lane.Partition, position));
     }
 
-    private bool ClaimReadyItem(IAtomicTransaction tx, PrincipalRecord principal, ReceiveRequest request,
-        ResourceDefinition resource, DateTimeOffset now, KeyValueRecord item, ReadyClaimState state)
+    private bool CaptureReadyItem(IAtomicTransaction tx, PrincipalRecord principal, ReceiveRequest request,
+        ResourceDefinition resource, DateTimeOffset now, ReadOnlySpan<byte> key,
+        ReadOnlySpan<byte> value, ReadyClaimState state)
     {
-        var id = JsonDefaults.Deserialize<string>(item.Value.Span);
+        var id = JsonDefaults.Deserialize<string>(value);
         var metadataKey = QueueKey(MessageMetadataSpace, request.Lane, id);
         var metadata = tx.GetRecord<MessageMetadata>(metadataKey)
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingReadyMetadata);
-        var body = StoredMessageBody.Read(tx, QueueKey(MessageBodySpace, request.Lane, id))
+        var bodyKey = QueueKey(MessageBodySpace, request.Lane, id);
+        var body = StoredMessageBody.Read(tx, bodyKey)
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingReadyBody);
         state.Counters ??= Counters(tx, request.Lane);
         if (metadata.ExpiresAt <= now)
         {
-            ExpireReadyItem(tx, request.Lane, item, metadataKey, metadata, body.Bytes, state);
-            return true;
+            AddExpiredReadyInput(key, bodyKey, metadataKey, metadata, body.Bytes, state);
+            return state.TransitionInputs.Count < QueueScanPageSize;
         }
+
         if (state.ReceivedBytes + body.Bytes > request.MaxBytes
             || state.Counters.InFlightMessages >= resource.QueuePolicy.MaxInFlightMessages
             || state.Counters.InFlightBytes + body.Bytes > resource.QueuePolicy.MaxInFlightBytes)
         {
             return false;
         }
-        LeaseReadyItem(tx, principal, request, resource, now, item, metadataKey, metadata, body, state);
-        return true;
+
+        AddLeaseReadyInput(principal, request, resource, now, key, metadataKey, metadata, body, state);
+        return state.Deliveries.Count < request.MaxMessages
+            && state.TransitionInputs.Count < QueueScanPageSize;
     }
 
-    private static void ExpireReadyItem(IAtomicTransaction tx, QueueLaneRef lane, KeyValueRecord item,
-        byte[] metadataKey, MessageMetadata metadata, long bodyBytes, ReadyClaimState state)
+    private static void AddExpiredReadyInput(ReadOnlySpan<byte> key, byte[] bodyKey, byte[] metadataKey,
+        MessageMetadata metadata, long bodyBytes, ReadyClaimState state)
     {
-        tx.Delete(item.Key.ToArray());
-        tx.Delete(QueueKey(MessageBodySpace, lane, metadata.Id));
-        tx.PutRecord(metadataKey, metadata with { State = MessageState.Expired, StateVersion = metadata.StateVersion + 1 });
+        var expired = metadata with { State = MessageState.Expired, StateVersion = metadata.StateVersion + 1 };
+        state.TransitionInputs.Add(new(ReadyKey: key.ToArray(), MetadataKey: metadataKey, Metadata: expired,
+            TransitionKey: bodyKey, DeletesBody: true));
         var counters = state.Counters!;
         state.Counters = counters with
         {
@@ -76,8 +80,8 @@ public sealed partial class DatabaseEngine
         state.CountersChanged = true;
     }
 
-    private void LeaseReadyItem(IAtomicTransaction tx, PrincipalRecord principal, ReceiveRequest request,
-        ResourceDefinition resource, DateTimeOffset now, KeyValueRecord item, byte[] metadataKey,
+    private void AddLeaseReadyInput(PrincipalRecord principal, ReceiveRequest request,
+        ResourceDefinition resource, DateTimeOffset now, ReadOnlySpan<byte> key, byte[] metadataKey,
         MessageMetadata metadata, StoredMessageBody body, ReadyClaimState state)
     {
         var deadline = now.AddSeconds(request.LeaseSeconds);
@@ -91,9 +95,9 @@ public sealed partial class DatabaseEngine
             LeaseOwner = principal.Id,
             LeaseUntil = deadline
         };
-        tx.Delete(item.Key.ToArray());
-        tx.PutRecord(metadataKey, updated);
-        tx.PutRecord(QueueKey(LeasedQueueSpace, request.Lane, deadline, metadata.Id), metadata.Id);
+        var leaseKey = QueueKey(LeasedQueueSpace, request.Lane, deadline, metadata.Id);
+        state.TransitionInputs.Add(new(ReadyKey: key.ToArray(), MetadataKey: metadataKey, Metadata: updated,
+            TransitionKey: leaseKey, DeletesBody: false));
         var counters = state.Counters!;
         state.Counters = counters with
         {
@@ -108,5 +112,23 @@ public sealed partial class DatabaseEngine
             Authorization.Project(principal, resource.HeaderPolicies, body.Body.HeadersJson, out _),
             token, version, deadline, updated.Attempts, updated.DeliveryGeneration));
         state.ReceivedBytes += body.Bytes;
+    }
+
+    private static void ApplyReadyInputs(IAtomicTransaction tx, List<ReadyClaimInput> inputs)
+    {
+        foreach (var input in inputs)
+        {
+            tx.Delete(input.ReadyKey);
+            if (input.DeletesBody)
+            {
+                tx.Delete(input.TransitionKey);
+                tx.PutRecord(input.MetadataKey, input.Metadata);
+            }
+            else
+            {
+                tx.PutRecord(input.MetadataKey, input.Metadata);
+                tx.PutRecord(input.TransitionKey, input.Metadata.Id);
+            }
+        }
     }
 }

@@ -25,6 +25,9 @@ const BUILD = Object.freeze({
   noJekyll: '.nojekyll', cname: 'CNAME', domain: 'www.keyload.cloud\n', robotsFile: 'robots.txt', sitemapFile: 'sitemap.xml',
   smokeLabel: ' · correctness smoke', zero: 0, one: 1, jsonIndent: 2,
   authoredJsLimit: 40960, cssLimit: 20480,
+  compression: 'compression', nodeVersion: 'nodeVersion', zlibVersion: 'zlibVersion', vendorReceipt: 'vendor',
+  recordedGzipBytes: 'recordedGzipBytes', runtimeGzipBytes: 'runtimeGzipBytes', safeGzip: 'isSafeInteger',
+  path: 'path', bytes: 'bytes',
   parent: '..', staticEvidence: '<!-- KEYLOAD_STATIC_EVIDENCE -->',
   documentationBlob: '/blob/main/docs', documentationTree: '/tree/main/docs',
   robots: 'User-agent: *\nAllow: /\nSitemap: https://www.keyload.cloud/sitemap.xml\n',
@@ -87,14 +90,23 @@ async function verifyVendor() {
   if (manifest.package !== BUILD.three || manifest.version !== BUILD.version || manifest.license !== BUILD.license ||
       manifest.sourceCommit !== BUILD.sourceCommit || manifest.integrity !== BUILD.integrity ||
       manifest.files?.length !== BUILD.vendorFiles.length) throw new Error(ERRORS.vendor);
+  const vendor = [];
   for (const [index, name] of BUILD.vendorFiles.entries()) {
     const path = join(root, name);
     await assertRegular(path);
     const bytes = await readFile(path);
     const recorded = manifest.files.find(file => file.path === name);
-    if (hash(bytes) !== BUILD.vendorHashes[index] || recorded?.sha256 !== BUILD.vendorHashes[index] ||
-        recorded.bytes !== bytes.length || recorded.gzipBytes !== gzipSync(bytes).length) throw new Error(ERRORS.vendor);
+    const sha256 = hash(bytes);
+    const runtimeGzipBytes = gzipSync(bytes).length;
+    if (sha256 !== BUILD.vendorHashes[index] || recorded?.sha256 !== BUILD.vendorHashes[index] ||
+        recorded.bytes !== bytes.length || !Number[BUILD.safeGzip](recorded.gzipBytes) ||
+        !(recorded.gzipBytes > BUILD.zero)) throw new Error(ERRORS.vendor);
+    vendor.push({ [BUILD.path]: name, [BUILD.hash]: sha256, [BUILD.bytes]: bytes.length,
+      [BUILD.recordedGzipBytes]: recorded.gzipBytes, [BUILD.runtimeGzipBytes]: runtimeGzipBytes });
   }
+
+  return { [BUILD.nodeVersion]: process.versions.node, [BUILD.zlibVersion]: process.versions.zlib,
+    [BUILD.vendorReceipt]: vendor };
 }
 
 async function verifyAssets() {
@@ -170,7 +182,7 @@ async function emitHtml(output, catalog) {
     html = html.replaceAll(BUILD.documentationBlob, `/blob/${catalog.siteSourceRevision}/docs`)
       .replaceAll(BUILD.documentationTree, `/tree/${catalog.siteSourceRevision}/docs`);
   }
-  const links = catalog.runs.map(run => `<li>${run.label} · <a href="./${BUILD.data}/${run.report}" download>Raw JSON</a> · <a href="${run.evidenceUrl}">Successful GitHub run</a></li>`).join(BUILD.empty);
+  const links = catalog.runs.map(run => `<li>${run.label} · <a href="./${BUILD.data}/${run.report}" download>Raw JSON</a> · <a href="${run.evidenceUrl}">GitHub comparison evidence</a></li>`).join(BUILD.empty);
   if (!html.includes(BUILD.staticEvidence)) throw new Error(ERRORS.profiles);
   await writeFile(join(output, BUILD.html), html.replace(BUILD.staticEvidence, `<ul>${links}</ul>`));
 }
@@ -178,13 +190,13 @@ async function emitHtml(output, catalog) {
 export async function buildSite(argv) {
   const args = parseArguments(argv);
   const { reports, output } = await preparePaths(args);
-  await verifyVendor();
+  const compression = await verifyVendor();
   const sizes = await verifyAssets();
   const catalog = await readCatalog(reports, args);
   await mkdir(output);
   try {
     await emit(output, reports, catalog);
-    return { output, profiles: catalog.runs.length, ...sizes };
+    return { output, profiles: catalog.runs.length, ...sizes, [BUILD.compression]: compression };
   } catch (error) {
     await rm(output, { recursive: true, force: true });
     throw error;

@@ -6,6 +6,27 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 /// <summary>Runs the emitted comparison page in the workflow-provided real Chrome browser.</summary>
 internal sealed class SiteBrowserBehaviorTests
 {
+    /// <summary>AC-BC-025: browser display expectations use exact shortest decimals and explicit midpoint rules.</summary>
+    [Test]
+    public async Task AC_BC_025_DisplayOracleRoundsShortestDecimalAtNamedBoundariesAsync()
+    {
+        await Assert.That(SiteBrowserAssertions.Display(SiteBrowserUiTokens.DisplayBelowHalfValue))
+            .IsEqualTo(SiteBrowserUiTokens.DisplayBelowHalfText);
+        await Assert.That(SiteBrowserAssertions.Display(SiteBrowserUiTokens.DisplayHalfValue))
+            .IsEqualTo(SiteBrowserUiTokens.DisplayHalfText);
+        await Assert.That(SiteBrowserAssertions.Display(SiteBrowserUiTokens.DisplayMillisecondTie))
+            .IsEqualTo(SiteBrowserUiTokens.DisplayMillisecondTieText);
+        await Assert.That(SiteBrowserAssertions.Display(SiteBrowserUiTokens.DisplayBelowMillisecondTie))
+            .IsEqualTo(SiteBrowserUiTokens.DisplayBelowMillisecondTieText);
+        await Assert.That(SiteBrowserAssertions.Display(SiteBrowserUiTokens.DisplayZeroValue))
+            .IsEqualTo(SiteBrowserUiTokens.DisplayZeroText);
+        await Assert.That(SiteBrowserAssertions.Display(SiteBrowserUiTokens.DisplayHalfCentValue))
+            .IsEqualTo(SiteBrowserUiTokens.DisplayHalfCentText);
+        await Assert.That(SiteBrowserAssertions.Display(SiteBrowserUiTokens.DisplayGroupedValue))
+            .IsEqualTo(SiteBrowserUiTokens.DisplayGroupedText);
+        await Assert.That(SiteBrowserAssertions.Display(null)).IsEqualTo(SiteBrowserUiTokens.MissingValue);
+    }
+
     /// <summary>Matches all profile, scenario and enabled metric views to the independent C# oracle.</summary>
     [Test]
     public async Task AC_BC_025_RealChromeControlsMatchAuthenticReportsAndRetainNativeCoverage()
@@ -30,6 +51,7 @@ internal sealed class SiteBrowserBehaviorTests
         await SiteBrowserVisualAssertions.AssertSceneLifecycle(browser.Chrome, browser.BaseUrl, cancellationToken);
         await SiteBrowserNoScriptAssertions.AssertNoScript(browser.Chrome, browser.BaseUrl, inputs, cancellationToken);
         await browser.CompleteAsync(cancellationToken);
+        await SiteBrowserCoverageAssertions.AssertNativeConversionAsync(browser.BaseUrl, inputs, cancellationToken);
     }
 
     private static async Task VerifyProfile(SiteBrowserSession browser, SiteTestInputs inputs, string profile,
@@ -66,6 +88,7 @@ internal sealed class SiteBrowserBehaviorTests
         {
             await observations.AssertRepresentativeStates();
         }
+        await AssertQueueMetricTransition(cdp, report, cancellationToken);
         await SiteBrowserAssertions.ClickScenario(cdp, SiteTokens.PointRead, cancellationToken);
         await SiteBrowserAssertions.SelectValue(cdp, SiteBrowserUiTokens.SelectorMetric, SiteTokens.ThroughputMetric, cancellationToken);
         for (var repetition = SiteTokens.Zero; repetition < report.Options.Repetitions; repetition++)
@@ -78,6 +101,20 @@ internal sealed class SiteBrowserBehaviorTests
         }
         await SiteBrowserAssertions.SelectValue(cdp, SiteBrowserUiTokens.SelectorRepetition,
             SiteTokens.MedianRepetition, cancellationToken);
+    }
+
+    private static async Task AssertQueueMetricTransition(SiteBrowserCdpClient cdp, SiteReport report,
+        CancellationToken cancellationToken)
+    {
+        await SiteBrowserAssertions.ClickScenario(cdp, SiteTokens.QueueCycle, cancellationToken);
+        await SiteBrowserAssertions.SelectValue(cdp, SiteBrowserUiTokens.SelectorMetric,
+            SiteTokens.AckMetric, cancellationToken);
+        await SiteBrowserAssertions.ClickScenario(cdp, SiteTokens.PointRead, cancellationToken);
+        await SiteBrowserAssertions.AssertQueueMetricAvailability(cdp, SiteTokens.PointRead, cancellationToken);
+        var snapshot = await SiteBrowserAssertions.ReadSnapshot(cdp, cancellationToken);
+        var expected = SiteMeasurementOracle.Rows(report, SiteTokens.PointRead, SiteTokens.ThroughputMetric,
+            SiteTokens.MedianRepetition);
+        await SiteBrowserAssertions.AssertSnapshot(snapshot, expected);
     }
 
     private static IEnumerable<string> EnabledMetrics(string scenario) => SiteTokens.Metrics.Where(metric =>
@@ -237,8 +274,17 @@ internal static class SiteBrowserAssertions
         await Assert.That(result.GetBoolean()).IsTrue();
     }
 
-    private static string Display(double? value) => value is null ? SiteBrowserUiTokens.MissingValue :
-        value.Value.ToString(SiteBrowserUiTokens.FormatNumberPattern, DisplayCulture);
+    internal static string Display(double? value)
+    {
+        if (value is null)
+        {
+            return SiteBrowserUiTokens.MissingValue;
+        }
+        var shortestDecimal = decimal.Parse(value.Value.ToString(SiteBrowserUiTokens.RoundTripNumberPattern, CultureInfo.InvariantCulture),
+            NumberStyles.Float, CultureInfo.InvariantCulture);
+        var rounded = decimal.Round(shortestDecimal, SiteBrowserUiTokens.DisplayDecimalPlaces, MidpointRounding.AwayFromZero);
+        return rounded.ToString(SiteBrowserUiTokens.FormatNumberPattern, DisplayCulture);
+    }
 
     private static string ScriptWithArguments(string template, string first, string? second = null)
     {

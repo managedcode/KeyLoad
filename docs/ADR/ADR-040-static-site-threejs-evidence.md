@@ -1,6 +1,6 @@
 # ADR-040: Static product website, conceptual Three.js and qualified evidence
 
-Status: Accepted; implementation and GitHub site qualification in progress. Date: 2026-10-02. Owner: website lead. Related: REQ-BC-011–018 / AC-BC-011–018, [BenchmarkComparisons](../Features/BenchmarkComparisons.md), [acceptance](../../site-design.acceptance.md), [plan](../../site-design.plan.md), ADR-021/032/034.
+Status: Implemented for the website scope; exact-H GitHub qualification, automatic publication and strongest final review complete. Date: 2026-10-02. Owner: website lead. Related: REQ-BC-011–018 / AC-BC-011–018, [BenchmarkComparisons](../Features/BenchmarkComparisons.md), [acceptance](../../site-design.acceptance.md), [plan](../../site-design.plan.md), ADR-021/032/034.
 
 ## Context and decision
 
@@ -22,7 +22,7 @@ flowchart LR
 
 ## Dependency, renderer and preservation contract
 
-Pin Three.js0.186.1 MIT from [official npm distribution](https://registry.npmjs.org/three/-/three-0.186.1.tgz), source commit9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8. Expected SHA512 integrity: `sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==`. Vendor only original build/three.webgpu.js, build/three.core.js and LICENSE under site/Features/BenchmarkComparisons/vendor/three/0.186.1, with file hashes, bytes and gzip sizes in a manifest. No package/framework/global installation or browser CDN. Preserve unmodified distribution bytes and license; this narrowly documented exception to authored LOC/type/function/literal limits applies only to those third-party files. The root `.gitattributes` also ignores only upstream `space-before-tab` findings in these exact two JavaScript files so generic diff checks do not mutate the hash-verified distribution; authored files receive ordinary checks. Repository-authored wrappers obey all limits. Upgrade replaces the versioned directory coherently after full hash/browser/CI review; no second legacy renderer is retained.
+Pin Three.js0.186.1 MIT from [official npm distribution](https://registry.npmjs.org/three/-/three-0.186.1.tgz), source commit9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8. Expected SHA512 integrity: `sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==`. Vendor only original build/three.webgpu.js, build/three.core.js and LICENSE under site/Features/BenchmarkComparisons/vendor/three/0.186.1, with file hashes, bytes and gzip sizes in a manifest. No package/framework/global installation or browser CDN. Preserve unmodified distribution bytes and license; this narrowly documented exception to authored LOC/type/function/literal limits applies only to those third-party files. The shared workspace additionally records upstream `space-before-tab` handling for the pinned vendor files in `.gitattributes`. Earlier isolated A–E validation candidates retained their parent attributes; exact H includes the separately reviewed attributes integration, preserving all original vendor bytes. Preserve the hash-verified distribution bytes; authored files receive ordinary checks. Repository-authored wrappers obey all limits. Upgrade replaces the versioned directory coherently after full hash/browser/CI review; no second legacy renderer is retained.
 
 Use WebGPURenderer, await init and node materials. The [native renderer](https://threejs.org/manual/pages/webgpurenderer) selects WebGPU or its own WebGL2 backend; no custom compatibility fallback. Use public onDeviceLost/onError from the [pinned renderer source](https://raw.githubusercontent.com/mrdoob/three.js/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/src/renderers/common/Renderer.js), not private backend/device access. Intentional device.destroy is ignored by the [pinned backend loss handler](https://raw.githubusercontent.com/mrdoob/three.js/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/src/renderers/webgpu/WebGPUBackend.js); it cannot be presented as actual public loss qualification.
 
@@ -113,7 +113,7 @@ This does not broaden website delivery into product/RF3 coverage qualification.
 
 Migrate site/index.html/app.js/styles.css/measurements.mjs and scripts/measurements.test.mjs to the accepted feature/template/TUnit surfaces as one reviewed change; keep scripts/build.mjs as a thin executable composition entry and favicon as a shared asset. Add SiteTests to the solution, architecture and current governance inventory without changing existing policy text. ADR-032 old layout debt is closed only for the migrated site, not for unrelated backend/tests.
 
-Benefits: a clear product identity, same-origin bounded graphics, accessible evidence and an independently runnable site qualification gate. Costs: a lazy vendor payload recorded separately and another centrally governed TUnit project; browser/device review is still necessary. Rollback restores the prior coherent asset/build set and evidence access, retains immutable measured artifacts, and never weakens policy/tests or mixes incompatible module versions. Current Core, quality/coverage, schema3/cluster comparisons, DNS and publication remain distinct pending gates.
+Benefits: a clear product identity, same-origin bounded graphics, accessible evidence and an independently runnable site qualification gate. Costs: a lazy vendor payload recorded separately and another centrally governed TUnit project; browser/device review is still necessary. Rollback restores the prior coherent asset/build set and evidence access, retains immutable measured artifacts, and never weakens policy/tests or mixes incompatible module versions. At this historical design stage, Core, quality/coverage, schema3/cluster comparisons, DNS and publication remained distinct pending gates; the scoped website closure below records the fulfilled website qualification and publication.
 
 ### Native equal-span function contract
 
@@ -137,3 +137,311 @@ production node/ or browser/sessions/ coverage denominators. Preserve original
 native bytes and cleanup of owned temporary files; mutated malformed/crossing
 copies must not be labeled or retained as actual executed native evidence. Root
 reviews the retained packet and actual GitHub converter assertions before join.
+
+Read-only hosted-runtime preflight confirms that validation discovers Chrome and
+configures browser/native coverage roots. The separate legacy publish job lacks
+these required site-suite inputs and checks out the measured revision, which may
+predate this suite. It is not a qualified delivery path for the redesigned site.
+Publication remains explicitly deferred: a future approved two-revision release
+must use qualified website source, independently authenticated measured evidence
+and the complete browser/native coverage inputs. Do not run publish or count its
+existing configuration as passing publication; no validation test may be skipped
+to bypass this boundary.
+
+### Observed portability repair implementation contract
+
+Related REQ/AC-BC-016/017/024/025: actual run36994330874 proves that historical
+gzip length is not vendor byte identity. The accepted repair preserves original
+vendor/manifest bytes and all fixed identity checks, validates historical
+compression as a positive safe integer, and measures current compression in the
+separate CLI `compression` receipt frozen in site-design.acceptance.md.
+
+1. Root records the actual failing positive-build/browser baseline, acceptance
+   schema and exact bounded task graph. Strongest contract review must be COMPLETE
+   before writes; no hosted missing gzip value is invented.
+2. TASK-SITE-VENDOR-PORTABILITY-019 (gpt-6-luna high) owns only build-site.mjs plus
+   new SiteVendorBuildTests/SiteVendorTestScope/SiteVendorTokens. Tests first use
+   actual isolated unchanged source/vendor/authentic reports, retain successful
+   metadata portability and identity/byte/hash/length/invalid-gzip rejections.
+3. TASK-SITE-BUILDER-DIAGNOSTICS-020 (gpt-6-luna high) owns only SiteBuildSupport,
+   SiteBrowserSession, SiteBuildTests, SiteEvidenceValidatorTests and new
+   SiteBuilderDiagnostics/SiteBuilderDiagnosticsTests/SiteBuilderTokens. Persist
+   actual bounded completed-process receipts under the evidence sibling directory,
+   correct the pre-Chrome failure label and strengthen intended negative errors.
+   Preserve all process APIs, bounds, timeout/cancellation/drain/cleanup contracts.
+4. Both scopes preserve vendor, measurements, analyzers, configuration, workflow,
+   source inventories and thresholds. Unknown contract, overlap, dependency or
+   limits issue stops/escalates; do not silently expand ownership.
+5. Root joins all COMPLETE source/hash/assertion packets, strongest full review,
+   development build/format/static checks, ordinary exact-source candidate and
+   complete real GitHub qualification. Site/native80/70/90 and every real browser
+   assertion remain mandatory. Missing/partial/failed evidence blocks final007.
+
+No runtime/database migration. Rollback restores the coherent builder/test source
+set while retaining original vendor/raw reports and failed-run artifacts. A
+reversion cannot qualify the still-failing builder. Publication remains separate
+until the owner's subsequent fresh-evidence extension is frozen and qualified.
+
+### Fresh-evidence publication implementation contract
+
+The owner's subsequent request introduces REQ/AC-BC-028 in the same canonical
+slice. [Publication brainstorm](../../site-publication.brainstorm.md),
+[acceptance](../../site-publication.acceptance.md) and [plan](../../site-publication.plan.md)
+preserve the earlier design task's scope records; this new workflow task resumes
+publication implementation. DNS remains excluded. Mandatory measured-source
+checkout is preserved: site/measured SHA fields are separately recorded and equal
+for publication. Manual candidate validation cannot deploy.
+
+```mermaid
+flowchart TD
+    MainCI[Own main push current attempt] --> Select[Trusted select job]
+    Select --> Metadata[Authenticated workflow run jobs artifacts]
+    Metadata --> ZIP[One ID pinned SHA verified ZIP]
+    ZIP --> Setup[Mandatory real TUnit BCL input preparation]
+    Setup --> Qualify[Full existing site Analyzer Chrome coverage]
+    Qualify --> Raw[Compare exact extracted and emitted report bytes]
+    Raw --> Recheck[Current highest run attempt and immutable tuple]
+    Recheck --> Publish[Least privilege deploy job]
+```
+
+1. TASK-SITE-PUBLICATION-PLAN-023 strongest read-only planning and exact recorded
+   contract approval precede every021/022 write. AC028's complete positive/negative/
+   edge/error/test/operational matrix controls execution. No policy weakening.
+2. TASK-SITE-GITHUB-EVIDENCE-021 (gpt-6-luna high), after019 source completion,
+   owns only four NEW production modules github-evidence-contracts/runs/proof.mjs
+   and github-evidence.mjs plus six NEW SiteGitHubRunSelectionTests,
+   SiteGitHubJobArtifactTests, SiteGitHubEvidenceDigestTests,
+   SiteGitHubEvidenceFreshnessTests, SiteGitHubEvidenceScope, SiteGitHubEvidenceTokens.
+   Exact CLI/errors/receipt and captured metadata fields are frozen in acceptance.
+   Real bounded Node/native execution; tests first with authentic captures and
+   controlled mutations. No HTTP/ZIP parser, fabricated API, arithmetic or existing
+   source/config/docs changes. All four modules require critical90 coverage.
+3. TASK-SITE-GITHUB-ARCHIVE-022 (gpt-6-luna high), after020 refreshed completion,
+   owns only six NEW SiteGitHubArchiveSetup/Reader/Receipt/Tests/RejectionTests/Tokens.
+   Actual verified ZIP/BCL inputs: preflight complete exact9file set and optional
+   unique empty profile dirs before output; reject links/aliases/traversal/unknown/
+   size violations, bound streams, retain unchanged ZIP/raw-file hashes. No optional
+   standalone production extractor or pre-extracted/fallback qualification path.
+4. Root owns024 shared integration: pages.yml select→fullqualify→deploy, policy/
+   protocol/docs, dedicated actual-source environment, mandatory input before/after
+   hooks, closed four-module source inventory/critical90, final raw/provenance
+   receipt. Do not edit ci.yml, runtime/TimeSeries, README or global status scopes.
+5. Workflow code/selection use trusted github.workflow_sha. Authenticated APIs read
+   full workflow/runs, exact-attempt jobs and artifacts; validate own main/push/
+   workflow/SHA/current attempt, all successful jobs and unique comparison-smoke.
+   Required successful unique step names are `Run dotnet test --project
+   tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release`,
+   `Measure 1 KiB documents, eight clients and three graph hops`, and
+   `Measure 16 KiB documents, four clients and five graph hops`. Actual numbers
+   remain metadata. Artifact digest/size/workflow_run/creation interval bind its
+   immutable ID; no nonexistent artifact job/attempt fields or digest-warning pass.
+6. Publish requires the highest main-push run number/current attempt itself fully
+   successful. Newer failed/cancelled/pending blocks refresh; older wake-ups cannot
+   roll back live evidence. Recheck complete run/attempt/SHA/job/artifact/digest
+   immediately before deploy and retain timestamp; no claim of atomic CI lock.
+7. Root joins every COMPLETE packet/full diff/hash/test matrix, strongest source
+   review, enabled build/format/static governance, then ordinary exact-source
+   candidate and complete real GitHub/native/browser thresholds. Failed/partial
+   workers block dependants; limits/unknown APIs/contracts escalate, never bypass.
+8. Actual automatic transport/cross-job transfer/permissions, qualified MAIN
+   producer, provider deployment and live JSON/UI matching remain operational
+   gates. Publish data/publication.json with real source/run/job/artifact/report/
+   qualification provenance. No source review or controlled fixture is a deploy
+   receipt. ADR stays Accepted until every required evidence gate is satisfied.
+
+No database/persisted-format migration. Rollback restores coherent workflow/site,
+retains last verified live evidence and every immutable failed/successful receipt,
+and never restores a bypass. Historical success15 cannot qualify current
+database source/schema3/readiness.
+
+### Owner-directed website-only contract revision, 2026-10-02
+
+The owner explicitly directed finishing only the website, with its separate action
+triggered by site folder changes or completion of benchmark work. This supersedes
+the earlier conservative-B and equal-site/measured-SHA publication task restrictions
+recorded above and in local AGENTS.md. Those records remain intact; no website
+qualification threshold, report validation, trust check or prior unrelated rule is
+weakened. Successful-run wording now means the actual successful comparison job;
+never falsely label a failed enclosing workflow successful.
+
+```mermaid
+flowchart LR
+    SitePush[Main site folder change] --> Pages[Separate Pages action]
+    Complete[Benchmark workflow completed] --> Pages
+    Pages --> Website[Current trusted main website]
+    Pages --> History[Authenticated runs and exact attempt jobs]
+    History --> Comparison[Highest successful comparison job]
+    Comparison --> Measured[Separate measured source inspection]
+    Comparison --> Artifact[Same verified immutable ZIP]
+    Website --> Qualify[Full site qualification]
+    Artifact --> Qualify
+    Qualify --> Fresh[Recheck website and evidence tuple]
+    Fresh --> Deploy[Deploy exact qualified output]
+```
+
+Implementation contract for REQ/AC-BC-028 under TASK021/022/024:
+1. Strongest023 approves the revised exact acceptance/plan before021 writes. Four
+   Node modules and six evidence tests retain their disjoint ownership. Exact
+   select needs_attempt/selected/unavailable states and capture trail are in the
+   updated acceptance; root owns authenticated bounded REST collection.
+2. Descending main-push run numbers and attempt history choose the highest actual
+   successful comparison-smoke job. Missing/pending/cancelled/failed comparisons
+   continue to earlier attempts/runs. Required successful steps remain the exact
+   three names above. Once successful comparison is selected, missing/expired/
+   ambiguous artifact or invalid report fails there, never silently falls back.
+   Required inaccessible history fails. Monotonic selection assumes retained
+   Actions history; administrative deletion is outside that guarantee.
+3. Current trusted-main website, measured report source and control workflow source
+   are sibling checkouts, never nested. Measured checkout is inspected for producer
+   definition/provenance only, without database build/tests. Dedicated actual site
+   SHA drives every source/coverage receipt; all existing site gates remain.
+4. Root024 adds main site/** push trigger, retains workflow_run and manual modes,
+   removes whole-CI-success conditions, and rechecks both latest trusted-main website
+   SHA and full immutable selected measurement tuple immediately before deployment.
+   A changed snapshot requires fresh qualification; previous live output remains.
+5. Exact same-ZIP preparation/raw rechecks, complete native/source/Chrome coverage,
+   metadata receipt and final publication.json remain mandatory. Actual producer
+   job/automatic consumer/provider/live proof closes this website task without
+   waiting for independently owned database/performance implementation gates.
+6. Rollback retains prior coherent source and verified public evidence. No data,
+   database deployment or DNS migration. All worker diffs/evidence join at024 and
+   strongest final review; this ADR remains Accepted pending required live proof.
+
+Actual authenticated artifact11193564650 inspection corrects the earlier inferred
+exact-nine ZIP shape: verified SHA25682aa46027dd143e3da6678e81ac881511068ac2329074ce59640952ad43ffdb2,
+357910 compressed bytes, exactly12 regular entries (three profiles × results.json,
+samples.csv, results.md, runner.log), 3469609 uncompressed bytes. Strongest023
+independently confirmed these bytes. TASK022 MUST preflight exactly these12 files,
+retain/hash every input, and publish/compare only the existing9 report files.
+Runner logs are qualification evidence, never measurement inputs. This explicit
+source-shape correction supersedes the earlier nine-entry assumption without
+allowing unknown files, weakening confinement/bounds or changing the producer.
+
+Native source compatibility under AC-BC-028/8 is strongest-approved TASK025: one
+internal Get-CoverageSourceRevision resolver in existing PowerShell shared tooling.
+Present dedicated KEYLOAD_SITE_SOURCE_REVISION is exclusive; empty/malformed
+values fail without fallback. Truly absent dedicated input preserves strict
+GITHUB_SHA for existing non-Pages callers, avoiding unrelated ci.yml edits. Main
+Verify starts revision null and resolves inside try; both inventory paths reuse
+the same resolver. Pages mandates verified actual HEAD; SiteTests never fallback.
+Eight disjoint native files and child-process-only positive/absent/invalid/changed/
+missing-source TUnit regressions are frozen in the plan. No thresholds, source
+denominators, collector, XML bytes, or previous assertions change. Root joins all
+diffs/build evidence, strongest review and real native GitHub proof before completion.
+
+Root024 centralizes authenticated REST collection in the bounded slice-owned `collect-github-evidence.sh`, called by qualification and predeploy recheck. Node gates retain their four-module pure local-capture boundary. The collector owns authenticated metadata bytes, exact-attempt search, bounded timeouts and proof orchestration; immutable ZIP download remains once in qualification. Actual workflow transport/permissions/callback proof is the explicit AC028 operational evidence requirement, not a fabricated API fixture or shell coverage claim. Root owns source review and real integration.
+
+TASK026 strongest-approved test-only E-run repair maps existing AC-BC-016/025: preserve product sorting and all assertions, qualify catalog by unique IDs plus independent explicit large/small/smoke order. The actual PostgreSQL GraphNeighbors json-16k-c4 p50 median0.47499999999999964 displays correctly as0.47; C# custom double formatting rounded an intermediate15-digit value incorrectly to0.48. Independent display oracle uses R invariant shortest decimal, decimal.Parse(Float invariant), decimal.Round(2,AwayFromZero), then existing en-US format/null marker. Eight named boundary regressions and unchanged complete real-browser flow prove it. Exactly SiteBuildTests.cs, SiteBrowserBehaviorTests.cs, SiteBrowserUiTokens.cs; ordered tests-first→sourcejoin→root build→strongest review→full GitHub Chrome/native gates. No production arithmetic/data changes or coverage waiver.
+
+Final AC028 integration closes fail-closed boundaries identified by root/strongest
+source review. Root024 proves equality and retains hashes of all four executed
+control metadata modules and the collector against the qualified website source;
+reuses that pinned control revision at deployment. Root024 validates extraction
+schema, archive binding, reports root and all twelve canonical unique rows before
+materializing TSV, counts all twelve rechecks and preserves nine final raw-byte
+comparisons. TASK021 expects identities from actual authenticated captures/ZIP,
+locates producer steps/jobs by exact name and keeps controlled history/error
+inputs distinct from provider proof. TASK022 accepts only consistent validate/false
+or publish/true archive receipts with lowercase positive bounded ZIP identity;
+validation cannot publish. Full-suite non-skipped TRX hashes/counts and actual
+Pages outcome/returned URL extend the retained operational receipts. These
+contracts preserve every existing threshold/assertion; tests-first source fixes,
+root integration/build, strongest review and actual GitHub/provider joins remain
+required in that order. No exception authorizes fake data or a skipped gate.
+
+Strongest022 source review completes the frozen archive edge/error methodology:
+the valid optional-empty-directory format case preserves all twelve authenticated
+file bytes and adds only an empty profile directory; it is controlled BCL input
+validation, never provider qualification. Malformed copies stay rejection-only.
+A BCL NoCompression copy with only a known central uncompressed-size field
+corrupted exercises actual streamed/declared mismatch through PrepareAsync;
+no production parser or substitute dependency is added. Confined extracted-input
+mutation exercises actual VerifyUnchangedAsync without global environment changes.
+TASK022 retains its exact six-file ownership, stages tests/source/static packet
+before root build and strongest join, then full GitHub qualification. The original
+authenticated ZIP alone feeds the real website/browser/publication flow.
+
+TASK030 closes the final source-review malformed-input contract under
+REQ/AC-BC-028/2,4,5,9.029 owns tests first; root records the real exact-SHA red
+GitHub baseline before a bounded economical030 worker edits only the existing
+four github-evidence modules. Require positive unique IDs across all jobs/artifact
+pages, exactly three named step records with distinct positive numbers, complete
+canonical nonduplicate lowercase-hash metadata records including mandatory
+captures/selected attempt pair and paired extra trail, ordered parseable job and
+artifact times, and positive bounded archive/artifact byte identity. Preserve
+commands, receipt schema, error families, valid inputs, module inventory and all
+thresholds. Root owns integration/build/format/provenance; strongest source and
+exact-SHA GitHub full-suite/coverage joins precede deployment. Missing input fails
+closed; rollback retains prior verified public evidence and coherent validator
+source. This ADR stays Accepted until actual workflow/provider/live evidence.
+
+TASK032 is the bounded existing-control repair under REQ/AC-BC-014/025. Strongest
+source review found undefined METRIC_ID.throughput on queue-phase metric→nonqueue
+scenario transition. Economical worker owns only SiteBrowserBehaviorTests.cs
+tests-first and benchmark-lab.mjs after the actual red GitHub baseline. Real
+Chrome selects QueueCycle ACK then PointRead for each authentic profile and checks
+the independent throughput oracle and disabled queue metrics. Replace the
+undefined reference with existing CONFIG.defaultMetric. No arithmetic, renderer,
+vendor, source inventory, threshold or deployment boundary changes. Root and
+strongest join exact source/build/format and full GitHub browser evidence.
+
+TASK034 is a test-oracle correction under REQ/AC-BC-016. Actual F4 full-suite
+regression looks for `output/site/Features/...`, but the accepted builder emits
+`output/Features/...`. Ordered implementation contract: root records real failing
+TRX and this contract; economical worker owns only SiteAssetTokens.cs and
+SiteBuildArtifacts.cs, adds a distinct named emitted-feature prefix and changes
+exactly three output-path uses; root inspects source/byte/vendor assertions and
+serial development build/format; strongest reviews the two-file diff; complete
+GitHub native/Site/Chrome/coverage qualification joins before delivery. Keep all
+repository source prefixes, fifteen authored assets, four vendor files, raw
+report/hash checks and seventeen-source/nine-critical coverage inventory. No
+builder, API, dependency, data, renderer or deployment migration; rollback is the
+coherent two-file caller restoration with failure evidence retained. Existing
+complete-preview test is the positive regression; no helper-mirroring test or
+qualification waiver is added. Other implementation owners remain disjoint.
+
+TASK035 completes AC-BC-028's existing bounded history rejection matrix. The
+capable caller worker owns only SiteGitHubEvidenceDigestTests.cs and adds a
+controlled10001-complete-pair receipt case to the real archive CLI regressions,
+keeping required original captures/selected pair and every existing assertion.
+Reuse MaxPairs and canonical path helpers; E_ARCHIVE rejection proves the
+receipt's structural bound without fake transport or performance data. Root
+reviews the single-file diff, serialized development build/format, strongest
+source join and complete real GitHub gates in that order. No data/contract/API/
+deployment migration or threshold change; production ownership stays with030.
+
+### Native browser zero-delta implementation contract
+
+REQ/AC-BC-024/025/028 retain valid CDP empty browser arrays as original hashed
+zero-contribution receipts. The official Profiler array contract and actual G
+initial-blank receipt establish the source error; Node-empty/non-array/malformed
+remain rejected. Every browser session independently requires mapped authored
+functions; another valid session cannot hide an empty-only or unmapped-only one.
+All17sources,9critical gates,80/70/90 thresholds, origins/source hashes and raw
+evidence remain mandatory. No Chrome capture filtering or report-schema change.
+
+Ordered stages: root records G full-suite baseline and acceptance; strongest
+approves this contract; TASK037 gpt-6-sol high owns tests-first ONE post-Complete
+Behavior call plus NEW SiteBrowserCoverageAssertions/Fixture/Tokens; TASK036
+gpt-6-luna high then owns ONLY NativeRanges/ArtifactReader and named error token
+in CoverageTokens if needed; root joins all terminal diffs/hashes, serial build/
+format/governance; strongest source review; complete exact-source real GitHub
+Analyzer/native/Site/Chrome/coverage before main/provider/live final join.
+Tests use unchanged ReadAsync and owned converter-fixtures copies of the actual
+complete browser session, manifest and mapped Node bytes, without global env
+mutation or fake execution. Positive retains every byte/hash with zero empty
+credit; controlled second sessions prove empty-only/anonymous-only/missing/
+non-array/foreign-origin and empty Node rejection even beside valid evidence.
+Ownership, dependencies, commands, terminal states and required evidence are
+tracked in site-publication.plan.md. No public API/data/runtime/dependency
+migration. Rollback restores the coherent parser/reader/tests and previous verified
+public output, retaining failed evidence; this ADR remains Accepted until actual
+publication and complete acceptance evidence exist.
+
+## Scoped implementation evidence, 2026-10-02
+
+REQ/AC-BC-011–018/024/025/027/028 are implemented and qualified at exact H `6a82c86d0113270335368bbfbff0080ea1c1800a`, with strongest TASK-SITE-REVIEW-007 documentation/evidence join COMPLETE. [Canonical status and immutable receipts](../implementation/site-design.json) bind complete GitHub validation37011817610, automatic push37013009381 and workflow_run37014111869 to118+70 non-skipped tests, unchanged native and JavaScript source/critical gates, actual predeploy tuple, original12/final9 raw files and exact35-file Pages output. All previously failed attempts remain retained.
+
+Both automatic publications succeeded at https://www.keyload.cloud/; current provider evidence confirms the authorized www/HTTPS update and live apex301 redirect. Live HTML/publication/catalog/raw-report bytes match qualified output. Manual desktop/mobile/WebGPU observations supplement the real GitHub Chrome qualification and preserve the narrower physical-device-loss exception. Schema3/advanced benchmarks, database/RF3/endurance/power-loss qualification and production readiness are separate; their status is not changed by this ADR closure. DNS was not modified.
+
+Implementation ownership and ordered stages above remain the executed contract. Rollback retains the coherent prior verified website and immutable evidence; it never restores a publisher bypass or suppresses tests/freshness. This immutable H as-of record may be delivered in one docs-only descendant without attributing H tests to that descendant; subsequent automatic qualification remains source-accurate in Actions.

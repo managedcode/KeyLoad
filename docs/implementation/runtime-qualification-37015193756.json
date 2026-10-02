@@ -1,0 +1,351 @@
+{
+  "runId": 37015193756,
+  "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+  "branch": "codex/runtime-qualification-20261002",
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37015193756",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 110864228001,
+      "name": "docker-rf3",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37015193756/job/110864228001",
+      "conclusion": "failure"
+    },
+    {
+      "id": 110864228200,
+      "name": "verify (ubuntu-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37015193756/job/110864228200",
+      "conclusion": "failure"
+    },
+    {
+      "id": 110864228210,
+      "name": "analyzer-rules",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37015193756/job/110864228210",
+      "conclusion": "success"
+    },
+    {
+      "id": 110864228224,
+      "name": "verify (windows-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37015193756/job/110864228224",
+      "conclusion": "failure"
+    },
+    {
+      "id": 110864228402,
+      "name": "comparison-smoke",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37015193756/job/110864228402",
+      "conclusion": "failure"
+    },
+    {
+      "id": 110864228540,
+      "name": "verify (macos-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37015193756/job/110864228540",
+      "conclusion": "failure"
+    }
+  ],
+  "unitSummaries": {
+    "ubuntu": {
+      "total": 781,
+      "passed": 778,
+      "failed": 3,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "macos": {
+      "total": 781,
+      "passed": 777,
+      "failed": 4,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "windows": {
+      "total": 781,
+      "passed": 779,
+      "failed": 2,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    }
+  },
+  "unitFailureUnion": [
+    {
+      "name": "AcMp006_MissingAndMalformedStoredBodiesStillRejectThenRecover",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "source": "tests/KeyLoad.UnitTests/Features/Messaging/QueueBodyAccountingTests.cs",
+      "line": 110
+    },
+    {
+      "name": "CancellationWhileJsonIsGrowingStopsBeforeRawCsvIsPublished",
+      "platforms": [
+        "ubuntu",
+        "macos"
+      ],
+      "source": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ReportFileTests.cs",
+      "line": 95
+    },
+    {
+      "name": "AcMp006SingleMessageReceiveStopsAtFirstReadyRecordAndKeepsFifo",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "source": "tests/KeyLoad.UnitTests/Features/Messaging/ReadyQueueRangeTests.cs",
+      "line": 13
+    },
+    {
+      "name": "MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest",
+      "platforms": [
+        "macos"
+      ],
+      "source": "tests/KeyLoad.UnitTests/Features/ClientApi/KeyLoadClientTransportTests.cs",
+      "line": 59
+    }
+  ],
+  "historicalRepairSummary": {
+    "runId": 37015193756,
+    "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+    "exactCasePassingOnAllThreeOs": 48,
+    "correctedFixtureMethodPassingOnAllThreeOs": 1,
+    "remainingFailureUnion": 4
+  },
+  "analyzerSummary": {
+    "total": 88,
+    "passed": 88,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "timedOut": 0,
+    "flaky": 0
+  },
+  "rf3Summary": {
+    "total": 26,
+    "passed": 8,
+    "failed": 18,
+    "skipped": 0,
+    "cancelled": 0,
+    "timedOut": 0,
+    "flaky": 0
+  },
+  "comparisonSummary": {
+    "total": 4,
+    "passed": 2,
+    "failed": 2,
+    "skipped": 0,
+    "cancelled": 0,
+    "timedOut": 0,
+    "flaky": 0
+  },
+  "recovery": "not_run_after_unit_failure_on_all_three_OSes",
+  "timeSeriesPartialEvidence": {
+    "path": "comparison-suite/timeseries/timeseries-results.json",
+    "sha256": "8cb48d9ecfeea7118e9f59a90231eec183e1381747325104224466130b863c86",
+    "attempts": 20,
+    "correctnessChecks": 20,
+    "allPassed": true,
+    "sampleCount": 48,
+    "targets": [
+      {
+        "name": "TimescaleDB TimeSeries",
+        "storageModel": "Persisted TimescaleDB hypertable",
+        "persistenceGuarantee": "Container-lifetime TimescaleDB hypertable; no cross-run volume and no replica guarantee",
+        "acknowledgementGuarantee": "PostgreSQL transaction commit acknowledged by one server",
+        "image": "docker.io/timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e",
+        "packageVersion": null
+      },
+      {
+        "name": "KeyLoad TimeSeries",
+        "storageModel": "Persisted RF3 time-series",
+        "persistenceGuarantee": "RF3 process-durable storage; power-loss durability unqualified",
+        "acknowledgementGuarantee": "Quorum acknowledgement through the public .NET SDK",
+        "image": "KeyLoad RF3 Dockerfile build at ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "packageVersion": null
+      },
+      {
+        "name": "ManagedCode.TimeSeries",
+        "storageModel": "in-memory bucket aggregation",
+        "persistenceGuarantee": "none; no persistence, recovery, or replication",
+        "acknowledgementGuarantee": "AddNewData returns after an in-process bucket update",
+        "image": null,
+        "packageVersion": "10.0.0"
+      }
+    ],
+    "testGate": "failed_native_runner_exit_wait_foreign_schema_check_not_reached"
+  },
+  "reportReceipts": [
+    {
+      "path": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "ca028c5923b12ec2712f9b02b8a4193b2777ea60f2f5b7dcc3086502eb6977ba",
+      "summary": {
+        "total": 781,
+        "passed": 778,
+        "failed": 3,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "path": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "sha256": "4b6f00f4fd665e36797e617194a66eaaf698a089ba5358c491e4c32b2759cff5",
+      "summary": {
+        "total": 781,
+        "passed": 777,
+        "failed": 4,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "path": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+      "sha256": "2464433e47be413af42977b2db3e92fb96426c0a2a548c4255671bc1f5d059f8",
+      "summary": {
+        "total": 781,
+        "passed": 779,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "path": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "sha256": "998608168e291fa80569c9672d1ce026f6387ca9f4044fcf7f5f2af294557dc0",
+      "summary": {
+        "total": 26,
+        "passed": 8,
+        "failed": 18,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "path": "comparison-test-results/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "sha256": "0156be0d5b2645ad79e224127d9c401829b16617262a521aad23bee18356b106",
+      "summary": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "path": "analyzer-rule-evidence/TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "374e0b6e98d523099b868dfdb0655738810d1b30638d9818bb7468bf3e968ea3",
+      "summary": {
+        "total": 88,
+        "passed": 88,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    }
+  ],
+  "artifactReceipts": [
+    {
+      "id": 11230535035,
+      "name": "comparison-suite",
+      "sizeBytes": 4269,
+      "githubDigest": "sha256:35907e00747c3a042a04adc4412d634d6134aebd1c7a08063dd1ed60a95c4ed7",
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11230221248,
+      "name": "test-results-macos-latest",
+      "sizeBytes": 576352,
+      "githubDigest": "sha256:b01d2d81c303474aeca81ec1d0e4dd7664836778af16e85eac3d1fe93077ac28",
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11229963817,
+      "name": "comparison-test-results",
+      "sizeBytes": 112575,
+      "githubDigest": "sha256:011a53c50080329a7ee3436ac7cad1459c088d8d4b93fd10e14e997070b4ccee",
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11229888997,
+      "name": "code-quality-comparisons",
+      "sizeBytes": 675300,
+      "githubDigest": "sha256:f287ed05721a9c573f7204f653dc3b81caab7013794f5cbba8d9f9fc348732f9",
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11229682832,
+      "name": "test-results-windows-latest",
+      "sizeBytes": 582748,
+      "githubDigest": "sha256:e04d0e52e316ae4528bab517e871424af4f80b159b20ed00a53b40aca0327a47",
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11229387737,
+      "name": "code-quality-ubuntu-latest",
+      "sizeBytes": 1290579,
+      "githubDigest": "sha256:b87428139029890306f7bb57d287c7a7b982422731125960c539a19973614217",
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11229348708,
+      "name": "docker-rf3-qualification",
+      "sizeBytes": 127291,
+      "githubDigest": "sha256:04a34dffe8e54186309b22380ac5a4c466525579d19b44f64b943bd933a3ff4b",
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11229298306,
+      "name": "code-quality-windows-latest",
+      "sizeBytes": 1295764,
+      "githubDigest": "sha256:59a46788715db57a5d462af6ab95ed86a52be371f90e2a615353832bc589ddbf",
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11229229073,
+      "name": "code-quality-macos-latest",
+      "sizeBytes": 1295707,
+      "githubDigest": "sha256:38dbb98066f504a44e8bce54bd37f81bf5ed1f588a8bd0ccd5a63c5cdb5e1325",
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11229222796,
+      "name": "test-results-ubuntu-latest",
+      "sizeBytes": 579849,
+      "githubDigest": "sha256:0c74e25fad5e87a93ff110dc5bc57839e6357ed765c50326ead11aabf44b1398",
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11229179044,
+      "name": "code-quality-docker-rf3",
+      "sizeBytes": 676027,
+      "githubDigest": "sha256:52afe01aeae0e66962bde0979a355901dbf085552d2b17278e7e267ebab10a5c",
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11229019275,
+      "name": "analyzer-rule-evidence",
+      "sizeBytes": 186271,
+      "githubDigest": "sha256:fcf948b4cce25379a271890a8e3315c711d3db95383b7c1fc23d810a23852b65",
+      "archiveDownloadDigestVerified": false
+    }
+  ],
+  "downloadDirectory": "/private/tmp/keyload-runtime-ci-37015193756/",
+  "localTestsExecuted": false
+}

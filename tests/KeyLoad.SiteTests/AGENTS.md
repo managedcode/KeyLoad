@@ -19,3 +19,9 @@
 ## Protected risks
 - Never omit a required test, replace unavailable reports with fabricated fixture measurements, weaken analyzers, leak process environment/credentials or mistake historical measured SHA for website source SHA. Keep process timeouts/cancellation/stderr/exit-code checks and isolate disposable output.
 - Worker ownership is only Features/BenchmarkComparisons test files. Root owns this policy, project, solution, workflow, shared contracts and governance inventory.
+
+## BC028 publication qualification inputs
+- Read `site-publication.acceptance.md`, `.plan.md` and ADR-040 before SiteGitHub-prefixed work. New worker scopes are disjoint and exact; root alone wires shared hooks, environment/source inventories and workflow.
+- The new publication qualification path MUST prepare authentic reports from the same digest-verified immutable GitHub ZIP through mandatory BCL before-session setup, with complete confinement/file-set/bounds preflight before owned output. No pre-extracted fallback, fake transport or custom ZIP parser.
+- Preserve archive/raw-file hashes across extraction/tests/final build and every existing numerical/browser assertion. Controlled malformed metadata/ZIP copies are rejection data only, never provider/publication proof.
+- `KEYLOAD_SITE_SOURCE_REVISION` MUST identify and match actual checkout HEAD in the new path. All four authored Node evidence modules MUST enter the closed source inventory and individual critical90 gate; no existing denominator may be removed.

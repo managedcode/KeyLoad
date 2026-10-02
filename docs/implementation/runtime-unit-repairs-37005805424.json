@@ -7,14 +7,14 @@
     "macos": 53,
     "windows": 50
   },
-  "qualification": "All symptoms are from the old baseline SHA. Current accepted repairs/fixture changes are not proven until the next exact-SHA GitHub CI run passes; tombstone mappings are explicitly source-cause inference pending CI.",
+  "qualification": "Baseline failures remain historical facts at6949fa0. At ad594642, 48 exact cases pass on all three OSes and one corrected catalog fixture method passes all current cases; four distinct cases still fail. Subsequent source repairs remain unqualified.",
   "notes": [
     "Queue receive/renew requests contain no immutable-array fields; tombstone-related JSON fallout remains an inference awaiting actual repaired-SHA CI.",
     "Catalog contains 47 tools. Old fixtures expected 37 entries and rejected cursor37 despite it being valid; corrected terminal46/invalid47 and continuation bytes preserve the 65536-byte limit.",
     "NullValueOverheadBytes=2 preserves exact canonical JSON frame limits: null is two bytes longer than quoted empty base64.",
     "Missing quota fixture now encodes the canonical resource-scoped key with public KeyCodec and proves its actual presence before and absence after deletion.",
     "The existing property-name surrogate failures are addressed by accepted MCP-FRAME-W validated native Utf8JsonReader decoding; there is no JsonElement.GetString path in those cases.",
-    "No source repair attribution or author report qualifies a failing baseline test. Every row remains pending a new exact-SHA GitHub run."
+    "Only actual exact-SHA report cases qualify repairs. One retired catalog argument is labeled corrected_fixture_current_method_passed rather than claiming the original argument ran."
   ],
   "failures": [
     {
@@ -31,7 +31,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcBlob003CurrentPrincipalRowAndCreatorAuthorityAreRecheckedForEveryRead",
@@ -47,7 +69,29 @@
       ],
       "repairTask": "TASK-RUNTIME-ADMISSION-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "The restricted Begin upload omitted the required owner row access, so it fails at write-scope authorization before per-read authority assertions. Accepted fixture passes RowAccess(OwnerAlice); wrong-owner, creator, and revoked-authority checks remain."
+      "assessment": "The restricted Begin upload omitted the required owner row access, so it fails at write-scope authorization before per-read authority assertions. Accepted fixture passes RowAccess(OwnerAlice); wrong-owner, creator, and revoked-authority checks remain.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcBlob007MissingCurrentStateFailsEveryOperationWithoutEffects",
@@ -63,7 +107,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcBlob005MissingPersistedResourceQuotaAfterReopenFailsClosed",
@@ -79,7 +145,29 @@
       ],
       "repairTask": "TASK-RUNTIME-BLOB-QUOTA-FIXTURE-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Corrupt the actual quota row using public KeyCodec resource-scope components, with pre/post presence assertions; preserve three real reopens and Corruption/no-effects checks."
+      "assessment": "Corrupt the actual quota row using public KeyCodec resource-scope components, with pre/post presence assertions; preserve three real reopens and Corruption/no-effects checks.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcBlob004ReusedUploadIdCannotReplayAnotherLifetimeOutcome",
@@ -95,7 +183,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcBlob003UploadStateAuthoritySurvivesHeadOwnerChangeButHeadMutationsDoNot",
@@ -111,7 +221,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcBlob005ExpiredUploadReclaimReleasesUnusedReservationExactlyOnce",
@@ -127,7 +259,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcBlob004DeleteRetiresCurrentVersionBeforeBoundedReclaimAndFinalReceiptReplay",
@@ -143,7 +297,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcBlob004RestoreRebindsAuthorityAndPreservesPublishedBytesAndActivePartForReclaim",
@@ -159,7 +335,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "MissingAndWrongSequencePointsCannotPartiallyPurge",
@@ -178,7 +376,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI."
+      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "NativePagesTraverseTheCompleteCatalogExactlyOnce",
@@ -195,7 +415,29 @@
       ],
       "repairTask": "TASK-RUNTIME-MCP-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "InvalidHeaderUsesFixedSafeValidation(EmptyNameValues)",
@@ -212,7 +454,29 @@
       ],
       "repairTask": "TASK-RUNTIME-MCP-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "InvalidHeaderUsesFixedSafeValidation(EmptySession)",
@@ -229,7 +493,29 @@
       ],
       "repairTask": "TASK-RUNTIME-MCP-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "InvalidHeaderUsesFixedSafeValidation(EmptyMethodValues)",
@@ -246,7 +532,29 @@
       ],
       "repairTask": "TASK-RUNTIME-MCP-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "InvalidHeaderUsesFixedSafeValidation(EmptyLastEvent)",
@@ -263,7 +571,29 @@
       ],
       "repairTask": "TASK-RUNTIME-MCP-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "CanonicalCursorResumesAtExactIndex(36)",
@@ -280,7 +610,29 @@
       ],
       "repairTask": "TASK-RUNTIME-MCP-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcBlob004NormalizationReopensAcrossMoreThanOneStateAndHeadPage",
@@ -296,7 +648,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "NativePageMutationCannotAlterLaterDiscovery",
@@ -313,7 +687,29 @@
       ],
       "repairTask": "TASK-RUNTIME-MCP-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "MalformedCursorUsesOneFixedSafeValidation(keyload-mcp-v1:37)",
@@ -330,7 +726,29 @@
       ],
       "repairTask": "TASK-RUNTIME-MCP-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "corrected_fixture_current_method_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "all_current_cases_of_corrected_fixture_method",
+            "currentCases": 15,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "all_current_cases_of_corrected_fixture_method",
+            "currentCases": 15,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "all_current_cases_of_corrected_fixture_method",
+            "currentCases": 15,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "EscapedUnpairedSurrogatesUseSafeValidation({\"\\uD800\":0})",
@@ -347,7 +765,29 @@
       ],
       "repairTask": "TASK-RUNTIME-MCP-FRAME-W",
       "disposition": "accepted-product-repair-awaiting-CI",
-      "assessment": "Remove unsafe ValueTextEquals before one validated property decode; native GetString invalid-surrogate exceptions map to fixed Validation. Preserve raw-byte/count/id budgets and duplicate ordering."
+      "assessment": "Remove unsafe ValueTextEquals before one validated property decode; native GetString invalid-surrogate exceptions map to fixed Validation. Preserve raw-byte/count/id budgets and duplicate ordering.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "EscapedUnpairedSurrogatesUseSafeValidation({\"\\uDC00\":0})",
@@ -364,7 +804,29 @@
       ],
       "repairTask": "TASK-RUNTIME-MCP-FRAME-W",
       "disposition": "accepted-product-repair-awaiting-CI",
-      "assessment": "Remove unsafe ValueTextEquals before one validated property decode; native GetString invalid-surrogate exceptions map to fixed Validation. Preserve raw-byte/count/id budgets and duplicate ordering."
+      "assessment": "Remove unsafe ValueTextEquals before one validated property decode; native GetString invalid-surrogate exceptions map to fixed Validation. Preserve raw-byte/count/id budgets and duplicate ordering.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "ErrorBodiesArePreservedWhenValidAndBoundedWhenNullMalformedOrOversized",
@@ -380,7 +842,29 @@
       ],
       "repairTask": "TASK-RUNTIME-ERROR-DECODING-W",
       "disposition": "accepted-source-and-oracle-repair-awaiting-CI",
-      "assessment": "Observed fallback body is \"The read response is unavailable.\" while test expected the server wording. Accepted repair is confined to BoundedProblemReader and maps malformed private Problem JSON to the existing bounded fallback; preserve path-specific fallback, cancellation/I/O/success behavior, and original command ID."
+      "assessment": "Observed fallback body is \"The read response is unavailable.\" while test expected the server wording. Accepted repair is confined to BoundedProblemReader and maps malformed private Problem JSON to the existing bounded fallback; preserve path-specific fallback, cancellation/I/O/success behavior, and original command ID.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp005RangePreservesRevisionOrderCutAndLookahead",
@@ -396,7 +880,29 @@
       ],
       "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp005GenerationAndRetentionFailuresRemainCallerVisible",
@@ -412,7 +918,29 @@
       ],
       "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp005RangeWorkStopsBeforeTheNextEventAndAHealthyReadStillWorks",
@@ -428,7 +956,29 @@
       ],
       "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp005PersistedFieldPoliciesRedactPayloadAndHeaders",
@@ -444,7 +994,29 @@
       ],
       "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp005CompletePageMetadataCountsTowardTheResultLimit",
@@ -460,7 +1032,29 @@
       ],
       "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp005CallerCancellationDoesNotPoisonTheFollowingRead",
@@ -476,7 +1070,29 @@
       ],
       "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
       "disposition": "accepted-fixture-repair-awaiting-CI",
-      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp006_MissingAndMalformedStoredBodiesStillRejectThenRecover",
@@ -493,7 +1109,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm."
+      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "failed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "failed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "failed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "failed"
+          }
+        }
+      }
     },
     {
       "name": "ExpiredWorkerCannotAckAfterReclaimAndAttemptsReachDeadLetter",
@@ -510,7 +1148,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm."
+      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "InboxEffectsAndAckAreAtomicAndReplayCannotApplyDifferentEffects",
@@ -526,7 +1186,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "ProcessingReleasesInputQuotaAtomicallyAndFailureRestoresItsLease",
@@ -542,7 +1224,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp006_RenewForeignExpiredAndStaleTokensPreserveLeaseFencing",
@@ -559,7 +1263,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm."
+      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp006_ProcessingReusesLeaseAndReleasesQuotaBeforeEffects",
@@ -575,7 +1301,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp005MissingOrCorruptTopicRecordsFailAndRestoredRecordReads",
@@ -594,7 +1342,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI."
+      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp006SingleMessageReceiveStopsAtFirstReadyRecordAndKeepsFifo",
@@ -611,7 +1381,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm."
+      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "failed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "failed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "failed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "failed"
+          }
+        }
+      }
     },
     {
       "name": "RetainedEventIdRejectsDifferentContentAndPreservesDedupForTheInitialStoreFormat",
@@ -630,7 +1422,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI."
+      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "ProcessingEffectsAndAcknowledgementRollBackTogetherAndInboxSurvivesReplay",
@@ -647,7 +1461,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm."
+      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "ExactSerializedEventQuotaAcceptsOrderedBatchAndOneByteShortRollsBack",
@@ -662,7 +1498,29 @@
       ],
       "repairTask": "TASK-RUNTIME-JSON-ORACLES-W",
       "disposition": "accepted-oracle-repair-awaiting-CI",
-      "assessment": "Assertion compares Int32 literal 1050 to Int64 rawBytes. Accepted test oracle uses 1050L; quota boundary and rollback assertions stay unchanged."
+      "assessment": "Assertion compares Int32 literal 1050 to Int64 rawBytes. Accepted test oracle uses 1050L; quota boundary and rollback assertions stay unchanged.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp006TextAndBytePathsPreserveLiteralEscapeAndSurrogateReplacement",
@@ -678,7 +1536,29 @@
       ],
       "repairTask": "TASK-RUNTIME-JSON-ORACLES-W",
       "disposition": "accepted-oracle-repair-awaiting-CI",
-      "assessment": "Wrong JSON token type currently produces JsonException; test expected InvalidOperationException. Accepted repair updates expected native JSON exception and property-decode classification without changing strict DTO/lease contracts."
+      "assessment": "Wrong JSON token type currently produces JsonException; test expected InvalidOperationException. Accepted repair updates expected native JSON exception and property-decode classification without changing strict DTO/lease contracts.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp006MultiSubscriptionReplayRetainsDeliveryIdentityAndLeaseFencing",
@@ -693,7 +1573,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-path-candidate-awaiting-CI",
-      "assessment": "Current generation, signed-scope/principal and persisted-lease error order is correct. ACK deletes the window row; old tombstone projection can leave empty JSON mapped to Validation. Exact baseline internal detail is absent, so this is a candidate requiring existing real-store replay regression, not a confirmed specific cause or authorization to reorder messaging."
+      "assessment": "Current generation, signed-scope/principal and persisted-lease error order is correct. ACK deletes the window row; old tombstone projection can leave empty JSON mapped to Validation. Exact baseline internal detail is absent, so this is a candidate requiring existing real-store replay regression, not a confirmed specific cause or authorization to reorder messaging.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "MissingProtectedPrincipalInVerifiedPendingImageRejectsHostAndSafeRetry",
@@ -709,7 +1611,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcPsw002RepeatedValidationReplacementDeletionResetAndCallerBuffersKeepFinalFrame",
@@ -725,7 +1649,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "accepted-source-repair-awaiting-CI",
-      "assessment": "Tombstone JSON null is four bytes; it replaces the two quotes emitted for an empty base64 string, so serialized mutation growth is exactly +2. NullValueOverheadBytes=2 is correct and must remain. Existing baseline expected frame lengths are two bytes short; accepted source/test change accounts for this. Static arithmetic, not test qualification."
+      "assessment": "Tombstone JSON null is four bytes; it replaces the two quotes emitted for an empty base64 string, so serialized mutation growth is exactly +2. NullValueOverheadBytes=2 is correct and must remain. Existing baseline expected frame lengths are two bytes short; accepted source/test change accounts for this. Static arithmetic, not test qualification.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "IncrementalFrameAccountingMatchesCanonicalJsonAtExactBase64Boundaries",
@@ -741,7 +1687,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "accepted-source-repair-awaiting-CI",
-      "assessment": "Tombstone JSON null is four bytes; it replaces the two quotes emitted for an empty base64 string, so serialized mutation growth is exactly +2. NullValueOverheadBytes=2 is correct and must remain. Existing baseline expected frame lengths are two bytes short; accepted source/test change accounts for this. Static arithmetic, not test qualification."
+      "assessment": "Tombstone JSON null is four bytes; it replaces the two quotes emitted for an empty base64 string, so serialized mutation growth is exactly +2. NullValueOverheadBytes=2 is correct and must remain. Existing baseline expected frame lengths are two bytes short; accepted source/test change accounts for this. Static arithmetic, not test qualification.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp011StagedReplacementTombstoneAndFallbackCountEachLookupOnce",
@@ -760,7 +1728,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI."
+      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcCq001_TypedRecordsRoundTripThroughTheActualStorageGate",
@@ -776,7 +1766,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp002TransactionMergeChargesOverridesAndIgnoresOutOfRangeChanges",
@@ -795,7 +1807,29 @@
       ],
       "repairTask": "TASK-RUNTIME-STORAGE-W",
       "disposition": "tombstone-source-cause-inference-awaiting-CI",
-      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI."
+      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "FreshRequestActorsKeepOneStableWriteOutcomeAndRejectWrongPartition",
@@ -810,7 +1844,29 @@
       ],
       "repairTask": "TASK-RUNTIME-ROUTE-ORACLE-W",
       "disposition": "accepted-oracle-repair-awaiting-CI",
-      "assessment": "Baseline compares byte[] object identity despite equal contents; accepted oracle compares exact ordered bytes. Request IDs, revision, outcome, and wrong-partition assertions remain."
+      "assessment": "Baseline compares byte[] object identity despite equal contents; accepted oracle compares exact ordered bytes. Request IDs, revision, outcome, and wrong-partition assertions remain.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries",
@@ -826,7 +1882,29 @@
       ],
       "repairTask": "TASK-RUNTIME-ADMISSION-W",
       "disposition": "accepted-test-repair-awaiting-CI",
-      "assessment": "Old helper did not deterministically hold the real store write gate; accepted test-only repair uses a real exclusive synchronous no-change Commit hold and bounded release/cleanup. Existing admission saturation/healthy-read assertions and 10-second limits remain."
+      "assessment": "Old helper did not deterministically hold the real store write gate; accepted test-only repair uses a real exclusive synchronous no-change Commit hold and bounded release/cleanup. Existing admission saturation/healthy-read assertions and 10-second limits remain.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcMp012_InFlightCancellationAtRealStoreGateReleasesAdmission",
@@ -841,7 +1919,29 @@
       ],
       "repairTask": "TASK-RUNTIME-ADMISSION-W",
       "disposition": "accepted-test-repair-awaiting-CI",
-      "assessment": "Old helper did not deterministically hold the real store write gate while cancellation occurred; accepted test-only repair coordinates the real exclusive commit gate and release while preserving cancellation, healthy subsequent admission, and 10-second bounds."
+      "assessment": "Old helper did not deterministically hold the real store write gate while cancellation occurred; accepted test-only repair coordinates the real exclusive commit gate and release while preserving cancellation, healthy subsequent admission, and 10-second bounds.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "AcEm002RealFixtureSetupRunsOperationsAndCleansStoreIdempotently",
@@ -856,7 +1956,29 @@
       ],
       "repairTask": "TASK-RUNTIME-JSON-ORACLES-W",
       "disposition": "accepted-oracle-repair-awaiting-CI",
-      "assessment": "Canonical JSON assertion has properties in the wrong order; accepted oracle changes expected canonical serialization, not production output."
+      "assessment": "Canonical JSON assertion has properties in the wrong order; accepted oracle changes expected canonical serialization, not production output.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "exact_case_passed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "CancellationWhileJsonIsGrowingStopsBeforeRawCsvIsPublished",
@@ -869,7 +1991,29 @@
       ],
       "repairTask": "TASK-MP-008C",
       "disposition": "accepted-product-and-regression-repair-awaiting-CI",
-      "assessment": "Private native async Cases and Samples views avoid synchronous collection buffering; direct real-file observer cancellation asserts OCE, partial JSON below one-quarter raw bytes, and absent Markdown/CSV."
+      "assessment": "Private native async Cases and Samples views avoid synchronous collection buffering; direct real-file observer cancellation asserts OCE, partial JSON below one-quarter raw bytes, and absent Markdown/CSV.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "failed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "failed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "failed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     },
     {
       "name": "MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest",
@@ -882,8 +2026,37 @@
       ],
       "repairTask": "TASK-RUNTIME-Kestrel-W",
       "disposition": "accepted-test-coordination-repair-awaiting-CI",
-      "assessment": "macOS-only timeout while coordinating partial request body cancellation. Accepted fixture correction observes bounded initial partial body before cancellation and retains the 5-second bound, error mapping, and subsequent-request assertion."
+      "assessment": "macOS-only timeout while coordinating partial request body cancellation. Accepted fixture correction observes bounded initial partial body before cancellation and retains the 5-second bound, error mapping, and subsequent-request assertion.",
+      "latestQualification": {
+        "runId": 37015193756,
+        "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+        "status": "failed",
+        "platforms": {
+          "ubuntu": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          },
+          "macos": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "failed"
+          },
+          "windows": {
+            "matching": "exact_display_name",
+            "currentCases": 1,
+            "status": "passed"
+          }
+        }
+      }
     }
   ],
-  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37005805424"
+  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37005805424",
+  "latestQualification": {
+    "runId": 37015193756,
+    "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
+    "exactCasePassingOnAllThreeOs": 48,
+    "correctedFixtureMethodPassingOnAllThreeOs": 1,
+    "remainingFailureUnion": 4
+  }
 }

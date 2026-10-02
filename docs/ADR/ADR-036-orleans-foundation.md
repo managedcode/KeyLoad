@@ -41,6 +41,19 @@ scope construction. Keep every SDK retry/parallel actor-ID assertion and product
 migration rejection. Source review/build/format precede full exact-SHA RF3;
 no production or persisted-format change, rollback is test-scope only.
 
+Accepted TASK-RUNTIME-RECEIPTS-W maps REQ/AC-TEST-007 and AC-MP-012 to the actual
+run37015193756. Lead first reviews unchanged bounded RF3 redaction, source
+resource ownership and complete native-runner assertions. Then retain up to32
+sequential failure files in addition to the last-failure view, retain comparison
+reports after app stop and before data deletion, and give the existing matrix
+recovery step a successful-build/noncancelled condition. No failed step is ignored,
+native exit replaced, capture cap widened or extra local qualification executed.
+The exact next GitHub run/job/SHA and downloaded first-failure/report/recovery
+receipts are the join and explicit environmental verification exception. Source
+rollback removes only receipt retention/step scheduling; production data and
+contracts need no migration. Source helpers stay in their canonical test slices;
+root alone owns shared ci.yml, docs and integration.
+
 Host integration contract: `Server/Features/StorageRecovery/PartitionHost` owns
 two physically separate ZoneTree stores, canonical `database` and replica
 `replica`, with one immutable voter configuration and incarnation. It constructs

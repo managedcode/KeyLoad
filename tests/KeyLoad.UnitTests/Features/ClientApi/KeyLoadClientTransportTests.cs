@@ -75,7 +75,8 @@ internal sealed class KeyLoadClientTransportTests
             await Assert.That(pending.IsCompleted).IsFalse();
             await cancellation.CancelAsync();
             var cancelled = await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
-            await response.RequestAborted.Task.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            response.ReleaseSecondWrite();
+            await WaitForRequestAbortAsync(response);
 
             await Assert.That(cancelled.IsFailed).IsTrue();
             await Assert.That(cancelled.Problem!.ErrorCode).IsEqualTo(ErrorCode.Cancelled.ToString());
@@ -87,6 +88,7 @@ internal sealed class KeyLoadClientTransportTests
         }
         finally
         {
+            response.ReleaseSecondWrite();
             await cancellation.CancelAsync();
             await nextRequestCancellation.CancelAsync();
             await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
@@ -102,6 +104,26 @@ internal sealed class KeyLoadClientTransportTests
             {
                 await response.SecondHandlerCompleted.Task.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
             }
+        }
+    }
+
+    private static async Task WaitForRequestAbortAsync(MidBodyCancellationResponse response)
+    {
+        try
+        {
+            var completed = await Task.WhenAny(response.RequestAborted.Task, response.HandlerFailure.Task)
+                .WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            if (completed == response.HandlerFailure.Task)
+            {
+                var failure = await response.HandlerFailure.Task;
+                throw new InvalidOperationException($"Kestrel response failed during {failure.Stage}.", failure.Error);
+            }
+
+            await response.RequestAborted.Task;
+        }
+        catch (TimeoutException exception)
+        {
+            throw new TimeoutException($"Timed out waiting for Kestrel request abort; stage: {response.Stage}.", exception);
         }
     }
 

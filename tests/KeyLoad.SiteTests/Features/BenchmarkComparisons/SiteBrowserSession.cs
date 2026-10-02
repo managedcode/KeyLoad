@@ -49,7 +49,7 @@ internal sealed class SiteBrowserSession : IAsyncDisposable
         var build = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, startup.Output, cancellationToken);
         if (build.ExitCode != SiteTokens.ProcessSuccessExitCode || build.StandardError.Length != SiteTokens.Zero)
         {
-            throw new InvalidOperationException(SiteBrowserTokens.BrowserStartFailure);
+            throw new InvalidOperationException(SiteBuilderDiagnostics.PreChromeFailure(build));
         }
 
         startup.StartHost();

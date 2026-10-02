@@ -40,9 +40,11 @@ internal static class SiteCoverageNativeSourceResolver
         }
 
         var siteRoot = Path.GetFullPath(Path.Combine(repository, SiteCoverageTokens.SiteSourcePrefix));
+        var evidenceRoot = Path.GetFullPath(Path.Combine(repository, SitePublicationTokens.EvidenceToolsPrefix));
         var portablePath = fullPath.Replace(Path.DirectorySeparatorChar, SiteCoverageTokens.RelativeSeparator);
         if (IsWithin(fullPath, siteRoot) && !portablePath.Contains(SiteCoverageTokens.VendorSourcePrefix,
-            StringComparison.Ordinal))
+                StringComparison.Ordinal) || IsWithin(fullPath, evidenceRoot) &&
+            Path.GetFileName(fullPath).StartsWith(SitePublicationTokens.EvidenceModulePrefix, StringComparison.Ordinal))
         {
             throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.UnexpectedProductionScriptFailure);
         }

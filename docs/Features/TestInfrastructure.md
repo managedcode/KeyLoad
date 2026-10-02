@@ -73,6 +73,28 @@ ZoneTree reopen are independent GitHub TUnit assertions. Environmental cleanup/
 coordination failures additionally require full source lifetime review; no fake
 or local qualification. All existing132 methods/19 migrated roots stay preserved.
 
+REQ-TEST-007 / AC-TEST-007 (TASK-RUNTIME-RECEIPTS-W) preserves failure evidence
+from run37015193756 without making failed gates pass. Save the existing bounded
+RF3 diagnostic text both as the last-failure file and as a sequential fixture-owned
+receipt; cap retained individual files at32, keeping the earliest failures and
+unchanged per-file privacy/line/byte caps. Bounded filenames contain only the
+sequence. Actual GitHub artifacts must retain the first replica failure before
+later MCP failures overwrite the last-failure view.
+
+On comparison cleanup, stop the actual application, copy any existing complete
+report files using the existing helper, then delete owned temporary data. Native
+terminal state, zero exit, deadlines and all existing assertions remain required;
+retained report bytes are partial evidence when the test fails. Recovery runs on
+each matrix OS after successful build even if a preceding unit/style/analyzer
+step fails, with normal job failure preserved and no continue-on-error. A failed
+build or cancellation prevents recovery. The lead owns ci.yml, RF3 receipt helper
+and RealComparisonSuite cleanup join. ADR036/035 govern the ordered source-only
+rollback. Actual temporary-file IntegrationTests verify first/last receipt
+preservation, the32-file ceiling and concurrent whole-file writes; source privacy
+and exact-SHA GitHub first-failure/report/recovery artifacts supplement those
+assertions. Environmental watch/runner failures
+must not be replaced by mocks or counted as green qualification.
+
 ## Platform, dependency та release qualification
 
 B3 keeps the exact task lifetime above while satisfying enabled CA1031: a private

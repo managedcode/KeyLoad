@@ -87,6 +87,34 @@ schema or package migration is needed; rollback reverts only this private catch.
 
 ## Повний caller contract
 
+### Accepted MCP rejection diagnostics
+
+REQ-CLIENT-008 / AC-CLIENT-008 (TASK-RUNTIME-MCP-DIAGNOSTICS-W) refines
+REQ-CLIENT-006 and AC-MCP-003/005/007 after run37015193756. Every existing transport
+guard rejection carries a closed private stage: revision count/value, session or
+last-event presence, method/name header shape/encoding, body method shape or
+mismatch, missing target, parameter/meta revision mismatch or target mismatch.
+The public Validation detail and every accept/reject predicate remain exact.
+Only failure paths attach enum metadata; successful calls gain no diagnostic
+allocation, payload copying or changed business routing.
+
+Logging uses only defined stage enums and Discovery/Initialize/ToolsCall/ToolsList/
+Other method categories. Unknown metadata or arbitrary method strings become
+closed defaults; no raw headers, arguments, URI/name, identity, bearer credential,
+exception object/text or serialized body can enter the logger. Tests exercise the
+actual guard and Microsoft logging EventSource provider with private canaries,
+invalid enum metadata, malformed headers/body and unchanged safe errors. All
+existing guard tests remain. The lead joins logging in McpHttpPipeline and owns
+shared EventSource filter coordination, preserving identical native SDK handling.
+Source privacy/predicate/lifetime review, enabled build and exact-SHA GitHub unit
+and RF3 receipts are required. The environmental first-discovery failure requires
+actual CI receipts rather than a synthetic caller or fabricated success.
+
+Server/UnitTests Features/ClientApi is the canonical map; frontend, data migration
+and SDK/API shape are N/A because this is internal failure evidence only. ADR039
+governs ordered implementation and source-only rollback. No protocol downgrade,
+dependency patch, broad exception fallback, trusted caller role or timeout change.
+
 Актори: application developer, operator CLI, durable worker і required MCP/agent caller. Source-present: typed [.NET SDK](../../src/KeyLoad.Client/KeyLoadClient.cs), [query builder](../../src/KeyLoad.Client/KeyLoadQuery.cs), [CLI](../../src/KeyLoad.Cli/Program.cs) та [HTTP routes](../../src/KeyLoad.Server/ApiEndpoints.cs). Public capability/operation semantics визначає owning Feature; SDK не є другим engine.
 
 | Вимога | Measurable acceptance / flows | Test mapping |

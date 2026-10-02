@@ -71,6 +71,26 @@ tests are preserved. CI owns TUnit/recovery/RF3 execution; provider lookup count
 and server allocation/RSS evidence remain separate MP-011 work before measured
 read or memory improvement claims.
 
+TASK-RUNTIME-QUEUE-W2 completes the preceding TASK-MP-007F contract after exact
+run37015193756 at ad594642b4f1a05ac5df0fff0a33b562f4aebf87 proves a remaining
+257-index-entry scan for one delivery. Its regression matrix retains the existing
+300-message one-entry/FIFO assertion and adds actual stored expired-before-live
+and fixed256-examined-entry cases. The callback captures only bounded owned
+transition inputs; every transaction mutation follows traversal. Existing
+MaxMessages/MaxBytes/in-flight quotas, counter reuse, recorded expiry time,
+signed-token/lease fencing, projection, rollback and receipts are unchanged.
+
+The same worker repairs the absent-body negative fixture to assert propagated
+KeyLoadException(Corruption), the existing atomic command fail-closed contract,
+and unchanged ready index/counters/body/position/apply state. Malformed-body
+Validation, restoration and successful subsequent receive remain required.
+The worker owns only QueueReadyClaims.cs, necessary new Messaging input helper,
+ReadyQueueRangeTests.cs and QueueBodyAccountingTests.cs; lead owns docs and the
+integration join. Tests-first source precedes implementation; exact multi-OS
+GitHub unit/recovery/RF3 proof follows enabled build/format/governance. No
+persisted/wire/data migration; source rollback restores only traversal/fixtures.
+This is not a measured throughput, physical-I/O or memory improvement claim.
+
 ### Accepted TASK-MP-007G topic publication read-work repair
 
 REQ-MSG-008 maps AC-MSG-003/005 and AC-MP-006/012 to a single SourceResource and

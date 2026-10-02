@@ -105,12 +105,16 @@ internal sealed class ReportFileTests
         };
         using var cancellation = new CancellationTokenSource();
         using var observation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        RealFileGrowthObserver? observer = null;
+        Task? growth = null;
         Task? writing = null;
         try
         {
             var jsonPath = Path.Combine(directory, "results.json");
+            observer = await RealFileGrowthObserver.StartAsync(jsonPath, cancellation.Cancel, observation.Token);
+            growth = observer.WaitForGrowthAsync(observation.Token);
             writing = ReportWriter.WriteAsync(report, directory, cancellation.Token);
-            await ObserveJsonGrowthAsync(jsonPath, cancellation.Cancel, observation.Token);
+            await growth;
             // A write that finishes before observed file growth fails this assertion instead of passing spuriously.
             var stopped = false;
             try
@@ -124,12 +128,16 @@ internal sealed class ReportFileTests
         }
         finally
         {
-            await observation.CancelAsync();
-            await cancellation.CancelAsync();
-            await AwaitCanceledOrCompletedAsync(writing);
-            if (Directory.Exists(directory))
+            try
             {
-                Directory.Delete(directory, true);
+                await CleanupReportWriteAsync(observer, growth, writing, observation, cancellation, directory);
+            }
+            finally
+            {
+                if (observer is not null)
+                {
+                    await observer.DisposeAsync();
+                }
             }
         }
     }
@@ -146,19 +154,53 @@ internal sealed class ReportFileTests
         catch (OperationCanceledException) { }
     }
 
-    private static async Task ObserveJsonGrowthAsync(string path, Action cancelWriter, CancellationToken observationToken)
+    private static async Task CleanupReportWriteAsync(RealFileGrowthObserver? observer, Task? growth, Task? writing,
+        CancellationTokenSource observation, CancellationTokenSource cancellation, string directory)
     {
-        while (true)
+        var failures = new List<Exception>();
+        await ObserveCleanupTasksAsync(
+            [InvokeCleanupAsync(observation.CancelAsync), InvokeCleanupAsync(cancellation.CancelAsync)], failures);
+        if (observer is not null)
         {
-            observationToken.ThrowIfCancellationRequested();
-            if (File.Exists(path) && new FileInfo(path).Length > 0)
+            await ObserveCleanupTasksAsync([InvokeCleanupAsync(async () => await observer.DisposeAsync())], failures);
+        }
+        await ObserveCleanupTasksAsync(
+            [InvokeCleanupAsync(() => AwaitCanceledOrCompletedAsync(growth)),
+                InvokeCleanupAsync(() => AwaitCanceledOrCompletedAsync(writing))], failures);
+        await ObserveCleanupTasksAsync(
+            [InvokeCleanupAsync(() =>
             {
-                cancelWriter();
-                return;
-            }
-            await Task.Delay(1, observationToken);
+                if (Directory.Exists(directory))
+                {
+                    Directory.Delete(directory, true);
+                }
+
+                return Task.CompletedTask;
+            })], failures);
+        if (failures.Count > 0)
+        {
+            throw new AggregateException("Report cancellation cleanup failed.", failures);
         }
     }
+
+    private static async Task ObserveCleanupTasksAsync(IReadOnlyCollection<Task> cleanupTasks, List<Exception> failures)
+    {
+        await Task.WhenAll(cleanupTasks).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        foreach (var cleanupTask in cleanupTasks)
+        {
+            if (cleanupTask.IsFaulted)
+            {
+                failures.AddRange(cleanupTask.Exception!.InnerExceptions);
+            }
+            else if (cleanupTask.IsCanceled)
+            {
+                failures.Add(new TaskCanceledException(cleanupTask));
+            }
+        }
+    }
+
+    private static async Task InvokeCleanupAsync(Func<Task> cleanup)
+        => await cleanup().ConfigureAwait(false);
 
     private static ComparisonReport Report()
     {

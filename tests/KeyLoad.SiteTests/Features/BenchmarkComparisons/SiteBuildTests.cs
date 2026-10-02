@@ -13,7 +13,8 @@ internal sealed class SiteBuildTests
         var inputs = SiteTestInputs.Read();
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var temporary = SiteTempDirectory.Create();
-        var build = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, temporary.Output, token);
+        var build = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, temporary.Output, token,
+            committedSource: false);
         await Assert.That(build.ExitCode).IsEqualTo(SiteTokens.ProcessSuccessExitCode);
         await Assert.That(build.StandardError.Length).IsEqualTo(SiteTokens.Zero);
         using var buildResult = JsonDocument.Parse(build.StandardOutput);
@@ -32,8 +33,7 @@ internal sealed class SiteBuildTests
         var inputs = SiteTestInputs.Read();
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var temporary = SiteTempDirectory.Create();
-        var siteRevision = $"{SiteTokens.SiteRevisionArgument}={inputs.SiteRevision}";
-        var build = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, temporary.Output, token, siteRevision);
+        var build = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, temporary.Output, token);
         await Assert.That(build.ExitCode).IsEqualTo(SiteTokens.ProcessSuccessExitCode);
         using var catalog = JsonDocument.Parse(await File.ReadAllBytesAsync(
             Path.Combine(temporary.Output, SiteTokens.DataDirectory, SiteTokens.CatalogFile), token));
@@ -77,11 +77,17 @@ internal sealed class SiteBuildTests
         await Assert.That(DateTimeOffset.TryParse(root.GetProperty(SiteTokens.GeneratedAt).GetString(),
             CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _)).IsTrue();
         var runs = root.GetProperty(SiteTokens.Runs);
-        for (var index = SiteTokens.Zero; index < SiteTokens.ProfileNames.Length; index++)
+        var expectedProfiles = new[] { SiteTokens.LargeProfile, SiteTokens.SmallProfile, SiteTokens.SmokeProfile };
+        var actualProfiles = runs.EnumerateArray()
+            .Select(entry => entry.GetProperty(SiteTokens.Id).GetString()!)
+            .ToArray();
+        await Assert.That(actualProfiles.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(expectedProfiles.Length);
+        await Assert.That(new HashSet<string>(actualProfiles, StringComparer.Ordinal).SetEquals(expectedProfiles)).IsTrue();
+        await Assert.That(actualProfiles.SequenceEqual(expectedProfiles, StringComparer.Ordinal)).IsTrue();
+        foreach (var profile in expectedProfiles)
         {
-            var profile = SiteTokens.ProfileNames[index];
-            var entry = runs[index];
-            await Assert.That(entry.GetProperty(SiteTokens.Id).GetString()).IsEqualTo(profile);
+            var entry = runs.EnumerateArray().Single(candidate =>
+                string.Equals(candidate.GetProperty(SiteTokens.Id).GetString(), profile, StringComparison.Ordinal));
             await Assert.That(string.IsNullOrWhiteSpace(entry.GetProperty(SiteTokens.Label).GetString())).IsFalse();
             await Assert.That(entry.GetProperty(SiteTokens.Report).GetString()).IsEqualTo(
                 $"{SiteTokens.RunsDirectory}/{profile}/{SiteTokens.ReportFile}");
@@ -106,6 +112,7 @@ internal sealed class SiteBuildTests
         await File.WriteAllTextAsync(sentinel, SiteAssetTokens.SentinelValue, token);
         var existing = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, temporary.Output, token);
         await Assert.That(existing.ExitCode != SiteTokens.ProcessSuccessExitCode).IsTrue();
+        await AssertBuilderError(existing, SiteBuilderTokens.OutputPathError);
         await Assert.That(await File.ReadAllTextAsync(sentinel, token)).IsEqualTo(SiteAssetTokens.SentinelValue);
 
         var siteRoot = Path.Combine(inputs.Repository, SiteAssetTokens.SiteRootDirectory);
@@ -114,6 +121,7 @@ internal sealed class SiteBuildTests
             var nested = Path.Combine(parent, $"{SiteAssetTokens.PreviewDirectoryPrefix}{Guid.NewGuid():N}");
             var rejected = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, nested, token);
             await Assert.That(rejected.ExitCode != SiteTokens.ProcessSuccessExitCode).IsTrue();
+            await AssertBuilderError(rejected, SiteBuilderTokens.OutputPathError);
             await Assert.That(Directory.Exists(nested)).IsFalse();
         }
     }
@@ -132,6 +140,7 @@ internal sealed class SiteBuildTests
         var outputThroughLink = Path.Combine(linkedParent, SiteAssetTokens.OutputDirectory);
         var linked = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, outputThroughLink, token);
         await Assert.That(linked.ExitCode != SiteTokens.ProcessSuccessExitCode).IsTrue();
+        await AssertBuilderError(linked, SiteBuilderTokens.SymlinkError);
         await Assert.That(Directory.Exists(Path.Combine(realParent, SiteAssetTokens.OutputDirectory))).IsFalse();
 
         Directory.CreateDirectory(temporary.Reports);
@@ -143,6 +152,7 @@ internal sealed class SiteBuildTests
         var linkedInputOutput = Path.Combine(temporary.Path, SiteAssetTokens.LinkedInputOutput);
         var linkedInput = await SiteBuilderProcess.RunAsync(inputs, temporary.Reports, linkedInputOutput, token);
         await Assert.That(linkedInput.ExitCode != SiteTokens.ProcessSuccessExitCode).IsTrue();
+        await AssertBuilderError(linkedInput, SiteBuilderTokens.SymlinkError);
         await Assert.That(Directory.Exists(linkedInputOutput)).IsFalse();
 
         await using var corrupt = SiteTempDirectory.Create();
@@ -151,7 +161,14 @@ internal sealed class SiteBuildTests
         var failedOutput = Path.Combine(corrupt.Path, SiteAssetTokens.FailedOutput);
         var failed = await SiteBuilderProcess.RunAsync(inputs, corrupt.Reports, failedOutput, token);
         await Assert.That(failed.ExitCode != SiteTokens.ProcessSuccessExitCode).IsTrue();
+        await AssertBuilderError(failed, SiteBuilderTokens.JsonParserMarker);
+        await Assert.That(failed.StandardError.Contains(SiteBuilderTokens.VendorError, StringComparison.Ordinal)).IsFalse();
         await Assert.That(Directory.Exists(failedOutput)).IsFalse();
+    }
+
+    private static async Task AssertBuilderError(SiteProcessResult result, string expected)
+    {
+        await Assert.That(result.StandardError.Contains(expected, StringComparison.Ordinal)).IsTrue();
     }
 
 }

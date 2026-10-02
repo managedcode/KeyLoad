@@ -34,3 +34,24 @@ Data stays exclusively successful GitHub JSON. No hand-written measurement, fabr
 Next: join TASK-SITE-PLAN-001, record stable acceptance IDs and an ADR implementation contract before any write-capable worker starts. Manual rendered browser proof is a design-review artifact; it does not replace GitHub test qualification.
 
 The candidate also requires its centrally attached analyzer dependency to be qualified. Strongest TASK010 reviewed native MTP collector18.11.2 and a fail-closed PowerShell/.NET XML count gate. Reuse the runner and existing collector, freeze all analyzer sources, require every executable file and each diagnostic pipeline, and retain original XML. This bounded dependency substage does not attempt unfinished product/RF3 coverage or invent a historical baseline.
+
+## Observed builder failure and fresh-evidence publication extension
+
+The actual first SiteTests run36994330874 rejects unchanged official vendor bytes
+because the builder compares a historical Node26 gzip length with Node22 output.
+Keep immutable raw identity checks; validate recorded compression as historical
+metadata and measure current gzip separately with Node/zlib provenance. Changing
+vendor bytes, its manifest, asset budgets or coverage thresholds would conceal
+the defect. Existing genuine positive build tests are the failing regression
+baseline. Retain bounded child-process diagnostics and require negative tests to
+identify their intended rejection, rather than accept an unrelated exit1.
+
+The owner's subsequent instruction adds a separate site deployment workflow
+that gathers fresh JSON from the actual GitHub comparison job after tests. Keep
+the CI producer separate from Pages. A successful CI completion wakes Pages;
+authenticated run/job/artifact selection, complete site qualification and a clean
+build precede deployment. All numeric UI/chart values still come from report
+bytes. Separate site-source and measured-source revisions; never treat a caller's
+run URL or the legacy publisher's CLI flags as authentication. DNS remains out of
+scope. Strongest publication planning will freeze the freshness/ordering contract
+before its implementation; no obsolete publish path is acceptable as proof.

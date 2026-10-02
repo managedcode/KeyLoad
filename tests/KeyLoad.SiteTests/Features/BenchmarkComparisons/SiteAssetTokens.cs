@@ -48,4 +48,5 @@ internal static class SiteAssetTokens
     public const string CoreVendorModule = "three.core.js";
     public const string VendorLicense = "LICENSE";
     public const string FeatureRelativePath = "site/Features/BenchmarkComparisons";
+    public const string EmittedFeatureRelativePath = "Features/BenchmarkComparisons";
 }

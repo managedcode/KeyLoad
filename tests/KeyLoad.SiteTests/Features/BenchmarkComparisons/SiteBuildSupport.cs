@@ -7,11 +7,14 @@ internal sealed record SiteProcessResult(int ExitCode, string StandardOutput, st
 internal static class SiteBuilderProcess
 {
     public static async Task<SiteProcessResult> RunAsync(SiteTestInputs inputs, string reports,
-        string output, CancellationToken cancellationToken, string? additionalArgument = null)
+        string output, CancellationToken cancellationToken, string? additionalArgument = null,
+        bool committedSource = true)
     {
+        var arguments = CreateArguments(inputs, reports, output, additionalArgument, committedSource);
+        var builderSources = await SiteBuilderDiagnostics.ReadBuilderSourcesAsync(inputs, cancellationToken);
         using var process = new Process
         {
-            StartInfo = CreateStartInfo(inputs, reports, output, additionalArgument),
+            StartInfo = CreateStartInfo(inputs, arguments),
             EnableRaisingEvents = true
         };
         if (!process.Start())
@@ -31,7 +34,9 @@ internal static class SiteBuilderProcess
             await exitTask;
             var stdout = await stdoutTask;
             var stderr = await stderrTask;
-            return new(process.ExitCode, stdout, stderr);
+            var result = new SiteProcessResult(process.ExitCode, stdout, stderr);
+            await SiteBuilderDiagnostics.RetainAsync(inputs, arguments, builderSources, result, cancellationToken);
+            return result;
         }
         catch (Exception)
         {
@@ -48,8 +53,31 @@ internal static class SiteBuilderProcess
         }
     }
 
-    private static ProcessStartInfo CreateStartInfo(SiteTestInputs inputs, string reports, string output,
-        string? additionalArgument)
+    private static string[] CreateArguments(SiteTestInputs inputs, string reports, string output,
+        string? additionalArgument, bool committedSource)
+    {
+        var arguments = new List<string>
+        {
+            Path.Combine(inputs.Repository, SiteAssetTokens.BuilderRelativePath),
+            $"{SiteTokens.ReportsArgument}={reports}",
+            $"{SiteTokens.OutputArgument}={output}",
+            $"{SiteTokens.RevisionArgument}={inputs.MeasuredRevision}",
+            $"{SiteTokens.EvidenceArgument}={inputs.EvidenceUrl}",
+        };
+        if (committedSource)
+        {
+            arguments.Add($"{SiteTokens.SiteRevisionArgument}={inputs.SiteRevision}");
+        }
+
+        if (additionalArgument is not null)
+        {
+            arguments.Add(additionalArgument);
+        }
+
+        return arguments.ToArray();
+    }
+
+    private static ProcessStartInfo CreateStartInfo(SiteTestInputs inputs, string[] arguments)
     {
         var start = new ProcessStartInfo(SiteTokens.NodeExecutable)
         {
@@ -59,14 +87,9 @@ internal static class SiteBuilderProcess
             UseShellExecute = false,
             CreateNoWindow = true,
         };
-        start.ArgumentList.Add(Path.Combine(inputs.Repository, SiteAssetTokens.BuilderRelativePath));
-        start.ArgumentList.Add($"{SiteTokens.ReportsArgument}={reports}");
-        start.ArgumentList.Add($"{SiteTokens.OutputArgument}={output}");
-        start.ArgumentList.Add($"{SiteTokens.RevisionArgument}={inputs.MeasuredRevision}");
-        start.ArgumentList.Add($"{SiteTokens.EvidenceArgument}={inputs.EvidenceUrl}");
-        if (additionalArgument is not null)
+        foreach (var argument in arguments)
         {
-            start.ArgumentList.Add(additionalArgument);
+            start.ArgumentList.Add(argument);
         }
 
         return start;

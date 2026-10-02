@@ -40,6 +40,17 @@ Current result: contract accepted for implementation; no MCP runtime qualificati
 has been recorded. Native foundation, blob implementation, all-operation caller
 parity and stable-main delivery remain open.
 
+AC-CLIENT-008 / REQ-CLIENT-008 supplements AC-MCP-003/005/007: each rejected
+transport guard predicate preserves the fixed Validation reply and records only
+a defined private stage plus a closed method category. Actual guard/privacy
+regressions use the real Microsoft EventSource logger and canaries in headers,
+target/body and exception metadata; unknown enum values and arbitrary method
+strings cannot enter logs. Existing acceptance/rejection and native SDK routing
+remain unchanged. Exact-SHA GitHub unit plus initial discovery/fallback RF3
+receipts qualify the environmental path; source privacy review is supplemental.
+No synthetic HTTP client/provider, successful-workload claim, relaxed guard,
+version downgrade, raw diagnostics or changed timeout is accepted.
+
 Transport refinements for AC-MCP-002/003/005/007: missing, revoked or expired
 credentials fail before the native SDK with HTTP 401, a safe canonical Problem
 and no execution GUID. Application errors after dispatch use the tool error

@@ -30,6 +30,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         LogLevel.Information, new EventId(SavedEventId), DiagnosticMessage);
 
     private readonly DistributedApplication app;
+    private readonly ClusterFailureReceipts failureReceipts = new();
     private readonly CancellationTokenSource lifetime = new();
     private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> nodeLogs = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, Task> logCapture = new(StringComparer.Ordinal);
@@ -79,8 +80,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         var output = Path.Combine(repository.FullName, ClusterFixtureProtocol.ArtifactDirectory,
             ClusterFixtureProtocol.QualificationDirectory);
         Directory.CreateDirectory(output);
-        var path = Path.Combine(output, ClusterFixtureProtocol.DiagnosticsFileName);
-        File.WriteAllLines(path, bounded);
+        var path = failureReceipts.Save(output, bounded);
         LogSaved(app.Services.GetRequiredService<ILogger<ClusterFixtureDiagnostics>>(), path, bounded.Length, null);
     }
 

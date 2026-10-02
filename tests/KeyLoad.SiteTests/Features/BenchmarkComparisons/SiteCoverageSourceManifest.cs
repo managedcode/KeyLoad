@@ -20,7 +20,7 @@ internal static class SiteCoverageSourceManifestWriter
         var repository = RequiredPath(SiteTokens.RepositoryEnvironment);
         var artifactRoot = RequiredPath(SiteCoverageTokens.CoverageRootEnvironment);
         var nodeCoverage = RequiredPath(SiteCoverageTokens.NodeCoverageEnvironment);
-        var revision = Environment.GetEnvironmentVariable(SiteTokens.GitHubShaEnvironment);
+        var revision = Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment);
         if (!Directory.Exists(repository) || !Directory.Exists(artifactRoot) || !IsRevision(revision) ||
             !PathsEqual(nodeCoverage, Path.Combine(artifactRoot, SiteCoverageTokens.NodeDirectory)))
         {
@@ -75,10 +75,17 @@ internal static class SiteCoverageSourceManifestWriter
     private static async Task<IReadOnlyList<SiteCoverageSourceEntry>> CaptureSourcesAsync(string repository)
     {
         var expected = SiteCoverageTokens.ProductionSources.Order(StringComparer.Ordinal).ToArray();
-        var actualFeature = EnumerateFeatureModules(repository).Order(StringComparer.Ordinal).ToArray();
+        var actualFeature = SiteCoverageSourcePaths.EnumerateModules(repository,
+            SiteCoverageTokens.FeatureSourcePrefix).Order(StringComparer.Ordinal).ToArray();
         var expectedFeature = expected.Where(path => path.StartsWith(SiteCoverageTokens.FeatureSourcePrefix, StringComparison.Ordinal))
             .ToArray();
-        if (!actualFeature.SequenceEqual(expectedFeature, StringComparer.Ordinal))
+        var actualTools = SiteCoverageSourcePaths.EnumerateModules(repository,
+            SitePublicationTokens.EvidenceToolsPrefix, SitePublicationTokens.EvidenceModulePrefix)
+            .Order(StringComparer.Ordinal).ToArray();
+        var expectedTools = expected.Where(path => path.StartsWith(SitePublicationTokens.EvidenceToolsPrefix,
+            StringComparison.Ordinal)).ToArray();
+        if (!actualFeature.SequenceEqual(expectedFeature, StringComparer.Ordinal) ||
+            !actualTools.SequenceEqual(expectedTools, StringComparer.Ordinal))
         {
             throw new InvalidOperationException(SiteCoverageTokens.InventoryFailure);
         }
@@ -98,27 +105,6 @@ internal static class SiteCoverageSourceManifestWriter
         }
 
         return sources;
-    }
-
-    private static IEnumerable<string> EnumerateFeatureModules(string repository)
-    {
-        var feature = Path.Combine(repository, SiteCoverageTokens.FeatureSourcePrefix.Replace(
-            SiteCoverageTokens.RelativeSeparator, Path.DirectorySeparatorChar));
-        if (!Directory.Exists(feature) || !SiteCoverageSourcePaths.PathHasNoLinks(repository, feature))
-        {
-            throw new InvalidOperationException(SiteCoverageTokens.InventoryFailure);
-        }
-
-        foreach (var file in SiteCoverageSourcePaths.EnumerateFilesWithoutLinks(feature))
-        {
-            var relative = Path.GetRelativePath(repository, file).Replace(Path.DirectorySeparatorChar,
-                SiteCoverageTokens.RelativeSeparator);
-            if (Path.GetExtension(file).Equals(SiteCoverageTokens.ModuleExtension, StringComparison.Ordinal) &&
-                !relative.StartsWith(SiteCoverageTokens.VendorSourcePrefix, StringComparison.Ordinal))
-            {
-                yield return relative;
-            }
-        }
     }
 
     private static void RejectStaleReceipts(string artifactRoot)

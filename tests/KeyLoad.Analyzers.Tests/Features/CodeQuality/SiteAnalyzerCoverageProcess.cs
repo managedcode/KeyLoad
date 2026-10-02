@@ -22,13 +22,14 @@ internal static class SiteAnalyzerCoverageProcess
 
     internal static async Task<(int ExitCode, string StandardOutput, string StandardError)> RunAsync(
         IReadOnlyList<string> arguments,
-        string workingDirectory)
+        string workingDirectory,
+        IReadOnlyDictionary<string, string?>? environmentOverrides = null)
     {
         using var timeout = new CancellationTokenSource(SiteAnalyzerCoverageTokens.ProcessTimeoutMilliseconds);
         await ProcessSlots.WaitAsync(timeout.Token);
         try
         {
-            return await RunProcessAsync(arguments, workingDirectory, timeout.Token);
+            return await RunProcessAsync(arguments, workingDirectory, environmentOverrides, timeout.Token);
         }
         finally
         {
@@ -39,6 +40,7 @@ internal static class SiteAnalyzerCoverageProcess
     private static async Task<(int ExitCode, string StandardOutput, string StandardError)> RunProcessAsync(
         IReadOnlyList<string> arguments,
         string workingDirectory,
+        IReadOnlyDictionary<string, string?>? environmentOverrides,
         CancellationToken cancellationToken)
     {
         var start = new ProcessStartInfo(SiteAnalyzerCoverageTokens.ProcessName)
@@ -50,6 +52,17 @@ internal static class SiteAnalyzerCoverageProcess
         };
         foreach (var argument in arguments)
         { start.ArgumentList.Add(argument); }
+        if (environmentOverrides is not null)
+        {
+            foreach (var (name, value) in environmentOverrides)
+            {
+                if (value is null)
+                { start.Environment.Remove(name); }
+                else
+                { start.Environment[name] = value; }
+            }
+        }
+
         using var process = new Process { StartInfo = start };
         process.Start();
         var standardOutput = ReadBoundedAsync(process.StandardOutput, cancellationToken);

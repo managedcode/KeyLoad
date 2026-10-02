@@ -18,6 +18,22 @@ schema change. Rollback removes only the internal classification repair.
 
 ## Контекст і запропонований напрям
 
+Accepted TASK-RUNTIME-MCP-DIAGNOSTICS-W implements REQ/AC-CLIENT-008 with
+AC-MCP-003/005/007. First retain tests-first source for actual rejected headers,
+body comparisons and private metadata through the real Microsoft EventSource
+logger. Then split the existing combined predicates without changing their
+ordering or semantics, attach closed stage enum metadata on failure, and add a
+bounded closed method/stage formatter. Root alone joins logging in
+McpHttpPipeline, reviews every predicate and coordinates the real logging
+EventSource filters. The worker owns only McpTransportGuard.cs, new ClientApi
+diagnostic enums/formatter and new same-slice tests/capture helper. No business
+dispatch, composition, frames, accepted revision, SDK package or public reply
+change. Exact-SHA GitHub unit tests and retained initial discovery plus fallback
+receipts are the join; this ADR remains Accepted while official RF3 calls fail.
+No persisted/wire migration, source rollback removes only diagnostic metadata
+and logging. Unknown metadata is sanitized, logging never receives exceptions,
+headers, body, arbitrary method/target text or private identities.
+
 Root policy вимагає простий agent API та інтегрований official MCP C# SDK server для всіх database/search/storage operations, з real .NET SDK і official MCP SDK клієнтами в Docker/Aspire RF3 тестах. Поточні HTTP operations у [ApiEndpoints](../../src/KeyLoad.Server/Features/ClientApi/ApiEndpoints.cs) і [KeyLoadClient](../../src/KeyLoad.Client/KeyLoadClient.cs) існують; завершеної official MCP/agent surface не знайдено.
 
 Напрям: протокольні adapters належать ClientApi, а business behavior/requirements залишаються в owning DocumentStorage/EventStreams/Messaging/GraphTraversal/TimeSeries/Search/ChangeFeeds/BlobStorage slices. Ідентичність береться з persisted server credentials; model/tool arguments не можуть підмінити trusted roles. Кожна операція викликає окремий Orleans request grain за ADR-036 і використовує ту саму canonical authorization, bounds, outcomes та unknown-write retry semantics.

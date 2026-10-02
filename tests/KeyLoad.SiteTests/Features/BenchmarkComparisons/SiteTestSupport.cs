@@ -189,7 +189,7 @@ internal sealed record SiteTestInputs(string Repository, string Reports, string 
         var reportsValue = RequiredEnvironment(SiteTokens.ReportsEnvironment, path: true);
         var run = RequiredEnvironment(SiteTokens.EvidenceRunEnvironment);
         var revision = RequiredEnvironment(SiteTokens.MeasuredRevisionEnvironment);
-        var siteRevision = RequiredEnvironment(SiteTokens.GitHubShaEnvironment);
+        var siteRevision = RequiredEnvironment(SitePublicationTokens.SourceRevisionEnvironment);
         var reports = Path.GetFullPath(reportsValue);
         if (!SiteTokens.EvidenceRunPattern.IsMatch(run) || !SiteTokens.MeasuredRevisionPattern.IsMatch(revision) ||
             !SiteTokens.MeasuredRevisionPattern.IsMatch(siteRevision) ||

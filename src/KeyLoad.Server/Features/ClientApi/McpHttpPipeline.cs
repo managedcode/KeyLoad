@@ -17,13 +17,13 @@ internal static class McpHttpPipeline
             capacity, context.RequestAborted);
         var principal = await DatabaseCredentialResolver.ReadAsync(context).ConfigureAwait(false);
         state.Authenticate(principal, context.RequestAborted);
-        var headers = McpTransportGuard.ReadHeaders(context.Request.Headers);
-        context.Items[ServerProtocol.PrincipalItem] = state.Principal;
-        context.Items[StateItem] = state;
         var originalBody = context.Request.Body;
         McpFrameBody? pendingBody = null;
         try
         {
+            var headers = McpTransportGuard.ReadHeaders(context.Request.Headers);
+            context.Items[ServerProtocol.PrincipalItem] = state.Principal;
+            context.Items[StateItem] = state;
             if (HttpMethods.IsPost(context.Request.Method))
             {
                 SetBodyLimit(context, governor.Limits.MaxBodyBytes);
@@ -37,6 +37,13 @@ internal static class McpHttpPipeline
             else
             { state.Admit(null, context.RequestAborted); }
             await next(context).ConfigureAwait(false);
+        }
+        catch (KeyLoadException error) when (McpTransportDiagnostics.HasStage(error))
+        {
+            var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
+                .CreateLogger(nameof(McpTransportGuard));
+            McpTransportDiagnostics.Log(logger, error, context.Request.Headers);
+            throw;
         }
         finally
         {

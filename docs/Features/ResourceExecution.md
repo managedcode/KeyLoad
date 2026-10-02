@@ -1,5 +1,17 @@
 # ResourceExecution
 
+TASK-RUNTIME-CANCEL-W2 is an accepted AC-MP-009/010/012 fixture refinement under
+[ADR035](../ADR/ADR-035-memory-performance.md): arm a dedicated real-file growth
+observer before native async report writing; retain the corpus,10second deadline,
+quarter-output cutoff, OCE and no-later-file assertions. The same scoped worker
+coordinates one bounded second real Kestrel partial-body write after the cancelled
+client result while preserving actual RequestAborted, incomplete response,
+five-second waits and same-client reuse. Only the four named fixture files and a
+necessary same-slice observer helper belong to this worker; product serializers,
+client/SDK transports, public contracts and all budgets remain unchanged. Existing
+run37015193756/ad594642 is the failing baseline; enabled source quality and the
+full new exact-SHA GitHub suite qualify the final result.
+
 Status: Accepted contract; implementation and qualification in progress.
 [ADR-035](../ADR/ADR-035-memory-performance.md) owns scoped read/resource/lifetime
 decisions. Full requirements and test strategy: [acceptance](../../memory-performance.acceptance.md).

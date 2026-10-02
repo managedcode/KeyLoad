@@ -12,6 +12,7 @@ internal sealed class QueueBodyAccountingTests
     private const string LargePayloadPrefix = "{\"text\":\"";
     private const string LargePayloadSuffix = "\"}";
     private const int UnicodeCharacters = 1_000;
+    private const int SingleReadyRecord = 1;
 
     [Test]
     public async Task AcMp006_StoredBytesDriveExactStoredAndInFlightQuotas()
@@ -117,9 +118,19 @@ internal sealed class QueueBodyAccountingTests
         var original = db.Store.Read(view => view.ReadOwnedValue(key)!);
         var lane = new QueueLaneRef(db.Partition, QueueName);
         db.Store.Commit((tx, _) => { tx.Delete(key); return true; });
+        var readyKey = db.Store.Read(view => view.Scan(ReadyPrefix(db), SingleReadyRecord).Records.Single().Key.ToArray());
+        var countersBefore = Counters(db);
+        var positionBefore = db.Store.Position;
+        var appliedBefore = db.Database.LastApplied;
         var missingId = Guid.NewGuid();
-        await Assert.That(db.Submit(OperationKind.Receive,
-            new ReceiveRequest(missingId, lane), id: missingId).Error).IsEqualTo(ErrorCode.Corruption);
+        var missing = Assert.ThrowsExactly<KeyLoadException>(() => db.Submit(OperationKind.Receive,
+            new ReceiveRequest(missingId, lane), id: missingId));
+        await Assert.That(missing.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(db.Store.Position).IsEqualTo(positionBefore);
+        await Assert.That(db.Database.LastApplied).IsEqualTo(appliedBefore);
+        await Assert.That(db.Store.Read(view => view.ReadOwnedValue(key))).IsNull();
+        await Assert.That(db.Store.Read(view => view.ReadOwnedValue(readyKey))).IsNotNull();
+        await Assert.That(Counters(db)).IsEqualTo(countersBefore);
         db.Store.Commit((tx, _) => { tx.Put(key, Encoding.UTF8.GetBytes("{")); return true; });
         var malformedId = Guid.NewGuid();
         await Assert.That(db.Submit(OperationKind.Receive,
@@ -132,6 +143,8 @@ internal sealed class QueueBodyAccountingTests
 
     private static byte[] BodyKey(TestDatabase db, string id)
         => KeySpace.Partition("message-body", db.Partition, QueueName, id);
+
+    private static byte[] ReadyPrefix(TestDatabase db) => KeySpace.Partition("ready", db.Partition, QueueName);
 
     private static long BodyLength(TestDatabase db, string id) => db.Store.Read(view =>
     {
