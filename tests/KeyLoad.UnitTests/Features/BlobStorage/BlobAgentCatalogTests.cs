@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.BlobStorage;
 internal sealed class BlobAgentCatalogTests
 {
     private const int BlobCount = 10;
-    private const int PublicCount = 47;
+    private const int PublicCount = 50;
     private const string AdditionalProperties = "additionalProperties";
     private const string Receipt = "receipt";
     private const string Value = "value";

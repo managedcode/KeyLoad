@@ -1,5 +1,16 @@
 # KeyLoad architecture and ownership map
 
+The additive [AdminDashboard](Features/AdminDashboard.md) slice under [ADR-051](ADR/ADR-051-admin-dashboard.md) hosts the runtime read-only console in `src/KeyLoad.Server/Features/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core catalog/queue readers, matching Client SDK and UnitTests/IntegrationTests slices. It borrows the existing unique Orleans request/read actors and node-local administration; physical observations are explicitly per node. The public benchmark `site/` remains its own surface. Source and exact-SHA qualification are pending.
+
+```mermaid
+flowchart LR
+    Admin[Same origin admin console] --> API[AdminDashboard API and MCP]
+    API --> Request[Unique request grain]
+    Request --> Read[Admin authorized read grain]
+    Read --> Core[Bounded catalog and queue readers]
+    Read --> Node[Node local file and process observer]
+```
+
 Read the root and nearest project-local AGENTS.md before changing this solution. The product specification is [architecture v0.3](design/architecture-v0.3.uk.md). This document is a navigation map, not a replacement specification or a readiness claim.
 
 The [documentation index](README.md) is the complete entry point for 20 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 50 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.

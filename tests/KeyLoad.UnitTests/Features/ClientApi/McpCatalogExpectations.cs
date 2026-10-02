@@ -82,7 +82,13 @@ internal static class McpCatalogExpectations
     internal const string OutboxPurge = "keyload_outbox_purge";
     private const string OutboxPurgeRoute = "/v1/admin/outbox/purge";
 
-    internal const int Count = 47;
+    private const string DashboardName = "keyload_admin_dashboard";
+    private const string DashboardRoute = "/v1/admin/dashboard";
+    private const string ResourcesListName = "keyload_admin_resources_list";
+    private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
+    private const string QueueBrowseName = "keyload_admin_queue_browse";
+    private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
+    internal const int Count = 50;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
@@ -122,6 +128,9 @@ internal static class McpCatalogExpectations
         (ProjectionsCommit, ProjectionsCommitRoute, null, OperationKind.CommitProjectionBatch),
         (ProjectionsRelease, ProjectionsReleaseRoute, null, OperationKind.ReleaseProjectionConsumer),
         (OutboxPurge, OutboxPurgeRoute, null, OperationKind.PurgeOutbox),
-        .. BlobAgentCases.All().Select(item => (item.Name, item.Route, item.ReadKind, item.CommandKind))
+        .. BlobAgentCases.All().Select(item => (item.Name, item.Route, item.ReadKind, item.CommandKind)),
+        (DashboardName, DashboardRoute, GrainReadKind.AdminDashboard, null),
+        (ResourcesListName, ResourcesListRoute, GrainReadKind.AdminResources, null),
+        (QueueBrowseName, QueueBrowseRoute, GrainReadKind.AdminQueue, null)
     ];
 }

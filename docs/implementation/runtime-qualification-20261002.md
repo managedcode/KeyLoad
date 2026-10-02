@@ -1,8 +1,22 @@
 # Runtime qualification, 2026-10-02
 
-Latest completed canonical workflow: [run37015193756](https://github.com/managedcode/KeyLoad/actions/runs/37015193756), source ad594642b4f1a05ac5df0fff0a33b562f4aebf87, branch codex/runtime-qualification-20261002. It completed with **failure**. Subsequent W2 repairs are source-reviewed and development-built, awaiting the next exact-SHA GitHub run. Shared checkout HEAD/index and independent website changes remain preserved.
+## Latest completed candidate: fa80c701
 
-## Actual gates
+[Run37021991878](https://github.com/managedcode/KeyLoad/actions/runs/37021991878) completed with required failures. Full solution build/format/governance and118/118 analyzer regressions pass on all three OSes. Unit suites are787/788 each; all four prior W2 failures now pass. Ubuntu search stored bytes, macOS exact topic-read bytes and Windows concurrent native logging capture fail independently. [Complete native reports, hashes, jobs and archive receipts](runtime-qualification-37021991878.json) retain precise cases. The historical53-case ledger now has52 exact cases passing on all OSes and one corrected fixture method with all current cases passing; the retired argument is not claimed executed.
+
+Recovery executes after every successful build even if unit tests fail:115/115 on Linux/macOS and104/115 on Windows. Eleven Windows errors involve metadata-WAL sharing or per-trial cancellation. The readiness probe omits that WAL; the holder is unknown. Preserve all seeds, deadlines and assertions, and do not claim a product/dependency cause without evidence.
+
+RF3 is12/29: nine of26 caller cases and three separate real-file receipt cases pass. The retained-replica scenario passes this run without a demonstrated root-cause repair and still needs stability proof. Seventeen official MCP cases receive discovery -32603 then fallback Initialize HTTP400 at ProtocolRevisionCount. Pinned SDK/.NET source uses unknown-length content; maximum-capacity buffering projects at least240,947,200 bytes into the134,217,728-byte default control pool. Bounded actual-capacity framing repairs are source joined, pending renewed official RF3 proof. Guards, auth, quotas, protocol and pool defaults remain exact.
+
+Comparison is2/4. Existing report bytes now survive cleanup: unqualified schema3 smoke and separate TimeSeries reports are retained. TimeSeries records20 successful attempts and20 checks total across its three targets and48 samples. Native terminal/zero-exit gates fail and foreign-schema assertion is not reached. Report existence does not qualify performance or refresh the published website; Aspire13.6 native watch remains an external blocker.
+
+The new main source packet repairs recorded-time fixture coordination, same-store raw-byte boundaries, native logging scheduling and unknown-length MCP buffers. Its exact-SHA CI remains pending. No local tests, recovery or benchmarks ran.
+
+## Historical candidate ad594642
+
+Previous completed canonical workflow: [run37015193756](https://github.com/managedcode/KeyLoad/actions/runs/37015193756), source ad594642b4f1a05ac5df0fff0a33b562f4aebf87, branch codex/runtime-qualification-20261002. It completed with **failure**. Subsequent W2 repairs are source-reviewed and development-built, awaiting the next exact-SHA GitHub run. Shared checkout HEAD/index and independent website changes remain preserved.
+
+## Previous gates at ad594642
 
 | Gate | Result | Exact job |
 |---|---|---|

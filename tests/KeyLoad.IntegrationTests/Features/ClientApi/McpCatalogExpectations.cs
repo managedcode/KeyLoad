@@ -5,6 +5,9 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <summary>The accepted ADR-039 public schema and effect oracle, independent of server implementation objects.</summary>
 internal static class McpCatalogExpectations
 {
+    private const string DashboardName = "keyload_admin_dashboard";
+    private const string ResourcesListName = "keyload_admin_resources_list";
+    private const string QueueBrowseName = "keyload_admin_queue_browse";
     internal static ImmutableArray<McpToolExpectation> Entries { get; } =
     [
         Read(McpCallerTools.DocumentsGet, [McpDiscoveryProtocol.Reference]),
@@ -26,6 +29,9 @@ internal static class McpCatalogExpectations
         new(McpCallerTools.AdminBackup, false, false, false, McpExpectedBody.None, false, []),
         Empty(McpCallerTools.AdminAdmission),
         Empty(McpCallerTools.AdminStatus),
+        Empty(DashboardName),
+        Read(ResourcesListName, [McpDiscoveryProtocol.TenantId, McpDiscoveryProtocol.DatabaseId]),
+        Read(QueueBrowseName, [McpDiscoveryProtocol.Lane]),
         Write(McpCallerTools.DocumentsCommit, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Mutations]),
         Write(McpCallerTools.MessagesReceive, [McpCallerProtocol.RequestId, McpDiscoveryProtocol.Lane]),
         Write(McpCallerTools.MessagesComplete, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Lane, McpDiscoveryProtocol.Token, McpDiscoveryProtocol.Action]),

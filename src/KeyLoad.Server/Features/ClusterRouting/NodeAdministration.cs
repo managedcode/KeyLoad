@@ -45,6 +45,10 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
     public NodeAdmissionStatus Admission() => new(commands.Limits, commands.Snapshot()) { Http = http.Status() };
 
     /// <inheritdoc />
+    public Task<AdminNodeSnapshot> DashboardAsync(CancellationToken cancellationToken)
+        => services.GetRequiredService<AdminNodeObserver>().ReadAsync(cancellationToken);
+
+    /// <inheritdoc />
     public async Task<NodeStatus> StatusAsync(CancellationToken cancellationToken)
     {
         var state = await partition.Consensus.StateAsync(cancellationToken).ConfigureAwait(false);

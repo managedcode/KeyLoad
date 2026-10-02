@@ -7,7 +7,8 @@ internal sealed class DatabaseIdentityMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context)
     {
-        if (context.Request.Path.StartsWithSegments(ServerProtocol.HealthPrefix, StringComparison.OrdinalIgnoreCase)
+        if (AdminStaticAssets.IsPublicRequest(context.Request)
+            || context.Request.Path.StartsWithSegments(ServerProtocol.HealthPrefix, StringComparison.OrdinalIgnoreCase)
             || context.Request.Path.StartsWithSegments(ServerProtocol.InternalPrefix, StringComparison.OrdinalIgnoreCase))
         {
             await next(context).ConfigureAwait(false);

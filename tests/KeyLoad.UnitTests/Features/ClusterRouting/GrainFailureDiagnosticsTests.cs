@@ -2,12 +2,14 @@ using System.Collections.Concurrent;
 using System.Diagnostics.Tracing;
 using System.Text.Json;
 using KeyLoad.Orleans;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventSource;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 /// <summary>AC-ROUTE-008: internal rejection diagnostics stay typed and private.</summary>
+[NotInParallel(LoggingEventSourceIsolation.Key)]
 internal sealed class GrainFailureDiagnosticsTests
 {
     private const string JsonCanary = "private-json-payload-canary";

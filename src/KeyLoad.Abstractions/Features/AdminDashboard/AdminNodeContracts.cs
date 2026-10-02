@@ -1,0 +1,39 @@
+using System.Collections.Immutable;
+
+namespace KeyLoad;
+
+/// <summary>Actual process HTTP observations; counters reset with the host process.</summary>
+/// <param name="StartedAt">Process counter start, independent of persisted storage incarnation.</param>
+/// <param name="ProcessInstance">Unique nonsecret lifetime identity for rate reset detection.</param>
+/// <param name="CompletedRequests">Completed public API HTTP requests excluding dashboard polling.</param>
+/// <param name="FailedRequests">Completed requests with an error status or aborted response.</param>
+/// <param name="ElapsedMilliseconds">Sum of measured request elapsed milliseconds.</param>
+public sealed record AdminHttpSnapshot(DateTimeOffset StartedAt, Guid ProcessInstance, long CompletedRequests,
+    long FailedRequests, double ElapsedMilliseconds);
+
+/// <summary>One observed physical file; never exposes an absolute path or file contents.</summary>
+/// <param name="Path">Path relative to the owning physical node directory.</param>
+/// <param name="Category">Canonical, replica, backup or other physical file category.</param>
+/// <param name="Bytes">Observed file length, not allocated disk blocks.</param>
+public sealed record AdminFileInfo(string Path, string Category, long Bytes);
+
+/// <summary>Bounded physical filesystem observation, independent of the database read cut.</summary>
+/// <param name="CanonicalBytes">Observed canonical store file lengths, null when unavailable.</param>
+/// <param name="ReplicaBytes">Observed replica journal file lengths, null when unavailable.</param>
+/// <param name="BackupBytes">Observed backup file lengths, null when unavailable.</param>
+/// <param name="TotalBytes">Observed node file lengths, null when unavailable.</param>
+/// <param name="ObservedFiles">Number of files whose lengths were included.</param>
+/// <param name="Complete">Whether all eligible files were observed within the bounds.</param>
+/// <param name="Files">Finite display subset; its sum need not equal total observed bytes.</param>
+/// <param name="Notice">Safe incomplete/unavailable reason without sensitive filesystem details.</param>
+public sealed record AdminStorageSnapshot(long? CanonicalBytes, long? ReplicaBytes, long? BackupBytes,
+    long? TotalBytes, int ObservedFiles, bool Complete, ImmutableArray<AdminFileInfo> Files, string? Notice);
+
+/// <summary>Administrator-authorized observation of the actual executing node.</summary>
+/// <param name="CapturedAt">Node capture time for process counter sampling.</param>
+/// <param name="Node">Actual physical status; never implies all voters are healthy.</param>
+/// <param name="Admission">Current node command and HTTP occupancy, not throughput.</param>
+/// <param name="Storage">Bounded physical file observation.</param>
+/// <param name="Http">Actual process HTTP observations.</param>
+public sealed record AdminNodeSnapshot(DateTimeOffset CapturedAt, NodeStatus Node, NodeAdmissionStatus Admission,
+    AdminStorageSnapshot Storage, AdminHttpSnapshot Http);

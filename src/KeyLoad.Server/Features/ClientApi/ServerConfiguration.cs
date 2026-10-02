@@ -21,11 +21,13 @@ internal static class ServerConfiguration
         Register(builder.Services, node);
         McpServerComposition.Register(builder, node);
         var app = builder.Build();
+        app.UseMiddleware<AdminHttpMetricsMiddleware>();
         app.Use(next => new ServerErrorMiddleware(next,
             app.Services.GetRequiredService<ILogger<ServerErrorMiddleware>>()).InvokeAsync);
         app.Use(next => new DatabaseIdentityMiddleware(next).InvokeAsync);
         app.MapDefaultEndpoints();
         ReplicaDiscoveryEndpoints.Map(app);
+        AdminStaticAssets.Map(app);
         app.MapKeyLoadApi();
         app.MapMcp(McpFramingProtocol.Path);
         return app;
@@ -48,6 +50,8 @@ internal static class ServerConfiguration
     {
         services.AddSingleton(options);
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<AdminHttpMetrics>();
+        services.AddSingleton<AdminNodeObserver>();
         services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();
         services.AddSingleton(new CommandAdmissionGovernor(options.CommandAdmission));
         services.AddSingleton(new HttpAdmissionGovernor(options.HttpAdmission));

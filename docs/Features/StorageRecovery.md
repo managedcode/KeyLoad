@@ -1,5 +1,26 @@
 # StorageRecovery
 
+REQ-STORAGE-011 / AC-STORAGE-011 (TASK-RUNTIME-WINDOWS-RECOVERY-W3) preserves
+the existing killed-child filesystem readiness bound. After actual process exit,
+exclusive readiness covers owner.lock, commands.wal and the actual ZoneTree
+tree/0.meta.wal which failed to reopen in Windows CI37021991878. The prior receipt
+does not identify the sharing holder; this is a test-fixture observation gap,
+not proof of a storage/dependency defect. Keep the five-second bound and25ms poll,
+all50 seeded trials, original trial deadlines, WAL/snapshot/atomic assertions and
+permanent sharing failure. Cancellation stops before another probe; no retry of
+the recovery operation, default timeout increase or filesystem bypass is allowed.
+
+New real-file tests first hold the metadata WAL exclusively after an actual
+ZoneTree store closes: the shared barrier must remain pending, complete only
+after releasing that holder, reject cancellation and fail under the same bounded
+permanent lock. Root owns the existing RecoveryTests shared entry wrapper;
+one worker owns new cohesive StorageRecovery readiness helper/tests. Existing
+ADR035/041 owner/lifetime contracts suffice; product APIs/formats/permissions,
+frontend and dependency release are N/A. Root reviews every original caller and
+cleanup, builds/formats and qualifies full GitHub recovery on all three OSes.
+Windows still fails if the real holder does not clear or original15-second trial
+bound is exceeded. Rollback reverts only the fixture helper/wrapper together.
+
 The preserving byte readback assertions in FrameBudgetTests and
 PreparedTransactionTests map additionally to AC-CQ-018. Pinned TUnit array equality
 is reference equality; ordered content equivalence must retain every exact byte,

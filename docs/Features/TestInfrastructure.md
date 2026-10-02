@@ -2,6 +2,20 @@
 
 Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 
+REQ-TEST-008 / AC-TEST-008 (TASK-RUNTIME-EVENTSOURCE-W3) coordinates the actual
+global Microsoft logging EventSource across the two diagnostic suites. Listener
+disposal issues a Disable command; LoggingEventSource disables its global filter
+state even when another capture remains active. Exact fa80c701 Windows CI misses
+ToolsCall midway through KnownMethodCategoryIsClosed. Use a single named native
+TUnit NotInParallel key on McpTransportDiagnosticsTests and
+GrainFailureDiagnosticsTests, declared once in a TestInfrastructure constant.
+Preserve all native provider/capture/filter and privacy/error/category assertions;
+no fake logging, sleeps, retries or production diagnostic change. Existing failing
+category/privacy cases and all grain diagnostics are the regression matrix, with
+full multi-OS GitHub execution required. Root owns this small cross-slice test
+scheduling join because the shared global resource has one integration owner.
+ADR039/036 existing contracts suffice; no product/API/data migration applies.
+
 | Requirement | Acceptance and observable evidence |
 |---|---|
 | REQ-TEST-001: TUnit and Microsoft.Testing.Platform are the sole .NET test framework/runner. | AC-TEST-001: all test projects compile and run with TUnit; no xUnit/VSTest package or attribute remains; migrated assertions preserve every original scenario. |

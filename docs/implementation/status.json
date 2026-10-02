@@ -896,8 +896,196 @@
         "conclusion": "success_existing_main_only",
         "url": "https://github.com/managedcode/KeyLoad/actions/runs/36930711012"
       },
-      "delivery": "runtime_checkpointad594642_pushed_private_branch_required_runtime_gates_failed_W2_source_and_full_requalification_pending",
+      "delivery": "all_runtime_and_delivered_site_source_joined_main_checkpoint_requested_W3_full_requalification_pending",
       "latestCandidateCi": {
+        "runId": 37021991878,
+        "sha": "fa80c701475d8faf65bb43b49b6e1c7afb33979a",
+        "branch": "codex/runtime-qualification-20261002",
+        "conclusion": "failure",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37021991878",
+        "unitTests": {
+          "ubuntu": {
+            "total": 788,
+            "passed": 787,
+            "failed": 1,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0,
+            "failures": [
+              {
+                "name": "AcMp003LargeNonmatchingPayloadsDoNotAllocateRawCorpusCopies",
+                "method": "AcMp003LargeNonmatchingPayloadsDoNotAllocateRawCorpusCopies",
+                "status": "error",
+                "message": "Expected to be 1048576\nbut found 1048511\n\nat Assert.That(addedStoredBytes).IsEqualTo((long)CorpusDocuments * PaddingCharacters)",
+                "source": "tests/KeyLoad.UnitTests/Features/Search/SearchResourceTests.cs"
+              }
+            ]
+          },
+          "macos": {
+            "total": 788,
+            "passed": 787,
+            "failed": 1,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0,
+            "failures": [
+              {
+                "name": "AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails",
+                "method": "AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails",
+                "status": "error",
+                "message": "Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown",
+                "source": "tests/KeyLoad.UnitTests/Features/Messaging/SourceReadBudgetTests.cs"
+              }
+            ]
+          },
+          "windows": {
+            "total": 788,
+            "passed": 787,
+            "failed": 1,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0,
+            "failures": [
+              {
+                "name": "KnownMethodCategoryIsClosed",
+                "method": "KnownMethodCategoryIsClosed",
+                "status": "error",
+                "message": "Expected to contain \"ToolsCall\"\nbut received \"3 1 McpTransportDiagnosticsTests 4  MCP transport rejected at MethodHeaderEncoding for Other. 7ddcfc1e38ea9159286bc350b114682d 2466bc8c41d488e8 1 3 3 McpTransportDiagnosticsTests 4  MCP transport rejected at BodyMethodMismatch for Discovery. efec0d80cc8fe052a58c8e5a15767dbe 9699003b60e7c104 1\"\n\nat Assert.That(capture.Text).Contains(CategoryToolsCall)",
+                "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportDiagnosticsTests.cs"
+              }
+            ]
+          }
+        },
+        "recovery": {
+          "ubuntu": {
+            "total": 115,
+            "passed": 115,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0,
+            "failures": []
+          },
+          "macos": {
+            "total": 115,
+            "passed": 115,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0,
+            "failures": []
+          },
+          "windows": {
+            "total": 115,
+            "passed": 104,
+            "failed": 11,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0,
+            "failures": [
+              {
+                "name": "ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration(install, SnapshotFlushed)",
+                "status": "error",
+                "type": "System.IO.IOException",
+                "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-checkpoint-crash-cbea157881954effb1c25a59fb9f6538\\tree\\0.meta.wal' because it is being used by another process.",
+                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+              },
+              {
+                "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(18)",
+                "status": "error",
+                "type": "System.IO.IOException",
+                "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-18-31-2515052916fe41d1b039405919a803a5\\tree\\0.meta.wal' because it is being used by another process.",
+                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+              },
+              {
+                "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(16)",
+                "status": "error",
+                "type": "System.IO.IOException",
+                "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-16-4-53875e1e8a684cae8948b4a9381ebd18\\tree\\0.meta.wal' because it is being used by another process.",
+                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+              },
+              {
+                "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(14)",
+                "status": "error",
+                "type": "System.IO.IOException",
+                "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-14-41-ae309d7e78cf438e8f53bfacaf267b2e\\tree\\0.meta.wal' because it is being used by another process.",
+                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+              },
+              {
+                "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(11)",
+                "status": "error",
+                "type": "System.IO.IOException",
+                "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-11-44-de66262e0dd845c294fe9ac043982dff\\tree\\0.meta.wal' because it is being used by another process.",
+                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+              },
+              {
+                "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(10)",
+                "status": "error",
+                "type": "System.IO.IOException",
+                "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-10-12-1a42116f5a9248debd689a1d99a69f6e\\tree\\0.meta.wal' because it is being used by another process.",
+                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+              },
+              {
+                "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(8)",
+                "status": "error",
+                "type": "System.IO.IOException",
+                "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-8-39-567ef228a3d647aba535571bd1c20e08\\tree\\0.meta.wal' because it is being used by another process.",
+                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+              },
+              {
+                "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(6)",
+                "status": "error",
+                "type": "System.Threading.Tasks.TaskCanceledException",
+                "message": "A task was canceled.",
+                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+              },
+              {
+                "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(4)",
+                "status": "error",
+                "type": "System.Threading.Tasks.TaskCanceledException",
+                "message": "A task was canceled.",
+                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+              },
+              {
+                "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(13)",
+                "status": "error",
+                "type": "System.IO.IOException",
+                "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-13-9-4f1cf75da3ae49458b7187f7d8372b9c\\tree\\0.meta.wal' because it is being used by another process.",
+                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+              },
+              {
+                "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(1)",
+                "status": "error",
+                "type": "System.IO.IOException",
+                "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-1-7-476a1685219c488e9e5a581311d2139e\\tree\\0.meta.wal' because it is being used by another process.",
+                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+              }
+            ]
+          }
+        },
+        "analyzerTests": "118_of118_pass_standalone_and_all_three_OS_matrix",
+        "buildFormatGovernance": "passed_full_solution_exact_sha_all_three_OSes",
+        "rf3IntegrationTests": "12_of29_pass_9_of26_caller_cases_3_of3_file_receipt_cases_17_MCP_initialization_failures",
+        "comparisonTests": "2_of4_pass_native_completion_failed",
+        "receipt": "docs/implementation/runtime-qualification-37021991878.json",
+        "evidence": "docs/implementation/runtime-qualification-20261002.md"
+      },
+      "analyzerRegressionQualification": "118_of118_passed_exactfa80c701_later_source_requires_renewed_CI",
+      "coverage": "not_configured",
+      "complexity": "full_three_OS_build_and118_rule_cases_pass_exactfa80c701_W3_pending",
+      "evidence": "docs/implementation/code-quality.md",
+      "siteTestsJoin": "reviewed_enabled_site_build_passed_0_errors_0_warnings_actual_seven_parameterless_generated_creators_options_defaults_and_real_listener_regressions_authored_ci_pending",
+      "unitTestsBuild": "ordinary_full_solution_Release_build_passed_including_actual_EventSource_privacy_regressions_test_execution_GitHub_pending",
+      "reviewedScopedFormatter": "full_solution_canonical_formatter_passed_after_EventStreams_and_EventSource_diagnostic_join_all_analyzers_enabled",
+      "embeddedBenchmarkJoin": "genuine_public_library_and_thin_host_source_reviewed_paired_csharp_common5_restore_and_enabled_host_build_0_errors_0_warnings_five_real_tunit_methods_authored_actual_generated_dry_and_registration_ci_pending",
+      "boundedMetadataJoin": "finite_manifest16384_identity4096_bytes_single_owned_region_and_restore_identity_source_reviewed_test_corrections_build_and_exact_sha_ci_pending",
+      "previousCandidateCi": {
         "runId": 37015193756,
         "sha": "ad594642b4f1a05ac5df0fff0a33b562f4aebf87",
         "branch": "codex/runtime-qualification-20261002",
@@ -942,50 +1130,6 @@
         "receipt": "docs/implementation/runtime-qualification-37015193756.json",
         "artifacts": "/private/tmp/keyload-runtime-ci-37015193756/"
       },
-      "analyzerRegressionQualification": "88_of88_passed_exactad594642_later_source_requires_renewed_ci",
-      "coverage": "not_configured",
-      "complexity": "four_source_owned_rules_full_three_OS_build_and88_rule_cases_pass_exactad594642_W2_requires_renewed_ci",
-      "evidence": "docs/implementation/code-quality.md",
-      "siteTestsJoin": "reviewed_enabled_site_build_passed_0_errors_0_warnings_actual_seven_parameterless_generated_creators_options_defaults_and_real_listener_regressions_authored_ci_pending",
-      "unitTestsBuild": "ordinary_full_solution_Release_build_passed_including_actual_EventSource_privacy_regressions_test_execution_GitHub_pending",
-      "reviewedScopedFormatter": "full_solution_canonical_formatter_passed_after_EventStreams_and_EventSource_diagnostic_join_all_analyzers_enabled",
-      "embeddedBenchmarkJoin": "genuine_public_library_and_thin_host_source_reviewed_paired_csharp_common5_restore_and_enabled_host_build_0_errors_0_warnings_five_real_tunit_methods_authored_actual_generated_dry_and_registration_ci_pending",
-      "boundedMetadataJoin": "finite_manifest16384_identity4096_bytes_single_owned_region_and_restore_identity_source_reviewed_test_corrections_build_and_exact_sha_ci_pending",
-      "previousCandidateCi": {
-        "runId": 37005805424,
-        "sha": "6949fa0c3099443c6f34f91245ab8064ef22c63c",
-        "branch": "codex/runtime-qualification-20261002",
-        "conclusion": "failure",
-        "analyzerTests": "88_pass_0_fail_0_skip_standalone_and_three_OS_matrix",
-        "buildFormatGovernance": "passed_full_solution_on_ubuntu_macos_windows_at_this_exact_sha",
-        "unitTests": {
-          "ubuntu": {
-            "passed": 719,
-            "failed": 51,
-            "skipped": 0,
-            "total": 770
-          },
-          "macos": {
-            "passed": 717,
-            "failed": 53,
-            "skipped": 0,
-            "total": 770
-          },
-          "windows": {
-            "passed": 720,
-            "failed": 50,
-            "skipped": 0,
-            "total": 770
-          },
-          "failingCaseUnion": 53
-        },
-        "comparisonTests": "2_pass_2_fail_measured_profiles_not_run",
-        "rf3IntegrationTests": "6_pass_20_fail_0_skip_of26_healthy_fixture_mcp_negotiation_and_read_failures_remain",
-        "recovery": "not_run_after_unit_failures_on_all_three_OSes",
-        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37005805424",
-        "evidence": "docs/implementation/runtime-qualification-20261002.md",
-        "artifacts": "/private/tmp/keyload-runtime-ci-37005805424/"
-      },
       "developmentChecks": {
         "source": "shared_main3559225_dirty_runtime_W2_and_delivered_website_source_no_exact_commit_qualification",
         "buildCommand": "dotnet build KeyLoad.slnx --no-restore --configuration Release -m:1 -nr:false -p:UseSharedCompilation=false",
@@ -1006,7 +1150,7 @@
       "vectorSimd": "five_metric_validation_golden_and_real_store_cases_pass_all_three_OSes_exactad594642_validation_optimization_software_fallback_and_measured_gain_pending",
       "activationMigrationResearch": "native_MigrateOnIdle_supports_advisory_live_silo_hint_management_observes_only_persisted_admin_public_move_contract_and_RF3_proof_pending",
       "routingFailureDiagnostics": "private_enum_stage_category_code_and_request_GUID_present_in6949fa0_exact_source_test_inventory_retained_no_payload_or_exception_text",
-      "eventSdkMcpParity": "three_real_RF3_event_scenarios_still_fail_MCP_initialization_atad594642_closed_first_rejection_diagnostics_pending_new_CI"
+      "eventSdkMcpParity": "real_official_SDK_default_discovery_still_fails_exactfa80c701_unknown_length_buffer_admission_repair_source_pending_new_CI"
     },
     "memoryPerformance": {
       "status": "in_progress",
@@ -1024,18 +1168,18 @@
         "url": "https://github.com/managedcode/KeyLoad/actions/runs/36936319423",
         "artifacts": "artifacts/memory-performance/baseline-36936319423/"
       },
-      "candidateQualification": "run37015193756_failed_exactad594642_full_build_format_governance_analyzer_pass_4_unit_failure_union_W2_qualification_pending",
-      "rf3SdkMcp": "8_pass_18_fail_0_skip_of26_17_MCP_initialization_and1_retained_replica_failure",
+      "candidateQualification": "run37021991878_failed_exactfa80c701_3_new_unit_failures_all4_prior_W2_cases_pass_all_OSes",
+      "rf3SdkMcp": "12_of29_pass_9_of26_caller_cases_3_of3_file_receipt_cases_17_MCP_initialization_failures",
       "serverResourceMeasurement": "not_configured_load_generator_metrics_only",
       "coverage": "not_configured",
-      "complexity": "four_source_owned_rules_full_three_OS_build_and88_rule_cases_pass_exactad594642_W2_requires_renewed_ci",
-      "delivery": "runtime_checkpointad594642_pushed_private_branch_required_runtime_gates_failed_W2_source_and_full_requalification_pending",
+      "complexity": "full_three_OS_build_and118_rule_cases_pass_exactfa80c701_W3_pending",
+      "delivery": "all_runtime_and_delivered_site_source_joined_main_checkpoint_requested_W3_full_requalification_pending",
       "preparedStorageMutationJoin": "reviewed_private_projection_cache_enabled_storage_build_0_errors_0_warnings_three_real_store_tests_authored_ci_and_measured_improvement_pending",
       "currentEvidence": "docs/implementation/runtime-qualification-20261002.md",
-      "progressiveReportOutput": "schema_metadata_exact_bytes_and_default_collection_errors_pass_multi_OS_exactad594642_early_cancellation_still_failed_W2_real_observer_pending_CI",
+      "progressiveReportOutput": "actual_early_JSON_cancellation_cutoff_and_no_MD_CSV_pass_all_three_OSes_exactfa80c701",
       "tombstoneRepair": "actual_null_empty_missing_journal_snapshot_and_frame_boundaries_pass_all_three_OSes_exactad594642",
-      "queueReadWork": "one_receive_scanned257_ready_entries_exactad594642_W2_bounded_visitor_and_expiry_cap_regressions_source_built_not_test_qualified",
-      "timeSeriesPartialEvidence": "20_attempts_and20_correctness_checks_pass_in_retained_report_atad594642_native_exit_gate_fails_foreign_schema_check_not_reached"
+      "queueReadWork": "bounded_ready_visitor_one_claim_FIFO_expiry_and256_ceiling_cases_pass_all_three_OSes_exactfa80c701",
+      "timeSeriesPartialEvidence": "20_attempts_and20_checks_in_retainedfa80c701_report_native_exit_failed_not_qualified"
     }
   }
 }

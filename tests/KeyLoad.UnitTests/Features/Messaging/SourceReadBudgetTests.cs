@@ -19,17 +19,24 @@ internal sealed class SourceReadBudgetTests
     [Test]
     public async Task AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails()
     {
-        using var probe = CreateTopicDatabase();
-        var requiredBytes = TopicReadBytes(probe);
-        using var exact = CreateTopicDatabase(new() { MaxQueryReadBytes = requiredBytes });
-        using var shortBudget = CreateTopicDatabase(new() { MaxQueryReadBytes = requiredBytes - 1 });
-        var source = new EventSourceRef(exact.Partition, TopicName, EventSourceKind.Topic);
+        using var database = CreateTopicDatabase();
+        var requiredBytes = TopicReadBytes(database);
+        var exact = new DatabaseEngine(database.Store, database.Database.Authorization,
+            new() { MaxQueryReadBytes = requiredBytes });
+        var shortBudget = new DatabaseEngine(database.Store, database.Database.Authorization,
+            new() { MaxQueryReadBytes = requiredBytes - 1 });
+        var source = new EventSourceRef(database.Partition, TopicName, EventSourceKind.Topic);
 
-        await Assert.That(exact.Database.ReadEventSource(ReaderId, new(source)).Events).HasSingleItem();
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => shortBudget.Database.ReadEventSource(ReaderId,
-            new(new(shortBudget.Partition, TopicName, EventSourceKind.Topic))));
+        var before = database.Store.GetReadDiagnostics();
+        var exactPage = exact.ReadEventSource(ReaderId, new(source));
+        var after = database.Store.GetReadDiagnostics();
+        await Assert.That(exactPage.Events).HasSingleItem();
+        await Assert.That(after.PointExaminedBytes - before.PointExaminedBytes).IsEqualTo(requiredBytes);
+
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => shortBudget.ReadEventSource(ReaderId, new(source)));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(exact.ReadEventSource(ReaderId, new(source)).Events).HasSingleItem();
     }
 
     [Test]

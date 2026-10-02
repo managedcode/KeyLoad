@@ -179,8 +179,12 @@ Run metadata is retained in `artifacts/code-quality/baseline-run.json`.
 This run covers existing committed main, not the dirty checkout or new analyzers.
 
 The failed build/formatter rows above are source-specific historical snapshots.
-The current joined working tree now passes full Release compilation, canonical
-formatting, and governance; those checks are not an exact delivered SHA and do
-not replace CI. TUnit, child-process recovery, RF3/.NET/MCP, container comparison,
-analyzer-fixture execution, and measured artifacts remain pending for the pushed
-candidate. ADR-033 remains Accepted and numeric coverage is still unconfigured.
+Commit `3559225a5f918160e46e32c9a812c3f71790e382` is pushed to protected `main`.
+Exact-SHA run [36988949282](https://github.com/managedcode/KeyLoad/actions/runs/36988949282)
+failed: the analyzer suite passed 84/88 tests, comparison passed 2/4, and Docker/Aspire
+RF3 passed 3/23. Governance failed on Ubuntu, macOS and Windows; UnitTests and
+child-process recovery did not run because the verification jobs stopped at
+governance. The known span/cohesion, resource naming/image-scope, RF3 invalid-read,
+and shared-cluster cleanup repairs are being joined. This run does not qualify the
+candidate; a new full exact-SHA workflow is required. ADR-033 remains Accepted and
+numeric coverage is still unconfigured.

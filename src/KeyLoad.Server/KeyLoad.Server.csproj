@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <ItemGroup>
+    <EmbeddedResource Include="Features/AdminDashboard/Assets/*" LogicalName="KeyLoad.AdminDashboard.%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <ProjectReference Include="../KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../KeyLoad.Orleans/KeyLoad.Orleans.csproj" />

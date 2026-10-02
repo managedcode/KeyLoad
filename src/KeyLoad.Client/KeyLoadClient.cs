@@ -8,7 +8,7 @@ using ManagedCode.Communication;
 namespace KeyLoad.Client;
 
 /// <summary>HTTP SDK. Writes keep caller command IDs; a timeout is an unknown outcome, never an automatic new write.</summary>
-public sealed class KeyLoadClient(HttpClient http, string apiKey)
+public sealed partial class KeyLoadClient(HttpClient http, string apiKey)
 {
     private const string CommandIdHeader = "X-KeyLoad-Command-Id";
 

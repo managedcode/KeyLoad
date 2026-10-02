@@ -1,0 +1,908 @@
+{
+  "runId": 37021991878,
+  "sha": "fa80c701475d8faf65bb43b49b6e1c7afb33979a",
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37021991878",
+  "branch": "codex/runtime-qualification-20261002",
+  "status": "completed",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 110887113857,
+      "name": "docker-rf3",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37021991878/job/110887113857",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require the actual Docker runtime",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Qualify RF3 through the real SDK clients",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Retain real topology and fault receipts",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain RF3 compiler diagnostic reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110887114099,
+      "name": "analyzer-rules",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37021991878/job/110887114099",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain rule regression and diagnostic evidence",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110887114231,
+      "name": "comparison-smoke",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37021991878/job/110887114231",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Measure 1 KiB documents, eight clients and three graph hops",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Measure 16 KiB documents, four clients and five graph hops",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain comparison test result reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain comparison compiler diagnostic reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110887114333,
+      "name": "verify (macos-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37021991878/job/110887114333",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify EditorConfig and analyzer fixes",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify repository governance",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify source-owned Roslyn rules",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Qualify real process recovery after a successful build",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain compiler diagnostic reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110887114433,
+      "name": "verify (ubuntu-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37021991878/job/110887114433",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify EditorConfig and analyzer fixes",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify repository governance",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify source-owned Roslyn rules",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Qualify real process recovery after a successful build",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain compiler diagnostic reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110887114440,
+      "name": "verify (windows-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37021991878/job/110887114440",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify EditorConfig and analyzer fixes",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify repository governance",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify source-owned Roslyn rules",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Qualify real process recovery after a successful build",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain compiler diagnostic reports",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "unitSummaries": {
+    "ubuntu": {
+      "total": 788,
+      "passed": 787,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0,
+      "failures": [
+        {
+          "name": "AcMp003LargeNonmatchingPayloadsDoNotAllocateRawCorpusCopies",
+          "method": "AcMp003LargeNonmatchingPayloadsDoNotAllocateRawCorpusCopies",
+          "status": "error",
+          "message": "Expected to be 1048576\nbut found 1048511\n\nat Assert.That(addedStoredBytes).IsEqualTo((long)CorpusDocuments * PaddingCharacters)",
+          "source": "tests/KeyLoad.UnitTests/Features/Search/SearchResourceTests.cs"
+        }
+      ]
+    },
+    "macos": {
+      "total": 788,
+      "passed": 787,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0,
+      "failures": [
+        {
+          "name": "AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails",
+          "method": "AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails",
+          "status": "error",
+          "message": "Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown",
+          "source": "tests/KeyLoad.UnitTests/Features/Messaging/SourceReadBudgetTests.cs"
+        }
+      ]
+    },
+    "windows": {
+      "total": 788,
+      "passed": 787,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0,
+      "failures": [
+        {
+          "name": "KnownMethodCategoryIsClosed",
+          "method": "KnownMethodCategoryIsClosed",
+          "status": "error",
+          "message": "Expected to contain \"ToolsCall\"\nbut received \"3 1 McpTransportDiagnosticsTests 4  MCP transport rejected at MethodHeaderEncoding for Other. 7ddcfc1e38ea9159286bc350b114682d 2466bc8c41d488e8 1 3 3 McpTransportDiagnosticsTests 4  MCP transport rejected at BodyMethodMismatch for Discovery. efec0d80cc8fe052a58c8e5a15767dbe 9699003b60e7c104 1\"\n\nat Assert.That(capture.Text).Contains(CategoryToolsCall)",
+          "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportDiagnosticsTests.cs"
+        }
+      ]
+    }
+  },
+  "recovery": {
+    "ubuntu": {
+      "total": 115,
+      "passed": 115,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0,
+      "failures": []
+    },
+    "macos": {
+      "total": 115,
+      "passed": 115,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0,
+      "failures": []
+    },
+    "windows": {
+      "total": 115,
+      "passed": 104,
+      "failed": 11,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0,
+      "failures": [
+        {
+          "name": "ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration(install, SnapshotFlushed)",
+          "status": "error",
+          "type": "System.IO.IOException",
+          "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-checkpoint-crash-cbea157881954effb1c25a59fb9f6538\\tree\\0.meta.wal' because it is being used by another process.",
+          "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+        },
+        {
+          "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(18)",
+          "status": "error",
+          "type": "System.IO.IOException",
+          "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-18-31-2515052916fe41d1b039405919a803a5\\tree\\0.meta.wal' because it is being used by another process.",
+          "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+        },
+        {
+          "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(16)",
+          "status": "error",
+          "type": "System.IO.IOException",
+          "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-16-4-53875e1e8a684cae8948b4a9381ebd18\\tree\\0.meta.wal' because it is being used by another process.",
+          "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+        },
+        {
+          "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(14)",
+          "status": "error",
+          "type": "System.IO.IOException",
+          "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-14-41-ae309d7e78cf438e8f53bfacaf267b2e\\tree\\0.meta.wal' because it is being used by another process.",
+          "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+        },
+        {
+          "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(11)",
+          "status": "error",
+          "type": "System.IO.IOException",
+          "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-11-44-de66262e0dd845c294fe9ac043982dff\\tree\\0.meta.wal' because it is being used by another process.",
+          "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+        },
+        {
+          "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(10)",
+          "status": "error",
+          "type": "System.IO.IOException",
+          "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-10-12-1a42116f5a9248debd689a1d99a69f6e\\tree\\0.meta.wal' because it is being used by another process.",
+          "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+        },
+        {
+          "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(8)",
+          "status": "error",
+          "type": "System.IO.IOException",
+          "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-8-39-567ef228a3d647aba535571bd1c20e08\\tree\\0.meta.wal' because it is being used by another process.",
+          "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+        },
+        {
+          "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(6)",
+          "status": "error",
+          "type": "System.Threading.Tasks.TaskCanceledException",
+          "message": "A task was canceled.",
+          "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+        },
+        {
+          "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(4)",
+          "status": "error",
+          "type": "System.Threading.Tasks.TaskCanceledException",
+          "message": "A task was canceled.",
+          "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+        },
+        {
+          "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(13)",
+          "status": "error",
+          "type": "System.IO.IOException",
+          "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-13-9-4f1cf75da3ae49458b7187f7d8372b9c\\tree\\0.meta.wal' because it is being used by another process.",
+          "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+        },
+        {
+          "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(1)",
+          "status": "error",
+          "type": "System.IO.IOException",
+          "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-1-7-476a1685219c488e9e5a581311d2139e\\tree\\0.meta.wal' because it is being used by another process.",
+          "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+        }
+      ]
+    }
+  },
+  "analyzerSummaries": {
+    "ubuntu": {
+      "total": 118,
+      "passed": 118,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "macos": {
+      "total": 118,
+      "passed": 118,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "windows": {
+      "total": 118,
+      "passed": 118,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    }
+  },
+  "rf3": {
+    "total": 29,
+    "passed": 12,
+    "failed": 17,
+    "skipped": 0,
+    "cancelled": 0,
+    "timedOut": 0,
+    "flaky": 0,
+    "callerTests": {
+      "total": 26,
+      "passed": 9,
+      "failed": 17
+    },
+    "infrastructureFileReceiptTests": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "failedMethods": [
+      "AcMcp005StableDocumentCommandHasTheSameOutcomeAcrossBothRealClients",
+      "AcMcp005ConflictingCommandIsRejectedByBothClientsWithoutChangingTheDocument",
+      "AcMcp007MissingDocumentIsCanonicalNullWithFreshNativeExecutionIds",
+      "AcMcp002ScopedEventReadDeniesForeignTenantAndStaleGenerationWithoutLeakingData",
+      "AcMcp005SdkAppendAndMcpRetryReturnOneCommittedEventBatch",
+      "AcMcp007SdkAndOfficialClientReturnIdenticalBoundedReplayPages",
+      "AcMcp002PersistedCredentialChangesRejectTheClientAfterDiscovery(True)",
+      "AcMcp002PersistedCredentialChangesRejectTheClientAfterDiscovery(False)",
+      "AcMcp003InvalidCanonicalBodyHasNoExecutionIdentity(False)",
+      "AcMcp003InvalidCanonicalBodyHasNoExecutionIdentity(True)",
+      "AcMcp002DistinctOfficialClientsKeepTheirOwnTenantsDuringConcurrentCalls",
+      "AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall",
+      "AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints",
+      "AcMcp007OfficialClientReceivesCanonicalCapabilitiesAndFreshExecutionIds",
+      "AcMcp002FieldProjectionAndDeniedPatchHaveTheSameCanonicalAuthorityAcrossClients",
+      "AcMcp002CurrentPersistedPrincipalControlsEachCallAfterDiscovery",
+      "AcMcp002CrossTenantAndForgedAuthorityAreDeniedWithoutChangingTheDocument"
+    ]
+  },
+  "comparison": {
+    "total": 4,
+    "passed": 2,
+    "failed": 2,
+    "skipped": 0,
+    "cancelled": 0,
+    "timedOut": 0,
+    "flaky": 0
+  },
+  "timeSeriesPartialEvidence": {
+    "sourceRevision": "fa80c701475d8faf65bb43b49b6e1c7afb33979a",
+    "runId": "3f85a2371ea64984aabb71cd9990bff2",
+    "attempts": 20,
+    "correctnessChecks": 20,
+    "sampleCount": 48,
+    "qualified": false,
+    "reason": "native_terminal_zero_exit_gate_failed_foreign_schema_assertion_not_reached"
+  },
+  "reportReceipts": [
+    {
+      "relativePath": "analyzer-rule-evidence/TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "7a25698cf2f9b4df3ac4655d427fd8e360f137f79d18589b2eacc078abc2f3ba",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "relativePath": "comparison-test-results/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "sha256": "7944e8e16c142ac333caafd93584fe0f1e7953774ec7344191bad08aa9a4157f",
+      "summary": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "relativePath": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "sha256": "4ba80d5e0badaceb398fae5b0acbcd5ae6c911bf91c8de21447282ff7b3a61a9",
+      "summary": {
+        "total": 29,
+        "passed": 12,
+        "failed": 17,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "relativePath": "test-results-macos-latest/TestResults/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json",
+      "sha256": "4fbb082c65b03f8e6e7f786005c1a81712f996a4b5490e14ca761c2148aa102e",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "relativePath": "test-results-macos-latest/TestResults/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+      "sha256": "e102e8456204068e6a10d10ab947635a0671b4bc4177ede23aa3575c80af4fbd",
+      "summary": {
+        "total": 115,
+        "passed": 115,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "relativePath": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "sha256": "dedbf9361bf4f163b11d6f278a32dd6f74e127829db0c55d49403dc4b0b6dc6c",
+      "summary": {
+        "total": 788,
+        "passed": 787,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "relativePath": "test-results-ubuntu-latest/TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "4988b66b18a588d8ed96f002500adf65ebe073ae65bf53961749f1957c0e919d",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "relativePath": "test-results-ubuntu-latest/TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "sha256": "9e7d0c77640fdae2693d6174ad547486b1fd21f99a27b6cd89bd29d3ea00922c",
+      "summary": {
+        "total": 115,
+        "passed": 115,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "relativePath": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "207e2f00c90d32942ef73c4378f0484625acdd580569f55612d3491fcee7e261",
+      "summary": {
+        "total": 788,
+        "passed": 787,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "relativePath": "test-results-windows-latest/TestResults/KeyLoad.Analyzers.Tests-windows-net10.0.tunit-report.json",
+      "sha256": "245638bf07d20c9704654fcae5f004785605e113c4d52998c4ef325ed74e9fdd",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "relativePath": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+      "sha256": "b092f32ec8276945d9f5191e685f14ad302186f07348dd8abc814b9081c78307",
+      "summary": {
+        "total": 115,
+        "passed": 104,
+        "failed": 11,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "relativePath": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+      "sha256": "38813b3df9bd7146a054ebba1bb1f5fd68b8bdfa909e96a35cdd9c7ece48728a",
+      "summary": {
+        "total": 788,
+        "passed": 787,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    }
+  ],
+  "artifactReceipts": [
+    {
+      "id": 11234925295,
+      "name": "test-results-macos-latest",
+      "digest": "sha256:a15184c6866848be9a7922d60f3e389a1379d7c79498197fec39179cfc9dada7",
+      "expired": false,
+      "sizeBytes": 705290,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11234895305,
+      "name": "code-quality-macos-latest",
+      "digest": "sha256:fbb0227ad8535996f3cc06e7a4d081482906a899771c8072addf8318be250feb",
+      "expired": false,
+      "sizeBytes": 1304015,
+      "downloaded": false,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11234047855,
+      "name": "code-quality-docker-rf3",
+      "digest": "sha256:2c591f8d184b48775456b250968c9ba8890ef81bc77308a8e18575c827b7cb7f",
+      "expired": false,
+      "sizeBytes": 677309,
+      "downloaded": false,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11234013914,
+      "name": "test-results-windows-latest",
+      "digest": "sha256:cffb96b59f46761e6d8504c66d5eb77585b1b7ef813569e78ffb2c68dcd060b3",
+      "expired": false,
+      "sizeBytes": 724263,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11233788106,
+      "name": "docker-rf3-qualification",
+      "digest": "sha256:bc40de52521886c4b917f0fc9f6dacace5a36216eacba09fffcd7e35d6b63bbd",
+      "expired": false,
+      "sizeBytes": 134376,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11233723896,
+      "name": "code-quality-ubuntu-latest",
+      "digest": "sha256:3bde33b91ef6af3e6e98033e58ad7d1602e5d48b887feb57dfc8fba011b2fdd3",
+      "expired": false,
+      "sizeBytes": 1306603,
+      "downloaded": false,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11233713781,
+      "name": "test-results-ubuntu-latest",
+      "digest": "sha256:0d74f421606431c803f37065934a8e27b76026755ec472a9c01d414ddd52023c",
+      "expired": false,
+      "sizeBytes": 711350,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11233684547,
+      "name": "comparison-test-results",
+      "digest": "sha256:64e84bdb6d63a83908a9b64d65737747adcc21d5b9c64d0a6ad02917d07b5f33",
+      "expired": false,
+      "sizeBytes": 108645,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11233649472,
+      "name": "comparison-suite",
+      "digest": "sha256:4479a806edec7cb222f33f25b347963701350124256bb8e7303ca186cf57782e",
+      "expired": false,
+      "sizeBytes": 26458,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11233594329,
+      "name": "code-quality-windows-latest",
+      "digest": "sha256:8570065a854738e065d2f72f9f1a8b4ed41e6523673f63f8d5a3a9eadb65e6c6",
+      "expired": false,
+      "sizeBytes": 1310078,
+      "downloaded": false,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11233484607,
+      "name": "code-quality-comparisons",
+      "digest": "sha256:3198a4a047fbd9f526e31526d315874718d73ce4e35da82613ecabef61c5803c",
+      "expired": false,
+      "sizeBytes": 675660,
+      "downloaded": false,
+      "archiveDownloadDigestVerified": false
+    },
+    {
+      "id": 11233257443,
+      "name": "analyzer-rule-evidence",
+      "digest": "sha256:112637ee9087cf2226ac750129628d2e0f2fd4c79797ac57199095b1542b13b7",
+      "expired": false,
+      "sizeBytes": 207183,
+      "downloaded": true,
+      "archiveDownloadDigestVerified": false
+    }
+  ],
+  "qualification": "failed_required_runtime_gates_remain_open"
+}

@@ -3,6 +3,11 @@ namespace KeyLoad.Orleans;
 /// <summary>Borrowed physical-node administration; callers first enforce current persisted administrator authority.</summary>
 public interface INodeAdministration
 {
+    /// <summary>Observes actual node files and process counters without acquiring storage ownership.</summary>
+    /// <param name="cancellationToken">Cancellation of bounded observation work.</param>
+    /// <returns>The actual executing physical node's administrator snapshot.</returns>
+    Task<AdminNodeSnapshot> DashboardAsync(CancellationToken cancellationToken);
+
     /// <summary>Create a durable backup of this physical node's canonical store.</summary>
     /// <param name="cancellationToken">Cancellation checked before starting the storage operation.</param>
     /// <returns>Backup identifier and materialized cut.</returns>

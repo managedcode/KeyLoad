@@ -18,6 +18,29 @@ schema change. Rollback removes only the internal classification repair.
 
 ## Контекст і запропонований напрям
 
+Accepted TASK-RUNTIME-MCP-FRAME-W3 implements REQ/AC-CLIENT-009 with
+AC-MCP-001/004/005/007 and AC-MP-009/012. The pinned SDK
+[McpHttpClient source](https://github.com/modelcontextprotocol/csharp-sdk/blob/6fa3825973949a9c4f0cd8af344e15a8db09dc35/src/ModelContextProtocol.Core/Client/McpHttpClient.cs)
+uses JsonContent, whose [.NET10 implementation](https://github.com/dotnet/runtime/blob/v10.0.12/src/libraries/System.Net.Http.Json/src/System/Net/Http/Json/JsonContent.cs)
+does not compute Content-Length. Existing maximum-capacity allocation and
+projection exceed the default control pool for this path. Preserve the maximum
+wire bound and conservative equations while charging the actual retained frame
+owner after bounded incremental reading. Pre-read ingress still covers maximum
+growth; no header claim can bypass framing or authority. This changes private
+buffer lifetime/allocation only, with no accepted revision, quota, default-pool,
+native dispatch, public result or data-format change.
+
+Ordered stages: retain tests-first real owner/state regression source; implement
+bounded unknown-length buffer growth in McpFrameBody and actual retained-capacity
+handoff in McpRequestState; root reviews overrun/zeroing/cancellation and every
+held owner, runs enabled build/format, then qualifies full exact-SHA GitHub unit
+and RF3 default official SDK discovery/tool/authority paths. One economical
+worker owns only these two production files, existing McpFrameBodyTests and a
+new cohesive ClientApi admission regression file. Root alone owns shared docs,
+CI, commit and integration. Stop on required contract/protocol changes. Source
+rollback reverts both owner/handoff changes together; this ADR remains Accepted
+until every required gate passes.
+
 Accepted TASK-RUNTIME-MCP-DIAGNOSTICS-W implements REQ/AC-CLIENT-008 with
 AC-MCP-003/005/007. First retain tests-first source for actual rejected headers,
 body comparisons and private metadata through the real Microsoft EventSource

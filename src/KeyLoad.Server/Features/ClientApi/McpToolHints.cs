@@ -29,6 +29,8 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         GrainReadKind.Backup => new(false, false, false),
         GrainReadKind.Admission => new(true, true, false),
         GrainReadKind.NodeStatus => new(true, true, false),
+        GrainReadKind.AdminDashboard or GrainReadKind.AdminResources or GrainReadKind.AdminQueue
+            => new(true, true, false),
         GrainReadKind.BlobMetadata or GrainReadKind.BlobUploadInfo or GrainReadKind.BlobRange or GrainReadKind.BlobList
             => new(true, true, false),
         _ => throw new ArgumentOutOfRangeException(nameof(kind), McpCatalogProtocol.InvalidOperation)

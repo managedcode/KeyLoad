@@ -87,6 +87,37 @@ schema or package migration is needed; rollback reverts only this private catch.
 
 ## Повний caller contract
 
+### Accepted unknown-length MCP framing repair
+
+REQ-CLIENT-009 / AC-CLIENT-009, AC-MCP-001/004/005/007 and AC-MP-009/012
+(TASK-RUNTIME-MCP-FRAME-W3) require the unmodified official2.2.0 discovery-first
+SDK to succeed under the existing default node/scope/memory limits. Its native
+JsonContent has unknown HTTP length. At fa80c701, a small such body allocates the
+8MiB permitted maximum, and admission carries an ingress projection already
+240,947,200 bytes into the default134,217,728-byte control pool. The prior RF3
+receipt lacks the exact admission exception, so this is a source-derived cause,
+not a captured memory failure. Keep first discovery proof in renewed RF3 CI.
+
+Separate permitted wire bytes from actual retained buffer capacity. For unknown
+length, begin with at most the existing16KiB scratch-sized buffer and grow only
+as actual bytes arrive, explicitly clamping growth to the same inclusive limit.
+Known-length declarations, one excess byte, truncated bodies, UTF8/JSON/shape
+errors, cancellation, replay bytes and clearing the entire retained buffer remain
+exact. Ingress retains its conservative pre-read maximum reservation. After
+framing, the canonical admission handoff uses the actual owned buffer capacity
+and inspected shape; it cannot undercharge any retained raw owner. Do not change
+projection equations, pool defaults, quotas, accepted protocol or client headers.
+
+Server/ClientApi McpFrameBody and McpRequestState plus UnitTests/ClientApi real
+frame/state regressions are the worker scope. Existing RF3 McpDiscoveryTests must
+connect with default negotiation, list all tools and execute canonical calls;
+scope/credential invalidation and malformed/oversized negatives remain required.
+Tests first prove a small unknown-length frame's retained capacity, exact replay,
+bounded growth/overrun and admission under the unchanged default control pool,
+then disposal releases execution/memory ownership. Root owns review/build/format
+and exact multi-OS unit plus RF3 official SDK join. Frontend, SDK API, persisted
+format and dependency migration are N/A; ADR039 owns source-only rollback.
+
 ### Accepted MCP rejection diagnostics
 
 REQ-CLIENT-008 / AC-CLIENT-008 (TASK-RUNTIME-MCP-DIAGNOSTICS-W) refines

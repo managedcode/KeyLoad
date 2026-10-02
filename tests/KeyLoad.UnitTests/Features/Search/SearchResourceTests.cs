@@ -28,8 +28,11 @@ internal sealed class SearchResourceTests
         db.Configure(SmallCollection, ResourceKind.Collection);
         db.Configure(LargeCollection, ResourceKind.Collection);
         var padding = new string('x', PaddingCharacters);
-        db.Commit(Rows(SmallCollection, string.Empty));
-        db.Commit(Rows(LargeCollection, padding));
+        var evaluatedAt = TimeProvider.System.GetUtcNow();
+        CommitAt(db, evaluatedAt, Rows(SmallCollection, string.Empty));
+        CommitAt(db, evaluatedAt, Rows(LargeCollection, padding));
+        await AssertStoredTimesAsync(db, SmallCollection, evaluatedAt);
+        await AssertStoredTimesAsync(db, LargeCollection, evaluatedAt);
         var addedStoredBytes = StoredBytes(LargeCollection) - StoredBytes(SmallCollection);
         var search = new SearchEngine(db.Database);
         var small = new SearchRequest(db.Partition, SmallCollection, TextPath, SearchTerm, Limit: 1);
@@ -60,11 +63,6 @@ internal sealed class SearchResourceTests
         await Assert.That(result.Document.Json).IsEqualTo("{\"text\":\"needle\"}");
         await Assert.That(result.Score).IsEqualTo(1.0 / 61).Within(ScoreTolerance);
 
-        Mutation[] Rows(string collection, string extra) => Enumerable.Range(0, CorpusDocuments)
-            .Select(index => (Mutation)new PutDocument(collection, $"row-{index:D2}",
-                "{\"text\":\"other\",\"padding\":\"" + extra + "\"}"))
-            .Append(new PutDocument(collection, HitId, "{\"text\":\"needle\"}"))
-            .ToArray();
         long StoredBytes(string collection) => db.Store.Read(view => view.Scan(
             DocumentStorageKeys.Prefix(db.Partition, collection), CorpusDocuments + 1).Records
             .Sum(record => (long)record.Value.Length));
@@ -74,6 +72,28 @@ internal sealed class SearchResourceTests
             result = search.Search("root", request, token);
             return GC.GetAllocatedBytesForCurrentThread() - before;
         }
+    }
+
+    private static Mutation[] Rows(string collection, string extra) => Enumerable.Range(0, CorpusDocuments)
+        .Select(index => (Mutation)new PutDocument(collection, $"row-{index:D2}",
+            "{\"text\":\"other\",\"padding\":\"" + extra + "\"}"))
+        .Append(new PutDocument(collection, HitId, "{\"text\":\"needle\"}"))
+        .ToArray();
+
+    private static void CommitAt(TestDatabase db, DateTimeOffset time, Mutation[] mutations)
+    {
+        var commandId = Guid.NewGuid();
+        db.Submit(OperationKind.Batch, new CommandRequest(commandId, db.Partition, [.. mutations]), id: commandId, time: time)
+            .Get<CommitReceipt>();
+    }
+
+    private static async Task AssertStoredTimesAsync(TestDatabase db, string collection, DateTimeOffset evaluatedAt)
+    {
+        var updatedAt = db.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(db.Partition, collection),
+            CorpusDocuments + 1).Records
+            .Select(record => JsonDefaults.Deserialize<DocumentRecord>(record.Value.Span).UpdatedAt).ToArray());
+        await Assert.That(updatedAt.Length).IsEqualTo(CorpusDocuments + 1);
+        await Assert.That(updatedAt.All(time => time == evaluatedAt)).IsTrue();
     }
 
     [Test]

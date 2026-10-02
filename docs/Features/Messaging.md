@@ -1,5 +1,20 @@
 # Messaging
 
+TASK-RUNTIME-READ-BUDGET-W3 preserves REQ-MSG-009 and AC-MP-005/011/012 after
+the exact fa80c701 macOS failure of
+SourceReadBudgetTests.AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails.
+Measure the existing four raw record byte counts from one real persisted store,
+then construct exact and one-byte-short DatabaseEngine wrappers over that same
+store and authority. Run sequentially without writes. Assert the isolated actual
+provider PointExaminedBytes delta equals the computed oracle, the exact read
+returns its event and the short read fails BudgetExceeded; a following exact read
+must still succeed. Different real timestamp serialization widths across three
+independent stores cannot define an exact byte boundary. No budget tolerance,
+clock, provider or production/API/data change is accepted. One worker owns only
+SourceReadBudgetTests.cs; root owns review, build/format and renewed exact-SHA
+multi-OS GitHub proof. ADR035's existing scoped-read contract suffices; rollback
+reverts the fixture coordination while keeping its strict negative oracle.
+
 Status: queue, topic, subscription-group, and inbox behavior exists in Core source and unit-test cases; full scheduler/worker/deployment capabilities and GitHub qualification remain pending. The accepted target contract is in [product design sections 37–46](../design/architecture-v0.3.uk.md).
 
 ## Purpose, actors, and entry points

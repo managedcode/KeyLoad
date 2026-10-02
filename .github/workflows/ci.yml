@@ -81,6 +81,13 @@ jobs:
           global-json-file: global.json
       - name: Require the actual Docker runtime
         run: docker version
+      - name: Require the actual administration browser
+        shell: bash
+        run: |
+          admin_chrome=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          test -n "$admin_chrome" && test -x "$admin_chrome"
+          "$admin_chrome" --version
+          printf 'KEYLOAD_ADMIN_CHROME_PATH=%s\n' "$admin_chrome" >> "$GITHUB_ENV"
       - run: dotnet restore KeyLoad.slnx
       - run: dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release
       - name: Qualify RF3 through the real SDK clients

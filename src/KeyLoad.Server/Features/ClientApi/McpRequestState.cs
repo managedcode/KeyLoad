@@ -53,7 +53,8 @@ internal sealed class McpRequestState : IDisposable
     /// <summary>Admits one raw native message before typed parameter conversion.</summary>
     internal void Admit(McpOperationDescriptor? descriptor, CancellationToken cancellationToken)
     {
-        var input = new McpInputMemory(capacity, body?.WireBytes ?? 0, body?.Shape ?? default,
+        var input = new McpInputMemory(body?.RetainedCapacity ?? capacity, body?.WireBytes ?? 0,
+            body?.Shape ?? default,
             0, authentication.Length, authenticationShape);
         admission.Acquire(Principal, descriptor, input, cancellationToken);
         Operation = descriptor;

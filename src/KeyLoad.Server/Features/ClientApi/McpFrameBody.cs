@@ -23,6 +23,12 @@ internal sealed class McpFrameBody : IDisposable
         get { ThrowIfDisposed(); return checked((int)buffer.Length); }
     }
 
+    /// <summary>Gets the full private wire buffer capacity retained by this owner.</summary>
+    internal int RetainedCapacity
+    {
+        get { ThrowIfDisposed(); return buffer.Capacity; }
+    }
+
     /// <summary>Gets the checked structural counts before native SDK parsing allocates its DOM.</summary>
     internal McpFrameShape Shape
     {
@@ -49,12 +55,15 @@ internal sealed class McpFrameBody : IDisposable
         if (declaredLength is < 0 || declaredLength > maximumBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
         cancellationToken.ThrowIfCancellationRequested();
-        var capacity = checked((int)(declaredLength ?? maximumBytes));
-        var retained = new MemoryStream(capacity);
+        var initialCapacity = declaredLength.HasValue
+            ? checked((int)declaredLength.Value)
+            : Math.Min(maximumBytes, ScratchCapacityBytes);
+        var retained = new MemoryStream(initialCapacity);
         var transferred = false;
         try
         {
-            await ReadBoundedAsync(source, retained, capacity, maximumBytes, cancellationToken).ConfigureAwait(false);
+            await ReadBoundedAsync(source, retained, checked((int)(declaredLength ?? maximumBytes)),
+                maximumBytes, !declaredLength.HasValue, cancellationToken).ConfigureAwait(false);
             if (declaredLength.HasValue && declaredLength.Value != retained.Length)
             { throw Errors.Fail(ErrorCode.Validation, McpFramingProtocol.InvalidFrame); }
             var checkedShape = McpFrameBounds.Inspect(retained.GetBuffer().AsSpan(0, checked((int)retained.Length)), maximumBytes);
@@ -90,7 +99,7 @@ internal sealed class McpFrameBody : IDisposable
     }
 
     private static async Task ReadBoundedAsync(Stream source, MemoryStream retained,
-        int capacity, int maximumBytes, CancellationToken cancellationToken)
+        int wireLimitBytes, int maximumBytes, bool mayGrow, CancellationToken cancellationToken)
     {
         var scratch = new byte[ScratchCapacityBytes];
         try
@@ -98,12 +107,13 @@ internal sealed class McpFrameBody : IDisposable
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var remaining = capacity - retained.Length;
+                var remaining = wireLimitBytes - retained.Length;
                 var count = checked((int)Math.Min(scratch.Length, remaining + 1));
                 var read = await source.ReadAsync(scratch.AsMemory(0, count), cancellationToken).ConfigureAwait(false);
                 if (read == 0)
                 { return; }
-                AppendWithinDeclaration(retained, scratch.AsSpan(0, read), remaining, maximumBytes);
+                AppendWithinDeclaration(retained, scratch.AsSpan(0, read), remaining,
+                    maximumBytes, mayGrow);
             }
         }
         finally
@@ -113,13 +123,24 @@ internal sealed class McpFrameBody : IDisposable
     }
 
     private static void AppendWithinDeclaration(MemoryStream retained, ReadOnlySpan<byte> value,
-        long remaining, int maximumBytes)
+        long remaining, int maximumBytes, bool mayGrow)
     {
         if (value.Length > remaining)
         {
             var exhausted = retained.Length + value.Length > maximumBytes;
             throw Errors.Fail(exhausted ? ErrorCode.ResourceExhausted : ErrorCode.Validation,
                 exhausted ? McpFramingProtocol.FrameBudgetExceeded : McpFramingProtocol.InvalidFrame);
+        }
+        var requiredCapacity = checked((int)(retained.Length + value.Length));
+        if (retained.Capacity < requiredCapacity)
+        {
+            if (!mayGrow)
+            { throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation); }
+            var doubledCapacity = (long)retained.Capacity * 2;
+            var precedingBuffer = retained.GetBuffer();
+            retained.Capacity = checked((int)Math.Min(maximumBytes,
+                Math.Max(requiredCapacity, doubledCapacity)));
+            CryptographicOperations.ZeroMemory(precedingBuffer);
         }
         retained.Write(value);
     }

@@ -81,6 +81,8 @@ internal static class McpToolDescriptions
         McpToolNames.ProjectionsCommit => ProjectionsCommit,
         McpToolNames.ProjectionsRelease => ProjectionsRelease,
         McpToolNames.OutboxPurge => OutboxPurge,
+        AdminDashboardProtocol.SnapshotTool or AdminDashboardProtocol.ResourcesTool or AdminDashboardProtocol.QueueTool
+            => AdminDashboardMcpCatalog.Description(name),
         _ => BlobMcpDescriptions.For(name)
     };
 }

@@ -10,7 +10,7 @@ internal static class McpOperationCatalog
     /// <summary>All implemented public operations, excluding internal authentication and membership.</summary>
     internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
         [.. McpReadCatalog.Entries, .. McpCommandCatalog.Entries, .. McpSubscriptionCatalog.Entries,
-            .. McpProjectionCatalog.Entries, .. BlobMcpCatalog.Entries];
+            .. McpProjectionCatalog.Entries, .. BlobMcpCatalog.Entries, .. AdminDashboardMcpCatalog.Entries];
 
     private static readonly FrozenDictionary<string, McpOperationDescriptor> Lookup =
         Entries.ToFrozenDictionary(entry => entry.Name, StringComparer.Ordinal);

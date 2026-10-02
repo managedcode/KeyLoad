@@ -14,6 +14,33 @@ Out of scope: changing the product contract to a demo or single node; replacing 
 
 ## Options and decision
 
+### Runtime checkpoint fa80c701 preserving repairs
+
+Run37021991878 proves the previous four unit failures now pass on all three
+operating systems. Three new cases fail independently: exact search bytes on
+Ubuntu, exact raw topic-read budget on macOS and concurrent EventSource logging
+capture on Windows. Two independently populated stores are not a byte-identical
+oracle because real timestamp JSON has variable fractional precision. Choose a
+single recorded time for the two search batches and the same actual persisted
+store/cut for exact versus one-byte-short topic reads; retain every threshold.
+The native logging provider has global filter state and listener disposal can
+disable other captures. Serialize only the two native logging suites using one
+TUnit isolation key, preserving real provider output and privacy assertions.
+
+The pinned MCP SDK uses unknown-length JsonContent. The server allocates the
+8MiB maximum body capacity for a tiny frame, then carries the associated
+240,947,200-byte ingress projection into a 134,217,728-byte control pool. This
+source path explains discovery admission failure if earlier node/scope checks
+pass; the prior report does not expose the precise caught admission exception.
+Choose bounded incremental unknown-length buffering and handoff of actual
+retained capacity, preserving maximum wire length, all conservative projection
+equations, authentication, quotas, protocol and pool defaults. Test real owners
+and full official SDK RF3 discovery before claiming this failure repaired.
+
+Windows recovery failures identify a still-shared metadata WAL after child exit.
+The current readiness probe omits that file. The handle owner is unknown; do not
+edit ZoneTree or classify an owned dependency defect without more evidence.
+
 ### Runtime checkpoint ad594642 diagnostic refinement
 
 Run37015193756 leaves four distinct unit failures, seventeen official MCP

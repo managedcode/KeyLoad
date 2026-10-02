@@ -64,6 +64,11 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         }
 
         var principal = GrainRequestAuthority.Reload(localDatabase, request.Envelope.PrincipalId!, runtimeClock);
+        if (GrainAdminDashboardCapabilities.Handles(kind))
+        {
+            return await GrainAdminDashboardCapabilities.ExecuteAsync(localDatabase, administration, principal,
+                kind, request.Payload, cancellationToken).ConfigureAwait(true);
+        }
         if (GrainBlobReadCapabilities.Handles(kind))
         {
             return blobs.Execute(kind, principal.Id, request.Payload, cancellationToken);

@@ -50,5 +50,11 @@ public enum GrainReadKind
     /// <summary>Read a bounded exact blob byte range at its current revision.</summary>
     BlobRange,
     /// <summary>List bounded authorized current blob metadata.</summary>
-    BlobList
+    BlobList,
+    /// <summary>Read administrator-authorized physical node observations.</summary>
+    AdminDashboard,
+    /// <summary>Read a bounded administrator-authorized resource metadata page.</summary>
+    AdminResources,
+    /// <summary>Read queue counters and metadata without consuming messages.</summary>
+    AdminQueue
 }

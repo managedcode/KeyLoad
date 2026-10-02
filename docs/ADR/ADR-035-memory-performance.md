@@ -432,6 +432,20 @@ Search admission remains separately open in the full resource inventory.
 
 ### Accepted portable SIMD validation stage, TASK-MP-006D
 
+Accepted TASK-RUNTIME-SEARCH-BYTES-W3 preserves the existing REQ-SR-001 /
+AC-MP-003/011/012 allocation and stored-byte oracle. Its actual failing baseline
+is Ubuntu788-case run37021991878 atfa80c701, expected1048576 versus1048511.
+Read-only tracing proves complete persisted records include a shared command's
+UpdatedAt and native JSON emits variable fractional-second width. Exact failed
+ticks are unavailable, so the cause remains a supported inference until the
+corrected fixture qualifies. First preserve the failing assertion and snapshot
+the test source. A worker changes only SearchResourceTests.cs to use one actual
+captured UTC time in two separate uniquely identified batches and assert real
+persisted time equality before measuring. Every original exact byte, allocation,
+hit payload and score condition remains; no provider, clock, counter, threshold
+or production change. Lead alone owns docs, joined enabled build/format and
+multi-OS GitHub reports; source rollback restores only fixture coordination.
+
 REQ-SR-002 / AC-MP-004/011/012 / AC-SEARCH-001 add edge qualification around the
 existing public metric and persisted search behavior. The lead accepts the
 validation-only optimization under the owner's operation-efficiency objective;

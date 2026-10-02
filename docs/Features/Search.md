@@ -66,6 +66,22 @@ RF3/MCP public integration and measured server memory remain required join gates
 
 ## Portable SIMD validation qualification
 
+TASK-RUNTIME-SEARCH-BYTES-W3 preserves REQ-SR-001 / AC-MP-003/011/012 after
+Ubuntu run37021991878 atfa80c701 reports1048511 rather than1048576 added stored
+bytes. The fixture compares complete DocumentRecord encodings, including65
+UpdatedAt values, while its two batches currently sample independent command
+times. Native System.Text.Json trims fractional-second zeros; the65-byte delta
+fits a one-byte timestamp-width difference, but CI contains no timestamps proving
+that exact cause. Capture one actual UTC time after configuration and use it for
+both separate batches with distinct matching inner/outer command IDs. Equality
+is permitted by the existing persisted command-clock contract. Assert actual
+stored times match that captured value before measurement, retain the exact
+1MiB stored-byte difference and every allocation/result/score assertion. No
+synthetic clock, tolerance, changed grouping or byte counter is accepted. The
+worker owns only SearchResourceTests.cs; the lead reviews metadata and timing
+boundaries, builds and obtains renewed exact multi-OS GitHub proof. ADR035 owns
+source-only rollback; production/API/data migration is N/A for this fixture repair.
+
 TASK-MP-006D, REQ-SR-002 and AC-SEARCH-001 expand the metric edge proof before
 optimizing finite-value validation. Public `SearchEngine.Similarity` cases and
 real-store search cases live in NEW
