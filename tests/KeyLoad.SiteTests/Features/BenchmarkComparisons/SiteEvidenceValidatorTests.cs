@@ -143,6 +143,8 @@ internal sealed class SiteEvidenceValidatorTests
             await SiteNodeProbe.RunRawAsync(inputs, SiteTokens.InvalidJson, token));
         await Assert.That(malformedJson).IsNotNull();
         await Assert.That(malformedJson?.Message.Contains(SiteTokens.StandardErrorLabel, StringComparison.Ordinal) == true).IsTrue();
+        await Assert.That(malformedJson?.Message.Contains(SiteBuilderTokens.JsonParserMarker, StringComparison.Ordinal) == true).IsTrue();
+        await Assert.That(malformedJson?.Message.Contains(SiteBuilderTokens.VendorError, StringComparison.Ordinal) == false).IsTrue();
     }
 
     private static JsonObject ChangeEntry(JsonObject catalog, string property, string value)

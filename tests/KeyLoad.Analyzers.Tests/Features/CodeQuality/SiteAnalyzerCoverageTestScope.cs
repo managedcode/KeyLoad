@@ -50,7 +50,8 @@ internal sealed class SiteAnalyzerCoverageTestScope : IDisposable
 
     internal Task<(int ExitCode, string StandardOutput, string StandardError)> RunAsync(
         string mode,
-        bool includeCoverage = true)
+        bool includeCoverage = true,
+        IReadOnlyDictionary<string, string?>? environmentOverrides = null)
     {
         var arguments = new List<string>
         {
@@ -74,7 +75,7 @@ internal sealed class SiteAnalyzerCoverageTestScope : IDisposable
             arguments.Add(Path.Combine(evidenceRoot, SiteAnalyzerCoverageTokens.InputName));
         }
 
-        return SiteAnalyzerCoverageProcess.RunAsync(arguments, sourceRepository);
+        return SiteAnalyzerCoverageProcess.RunAsync(arguments, sourceRepository, environmentOverrides);
     }
 
     private void CopyContractSources()

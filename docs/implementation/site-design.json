@@ -59,7 +59,11 @@
     "coverage": "TASK013_COMPLETE_strongest_source_approval_ae21793f1c58424a507dbeb2b8bdf4b227cd84821f4034b7d576966d6e5ad352; integrated_development_build_passed; real_GitHub_native_numeric_qualification_pending",
     "browser": "TASK012_COMPLETE_strongest_source_approval_7424fb8d25f303c3c94ca95870de76431de473e5317a76654e028a8b23bf1082; preserved_otherchat_KL-SITE-BUILD-003A_handoff; integrated_build_and_format_passed",
     "candidateAudit": "TASK-SITE-CANDIDATE-AUDIT-010_COMPLETE; repair source-preparation review COMPLETE, all required joins still pending",
-    "analyzerCoverage": "TASK011_COMPLETE_strongest_source_approval; native_boolean_BigInteger_checked_sum_physical_line_gate_and_complete_12_pipeline_oracles_joined; nesting3; integrated_build_and_format_passed"
+    "analyzerCoverage": "TASK011_COMPLETE_strongest_source_approval; native_boolean_BigInteger_checked_sum_physical_line_gate_and_complete_12_pipeline_oracles_joined; nesting3; integrated_build_and_format_passed",
+    "nativeFormatRepair": "TASK014_COMPLETE_source_and_GitHub_36991420593_all3real_process_cases_passed",
+    "numericRepair": "TASK015_COMPLETE_source_and_GitHub_36991420593_original4failures_plus_all17registrations_and_numeric_selfinventory_passed",
+    "diagnosticFlows": "TASK016_COMPLETE_root_and_strongest_4file_source_join_213298217ea9f5309765bb41eca581062cc1ca78ef45abd4cd4715dd26cd41cb; retainedregressionbytepreserved; integrateddevelopmentbuild_and_formatpass; runtime_pending",
+    "argumentRoleRepair": "TASK018_FIX_COMPLETE_root_and_strongest_twofile_source_join_6daafb389c2caca0976ea7c8530cae37a6ba033f5fb3001171a2489bfeef1218_bf33778bb16a12d04b07a88d535a516d004957592a2aba9d5b91845e2e0de5fc; enabledbuild0warnings0errors_and_analyzerformatpass; realGitHub_pending"
   },
   "verification": {
     "source": "All_bounded_worker_packets_complete_joined_full_root_and_strongest_review; 51_source_manifest_98c457ee0333c816795665f742101989b9a0638b2382372313afefd823de4617; source_only_not_runtime_qualification",
@@ -106,7 +110,7 @@
       ]
     },
     "githubSiteSuite": {
-      "state": "exact_descendant_github_qualification_in_progress",
+      "state": "actual_E_failure_repaired_source_awaiting_full_site_publication_candidate_gate",
       "attempts": [
         {
           "run": 36987695573,
@@ -132,16 +136,167 @@
           "sourceRevision": "b402dc50785028cc5b09a3928c5b28ba8a721a6e",
           "url": "https://github.com/managedcode/KeyLoad/actions/runs/36988549282",
           "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/36988549282/job/110779101338",
-          "conclusion": null,
-          "state": "in_progress",
+          "conclusion": "failure",
+          "state": "completed_failure",
           "runtimeSourceReceipt": "passed",
-          "publication": "skipped"
+          "publication": "skipped",
+          "analyzerTests": {
+            "total": 88,
+            "executed": 88,
+            "passed": 84,
+            "failed": 4,
+            "skipped": 0
+          },
+          "siteTests": "skipped_not_passing",
+          "coverage": "native_report_retained_decimal_display_pair_rejected",
+          "nativeReportSha256": "983f7de7132938062db791723cdfba1ca683eceb98b3cecb191b2452af938091",
+          "artifactReceipt": {
+            "id": 11217729758,
+            "name": "site-qualification-b402dc50785028cc5b09a3928c5b28ba8a721a6e",
+            "digest": "sha256:9ed687f54b29ba15de64653993cb5cb2b93227eb64a8295621eeffcddc6a3640",
+            "localEvidence": "/private/tmp/keyload-site-run-36988549282",
+            "log": "/private/tmp/keyload-site-run-36988549282/workflow.log"
+          }
+        },
+        {
+          "run": 36991420593,
+          "sourceRevision": "8d8d395f7fa6157773e0318d64f0124cd2e84579",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/36991420593",
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/36991420593/job/110788278234",
+          "purpose": "tests_first_red_baseline_not_final_acceptance",
+          "state": "completed_failure",
+          "conclusion": "failure",
+          "productionAnalyzerSource": "all30files_unchanged_from_parent",
+          "publication": "skipped",
+          "analyzerTests": {
+            "total": 103,
+            "executed": 103,
+            "passed": 96,
+            "failed": 7,
+            "skipped": 0
+          },
+          "siteTests": "skipped_not_passing",
+          "coverage": "native_integer_gate_valid_KLD0022_below_required90percent",
+          "nativeReportSha256": "aea1ab67c5c15dbd76dc2bed6c0ba8eb5bb1a31ca14306195171cd43ca1abe60",
+          "artifactReceipt": {
+            "id": 11219323506,
+            "name": "site-qualification-8d8d395f7fa6157773e0318d64f0124cd2e84579",
+            "digest": "sha256:590518a45e2ee52b183949899c18bc5aa0e56c7431e2aec20743cd20ec2a51c0",
+            "localEvidence": "/private/tmp/keyload-site-run-36991420593",
+            "log": "/private/tmp/keyload-site-run-36991420593/workflow.log"
+          },
+          "failedRegressions": [
+            {
+              "test": "Utf8JsonWriterValueArgumentIsNotAMachineKeyAsync",
+              "expected": 1,
+              "actual": 2
+            },
+            {
+              "test": "DynamicPropertyLookupUsesNamedAndPositionalKeyFallbackAsync",
+              "expected": 2,
+              "actual": 3
+            },
+            {
+              "test": "NestedKeyConcatIsPositiveAndNestedValueConcatIsNegativeAsync",
+              "expected": 2,
+              "actual": 3
+            },
+            {
+              "test": "ReorderedNamedConstructorsBindKeysNotFirstSourceValuesAsync",
+              "expected": 2,
+              "actual": 4
+            },
+            {
+              "test": "DictionaryAddBindsPositionalAndReorderedNamedKeysAsync",
+              "expected": 2,
+              "actual": 3
+            },
+            {
+              "test": "Utf8JsonWriterPositionalArgumentsBindPropertyAndValueAsync",
+              "expected": 1,
+              "actual": 2
+            },
+            {
+              "test": "Utf8JsonWriterReorderedNamedArgumentsBindPropertyAndValueAsync",
+              "expected": 1,
+              "actual": 2
+            }
+          ]
+        },
+        {
+          "run": 36994330874,
+          "sourceRevision": "7c50573adb92eec67a7a3209f11be97a7688bd3c",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/36994330874",
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/36994330874/job/110797469875",
+          "purpose": "full_joined_source_qualification",
+          "state": "completed_failure",
+          "conclusion": "failure",
+          "publication": "skipped",
+          "analyzerTests": {
+            "total": 112,
+            "executed": 112,
+            "passed": 112,
+            "failed": 0,
+            "skipped": 0
+          },
+          "siteTests": {
+            "total": 28,
+            "executed": 28,
+            "passed": 21,
+            "failed": 7,
+            "skipped": 0
+          },
+          "coverage": "analyzer_native_all_thresholds_pass; site_missing_browser_execution_failed_closed",
+          "nativeReportSha256": "b7514a3a32072bf0f567200f2abfdfff3942b116709e9f4aea088511b14367ab",
+          "artifactReceipt": {
+            "id": 11220962516,
+            "name": "site-qualification-7c50573adb92eec67a7a3209f11be97a7688bd3c",
+            "digest": "sha256:2ad13a414cafd5a26d327bc0f5144a9c2e5bc7dfa8cf149d84fdb23074f26cd7",
+            "localEvidence": "/private/tmp/keyload-site-run-36994330874",
+            "log": "/private/tmp/keyload-site-run-36994330874/workflow.log"
+          },
+          "cause": "verifyVendor compares historical gzip byte count against hosted Node22 runtime compression; exact raw vendor identity passes; browser builder fails before Chrome starts"
+        },
+        {
+          "run": 36999295427,
+          "sourceRevision": "c203860ac4f489debe6a5daad09d8942415e54b6",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/36999295427",
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/36999295427/job/110813053048",
+          "purpose": "portable_vendor_and_diagnostics_join",
+          "state": "completed_failure",
+          "conclusion": "failure",
+          "publication": "skipped",
+          "analyzerTests": {
+            "total": 112,
+            "executed": 112,
+            "passed": 112,
+            "failed": 0,
+            "skipped": 0
+          },
+          "siteTests": {
+            "total": 33,
+            "executed": 33,
+            "passed": 30,
+            "failed": 3,
+            "skipped": 0
+          },
+          "nativeReportSha256": "445785d85fd2cc60a5c389522a43925457a4162ff05e8a0a714589e508eb7d5a",
+          "siteReportSha256": "987fbe4e40e6e6a8684aceb3e06daf5d464b3cfac2aa13ae620e848c795a3b0a",
+          "coverage": "native_thresholds_pass; site_712_of_1817_lines_140_of_175_block_outcomes_failed_closed_missing_browser_receipt",
+          "artifactReceipt": {
+            "id": 11223146701,
+            "name": "site-qualification-c203860ac4f489debe6a5daad09d8942415e54b6",
+            "digest": "sha256:770e3d37aff799825955f9aba0f91bc3597be3ba3dc87e204f08fdb965c7f2fa",
+            "localEvidence": "/private/tmp/keyload-site-run-36999295427",
+            "log": "/private/tmp/keyload-site-run-36999295427-failed.log"
+          },
+          "cause": "Preview catalog assumes smoke-first instead of actual large/small/smoke; C# display oracle rounds intermediate p50 incorrectly to 0.48 instead of correct 0.47; browser stops before native receipt and coverage fails as a secondary effect. Portable vendor raw identity/compression tests pass."
         }
       ]
     },
     "coverage": "native_Node_browser_and_MTP_analyzer_gates_in_progress; exact_candidate_GitHub_numeric_pass_pending",
     "databaseQualification": "not_part_of_site_gate",
-    "publicPublication": "deferred_separate_two_revision_gate",
+    "publicPublication": "owner_authorized_separate_workflow_implemented_qualification_and_provider_proof_pending",
     "dns": "unchanged",
     "developmentBuild": "Integrated SiteTests_and_AnalyzerTests_Release_builds_passed_0warnings_0errors; focused_format_passed_for_all_three_dependency_projects; no_local_tests; broader_solution_qualification_separate",
     "githubAccess": "Authenticated_read_verified_live_2026-10-02; repository_push_permission_true; no_credentials_changed",
@@ -165,17 +320,35 @@
         "kind": "raw_compiler_SARIF; includes suppressed/generated diagnostics; terminal error count is separate",
         "terminalBuildErrors": 3
       }
-    ]
+    ],
+    "analyzerNativeAnalysis": {
+      "state": "genuine_complete_analyzer_module_first_passing_baseline; bounded_site_dependency_only",
+      "run": 36994330874,
+      "sourceRevision": "7c50573adb92eec67a7a3209f11be97a7688bd3c",
+      "nativeReportSha256": "b7514a3a32072bf0f567200f2abfdfff3942b116709e9f4aea088511b14367ab",
+      "unionLinesCovered": 935,
+      "unionLinesValid": 981,
+      "branchesCovered": 528,
+      "branchesValid": 612,
+      "criticalPipelines": "all12pass_exact90percent",
+      "fullAnalyzerTests": "112executed112passed0failed0skipped",
+      "globalProductAndNoDecreaseCoverage": "separate_unqualified"
+    },
+    "publicationPreflight": "separate_BC028_source_job_artifact_digest_archive_and_freshness_gates_under_final_source_review"
   },
   "delivery": {
-    "candidate": "ordinary_descendant_validation_in_progress",
+    "candidate": "ordinary_joined_source_descendant_pushed_and_dispatched",
     "branch": "codex/site-qualification-20261002-a",
     "initialCandidateRevision": "f56d511b4a343eff99d3117e9414490a05cfb8ae",
     "qualifiedRevision": null,
     "sourceSnapshotReceiptSha256": "271d8415d29c69e8af84f604858079ed6effd4ce586d06220237ff9ac57b9684",
     "workspace": "shared_dirty_checkout_preserved",
-    "main": "not_changed",
-    "currentCandidateRevision": "b402dc50785028cc5b09a3928c5b28ba8a721a6e",
-    "descendantReceipt": "/private/tmp/keyload-site-candidate-20261002-b.delivery.json"
+    "main": "preserved_by_site_composer; advanced_by_concurrent_runtime_owner",
+    "currentCandidateRevision": "c203860ac4f489debe6a5daad09d8942415e54b6",
+    "descendantReceipt": "/private/tmp/keyload-site-candidate-20261002-b.delivery.json",
+    "redSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-c.delivery.json",
+    "sharedHeadAtRedComposition": "3559225a5f918160e46e32c9a812c3f71790e382",
+    "joinedSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-d.delivery.json",
+    "portableSourceReceipt": "/private/tmp/keyload-site-candidate-20261002-e.delivery.json"
   }
 }

@@ -11,8 +11,12 @@ internal sealed class SiteAnalyzerCoverageProcessTests
         await Assert.That(prepare.ExitCode).IsEqualTo(SiteAnalyzerCoverageTokens.SuccessExitCode);
         await Assert.That(File.Exists(scope.ManifestPath)).IsTrue();
         using var manifest = SiteAnalyzerCoverageTestScope.ReadJson(scope.ManifestPath);
+        var environment = Environment.GetEnvironmentVariables();
+        var expectedRevisionVariable = environment.Contains(SiteAnalyzerCoverageTokens.SiteRevisionVariable)
+            ? SiteAnalyzerCoverageTokens.SiteRevisionVariable
+            : SiteAnalyzerCoverageTokens.GitHubRevisionVariable;
         await Assert.That(manifest.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonSourceRevision).GetString())
-            .IsEqualTo(Environment.GetEnvironmentVariable(SiteAnalyzerCoverageTokens.GitHubRevisionVariable));
+            .IsEqualTo(Environment.GetEnvironmentVariable(expectedRevisionVariable));
         var runtimeProof = await SiteAnalyzerCoverageProcess.ReadPowerShellRuntimeAsync(scope.Repository);
         var runtimeVersions = runtimeProof.StandardOutput.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
         await Assert.That(runtimeProof.ExitCode).IsEqualTo(SiteAnalyzerCoverageTokens.SuccessExitCode);

@@ -12,6 +12,11 @@ Use .NET 10 and centrally pinned packages. Do not generate or commit packages.lo
 
 ManagedCode packages are our projects. Fix dependency defects in their owning sibling repository, with regression tests, canonical patch release, successful GitHub publication and verified NuGet availability before updating KeyLoad. Preserve unrelated work; never force-push or bypass repository protections. The user authorizes scoped dependency repair commits, pushes and releases, and stable KeyLoad commits and pushes to main.
 
+## System-critical SMID and operation efficiency
+- Treat the owner's SMID work as a first-priority product workstream and keep it visible in implementation planning and status. The term is not defined in the current repository or v0.3 architecture documents; do not guess its expansion or begin SMID-specific implementation until its canonical slice, REQ/AC criteria and required ADRs are mapped with the owner.
+- Orleans provides request isolation, cluster routing and activation movement. Keep the one-grain-per-request boundary and RF3 topology; treat Orleans Streams as a first-class architecture workstream to specify and qualify alongside persisted KeyLoad EventStreams. Keep their distinct delivery/restart contracts explicit, and define bounded resource, concurrency, backpressure, recovery and performance behavior for every operation.
+- Optimize each operation only against its correctness and fault contracts, using representative multi-node GitHub qualification to measure latency, throughput, allocations, memory, contention and backlog where applicable. Architecture choices or local builds alone do not prove maximum scalability or performance.
+
 ## MCAF repository workflow
 
 Project: KeyLoad
@@ -377,6 +382,9 @@ For changes outside existing owner authorization, obtain direction before changi
 - Shared-checkout work that preserves unrelated changes and completes authorized delivery.
 - Real Docker/Aspire multi-node comparisons using the same data, oracle and workload contract.
 - All published test results and chart values MUST come from JSON produced by successful GitHub Actions runs. Include raw GitHub JSON links, measured source SHA, options, topology and acknowledgement/read guarantees. Missing or unsupported measurements MUST remain unavailable; never invent winners, zeros or sample performance values.
+- Website publication MUST use a separate GitHub Actions workflow that collects fresh JSON artifacts from the actual successful comparison job, verifies its run/job/revision/artifact provenance, and publishes those files. Performance figures MUST be read from that evidence; never hardcode them in website or README charts. A failed, skipped, incomplete, expired or unauthenticated comparison cannot refresh the published evidence.
+- The separate website workflow MUST trigger when `site/` changes and when the performance-benchmark producer workflow completes. Website completion is scoped to the site, its evidence ingestion, qualification and publication workflow; independently owned database and performance implementation MUST NOT be silently added to that task.
+- Owner direction on 2026-10-02 resolves the earlier website-source and producer-success policy conflict for REQ-BC-028: qualify the current trusted-main website separately from the measured-source checkout, and require the actual successful comparison job and its measurement steps. Unrelated database jobs or whole-workflow failure MUST NOT block this website-only delivery. Preserve accurate site/measured/control revisions and all website qualification gates. Earlier successful-run and equal-source guidance remains recorded as the superseded task boundary; never label a failed whole run successful.
 - Free community features only for comparison engines. No Enterprise images, license activation or paid cluster features.
 ### Dislikes
 - Repeated permission questions for already authorized work.

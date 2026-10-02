@@ -70,7 +70,8 @@ internal static class MachineKeyLiteralClassifier
 
         var methodName = MachineKeySemanticSymbols.ResolveMethod(context, invocation)?.Name ??
                          MachineKeySemanticSymbols.InvocationName(invocation.Expression);
-        return MachineKeyRuleCatalog.AlwaysKeyMethodNames.Contains(methodName);
+        return MachineKeyRuleCatalog.AlwaysKeyMethodNames.Contains(methodName) &&
+               IsMachineKeyInvocationArgument(context, invocation, argument);
     }
 
     private static bool IsMachineKeyInvocationArgument(
@@ -78,34 +79,28 @@ internal static class MachineKeyLiteralClassifier
         InvocationExpressionSyntax invocation,
         ArgumentSyntax argument)
     {
-        var symbol = MachineKeySemanticSymbols.ResolveMethod(context, invocation);
-        var parameter = MachineKeySemanticSymbols.ResolveParameter(
-            symbol,
+        var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken);
+        var boundMethod = symbolInfo.Symbol as IMethodSymbol;
+        var method = boundMethod ?? MachineKeySemanticSymbols.ResolveMethod(context, invocation);
+        var methodName = method?.Name ?? MachineKeySemanticSymbols.InvocationName(invocation.Expression);
+        var allowFirstLogicalParameter = MachineKeyRuleCatalog.AlwaysKeyMethodNames.Contains(methodName) ||
+                                         IsKeyedMutationMethod(methodName) &&
+                                         MachineKeySemanticSymbols.IsKeyedContainer(method);
+        return MachineKeySemanticSymbols.IsKeyArgument(
+            context,
+            boundMethod,
             argument,
-            invocation.ArgumentList.Arguments);
-        if (parameter is not null && MachineKeySemanticSymbols.IsExplicitKeyParameter(parameter.Name))
-        {
-            return true;
-        }
-
-        if (invocation.ArgumentList.Arguments.IndexOf(argument) != 0)
-        {
-            return false;
-        }
-
-        var methodName = symbol?.Name ?? MachineKeySemanticSymbols.InvocationName(invocation.Expression);
-        if (MachineKeyRuleCatalog.AlwaysKeyMethodNames.Contains(methodName))
-        {
-            return true;
-        }
-
-        return methodName is MachineKeyMethodNames.Add or
-                   MachineKeyMethodNames.Remove or
-                   MachineKeyMethodNames.TryAdd or
-                   MachineKeyMethodNames.Append or
-                   MachineKeyMethodNames.Set &&
-               MachineKeySemanticSymbols.IsKeyedContainer(symbol);
+            invocation.ArgumentList.Arguments,
+            allowFirstLogicalParameter,
+            allowUnboundFallback: boundMethod is null);
     }
+
+    private static bool IsKeyedMutationMethod(string methodName) =>
+        methodName is MachineKeyMethodNames.Add or
+            MachineKeyMethodNames.Remove or
+            MachineKeyMethodNames.TryAdd or
+            MachineKeyMethodNames.Append or
+            MachineKeyMethodNames.Set;
 
     private static bool IsMachineKeyCreationArgument(
         SyntaxNodeAnalysisContext context,
@@ -117,21 +112,22 @@ internal static class MachineKeyLiteralClassifier
             return false;
         }
 
-        var constructor = context.SemanticModel.GetSymbolInfo(creation, context.CancellationToken)
-            .Symbol as Microsoft.CodeAnalysis.IMethodSymbol;
-        var parameter = MachineKeySemanticSymbols.ResolveParameter(
-            constructor,
-            argument,
-            argumentList.Arguments);
-        if (parameter is not null && MachineKeySemanticSymbols.IsExplicitKeyParameter(parameter.Name))
+        if (context.SemanticModel.GetSymbolInfo(creation, context.CancellationToken)
+            .Symbol is not IMethodSymbol constructor)
         {
-            return true;
+            return false;
         }
 
-        var containingType = constructor?.ContainingType;
-        return argumentList.Arguments.IndexOf(argument) == 0 &&
-               containingType is not null &&
-               MachineKeySemanticSymbols.IsKnownKeyValueType(containingType);
+        var containingType = constructor.ContainingType;
+        var allowFirstLogicalParameter = containingType is not null &&
+                                         MachineKeySemanticSymbols.IsKnownKeyValueType(containingType);
+        return MachineKeySemanticSymbols.IsKeyArgument(
+            context,
+            constructor,
+            argument,
+            argumentList.Arguments,
+            allowFirstLogicalParameter,
+            allowUnboundFallback: false);
     }
 
     private static bool IsMachineKeyAttributeArgument(AttributeArgumentSyntax argument)

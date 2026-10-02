@@ -506,3 +506,144 @@ per file and explicit aggregate covered-line budgets, with independent exact cou
 exit and critical-pipeline assertions. It must not pad production sources, copy
 invented execution into native evidence, or make absence of a threshold label
 alone count as a successful parse. These bounded corrections precede TASK011 join.
+
+### Observed native candidate failure implementation contract
+
+Run36988549282 atb402dc50785028cc5b09a3928c5b28ba8a721a6e preserves the first real
+AnalyzerTests baseline:88executed/84passed/4failed/0skipped and native Cobertura
+SHA256983f7de7132938062db791723cdfba1ca683eceb98b3cecb191b2452af938091. Related
+REQ/AC-BC-027, REQ-CQ-006 and AC-CQ-008/009 keep all original thresholds/sources.
+
+1. Strongest lead freezes the observed failure acceptance and task graph before
+   writing workers. Read-only native grammar/numeric span/cohesion discovery is
+   complete; the missing native report or test failure never becomes a pass.
+2. TASK-SITE-NATIVE-FORMAT-014 owns only
+   `scripts/Features/CodeQuality/site-analyzer-coverage.shared.ps1` and new
+   `tests/KeyLoad.Analyzers.Tests/Features/CodeQuality/SiteAnalyzerCoverageBranchDisplayTests.cs`.
+   Author real-PowerShell TUnit native decimal/display-rounding/malformed cases
+   first; change only the full-token display regex. Observed0..100 integer or
+   one/two decimal spellings are valid; covered/valid groups stay integer-only
+   and retain all bounds/overflow/denominator checks. Rounded display never
+   controls a threshold. No other parser, contract or configuration change.
+3. TASK-SITE-NUMERIC-REPAIR-015 owns existing ControlFlowNestingAnalyzerTests.cs
+   and ExecutableUnitCodeLineCountAnalyzerTests.cs, and new
+   ControlFlowNestingExtendedConstructTests.cs and
+   ExecutableUnitSpanAndTriviaAnalyzerTests.cs in the same test slice. Preserve
+   all registered cases/assertions; move cohesive construct/trivia scenarios into
+   separate nonpartial types under200code lines. Expected method spans use the
+   known declaration token's source index, preserving all location/end assertions.
+   NumericAnalyzerFixture, production analyzers and self-inventory stay unchanged.
+4. TASK-SITE-DIAGNOSTIC-FLOWS-016 follows a strongest reviewed source/case map
+   before implementation. It owns only explicitly new CodeQuality test files;
+   no014/015/shared source overlaps. It exercises real analyzers through SDK
+   Roslyn/BCL/Orleans inputs and diagnostic/no-diagnostic assertions for actual
+   KLD0001/KLD0022 uncovered flows. Source denominators remain frozen; no direct
+   helper calls, stubs, padding, reclassification or threshold alteration.
+5. Root alone integrates docs, project/workflow/config/candidate ownership. Join
+   every complete source/method-registration/hash packet; development Release
+   build and scoped formatter precede GitHub qualification. Compose an ordinary
+   descendant using a reviewed separate index; preserve the shared dirty checkout.
+   Run complete AnalyzerTests/native collection/gate and complete SiteTests at
+   the exact candidate SHA, retain raw native/TRX/PDB/SARIF/run/job/hash receipts,
+   then require strongest joined final review. No local tests or qualifications.
+
+Stages014/015 are safe parallel writes after frozen approval;016 waits for its
+read-only case map and an available capable economical worker. Workers must end
+complete/blocked/failed/cancelled with exact diff/hashes and preserved case maps;
+only reviewed complete packets unblock integration. Stop on ambiguous semantics,
+actual analyzer defects, unsupported APIs, overlapping ownership or new contracts.
+Rollback restores the coherent candidate tooling/test unit while keeping mandatory
+policy and failed artifacts. Runtime/data/public migrations are N/A. ADR remains
+Accepted until required exact-SHA evidence and every acceptance criterion pass.
+
+TASK016's exact new-file ownership is now frozen under
+`tests/KeyLoad.Analyzers.Tests/Features/CodeQuality/`:
+LiteralMachineKeyInvocationTests.cs (actual keyed invocation and nested-literal
+flows), LiteralMachineKeyConstructionTests.cs (actual key-value construction and
+initializer flows), LiteralMachineKeyAttributeContractTests.cs (native qualified
+attribute key contracts), and SystemClockSemanticTests.cs (real clock/nonclock
+property symbols). Its precise positive/negative/edge map is in site acceptance.
+Use existing AnalyzerFixture compilation and public analyzer entry points only;
+each positive proves exact count/ID/severity/path/known token location, negatives
+prove no finding. No shared fixture changes or artificial framework types.
+Known potential reordered named-value/multiargument WriteString false positives
+must be retained as regressions and escalated, never copied into a passing oracle.
+Any production repair requires a separate explicit strongest-reviewed contract
+before writes. Root queues this task on the economical014 worker after its complete
+join, while015 retains disjoint numeric-test ownership; no blocked dependency is
+treated as complete. Native90% pipeline proof remains required after all joins.
+
+TASK015's strongest source join found a latent executable-unit violation in
+ElseIfEveryLoopUsingStatementAndFixedAddNestingAsync: its multiline literal is
+part of the unit's token line span, exceeding50 even after aggregate-type splits.
+The same worker may edit only ControlFlowNestingExtendedConstructTests.cs to
+extract that literal into a named private const in the same class. Preserve exact
+decoded compiler-input bytes, all assertions and the sole original registration.
+No counter/threshold/source exclusion or test case changes. Root verifies the
+raw-string byte-equivalence and refreshed hash before enabled build/format/CI;
+this source-only remedy cannot close the GitHub self-inventory qualification.
+
+### Accepted machine-key argument-role repair contract
+
+TASK016 stopped with a real compiler-input regression for Utf8JsonWriter.WriteString:
+the existing nested AlwaysKey helper classifies both property-name and human value.
+Related REQ-CQ-002/006, AC-CQ-004/008/009 and REQ/AC-BC-027 require this test-first
+TASK-SITE-ARGUMENT-ROLE-018 repair, not an oracle accepting the false positive.
+
+1. Root freezes the detailed semantic acceptance and explicit task graph. The
+   economical capable worker authors only new LiteralMachineKeyArgumentBindingTests.cs
+   and LiteralMachineKeyCreationBindingTests.cs under the CodeQuality test slice.
+   Keep016's retained Invocation regression unchanged and blocked. Verify actual
+   compiler-valid SDK/BCL/ASP.NET inputs and independent exact literal spans for
+   positional/reordered/nested key versus value, key-value construction, dynamic
+   fallback, reduced/static extensions and expanded params.
+2. Root joins those sources plus completed014/015, enabled build/format and a
+   reviewed ordinary descendant temporary-index source cut. Run complete real
+   AnalyzerTests/native collection in GitHub with production unchanged. Retain
+   exact failed assertions/TRX/XML/source/PDB/run/job/artifact hashes. This red
+   baseline cannot unblock017/final acceptance; no test or branch exit is ignored.
+3. After reviewed GitHub regression evidence, the same worker may edit only
+   src/KeyLoad.Analyzers/Features/CodeQuality/MachineKeyLiteralClassifier.cs and
+   MachineKeySemanticSymbols.cs. Resolve named arguments by actual parameter
+   identity; positional and expanded params by bound parameter. Explicit key
+   names qualify; current method/container/constructor heuristics qualify only
+   the first logical parameter, skipping an unreduced extension receiver.
+   Reduced instance extension calls already omit that receiver. A resolved value
+   parameter returns false before any textual-position heuristic.
+4. Apply one shared decision to nested AlwaysKey literals, ordinary invocation
+   fallback and known key-value construction. Preserve nearest argument context.
+   Unresolved/dynamic invocations retain recognized named-key or unnamed argument0
+   method-name fallback; unresolved construction stays non-key. Keep catalogs,
+   analyzer entry point/ID/severity, attributes/indexers/initializers/generated/
+   empty-string behavior and all25 executable paths/12 pipelines unchanged.
+5. Root/strongest join every source diff/case/hash and mandatory numeric limits,
+   then resume016's exact semantic scope. Enabled build/format/governance precede
+   complete exact-SHA GitHub analyzer/native/site/browser qualification. Freeze
+   new source hashes and use actual new native denominators for80/70/90; historical
+   native counts cannot qualify changed source. Final017/TASK007 waits for every
+   completed source stage and all required runtime evidence.
+
+Worker018 owns its two new tests and later two production files only;014/015/016,
+shared AnalyzerFixture, catalog, contracts/config/packages/policy/docs stay other
+owned. Root exclusively owns shared integration/candidate delivery. Completion
+requires complete/blocked/failed/cancelled stage packets; stop on unsupported SDK
+metadata, ambiguous bindings or changed diagnostic contract. No local tests,
+stubs, direct helper coverage, suppression, exclusions or weakened thresholds.
+This changes compiler diagnostic classification only, with no public runtime,
+data or deployment migration. Rollback restores the coherent analyzer plus
+regressions under unchanged mandatory policy and retains all red evidence.
+ADR remains Accepted until actual joined implementation and verification pass.
+
+TASK018-RED evidence is COMPLETE: real run36991420593/job110788278234 at
+8d8d395f7fa6157773e0318d64f0124cd2e84579 executed103cases,96passed,
+7failed,0skipped. Every failure is a retained excess-diagnostic key/value
+regression after valid fixture compilation. Original numeric failures and all3
+native display process cases passed. Artifact11219323506 digest
+590518a45e2ee52b183949899c18bc5aa0e56c7431e2aec20743cd20ec2a51c0
+retains TRX/XML/source/PDB/logs. Genuine native XML SHA256
+aea1ab67c5c15dbd76dc2bed6c0ba8eb5bb1a31ca14306195171cd43ca1abe60
+reports889/942lines,472/570branches; KLD0022still fails25/30. SiteTests skipped.
+Strongest independently authenticated evidence review explicitly releases018-FIX
+under the unchanged two-file contract above; no further red baseline is needed.
+018 source review must complete before016 resumes. Native counts/hashes must be
+regenerated after source repair; no red result or source-only join qualifies017.

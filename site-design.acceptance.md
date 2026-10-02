@@ -49,3 +49,161 @@ Baseline evidence: successful GitHub run36926803549 at9c570f8c33a7a9667507a8e1c0
 Claude CLI2.1.267 consultation used alias opus, actual returned model claude-opus-5, no tools or writes. Exact claude-opus-5-5 returned API400 requiring CLI2.1.280+. Keep useful design input; reject its stale Three0.169 advice, false model-availability statement, partial malformed report display and changed log arithmetic. No CLI update is part of this task.
 
 Migration removes superseded flat site behavior after replacements are joined; no runtime/data migration. Rollback restores the prior coherent site source/assets without deleting immutable benchmark evidence or weakening mandatory policies. Public Pages remains bound to successful source evidence; any future site/measured two-revision publication contract requires separate review.
+
+## AC-BC-027 observed GitHub failure contract
+
+Run36988549282 atb402dc50785028cc5b09a3928c5b28ba8a721a6e executed every88
+AnalyzerTests with84 successes,4 failures and0 skips. This observed baseline adds
+the following required repairs under the existing BC-027/CQ-006/CQ-008/009 IDs;
+it does not reduce the native80/70/90 or complete-suite acceptance conditions.
+
+- Native condition-coverage display accepts the observed integer and1–2decimal
+  percent spellings in0..100. Strict delimiters and unsigned integer counts remain
+  mandatory; reject missing/comma/sign/exponent/out-of-range/malformed display.
+  The covered/valid integer pair alone controls thresholds. A displayed70.00%
+  with69995/100000 must still fail70%; native16.67%,56.25%,62.5%,83.33%,91.67%
+  reports must parse into their unchanged exact integer counters.
+- Numeric diagnostic spans start at the declaration's first token, excluding
+  leading indentation while retaining the complete header/body end. Three
+  observed failures must retain exact ID/error/path/line2/column4/end assertions
+  plus depth2/3/4,49/50/51 and disabled-text scenarios. The independent expected
+  span uses the known source signature, never the actual diagnostic or analyzer
+  location helper as its oracle.
+- Every existing test remains registered exactly once. Cohesive test-class splits
+  must satisfy the real self-inventory200type/400file/50unit/3depth limits, without
+  partial aggregation, source exclusion, suppressions or reduced assertions.
+  Strongest source review additionally found the existing ElseIf/loop/using/fixed
+  method's raw-string token makes its full executable unit exceed50code lines.
+  Extract only that unchanged compiler-input literal to a named private constant
+  in its owned extended-construct class. Preserve its exact decoded source bytes,
+  all assertions and the same registered case; do not alter the numeric counter.
+- Required KLD0001 and KLD0022 diagnostic-flow gaps receive meaningful real SDK
+  Roslyn inputs with caller-visible positive/negative/edge assertions before the
+  retry. Keep all25 executable sources and12 critical-pipeline denominators; no
+  padding, direct helper invocation for counts or reclassification is allowed.
+
+Verification mapping: SiteAnalyzerCoverageBranchDisplayTests runs the real
+PowerShell verifier through the existing TUnit process scope; the original three
+numeric cases and full NumericAnalyzerSelfInventoryTests prove span/cohesion
+repairs; required diagnostic-flow regressions exercise real analyzers and actual
+BCL/Orleans metadata. GitHub alone executes the full AnalyzerTests/native gate
+and subsequent SiteTests suite. Root joins all changed sources and strongest
+review before an ordinary descendant candidate retry; preserve failed TRX/XML
+and every exact source/run/job/artifact receipt. ADR-033 owns implementation and
+rollback; no runtime/public/data contract changes occur.
+
+TASK016's frozen semantic map uses four new CodeQuality test files only:
+LiteralMachineKeyInvocationTests.cs, LiteralMachineKeyConstructionTests.cs,
+LiteralMachineKeyAttributeContractTests.cs and SystemClockSemanticTests.cs.
+Real Dictionary.Add positional/named keys, NameValueCollection.Add key/value,
+JsonElement.GetProperty with direct/nested string literal, dictionary complex
+initializer and KeyValuePair positional/named key are machine-key positives.
+Named constants, empty strings, List.Add human text, ordinary Tuple constructor
+strings and normal value positions are negatives. Actual DataMember(Name),
+fully/global-qualified JsonPropertyName and JsonPolymorphic discriminator keys
+are positives; Description human text and constant metadata are negatives.
+Clock positives cover DateTime Now/Today/UtcNow and DateTimeOffset Now/UtcNow
+including aliases/static imports; TimeProvider.GetUtcNow, static nonclock date
+members and instance date properties are negatives. Each positive checks exact
+count/ID/error/path/source token location; each negative requires no diagnostic.
+Use the existing AnalyzerFixture's compiler-valid real platform metadata.
+
+Reordered named dictionary values or Utf8JsonWriter.WriteString value positions
+must not be asserted as machine keys to match a false positive. If source review
+or GitHub exposes this issue, retain the meaningful failing regression, report
+the exact owning production path and stop/escalate before any production edit.
+Plain interpolation text is outside the current literal registration; use the
+actual nested literal `GetProperty("prefix" + suffix)` for that accepted edge.
+
+## TASK018 machine-key argument-role regression and repair
+
+REQ-CQ-002/006, AC-CQ-004/008/009 and REQ/AC-BC-027 require a meaningful fix
+for TASK016's retained real `Utf8JsonWriter.WriteString` regression. That task is
+blocked until this scoped repair is joined; its partial output cannot satisfy017.
+
+Pass: actual named/positional/expanded arguments resolve to their parameter. An
+explicit key parameter or the existing heuristic's first logical parameter is a
+key; a known value parameter never becomes a key because it appears first in
+source. Ignore the receiver of unreduced static extension calls; reduced calls
+already omit it. Match expanded final `params` elements to the same parameter.
+Keep nested key expressions positive and nested human value expressions negative.
+For unresolved/dynamic invocations preserve method-name fallback restricted to
+recognized named keys or first unnamed syntax argument; unresolved constructors
+retain their non-key result. Catalog/ID/severity/generated/attribute/indexer/
+initializer/empty-string behavior remains unchanged.
+
+Tests-first ownership: only new LiteralMachineKeyArgumentBindingTests.cs and
+LiteralMachineKeyCreationBindingTests.cs. Use real SDK Roslyn/BCL/ASP.NET metadata
+for positional/reordered WriteString and Dictionary.Add, named constant key plus
+literal value, nested key/value concatenation, reordered KeyValuePair and
+DictionaryEntry, ordinary List/Tuple negatives, reduced/static WithName/WithTags,
+expanded params and compiler-valid dynamic invocation fallback. Every result
+asserts exact diagnostic count/ID/Error/path and independent full literal span.
+An unsupported SDK shape escalates; no framework stubs or fixture weakening.
+
+GitHub must run the real tests-first source cut with production unchanged and
+retain its failures. This expected red run is a regression baseline, never017
+acceptance. Only after root/strongest review of that receipt may the worker edit
+MachineKeyLiteralClassifier.cs and MachineKeySemanticSymbols.cs using one shared
+argument-role decision. Then join source/build/format, resume016's four-file
+semantic map, hash all unchanged25source paths with new content and run complete
+AnalyzerTests/native coverage/site suite. Actual new denominators determine90%,
+never historical224/30 or rounded summaries. No local tests, exclusion, threshold
+change or shared fixture/configuration/package modification.
+
+## Observed SiteTests portability and diagnostic repair contract
+
+REQ/AC-BC-016/017/024/025 retain their full requirements. The genuine failing
+positive builder and browser tests in run36994330874 are the regression baseline;
+write the following additional assertions before the corresponding source repair.
+
+AC-BC-016 portability passes only when the real builder accepts an isolated copy
+of its unchanged production source/vendor and all three authentic GitHub reports
+after changing solely valid historical gzip metadata. Every recorded gzipBytes
+must be a positive safe integer. Exact raw file SHA256, byte length, package,
+version, MIT license, sourceCommit, integrity and complete file identities remain
+mandatory. Wrong metadata identities, invalid historical gzip values, raw byte
+corruption, recorded hash or byte-length corruption reject with the existing
+vendor error before output creation. Official repository vendor files/manifest
+are immutable. Copied production files are real isolated inputs, never doubles;
+they cannot substitute for exact-source production coverage.
+
+The successful builder CLI JSON adds `compression` with actual `nodeVersion`,
+`zlibVersion` and `vendor` entries containing `path`, `sha256`, `bytes`,
+`recordedGzipBytes` and `runtimeGzipBytes`. The latter is computed from those actual
+bytes by the running Node zlib; do not infer the hosted failed run's missing size.
+Existing output/profile/authored-JS/CSS fields, raw-report preservation and40KiB/
+20KiB budgets stay unchanged. Real TUnit assertions verify current gzip against
+independent Node gzip output, preserved source identity and unchanged budgets.
+
+AC-BC-017 diagnostic passes only when each completed real builder process retains
+bounded stdout/stderr and its exact exit status in a unique directory under
+`artifacts/site-evidence/builder-invocations`, outside JS production coverage
+inputs. `invocation.json` schemaVersion1 records siteSourceRevision,
+measuredSourceRevision, evidenceRun, evidenceUrl, workingDirectory, arguments,
+builderSources (relative path and raw SHA256 for the entry and feature builder),
+exitCode, stdoutFile and stderrFile. Files are `stdout.txt`/`stderr.txt`; no process
+environment, credentials or fabricated runtime output. Preserve RunAsync's
+signature/result, all output bounds, timeout/cancellation, pipe draining and
+owned-process/temp cleanup. The record survives temporary teardown; an evidence
+write failure cannot become a passing process result.
+
+Browser pre-build failure must identify the builder and include its actual exit/
+bounded stderr; it must not claim Chrome launched. Existing registered negative
+tests keep every sentinel/no-residue assertion and additionally identify the
+specific output-path or symlink error. The malformed JSON case must identify a
+JSON parser rejection and exclude the vendor error. Existing validator/HTTP
+tests keep their real accepted-build and rejected-report assertions. Additional
+real-builder diagnostics tests verify success/failure receipts and provenance;
+no browser/process stub or local qualification is allowed.
+
+Verification map: TASK019 owns the builder plus new SiteVendorBuildTests,
+SiteVendorTestScope and SiteVendorTokens only; TASK020 owns SiteBuildSupport,
+SiteBrowserSession, SiteBuildTests and SiteEvidenceValidatorTests plus new
+SiteBuilderDiagnostics/SiteBuilderDiagnosticsTests/SiteBuilderTokens only.
+Strongest recorded-contract approval precedes both disjoint write tasks. Root
+joins every source/assertion/receipt diff, development build/format/static checks,
+then complete GitHub Analyzer/native/site/real-Chrome/JS80/70/90 qualification.
+No gate, registration, denominator or original failure record is weakened.
+
+E-run36999295427 exposes AC-BC-016/025 test-oracle defects under TASK026. Catalog assertions MUST retain exact profile count, uniqueness, per-ID provenance/hashes/timestamps, and explicit production order [LargeProfile,SmallProfile,SmokeProfile]. Browser display oracle MUST use shortest round-trip decimal (R invariant) then decimal.Parse(Float invariant), decimal.Round(2,AwayFromZero), then existing en-US format. Preserve null marker, numeric row calculation and every exact UI/geometry/status assertion. Named formatter regressions cover actual below-half0.47499999999999964, exact0.475,1.005,just-below1.005,zero,0.005,1234.5,null; controlled formatter correctness values never become published performance. Full real Chrome completion and native coverage remain mandatory.

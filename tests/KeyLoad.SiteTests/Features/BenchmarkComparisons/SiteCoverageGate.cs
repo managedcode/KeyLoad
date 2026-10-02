@@ -11,10 +11,23 @@ internal static class SiteCoverageGate
         $"{SiteCoverageTokens.FeatureSourcePrefix}build-site.mjs",
         $"{SiteCoverageTokens.FeatureSourcePrefix}benchmark-lab.mjs",
         $"{SiteCoverageTokens.FeatureSourcePrefix}benchmark-profiles.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}github-evidence-contracts.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}github-evidence-runs.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}github-evidence-proof.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}github-evidence.mjs",
     ];
 
+    private static SiteGitHubArchiveReceipt? archiveReceipt;
+
     [Before(HookType.TestSession)]
-    public static Task CaptureSourceBaselineAsync() => SiteCoverageSourceManifestWriter.CaptureAsync();
+    public static async Task CaptureSourceBaselineAsync()
+    {
+        var repository = RequiredPath(SiteTokens.RepositoryEnvironment);
+        var revision = Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment);
+        await SiteQualificationSource.RequireCheckoutAsync(repository, revision ?? string.Empty, CancellationToken.None);
+        archiveReceipt = await SiteGitHubArchiveSetup.PrepareFromEnvironmentAsync(CancellationToken.None);
+        await SiteCoverageSourceManifestWriter.CaptureAsync();
+    }
 
     [After(HookType.TestSession)]
     public static async Task JoinAndEnforceCoverageAsync()
@@ -23,12 +36,14 @@ internal static class SiteCoverageGate
         var artifactRoot = RequiredPath(SiteCoverageTokens.CoverageRootEnvironment);
         var manifestHash = await SiteCoverageSourceManifestWriter.VerifyManifestAsync(artifactRoot).ConfigureAwait(false);
         var manifest = await ReadManifestAsync(artifactRoot).ConfigureAwait(false);
-        if (Environment.GetEnvironmentVariable(SiteTokens.GitHubShaEnvironment) != manifest.SourceRevision)
+        if (Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment) != manifest.SourceRevision)
         {
             throw new InvalidOperationException(SiteCoverageTokens.SourceMismatchFailure);
         }
 
         await SiteCoverageSourceManifestWriter.VerifyUnchangedAsync(repository, manifest).ConfigureAwait(false);
+        await SiteGitHubArchiveSetup.VerifyUnchangedAsync(archiveReceipt ??
+            throw new InvalidOperationException(SitePublicationTokens.MissingArchivePreparation), CancellationToken.None);
         var collection = await SiteCoverageArtifactReader.ReadAsync(repository, artifactRoot, manifest,
             CancellationToken.None).ConfigureAwait(false);
         var fileResults = AnalyzeFiles(repository, manifest, collection);

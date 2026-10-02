@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace KeyLoad.Analyzers.Features.CodeQuality;
 
@@ -17,7 +18,41 @@ internal static class MachineKeySemanticSymbols
                symbolInfo.CandidateSymbols.OfType<IMethodSymbol>().FirstOrDefault();
     }
 
-    public static IParameterSymbol? ResolveParameter(
+    public static bool IsKeyArgument(
+        SyntaxNodeAnalysisContext context,
+        IMethodSymbol? method,
+        ArgumentSyntax argument,
+        SeparatedSyntaxList<ArgumentSyntax> arguments,
+        bool allowFirstLogicalParameter,
+        bool allowUnboundFallback)
+    {
+        var parameter = (context.SemanticModel.GetOperation(argument, context.CancellationToken) as IArgumentOperation)
+            ?.Parameter ?? ResolveParameter(method, argument, arguments);
+        if (parameter is not null)
+        {
+            var parameterMethod = parameter.ContainingSymbol as IMethodSymbol ?? method;
+            if (IsUnreducedExtensionReceiver(parameterMethod, parameter))
+            {
+                return false;
+            }
+
+            return IsExplicitKeyParameter(parameter.Name) ||
+                   allowFirstLogicalParameter && IsFirstLogicalParameter(parameterMethod, parameter);
+        }
+
+        var namedArgument = argument.NameColon?.Name.Identifier.ValueText;
+        if (namedArgument is not null)
+        {
+            return allowUnboundFallback && IsExplicitKeyParameter(namedArgument);
+        }
+
+        return allowUnboundFallback &&
+               allowFirstLogicalParameter &&
+               arguments.IndexOf(argument) == 0 &&
+               argument.NameColon is null;
+    }
+
+    private static IParameterSymbol? ResolveParameter(
         IMethodSymbol? method,
         ArgumentSyntax argument,
         SeparatedSyntaxList<ArgumentSyntax> arguments)
@@ -34,8 +69,57 @@ internal static class MachineKeySemanticSymbols
                 string.Equals(parameter.Name, namedArgument, StringComparison.Ordinal));
         }
 
-        var index = arguments.IndexOf(argument);
-        return index >= 0 && index < method.Parameters.Length ? method.Parameters[index] : null;
+        var nextParameter = 0;
+        foreach (var candidate in arguments)
+        {
+            if (candidate.NameColon is not null)
+            {
+                continue;
+            }
+
+            while (nextParameter < method.Parameters.Length &&
+                   HasNamedArgument(method.Parameters[nextParameter], arguments))
+            {
+                nextParameter++;
+            }
+
+            if (nextParameter >= method.Parameters.Length)
+            {
+                return method.Parameters.LastOrDefault(parameter => parameter.IsParams);
+            }
+
+            var parameter = method.Parameters[nextParameter];
+            if (parameter.IsParams || candidate == argument)
+            {
+                return parameter;
+            }
+
+            nextParameter++;
+        }
+
+        return null;
+    }
+
+    private static bool HasNamedArgument(
+        IParameterSymbol parameter,
+        SeparatedSyntaxList<ArgumentSyntax> arguments) =>
+        arguments.Any(argument => string.Equals(
+            argument.NameColon?.Name.Identifier.ValueText,
+            parameter.Name,
+            StringComparison.Ordinal));
+
+    private static bool IsUnreducedExtensionReceiver(IMethodSymbol? method, IParameterSymbol parameter) =>
+        method is { IsExtensionMethod: true, ReducedFrom: null } && parameter.Ordinal == 0;
+
+    private static bool IsFirstLogicalParameter(IMethodSymbol? method, IParameterSymbol parameter)
+    {
+        if (method is null)
+        {
+            return false;
+        }
+
+        var firstLogicalOrdinal = method.IsExtensionMethod && method.ReducedFrom is null ? 1 : 0;
+        return parameter.Ordinal == firstLogicalOrdinal;
     }
 
     public static bool IsKeyedContainer(IMethodSymbol? method)

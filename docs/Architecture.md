@@ -37,6 +37,7 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | site | Features/BenchmarkComparisons/index.html, bootstrap.mjs, measurement-loader.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction, conceptual Three.js RF3 view and public views of qualified GitHub JSON; ADR-040 migration in progress. |
 | tests/KeyLoad.SiteTests | KeyLoad.SiteTests.csproj, Features/BenchmarkComparisons/ | BenchmarkComparisons; independently buildable TUnit suite invokes actual Node modules and authentic GitHub report files. |
 | .github/workflows | ci.yml, pages.yml | RepositoryGovernance, BenchmarkComparisons; verification and publication boundary. |
+| scripts/Features/BenchmarkComparisons | github-evidence-contracts/runs/proof.mjs, github-evidence.mjs | BenchmarkComparisons; ADR-040/BC028 authenticated-metadata and same-ZIP proof tooling, implementation pending. |
 | docs | design/, implementation/, Features/, ADR/ | Product specification, evidence and canonical slice/decision records. |
 
 [ADR-049](ADR/ADR-049-genuine-neo4j-harness.md) accepts genuine harness regressions
@@ -222,6 +223,42 @@ flowchart TB
     CI --> JSON[Raw comparison JSON with source SHA]
     JSON --> Site[README charts and Pages site]
 ```
+
+## Fresh website evidence boundary (BC028)
+
+The separate Pages consumer uses trusted control-workflow source, authentic
+successful exact-attempt comparison execution and one digest-verified archive.
+Publication qualifies current trusted-main website source independently from the
+separate inspected measured-source checkout; candidate validation cannot deploy.
+Unrelated database-workflow failure is outside the site-only boundary. Complete
+site qualification and repeated website/evidence freshness proof precede Pages.
+See [BenchmarkComparisons](Features/BenchmarkComparisons.md),
+[ADR-040](ADR/ADR-040-static-site-threejs-evidence.md) and publication acceptance.
+
+```mermaid
+flowchart LR
+    CI[Actual comparison producer] --> ZIP[Immutable report archive]
+    API[Authenticated run job artifact metadata] --> Gate[Evidence Node tooling]
+    ZIP --> Gate
+    Gate --> Setup[Real BCL qualification inputs]
+    Setup --> Tests[Full TUnit Chrome native coverage]
+    Tests --> Build[Raw JSON and publication receipt]
+    Build --> Recheck[Freshness proof]
+    Recheck --> Pages[Separate Pages deploy]
+```
+
+```mermaid
+classDiagram
+    SiteGitHubArchiveSetup --> SiteGitHubArchiveReader
+    SiteGitHubArchiveReader --> SiteGitHubArchiveReceipt
+    TUnitSession --> SiteCoverageSourceManifestWriter
+    TUnitSession --> SiteGitHubEvidenceScope
+    SiteGitHubEvidenceScope --> GitHubEvidenceCLI
+    GitHubEvidenceCLI --> GitHubEvidenceRuns
+    GitHubEvidenceCLI --> GitHubEvidenceProof
+```
+
+## Shared request contracts
 
 ```mermaid
 sequenceDiagram

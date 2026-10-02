@@ -1,5 +1,14 @@
 # BenchmarkComparisons
 
+The site candidate's observed analyzer dependency failure loop is traced under
+REQ/AC-BC-027 in [site acceptance](../../site-design.acceptance.md) and its working
+plan. TASK014/015/016 preserve all diagnostics/tests/native thresholds while
+repairing genuine decimal display parsing, independent token-start location
+oracles, cohesive test classes and uncovered real diagnostic flows. The exact
+ownership, staged join and rollback contract is in
+[ADR-033](../ADR/ADR-033-code-quality.md); no source-only repair qualifies site
+runtime, native coverage or the full database.
+
 Status: in progress. Owner: lead benchmark integrator. Product scope and authoritative boundaries remain in the root policy and product specification. [ADR-034](../ADR/ADR-034-cluster-comparisons.md) defines engine/deployment/evidence contracts.
 
 [ADR-021](../ADR/ADR-021-comparable-postgres-baseline.md) owns PostgreSQL as the primary general-purpose baseline and the equivalent workload/guarantee contract; specialized engines remain separate workload arms. Neither decision establishes a performance winner without successful matched GitHub evidence.
@@ -122,6 +131,53 @@ Canonical site files, mounts, TUnit project, limits, task ownership and terminal
 
 The strongest coverage review found that manual design proof does not waive numeric root rules. These additions close that qualification gap; pending coverage is never a completed acceptance criterion. Their exact source inventory, converter semantics, task ownership and terminal joins are frozen in ADR-040 and the site working plan before write-capable workers start.
 
+The actual SiteTests run36994330874 exposed a shared vendor-gzip portability
+failure before browser launch. REQ/AC-BC-016/017/024/025 retain their existing
+requirements; the strict byte-identity/current-runtime compression receipt and
+bounded persistent builder diagnostics are frozen in [site acceptance](../../site-design.acceptance.md),
+[ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md) and TASK019/020 in the
+[site plan](../../site-design.plan.md). Real isolated-builder success/corruption
+regressions and specific intended negative errors map to those criteria. Every
+source/worker/strongest join and full GitHub Analyzer/native/site/Chrome/coverage
+gate is required; the failed baseline and missing hosted gzip length stay honest.
+
+## Fresh GitHub evidence and separate website deployment
+
+REQ-BC-028 maps to AC-BC-028 in [publication acceptance](../../site-publication.acceptance.md),
+[ordered plan](../../site-publication.plan.md) and [ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md).
+The owner's subsequent request adds a separate post-test publication workflow;
+earlier design/DNS exclusions and all BC001–027 requirements remain recorded.
+Every number is read from actual comparison-job JSON. Select the highest successful
+comparison job by own-main-push run number and descending attempt history; unrelated
+database jobs or whole-workflow failure do not block website-only delivery. Exact
+comparison-step/artifact/ZIP proof and full current-main website qualification
+precede deployment. Separate sibling website/measured/control checkouts retain
+accurate revisions. Invalid selected evidence fails without fallback. Existing
+verified public data remains until a successful update. Main site/** changes and
+benchmark workflow completion trigger the separate action; workflow_run arrives
+after the enclosing workflow, not immediately at individual-job completion.
+
+```mermaid
+flowchart LR
+    Producer[Actual CI comparison job] --> Artifact[Immutable JSON ZIP artifact]
+    Control[Trusted separate Pages workflow] --> Select[Authenticated run job artifact proof]
+    Artifact --> Select
+    Select --> Inputs[Same verified ZIP to BCL qualification input]
+    Inputs --> Qualify[Complete Analyzer site Chrome coverage gates]
+    Qualify --> Build[Exact raw bytes and publication provenance]
+    Build --> Fresh[Repeat current run attempt artifact proof]
+    Fresh --> Deploy[Pages deploy only after success]
+```
+
+Canonical surfaces: scripts/Features/BenchmarkComparisons/github-evidence-*.mjs
+and github-evidence.mjs; SiteGitHub-prefixed tests/input helpers under
+tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/; shared pages.yml; durable
+spec here. Backend/contracts/database persistence N/A: no runtime/data API changes.
+Actors, public receipt schema, positive/negative/edge/error flows, tests, exact
+worker ownership and terminal joins are frozen in acceptance/ADR/plan before
+writes. Pure controlled metadata/ZIP tests are not fake API transport evidence.
+Real workflow/provider/live evidence remains mandatory and currently pending.
+
 ## Required analyzer dependency for the website candidate
 
 REQ-BC-027 maps to AC-BC-027 in [site acceptance](../../site-design.acceptance.md),
@@ -153,3 +209,12 @@ requires explicit source review plus runtime evidence as stated in acceptance.
 Frontend/persistence/auth surfaces are N/A because this prerequisite changes only
 build/CLI ownership. [Host task graph](../../comparison-host.plan.md) records exact
 disjoint scopes and lead-only join; existing nine-engine criteria remain mandatory.
+
+Current website delivery consumes authenticated successful schema2 evidence and
+rejects unsupported versions without selecting older data after a successful
+comparison is chosen. Source inspection of main355's schema3 emitter is not
+successful producer or website qualification; failed/incomplete comparison
+artifacts cannot refresh the site. Its three profile folders and measurement-step
+names still match the publication transport contract. The current schema2 queue
+phase→PointRead control regression is TASK032 under REQ/AC-BC-014/025; complete
+real Chrome evidence is required, with every existing oracle and numeric gate.

@@ -166,8 +166,7 @@ function Invoke-CoveragePrepare([string] $RepositoryRoot, [string] $ContractPath
         throw $tokens.ErrorStaleEvidence
     }
 
-    $revision = [string] $env:GITHUB_SHA
-    if ($revision -cnotmatch $tokens.RevisionPattern) { throw $tokens.ErrorNoRevision }
+    $revision = Get-CoverageSourceRevision
     $contract = Read-CoverageContract $ContractPath $RepositoryRoot
     $inventory = Get-CoverageInventory $RepositoryRoot $contract $EvidenceRoot
     $manifest = [ordered]@{}
@@ -190,11 +189,10 @@ function Read-AndVerifyCoverageManifest([string] $RepositoryRoot, [string] $Cont
     $manifestPath = Join-Path $EvidenceRoot $tokens.SourceManifestName
     if (-not [IO.File]::Exists($manifestPath)) { throw $tokens.ErrorMissingManifest }
     $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json -AsHashtable
-    $revision = [string] $env:GITHUB_SHA
+    $revision = Get-CoverageSourceRevision
     $runtimeVersion = [Environment]::Version.ToString()
     $powerShellVersion = $PSVersionTable.PSVersion.ToString()
     if ($manifest[$tokens.JsonSchemaVersion] -ne $tokens.SchemaVersion -or
-        $revision -cnotmatch $tokens.RevisionPattern -or
         $manifest[$tokens.JsonSourceRevision] -cne $revision -or
         $manifest[$tokens.JsonRepositoryRoot] -cne $RepositoryRoot -or
         $manifest[$tokens.JsonContractHash] -cne (Get-CoverageSha256 $ContractPath) -or
