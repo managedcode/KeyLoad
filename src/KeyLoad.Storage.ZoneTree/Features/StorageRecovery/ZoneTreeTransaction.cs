@@ -124,4 +124,10 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
         CancellationToken cancellationToken = default)
         => ZoneTreeRangeReader.Visit(runtime, prefix, maxRecords, visitor, Changes,
             afterKey, untilKey, observer, cancellationToken);
+
+    public StorageScanResult VisitReverseRange(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
+        byte[]? afterKey = null, byte[]? untilKey = null, StorageReadObserver? observer = null,
+        CancellationToken cancellationToken = default)
+        => ZoneTreeRangeReader.Visit(runtime, prefix, maxRecords, visitor, Changes,
+            afterKey, untilKey, observer, cancellationToken, reverse: true);
 }

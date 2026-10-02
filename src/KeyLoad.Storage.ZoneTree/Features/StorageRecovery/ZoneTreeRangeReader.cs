@@ -6,24 +6,28 @@ internal static class ZoneTreeRangeReader
 {
     internal static StorageScanResult Visit(ZoneTreeStoreRuntime runtime, byte[] prefix, int maxRecords,
         StorageRecordVisitor visitor, SortedSet<ZoneTreeStagedEntry>? changes, byte[]? afterKey,
-        byte[]? untilKey, StorageReadObserver? observer, CancellationToken cancellationToken)
+        byte[]? untilKey, StorageReadObserver? observer, CancellationToken cancellationToken, bool reverse = false)
     {
         runtime.ReadCounters.RangeAttempt();
         Validate(prefix, maxRecords, visitor, cancellationToken);
         var lower = afterKey is not null && BinaryKeyComparer.Instance.Compare(afterKey, prefix) > 0 ? afterKey : prefix;
-        if (untilKey is not null && BinaryKeyComparer.Instance.Compare(lower, untilKey) >= 0)
+        var prefixSuccessor = reverse ? ZoneTreeRangeBounds.PrefixSuccessor(prefix) : null;
+        if ((untilKey is not null && BinaryKeyComparer.Instance.Compare(lower, untilKey) >= 0)
+            || (reverse && prefixSuccessor is not null
+                && BinaryKeyComparer.Instance.Compare(lower, prefixSuccessor) >= 0))
         {
             return default;
         }
 
+        var upper = reverse ? ZoneTreeRangeBounds.Minimum(untilKey, prefixSuccessor) : untilKey;
         var work = new ZoneTreeRangeWork(runtime.ReadCounters, observer, cancellationToken);
-        using var baseline = new ZoneTreeBaselineCursor(runtime.Tree, lower, prefix, afterKey, untilKey, work);
-        using var staged = new ZoneTreeStagedCursor(changes, lower, prefix, afterKey, untilKey, work);
-        return VisitMerged(baseline, staged, work, maxRecords, visitor);
+        using var baseline = new ZoneTreeBaselineCursor(runtime.Tree, lower, upper, prefix, afterKey, untilKey, work, reverse);
+        using var staged = new ZoneTreeStagedCursor(changes, lower, upper, prefix, afterKey, untilKey, work, reverse);
+        return VisitMerged(baseline, staged, work, maxRecords, visitor, reverse);
     }
 
     private static StorageScanResult VisitMerged(ZoneTreeBaselineCursor baseline, ZoneTreeStagedCursor staged,
-        ZoneTreeRangeWork work, int maxRecords, StorageRecordVisitor visitor)
+        ZoneTreeRangeWork work, int maxRecords, StorageRecordVisitor visitor, bool reverse)
     {
         var hasBaseline = baseline.MoveNext();
         var hasStaged = staged.MoveNext();
@@ -31,7 +35,9 @@ internal static class ZoneTreeRangeReader
         while (hasBaseline || hasStaged)
         {
             work.Check();
-            var comparison = hasBaseline && hasStaged ? baseline.Key.Span.SequenceCompareTo(staged.Key) : hasBaseline ? -1 : 1;
+            var comparison = hasBaseline && hasStaged
+                ? baseline.Key.Span.SequenceCompareTo(staged.Key) * (reverse ? -1 : 1)
+                : hasBaseline ? -1 : 1;
             var useStaged = hasStaged && comparison >= 0;
             var key = useStaged ? staged.Key.AsSpan() : baseline.Key.Span;
             var value = useStaged ? staged.Value : null;

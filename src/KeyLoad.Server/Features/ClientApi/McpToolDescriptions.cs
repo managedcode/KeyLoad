@@ -11,6 +11,9 @@ internal static class McpToolDescriptions
     private const string MessagesInspect = "Inspect authorized queue message metadata and visible payload; result is null when absent.";
     private const string GraphTraverse = "Traverse a graph with explicit depth, vertex and edge limits under the current principal.";
     private const string SeriesRead = "Read a bounded time-series page in the supplied UTC time range.";
+    private const string SeriesLatest = "Read the latest authorized sample at or before an optional inclusive UTC timestamp; sample is null when absent.";
+    private const string SeriesAggregate = "Read complete raw count, sum, minimum, maximum and sum/count average in [from, untilExclusive); null end includes the maximum timestamp. Exceeding maxSamples rejects the whole result.";
+    private const string SeriesWindows = "Read dense fixed-width UTC windows anchored at from, including empty windows and a clamped final window. Sample and window caps reject the whole result when exceeded.";
     private const string QueryExecute = "Execute an authorized read-only query with bounded work; continue with its returned cursor.";
     private const string QueryAst = "Execute the canonical typed query AST. Put polymorphic kind before other object fields and preserve its returned cursor.";
     private const string QueryCapabilities = "Discover supported query versions, predicates, read profiles and bounded execution limits.";
@@ -51,6 +54,9 @@ internal static class McpToolDescriptions
         McpToolNames.MessagesInspect => MessagesInspect,
         McpToolNames.GraphTraverse => GraphTraverse,
         McpToolNames.SeriesRead => SeriesRead,
+        McpToolNames.SeriesLatest => SeriesLatest,
+        McpToolNames.SeriesAggregate => SeriesAggregate,
+        McpToolNames.SeriesWindows => SeriesWindows,
         McpToolNames.QueryExecute => QueryExecute,
         McpToolNames.QueryAst => QueryAst,
         McpToolNames.QueryCapabilities => QueryCapabilities,

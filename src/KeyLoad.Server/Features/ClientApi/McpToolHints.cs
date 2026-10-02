@@ -17,6 +17,8 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         GrainReadKind.Message => new(true, true, false),
         GrainReadKind.Traverse => new(true, true, false),
         GrainReadKind.Samples => new(true, true, false),
+        GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows
+            => new(true, true, false),
         GrainReadKind.Query => new(true, true, false),
         GrainReadKind.AstQuery => new(true, true, false),
         GrainReadKind.QueryCapabilities => new(true, true, false),

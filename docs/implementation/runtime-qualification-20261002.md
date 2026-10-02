@@ -1,6 +1,39 @@
 # Runtime qualification, 2026-10-02
 
-## Main runtime baseline: 323d60499
+## Main runtime baseline: e8d1a9eb1
+
+[Run37049469093](https://github.com/managedcode/KeyLoad/actions/runs/37049469093)
+retains all12 source-checked native reports. Full solution build, formatter,
+governance and118 analyzer cases pass on all three OSes. Units pass **809/809 on
+each OS**, process recovery passes **136/136 on each OS**, and native
+Docker/Aspire RF3 passes **41/41** through the real .NET/MCP clients. The complete
+workflow still fails: comparison is **2/4**, both native runner-completion
+predicates remain Waiting, and both measurement profiles are skipped.
+[Exact native hashes, case transitions, jobs and artifact metadata](runtime-qualification-37049469093.json)
+retain3352 outcomes:3350passed,2errors and zero native skipped/cancelled/timed-out/
+flaky/in-progress cases. Successful GitHub step conclusions are retained; their
+literal process exit integers were not logged. Comparison records literal exit2.
+
+All11 prior macOS replica-readiness setup errors and both Windows missing-required
+elapsed errors now pass with their original assertions and bounds. The four W5
+startup diagnostic methods pass on each OS, including the real output-drain
+streams. That does not execute every environmental startup/restart failure branch
+or establish its cause. ZIP digests are retained as GitHub metadata, not independently
+verified downloads. No local runtime tests ran. Numeric coverage, actual activation
+movement, server-resource/performance, endurance and power-loss gates remain open.
+
+## TimeSeries additive source join
+
+[ADR-052](../ADR/ADR-052-timeseries-bounded-aggregates.md) and
+[TimeSeries](../Features/TimeSeries.md) map AC-SERIES-008..012 to new latest,
+half-open raw aggregates and dense UTC windows using published
+ManagedCode.TimeSeries10.0.0. The shared native reverse storage visitor preserves
+forward scans; typed SDK/HTTP/MCP operations retain persisted authorization,
+one read budget, request actors and RF3 storage ownership. New unit and genuine
+SDK/MCP follower-restart cases are authored. Their own delivered-SHA qualification
+is pending; e8d1a9eb1 does not qualify this later source.
+
+## Previous main runtime baseline: 323d60499
 
 [Run37044499074](https://github.com/managedcode/KeyLoad/actions/runs/37044499074) retains all12 source-checked native reports. Full build, formatter, governance and118 analyzer cases pass on all three OSes; units are **805/805 on each OS**. **Native Docker/Aspire RF3 passes41/41**, including real .NET/MCP clients, Chrome and five new safe-diagnostic regressions. Recovery is **136/136 Linux**,125/136 macOS and134/136 Windows. [Exact native hashes, failures, previous-case transitions, job URLs and artifact metadata](runtime-qualification-37044499074.json) retain the complete scope.
 
@@ -10,7 +43,7 @@ Both comparison completion predicates still fail with the runner in Waiting; ret
 
 ## W5/W6 source follow-up
 
-[Source join](runtime-source-w5-w6.json) retains all six source hashes, accepted feature/task ownership, native red baseline and authored source chronology. It reuses the existing physical-temp resolver for the macOS readiness fixture, isolates only two Windows intrinsic missing-file timing cases, and adds closed bounded startup exit/drain diagnostics. All25 projects pass an enabled Release development build with0warnings/0errors; canonical formatter and static governance pass. No local runtime tests ran. Four new startup projection/real-stream methods and preserved recovery cases require the next delivered-SHA GitHub run; the full goal remains in progress.
+[Source join](runtime-source-w5-w6.json) retains all six source hashes, accepted feature/task ownership, native red baseline and authored source chronology. It reuses the existing physical-temp resolver for the macOS readiness fixture, isolates only two Windows intrinsic missing-file timing cases, and adds closed bounded startup exit/drain diagnostics. All25 projects pass an enabled Release development build with0warnings/0errors; canonical formatter and static governance pass. No local runtime tests ran. The subsequent exact e8d1a9eb1 run above qualifies all12 new startup outcomes and the full recovery suites on three OSes. Comparison remains failed and unexecuted environmental branches remain open; the full goal stays in progress.
 
 ## Previous main runtime baseline: 8b475d4
 

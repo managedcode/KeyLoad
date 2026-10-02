@@ -21,6 +21,12 @@ internal static class McpCatalogExpectations
     private const string GraphTraverseRoute = "/v1/graph/traverse";
     internal const string SeriesRead = "keyload_series_read";
     private const string SeriesReadRoute = "/v1/series/read";
+    internal const string SeriesLatest = "keyload_series_latest";
+    private const string SeriesLatestRoute = "/v1/series/latest";
+    internal const string SeriesAggregate = "keyload_series_aggregate";
+    private const string SeriesAggregateRoute = "/v1/series/aggregate";
+    internal const string SeriesWindows = "keyload_series_windows";
+    private const string SeriesWindowsRoute = "/v1/series/windows";
     internal const string QueryExecute = "keyload_query_execute";
     private const string QueryExecuteRoute = "/v1/query";
     internal const string QueryAst = "keyload_query_ast";
@@ -88,7 +94,7 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 50;
+    internal const int Count = 53;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
@@ -98,6 +104,9 @@ internal static class McpCatalogExpectations
         (MessagesInspect, MessagesInspectRoute, GrainReadKind.Message, null),
         (GraphTraverse, GraphTraverseRoute, GrainReadKind.Traverse, null),
         (SeriesRead, SeriesReadRoute, GrainReadKind.Samples, null),
+        (SeriesLatest, SeriesLatestRoute, GrainReadKind.LatestSample, null),
+        (SeriesAggregate, SeriesAggregateRoute, GrainReadKind.AggregateSamples, null),
+        (SeriesWindows, SeriesWindowsRoute, GrainReadKind.AggregateSampleWindows, null),
         (QueryExecute, QueryExecuteRoute, GrainReadKind.Query, null),
         (QueryAst, QueryAstRoute, GrainReadKind.AstQuery, null),
         (QueryCapabilities, QueryCapabilitiesRoute, GrainReadKind.QueryCapabilities, null),

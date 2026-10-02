@@ -1,52 +1,135 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark"><title>KeyLoad · Database console</title>
-<link rel="stylesheet" href="/admin/styles.css"><script type="module" src="/admin/app.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>KeyLoad Console</title>
+<link rel="icon" href="/admin/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/admin/brand.css">
+<link rel="stylesheet" href="/admin/layout.css">
+<link rel="stylesheet" href="/admin/views.css">
+<script type="module" src="/admin/app.js"></script>
 </head>
 <body>
+<div class="shell">
 <aside class="sidebar">
-<a class="brand" href="/admin"><span class="monogram" aria-hidden="true">K<span>↗</span></span><span>KeyLoad<small>DATABASE CONSOLE</small></span></a>
-<div class="workspace"><span class="workspace-icon">K</span><div>Database workspace<small>Read-only administration</small></div></div>
-<p class="nav-label">WORKSPACE</p>
+<div class="sidebar-top">
+<a class="kl-brand" href="/admin/"><img src="/admin/logo.svg" alt="" width="32" height="32"><span>Key<b>Load</b></span><span class="console-tag">Console</span></a>
+<button id="menu-toggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-panel" aria-label="Open navigation"><svg class="kl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</div>
+<div id="nav-panel" class="nav-panel">
 <nav aria-label="Console navigation">
-<button data-view="overview" aria-current="page"><span aria-hidden="true">◫</span> Overview</button>
-<button data-view="collections"><span aria-hidden="true">▦</span> Collections</button>
-<button data-view="queues"><span aria-hidden="true">≋</span> Queues</button>
-<button data-view="files"><span aria-hidden="true">▤</span> Files &amp; storage</button>
-<button data-view="cluster"><span aria-hidden="true">◇</span> Cluster</button>
+<p class="nav-group">Monitoring</p>
+<button type="button" data-view="overview" aria-current="page"><svg class="kl-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg><span>Overview</span></button>
+<button type="button" data-view="performance"><svg class="kl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg><span>Performance</span></button>
+<button type="button" data-view="errors"><svg class="kl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 3 19h18L12 4z"/><path d="M12 10v4M12 16.5v.5"/></svg><span>Errors &amp; logs</span><span id="nav-error-count" class="nav-count" hidden></span></button>
+<p class="nav-group">Data</p>
+<button type="button" data-view="catalog"><svg class="kl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 8 4.5-8 4.5-8-4.5L12 4z"/><path d="m4 13 8 4.5 8-4.5"/></svg><span>Catalog</span></button>
+<button type="button" data-view="collections"><svg class="kl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4c-2 0-3 1-3 3v2c0 1.5-.8 3-2 3 1.2 0 2 1.5 2 3v2c0 2 1 3 3 3M15 4c2 0 3 1 3 3v2c0 1.5.8 3 2 3-1.2 0-2 1.5-2 3v2c0 2-1 3-3 3"/></svg><span>Collections</span></button>
+<button type="button" data-view="queues"><svg class="kl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h9"/><path d="m17 16 3 2-3 2"/></svg><span>Queues</span></button>
+<button type="button" data-view="files"><svg class="kl-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v10h14V9M10 13h4"/></svg><span>Blob storage</span></button>
+<p class="nav-group">Infrastructure</p>
+<button type="button" data-view="cluster"><svg class="kl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="2.5"/><circle cx="5.5" cy="18" r="2.5"/><circle cx="18.5" cy="18" r="2.5"/><path d="M10.8 7.7 6.7 15.8M13.2 7.7l4.1 8.1M8 18h8"/></svg><span>Nodes</span></button>
+<button type="button" data-view="storage"><svg class="kl-icon" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span>Disk usage</span></button>
 </nav>
-<div class="sidebar-bottom"><span class="live-dot"></span><span id="connection-state">Disconnected</span><small>ORLEANS · RF3 TOPOLOGY</small></div>
+<div class="sidebar-foot">
+<div class="session"><span class="live-dot" aria-hidden="true"></span><div><strong id="connection-state">Disconnected</strong><small id="session-node">Not connected</small></div></div>
+<p class="topology-note">Orleans · RF3 cluster · read-only</p>
+</div>
+</div>
 </aside>
 <main>
-<header class="topbar"><div class="breadcrumb">Workspace <span>/</span> <strong id="breadcrumb-view">Overview</strong></div><span class="badge">READ ONLY</span></header>
-<section class="page-head"><div><p class="eyebrow">YOUR DATA, IN FOCUS</p><h1 id="view-title">Overview</h1><p id="view-description">A live view of the node serving this console.</p></div><button id="refresh" class="button secondary" disabled><span aria-hidden="true">↻</span> Refresh</button></section>
-<section class="connection panel">
-<form id="connect-form"><label class="key-label" for="api-key">Administrator API key<input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Enter your API key" required></label><button class="button primary" id="connect-button" type="submit">Connect <span aria-hidden="true">↗</span></button><button class="button secondary" id="disconnect" type="button" disabled>Disconnect</button></form>
-<p class="hint">Connect to this server with a persisted administrator credential. Your key stays in this tab’s memory.</p>
+<header class="topbar">
+<div class="crumbs"><span id="breadcrumb-group">Monitoring</span><svg class="kl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg><strong id="breadcrumb-view">Overview</strong></div>
+<div class="topbar-actions">
+<span class="live-pill" id="live-pill"><i aria-hidden="true"></i><span id="live-text">Offline</span></span>
+<button id="refresh" class="kl-btn" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg><span>Refresh</span></button>
+<button id="disconnect" class="kl-btn kl-btn--ghost" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg><span>Disconnect</span></button>
+</div>
+</header>
+<div class="content">
+<section class="page-head">
+<div><h1 id="view-title">Overview</h1><p id="view-description">A live view of the node serving this console.</p></div>
+<div class="page-meta"><span class="kl-badge kl-badge--plain">Read only</span><span id="captured-at" class="captured">No observation yet</span></div>
 </section>
 <p id="status-message" role="status" aria-live="polite">Connect to explore live database observations.</p>
+<section id="connect-panel" class="connect kl-card" aria-labelledby="connect-title">
+<div class="connect-art" aria-hidden="true"><img src="/admin/logo.svg" alt="" width="56" height="56"></div>
+<h2 id="connect-title">Connect to your cluster</h2>
+<p>Use a persisted administrator API key. The key stays only in this tab’s memory and is sent as a same-origin Bearer header.</p>
+<form id="connect-form">
+<label for="api-key">Administrator API key</label>
+<div class="connect-row"><input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="root.…" required><button class="kl-btn kl-btn--primary" id="connect-button" type="submit">Connect</button></div>
+</form>
+<ul class="connect-points"><li>Live node metrics &amp; charts</li><li>Error log &amp; performance</li><li>Collections, queues &amp; blobs</li></ul>
+</section>
+<div class="views">
+<section id="scope-bar" class="scope kl-card" hidden>
+<form id="scope-form">
+<label for="tenant-id">Tenant<input id="tenant-id" value="root" required></label>
+<label for="database-id">Database<input id="database-id" value="root" required></label>
+<label for="partition-key">Partition key<input id="partition-key" value="default" required></label>
+<button class="kl-btn kl-btn--primary" type="submit">Load resources</button>
+</form>
+</section>
 <section id="overview-view" class="view">
-<div class="metrics-grid">
-<article class="metric panel"><div class="metric-label">Canonical database <span>◫</span></div><strong id="canonical-value">—</strong><p>Physical bytes · this node</p></article>
-<article class="metric panel"><div class="metric-label">HTTP throughput <span>↗</span></div><strong id="throughput-value">—</strong><p>Completed API requests / second</p></article>
-<article class="metric panel"><div class="metric-label">Average latency <span>◷</span></div><strong id="latency-value">—</strong><p>Measured HTTP response duration</p></article>
-<article class="metric panel"><div class="metric-label">Admission occupancy <span>≋</span></div><strong id="admission-value">—</strong><p>Active commands / configured limit</p></article>
+<div class="kpis">
+<article class="kpi kl-card"><header><span>Throughput</span><i class="kpi-icon c1" aria-hidden="true"></i></header><strong id="throughput-value">—</strong><p>Completed API requests / s</p><svg id="spark-throughput" class="spark c1" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
+<article class="kpi kl-card"><header><span>Average latency</span><i class="kpi-icon c7" aria-hidden="true"></i></header><strong id="latency-value">—</strong><p>Mean HTTP response duration</p><svg id="spark-latency" class="spark c7" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
+<article class="kpi kl-card"><header><span>Error rate</span><i class="kpi-icon bad" aria-hidden="true"></i></header><strong id="error-rate-value">—</strong><p id="error-rate-note">Failed share of completed requests</p><svg id="spark-errors" class="spark bad" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
+<article class="kpi kl-card"><header><span>Canonical database</span><i class="kpi-icon c3" aria-hidden="true"></i></header><strong id="canonical-value">—</strong><p id="canonical-note">Physical bytes on this node</p><svg id="spark-storage" class="spark c3" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg></article>
 </div>
-<div class="overview-grid">
-<article class="panel chart-panel"><div class="panel-head"><div><h2>Request activity</h2><p>Measured on the executing node</p></div><span class="legend"><i></i> requests / sec</span></div><div class="chart"><svg id="throughput-chart" viewBox="0 0 700 180" role="img" aria-label="Measured request throughput"><path class="grid" d="M0 20H700M0 65H700M0 110H700M0 155H700"/><polyline id="throughput-line" points=""/></svg><p id="chart-empty">Two live observations unlock the chart.</p></div><div class="chart-foot"><span>Session history · up to 120 samples</span><span>5 second refresh</span></div></article>
-<article class="panel storage-panel"><div class="panel-head"><div><h2>Storage breakdown</h2><p>Observed physical file lengths</p></div><span aria-hidden="true">◫</span></div><dl class="storage-list"><div><dt><i class="mint"></i>Canonical</dt><dd id="storage-canonical">—</dd></div><div><dt><i class="blue"></i>Replica journals</dt><dd id="storage-replica">—</dd></div><div><dt><i class="purple"></i>Backups</dt><dd id="storage-backup">—</dd></div><div class="total"><dt>Node total · all categories</dt><dd id="storage-total">—</dd></div></dl><p class="hint" id="storage-notice">Storage observations appear after connection.</p></article>
+<div class="grid-2-1">
+<article class="panel kl-card"><div class="panel-head"><div><h2>Request activity</h2><p>Requests per second on the executing node · this session</p></div><div class="legend"><span><i class="c1"></i>Succeeded</span><span><i class="bad"></i>Failed</span></div></div><div id="activity-chart" class="chart" role="img" aria-label="Measured requests per second"></div><p id="chart-empty" class="chart-empty">Two live observations unlock the chart.</p></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Storage composition</h2><p>Observed physical file lengths</p></div><span id="storage-state" class="kl-badge">Waiting</span></div><div class="donut-wrap"><svg id="storage-donut" class="donut" viewBox="0 0 120 120" role="img" aria-label="Storage composition"></svg><div class="donut-center"><strong id="storage-total">—</strong><span>node total</span></div></div><dl class="split-list"><div><dt><i class="c1"></i>Canonical</dt><dd id="storage-canonical">—</dd></div><div><dt><i class="c2"></i>Replica journals</dt><dd id="storage-replica">—</dd></div><div><dt><i class="c3"></i>Backups</dt><dd id="storage-backup">—</dd></div><div><dt><i class="c4"></i>Other files</dt><dd id="storage-other">—</dd></div></dl><p class="hint" id="storage-notice">Storage observations appear after connection.</p></article>
 </div>
-<article class="panel node-strip"><span class="node-symbol">◇</span><div><h2 id="node-name">No node connected</h2><p id="node-summary">Node identity, read position and routing status appear here.</p></div><span class="badge" id="routing-state">AWAITING CONNECTION</span></article>
+<div class="grid-3">
+<article class="panel kl-card node-card"><div class="panel-head"><div><h2 id="node-name">No node connected</h2><p id="node-summary">Node identity, read position and routing status appear here.</p></div><span class="kl-badge" id="routing-state">AWAITING CONNECTION</span></div><svg id="mini-topology" class="mini-topology" viewBox="0 0 240 92" role="img" aria-label="RF3 voter topology"></svg><button class="kl-btn kl-btn--ghost link-btn" type="button" data-goto="cluster">Open nodes</button></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Admission</h2><p>Current occupancy, not throughput</p></div></div><div class="admission-head"><strong id="admission-value">—</strong><span>commands in use</span></div><div id="admission-meters" class="meters"></div></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Recent errors</h2><p>Latest failed API requests</p></div><span id="recent-error-count" class="kl-badge kl-badge--plain">0</span></div><ol id="recent-errors" class="mini-log"><li class="muted">No failed requests observed.</li></ol><button class="kl-btn kl-btn--ghost link-btn" type="button" data-goto="errors">Open error log</button></article>
+</div>
+</section>
+<section id="performance-view" class="view" hidden>
+<div id="perf-stats" class="stat-strip kl-card"></div>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Throughput</h2><p>Completed public API requests per second</p></div></div><div id="perf-throughput" class="chart chart-lg" role="img" aria-label="Throughput history"></div></article>
+<div class="grid-2">
+<article class="panel kl-card"><div class="panel-head"><div><h2>Average latency</h2><p>Mean response duration per interval, ms</p></div></div><div id="perf-latency" class="chart" role="img" aria-label="Latency history"></div></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Error rate</h2><p>Failed share of requests per interval, %</p></div></div><div id="perf-errors" class="chart" role="img" aria-label="Error rate history"></div></article>
+</div>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Admission capacity</h2><p>Node-local admitted commands and retained bytes against configured limits</p></div></div><div id="perf-admission" class="meters meters-wide"></div></article>
+</section>
+<section id="errors-view" class="view" hidden>
+<div id="error-stats" class="stat-strip kl-card"></div>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Failed requests</h2><p>Newest first · route templates only · resets with the server process</p></div><div id="error-filters" class="chips" role="group" aria-label="Filter failed requests"></div></div><div class="table-scroll"><table id="error-table"><caption class="sr-only">Recent failed API requests</caption><thead></thead><tbody></tbody></table><p id="error-empty" class="empty">No failed requests observed on this node.</p></div></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Console activity</h2><p>Events observed by this browser session</p></div></div><ol id="event-log" class="event-log"></ol></article>
+</section>
+<section id="catalog-view" class="view" hidden>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Resources by category</h2><p id="catalog-note">Counts describe the loaded page, not the whole database.</p></div><div id="catalog-chips" class="chips" role="group" aria-label="Filter by category"></div></div><div class="table-scroll"><table id="catalog-table"><caption class="sr-only">Catalog resources</caption><thead></thead><tbody></tbody></table><p id="catalog-empty" class="empty">Connect to browse resources.</p></div><div class="pagination"><span id="catalog-page">Bounded page</span><button id="catalog-first" class="kl-btn" type="button" disabled>First page</button><button id="catalog-next" class="kl-btn" type="button" disabled>Next page</button></div></article>
 </section>
 <section id="browse-view" class="view" hidden>
-<div class="panel scope-panel"><div class="panel-head"><div><h2>Database scope</h2><p>Browse one explicit tenant, database and atomic partition.</p></div></div><form id="scope-form"><label for="tenant-id">Tenant<input id="tenant-id" value="root" required></label><label for="database-id">Database<input id="database-id" value="root" required></label><label for="partition-key">Partition key<input id="partition-key" value="default" required></label><button class="button secondary" type="submit">Load resources</button></form></div>
-<div class="browse-grid"><article class="panel resource-panel"><div class="panel-head"><h2>Resources</h2><span id="resource-count" class="badge">—</span></div><div id="resource-list" class="resource-list"><p class="empty">Connect to browse resources.</p></div><div class="pagination"><button id="resources-first" class="button quiet" disabled>First page</button><button id="resources-next" class="button quiet" disabled>Next →</button></div></article><article class="panel data-panel"><div class="panel-head"><div><h2 id="data-title">Select a resource</h2><p id="data-description">Metadata and records are read without changing stored data.</p></div></div><div class="table-scroll"><table id="data-table"><caption class="sr-only">Resource records</caption><thead></thead><tbody></tbody></table><p id="data-empty" class="empty">Select a resource to inspect its records.</p></div><div class="pagination"><span id="page-description">Bounded pages</span><button id="data-first" class="button quiet" disabled>First page</button><button id="data-next" class="button quiet" disabled>Next →</button></div></article></div>
+<div class="browse">
+<article class="panel kl-card resource-panel"><div class="panel-head"><h2>Resources</h2><span id="resource-count" class="kl-badge kl-badge--plain">—</span></div><div id="resource-list" class="resource-list"><p class="empty">Connect to browse resources.</p></div><div class="pagination"><button id="resources-first" class="kl-btn" type="button" disabled>First</button><button id="resources-next" class="kl-btn" type="button" disabled>Next</button></div></article>
+<article class="panel kl-card data-panel"><div class="panel-head"><div><h2 id="data-title">Select a resource</h2><p id="data-description">Metadata and records are read without changing stored data.</p></div></div><div class="table-scroll"><table id="data-table"><caption class="sr-only">Resource records</caption><thead></thead><tbody></tbody></table><p id="data-empty" class="empty">Select a resource to inspect its records.</p></div><div class="pagination"><span id="page-description">Bounded pages</span><button id="data-first" class="kl-btn" type="button" disabled>First page</button><button id="data-next" class="kl-btn" type="button" disabled>Next page</button></div></article>
+</div>
 </section>
-<section id="cluster-view" class="view" hidden><article class="panel"><div class="panel-head"><div><h2>Executing node</h2><p>This observation does not establish the health of every RF3 voter.</p></div><span class="badge">NODE LOCAL</span></div><dl id="cluster-details" class="detail-grid"><div><dt>Connection</dt><dd>Awaiting administrator connection</dd></div></dl></article></section>
-<footer>KeyLoad <span>Distributed data. Clear visibility.</span><span id="captured-at">No observation yet</span></footer>
+<section id="cluster-view" class="view" hidden>
+<div class="grid-2-1">
+<article class="panel kl-card"><div class="panel-head"><div><h2>RF3 voters</h2><p>Observed from the executing node; peers it cannot observe are marked as such.</p></div><span class="kl-badge kl-badge--brand">Node local</span></div><svg id="topology" class="topology" viewBox="0 0 560 250" role="img" aria-label="RF3 voter topology"></svg><div class="legend legend-wide"><span><i class="brand"></i>Executing node</span><span><i class="c4"></i>Leader</span><span><i class="muted"></i>Not observed from here</span></div></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Process</h2><p>Server process serving this console</p></div></div><dl id="process-facts" class="facts"></dl></article>
+</div>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Executing node</h2><p>This observation does not establish the health of every RF3 voter.</p></div></div><dl id="cluster-details" class="detail-grid"></dl></article>
+</section>
+<section id="storage-view" class="view" hidden>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Physical storage on this node</h2><p>Bounded file-length observation; not unique logical database size.</p></div><span id="disk-state" class="kl-badge">Waiting</span></div><div class="disk-summary"><div><strong id="disk-total">—</strong><span id="disk-files">No files observed</span></div><div id="disk-bar" class="stack-bar" role="img" aria-label="Storage by category"></div><div id="disk-legend" class="legend legend-wide"></div></div></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Largest files</h2><p>Relative paths inside the node directory, largest first</p></div></div><div class="table-scroll"><table id="disk-table"><caption class="sr-only">Observed physical files</caption><thead></thead><tbody></tbody></table><p id="disk-empty" class="empty">Storage observations appear after connection.</p></div></article>
+</section>
+</div>
+<footer class="foot"><span>Key<b>Load</b> console</span><span>Real observations only · counters reset with each server process</span></footer>
+</div>
 </main>
-<dialog id="details-dialog"><div class="panel-head"><h2>Document details</h2><button id="close-details" class="button secondary" autofocus>Close</button></div><pre tabindex="0"></pre></dialog>
+</div>
+<div id="chart-tooltip" class="chart-tooltip" role="presentation" hidden></div>
+<dialog id="details-dialog"><div class="panel-head"><h2>Document details</h2><button id="close-details" class="kl-btn" type="button" autofocus>Close</button></div><pre tabindex="0"></pre></dialog>
 </body>
 </html>

@@ -10,16 +10,39 @@ internal sealed class ZoneTreeBaselineCursor : IDisposable
     private readonly byte[]? afterKey;
     private readonly byte[]? untilKey;
     private readonly ZoneTreeRangeWork work;
+    private readonly bool reverse;
 
-    internal ZoneTreeBaselineCursor(IZoneTree<Memory<byte>, Memory<byte>> tree, byte[] lower,
-        byte[] prefix, byte[]? afterKey, byte[]? untilKey, ZoneTreeRangeWork work)
+    internal ZoneTreeBaselineCursor(IZoneTree<Memory<byte>, Memory<byte>> tree, byte[] lower, byte[]? upper,
+        byte[] prefix, byte[]? afterKey, byte[]? untilKey, ZoneTreeRangeWork work, bool reverse)
     {
-        iterator = tree.CreateIterator(IteratorType.NoRefresh);
-        iterator.Seek(lower);
+        var acquired = reverse
+            ? tree.CreateReverseIterator(IteratorType.NoRefresh)
+            : tree.CreateIterator(IteratorType.NoRefresh);
+        try
+        {
+            if (reverse)
+            {
+                if (upper is not null)
+                {
+                    acquired.Seek(upper);
+                }
+            }
+            else
+            {
+                acquired.Seek(lower);
+            }
+        }
+        catch (Exception)
+        {
+            acquired.Dispose();
+            throw;
+        }
+        iterator = acquired;
         this.prefix = prefix;
         this.afterKey = afterKey;
         this.untilKey = untilKey;
         this.work = work;
+        this.reverse = reverse;
     }
 
     internal Memory<byte> Key { get; private set; }
@@ -38,7 +61,7 @@ internal sealed class ZoneTreeBaselineCursor : IDisposable
             var key = iterator.CurrentKey;
             if (!ZoneTreeRangeBounds.Contains(key.Span, prefix, afterKey, untilKey))
             {
-                if (ZoneTreeRangeBounds.IsPast(key.Span, prefix, untilKey))
+                if (ZoneTreeRangeBounds.IsPast(key.Span, prefix, afterKey, untilKey, reverse))
                 {
                     return false;
                 }

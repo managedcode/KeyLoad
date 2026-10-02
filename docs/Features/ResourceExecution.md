@@ -1,5 +1,15 @@
 # ResourceExecution
 
+The additive TimeSeries readers under
+[ADR-052](../ADR/ADR-052-timeseries-bounded-aggregates.md) map REQ-MP-002/005 and
+AC-MP-002/005/011/012 to AC-SERIES-011 and AC-RANGE-REV-003. One original read
+gate and one budgeted view charge metadata/data/lookahead exactly once, enforce
+deadline/cancellation and exact full JSON results, and preserve healthy
+following operations after failure. Root owns BudgetedReadView reverse forwarding;
+TimeSeries and StorageRecovery workers own their disjoint operation/provider
+acceptance tests. Source and exact-SHA evidence are pending; architecture choices
+do not establish maximum throughput, physical I/O, process RSS or numeric coverage.
+
 TASK-RUNTIME-CANCEL-W2 is an accepted AC-MP-009/010/012 fixture refinement under
 [ADR035](../ADR/ADR-035-memory-performance.md): arm a dedicated real-file growth
 observer before native async report writing; retain the corpus,10second deadline,

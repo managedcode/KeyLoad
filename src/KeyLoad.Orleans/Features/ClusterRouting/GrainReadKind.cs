@@ -56,5 +56,11 @@ public enum GrainReadKind
     /// <summary>Read a bounded administrator-authorized resource metadata page.</summary>
     AdminResources,
     /// <summary>Read queue counters and metadata without consuming messages.</summary>
-    AdminQueue
+    AdminQueue,
+    /// <summary>Read the projected latest sample at an optional inclusive timestamp.</summary>
+    LatestSample,
+    /// <summary>Read complete bounded raw statistics over a half-open sample range.</summary>
+    AggregateSamples,
+    /// <summary>Read dense bounded fixed-width UTC sample windows.</summary>
+    AggregateSampleWindows
 }

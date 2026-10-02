@@ -1,11 +1,12 @@
 namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeStagedCursor(SortedSet<ZoneTreeStagedEntry>? changes,
-    byte[] lower, byte[] prefix, byte[]? afterKey, byte[]? untilKey, ZoneTreeRangeWork work) : IDisposable
+    byte[] lower, byte[]? upper, byte[] prefix, byte[]? afterKey, byte[]? untilKey,
+    ZoneTreeRangeWork work, bool reverse) : IDisposable
 {
     private readonly IEnumerator<ZoneTreeStagedEntry> iterator = changes is null
         ? Enumerable.Empty<ZoneTreeStagedEntry>().GetEnumerator()
-        : changes.GetViewBetween(new(lower, null), ZoneTreeStagedEntry.High).GetEnumerator();
+        : GetRange(changes, lower, upper, reverse).GetEnumerator();
     private readonly byte[] prefix = prefix;
     private readonly byte[]? afterKey = afterKey;
     private readonly byte[]? untilKey = untilKey;
@@ -27,7 +28,7 @@ internal sealed class ZoneTreeStagedCursor(SortedSet<ZoneTreeStagedEntry>? chang
             var entry = iterator.Current;
             if (!ZoneTreeRangeBounds.Contains(entry.Key, prefix, afterKey, untilKey))
             {
-                if (ZoneTreeRangeBounds.IsPast(entry.Key, prefix, untilKey))
+                if (ZoneTreeRangeBounds.IsPast(entry.Key, prefix, afterKey, untilKey, reverse))
                 {
                     return false;
                 }
@@ -41,4 +42,12 @@ internal sealed class ZoneTreeStagedCursor(SortedSet<ZoneTreeStagedEntry>? chang
     }
 
     public void Dispose() => iterator.Dispose();
+
+    private static IEnumerable<ZoneTreeStagedEntry> GetRange(SortedSet<ZoneTreeStagedEntry> changes,
+        byte[] lower, byte[]? upper, bool reverse)
+    {
+        var upperEntry = upper is null ? ZoneTreeStagedEntry.High : new(upper, null);
+        var view = changes.GetViewBetween(new(lower, null), upperEntry);
+        return reverse ? view.Reverse() : view;
+    }
 }

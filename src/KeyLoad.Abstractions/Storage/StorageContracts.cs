@@ -53,6 +53,19 @@ public interface IKeyValueView
     StorageScanResult VisitRange(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         byte[]? afterKey = null, byte[]? untilKey = null, StorageReadObserver? observer = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>Visits descending encoded keys inside the same storage gate without materializing the range.</summary>
+    /// <param name="prefix">Required key prefix.</param>
+    /// <param name="maxRecords">Maximum live records delivered before charged lookahead.</param>
+    /// <param name="visitor">Read-only borrowed callback; false stops before another advance. Do not mutate the transaction.</param>
+    /// <param name="afterKey">Optional exclusive lower key bound, independent of direction.</param>
+    /// <param name="untilKey">Optional exclusive upper key bound, independent of direction.</param>
+    /// <param name="observer">Optional examined-byte charge before callback or lookahead.</param>
+    /// <param name="cancellationToken">Cancellation checked during traversal.</param>
+    /// <returns>Delivered count, stop reason and examined logical bytes.</returns>
+    StorageScanResult VisitReverseRange(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
+        byte[]? afterKey = null, byte[]? untilKey = null, StorageReadObserver? observer = null,
+        CancellationToken cancellationToken = default);
 }
 /// <summary>Stages atomic writes while preserving the same gated read view.</summary>
 public interface IAtomicTransaction : IKeyValueView

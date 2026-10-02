@@ -1,5 +1,5 @@
 {
-  "stage": "source_join_reviewed_and_development_checks_pass_runtime_qualification_pending",
+  "stage": "source_reviewed_development_checks_pass_unit_recovery_RF3_qualified_exacte8d1a9eb1_comparison_failures_remain",
   "mainParent": "323d60499381ec94fa2c9b4d412cb76837fd98bf",
   "tasks": [
     {
@@ -189,8 +189,22 @@
     "expectedUnitCases": 809,
     "expectedRecoveryCases": 136,
     "expectedRf3Cases": 41,
-    "executedAtThisSource": false
+    "executedAtThisSource": true
   },
   "chronology": "Native recovery failures preceded W6 fixes. W5 first-authored/refined/compiled test copies retained; no local tests ran and no local TDD red-green result is claimed. Previous four Windows startup cases pass323d without a cause repair; W5 provides bounded evidence if they fail again.",
-  "requiredQualification": "Deliver all available source to main and retain complete native Unit/Recovery/RF3/Comparison results for the exact SHA. Environmental timeout/restart branches need actual artifact evidence plus source audit when unexecuted. Coverage/migration/resource/endurance/power-loss gates remain full-goal work."
+  "requiredQualification": "Deliver all available source to main and retain complete native Unit/Recovery/RF3/Comparison results for the exact SHA. Environmental timeout/restart branches need actual artifact evidence plus source audit when unexecuted. Coverage/migration/resource/endurance/power-loss gates remain full-goal work.",
+  "nativeQualification": {
+    "runId": 37049469093,
+    "sha": "e8d1a9eb1ccab3aee228bd3f02b9bdb4e5c5ba1d",
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093",
+    "receipt": "docs/implementation/runtime-qualification-37049469093.json",
+    "W5OutcomesPassed": 12,
+    "W6PriorRecoveryErrorsNowPassed": 13,
+    "unitEachOS": "809_of809",
+    "recoveryEachOS": "136_of136",
+    "rf3": "41_of41",
+    "comparison": "2_of4",
+    "environmentalFailureBranches": "unexecuted_not_claimed",
+    "coveragePerformanceEndurancePowerLoss": "open"
+  }
 }

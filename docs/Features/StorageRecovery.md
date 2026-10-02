@@ -1,5 +1,30 @@
 # StorageRecovery
 
+## Descending bounded borrowed ranges
+
+REQ-STORAGE-013 / AC-RANGE-REV-001..003 under
+[ADR-052](../ADR/ADR-052-timeseries-bounded-aggregates.md) accepts the additive
+VisitReverseRange contract with the same exclusive bounds/borrowed lifetime as
+VisitRange. TASK-SERIES-REVERSE-W8 owns only private cursor/bounds/merge behavior
+and new real-store ReverseRangeTests, ReverseTransactionRangeTests and
+ReverseRangeResourceTests. Root alone owns interface and facade/budget forwarding.
+Native prefix-bounded NoRefresh reverse seek and native SortedSet reverse
+enumeration preserve staged tombstones/replacements without complete buffering.
+Exact observer/lookahead/cancel/early-stop and healthy-following-operation tests
+remain mandatory, with all existing forward tests preserved. Native seek failure
+disposal is source/lifetime review, explicitly not an executed fake fault case.
+Source implementation and exact-SHA runtime evidence remain pending.
+
+```mermaid
+flowchart LR
+    Gate[Original node local storage gate] --> Baseline[Native descending prefix bounded iterator]
+    Gate --> Staged[Native descending bounded staged enumerator]
+    Baseline --> Merge[Same canonical overlay merge]
+    Staged --> Merge
+    Merge --> Charge[Charge examined bytes before callback or lookahead]
+    Charge --> Visitor[Borrowed bounded visitor]
+```
+
 REQ-STORAGE-012 / AC-STORAGE-012 (TASK-RUNTIME-WINDOWS-RECOVERY-W3) preserves
 the existing killed-child filesystem readiness bound. After actual process exit,
 exclusive readiness covers owner.lock, commands.wal and the actual ZoneTree

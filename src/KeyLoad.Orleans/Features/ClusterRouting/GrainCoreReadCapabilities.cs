@@ -16,6 +16,10 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
             GrainReadKind.Message => Message(principal, GrainPayloadJson.Read<InspectMessageRequest>(payload)),
             GrainReadKind.Traverse => Traverse(principal, GrainPayloadJson.Read<TraverseRequest>(payload), cancellationToken),
             GrainReadKind.Samples => Samples(principal, GrainPayloadJson.Read<ReadSamplesRequest>(payload), cancellationToken),
+            GrainReadKind.LatestSample => database.ReadLatestSample(principal, GrainPayloadJson.Read<ReadLatestSampleRequest>(payload), cancellationToken),
+            GrainReadKind.AggregateSamples => database.AggregateSamples(principal, GrainPayloadJson.Read<AggregateSamplesRequest>(payload), cancellationToken),
+            GrainReadKind.AggregateSampleWindows => database.AggregateSampleWindows(principal,
+                GrainPayloadJson.Read<AggregateSampleWindowsRequest>(payload), cancellationToken),
             GrainReadKind.ChangeFeed => database.ReadChangeFeed(principal, GrainPayloadJson.Read<ReadChangeFeedRequest>(payload)),
             GrainReadKind.OutboxStatus => database.GetOutboxStatus(principal, GrainPayloadJson.Read<GetOutboxStatusRequest>(payload).Partition),
             GrainReadKind.ProjectionBatch => database.ReadProjectionBatch(principal, GrainPayloadJson.Read<ReadProjectionBatchRequest>(payload)),
@@ -24,7 +28,8 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
     }
 
     internal static bool Handles(GrainReadKind kind) => kind is >= GrainReadKind.Document and <= GrainReadKind.Samples
-        or GrainReadKind.ChangeFeed or GrainReadKind.OutboxStatus or GrainReadKind.ProjectionBatch;
+        or GrainReadKind.ChangeFeed or GrainReadKind.OutboxStatus or GrainReadKind.ProjectionBatch
+        or GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows;
 
     private StreamPage Stream(string principal, ReadStreamRequest request, CancellationToken cancellationToken)
         => database.ReadStream(principal, request.Stream, request.AfterRevision, request.Limit, cancellationToken);

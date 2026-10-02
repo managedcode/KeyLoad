@@ -13,9 +13,35 @@ flowchart LR
 
 Read the root and nearest project-local AGENTS.md before changing this solution. The product specification is [architecture v0.3](design/architecture-v0.3.uk.md). This document is a navigation map, not a replacement specification or a readiness claim.
 
-The [documentation index](README.md) is the complete entry point for 21 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 51 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
+The [documentation index](README.md) is the complete entry point for 21 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 52 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
 
 Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
+
+[ADR-052](ADR/ADR-052-timeseries-bounded-aggregates.md) accepts the additive
+[TimeSeries](Features/TimeSeries.md) latest/aggregate/window slice. New typed
+Abstractions DTOs mirror Client/Server/Core TimeSeries owners and real matching
+UnitTests/IntegrationTests. Core uses the published ManagedCode.TimeSeries library
+inside one budgeted storage cut; shared StorageRecovery reverse visitors support
+bounded latest. Orleans request routing and node-local storage ownership remain.
+This contract is accepted; source and exact-SHA qualification remain pending.
+
+```mermaid
+classDiagram
+    class TimeSeriesReadOperations
+    class SampleLatestReader
+    class SampleAggregateReader
+    class SampleAggregateWindowReader
+    class SampleAggregateAccumulator
+    class BudgetedReadView
+    class ZoneTreeRangeReader
+    TimeSeriesReadOperations --> BudgetedReadView : one gated operation budget
+    TimeSeriesReadOperations --> SampleLatestReader
+    TimeSeriesReadOperations --> SampleAggregateReader
+    TimeSeriesReadOperations --> SampleAggregateWindowReader
+    SampleLatestReader --> ZoneTreeRangeReader : descending first live key
+    SampleAggregateReader --> SampleAggregateAccumulator : published native sums
+    SampleAggregateWindowReader --> SampleAggregateAccumulator : bounded windows
+```
 
 ## Complete repository boundary
 

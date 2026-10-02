@@ -10,6 +10,9 @@ internal static class McpToolNames
     internal const string MessagesInspect = "keyload_messages_inspect";
     internal const string GraphTraverse = "keyload_graph_traverse";
     internal const string SeriesRead = "keyload_series_read";
+    internal const string SeriesLatest = TimeSeriesReadProtocol.LatestTool;
+    internal const string SeriesAggregate = TimeSeriesReadProtocol.AggregateTool;
+    internal const string SeriesWindows = TimeSeriesReadProtocol.WindowsTool;
     internal const string QueryExecute = "keyload_query_execute";
     internal const string QueryAst = "keyload_query_ast";
     internal const string QueryCapabilities = "keyload_query_capabilities";

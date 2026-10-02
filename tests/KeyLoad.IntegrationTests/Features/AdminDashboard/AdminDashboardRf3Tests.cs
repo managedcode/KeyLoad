@@ -10,6 +10,9 @@ namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
 internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
 {
     private const string TraversalPath = "/admin/unknown.js";
+    private const string DocumentGetRoute = "/v1/documents/get";
+    private const string QueryMarker = "?";
+    private const int ErrorStatus = 400;
 
     [Test]
     public async Task AcAd007RealSdkAndOfficialMcpAgreeOnCatalogAndNonconsumingQueue()
@@ -99,6 +102,13 @@ internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
         await Assert.That(after.Http.CompletedRequests).IsGreaterThanOrEqualTo(before.Http.CompletedRequests + 2);
         await Assert.That(after.Http.FailedRequests).IsGreaterThanOrEqualTo(before.Http.FailedRequests + 1);
         await Assert.That(after.Http.ElapsedMilliseconds).IsGreaterThan(before.Http.ElapsedMilliseconds);
+        var failures = after.Http.RecentFailures;
+        await Assert.That(failures.IsDefaultOrEmpty).IsFalse();
+        await Assert.That(failures.Length).IsLessThanOrEqualTo(AdminDashboardProtocol.RecentFailureLimit);
+        await Assert.That(failures.Any(entry => entry.Route == DocumentGetRoute && entry.StatusCode >= ErrorStatus)).IsTrue();
+        await Assert.That(failures.All(entry =>
+            !entry.Route.Contains(AdminDashboardScenario.DocumentId, StringComparison.Ordinal)
+            && !entry.Route.Contains(QueryMarker, StringComparison.Ordinal))).IsTrue();
     }
 
     [Test]

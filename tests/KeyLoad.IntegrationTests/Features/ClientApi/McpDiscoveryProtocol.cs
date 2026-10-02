@@ -24,6 +24,8 @@ internal static class McpDiscoveryProtocol
     internal const string SeriesId = "seriesId";
     internal const string From = "from";
     internal const string Until = "until";
+    internal const string UntilExclusive = "untilExclusive";
+    internal const string Width = "width";
     internal const string Sql = "sql";
     internal const string Query = "query";
     internal const string Collection = "collection";

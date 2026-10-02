@@ -62,28 +62,40 @@ internal sealed class BudgetedReadView : IKeyValueView
     public StorageScanResult VisitRange(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         byte[]? afterKey = null, byte[]? untilKey = null, StorageReadObserver? observer = null,
         CancellationToken cancellationToken = default)
+        => VisitRangeWithDirection(prefix, maxRecords, visitor, afterKey, untilKey, observer, false, cancellationToken);
+
+    /// <inheritdoc />
+    public StorageScanResult VisitReverseRange(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
+        byte[]? afterKey = null, byte[]? untilKey = null, StorageReadObserver? observer = null,
+        CancellationToken cancellationToken = default)
+        => VisitRangeWithDirection(prefix, maxRecords, visitor, afterKey, untilKey, observer, true, cancellationToken);
+
+    private StorageScanResult VisitRangeWithDirection(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
+        byte[]? afterKey, byte[]? untilKey, StorageReadObserver? observer, bool reverse, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(prefix);
         ArgumentNullException.ThrowIfNull(visitor);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxRecords);
         budget.Check();
         using var linked = CreateLinkedToken(cancellationToken, out var effectiveToken);
-        var result = VisitRangeCore(prefix, maxRecords, visitor, afterKey, untilKey, observer, effectiveToken);
+        var result = VisitRangeCore(prefix, maxRecords, visitor, afterKey, untilKey, observer, reverse, effectiveToken);
         effectiveToken.ThrowIfCancellationRequested();
         budget.Check();
         return result;
     }
 
     private StorageScanResult VisitRangeCore(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
-        byte[]? afterKey, byte[]? untilKey, StorageReadObserver? observer, CancellationToken cancellationToken)
+        byte[]? afterKey, byte[]? untilKey, StorageReadObserver? observer, bool reverse, CancellationToken cancellationToken)
     {
-        return view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey, bytes =>
+        StorageReadObserver charge = bytes =>
         {
             budget.ChargeBytes(bytes);
             observer?.Invoke(bytes);
             cancellationToken.ThrowIfCancellationRequested();
             budget.Check();
-        }, cancellationToken);
+        };
+        return reverse ? view.VisitReverseRange(prefix, maxRecords, visitor, afterKey, untilKey, charge, cancellationToken)
+            : view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey, charge, cancellationToken);
     }
 
     private CancellationTokenSource? CreateLinkedToken(CancellationToken viewToken, out CancellationToken effectiveToken)

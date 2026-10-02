@@ -226,8 +226,21 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/GraphAndSeries.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs",
+      "docs/Features/TimeSeries.md",
+      "docs/ADR/ADR-052-timeseries-bounded-aggregates.md",
+      "src/KeyLoad.Core/Features/TimeSeries",
+      "src/KeyLoad.Client/Features/TimeSeries",
+      "tests/KeyLoad.UnitTests/Features/TimeSeries",
+      "tests/KeyLoad.IntegrationTests/Features/TimeSeries"
+    ],
+    "boundedReads": {
+      "requirements": "REQ-SERIES-008..012",
+      "acceptance": "AC-SERIES-008..012",
+      "source": "latest_raw_half_open_aggregates_dense_UTC_windows_published_ManagedCode_TimeSeries10_0_0_SDK_HTTP_MCP_reverse_storage_shared_budgets",
+      "qualification": "source_joined_exact_delivered_SHA_CI_pending",
+      "remaining": "retention_rollups_SQL_compression_coverage_resource_performance_endurance_fault_work_not_qualified"
+    }
   },
   "KL-026": {
     "title": "Retention, expiry і rollups",
@@ -1166,9 +1179,9 @@
         "qualification": "source_compilation_and_static_validation_only"
       },
       "latestMainCi": {
-        "runId": 37044499074,
-        "sha": "323d60499381ec94fa2c9b4d412cb76837fd98bf",
-        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37044499074",
+        "runId": 37049469093,
+        "sha": "e8d1a9eb1ccab3aee228bd3f02b9bdb4e5c5ba1d",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093",
         "conclusion": "failure",
         "buildFormatGovernance": "passed_full_solution_all_three_OSes",
         "analyzerTests": {
@@ -1182,8 +1195,8 @@
         },
         "unitTests": {
           "ubuntu": {
-            "total": 805,
-            "passed": 805,
+            "total": 809,
+            "passed": 809,
             "failed": 0,
             "skipped": 0,
             "cancelled": 0,
@@ -1191,8 +1204,8 @@
             "flaky": 0
           },
           "macos": {
-            "total": 805,
-            "passed": 805,
+            "total": 809,
+            "passed": 809,
             "failed": 0,
             "skipped": 0,
             "cancelled": 0,
@@ -1200,8 +1213,8 @@
             "flaky": 0
           },
           "windows": {
-            "total": 805,
-            "passed": 805,
+            "total": 809,
+            "passed": 809,
             "failed": 0,
             "skipped": 0,
             "cancelled": 0,
@@ -1221,8 +1234,8 @@
           },
           "macos": {
             "total": 136,
-            "passed": 125,
-            "failed": 11,
+            "passed": 136,
+            "failed": 0,
             "skipped": 0,
             "cancelled": 0,
             "timedOut": 0,
@@ -1230,8 +1243,8 @@
           },
           "windows": {
             "total": 136,
-            "passed": 134,
-            "failed": 2,
+            "passed": 136,
+            "failed": 0,
             "skipped": 0,
             "cancelled": 0,
             "timedOut": 0,
@@ -1256,24 +1269,24 @@
           "timedOut": 0,
           "flaky": 0
         },
-        "receipt": "docs/implementation/runtime-qualification-37044499074.json",
-        "remaining": "macOS11_fixture_path_and_Windows2_intrinsic_elapsed_recovery_failures_comparison_coverage_actual_migration_resource_endurance_open"
+        "receipt": "docs/implementation/runtime-qualification-37049469093.json",
+        "remaining": "comparison_native_runner_Waiting_two_failures_measured_profiles_skipped_coverage_actual_migration_resource_endurance_power_loss_open"
       },
       "recoveryReadiness": {
         "requirement": "REQ-STORAGE-012",
         "acceptance": "AC-STORAGE-012",
         "source": "optional_metadata_absence_plus_required_target_and_six_transfer_boundary_source_store_exclusive_probe_one5s25ms_deadline",
-        "tests": "all_prior_checkpoint_and_Windows_target_WAL_failures_pass_exact323d60499_new_macOS11_fixture_and_Windows2_elapsed_cases_fail",
+        "tests": "all136_real_process_recovery_cases_pass_on_each_OS_exacte8d1a9eb1_including11_prior_macOS_and2_prior_Windows_failures",
         "originalReadinessSeconds": 5,
         "originalPollMilliseconds": 25,
         "originalSeededTrials": 50,
         "originalTrialDeadlineSeconds": 15,
-        "verification": "Linux136_of136_macOS125_of136_Windows134_of136_exact323d60499_full_recovery_gate_not_green",
+        "verification": "Linux136_of136_macOS136_of136_Windows136_of136_exacte8d1a9eb1",
         "receipt": "docs/implementation/runtime-source-w4.json",
         "refinement": "only_optional_metadata_FileNotFound_or_DirectoryNotFound_means_absent_required_owner_and_journal_remain_exclusive_under_same5s25ms",
-        "nativeReceipt": "docs/implementation/runtime-qualification-37044499074.json",
+        "nativeReceipt": "docs/implementation/runtime-qualification-37049469093.json",
         "sourceFollowupReceipt": "docs/implementation/runtime-source-w5-w6.json",
-        "sourceFollowup": "existing_physical_temp_helper_reuse_and_only_two_missing_required_intrinsic_timing_argument_cases_isolated_native_CI_pending"
+        "sourceFollowup": "existing_physical_temp_helper_reuse_and_two_missing_required_intrinsic_timing_arguments_isolated_qualified_without_changing5s6s_bounds"
       },
       "previousMainBuildCi": {
         "runId": 37029344985,
@@ -1387,13 +1400,109 @@
         "requirement": "REQ-TEST-007",
         "acceptance": "AC-TEST-007",
         "receipt": "docs/implementation/runtime-source-w4.json",
-        "status": "five_projection_file_stream_regressions_and_RF3_leader_loss_pass_exact323d60499_environmental_failure_path_unexecuted"
+        "status": "five_projection_file_stream_regressions_and_RF3_leader_loss_pass_exacte8d1a9eb1_environmental_failure_path_unexecuted",
+        "nativeReceipt": "docs/implementation/runtime-qualification-37049469093.json"
       },
       "comparisonHostStartupDiagnostics": {
         "requirement": "REQ-TEST-009",
         "acceptance": "AC-TEST-009",
         "sourceReceipt": "docs/implementation/runtime-source-w5-w6.json",
-        "status": "closed_bounded_actual_exit_drain_receipt_four_new_methods_authored_development_build_pass_runtime_pending"
+        "status": "four_projection_and_real_stream_methods_pass_on_each_OS_exacte8d1a9eb1_environmental_timeout_failure_branch_unexecuted",
+        "nativeReceipt": "docs/implementation/runtime-qualification-37049469093.json"
+      },
+      "previousMainCi": {
+        "runId": 37044499074,
+        "sha": "323d60499381ec94fa2c9b4d412cb76837fd98bf",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37044499074",
+        "conclusion": "failure",
+        "buildFormatGovernance": "passed_full_solution_all_three_OSes",
+        "analyzerTests": {
+          "total": 118,
+          "passed": 118,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "unitTests": {
+          "ubuntu": {
+            "total": 805,
+            "passed": 805,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "macos": {
+            "total": 805,
+            "passed": 805,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "windows": {
+            "total": 805,
+            "passed": 805,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          }
+        },
+        "recovery": {
+          "ubuntu": {
+            "total": 136,
+            "passed": 136,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "macos": {
+            "total": 136,
+            "passed": 125,
+            "failed": 11,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "windows": {
+            "total": 136,
+            "passed": 134,
+            "failed": 2,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          }
+        },
+        "rf3IntegrationTests": {
+          "total": 41,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "comparisonTests": {
+          "total": 4,
+          "passed": 2,
+          "failed": 2,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "receipt": "docs/implementation/runtime-qualification-37044499074.json",
+        "remaining": "macOS11_fixture_path_and_Windows2_intrinsic_elapsed_recovery_failures_comparison_coverage_actual_migration_resource_endurance_open"
       }
     },
     "ownerPriorities": {

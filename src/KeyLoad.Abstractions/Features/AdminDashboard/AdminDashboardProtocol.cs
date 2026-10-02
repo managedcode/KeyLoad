@@ -19,4 +19,10 @@ public static class AdminDashboardProtocol
     public const int DefaultPageSize = 50;
     /// <summary>Maximum bounded metadata page size.</summary>
     public const int MaximumPageSize = 100;
+    /// <summary>Maximum retained process-local failed request log entries.</summary>
+    public const int RecentFailureLimit = 50;
+    /// <summary>Route marker for a failed request that matched no endpoint.</summary>
+    public const string UnmatchedRoute = "unmatched";
+    /// <summary>Method marker for an unrecognized HTTP method.</summary>
+    public const string OtherMethod = "OTHER";
 }

@@ -9,7 +9,21 @@ namespace KeyLoad;
 /// <param name="FailedRequests">Completed requests with an error status or aborted response.</param>
 /// <param name="ElapsedMilliseconds">Sum of measured request elapsed milliseconds.</param>
 public sealed record AdminHttpSnapshot(DateTimeOffset StartedAt, Guid ProcessInstance, long CompletedRequests,
-    long FailedRequests, double ElapsedMilliseconds);
+    long FailedRequests, double ElapsedMilliseconds)
+{
+    /// <summary>Gets the newest-first bounded process-local failed request log; resets with the host process.</summary>
+    public ImmutableArray<AdminHttpFailure> RecentFailures { get; init; } = [];
+}
+
+/// <summary>One failed public API request without raw paths, query strings, payloads, headers or credentials.</summary>
+/// <param name="At">Completion time of the failed request.</param>
+/// <param name="Method">Normalized HTTP method; unrecognized methods use a fixed marker.</param>
+/// <param name="Route">Matched endpoint route template, or a fixed unmatched marker; never the raw request path.</param>
+/// <param name="StatusCode">Final HTTP response status code.</param>
+/// <param name="Aborted">Whether the caller aborted the request before completion.</param>
+/// <param name="ElapsedMilliseconds">Measured request elapsed milliseconds.</param>
+public sealed record AdminHttpFailure(DateTimeOffset At, string Method, string Route, int StatusCode, bool Aborted,
+    double ElapsedMilliseconds);
 
 /// <summary>One observed physical file; never exposes an absolute path or file contents.</summary>
 /// <param name="Path">Path relative to the owning physical node directory.</param>
