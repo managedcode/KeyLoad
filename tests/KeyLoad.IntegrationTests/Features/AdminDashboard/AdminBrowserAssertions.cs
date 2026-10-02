@@ -11,6 +11,9 @@ internal static class AdminBrowserAssertions
     private const string ConnectScript = "(()=>{const values=VALUE;for(const [id,value] of Object.entries(values)){document.getElementById(id).value=value;}document.getElementById('connect-form').requestSubmit();return true;})()";
     private const string DisconnectScript = "document.querySelector('#disconnect').click();true";
     private const string Disconnected = "document.querySelector('#connection-state')?.textContent.toLowerCase().includes('disconnected')===true";
+    private const string InvalidCredential = "root.invalid-untrusted-credential-long-enough";
+    private const string RejectCredentialScript = "(()=>{document.getElementById('api-key').value=VALUE;document.getElementById('connect-form').requestSubmit();return true;})()";
+    private const string Unauthorized = "document.getElementById('status-message').textContent.includes('Administrator authorization failed')";
 
     internal static async Task ConnectAsync(AdminBrowserCdp browser, ClusterFixture fixture,
         AdminDashboardScenario scenario, CancellationToken cancellationToken)
@@ -69,5 +72,16 @@ internal static class AdminBrowserAssertions
             await browser.EvaluateAsync("document.querySelector('button[data-view=" + view + "]').click();true", cancellationToken);
             await Assert.That((await browser.EvaluateAsync("document.querySelector('button[data-view=" + view + "]').getAttribute('aria-current')==='page'", cancellationToken)).GetBoolean()).IsTrue();
         }
+    }
+
+    internal static async Task RejectThenReconnectAsync(AdminBrowserCdp browser, ClusterFixture fixture,
+        AdminDashboardScenario scenario, CancellationToken cancellationToken)
+    {
+        await browser.EvaluateAsync(RejectCredentialScript.Replace("VALUE", JsonSerializer.Serialize(InvalidCredential),
+            StringComparison.Ordinal), cancellationToken);
+        await browser.WaitAsync(Unauthorized, cancellationToken);
+        await Assert.That((await browser.EvaluateAsync(Disconnected, cancellationToken)).GetBoolean()).IsTrue();
+        await ConnectAsync(browser, fixture, scenario, cancellationToken);
+        await DisconnectAsync(browser, fixture, cancellationToken);
     }
 }

@@ -38,5 +38,6 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
         await AdminBrowserAssertions.CheckViewportAsync(browser.Cdp, AdminBrowserProtocol.DesktopWidth, "desktop", deadline.Token);
         await AdminBrowserAssertions.CheckViewportAsync(browser.Cdp, AdminBrowserProtocol.MobileWidth, "mobile", deadline.Token);
         await AdminBrowserAssertions.DisconnectAsync(browser.Cdp, fixture, deadline.Token);
+        await AdminBrowserAssertions.RejectThenReconnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
     }
 }
