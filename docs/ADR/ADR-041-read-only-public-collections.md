@@ -38,6 +38,18 @@ identity. Caller mutation after construction cannot change the store identity or
 signatures. Existing identity/reopen checks and a caller-buffer mutation regression
 cover this provider configuration extension.
 
+Accepted runtime repair TASK-RUNTIME-STORAGE-W / AC-ROC-002/004/005 and
+AC-PSW-002..004 restores that nullable-null contract at the owning producer.
+Run37005805424 at6949fa0 demonstrates Delete projected as a live empty value by
+ZoneTreeTransaction.PrepareChanges. The worker first authors NEW real-store
+StorageRecovery/TombstoneValueTests, then changes only that projection to preserve
+an explicit nullable null. Keep legitimate empty Put, reader/replay/format/version,
+cache/copy and flush/apply order, and null frame overhead=2 identical. Lead owns
+docs/source review/build/formatter and exact-SHA full GitHub unit/process recovery/
+RF3 SDK/MCP joins. WAL byte equality, borrowed/owned absence, range, empty value,
+reopen and snapshot counts are mandatory. No historical empty-row rewrite is
+safe without provenance; rollback reverts the projection and keeps regressions.
+
 The lead owns strict converter registration in JsonDefaults and new Abstractions
 Features/ResourceExecution converter files. ImmutableArray conversion delegates
 the complete element/array protocol to System.Text.Json's T[] serializer with the

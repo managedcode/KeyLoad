@@ -33,7 +33,7 @@ public static class ReportWriter
             Options = FileOptions.Asynchronous | FileOptions.SequentialScan
         }))
         {
-            await JsonSerializer.SerializeAsync(stream, report, JsonOptions, cancellationToken).ConfigureAwait(false);
+            await JsonSerializer.SerializeAsync(stream, StreamedComparisonReport.Create(report), JsonOptions, cancellationToken).ConfigureAwait(false);
         }
         cancellationToken.ThrowIfCancellationRequested();
         await File.WriteAllTextAsync(Path.Combine(directory, MarkdownFileName), Markdown(report), cancellationToken).ConfigureAwait(false);

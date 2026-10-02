@@ -79,8 +79,7 @@ internal sealed class McpOfficialClient : IAsyncDisposable
 
     private async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        client = await McpClient.CreateAsync(transport,
-            new McpClientOptions { ProtocolVersion = McpCallerProtocol.ProtocolVersion },
+        client = await McpClient.CreateAsync(transport, new McpClientOptions(),
             cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 

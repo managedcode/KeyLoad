@@ -54,3 +54,17 @@ cut must cover the append receipt and sequential cuts remain monotonic; independ
 cuts may advance because five-second persisted Orleans heartbeats share the physical
 store. No public pin-to-cut input exists, so byte parity applies to the exact event
 records while each returned cut is checked independently.
+
+TASK-RUNTIME-EVENT-FIXTURE-W preserves REQ-EVENT-004/006, AC-EVENT-004/006 and
+AC-MP-005/012 after six exact candidate6949fa0 / run37005805424 tests fail during
+setup. StreamReadResourceFixture creates different IDs for the CommandRequest
+and replicated envelope; production correctly rejects that mismatch. The worker
+owns only UnitTests/Features/EventStreams/StreamReadResourceFixture.cs and NEW
+StreamCommandIdentityTests.cs. Derive the batch envelope ID from its existing
+CommandRequest; other fixture commands retain fresh IDs. The new actual-store
+negative regression must prove mismatched IDs return Validation without stream
+effects, while matched ID append succeeds and retains its receipt identity/replay.
+Preserve all existing range/policy/budget/cancellation and fixture lifetime cases.
+This is test-only input repair: ADR-035/041/039 and the canonical batch contract
+are sufficient, with no product/API/data boundary change or separate ADR. Lead
+reviews/builds/formats and qualifies complete exact-SHA GitHub unit/RF3 suites.

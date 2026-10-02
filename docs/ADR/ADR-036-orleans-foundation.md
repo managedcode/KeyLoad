@@ -23,6 +23,24 @@ public API or persisted-format migration; rollback removes only this metadata/lo
 path while retaining the original safe replies. The stage log helps locate a
 rejection and does not by itself qualify a repaired runtime failure.
 
+TASK-RUNTIME-ARTIFACTS-W is an accepted retention-path refinement for
+REQ/AC-TEST-001/002/005 and AC-MP-012. The native TUnit reports in run37005805424
+were written to root TestResults and omitted by scoped analyzer/RF3 globs. Lead
+adds the actual root report path alongside every existing path. Comparison reports
+use a separate artifact, preserving the measured archive schema and all CI gates.
+Ordered verification is source review, static governance, then downloaded full
+HTML reports and SARIF bound to the new exact run/job/SHA. This infrastructure
+path has manual actual-CI artifact evidence; no synthetic test or passing-runtime
+claim substitutes for it. Rollback removes only the added report globs/step.
+
+TASK-RUNTIME-RESOURCE-W preserves REQ/AC-ROUTE-001 by giving the existing
+RequestIdReceiptTests scenario a unique tenant. Resource catalog identity omits
+partition key; run37005805424 proved a legitimate incompatible orders definition
+collision with an earlier RF3 leader-loss fixture. Worker owns only that fixture
+scope construction. Keep every SDK retry/parallel actor-ID assertion and product
+migration rejection. Source review/build/format precede full exact-SHA RF3;
+no production or persisted-format change, rollback is test-scope only.
+
 Host integration contract: `Server/Features/StorageRecovery/PartitionHost` owns
 two physically separate ZoneTree stores, canonical `database` and replica
 `replica`, with one immutable voter configuration and incarnation. It constructs
@@ -423,3 +441,43 @@ helpers, with no partial-class split. Actual allocated endpoints, SDK credential
 signed discovery, private data-root permissions and startup/disposal order remain
 unchanged. This source-quality task neither adds hard lifecycle supervision nor
 claims RF3 qualification; those real-client fault gates remain pending.
+
+## Accepted bounded comparison startup evidence
+
+TASK-RUNTIME-COMPARISON-DIAGNOSTICS-W implements REQ/AC-TEST-002/005 and
+AC-MP-012. Run37005805424 shows all recorded direct wait gates healthy, then an
+uncreated Waiting comparison runner at eight minutes; correlated DCP watch
+timeouts are not established causality. Native ResourceNotificationService
+WatchAsync and TryGetCurrentState provide passive evidence. Add one internal
+ComparisonTests/Features/BenchmarkComparisons/ComparisonResourceDiagnostics
+helper with a 128-record ring over nine fixed resource names; retain only native
+timestamps, a clearly labeled local observation sequence, closed state/health
+categories and exit code. Enabled compilation proves the pinned native snapshot
+version/readiness members are internal, so omit them as unavailable rather than
+reflecting them or fabricating values.
+Never retain raw health descriptions, properties, environments, URIs, credentials
+or exception text. Output only on the existing cancellation/timeout path, capped
+at 80 lines/8KiB on test-runner stderr. Observation/output faults must not replace
+the original exception; cancel and observe the collector before application
+disposal. No measured archive/report, public product API, dependency, timeout,
+success predicate or startup sequencing change is authorized.
+
+Ordered stages: read-only native API/source and failed-run research; this accepted
+contract; worker owns only the new helper, lead joins ComparisonTests.cs; review
+privacy/bounds/lifetime and preserve original failure; enabled solution build and
+format/governance; full exact-SHA GitHub qualification with original run/job/log
+and any actual failure diagnostic. Environmental branches use source review and
+real CI evidence rather than faked snapshots/providers. Rollback removes only
+passive capture and failure output; product/storage/schema/topology are unchanged.
+Keep this ADR Accepted while qualified comparison startup remains unresolved.
+
+The passive diagnostic worker may separate the closed lifecycle-record formatting
+into one additional internal ComparisonLifecycleRecord.cs helper to keep each type
+under 200 code lines. Do not consume broad exception catches: wrap actual output
+and cancellation in asynchronous tasks, await and observe their native fault state
+without propagating it, and never replace the primary failure. Use the existing
+system TimeProvider for receipt time. Lead numeric integration additionally moves
+the existing evidence-directory/report-copy methods into the new internal
+ComparisonTestEvidenceFiles.cs helper under the same slice, preserving every
+path, filename and call order. These are source-quality preserving joins;
+the bounds/privacy/manual environmental evidence contract above is unchanged.

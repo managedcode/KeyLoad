@@ -26,7 +26,7 @@ internal sealed class RealComparisonSuite
     {
         var root = Path.Combine(Path.GetTempPath(), "keyload-comparison-" + Guid.NewGuid().ToString("N"));
         var output = Path.Combine(root, "reports");
-        var evidence = GetEvidenceDirectory();
+        var evidence = ComparisonTestEvidenceFiles.GetDirectory();
         var options = ReadOptions();
         var neo4jPassword = Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(24));
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
@@ -35,14 +35,22 @@ internal sealed class RealComparisonSuite
         ConfigureLogging(builder);
         await using var app = await builder.BuildAsync(timeout.Token);
         await using var logCapture = new ComparisonTestLogCapture(app);
+        await using var diagnostics = new ComparisonResourceDiagnostics(app.ResourceNotifications);
+        diagnostics.Start();
         try
         {
             await VerifyPinnedContainerImagesAsync(app);
             await app.StartAsync(timeout.Token);
             await VerifyCompletedRunAsync(app, output, evidence, options, neo4jPassword, timeout.Token);
         }
+        catch (OperationCanceledException) when (timeout.IsCancellationRequested)
+        {
+            await diagnostics.WriteFailureAsync();
+            throw;
+        }
         finally
         {
+            await diagnostics.DisposeAsync();
             await logCapture.StopAsync();
             Directory.CreateDirectory(evidence);
             await logCapture.WriteToAsync(Path.Combine(evidence, "runner.log"));
@@ -69,18 +77,6 @@ internal sealed class RealComparisonSuite
             .AddEnvironmentVariables("KEYLOAD_COMPARISON_").Build().Get<ComparisonOptions>()!;
         options.Validate();
         return options;
-    }
-
-    private static string GetEvidenceDirectory()
-    {
-        var repository = new DirectoryInfo(AppContext.BaseDirectory);
-        while (repository.Parent is not null && !File.Exists(Path.Combine(repository.FullName, "KeyLoad.slnx")))
-        {
-            repository = repository.Parent;
-        }
-
-        var reportName = Environment.GetEnvironmentVariable("KEYLOAD_COMPARISON_REPORT_NAME") ?? "smoke";
-        return Path.Combine(repository.FullName, "artifacts", "comparisons", reportName);
     }
 
     private static Task<IDistributedApplicationTestingBuilder> CreateBuilderAsync(string root, string output,
@@ -145,7 +141,7 @@ internal sealed class RealComparisonSuite
             resource => resource.Snapshot.ExitCode is not null || resource.Snapshot.State?.Text == KnownResourceStates.FailedToStart,
             cancellationToken);
         await Assert.That(app.ResourceNotifications.TryGetCurrentState("comparisons", out var state)).IsTrue();
-        CopyReportsIfPresent(output, evidence);
+        ComparisonTestEvidenceFiles.CopyReportsIfPresent(output, evidence);
         await Assert.That(state!.Snapshot.ExitCode).IsEqualTo(0);
         var connectionString = await app.GetConnectionStringAsync("benchmark-postgres", cancellationToken)
             ?? throw new InvalidOperationException("Comparison PostgreSQL connection string is unavailable.");
@@ -155,20 +151,6 @@ internal sealed class RealComparisonSuite
             ?? throw new InvalidOperationException("Neo4j image is missing from the comparison report.");
         var neo4jEndpoint = app.GetEndpoint("benchmark-neo4j", "http");
         await Neo4jHarnessMismatchRegression.VerifyAsync(neo4jEndpoint, neo4jPassword, neo4jImage, cancellationToken);
-    }
-
-    private static void CopyReportsIfPresent(string output, string evidence)
-    {
-        if (!File.Exists(Path.Combine(output, "results.json")))
-        {
-            return;
-        }
-
-        Directory.CreateDirectory(evidence);
-        foreach (var file in Directory.EnumerateFiles(output))
-        {
-            File.Copy(file, Path.Combine(evidence, Path.GetFileName(file)), true);
-        }
     }
 
     private static async Task DeleteDataAsync(string root, ContainerResource redis)

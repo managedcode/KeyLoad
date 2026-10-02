@@ -23,9 +23,9 @@ internal sealed class TopicPublicationTests
         var exactId = Guid.NewGuid();
         var receipt = exact.Submit(OperationKind.Batch, new CommandRequest(exactId, exact.Partition,
             [new PublishTopic(TopicName, [.. events])]), id: exactId, time: publicationTime).Get<CommitReceipt>();
-        var rawBytes = exact.Store.Read(view => RawEvent(view, exact, 1).Length + RawEvent(view, exact, 2).Length);
+        var rawBytes = exact.Store.Read(view => RawEvent(view, exact, 1).LongLength + RawEvent(view, exact, 2).LongLength);
         await Assert.That(rawBytes).IsEqualTo(exactBytes);
-        await Assert.That(receipt.Mutations[0].Revision).IsEqualTo(2);
+        await Assert.That(receipt.Mutations[0].Revision).IsEqualTo(2L);
         var page = exact.Database.ReadEventSource("root", new(new(exact.Partition, TopicName, EventSourceKind.Topic)));
         await Assert.That(page.Events.Select(record => record.Position)).IsEquivalentTo(new long[] { 1, 2 }, CollectionOrdering.Matching);
         await Assert.That(page.Events.Select(record => record.EventSequence)).IsEquivalentTo(new long[] { 1, 2 }, CollectionOrdering.Matching);
@@ -112,7 +112,7 @@ internal sealed class TopicPublicationTests
             id: failedId, time: publicationTime.AddMinutes(1));
         await Assert.That(failed.Error).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(database.Database.GetDocument("root", new(database.Partition, ResourceName, "rolled-back"))).IsNull();
-        await Assert.That(database.Database.ReadEventSource("root", new(new(database.Partition, TopicName, EventSourceKind.Topic))).Head.TailPosition).IsEqualTo(1);
+        await Assert.That(database.Database.ReadEventSource("root", new(new(database.Partition, TopicName, EventSourceKind.Topic))).Head.TailPosition).IsEqualTo(1L);
         var currentSequence = database.Store.Read(view => JsonDefaults.Deserialize<long>(view.ReadOwnedValue(KeySpace.Partition(EventSequenceSpace, database.Partition))!));
         await Assert.That(currentSequence).IsEqualTo(priorSequence);
     }

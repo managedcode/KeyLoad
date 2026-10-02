@@ -35,11 +35,11 @@ internal sealed class JsonTextProtocolTests
 
         await Assert.That(JsonDefaults.Deserialize<string>(RawUnpairedSurrogateJson)).IsEqualTo(ReplacementCharacter);
         await Assert.That(JsonDefaults.Deserialize<string>(LiteralUnicodeJson)).IsEqualTo(DecodedUnicode);
-        Assert.ThrowsExactly<InvalidOperationException>(() =>
+        Assert.ThrowsExactly<JsonException>(() =>
             JsonDefaults.Deserialize<string>(Encoding.UTF8.GetBytes(EscapedUnpairedSurrogateJson)));
-        Assert.ThrowsExactly<InvalidOperationException>(() =>
+        Assert.ThrowsExactly<JsonException>(() =>
             JsonDefaults.Deserialize<string>(EscapedUnpairedSurrogateJson));
-        Assert.ThrowsExactly<InvalidOperationException>(() =>
+        Assert.ThrowsExactly<JsonException>(() =>
             new OperationResult(EscapedUnpairedSurrogateJson).Get<string>());
     }
 

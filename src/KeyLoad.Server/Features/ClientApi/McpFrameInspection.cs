@@ -45,8 +45,7 @@ internal sealed class McpFrameInspection(bool boundIdentifier)
         if (boundIdentifier && rootIdentifier && reader.TokenType == JsonTokenType.String
             && reader.ValueSpan.Length > McpFramingProtocol.MaximumIdentifierBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
-        rootIdentifier = reader.TokenType == JsonTokenType.PropertyName && reader.CurrentDepth == 1
-            && reader.ValueTextEquals(McpFramingProtocol.Identifier);
+        rootIdentifier = false;
     }
 
     private void AddProperty(ref Utf8JsonReader reader)
@@ -57,6 +56,8 @@ internal sealed class McpFrameInspection(bool boundIdentifier)
             throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
         }
         var name = McpFrameStrings.Decode(ref reader);
+        rootIdentifier = reader.CurrentDepth == 1
+            && string.Equals(name, McpFramingProtocol.Identifier, StringComparison.Ordinal);
         if (!names[reader.CurrentDepth - 1]!.Add(name))
         {
             throw Errors.Fail(ErrorCode.Validation, McpFramingProtocol.InvalidFrame);

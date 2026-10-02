@@ -106,3 +106,26 @@ from a matched exact-SHA RF3 baseline/candidate pair. Do not infer numeric SLOs
 from configured limits or claim activation repartitioning improves a three-silo
 cluster before measuring stable call locality and migration overhead. See the
 [official Orleans placement guidance](https://learn.microsoft.com/en-us/dotnet/orleans/grains/grain-placement).
+
+## Narrow SIMD validation follow-up, 2026-10-02
+
+The native vector score already uses portable `Vector<float>` blocks widened to
+double. The remaining finite-value check walks every query/candidate lane with
+scalar `float.IsFinite`. TASK-MP-006D-R verified the .NET 10 strict
+`Vector.LessThanAll(Vector.Abs(block), +Infinity)` APIs and software fallback.
+This can replace only full validation blocks while preserving scalar tails,
+length-first rejection, query-before-metric validation and every score reduction.
+An explicit hardware-specific intrinsic branch would add portability and width
+contracts without a demonstrated need; retain the portable vector API.
+
+Recommended stages are public metric and real-store acceptance edge tests first,
+exact-SHA GitHub baseline, then the bounded validation-only implementation and
+hardware-enabled/software-fallback GitHub qualification. Finite extremes, signed
+zero, NaN/infinities in all block/tail locations, dimension bounds and error
+precedence must remain identical. Source vectorization alone establishes no speed
+or allocation improvement; matched RF3/per-operation measurements remain 011B.
+This independently useful SIMD scope does not resolve the undefined term SMID.
+
+## Runtime report streaming finding, 2026-10-02
+
+Run37005805424 exposes report cancellation scheduling drift. Read-only source review confirms the owned synchronous ImmutableArray converters also retain the entire serialized Cases/Samples payload before SerializeAsync can flush. Correct both collection levels with private write-only async-enumerable views over existing immutable arrays. Preserve public CLR types, exact schema/property order, strict reads, every attempt and all JSON/CSV/Markdown content. Reject changing the shared strict converter or adding test-only production hooks. An early real-file cancellation must leave a bounded partial JSON and no later report files; source review and actual CI evidence are separate from a measured speed or allocation claim.

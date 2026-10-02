@@ -34,7 +34,6 @@ internal sealed class StreamReadResourceFixture : IDisposable
     private const string PayloadJson = "{\"secret\":\"" + ProtectedValue + "\",\"public\":\"" + PublicValue + "\"}";
     private const string HeadersJson = "{\"secretHeader\":\"" + ProtectedHeaderValue + "\",\"kind\":\"created\"}";
     private readonly string directory;
-    private readonly PartitionRef partition = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
     private ZoneTreeStore store = null!;
     private DatabaseEngine database = null!;
 
@@ -71,7 +70,15 @@ internal sealed class StreamReadResourceFixture : IDisposable
     }
 
     public StreamPage Read(long afterRevision = 0, long generation = 1, int limit = 100, CancellationToken cancellationToken = default)
-        => database.ReadStream(ReaderId, new(partition, StreamSetName, StreamId, generation), afterRevision, limit, cancellationToken);
+        => database.ReadStream(ReaderId, new(Partition, StreamSetName, StreamId, generation), afterRevision, limit, cancellationToken);
+
+    internal PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
+
+    internal EventSourceHead EventSourceHead
+        => database.ReadEventSource(AdministratorId,
+            new(new(Partition, StreamSetName, EventSourceKind.Stream, StreamId))).Head;
+
+    internal OperationResult Apply(ReplicatedOperation operation) => database.Apply(operation);
 
     public void Reopen(DatabaseLimits limits)
     {
@@ -119,10 +126,10 @@ internal sealed class StreamReadResourceFixture : IDisposable
         }
     }
 
-    private byte[] HeadKey => KeySpace.Partition(StreamHeadSpace, partition, StreamSetName, StreamId);
+    private byte[] HeadKey => KeySpace.Partition(StreamHeadSpace, Partition, StreamSetName, StreamId);
 
     private byte[] EventKey(long revision)
-        => KeySpace.Partition(EventSpace, partition, StreamSetName, StreamId, 1, revision);
+        => KeySpace.Partition(EventSpace, Partition, StreamSetName, StreamId, 1, revision);
 
     private void Open(DatabaseLimits limits)
     {
@@ -132,18 +139,18 @@ internal sealed class StreamReadResourceFixture : IDisposable
 
     private void ConfigureResource(bool protectedFields)
     {
-        var definition = new ResourceDefinition(StreamSetName, ResourceKind.StreamSet, partition.TransactionDomainId)
+        var definition = new ResourceDefinition(StreamSetName, ResourceKind.StreamSet, Partition.TransactionDomainId)
         {
             FieldPolicies = protectedFields ? [new(SecretPath, PrivateClassification)] : [],
             HeaderPolicies = protectedFields ? [new(HeaderSecretPath, PrivateClassification)] : []
         };
-        Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition));
+        Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId, definition));
     }
 
     private void ConfigureReader()
     {
-        var reader = new PrincipalRecord(ReaderId, partition.TenantId,
-            [new(partition.DatabaseId, StreamSetName, Capability.EventsRead)], []);
+        var reader = new PrincipalRecord(ReaderId, Partition.TenantId,
+            [new(Partition.DatabaseId, StreamSetName, Capability.EventsRead)], []);
         Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader));
     }
 
@@ -156,12 +163,13 @@ internal sealed class StreamReadResourceFixture : IDisposable
         var events = Enumerable.Range(1, eventCount)
             .Select(index => new EventData(index.ToString(System.Globalization.CultureInfo.InvariantCulture), EventType, PayloadJson, HeadersJson)).ToArray();
         var append = new AppendEvents(StreamSetName, StreamId, [.. events], ExpectedStreamRevision.NoStream);
-        Submit(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), partition, [append]));
+        Submit(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), Partition, [append]));
     }
 
     private void Submit<T>(OperationKind kind, T payload)
     {
-        var operation = new ReplicatedOperation(Guid.NewGuid(), kind, AdministratorId, TimeProvider.System.GetUtcNow(),
+        var id = kind == OperationKind.Batch && payload is CommandRequest command ? command.CommandId : Guid.NewGuid();
+        var operation = new ReplicatedOperation(id, kind, AdministratorId, TimeProvider.System.GetUtcNow(),
             JsonSerializer.Serialize(payload, JsonDefaults.Options));
         database.Apply(operation).Get<object>();
     }

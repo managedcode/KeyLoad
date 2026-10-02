@@ -2,6 +2,21 @@
 
 Status: Accepted; source implementation and full Release build complete, exact-SHA qualification pending. Date: 2026-10-02. Owner: BenchmarkComparisons lead. Related: REQ-TSC-001..006, AC-TSC-001..006, REQ-SERIES-007, AC-SERIES-007, REQ-BC-026, AC-BC-026; [TimeSeries](../Features/TimeSeries.md), [BenchmarkComparisons](../Features/BenchmarkComparisons.md), [acceptance](../../timeseries-comparison.acceptance.md), [plan](../../timeseries-comparison.plan.md).
 
+## Accepted native digest assertion refinement
+
+TASK-RUNTIME-TIMESCALE-W preserves REQ/AC-TSC-001/006 and the accepted image hash.
+Official Aspire ContainerImageAnnotation makes Tag and SHA256 mutually exclusive;
+WithImageSHA256 clears Tag. Run37005805424 failed before resource startup because
+the test required tag plus digest in the native image name. The worker owns only
+TimeSeriesAspireProfileTests.VerifyTimescaleImage and its named constants: assert
+the native annotation's exact image repository and SHA256, require a resolved
+digest-bearing image for cleanup, and keep the report's full source tag/digest.
+No AppHost pin, actual readiness/oracle/foreign-schema/cleanup assertion, timeout,
+report or package changes. Existing failing actual Aspire-model case is tests-first
+proof; lead reviews source, builds/formats and qualifies the complete GitHub suite.
+Rollback affects only test native-identity inspection; no migration is involved.
+Primary source: [Aspire ContainerImageAnnotation](https://source.dot.net/Aspire.Hosting/ApplicationModel/ContainerImageAnnotation.cs.html).
+
 ## Decision
 
 Add an isolated Aspire benchmark-mode TimescaleDB resource and a separate time-series comparison result. Run the same deterministic UTC sample workload against KeyLoad through the real RF3 .NET SDK, TimescaleDB through Npgsql and ManagedCode.TimeSeries as an explicitly in-memory aggregation primitive. Pin the Timescale image to its multi-platform digest and centrally pin the published ManagedCode package. Preserve the current nine-engine/schema3 comparison and KeyLoad's public/persisted sample contract.

@@ -6,6 +6,8 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 /// <summary>AC-MCP-001/003/007: actual native discovery pages retain the sole catalog under an inclusive byte ceiling.</summary>
 internal sealed class McpToolPaginationTests
 {
+    private const string ChangedInputSchemaJson = "{\"type\":\"object\",\"properties\":{\"isolationMarker\":{\"type\":\"string\"}},\"additionalProperties\":false}";
+
     /// <summary>Traversal visits all 47 catalog entries once, in order, using nonempty bounded pages and a terminal null cursor.</summary>
     [Test]
     public async Task NativePagesTraverseTheCompleteCatalogExactlyOnce()
@@ -61,6 +63,7 @@ internal sealed class McpToolPaginationTests
     /// <param name="index">The accepted invariant decimal catalog position.</param>
     [Test]
     [Arguments(1)]
+    [Arguments(36)]
     [Arguments(McpPaginationTestData.FinalIndex)]
     public async Task CanonicalCursorResumesAtExactIndex(int index)
     {
@@ -84,9 +87,11 @@ internal sealed class McpToolPaginationTests
         await Assert.That(ReferenceEquals(changed.Annotations, second.Tools[0].Annotations)).IsFalse();
         changed.Name = McpPaginationTestData.Marker;
         changed.Description = McpPaginationTestData.Marker;
-        changed.InputSchema = default;
+        using var changedSchemaDocument = JsonDocument.Parse(ChangedInputSchemaJson);
+        changed.InputSchema = changedSchemaDocument.RootElement.Clone();
         changed.Annotations!.ReadOnlyHint = !descriptor.ReadOnly;
         first.Tools.Clear();
+        await Assert.That(JsonElement.DeepEquals(changed.InputSchema, descriptor.InputSchema)).IsFalse();
         await Assert.That(second.Tools.Count).IsEqualTo(1);
         await Assert.That(second.Tools[0].Name).IsEqualTo(descriptor.Name);
         await Assert.That(second.Tools[0].Description).IsEqualTo(descriptor.Description);

@@ -5,6 +5,15 @@ Status: in progress. The complete scope is [ResourceExecution](../Features/Resou
 This inventory distinguishes authored repairs from compiled source and runtime qualification.
 No row is closed by a worker report, an old-main CI result or a development build.
 
+Latest completed candidate: [run37005805424](https://github.com/managedcode/KeyLoad/actions/runs/37005805424)
+at `6949fa0c3099443c6f34f91245ab8064ef22c63c`. Full solution build, formatter,
+governance and all88 analyzer cases passed on all three OSes. Unit770 cases had
+51/53/50 failures on Ubuntu/macOS/Windows; RF3 passed6/26 and comparisons2/4.
+Recovery and measured profiles did not execute. The [runtime ledger](runtime-qualification-20261002.md)
+retains each actual case and artifact receipt. Later tombstone, MCP, real fixture,
+bounded problem-body and progressive report repairs remain unqualified; this
+current record supersedes older source-cut descriptions as a status summary.
+
 ## Located inventory
 
 | Issue | Owning path / slice | Required result and present state |
@@ -36,7 +45,7 @@ No row is closed by a worker report, an old-main CI result or a development buil
 | MP-025 | official MCP surface and RF3 public operations | Exercise all affected flows through the official MCP C# client and .NET SDK in Docker/Aspire. Required product/qualification surface is incomplete. |
 | MP-026 | `Client/KeyLoadClient.cs`, `Features/ClientApi/` | Stream successful JSON after headers and cap problem bodies. Source and real-Kestrel transport/cancellation/error cases authored; Client passes a normal dependency-enabled strict build; CI runtime proof pending. |
 | MP-027 | `Features/BenchmarkComparisons/ComparisonRunner.cs`, dataset and host profile loading | Individual settings allow 1M documents/operations, 20 repetitions and concurrency 128 without a combined checked corpus/attempt budget. Dataset construction eagerly materializes documents and graph caches; every case retains operation-sized samples/results. Bound aggregate corpus bytes, targets, attempts and input before allocation while preserving allowed CI profiles. |
-| MP-028 | `ReportWriter.cs`, `ReportCsvWriter.cs`, Markdown/error helpers | JSON and CSV stream with fixed buffers, but Markdown materializes a full string, report strings/error messages lack general bounds, and interrupted-file cleanup/cancellation during CSV lack proof. Preserve exact schema and all attempts; test real-file mid-write cancellation and cleanup. |
+| MP-028 | `ReportWriter.cs`, `ReportCsvWriter.cs`, Markdown/error helpers | Native SerializeAsync was prevented from progressive Cases/Samples output by synchronous immutable converters. Private async write views and stronger early real-file cancellation/schema regressions are authored under TASK-MP-008C, awaiting full CI. CSV has fixed buffers; Markdown still materializes a full string, general report/error bounds and interrupted CSV proof remain open. |
 | MP-029 | `ClientResourceSampler.cs`, database-node instrumentation | Current sampler measures load-generator CPU/allocations/working set only; the Markdown label `RSS` is inaccurate for working set. Add database-node allocations/GC/working set and export logical ZoneTree counters; label physical I/O only if measured. No server export/resource proof yet. |
 | MP-030 | comparison profiles and RF3 suites | Current short 128-document/60-operation profiles do not establish over-RAM behavior, server resource ceilings, admission/fault behavior, or matched-topology baseline/candidate performance. Add repeated controlled profiles with exact workload, source SHA, topology and report provenance before any speed claim. |
 | MP-031 | `.github/workflows/ci.yml`, CodeQuality | Preserve strict analyzer severities and complete build/formatter gates. Abstractions/Core/ZoneTree/Client/Query/Security/CLI/Comparisons pass ordinary numeric-enabled source builds; full solution and formatter remain open. Four source-owned numeric complexity rules are configured and compiled, with complete-graph/fixture CI pending. Coverage collection, container export and matched numeric baseline remain unconfigured. |
@@ -53,16 +62,16 @@ established by this review.
 
 ## Evidence and qualification boundary
 
-The latest dirty-checkout development build is
+The historical dirty-checkout development build below is
 [strict-solution-dirty-refresh-20261002.log](../../artifacts/memory-performance/strict-solution-dirty-refresh-20261002.log),
 SHA256 `531721ea2d7f42f598dbf4814e0830fcb744bd4ce0086bc5bdad052ca2db0d5d`.
 `dotnet build KeyLoad.slnx --no-restore --configuration Release` failed with
 271 errors and zero warnings: UnitTests92, ComparisonTests90, SiteTests80,
 IntegrationTests7 and CrashHost2. The production libraries and comparison host
 compiled in this cut. The errors are primarily strict analyzer/style findings and
-test-source/compiler defects; no tests executed. This supersedes older retained
-build cuts as the current qualification blocker, but does not replace their
-historical evidence or establish runtime memory behavior.
+test-source/compiler defects; no tests executed. Later all25-project builds and
+the actual candidate CI above supersede this build cut as current status, while
+preserving its historical evidence. Neither establishes measured memory behavior.
 
 The post-plan baseline is [GitHub Actions run 36936319423](https://github.com/managedcode/KeyLoad/actions/runs/36936319423),
 SHA `9c570f8c33a7a9667507a8e1c0ca68860de3be45`. All four jobs succeeded:

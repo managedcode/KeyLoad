@@ -71,6 +71,26 @@ qualification execute only in GitHub Actions. Counters describe logical examined
 work; physical I/O/native allocation requires separate measurement. Gates and
 fault semantics cannot be relaxed for throughput.
 
+## Null tombstone versus empty value repair
+
+REQ-STORAGE-006/009, AC-STORAGE-006, AC-PSW-002..004 and AC-ROC-002/004/005 retain
+the canonical nullable mutation distinction. The read-only CLR migration's byte
+array projection currently turns Delete into a live empty value; exact candidate
+6949fa0 / GitHub run37005805424 contains failing WAL, absence, typed-read and
+transaction-range regressions. TASK-RUNTIME-STORAGE-W owns only the explicit-null
+projection in ZoneTreeTransaction.PrepareChanges and NEW
+UnitTests/Features/StorageRecovery/TombstoneValueTests.cs. Lead owns docs and joins.
+
+The new actual-store tests first prove staged/committed owned and borrowed reads,
+empty Put versus Delete, exact WAL/base64/null bytes, frame limit, ordered range,
+WAL reopen and snapshot record count/reopen. Preserve cache/copy/flush/apply order
+and NullValueOverheadBytes=2 (four-byte null replaces two value quotes). ADR-035
+and ADR-041 record the preserving repair. No format migration is required; earlier
+empty rows cannot be safely reclassified without independent provenance. Rollback
+reverts the projection but retains the regression source. Qualification requires
+complete exact-SHA GitHub unit/process recovery/RF3 SDK/MCP evidence; source repair
+alone proves no historical recovery, power-loss guarantee or performance gain.
+
 ## Повний storage, journal та recovery contract
 
 Актори: node-local PartitionHost, canonical apply/read callers і recovery/backup operator. Actual source: [ZoneTreeStore](../../src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs), [runtime](../../src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs), [checkpoint manager](../../src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeCheckpointManager.cs), [KeyCodec](../../src/KeyLoad.Abstractions/Storage/KeyCodec.cs), [storage contracts](../../src/KeyLoad.Abstractions/Storage/StorageContracts.cs). Один фізичний owner утримує lock, journal/read-apply gate та immutable returned values; migrating grains не відкривають tree.

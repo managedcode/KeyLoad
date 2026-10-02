@@ -21,6 +21,37 @@ Slice map: tests mirror their product slice; shared fixture/lifecycle infrastruc
 
 Traceability: AC-TEST-001 maps to all invoking test projects, AC-TEST-002 to IntegrationTests and ComparisonTests, AC-TEST-003 to source/ignore checks. TASK-TEST-MIGRATE and TASK-REP-VERIFY are in the execution plan. Tests run only in GitHub Actions; development builds are compilation evidence. Coverage and complexity policy cannot be claimed satisfied without measured configured gates.
 
+TASK-RUNTIME-ARTIFACTS-W retains actual root TestResults reports from native TUnit
+alongside each existing scoped report glob under REQ/AC-TEST-001/002/005 and
+AC-MP-012. Run37005805424 proves the missing RF3/analyzer report retention path.
+Comparison test reports use a separate comparison-test-results artifact so the
+measured comparison-suite archive keeps its existing contract. The lead owns
+ci.yml; no test, timeout, gate, permission, measured-report schema or ignore rule
+changes. Source review and downloaded complete reports at the new exact run/job
+SHA are required evidence. The artifact-path repair itself has a manual exact-CI
+verification exception; it cannot convert failing or unexecuted tests to success.
+
+TASK-RUNTIME-COMPARISON-DIAGNOSTICS-W is a failure-only refinement of
+REQ/AC-TEST-002/005 and AC-MP-012 after run37005805424. Before StartAsync,
+passively retain at most 128 lifecycle records for the comparison runner and its
+eight direct wait resources. Only fixed resource names, native timestamps,
+local observation sequence, closed state/health categories and exit code are
+retained. Snapshot version/readiness are internal in the pinned native package
+and remain unavailable; do not infer or reflect them. No properties,
+environments, endpoints, connection strings, health
+descriptions, exception text or payloads. On the existing cancellation/timeout
+path, emit at most 80 lines/8KiB to test-runner stderr, preserving the original
+failure even if observation or output fails. Keep this diagnostic out of measured
+comparison archives and retain the eight-minute timeout and existing terminal
+predicate. The worker owns only a new ComparisonResourceDiagnostics helper;
+the lead owns the RealComparisonSuite join and shared documentation. The closed
+receipt formatter may be a second helper to preserve type limits; lead extracts
+existing evidence-directory/report-copy logic to ComparisonTestEvidenceFiles.cs
+without changing path resolution or report bytes. Source privacy,
+memory/task-lifetime review plus actual exact-SHA GitHub resource events are the
+verification exception for an environmental failure path; no synthetic provider,
+local AppHost execution or successful-workload claim is allowed.
+
 REQ-TEST-006 / AC-TEST-006: real shared fixture ownership transfers only after
 successful setup. Failure after opening a store releases it before deleting its
 owned fresh directory; the same path can reopen without a leaked lock.

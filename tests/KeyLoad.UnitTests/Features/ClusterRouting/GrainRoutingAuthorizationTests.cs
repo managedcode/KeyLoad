@@ -63,7 +63,7 @@ internal sealed class GrainRoutingAuthorizationTests
         await Assert.That(first.Envelope.RequestId).IsNotEqualTo(second.Envelope.RequestId);
         var initial = await executor.ExecuteAsync(first, key, CancellationToken.None);
         var replay = await executor.ExecuteAsync(second, key, CancellationToken.None);
-        await Assert.That(initial.Payload.ToArray()).IsEqualTo(replay.Payload.ToArray());
+        await Assert.That(initial.Payload.Span.SequenceEqual(replay.Payload.Span)).IsTrue();
         await Assert.That(fixture.Database.GetDocument(Root, new(fixture.Partition, Collection, DocumentId))!.Revision).IsEqualTo(FirstRevision);
         var wrongKey = (fixture.Partition with { TransactionDomainId = OtherDomain }).AtomicPartitionId;
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => executor.ExecuteAsync(second, wrongKey, CancellationToken.None))

@@ -13,7 +13,8 @@ internal sealed class TimeSeriesAspireProfileTests
     private const string TimescaleServerResource = "benchmark-timescale-server";
     private const string TimescaleDatabaseResource = "benchmark-timescale";
     private const string ComparisonResource = "comparisons";
-    private const string TimescaleImagePrefix = "timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
+    private const string TimescaleImage = "timescale/timescaledb";
+    private const string TimescaleDigest = "e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
     private static string SourceRevision => Environment.GetEnvironmentVariable("GITHUB_SHA")
         ?? throw new InvalidOperationException("The comparison run requires its GitHub source SHA.");
 
@@ -71,7 +72,17 @@ internal sealed class TimeSeriesAspireProfileTests
     {
         var resource = app.Services.GetRequiredService<DistributedApplicationModel>().Resources
             .OfType<ContainerResource>().Single(item => item.Name == TimescaleServerResource);
-        if (!resource.TryGetContainerImageName(out var image) || image is null || !image.Contains(TimescaleImagePrefix, StringComparison.Ordinal))
+        var imageAnnotation = resource.Annotations.OfType<ContainerImageAnnotation>().SingleOrDefault();
+        if (imageAnnotation is null
+            || !string.Equals(imageAnnotation.Image, TimescaleImage, StringComparison.Ordinal)
+            || !string.Equals(imageAnnotation.SHA256, TimescaleDigest, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("Aspire Timescale resource is not pinned to the accepted multi-platform digest.");
+        }
+
+        if (!resource.TryGetContainerImageName(out var image)
+            || image is null
+            || !image.EndsWith("@sha256:" + TimescaleDigest, StringComparison.Ordinal))
         {
             throw new InvalidOperationException("Aspire Timescale resource is not pinned to the accepted multi-platform digest.");
         }

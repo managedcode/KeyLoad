@@ -64,6 +64,33 @@ test/load execution. Build/formatter checks are development/static evidence only
 UI/data migration are N/A because stored format and wire shape do not change;
 RF3/MCP public integration and measured server memory remain required join gates.
 
+## Portable SIMD validation qualification
+
+TASK-MP-006D, REQ-SR-002 and AC-SEARCH-001 expand the metric edge proof before
+optimizing finite-value validation. Public `SearchEngine.Similarity` cases and
+real-store search cases live in NEW
+`tests/KeyLoad.UnitTests/Features/Search/VectorMetricValidationTests.cs` and
+`VectorMetricGoldenTests.cs`. The test worker owns only these files; the lead
+alone owns any `PreparedSimilarity.Validate` implementation, CI, docs and join.
+
+Pass requires exact error codes/details for query and candidate NaN/+Infinity/
+-Infinity at every full-block lane and scalar-tail position; empty, 4097 and
+mismatched dimensions; query-validation-before-invalid-metric precedence. Finite
+lengths 1, runtime vector width, width+1, two widths+1 and 4096 preserve selected
+metric goldens, finite extremes and zero-vector handling. Normal and
+`DOTNET_EnableHWIntrinsic=0` GitHub invocations must both qualify the same source;
+the public scoring oracle and real-store outcomes must agree. No private test
+provider or mock is introduced.
+
+Only full finite-validation blocks may use portable `Vector.Abs` and strict
+`Vector.LessThanAll(..., +Infinity)`; the length check, scalar `float.IsFinite`
+tail, query/candidate error order and all metric reductions remain identical.
+Existing tests and full RF3/SDK/MCP gates remain required. ADR-035 records ordered
+baseline/implementation/fallback stages. This internal compatible optimization has
+no data/wire migration; rollback restores the validation loop. Numeric performance
+budgets and improved throughput/allocation claims still require TASK-MP-011B's
+matched actual server receipts.
+
 ## Повний пошуковий контракт
 
 Актори: authorized text/vector/hybrid caller та майбутній index-generation worker. Entry points: [SearchRequest](../../src/KeyLoad.Abstractions/Queries.cs), [SearchEngine](../../src/KeyLoad.Query/SearchEngine.cs), [canonical vectors](../../src/KeyLoad.Core/GraphAndSeries.cs), [.NET SDK](../../src/KeyLoad.Client/KeyLoadClient.cs) і [HTTP search](../../src/KeyLoad.Server/ApiEndpoints.cs). Source-present request-time lexical scoring, exact vector scoring і weighted rank fusion відрізняються від майбутніх provider-backed indexes.

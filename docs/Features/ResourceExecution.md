@@ -85,6 +85,46 @@ its documentation, braces and null guards. Public wrappers, 1,024-character boun
 RFC 6901 decoding, missing/scalar distinction and field-patch behavior stay exact;
 direct pointer/patch acceptance cases join existing real-document regressions.
 
+## Accepted progressive report output repair
+
+TASK-MP-008C implements REQ-MP-004, REQ-BC-010 and AC-MP-010/012 under ADR-035/044.
+The current owned synchronous Cases/Samples converters retain full serialized
+payloads before SerializeAsync can flush. Private write-only views adapt both
+collections to native async enumeration over existing immutable arrays. Public
+ComparisonReport/ComparisonCase, strict read converters, targets, exact JSON
+schema/property order, every attempt and CSV/Markdown content stay unchanged.
+Default arrays still reject with the existing JsonException and safe detail.
+
+Tests-first source retains the real-file byte/schema/roundtrip oracle, populates
+optional provenance/image metadata, and cancels directly in the early-growth
+observer. The fixed 20,000-by-4,096 sample input stays bounded; partial output must
+remain below one quarter of its complete raw error-byte lower bound, with no
+Markdown/CSV. Source audit verifies no sample-array/list/string duplication. The
+worker owns new BenchmarkComparisons write views/helpers and ReportFileTests.cs;
+lead alone joins ReportWriter and shared docs. Enabled build/format/governance and
+complete exact-SHA GitHub tests qualify correctness; matched memory/speed evidence
+remains open. No public/data/report-version or package migration.
+
+## Accepted exact-CI fixture corrections
+
+TASK-RUNTIME-ADMISSION-W preserves REQ-MP-002/005 and AC-MP-004/011/012 under
+ADR-035. Run37005805424 proves that a held shared read callback does not block
+another reader. Only the two analytical-admission cases use a new real exclusive
+ZoneTree Commit callback holder with no staged changes; existing read-lifetime
+tests retain their original helper. Keep all saturation, independent-engine,
+in-flight cancellation, cleanup, ten-second bounds and healthy-followup assertions.
+The worker owns those two test references and the new helper; the lead reviews
+complete task/holder release before store disposal and qualifies on GitHub.
+
+TASK-RUNTIME-JSON-ORACLES-W keeps REQ-MP-006 / AC-MP-006/012 and ADR-035/041
+serializer contracts. Existing direct System.Text.Json byte/text/OperationResult
+lone-escaped-surrogate cases expect the actual JsonException on all three paths;
+raw UTF-8 replacement and all strict collection/base64 cases remain unchanged.
+The embedded benchmark keeps unsorted producer input and expects ordinal canonical
+stored JSON under ADR-047 / AC-EM-002. Topic quota comparisons use the correct
+Int64 operands without changing exact-byte, one-byte-short or rollback checks.
+These are test-oracle repairs, with no new product or persistence decision.
+
 ## Admission, operations та observability
 
 ### Accepted TASK-MP-006C analytical-read admission

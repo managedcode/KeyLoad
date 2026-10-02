@@ -64,6 +64,16 @@ scoped borrowing contract explicitly prevents escape/mutation.
   its positive MaxConcurrentQueries ceiling. Admission is fail-fast before parsing,
   ranking or entering the store gate; cancellation and every error release exactly
   once. Creating another engine cannot multiply that node-local allowance.
+  TASK-MP-006D expands REQ-SR-002 / AC-SEARCH-001 with public metric and real-store
+  SIMD validation cases: finite vectors at 1, Vector<float>.Count, Count+1,
+  2*Count+1 and 4096 dimensions retain selected dot/cosine/Euclidean goldens and
+  zero/extreme behavior. Query/candidate NaN and either infinity in vector lanes
+  or scalar tails, empty/4097/mismatched inputs and invalid metrics preserve exact
+  Validation code/detail and query-before-metric rejection order. GitHub tests
+  run with normal hardware capability and DOTNET_EnableHWIntrinsic=0; software
+  fallback is a distinct qualified invocation. Only the finite-validation loop
+  may change; no scoring reduction, ranking, public wire or persisted format
+  change. No performance gain passes acceptance without matched 011B receipts.
 - AC-MP-005 / REQ-MP-002: event/sample/graph reads bound complete response bytes,
   cumulative work and cancellation. Time-range scans stop at the end bound; graph
   repeated destinations reuse gate-scoped visibility without revealing hidden
@@ -73,6 +83,10 @@ scoped borrowing contract explicitly prevents escape/mutation.
   signed cursor authority and include the complete cursor envelope in output size.
   SourceRecord decodes borrowed values for read and subscription/publication callers;
   it rejects missing or wrongly scoped/positioned persisted records explicitly.
+  EventStreams fixture inputs must retain the same stable batch command ID in
+  envelope and payload. Actual mismatched IDs still fail Validation before stream
+  effects; fixing test setup must not relax production identity validation. New
+  StreamCommandIdentityTests and existing bounded stream suite map this edge.
 - AC-MP-006 / REQ-MP-002: mutation/change-feed, queue and outbox paths remove
   duplicate reads/serialization while preserving before/after images, quotas,
   ordering, FIFO, leases, checksums, replay, policy and atomic durable outcomes.
@@ -98,11 +112,19 @@ scoped borrowing contract explicitly prevents escape/mutation.
   parsing is bounded. Typed results and unknown-write/error mapping remain intact.
   Real server tests exercise delayed/chunked/large bodies, cancellation, malformed
   errors and a following request; no fake HTTP handler or stream is proof.
+  A malformed HTTP problem body uses the same bounded server-unavailable fallback
+  as a null or oversized body. Transport/body cancellation and I/O errors retain
+  the existing read/write transport mapping and same-command retry detail.
 - AC-MP-010 / REQ-MP-004: supported workload sizes cannot cause report-time sample
   duplication or unbounded report strings. JSON/CSV stream to files, permitted
   sample totals are validated before allocations and exact report schema/results
   survive. Oversized operator profile reads are bounded without changing valid
   generated profiles or configuration trust boundaries.
+  Report JSON must flush progressively through both Cases and Samples despite
+  strict immutable read converters. Real-file cancellation after early observed
+  growth leaves a partial JSON well below the complete payload's lower bound and
+  publishes neither Markdown nor CSV. Public DTOs, property order, schema and all
+  valid emitted bytes remain exact; no full-payload test oracle or fake stream.
 - AC-MP-011 / REQ-MP-005: CI evidence distinguishes server/node resources from
   load-generator resources for every advertised operation family. Each profile
   records exact workload/input/result bounds, concurrency, topology, source SHA,

@@ -16,6 +16,13 @@ transport, client credentials, formats and topology stay outside this source sco
   WAL payload equals independently serialized final mutations byte for byte. A
   real store read/reopen returns the same final values and position. Caller input
   mutation cannot change committed bytes.
+  Null tombstones must remain nullable null during the byte-array to read-only
+  memory projection. An explicit empty Put remains a found zero-length value;
+  Delete is absent before/after commit, WAL replay and snapshot/reopen, including
+  borrowed-reader callback and exact range/record-count behavior. Canonical WAL
+  has JSON null for Delete and an empty base64 string for empty Put; every byte
+  and exact frame limit is asserted. Historical empty rows are preserved because
+  no delete provenance can distinguish them from legitimate empty values.
 - AC-PSW-003: an oversized rejected Stage leaves the already validated staged set
   intact; caller may catch ResourceExhausted then validate/commit the prior set.
   An empty/reset-to-empty commit has no WAL frame and no position advance. Existing

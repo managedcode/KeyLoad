@@ -2,6 +2,20 @@
 
 Status: Accepted for implementation; runtime and delivery qualification pending. Date: 2026-10-02. Owner: ClientApi lead / KeyLoad integration owner. Related: [ClientApi](../Features/ClientApi.md), REQ-CLIENT-004–007 / AC-CLIENT-004–007; [Authorization](../Features/Authorization.md), [BlobStorage](../Features/BlobStorage.md), [TestInfrastructure](../Features/TestInfrastructure.md).
 
+## Accepted runtime root-name framing refinement
+
+TASK-RUNTIME-MCP-FRAME-W maps REQ-CLIENT-006 and AC-MCP-003/005/007 to the actual
+run37005805424 lone-surrogate-name failures. Only McpFrameInspection.cs changes:
+retain previous root-id value's encoded-length check, reset root-id state for each
+token, then classify a root id using the single safely decoded property name in
+AddProperty. Keep count/name budgets before decode, duplicate detection, escaped
+id spelling, scalar/native ids, valid surrogate pairs and fixed safe errors.
+Existing malformed name/value and escaped-id exact-boundary tests are the
+tests-first baseline. One bounded worker owns that file; lead owns shared docs,
+source review, enabled build/format/governance and exact GitHub UnitTests/RF3
+qualification. No broad catch, dependency change, wire/data migration or public
+schema change. Rollback removes only the internal classification repair.
+
 ## Контекст і запропонований напрям
 
 Root policy вимагає простий agent API та інтегрований official MCP C# SDK server для всіх database/search/storage operations, з real .NET SDK і official MCP SDK клієнтами в Docker/Aspire RF3 тестах. Поточні HTTP operations у [ApiEndpoints](../../src/KeyLoad.Server/Features/ClientApi/ApiEndpoints.cs) і [KeyLoadClient](../../src/KeyLoad.Client/KeyLoadClient.cs) існують; завершеної official MCP/agent surface не знайдено.
@@ -131,7 +145,10 @@ must be opaque and authorization checked on each read, with bounded range/page
 limits. Native BlobResourceContents.FromBytes receives raw bytes; official clients
 use DecodedData, avoiding double base64. Native resources/read has no IsError;
 unresolved URIs use safe protocol InvalidParams for the current revision. No
-unfinished blob tool or resource is advertised by this 37-operation catalog.
+unfinished blob tool or resource may be advertised. The current source catalog
+contains 47 operations: the base 37 below plus ten implemented-source BlobStorage
+tools whose names/routes/contracts are frozen by ADR-038. All runtime and delivery
+gates remain pending; a catalog count does not qualify blob semantics.
 
 ```mermaid
 flowchart LR
@@ -157,7 +174,7 @@ declare MCP coverage, runtime qualification or future blobs complete.
 
 ## Implementation contract
 
-1. The table freezes all current typed operations; root resolves admission/schema review findings before dependent runtime implementation. Required planned blob operations remain separate and cannot be advertised early.
+1. The table freezes the base typed operations; ADR-038 freezes the ten additional current BlobStorage tools. Root resolves admission/schema review findings before dependent runtime implementation. Any further unfinished blob operation remains gated by its owning accepted contract and implementation.
 2. Shared protocol composition належить Server/ClientApi; `.NET` DTO shape не змінюється неявно. Нові helpers/tests mirror `Features/ClientApi/`, business tests — owning feature. Existing `src/KeyLoad.Server/ApiEndpoints.cs` та Client transport лишаються tracked ADR-032 layout debt, а не compliant layer-first target.
 3. AC-CLIENT-004/005 and AC-MCP-001–007 map to real operation/error/retry regressions; AC-MCP-008 retains genuine large/range storage after BlobStorage acceptance. The .NET SDK adds its missing BackupAsync and SetDispatchAsync surfaces for complete parity.
 4. Workers мають окремі adapter/schema, SDK caller/tests та owning-feature operation scopes після contracts; один lead owns shared packages/host/API docs. Новий tool contract, trust weakening, missing upstream SDK contract або overlap → stop/escalate. Join усіх complete reviewed source і evidence перед qualification.
@@ -166,6 +183,31 @@ declare MCP coverage, runtime qualification or future blobs complete.
 Prerequisites: ADR-036 Orleans request/host lifetime, Authorization current principal/policy epoch, ResourceExecution budgets, owning operation contracts; BlobStorage додатково ADR-038 accepted implementation.
 
 ## Migration, rollout, rollback та verification
+
+Accepted qualification repair TASK-RUNTIME-MCP-W maps REQ-CLIENT-006,
+AC-MCP-001/003/005/007 and AC-ROC-006 to actual run37005805424 at6949fa0.
+The official client must retain default protocol negotiation for discovery-first
+stateless HTTP; pinning the client revision disables its server/discover path and
+forces an initialize handshake which the current stateless protocol does not use.
+Keep the server's current protocol, official transport and per-request persisted
+bearer authentication unchanged. Do not pin an older revision or emulate protocol.
+
+The worker owns only IntegrationTests/ClientApi/McpOfficialClient.cs and UnitTests/
+ClientApi/McpPaginationTestData.cs, McpToolPaginationTests.cs,
+McpTransportGuardTestData.cs. Retain the 65,536-byte cap, exact cursor/one-byte-short
+assertions, former index36 continuation plus current terminal index46, out-of-range
+index47, all47 unique tools and every negative/authority scenario. A present empty
+header is one empty StringValues element; a no-values header is absent in this
+abstraction. Mutate a copied native Tool to a different valid object input schema,
+because its public setter rejects default/invalid schemas before isolation can be
+tested. Add no reflection discovery, new catalog source or protocol workaround.
+
+Ordered stages: accepted contracts and actual failure baseline; preserving test
+vectors/caller repair; lead source review/build/formatter/static checks; complete
+exact-SHA GitHub UnitTests and real official SDK RF3 caller gates. Rollback reverts
+these test/caller changes; no product/data/wire migration. If native negotiation
+still fails, retain bounded sanitized discovery status/error evidence without keys.
+No passing or all-operation parity claim is made before actual qualification.
 
 This additive version-one adapter does not change database schema or existing HTTP
 JSON. Tool names and wrappers are versioned; later incompatible contracts require

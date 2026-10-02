@@ -1,5 +1,14 @@
 # ClusterRouting
 
+TASK-RUNTIME-RESOURCE-W preserves REQ/AC-ROUTE-001 under ADR-036. The shared RF3
+request-ID scenario receives a unique tenant, because persisted resource catalog
+identity is tenant/database/name and a random partition key does not isolate it.
+Run37005805424 found its orders definition colliding with the prior leader-loss
+fixture's domain/indexes. Preserve actual eight parallel SDK reads, stable write
+outcome, fresh actor IDs and strict unsupported resource-migration rejection.
+Only RequestIdReceiptTests.cs changes; existing failing CI is the baseline and
+full exact-SHA RF3 qualification remains required.
+
 Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 
 | Requirement | Acceptance and observable evidence |

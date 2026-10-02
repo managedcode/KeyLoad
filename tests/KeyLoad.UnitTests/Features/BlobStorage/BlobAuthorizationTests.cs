@@ -76,8 +76,9 @@ internal sealed class BlobAuthorizationTests
     {
         var uploadId = Guid.NewGuid();
         var beginId = Guid.NewGuid();
+        var access = new RowAccess(OwnerAlice);
         Apply(database, OperationKind.BeginBlobUpload, PrincipalAlice, beginId,
-            new BeginBlobUploadRequest(beginId, blob, uploadId, ActiveBytes.Length, 0))
+            new BeginBlobUploadRequest(beginId, blob, uploadId, ActiveBytes.Length, 0, access))
             .Get<BlobCommitResult<BlobUploadInfo>>();
         return uploadId;
     }

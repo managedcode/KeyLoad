@@ -43,7 +43,7 @@ internal sealed class AnalyticalAdmissionTests
         var request = new SearchRequest(db.Partition, Collection, SearchField, SearchTerm);
         var tasks = new AnalyticalAdmissionTaskLifetime(CoordinationTimeout);
         Task<RankedDocument[]>? admitted = null;
-        await using var held = new RealZoneTreeReadGateHold(db.Store);
+        await using var held = new RealZoneTreeWriteGateHold(db.Store);
         await held.WaitUntilEnteredAsync();
         await tasks.RunWithCleanupAsync(async () =>
         {
@@ -88,7 +88,7 @@ internal sealed class AnalyticalAdmissionTests
         using var cancellation = new CancellationTokenSource();
         var tasks = new AnalyticalAdmissionTaskLifetime(CoordinationTimeout);
         Task<RankedDocument[]>? admitted = null;
-        await using var held = new RealZoneTreeReadGateHold(db.Store);
+        await using var held = new RealZoneTreeWriteGateHold(db.Store);
         await held.WaitUntilEnteredAsync();
         await tasks.RunWithCleanupAsync(async () =>
         {

@@ -1,0 +1,889 @@
+{
+  "runId": "37005805424",
+  "baselineSha": "6949fa0c3099443c6f34f91245ab8064ef22c63c",
+  "unionCount": 53,
+  "platformCounts": {
+    "ubuntu": 51,
+    "macos": 53,
+    "windows": 50
+  },
+  "qualification": "All symptoms are from the old baseline SHA. Current accepted repairs/fixture changes are not proven until the next exact-SHA GitHub CI run passes; tombstone mappings are explicitly source-cause inference pending CI.",
+  "notes": [
+    "Queue receive/renew requests contain no immutable-array fields; tombstone-related JSON fallout remains an inference awaiting actual repaired-SHA CI.",
+    "Catalog contains 47 tools. Old fixtures expected 37 entries and rejected cursor37 despite it being valid; corrected terminal46/invalid47 and continuation bytes preserve the 65536-byte limit.",
+    "NullValueOverheadBytes=2 preserves exact canonical JSON frame limits: null is two bytes longer than quoted empty base64.",
+    "Missing quota fixture now encodes the canonical resource-scoped key with public KeyCodec and proves its actual presence before and absence after deletion.",
+    "The existing property-name surrogate failures are addressed by accepted MCP-FRAME-W validated native Utf8JsonReader decoding; there is no JsonElement.GetString path in those cases.",
+    "No source repair attribution or author report qualifies a failing baseline test. Every row remains pending a new exact-SHA GitHub run."
+  ],
+  "failures": [
+    {
+      "name": "AcAuth002MissingProtectedPrincipalAtExistingCutRequiresRecovery",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "JsonException: The input does not contain any JSON tokens. Expected the input to start with a valid JSON token, when isFinalBlock is true. Path: $ | LineNumber: 0 | BytePositionInLine: 0.",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeReadView.cs:38",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+    },
+    {
+      "name": "AcBlob003CurrentPrincipalRowAndCreatorAuthorityAreRecheckedForEveryRead",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The principal cannot write this row scope.",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAuthorizationTests.cs:StartActiveUpload",
+        "src/KeyLoad.Abstractions/Contracts.cs:RowAccess"
+      ],
+      "repairTask": "TASK-RUNTIME-ADMISSION-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "The restricted Begin upload omitted the required owner row access, so it fails at write-scope authorization before per-read authority assertions. Accepted fixture passes RowAccess(OwnerAlice); wrong-owner, creator, and revoked-authority checks remain."
+    },
+    {
+      "name": "AcBlob007MissingCurrentStateFailsEveryOperationWithoutEffects",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be null",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/BlobStorage/BlobRecordReader.cs:11,24",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:38,91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+    },
+    {
+      "name": "AcBlob005MissingPersistedResourceQuotaAfterReopenFailsClosed",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/BlobStorage/BlobMissingQuotaReopenTests.cs:43",
+        "src/KeyLoad.Core/Features/BlobStorage/BlobKeys.cs:27-28"
+      ],
+      "repairTask": "TASK-RUNTIME-BLOB-QUOTA-FIXTURE-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Corrupt the actual quota row using public KeyCodec resource-scope components, with pre/post presence assertions; preserve three real reopens and Corruption/no-effects checks."
+    },
+    {
+      "name": "AcBlob004ReusedUploadIdCannotReplayAnotherLifetimeOutcome",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The persisted blob records are inconsistent.",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/BlobStorage/BlobRecordReader.cs:11,24",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:38,91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+    },
+    {
+      "name": "AcBlob003UploadStateAuthoritySurvivesHeadOwnerChangeButHeadMutationsDoNot",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be null",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/BlobStorage/BlobRecordReader.cs:11,24",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:38,91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+    },
+    {
+      "name": "AcBlob005ExpiredUploadReclaimReleasesUnusedReservationExactlyOnce",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The persisted blob records are inconsistent.",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/BlobStorage/BlobRecordReader.cs:11,24",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:38,91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+    },
+    {
+      "name": "AcBlob004DeleteRetiresCurrentVersionBeforeBoundedReclaimAndFinalReceiptReplay",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The persisted blob records are inconsistent.",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/BlobStorage/BlobRecordReader.cs:11,24",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:38,91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+    },
+    {
+      "name": "AcBlob004RestoreRebindsAuthorityAndPreservesPublishedBytesAndActivePartForReclaim",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The persisted blob records are inconsistent.",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/BlobStorage/BlobRecordReader.cs:11,24",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:38,91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+    },
+    {
+      "name": "MissingAndWrongSequencePointsCannotPartiallyPurge",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93",
+        "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReadDiagnosticsTests.cs",
+        "tests/KeyLoad.UnitTests/Features/StorageRecovery/TransactionRangeTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ChangeFeeds/OutboxPurgeTests.cs",
+        "tests/KeyLoad.UnitTests/Features/Messaging/SubscriptionRecoveryAndPolicyTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI."
+    },
+    {
+      "name": "NativePagesTraverseTheCompleteCatalogExactlyOnce",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be 37",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpToolPaginationTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpPaginationTestData.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportGuardTestData.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-MCP-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+    },
+    {
+      "name": "InvalidHeaderUsesFixedSafeValidation(EmptyNameValues)",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpToolPaginationTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpPaginationTestData.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportGuardTestData.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-MCP-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+    },
+    {
+      "name": "InvalidHeaderUsesFixedSafeValidation(EmptySession)",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpToolPaginationTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpPaginationTestData.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportGuardTestData.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-MCP-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+    },
+    {
+      "name": "InvalidHeaderUsesFixedSafeValidation(EmptyMethodValues)",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpToolPaginationTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpPaginationTestData.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportGuardTestData.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-MCP-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+    },
+    {
+      "name": "InvalidHeaderUsesFixedSafeValidation(EmptyLastEvent)",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpToolPaginationTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpPaginationTestData.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportGuardTestData.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-MCP-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+    },
+    {
+      "name": "CanonicalCursorResumesAtExactIndex(36)",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: A catalog tool exceeds the MCP discovery page budget.",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpToolPaginationTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpPaginationTestData.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportGuardTestData.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-MCP-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+    },
+    {
+      "name": "AcBlob004NormalizationReopensAcrossMoreThanOneStateAndHeadPage",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The persisted blob records are inconsistent.",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/BlobStorage/BlobRecordReader.cs:11,24",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:38,91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Failure reads deleted blob state as a live empty value and later reports persisted-record inconsistency or observes non-null state. Explicit nullable tombstone projection is accepted. Attribution is a source-cause inference from the mutation/read path and symptoms, not a demonstrated post-fix pass; CI must qualify the repair."
+    },
+    {
+      "name": "NativePageMutationCannotAlterLaterDiscovery",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "ArgumentException: The specified document is not a valid MCP tool input JSON schema. (Parameter 'InputSchema')",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpToolPaginationTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpPaginationTestData.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportGuardTestData.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-MCP-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+    },
+    {
+      "name": "MalformedCursorUsesOneFixedSafeValidation(keyload-mcp-v1:37)",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpToolPaginationTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpPaginationTestData.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportGuardTestData.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-MCP-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Preserve native 47-entry catalog, continuation/page byte limits, terminal46/invalid47 cursors, valid input schema mutation and present-empty headers. Correct the stale fixtures without changing product limits or authority."
+    },
+    {
+      "name": "EscapedUnpairedSurrogatesUseSafeValidation({\"\\uD800\":0})",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected exactly KeyLoadException but got InvalidOperationException: Cannot read incomplete UTF-16 JSON text as string with missing low surrogate.",
+      "sourceEvidence": [
+        "src/KeyLoad.Server/Features/ClientApi/McpFrameInspection.cs",
+        "src/KeyLoad.Server/Features/ClientApi/McpFrameStrings.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpValueFrameBoundsTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-MCP-FRAME-W",
+      "disposition": "accepted-product-repair-awaiting-CI",
+      "assessment": "Remove unsafe ValueTextEquals before one validated property decode; native GetString invalid-surrogate exceptions map to fixed Validation. Preserve raw-byte/count/id budgets and duplicate ordering."
+    },
+    {
+      "name": "EscapedUnpairedSurrogatesUseSafeValidation({\"\\uDC00\":0})",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected exactly KeyLoadException but got InvalidOperationException: Cannot read invalid UTF-16 JSON text as string. Invalid surrogate value: '0xDC00'.",
+      "sourceEvidence": [
+        "src/KeyLoad.Server/Features/ClientApi/McpFrameInspection.cs",
+        "src/KeyLoad.Server/Features/ClientApi/McpFrameStrings.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/McpValueFrameBoundsTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-MCP-FRAME-W",
+      "disposition": "accepted-product-repair-awaiting-CI",
+      "assessment": "Remove unsafe ValueTextEquals before one validated property decode; native GetString invalid-surrogate exceptions map to fixed Validation. Preserve raw-byte/count/id budgets and duplicate ordering."
+    },
+    {
+      "name": "ErrorBodiesArePreservedWhenValidAndBoundedWhenNullMalformedOrOversized",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be equal to \"The server response is unavailable.\"",
+      "sourceEvidence": [
+        "src/KeyLoad.Client/Features/ClientApi/BoundedProblemReader.cs",
+        "tests/KeyLoad.UnitTests/Features/ClientApi/KeyLoadClientTransportTests.cs:151-169"
+      ],
+      "repairTask": "TASK-RUNTIME-ERROR-DECODING-W",
+      "disposition": "accepted-source-and-oracle-repair-awaiting-CI",
+      "assessment": "Observed fallback body is \"The read response is unavailable.\" while test expected the server wording. Accepted repair is confined to BoundedProblemReader and maps malformed private Problem JSON to the existing bounded fallback; preserve path-specific fallback, cancellation/I/O/success behavior, and original command ID."
+    },
+    {
+      "name": "AcMp005RangePreservesRevisionOrderCutAndLookahead",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The envelope and command IDs differ.",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceFixture.cs",
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+    },
+    {
+      "name": "AcMp005GenerationAndRetentionFailuresRemainCallerVisible",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The envelope and command IDs differ.",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceFixture.cs",
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+    },
+    {
+      "name": "AcMp005RangeWorkStopsBeforeTheNextEventAndAHealthyReadStillWorks",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The envelope and command IDs differ.",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceFixture.cs",
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+    },
+    {
+      "name": "AcMp005PersistedFieldPoliciesRedactPayloadAndHeaders",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The envelope and command IDs differ.",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceFixture.cs",
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+    },
+    {
+      "name": "AcMp005CompletePageMetadataCountsTowardTheResultLimit",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The envelope and command IDs differ.",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceFixture.cs",
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+    },
+    {
+      "name": "AcMp005CallerCancellationDoesNotPoisonTheFollowingRead",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The envelope and command IDs differ.",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceFixture.cs",
+        "tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-EVENT-FIXTURE-W",
+      "disposition": "accepted-fixture-repair-awaiting-CI",
+      "assessment": "Six setup paths create different command IDs in the event envelope and replicated command payload; the store rejects them before the asserted read behavior. Accepted fixture repair reuses the payload batch command ID for the replicated envelope and adds a real-store mismatched-ID regression."
+    },
+    {
+      "name": "AcMp006_MissingAndMalformedStoredBodiesStillRejectThenRecover",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be equal to Corruption",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/Messaging/QueueReadyClaims.cs:42,64-110",
+        "src/KeyLoad.Core/AtomicCommandCommit.cs:66-70",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm."
+    },
+    {
+      "name": "ExpiredWorkerCannotAckAfterReclaimAndAttemptsReachDeadLetter",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The operation contains invalid protocol JSON.",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/Messaging/QueueReadyClaims.cs:42,64-110",
+        "src/KeyLoad.Core/AtomicCommandCommit.cs:66-70",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm."
+    },
+    {
+      "name": "InboxEffectsAndAckAreAtomicAndReplayCannotApplyDifferentEffects",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "JsonException: The input does not contain any JSON tokens. Expected the input to start with a valid JSON token, when isFinalBlock is true. Path: $ | LineNumber: 0 | BytePositionInLine: 0.",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeReadView.cs:38",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+    },
+    {
+      "name": "ProcessingReleasesInputQuotaAtomicallyAndFailureRestoresItsLease",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "JsonException: The input does not contain any JSON tokens. Expected the input to start with a valid JSON token, when isFinalBlock is true. Path: $ | LineNumber: 0 | BytePositionInLine: 0.",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeReadView.cs:38",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+    },
+    {
+      "name": "AcMp006_RenewForeignExpiredAndStaleTokensPreserveLeaseFencing",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The operation contains invalid protocol JSON.",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/Messaging/QueueReadyClaims.cs:42,64-110",
+        "src/KeyLoad.Core/AtomicCommandCommit.cs:66-70",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm."
+    },
+    {
+      "name": "AcMp006_ProcessingReusesLeaseAndReleasesQuotaBeforeEffects",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "JsonException: The input does not contain any JSON tokens. Expected the input to start with a valid JSON token, when isFinalBlock is true. Path: $ | LineNumber: 0 | BytePositionInLine: 0.",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeReadView.cs:38",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+    },
+    {
+      "name": "AcMp005MissingOrCorruptTopicRecordsFailAndRestoredRecordReads",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be equal to HistoryUnavailable",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93",
+        "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReadDiagnosticsTests.cs",
+        "tests/KeyLoad.UnitTests/Features/StorageRecovery/TransactionRangeTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ChangeFeeds/OutboxPurgeTests.cs",
+        "tests/KeyLoad.UnitTests/Features/Messaging/SubscriptionRecoveryAndPolicyTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI."
+    },
+    {
+      "name": "AcMp006SingleMessageReceiveStopsAtFirstReadyRecordAndKeepsFifo",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The operation contains invalid protocol JSON.",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/Messaging/QueueReadyClaims.cs:42,64-110",
+        "src/KeyLoad.Core/AtomicCommandCommit.cs:66-70",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm."
+    },
+    {
+      "name": "RetainedEventIdRejectsDifferentContentAndPreservesDedupForTheInitialStoreFormat",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be equal to DuplicateEventId",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93",
+        "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReadDiagnosticsTests.cs",
+        "tests/KeyLoad.UnitTests/Features/StorageRecovery/TransactionRangeTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ChangeFeeds/OutboxPurgeTests.cs",
+        "tests/KeyLoad.UnitTests/Features/Messaging/SubscriptionRecoveryAndPolicyTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI."
+    },
+    {
+      "name": "ProcessingEffectsAndAcknowledgementRollBackTogetherAndInboxSurvivesReplay",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "KeyLoadException: The operation contains invalid protocol JSON.",
+      "sourceEvidence": [
+        "src/KeyLoad.Core/Features/Messaging/QueueReadyClaims.cs:42,64-110",
+        "src/KeyLoad.Core/AtomicCommandCommit.cs:66-70",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Queue receive/renew records contain no collection-valued DTO fields requiring ImmutableArray normalization (ReceiveRequest is scalar/reference data). The observed invalid-JSON or wrong missing-body error follows transitions/deletes that can leave an empty value under the ZoneTree null conversion. This is tombstone-source inference, not a strict-JSON-default diagnosis; CI must confirm."
+    },
+    {
+      "name": "ExactSerializedEventQuotaAcceptsOrderedBatchAndOneByteShortRollsBack",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be equal to 1050",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/Messaging/TopicPublicationTests.cs:27"
+      ],
+      "repairTask": "TASK-RUNTIME-JSON-ORACLES-W",
+      "disposition": "accepted-oracle-repair-awaiting-CI",
+      "assessment": "Assertion compares Int32 literal 1050 to Int64 rawBytes. Accepted test oracle uses 1050L; quota boundary and rollback assertions stay unchanged."
+    },
+    {
+      "name": "AcMp006TextAndBytePathsPreserveLiteralEscapeAndSurrogateReplacement",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected exactly InvalidOperationException but got JsonException: The JSON value could not be converted to System.String. Path: $ | LineNumber: 0 | BytePositionInLine: 8.",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ResourceExecution/JsonTextProtocolTests.cs:38",
+        "src/KeyLoad.Server/Features/ClientApi/McpFrameInspection.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-JSON-ORACLES-W",
+      "disposition": "accepted-oracle-repair-awaiting-CI",
+      "assessment": "Wrong JSON token type currently produces JsonException; test expected InvalidOperationException. Accepted repair updates expected native JSON exception and property-decode classification without changing strict DTO/lease contracts."
+    },
+    {
+      "name": "AcMp006MultiSubscriptionReplayRetainsDeliveryIdentityAndLeaseFencing",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be equal to StaleLease",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ResourceExecution/JsonTextSubscriptionReplayTests.cs:42-47"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-path-candidate-awaiting-CI",
+      "assessment": "Current generation, signed-scope/principal and persisted-lease error order is correct. ACK deletes the window row; old tombstone projection can leave empty JSON mapped to Validation. Exact baseline internal detail is absent, so this is a candidate requiring existing real-store replay regression, not a confirmed specific cause or authorization to reorder messaging."
+    },
+    {
+      "name": "MissingProtectedPrincipalInVerifiedPendingImageRejectsHostAndSafeRetry",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "JsonException: The input does not contain any JSON tokens. Expected the input to start with a valid JSON token, when isFinalBlock is true. Path: $ | LineNumber: 0 | BytePositionInLine: 0.",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeReadView.cs:38",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+    },
+    {
+      "name": "AcPsw002RepeatedValidationReplacementDeletionResetAndCallerBuffersKeepFinalFrame",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be equivalent to [75, 76, 68, 87, 65, 76, 49, 0, 59, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 125, 139, 34, 82, 162, 214, 152, 205, 86, 5, 218, 5, 208, 82, 44, 4, 184, 59, 211, 74, 84, 2, 225, 35, 230, 73, 146, 194, 172, 100, 183, 232, 91, 123, 34, 107, 101, 121, 34, 58, 34, 77, 65, 61, 61, 34, 44, 34, 118, 97, 108, 117, 101, 34, 58, 34, 81, 69, 70, 67, 34, 125, 44, 123, 34, 107, 101, 121, 34, 58, 34, 85, 65, 61, 61, 34, 44, 34, 118, 97, 108, 117, 101, 34, 58, 110, 117, 108, 108, 125, 93]",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:NullValueOverheadBytes"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "accepted-source-repair-awaiting-CI",
+      "assessment": "Tombstone JSON null is four bytes; it replaces the two quotes emitted for an empty base64 string, so serialized mutation growth is exactly +2. NullValueOverheadBytes=2 is correct and must remain. Existing baseline expected frame lengths are two bytes short; accepted source/test change accounts for this. Static arithmetic, not test qualification."
+    },
+    {
+      "name": "IncrementalFrameAccountingMatchesCanonicalJsonAtExactBase64Boundaries",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be equivalent to [75, 76, 68, 87, 65, 76, 49, 0, 63, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 35, 54, 119, 216, 83, 233, 175, 224, 195, 139, 183, 193, 223, 21, 96, 79, 251, 25, 143, 132, 137, 79, 85, 137, 9, 18, 100, 62, 38, 122, 223, 176, 91, 123, 34, 107, 101, 121, 34, 58, 34, 43, 47, 56, 61, 34, 44, 34, 118, 97, 108, 117, 101, 34, 58, 34, 82, 50, 121, 82, 116, 116, 115, 61, 34, 125, 44, 123, 34, 107, 101, 121, 34, 58, 34, 47, 47, 115, 61, 34, 44, 34, 118, 97, 108, 117, 101, 34, 58, 110, 117, 108, 108, 125, 93]",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:NullValueOverheadBytes"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "accepted-source-repair-awaiting-CI",
+      "assessment": "Tombstone JSON null is four bytes; it replaces the two quotes emitted for an empty base64 string, so serialized mutation growth is exactly +2. NullValueOverheadBytes=2 is correct and must remain. Existing baseline expected frame lengths are two bytes short; accepted source/test change accounts for this. Static arithmetic, not test qualification."
+    },
+    {
+      "name": "AcMp011StagedReplacementTombstoneAndFallbackCountEachLookupOnce",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be null",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93",
+        "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReadDiagnosticsTests.cs",
+        "tests/KeyLoad.UnitTests/Features/StorageRecovery/TransactionRangeTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ChangeFeeds/OutboxPurgeTests.cs",
+        "tests/KeyLoad.UnitTests/Features/Messaging/SubscriptionRecoveryAndPolicyTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI."
+    },
+    {
+      "name": "AcCq001_TypedRecordsRoundTripThroughTheActualStorageGate",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "JsonException: The input does not contain any JSON tokens. Expected the input to start with a valid JSON token, when isFinalBlock is true. Path: $ | LineNumber: 0 | BytePositionInLine: 0.",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeReadView.cs:38",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Storage record read attempts JSON deserialization on a zero-length value after a deletion path; the accepted explicit-null projection should restore missing-record semantics. Source-cause inference only; no post-fix CI result yet."
+    },
+    {
+      "name": "AcMp002TransactionMergeChargesOverridesAndIgnoresOutOfRangeChanges",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be 3",
+      "sourceEvidence": [
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTransaction.cs:91-93",
+        "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReadDiagnosticsTests.cs",
+        "tests/KeyLoad.UnitTests/Features/StorageRecovery/TransactionRangeTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ChangeFeeds/OutboxPurgeTests.cs",
+        "tests/KeyLoad.UnitTests/Features/Messaging/SubscriptionRecoveryAndPolicyTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-STORAGE-W",
+      "disposition": "tombstone-source-cause-inference-awaiting-CI",
+      "assessment": "Delete-specific missing/range/diagnostic behavior sees an empty live row, causing null/range/count/error-code assertions to fail. The accepted nullable tombstone projection is the matching source repair. Inference only, awaiting CI."
+    },
+    {
+      "name": "FreshRequestActorsKeepOneStableWriteOutcomeAndRejectWrongPartition",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be equal to [123, 34, 99, 111, 109, 109, 97, 110, 100, 73, and 339 more...]",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ClusterRouting/GrainRoutingAuthorizationTests.cs:66"
+      ],
+      "repairTask": "TASK-RUNTIME-ROUTE-ORACLE-W",
+      "disposition": "accepted-oracle-repair-awaiting-CI",
+      "assessment": "Baseline compares byte[] object identity despite equal contents; accepted oracle compares exact ordered bytes. Request IDs, revision, outcome, and wrong-partition assertions remain."
+    },
+    {
+      "name": "AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AggregateException: Analytical admission cleanup failed. (The operation has timed out.)",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ResourceExecution/RealZoneTreeWriteGateHold.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-ADMISSION-W",
+      "disposition": "accepted-test-repair-awaiting-CI",
+      "assessment": "Old helper did not deterministically hold the real store write gate; accepted test-only repair uses a real exclusive synchronous no-change Commit hold and bounded release/cleanup. Existing admission saturation/healthy-read assertions and 10-second limits remain."
+    },
+    {
+      "name": "AcMp012_InFlightCancellationAtRealStoreGateReleasesAdmission",
+      "platforms": [
+        "ubuntu",
+        "macos"
+      ],
+      "symptom": "AggregateException: Analytical admission cleanup failed. (Expected to be true",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs",
+        "tests/KeyLoad.UnitTests/Features/ResourceExecution/RealZoneTreeWriteGateHold.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-ADMISSION-W",
+      "disposition": "accepted-test-repair-awaiting-CI",
+      "assessment": "Old helper did not deterministically hold the real store write gate while cancellation occurred; accepted test-only repair coordinates the real exclusive commit gate and release while preserving cancellation, healthy subsequent admission, and 10-second bounds."
+    },
+    {
+      "name": "AcEm002RealFixtureSetupRunsOperationsAndCleansStoreIdempotently",
+      "platforms": [
+        "ubuntu",
+        "macos",
+        "windows"
+      ],
+      "symptom": "AssertionException: Expected to be equal to \"{\"text\":\"clustered document database\",\"number\":42}\"",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/EmbeddedBenchmarkContractTests.cs:71"
+      ],
+      "repairTask": "TASK-RUNTIME-JSON-ORACLES-W",
+      "disposition": "accepted-oracle-repair-awaiting-CI",
+      "assessment": "Canonical JSON assertion has properties in the wrong order; accepted oracle changes expected canonical serialization, not production output."
+    },
+    {
+      "name": "CancellationWhileJsonIsGrowingStopsBeforeRawCsvIsPublished",
+      "platforms": [
+        "macos"
+      ],
+      "symptom": "AssertionException: Expected to be true",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ClientApi/ReportStreamingCancellationTests.cs"
+      ],
+      "repairTask": "TASK-MP-008C",
+      "disposition": "accepted-product-and-regression-repair-awaiting-CI",
+      "assessment": "Private native async Cases and Samples views avoid synchronous collection buffering; direct real-file observer cancellation asserts OCE, partial JSON below one-quarter raw bytes, and absent Markdown/CSV."
+    },
+    {
+      "name": "MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest",
+      "platforms": [
+        "macos"
+      ],
+      "symptom": "TimeoutException: The operation has timed out.",
+      "sourceEvidence": [
+        "tests/KeyLoad.UnitTests/Features/ClientApi/KeyLoadClientTransportTests.cs"
+      ],
+      "repairTask": "TASK-RUNTIME-Kestrel-W",
+      "disposition": "accepted-test-coordination-repair-awaiting-CI",
+      "assessment": "macOS-only timeout while coordinating partial request body cancellation. Accepted fixture correction observes bounded initial partial body before cancellation and retains the 5-second bound, error mapping, and subsequent-request assertion."
+    }
+  ],
+  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37005805424"
+}

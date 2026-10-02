@@ -1,15 +1,7 @@
-using System.Collections.Concurrent;
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Client;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
@@ -20,7 +12,6 @@ internal sealed class KeyLoadClientTransportTests
     private const string CommandsPath = "/v1/commands";
     private const string JsonContentType = "application/json";
     private const string CommandIdHeader = "X-KeyLoad-Command-Id";
-    private const string AuthorizationHeader = "Authorization";
     private const string TenantId = "tenant";
     private const string DatabaseId = "database";
     private const string TransactionDomainId = "domain";
@@ -46,7 +37,7 @@ internal sealed class KeyLoadClientTransportTests
     {
         var expected = Status(new string(LargeNodeIdCharacter, LargeNodeIdLength));
         var payload = JsonSerializer.SerializeToUtf8Bytes(expected, JsonDefaults.Options);
-        await using var server = await KestrelServer.StartAsync(async context =>
+        await using var server = await KeyLoadClientKestrelServer.StartAsync(async context =>
         {
             context.Response.ContentType = JsonContentType;
             for (var offset = 0; offset < payload.Length; offset += ChunkSize)
@@ -68,47 +59,72 @@ internal sealed class KeyLoadClientTransportTests
     [Test]
     public async Task MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest()
     {
-        var firstChunkWritten = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        var requestAborted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var partialResponse = Encoding.UTF8.GetBytes(PartialNodeJson + new string(PartialBodyCharacter, PartialBodyCharacterCount));
-        var requestCount = 0;
-        await using var server = await KestrelServer.StartAsync(async context =>
-        {
-            context.Response.ContentType = JsonContentType;
-            if (Interlocked.Increment(ref requestCount) == 1)
-            {
-                try
-                {
-                    await context.Response.Body.WriteAsync(partialResponse, context.RequestAborted);
-                    await context.Response.Body.FlushAsync(context.RequestAborted);
-                    firstChunkWritten.TrySetResult();
-                    await Task.Delay(Timeout.InfiniteTimeSpan, context.RequestAborted);
-                }
-                catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
-                {
-                    requestAborted.TrySetResult();
-                }
-                return;
-            }
-
-            await JsonSerializer.SerializeAsync(context.Response.Body, Status(NodeAfterCancellation), JsonDefaults.Options,
-                context.RequestAborted);
-        });
+        var response = new MidBodyCancellationResponse(partialResponse, Status(NodeAfterCancellation), ChunkSize);
+        await using var server = await KeyLoadClientKestrelServer.StartAsync(response.HandleAsync);
 
         using var cancellation = new CancellationTokenSource();
+        using var nextRequestCancellation = new CancellationTokenSource();
         var client = new KeyLoadClient(server.Client, ApiKey);
         var pending = client.StatusAsync(cancellation.Token);
-        await firstChunkWritten.Task.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
-        await Assert.That(pending.IsCompleted).IsFalse();
-        await cancellation.CancelAsync();
-        var cancelled = await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
-        await requestAborted.Task.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+        Task? nextRequest = null;
+        try
+        {
+            await WaitForFirstChunkAsync(response.FirstChunkWritten.Task, response.HandlerEntered.Task,
+                response.HandlerFailure.Task, () => response.Stage);
+            await Assert.That(pending.IsCompleted).IsFalse();
+            await cancellation.CancelAsync();
+            var cancelled = await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            await response.RequestAborted.Task.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
 
-        await Assert.That(cancelled.IsFailed).IsTrue();
-        await Assert.That(cancelled.Problem!.ErrorCode).IsEqualTo(ErrorCode.Cancelled.ToString());
-        var next = await client.StatusAsync().WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
-        await Assert.That(next.IsSuccess).IsTrue();
-        await Assert.That(next.Value!.NodeId).IsEqualTo(NodeAfterCancellation);
+            await Assert.That(cancelled.IsFailed).IsTrue();
+            await Assert.That(cancelled.Problem!.ErrorCode).IsEqualTo(ErrorCode.Cancelled.ToString());
+            var nextRequestTask = client.StatusAsync(nextRequestCancellation.Token);
+            nextRequest = nextRequestTask;
+            var next = await nextRequestTask.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            await Assert.That(next.IsSuccess).IsTrue();
+            await Assert.That(next.Value!.NodeId).IsEqualTo(NodeAfterCancellation);
+        }
+        finally
+        {
+            await cancellation.CancelAsync();
+            await nextRequestCancellation.CancelAsync();
+            await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            if (nextRequest is not null)
+            {
+                await nextRequest.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            }
+            if (response.HandlerEntered.Task.IsCompleted)
+            {
+                await response.FirstHandlerCompleted.Task.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            }
+            if (response.SecondHandlerEntered.Task.IsCompleted)
+            {
+                await response.SecondHandlerCompleted.Task.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            }
+        }
+    }
+
+    private static async Task WaitForFirstChunkAsync(Task firstChunkWritten, Task handlerEntered,
+        Task<(FirstRequestStage Stage, Exception Error)> handlerFailure, Func<FirstRequestStage> currentStage)
+    {
+        try
+        {
+            var completed = await Task.WhenAny(firstChunkWritten, handlerFailure)
+                .WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            if (completed == handlerFailure)
+            {
+                var failure = await handlerFailure;
+                throw new InvalidOperationException(
+                    $"Kestrel first response failed during {failure.Stage}.", failure.Error);
+            }
+        }
+        catch (TimeoutException exception)
+        {
+            throw new TimeoutException(
+                $"Timed out waiting for the first Kestrel response chunk; handler entered: {handlerEntered.IsCompleted}; stage: {currentStage()}.",
+                exception);
+        }
     }
 
     [Test]
@@ -116,7 +132,7 @@ internal sealed class KeyLoadClientTransportTests
     {
         var bodyNumber = 0;
         string? commandIdHeader = null;
-        await using var server = await KestrelServer.StartAsync(async context =>
+        await using var server = await KeyLoadClientKestrelServer.StartAsync(async context =>
         {
             context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             context.Response.ContentType = JsonContentType;
@@ -172,54 +188,4 @@ internal sealed class KeyLoadClientTransportTests
 
     private static NodeStatus Status(string nodeId)
         => new(nodeId, Guid.Empty, 1, nodeId, 3, DurabilityProfile.QuorumProcessDurable, true, Environment.ProcessId);
-
-    private sealed class KestrelServer : IAsyncDisposable
-    {
-        private readonly WebApplication app;
-        private KestrelServer(WebApplication app, Uri baseAddress, ConcurrentQueue<string> authorizationHeaders)
-        {
-            this.app = app;
-            Client = new HttpClient { BaseAddress = baseAddress, Timeout = Timeout.InfiniteTimeSpan };
-            AuthorizationHeaders = authorizationHeaders;
-        }
-
-        public HttpClient Client { get; }
-        public ConcurrentQueue<string> AuthorizationHeaders { get; }
-
-        public static async Task<KestrelServer> StartAsync(RequestDelegate handler)
-        {
-            var builder = WebApplication.CreateBuilder();
-            builder.Logging.ClearProviders();
-            builder.WebHost.ConfigureKestrel(options => options.Listen(IPAddress.Loopback, 0));
-            var app = builder.Build();
-            var authorizationHeaders = new ConcurrentQueue<string>();
-            app.Run(async context =>
-            {
-                if (context.Request.Headers[AuthorizationHeader].SingleOrDefault() is { } authorization)
-                {
-                    authorizationHeaders.Enqueue(authorization);
-                }
-                await handler(context);
-            });
-            await app.StartAsync();
-            try
-            {
-                var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!;
-                return new KestrelServer(app, new Uri(addresses.Addresses.Single()), authorizationHeaders);
-            }
-            catch (Exception)
-            {
-                await app.StopAsync();
-                await app.DisposeAsync();
-                throw;
-            }
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            Client.Dispose();
-            await app.StopAsync();
-            await app.DisposeAsync();
-        }
-    }
 }

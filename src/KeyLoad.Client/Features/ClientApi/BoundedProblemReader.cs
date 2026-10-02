@@ -39,7 +39,14 @@ internal static class BoundedProblemReader
                 return null;
             }
 
-            return JsonSerializer.Deserialize<Problem>(buffer.AsSpan(0, count), options);
+            try
+            {
+                return JsonSerializer.Deserialize<Problem>(buffer.AsSpan(0, count), options);
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
         }
         finally
         {

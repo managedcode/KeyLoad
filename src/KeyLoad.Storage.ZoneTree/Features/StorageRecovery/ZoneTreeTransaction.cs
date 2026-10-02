@@ -89,7 +89,8 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
     public void ValidateCommit() => _ = PreparePayload();
 
     internal StorageMutation[] PrepareChanges()
-        => preparedChanges ??= Changes.Select(pair => new StorageMutation(pair.Key, pair.Value)).ToArray();
+        => preparedChanges ??= Changes.Select(pair => new StorageMutation(pair.Key,
+            pair.Value is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(pair.Value))).ToArray();
 
     internal byte[] PreparePayload()
     {

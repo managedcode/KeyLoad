@@ -1,5 +1,24 @@
 # BlobStorage
 
+Accepted TASK-RUNTIME-BLOB-QUOTA-FIXTURE-W refines REQ/AC-BLOB-005 after
+run37005805424. BlobMissingQuotaReopenTests previously deleted a partition-scoped
+key although the actual quota row is resource-scoped. Encode the actual key with
+public KeyCodec using QuotaSpace/tenant/database/domain/resource, exactly matching
+the internal BlobKeys.Quota(blob) format without changing its visibility. Delete it,
+assert the actual row exists before deletion and is absent afterward, then retain
+the existing real reopen Corruption/no-position-change/no-apply assertions.
+Only that test file and its now-unused literal change; no production key encoding,
+quota, missing-state policy or timeout change. Source review and full exact-SHA
+GitHub verification are required; the prior failure is its tests-first baseline.
+
+Accepted TASK-RUNTIME-ADMISSION-W fixture refinement for REQ/AC-BLOB-003:
+BlobAuthorizationTests.StartActiveUpload supplies RowAccess(OwnerAlice) for the
+persisted restricted Alice principal, matching the existing PublishOwned setup.
+Run37005805424 rejected setup before its intended adversarial reads. Preserve
+all wrong-owner/creator/revoked-principal denials and exact error codes. The worker
+owns this test file only; ADR-038 authority and all product code stay unchanged.
+Lead source review/build and full exact-SHA GitHub tests qualify the correction.
+
 Status: contract Accepted; public implementation and runtime qualification pending. Owner: BlobStorage feature lead, with the KeyLoad integrator owning shared contracts. Decision: [ADR-038](../ADR/ADR-038-chunked-blob-storage.md). Authority: [root policy](../../AGENTS.md). Detailed criteria: [acceptance](../../blob-storage.acceptance.md); execution graph: [plan](../implementation/blob-storage.plan.md).
 
 ## Призначення, актори та межі

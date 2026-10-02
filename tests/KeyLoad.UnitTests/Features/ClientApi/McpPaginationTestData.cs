@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 /// <summary>Owns the strict cursor vectors and actual native page serializer used by pagination regressions.</summary>
 internal static class McpPaginationTestData
 {
-    internal const int CatalogCount = 37;
+    internal const int CatalogCount = McpCatalogExpectations.Count;
     internal const int FinalIndex = CatalogCount - 1;
     internal const int MaximumPageBytes = 65_536;
     internal const string Prefix = "keyload-mcp-v1:";
@@ -24,7 +24,7 @@ internal static class McpPaginationTestData
     internal const string CaseCursor = "KeyLoad-mcp-v1:1";
     internal const string FractionCursor = Prefix + "1.0";
     internal const string NonAsciiCursor = Prefix + "١";
-    internal const string EndCursor = Prefix + "37";
+    internal const string EndCursor = Prefix + "47";
     internal const string IntegerMaximumCursor = Prefix + "2147483647";
     internal const string OverflowCursor = Prefix + "999999999999999999999999999999999999";
     internal const string MarkerCursor = Prefix + Marker;

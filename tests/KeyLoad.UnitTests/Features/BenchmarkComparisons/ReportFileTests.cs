@@ -12,7 +12,11 @@ internal sealed class ReportFileTests
     public async Task JsonAndCsvPreserveSchemaEveryAttemptAndCsvEscaping()
     {
         var directory = Path.Combine(Path.GetTempPath(), "keyload-report-" + Guid.NewGuid().ToString("N"));
-        var report = Report();
+        var report = Report() with
+        {
+            Provenance = new GitHubProvenance(37005805424, 1, "managedcode/KeyLoad", "refs/heads/main", "ci.yml", "comparison"),
+            LoadGeneratorImage = "ghcr.io/managedcode/keyload-generator@sha256:0123456789abcdef"
+        };
         try
         {
             await ReportWriter.WriteAsync(report, directory, TestContext.Current!.Execution.CancellationToken);
@@ -23,6 +27,8 @@ internal sealed class ReportFileTests
                 .SequenceEqual(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(report, ReportWriter.JsonOptions)))).IsTrue();
             var restored = JsonSerializer.Deserialize<ComparisonReport>(json, ReportWriter.JsonOptions)!;
             await Assert.That(restored.SchemaVersion).IsEqualTo(report.SchemaVersion);
+            await Assert.That(restored.Provenance).IsEqualTo(report.Provenance);
+            await Assert.That(restored.LoadGeneratorImage).IsEqualTo(report.LoadGeneratorImage);
             await Assert.That(restored.Cases.Length).IsEqualTo(2);
             await Assert.That(restored.Cases.Sum(item => item.Samples.Length)).IsEqualTo(3);
             await Assert.That(restored.Cases[0].Samples[0].Success).IsTrue();
@@ -38,6 +44,34 @@ internal sealed class ReportFileTests
                 + "\"other\",PointRead,0,2,0,4.000,5.000,1.000,False,\"unavailable\",0,\"\",,," + Environment.NewLine;
             await Assert.That(csv).IsEqualTo(expected);
             await Assert.That(await File.ReadAllTextAsync(Path.Combine(directory, "results.md"))).IsEqualTo(ReportWriter.Markdown(report));
+        }
+        finally
+        {
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, true);
+            }
+        }
+    }
+
+    [Test]
+    public async Task JsonReportRejectsDefaultRequiredArraysWithTheStrictCollectionError()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "keyload-report-default-" + Guid.NewGuid().ToString("N"));
+        var report = Report();
+        const string detail = "A required collection must be an initialized JSON array.";
+        try
+        {
+            var casesError = await Assert.ThrowsExactlyAsync<JsonException>(() =>
+                ReportWriter.WriteAsync(report with { Cases = default }, directory, TestContext.Current!.Execution.CancellationToken))
+                ?? throw new InvalidOperationException("The default case array was not rejected.");
+            await Assert.That(casesError.Message).IsEqualTo(detail);
+
+            var samplesError = await Assert.ThrowsExactlyAsync<JsonException>(() =>
+                ReportWriter.WriteAsync(report with { Cases = [report.Cases[0] with { Samples = default }] }, directory,
+                    TestContext.Current!.Execution.CancellationToken))
+                ?? throw new InvalidOperationException("The default sample array was not rejected.");
+            await Assert.That(samplesError.Message).IsEqualTo(detail);
         }
         finally
         {
@@ -72,29 +106,26 @@ internal sealed class ReportFileTests
         using var cancellation = new CancellationTokenSource();
         using var observation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         Task? writing = null;
-        Task? watching = null;
         try
         {
             var jsonPath = Path.Combine(directory, "results.json");
-            var armed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            watching = ObserveJsonGrowthAsync(jsonPath, armed, observation.Token);
-            await armed.Task.WaitAsync(observation.Token);
             writing = ReportWriter.WriteAsync(report, directory, cancellation.Token);
-            await watching;
-            await cancellation.CancelAsync();
+            await ObserveJsonGrowthAsync(jsonPath, cancellation.Cancel, observation.Token);
             // A write that finishes before observed file growth fails this assertion instead of passing spuriously.
             var stopped = false;
             try
             { await writing; }
             catch (OperationCanceledException) { stopped = true; }
             await Assert.That(stopped).IsTrue();
+            var rawErrorBytes = (long)samples.Length * error.Length;
+            await Assert.That(new FileInfo(jsonPath).Length < rawErrorBytes / 4).IsTrue();
+            await Assert.That(File.Exists(Path.Combine(directory, "results.md"))).IsFalse();
             await Assert.That(File.Exists(Path.Combine(directory, "samples.csv"))).IsFalse();
         }
         finally
         {
             await observation.CancelAsync();
             await cancellation.CancelAsync();
-            await AwaitCanceledOrCompletedAsync(watching);
             await AwaitCanceledOrCompletedAsync(writing);
             if (Directory.Exists(directory))
             {
@@ -115,15 +146,14 @@ internal sealed class ReportFileTests
         catch (OperationCanceledException) { }
     }
 
-    private static async Task ObserveJsonGrowthAsync(string path, TaskCompletionSource armed,
-        CancellationToken observationToken)
+    private static async Task ObserveJsonGrowthAsync(string path, Action cancelWriter, CancellationToken observationToken)
     {
-        armed.SetResult();
         while (true)
         {
             observationToken.ThrowIfCancellationRequested();
             if (File.Exists(path) && new FileInfo(path).Length > 0)
             {
+                cancelWriter();
                 return;
             }
             await Task.Delay(1, observationToken);

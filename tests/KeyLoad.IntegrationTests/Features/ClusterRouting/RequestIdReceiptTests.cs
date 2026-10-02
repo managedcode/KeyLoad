@@ -22,7 +22,7 @@ internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
             Timeout = TimeSpan.FromSeconds(30)
         };
         var client = new KeyLoadClient(http, fixture.AdminKey);
-        var partition = new PartitionRef("integration", "database", "request-routing", Guid.NewGuid().ToString("N"));
+        var partition = new PartitionRef($"integration-{Guid.NewGuid():N}", "database", "request-routing", Guid.NewGuid().ToString("N"));
         await ConfigureResourceAsync(client, partition, timeout.Token);
         await VerifyStableWriteRetryAsync(client, recorder, partition, timeout.Token);
         await VerifyParallelReadsAsync(client, recorder, partition, timeout.Token);

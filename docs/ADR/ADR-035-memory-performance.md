@@ -430,6 +430,40 @@ compatible; rollback reverts implementation without a storage migration. No publ
 SDK schema, admission policy, consensus or clock-runtime change is in worker scope.
 Search admission remains separately open in the full resource inventory.
 
+### Accepted portable SIMD validation stage, TASK-MP-006D
+
+REQ-SR-002 / AC-MP-004/011/012 / AC-SEARCH-001 add edge qualification around the
+existing public metric and persisted search behavior. The lead accepts the
+validation-only optimization under the owner's operation-efficiency objective;
+the separately undefined term SMID remains unresolved.
+
+1. `simd_search_tests` owns only NEW `UnitTests/Features/Search/`
+   `VectorMetricValidationTests.cs` and `VectorMetricGoldenTests.cs`; write
+   public-score and actual ZoneTree search assertions first. Cover dynamic vector
+   width/block/tail, NaN and both infinities in either operand, length bounds and
+   mismatch, invalid metric precedence, zero, signed zero and finite extremes.
+   Existing score grouping is the baseline; do not introduce an alternate score
+   algorithm or fake store. Lead owns shared docs/CI and reviews every source.
+2. Qualify the unchanged production baseline at the test-source SHA through the
+   canonical GitHub workflow. Local tests/load/AppHost execution are forbidden.
+   Retain exact run/job/source and test counts; source builds do not qualify tests.
+3. After baseline and integrated caller-correctness gates pass, the lead changes
+   only `Query/Features/Search/PreparedSimilarity.cs:Validate`: keep length first,
+   use full portable Vector blocks with strict abs(value) < +Infinity, preserve
+   the scalar IsFinite tail. Do not change Create/Score/error constants or any
+   Vector.Widen/Vector.Dot/scalar metric reduction.
+4. GitHub normal hardware and DOTNET_EnableHWIntrinsic=0 invocations qualify the
+   same metric edge cases, alongside all existing unit/recovery/RF3 SDK/MCP and
+   comparison gates. No skip or fixed hardware width counts as proof.
+
+Join is the reviewed exact-source baseline/candidate/error and actual store
+outcome; CI evidence includes fallback invocation and zero skipped cases. This
+compatible internal change requires no CLR/wire/storage migration. Rollback
+reverts only the finite-validation loop and retains the acceptance regressions.
+No measured gain is declared without TASK-MP-011B matched RF3 server/resource
+artifacts and evidence-derived budgets; hardware availability affects performance,
+not validity or portability.
+
 ### Accepted Core work-reuse stages
 
 TASK-MP-007G implements REQ-MSG-008 / AC-MP-006/012: Topic Publish validates one
@@ -630,3 +664,91 @@ Rollback of instrumentation requires no persisted-data conversion and must not
 remove existing correctness budgets or request isolation. Rollback of an
 operation-level optimization is confined to that owning slice and must preserve
 its persisted format, exact outcomes and established budgets.
+
+## Accepted TASK-MP-008C progressive report output
+
+REQ-MP-004/REQ-BC-010 and AC-MP-010/012 preserve ADR-044 public immutable contracts.
+Run37005805424 is the failing cancellation baseline; source and native .NET 10
+serializer review confirm custom synchronous array converters prevent incremental
+async output. Keep those shared strict read/write converters unchanged. Add only
+private report/case write views exposing Cases and Samples as native async
+enumerables over owned immutable arrays, with exact scalar metadata/order and
+default-array JsonException. Never materialize another samples list/array or a
+whole-report UTF-8/string buffer. Targets remain under their original converter.
+
+Ordered stages: worker authors stronger real-file regressions and snapshots their
+source; adds internal helpers under Comparisons/Features/BenchmarkComparisons;
+lead changes only ReportWriter's JSON serialization join and shared docs; reviews
+public schema/lifetime/memory boundaries; enabled solution build, format/governance;
+complete exact-SHA GitHub qualification. Worker owns only new StreamedComparisonReport,
+StreamedComparisonCase and necessary bounded async-array helper files plus
+UnitTests/Features/BenchmarkComparisons/ReportFileTests.cs. Lead owns ReportWriter,
+central composition, contracts/docs/CI/status. No source Contracts, shared converter,
+producer, measured report schema, workflow permission or timeout changes.
+
+Existing byte-exact small report/roundtrip/CSV assertions gain nonnull provenance
+and image metadata. The existing 80MiB-input cancellation case cancels inside the
+actual early-growth observer, retains its ten-second bound and verifies a canceled
+write, partial JSON below one quarter of complete raw error bytes, and absent
+Markdown/CSV. No fake stream, file hook, synthetic dependency or full-output oracle.
+These resource/correctness assertions do not claim measured peak allocation or
+latency. Rollback reverts only the internal write projection/join; no persisted
+format, public CLR or schema migration. Required evidence includes tests-first
+source snapshot, reviewed diff and exact CI report/job/SHA; remain Accepted until
+all actual gates pass.
+
+## Accepted exact-CI test-fixture repairs
+
+TASK-RUNTIME-ADMISSION-W implements REQ-MP-002/005 and AC-MP-004/011/012 using
+only AnalyticalAdmissionTests.cs and new RealZoneTreeWriteGateHold.cs in UnitTests
+Features/ResourceExecution. A no-change real Commit holds the exclusive store gate;
+the shared read-holder remains untouched for its read-lifetime callers. Preserve
+existing bounded waits, saturation, cancellation, cleanup and follow-up assertions.
+TASK-RUNTIME-JSON-ORACLES-W changes only JsonTextProtocolTests.cs,
+EmbeddedBenchmarkContractTests.cs and TopicPublicationTests.cs. Native serializer
+exception, canonical stored order and typed exact-byte equality reflect existing
+AC-MP-006/012 and ADR-041/047 contracts. Input remains unsorted and no semantic
+assertion is removed. Existing failed run37005805424 is the tests-first baseline.
+
+Both workers own disjoint named test files; lead owns shared docs and integration.
+Ordered verification is source lifetime/oracle review, enabled solution build,
+formatter/governance and full exact-SHA GitHub UnitTests and regressions. No new
+API, data format, package, timeout or authority migration. Rollback reverts only
+the corresponding fixture/oracle changes, retaining the original production paths.
+
+TASK-RUNTIME-Kestrel-W additionally owns only
+UnitTests/Features/ClientApi/KeyLoadClientTransportTests.cs for REQ-CLIENT-002 and
+AC-MP-009/012. Replace the full 1 MiB pre-cancellation write with a bounded partial
+initial chunk and named handler/write/flush coordination, surfacing unexpected
+handler faults. Keep the response incomplete and all five-second waits, actual
+cancellation/request-abort/reuse assertions and original transport mapping. The
+macOS failed run37005805424 is its tests-first baseline; source lifecycle review,
+enabled build/format and full multi-OS GitHub suites qualify this fixture repair.
+No production, data or API migration; rollback changes only test coordination.
+
+The enabled join found KLD0031: the transport test type includes its two nested
+fixture implementations and totals 290 code lines. Lead numeric integration owns
+new ClientApi/MidBodyCancellationResponse.cs and KeyLoadClientKestrelServer.cs,
+moving those cohesive real response/lifecycle helpers out of the test type without
+partial classes, assertions or policy exceptions. Pass the existing next NodeStatus
+and chunk size explicitly; preserve every byte, stage, timeout and cleanup call.
+Review the extraction before the next enabled build and full GitHub tests.
+
+## Accepted runtime problem-body repair
+
+TASK-RUNTIME-ERROR-DECODING-W implements REQ-CLIENT-002 and AC-MP-009/012.
+Exact run37005805424 provides the existing failing real-Kestrel regression:
+malformed error JSON escapes bounded Problem decoding and is classified as a
+transport read failure. The lead owns only Client/Features/ClientApi/
+BoundedProblemReader.cs, this contract and ClientApi evidence. Catch JsonException
+at Problem deserialization and return null, preserving the established null/
+oversized fallback. Do not catch cancellation or I/O, change success decoding,
+valid server details, command identity or the 65,536-byte bound.
+
+Ordered stages are failing CI baseline; accepted source repair; enabled solution
+build, formatter and static governance; complete exact-SHA GitHub verification.
+The existing ErrorBodiesArePreservedWhenValidAndBoundedWhenNullMalformedOrOversized
+test proves valid, malformed, null and oversized responses over real Kestrel and
+the original write ID. Source rollback needs no data, package or public-contract
+migration. Read-only workers own independent failure families; this small shared
+transport/error join stays with the lead to serialize contract and evidence edits.
