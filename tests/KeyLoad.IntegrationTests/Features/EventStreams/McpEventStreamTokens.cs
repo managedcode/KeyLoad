@@ -20,6 +20,12 @@ internal static class McpEventStreamTokens
     internal const string InitialHeaders = "{\"source\":\"checkout\",\"sequence\":1}";
     internal const string PaidHeaders = "{\"source\":\"billing\",\"sequence\":2}";
     internal const string ShippedHeaders = "{\"source\":\"fulfillment\",\"sequence\":3}";
+    internal const string CanonicalInitialPayload = "{\"private\":\"mcp-private-event-canary\",\"status\":\"created\"}";
+    internal const string CanonicalPaidPayload = "{\"private\":\"mcp-private-event-canary\",\"status\":\"paid\"}";
+    internal const string CanonicalShippedPayload = "{\"private\":\"mcp-private-event-canary\",\"status\":\"shipped\"}";
+    internal const string CanonicalInitialHeaders = "{\"sequence\":1,\"source\":\"checkout\"}";
+    internal const string CanonicalPaidHeaders = "{\"sequence\":2,\"source\":\"billing\"}";
+    internal const string CanonicalShippedHeaders = "{\"sequence\":3,\"source\":\"fulfillment\"}";
     internal const string CorrelationId = "mcp-event-correlation";
     internal const string CausationIdCreated = "mcp-event-cause-created";
     internal const string CausationIdPaid = "mcp-event-cause-paid";

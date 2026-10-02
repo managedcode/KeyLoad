@@ -162,7 +162,7 @@ function fetchData(kind, cursor) {
         query:{
             collection:resource.name,
             alias:null,
-            projection:[],
+            projection:[{path:Config.wildcard, alias:Config.wildcard}],
             filter:null,
             order:[],
             limit:Config.rows,

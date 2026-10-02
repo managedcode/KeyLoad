@@ -185,9 +185,10 @@ limits. Native BlobResourceContents.FromBytes receives raw bytes; official clien
 use DecodedData, avoiding double base64. Native resources/read has no IsError;
 unresolved URIs use safe protocol InvalidParams for the current revision. No
 unfinished blob tool or resource may be advertised. The current source catalog
-contains 47 operations: the base 37 below plus ten implemented-source BlobStorage
-tools whose names/routes/contracts are frozen by ADR-038. All runtime and delivery
-gates remain pending; a catalog count does not qualify blob semantics.
+contains 50 operations: the base 37 below, ten implemented-source BlobStorage
+tools whose names/routes/contracts are frozen by ADR-038, and three additive
+read-only [AdminDashboard](ADR-051-admin-dashboard.md) tools. All runtime and
+delivery gates remain pending; a catalog count does not qualify blob semantics.
 
 ```mermaid
 flowchart LR

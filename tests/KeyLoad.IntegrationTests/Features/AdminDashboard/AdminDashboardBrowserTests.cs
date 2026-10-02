@@ -12,7 +12,9 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
     private const string SelectCollections = "document.querySelector('button[data-view=collections]').click();true";
     private const string ResourcesLoaded = "document.querySelector('#resource-list')?.textContent.includes('dashboard-documents')===true";
     private const string SelectResource = "(()=>{const button=[...document.querySelectorAll('#resource-list button')].find(item=>item.textContent.includes('dashboard-documents'));button.click();return true;})()";
-    private const string RowsLoaded = "document.querySelector('#data-table')?.textContent.includes('document-1')===true";
+    private const string RowsLoaded = "document.querySelector('#data-title')?.textContent==='dashboard-documents'"
+        + "&&document.querySelectorAll('#data-table tbody tr').length===1"
+        + "&&document.querySelector('#data-table')?.textContent.includes('document-1')===true";
     private const string InjectionAbsent = "window.dashboardInjection!==true";
     private const string FocusVisible = "(()=>{const refresh=document.getElementById('refresh');refresh.focus();return document.activeElement===refresh;})()";
 

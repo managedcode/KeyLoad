@@ -4,6 +4,7 @@ export const Config  =  Object.freeze({
     pageSize:50,
     rows:25,
     astVersion:1,
+    wildcard:'*',
     zero:0,
     one:1,
     unauthenticated:401,

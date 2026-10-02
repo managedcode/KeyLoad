@@ -1222,14 +1222,14 @@
     ],
     "manualDesignReview": "desktop_1280x720_and_mobile_390x844_disconnected_real_shell_inspected_2026_10_02_only_subjective_design",
     "localTestsExecuted": false,
-    "qualification": "candidate_build_format_governance_analyzers_pass_RF3_catalog_queue_node_and_http_observation_pass_shell_browser_fixture_repairs_pending_exact_source_requalification",
+    "qualification": "805_unit_and_13_dashboard_unit_pass_each_OS_all_6_RF3_admin_API_pass_browser_invalid_AST_projection_repair_pending_exact_source_requalification",
     "coverage": "required_thresholds_preserved_collector_and_actual_result_not_yet_available",
     "candidateRun": {
-      "id": 37032546228,
-      "sha": "b533c80a128a85c6e2072de3bc011a09d4a97cc7",
-      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37032546228",
-      "conclusion": "failure_27_of_36_RF3_pass_no_skips_three_dashboard_observation_tests_pass_shell_500_browser_not_started_test_epoch_and_clock_repairs_unqualified",
-      "artifacts": "artifacts/qualification/admin-dashboard/37032546228/"
+      "id": 37036628601,
+      "sha": "1bee2609ff0de620640f304e2e42eb2859716646",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37036628601",
+      "conclusion": "failure_805_of_805_unit_each_OS_13_dashboard_unit_each_OS_all_6_RF3_admin_API_pass_browser_row_wait_error_and_three_EventStreams_oracle_failures_no_skips",
+      "artifacts": "artifacts/qualification/admin-dashboard/37036628601/"
     },
     "baselineRun": {
       "id": 37028314087,

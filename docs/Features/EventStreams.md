@@ -68,3 +68,16 @@ Preserve all existing range/policy/budget/cancellation and fixture lifetime case
 This is test-only input repair: ADR-035/041/039 and the canonical batch contract
 are sufficient, with no product/API/data boundary change or separate ADR. Lead
 reviews/builds/formats and qualifies complete exact-SHA GitHub unit/RF3 suites.
+
+TASK-AD-E2 preserves REQ/AC-EVENT-004/005/006 and AC-MCP-002/005/007 after
+run37032546228 at exactb533c80 fails three RF3 cases at byte-exact EventData
+expectations. The existing production contract canonicalizes JSON payload/header
+property order; SDK/MCP bytes already agree, while the fixture expects unsorted
+producer bytes. One worker owns only IntegrationTests/Features/EventStreams/
+McpEventStreamScenario.cs and McpEventStreamTokens.cs. Keep unsorted InputEvents
+for actual append and handcrafted independent canonical ExpectedEvents for the
+unchanged exact equality, identity, sequence, paging, retry and security assertions.
+Do not compute expectations through production normalization or weaken comparisons.
+ADR-035/039 remain sufficient for this test-only oracle correction; no product,
+schema, authority or transport contract changes. Lead owns integration/delivery
+and exact-SHA GitHub qualification; local tests remain prohibited.
