@@ -71,16 +71,16 @@ internal sealed class McpOutputSchemaTests
             .Any(value => value.GetString() == OwnershipEpoch)).IsFalse();
     }
 
-    /// <summary>Only the four accepted absent-object reads allow a null root result.</summary>
+    /// <summary>The four absent-object reads and the dynamic SQL adapter allow a null root result.</summary>
     [Test]
-    public async Task AcMcp007OnlyTheFourFrozenAbsentResultsAllowRootResultNull()
+    public async Task AcMcp007AbsentReadsAndDynamicSqlAllowRootResultNull()
     {
         foreach (var descriptor in McpOperationCatalog.Entries)
         {
             var result = descriptor.OutputSchema.GetProperty(McpSchemaInspector.OneOf)[0]
                 .GetProperty(McpSchemaInspector.Properties).GetProperty(McpSchemaInspector.Result);
             var expected = descriptor.Name is McpCatalogExpectations.DocumentsGet or McpCatalogExpectations.MessagesInspect
-                or BlobAgentCases.Metadata or BlobAgentCases.UploadInfo;
+                or BlobAgentCases.Metadata or BlobAgentCases.UploadInfo or SqlOperationProtocol.ToolName;
             await Assert.That(McpSchemaInspector.HasType(result, McpSchemaInspector.Null)).IsEqualTo(expected);
         }
     }

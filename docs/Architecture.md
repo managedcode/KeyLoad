@@ -1,5 +1,35 @@
 # KeyLoad architecture and ownership map
 
+Owner clarification2026-10-02: KeyLoad is one server/database for AI agents with
+linked documents, relational rows, graph, vectors/text search, events, queues,
+time series and files/blobs. SQL is the central versioned language. The first
+unified invocation/typed-row stage is specified by [ADR-054](ADR/ADR-054-central-sql.md)
+and [ADR-055](ADR/ADR-055-typed-relational-rows.md); qualification remains pending.
+Typed rows reuse Collection entity storage so graph/vector references retain one
+identity. [RelationalStorage](Features/RelationalStorage.md) defines schemas and
+native constraints; QueryExecution owns the SQL adapter over canonical operations.
+
+```mermaid
+flowchart LR
+    Agent[AI agent SQL SDK MCP] --> Server[One server API]
+    Server --> SQL[Versioned SELECT and CALL compiler]
+    SQL --> Gateway[Existing signed Orleans gateway]
+    Gateway --> Host[Node local PartitionHost RF3]
+    Host --> Entity[Canonical documents and typed rows]
+    Host --> Models[Graph search events queues series blobs]
+    Entity --> Models
+```
+
+```mermaid
+classDiagram
+    ResourceDefinition --> RelationalSchema
+    RelationalSchema --> RelationalColumn
+    SqlOperationRequest --> SqlOperationCompiler
+    SqlOperationCompiler --> McpOperationDescriptor : canonical typed decoder
+    McpOperationDescriptor --> CanonicalOperationGateway
+    RelationalRowValidation --> DocumentRecord : validates final row image
+```
+
 The additive [AdminDashboard](Features/AdminDashboard.md) slice under [ADR-051](ADR/ADR-051-admin-dashboard.md) hosts the runtime read-only console in `src/KeyLoad.Server/Features/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core catalog/queue readers, matching Client SDK and UnitTests/IntegrationTests slices. It borrows the existing unique Orleans request/read actors and node-local administration; physical observations are explicitly per node. The public benchmark `site/` remains its own surface. Both surfaces share one light visual identity under [ADR-053](ADR/ADR-053-unified-visual-identity.md): the console owns the canonical `brand.css`/`logo.svg`, and the site keeps byte-identical mirrors checked by SiteTests. Exact-SHA dashboard unit/RF3/native browser cases pass and retained desktop/mobile images are visually reviewed; complete recovery/comparison and numeric coverage qualification remains open.
 
 ```mermaid
@@ -13,7 +43,7 @@ flowchart LR
 
 Read the root and nearest project-local AGENTS.md before changing this solution. The product specification is [architecture v0.3](design/architecture-v0.3.uk.md). This document is a navigation map, not a replacement specification or a readiness claim.
 
-The [documentation index](README.md) is the complete entry point for 21 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 53 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
+The [documentation index](README.md) is the complete entry point for 22 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 55 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
 
 Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
 
@@ -103,7 +133,7 @@ classDiagram
 
 ## Feature convention and migration
 
-Canonical slice names use PascalCase consistently: RepositoryGovernance, BenchmarkComparisons, DocumentStorage, EventStreams, Messaging, GraphTraversal, TimeSeries, Search, QueryExecution, Authorization, ChangeFeeds, StorageRecovery, ClusterReplication, ClusterRouting, ClientApi, BackupRestore, BlobStorage, ResourceExecution, CodeQuality and TestInfrastructure. Their owning contracts and navigation are in the [Feature index](README.md).
+Canonical slice names use PascalCase consistently: RepositoryGovernance, BenchmarkComparisons, DocumentStorage, RelationalStorage, EventStreams, Messaging, GraphTraversal, TimeSeries, Search, QueryExecution, Authorization, ChangeFeeds, StorageRecovery, ClusterReplication, ClusterRouting, ClientApi, BackupRestore, BlobStorage, ResourceExecution, CodeQuality and TestInfrastructure. Their owning contracts and navigation are in the [Feature index](README.md).
 
 The embedded microbenchmark boundary follows Accepted ADR-047; it is peripheral
 runner qualification and does not replace the first product server's RF3 topology.
@@ -255,7 +285,7 @@ parallel reduction is introduced. [Search](Features/Search.md) and
 [BenchmarkComparisons](Features/BenchmarkComparisons.md) keep source, correctness
 and measured performance evidence distinct.
 
-Public chunked blobs and partial reads are required in [BlobStorage](Features/BlobStorage.md), with unresolved contracts in Proposed [ADR-038](ADR/ADR-038-chunked-blob-storage.md). Required official MCP and simple agent adapters belong to [ClientApi](Features/ClientApi.md) and Proposed [ADR-039](ADR/ADR-039-official-mcp-agent-api.md); business operations retain their existing Feature owners. Private snapshot chunks and backup archive pieces do not implement public BlobStorage.
+Public chunked blobs and partial reads have canonical source implementations under [BlobStorage](Features/BlobStorage.md) and Accepted [ADR-038](ADR/ADR-038-chunked-blob-storage.md). Official MCP and simple agent adapters belong to [ClientApi](Features/ClientApi.md) and Accepted [ADR-039](ADR/ADR-039-official-mcp-agent-api.md); business operations retain their existing Feature owners. The typed .NET blob lifecycle/range adapter and SQL CALL join are specified in [central SQL evidence](implementation/central-sql.md). Exact delivered-SHA qualification remains required; private snapshot chunks and backup archive pieces are separate storage protocols.
 
 ```mermaid
 flowchart TB
@@ -345,7 +375,7 @@ classDiagram
 
 ## Current implementation and qualification gaps
 
-The product design still contains earlier DotNext-candidate and standalone-first text. Current AGENTS policy supersedes those choices. The current server source composes a node-local PartitionHost with the Orleans silo, distributed grain directory, activation repartitioner and separate request grains under [ADR-036](ADR/ADR-036-orleans-foundation.md). The three-node Aspire graph is present. No current integration case forces activation migration and verifies node-local storage ownership afterward; delivered-source GitHub qualification is pending. TUnit package/test migration and persisted principal/API-key verifier, grant, feed and paused local restore behavior are source-present. Public BlobStorage and official MCP/agent protocol mapping remain Proposed. The diagrams show mandatory ownership and delivery boundaries; they do not claim every target is implemented. Current build/formatter prerequisites and their exact historical source cuts are recorded in [CodeQuality evidence](implementation/code-quality.md); full solution and delivered-SHA qualification remain open.
+The product design retains historical DotNext-candidate and standalone-first text beneath the current owner clarification. Current AGENTS policy supersedes those choices. The current server source composes a node-local PartitionHost with the Orleans silo, distributed grain directory, activation repartitioner and separate request grains under [ADR-036](ADR/ADR-036-orleans-foundation.md). The three-node Aspire graph is present. No current integration case forces activation migration and verifies node-local storage ownership afterward; delivered-source GitHub qualification is pending. TUnit package/test migration and persisted principal/API-key verifier, grant, feed and paused local restore behavior are source-present. Public BlobStorage and official MCP/agent contracts are Accepted and source-present, with exact delivered-SHA qualification pending. The diagrams show mandatory ownership and delivery boundaries; they do not claim every target is implemented. Current build/formatter prerequisites and their exact historical source cuts are recorded in [CodeQuality evidence](implementation/code-quality.md); full solution and delivered-SHA qualification remain open.
 
 The successful [GitHub CI baseline 36926803549](https://github.com/managedcode/KeyLoad/actions/runs/36926803549) measured commit 9c570f8c33a7a9667507a8e1c0ca68860de3be45. It does not qualify later uncommitted work, power-loss durability, endurance or production readiness. See [implementation status](implementation/status.json), [durability audit](implementation/durability-audit.md), [comparative benchmark contract](implementation/comparative-benchmarks.md), [RepositoryGovernance](Features/RepositoryGovernance.md) and [ADR-032](ADR/ADR-032-mcaf-governance.md).
 

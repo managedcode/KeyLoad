@@ -18,6 +18,7 @@
 - Maintain meaningful success, negative, edge and failure assertions. Coverage qualification is not configured; numeric complexity rules are configured but their complete delivered-SHA gate remains pending. Neither gate may be claimed as passing without its authentic required evidence.
 
 ## Read-first and canonical slice ownership
+- Owns `Features/RelationalStorage/` real-ZoneTree schema/row/constraint/atomicity/linkage regressions under ADR-055 and QueryExecution SQL compilation/equality regressions under ADR-054; authored cases require exact-SHA GitHub execution.
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned test slices: `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, `TimeSeries`, `Search`, `QueryExecution`, `Authorization`, `ChangeFeeds`, `StorageRecovery`, `ClusterReplication`, `ClusterRouting`, `ClientApi`, and `BackupRestore`.
 - Target test paths are `Features/<SliceName>/` for each named slice; `TestDatabase.cs` remains shared fixture infrastructure.

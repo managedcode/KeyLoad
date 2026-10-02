@@ -1,5 +1,19 @@
 # QueryExecution
 
+Owner direction2026-10-02 requires SQL as the central language for one linked AI
+database. [ADR-054](../ADR/ADR-054-central-sql.md) adds a versioned unified SQL
+operation envelope: existing Q1 SELECT plus CALL into the sole canonical public
+operation catalog. [RelationalStorage](RelationalStorage.md)/ADR-055 supplies typed
+rows using those same document query/index paths. This is the first invocation
+stage; declarative model sources, arbitrary JOIN and FK remain required pending
+product stages. Exact source/qualification coverage is [central SQL evidence](../implementation/central-sql.md).
+
+| Requirement | Acceptance | Task/test/evidence |
+|---|---|---|
+| REQ-AISQL-001: one server supports linked model operations with SQL central | AC-AISQL-001/005/006 | TASK-AISQL-004/006/008, strict compiler and real SDK/official MCP RF3 differential cases |
+| REQ-AISQL-003: versioned single-statement SQL preserves canonical authority and resources | AC-AISQL-005–007 | TASK-AISQL-006/008, rejection/ID/retry/permission/cancellation/admission/metadata cases |
+| REQ-AISQL-004: native indexed work and honest comparable performance | AC-AISQL-008–010 | TASK-AISQL-007/008, reversed equality real-store regressions and exact GitHub gates |
+
 Status: Accepted repair contract; qualification pending. Requirements map to
 [ResourceExecution](ResourceExecution.md), AC-MP-003/012 and
 [ADR-035](../ADR/ADR-035-memory-performance.md).

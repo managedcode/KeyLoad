@@ -21,11 +21,22 @@ internal sealed class McpCatalogTests
             .IsEqualTo(McpCatalogExpectations.Count);
         foreach (var expected in McpCatalogExpectations.Entries)
         {
-            await Assert.That(McpOperationCatalog.TryGet(expected.Name, out var actual)).IsTrue();
+            await Assert.That(McpOperationCatalog.TryGetTool(expected.Name, out var actual)).IsTrue();
             await Assert.That(actual!.Route).IsEqualTo(expected.Route);
             await Assert.That(actual.ReadKind).IsEqualTo(expected.ReadKind);
             await Assert.That(actual.CommandKind).IsEqualTo(expected.CommandKind);
-            await Assert.That(actual.ReadKind.HasValue ^ actual.CommandKind.HasValue).IsTrue();
+            if (expected.Name == SqlOperationProtocol.ToolName)
+            {
+                await Assert.That(actual.IsAdapter).IsTrue();
+                await Assert.That(actual.ReadOnly || actual.Idempotent).IsFalse();
+                await Assert.That(actual.Destructive).IsTrue();
+                await Assert.That(McpOperationCatalog.TryGet(expected.Name, out _)).IsFalse();
+            }
+            else
+            {
+                await Assert.That(actual.IsAdapter).IsFalse();
+                await Assert.That(actual.ReadKind.HasValue ^ actual.CommandKind.HasValue).IsTrue();
+            }
             await Assert.That(string.IsNullOrWhiteSpace(actual.Description)).IsFalse();
             await Assert.That(actual.InputSchema.GetProperty(TypeKey).GetString()).IsEqualTo(ObjectType);
             await Assert.That(actual.InputSchema.GetProperty(AdditionalPropertiesKey).ValueKind).IsEqualTo(JsonValueKind.False);

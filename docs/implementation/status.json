@@ -1906,5 +1906,26 @@
       "url": "https://github.com/managedcode/KeyLoad/actions/runs/37028314087",
       "conclusion": "failure"
     }
+  },
+  "AI-SQL-001": {
+    "title": "Єдиний SQL-вхід для пов’язаної AI database",
+    "status": "in_progress",
+    "sourceStage": "version1_SELECT_CALL_canonical_operation_adapter_typed_rows_native_equality_planning",
+    "qualification": "pending_exact_delivered_SHA_GitHub_full_gates",
+    "evidence": [
+      "docs/Features/QueryExecution.md",
+      "docs/Features/RelationalStorage.md",
+      "docs/ADR/ADR-054-central-sql.md",
+      "docs/ADR/ADR-055-typed-relational-rows.md",
+      "docs/implementation/central-sql.md",
+      "ai-database-sql.acceptance.md",
+      "ai-database-sql.plan.md"
+    ],
+    "remaining": [
+      "SQL_declarative_cross_model_sources_and_JOIN",
+      "relational_FK_check_default_cascade_and_migrations",
+      "dedicated_RF3_SQL_table_CALL_performance_and_per_node_resources",
+      "numeric_coverage_endurance_power_loss"
+    ]
   }
 }

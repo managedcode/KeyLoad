@@ -18,6 +18,7 @@
 - This suite crosses process, network, authorization and cluster boundaries. Process-kill results are not power-loss proof; do not report production readiness without all required fault and endurance gates.
 
 ## Read-first and canonical slice ownership
+- Owns `Features/RelationalStorage/` and QueryExecution unified SQL RF3 differential cases under ADR-054/055, through actual .NET/official MCP clients. Separate calls can observe different committed cuts; verify each contract and exact logical output rather than asserting cross-node cut equality.
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Shared cluster and SDK transport tests use `Features/ClusterReplication/` and `Features/ClientApi/`. Business integration cases MUST mirror their owning business slice under `Features/<same-business-SliceName>/`, including `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, `TimeSeries`, `Search`, `QueryExecution`, `Authorization` and `ChangeFeeds`.
 - `ClusterFixture.cs` is shared test infrastructure; `ClusterTests.cs` and `AdmissionClusterTests.cs` are current feature test entry points.

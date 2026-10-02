@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.BlobStorage;
 internal sealed class BlobAgentCatalogTests
 {
     private const int BlobCount = 10;
-    private const int PublicCount = 53;
+    private const int PublicCount = 54;
     private const string AdditionalProperties = "additionalProperties";
     private const string Receipt = "receipt";
     private const string Value = "value";
@@ -37,7 +37,7 @@ internal sealed class BlobAgentCatalogTests
 
     /// <summary>Every frozen name resolves once, routes exactly and preserves the accepted read/write hints.</summary>
     [Test]
-    public async Task AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog()
+    public async Task AcBlob006TenExactToolsRetainTheirContractsInThePublicCatalog()
     {
         var cases = BlobAgentCases.All();
         await Assert.That(cases.Length).IsEqualTo(BlobCount);

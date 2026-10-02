@@ -18,6 +18,7 @@
 - Transactions, command ordering, admission, projections and recovery contracts are high-risk. Runtime claims require the exact GitHub Actions run/SHA/artifacts; process-kill evidence does not establish power-loss durability.
 
 ## Read-first and canonical slice ownership
+- Owns `Features/RelationalStorage/` final-image/schema/raw-patch validation under ADR-055; typed rows reuse canonical Collection entity/index storage. Preserve mixed-model atomicity, graph/vector identity, exact raw numeric checks and per-operation bounds.
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned slices: `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, and `TimeSeries`; target paths: `Features/DocumentStorage/`, `Features/EventStreams/`, `Features/Messaging/`, `Features/GraphTraversal/`, and `Features/TimeSeries/`.
 - `DatabaseEngine.cs` and shared atomic transaction primitives remain shared building blocks; feature behavior goes in its named slice.

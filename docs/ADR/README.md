@@ -61,6 +61,14 @@
 
 ## Ідентичність і пріоритет
 
+Owner-directed unified AI database continuation:
+
+- [ADR-054 central SQL](ADR-054-central-sql.md): Accepted versioned SELECT/CALL
+  over the existing authorized operation catalog; exact qualification pending.
+- [ADR-055 typed relational rows](ADR-055-typed-relational-rows.md): Accepted
+  schema-constrained canonical entities/native indexes; JOIN/FK and qualification
+  remain separate pending stages.
+
 ADR-001–031 materialize перелік продуктової специфікації; unresolved provider/algorithm/upgrade/token choices лишаються Proposed. Старий optional request-facade/DotNext direction не переважає current mandatory root policy: Orleans only, окремий grain для кожного request, distributed directory/migration, node-local storage owner, Docker/Aspire RF3 і TUnit/SDK/MCP gates.
 
 Identity correction 2026-10-02: два незафіксовані ADR мали номер 034. Comparisons зберігає ADR-034 та шлях, бо на нього вже посилаються mandatory local policies. Foundation отримує ADR-036; його decision/body/requirements збережені, dependent doc links оновлені. Це виправлення дубля, не зміна product architecture і не repeated/reused decision identity.

@@ -13,6 +13,7 @@ internal static class QueryApi
 
     internal static void Map(WebApplication app)
     {
+        app.MapPost(SqlOperationProtocol.Route, ExecuteSqlAsync);
         app.MapPost(QueryPath, (QueryRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.Query, request));
         app.MapPost(AstPath, (AstQueryRequest request, HttpContext context) =>
@@ -23,5 +24,15 @@ internal static class QueryApi
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.LiveQueryStart, request));
         app.MapPost(LiveReadPath, (ReadLiveQueryRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.LiveQueryRead, request));
+    }
+
+    private static async Task<IResult> ExecuteSqlAsync(SqlOperationRequest request, HttpContext context,
+        KeyLoad.Core.DatabaseEngine database, KeyLoad.Core.HttpAdmissionGovernor admission)
+    {
+        var operation = SqlOperationCompiler.Compile(request, database.Limits, admission.Limits.MaxBodyBytes,
+            context.RequestAborted);
+        var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
+            operation.CommandKind, operation.CommandId, operation.Payload, context.RequestAborted).ConfigureAwait(false);
+        return new GrainJsonResult(reply.Payload);
     }
 }

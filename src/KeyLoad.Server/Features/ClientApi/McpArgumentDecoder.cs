@@ -43,7 +43,7 @@ internal static class McpArgumentDecoder
         return new McpDecodedOperation(null, kind, stableId, McpBoundedJson.Serialize(request, maximumPayloadBytes));
     }
 
-    private static TRequest Request<TRequest>(IDictionary<string, JsonElement>? arguments, bool headerCommand)
+    internal static TRequest Request<TRequest>(IDictionary<string, JsonElement>? arguments, bool headerCommand)
     {
         ValidateKeys(arguments, headerCommand);
         var value = arguments![McpCatalogProtocol.Request];

@@ -11,13 +11,13 @@ internal sealed record McpOperationDescriptor
 
     internal McpOperationDescriptor(string name, string route, GrainReadKind? readKind, OperationKind? commandKind,
         string description, JsonElement inputSchema, JsonElement outputSchema, McpToolHints hints,
-        Func<IDictionary<string, JsonElement>?, int, McpDecodedOperation> decoder)
+        Func<IDictionary<string, JsonElement>?, int, McpDecodedOperation> decoder, bool adapter = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(route);
         ArgumentException.ThrowIfNullOrWhiteSpace(description);
         ArgumentNullException.ThrowIfNull(decoder);
-        if (readKind.HasValue == commandKind.HasValue)
+        if (adapter ? readKind.HasValue || commandKind.HasValue : readKind.HasValue == commandKind.HasValue)
         {
             throw new ArgumentException(McpCatalogProtocol.InvalidOperation, nameof(readKind));
         }
@@ -31,6 +31,7 @@ internal sealed record McpOperationDescriptor
         ReadOnly = hints.ReadOnly;
         Idempotent = hints.Idempotent;
         Destructive = hints.Destructive;
+        IsAdapter = adapter;
         this.decoder = decoder;
     }
 
@@ -54,6 +55,8 @@ internal sealed record McpOperationDescriptor
     internal bool Idempotent { get; }
     /// <summary>Advisory hint for operations that can remove or consume existing data.</summary>
     internal bool Destructive { get; }
+    /// <summary>Whether the decoder resolves one canonical operation rather than declaring a fixed effect.</summary>
+    internal bool IsAdapter { get; }
 
     /// <summary>Decodes strict outer arguments using the actual canonical JSON contract.</summary>
     /// <param name="arguments">Native SDK arguments, inspected without mutation.</param>

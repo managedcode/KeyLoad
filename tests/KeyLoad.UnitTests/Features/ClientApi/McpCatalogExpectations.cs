@@ -94,7 +94,7 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 53;
+    internal const int Count = 54;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
@@ -140,6 +140,7 @@ internal static class McpCatalogExpectations
         .. BlobAgentCases.All().Select(item => (item.Name, item.Route, item.ReadKind, item.CommandKind)),
         (DashboardName, DashboardRoute, GrainReadKind.AdminDashboard, null),
         (ResourcesListName, ResourcesListRoute, GrainReadKind.AdminResources, null),
-        (QueueBrowseName, QueueBrowseRoute, GrainReadKind.AdminQueue, null)
+        (QueueBrowseName, QueueBrowseRoute, GrainReadKind.AdminQueue, null),
+        (SqlOperationProtocol.ToolName, SqlOperationProtocol.Route, null, null)
     ];
 }

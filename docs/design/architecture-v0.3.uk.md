@@ -12,6 +12,12 @@
 Цей документ містить результати перевірки публічної документації, вибіркове читання API ZoneTree та запропоновані рішення для KeyLoad. Прототип, навантажувальні тести, перевірки відмов і повний аудит коду залежностей у межах цього дослідження не виконувалися. Числові межі в розділах про тести й бюджет запитів є початковими інженерними цілями. Версії пакетів та source commits потрібно зафіксувати в KL-001 перед реалізацією.
 
 
+### Уточнення власника 2026-10-02
+
+KeyLoad — один сервер бази для AI-агентів: документи, типізовані реляційні дані, графи, вектори, текстовий/гібридний пошук, файли/blob, черги, події та часові ряди. Моделі можуть посилатися одна на одну через canonical identity. SQL — центральна versioned мова для всіх моделей; продуктивність і SIMD/.NET intrinsics — першочергові, з доказами тільки із зіставних GitHub RF3 вимірювань. Це уточнення замінює scalar-only SQL як завершений scope і старий standalone-first/DotNext напрям, зберігаючи історичний дизайн нижче.
+
+[ADR-054](../ADR/ADR-054-central-sql.md) і [ADR-055](../ADR/ADR-055-typed-relational-rows.md) визначають перший SQL invocation/typed-row етап, а [implementation matrix](../implementation/central-sql.md) явно відділяє реалізоване, некваліфіковане й наступні JOIN/FK/declarative-source етапи. «Один сервер» не змінює RF3 та node-local журнали.
+
 ### Що змінилося у редакції 0.3
 
 Event Store і durable queues включені до раннього kernel. Додано 10 розділів, 24 задачі KL-081..KL-104 та ADR-023..ADR-031. Спільний TransactionDomain формалізує atomic document + event + enqueue, а inbox/lease contract визначає protected processing effects. Описано topics, checkpoints, delayed delivery, privacy та paused restore. PostgreSQL baseline розширено Marten/Wolverine і messaging workload. Редакція 0.2 збережена окремими файлами.

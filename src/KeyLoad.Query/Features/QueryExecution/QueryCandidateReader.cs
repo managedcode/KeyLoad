@@ -97,21 +97,26 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
     private static IEnumerable<KeyValuePair<string, object?>> Equalities(Predicate? predicate,
         Dictionary<string, JsonElement>? parameters)
     {
-        if (predicate is Logical { Operator: "AND" } conjunction)
+        if (predicate is Logical { Operator: SqlSyntax.And } conjunction)
         {
             foreach (var pair in Equalities(conjunction.Left, parameters).Concat(Equalities(conjunction.Right, parameters)))
             {
                 yield return pair;
             }
         }
-        else if (predicate is Comparison { Operator: "=", Left: FieldOperand field, Right: ValueOperand value })
+        else if (predicate is Comparison { Operator: SqlSyntax.Equals } comparison)
         {
-            yield return new(field.Path, JsonData.Scalar(value.Value, string.Empty));
-        }
-        else if (predicate is Comparison { Operator: "=", Left: FieldOperand parameterField, Right: ParameterOperand parameter }
-            && parameters?.TryGetValue(parameter.Name, out var literal) == true)
-        {
-            yield return new(parameterField.Path, JsonData.Scalar(literal, string.Empty));
+            var field = comparison.Left as FieldOperand ?? comparison.Right as FieldOperand;
+            var operand = comparison.Left is FieldOperand ? comparison.Right : comparison.Left;
+            if (field is not null && operand is ValueOperand value)
+            {
+                yield return new(field.Path, JsonData.Scalar(value.Value, string.Empty));
+            }
+            else if (field is not null && operand is ParameterOperand parameter
+                && parameters?.TryGetValue(parameter.Name, out var literal) == true)
+            {
+                yield return new(field.Path, JsonData.Scalar(literal, string.Empty));
+            }
         }
     }
 }

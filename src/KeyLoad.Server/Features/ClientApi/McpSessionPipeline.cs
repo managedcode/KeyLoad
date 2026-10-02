@@ -57,7 +57,7 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
         if (request.Params is not JsonObject parameters || parameters[McpTransportProtocol.Name] is not JsonValue name
             || !name.TryGetValue<string>(out var toolName) || string.IsNullOrWhiteSpace(toolName))
         { throw Errors.Fail(ErrorCode.Validation, McpCatalogProtocol.InvalidArguments); }
-        return McpOperationCatalog.TryGet(toolName, out var descriptor) ? descriptor
+        return McpOperationCatalog.TryGetTool(toolName, out var descriptor) ? descriptor
             : throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation);
     }
 

@@ -55,7 +55,9 @@ internal static class McpCatalogExpectations
         Write(McpCallerTools.ProjectionsConfigure, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Consumer, McpDiscoveryProtocol.Definition]),
         Write(McpCallerTools.ProjectionsCommit, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Consumer, McpDiscoveryProtocol.Token, McpDiscoveryProtocol.Effects]),
         Write(McpCallerTools.ProjectionsRelease, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Consumer, McpDiscoveryProtocol.IndexGeneration]),
-        Write(McpCallerTools.OutboxPurge, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.ThroughSequence])
+        Write(McpCallerTools.OutboxPurge, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.ThroughSequence]),
+        new(SqlOperationProtocol.ToolName, false, false, true, McpExpectedBody.Object, false,
+            [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Sql])
     ];
 
     private static McpToolExpectation Read(string name, ImmutableArray<string> fields) => new(name, true, true, false, McpExpectedBody.Object, false, fields);

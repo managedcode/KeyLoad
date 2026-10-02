@@ -200,6 +200,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
                 limits.MaxBodyBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
             node.WithEnvironment(ClusterFixtureProtocol.HttpControlBodyBytesSetting,
                 limits.MaxControlBodyBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpReservedBytesSetting,
+                limits.MaxReservedBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            node.WithEnvironment(ClusterFixtureProtocol.HttpHeavyReadBytesSetting,
+                limits.HeavyReadReservedBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
     }
 

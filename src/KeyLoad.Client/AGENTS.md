@@ -18,6 +18,7 @@
 - Preserve cancellation, disposal, transport errors and typed contracts. Keep secrets out of source and diagnostics; maintain central package pins and the no-lock-file policy.
 
 ## Read-first and canonical slice ownership
+- Owns `Features/QueryExecution/SqlClient.cs` unified SELECT/CALL transport under ADR-054 and `Features/BlobStorage/` typed canonical lifecycle/range adapters under ADR-038. Preserve stable command IDs and classify interrupted CALL as potentially unknown writes.
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - `ClientApi` owns shared SDK transport and request/response infrastructure under `Features/ClientApi/`, matching `docs/Features/ClientApi.md`.
 - Business SDK operations MUST mirror their owning business slice, including `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, `TimeSeries`, `Search`, `QueryExecution`, `Authorization` and `ChangeFeeds`, under `Features/<same-business-SliceName>/` and its matching feature doc.

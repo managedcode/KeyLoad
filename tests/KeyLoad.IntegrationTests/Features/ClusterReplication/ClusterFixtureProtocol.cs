@@ -24,6 +24,8 @@ internal static class ClusterFixtureProtocol
     internal const string CommandBytesSetting = "KeyLoad__CommandAdmission__MaxRetainedBytes";
     internal const string HttpBodyBytesSetting = "KeyLoad__HttpAdmission__MaxBodyBytes";
     internal const string HttpControlBodyBytesSetting = "KeyLoad__HttpAdmission__MaxControlBodyBytes";
+    internal const string HttpReservedBytesSetting = "KeyLoad__HttpAdmission__MaxReservedBytes";
+    internal const string HttpHeavyReadBytesSetting = "KeyLoad__HttpAdmission__HeavyReadReservedBytes";
     internal const string HealthCheckLoggerCategory = "Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService";
     internal const string ArtifactDirectory = "artifacts";
     internal const string QualificationDirectory = "qualification";

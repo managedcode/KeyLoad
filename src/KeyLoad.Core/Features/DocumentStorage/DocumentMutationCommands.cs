@@ -29,6 +29,7 @@ public sealed partial class DatabaseEngine
             Authorization.RequireReplacement(principal, resource, put.ExplicitReplacement);
         }
 
+        Features.RelationalStorage.RelationalRowValidation.ValidateRow(resource, put.Id, put.Json, Limits);
         var json = JsonData.Validate(put.Json, Limits);
         foreach (var policy in resource.FieldPolicies)
         {
@@ -67,12 +68,14 @@ public sealed partial class DatabaseEngine
             Authorization.RequireFieldWrite(principal, resource, field.Path);
         }
 
+        Features.RelationalStorage.RelationalRowValidation.ValidatePatchValues(resource, patch.Patches, Limits);
         var updated = previous with
         {
             Json = JsonData.Patch(previous.Json, patch.Patches, Limits),
             Revision = checked(previous.Revision + 1),
             UpdatedAt = now
         };
+        Features.RelationalStorage.RelationalRowValidation.ValidateRow(resource, patch.Id, updated.Json, Limits);
         UpdateIndexes(tx, principal, resource, previous, updated);
         tx.PutRecord(context.Key, updated);
         return new(new(PatchDocumentMutationKind, patch.Collection, patch.Id, updated.Revision), updated);

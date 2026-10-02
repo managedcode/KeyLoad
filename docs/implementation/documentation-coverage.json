@@ -7557,5 +7557,37 @@
     "projects": 23,
     "scope": "Static product website design; prior documentation review and product baseline unchanged.",
     "verification": "Pending joined source/static/manual browser/exact-candidate GitHub site evidence; prior review does not qualify this extension."
+  },
+  "centralSqlExtension": {
+    "date": "2026-10-02",
+    "ownerClarification": "one_server_linked_models_SQL_central_performance_first",
+    "features": [
+      "docs/Features/QueryExecution.md",
+      "docs/Features/RelationalStorage.md"
+    ],
+    "decisions": [
+      "docs/ADR/ADR-054-central-sql.md",
+      "docs/ADR/ADR-055-typed-relational-rows.md"
+    ],
+    "acceptanceSource": "ai-database-sql.acceptance.md",
+    "planSource": "ai-database-sql.plan.md",
+    "status": "source_joining_runtime_qualification_pending",
+    "qualificationAuthority": "docs/implementation/status.json",
+    "existingCatalog": "preserved_historical_104_KL_mapping",
+    "newRequirements": [
+      "REQ-AISQL-001",
+      "REQ-AISQL-003",
+      "REQ-AISQL-004",
+      "REQ-REL-001",
+      "REQ-REL-002",
+      "REQ-REL-003",
+      "REQ-REL-004",
+      "REQ-REL-005"
+    ],
+    "pendingProductStages": [
+      "declarative_sources_JOIN_FK_integrity",
+      "dedicated_comparable_RF3_SQL_measurements",
+      "numeric_coverage_endurance_power_loss"
+    ]
   }
 }

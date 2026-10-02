@@ -22,7 +22,10 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             if (descriptor is null || request.Params is not { } parameters
                 || !string.Equals(descriptor.Name, parameters.Name, StringComparison.Ordinal))
             { throw Errors.Fail(ErrorCode.Validation, McpCatalogProtocol.InvalidArguments); }
-            var operation = descriptor.Decode(parameters.Arguments, state.MaximumPayloadBytes);
+            var operation = descriptor.IsAdapter
+                ? SqlMcpCatalog.Decode(parameters.Arguments, state.MaximumPayloadBytes,
+                    context.RequestServices.GetRequiredService<KeyLoad.Core.DatabaseEngine>().Limits, cancellationToken)
+                : descriptor.Decode(parameters.Arguments, state.MaximumPayloadBytes);
             var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
                 operation.CommandKind, operation.CommandId, operation.Payload, cancellationToken).ConfigureAwait(false);
             return state.Success(reply, cancellationToken);

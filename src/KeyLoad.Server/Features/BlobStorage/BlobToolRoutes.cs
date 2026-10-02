@@ -3,14 +3,14 @@ namespace KeyLoad.Server;
 /// <summary>Shared canonical HTTP routes for native MCP and direct BlobStorage adapters.</summary>
 internal static class BlobToolRoutes
 {
-    internal const string BeginUpload = "/v1/blobs/uploads/begin";
-    internal const string WritePart = "/v1/blobs/uploads/parts";
-    internal const string CompleteUpload = "/v1/blobs/uploads/complete";
-    internal const string AbortUpload = "/v1/blobs/uploads/abort";
-    internal const string Delete = "/v1/blobs/delete";
-    internal const string Reclaim = "/v1/blobs/reclaim";
-    internal const string Metadata = "/v1/blobs/metadata";
-    internal const string UploadInfo = "/v1/blobs/uploads/info";
-    internal const string ReadRange = "/v1/blobs/range";
-    internal const string List = "/v1/blobs/list";
+    internal const string BeginUpload = BlobOperationProtocol.BeginUpload;
+    internal const string WritePart = BlobOperationProtocol.WritePart;
+    internal const string CompleteUpload = BlobOperationProtocol.CompleteUpload;
+    internal const string AbortUpload = BlobOperationProtocol.AbortUpload;
+    internal const string Delete = BlobOperationProtocol.Delete;
+    internal const string Reclaim = BlobOperationProtocol.Reclaim;
+    internal const string Metadata = BlobOperationProtocol.Metadata;
+    internal const string UploadInfo = BlobOperationProtocol.UploadInfo;
+    internal const string ReadRange = BlobOperationProtocol.ReadRange;
+    internal const string List = BlobOperationProtocol.List;
 }

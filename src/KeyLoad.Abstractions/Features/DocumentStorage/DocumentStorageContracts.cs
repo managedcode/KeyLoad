@@ -80,6 +80,9 @@ public sealed record ResourceDefinition(string Name, ResourceKind Kind, string T
     /// <summary>Gets optional version-one binary limits; null selects immutable blob defaults.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public BlobPolicy? BlobPolicy { get; init; }
+    /// <summary>Gets an optional closed typed-row schema for a document-authority collection.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public RelationalSchema? RelationalSchema { get; init; }
 }
 
 /// <summary>Describes row ownership and project metadata used by row-level access policy.</summary>

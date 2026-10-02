@@ -39,6 +39,7 @@ public sealed partial class DatabaseEngine
         JsonData.Identifier(request.Definition.Name);
         JsonData.Identifier(request.Definition.TransactionDomainId);
         var definition = request.Definition;
+        Features.RelationalStorage.RelationalRowValidation.ValidateSchema(definition);
         BlobStorageOperations.ValidatePolicy(definition);
         if (!Enum.IsDefined(definition.Kind) || !Enum.IsDefined(definition.Authority)
             || definition.Indexes.Any(index => index is null || index.Fields.Any(string.IsNullOrEmpty))

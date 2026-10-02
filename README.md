@@ -6,7 +6,9 @@ The cluster foundation is Orleans, with separate request grains and a distribute
 
 The original load-testing prototype has been replaced. This repository implements the new [architecture and development plan](docs/design/architecture-v0.3.uk.md), with the [original HTML edition](docs/design/architecture-v0.3.uk.html) preserved alongside it.
 
-The [documentation index](docs/README.md) covers all 21 Feature specifications with requirements, acceptance criteria, source/test boundaries and diagrams. The ADR catalog (docs/ADR/README.md) records architectural decisions and implementation contracts; the [coverage map](docs/implementation/documentation-coverage.json) links every KL task to its owning Feature and ADR without changing qualification status.
+The [documentation index](docs/README.md) covers all 22 Feature specifications with requirements, acceptance criteria, source/test boundaries and diagrams. The ADR catalog (docs/ADR/README.md) records architectural decisions and implementation contracts; the [coverage map](docs/implementation/documentation-coverage.json) links every KL task to its owning Feature and ADR without changing qualification status.
+
+The product is one database server for AI agents with linked documents, typed relational rows, graphs, vectors/search, files/blobs, events and queues. SQL is the central language. The new [SQL and relational contracts](docs/implementation/central-sql.md) add a versioned SELECT/CALL adapter over the existing operations and schema-constrained canonical rows. Arbitrary SQL JOIN, foreign keys and declarative cross-model SELECT remain required future stages; this source is not yet qualified by an exact-SHA GitHub run.
 
 ## Development status
 
