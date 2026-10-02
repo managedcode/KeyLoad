@@ -20,8 +20,15 @@ internal sealed class RelationalSchemaTests
         await Assert.That(JsonDefaults.Serialize(configured).SequenceEqual(JsonDefaults.Serialize(definition))).IsTrue();
         var persisted = database.Store.Read(view => database.Database.Resource(view, database.Partition, RelationalTestData.Table));
         await Assert.That(persisted.RelationalSchema!.Columns.Length).IsEqualTo(RelationalTestData.Columns.Length);
-        var changed = definition with { RelationalSchema = new(RelationalTestData.Key, [new(RelationalTestData.Key, RelationalColumnType.Text)]) };
+        var changed = definition with
+        {
+            RelationalSchema = new(RelationalTestData.Key, [.. RelationalTestData.Columns.Select(column =>
+                column.Name == RelationalTestData.Name ? column with { Nullable = true } : column)])
+        };
+        RelationalRowValidation.ValidateSchema(changed);
         await Assert.That(RelationalTestData.ConfigureResult(database, changed).Error).IsEqualTo(ErrorCode.UnsupportedCapability);
+        var persistedAfter = database.Store.Read(view => database.Database.Resource(view, database.Partition, RelationalTestData.Table));
+        await Assert.That(JsonDefaults.Serialize(persistedAfter).SequenceEqual(JsonDefaults.Serialize(persisted))).IsTrue();
     }
 
     [Test]
