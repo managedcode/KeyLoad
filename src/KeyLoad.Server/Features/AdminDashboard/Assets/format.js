@@ -52,5 +52,6 @@ export function duration(milliseconds) {
 
 export function shortId(value) {
     if (!value) return Text.dash;
+    if (URL.canParse(value)) return new URL(value).hostname;
     return value.length > Config.longId ? value.slice(Config.zero, Config.shortId) : value;
 }

@@ -83,3 +83,10 @@ Full coverage/verification: [catalog](../implementation/documentation-coverage.j
 library and existing typed executable boundary required by BenchmarkDotNet's real
 generated external consumer. REQ-BC-022/AC-EM-001..004 include complete source/lifetime
 and GitHub TUnit/Dry qualification; implementation and exact-SHA proof are pending.
+
+[ADR-053](ADR-053-unified-visual-identity.md) accepts one light KeyLoad identity shared by the `/admin` console and the public site:
+- a canonical `brand.css` and `logo.svg` with byte-identical site mirrors and a SiteTests drift gate;
+- a bounded server failed-request log;
+- configured voter membership for the console's node view.
+
+REQ/AC-AD-008..010 and REQ/AC-BC-029 apply. Exact-SHA qualification is pending.

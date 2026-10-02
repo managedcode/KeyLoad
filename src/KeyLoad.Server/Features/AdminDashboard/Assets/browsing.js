@@ -169,7 +169,7 @@ function stateBadge(state) {
 function documents(page) {
     dataAfter = page.cursor;
     write(Id.dataDescription, Text.documentHint);
-    table(Headers.documents, page.rows.map(row => [row.entityId, row.revision, row.json.slice(Config.zero, Config.preview), detailButton(row.json)]), [Css.mono, Css.num, Css.mono]);
+    table(Headers.documents, page.rows.map(row => [row.entityId, row.revision, row.json.slice(Config.zero, Config.preview), detailButton(row.json)]), [Css.mono, Css.num, Css.preview]);
     write(Id.dataEmpty, Text.noRows);
     write(Id.pageDescription, `${Text.cut}${Text.space}${page.cutPosition}`);
 }

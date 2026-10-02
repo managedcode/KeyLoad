@@ -17,17 +17,19 @@
 <body>
   <a class="skip-link" href="#product">Skip to product</a>
   <header class="site-header">
-    <a class="brand" href="./" aria-label="KeyLoad home">
-      <img src="./favicon.svg" width="34" height="34" alt="">
-      <span>KeyLoad<span class="brand-dot">.</span></span>
-    </a>
-    <nav aria-label="Main navigation">
-      <a href="#product">Product</a>
-      <a href="#benchmarks">Benchmarks</a>
-      <a href="https://github.com/managedcode/KeyLoad/blob/main/docs/Architecture.md">Architecture</a>
-      <a href="https://github.com/managedcode/KeyLoad/tree/main/docs">Docs</a>
-      <a href="https://github.com/managedcode/KeyLoad" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
-    </nav>
+    <div class="site-header-inner">
+      <a class="brand kl-brand" href="./" aria-label="KeyLoad home">
+        <img src="./favicon.svg" width="32" height="32" alt="">
+        <span>Key<b>Load</b></span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#product">Product</a>
+        <a href="#benchmarks">Benchmarks</a>
+        <a href="https://github.com/managedcode/KeyLoad/blob/main/docs/Architecture.md">Architecture</a>
+        <a href="https://github.com/managedcode/KeyLoad/tree/main/docs">Docs</a>
+        <a class="nav-cta" href="https://github.com/managedcode/KeyLoad" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
   </header>
 
   <main>
@@ -37,10 +39,10 @@
         <h1 id="page-title">Documents.<br>Events.<br><em>Graphs.</em><br>One data engine.</h1>
         <p class="hero-summary">KeyLoad is an open .NET data engine bringing transactional documents, event streams, graph traversal and search into one system.</p>
         <div class="hero-actions">
-          <a class="button button-primary" href="#benchmarks">Explore benchmark evidence <span aria-hidden="true">↓</span></a>
+          <a class="button button-primary kl-btn kl-btn--primary" href="#benchmarks">Explore benchmark evidence <span aria-hidden="true">↓</span></a>
           <a class="text-link" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Architecture.md">Read the architecture <span aria-hidden="true">↗</span></a>
         </div>
-        <p class="planned-note">Chunked Blob storage and the official MCP server remain planned capabilities.</p>
+        <p class="planned-note">Also in the engine: chunked blob storage, an official MCP server for agents and a read-only admin console.</p>
       </div>
       <figure class="architecture-figure" aria-labelledby="scene-caption">
         <div class="scene-frame" id="cluster-scene" aria-label="Conceptual view of one logical partition placed across three physical hosts">
@@ -48,7 +50,7 @@
           <span class="scene-status" data-scene-status role="status">Static conceptual view</span>
         </div>
         <div class="scene-caption-row">
-          <figcaption id="scene-caption"><span class="caption-kicker">RF3 architecture · conceptual view</span><span>Green tiles: one logical partition replicated across three physical hosts.</span></figcaption>
+          <figcaption id="scene-caption"><span class="caption-kicker">RF3 architecture · conceptual view</span><span>Blue tiles: one logical partition replicated across three physical hosts.</span></figcaption>
           <button class="motion-button" id="scene-motion" type="button" aria-pressed="false" aria-controls="cluster-scene" disabled>Enable motion</button>
         </div>
       </figure>
@@ -138,6 +140,12 @@
       <div class="command-box"><code>gh workflow run ci.yml --repo managedcode/KeyLoad --ref main</code><button id="copy-command" type="button" aria-label="Copy benchmark workflow command">Copy</button></div>
     </section>
   </main>
-  <footer><a class="brand" href="./">KeyLoad<span class="brand-dot">.</span></a><p>A .NET data engine in early development.</p><div><a href="https://github.com/managedcode/KeyLoad/tree/main/docs">Documentation</a><a href="https://github.com/managedcode/KeyLoad" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a></div></footer>
+  <footer>
+    <div class="site-footer-inner">
+      <a class="brand kl-brand" href="./"><img src="./favicon.svg" width="28" height="28" alt=""><span>Key<b>Load</b></span></a>
+      <p>A .NET data engine in early development.</p>
+      <div class="footer-links"><a href="https://github.com/managedcode/KeyLoad/tree/main/docs">Documentation</a><a href="https://github.com/managedcode/KeyLoad" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </footer>
 </body>
 </html>

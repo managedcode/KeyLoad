@@ -18,7 +18,8 @@ internal sealed class AdminNodeObserver(PartitionHost partition, CommandAdmissio
         {
             var node = await services.GetRequiredService<INodeAdministration>().StatusAsync(cancellationToken).ConfigureAwait(false);
             var storage = await Task.Run(() => AdminStorageObserver.Read(partition.DirectoryPath, cancellationToken), cancellationToken).ConfigureAwait(false);
-            return new(clock.GetUtcNow(), node, new(commands.Limits, commands.Snapshot()) { Http = http.Status() }, storage, metrics.Snapshot());
+            return new(clock.GetUtcNow(), node, new(commands.Limits, commands.Snapshot()) { Http = http.Status() }, storage, metrics.Snapshot())
+            { LocalVoter = partition.Configuration.LocalId, Voters = partition.Configuration.VoterIds };
         }
         finally
         { Volatile.Write(ref scanning, 0); }

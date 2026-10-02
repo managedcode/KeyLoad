@@ -41,6 +41,9 @@ internal static class SiteAssetTokens
     public const string LifecycleModule = "scene-lifecycle.mjs";
     public const string ObserversModule = "scene-observers.mjs";
     public const string Stylesheet = "styles.css";
+    public const string BrandStylesheet = "brand.css";
+    public const string ConsoleBrandStylesheetPath = "src/KeyLoad.Server/Features/AdminDashboard/Assets/brand.css";
+    public const string ConsoleLogoPath = "src/KeyLoad.Server/Features/AdminDashboard/Assets/logo.svg";
     public const string TokenStylesheet = "tokens.css";
     public const string SceneStylesheet = "scene.css";
     public const string PosterAsset = "assets/cluster-poster.svg";

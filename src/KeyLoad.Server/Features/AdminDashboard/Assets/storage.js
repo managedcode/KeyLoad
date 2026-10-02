@@ -49,8 +49,8 @@ function files(storage) {
     const largest = sorted.length ? sorted[Config.zero].bytes : Config.zero;
     const rows = sorted.map(file => {
         const category = categoryOf(file.category);
-        const kind = make(Dom.span, Text.empty, `${Css.kind} ${category.cls}`);
-        kind.append(swatch(Css.empty), document.createTextNode(category.label));
+        const kind = make(Dom.span, Text.empty, Css.kind);
+        kind.append(swatch(category.cls), document.createTextNode(category.label));
         return [file.path, kind, sizeCell(file, largest, category)];
     });
     fillTable(Id.diskTable, Id.diskEmpty, rows.length ? Headers.physical : [], rows, [Css.mono, Css.empty, Css.empty]);

@@ -52,6 +52,10 @@ internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
             await Assert.That(Guid.TryParse(first.Node.NodeId, out var nodeIdentity) && nodeIdentity != Guid.Empty).IsTrue();
             await Assert.That(first.Node.Incarnation).IsEqualTo(status.Incarnation);
             await Assert.That(first.Node.Voters).IsEqualTo(3);
+            await Assert.That(first.Voters.Length).IsEqualTo(first.Node.Voters);
+            await Assert.That(first.Voters.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(first.Voters.Length);
+            await Assert.That(first.LocalVoter is not null && first.Voters.Contains(first.LocalVoter, StringComparer.Ordinal)).IsTrue();
+            await Assert.That(first.Node.Leader is null || first.Voters.Contains(first.Node.Leader, StringComparer.Ordinal)).IsTrue();
             await Assert.That(first.Http.ProcessInstance).IsEqualTo(second.Http.ProcessInstance);
             await Assert.That(first.Http.CompletedRequests).IsEqualTo(second.Http.CompletedRequests);
             await Assert.That(first.Storage.Files.Length).IsLessThanOrEqualTo(200);
@@ -63,6 +67,8 @@ internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
             await Assert.That(native.Value.Node.NodeId).IsEqualTo(first.Node.NodeId);
             await Assert.That(native.Value.Node.Incarnation).IsEqualTo(first.Node.Incarnation);
             await Assert.That(native.Value.Http.ProcessInstance).IsEqualTo(first.Http.ProcessInstance);
+            await Assert.That(native.Value.LocalVoter).IsEqualTo(first.LocalVoter);
+            await Assert.That(native.Value.Voters.SequenceEqual(first.Voters)).IsTrue();
         }
     }
 

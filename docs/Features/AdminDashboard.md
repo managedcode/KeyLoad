@@ -13,6 +13,9 @@ This is the durable requirements and acceptance contract. Architecture and the o
 | REQ-AD-005 non-consuming queue counters/metadata | AC-AD-005 | AdminQueueTests, AdminDashboardRf3Tests |
 | REQ-AD-006 accessible responsive usable administration console | AC-AD-006 | AdminDashboardBrowserTests and explicit subjective screenshot review |
 | REQ-AD-007 integrated .NET/official MCP callers and honest qualification | AC-AD-007 | MCP inventory and RF3 tests; canonical GitHub gates |
+| REQ-AD-008 bounded failed-request log for operators | AC-AD-008 | AdminHttpMetricsTests, AdminHttpMetricsMiddlewareTests, AdminDashboardRf3Tests |
+| REQ-AD-009 configured voter membership for the node view | AC-AD-009 | AdminDashboardRf3Tests (SDK and official MCP) |
+| REQ-AD-010 light console in the shared KeyLoad identity (ADR-053) | AC-AD-010 | AdminDashboardBrowserTests, SiteBrandParityTests; desktop/mobile review |
 
 ```mermaid
 flowchart LR
@@ -61,6 +64,19 @@ Actors: an operator with a current persisted administrator principal, an unautho
 - **AC-AD-006 / REQ-AD-006**: console provides coherent sidebar navigation (overview, collections, queues, files, cluster), readable metric cards and measured throughput plot, scope controls, manual refresh and bounded automatic refresh, paginated tables, document JSON details, empty/loading/unauthorized/disconnected/error states. Desktop and 390 px mobile layouts fit without page overflow; keyboard navigation, visible focus, labels, status announcements and reduced-motion behavior work. Disconnect clears credential and all sensitive DOM/history; one in-flight refresh per session and abort/epoch handling prevent stale post-disconnect renders. Background tabs suspend polling; overlapping polls cannot accumulate.
 - **AC-AD-007 / REQ-AD-007**: all three new reads are available through typed .NET SDK and explicit official MCP catalog/agent gateway with read-only/nondestructive hints and unchanged prior operation semantics. TUnit/Microsoft.Testing.Platform regressions use actual file-backed stores and actual Docker/Aspire RF3 + real .NET/official MCP clients; browser tests use the real server/browser, no mocked API or doubles. Exact-SHA GitHub build/format/analyzer/governance/unit/recovery/RF3/browser receipts and artifacts must exist before qualification is claimed. Required coverage thresholds stay mandatory; absent collector/result is an open gate, not success.
 
+- **AC-AD-008 / REQ-AD-008**: `AdminHttpSnapshot.RecentFailures` keeps the newest 50 failed `/v1` and `/mcp` requests (status ≥ 400, aborted or faulted), newest first. Each entry holds the completion time, normalised method (unknown methods become `OTHER`), matched route template (or `unmatched`), status, aborted flag and duration.
+  - It never holds a raw path, query, payload, header or credential.
+  - Successful and excluded (dashboard polling, admission, status, static, health) requests are never logged.
+  - The log resets with the process. The Errors view filters 4xx/5xx/aborted and clears on disconnect.
+- **AC-AD-009 / REQ-AD-009**: the snapshot carries the executing voter identity (`LocalVoter`) and configured membership (`Voters`), comparable with `Node.Leader`.
+  - The Nodes view draws the executing node, the leader and the remaining peers, and labels peers as not observed from this node. Membership never implies peer health.
+- **AC-AD-010 / REQ-AD-010**: the console uses the shared brand (ADR-053) in a light theme with grouped navigation:
+  - Monitoring: overview, performance, errors.
+  - Data: catalog, collections, queues, blob storage.
+  - Infrastructure: nodes, disk usage.
+  - It also has KPI sparklines, stacked request activity with a crosshair tooltip, a storage donut, admission meters, catalog kind chips (page counts, never totals) and a disk category bar with largest files.
+  - All AC-AD-006 hooks and behaviours stay intact. No horizontal overflow at 1440 and 390 px. A mobile menu toggle exposes `aria-expanded`.
+
 ## Criterion-to-test matrix
 
 | Criteria | Planned test/level | Assertions and verification |
@@ -72,6 +88,9 @@ Actors: an operator with a current persisted administrator principal, an unautho
 | 005 | AdminQueueTests / real store; AdminDashboardRf3Tests | empty and populated lanes, metadata pagination, state/counter/read-position unchanged; CI unit + RF3 |
 | 006 | AdminDashboardBrowserTests / real RF3 + actual headless browser | navigation, credential disconnect, empty/error/loading, document viewing, viewport overflow, keyboard; CI RF3 browser; manual visual inspection adds design evidence only |
 | 007 | MCP catalog unit assertions + AdminDashboardRf3Tests | tool inventory/shapes/hints, real SDK/MCP agreement and auth failure; all canonical CI gates |
+| 008 | AdminHttpMetricsTests, AdminHttpMetricsMiddlewareTests / unit; AdminDashboardRf3Tests / RF3 | bound, order, exact fields, template-not-path, exclusions, real SDK failure appears; CI unit + RF3 |
+| 009 | AdminDashboardRf3Tests / RF3 SDK and official MCP | three distinct voters, local voter and leader are members, SDK and MCP agree; CI RF3 |
+| 010 | AdminDashboardBrowserTests / real Chrome; SiteBrandParityTests / pages | navigation across all nine views, overflow, reduced motion, brand parity; screenshots reviewed |
 
 Manual exception: subjective visual polish is inspected via desktop/mobile screenshots; it does not replace functional browser or numeric coverage qualification. Migration is additive, with no persisted schema changes or dependencies. Rollback removes this slice's routes/assets/client methods/read enum additions in a coordinated release; existing wire enum numbers remain stable. ADR-051 defines the implementation contract. Unknown SMID mapping and separate Orleans Streams qualification remain visible independent workstreams.
 

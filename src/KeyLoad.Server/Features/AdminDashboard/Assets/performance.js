@@ -48,8 +48,7 @@ function admission(snapshot) {
         meter(Text.commands, usage.commands, limits.maxCommands, pair(usage.commands, limits.maxCommands, count)),
         meter(Text.retainedBytes, usage.retainedBytes, limits.maxRetainedBytes, pair(usage.retainedBytes, limits.maxRetainedBytes, bytes)),
         meter(Text.controlCommands, usage.controlCommands, limits.reservedControlCommands, pair(usage.controlCommands, limits.reservedControlCommands, count)),
-        meter(Text.tenantScopes, usage.activeTenantScopes, limits.maxCommands, count(usage.activeTenantScopes)),
-        meter(Text.principalScopes, usage.activePrincipalScopes, limits.maxCommands, count(usage.activePrincipalScopes)));
+        meter(Text.controlBytes, usage.controlRetainedBytes, limits.reservedControlBytes, pair(usage.controlRetainedBytes, limits.reservedControlBytes, bytes)));
 }
 
 export function renderPerformance(snapshot) {

@@ -50,4 +50,11 @@ public sealed record AdminStorageSnapshot(long? CanonicalBytes, long? ReplicaByt
 /// <param name="Storage">Bounded physical file observation.</param>
 /// <param name="Http">Actual process HTTP observations.</param>
 public sealed record AdminNodeSnapshot(DateTimeOffset CapturedAt, NodeStatus Node, NodeAdmissionStatus Admission,
-    AdminStorageSnapshot Storage, AdminHttpSnapshot Http);
+    AdminStorageSnapshot Storage, AdminHttpSnapshot Http)
+{
+    /// <summary>Gets the configured voter identity of the executing node, comparable with the reported leader.</summary>
+    public string? LocalVoter { get; init; }
+
+    /// <summary>Gets the configured voter membership; membership never implies that another voter is healthy.</summary>
+    public ImmutableArray<string> Voters { get; init; } = [];
+}

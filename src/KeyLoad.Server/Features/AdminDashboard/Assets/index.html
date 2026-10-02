@@ -92,7 +92,7 @@
 </section>
 <section id="performance-view" class="view" hidden>
 <div id="perf-stats" class="stat-strip kl-card"></div>
-<article class="panel kl-card"><div class="panel-head"><div><h2>Throughput</h2><p>Completed public API requests per second</p></div></div><div id="perf-throughput" class="chart chart-lg" role="img" aria-label="Throughput history"></div></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Throughput</h2><p>Completed public API requests per second</p></div><div class="legend"><span><i class="c1"></i>Succeeded</span><span><i class="bad"></i>Failed</span></div></div><div id="perf-throughput" class="chart chart-lg" role="img" aria-label="Throughput history"></div></article>
 <div class="grid-2">
 <article class="panel kl-card"><div class="panel-head"><div><h2>Average latency</h2><p>Mean response duration per interval, ms</p></div></div><div id="perf-latency" class="chart" role="img" aria-label="Latency history"></div></article>
 <article class="panel kl-card"><div class="panel-head"><div><h2>Error rate</h2><p>Failed share of requests per interval, %</p></div></div><div id="perf-errors" class="chart" role="img" aria-label="Error rate history"></div></article>
@@ -101,7 +101,7 @@
 </section>
 <section id="errors-view" class="view" hidden>
 <div id="error-stats" class="stat-strip kl-card"></div>
-<article class="panel kl-card"><div class="panel-head"><div><h2>Failed requests</h2><p>Newest first · route templates only · resets with the server process</p></div><div id="error-filters" class="chips" role="group" aria-label="Filter failed requests"></div></div><div class="table-scroll"><table id="error-table"><caption class="sr-only">Recent failed API requests</caption><thead></thead><tbody></tbody></table><p id="error-empty" class="empty">No failed requests observed on this node.</p></div></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Failed requests</h2><p>Newest first · route templates only · resets with the server process</p></div><div id="error-filters" class="chips" role="group" aria-label="Filter failed requests"></div></div><div class="table-scroll capped"><table id="error-table"><caption class="sr-only">Recent failed API requests</caption><thead></thead><tbody></tbody></table><p id="error-empty" class="empty">No failed requests observed on this node.</p></div></article>
 <article class="panel kl-card"><div class="panel-head"><div><h2>Console activity</h2><p>Events observed by this browser session</p></div></div><ol id="event-log" class="event-log"></ol></article>
 </section>
 <section id="catalog-view" class="view" hidden>
@@ -122,7 +122,7 @@
 </section>
 <section id="storage-view" class="view" hidden>
 <article class="panel kl-card"><div class="panel-head"><div><h2>Physical storage on this node</h2><p>Bounded file-length observation; not unique logical database size.</p></div><span id="disk-state" class="kl-badge">Waiting</span></div><div class="disk-summary"><div><strong id="disk-total">—</strong><span id="disk-files">No files observed</span></div><div id="disk-bar" class="stack-bar" role="img" aria-label="Storage by category"></div><div id="disk-legend" class="legend legend-wide"></div></div></article>
-<article class="panel kl-card"><div class="panel-head"><div><h2>Largest files</h2><p>Relative paths inside the node directory, largest first</p></div></div><div class="table-scroll"><table id="disk-table"><caption class="sr-only">Observed physical files</caption><thead></thead><tbody></tbody></table><p id="disk-empty" class="empty">Storage observations appear after connection.</p></div></article>
+<article class="panel kl-card"><div class="panel-head"><div><h2>Largest files</h2><p>Relative paths inside the node directory, largest first</p></div></div><div class="table-scroll capped"><table id="disk-table"><caption class="sr-only">Observed physical files</caption><thead></thead><tbody></tbody></table><p id="disk-empty" class="empty">Storage observations appear after connection.</p></div></article>
 </section>
 </div>
 <footer class="foot"><span>Key<b>Load</b> console</span><span>Real observations only · counters reset with each server process</span></footer>

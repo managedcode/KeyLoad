@@ -236,3 +236,20 @@ real Chrome evidence is required, with every existing oracle and numeric gate.
 The live responsive product page includes the bounded independent Three.js scene, accessible charts/tables, workload/metric/repetition controls and exact JSON/CSV/Markdown downloads. Current published measurements are the authentic successful comparison36926803549 at9c570f8c33a7a9667507a8e1c0ca68860de3be45; failed current producer37013008931 supplies no new results. Website/control/measured revisions and run/job/artifact hashes remain distinct. Every performance number is derived from these raw reports; unsupported values stay unavailable.
 
 Pages at https://www.keyload.cloud/ uses enforced HTTPS; live apex redirects301 to www. Both automatic triggers, current-main/evidence freshness, immutable Pages35-file output and all9 raw-report bytes were verified. Manual mobile/desktop/WebGPU review complements real Chrome qualification; physical GPU-loss qualification remains explicitly unexercised. The feature's global status, BC001–010/019–023/026, schema3/advanced profiles and database/endurance/readiness qualification remain unchanged.
+
+
+## REQ-BC-029: shared KeyLoad visual identity
+
+- **AC-BC-029:** the public site uses the shared light identity from [ADR-053](../ADR/ADR-053-unified-visual-identity.md):
+  - the same logo, tokens and sans display type, plus cards, buttons, tabs, bars and tables;
+  - brand-palette engine colours and scene colours.
+- `site/Features/BenchmarkComparisons/brand.css` and `site/favicon.svg` are byte-identical mirrors of the console's canonical `brand.css` and `logo.svg`. The test is `SiteBrandParityTests.AC_VI_001_SiteAndConsoleShareByteIdenticalBrandSources` in pages.yml.
+- Every existing site hook, the size budgets, no-overflow widths, poster/scene lifecycle, zero console errors and the JS inventory remain unchanged. Copy keeps the early-development and no-winner wording.
+- Subjective visual quality is a desktop/mobile screenshot review. It is not a numeric gate.
+
+```mermaid
+flowchart LR
+    Canonical[Console brand.css and logo.svg] -->|mirror| SiteBrand[site brand.css and favicon.svg]
+    SiteBrand --> Pages[Pages build BUILD.assets]
+    Parity[SiteBrandParityTests] --> SiteBrand
+```

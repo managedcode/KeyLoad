@@ -68,7 +68,7 @@ function storage(snapshot) {
 function admission(snapshot) {
     const usage = snapshot.admission.usage;
     const limits = snapshot.admission.limits;
-    write(Id.admission, `${usage.commands} / ${limits.maxCommands}`);
+    write(Id.admission, `${usage.commands}${Text.slash}${limits.maxCommands}`);
     el(Id.admissionMeters).replaceChildren(
         meter(Text.commands, usage.commands, limits.maxCommands, `${usage.commands}${Text.slash}${limits.maxCommands}`),
         meter(Text.retainedBytes, usage.retainedBytes, limits.maxRetainedBytes, `${bytes(usage.retainedBytes)}${Text.slash}${bytes(limits.maxRetainedBytes)}`));

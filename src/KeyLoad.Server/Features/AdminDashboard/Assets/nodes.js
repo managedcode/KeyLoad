@@ -8,15 +8,20 @@ const Layout = Object.freeze({
     mini: { radius: 15, crown: 5, label: 33, sub: 46, points: [[40, 30], [120, 30], [200, 30]] }
 });
 const glyphPath = 'M-9 -7c0-2 4-3.5 9-3.5s9 1.5 9 3.5-4 3.5-9 3.5-9-1.5-9-3.5zM-9 -7v14c0 2 4 3.5 9 3.5s9-1.5 9-3.5v-14M-9 0c0 2 4 3.5 9 3.5s9-1.5 9-3.5';
-const translate = (x, y) => `translate(${x} ${y})`;
+const translate = (x, y) => `${Css.translate}${x}${Css.space}${y}${Css.closeParen}`;
 
-function voters(node) {
-    const slots = [{ title: Text.thisNode, sub: shortId(node.nodeId), self: true, leader: node.leader === node.nodeId }];
-    const total = Math.max(Config.one, node.voters);
-    if (node.leader && node.leader !== node.nodeId && slots.length < total)
-        slots.push({ title: Text.leader, sub: shortId(node.leader), self: false, leader: true });
-    while (slots.length < total) slots.push({ title: Text.peer, sub: Text.notObserved, self: false, leader: false });
-    return slots;
+function voters(snapshot) {
+    const node = snapshot.node;
+    const members = snapshot.voters ?? [];
+    if (!members.length) return [{ title: Text.thisNode, sub: shortId(node.nodeId), self: true, leader: false }];
+    const slots = members.map(id => ({
+        title: id === snapshot.localVoter ? Text.thisNode : id === node.leader ? Text.leader : Text.peer,
+        sub: shortId(id),
+        self: id === snapshot.localVoter,
+        leader: id === node.leader
+    }));
+    const rank = slot => slot.self ? Config.zero : slot.leader ? Config.one : Config.two;
+    return slots.sort((left, right) => rank(left) - rank(right));
 }
 
 function drawNode(root, slot, point, layout, mini) {
@@ -25,14 +30,14 @@ function drawNode(root, slot, point, layout, mini) {
     svg(Css.circle, { r: layout.radius }, group);
     if (!mini) svg(Css.path, { d: glyphPath, class: Css.glyph }, group);
     if (slot.leader) svg(Css.circle, { class: Css.crown, cx: layout.radius * 0.72, cy: -layout.radius * 0.72, r: layout.crown }, group);
-    svg(Css.text, { y: layout.label }, group).textContent = slot.leader && !slot.self ? Text.leader : slot.title;
+    svg(Css.text, { y: layout.label }, group).textContent = slot.title;
     if (!mini) svg(Css.text, { y: layout.sub, class: Css.sub }, group).textContent = slot.sub;
 }
 
-function drawTopology(id, node, layout, mini) {
+function drawTopology(id, snapshot, layout, mini) {
     const root = el(id);
     root.replaceChildren();
-    const slots = voters(node).slice(Config.zero, layout.points.length);
+    const slots = voters(snapshot).slice(Config.zero, layout.points.length);
     const points = layout.points.slice(Config.zero, slots.length);
     points.forEach((from, index) => points.slice(index + Config.one).forEach(to =>
         svg(Css.line, { x1: from[0], y1: from[1], x2: to[0], y2: to[1] }, root)));
@@ -62,14 +67,15 @@ function summary(snapshot) {
 export function renderNodes(snapshot) {
     const node = snapshot.node;
     summary(snapshot);
-    drawTopology(Id.topology, node, Layout.full, false);
-    drawTopology(Id.miniTopology, node, Layout.mini, true);
+    drawTopology(Id.topology, snapshot, Layout.full, false);
+    drawTopology(Id.miniTopology, snapshot, Layout.mini, true);
     facts(Id.processFacts, [
         [Text.processId, node.processId],
         [Text.httpInstance, snapshot.http.processInstance],
         [Text.startedAt, date(snapshot.http.startedAt)],
         [Text.uptime, duration(Date.parse(snapshot.capturedAt) - Date.parse(snapshot.http.startedAt))],
         [Text.durability, node.durability],
+        [Text.localVoter, snapshot.localVoter],
         [Text.leader, node.leader ?? Text.unknownLeader]
     ]);
     facts(Id.clusterDetails, ClusterLabels.map((label, index) => [label, [node.nodeId, node.leader, node.voters,

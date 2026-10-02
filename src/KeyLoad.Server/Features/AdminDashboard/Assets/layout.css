@@ -180,6 +180,7 @@ main { min-width: 0; }
   color: var(--kl-muted);
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .live-pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--kl-faint); }

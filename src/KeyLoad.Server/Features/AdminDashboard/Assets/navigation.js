@@ -1,4 +1,4 @@
-import { DataViews, Dom, Id, View, ViewSections } from './constants.js';
+import { DataViews, Dom, Id, ViewSections } from './constants.js';
 import { Text } from './text.js';
 import { el, write } from './dom.js';
 
@@ -33,5 +33,3 @@ export function initializeNavigation(navigate) {
         el(Id.menu).setAttribute(Dom.expanded, String(open));
     });
 }
-
-export const isDataView = view => DataViews.includes(view) && view !== View.catalog;

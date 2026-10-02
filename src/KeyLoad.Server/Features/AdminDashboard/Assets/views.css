@@ -119,6 +119,8 @@ th { position: sticky; top: 0; padding: 10px 16px; background: var(--kl-surface-
 td { max-width: 380px; padding: 11px 16px; border-bottom: 1px solid var(--kl-line); overflow-wrap: anywhere; vertical-align: middle; }
 tbody tr:hover td { background: var(--kl-surface-2); }
 td.mono, td code { font-family: var(--kl-font-mono); font-size: 12px; }
+td.preview { max-width: 460px; overflow: hidden; color: var(--kl-ink-2); text-overflow: ellipsis; white-space: nowrap; }
+.table-scroll.capped { max-height: 560px; }
 td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 td button { padding: 5px 10px; border: 1px solid var(--kl-brand-100); border-radius: 8px; background: var(--kl-brand-50); color: var(--kl-brand-700); font-size: 12px; font-weight: 600; white-space: nowrap; }
 .empty { padding: 34px 20px; color: var(--kl-faint); font-size: 13px; text-align: center; }
@@ -142,7 +144,7 @@ td button { padding: 5px 10px; border: 1px solid var(--kl-brand-100); border-rad
 .resource-list small { display: block; margin-top: 2px; color: var(--kl-muted); font-size: 12px; font-weight: 500; }
 
 .kind { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; white-space: nowrap; }
-.kind i { width: 9px; height: 9px; border-radius: 3px; background: currentColor; }
+.kind i { width: 9px; height: 9px; flex: none; border-radius: 3px; background: currentColor; }
 .status-code { display: inline-block; min-width: 44px; padding: 3px 8px; border-radius: 7px; font-family: var(--kl-font-mono); font-size: 12px; font-weight: 700; text-align: center; }
 .status-code.client { background: var(--kl-warn-bg); color: var(--kl-warn-ink); }
 .status-code.server { background: var(--kl-bad-bg); color: var(--kl-bad-ink); }

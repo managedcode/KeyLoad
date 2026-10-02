@@ -56,8 +56,8 @@ function browseCell(item) {
 
 function kindCell(item) {
     const info = KindInfo[kindName(item.kind)];
-    const node = make(Dom.span, Text.empty, `${Css.kind} ${info?.cls ?? Css.muted}`);
-    node.append(swatch(Css.empty), document.createTextNode(info?.single ?? String(item.kind)));
+    const node = make(Dom.span, Text.empty, Css.kind);
+    node.append(swatch(info?.cls ?? Css.muted), document.createTextNode(info?.single ?? String(item.kind)));
     return node;
 }
 

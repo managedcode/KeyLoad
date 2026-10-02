@@ -13,7 +13,7 @@ const BUILD = Object.freeze({
   integrity: 'sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==',
   assets: ['contracts.mjs', 'bootstrap.mjs', 'measurements.mjs', 'measurement-loader.mjs',
     'benchmark-lab.mjs', 'benchmark-chart.mjs', 'benchmark-profiles.mjs', 'cluster-scene.mjs',
-    'scene-geometry.mjs', 'scene-lifecycle.mjs', 'scene-observers.mjs', 'styles.css', 'tokens.css', 'scene.css', 'assets/cluster-poster.svg'],
+    'scene-geometry.mjs', 'scene-lifecycle.mjs', 'scene-observers.mjs', 'styles.css', 'brand.css', 'tokens.css', 'scene.css', 'assets/cluster-poster.svg'],
   vendorFiles: ['three.webgpu.js', 'three.core.js', 'LICENSE'],
   vendorHashes: ['15cfce5c653541704fd9a3463c39d3e8b854bb6265ccd854d7cfe74090625cc6',
     '9edde002b066a9a05676a6127f67735b62baf399bdea529f2f7e31657da769e6',
