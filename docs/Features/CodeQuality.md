@@ -23,6 +23,7 @@ verification cases: [working acceptance](../../code-quality.acceptance.md).
 | REQ-CQ-005: preserving benchmark source prerequisites | AC-CQ-007 | TASK-MP-010U/V/W/X; XML/private adapter review, public argument regressions and real GitHub comparison qualification |
 | REQ-CQ-006: executable numeric maintainability and coverage gates | AC-CQ-008/009 | TASK-MP-010AC-W and TASK-CQ-009; real Roslyn boundaries/self-inventory; later strict coverage/export/no-decrease qualification |
 | REQ-CQ-007: preserving CLI, live-query, search, redaction and site/query/storage/remaining-unit quality joins with explicit lifetime/constructor validation | AC-CQ-010/011/012/013/014/015/016 | TASK-MP-010AH-C/Q/L/QN/SA/SB, TASK-MP-010UQ/US/UTF; source parity, real null/lifetime and deterministic workload regressions, enabled builds and actual GitHub feature suites |
+| REQ-CQ-008: started main qualification survives subsequent main submissions within bounded workflow concurrency | AC-CQ-017 / AC-QUAL-001..003 | TASK-QUAL-CI-QUEUE-R9; exact workflow review and live same-group run/SHA/job/native evidence under the ADR033 continuation |
 
 The website candidate's REQ/AC-BC-027 is a bounded REQ-CQ-006 dependency substage,
 owned by TASK-SITE-ANALYZER-COVERAGE-011 in the [site plan](../../site-design.plan.md).
@@ -52,6 +53,27 @@ site acceptance/plan and ADR-033 implementation contract; blocked source never
 unblocks final acceptance.
 
 ## Canonical slice map
+
+AC-CQ-017 follows the frozen product-qualification.acceptance.md and plan. Main
+push/dispatch submissions retain one running and the default one pending workflow
+per existing workflow/ref group; a newer pending submission can replace the prior
+pending one without cancelling the started run. PR replacement retains its prior
+cancellation behavior. All existing jobs, actual RF3/client requirements, limits,
+failure/skip conditions and artifacts remain unchanged. Source configuration is
+not proof of live scheduler behavior or runtime qualification. A cancelled pending
+run may have no jobs/native reports and remains explicitly unqualified. Main
+behavior requires two real same-group submissions and terminal/native evidence;
+PR expression review is the documented service-review exception. This changes CI
+coordination only and does not establish AC-CQ-009 numerical coverage.
+
+```mermaid
+flowchart LR
+    Push[Main push or dispatch] --> Queue[One latest pending workflow]
+    Running[Started main workflow] --> Terminal[Complete native qualification evidence]
+    Terminal --> Queue
+    Queue --> Next[Next workflow starts]
+    PR[New PR submission] --> Replace[Cancel prior PR workflow]
+```
 
 - Backend/tooling: `src/KeyLoad.Analyzers/Features/CodeQuality/`.
 - Tests: `tests/KeyLoad.Analyzers.Tests/Features/CodeQuality/`.

@@ -1,6 +1,44 @@
 # Runtime qualification, 2026-10-02
 
-## Main runtime baseline: e8d1a9eb1
+## Main runtime baseline: f627d4b9f
+
+[Run37057708780](https://github.com/managedcode/KeyLoad/actions/runs/37057708780)
+retains all12 independently source/hash/count-checked native reports. Full solution
+build, formatter, governance and118 analyzer cases pass on all three OSes. Units
+are **868/870 on each OS**, process recovery passes **136/136 on each OS**, and
+native Docker/Aspire RF3 is **44/46**, including the real Chrome administration
+flow. Comparison remains **2/4** with both measured profiles skipped.
+[Exact report hashes, case failures and six terminal job receipts](runtime-qualification-37057708780.json)
+retain3540 outcomes:3530passed,10errors and zero native skipped/cancelled/timed-out/
+flaky/in-progress cases. Successful step conclusions are preserved; absent literal
+process exit integers remain null.
+
+The new valid aggregate fixture accidentally reused sample ID5 with changed
+content; the real deduplication gate correctly rejected it. Two catalog constants
+still expected50 after the three accepted series tools raised the exact catalog
+to53. The RF3 cancellation fixture expected a CLR exception while the existing
+SDK returns a failed Cancelled Result. [The R9 source repair](qualification-source-r9.json)
+adds a changed-content Conflict/unchanged-state/healthy-append regression, repairs
+the valid corpus, updates only the frozen catalog counts, and asserts all three
+SDK cancellation results plus a successful following read. These source repairs
+pass an all25-project development build and canonical formatter; their own
+delivered-SHA GitHub tests remain pending.
+
+The d186/run37056851814 workflow was cancelled after retaining seven native
+reports, including these real failures and one Chrome cancellation. The following
+2fc0/run37057526531 was cancelled before jobs/artifacts existed. Neither is a full
+qualification. [The partial d186 receipt](runtime-qualification-37056851814.json)
+preserves its actual source and scope. The later f627 Chrome pass does not prove
+the cause of the earlier cancellation.
+
+Main CI now preserves an already running main qualification when another main
+push/dispatch arrives; PR replacement cancellation remains enabled. The one-line
+source change still needs a real two-submission GitHub scheduler receipt under
+REQ-CQ-008/AC-CQ-017. GitHub's pending-run replacement behavior is not changed.
+The full workflow, numeric coverage, actual activation movement, per-operation
+server costs, retention/rollups, endurance and power-loss gates remain unfinished.
+
+## Previous main runtime baseline: e8d1a9eb1
 
 [Run37049469093](https://github.com/managedcode/KeyLoad/actions/runs/37049469093)
 retains all12 source-checked native reports. Full solution build, formatter,

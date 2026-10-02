@@ -47,18 +47,28 @@ internal sealed class TimeSeriesRf3AuthorizationTests(ClusterFixture fixture)
         await VerifyMalformedRequestsAsync(sdk, mcp, scenario, deadline.Token);
         await VerifyBudgetFailureAndHealthyFollowupAsync(sdk, mcp, scenario, deadline.Token);
         await VerifyOverflowAndHealthyFollowupAsync(sdk, mcp, scenario, deadline.Token);
-        using var cancelled = new CancellationTokenSource();
-        await cancelled.CancelAsync();
-        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => sdk.ReadLatestSampleAsync(
-            scenario.Latest(), cancelled.Token));
-        await Assert.That((await McpCallerAssertions.SdkSuccessAsync(await sdk.AggregateSamplesAsync(
+        await VerifyPreCancelledSdkReadsAsync(sdk, scenario);
+        var healthy = await McpCallerAssertions.SdkSuccessAsync(await sdk.AggregateSamplesAsync(
             scenario.Aggregate(TimeSeriesRf3Scenario.Start, maxSamples: TimeSeriesRf3Scenario.TwoSampleCap),
-            deadline.Token))).Count).IsEqualTo(2L);
+            deadline.Token));
+        await Assert.That(healthy.Count).IsEqualTo(2L);
 
         var revoked = identity.Principal with { Revoked = true, PolicyEpoch = identity.Principal.PolicyEpoch + 1 };
         await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey)
             .ConfigurePrincipalAsync(Guid.NewGuid(), revoked, deadline.Token));
         await VerifyRevokedOperationsAsync(sdk, mcp, scenario, identity.Secret, deadline.Token);
+    }
+
+    private static async Task VerifyPreCancelledSdkReadsAsync(KeyLoadClient sdk, TimeSeriesRf3Scenario scenario)
+    {
+        using var cancelled = new CancellationTokenSource();
+        await cancelled.CancelAsync();
+        await AssertSdkFailureAsync(await sdk.ReadLatestSampleAsync(scenario.Latest(), cancelled.Token), ErrorCode.Cancelled);
+        await AssertSdkFailureAsync(await sdk.AggregateSamplesAsync(
+            scenario.Aggregate(TimeSeriesRf3Scenario.Start), cancelled.Token), ErrorCode.Cancelled);
+        await AssertSdkFailureAsync(await sdk.AggregateSampleWindowsAsync(
+            scenario.Windows(TimeSeriesRf3Scenario.Start, TimeSeriesRf3Scenario.Start.Add(TimeSeriesRf3Scenario.Minute),
+                TimeSeriesRf3Scenario.Minute), cancelled.Token), ErrorCode.Cancelled);
     }
 
     private static async Task VerifyAuthorizedEmptyResultsAsync(KeyLoadClient sdk, McpOfficialClient mcp,

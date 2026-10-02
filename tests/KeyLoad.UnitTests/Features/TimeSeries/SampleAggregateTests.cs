@@ -18,11 +18,14 @@ internal sealed class SampleAggregateTests
         SampleAggregateTestData.Append(db,
             SampleAggregateTestData.Data(2, offset, 0),
             SampleAggregateTestData.Data(5, SampleAggregateTestData.Start.AddSeconds(30), -2));
-        SampleAggregateTestData.Append(db, SampleAggregateTestData.Data(5, SampleAggregateTestData.Start, 2));
+        SampleAggregateTestData.Append(db, SampleAggregateTestData.Data(6, SampleAggregateTestData.Start, 2));
         var raw = db.Database.ReadSamples(SampleAggregateTestData.RootPrincipal, db.Partition,
             SampleAggregateTestData.Set, SampleAggregateTestData.Series, SampleAggregateTestData.Start,
             SampleAggregateTestData.Start.Add(SampleAggregateTestData.TwoMinutes).AddTicks(-1));
         var expected = SampleAggregateTestData.Oracle(raw);
+
+        await Assert.That(raw.Length).IsEqualTo(5);
+        await Assert.That(expected.Count).IsEqualTo(5L);
 
         var actual = db.Database.AggregateSamples(SampleAggregateTestData.RootPrincipal,
             new(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series,

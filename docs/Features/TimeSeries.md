@@ -122,3 +122,17 @@ canonical route with an existing heavy query using the real shared admission
 governor, checks rejection leaves the reservation unchanged and confirms healthy
 admission after release. HttpAdmissionGovernor is a serialized root join; HTTP
 and MCP route classification share the existing working-set ceilings.
+
+R9 native failure loop preserves ADR052's public contracts. Cancelled d186
+run37056851814 nevertheless retains terminal Linux/macOS unit868/870 and RF343/46
+reports; those partial failures are not complete qualification. The valid raw-fold
+fixture must use distinct IDs when content changes, while the new
+SampleAggregateIdempotencyTests separately proves Conflict leaves canonical
+samples unchanged and a following legitimate append/aggregate succeeds. The
+complete catalog remains exactly53 tools with all prior50 and three additive
+TimeSeries schemas/routes/hints, including the same ten blob operations. All three
+SDK pre-cancelled reads use the existing shared transport's failed Result/Cancelled
+problem; native official MCP cancellation keeps its existing exception semantics.
+These are source-oracle corrections, not altered production dedup/transport rules.
+REQ-SERIES009/011/012 and AC-QUAL004 trace to those existing/new real tests;
+the exact corrected-source full GitHub suites and coverage remain mandatory.

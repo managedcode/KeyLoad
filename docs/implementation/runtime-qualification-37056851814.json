@@ -1,0 +1,1002 @@
+{
+  "run": {
+    "databaseId": 37056851814,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37056851814",
+    "workflowName": "KeyLoad CI",
+    "headSha": "d186bb597165cfa04dd0679eec5da5fa632c367e",
+    "headBranch": "main",
+    "status": "completed",
+    "conclusion": "cancelled",
+    "createdAt": "2026-10-02T19:51:44Z",
+    "updatedAt": "2026-10-02T19:59:53Z",
+    "attempt": 1
+  },
+  "artifacts": [
+    {
+      "id": 11249995213,
+      "name": "code-quality-ubuntu-latest",
+      "sizeBytes": 1326389,
+      "digest": "sha256:a6e7a5f53eb993a25cb00b58600ff8d0598e8248d1aef45cd06c7a948431715a",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "runSha": "d186bb597165cfa04dd0679eec5da5fa632c367e"
+    },
+    {
+      "id": 11249825383,
+      "name": "docker-rf3-qualification",
+      "sizeBytes": 159336,
+      "digest": "sha256:6ac7f9c10eb9f2e1307a83348cb46c373eae09ebb85d0bc21043001e06f98967",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "runSha": "d186bb597165cfa04dd0679eec5da5fa632c367e"
+    },
+    {
+      "id": 11249780493,
+      "name": "code-quality-macos-latest",
+      "sizeBytes": 1321235,
+      "digest": "sha256:771c010091ff8d0f8cd4bd83213583f50a2a77f10ce683f2952157712b6cd212",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "runSha": "d186bb597165cfa04dd0679eec5da5fa632c367e"
+    },
+    {
+      "id": 11249735419,
+      "name": "test-results-macos-latest",
+      "sizeBytes": 659043,
+      "digest": "sha256:17b98e1656fcea63d6ded509b19082fcab13bcdf894b520e9af88e1dc099be71",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "runSha": "d186bb597165cfa04dd0679eec5da5fa632c367e"
+    },
+    {
+      "id": 11249710574,
+      "name": "test-results-ubuntu-latest",
+      "sizeBytes": 662229,
+      "digest": "sha256:2cd7098aaa8136f282597b33cfe25dcec22ec67fa4cc56f22190243181b29bfd",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "runSha": "d186bb597165cfa04dd0679eec5da5fa632c367e"
+    },
+    {
+      "id": 11249665550,
+      "name": "code-quality-windows-latest",
+      "sizeBytes": 1328937,
+      "digest": "sha256:f5d21f19679d9ab719720d35ba0d52e63ecbf522938f9ebb7f173cdf0ad1a663",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "runSha": "d186bb597165cfa04dd0679eec5da5fa632c367e"
+    },
+    {
+      "id": 11249520422,
+      "name": "code-quality-comparisons",
+      "sizeBytes": 675228,
+      "digest": "sha256:ece0f9b562b86680b44bbdb990fc0d95a00c64c2afccd4c790d8b3637f1cca78",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "runSha": "d186bb597165cfa04dd0679eec5da5fa632c367e"
+    },
+    {
+      "id": 11249016387,
+      "name": "code-quality-docker-rf3",
+      "sizeBytes": 681941,
+      "digest": "sha256:0584e3cece230317c43e6fe4c2b28de3af5b0a938c2c32f13b4220756d21bdfd",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "runSha": "d186bb597165cfa04dd0679eec5da5fa632c367e"
+    },
+    {
+      "id": 11248976563,
+      "name": "test-results-windows-latest",
+      "sizeBytes": 102387,
+      "digest": "sha256:f4f46a4611efca3cd70a8a69c74e0a9dfdec41a6bf569cfa39a3f7417260aa60",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "runSha": "d186bb597165cfa04dd0679eec5da5fa632c367e"
+    },
+    {
+      "id": 11248509163,
+      "name": "analyzer-rule-evidence",
+      "sizeBytes": 206607,
+      "digest": "sha256:a1082ca6f53febb97426ee51e0c798e52d38d90c61dd38bfa77b154040f78320",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "runSha": "d186bb597165cfa04dd0679eec5da5fa632c367e"
+    }
+  ],
+  "nativeReports": [
+    {
+      "path": "analyzer-rule-evidence/TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "5691805c1f7b929b38b830107429dcf69fe5922706cf2300ac6b9ad244ab3e3d",
+      "schemaVersion": 1,
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "sourceSha": "d186bb597165cfa04dd0679eec5da5fa632c367e",
+      "sourceMatchesRun": true,
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "observedStatuses": {
+        "passed": 118
+      },
+      "terminalStatuses": true,
+      "countsReconcile": true
+    },
+    {
+      "path": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "sha256": "58245e7cdfb3e812c424af9e79bb1da69e4574cd32d9f1a7cb35d326fedea6c8",
+      "schemaVersion": 1,
+      "assembly": "KeyLoad.IntegrationTests",
+      "sourceSha": "d186bb597165cfa04dd0679eec5da5fa632c367e",
+      "sourceMatchesRun": true,
+      "summary": {
+        "total": 46,
+        "passed": 43,
+        "failed": 3,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "observedStatuses": {
+        "passed": 43,
+        "error": 3
+      },
+      "terminalStatuses": true,
+      "countsReconcile": true
+    },
+    {
+      "path": "test-results-macos-latest/TestResults/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json",
+      "sha256": "c8e436fb1be9da51267b5be945c94aaebefa3f72cff460303b17fc1ba3730699",
+      "schemaVersion": 1,
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "sourceSha": "d186bb597165cfa04dd0679eec5da5fa632c367e",
+      "sourceMatchesRun": true,
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "observedStatuses": {
+        "passed": 118
+      },
+      "terminalStatuses": true,
+      "countsReconcile": true
+    },
+    {
+      "path": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "sha256": "74df49fd66bffea7aee5c1fe5c1af66bf2963a7651fd84bfd77f6cf7a6a2b3ae",
+      "schemaVersion": 1,
+      "assembly": "KeyLoad.UnitTests",
+      "sourceSha": "d186bb597165cfa04dd0679eec5da5fa632c367e",
+      "sourceMatchesRun": true,
+      "summary": {
+        "total": 870,
+        "passed": 868,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "observedStatuses": {
+        "passed": 868,
+        "error": 2
+      },
+      "terminalStatuses": true,
+      "countsReconcile": true
+    },
+    {
+      "path": "test-results-ubuntu-latest/TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "2028777486c89cc9a6533d8eef62d2121054a7ca03de35241c802218d46a17ad",
+      "schemaVersion": 1,
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "sourceSha": "d186bb597165cfa04dd0679eec5da5fa632c367e",
+      "sourceMatchesRun": true,
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "observedStatuses": {
+        "passed": 118
+      },
+      "terminalStatuses": true,
+      "countsReconcile": true
+    },
+    {
+      "path": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "1aa264afe5d83faf22e1acbbe9f69f6f13f08743ffd963d0ddaeddda05aa66a5",
+      "schemaVersion": 1,
+      "assembly": "KeyLoad.UnitTests",
+      "sourceSha": "d186bb597165cfa04dd0679eec5da5fa632c367e",
+      "sourceMatchesRun": true,
+      "summary": {
+        "total": 870,
+        "passed": 868,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "observedStatuses": {
+        "passed": 868,
+        "error": 2
+      },
+      "terminalStatuses": true,
+      "countsReconcile": true
+    },
+    {
+      "path": "test-results-windows-latest/TestResults/KeyLoad.Analyzers.Tests-windows-net10.0.tunit-report.json",
+      "sha256": "7370c0e2839303b1593a87295d39fb5dbfb613b4a7686200e0df8b75e951c598",
+      "schemaVersion": 1,
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "sourceSha": "d186bb597165cfa04dd0679eec5da5fa632c367e",
+      "sourceMatchesRun": true,
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "observedStatuses": {
+        "passed": 118
+      },
+      "terminalStatuses": true,
+      "countsReconcile": true
+    }
+  ],
+  "reportSummaryTotals": {
+    "total": 2258,
+    "passed": 2251,
+    "failed": 7,
+    "skipped": 0,
+    "cancelled": 0,
+    "timedOut": 0,
+    "flaky": 0
+  },
+  "observedStatuses": {
+    "passed": 2251,
+    "error": 7
+  },
+  "failures": [
+    {
+      "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpDiscoveryTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints.1.1.0",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to be less than or equal to 50\nbut received 53\n\nat Assert.That(discovered.Count + page.Tools.Count).IsLessThanOrEqualTo(McpCallerProtocol.ToolCount)"
+    },
+    {
+      "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3AuthorizationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries011EmptyResultsProjectedTagsRevocationAndBudgetFailuresAreConsistent.1.1.0",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to throw exactly OperationCanceledException\nbut no exception was thrown\n\nat Assert.That(action).ThrowsExactly<OperationCanceledException>()"
+    },
+    {
+      "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardBrowserTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd006RealChromeBrowsesSeededRf3DataAndDisconnectClearsSession.1.1.0",
+      "status": "error",
+      "exceptionType": "System.Threading.Tasks.TaskCanceledException",
+      "message": "A task was canceled."
+    },
+    {
+      "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges.1.1.0",
+      "status": "error",
+      "exceptionType": "KeyLoad.KeyLoadException",
+      "message": "A sample ID was reused with different content."
+    },
+    {
+      "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "id": "KeyLoad.UnitTests.Features.BlobStorage.BlobAgentCatalogTests.1.1.AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog.1.1.0",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to be 50\nbut found 53\n\nat Assert.That(McpOperationCatalog.Entries.Length).IsEqualTo(PublicCount)"
+    },
+    {
+      "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges.1.1.0",
+      "status": "error",
+      "exceptionType": "KeyLoad.KeyLoadException",
+      "message": "A sample ID was reused with different content."
+    },
+    {
+      "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "id": "KeyLoad.UnitTests.Features.BlobStorage.BlobAgentCatalogTests.1.1.AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog.1.1.0",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to be 50\nbut found 53\n\nat Assert.That(McpOperationCatalog.Entries.Length).IsEqualTo(PublicCount)"
+    }
+  ],
+  "allJobs": [
+    {
+      "id": 111003554494,
+      "name": "analyzer-rules",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run dotnet restore tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Retain rule regression and diagnostic evidence",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 14,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 15,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Run dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release",
+          "conclusion": "success",
+          "exitCode": null,
+          "exitCodeBasis": "No numeric code retained for this canceled/incomplete step."
+        }
+      ]
+    },
+    {
+      "id": 111003554549,
+      "name": "verify (windows-latest)",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Verify EditorConfig and analyzer fixes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Verify repository governance",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 8,
+          "name": "Verify source-owned Roslyn rules",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 9,
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "cancelled"
+        },
+        {
+          "number": 10,
+          "name": "Qualify real process recovery after a successful build",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 11,
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Retain compiler diagnostic reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 23,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 24,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 25,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "conclusion": "cancelled",
+          "exitCode": null,
+          "exitCodeBasis": "No numeric code retained for this canceled/incomplete step."
+        },
+        {
+          "step": "Qualify real process recovery after a successful build",
+          "conclusion": "skipped",
+          "exitCode": null,
+          "exitCodeBasis": "No numeric code retained for this canceled/incomplete step."
+        }
+      ]
+    },
+    {
+      "id": 111003554597,
+      "name": "comparison-smoke",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "cancelled"
+        },
+        {
+          "number": 7,
+          "name": "Measure 1 KiB documents, eight clients and three graph hops",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 8,
+          "name": "Measure 16 KiB documents, four clients and five graph hops",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 9,
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 10,
+          "name": "Retain comparison test result reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Retain comparison compiler diagnostic reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 21,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 22,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 23,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Run dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release",
+          "conclusion": "cancelled",
+          "exitCode": null,
+          "exitCodeBasis": "No numeric code retained for this canceled/incomplete step."
+        },
+        {
+          "step": "Measure 1 KiB documents, eight clients and three graph hops",
+          "conclusion": "skipped",
+          "exitCode": null,
+          "exitCodeBasis": "No numeric code retained for this canceled/incomplete step."
+        },
+        {
+          "step": "Measure 16 KiB documents, four clients and five graph hops",
+          "conclusion": "skipped",
+          "exitCode": null,
+          "exitCodeBasis": "No numeric code retained for this canceled/incomplete step."
+        }
+      ]
+    },
+    {
+      "id": 111003554607,
+      "name": "verify (ubuntu-latest)",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Verify EditorConfig and analyzer fixes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Verify repository governance",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 8,
+          "name": "Verify source-owned Roslyn rules",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 9,
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "number": 10,
+          "name": "Qualify real process recovery after a successful build",
+          "status": "completed",
+          "conclusion": "cancelled"
+        },
+        {
+          "number": 11,
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Retain compiler diagnostic reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 23,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 24,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 25,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "conclusion": "failure",
+          "exitCode": 2,
+          "exitCodeBasis": "Literal Exit code: 2 in job log, even though later workflow cancellation marked the step canceled."
+        },
+        {
+          "step": "Qualify real process recovery after a successful build",
+          "conclusion": "cancelled",
+          "exitCode": null,
+          "exitCodeBasis": "No numeric code retained for this canceled/incomplete step."
+        }
+      ]
+    },
+    {
+      "id": 111003554627,
+      "name": "verify (macos-latest)",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Verify EditorConfig and analyzer fixes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Verify repository governance",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 8,
+          "name": "Verify source-owned Roslyn rules",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 9,
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "number": 10,
+          "name": "Qualify real process recovery after a successful build",
+          "status": "completed",
+          "conclusion": "cancelled"
+        },
+        {
+          "number": 11,
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Retain compiler diagnostic reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 23,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 24,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 25,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "conclusion": "failure",
+          "exitCode": 2,
+          "exitCodeBasis": "Literal Exit code: 2 in job log, even though later workflow cancellation marked the step canceled."
+        },
+        {
+          "step": "Qualify real process recovery after a successful build",
+          "conclusion": "cancelled",
+          "exitCode": null,
+          "exitCodeBasis": "No numeric code retained for this canceled/incomplete step."
+        }
+      ]
+    },
+    {
+      "id": 111003554656,
+      "name": "docker-rf3",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Require the actual Docker runtime",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Require the actual administration browser",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Run dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 8,
+          "name": "Qualify RF3 through the real SDK clients",
+          "status": "completed",
+          "conclusion": "cancelled"
+        },
+        {
+          "number": 9,
+          "name": "Retain real topology and fault receipts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 10,
+          "name": "Retain RF3 compiler diagnostic reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 19,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 20,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 21,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Qualify RF3 through the real SDK clients",
+          "conclusion": "cancelled",
+          "exitCode": 2,
+          "exitCodeBasis": "Literal Exit code: 2 in job log, even though later workflow cancellation marked the step canceled."
+        }
+      ]
+    }
+  ],
+  "skippedSteps": [
+    {
+      "job": "verify (windows-latest)",
+      "step": "Qualify real process recovery after a successful build",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "verify (windows-latest)",
+      "step": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "comparison-smoke",
+      "step": "Measure 1 KiB documents, eight clients and three graph hops",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "comparison-smoke",
+      "step": "Measure 16 KiB documents, four clients and five graph hops",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "comparison-smoke",
+      "step": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "verify (ubuntu-latest)",
+      "step": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "verify (macos-latest)",
+      "step": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "docker-rf3",
+      "step": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+      "conclusion": "skipped"
+    }
+  ],
+  "qualification": "NOT QUALIFIED: run terminally cancelled by later push; required recovery and comparison native reports absent; unit and RF3 reports contain test errors. No result is transferable to later SHAs.",
+  "limitations": [
+    "Artifact metadata digests retained; ZIP bytes not independently verified.",
+    "The evidence worker ran no local builds or runtime. Lead development/static checks are separate; no local tests, recovery, containers or benchmarks were executed."
+  ],
+  "leadVerification": {
+    "sourceAndRepositoryAndBranch": true,
+    "reportHashesAndCaseCounts": true,
+    "reports": 7,
+    "completeRequiredScope": false
+  }
+}

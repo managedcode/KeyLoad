@@ -1,0 +1,3081 @@
+{
+  "run": {
+    "runId": 37057708780,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37057708780",
+    "workflow": "KeyLoad CI",
+    "event": "push",
+    "attempt": 1,
+    "branch": "main",
+    "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+    "status": "completed",
+    "conclusion": "failure",
+    "createdAt": "2026-10-02T19:59:51Z",
+    "updatedAt": "2026-10-02T20:12:36Z"
+  },
+  "provenanceCheck": {
+    "requestedSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+    "runShaMatches": true,
+    "nativeReportCount": 12,
+    "allReportsMatchRequestedSource": true,
+    "artifactCount": 12,
+    "allArtifactsBoundToRunAndSha": true
+  },
+  "artifacts": [
+    {
+      "id": 11250166273,
+      "name": "code-quality-ubuntu-latest",
+      "sizeBytes": 1327187,
+      "digest": "sha256:852314eb559d3553c1a3c8c2d3222a7f03cdc407db209c741be954f1d2be0554",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:07:00Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    },
+    {
+      "id": 11250131165,
+      "name": "code-quality-docker-rf3",
+      "sizeBytes": 680652,
+      "digest": "sha256:79766d8986a8d337d1ac5b1a0116fe976e426c5a485350690359003d96b3c583",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:05:30Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    },
+    {
+      "id": 11250046301,
+      "name": "docker-rf3-qualification",
+      "sizeBytes": 325018,
+      "digest": "sha256:7fa09f7af1ea43c261ce7f1da5bda595762bb49cbdbf446921373dac2b857118",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:05:28Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    },
+    {
+      "id": 11249980772,
+      "name": "analyzer-rule-evidence",
+      "sizeBytes": 207255,
+      "digest": "sha256:f0dcd4ba5a0562d0261cd795f75d8f2f8fb4c1f5c3a1b880686b10952b90ac97",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:02:28Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    },
+    {
+      "id": 11249761752,
+      "name": "test-results-ubuntu-latest",
+      "sizeBytes": 772611,
+      "digest": "sha256:91893db72644210b80cfca62908621612eebb6d0a064947f8909dc2994a4d0be",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:06:59Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    },
+    {
+      "id": 11249667652,
+      "name": "code-quality-comparisons",
+      "sizeBytes": 675585,
+      "digest": "sha256:77e2a05d3805b3f87815a7bfcd8fa3210e71fc1fd79db760f0df4116d84a21ba",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:11:35Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    },
+    {
+      "id": 11249391962,
+      "name": "test-results-macos-latest",
+      "sizeBytes": 761877,
+      "digest": "sha256:3064b525e599fd07e501531e75dec1ff9c143bb64fc4ce3673fa3749f458ab3d",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:09:33Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    },
+    {
+      "id": 11249342393,
+      "name": "code-quality-windows-latest",
+      "sizeBytes": 1329290,
+      "digest": "sha256:8af64b6ccd48300b5f9341ade1133352c00600b520907d6855ace4ce8304d343",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:12:31Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    },
+    {
+      "id": 11249302085,
+      "name": "code-quality-macos-latest",
+      "sizeBytes": 1327534,
+      "digest": "sha256:62741d8f5d6e5c2b61254d2cf48773fba44c8c6c8011b31d80a08a1f7c1b8865",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:09:36Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    },
+    {
+      "id": 11249252480,
+      "name": "test-results-windows-latest",
+      "sizeBytes": 774286,
+      "digest": "sha256:f23e85347b2a54c7a2159596c4c42f355babf436918ab5287b0ae6188c1d85fb",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:12:30Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    },
+    {
+      "id": 11249148055,
+      "name": "comparison-test-results",
+      "sizeBytes": 107617,
+      "digest": "sha256:6e10c1c1fb8aacd23eed7d6320ea3face831eb888748c2314c5574755d9a7c86",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:11:34Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    },
+    {
+      "id": 11249108159,
+      "name": "comparison-suite",
+      "sizeBytes": 26299,
+      "digest": "sha256:026e874703d054d574cecf0e11a9055c68bc2c834c47472fc7249bc16fca5b85",
+      "digestSource": "GitHub artifact metadata",
+      "zipDigestVerified": false,
+      "expired": false,
+      "createdAt": "2026-10-02T20:11:33Z",
+      "runId": 37057708780,
+      "headSha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3"
+    }
+  ],
+  "nativeSummary": {
+    "reportCount": 12,
+    "caseTotal": 3540,
+    "summaryTotals": {
+      "total": 3540,
+      "passed": 3530,
+      "failed": 10,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "observedStatuses": {
+      "passed": 3530,
+      "error": 10
+    },
+    "inProgress": 0,
+    "allObservedStatusesTerminal": true,
+    "allSchemaV1": true,
+    "allReportsReconcile": true,
+    "reports": [
+      {
+        "path": "analyzer-rule-evidence/TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+        "sha256": "875d50fb322a620608c8c5d4622d3f4cecc73f1a3d31f00db5dd39c5810967a9",
+        "artifactName": "analyzer-rule-evidence",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.Analyzers.Tests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "Ubuntu 24.04.5 LTS",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 118,
+          "passed": 118,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 118
+        },
+        "actualCaseCount": 118,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      },
+      {
+        "path": "comparison-test-results/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+        "sha256": "1741b2b08a0bd44257bdaa2dca7e4afbe6263d7391eb5f4a770b168628f9e496",
+        "artifactName": "comparison-test-results",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.ComparisonTests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "Ubuntu 24.04.5 LTS",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 4,
+          "passed": 2,
+          "failed": 2,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 2,
+          "error": 2
+        },
+        "actualCaseCount": 4,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      },
+      {
+        "path": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+        "sha256": "dd3bb0a9879998f8c869451f103e4cb78dfee7daead50209d262a446bdbaf419",
+        "artifactName": "docker-rf3-qualification",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.IntegrationTests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "Ubuntu 24.04.5 LTS",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 46,
+          "passed": 44,
+          "failed": 2,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 44,
+          "error": 2
+        },
+        "actualCaseCount": 46,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      },
+      {
+        "path": "test-results-macos-latest/TestResults/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json",
+        "sha256": "8fa1a7b847c9d31509d7ddfb064ff420852731c05e393c4f770861aa730546a1",
+        "artifactName": "test-results-macos-latest",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.Analyzers.Tests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "macOS 26.6.2",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 118,
+          "passed": 118,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 118
+        },
+        "actualCaseCount": 118,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      },
+      {
+        "path": "test-results-macos-latest/TestResults/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+        "sha256": "990672866823f566bad91191202dd8107d126f7acce48c85fc90a417c0c6a332",
+        "artifactName": "test-results-macos-latest",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.RecoveryTests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "macOS 26.6.2",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 136,
+          "passed": 136,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 136
+        },
+        "actualCaseCount": 136,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      },
+      {
+        "path": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "sha256": "147580b1c24172d48f632d135e37a8b3befdae86617bc6408af9b8bf40357eb2",
+        "artifactName": "test-results-macos-latest",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.UnitTests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "macOS 26.6.2",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 870,
+          "passed": 868,
+          "failed": 2,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 868,
+          "error": 2
+        },
+        "actualCaseCount": 870,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      },
+      {
+        "path": "test-results-ubuntu-latest/TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+        "sha256": "3c91cfe2015106eca1a008710000df6714b7b477d8dd87dc6e3d12d9c6e05b66",
+        "artifactName": "test-results-ubuntu-latest",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.Analyzers.Tests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "Ubuntu 24.04.5 LTS",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 118,
+          "passed": 118,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 118
+        },
+        "actualCaseCount": 118,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      },
+      {
+        "path": "test-results-ubuntu-latest/TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+        "sha256": "4269b8dc38f484fdcc62a69a5e66509f5a484c85ca8925a27bedc9006820155e",
+        "artifactName": "test-results-ubuntu-latest",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.RecoveryTests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "Ubuntu 24.04.5 LTS",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 136,
+          "passed": 136,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 136
+        },
+        "actualCaseCount": 136,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      },
+      {
+        "path": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+        "sha256": "8c12362a7a466c776f8d709af43755ec4f7706ab577f714a86e09502d075c837",
+        "artifactName": "test-results-ubuntu-latest",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.UnitTests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "Ubuntu 24.04.5 LTS",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 870,
+          "passed": 868,
+          "failed": 2,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 868,
+          "error": 2
+        },
+        "actualCaseCount": 870,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      },
+      {
+        "path": "test-results-windows-latest/TestResults/KeyLoad.Analyzers.Tests-windows-net10.0.tunit-report.json",
+        "sha256": "fb798bf394b553e2207bfc6ba236e9dc269fe3809a1d54e968252a21de408007",
+        "artifactName": "test-results-windows-latest",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.Analyzers.Tests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "Microsoft Windows 10.0.26100",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 118,
+          "passed": 118,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 118
+        },
+        "actualCaseCount": 118,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      },
+      {
+        "path": "test-results-windows-latest/TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+        "sha256": "58d92fa2b56d8da9d23c360ef7a82f27dd049146208ad5846386bc86732a8f26",
+        "artifactName": "test-results-windows-latest",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.RecoveryTests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "Microsoft Windows 10.0.26100",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 136,
+          "passed": 136,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 136
+        },
+        "actualCaseCount": 136,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      },
+      {
+        "path": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+        "sha256": "b24f98359585d11a969f881f45cc3e42434b433199e537079506761fd066cf2b",
+        "artifactName": "test-results-windows-latest",
+        "schemaVersion": 1,
+        "assembly": "KeyLoad.UnitTests",
+        "source": {
+          "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+          "branch": "main",
+          "repository": "managedcode/KeyLoad",
+          "matchesRun": true
+        },
+        "os": "Microsoft Windows 10.0.26100",
+        "runtime": ".NET 10.0.12",
+        "tunit": "1.72.10.0",
+        "declared": {
+          "total": 870,
+          "passed": 868,
+          "failed": 2,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "observedStatuses": {
+          "passed": 868,
+          "error": 2
+        },
+        "actualCaseCount": 870,
+        "allCasesTerminal": true,
+        "sourceAndCountReconciled": true,
+        "mismatches": []
+      }
+    ]
+  },
+  "allSixJobs": [
+    {
+      "id": 111006408449,
+      "name": "docker-rf3",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37057708780/job/111006408449",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Require the actual Docker runtime",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Require the actual administration browser",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Run dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 8,
+          "name": "Qualify RF3 through the real SDK clients",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "number": 9,
+          "name": "Retain real topology and fault receipts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 10,
+          "name": "Retain RF3 compiler diagnostic reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 19,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 20,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 21,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Qualify RF3 through the real SDK clients",
+          "status": "completed",
+          "conclusion": "failure",
+          "exitCode": 2,
+          "exitCodeBasis": "Literal Exit code in job log."
+        }
+      ]
+    },
+    {
+      "id": 111006408582,
+      "name": "analyzer-rules",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37057708780/job/111006408582",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run dotnet restore tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Retain rule regression and diagnostic evidence",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 14,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 15,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Run dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success",
+          "exitCode": null,
+          "exitCodeBasis": "Step completed successfully and its retained native report shows all tests passed; no numeric exit code logged."
+        }
+      ]
+    },
+    {
+      "id": 111006408600,
+      "name": "verify (windows-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37057708780/job/111006408600",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Verify EditorConfig and analyzer fixes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Verify repository governance",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 8,
+          "name": "Verify source-owned Roslyn rules",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 9,
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "number": 10,
+          "name": "Qualify real process recovery after a successful build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Retain compiler diagnostic reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 23,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 24,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 25,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "failure",
+          "exitCode": 2,
+          "exitCodeBasis": "Literal Exit code in job log."
+        },
+        {
+          "step": "Qualify real process recovery after a successful build",
+          "status": "completed",
+          "conclusion": "success",
+          "exitCode": null,
+          "exitCodeBasis": "Step completed successfully and its retained native report shows all tests passed; no numeric exit code logged."
+        }
+      ]
+    },
+    {
+      "id": 111006408656,
+      "name": "verify (macos-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37057708780/job/111006408656",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Verify EditorConfig and analyzer fixes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Verify repository governance",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 8,
+          "name": "Verify source-owned Roslyn rules",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 9,
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "number": 10,
+          "name": "Qualify real process recovery after a successful build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Retain compiler diagnostic reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 23,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 24,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 25,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "failure",
+          "exitCode": 2,
+          "exitCodeBasis": "Literal Exit code in job log."
+        },
+        {
+          "step": "Qualify real process recovery after a successful build",
+          "status": "completed",
+          "conclusion": "success",
+          "exitCode": null,
+          "exitCodeBasis": "Step completed successfully and its retained native report shows all tests passed; no numeric exit code logged."
+        }
+      ]
+    },
+    {
+      "id": 111006408720,
+      "name": "comparison-smoke",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37057708780/job/111006408720",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "number": 7,
+          "name": "Measure 1 KiB documents, eight clients and three graph hops",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 8,
+          "name": "Measure 16 KiB documents, four clients and five graph hops",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 9,
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 10,
+          "name": "Retain comparison test result reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Retain comparison compiler diagnostic reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 21,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 22,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 23,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Run dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "failure",
+          "exitCode": 2,
+          "exitCodeBasis": "Literal Exit code in job log."
+        },
+        {
+          "step": "Measure 1 KiB documents, eight clients and three graph hops",
+          "status": "completed",
+          "conclusion": "skipped",
+          "exitCode": null,
+          "exitCodeBasis": "No numeric code logged; rely only on the recorded step conclusion and native report."
+        },
+        {
+          "step": "Measure 16 KiB documents, four clients and five graph hops",
+          "status": "completed",
+          "conclusion": "skipped",
+          "exitCode": null,
+          "exitCodeBasis": "No numeric code logged; rely only on the recorded step conclusion and native report."
+        }
+      ]
+    },
+    {
+      "id": 111006408818,
+      "name": "verify (ubuntu-latest)",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37057708780/job/111006408818",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run dotnet restore KeyLoad.slnx",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Verify EditorConfig and analyzer fixes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Verify repository governance",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 8,
+          "name": "Verify source-owned Roslyn rules",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 9,
+          "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "number": 10,
+          "name": "Qualify real process recovery after a successful build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Retain compiler diagnostic reports",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 23,
+          "name": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 24,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 25,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "processReceipts": [
+        {
+          "step": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+          "status": "completed",
+          "conclusion": "failure",
+          "exitCode": 2,
+          "exitCodeBasis": "Literal Exit code in job log."
+        },
+        {
+          "step": "Qualify real process recovery after a successful build",
+          "status": "completed",
+          "conclusion": "success",
+          "exitCode": null,
+          "exitCodeBasis": "Step completed successfully and its retained native report shows all tests passed; no numeric exit code logged."
+        }
+      ]
+    }
+  ],
+  "skippedStepsFromGitHub": [
+    {
+      "job": "docker-rf3",
+      "jobId": 111006408449,
+      "step": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "verify (windows-latest)",
+      "jobId": 111006408600,
+      "step": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "verify (macos-latest)",
+      "jobId": 111006408656,
+      "step": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "comparison-smoke",
+      "jobId": 111006408720,
+      "step": "Measure 1 KiB documents, eight clients and three graph hops",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "comparison-smoke",
+      "jobId": 111006408720,
+      "step": "Measure 16 KiB documents, four clients and five graph hops",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "comparison-smoke",
+      "jobId": 111006408720,
+      "step": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+      "conclusion": "skipped"
+    },
+    {
+      "job": "verify (ubuntu-latest)",
+      "jobId": 111006408818,
+      "step": "Post Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68",
+      "conclusion": "skipped"
+    }
+  ],
+  "nativeFailures": [
+    {
+      "report": "comparison-test-results/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "id": "KeyLoad.ComparisonTests.RealComparisonSuite.1.1.AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines.1.1.0",
+      "displayName": "AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines",
+      "status": "error",
+      "exceptionType": "System.OperationCanceledException",
+      "message": "Resource 'comparisons' failed to meet the predicate condition before the operation was cancelled.\n- Current State: Waiting\n- Creation Time: (null)\n- Current Health: (null)",
+      "stackHead": [
+        "   at Aspire.Hosting.ApplicationModel.ResourceNotificationService.WaitForResourceCoreAsync(String resourceName, Func`2 predicate, String cancellationMessage, CancellationToken cancellationToken, String waitCondition) in /_/src/Aspire.Hosting/ApplicationModel/ResourceNotificationService.cs:line 693",
+        "   at Aspire.Hosting.ApplicationModel.ResourceNotificationService.WaitForResourceAsync(String resourceName, Func`2 predicate, CancellationToken cancellationToken) in /_/src/Aspire.Hosting/ApplicationModel/ResourceNotificationService.cs:line 651",
+        "   at KeyLoad.ComparisonTests.RealComparisonSuite.VerifyCompletedRunAsync(DistributedApplication app, String output, String evidence, ComparisonOptions options, String neo4jPassword, CancellationToken cancellationToken) in /_/tests/KeyLoad.ComparisonTests/ComparisonTests.cs:line 153",
+        "   at KeyLoad.ComparisonTests.RealComparisonSuite.AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines() in /_/tests/KeyLoad.ComparisonTests/ComparisonTests.cs:line 44",
+        "   at KeyLoad.ComparisonTests.RealComparisonSuite.AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines() in /_/tests/KeyLoad.ComparisonTests/ComparisonTests.cs:line 49"
+      ]
+    },
+    {
+      "report": "comparison-test-results/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.1.1.AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema.1.1.0",
+      "displayName": "AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema",
+      "status": "error",
+      "exceptionType": "System.OperationCanceledException",
+      "message": "Resource 'comparisons' failed to meet the predicate condition before the operation was cancelled.\n- Current State: Waiting\n- Creation Time: (null)\n- Current Health: (null)",
+      "stackHead": [
+        "   at Aspire.Hosting.ApplicationModel.ResourceNotificationService.WaitForResourceCoreAsync(String resourceName, Func`2 predicate, String cancellationMessage, CancellationToken cancellationToken, String waitCondition) in /_/src/Aspire.Hosting/ApplicationModel/ResourceNotificationService.cs:line 693",
+        "   at Aspire.Hosting.ApplicationModel.ResourceNotificationService.WaitForResourceAsync(String resourceName, Func`2 predicate, CancellationToken cancellationToken) in /_/src/Aspire.Hosting/ApplicationModel/ResourceNotificationService.cs:line 651",
+        "   at KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.WaitForComparisonAsync(DistributedApplication app, CancellationToken cancellationToken) in /_/tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/TimeSeriesAspireProfileTests.cs:line 99",
+        "   at KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema() in /_/tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/TimeSeriesAspireProfileTests.cs:line 52",
+        "   at KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema() in /_/tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/TimeSeriesAspireProfileTests.cs:line 66"
+      ]
+    },
+    {
+      "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpDiscoveryTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints.1.1.0",
+      "displayName": "AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to be less than or equal to 50\nbut received 53\n\nat Assert.That(discovered.Count + page.Tools.Count).IsLessThanOrEqualTo(McpCallerProtocol.ToolCount)",
+      "stackHead": [
+        "   at TUnit.Assertions.Core.Assertion`1.ThrowOrAccumulateFailure(AssertionResult result)",
+        "   at TUnit.Assertions.Core.Assertion`1.ExecuteCoreAsync()",
+        "   at TUnit.Assertions.Core.Assertion`1.AssertAsync()",
+        "   at KeyLoad.IntegrationTests.Features.ClientApi.McpDiscoveryTests.AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints() in /_/tests/KeyLoad.IntegrationTests/Features/ClientApi/McpDiscoveryTests.cs:line 26",
+        "   at KeyLoad.IntegrationTests.Features.ClientApi.McpDiscoveryTests.AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints() in /_/tests/KeyLoad.IntegrationTests/Features/ClientApi/McpDiscoveryTests.cs:line 40"
+      ]
+    },
+    {
+      "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3AuthorizationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries011EmptyResultsProjectedTagsRevocationAndBudgetFailuresAreConsistent.1.1.0",
+      "displayName": "AcSeries011EmptyResultsProjectedTagsRevocationAndBudgetFailuresAreConsistent",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to throw exactly OperationCanceledException\nbut no exception was thrown\n\nat Assert.That(action).ThrowsExactly<OperationCanceledException>()",
+      "stackHead": [
+        "   at TUnit.Assertions.Core.Assertion`1.ThrowOrAccumulateFailure(AssertionResult result)",
+        "   at TUnit.Assertions.Core.Assertion`1.ExecuteCoreAsync()",
+        "   at TUnit.Assertions.Core.Assertion`1.AssertAsync()",
+        "   at KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3AuthorizationTests.AcSeries011EmptyResultsProjectedTagsRevocationAndBudgetFailuresAreConsistent() in /_/tests/KeyLoad.IntegrationTests/Features/TimeSeries/TimeSeriesRf3AuthorizationTests.cs:line 52",
+        "   at KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3AuthorizationTests.AcSeries011EmptyResultsProjectedTagsRevocationAndBudgetFailuresAreConsistent() in /_/tests/KeyLoad.IntegrationTests/Features/TimeSeries/TimeSeriesRf3AuthorizationTests.cs:line 61"
+      ]
+    },
+    {
+      "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges.1.1.0",
+      "displayName": "AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges",
+      "status": "error",
+      "exceptionType": "KeyLoad.KeyLoadException",
+      "message": "A sample ID was reused with different content.",
+      "stackHead": [
+        "   at KeyLoad.OperationResult.Get[T]() in /_/src/KeyLoad.Abstractions/Contracts.cs:line 409",
+        "   at KeyLoad.UnitTests.TestDatabase.Commit(Mutation[] mutations) in /_/tests/KeyLoad.UnitTests/TestDatabase.cs:line 66",
+        "   at KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTestData.Append(TestDatabase database, SampleData[] samples) in /_/tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTestData.cs:line 49",
+        "   at KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges() in /_/tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs:line 21",
+        "   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)"
+      ]
+    },
+    {
+      "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "id": "KeyLoad.UnitTests.Features.BlobStorage.BlobAgentCatalogTests.1.1.AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog.1.1.0",
+      "displayName": "AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to be 50\nbut found 53\n\nat Assert.That(McpOperationCatalog.Entries.Length).IsEqualTo(PublicCount)",
+      "stackHead": [
+        "   at TUnit.Assertions.Core.Assertion`1.ThrowOrAccumulateFailure(AssertionResult result)",
+        "   at TUnit.Assertions.Core.Assertion`1.ExecuteCoreAsync()",
+        "   at TUnit.Assertions.Core.Assertion`1.AssertAsync()",
+        "   at KeyLoad.UnitTests.Features.BlobStorage.BlobAgentCatalogTests.AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog() in /_/tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAgentCatalogTests.cs:line 44",
+        "   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)"
+      ]
+    },
+    {
+      "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges.1.1.0",
+      "displayName": "AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges",
+      "status": "error",
+      "exceptionType": "KeyLoad.KeyLoadException",
+      "message": "A sample ID was reused with different content.",
+      "stackHead": [
+        "   at KeyLoad.OperationResult.Get[T]() in /_/src/KeyLoad.Abstractions/Contracts.cs:line 409",
+        "   at KeyLoad.UnitTests.TestDatabase.Commit(Mutation[] mutations) in /_/tests/KeyLoad.UnitTests/TestDatabase.cs:line 66",
+        "   at KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTestData.Append(TestDatabase database, SampleData[] samples) in /_/tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTestData.cs:line 49",
+        "   at KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges() in /_/tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs:line 21",
+        "   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)"
+      ]
+    },
+    {
+      "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "id": "KeyLoad.UnitTests.Features.BlobStorage.BlobAgentCatalogTests.1.1.AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog.1.1.0",
+      "displayName": "AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to be 50\nbut found 53\n\nat Assert.That(McpOperationCatalog.Entries.Length).IsEqualTo(PublicCount)",
+      "stackHead": [
+        "   at TUnit.Assertions.Core.Assertion`1.ThrowOrAccumulateFailure(AssertionResult result)",
+        "   at TUnit.Assertions.Core.Assertion`1.ExecuteCoreAsync()",
+        "   at TUnit.Assertions.Core.Assertion`1.AssertAsync()",
+        "   at KeyLoad.UnitTests.Features.BlobStorage.BlobAgentCatalogTests.AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog() in /_/tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAgentCatalogTests.cs:line 44",
+        "   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)"
+      ]
+    },
+    {
+      "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+      "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges.1.1.0",
+      "displayName": "AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges",
+      "status": "error",
+      "exceptionType": "KeyLoad.KeyLoadException",
+      "message": "A sample ID was reused with different content.",
+      "stackHead": [
+        "   at KeyLoad.OperationResult.Get[T]() in /_/src/KeyLoad.Abstractions/Contracts.cs:line 409",
+        "   at KeyLoad.UnitTests.TestDatabase.Commit(Mutation[] mutations) in /_/tests/KeyLoad.UnitTests/TestDatabase.cs:line 66",
+        "   at KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTestData.Append(TestDatabase database, SampleData[] samples) in /_/tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTestData.cs:line 49",
+        "   at KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges() in /_/tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs:line 21",
+        "   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)"
+      ]
+    },
+    {
+      "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+      "id": "KeyLoad.UnitTests.Features.BlobStorage.BlobAgentCatalogTests.1.1.AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog.1.1.0",
+      "displayName": "AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to be 50\nbut found 53\n\nat Assert.That(McpOperationCatalog.Entries.Length).IsEqualTo(PublicCount)",
+      "stackHead": [
+        "   at TUnit.Assertions.Core.Assertion`1.ThrowOrAccumulateFailure(AssertionResult result)",
+        "   at TUnit.Assertions.Core.Assertion`1.ExecuteCoreAsync()",
+        "   at TUnit.Assertions.Core.Assertion`1.AssertAsync()",
+        "   at KeyLoad.UnitTests.Features.BlobStorage.BlobAgentCatalogTests.AcBlob006TenExactToolsJoinTheFortySevenOperationNativeCatalog() in /_/tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAgentCatalogTests.cs:line 44",
+        "   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)"
+      ]
+    }
+  ],
+  "requestedCaseCatalogs": {
+    "TimeSeries": {
+      "outcomeCount": 83,
+      "distinctIds": 31,
+      "statusCounts": {
+        "error": 4,
+        "passed": 79
+      },
+      "cases": [
+        {
+          "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3ReadTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries008LatestUsesTimestampThenSequenceAndReturnsTypedAbsence.1.1.0",
+          "name": "AcSeries008LatestUsesTimestampThenSequenceAndReturnsTypedAbsence",
+          "class": "TimeSeriesRf3ReadTests(ClusterFixture)",
+          "status": "passed",
+          "source": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/TimeSeriesRf3ReadTests.cs"
+        },
+        {
+          "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3ReadTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries009AggregateMatchesIndependentRawOracleForOffsetsLateSamplesAndDeduplication.1.1.0",
+          "name": "AcSeries009AggregateMatchesIndependentRawOracleForOffsetsLateSamplesAndDeduplication",
+          "class": "TimeSeriesRf3ReadTests(ClusterFixture)",
+          "status": "passed",
+          "source": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/TimeSeriesRf3ReadTests.cs"
+        },
+        {
+          "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3AuthorizationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries011EmptyResultsProjectedTagsRevocationAndBudgetFailuresAreConsistent.1.1.0",
+          "name": "AcSeries011EmptyResultsProjectedTagsRevocationAndBudgetFailuresAreConsistent",
+          "class": "TimeSeriesRf3AuthorizationTests(ClusterFixture)",
+          "status": "error",
+          "source": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/TimeSeriesRf3AuthorizationTests.cs"
+        },
+        {
+          "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3WindowTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries010WindowsAreDenseAnchoredUtcAndClampThePartialFinalWindow.1.1.0",
+          "name": "AcSeries010WindowsAreDenseAnchoredUtcAndClampThePartialFinalWindow",
+          "class": "TimeSeriesRf3WindowTests(ClusterFixture)",
+          "status": "passed",
+          "source": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/TimeSeriesRf3WindowTests.cs"
+        },
+        {
+          "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3ReplicaRestartTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica.1.1.0",
+          "name": "AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica",
+          "class": "TimeSeriesRf3ReplicaRestartTests(ClusterFixture)",
+          "status": "passed",
+          "source": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/TimeSeriesRf3ReplicaRestartTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests.1.1.AcSeries008LatestVisitsOneBaselineEntryWithLargeOlderHistoryAndSmallRawBudget.1.1.0",
+          "name": "AcSeries008LatestVisitsOneBaselineEntryWithLargeOlderHistoryAndSmallRawBudget",
+          "class": "SampleLatestTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleLatestTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests.1.1.AcSeries008LatestIncludesDateMaximumAndReturnsNullWhenNoSampleIsAtCut.1.1.0",
+          "name": "AcSeries008LatestIncludesDateMaximumAndReturnsNullWhenNoSampleIsAtCut",
+          "class": "SampleLatestTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleLatestTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests.1.1.AcSeries008LatestUsesUtcTimestampAndGreatestSequenceAtInclusiveCut.1.1.0",
+          "name": "AcSeries008LatestUsesUtcTimestampAndGreatestSequenceAtInclusiveCut",
+          "class": "SampleLatestTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleLatestTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges.1.1.0",
+          "name": "AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges",
+          "class": "SampleAggregateTests",
+          "status": "error",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009FiniteSumOverflowFailsWithoutChangingPositionOrHealthyFollowup.1.1.0",
+          "name": "AcSeries009FiniteSumOverflowFailsWithoutChangingPositionOrHealthyFollowup",
+          "class": "SampleAggregateTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009NullEndIncludesMaximumAndEqualBoundsReturnEmptyAggregate.1.1.0",
+          "name": "AcSeries009NullEndIncludesMaximumAndEqualBoundsReturnEmptyAggregate",
+          "class": "SampleAggregateTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).1.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/latest)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).2.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/aggregate)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).3.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/V1/SERIES/WINDOWS/)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateAuthorizationTests.1.1.AcSeries011PersistedRevocationDeniesEveryNewReadOperation.1.1.0",
+          "name": "AcSeries011PersistedRevocationDeniesEveryNewReadOperation",
+          "class": "SampleAggregateAuthorizationTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateAuthorizationTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateAuthorizationTests.1.1.AcSeries011AllReadersRequireCurrentPersistedSeriesReadEvenWhenEmpty.1.1.0",
+          "name": "AcSeries011AllReadersRequireCurrentPersistedSeriesReadEvenWhenEmpty",
+          "class": "SampleAggregateAuthorizationTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateAuthorizationTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateAuthorizationTests.1.1.AcSeries011LatestTagsAndNumericReadersUseCurrentPersistedFieldPolicies.1.1.0",
+          "name": "AcSeries011LatestTagsAndNumericReadersUseCurrentPersistedFieldPolicies",
+          "class": "SampleAggregateAuthorizationTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateAuthorizationTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005ProjectionUsesPersistedPolicyAndCancellationKeepsStoreUsable.1.1.0",
+          "name": "AcMp005ProjectionUsesPersistedPolicyAndCancellationKeepsStoreUsable",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005CompleteArrayBudgetAcceptsItsExactBoundaryAndRejectsOneByteLess.1.1.0",
+          "name": "AcMp005CompleteArrayBudgetAcceptsItsExactBoundaryAndRejectsOneByteLess",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits.1.1.0",
+          "name": "AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005NarrowRangeSkipsLargeLaterValuesBeforeCopyingOrDecoding.1.1.0",
+          "name": "AcMp005NarrowRangeSkipsLargeLaterValuesBeforeCopyingOrDecoding",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010WindowsAreDenseAnchoredClampedAndMatchRawReference.1.1.0",
+          "name": "AcSeries010WindowsAreDenseAnchoredClampedAndMatchRawReference",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange.1.1.0",
+          "name": "AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation.1.1.0",
+          "name": "AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation.1.1.0",
+          "name": "AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011CompleteRawReadBudgetAcceptsExactBytesAndRejectsOneByteLess.1.1.0",
+          "name": "AcSeries011CompleteRawReadBudgetAcceptsExactBytesAndRejectsOneByteLess",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011ReadByteBudgetPreCancellationAndElapsedDeadlineRejectAndPreserveStore.1.1.0",
+          "name": "AcSeries011ReadByteBudgetPreCancellationAndElapsedDeadlineRejectAndPreserveStore",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011CompleteJsonOutputAcceptsExactBytesAndRejectsOneByteLess.1.1.0",
+          "name": "AcSeries011CompleteJsonOutputAcceptsExactBytesAndRejectsOneByteLess",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded.1.1.0",
+          "name": "AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate.1.1.0",
+          "name": "AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleOrderingTests.1.1.OutOfOrderSamplesStayOrderedAndSampleIdIsIdempotent.1.1.0",
+          "name": "OutOfOrderSamplesStayOrderedAndSampleIdIsIdempotent",
+          "class": "SampleOrderingTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleOrderingTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests.1.1.AcSeries008LatestVisitsOneBaselineEntryWithLargeOlderHistoryAndSmallRawBudget.1.1.0",
+          "name": "AcSeries008LatestVisitsOneBaselineEntryWithLargeOlderHistoryAndSmallRawBudget",
+          "class": "SampleLatestTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleLatestTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests.1.1.AcSeries008LatestIncludesDateMaximumAndReturnsNullWhenNoSampleIsAtCut.1.1.0",
+          "name": "AcSeries008LatestIncludesDateMaximumAndReturnsNullWhenNoSampleIsAtCut",
+          "class": "SampleLatestTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleLatestTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests.1.1.AcSeries008LatestUsesUtcTimestampAndGreatestSequenceAtInclusiveCut.1.1.0",
+          "name": "AcSeries008LatestUsesUtcTimestampAndGreatestSequenceAtInclusiveCut",
+          "class": "SampleLatestTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleLatestTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges.1.1.0",
+          "name": "AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges",
+          "class": "SampleAggregateTests",
+          "status": "error",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009NullEndIncludesMaximumAndEqualBoundsReturnEmptyAggregate.1.1.0",
+          "name": "AcSeries009NullEndIncludesMaximumAndEqualBoundsReturnEmptyAggregate",
+          "class": "SampleAggregateTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009FiniteSumOverflowFailsWithoutChangingPositionOrHealthyFollowup.1.1.0",
+          "name": "AcSeries009FiniteSumOverflowFailsWithoutChangingPositionOrHealthyFollowup",
+          "class": "SampleAggregateTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).1.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/latest)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).2.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/aggregate)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).3.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/V1/SERIES/WINDOWS/)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateAuthorizationTests.1.1.AcSeries011AllReadersRequireCurrentPersistedSeriesReadEvenWhenEmpty.1.1.0",
+          "name": "AcSeries011AllReadersRequireCurrentPersistedSeriesReadEvenWhenEmpty",
+          "class": "SampleAggregateAuthorizationTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateAuthorizationTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateAuthorizationTests.1.1.AcSeries011PersistedRevocationDeniesEveryNewReadOperation.1.1.0",
+          "name": "AcSeries011PersistedRevocationDeniesEveryNewReadOperation",
+          "class": "SampleAggregateAuthorizationTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateAuthorizationTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateAuthorizationTests.1.1.AcSeries011LatestTagsAndNumericReadersUseCurrentPersistedFieldPolicies.1.1.0",
+          "name": "AcSeries011LatestTagsAndNumericReadersUseCurrentPersistedFieldPolicies",
+          "class": "SampleAggregateAuthorizationTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateAuthorizationTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005ProjectionUsesPersistedPolicyAndCancellationKeepsStoreUsable.1.1.0",
+          "name": "AcMp005ProjectionUsesPersistedPolicyAndCancellationKeepsStoreUsable",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005CompleteArrayBudgetAcceptsItsExactBoundaryAndRejectsOneByteLess.1.1.0",
+          "name": "AcMp005CompleteArrayBudgetAcceptsItsExactBoundaryAndRejectsOneByteLess",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits.1.1.0",
+          "name": "AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005NarrowRangeSkipsLargeLaterValuesBeforeCopyingOrDecoding.1.1.0",
+          "name": "AcMp005NarrowRangeSkipsLargeLaterValuesBeforeCopyingOrDecoding",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010WindowsAreDenseAnchoredClampedAndMatchRawReference.1.1.0",
+          "name": "AcSeries010WindowsAreDenseAnchoredClampedAndMatchRawReference",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange.1.1.0",
+          "name": "AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation.1.1.0",
+          "name": "AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation.1.1.0",
+          "name": "AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011ReadByteBudgetPreCancellationAndElapsedDeadlineRejectAndPreserveStore.1.1.0",
+          "name": "AcSeries011ReadByteBudgetPreCancellationAndElapsedDeadlineRejectAndPreserveStore",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011CompleteRawReadBudgetAcceptsExactBytesAndRejectsOneByteLess.1.1.0",
+          "name": "AcSeries011CompleteRawReadBudgetAcceptsExactBytesAndRejectsOneByteLess",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded.1.1.0",
+          "name": "AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011CompleteJsonOutputAcceptsExactBytesAndRejectsOneByteLess.1.1.0",
+          "name": "AcSeries011CompleteJsonOutputAcceptsExactBytesAndRejectsOneByteLess",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate.1.1.0",
+          "name": "AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleOrderingTests.1.1.OutOfOrderSamplesStayOrderedAndSampleIdIsIdempotent.1.1.0",
+          "name": "OutOfOrderSamplesStayOrderedAndSampleIdIsIdempotent",
+          "class": "SampleOrderingTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleOrderingTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests.1.1.AcSeries008LatestIncludesDateMaximumAndReturnsNullWhenNoSampleIsAtCut.1.1.0",
+          "name": "AcSeries008LatestIncludesDateMaximumAndReturnsNullWhenNoSampleIsAtCut",
+          "class": "SampleLatestTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleLatestTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests.1.1.AcSeries008LatestUsesUtcTimestampAndGreatestSequenceAtInclusiveCut.1.1.0",
+          "name": "AcSeries008LatestUsesUtcTimestampAndGreatestSequenceAtInclusiveCut",
+          "class": "SampleLatestTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleLatestTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests.1.1.AcSeries008LatestVisitsOneBaselineEntryWithLargeOlderHistoryAndSmallRawBudget.1.1.0",
+          "name": "AcSeries008LatestVisitsOneBaselineEntryWithLargeOlderHistoryAndSmallRawBudget",
+          "class": "SampleLatestTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleLatestTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges.1.1.0",
+          "name": "AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges",
+          "class": "SampleAggregateTests",
+          "status": "error",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009NullEndIncludesMaximumAndEqualBoundsReturnEmptyAggregate.1.1.0",
+          "name": "AcSeries009NullEndIncludesMaximumAndEqualBoundsReturnEmptyAggregate",
+          "class": "SampleAggregateTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests.1.1.AcSeries009FiniteSumOverflowFailsWithoutChangingPositionOrHealthyFollowup.1.1.0",
+          "name": "AcSeries009FiniteSumOverflowFailsWithoutChangingPositionOrHealthyFollowup",
+          "class": "SampleAggregateTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).3.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/V1/SERIES/WINDOWS/)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).2.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/aggregate)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).1.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/latest)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateAuthorizationTests.1.1.AcSeries011PersistedRevocationDeniesEveryNewReadOperation.1.1.0",
+          "name": "AcSeries011PersistedRevocationDeniesEveryNewReadOperation",
+          "class": "SampleAggregateAuthorizationTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateAuthorizationTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateAuthorizationTests.1.1.AcSeries011LatestTagsAndNumericReadersUseCurrentPersistedFieldPolicies.1.1.0",
+          "name": "AcSeries011LatestTagsAndNumericReadersUseCurrentPersistedFieldPolicies",
+          "class": "SampleAggregateAuthorizationTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateAuthorizationTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateAuthorizationTests.1.1.AcSeries011AllReadersRequireCurrentPersistedSeriesReadEvenWhenEmpty.1.1.0",
+          "name": "AcSeries011AllReadersRequireCurrentPersistedSeriesReadEvenWhenEmpty",
+          "class": "SampleAggregateAuthorizationTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateAuthorizationTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005CompleteArrayBudgetAcceptsItsExactBoundaryAndRejectsOneByteLess.1.1.0",
+          "name": "AcMp005CompleteArrayBudgetAcceptsItsExactBoundaryAndRejectsOneByteLess",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits.1.1.0",
+          "name": "AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005NarrowRangeSkipsLargeLaterValuesBeforeCopyingOrDecoding.1.1.0",
+          "name": "AcMp005NarrowRangeSkipsLargeLaterValuesBeforeCopyingOrDecoding",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests.1.1.AcMp005ProjectionUsesPersistedPolicyAndCancellationKeepsStoreUsable.1.1.0",
+          "name": "AcMp005ProjectionUsesPersistedPolicyAndCancellationKeepsStoreUsable",
+          "class": "TimeSeriesReadResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange.1.1.0",
+          "name": "AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation.1.1.0",
+          "name": "AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation.1.1.0",
+          "name": "AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests.1.1.AcSeries010WindowsAreDenseAnchoredClampedAndMatchRawReference.1.1.0",
+          "name": "AcSeries010WindowsAreDenseAnchoredClampedAndMatchRawReference",
+          "class": "SampleAggregateWindowTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateWindowTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011CompleteJsonOutputAcceptsExactBytesAndRejectsOneByteLess.1.1.0",
+          "name": "AcSeries011CompleteJsonOutputAcceptsExactBytesAndRejectsOneByteLess",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011CompleteRawReadBudgetAcceptsExactBytesAndRejectsOneByteLess.1.1.0",
+          "name": "AcSeries011CompleteRawReadBudgetAcceptsExactBytesAndRejectsOneByteLess",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011ReadByteBudgetPreCancellationAndElapsedDeadlineRejectAndPreserveStore.1.1.0",
+          "name": "AcSeries011ReadByteBudgetPreCancellationAndElapsedDeadlineRejectAndPreserveStore",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate.1.1.0",
+          "name": "AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests.1.1.AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded.1.1.0",
+          "name": "AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded",
+          "class": "SampleAggregateBudgetTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateBudgetTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.SampleOrderingTests.1.1.OutOfOrderSamplesStayOrderedAndSampleIdIsIdempotent.1.1.0",
+          "name": "OutOfOrderSamplesStayOrderedAndSampleIdIsIdempotent",
+          "class": "SampleOrderingTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleOrderingTests.cs"
+        }
+      ]
+    },
+    "ReverseRange": {
+      "outcomeCount": 24,
+      "distinctIds": 8,
+      "statusCounts": {
+        "passed": 24
+      },
+      "cases": [
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003VisitorFalseStopsBeforeAdvancingAndPreCancellationExaminesNothing.1.1.0",
+          "name": "AcRangeRev003VisitorFalseStopsBeforeAdvancingAndPreCancellationExaminesNothing",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003ObserverChargesDescendingEntriesAndLiveLookahead.1.1.0",
+          "name": "AcRangeRev003ObserverChargesDescendingEntriesAndLiveLookahead",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003TransactionObserverChargesReplacementAndTombstoneWork.1.1.0",
+          "name": "AcRangeRev003TransactionObserverChargesReplacementAndTombstoneWork",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003CancellationAndObserverOrVisitorFaultReleaseCursorsAndStoreGate.1.1.0",
+          "name": "AcRangeRev003CancellationAndObserverOrVisitorFaultReleaseCursorsAndStoreGate",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003InvalidCapsFailWithoutChangingCommittedData.1.1.0",
+          "name": "AcRangeRev003InvalidCapsFailWithoutChangingCommittedData",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeTests.1.1.AcRangeRev001CommittedKeysVisitInDescendingOrderWithinExclusiveBounds.1.1.0",
+          "name": "AcRangeRev001CommittedKeysVisitInDescendingOrderWithinExclusiveBounds",
+          "class": "ReverseRangeTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeTests.1.1.AcRangeRev001PrefixSuccessorAndAllFfPrefixExcludeUnrelatedKeys.1.1.0",
+          "name": "AcRangeRev001PrefixSuccessorAndAllFfPrefixExcludeUnrelatedKeys",
+          "class": "ReverseRangeTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeTests.1.1.AcRangeRev001ExplicitExclusiveUpperAndLowerBoundsAreAppliedToReverseSeek.1.1.0",
+          "name": "AcRangeRev001ExplicitExclusiveUpperAndLowerBoundsAreAppliedToReverseSeek",
+          "class": "ReverseRangeTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003VisitorFalseStopsBeforeAdvancingAndPreCancellationExaminesNothing.1.1.0",
+          "name": "AcRangeRev003VisitorFalseStopsBeforeAdvancingAndPreCancellationExaminesNothing",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003ObserverChargesDescendingEntriesAndLiveLookahead.1.1.0",
+          "name": "AcRangeRev003ObserverChargesDescendingEntriesAndLiveLookahead",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003TransactionObserverChargesReplacementAndTombstoneWork.1.1.0",
+          "name": "AcRangeRev003TransactionObserverChargesReplacementAndTombstoneWork",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003CancellationAndObserverOrVisitorFaultReleaseCursorsAndStoreGate.1.1.0",
+          "name": "AcRangeRev003CancellationAndObserverOrVisitorFaultReleaseCursorsAndStoreGate",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003InvalidCapsFailWithoutChangingCommittedData.1.1.0",
+          "name": "AcRangeRev003InvalidCapsFailWithoutChangingCommittedData",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeTests.1.1.AcRangeRev001CommittedKeysVisitInDescendingOrderWithinExclusiveBounds.1.1.0",
+          "name": "AcRangeRev001CommittedKeysVisitInDescendingOrderWithinExclusiveBounds",
+          "class": "ReverseRangeTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeTests.1.1.AcRangeRev001PrefixSuccessorAndAllFfPrefixExcludeUnrelatedKeys.1.1.0",
+          "name": "AcRangeRev001PrefixSuccessorAndAllFfPrefixExcludeUnrelatedKeys",
+          "class": "ReverseRangeTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeTests.1.1.AcRangeRev001ExplicitExclusiveUpperAndLowerBoundsAreAppliedToReverseSeek.1.1.0",
+          "name": "AcRangeRev001ExplicitExclusiveUpperAndLowerBoundsAreAppliedToReverseSeek",
+          "class": "ReverseRangeTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003TransactionObserverChargesReplacementAndTombstoneWork.1.1.0",
+          "name": "AcRangeRev003TransactionObserverChargesReplacementAndTombstoneWork",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003ObserverChargesDescendingEntriesAndLiveLookahead.1.1.0",
+          "name": "AcRangeRev003ObserverChargesDescendingEntriesAndLiveLookahead",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003VisitorFalseStopsBeforeAdvancingAndPreCancellationExaminesNothing.1.1.0",
+          "name": "AcRangeRev003VisitorFalseStopsBeforeAdvancingAndPreCancellationExaminesNothing",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003CancellationAndObserverOrVisitorFaultReleaseCursorsAndStoreGate.1.1.0",
+          "name": "AcRangeRev003CancellationAndObserverOrVisitorFaultReleaseCursorsAndStoreGate",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeResourceTests.1.1.AcRangeRev003InvalidCapsFailWithoutChangingCommittedData.1.1.0",
+          "name": "AcRangeRev003InvalidCapsFailWithoutChangingCommittedData",
+          "class": "ReverseRangeResourceTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeResourceTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeTests.1.1.AcRangeRev001CommittedKeysVisitInDescendingOrderWithinExclusiveBounds.1.1.0",
+          "name": "AcRangeRev001CommittedKeysVisitInDescendingOrderWithinExclusiveBounds",
+          "class": "ReverseRangeTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeTests.1.1.AcRangeRev001PrefixSuccessorAndAllFfPrefixExcludeUnrelatedKeys.1.1.0",
+          "name": "AcRangeRev001PrefixSuccessorAndAllFfPrefixExcludeUnrelatedKeys",
+          "class": "ReverseRangeTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.StorageRecovery.ReverseRangeTests.1.1.AcRangeRev001ExplicitExclusiveUpperAndLowerBoundsAreAppliedToReverseSeek.1.1.0",
+          "name": "AcRangeRev001ExplicitExclusiveUpperAndLowerBoundsAreAppliedToReverseSeek",
+          "class": "ReverseRangeTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ReverseRangeTests.cs"
+        }
+      ]
+    },
+    "Admission": {
+      "outcomeCount": 89,
+      "distinctIds": 31,
+      "statusCounts": {
+        "passed": 89
+      },
+      "cases": [
+        {
+          "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.IntegrationTests.AdmissionClusterTests.1.1.FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable.1.1.0",
+          "name": "FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable",
+          "class": "AdmissionClusterTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.IntegrationTests/AdmissionClusterTests.cs"
+        },
+        {
+          "report": "docker-rf3-qualification/TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.IntegrationTests.AdmissionClusterTests.1.1.OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds.1.1.0",
+          "name": "OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds",
+          "class": "AdmissionClusterTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.IntegrationTests/AdmissionClusterTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.ControlBodiesHaveAnIndependentBoundWhileProcessingStillUsesDataAdmission.1.1.0",
+          "name": "ControlBodiesHaveAnIndependentBoundWhileProcessingStillUsesDataAdmission",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.KnownBodiesAndChunkedBodiesReserveTheirFramingBoundsBeforeAuthentication.1.1.0",
+          "name": "KnownBodiesAndChunkedBodiesReserveTheirFramingBoundsBeforeAuthentication",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.CancellationAndRejectedBindingsReleaseEveryReservationAtRequestEnd.1.1.0",
+          "name": "CancellationAndRejectedBindingsReleaseEveryReservationAtRequestEnd",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.QuerySearchAndGraphRequestsShareOneWorkingSetReservationBudget.1.1.0",
+          "name": "QuerySearchAndGraphRequestsShareOneWorkingSetReservationBudget",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.OnlyVerifiedBindingsConsumeTenantAndPrincipalScopes.1.1.0",
+          "name": "OnlyVerifiedBindingsConsumeTenantAndPrincipalScopes",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).1.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/latest)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).2.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/aggregate)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).3.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/V1/SERIES/WINDOWS/)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp012_CancellationAndValidationFailuresReleaseAdmission.1.1.0",
+          "name": "AcMp012_CancellationAndValidationFailuresReleaseAdmission",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp012_InFlightCancellationAtRealStoreGateReleasesAdmission.1.1.0",
+          "name": "AcMp012_InFlightCancellationAtRealStoreGateReleasesAdmission",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp012_ReadBudgetFailureReleasesAllowanceForFollowingSearch.1.1.0",
+          "name": "AcMp012_ReadBudgetFailureReleasesAllowanceForFollowingSearch",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp004_ReservationIsSharedExactlyOnceAndRejectsInvalidLimits.1.1.0",
+          "name": "AcMp004_ReservationIsSharedExactlyOnceAndRejectsInvalidLimits",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries.1.1.0",
+          "name": "AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.AsyncDisposalStopsAndDrainsRegisteredReaderBeforeRejectingFutureWork.1.1.0",
+          "name": "AsyncDisposalStopsAndDrainsRegisteredReaderBeforeRejectingFutureWork",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.PreCancelledReadIsRejectedBeforeReaderOwnershipEvenAfterStop.1.1.0",
+          "name": "PreCancelledReadIsRejectedBeforeReaderOwnershipEvenAfterStop",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.InvalidCommandReservationArgumentsLeaveEveryCounterUnchanged.1.1.0",
+          "name": "InvalidCommandReservationArgumentsLeaveEveryCounterUnchanged",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.InboxRejectsConcurrentReaderWithoutConsumingTheQueuedSignal.1.1.0",
+          "name": "InboxRejectsConcurrentReaderWithoutConsumingTheQueuedSignal",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.HttpAdmissionRejectsInvalidPathFramingAndPrincipalBeforeReservation.1.1.0",
+          "name": "HttpAdmissionRejectsInvalidPathFramingAndPrincipalBeforeReservation",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.DisposingUnresolvedDispatchedCommandReportsUnknownOutcomeAndReleasesOnce.1.1.0",
+          "name": "DisposingUnresolvedDispatchedCommandReportsUnknownOutcomeAndReleasesOnce",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpUnknownLengthAdmissionTests.1.1.UnknownLengthBodyGrowsToExactNonPowerOfTwoMaximum.1.1.0",
+          "name": "UnknownLengthBodyGrowsToExactNonPowerOfTwoMaximum",
+          "class": "McpUnknownLengthAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpUnknownLengthAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpUnknownLengthAdmissionTests.1.1.UnknownLengthSmallBodyRetainsScratchCapacityAndExactReplay.1.1.0",
+          "name": "UnknownLengthSmallBodyRetainsScratchCapacityAndExactReplay",
+          "class": "McpUnknownLengthAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpUnknownLengthAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpUnknownLengthAdmissionTests.1.1.SmallUnknownLengthDiscoveryAdmitsAndReleasesDefaultMemoryAndExecutionLeases.1.1.0",
+          "name": "SmallUnknownLengthDiscoveryAdmitsAndReleasesDefaultMemoryAndExecutionLeases",
+          "class": "McpUnknownLengthAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpUnknownLengthAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.TenantAndPrincipalCapsCannotBeEvadedWithMoreApiKeys.1.1.0",
+          "name": "TenantAndPrincipalCapsCannotBeEvadedWithMoreApiKeys",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.BytesAndScopesAreReservedAtomicallyAndReleasedExactlyOnce.1.1.0",
+          "name": "BytesAndScopesAreReservedAtomicallyAndReleasedExactlyOnce",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.ConcurrentLoadCannotExceedTheNodeCeilingAndReleasedScopesDoNotAccumulate.1.1.0",
+          "name": "ConcurrentLoadCannotExceedTheNodeCeilingAndReleasedScopesDoNotAccumulate",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.CancellationBeforeAdmissionDoesNotConsumeCapacity.1.1.0",
+          "name": "CancellationBeforeAdmissionDoesNotConsumeCapacity",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.FullDataAdmissionPreservesBoundedControlCapacity.1.1.0",
+          "name": "FullDataAdmissionPreservesBoundedControlCapacity",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.BlobStorage.BlobAdmissionTests.1.1.AcBlob004OnlyAbortAndReclaimUseTheBoundedCleanupLane.1.1.0",
+          "name": "AcBlob004OnlyAbortAndReclaimUseTheBoundedCleanupLane",
+          "class": "BlobAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-macos-latest/TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.BlobStorage.BlobAdmissionTests.1.1.AcBlob004CleanupUsesTwoBoundedControlReservationsDuringDataSaturation.1.1.0",
+          "name": "AcBlob004CleanupUsesTwoBoundedControlReservationsDuringDataSaturation",
+          "class": "BlobAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.ControlBodiesHaveAnIndependentBoundWhileProcessingStillUsesDataAdmission.1.1.0",
+          "name": "ControlBodiesHaveAnIndependentBoundWhileProcessingStillUsesDataAdmission",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.KnownBodiesAndChunkedBodiesReserveTheirFramingBoundsBeforeAuthentication.1.1.0",
+          "name": "KnownBodiesAndChunkedBodiesReserveTheirFramingBoundsBeforeAuthentication",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.CancellationAndRejectedBindingsReleaseEveryReservationAtRequestEnd.1.1.0",
+          "name": "CancellationAndRejectedBindingsReleaseEveryReservationAtRequestEnd",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.QuerySearchAndGraphRequestsShareOneWorkingSetReservationBudget.1.1.0",
+          "name": "QuerySearchAndGraphRequestsShareOneWorkingSetReservationBudget",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.OnlyVerifiedBindingsConsumeTenantAndPrincipalScopes.1.1.0",
+          "name": "OnlyVerifiedBindingsConsumeTenantAndPrincipalScopes",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).1.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/latest)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).2.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/aggregate)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).3.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/V1/SERIES/WINDOWS/)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries.1.1.0",
+          "name": "AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp012_CancellationAndValidationFailuresReleaseAdmission.1.1.0",
+          "name": "AcMp012_CancellationAndValidationFailuresReleaseAdmission",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp012_InFlightCancellationAtRealStoreGateReleasesAdmission.1.1.0",
+          "name": "AcMp012_InFlightCancellationAtRealStoreGateReleasesAdmission",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp012_ReadBudgetFailureReleasesAllowanceForFollowingSearch.1.1.0",
+          "name": "AcMp012_ReadBudgetFailureReleasesAllowanceForFollowingSearch",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp004_ReservationIsSharedExactlyOnceAndRejectsInvalidLimits.1.1.0",
+          "name": "AcMp004_ReservationIsSharedExactlyOnceAndRejectsInvalidLimits",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.AsyncDisposalStopsAndDrainsRegisteredReaderBeforeRejectingFutureWork.1.1.0",
+          "name": "AsyncDisposalStopsAndDrainsRegisteredReaderBeforeRejectingFutureWork",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.PreCancelledReadIsRejectedBeforeReaderOwnershipEvenAfterStop.1.1.0",
+          "name": "PreCancelledReadIsRejectedBeforeReaderOwnershipEvenAfterStop",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.InvalidCommandReservationArgumentsLeaveEveryCounterUnchanged.1.1.0",
+          "name": "InvalidCommandReservationArgumentsLeaveEveryCounterUnchanged",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.InboxRejectsConcurrentReaderWithoutConsumingTheQueuedSignal.1.1.0",
+          "name": "InboxRejectsConcurrentReaderWithoutConsumingTheQueuedSignal",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.HttpAdmissionRejectsInvalidPathFramingAndPrincipalBeforeReservation.1.1.0",
+          "name": "HttpAdmissionRejectsInvalidPathFramingAndPrincipalBeforeReservation",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.DisposingUnresolvedDispatchedCommandReportsUnknownOutcomeAndReleasesOnce.1.1.0",
+          "name": "DisposingUnresolvedDispatchedCommandReportsUnknownOutcomeAndReleasesOnce",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpUnknownLengthAdmissionTests.1.1.UnknownLengthSmallBodyRetainsScratchCapacityAndExactReplay.1.1.0",
+          "name": "UnknownLengthSmallBodyRetainsScratchCapacityAndExactReplay",
+          "class": "McpUnknownLengthAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpUnknownLengthAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpUnknownLengthAdmissionTests.1.1.UnknownLengthBodyGrowsToExactNonPowerOfTwoMaximum.1.1.0",
+          "name": "UnknownLengthBodyGrowsToExactNonPowerOfTwoMaximum",
+          "class": "McpUnknownLengthAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpUnknownLengthAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpUnknownLengthAdmissionTests.1.1.SmallUnknownLengthDiscoveryAdmitsAndReleasesDefaultMemoryAndExecutionLeases.1.1.0",
+          "name": "SmallUnknownLengthDiscoveryAdmitsAndReleasesDefaultMemoryAndExecutionLeases",
+          "class": "McpUnknownLengthAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpUnknownLengthAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.TenantAndPrincipalCapsCannotBeEvadedWithMoreApiKeys.1.1.0",
+          "name": "TenantAndPrincipalCapsCannotBeEvadedWithMoreApiKeys",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.BytesAndScopesAreReservedAtomicallyAndReleasedExactlyOnce.1.1.0",
+          "name": "BytesAndScopesAreReservedAtomicallyAndReleasedExactlyOnce",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.ConcurrentLoadCannotExceedTheNodeCeilingAndReleasedScopesDoNotAccumulate.1.1.0",
+          "name": "ConcurrentLoadCannotExceedTheNodeCeilingAndReleasedScopesDoNotAccumulate",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.CancellationBeforeAdmissionDoesNotConsumeCapacity.1.1.0",
+          "name": "CancellationBeforeAdmissionDoesNotConsumeCapacity",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.FullDataAdmissionPreservesBoundedControlCapacity.1.1.0",
+          "name": "FullDataAdmissionPreservesBoundedControlCapacity",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.BlobStorage.BlobAdmissionTests.1.1.AcBlob004OnlyAbortAndReclaimUseTheBoundedCleanupLane.1.1.0",
+          "name": "AcBlob004OnlyAbortAndReclaimUseTheBoundedCleanupLane",
+          "class": "BlobAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-ubuntu-latest/TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.BlobStorage.BlobAdmissionTests.1.1.AcBlob004CleanupUsesTwoBoundedControlReservationsDuringDataSaturation.1.1.0",
+          "name": "AcBlob004CleanupUsesTwoBoundedControlReservationsDuringDataSaturation",
+          "class": "BlobAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.OnlyVerifiedBindingsConsumeTenantAndPrincipalScopes.1.1.0",
+          "name": "OnlyVerifiedBindingsConsumeTenantAndPrincipalScopes",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.CancellationAndRejectedBindingsReleaseEveryReservationAtRequestEnd.1.1.0",
+          "name": "CancellationAndRejectedBindingsReleaseEveryReservationAtRequestEnd",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.ControlBodiesHaveAnIndependentBoundWhileProcessingStillUsesDataAdmission.1.1.0",
+          "name": "ControlBodiesHaveAnIndependentBoundWhileProcessingStillUsesDataAdmission",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.QuerySearchAndGraphRequestsShareOneWorkingSetReservationBudget.1.1.0",
+          "name": "QuerySearchAndGraphRequestsShareOneWorkingSetReservationBudget",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.HttpAdmissionGovernorTests.1.1.KnownBodiesAndChunkedBodiesReserveTheirFramingBoundsBeforeAuthentication.1.1.0",
+          "name": "KnownBodiesAndChunkedBodiesReserveTheirFramingBoundsBeforeAuthentication",
+          "class": "HttpAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/HttpAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).3.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/V1/SERIES/WINDOWS/)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).2.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/aggregate)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesHttpAdmissionTests.1.1.AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(System.String).1.1.0",
+          "name": "AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(/v1/series/latest)",
+          "class": "TimeSeriesHttpAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesHttpAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp012_ReadBudgetFailureReleasesAllowanceForFollowingSearch.1.1.0",
+          "name": "AcMp012_ReadBudgetFailureReleasesAllowanceForFollowingSearch",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries.1.1.0",
+          "name": "AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp012_InFlightCancellationAtRealStoreGateReleasesAdmission.1.1.0",
+          "name": "AcMp012_InFlightCancellationAtRealStoreGateReleasesAdmission",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp012_CancellationAndValidationFailuresReleaseAdmission.1.1.0",
+          "name": "AcMp012_CancellationAndValidationFailuresReleaseAdmission",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AnalyticalAdmissionTests.1.1.AcMp004_ReservationIsSharedExactlyOnceAndRejectsInvalidLimits.1.1.0",
+          "name": "AcMp004_ReservationIsSharedExactlyOnceAndRejectsInvalidLimits",
+          "class": "AnalyticalAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AnalyticalAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.AsyncDisposalStopsAndDrainsRegisteredReaderBeforeRejectingFutureWork.1.1.0",
+          "name": "AsyncDisposalStopsAndDrainsRegisteredReaderBeforeRejectingFutureWork",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.PreCancelledReadIsRejectedBeforeReaderOwnershipEvenAfterStop.1.1.0",
+          "name": "PreCancelledReadIsRejectedBeforeReaderOwnershipEvenAfterStop",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.DisposingUnresolvedDispatchedCommandReportsUnknownOutcomeAndReleasesOnce.1.1.0",
+          "name": "DisposingUnresolvedDispatchedCommandReportsUnknownOutcomeAndReleasesOnce",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.HttpAdmissionRejectsInvalidPathFramingAndPrincipalBeforeReservation.1.1.0",
+          "name": "HttpAdmissionRejectsInvalidPathFramingAndPrincipalBeforeReservation",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.InboxRejectsConcurrentReaderWithoutConsumingTheQueuedSignal.1.1.0",
+          "name": "InboxRejectsConcurrentReaderWithoutConsumingTheQueuedSignal",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.AdmissionOwnershipTests.1.1.InvalidCommandReservationArgumentsLeaveEveryCounterUnchanged.1.1.0",
+          "name": "InvalidCommandReservationArgumentsLeaveEveryCounterUnchanged",
+          "class": "AdmissionOwnershipTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/AdmissionOwnershipTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpUnknownLengthAdmissionTests.1.1.UnknownLengthBodyGrowsToExactNonPowerOfTwoMaximum.1.1.0",
+          "name": "UnknownLengthBodyGrowsToExactNonPowerOfTwoMaximum",
+          "class": "McpUnknownLengthAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpUnknownLengthAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpUnknownLengthAdmissionTests.1.1.SmallUnknownLengthDiscoveryAdmitsAndReleasesDefaultMemoryAndExecutionLeases.1.1.0",
+          "name": "SmallUnknownLengthDiscoveryAdmitsAndReleasesDefaultMemoryAndExecutionLeases",
+          "class": "McpUnknownLengthAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpUnknownLengthAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ClientApi.McpUnknownLengthAdmissionTests.1.1.UnknownLengthSmallBodyRetainsScratchCapacityAndExactReplay.1.1.0",
+          "name": "UnknownLengthSmallBodyRetainsScratchCapacityAndExactReplay",
+          "class": "McpUnknownLengthAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpUnknownLengthAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.ConcurrentLoadCannotExceedTheNodeCeilingAndReleasedScopesDoNotAccumulate.1.1.0",
+          "name": "ConcurrentLoadCannotExceedTheNodeCeilingAndReleasedScopesDoNotAccumulate",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.CancellationBeforeAdmissionDoesNotConsumeCapacity.1.1.0",
+          "name": "CancellationBeforeAdmissionDoesNotConsumeCapacity",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.FullDataAdmissionPreservesBoundedControlCapacity.1.1.0",
+          "name": "FullDataAdmissionPreservesBoundedControlCapacity",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.TenantAndPrincipalCapsCannotBeEvadedWithMoreApiKeys.1.1.0",
+          "name": "TenantAndPrincipalCapsCannotBeEvadedWithMoreApiKeys",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CommandAdmissionGovernorTests.1.1.BytesAndScopesAreReservedAtomicallyAndReleasedExactlyOnce.1.1.0",
+          "name": "BytesAndScopesAreReservedAtomicallyAndReleasedExactlyOnce",
+          "class": "CommandAdmissionGovernorTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CommandAdmissionGovernorTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.BlobStorage.BlobAdmissionTests.1.1.AcBlob004CleanupUsesTwoBoundedControlReservationsDuringDataSaturation.1.1.0",
+          "name": "AcBlob004CleanupUsesTwoBoundedControlReservationsDuringDataSaturation",
+          "class": "BlobAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAdmissionTests.cs"
+        },
+        {
+          "report": "test-results-windows-latest/TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+          "id": "KeyLoad.UnitTests.Features.BlobStorage.BlobAdmissionTests.1.1.AcBlob004OnlyAbortAndReclaimUseTheBoundedCleanupLane.1.1.0",
+          "name": "AcBlob004OnlyAbortAndReclaimUseTheBoundedCleanupLane",
+          "class": "BlobAdmissionTests",
+          "status": "passed",
+          "source": "tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAdmissionTests.cs"
+        }
+      ]
+    }
+  },
+  "comparison": {
+    "failures": [
+      {
+        "report": "comparison-test-results/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+        "id": "KeyLoad.ComparisonTests.RealComparisonSuite.1.1.AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines.1.1.0",
+        "displayName": "AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines",
+        "status": "error",
+        "exceptionType": "System.OperationCanceledException",
+        "message": "Resource 'comparisons' failed to meet the predicate condition before the operation was cancelled.\n- Current State: Waiting\n- Creation Time: (null)\n- Current Health: (null)",
+        "stackHead": [
+          "   at Aspire.Hosting.ApplicationModel.ResourceNotificationService.WaitForResourceCoreAsync(String resourceName, Func`2 predicate, String cancellationMessage, CancellationToken cancellationToken, String waitCondition) in /_/src/Aspire.Hosting/ApplicationModel/ResourceNotificationService.cs:line 693",
+          "   at Aspire.Hosting.ApplicationModel.ResourceNotificationService.WaitForResourceAsync(String resourceName, Func`2 predicate, CancellationToken cancellationToken) in /_/src/Aspire.Hosting/ApplicationModel/ResourceNotificationService.cs:line 651",
+          "   at KeyLoad.ComparisonTests.RealComparisonSuite.VerifyCompletedRunAsync(DistributedApplication app, String output, String evidence, ComparisonOptions options, String neo4jPassword, CancellationToken cancellationToken) in /_/tests/KeyLoad.ComparisonTests/ComparisonTests.cs:line 153",
+          "   at KeyLoad.ComparisonTests.RealComparisonSuite.AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines() in /_/tests/KeyLoad.ComparisonTests/ComparisonTests.cs:line 44",
+          "   at KeyLoad.ComparisonTests.RealComparisonSuite.AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines() in /_/tests/KeyLoad.ComparisonTests/ComparisonTests.cs:line 49"
+        ]
+      },
+      {
+        "report": "comparison-test-results/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+        "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.1.1.AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema.1.1.0",
+        "displayName": "AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema",
+        "status": "error",
+        "exceptionType": "System.OperationCanceledException",
+        "message": "Resource 'comparisons' failed to meet the predicate condition before the operation was cancelled.\n- Current State: Waiting\n- Creation Time: (null)\n- Current Health: (null)",
+        "stackHead": [
+          "   at Aspire.Hosting.ApplicationModel.ResourceNotificationService.WaitForResourceCoreAsync(String resourceName, Func`2 predicate, String cancellationMessage, CancellationToken cancellationToken, String waitCondition) in /_/src/Aspire.Hosting/ApplicationModel/ResourceNotificationService.cs:line 693",
+          "   at Aspire.Hosting.ApplicationModel.ResourceNotificationService.WaitForResourceAsync(String resourceName, Func`2 predicate, CancellationToken cancellationToken) in /_/src/Aspire.Hosting/ApplicationModel/ResourceNotificationService.cs:line 651",
+          "   at KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.WaitForComparisonAsync(DistributedApplication app, CancellationToken cancellationToken) in /_/tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/TimeSeriesAspireProfileTests.cs:line 99",
+          "   at KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema() in /_/tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/TimeSeriesAspireProfileTests.cs:line 52",
+          "   at KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema() in /_/tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/TimeSeriesAspireProfileTests.cs:line 66"
+        ]
+      }
+    ],
+    "resourceObservation": {
+      "name": "comparisons",
+      "state": "Waiting",
+      "creationTime": null,
+      "health": null
+    },
+    "measurementSteps": [
+      {
+        "name": "Measure 1 KiB documents, eight clients and three graph hops",
+        "conclusion": "skipped"
+      },
+      {
+        "name": "Measure 16 KiB documents, four clients and five graph hops",
+        "conclusion": "skipped"
+      }
+    ],
+    "measurementsQualified": false,
+    "note": "TUnit report shows Current State Waiting; GitHub run and job are terminal. No dedicated native/waiting/terminal field appears in comparison JSON."
+  },
+  "limitations": [
+    "Whole CI run failed; this is not full qualification.",
+    "GitHub artifact digests are metadata; ZIP bytes were not independently verified.",
+    "Evidence worker ran no local build/runtime/tests; the integration lead separately performed a development solution build, formatter and static governance. No local runtime tests, recovery, containers or benchmarks ran.",
+    "Later test-oracle repairs and later independent source commits require their own exact-SHA GitHub qualification."
+  ],
+  "leadVerification": {
+    "verifiedAt": "2026-10-02T20:19:42.987Z",
+    "receiptSha256": "8e90a76992e58dca933a06ffbdcaa214c047c7cbfdc4b6ac861222cc0fefa35c",
+    "nativeReportBytesAndSha256Verified": 12,
+    "commitShaBranchRepositoryChecked": true,
+    "actualGroupTestStatusesAndDeclaredCountsReconciled": true,
+    "exactFailureIdsReconciled": true,
+    "completeRequiredScopeRetained": true,
+    "allSixTerminalJobsReviewed": true,
+    "completeWorkflowPass": false
+  }
+}

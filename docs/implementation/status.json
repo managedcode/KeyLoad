@@ -232,14 +232,17 @@
       "src/KeyLoad.Core/Features/TimeSeries",
       "src/KeyLoad.Client/Features/TimeSeries",
       "tests/KeyLoad.UnitTests/Features/TimeSeries",
-      "tests/KeyLoad.IntegrationTests/Features/TimeSeries"
+      "tests/KeyLoad.IntegrationTests/Features/TimeSeries",
+      "docs/implementation/runtime-qualification-37057708780.json",
+      "docs/implementation/qualification-source-r9.json"
     ],
     "boundedReads": {
       "requirements": "REQ-SERIES-008..012",
       "acceptance": "AC-SERIES-008..012",
       "source": "latest_raw_half_open_aggregates_dense_UTC_windows_published_ManagedCode_TimeSeries10_0_0_SDK_HTTP_MCP_reverse_storage_shared_budgets",
-      "qualification": "source_joined_exact_delivered_SHA_CI_pending",
-      "remaining": "retention_rollups_SQL_compression_coverage_resource_performance_endurance_fault_work_not_qualified"
+      "qualification": "exactf627_868_of870_units_each_OS_44_of46_RF3_source_oracle_repairs_reviewed_built_formatter_pass_new_exact_SHA_CI_pending",
+      "remaining": "retention_rollups_SQL_compression_coverage_resource_performance_endurance_fault_work_not_qualified",
+      "sourceRepairReceipt": "docs/implementation/qualification-source-r9.json"
     }
   },
   "KL-026": {
@@ -1179,9 +1182,9 @@
         "qualification": "source_compilation_and_static_validation_only"
       },
       "latestMainCi": {
-        "runId": 37049469093,
-        "sha": "e8d1a9eb1ccab3aee228bd3f02b9bdb4e5c5ba1d",
-        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093",
+        "runId": 37057708780,
+        "sha": "f627d4b9f71ce01abf773f6fcac8ea68136b63c3",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37057708780",
         "conclusion": "failure",
         "buildFormatGovernance": "passed_full_solution_all_three_OSes",
         "analyzerTests": {
@@ -1195,27 +1198,27 @@
         },
         "unitTests": {
           "ubuntu": {
-            "total": 809,
-            "passed": 809,
-            "failed": 0,
+            "total": 870,
+            "passed": 868,
+            "failed": 2,
             "skipped": 0,
             "cancelled": 0,
             "timedOut": 0,
             "flaky": 0
           },
           "macos": {
-            "total": 809,
-            "passed": 809,
-            "failed": 0,
+            "total": 870,
+            "passed": 868,
+            "failed": 2,
             "skipped": 0,
             "cancelled": 0,
             "timedOut": 0,
             "flaky": 0
           },
           "windows": {
-            "total": 809,
-            "passed": 809,
-            "failed": 0,
+            "total": 870,
+            "passed": 868,
+            "failed": 2,
             "skipped": 0,
             "cancelled": 0,
             "timedOut": 0,
@@ -1252,9 +1255,9 @@
           }
         },
         "rf3IntegrationTests": {
-          "total": 41,
-          "passed": 41,
-          "failed": 0,
+          "total": 46,
+          "passed": 44,
+          "failed": 2,
           "skipped": 0,
           "cancelled": 0,
           "timedOut": 0,
@@ -1269,8 +1272,8 @@
           "timedOut": 0,
           "flaky": 0
         },
-        "receipt": "docs/implementation/runtime-qualification-37049469093.json",
-        "remaining": "comparison_native_runner_Waiting_two_failures_measured_profiles_skipped_coverage_actual_migration_resource_endurance_power_loss_open"
+        "receipt": "docs/implementation/runtime-qualification-37057708780.json",
+        "remaining": "two_unit_oracle_errors_each_OS_two_RF3_oracle_errors_R9_repairs_pending_new_exact_SHA_comparison_two_native_Waiting_failures_profiles_skipped_coverage_migration_resource_endurance_power_loss_open"
       },
       "recoveryReadiness": {
         "requirement": "REQ-STORAGE-012",
@@ -1411,9 +1414,9 @@
         "nativeReceipt": "docs/implementation/runtime-qualification-37049469093.json"
       },
       "previousMainCi": {
-        "runId": 37044499074,
-        "sha": "323d60499381ec94fa2c9b4d412cb76837fd98bf",
-        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37044499074",
+        "runId": 37049469093,
+        "sha": "e8d1a9eb1ccab3aee228bd3f02b9bdb4e5c5ba1d",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093",
         "conclusion": "failure",
         "buildFormatGovernance": "passed_full_solution_all_three_OSes",
         "analyzerTests": {
@@ -1427,8 +1430,8 @@
         },
         "unitTests": {
           "ubuntu": {
-            "total": 805,
-            "passed": 805,
+            "total": 809,
+            "passed": 809,
             "failed": 0,
             "skipped": 0,
             "cancelled": 0,
@@ -1436,8 +1439,8 @@
             "flaky": 0
           },
           "macos": {
-            "total": 805,
-            "passed": 805,
+            "total": 809,
+            "passed": 809,
             "failed": 0,
             "skipped": 0,
             "cancelled": 0,
@@ -1445,8 +1448,8 @@
             "flaky": 0
           },
           "windows": {
-            "total": 805,
-            "passed": 805,
+            "total": 809,
+            "passed": 809,
             "failed": 0,
             "skipped": 0,
             "cancelled": 0,
@@ -1466,8 +1469,8 @@
           },
           "macos": {
             "total": 136,
-            "passed": 125,
-            "failed": 11,
+            "passed": 136,
+            "failed": 0,
             "skipped": 0,
             "cancelled": 0,
             "timedOut": 0,
@@ -1475,8 +1478,8 @@
           },
           "windows": {
             "total": 136,
-            "passed": 134,
-            "failed": 2,
+            "passed": 136,
+            "failed": 0,
             "skipped": 0,
             "cancelled": 0,
             "timedOut": 0,
@@ -1501,9 +1504,201 @@
           "timedOut": 0,
           "flaky": 0
         },
-        "receipt": "docs/implementation/runtime-qualification-37044499074.json",
-        "remaining": "macOS11_fixture_path_and_Windows2_intrinsic_elapsed_recovery_failures_comparison_coverage_actual_migration_resource_endurance_open"
-      }
+        "receipt": "docs/implementation/runtime-qualification-37049469093.json",
+        "remaining": "comparison_native_runner_Waiting_two_failures_measured_profiles_skipped_coverage_actual_migration_resource_endurance_power_loss_open"
+      },
+      "mainCiHistory": [
+        {
+          "runId": 37044499074,
+          "sha": "323d60499381ec94fa2c9b4d412cb76837fd98bf",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37044499074",
+          "conclusion": "failure",
+          "buildFormatGovernance": "passed_full_solution_all_three_OSes",
+          "analyzerTests": {
+            "total": 118,
+            "passed": 118,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "unitTests": {
+            "ubuntu": {
+              "total": 805,
+              "passed": 805,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "macos": {
+              "total": 805,
+              "passed": 805,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "windows": {
+              "total": 805,
+              "passed": 805,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            }
+          },
+          "recovery": {
+            "ubuntu": {
+              "total": 136,
+              "passed": 136,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "macos": {
+              "total": 136,
+              "passed": 125,
+              "failed": 11,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "windows": {
+              "total": 136,
+              "passed": 134,
+              "failed": 2,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            }
+          },
+          "rf3IntegrationTests": {
+            "total": 41,
+            "passed": 41,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "comparisonTests": {
+            "total": 4,
+            "passed": 2,
+            "failed": 2,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "receipt": "docs/implementation/runtime-qualification-37044499074.json",
+          "remaining": "macOS11_fixture_path_and_Windows2_intrinsic_elapsed_recovery_failures_comparison_coverage_actual_migration_resource_endurance_open"
+        },
+        {
+          "runId": 37049469093,
+          "sha": "e8d1a9eb1ccab3aee228bd3f02b9bdb4e5c5ba1d",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093",
+          "conclusion": "failure",
+          "buildFormatGovernance": "passed_full_solution_all_three_OSes",
+          "analyzerTests": {
+            "total": 118,
+            "passed": 118,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "unitTests": {
+            "ubuntu": {
+              "total": 809,
+              "passed": 809,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "macos": {
+              "total": 809,
+              "passed": 809,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "windows": {
+              "total": 809,
+              "passed": 809,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            }
+          },
+          "recovery": {
+            "ubuntu": {
+              "total": 136,
+              "passed": 136,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "macos": {
+              "total": 136,
+              "passed": 136,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "windows": {
+              "total": 136,
+              "passed": 136,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            }
+          },
+          "rf3IntegrationTests": {
+            "total": 41,
+            "passed": 41,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "comparisonTests": {
+            "total": 4,
+            "passed": 2,
+            "failed": 2,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "receipt": "docs/implementation/runtime-qualification-37049469093.json",
+          "remaining": "comparison_native_runner_Waiting_two_failures_measured_profiles_skipped_coverage_actual_migration_resource_endurance_power_loss_open"
+        }
+      ],
+      "qualificationSourceR9": "docs/implementation/qualification-source-r9.json",
+      "mainQualificationScheduling": "PR_only_replacement_cancellation_source_reviewed_real_two_submission_observation_pending"
     },
     "ownerPriorities": {
       "SMID": "highest_priority_scope_clarification_requested_not_defined_in_repo_or_v0_3_spec_implementation_not_started",

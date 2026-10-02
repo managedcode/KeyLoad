@@ -647,3 +647,56 @@ Strongest independently authenticated evidence review explicitly releases018-FIX
 under the unchanged two-file contract above; no further red baseline is needed.
 018 source review must complete before016 resumes. Native counts/hashes must be
 regenerated after source repair; no red result or source-only join qualifies017.
+
+### Accepted main qualification scheduling continuation
+
+REQ-CQ-008 / AC-CQ-017 and AC-QUAL-001..003 in the frozen
+product-qualification.acceptance.md govern TASK-QUAL-CI-QUEUE-R9. Root accepts
+this preserving cross-cutting workflow contract before the one-line source join.
+The full v0.3 objective and every previous mandatory policy remain unchanged.
+
+Observed baseline: d186/run37056851814 and2fc0/run37057526531 are terminal
+cancelled after overlapping main pushes, while the existing workflow sets
+unconditional cancel-in-progress in the same workflow/ref group. Pending2fc0 has
+no jobs. This is not a failing-test or passing-new-source qualification claim.
+Use the [official GitHub concurrency contract](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)
+as the scheduler specification: default one running/one pending, newer pending
+replaces older pending, and cancel-in-progress accepts an event expression.
+
+Implementation contract and ordering:
+1. Root freezes the brainstorm, REQ/AC/test exceptions and detailed plan; preserves
+   exact baseline cancellation metadata and all available partial native failures.
+2. Root alone changes `.github/workflows/ci.yml` cancel-in-progress to
+   `${{ github.event_name == 'pull_request' }}`. Keep its group, triggers, matrix,
+   job bodies, real SDK/MCP/container requirements, predicates, flags, timeouts,
+   skip/error behavior and always-upload artifacts exactly unchanged.
+3. Review complete workflow diff and static governance; deliver all current
+   eligible source on current main with fetch/ordinary merge/push/remote proof.
+   Do not stash, move existing changes or force push. This small shared-file join
+   stays with root because independent writable ownership would add coordination
+   overhead and risk. Discovery/evidence workers remain read-only.
+4. Preserve two actual same-main run/SHA submissions and show that the started run
+   reaches terminal instead of being replaced by the next pending submission.
+   Qualify only each run's actual native scope; inspect every real failure and
+   fix it under its owning Feature/test contract. PR expression review is the
+   explicit manual service-review exception; no fake GitHub scheduler is added.
+5. Root joins exact delivered-source required native unit/recovery/RF3 and all
+   configured gates/artifacts. Queue configuration alone does not prove tests,
+   coverage or readiness; cancellations/skips/absent reports remain unqualified.
+
+Dependencies: existing canonical workflow, GitHub hosted scheduler and current
+exact-SHA native evidence. Persistence/wire/deployment migration is N/A. Rollout
+is ordinary main delivery; an expression rollback restores former cancellation
+behavior without changing mandatory test/quality requirements. Root owns docs,
+configuration, integration and final review; CI worker owns only private evidence
+capture. Stop on source overlap or any changed gate/body rather than broadening
+this exception. ADR remains Accepted pending complete implementation/evidence.
+
+```mermaid
+flowchart LR
+    Main[Main submission] --> Pending[One replaceable pending run]
+    Running[Started main run] --> Evidence[Terminal job and native receipts]
+    Evidence --> Start[Start next pending run]
+    Pending --> Start
+    PullRequest[PR submission] --> Cancel[Replace obsolete PR run]
+```

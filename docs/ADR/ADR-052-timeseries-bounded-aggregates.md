@@ -170,3 +170,42 @@ exist. Numeric coverage, full comparison, endurance, power-loss, maximum speed,
 activation movement, retention/rollups, SQL and compressed chunks remain open
 gates/work. SMID waits for owner mapping; native Orleans Streams remains an
 independent first-priority architecture workstream under the root policy.
+
+## Accepted R9 source-oracle correction contract
+
+REQ-SERIES009/011/012, AC-SERIES009/011/012 and AC-QUAL004 use the real partial
+d186/run37056851814 red baseline: two identical unit failures on Linux/macOS and
+three RF3 failures. Cancellation/missing recovery/comparison reports cannot qualify
+the source. Root freezes the detailed criteria/graph in product-qualification
+acceptance/plan before approving these two economical capable writing workers.
+
+1. TASK-SERIES-UNIT-FIX-W9 owns ONLY
+   `tests/KeyLoad.UnitTests/Features/TimeSeries/SampleAggregateTests.cs` and NEW
+   `SampleAggregateIdempotencyTests.cs`. First author a real-store changed-content
+   Conflict regression that compares unchanged canonical samples, verifies the
+   original aggregate and a following legitimate append/aggregate. Then correct
+   the valid raw-fold corpus's unintended changed ID5 to distinct ID6, keeping its
+   identical ID2 retry, late/equal/offset/boundary inputs and complete raw oracle;
+   add explicit raw count5. Do not change any production dedup/reader/library rule.
+2. TASK-SERIES-ORACLE-FIX-W9 owns ONLY
+   `tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAgentCatalogTests.cs` PublicCount,
+   `tests/KeyLoad.IntegrationTests/Features/ClientApi/McpCallerProtocol.cs` ToolCount
+   and `tests/KeyLoad.IntegrationTests/Features/TimeSeries/TimeSeriesRf3AuthorizationTests.cs`.
+   Set the two independent complete-tool counts53, retaining every existing ten
+   blob/full catalog name/schema/route/hint/uniqueness assertion. Assert the exact
+   failed Result/Cancelled problem for each of the three pre-cancelled SDK reads
+   and preserve a successful following real aggregate. A cohesive private helper
+   may keep the test under50code lines. Shared Send/native official MCP behavior,
+   revoke/empty/tag/budget/overflow assertions and all deadlines remain unchanged.
+3. Root reviews every complete diff/hash/assertion, joins shared docs/CI, normal
+   development build/formatter/static governance, all-source main delivery and
+   exact-SHA full GitHub unit/recovery/RF3/native receipts. No local tests, fake
+   transports, missing-report pass, new retries/timeouts or weakened assertions.
+
+Root owns shared contracts/config/docs and final quality gates. Independent admin
+assets/browser diagnosis is outside these disjoint worker scopes; no overwritten
+or partial packet unblocks final review. Workers stop on unsupported APIs, overlap
+or actual production defects and report complete/blocked/failed/cancelled evidence.
+No public/persistence/dependency migration occurs; rollback restores coherent
+fixture/oracle sources while preserving all behavior/gates and native red evidence.
+This ADR remains Accepted; source-oracle repair is not numeric coverage/readiness.
