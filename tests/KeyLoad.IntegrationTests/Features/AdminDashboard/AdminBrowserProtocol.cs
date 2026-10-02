@@ -14,6 +14,15 @@ internal static class AdminBrowserProtocol
     internal const string PageNavigate = "Page.navigate";
     internal const string SetMetrics = "Emulation.setDeviceMetricsOverride";
     internal const string CaptureScreenshot = "Page.captureScreenshot";
+    internal const string IdProperty = "id";
+    internal const string ErrorProperty = "error";
+    internal const string ResultProperty = "result";
+    internal const string ExceptionProperty = "exceptionDetails";
+    internal const string ValueProperty = "value";
+    internal const string TypeProperty = "type";
+    internal const string PageType = "page";
+    internal const string GuidFormat = "N";
+    internal const string LoopbackPrefix = "http://127.0.0.1:";
     internal const int MaximumReplyBytes = 4_194_304;
     internal const int ReceiveBufferBytes = 16_384;
     internal const int PollMilliseconds = 100;

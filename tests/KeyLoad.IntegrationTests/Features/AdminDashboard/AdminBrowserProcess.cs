@@ -25,7 +25,7 @@ internal sealed class AdminBrowserProcess : IAsyncDisposable
         var executable = Environment.GetEnvironmentVariable(AdminBrowserProtocol.BrowserEnvironment);
         if (string.IsNullOrWhiteSpace(executable) || !Path.IsPathFullyQualified(executable) || !File.Exists(executable))
         { throw new InvalidOperationException(AdminBrowserProtocol.MissingBrowser); }
-        var profile = Path.Combine(Path.GetTempPath(), AdminBrowserProtocol.ProfilePrefix + Guid.NewGuid().ToString("N"));
+        var profile = Path.Combine(Path.GetTempPath(), AdminBrowserProtocol.ProfilePrefix + Guid.NewGuid().ToString(AdminBrowserProtocol.GuidFormat));
         Directory.CreateDirectory(profile);
         var start = new ProcessStartInfo(executable) { UseShellExecute = false, RedirectStandardError = true, RedirectStandardOutput = true };
         foreach (var argument in new[] { "--headless=new", "--no-sandbox", "--disable-dev-shm-usage",
@@ -55,8 +55,8 @@ internal sealed class AdminBrowserProcess : IAsyncDisposable
         var port = int.Parse(lines[0], CultureInfo.InvariantCulture);
         using var http = new HttpClient { Timeout = AdminBrowserProtocol.Deadline };
         using var targets = JsonDocument.Parse(await http.GetStringAsync(new Uri(
-            "http://127.0.0.1:" + port.ToString(CultureInfo.InvariantCulture) + AdminBrowserProtocol.TargetsPath), cancellationToken));
-        return new(targets.RootElement.EnumerateArray().First(target => target.GetProperty("type").GetString() == "page")
+            AdminBrowserProtocol.LoopbackPrefix + port.ToString(CultureInfo.InvariantCulture) + AdminBrowserProtocol.TargetsPath), cancellationToken));
+        return new(targets.RootElement.EnumerateArray().First(target => target.GetProperty(AdminBrowserProtocol.TypeProperty).GetString() == AdminBrowserProtocol.PageType)
             .GetProperty(AdminBrowserProtocol.SocketProperty).GetString()!);
     }
 

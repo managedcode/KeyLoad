@@ -1,8 +1,47 @@
-import {Config,Dom,Id,Text} from './constants.js';
-import {el,write} from './dom.js';
+import {
+    Config,
+    Dom,
+    Id,
+    Text
+} from './constants.js';
+import {
+    el,
+    write
+} from './dom.js';
 let previous=null;
 let samples=[];
-export function resetMetrics(){previous=null;samples=[];write(Id.throughput,Text.dash);write(Id.latency,Text.dash);el(Id.line).setAttribute(Dom.polylinePoints,Text.empty);el(Id.chartEmpty).hidden=false;write(Id.chartEmpty,Text.twoSamples);}
-function comparable(next){return previous&&previous.node.nodeId===next.node.nodeId&&previous.http.processInstance===next.http.processInstance&&Date.parse(next.capturedAt)>Date.parse(previous.capturedAt)&&next.http.completedRequests>=previous.http.completedRequests&&next.http.failedRequests>=previous.http.failedRequests&&next.http.elapsedMilliseconds>=previous.http.elapsedMilliseconds;}
-export function measure(next){if(!comparable(next)){resetMetrics();previous=next;return;}const seconds=(Date.parse(next.capturedAt)-Date.parse(previous.capturedAt))/Config.millis;const count=next.http.completedRequests-previous.http.completedRequests;const rate=count/seconds;const latency=count>Config.zero?(next.http.elapsedMilliseconds-previous.http.elapsedMilliseconds)/count:null;previous=next;samples.push(rate);if(samples.length>Config.maxSamples)samples.shift();write(Id.throughput,rate.toFixed(Config.digits)+Text.perSecond);write(Id.latency,latency===null?Text.dash:latency.toFixed(Config.digits)+Text.ms);plot();}
-function plot(){const max=Math.max(Config.one,...samples);const width=Math.max(Config.one,samples.length-Config.one);const points=samples.map((value,index)=>`${index/width*Config.chartWidth},${Config.chartBase-value/max*Config.chartHeight}`).join(Text.space);el(Id.line).setAttribute(Dom.polylinePoints,points);el(Id.chartEmpty).hidden=true;}
+export function resetMetrics(){
+    previous=null;
+    samples=[];
+    write(Id.throughput,Text.dash);
+    write(Id.latency,Text.dash);
+    el(Id.line).setAttribute(Dom.polylinePoints,Text.empty);
+    el(Id.chartEmpty).hidden=false;
+    write(Id.chartEmpty,Text.twoSamples);
+}
+function comparable(next){
+    return previous&&previous.node.nodeId===next.node.nodeId&&previous.http.processInstance===next.http.processInstance&&Date.parse(next.capturedAt)>Date.parse(previous.capturedAt)&&next.http.completedRequests>=previous.http.completedRequests&&next.http.failedRequests>=previous.http.failedRequests&&next.http.elapsedMilliseconds>=previous.http.elapsedMilliseconds;
+}
+export function measure(next){
+    if(!comparable(next)){
+        resetMetrics();
+        previous=next;
+        return;
+    }const seconds=(Date.parse(next.capturedAt)-Date.parse(previous.capturedAt))/Config.millis;
+    const count=next.http.completedRequests-previous.http.completedRequests;
+    const rate=count/seconds;
+    const latency=count>Config.zero?(next.http.elapsedMilliseconds-previous.http.elapsedMilliseconds)/count:null;
+    previous=next;
+    samples.push(rate);
+    if(samples.length>Config.maxSamples)samples.shift();
+    write(Id.throughput,rate.toFixed(Config.digits)+Text.perSecond);
+    write(Id.latency,latency===null?Text.dash:latency.toFixed(Config.digits)+Text.ms);
+    plot();
+}
+function plot(){
+    const max=Math.max(Config.one,...samples);
+    const width=Math.max(Config.one,samples.length-Config.one);
+    const points=samples.map((value,index)=>`${index/width*Config.chartWidth},${Config.chartBase-value/max*Config.chartHeight}`).join(Text.space);
+    el(Id.line).setAttribute(Dom.polylinePoints,points);
+    el(Id.chartEmpty).hidden=true;
+}

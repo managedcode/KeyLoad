@@ -19,11 +19,11 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
         while (true)
         {
             using var response = JsonDocument.Parse(await ReceiveAsync(cancellationToken));
-            if (!response.RootElement.TryGetProperty("id", out var actual) || actual.GetInt32() != id)
+            if (!response.RootElement.TryGetProperty(AdminBrowserProtocol.IdProperty, out var actual) || actual.GetInt32() != id)
             { continue; }
-            if (response.RootElement.TryGetProperty("error", out _))
+            if (response.RootElement.TryGetProperty(AdminBrowserProtocol.ErrorProperty, out _))
             { throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure); }
-            return response.RootElement.GetProperty("result").Clone();
+            return response.RootElement.GetProperty(AdminBrowserProtocol.ResultProperty).Clone();
         }
     }
 
@@ -31,9 +31,9 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
     {
         var response = await CommandAsync(AdminBrowserProtocol.RuntimeEvaluate,
             new { expression, returnByValue = true, awaitPromise = true }, cancellationToken);
-        if (response.TryGetProperty("exceptionDetails", out _))
+        if (response.TryGetProperty(AdminBrowserProtocol.ExceptionProperty, out _))
         { throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure); }
-        return response.GetProperty("result").GetProperty("value").Clone();
+        return response.GetProperty(AdminBrowserProtocol.ResultProperty).GetProperty(AdminBrowserProtocol.ValueProperty).Clone();
     }
 
     internal async Task WaitAsync(string expression, CancellationToken cancellationToken)

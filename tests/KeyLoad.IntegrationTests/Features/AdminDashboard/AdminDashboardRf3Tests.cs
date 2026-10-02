@@ -102,4 +102,31 @@ internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
         await Assert.That(after.Http.FailedRequests).IsGreaterThanOrEqualTo(before.Http.FailedRequests + 1);
         await Assert.That(after.Http.ElapsedMilliseconds).IsGreaterThan(before.Http.ElapsedMilliseconds);
     }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task AcAd001CurrentPersistedAdministratorRevocationOrExpiryRejectsLaterReads(bool expire)
+    {
+        using var deadline = McpCallerDeadline.Create();
+        var scenario = await AdminDashboardScenario.CreateAsync(fixture, deadline.Token);
+        var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
+            AdminDashboardScenario.Collection, Capability.All, deadline.Token);
+        var root = fixture.Client(McpCallerProtocol.Node1);
+        var administrator = identity.Principal with { ClusterAdministrator = true };
+        await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), administrator, deadline.Token));
+        var sdk = fixture.Client(McpCallerProtocol.Node2, identity.Secret);
+        await McpCallerAssertions.SdkSuccessAsync(await sdk.ListResourcesAsync(scenario.Resources, deadline.Token));
+        var disabled = administrator with
+        {
+            Revoked = !expire,
+            ExpiresAt = expire ? TimeProvider.System.GetUtcNow().AddMinutes(-1) : null,
+            PolicyEpoch = administrator.PolicyEpoch + 1
+        };
+        await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), disabled, deadline.Token));
+        var result = await sdk.ListResourcesAsync(scenario.Resources, deadline.Token);
+        await Assert.That(result.IsFailed).IsTrue();
+        await Assert.That(result.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Unauthenticated));
+        await Assert.That(JsonSerializer.Serialize(result.Problem).Contains(identity.Secret, StringComparison.Ordinal)).IsFalse();
+    }
 }
