@@ -76,6 +76,15 @@ jobs:
           global-json-file: global.json
       - name: Check Docker
         run: docker version
+      - name: Restore .NET packages
+        run: dotnet restore KeyLoad.slnx
+      - name: Build benchmark tests
+        id: benchmark-build
+        run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
+      - name: Build benchmark preparation unit tests
+        run: dotnet build tests/KeyLoad.UnitTests --no-restore --configuration Release
+      - name: Check bounded Docker registry readiness
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/ImageRegistryReadinessTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/registry-readiness
       - name: Build KeyLoad server and benchmark Docker images
         id: images
         run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs
@@ -86,11 +95,8 @@ jobs:
         run: |
           test -n "$KEYLOAD_SERVER_IMAGE" && test -n "$KEYLOAD_RUNNER_IMAGE"
           printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
-      - name: Restore .NET packages
-        run: dotnet restore KeyLoad.slnx
-      - name: Build benchmark tests
-        id: benchmark-build
-        run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
+      - name: Check native KurrentDB discovery settings
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKurrentDiscoverySettingsTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-discovery
       - name: Check TimescaleDB Docker image and startup tools
         env:
           KEYLOAD_TIMESERIES_IMAGE_FACTS_DIRECTORY: ${{ runner.temp }}/keyload-timeseries-image-facts

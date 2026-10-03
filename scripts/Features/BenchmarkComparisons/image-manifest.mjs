@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
-import { imageKind, imageReference, message, outputFormat, processLimit, registry, registryProtocol, safeErrorMessage, validation } from './image-contracts.mjs';
-import { recordRegistryHeaders } from './image-evidence.mjs';
+import { imageKind, imageReference, message, outputFormat, processLimit, registry, registryProbeErrorCodes, registryProtocol, registryReadinessTokens, safeErrorMessage, validation } from './image-contracts.mjs';
+import { recordRegistryHeaders, recordRegistryReadiness } from './image-evidence.mjs';
 
 const successfulHttpStatus = 200;
 const manifestSchemaVersion = 2;
@@ -92,22 +92,47 @@ export function parseManifestEvidence(bytes, digestHeader, contentTypeHeader, ex
 
 export async function waitForRegistry(context) {
   const deadline = Date.now() + processLimit.readinessTimeoutMs;
+  let sequence = 0;
   while (Date.now() < deadline) {
     const remaining = deadline - Date.now();
     if (remaining <= 0) break;
-    try {
-      const result = await withHttpDeadline(Math.min(processLimit.inspectTimeoutMs, remaining), async signal => {
-        const response = await fetch(`${registry.url}${registryProtocol.path}`, { signal, redirect: 'error' });
-        await response.body?.cancel();
-        return { status: response.status, aborted: signal.aborted };
-      });
-      if (result.status === successfulHttpStatus && !result.aborted && Date.now() < deadline) return;
-    } catch {
-    }
+    sequence++;
+    const result = await probeRegistry(context, sequence, Math.min(processLimit.readinessProbeTimeoutMs, remaining));
+    if (result.outcome === registryReadinessTokens.outcome.ready && Date.now() < deadline) return;
     const backoff = Math.min(processLimit.readinessIntervalMs, deadline - Date.now());
     if (backoff > 0) await wait(backoff);
   }
   throw new Error(message.registryTimeout);
+}
+
+async function probeRegistry(context, sequence, timeoutMs) {
+  const started = Date.now();
+  let signal;
+  let status = null;
+  let phase = registryReadinessTokens.phase.request;
+  let outcome;
+  let errorCode = null;
+  try {
+    await withHttpDeadline(timeoutMs, async value => {
+      signal = value;
+      const response = await fetch(`${registry.url}${registryProtocol.path}`, { signal, redirect: 'error' });
+      status = response.status;
+      phase = registryReadinessTokens.phase.bodyCancel;
+      await response.body?.cancel();
+    });
+    outcome = signal.aborted ? registryReadinessTokens.outcome.timeout
+      : status === successfulHttpStatus ? registryReadinessTokens.outcome.ready : registryReadinessTokens.outcome.httpStatus;
+  } catch (error) {
+    outcome = signal?.aborted ? registryReadinessTokens.outcome.timeout
+      : phase === registryReadinessTokens.phase.bodyCancel ? registryReadinessTokens.outcome.bodyCancelFailed : registryReadinessTokens.outcome.requestFailed;
+    const code = error?.cause?.code ?? error?.code;
+    errorCode = registryProbeErrorCodes.includes(code) ? code : null;
+  }
+  const result = Object.freeze({ sequence, startedAt: new Date(started).toISOString(),
+    durationMs: Math.max(0, Date.now() - started), timeoutMs, status, aborted: signal?.aborted === true,
+    phase, outcome, errorCode });
+  await recordRegistryReadiness(context, result);
+  return result;
 }
 
 export async function fetchManifest(context, imageName, tag, image) {

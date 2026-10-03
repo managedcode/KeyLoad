@@ -16,6 +16,33 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
     private const string NativeNeeds = "needs: [comparison-plan, comparison-images]";
     private const string AggregateNeeds = "needs: [comparison-build, comparison-plan, comparison-images, comparison-preflight, comparison-crud, comparison-specialized]";
     private const string ContractPath = "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/isolated-contract.json";
+    private const string RegistryReadinessTest = "ImageRegistryReadinessTests";
+    private const string KurrentDiscoveryTest = "IsolatedKurrentDiscoverySettingsTests";
+    private const string UnitBuild = "dotnet build tests/KeyLoad.UnitTests";
+    private const string UnitSuite = "unit";
+    private const string ComparisonSuite = "comparison";
+    private const string AspireCommand = "dotnet run --project src/KeyLoad.AppHost";
+    private const string SuitePrefix = "--KeyLoadTests:Suite=";
+    private const string ConditionalStep = "if:";
+    private const string ContinueOnError = "continue-on-error:";
+
+    [Test]
+    public async Task AcBcFail006And007NativeStartupRegressionsAreMandatoryBeforeFanOut()
+    {
+        var workflow = WorkflowLayoutSource.Read(BenchmarksFile);
+        var images = WorkflowLayoutSource.JobBlock(workflow, ImageJob);
+        await Assert.That(images.Contains(UnitBuild, StringComparison.Ordinal)).IsTrue();
+        var steps = WorkflowStepNameTests.StepBlocks(images);
+        foreach (var (name, suite) in new[] { (RegistryReadinessTest, UnitSuite), (KurrentDiscoveryTest, ComparisonSuite) })
+        {
+            await Assert.That(Count(workflow, name)).IsEqualTo(1);
+            var step = steps.Single(value => value.Contains(name, StringComparison.Ordinal));
+            await Assert.That(step.Contains(AspireCommand, StringComparison.Ordinal)).IsTrue();
+            await Assert.That(step.Contains(SuitePrefix + suite, StringComparison.Ordinal)).IsTrue();
+            await Assert.That(step.Contains(ConditionalStep, StringComparison.Ordinal)).IsFalse();
+            await Assert.That(step.Contains(ContinueOnError, StringComparison.Ordinal)).IsFalse();
+        }
+    }
 
     [Test]
     public async Task AcUb001PinnedImageQualificationBelongsToCommonPreparationAndRetainsFailures()

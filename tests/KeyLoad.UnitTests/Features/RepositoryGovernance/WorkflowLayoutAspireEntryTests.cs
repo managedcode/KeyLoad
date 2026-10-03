@@ -139,7 +139,6 @@ internal sealed class WorkflowLayoutAspireEntryTests
         var imageJob = WorkflowLayoutSource.JobBlock(benchmarks, "comparison-images");
         var steps = WorkflowStepNameTests.StepBlocks(imageJob)
             .Where(static step => step.Contains("Suite=comparison", StringComparison.Ordinal)).ToArray();
-        await Assert.That(steps.Length).IsEqualTo(22);
         var expectedFilters = new[]
         {
             "/*/*/TimeSeriesIntensivePinnedImageTests/*", "/*/*/ImageBundleRealTests/*",
@@ -153,8 +152,10 @@ internal sealed class WorkflowLayoutAspireEntryTests
             "/*/*/ComparisonReplayDiagnosticRetentionTests/*", "/*/*/TimeSeriesWorkloadTests/*",
             "/*/*/TimeSeriesPackageVersionTests/*", "/*/*/IsolatedTimeSeriesKeyLoadResourceTests/*",
             "/*/*/IsolatedTimeSeriesTimescaleResourceTests/*",
-            "/*/*/IsolatedTimeSeriesBenchmarkResourceTests/*"
+            "/*/*/IsolatedTimeSeriesBenchmarkResourceTests/*",
+            "/*/*/IsolatedKurrentDiscoverySettingsTests/*"
         };
+        await Assert.That(steps.Length).IsEqualTo(expectedFilters.Length);
         foreach (var step in steps)
         {
             await Assert.That(step.Contains(AppHostCommand, StringComparison.Ordinal)).IsTrue();

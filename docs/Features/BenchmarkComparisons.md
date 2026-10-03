@@ -688,6 +688,8 @@ KeyLoad engine repair and concurrent series-codec work are outside this task.
 | REQ-BC-FAIL-003 authenticated partial results | AC-BC-FAIL-003 failed job accepted only with failed workload, successful result upload and matching failed envelope; missing/malformed/expired/mixed evidence rejected | producer/aggregate/site negative and positive TUnit regressions |
 | REQ-BC-FAIL-004 honest site | AC-BC-FAIL-004 successful competitors retain values; failed cells have no numeric values and expose actual job link | independent numeric oracle, projection validation and real Chrome |
 | REQ-BC-FAIL-005 repair shared preparation | AC-BC-FAIL-005 diagnose exact failed logs, repair benchmark setup/build invocation, retain native isolated topology and Aspire ownership | exact failed-source log, focused regression, delivered-source GitHub rerun |
+| REQ-BC-FAIL-006 bounded registry readiness | AC-BC-FAIL-006 each native HTTP probe has at most2s within the unchanged30s total; only settled non-aborted HTTP200 succeeds; private no-follow diagnostics remain at most121 records/64KiB and evidence-write failures propagate | `ImageRegistryReadinessTests`:10 actual loopback HTTP/error/bounds cases, plus genuine pinned Docker image export/import in GitHub |
+| REQ-BC-FAIL-007 Kurrent writer starts after membership | AC-BC-FAIL-007 verify all native1/2/3-member views before constructing the SDK writer; retain native DNS seeds, TLS verification, leader preference, NoStream semantics, acknowledgements, replica-copy oracle and cleanup | `IsolatedKurrentDiscoverySettingsTests`:3 actual SDK/resource-model cases; genuine Aspire-owned StreamAppend preflights for1/2/3 nodes |
 
 [ADR-080](../ADR/ADR-080-benchmark-failure-isolation.md) owns the boundary change.
 Ordered task graph: FAIL-CONTRACT (root, complete) -> FAIL-SITE (site worker),
@@ -711,6 +713,35 @@ as compact immutable test-only fixtures with original hashes, source and provena
 48 original measured-report positive/negative probes passed. These fixtures never
 substitute for current publication input. Final formatting is recorded separately; unrelated concurrent SampleChunk
 formatting is outside this repair. Delivered-source workload/site publication proof remains pending.
+
+The first repair run37158699545/source65e8bf59 passed the clean Linux solution
+build, formatter and pinned Docker image preparation/roundtrip. Actual website
+cell `keyload-n1-document-update` job111309324270/artifact11286559225 failed its
+workload, uploaded successfully and passed unchanged production job/artifact/ZIP/
+envelope/agreement/site validators with its original null report. This is genuine
+failed-cell runtime proof; complete270 aggregation and Pages remain pending.
+
+That run exposed two native preparation defects. Kurrent n3 job111309323415
+started a listening registry but its first HTTP request consumed the entire30s
+probe budget; the underlying transport cause was not logged. FAIL-PREP-REGISTRY
+uses2s attempts inside the same30s total and records bounded safe probe facts.
+Kurrent n2 job111309323419/artifact11286971852 began writer construction while
+native election was still `PreLeader`. Actual pinned SDK1.4.0 constructor/selector
+inspection proves eager discovery can choose a live follower at that stage;
+the exact cached endpoint was not logged. FAIL-PREP-KURRENT moves construction
+after awaited complete membership verification. These are benchmark fixture
+repairs; neither changes a database engine, URI, retry/ACK contract or topology.
+Root records this contract before integration, then runs the focused Aspire
+unit/comparison cases, full build/formatter/governance and an exact-source Linux
+rerun before claiming the two repairs or publication qualified.
+
+Native-stage local development checks: initial full Release build and formatter
+passed; Aspire registry10/10 and actual SDK/resource settings3/3 passed. The new
+mandatory preparation workflow regression passed. The full24-case workflow filter
+had23 passes and exposed its old22-comparison-filter inventory expectation; source
+now enumerates the added23rd filter explicitly. Its clean-source rerun is pending.
+Concurrent uncommitted NativeTextAsync CA1849/IDE0005 prevent repeat shared-checkout
+full checks; those product changes remain outside this repair and are not staged.
 
 ```mermaid
 flowchart LR

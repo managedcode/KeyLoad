@@ -57,14 +57,16 @@ public sealed class KurrentTarget : IComparisonTarget
         try
         {
             ownership = new KurrentStreamOwnership(dataset.Options);
-            setupStage = KurrentSetupStage.WriterConstruction;
-            writer = new KurrentDBClient(KurrentNativeSettings.CreateWriter(connectionString));
-            ownedClients.Add(writer);
             setupStage = KurrentSetupStage.MemberVerification;
             var timeout = TimeSpan.FromSeconds(dataset.Options.TimeoutSeconds);
             var proof = await KurrentClusterVerifier.VerifyAsync(connectionString, nodeHttpClients, topology, timeout, cancellationToken);
             nodeClients = proof.NodeClients;
             ownedClients.AddRange(nodeClients);
+            // Native SDK construction eagerly discovers and caches a preferred live member.
+            // Construct the writer after all native views agree on their actual leader.
+            setupStage = KurrentSetupStage.WriterConstruction;
+            writer = new KurrentDBClient(KurrentNativeSettings.CreateWriter(connectionString));
+            ownedClients.Add(writer);
             setupStage = KurrentSetupStage.NoStreamSemantics;
             await VerifyNoStreamConflictAsync(cancellationToken);
 

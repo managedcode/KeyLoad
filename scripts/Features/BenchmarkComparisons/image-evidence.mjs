@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { constants as fileFlags } from 'node:fs';
 import { lstat, mkdir, open, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { directoryName, fileName, imageReference, message, outputFormat, processLimit, validation } from './image-contracts.mjs';
+import { directoryName, fileName, imageReference, message, outputFormat, processLimit, registryProbeErrorCodes, registryReadinessTokens, validation } from './image-contracts.mjs';
 
 const privateDirectoryMode = 0o700;
 const privateFileMode = 0o600;
@@ -19,6 +19,9 @@ const diagnosticRedactions = Object.freeze([
   }),
   Object.freeze({ pattern: /\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[A-Z0-9]{16})\b/g, replacement: '[REDACTED]' }),
 ]);
+const readinessOutcomes = Object.freeze(Object.values(registryReadinessTokens.outcome));
+const readinessPhases = Object.freeze(Object.values(registryReadinessTokens.phase));
+const utcTimestampPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 export async function ensureEvidenceDirectory(context) {
   const expectedPath = path.resolve(context.runnerTemp, directoryName.evidence);
@@ -142,6 +145,23 @@ export async function recordRegistryHeaders(context, imageName, status, headers)
   await appendOwnedLine(context, fileName.registryHeaders, record, processLimit.maxNativeCommandRecords);
 }
 
+export async function recordRegistryReadiness(context, probe) {
+  if (!probe || !Number.isInteger(probe.sequence) || probe.sequence < 1 || probe.sequence > processLimit.maxRegistryReadinessRecords
+    || typeof probe.startedAt !== 'string' || !utcTimestampPattern.test(probe.startedAt) || !Number.isFinite(Date.parse(probe.startedAt))
+    || !Number.isSafeInteger(probe.durationMs) || probe.durationMs < 0
+    || !Number.isInteger(probe.timeoutMs) || probe.timeoutMs <= 0 || probe.timeoutMs > processLimit.readinessProbeTimeoutMs
+    || (probe.status !== null && (!Number.isInteger(probe.status) || probe.status < 100 || probe.status > 599))
+    || typeof probe.aborted !== 'boolean' || !readinessPhases.includes(probe.phase) || !readinessOutcomes.includes(probe.outcome)
+    || (probe.errorCode !== null && !registryProbeErrorCodes.includes(probe.errorCode))) {
+    throw new Error(message.commandOutputLimit);
+  }
+  const record = Object.freeze({ sequence: probe.sequence, startedAt: probe.startedAt, durationMs: probe.durationMs,
+    timeoutMs: probe.timeoutMs, status: probe.status, aborted: probe.aborted, phase: probe.phase,
+    outcome: probe.outcome, errorCode: probe.errorCode });
+  await appendOwnedLine(context, fileName.registryReadiness, record, processLimit.maxRegistryReadinessRecords,
+    processLimit.maxRegistryReadinessBytes);
+}
+
 export async function appendImageOutputs(context, serverReference, loadGeneratorReference) {
   const outputFilePath = context.githubOutput;
   const fileInfo = await lstat(outputFilePath).catch(() => null);
@@ -162,7 +182,7 @@ async function writeOwnedBytes(target, bytes) {
   await writeFile(target, bytes, { flag: existing ? replaceWriteFlag : exclusiveWriteFlag, mode: privateFileMode });
 }
 
-async function appendOwnedLine(context, name, value, maximumRecords) {
+async function appendOwnedLine(context, name, value, maximumRecords, maximumBytes = processLimit.maxCommandEvidenceBytes) {
   const target = await ownedPath(context, name);
   const line = Buffer.from(`${JSON.stringify(value)}${outputFormat.newline}`, outputFormat.utf8);
   if (line.length > processLimit.maxCommandEvidenceRecordBytes) throw new Error(message.commandOutputLimit);
@@ -173,7 +193,7 @@ async function appendOwnedLine(context, name, value, maximumRecords) {
     const info = await handle.stat();
     if (!info.isFile() || info.uid !== process.getuid() || (info.mode & 0o077) !== 0) throw new Error(message.unsafeEvidencePath);
     const recordCount = (await readFile(target, outputFormat.utf8)).split(outputFormat.newline).filter(Boolean).length;
-    if (info.size + line.length > processLimit.maxCommandEvidenceBytes || recordCount >= maximumRecords) {
+    if (info.size + line.length > maximumBytes || recordCount >= maximumRecords) {
       throw new Error(message.commandOutputLimit);
     }
     await handle.writeFile(line);

@@ -19,6 +19,7 @@ export const fileName = Object.freeze({
   registryState: 'registry-state.json',
   nativeCommands: 'native-commands.jsonl',
   registryHeaders: 'registry-headers.jsonl',
+  registryReadiness: 'registry-readiness.jsonl',
   serverDockerfile: 'Dockerfile',
   runnerDockerfile: 'benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Dockerfile',
 });
@@ -198,7 +199,10 @@ export const processLimit = Object.freeze({
   inspectTimeoutMs: 30000,
   cleanupTimeoutMs: 30000,
   readinessTimeoutMs: 30000,
+  readinessProbeTimeoutMs: 2000,
   readinessIntervalMs: 250,
+  maxRegistryReadinessRecords: 121,
+  maxRegistryReadinessBytes: 64 * 1024,
   maxOutputBytes: 256 * 1024,
   maxLogBytes: 128 * 1024,
   maxInspectBytes: 64 * 1024,
@@ -208,6 +212,17 @@ export const processLimit = Object.freeze({
   maxManifestBytes: 4 * 1024 * 1024,
   maxLogLines: 200,
   killGraceMs: 1000,
+});
+
+export const registryProbeErrorCodes = Object.freeze([
+  'ECONNREFUSED', 'ECONNRESET', 'EPIPE', 'ETIMEDOUT', 'EHOSTUNREACH', 'ENETUNREACH',
+  'UND_ERR_CONNECT_TIMEOUT', 'UND_ERR_HEADERS_TIMEOUT', 'UND_ERR_BODY_TIMEOUT', 'UND_ERR_SOCKET',
+]);
+
+export const registryReadinessTokens = Object.freeze({
+  phase: Object.freeze({ request: 'request', bodyCancel: 'body-cancel' }),
+  outcome: Object.freeze({ ready: 'ready', httpStatus: 'http-status', timeout: 'timeout',
+    requestFailed: 'request-failed', bodyCancelFailed: 'body-cancel-failed' }),
 });
 
 export const outputFormat = Object.freeze({
