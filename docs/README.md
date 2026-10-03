@@ -1,11 +1,20 @@
 # Документація KeyLoad
 
+Головна ідея — одна база для AI-агентів: документи, типізовані таблиці, графи,
+блоби, черги, події, пошук і часові ряди співіснують і доступні один одному через
+канонічні посилання. SQL — знайома спільна мова для їх поєднання. Наприклад,
+один bounded запит читає повідомлення черги, знаходить пов'язані сутності й
+записує зв'язки у граф знань; зворотний напрямок створює завдання з графа.
+[DatabaseComposition](Features/DatabaseComposition.md) / [ADR-067](ADR/ADR-067-composable-agent-database.md)
+визначають перший atomic server stage та відділяють його від повного declarative SQL.
+
 KeyLoad поєднує документи, історію подій, надійну доставку, граф, часові ряди та пошук у спільному transaction/authorization/recovery середовищі. Почніть із [карти архітектури](Architecture.md); owning contracts нижче пояснюють поведінку конкретних функцій. [Продуктова специфікація](design/architecture-v0.3.uk.md) зберігає повний задум, але поточні [обов'язкові правила](../AGENTS.md) мають пріоритет над її старими DotNext/standalone-first choices.
 
 ## Функції продукту
 
 | Canonical Feature | Що описує контракт |
 |---|---|
+| [DatabaseComposition](Features/DatabaseComposition.md) | Одна база: bounded queue→entity→graph і graph→queue atomic derivation через SQL CALL/SDK/MCP; full declarative SQL та RF3 qualification pending |
 | [DocumentStorage](Features/DocumentStorage.md) | JSON CRUD/PATCH/CAS, strict scalar/unique indexes, domain-bound atomic batch та persisted command outcomes |
 | [RelationalStorage](Features/RelationalStorage.md) | Типізовані рядки в canonical entity storage, primary/type/null та native unique constraints; JOIN/FK — наступні незавершені етапи |
 | [EventStreams](Features/EventStreams.md) | Expected-revision append, generation/EventId dedup, ordered safe replay; planned aggregate snapshots/schema evolution |

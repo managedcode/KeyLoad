@@ -111,6 +111,10 @@ internal sealed record StoredOutcome(
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.BlobAuthority)]
     public BlobOutcomeAuthority? BlobAuthority { get; init; }
+
+    [JsonIgnore]
+    [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.CompositionAuthority)]
+    public global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? CompositionAuthority { get; init; }
 }
 
 [global::Orleans.GenerateSerializer]

@@ -1,5 +1,12 @@
 # ADR-054: Central SQL over canonical database operations
 
+Owner clarification 2026-10-03: SQL serves one composable agent database, where
+logical model resources reference and use one another. [ADR-067](ADR-067-composable-agent-database.md)
+adds bounded queue-to-entity-to-graph and graph-to-queue server derivation inside
+the existing atomic command/CALL. This extends the initial invocation stage below;
+the no-multiple-statements/no-recursive-CALL contract remains. Full declarative
+composition and native clients remain mandatory under ADR-065.
+
 Status: Accepted under owner direction2026-10-02; implementation/qualification pending.
 
 ## Decision and contracts

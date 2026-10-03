@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <meta name="description" content="KeyLoad is an early-stage, MIT-licensed open-source database for AI agents, built with .NET and Orleans. Explore its architecture and public benchmark evidence.">
+  <meta name="description" content="KeyLoad is one early-stage, MIT-licensed database for AI agents on .NET and Orleans. Linked models share entity references, permissions and a familiar SQL language.">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="theme-color" content="#f7f6f2">
   <meta property="og:type" content="website">
   <meta property="og:title" content="KeyLoad — the database for AI agents">
-  <meta property="og:description" content="An early-stage, open-source database for AI agents. Explore the architecture, .NET SDK, built-in MCP server and public benchmark evidence.">
+  <meta property="og:description" content="One early-stage database for AI agents. Linked documents, tables, graphs, blobs, queues, events, search and time series, with SQL as the shared language.">
   <meta property="og:site_name" content="KeyLoad">
   <meta property="og:url" content="https://www.keyload.cloud/">
   <meta property="og:locale" content="en_US">
@@ -20,7 +20,7 @@
   <meta property="og:image:alt" content="KeyLoad: an open-source database for AI agents">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="KeyLoad — the database for AI agents">
-  <meta name="twitter:description" content="An early-stage, open-source database for AI agents. Explore the architecture, .NET SDK, built-in MCP server and public benchmark evidence.">
+  <meta name="twitter:description" content="One early-stage database for AI agents. Linked documents, tables, graphs, blobs, queues, events, search and time series, with SQL as the shared language.">
   <meta name="twitter:image" content="https://www.keyload.cloud/og-image.png">
   <meta name="twitter:image:alt" content="KeyLoad: an open-source database for AI agents">
   <link rel="canonical" href="https://www.keyload.cloud/">
@@ -41,7 +41,7 @@
         "@id": "https://www.keyload.cloud/#website",
         "url": "https://www.keyload.cloud/",
         "name": "KeyLoad",
-        "description": "An early-stage, open-source database for AI agents."
+        "description": "One early-stage database for AI agents with linked models and SQL as the shared language."
       },
       {
         "@type": "SoftwareSourceCode",
@@ -84,7 +84,7 @@
         <h1 id="page-title">The database <span class="h1-break">for <span class="kl-mark">AI&nbsp;agents.</span></span></h1>
       </div>
       <div class="hero-lede">
-        <p class="hero-summary">Documents, SQL, graphs, events, queues, vectors, time series and blobs in one transactional engine. Agents connect through the built-in MCP server; services use the typed .NET SDK.</p>
+        <p class="hero-summary">One database for AI agents: documents, typed tables, graphs, blobs, queues, events, vectors/search and time series connected through canonical entity references. SQL is the familiar shared language; agents use the built-in MCP server and services use the typed .NET SDK.</p>
         <div class="hero-actions">
           <a class="kl-btn kl-btn--primary" href="#benchmarks">See the benchmarks</a>
           <a class="kl-btn" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Architecture.md">Read the architecture <span aria-hidden="true">↗</span></a>
@@ -111,11 +111,37 @@
         </div>
       </figure>
       <ul class="hero-facts" aria-label="KeyLoad at a glance">
-        <li><strong>One transaction</strong><span>Write a document, append its event and enqueue the follow-up work atomically.</span></li>
+        <li><strong>Connected models</strong><span>Documents, rows, graphs and queued work share references and persisted permissions.</span></li>
         <li><strong>MCP built in</strong><span>Agents query, read and write through the official MCP server, under the same permissions.</span></li>
         <li><strong>Policy in the database</strong><span>Credentials and authorization live server-side; callers cannot claim trusted roles.</span></li>
         <li><strong>.NET 10 · Orleans · RF3</strong><span>Three replicated voters per database with node-local storage.</span></li>
       </ul>
+    </section>
+
+    <section class="anatomy" id="composition" aria-labelledby="composition-title">
+      <header class="section-head">
+        <div><p class="eyebrow">Data that works together</p><h2 id="composition-title">Connected data. One request.</h2></div>
+        <p class="section-intro">Tables, collections and queues organize one database. An agent can follow entity references across models and write the result through the same persisted permissions.</p>
+      </header>
+      <div class="anatomy-grid">
+        <ol class="anatomy-steps">
+          <li><span class="step-no" aria-hidden="true">01</span><div><h3>Queue to knowledge graph</h3><p>Read ready messages, resolve their linked entities and write knowledge-graph relationships inside the database.</p></div></li>
+          <li><span class="step-no" aria-hidden="true">02</span><div><h3>Graph to queued actions</h3><p>Follow visible relationships to enqueue actions carrying canonical entity references.</p></div></li>
+          <li><span class="step-no" aria-hidden="true">03</span><div><h3>One authorized atomic command</h3><p>Source and target resources share the same atomic partition and transaction domain. A failed effect rolls back the whole command. Projection does not lease or ACK messages; the blob lifecycle remains separate.</p></div></li>
+        </ol>
+        <div class="terminal kl-graphite">
+          <article class="code-card"><header><span class="code-tag">SQL</span>One bound command envelope</header><pre><code><span class="tok-key">CALL</span> keyload_documents_commit(@arguments);</code></pre></article>
+          <article class="code-card"><header><span class="code-tag">SDK</span>The same atomic CommandRequest</header><pre><code><span class="tok-key">var</span> command = <span class="tok-key">new</span> CommandRequest(commandId, partition,
+[
+    <span class="tok-key">new</span> QueueToGraph(<span class="tok-val">"knowledge"</span>, <span class="tok-val">"inbox"</span>, <span class="tok-val">"fact-"</span>),
+    <span class="tok-key">new</span> GraphToQueueMutation(<span class="tok-val">"actions"</span>, <span class="tok-val">"knowledge"</span>,
+        start, <span class="tok-val">"action-"</span>)
+]);
+(<span class="tok-key">await</span> client.CommitAsync(command)).ThrowIfFail();</code></pre></article>
+        </div>
+      </div>
+      <p>The source adds this initial bounded procedural composition stage through SQL CALL, the .NET SDK and official MCP, with exact-source qualification pending. Full declarative SQL, the native SQL-client protocol and cross-partition composition remain required and pending.</p>
+      <p><a class="text-link" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Features/DatabaseComposition.md">Database composition contract <span aria-hidden="true">↗</span></a> · <a class="text-link" href="https://github.com/managedcode/KeyLoad/blob/main/docs/ADR/ADR-067-composable-agent-database.md">Composition architecture <span aria-hidden="true">↗</span></a></p>
     </section>
 
     <section class="anatomy" id="agents" aria-labelledby="anatomy-title">
@@ -155,7 +181,7 @@
     <section class="shapes" aria-labelledby="shapes-title">
       <header class="section-head">
         <div><p class="eyebrow">Agent memory, without the glue code</p><h2 id="shapes-title">Every shape of agent data. One engine.</h2></div>
-        <p class="section-intro">Each model has its own contract, evidence and qualification gates, documented in the open.</p>
+        <p class="section-intro">Each model serves the same linked entities. Their contracts define how an agent reads, combines and writes data within one database.</p>
       </header>
       <div class="bento">
         <a class="shape shape--rows" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Features/RelationalStorage.md"><svg class="shape-art" viewBox="0 0 240 120" aria-hidden="true"><path class="head" d="M20 10h200a12 12 0 0 1 12 12v14H8V22a12 12 0 0 1 12-12z"/><rect x="8" y="10" width="224" height="100" rx="12"/><path d="M8 36h224M8 62h224M8 88h224M76 10v100M156 10v100"/><rect class="fill" x="9" y="63" width="222" height="24"/></svg><span class="shape-no">01</span><h3>Relational rows &amp; SQL</h3><p>Typed rows with keys and constraints. A versioned SQL dialect compiles to the same bounded, authorized operations as SDK and MCP calls.</p><span class="shape-link">Relational storage <span aria-hidden="true">↗</span></span></a>

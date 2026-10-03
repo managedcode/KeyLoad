@@ -57,6 +57,7 @@ public sealed partial class DatabaseEngine
         {
             new BlobStorageOperations(this).ValidateOutcomeAuthority(view, operation, previous.Result, previous.BlobAuthority);
         }
+        ValidateCompositionOutcome(view, principal, operation, previous);
 
         if (operation.Kind == OperationKind.Receive && previous.Result.Error is null)
         {

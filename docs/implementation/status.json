@@ -1,4 +1,22 @@
 {
+  "DATABASE-COMPOSITION-001": {
+    "title": "Одна база для агентів: пов'язані моделі та SQL composition",
+    "status": "in_progress",
+    "decision": "docs/ADR/ADR-067-composable-agent-database.md",
+    "feature": "docs/Features/DatabaseComposition.md",
+    "sourceStage": "bounded_same_partition_queue_to_graph_and_graph_to_queue_atomic_mutations",
+    "sourceReceipt": "docs/implementation/database-composition-source-stage-001.json",
+    "fullDeclarativeCompositionComplete": false,
+    "crossPartitionCompositionImplemented": false,
+    "newCasesQualified": false,
+    "remaining": [
+      "Full unit gate retains 140 failures also present at base 8071148; local composition checks pass",
+      "Exact-source normal scalar process recovery and RF3 SQL SDK official MCP Actions",
+      "Full declarative model sources joins DML under ADR-065",
+      "All-model and distributed composition correctness fault and comparable performance",
+      "Complete Benchmarks and site qualification before publication"
+    ]
+  },
   "SQL-CLIENT-001": {
     "title": "Повний SQL, клієнтський протокол та перевірка текстового індексу",
     "status": "in_progress",

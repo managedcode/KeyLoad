@@ -1,5 +1,36 @@
 # KeyLoad architecture and ownership map
 
+Owner clarification 2026-10-03 makes composition the core product:
+**one database for AI agents**, where documents, typed tables, graphs, blobs,
+queues, events, vectors/search and time series coexist and reference one another.
+SQL is the familiar shared language for combining those models in one request.
+The motivating flows are queue messages -> referenced entities -> knowledge graph,
+and graph relationships -> queued actions. Logical resources organize one database.
+[DatabaseComposition](Features/DatabaseComposition.md) and
+[ADR-067](ADR/ADR-067-composable-agent-database.md) own the first bounded server
+derivation stage through the existing atomic command and SQL CALL. Full
+declarative SQL and client protocol remain mandatory under ADR-065.
+
+```mermaid
+flowchart LR
+    Caller[Agent SQL SDK MCP] --> Request[One authorized Orleans request]
+    Request --> Tx[Same partition ordered RF3 ZoneTree transaction]
+    Tx --> Source[Ready queue links or visible graph traversal]
+    Source --> Refs[Canonical document and typed row references]
+    Refs --> Effects[Graph edges or queued actions]
+    Effects --> Atomic[Primitive effects outbox and stable outcome]
+```
+
+```mermaid
+classDiagram
+    Mutation <|-- QueueToGraph
+    Mutation <|-- GraphToQueueMutation
+    QueueGraphLink --> EntityRef : canonical endpoints
+    CommandRequest --> Mutation : ordered source and effect stages
+    DatabaseEngine --> QueueGraphLink : authorized transaction expansion
+    DatabaseEngine --> ReadExecutionBudget : cumulative deterministic bounds
+```
+
 Owner clarification2026-10-02: KeyLoad is one server/database for AI agents with
 linked documents, relational rows, graph, vectors/text search, events, queues,
 time series and files/blobs. SQL is the central versioned language. The first

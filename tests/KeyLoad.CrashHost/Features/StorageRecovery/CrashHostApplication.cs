@@ -29,6 +29,10 @@ internal static class CrashHostApplication
         {
             await SubscriptionCrashScenario.RunAsync(directory, store, boundary);
         }
+        else if (mode == DatabaseCompositionCrashScenario.Mode)
+        {
+            await DatabaseCompositionCrashScenario.RunAsync(directory, store, boundary);
+        }
         else
         {
             CanonicalCrashScenario.Run(directory, store, boundary, mode);

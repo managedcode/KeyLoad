@@ -36,7 +36,10 @@ internal sealed class NativeNullableMetadataTests
     {
         DateTimeOffset? date = present ? NativeNullableMetadataFixtures.At : null;
         var principal = new PrincipalRecord(NativeNullableMetadataFixtures.PrincipalId,
-            NativeNullableMetadataFixtures.TenantId, [], []) { ExpiresAt = date };
+            NativeNullableMetadataFixtures.TenantId, [], [])
+        {
+            ExpiresAt = date
+        };
         var key = new ApiKeyRecord(NativeNullableMetadataFixtures.ApiKeyId, principal.Id,
             NativeNullableMetadataFixtures.Verifier, date);
         var restoredPrincipal = NativeSerialization.Deserialize<PrincipalRecord>(NativeSerialization.Serialize(principal));

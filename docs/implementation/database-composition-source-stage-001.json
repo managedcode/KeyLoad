@@ -1,0 +1,303 @@
+{
+  "schema": "keyload.database-composition.source-stage.v1",
+  "ownerDirectionDate": "2026-10-03",
+  "status": "implemented_bounded_source_stage_full_qualification_pending",
+  "decision": "docs/ADR/ADR-067-composable-agent-database.md",
+  "feature": "docs/Features/DatabaseComposition.md",
+  "sourceBaseRevision": "8071148cd83bfecd67332c2a794248bf66c6b4ec",
+  "sourceRevision": null,
+  "sourceCodePacketSha256": "376bc7b78a5c5e08b28fbb27ebb79456aeff7d86a3a7ff7ba029bcceccb65c71",
+  "sourceCodeFiles": [
+    {
+      "path": "src/KeyLoad.Abstractions/Contracts.cs",
+      "sha256": "32822146fa6751ecd908ee424b2151b112ec2c1c14da6b50dabc2f9d7209dadb"
+    },
+    {
+      "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/NativeContractAliases.cs",
+      "sha256": "0c2bd0538c4cb0d9be28a7484107609ff7b21d29a66010d3cdf94d85cbbc2b9b"
+    },
+    {
+      "path": "src/KeyLoad.Core/AtomicCommandCommit.cs",
+      "sha256": "be010afb90eebf00e77647670f831074b4c01e6d477d0f60cb937abe6be0b2fd"
+    },
+    {
+      "path": "src/KeyLoad.Core/AtomicMutationApplication.cs",
+      "sha256": "deaa16af1dc3f3b722cbd15f5c08e644884dbdd1be0032b6f4b0d9c78cfb6af4"
+    },
+    {
+      "path": "src/KeyLoad.Core/CommandOutcomes.cs",
+      "sha256": "c5cac155d5c64d75584267485100c9cab5252b2eb2593d076f7284f5f06c89c5"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/Authorization/CommandAuthorization.cs",
+      "sha256": "b05d1e7c6b514b14ed5b722f898b0a4c7c28a62bde2171c532ed3b7f6cc88e2b"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/InternalSerialization/CoreNativeContracts.cs",
+      "sha256": "8c0db3d57ef6840086e0ae0a4fe96133fe5b87cde101fbbd55271bc79a16e4ff"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/InternalSerialization/CoreNativeFieldIds.cs",
+      "sha256": "78c4e2902d8b6756680fdb4970ce0c1db47847f13cc8152fc2eff8a1fb6dc978"
+    },
+    {
+      "path": "src/KeyLoad.Core/MutationAuthorization.cs",
+      "sha256": "0b3287a5975ebf8b4400e00d020b74afca52e6f3d0da24a481afbf8d9f658d79"
+    },
+    {
+      "path": "src/KeyLoad.Core/ProtocolValidation.cs",
+      "sha256": "98f0b154405d9b2f103daf4ad63094a829b2beeb162a35be8465eca0e869d340"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/CrashHostApplication.cs",
+      "sha256": "e0ba6f1f85d4a4e009dced6bfc9b4aaac8338962104a6c99fd2e2315eeff3ac1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClientApi/McpMutationTestData.cs",
+      "sha256": "54ec8c1b567058871356a921774c9eba61be7a0a2e09b85cea1972d0bbb1c20e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeNullableMetadataTests.cs",
+      "sha256": "b975f7c7cd14b6c09cf5ea34b4e90ac9d79e5d379d1dce11a6f0352f66ed3dcd"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClientApi/McpPolymorphicSchemaTests.cs",
+      "sha256": "480b7b832d5a18283095da039b0f9bb8b1ba7e3f02e1a48e6c1360eb2ea4571a"
+    },
+    {
+      "path": "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteDatabaseCompositionTests.cs",
+      "sha256": "5fb7c422578e9de4b532c8ab166edaa335cb70269af94f116a4f562b7d85ca97"
+    },
+    {
+      "path": "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteDatabaseCompositionTokens.cs",
+      "sha256": "f63e04f2eeb4ee5543e8f196b9c24eac7506d2a7537d6b8ccbbd1527a4ffa337"
+    },
+    {
+      "path": "src/KeyLoad.Abstractions/Features/DatabaseComposition/DatabaseCompositionContracts.cs",
+      "sha256": "cdf1d0992a25b9c01ecf3ca69c2b795529602480840fb24b9ef894f68cc4cd57"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/DatabaseComposition/CompositionOutcomeAuthority.cs",
+      "sha256": "b6520eb48d68d79e81c65b4a95e4f2b1494ce30c3b00fef14d09f965a87d7e7d"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/DatabaseComposition/CompositionTimeProvider.cs",
+      "sha256": "9f1b6b784cb97114d60cfcb6d793b98f6ea45840eff338c9d89c2d852e877998"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/DatabaseComposition/DatabaseCompositionAuthorization.cs",
+      "sha256": "6d4a4c51a82c9cdd76adc4fe8adfd082b5ecb5a023734aa4b4732bac0f94f86f"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/DatabaseComposition/DatabaseCompositionExpansion.cs",
+      "sha256": "ba08ee056f3e2438972465557ed976c1baeac4b576253323dc29386bf1b594f7"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/DatabaseComposition/DatabaseCompositionOutcomeAuthority.cs",
+      "sha256": "351807d74e2049a7bd78a69dd2a72e8670480f83528a8c89f51a9a91c61f24a6"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DatabaseComposition/DatabaseCompositionBudgetTests.cs",
+      "sha256": "0f03e04c4afe1aeca1cd2026d7f4377e6c71ffe69060792abb08c81ad9e37195"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DatabaseComposition/DatabaseCompositionCompatibilityTests.cs",
+      "sha256": "0a47baa6d4ef0f8f2c7f7b43395b6124eb4ccb80cd3ee407510ab5ef35582447"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DatabaseComposition/DatabaseCompositionContractTests.cs",
+      "sha256": "a1e3460031936476c16a66f542fc4a626be9ad38cd8ca3a3d0d7ee199cc22c60"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DatabaseComposition/DatabaseCompositionDeterminismTests.cs",
+      "sha256": "c4720450c0564da137f3d2764b6f1c28c50c16e4540141f3a52a2bac73b8ff53"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DatabaseComposition/DatabaseCompositionFlowTests.cs",
+      "sha256": "02ae3102056701add913ddcfd620d80c9d92e808771b380a6b2eb00078367846"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DatabaseComposition/DatabaseCompositionReplayTests.cs",
+      "sha256": "e123de751797b126e4dff2175ac12a15fda1aa069c7215d6de2d5dfabf3c21b4"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DatabaseComposition/DatabaseCompositionReverseTests.cs",
+      "sha256": "8f7db2c6f606f08ba9fe3cb43a04e363a7e0f6186449901ea15fead182622aa8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DatabaseComposition/DatabaseCompositionSafetyTests.cs",
+      "sha256": "4295052eea835541e9cdfca76a1b45b968d12468e79162e3fede40277f500a73"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DatabaseComposition/DatabaseCompositionVisibilityTests.cs",
+      "sha256": "63d97946ab0768f40b1031049afca49c8cff8201e1051f00e5bfaf094de46c56"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/DatabaseComposition/DatabaseCompositionRf3Tests.cs",
+      "sha256": "81fc901942052331c035d7426bcf9d84d89943e050e1d9e8dfec1f0aecd9cdcf"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/DatabaseComposition/DatabaseCompositionCrashScenario.cs",
+      "sha256": "dec29209f75704f3cf90c1f608529f599159669c370a70753adf856629b2d27b"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/DatabaseComposition/DatabaseCompositionProcessRecoveryTests.cs",
+      "sha256": "79ae3e8f2d5104a7e54e94df585c07800cd8bd7f1b97f8e8ba54e249c1810269"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/DatabaseComposition/DatabaseCompositionRecoveryAssertions.cs",
+      "sha256": "2bb3fc91126f62714bf9ac2c52dbf370ecf230ebe4b8548fd0a0dbd5b57d5e21"
+    }
+  ],
+  "scope": {
+    "implemented": [
+      "One composable AI-agent database documented in mandatory rules, ADR, architecture, README and site source",
+      "QueueToGraph and GraphToQueueMutation expand to authorized atomic primitive effects on the staged same-partition view",
+      "Same SDK/official MCP/SQL CALL gateway, native DTOs, bounded deterministic apply and saved replay row authority",
+      "Real ZoneTree, frozen pre-composition binary writer fixtures and real process-kill regressions"
+    ],
+    "fullDeclarativeSqlComplete": false,
+    "nativeSqlClientProtocolComplete": false,
+    "crossPartitionCompositionComplete": false,
+    "allModelCompositionQualified": false,
+    "websitePublished": false,
+    "guardrails": [
+      "Persisted resource/row/field policies",
+      "RF3 and one Orleans grain per request",
+      "Node-local ZoneTree native WAL and distinct replication/atomic journals",
+      "Standalone CommandRequest only; inbox composition explicitly unsupported",
+      "Ready projection does not lease or ACK",
+      "No performance or power-loss claims"
+    ],
+    "formatPrerequisite": "One pre-existing whitespace fix in NativeNullableMetadataTests.cs; no semantic native-migration repairs absorbed"
+  },
+  "localDevelopment": {
+    "environment": {
+      "os": "macOS/Darwin 27",
+      "architecture": "arm64",
+      "dotnetSdk": "10.0.401",
+      "githubQualification": false
+    },
+    "sourceFixture": "Immutable archive of sourceBaseRevision plus only scoped composition changes at /private/tmp/keyload-composition-delivery-check; unrelated dirty checkout work preserved",
+    "restore": {
+      "command": "dotnet restore KeyLoad.slnx --disable-build-servers -m:1",
+      "exitCode": 0,
+      "log": {
+        "path": "/private/tmp/keyload-composition-delivery-restore-controlled.log",
+        "sha256": "bae2bedd94489dfa41d4b8f75fc024cec531067fdcafddcf89588252d4f0a407"
+      }
+    },
+    "build": {
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --disable-build-servers -m:1",
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "log": {
+        "path": "/private/tmp/keyload-composition-delivery-final-build.log",
+        "sha256": "c0b637410b4e2ad5d65f0c2b5fba38744fd2b153ee171d13bfeb22717d999cfc"
+      }
+    },
+    "format": {
+      "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+      "exitCode": 0,
+      "log": {
+        "path": "/private/tmp/keyload-composition-delivery-final-format.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "governance": {
+      "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+      "exitCode": 0,
+      "projects": 26,
+      "modules": 4,
+      "log": {
+        "path": "/private/tmp/keyload-composition-delivery-final-governance.log",
+        "sha256": "76cb9ab8d9569308e691c3b773158a6447ff5fb4be35c6528a3497948ddd31ae"
+      }
+    },
+    "fullNormalUnit": {
+      "report": "/private/tmp/keyload-composition-final-unit-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "sha256": "7a7a983ea94d3a004e7e9921b3f447ac1d2f15373cccb683f3c3204667fc151d",
+      "total": 2349,
+      "passed": 2209,
+      "failed": 140,
+      "skipped": 0,
+      "exitCode": 2,
+      "fullGatePassed": false,
+      "compositionPassed": 32
+    },
+    "preChangeFullNormalUnit": {
+      "report": "/private/tmp/keyload-head807-baseline/full-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "sha256": "522bf042d61aa65d7207ba9a694c145fcc5e6e26054a3e1c3e58e733b2cf5b9f",
+      "total": 2317,
+      "passed": 2177,
+      "failed": 140,
+      "skipped": 0
+    },
+    "failureComparison": {
+      "identicalFailedNameMultisets": true,
+      "newFailures": 0,
+      "baselineOnlyFailures": 0,
+      "addedPassingTests": 32,
+      "failedNameMultisetSha256": "ed21c5500651bf65f40507e5029ec3d596e0256693c662a3eccf9be177459d02"
+    },
+    "compositionScalar": {
+      "report": "/private/tmp/keyload-composition-final-scalar-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "sha256": "5f011b978106e50dcfdb65dcf2f83cb60ea5421ac91b95d9fbc2e9fcfa4441b1",
+      "total": 32,
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0,
+      "hardwareIntrinsics": false,
+      "exitCode": 0
+    },
+    "compositionProcessKill": {
+      "report": "/private/tmp/keyload-composition-final-recovery-results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+      "sha256": "6e6ea9377078bbdbc9e2f4052e2ec52dfac8cbc187729081b8749be64ef0440f",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "exitCode": 0,
+      "powerLossQualified": false
+    },
+    "rf3Attempt": {
+      "newCases": 2,
+      "testBodiesExecuted": 0,
+      "status": "blocked_before_test_body_by_required_GitHub_image_identity_receipt",
+      "log": {
+        "path": "/private/tmp/keyload-composition-rf3-canonical-run.log",
+        "sha256": "8e5a2fdfc2a4d51ca2615925fceeb9d62c3c8dfe03adc2fad53e58c5df1910de"
+      }
+    },
+    "site": {
+      "newCasesDiscovered": 4,
+      "newCasesExecuted": 0,
+      "testGatePassed": false,
+      "requiredInputs": "Original authenticated archive and coverage receipts from the complete Benchmarks/site pipeline",
+      "manualReview": "Temporary static site copy visually inspected in in-app browser at desktop width; connected model section and code samples rendered without overflow; not publication evidence"
+    }
+  },
+  "legacyCompatibility": {
+    "writerRevision": "8071148cd83bfecd67332c2a794248bf66c6b4ec",
+    "fixtureOwner": "tests/KeyLoad.UnitTests/Features/DatabaseComposition/DatabaseCompositionCompatibilityTests.cs",
+    "mutationReceiptBytesSha256": "37965220c92b3e3e1956754733175e6b6c69f11fd2021149cbfb28a432de4806",
+    "storedOutcomeBytesSha256": "2b51fc1deaac76245beb280daf024d85967aff737435e0bad22ff376fa1c29a7",
+    "contract": "Current generated reader decodes missing appended receipt field4 as a safe empty collection and missing outcome field5 as null; ordinary fields unchanged. This is not universal old-store/downgrade qualification."
+  },
+  "githubQualification": {
+    "sourceRevision": null,
+    "ciRunId": null,
+    "ciUrl": null,
+    "status": "not_yet_dispatched_for_this_source",
+    "runtimeQualified": false,
+    "linuxOnly": true
+  },
+  "remainingGates": [
+    "Delivered-source full build/format/governance and TUnit normal/scalar/process recovery",
+    "Genuine Docker/Aspire RF3 SQL/.NET/official MCP cases with original image receipts",
+    "Full SQL model sources, joins, DML and native client-session interoperability",
+    "All-model/distributed correctness, endurance, fault and comparable resource/performance qualification",
+    "Complete Benchmarks and site pipeline before publication"
+  ]
+}

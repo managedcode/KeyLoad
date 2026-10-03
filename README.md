@@ -1,12 +1,12 @@
 # KeyLoad
 
-KeyLoad is an experimental .NET 10 database that puts JSON documents, event streams, durable work queues, graphs, time series and search behind one API and one authorization model. An atomic command can update a document, append its event and enqueue work in the same transaction domain. The first server topology has three replicated nodes; each node owns its ZoneTree storage and journals.
+KeyLoad is one database for AI agents, built on .NET 10. Documents, typed tables, graphs, blobs, queues, events, vectors/search and time series coexist through canonical entity references, persisted permissions and shared transaction contracts. SQL is the familiar shared language for combining these models. The experimental RF3 server has three replicated nodes; each node owns its ZoneTree storage and journals.
 
 The cluster foundation is Orleans, with separate request grains and a distributed grain directory. Docker/Aspire RF3 operations are exercised through the real .NET and official MCP SDK clients in GitHub Actions. Actual activation migration remains unqualified, and the published comparison baseline predates this replacement. Follow the [architecture map](docs/Architecture.md) and [qualification tracker](docs/implementation/status.json) for the implemented and verified boundaries.
 
 The original load-testing prototype has been replaced. This repository implements the new [architecture and development plan](docs/design/architecture-v0.3.uk.md), with the [original HTML edition](docs/design/architecture-v0.3.uk.html) preserved alongside it.
 
-The [documentation index](docs/README.md) covers all 22 Feature specifications with requirements, acceptance criteria, source/test boundaries and diagrams. The ADR catalog (docs/ADR/README.md) records architectural decisions and implementation contracts; the [coverage map](docs/implementation/documentation-coverage.json) links every KL task to its owning Feature and ADR without changing qualification status.
+The [documentation index](docs/README.md) covers the Feature specifications with requirements, acceptance criteria, source/test boundaries and diagrams. The ADR catalog (docs/ADR/README.md) records architectural decisions and implementation contracts; the [coverage map](docs/implementation/documentation-coverage.json) links every KL task to its owning Feature and ADR without changing qualification status.
 
 The product is one database server for AI agents with linked documents, typed relational rows, graphs, vectors/search, files/blobs, events and queues. SQL is the central language. The new [SQL and relational contracts](docs/implementation/central-sql.md) add a versioned SELECT/CALL adapter over the existing operations and schema-constrained canonical rows. Arbitrary SQL JOIN, foreign keys and declarative cross-model SELECT remain required future stages; this source is not yet qualified by an exact-SHA GitHub run.
 
@@ -19,6 +19,29 @@ syntax/execution and native PostgreSQL client interoperability are still pending
 [ZoneTree.FullTextSearch](docs/implementation/zonetree-fulltextsearch-review.md)
 is an evaluated text-index candidate; integration and comparable performance
 must pass its correctness, recovery and resource gates.
+
+## One database, connected models
+
+Tables, collections and queues organize data inside the same database. A queued
+message can reference a typed row or document, that entity can participate in a
+graph and search, and its files, events and samples remain available to the same
+authorized workflow. Agents combine these relationships at the database boundary.
+
+- **Queue to knowledge graph.** `QueueToGraph` reads ready queue messages,
+  resolves their linked entities and writes knowledge-graph relationships.
+- **Graph to queued actions.** `GraphToQueueMutation` follows visible graph
+  relationships to enqueue actions with canonical entity references.
+
+These typed mutations run in one atomic `CommandRequest` through SDK
+`CommitAsync`, official MCP, or SQL `CALL keyload_documents_commit(@arguments)`.
+This is the initial bounded procedural composition stage, with exact-source
+qualification pending. All source and target resources share the same atomic
+partition and transaction domain. Projection does not lease or ACK queue
+messages; the blob lifecycle remains separate. Full declarative SQL, the native
+SQL-client protocol and cross-partition composition remain required and pending.
+The [DatabaseComposition contract](docs/Features/DatabaseComposition.md) and
+[ADR-067](docs/ADR/ADR-067-composable-agent-database.md) define authorization,
+cumulative limits, retries and all-or-nothing effects.
 
 ## Development status
 

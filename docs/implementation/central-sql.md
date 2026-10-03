@@ -1,5 +1,14 @@
 # One AI database: SQL, linked models and relational delivery
 
+Owner clarification 2026-10-03: the central purpose is cross-model composition in
+one database for AI agents. [DatabaseComposition](../Features/DatabaseComposition.md)
+and [ADR-067](../ADR/ADR-067-composable-agent-database.md) add bounded server-derived
+queue links -> canonical entities -> graph edges and graph -> queued actions
+inside the existing atomic command, reached through the same SQL CALL/catalog.
+This preserves the one-statement/one-canonical-operation boundary while making
+that operation compose source reads and effects. Full declarative sources/JOIN/
+DML and native SQL client protocol remain required under ADR-065.
+
 Owner direction2026-10-02: one server/database supports all models and their
 links; SQL is central and performance has first priority. This is not a request
 for a new single physical file. [ADR-054](../ADR/ADR-054-central-sql.md),

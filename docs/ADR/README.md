@@ -1,5 +1,11 @@
 # Каталог архітектурних рішень
 
+[ADR-067: One composable database for AI agents](ADR-067-composable-agent-database.md)
+фіксує головну ідею: всі моделі співіснують, посилаються одна на одну і
+поєднуються через SQL в одному bounded запиті. Перший executable stage читає
+чергу й будує граф або читає граф і створює queued actions в одній atomic partition;
+повний declarative SQL та qualification залишаються окремими обов'язковими gates.
+
 Номери ADR стабільні. `Accepted` фіксує нормативний direction/contract, а не готовність source; `Proposed` залишає unresolved choices явними. Жоден новий запис не стає `Implemented` через створення документа. Всі related REQ/AC та implementation/test/rollout contracts знаходяться в owning ADR і [Feature](../README.md).
 
 ## Decision inventory
@@ -67,6 +73,7 @@
 | [ADR-062 workflow separation](ADR-062-workflow-separation.md) | Placement superseded by ADR-064; authentic historical proof retained | RepositoryGovernance, BenchmarkComparisons |
 | [ADR-064 three-pipeline release delivery](ADR-064-three-pipeline-release-delivery.md) | Accepted; exact-SHA CI/site/release qualification pending | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery |
 | [ADR-065 full SQL and client protocol](ADR-065-full-sql-client-compatibility.md) | Accepted staged lexical contract; full execution/native qualification pending | QueryExecution, ClientApi, RelationalStorage, Search |
+| [ADR-067 composable agent database](ADR-067-composable-agent-database.md) | Accepted; bounded atomic composition source, full SQL and exact-SHA qualification pending | DatabaseComposition, QueryExecution, ClientApi |
 
 ## Ідентичність і пріоритет
 

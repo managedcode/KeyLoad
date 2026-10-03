@@ -47,6 +47,8 @@ public sealed partial class DatabaseEngine
             DeleteEdge edge => edge.Graph,
             AppendSamples samples => samples.SeriesSet,
             PutVector vector => vector.Collection,
+            QueueToGraph projection => projection.Graph,
+            GraphToQueueMutation projection => projection.Queue,
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, "The mutation is unsupported.")
         };
         if (mutation.Resource != owner)

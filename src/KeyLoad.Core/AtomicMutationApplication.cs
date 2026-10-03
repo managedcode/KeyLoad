@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.Core.Features.DatabaseComposition;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Storage;
 
@@ -13,7 +14,7 @@ public sealed partial class DatabaseEngine
         DateTimeOffset now, long position, bool allowOutboxProgressReserve = false)
     {
         var receipts = ImmutableArray.CreateBuilder<MutationReceipt>(mutations.Length);
-        foreach (var mutation in mutations)
+        foreach (var (mutation, derived) in ExpandCommandMutations(tx, principal, partition, mutations, now))
         {
             var documentId = mutation switch { PutDocument put => put.Id, PatchDocument patch => patch.Id, DeleteDocument delete => delete.Id, _ => null };
             var key = documentId is null ? null : DocumentKey(partition, mutation.Resource, documentId);
@@ -27,6 +28,10 @@ public sealed partial class DatabaseEngine
                 _ => null
             };
             var receipt = image?.Receipt ?? ApplyNonDocumentMutation(tx, principal, partition, mutation, now);
+            if (derived)
+            {
+                receipt = receipt with { CompositionReferences = CompositionMutationReferences(mutation) };
+            }
             receipts.Add(receipt);
             var after = image?.After;
             AppendOutbox(tx, partition, new(0, receipts.Count - 1, Token(partition, position), now, mutation, receipt, before, after), allowOutboxProgressReserve);
@@ -41,7 +46,37 @@ public sealed partial class DatabaseEngine
             tx.PutRecord(KeySpace.Partition(DocumentEpochSpace, partition, collection), checked(DocumentEpoch(tx, partition, collection) + 1));
         }
 
-        return receipts.MoveToImmutable();
+        return receipts.Count == receipts.Capacity ? receipts.MoveToImmutable() : receipts.ToImmutable();
+    }
+
+    private IEnumerable<(Mutation Effect, bool Derived)> ExpandCommandMutations(IAtomicTransaction tx, PrincipalRecord principal,
+        PartitionRef partition, ImmutableArray<Mutation> mutations, DateTimeOffset now)
+    {
+        var count = 0;
+        ReadExecutionBudget? budget = null;
+        foreach (var requested in mutations)
+        {
+            if (requested is not (QueueToGraph or GraphToQueueMutation))
+            {
+                AcceptExpandedMutation(ref count);
+                yield return (requested, false);
+                continue;
+            }
+            budget ??= new ReadExecutionBudget(Limits, CompositionTimeProvider.Instance);
+            foreach (var effect in ExpandComposition(tx, principal, partition, requested, now, budget))
+            {
+                AcceptExpandedMutation(ref count);
+                yield return (effect, true);
+            }
+        }
+    }
+
+    private void AcceptExpandedMutation(ref int count)
+    {
+        if (++count > Limits.MaxBatchMutations)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, MutationCountBudgetMessage);
+        }
     }
 
     private MutationReceipt ApplyNonDocumentMutation(IAtomicTransaction tx, PrincipalRecord principal,

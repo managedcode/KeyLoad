@@ -1,5 +1,14 @@
 # QueryExecution
 
+SQL exists because KeyLoad is one composable database for AI agents: documents,
+typed tables, graphs, blobs, queues, events, vectors/search and time series can
+reference and use one another. [DatabaseComposition](DatabaseComposition.md) /
+[ADR-067](../ADR/ADR-067-composable-agent-database.md) specify queue -> linked
+entities -> knowledge graph and graph -> queued actions in one authorized bounded
+request. The first server-derived stage uses composing mutations through existing
+canonical SQL CALL; full declarative model sources/JOIN/DML remain required under
+ADR-065. One shared language must not stop at independent calls per model.
+
 Owner clarification2026-10-03 makes full SQL syntax and a client connection
 protocol required. [ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md) owns
 the ordered implementation contract; [conformance inventory](../implementation/sql-client-conformance.json)

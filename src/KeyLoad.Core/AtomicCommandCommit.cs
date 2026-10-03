@@ -41,6 +41,7 @@ public sealed partial class DatabaseEngine
         long policyEpoch = 0;
         BlobOutcomeAuthority? blobAuthority = null;
         OperationResult result;
+        global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority = null;
         try
         {
             var principal = Principal(transaction, operation.PrincipalId, operation.EvaluatedAt);
@@ -56,6 +57,7 @@ public sealed partial class DatabaseEngine
                 blobAuthority = new BlobStorageOperations(this).CaptureOutcomeAuthority(transaction, principal, operation);
             }
             result = Execute(transaction, principal, operation, replicationIndex > 0 ? replicationIndex : position);
+            compositionAuthority = CaptureCompositionOutcome(operation, result);
         }
         catch (KeyLoadException exception) when (exception.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported
             or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome))
@@ -69,7 +71,10 @@ public sealed partial class DatabaseEngine
             result = new(null, ErrorCode.Validation, InvalidCommandJsonMessage);
         }
         var outcome = new StoredOutcome(fingerprint, Store.Identity.Incarnation, policyEpoch, result)
-        { BlobAuthority = result.Error is null ? blobAuthority : null };
+        {
+            BlobAuthority = result.Error is null ? blobAuthority : null,
+            CompositionAuthority = result.Error is null ? compositionAuthority : null
+        };
         PersistCommandOutcome(transaction, operation, resultKey, outcome, replicationIndex);
         return ValidateCompiledCommand(transaction, operation, resultKey, outcome, replicationIndex);
     }
@@ -134,7 +139,8 @@ public sealed partial class DatabaseEngine
             // Reject at this same apply position without leaving an unapplicable entry.
             transaction.Reset();
             var failure = new OperationResult(null, exception.Code, exception.Message);
-            PersistCommandOutcome(transaction, operation, resultKey, outcome with { Result = failure, BlobAuthority = null }, replicationIndex);
+            PersistCommandOutcome(transaction, operation, resultKey, outcome with
+            { Result = failure, BlobAuthority = null, CompositionAuthority = null }, replicationIndex);
             transaction.ValidateCommit();
             return failure;
         }

@@ -234,6 +234,7 @@ internal static class StoredOutcomeFields
     internal const uint PolicyEpoch = 2;
     internal const uint Result = 3;
     internal const uint BlobAuthority = 4;
+    internal const uint CompositionAuthority = 5;
 }
 
 internal static class SubscriptionCompletionFields

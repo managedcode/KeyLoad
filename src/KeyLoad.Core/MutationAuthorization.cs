@@ -26,6 +26,7 @@ public sealed partial class DatabaseEngine
 
     private void ReauthorizeEffect(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect)
     {
+        AuthorizeComposition(view, principal, partition, effect);
         var resource = Resource(view, partition, effect.Resource);
         var documentId = effect switch
         {

@@ -3,6 +3,9 @@ namespace KeyLoad;
 // Persisted aliases are immutable format identifiers, independent of CLR renames.
 internal static class NativeContractAliases
 {
+    internal const string QueueGraphLink = "keyload.contract.queue-graph-link.v1";
+    internal const string QueueToGraph = "keyload.contract.queue-to-graph.v1";
+    internal const string GraphToQueueMutation = "keyload.contract.graph-to-queue.v1";
     internal const string AbortBlobUploadRequest = "keyload.contract.abort-blob-upload-request.v1";
     internal const string AdminFileInfo = "keyload.contract.admin-file-info.v1";
     internal const string AdminHttpFailure = "keyload.contract.admin-http-failure.v1";

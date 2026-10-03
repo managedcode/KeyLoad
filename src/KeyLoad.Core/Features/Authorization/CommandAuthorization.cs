@@ -9,6 +9,7 @@ public sealed partial class DatabaseEngine
     private const string StalePartitionOwnershipMessage = "The partition ownership epoch is stale.";
     private const string MutationCountBudgetMessage = "The mutation count exceeds its budget.";
     private const string UnsupportedBatchMutationMessage = "This mutation is unsupported.";
+    private const string CompositionBatchRequiredMessage = "Database composition requires a standalone atomic command.";
 
     private void AuthorizeOperation(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
     {
@@ -102,6 +103,10 @@ public sealed partial class DatabaseEngine
         foreach (var mutation in request.Mutations)
         {
             ValidateMutationStructure(mutation);
+            if (allowEmpty && mutation is QueueToGraph or GraphToQueueMutation)
+            {
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, CompositionBatchRequiredMessage);
+            }
             JsonData.Identifier(mutation.Resource);
             var capability = mutation switch
             {
@@ -109,13 +114,15 @@ public sealed partial class DatabaseEngine
                 AppendEvents => Capability.EventsAppend,
                 PublishTopic => Capability.TopicsPublish,
                 EnqueueMessage => Capability.QueuePublish,
-                UpsertEdge or DeleteEdge => Capability.GraphWrite,
+                UpsertEdge or DeleteEdge or QueueToGraph => Capability.GraphWrite,
+                GraphToQueueMutation => Capability.QueuePublish,
                 AppendSamples => Capability.SeriesAppend,
                 PutVector => Capability.DocumentsWrite,
                 _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedBatchMutationMessage)
             };
             Authorization.Require(principal, request.Partition, mutation.Resource, capability);
             Resource(view, request.Partition, mutation.Resource);
+            AuthorizeComposition(view, principal, request.Partition, mutation);
         }
     }
 }

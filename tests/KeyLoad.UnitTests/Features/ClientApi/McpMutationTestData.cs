@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>All ten real public mutation DTOs, independent of catalog discovery.</summary>
+/// <summary>All twelve real public mutation DTOs, independent of catalog discovery.</summary>
 internal static class McpMutationTestData
 {
     private const string EventId = "mcp-event";
@@ -26,9 +26,12 @@ internal static class McpMutationTestData
     private const string DeleteEdgeKind = "deleteEdge";
     private const string SamplesKind = "appendSamples";
     private const string VectorKind = "putVector";
+    private const string QueueToGraphKind = "queueToGraph";
+    private const string GraphToQueueKind = "graphToQueue";
     internal static readonly ImmutableArray<string> Discriminators =
         [PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind,
-         EnqueueKind, UpsertEdgeKind, DeleteEdgeKind, SamplesKind, VectorKind];
+         EnqueueKind, UpsertEdgeKind, DeleteEdgeKind, SamplesKind, VectorKind,
+         QueueToGraphKind, GraphToQueueKind];
 
     internal static ImmutableArray<Mutation> Create() =>
     [
@@ -45,7 +48,10 @@ internal static class McpMutationTestData
         new AppendSamples(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
             [new SampleData(EventId, DateTimeOffset.UnixEpoch, Sample)]),
         new PutVector(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, McpCanonicalTestData.Field,
-            [Vector], new VectorSpace(SpaceId, Dimension, DistanceMetric.Cosine, Model, Version), Revision)
+            [Vector], new VectorSpace(SpaceId, Dimension, DistanceMetric.Cosine, Model, Version), Revision),
+        new QueueToGraph(McpCanonicalTestData.Resource, McpCanonicalTestData.Resource, EdgeId),
+        new GraphToQueueMutation(McpCanonicalTestData.Resource, McpCanonicalTestData.Resource,
+            McpCanonicalTestData.Reference, EdgeId)
     ];
 
     private static EventData Event() => new(EventId, EventType, McpCanonicalTestData.EmptyJson);

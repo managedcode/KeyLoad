@@ -19,6 +19,8 @@ internal static class MutationDiscriminatorNames
     internal const string DeleteEdge = "deleteEdge";
     internal const string AppendSamples = "appendSamples";
     internal const string PutVector = "putVector";
+    internal const string QueueToGraph = "queueToGraph";
+    internal const string GraphToQueue = "graphToQueue";
 }
 
 /// <summary>Identifies the stable error category returned by KeyLoad operations.</summary>
@@ -204,7 +206,18 @@ public sealed record CommitToken([property: Orleans.Id(0)] Guid Incarnation, [pr
 /// <param name="Revision">Identifies the document, stream, or edge revision.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.MutationReceipt)]
-public sealed record MutationReceipt([property: Orleans.Id(0)] string Kind, [property: Orleans.Id(1)] string Resource, [property: Orleans.Id(2)] string Id, [property: Orleans.Id(3)] long Revision);
+public sealed record MutationReceipt([property: Orleans.Id(0)] string Kind, [property: Orleans.Id(1)] string Resource, [property: Orleans.Id(2)] string Id, [property: Orleans.Id(3)] long Revision)
+{
+    private ImmutableArray<EntityRef> compositionReferences;
+
+    [JsonIgnore]
+    [Orleans.Id(4)]
+    internal ImmutableArray<EntityRef> CompositionReferences
+    {
+        get => compositionReferences.IsDefault ? [] : compositionReferences;
+        set => compositionReferences = value;
+    }
+}
 
 /// <summary>Describes the durable result of a command and its mutation effects.</summary>
 /// <param name="CommandId">Identifies the command for deduplication.</param>
@@ -238,6 +251,8 @@ public sealed record CommandOutcome([property: Orleans.Id(0)] string Fingerprint
 [JsonDerivedType(typeof(DeleteEdge), MutationDiscriminatorNames.DeleteEdge)]
 [JsonDerivedType(typeof(AppendSamples), MutationDiscriminatorNames.AppendSamples)]
 [JsonDerivedType(typeof(PutVector), MutationDiscriminatorNames.PutVector)]
+[JsonDerivedType(typeof(QueueToGraph), MutationDiscriminatorNames.QueueToGraph)]
+[JsonDerivedType(typeof(GraphToQueueMutation), MutationDiscriminatorNames.GraphToQueue)]
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.Mutation)]
 public abstract record Mutation([property: Orleans.Id(0)] string Resource);
