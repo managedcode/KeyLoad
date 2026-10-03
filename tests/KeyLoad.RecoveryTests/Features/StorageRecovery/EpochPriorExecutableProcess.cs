@@ -62,6 +62,7 @@ internal static class EpochPriorProcessOutput
     private const int MaximumCharacters = 65536;
     private const int ChunkCharacters = 1024;
     private const string OutputExceeded = "The prior-executable probe output exceeds its bounded protocol.";
+    private const string CleanupFailureKey = "KeyLoad.EpochPriorProbeCleanupFailure";
 
     internal static async Task<string> ReadAsync(StreamReader reader, CancellationToken cancellationToken)
     {
@@ -100,7 +101,7 @@ internal static class EpochPriorProcessOutput
             {
                 throw;
             }
-            activeFailure.Data["KeyLoad.EpochPriorProbeCleanupFailure"] = cleanupFailure;
+            activeFailure.Data[CleanupFailureKey] = cleanupFailure;
         }
     }
 }

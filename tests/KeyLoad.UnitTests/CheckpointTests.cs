@@ -36,7 +36,7 @@ internal sealed class CheckpointTests
             }
             using var reopened = new ZoneTreeStore(new(root));
             await Assert.That(reopened.Position).IsEqualTo(101);
-            await Assert.That(reopened.Identity.FormatVersion).IsEqualTo(ZoneTreePersistenceFormat.BinaryJournalIdentityVersion);
+            await Assert.That(reopened.Identity.FormatVersion).IsEqualTo(ZoneTreePersistenceFormat.CurrentDataEpoch);
             await Assert.That(reopened.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("value"))!))).EndsWith("99");
             await Assert.That(reopened.Read(view => NativeSerialization.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("next"))!))).IsEqualTo(101);
         }

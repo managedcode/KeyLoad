@@ -88,6 +88,8 @@ DestinationDirectory,3 original identity SHA256,4 original journal SHA256,
 in the existing checksummed native metadata envelope with its own named magic
 `0x315055444C4B`. Staging is `destination + ".upgrade"`; reject mismatched or
 unrecognized contents and links. Signing keys never enter a receipt or logs.
+Check every path ancestor for links, including parents of an absent target or
+staging directory, before opening owners or modifying files.
 Destination options supply the existing native limits/fault observer; supplied
 authority must match the source rather than silently rebinding it. Append fault
 stages `UpgradeSourceVerified`, `UpgradePrepared`, `UpgradeRecovered`,
@@ -109,7 +111,12 @@ A recognized unpublished staging directory may be discarded and reconstructed
 only while holding the source owner lock and after its receipt matches the same
 unchanged source/target. Unknown or mismatched contents fail closed. A matching
 already-published target makes upgrade retry idempotent and must not reset target
-writes. Original source remains the pre-upgrade rollback authority. Process death
+writes. Its authority, codec, durability and current epoch must still match,
+and its validated journal cut and read generation cannot precede the original
+source. Legitimate current writes or maintenance may advance the cut/generation
+or change dispatch pause; retry preserves those changes without ordinary recovery,
+truncation or rewriting. Initial publication still preserves the exact source
+cut, generation and pause. Original source remains the pre-upgrade rollback authority. Process death
 at source validation, prepared copy, reconstruction, current-checkpoint flush or
 publication leaves the source intact and the target absent or fully current.
 Append named fault stages without renumbering existing CommitStage values.
@@ -174,3 +181,16 @@ All workers remain source-only until root's integrated validation. Every type,
 method and nesting limit remains enforced. Failure is not bypassed by a skip,
 broadened accepted version, weak assertion, increased bound or swallowed cleanup.
 Power-loss, endurance and performance improvements require independent evidence.
+
+## Real executable oracle and ordinary reopen
+
+The actual previous immutable provider is compiled with its preexisting
+CrashHost friend access. Its snapshot probe invokes the unchanged native
+checkpoint reader before any store opens; checkpoint4 refusal therefore compares
+the entire source and target byte inventory without replay effects. Ordinary
+successful ZoneTree opens may replay into native metadata/WAL files. Those
+positive reopen controls assert exact authority files, identity, committed cut,
+applied cut and raw records rather than immutable materialized-tree bytes. All
+upgrade, unsupported-open, snapshot-reader refusal and read-only published-target
+retry comparisons retain the complete byte inventory. No previous provider or
+serializer source is patched to produce the oracle.

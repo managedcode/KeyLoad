@@ -116,7 +116,7 @@ internal static class ZoneTreeJournalCodec
         }
     }
 
-    private static bool IsMalformedPayload(Exception exception)
+    internal static bool IsMalformedPayload(Exception exception)
         => exception is SerializerException or ArgumentException or InvalidOperationException
             or IndexOutOfRangeException or OverflowException or InvalidCastException
             or FormatException or NotSupportedException or EndOfStreamException or TypeLoadException;

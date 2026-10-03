@@ -23,6 +23,9 @@ internal sealed class OrleansWalLegacyBinaryTests
     [Arguments(5, PayloadState.Complete)]
     [Arguments(5, PayloadState.Missing)]
     [Arguments(5, PayloadState.Torn)]
+    [Arguments(6, PayloadState.Complete)]
+    [Arguments(6, PayloadState.Missing)]
+    [Arguments(6, PayloadState.Torn)]
     public async Task AcWal003And004GenericFrameTwoIsRefusedWithoutRewritingOrTruncatingFiles(
         int version, PayloadState state)
     {

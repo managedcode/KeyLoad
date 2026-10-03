@@ -28,7 +28,7 @@ original = path.read_text()
 expected = 'using KeyLoad.CrashHost;\n\nawait CrashHostApplication.RunAsync(args);\n'
 if original != expected:
     raise SystemExit('The immutable prior CrashHost entry point differs.')
-path.write_text('using KeyLoad.CrashHost;\n\nif (!await EpochPriorSourceProbe.TryRunAsync(args))\n{\n    await CrashHostApplication.RunAsync(args);\n}\n')
+path.write_text('using KeyLoad.CrashHost;\n\nawait EpochPriorSourceProbe.RunAsync(args);\n')
 PY
 
 dotnet restore "$temporary/source/$project" -p:RestorePackagesWithLockFile=false \

@@ -13,14 +13,16 @@ internal static class ZoneTreeCheckpointReader
     internal static StorageSnapshot ReadNative3ForUpgrade(
         FileStream input,
         ZoneTreeStoreOptions options,
-        Action<StorageMutation> apply)
-        => Read(input, options, apply, SourceFormat);
+        Action<StorageMutation> apply,
+        Guid expectedIncarnation)
+        => Read(input, options, apply, SourceFormat, expectedIncarnation);
 
     private static StorageSnapshot Read(
         FileStream input,
         ZoneTreeStoreOptions options,
         Action<StorageMutation>? apply,
-        CheckpointFormat format)
+        CheckpointFormat format,
+        Guid? expectedIncarnation = null)
     {
         if (input.Length > options.MaxSnapshotBytes && apply is null)
         {
@@ -39,7 +41,7 @@ internal static class ZoneTreeCheckpointReader
             var frame = ZoneTreeCheckpointFrame.Read(input, options, maximumPosition);
             if (metadata is null)
             {
-                metadata = ReadMetadata(frame, format);
+                metadata = ReadMetadata(frame, format, expectedIncarnation);
             }
             else
             {
@@ -66,7 +68,8 @@ internal static class ZoneTreeCheckpointReader
         }
     }
 
-    private static ZoneTreeCheckpointMetadata ReadMetadata(ZoneTreeCheckpointFrame frame, CheckpointFormat format)
+    private static ZoneTreeCheckpointMetadata ReadMetadata(ZoneTreeCheckpointFrame frame, CheckpointFormat format,
+        Guid? expectedIncarnation)
     {
         if (frame.Magic != format.HeaderMagic)
         {
@@ -83,6 +86,10 @@ internal static class ZoneTreeCheckpointReader
             || frame.Position != metadata.Position)
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointCutInvalid);
+        }
+        if (expectedIncarnation is { } expected && metadata.Incarnation != expected)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, ZoneTreePersistenceFormat.SnapshotScopeInvalid);
         }
 
         return metadata;

@@ -3,7 +3,6 @@ using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Security;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;

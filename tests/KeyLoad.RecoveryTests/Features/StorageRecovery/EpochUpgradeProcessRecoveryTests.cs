@@ -9,11 +9,6 @@ internal sealed class EpochUpgradeProcessRecoveryTests
     private const string TrialPrefix = "keyload-epoch-upgrade-crash-";
     private const int TimeoutSeconds = 45;
     private const int CleanupSeconds = 30;
-    private const int SourceArgument = 0;
-    private const int TargetArgument = 1;
-    private const int StageArgument = 2;
-    private const int ModeArgument = 3;
-    private const string CleanupFailureKey = "KeyLoad.EpochUpgradeCleanupFailure";
 
     [Test]
     [Arguments(CommitStage.UpgradeSourceVerified, false)]
@@ -62,18 +57,7 @@ internal sealed class EpochUpgradeProcessRecoveryTests
         finally
         {
             using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds));
-            try
-            {
-                await CleanupAsync(process, root, source, cleanup.Token);
-            }
-            catch (Exception cleanupFailure)
-            {
-                if (activeFailure is null)
-                {
-                    throw;
-                }
-                activeFailure.Data[CleanupFailureKey] = cleanupFailure;
-            }
+            await EpochUpgradeCleanup.SettleAsync(process, root, source, activeFailure, cleanup.Token);
         }
     }
 
@@ -134,47 +118,4 @@ internal sealed class EpochUpgradeProcessRecoveryTests
         }
     }
 
-    private static async Task CleanupAsync(Process? process, string root, string source,
-        CancellationToken cancellationToken)
-    {
-        var failures = new List<Exception>();
-        if (process is not null)
-        {
-            if (!process.HasExited)
-            {
-                Capture(() => process.Kill(entireProcessTree: true), failures);
-                await CaptureAsync(() => process.WaitForExitAsync(cancellationToken), failures);
-            }
-            Capture(process.Dispose, failures);
-        }
-        if (Directory.Exists(source))
-        {
-            await CaptureAsync(() => KilledProcessFileReadiness.WaitAsync(source, cancellationToken), failures);
-            Capture(() => EpochUpgradeFileInventory.AssertNativeHandlesReleased(source), failures);
-        }
-        if (Directory.Exists(root))
-        {
-            await CaptureAsync(() => StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken), failures);
-        }
-        if (failures.Count == 1)
-        {
-            throw failures[0];
-        }
-        if (failures.Count > 1)
-        {
-            throw new AggregateException(failures);
-        }
-    }
-
-    private static void Capture(Action action, List<Exception> failures)
-    {
-        try { action(); }
-        catch (Exception failure) { failures.Add(failure); }
-    }
-
-    private static async Task CaptureAsync(Func<Task> action, List<Exception> failures)
-    {
-        try { await action(); }
-        catch (Exception failure) { failures.Add(failure); }
-    }
 }

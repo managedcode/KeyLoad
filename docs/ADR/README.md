@@ -146,3 +146,8 @@ current-cohort, source, coverage, browser and freshness gates. Qualification pen
 [ADR-077](ADR-077-offline-native-data-epoch.md) accepts an explicit preserving
 native5-to-separate-native6 offline upgrade, checkpoint4 and incompatible signed
 peer fences. Homogeneous rollout, real prior-binary proof and qualification pending.
+
+[ADR-078](ADR-078-native-full-text-projection.md) freezes bounded actual native
+ZoneTree.FullTextSearch candidate generations under a node-local physical owner,
+exact canonical ranking, persisted-policy cuts and fail-closed publication.
+Source integration and qualification pending; acceleration is not claimed.

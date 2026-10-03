@@ -1,7 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
-using KeyLoad.Security;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
@@ -52,6 +50,6 @@ internal static class SampleRetentionRecoveryIdentityAssertions
         var request = new CommandRequest(id, SampleRetentionCrashScenario.Partition,
             [new AppendSamples(SampleRetentionCrashScenario.SeriesSet, SampleRetentionCrashScenario.SeriesId,
                 [new(eventId, timestamp, value)], SampleRetentionCrashScenario.Tags)]);
-        return new(id, OperationKind.Batch, Principal, TimeProvider.System.GetUtcNow(), JsonDefaults.Serialize(request));
+        return CrashDatabase.Operation(OperationKind.Batch, request, id);
     }
 }

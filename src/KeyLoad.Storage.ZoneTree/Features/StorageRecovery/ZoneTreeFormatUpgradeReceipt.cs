@@ -46,11 +46,8 @@ internal static class ZoneTreeFormatUpgradeReceiptFile
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidReceipt);
         }
-        var receipt = NativeSerialization.Deserialize<ZoneTreeFormatUpgradeReceipt>(envelope.Payload);
-        if (receipt is null)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, InvalidReceipt);
-        }
+        var receipt = NativeSerialization.Deserialize<ZoneTreeFormatUpgradeReceipt>(envelope.Payload)
+            ?? throw Errors.Fail(ErrorCode.Corruption, InvalidReceipt);
         Validate(receipt);
         return receipt;
     }

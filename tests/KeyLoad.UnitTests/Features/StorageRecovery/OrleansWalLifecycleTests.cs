@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal sealed class OrleansWalLifecycleTests
 {
-    private const ulong CheckpointMagic = 0x33545043444C4BUL;
+    private const ulong CheckpointMagic = 0x34545043444C4BUL;
     private const int SigningKeyBytes = 32;
     private const long AppliedPosition = 7;
     private const string SnapshotFileName = "snapshot";
@@ -18,7 +18,7 @@ internal sealed class OrleansWalLifecycleTests
     private const string LastAppliedKey = "last-applied";
 
     [Test]
-    public async Task AcWal004CompactionKeepsCheckpointThreeAndIdentityFiveAfterBinaryWrites()
+    public async Task AcWal004CompactionKeepsCheckpointFourAndIdentitySixAfterBinaryWrites()
     {
         using var files = new WalFileFixture();
         StoreIdentity original;

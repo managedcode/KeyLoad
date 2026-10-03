@@ -48,6 +48,7 @@ internal sealed class OrleansWalUpgradeTests
     [Arguments(3)]
     [Arguments(4)]
     [Arguments(5)]
+    [Arguments(6)]
     public async Task AcWal003And004CompleteLegacyJsonJournalIsRefusedWithoutChangingAuthoritativeFiles(int version)
     {
         using var files = new WalFileFixture();
@@ -86,6 +87,7 @@ internal sealed class OrleansWalUpgradeTests
     [Arguments(3)]
     [Arguments(4)]
     [Arguments(5)]
+    [Arguments(6)]
     public async Task AcWal004LegacyJsonAfterVerifiedCheckpointRefusesUpgradeWithoutRewritingJournal(int version)
     {
         using var files = new WalFileFixture();
@@ -114,6 +116,7 @@ internal sealed class OrleansWalUpgradeTests
     [Arguments(3)]
     [Arguments(4)]
     [Arguments(5)]
+    [Arguments(6)]
     public async Task AcIs007OldIdentityRefusesReinterpretationAndCurrentCheckpointCorruptionStillFails(int version)
     {
         using var files = new WalFileFixture();
@@ -144,6 +147,8 @@ internal sealed class OrleansWalUpgradeTests
     [Arguments(4, false)]
     [Arguments(5, true)]
     [Arguments(5, false)]
+    [Arguments(6, true)]
+    [Arguments(6, false)]
     public async Task AcWal003And004FullLegacyHeaderWithMissingOrTornPayloadFailsWithoutTruncation(
         int version, bool missingPayload)
     {
@@ -164,7 +169,7 @@ internal sealed class OrleansWalUpgradeTests
 
     [Test]
     [Arguments(0)]
-    [Arguments(6)]
+    [Arguments(7)]
     public async Task AcWal004UnsupportedIdentityVersionFailsBeforeJournalMutation(int version)
     {
         using var files = new WalFileFixture();

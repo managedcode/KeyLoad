@@ -10,7 +10,7 @@ internal sealed class NativeStoreOpenPreflightTests
     private const int ChecksumOffset = 20;
     private const int IncompleteHeaderBytes = 7;
     private const int ChangedByte = 1;
-    private const int CurrentIdentityVersion = 5;
+    private const int CurrentIdentityVersion = 6;
     private const string MissingReceipt = "The native preflight inspector did not return a receipt.";
 
     [Test]

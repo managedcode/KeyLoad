@@ -133,7 +133,7 @@ internal static class EpochUpgradeRecoveryAssertions
             await AssertIdentityAsync(store.Identity, receipt);
         }
         EpochUpgradeFileInventory.AssertNativeHandlesReleased(target);
-        await EpochUpgradeFileInventory.AssertUnchangedAsync(target, targetInventory, cancellationToken);
+        await EpochUpgradeFileInventory.AssertAuthorityUnchangedAsync(target, targetInventory, cancellationToken);
     }
 
     private static void AssertCurrentTarget(ZoneTreeStore store, EpochPriorProbeReceipt receipt)

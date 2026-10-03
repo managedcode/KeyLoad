@@ -3,8 +3,12 @@
 ## Native data epoch and explicit offline copy upgrade
 
 [ADR-077](../ADR/ADR-077-offline-native-data-epoch.md) freezes KL-043's supported
-native5 -> separate native6 transition. Source implementation and qualification
-remain pending. This fulfills the downgrade obligation of ADR-073/075 without
+native5 -> separate native6 transition. Source is authored and root-reviewed;
+provider and RecoveryTests development Release builds passed with zero warnings
+and errors. The Aspire development process suite passed14/14 with no skipped
+cases; its original artifacts and executed binaries are bound in
+[development evidence](../implementation/epoch-upgrade-development-2026-10-03.json).
+Homogeneous Docker RF3 and exact-source Linux qualification remain open. This fulfills the downgrade obligation of ADR-073/075 without
 changing user model bytes, RF3 placement or native WAL acknowledgement ordering.
 
 |Requirement|Acceptance and required evidence|

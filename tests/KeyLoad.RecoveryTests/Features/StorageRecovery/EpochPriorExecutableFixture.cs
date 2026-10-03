@@ -33,7 +33,7 @@ internal static class EpochPriorExecutableFixture
         var executable = await EpochPriorExecutableArtifact.VerifyAsync(cancellationToken);
         var result = await EpochPriorExecutableProcess.RunAsync(executable,
             JsonSerializer.Serialize(request, EpochPriorSourceProbe.JsonOptions), cancellationToken);
-        var receipt = JsonSerializer.Deserialize<EpochPriorProbeReceipt>(result.Output, EpochPriorSourceProbe.JsonOptions)
+        var receipt = JsonSerializer.Deserialize<EpochPriorProbeReceipt?>(result.Output, EpochPriorSourceProbe.JsonOptions)
             ?? throw new InvalidDataException(InvalidReceipt);
         if (receipt.SourceRevision != EpochPriorSourceProbe.SourceRevision
             || result.ExitCode != (receipt.ErrorCode is null ? 0 : 1) || result.Error.Length != 0)

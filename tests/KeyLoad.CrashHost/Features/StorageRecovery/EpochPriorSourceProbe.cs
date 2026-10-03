@@ -18,6 +18,14 @@ internal static class EpochPriorSourceProbe
     private const string InvalidProbe = "The prior-executable probe input or data epoch is invalid.";
     internal static JsonSerializerOptions JsonOptions { get; } = new(JsonSerializerDefaults.Web);
 
+    internal static async Task RunAsync(string[] args)
+    {
+        if (!await TryRunAsync(args))
+        {
+            await CrashHostApplication.RunAsync(args);
+        }
+    }
+
     internal static async Task<bool> TryRunAsync(string[] args)
     {
         if (args.Length != 1 || args[0] != Mode)
@@ -63,6 +71,10 @@ internal static class EpochPriorSourceProbe
         {
             throw Errors.Fail(ErrorCode.Conflict, InvalidProbe);
         }
+        if (request.Operation == VerifySnapshotOperation)
+        {
+            return VerifySnapshot(request);
+        }
 
         using var store = new ZoneTreeStore(new(request.Directory));
         if (store.Identity.FormatVersion != ExpectedDataEpoch)
@@ -73,13 +85,18 @@ internal static class EpochPriorSourceProbe
         {
             EpochUpgradeFixture.Seed(store, request.Compacted);
         }
-        if (request.Operation == VerifySnapshotOperation)
-        {
-            _ = store.VerifySnapshot(request.Snapshot ?? throw Errors.Fail(ErrorCode.Validation, InvalidProbe));
-        }
         var applied = store.Read(view => NativeSerialization.Deserialize<long>(
             view.ReadOwnedValue(EpochUpgradeFixture.AppliedKey)!));
         return EpochPriorSourceReply.Succeeded(store.Identity, store.Position, applied);
+    }
+
+    private static EpochPriorSourceReply VerifySnapshot(EpochPriorSourceRequest request)
+    {
+        using var input = File.OpenRead(request.Snapshot ?? throw Errors.Fail(ErrorCode.Validation, InvalidProbe));
+        var snapshot = ZoneTreeCheckpointReader.Read(input, new ZoneTreeStoreOptions(request.Directory));
+        var identity = ZoneTreeIdentityFile.Read(Path.Combine(request.Directory,
+            ZoneTreePersistenceFormat.IdentityFileName));
+        return EpochPriorSourceReply.Succeeded(identity, snapshot.Position, snapshot.AppliedPosition);
     }
 
     private static bool KnownOperation(string operation)

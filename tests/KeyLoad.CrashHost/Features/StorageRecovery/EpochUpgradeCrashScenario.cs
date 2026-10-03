@@ -34,20 +34,26 @@ internal static class EpochUpgradeCrashScenario
                 "The offline-upgrade crash stage is unsupported.");
         }
 
-        var observed = 0;
+        var boundary = new EpochUpgradeCrashBoundary(requested);
         var options = new ZoneTreeStoreOptions(destinationDirectory)
         {
-            FaultObserver = (stage, _, _) => Observe(stage, requested, ref observed)
+            FaultObserver = (stage, _, _) => boundary.Observe(stage)
         };
         _ = ZoneTreeFormatUpgrade.Upgrade(sourceDirectory, options);
-        if (observed == 0)
+        if (!boundary.Observed)
         {
             throw new InvalidOperationException(UnexpectedStageMessage);
         }
         return Task.CompletedTask;
     }
+}
 
-    private static void Observe(CommitStage observedStage, CommitStage requestedStage, ref int observed)
+internal sealed class EpochUpgradeCrashBoundary(CommitStage requestedStage)
+{
+    private int observed;
+    internal bool Observed => Volatile.Read(ref observed) != 0;
+
+    internal void Observe(CommitStage observedStage)
     {
         if (observedStage != requestedStage)
         {

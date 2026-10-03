@@ -1,5 +1,3 @@
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
-
 namespace KeyLoad.Storage.ZoneTree;
 
 /// <summary>Copies one stopped native5 store into a separately published native6 store.</summary>
@@ -18,9 +16,9 @@ public static class ZoneTreeFormatUpgrade
         using var sourceLease = ZoneTreeFormatUpgradeSource.Open(paths.Source, destinationOptions);
         var receipt = CreateReceipt(paths, sourceLease);
         destinationOptions.FaultObserver?.Invoke(CommitStage.UpgradeSourceVerified, sourceLease.Position, 0);
-        if (FileSystemEntryExists(paths.Destination))
+        if (ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(paths.Destination, allowMissingFinal: true) is { } destinationAttributes)
         {
-            if (!Directory.Exists(paths.Destination))
+            if ((destinationAttributes & FileAttributes.Directory) == 0)
             {
                 throw Errors.Fail(ErrorCode.Conflict, ZoneTreePersistenceFormat.RestoreDestinationNotEmpty);
             }
@@ -34,7 +32,8 @@ public static class ZoneTreeFormatUpgrade
                 throw Errors.Fail(ErrorCode.Conflict, ZoneTreePersistenceFormat.RestoreDestinationNotEmpty);
             }
         }
-        if (FileSystemEntryExists(paths.Staging) && !Directory.Exists(paths.Staging))
+        if (ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(paths.Staging, allowMissingFinal: true) is { } stagingAttributes
+            && (stagingAttributes & FileAttributes.Directory) == 0)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradePathAmbiguous);
         }
@@ -63,8 +62,8 @@ public static class ZoneTreeFormatUpgrade
             throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradePathAmbiguous);
         }
         source.VerifyUnchanged();
-        return ZoneTreeFormatUpgradeBuilder.VerifyTarget(destination, source.Identity,
-            TargetOptions(options, destination, source.Identity));
+        return ZoneTreeFormatUpgradeBuilder.VerifyPublishedTarget(destination, source.Identity,
+            source.Position, TargetOptions(options, destination, source.Identity));
     }
 
     private static ZoneTreeFormatUpgradeReceipt CreateReceipt(UpgradePaths paths,
@@ -101,8 +100,15 @@ public static class ZoneTreeFormatUpgrade
         {
             throw Errors.Fail(ErrorCode.Validation, UpgradePathAmbiguous);
         }
-        if (FileSystemEntryExists(stagingPath))
+        _ = ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(sourcePath, allowMissingFinal: false);
+        _ = ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(destinationPath, allowMissingFinal: true);
+        var stagingAttributes = ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(stagingPath, allowMissingFinal: true);
+        if (stagingAttributes is { } attributes)
         {
+            if ((attributes & FileAttributes.Directory) == 0)
+            {
+                throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradePathAmbiguous);
+            }
             ZoneTreeFormatUpgradeStage.VerifyDirectory(stagingPath);
         }
         return new(sourcePath, destinationPath, stagingPath);
@@ -119,23 +125,6 @@ public static class ZoneTreeFormatUpgrade
         return relative == "." || !Path.IsPathRooted(relative)
             && relative != ".." && !relative.StartsWith(".." + Path.DirectorySeparatorChar, comparison)
             && !relative.StartsWith(".." + Path.AltDirectorySeparatorChar, comparison);
-    }
-
-    private static bool FileSystemEntryExists(string path)
-    {
-        try
-        {
-            _ = File.GetAttributes(path);
-            return true;
-        }
-        catch (FileNotFoundException)
-        {
-            return false;
-        }
-        catch (DirectoryNotFoundException)
-        {
-            return false;
-        }
     }
 
     private const string UpgradePathAmbiguous = "Offline format upgrade paths are not separate, empty and unambiguous directories.";

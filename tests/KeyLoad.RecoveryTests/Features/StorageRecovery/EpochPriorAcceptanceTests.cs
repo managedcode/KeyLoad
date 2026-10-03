@@ -1,4 +1,3 @@
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
@@ -27,7 +26,8 @@ internal sealed class EpochPriorAcceptanceTests
             await AssertInventoriesUnchangedAsync(source, sourceFiles, target, targetFiles, token);
             var stillReadable = await EpochPriorExecutableFixture.InspectAsync(source, token);
             await AssertSameOriginalIdentityAsync(stillReadable, original);
-            await AssertInventoriesUnchangedAsync(source, sourceFiles, target, targetFiles, token);
+            await EpochUpgradeFileInventory.AssertAuthorityUnchangedAsync(source, sourceFiles, token);
+            await EpochUpgradeFileInventory.AssertUnchangedAsync(target, targetFiles, token);
         }, TestContext.Current!.Execution.CancellationToken);
     }
 
@@ -56,7 +56,8 @@ internal sealed class EpochPriorAcceptanceTests
             await AssertInventoriesUnchangedAsync(source, sourceFiles, target, targetFiles, token);
             var stillReadable = await EpochPriorExecutableFixture.InspectAsync(source, token);
             await AssertSameOriginalIdentityAsync(stillReadable, original);
-            await AssertInventoriesUnchangedAsync(source, sourceFiles, target, targetFiles, token);
+            await EpochUpgradeFileInventory.AssertAuthorityUnchangedAsync(source, sourceFiles, token);
+            await EpochUpgradeFileInventory.AssertUnchangedAsync(target, targetFiles, token);
         }, TestContext.Current!.Execution.CancellationToken);
     }
 
@@ -69,7 +70,10 @@ internal sealed class EpochPriorAcceptanceTests
             _ = await EpochPriorExecutableFixture.CreateAsync(source, false, token);
             var sourceFiles = await EpochUpgradeFileInventory.CaptureAsync(source, token);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => new ZoneTreeStore(new(source)));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
+            {
+                using var unexpected = new ZoneTreeStore(new(source));
+            });
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.FormatUnsupported);
             await EpochUpgradeFileInventory.AssertUnchangedAsync(source, sourceFiles, token);
         }, TestContext.Current!.Execution.CancellationToken);

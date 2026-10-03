@@ -8149,6 +8149,126 @@
           "KL-043"
         ],
         "evidenceState": "accepted_contract_source_pending_runtime_unqualified"
+      },
+      {
+        "id": "REQ-FTS-001",
+        "feature": "docs/Features/Search/NativeFullTextProjection.md",
+        "sourceLine": 10,
+        "acceptanceIds": [
+          "AC-FTS-001"
+        ],
+        "requirementText": "REQ-FTS-001: selected actual native provider stays a derived index",
+        "acceptanceText": "AC-FTS-001: published/source-bound1.0.9 and native ZoneTree posting files are used; exact canonical identities/scores/ties and all RRF branch ranks agree on real-store Unicode/digit/short/repeated/missing-field/collision corpus",
+        "testOrReviewMapping": "real native NativeText TUnit/process/RF3 exact oracle; root original Linux artifacts",
+        "documentationTask": "TASK-FTS-CONTRACT",
+        "implementationTask": "TASK-FTS-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "evidenceState": "contract_frozen_runtime_unqualified"
+      },
+      {
+        "id": "REQ-FTS-002",
+        "feature": "docs/Features/Search/NativeFullTextProjection.md",
+        "sourceLine": 11,
+        "acceptanceIds": [
+          "AC-FTS-002"
+        ],
+        "requirementText": "REQ-FTS-002: scope, privacy and freshness remain canonical",
+        "acceptanceText": "AC-FTS-002: source cut/read-generation/incarnation/partition/principal/policy/schema/field mismatch cannot reuse a generation; mutation/delete/revocation/hidden-row tests preserve persisted checks and never leak unauthorized counts or payload",
+        "testOrReviewMapping": "real native NativeText TUnit/process/RF3 exact oracle; root original Linux artifacts",
+        "documentationTask": "TASK-FTS-CONTRACT",
+        "implementationTask": "TASK-FTS-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "evidenceState": "contract_frozen_runtime_unqualified"
+      },
+      {
+        "id": "REQ-FTS-003",
+        "feature": "docs/Features/Search/NativeFullTextProjection.md",
+        "sourceLine": 12,
+        "acceptanceIds": [
+          "AC-FTS-003"
+        ],
+        "requirementText": "REQ-FTS-003: lease, storage and work are bounded",
+        "acceptanceText": "AC-FTS-003: saturation, exact/excess posting/record/token/metadata/disk/file/deadline bounds and cancellation return exact failures without partial success; handles release and following request succeeds",
+        "testOrReviewMapping": "real native NativeText TUnit/process/RF3 exact oracle; root original Linux artifacts",
+        "documentationTask": "TASK-FTS-CONTRACT",
+        "implementationTask": "TASK-FTS-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "evidenceState": "contract_frozen_runtime_unqualified"
+      },
+      {
+        "id": "REQ-FTS-004",
+        "feature": "docs/Features/Search/NativeFullTextProjection.md",
+        "sourceLine": 13,
+        "acceptanceIds": [
+          "AC-FTS-004"
+        ],
+        "requirementText": "REQ-FTS-004: staged generations and restart cannot supply partial truth",
+        "acceptanceText": "AC-FTS-004: actual native write/publication interruption, malformed/unknown/link generation and reopen/rebuild tests preserve canonical bytes, recognize only owned cleanup and serve only a fully verified source cut",
+        "testOrReviewMapping": "real native NativeText TUnit/process/RF3 exact oracle; root original Linux artifacts",
+        "documentationTask": "TASK-FTS-CONTRACT",
+        "implementationTask": "TASK-FTS-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "evidenceState": "contract_frozen_runtime_unqualified"
+      },
+      {
+        "id": "REQ-FTS-005",
+        "feature": "docs/Features/Search/NativeFullTextProjection.md",
+        "sourceLine": 14,
+        "acceptanceIds": [
+          "AC-FTS-005"
+        ],
+        "requirementText": "REQ-FTS-005: physical owner and public RF3 joins are real",
+        "acceptanceText": "AC-FTS-005: node-local handles survive activation routing changes; Docker/Aspire RF3 SDK/official MCP text/hybrid results remain exact after restart/leader loss and current source rebuild",
+        "testOrReviewMapping": "real native NativeText TUnit/process/RF3 exact oracle; root original Linux artifacts",
+        "documentationTask": "TASK-FTS-CONTRACT",
+        "implementationTask": "TASK-FTS-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "evidenceState": "contract_frozen_runtime_unqualified"
+      },
+      {
+        "id": "REQ-FTS-006",
+        "feature": "docs/Features/Search/NativeFullTextProjection.md",
+        "sourceLine": 15,
+        "acceptanceIds": [
+          "AC-FTS-006"
+        ],
+        "requirementText": "REQ-FTS-006: measured qualification is honest",
+        "acceptanceText": "AC-FTS-006: exact-SHA Linux build/TUnit/process/RF3, native package signature and original provider artifacts pass; actual matched scale/resource measurements precede any acceleration claim",
+        "testOrReviewMapping": "real native NativeText TUnit/process/RF3 exact oracle; root original Linux artifacts",
+        "documentationTask": "TASK-FTS-CONTRACT",
+        "implementationTask": "TASK-FTS-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "evidenceState": "contract_frozen_runtime_unqualified"
       }
     ],
     "decisions": [
@@ -8158,7 +8278,8 @@
       "docs/ADR/ADR-074-aspire-owned-test-entry.md",
       "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md",
       "docs/ADR/ADR-076-current-cohort-publication.md",
-      "docs/ADR/ADR-077-offline-native-data-epoch.md"
+      "docs/ADR/ADR-077-offline-native-data-epoch.md",
+      "docs/ADR/ADR-078-native-full-text-projection.md"
     ],
     "taskGraph": [
       {
@@ -8561,7 +8682,7 @@
           "Docker_Aspire_RF3_SDK_official_MCP",
           "exact_source_Linux_CI_original_artifacts"
         ],
-        "state": "contract_frozen_source_pending",
+        "state": "source_reviewed_scoped_Release_build_passed_runtime_unqualified",
         "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification"
       },
       {
@@ -8606,7 +8727,7 @@
           "Docker_Aspire_RF3_SDK_official_MCP",
           "exact_source_Linux_CI_original_artifacts"
         ],
-        "state": "contract_frozen_source_pending",
+        "state": "source_authored_root_reviewed_integrated_build_and_runtime_pending",
         "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification"
       },
       {
@@ -8651,7 +8772,7 @@
           "Docker_Aspire_RF3_SDK_official_MCP",
           "exact_source_Linux_CI_original_artifacts"
         ],
-        "state": "contract_frozen_source_pending",
+        "state": "source_reviewed_Release_and_14_case_Aspire_local_process_gate_passed_Linux_RF3_pending",
         "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification"
       },
       {
@@ -8697,8 +8818,223 @@
           "Docker_Aspire_RF3_SDK_official_MCP",
           "exact_source_Linux_CI_original_artifacts"
         ],
-        "state": "contract_frozen_source_pending",
+        "state": "prior_binary_refusal_and_five_cut_process_development_evidence_passed_full_exact_source_Linux_RF3_pending",
         "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification"
+      },
+      {
+        "id": "TASK-FTS-QUERY",
+        "owner": "query_wave_luna",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "Query_SearchEngine_TextRanker_only",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-001",
+          "REQ-FTS-002",
+          "REQ-FTS-003",
+          "REQ-FTS-004",
+          "REQ-FTS-005",
+          "REQ-FTS-006"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-001",
+          "AC-FTS-002",
+          "AC-FTS-003",
+          "AC-FTS-004",
+          "AC-FTS-005",
+          "AC-FTS-006"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-CONTRACT",
+          "TASK-EPOCH-JOIN"
+        ],
+        "startCondition": "root_frozen_contract_and_disjoint_write_scope_after_epoch_source_repair",
+        "artifacts": [
+          "authorized_same_cut_native_candidate_join"
+        ],
+        "verification": [
+          "root_Release_build_formatter_governance",
+          "root_Aspire_TUnit",
+          "root_process_and_Docker_RF3_SDK_MCP",
+          "exact_source_Linux_original_artifacts"
+        ],
+        "state": "contract_frozen_source_pending",
+        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance"
+      },
+      {
+        "id": "TASK-FTS-NATIVE",
+        "owner": "lifecycle_wave_luna",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "Server_Features_Search_new_NativeText_prefixed_files_only",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-001",
+          "REQ-FTS-002",
+          "REQ-FTS-003",
+          "REQ-FTS-004",
+          "REQ-FTS-005",
+          "REQ-FTS-006"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-001",
+          "AC-FTS-002",
+          "AC-FTS-003",
+          "AC-FTS-004",
+          "AC-FTS-005",
+          "AC-FTS-006"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-CONTRACT",
+          "TASK-EPOCH-JOIN"
+        ],
+        "startCondition": "root_frozen_contract_and_disjoint_write_scope_after_epoch_source_repair",
+        "artifacts": [
+          "actual_native_projection_generation_receipts_bound_lifetime"
+        ],
+        "verification": [
+          "root_Release_build_formatter_governance",
+          "root_Aspire_TUnit",
+          "root_process_and_Docker_RF3_SDK_MCP",
+          "exact_source_Linux_original_artifacts"
+        ],
+        "state": "contract_frozen_source_pending",
+        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance"
+      },
+      {
+        "id": "TASK-FTS-TEST",
+        "owner": "cluster_wave_luna",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "UnitTests_Features_Search_new_NativeText_prefixed_files_only",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-001",
+          "REQ-FTS-002",
+          "REQ-FTS-003",
+          "REQ-FTS-004",
+          "REQ-FTS-005",
+          "REQ-FTS-006"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-001",
+          "AC-FTS-002",
+          "AC-FTS-003",
+          "AC-FTS-004",
+          "AC-FTS-005",
+          "AC-FTS-006"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-CONTRACT",
+          "TASK-EPOCH-JOIN"
+        ],
+        "startCondition": "root_frozen_contract_and_disjoint_write_scope_after_epoch_source_repair",
+        "artifacts": [
+          "real_store_native_parity_privacy_collision_resource_rebuild_tests"
+        ],
+        "verification": [
+          "root_Release_build_formatter_governance",
+          "root_Aspire_TUnit",
+          "root_process_and_Docker_RF3_SDK_MCP",
+          "exact_source_Linux_original_artifacts"
+        ],
+        "state": "source_authored_frozen_root_review_build_and_Aspire_runtime_pending",
+        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance"
+      },
+      {
+        "id": "TASK-FTS-JOIN",
+        "owner": "root_high_capability",
+        "modelTier": "high_capability_integration",
+        "permissions": "shared_protocol_dependency_physical_host_DI_runtime_docs_commits",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-001",
+          "REQ-FTS-002",
+          "REQ-FTS-003",
+          "REQ-FTS-004",
+          "REQ-FTS-005",
+          "REQ-FTS-006"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-001",
+          "AC-FTS-002",
+          "AC-FTS-003",
+          "AC-FTS-004",
+          "AC-FTS-005",
+          "AC-FTS-006"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-CONTRACT",
+          "TASK-EPOCH-JOIN"
+        ],
+        "startCondition": "root_frozen_contract_and_disjoint_write_scope_after_epoch_source_repair",
+        "artifacts": [
+          "reviewed_integrated_source",
+          "Aspire_TUnit_process_RF3_Linux_original_proof"
+        ],
+        "verification": [
+          "root_Release_build_formatter_governance",
+          "root_Aspire_TUnit",
+          "root_process_and_Docker_RF3_SDK_MCP",
+          "exact_source_Linux_original_artifacts"
+        ],
+        "state": "contract_frozen_source_pending",
+        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance"
+      },
+      {
+        "id": "TASK-FTS-RECOVERY",
+        "owner": "cluster_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "new_CrashHost_and_RecoveryTests_Features_Search_NativeText_files_only",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-003",
+          "REQ-FTS-004",
+          "REQ-FTS-005"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-003",
+          "AC-FTS-004",
+          "AC-FTS-005"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-NATIVE",
+          "TASK-FTS-CONTRACT"
+        ],
+        "startCondition": "root_frozen_real_process_cut_contract_and_shared_dispatch_join",
+        "artifacts": [
+          "actual_native_first_build_and_replacement_crash_rebuild_oracles"
+        ],
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "Aspire_TUnit_real_process",
+          "genuine_exact_source_Linux_original_artifacts"
+        ],
+        "state": "frozen_source_pending",
+        "joinCondition": "root_diff_review_full_resource_ownership_and_original_process_gates"
       }
     ],
     "qualificationRule": "Neither presence of source nor a local development result closes a full task. Preserve exact-source Linux fault/endurance and publication gates.",

@@ -19,6 +19,7 @@ internal static class ZoneTreeFormatUpgradeStage
 
     internal static void CreateOrReset(string path, ZoneTreeFormatUpgradeReceipt receipt)
     {
+        ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(path, allowMissingFinal: true);
         if (!Directory.Exists(path))
         {
             ZoneTreeStoreFiles.CreatePrivateDirectory(path);
@@ -39,12 +40,24 @@ internal static class ZoneTreeFormatUpgradeStage
 
     internal static void CopySources(ZoneTreeFormatUpgradeSource source, string stagePath)
     {
+        ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(source.Directory, allowMissingFinal: false);
+        VerifyDirectory(stagePath);
         var copyDirectory = Path.Combine(stagePath, SourceCopyDirectory);
         ZoneTreeStoreFiles.CreatePrivateDirectory(copyDirectory);
         CopyVerified(Path.Combine(source.Directory, ZoneTreePersistenceFormat.IdentityFileName),
             Path.Combine(copyDirectory, ZoneTreePersistenceFormat.IdentityFileName), source.IdentityDigest);
         CopyVerified(Path.Combine(source.Directory, ZoneTreePersistenceFormat.JournalFileName),
             Path.Combine(copyDirectory, ZoneTreePersistenceFormat.JournalFileName), source.JournalDigest);
+    }
+
+    internal static void VerifySourceCopies(string stagePath, ZoneTreeFormatUpgradeSource source)
+    {
+        VerifyDirectory(stagePath);
+        VerifyEntries(stagePath);
+        var copyDirectory = Path.Combine(stagePath, SourceCopyDirectory);
+        VerifyDirectory(copyDirectory);
+        VerifyDigest(Path.Combine(copyDirectory, ZoneTreePersistenceFormat.IdentityFileName), source.IdentityDigest);
+        VerifyDigest(Path.Combine(copyDirectory, ZoneTreePersistenceFormat.JournalFileName), source.JournalDigest);
     }
 
     internal static string SourceCopyPath(string stagePath, string fileName)
@@ -74,6 +87,8 @@ internal static class ZoneTreeFormatUpgradeStage
 
     internal static void Publish(string stagePath, string destinationPath)
     {
+        VerifyDirectory(stagePath);
+        ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(destinationPath, allowMissingFinal: true);
         if (Directory.Exists(destinationPath))
         {
             if (Directory.EnumerateFileSystemEntries(destinationPath).Any())
@@ -87,6 +102,7 @@ internal static class ZoneTreeFormatUpgradeStage
 
     internal static void VerifyDirectory(string path)
     {
+        ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(path, allowMissingFinal: false);
         var info = new DirectoryInfo(path);
         if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != 0)
         {
@@ -102,12 +118,26 @@ internal static class ZoneTreeFormatUpgradeStage
             ZoneTreePersistenceFormat.FileBufferBytes, FileOptions.WriteThrough);
         copy.Flush(true);
         copy.Position = 0;
-        var digest = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(copy));
+        var digest = Digest(copy);
         if (!string.Equals(digest, expectedDigest, StringComparison.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.BackupFileVerificationFailed);
         }
     }
+
+    private static void VerifyDigest(string path, string expectedDigest)
+    {
+        ZoneTreeFormatUpgradeReceiptFile.VerifyRegularFile(path);
+        using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None,
+            ZoneTreePersistenceFormat.FileBufferBytes, FileOptions.SequentialScan);
+        if (!string.Equals(Digest(file), expectedDigest, StringComparison.Ordinal))
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.BackupFileVerificationFailed);
+        }
+    }
+
+    internal static string Digest(FileStream file)
+        => Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(file));
 
     private static void VerifyEntries(string path)
     {

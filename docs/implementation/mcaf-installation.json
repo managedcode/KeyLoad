@@ -7,8 +7,8 @@
   "templateSha256": "421160c442f9c2fba52b12787995f18f524dfe09165b15b26a2c19d272b3e18c",
   "preservedRoot": {
     "path": "AGENTS.md",
-    "prefixBytes": 3456,
-    "sha256": "244195aa2f3fb8d372709ddaf161d9af467ec29c188cb1410fdf10cf1f6aee5f"
+    "prefixBytes": 3861,
+    "sha256": "f3c8b8e03c4e72943390dfaa52c979db47af74f68bba57a41c889ff51c2d7bb5"
   },
   "preservedLocal": [],
   "projects": [
@@ -208,6 +208,21 @@
         "path": "AGENTS.md",
         "prefixBytes": 3456,
         "sha256": "244195aa2f3fb8d372709ddaf161d9af467ec29c188cb1410fdf10cf1f6aee5f"
+      }
+    },
+    {
+      "date": "2026-10-03",
+      "authorization": "Explicit owner request: commit all current code now and commit after every completed stage.",
+      "scope": "One additive Git workflow bullet; independently reconstructed previous prefix matches its preserved digest. All prior rules remain mandatory.",
+      "previousPreservedRoot": {
+        "path": "AGENTS.md",
+        "prefixBytes": 3456,
+        "sha256": "244195aa2f3fb8d372709ddaf161d9af467ec29c188cb1410fdf10cf1f6aee5f"
+      },
+      "currentPreservedRoot": {
+        "path": "AGENTS.md",
+        "prefixBytes": 3861,
+        "sha256": "f3c8b8e03c4e72943390dfaa52c979db47af74f68bba57a41c889ff51c2d7bb5"
       }
     }
   ]

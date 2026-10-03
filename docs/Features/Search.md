@@ -9,7 +9,10 @@ Research is complete; provider selection is fixed, while integration and native
 performance qualification are pending.
 Freeze canonical-commit/index-generation freshness, tokenizer/hash/rank parity,
 nonpartial cancellation, authorization/read cuts, rebuild/rollback and resource
-bounds before implementation. The provider's query language does not replace SQL.
+bounds before implementation. The first native candidate-generation contract is
+now frozen in [ADR-078](../ADR/ADR-078-native-full-text-projection.md) and
+[NativeFullTextProjection](Search/NativeFullTextProjection.md); source and runtime
+qualification are pending. The provider's query language does not replace SQL.
 
 | Requirement | Acceptance | Mapping |
 |---|---|---|

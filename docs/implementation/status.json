@@ -891,8 +891,16 @@
   },
   "KL-029": {
     "title": "Text projection і rebuild",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/ADR/ADR-078-native-full-text-projection.md",
+      "docs/Features/Search/NativeFullTextProjection.md"
+    ],
+    "qualification": {
+      "source": "frozen_native_candidate_generation_contract_implementation_pending",
+      "runtimeQualified": false,
+      "remaining": "native source, exact oracle, process/RF3 and Linux original artifacts; no acceleration claim"
+    }
   },
   "KL-030": {
     "title": "ANN provider qualification",
@@ -1092,16 +1100,20 @@
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-077-offline-native-data-epoch.md",
-      "docs/Features/StorageRecovery.md"
+      "docs/Features/StorageRecovery.md",
+      "src/KeyLoad.Storage.ZoneTree/ZoneTreeFormatUpgrade.cs",
+      "scripts/Features/StorageRecovery/build-native5-probe.sh",
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochUpgradeProcessRecoveryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochPriorAcceptanceTests.cs"
     ],
     "decision": "docs/ADR/ADR-077-offline-native-data-epoch.md",
-    "sourceStage": "accepted_frozen_native5_to_separate_native6_contract_implementation_pending",
+    "sourceStage": "reviewed_native5_to_separate_native6_source_and_Aspire_14_case_local_process_recovery_passed",
     "runtimeQualified": false,
     "remaining": [
-      "explicit_preserving_offline_copy_upgrade_and_signed_epoch_fence",
-      "real_prior_executable_and_process_recovery_source",
-      "homogeneous_Aspire_RF3_and_exact_source_Linux_qualification"
-    ]
+      "homogeneous_Docker_Aspire_RF3_cold_upgrade_SDK_official_MCP",
+      "complete_exact_source_Linux_original_qualification"
+    ],
+    "developmentEvidence": "docs/implementation/epoch-upgrade-development-2026-10-03.json"
   },
   "KL-044": {
     "title": "Release gate і operational handbook",

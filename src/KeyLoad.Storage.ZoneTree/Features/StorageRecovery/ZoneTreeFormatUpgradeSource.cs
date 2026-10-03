@@ -28,6 +28,7 @@ internal sealed class ZoneTreeFormatUpgradeSource : IDisposable
 
     internal void VerifyUnchanged()
     {
+        ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(Directory, allowMissingFinal: false);
         var identityPath = Path.Combine(Directory, ZoneTreePersistenceFormat.IdentityFileName);
         var journalPath = Path.Combine(Directory, ZoneTreePersistenceFormat.JournalFileName);
         VerifyRegularFile(identityPath);
@@ -48,15 +49,17 @@ internal sealed class ZoneTreeFormatUpgradeSource : IDisposable
         VerifyDirectory(directory);
         var ownerPath = Path.Combine(directory, ZoneTreePersistenceFormat.OwnerLockFileName);
         VerifyRegularFile(ownerPath);
-        var ownership = new FileStream(ownerPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        FileStream? ownership = null;
         try
         {
-            return ReadLocked(directory, options, ownership);
+            ownership = new FileStream(ownerPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            var source = ReadLocked(directory, options, ownership);
+            ownership = null;
+            return source;
         }
-        catch
+        finally
         {
-            ownership.Dispose();
-            throw;
+            ownership?.Dispose();
         }
     }
 
@@ -73,7 +76,7 @@ internal sealed class ZoneTreeFormatUpgradeSource : IDisposable
         VerifyAuthority(identity, options);
         using var journal = new FileStream(journalPath, FileMode.Open, FileAccess.Read, FileShare.Read,
             ZoneTreePersistenceFormat.FileBufferBytes, FileOptions.SequentialScan);
-        var position = ZoneTreeFormatUpgradeJournal.ValidateSource(journal, options);
+        var position = ZoneTreeFormatUpgradeJournal.ValidateSource(journal, options, identity.Incarnation);
         journal.Position = 0;
         var journalDigest = Digest(journal);
         return new(directory, identity, Digest(identityBytes.Span), journalDigest, position, ownership);
@@ -95,6 +98,7 @@ internal sealed class ZoneTreeFormatUpgradeSource : IDisposable
 
     private static void VerifyDirectory(string directory)
     {
+        ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(directory, allowMissingFinal: false);
         var info = new DirectoryInfo(directory);
         if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != 0)
         {
@@ -113,10 +117,10 @@ internal sealed class ZoneTreeFormatUpgradeSource : IDisposable
 
 internal static class ZoneTreeFormatUpgradeJournal
 {
-    internal static long ValidateCurrent(FileStream journal, ZoneTreeStoreOptions options)
+    internal static long ValidateCurrent(FileStream journal, ZoneTreeStoreOptions options, Guid expectedIncarnation)
     {
         journal.Position = 0;
-        var position = ReadCurrentCheckpoint(journal, options);
+        var position = ReadCurrentCheckpoint(journal, options, expectedIncarnation);
         var header = new byte[ZoneTreePersistenceFormat.HeaderLength];
         while (journal.Position < journal.Length)
         {
@@ -130,10 +134,10 @@ internal static class ZoneTreeFormatUpgradeJournal
         return position;
     }
 
-    internal static long ValidateSource(FileStream journal, ZoneTreeStoreOptions options)
+    internal static long ValidateSource(FileStream journal, ZoneTreeStoreOptions options, Guid expectedIncarnation)
     {
         journal.Position = 0;
-        var position = ReadSourceCheckpoint(journal, options);
+        var position = ReadSourceCheckpoint(journal, options, expectedIncarnation);
         var header = new byte[ZoneTreePersistenceFormat.HeaderLength];
         while (journal.Position < journal.Length)
         {
@@ -150,7 +154,7 @@ internal static class ZoneTreeFormatUpgradeJournal
     internal static long ReplaySource(FileStream journal, ZoneTreeStoreOptions options, ZoneTreeStoreRuntime runtime)
     {
         journal.Position = 0;
-        var position = ReadSourceCheckpoint(journal, options, runtime.Apply);
+        var position = ReadSourceCheckpoint(journal, options, runtime.Apply, runtime.Identity.Incarnation);
         runtime.SetPosition(position);
         var header = new byte[ZoneTreePersistenceFormat.HeaderLength];
         while (journal.Position < journal.Length)
@@ -162,11 +166,11 @@ internal static class ZoneTreeFormatUpgradeJournal
         return position;
     }
 
-    private static long ReadSourceCheckpoint(FileStream journal, ZoneTreeStoreOptions options)
-        => ReadSourceCheckpoint(journal, options, static _ => { });
+    private static long ReadSourceCheckpoint(FileStream journal, ZoneTreeStoreOptions options, Guid expectedIncarnation)
+        => ReadSourceCheckpoint(journal, options, static _ => { }, expectedIncarnation);
 
     private static long ReadSourceCheckpoint(FileStream journal, ZoneTreeStoreOptions options,
-        Action<StorageMutation> apply)
+        Action<StorageMutation> apply, Guid expectedIncarnation)
     {
         if (journal.Length == 0)
         {
@@ -182,7 +186,8 @@ internal static class ZoneTreeFormatUpgradeJournal
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(magicBytes);
         if (magic == ZoneTreePersistenceFormat.SourceCheckpointMagic)
         {
-            return ZoneTreeCheckpointReader.ReadNative3ForUpgrade(journal, options, apply).Position;
+            return ZoneTreeCheckpointReader.ReadNative3ForUpgrade(journal, options, apply,
+                expectedIncarnation).Position;
         }
         if (magic == ZoneTreePersistenceFormat.JournalMagic)
         {
@@ -191,7 +196,8 @@ internal static class ZoneTreeFormatUpgradeJournal
         throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.JournalFormatUpgradeRequired);
     }
 
-    private static long ReadCurrentCheckpoint(FileStream journal, ZoneTreeStoreOptions options)
+    private static long ReadCurrentCheckpoint(FileStream journal, ZoneTreeStoreOptions options,
+        Guid expectedIncarnation)
     {
         if (journal.Length == 0)
         {
@@ -207,7 +213,12 @@ internal static class ZoneTreeFormatUpgradeJournal
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(magicBytes);
         if (magic == ZoneTreePersistenceFormat.CheckpointMagic)
         {
-            return ZoneTreeCheckpointReader.Read(journal, options, static _ => { }).Position;
+            var checkpoint = ZoneTreeCheckpointReader.Read(journal, options, static _ => { });
+            if (checkpoint.Incarnation != expectedIncarnation)
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, ZoneTreePersistenceFormat.SnapshotScopeInvalid);
+            }
+            return checkpoint.Position;
         }
         if (magic == ZoneTreePersistenceFormat.JournalMagic)
         {
@@ -231,7 +242,7 @@ internal static class ZoneTreeFormatUpgradeJournal
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.JournalChecksumInvalid);
         }
-        _ = ZoneTreeJournalCodec.Deserialize(payload);
+        ValidateAppliedPosition(ZoneTreeJournalCodec.Deserialize(payload));
         return frame.Sequence;
     }
 
@@ -250,11 +261,43 @@ internal static class ZoneTreeFormatUpgradeJournal
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.JournalChecksumInvalid);
         }
-        foreach (var mutation in ZoneTreeJournalCodec.Deserialize(payload))
+        var mutations = ZoneTreeJournalCodec.Deserialize(payload);
+        ValidateAppliedPosition(mutations);
+        foreach (var mutation in mutations)
         {
             runtime.Apply(mutation);
         }
         return frame.Sequence;
+    }
+
+    private static void ValidateAppliedPosition(StorageMutation[] mutations)
+    {
+        var appliedKey = KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
+            ZoneTreePersistenceFormat.LastAppliedKey);
+        foreach (var mutation in mutations)
+        {
+            if (!mutation.Key.Span.SequenceEqual(appliedKey))
+            {
+                continue;
+            }
+            if (mutation.Value is not { } value)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ZoneTreeJournalCodec.JournalRecordsInvalid);
+            }
+            long applied;
+            try
+            {
+                applied = NativeSerialization.Deserialize<long>(value.Span);
+            }
+            catch (Exception error) when (ZoneTreeJournalCodec.IsMalformedPayload(error))
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ZoneTreeJournalCodec.JournalPayloadInvalid);
+            }
+            if (applied < 0)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ZoneTreeJournalCodec.JournalRecordsInvalid);
+            }
+        }
     }
 
     internal static (int Length, long Sequence) ReadHeader(byte[] header, long position, int maxFrameBytes)

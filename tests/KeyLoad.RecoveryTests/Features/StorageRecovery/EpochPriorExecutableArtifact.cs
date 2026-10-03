@@ -30,7 +30,7 @@ internal static class EpochPriorExecutableArtifact
             throw new InvalidDataException(InvalidArtifact);
         }
         using var document = JsonDocument.Parse(await File.ReadAllBytesAsync(path, cancellationToken));
-        var receipt = document.RootElement.Deserialize<EpochPriorArtifactReceipt>(EpochPriorSourceProbe.JsonOptions)
+        var receipt = document.RootElement.Deserialize<EpochPriorArtifactReceipt?>(EpochPriorSourceProbe.JsonOptions)
             ?? throw new InvalidDataException(InvalidArtifact);
         if (receipt.SchemaVersion != 1 || receipt.SourceRevision != EpochPriorSourceProbe.SourceRevision
             || receipt.DataEpoch != 5 || receipt.JournalVersion != 4 || receipt.CheckpointVersion != 3
@@ -105,7 +105,7 @@ internal static class EpochPriorExecutableArtifact
     }
 }
 
-internal sealed record EpochPriorArtifactReceipt(int SchemaVersion, string SourceRevision, int DataEpoch,
+internal readonly record struct EpochPriorArtifactReceipt(int SchemaVersion, string SourceRevision, int DataEpoch,
     int JournalVersion, int CheckpointVersion, EpochPriorArtifactFile[] DriverSources, EpochPriorArtifactFile[] Files);
 
-internal sealed record EpochPriorArtifactFile(string Path, long Bytes, string Sha256);
+internal readonly record struct EpochPriorArtifactFile(string Path, long Bytes, string Sha256);

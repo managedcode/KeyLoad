@@ -31,7 +31,22 @@ internal static class EpochUpgradeFileInventory
         await Assert.That(actual.Keys).IsEquivalentTo(expected.Keys);
         foreach (var file in expected)
         {
-            await Assert.That(actual[file.Key]).IsEqualTo(file.Value);
+            await Assert.That(actual[file.Key]).IsEqualTo(file.Value).Because(file.Key);
+        }
+    }
+
+    internal static async Task AssertAuthorityUnchangedAsync(string directory,
+        Dictionary<string, string> expected, CancellationToken cancellationToken)
+    {
+        var actual = await CaptureAsync(directory, cancellationToken);
+        var expectedAuthority = expected.Where(file => !file.Key.Contains(Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            .ToDictionary(StringComparer.Ordinal);
+        var actualAuthority = actual.Where(file => !file.Key.Contains(Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            .ToDictionary(StringComparer.Ordinal);
+        await Assert.That(actualAuthority.Keys).IsEquivalentTo(expectedAuthority.Keys);
+        foreach (var file in expectedAuthority)
+        {
+            await Assert.That(actualAuthority[file.Key]).IsEqualTo(file.Value).Because(file.Key);
         }
     }
 

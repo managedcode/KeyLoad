@@ -113,7 +113,7 @@ internal sealed class NativeMetadataFormatTests
             IdentityDefect.PayloadTrailing => EncodeEnvelope([.. NativeSerialization.Serialize(identity), TrailingByte]),
             IdentityDefect.FileTrailing => [.. original, TrailingByte],
             IdentityDefect.Truncated => original[..^MetadataTestContract.OneByte],
-            IdentityDefect.UnsupportedVersion => EncodeIdentity(identity with { FormatVersion = ZoneTreePersistenceFormat.BinaryJournalIdentityVersion + MetadataTestContract.OneByte }),
+            IdentityDefect.UnsupportedVersion => EncodeIdentity(identity with { FormatVersion = ZoneTreePersistenceFormat.CurrentDataEpoch + MetadataTestContract.OneByte }),
             IdentityDefect.UnsupportedCodec => EncodeIdentity(identity with { KeyCodecVersion = KeyCodec.Version + MetadataTestContract.OneByte }),
             _ => throw new ArgumentOutOfRangeException(nameof(defect))
         };

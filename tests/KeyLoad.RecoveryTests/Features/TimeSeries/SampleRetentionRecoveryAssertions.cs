@@ -1,7 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Security;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
@@ -18,7 +17,7 @@ internal static class SampleRetentionRecoveryAssertions
         var database = new DatabaseEngine(store, new AuthorizationPolicy());
         var operation = NativeSerialization.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
             Path.Combine(root, SampleRetentionCrashScenario.OperationFile), cancellationToken));
-        var recoveredStatus = database.ReadSampleRetention(Principal, RetentionRequest());
+        var recoveredStatus = database.ReadSampleRetention(Principal, RetentionRequest(), cancellationToken);
         var committed = recoveredStatus.Before == SampleRetentionCrashScenario.Cutoff;
         if (stage >= CommitStage.JournalFlushed)
         {
@@ -36,7 +35,7 @@ internal static class SampleRetentionRecoveryAssertions
     }
 
     private static async Task ReplayFirstPageAsync(DatabaseEngine database, ZoneTreeStore store, string root,
-        ReplicatedOperation operation, OperationOutcome? oldOutcome, CancellationToken cancellationToken)
+        ReplicatedOperation operation, OperationResult? oldOutcome, CancellationToken cancellationToken)
     {
         var first = database.Apply(operation).Get<CommitReceipt>();
         await Assert.That(first.Mutations).HasSingleItem();
@@ -48,7 +47,7 @@ internal static class SampleRetentionRecoveryAssertions
                 .SequenceEqual(JsonDefaults.Serialize(first))).IsTrue();
         }
         var afterFirstReplay = store.Position;
-        var firstStatus = database.ReadSampleRetention(Principal, RetentionRequest());
+        var firstStatus = database.ReadSampleRetention(Principal, RetentionRequest(), cancellationToken);
         await Assert.That(firstStatus).IsEqualTo(new(SampleRetentionCrashScenario.Cutoff,
             SampleRetentionCrashScenario.FirstPageDeletes, true));
         var firstPageAgain = database.Apply(operation).Get<CommitReceipt>();
@@ -64,12 +63,13 @@ internal static class SampleRetentionRecoveryAssertions
     {
         var nextId = Guid.Parse("76d20dd7-5b66-4de4-9e63-ed09f0d19930");
         var next = new ReplicatedOperation(nextId, OperationKind.Batch, Principal,
-            operation.EvaluatedAt, JsonDefaults.Serialize(new CommandRequest(nextId,
+            operation.EvaluatedAt, System.Text.Json.JsonSerializer.Serialize(new CommandRequest(nextId,
                 SampleRetentionCrashScenario.Partition,
                 [new ExpireSamples(SampleRetentionCrashScenario.SeriesSet, SampleRetentionCrashScenario.SeriesId,
-                    SampleRetentionCrashScenario.Cutoff, SampleRetentionCrashScenario.RepeatPageDeletes)])));
+                    SampleRetentionCrashScenario.Cutoff, SampleRetentionCrashScenario.RepeatPageDeletes)]),
+                JsonDefaults.Options));
         _ = database.Apply(next).Get<CommitReceipt>();
-        var complete = database.ReadSampleRetention(Principal, RetentionRequest());
+        var complete = database.ReadSampleRetention(Principal, RetentionRequest(), cancellationToken);
         await Assert.That(complete).IsEqualTo(new(SampleRetentionCrashScenario.Cutoff,
             SampleRetentionCrashScenario.SampleCount - 1, false));
         await VerifyPersistedBytesAsync(store, root, committed: true, cancellationToken: cancellationToken,
