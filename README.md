@@ -22,6 +22,8 @@ The historical joined [exact c10c CI](docs/implementation/runtime-qualification-
 
 The current source stage adds common immutable server/runner images, isolated native one/two/three-node CRUD and specialized comparisons, bounded cluster-failure diagnostics and KeyLoad stream readback regressions. Its delivered-SHA GitHub qualification is pending. TimeSeries 10.0.3 removes summer-update allocations for Int32/Int64/Double in its repeated library profiles; complete KeyLoad and Timescale measurements, measured SIMD benefit and Orleans-coordinated RAM caches remain open. Rust requires profiling evidence first.
 
+The later [b474 native source run](docs/implementation/runtime-qualification-37087909605.json) consumes TimeSeries 10.0.3 and passes the full build/format/governance gates, 1407 normal and 1407 scalar unit cases, 138 recovery, 118 analyzer and 63 RF3 cases. Its isolated preflights finish17/27 successful;10 fail, so the complete run and intensive cohort remain unqualified. Current source adds the staged [shared RAM budget, embedded point cache, finite local permit and opened-store binding](docs/ADR/ADR-058-orleans-coordinated-cache-memory.md), outside that measured SHA. Cache correctness, authenticated Orleans leases and matched performance measurements require later qualification; RF3 cache admission remains disabled in this stage. The [earlier cf630 receipt](docs/implementation/runtime-qualification-37084177131.json) remains historical evidence.
+
 The [104-task implementation tracker](docs/implementation/status.json) records the remaining work. Automatic canonical journal maintenance, large and interrupted snapshot transfer qualification, shard movement, distributed multi-shard query planning, managed HNSW, subscription coverage discovery across partitions and rebalance, automatic retention and generation cleanup, schema migrations, external backup stores and full release qualification remain under development. The current server uses one replicated physical shard which contains many independent atomic partitions.
 
 The advertised profiles are `ProcessDurable` for embedded storage and `QuorumProcessDurable` for the cluster. The kernel has process-kill recovery tests and the cluster has real leader-loss and minority tests. Power-loss qualification, broader platform qualification and the 72-hour endurance gate are still required before advertising `LocalDurable`, `QuorumDurable` or production readiness.
@@ -282,6 +284,7 @@ unsupported Community topology has an explicit reason and no measurement.
 Source integration is in progress. No new intensive cohort or performance claim
 is qualified yet; production default remains RF3.
 
+
 The isolated publication path now requires the complete270-worker cohort and
 277 original files, keeps its measured SHA separate from website/control and
 historical measurements, and rechecks both evidence identities before Pages.
@@ -296,3 +299,5 @@ No new intensive performance or live publication result is claimed.
 
 
 The latest isolated Linux baseline ([run37087909605](https://github.com/managedcode/KeyLoad/actions/runs/37087909605), source `b47409e`) passes source, unit, recovery and RF3 gates. Ten of27 native1/2/3 preflights fail, so the complete270-cell cohort and new performance publication remain blocked. Read/control admission, native diagnostics, document oracle and pinned gossip identity repairs are awaiting exact-source GitHub qualification; the separate intensive TimeSeries corpus/oracle source does not yet implement its native runner/adapters.
+
+The bounded RAM pool, explicit embedded point cache and local coordinated binding pass the complete development build, formatter and static governance checks in the [R79 source receipt](docs/implementation/cache-memory-source-r79.json). Genuine ZoneTree test source covers expiry, pressure, pinned readers, safe callback-disposal rejection and same-directory reopen. Exact delivered-SHA GitHub execution, signed Orleans RF3 controls, coverage and measured benefit remain pending; server RF3 caches are disabled.

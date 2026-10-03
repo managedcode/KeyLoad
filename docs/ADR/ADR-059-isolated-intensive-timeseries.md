@@ -371,3 +371,110 @@ format, exact-SHA full normal/scalar GitHub suites, later actual all30 native
 responses. No local tests/runtime/benchmarks/Git or invented allocation/speed
 result. Additive source rollback removes this coherent owned unit; no persistence
 migration. ADR remains Accepted; source and native gates stay distinct.
+
+
+## TASK-ISO-TS007B accepted compact runner implementation contract
+
+Root accepts the completed read-only TS007R proposal for REQ-BC-060/062 and
+AC-TSI-002/004/005/008. This is a bounded internal source stage; real SDK/Npgsql
+adapters, native resources, family wire/host/workflow/site remain separate tasks.
+The genuine source baseline is2f374fc34/run37093197474: full Release/format/
+governance, normal/scalar units and63/63 RF3 currently pass; original recovery
+counts and native preflights are still pending. Source success cannot unblock
+missing native qualifications. Existing270/legacy interfaces and bytes stay fixed.
+
+The exact internal ITimeSeriesIntensiveTarget signatures are the DTO-returning
+TS006 interface above, with InitializeAsync(CancellationToken),
+SeedAsync(string seriesId, ImmutableArray<SampleData> samples, string tagsJson,
+CancellationToken), AppendAsync(string seriesId, Guid commandId, SampleData,
+string tagsJson, CancellationToken), ReadAsync(string seriesId, DateTimeOffset
+from, DateTimeOffset until, int limit, CancellationToken), LatestAsync(string
+seriesId, DateTimeOffset? atOrBefore, CancellationToken), AggregateAsync(string
+seriesId, DateTimeOffset from, DateTimeOffset? untilExclusive, int maxSamples,
+CancellationToken), WindowsAsync(string seriesId, DateTimeOffset from,
+DateTimeOffset? untilExclusive, TimeSpan width, int maxSamples, int maxWindows,
+CancellationToken). Return types remain Task, Task, Task<AppendReceipt>,
+Task<ImmutableArray<SampleRecord>>, Task<SampleRecord?>, Task<SampleAggregate>,
+Task<ImmutableArray<SampleAggregateWindow>> respectively. One real target binds
+one private namespace/set/topology, supports16 concurrent calls, and implements
+IAsyncDisposable. The runner borrows it; the host calls disposal and owns resources.
+Runner.RunAsync(target, closed Scenario, string runId, CancellationToken
+cellCancellation) returns Task<TimeSeriesIntensiveRunResult>. Scenario values are
+Append, RawRangeRead, Latest, Aggregate, Windows. Reject unknown selection before
+allocation. No fallback, delegate transport, Supports or legacy runner changes.
+
+Prepare one cell-local Expectations before timing:224 raw arrays/aggregates/window
+arrays and256 latest values/cuts. Reuse exact pure oracles and separate range/latest
+moduli. Prepare10000 append samples and one phase's command GUIDs outside clocks.
+Initialize and seed16 sequential256-sample batches; verify all predetermined seed
+readbacks plus whole-series aggregate/count. Each append phase starts with verified
+empty raw/latest/count and uses its fresh warm-rN/measured-rN series. Other scenarios
+read the same seed. Every phase releases exactly16 loops from one common start gate;
+worker w owns indices w,w+16,... (625 measured or16 warmup calls each). No task per
+attempt or detached verifier. A phase ledger publishes each completed compact value
+once, directly to its unique index; duplicate/missing publication fails.
+
+Retain one fixed50000 value-type attempt array; warmup uses a separate256-slot
+phase ledger, verifies readbacks and discards it before measured timing. Attempt
+fields are repetition/index/worker, monotonic latency and validation tick deltas,
+closed outcome, nullable actual count, four-ulong32-byte digest, observed append
+sequence and fixed failure value. No per-attempt retained response/hex/error/case
+string. Temporary existing digest hex is consumed immediately; hex projection is
+untimed/root-owned. Outcomes: NotStarted, Succeeded, TargetFailure, TransportFailure,
+DeadlineExceeded, Cancelled, ValidationFailure, UnexpectedFailure. Fixed origin
+values distinguish None, KeyLoad, PostgreSQL, HttpTransport, Client, Oracle,
+Unexpected; optional ErrorCode/HTTP status are observed values only. Pack an actual
+five-character ASCII0..9/A..Z SQLSTATE into a ulong; reject malformed codes instead
+of guessing. Known exceptions map actual KeyLoadException.Code/StatusCode,
+PostgresException.SqlState, HttpRequestException.StatusCode, native transport and
+ComparisonFailureException facts. Generic failure stays unknown. No exception
+message, credentials, SQL text or fabricated native code enters these records.
+
+Directly await each original target Task under linked30-second cancellation.
+Cancellation completion must include transport drain/decode/response release in
+the real adapter. No WaitAsync-only timeout, detached client task or replacement
+while an old response remains live. If deadline/cell cancellation was signalled
+before observed completion, a late success cannot be recorded as Succeeded. Stop
+starting calls after cell cancellation and observe all original loops. The host's
+90-minute lifetime includes readiness and is never restarted by the runner; real
+adapters/owned resource teardown must resolve stalled transport. Independent
+30-second teardown and primary-error preservation remain host obligations.
+
+Stop latency after actual complete decode/receipt or observed failure, then do
+synchronous full verification/digest. Raw/latest use combined validated digest;
+aggregate/windows preserve full finite numeric/boundary checks and actual bits.
+Append validates real command identity, positive in-phase sequence bound and
+Interlocked atomic sequence uniqueness. Complete successful phases prove the
+1..N bijection; incomplete phases are unpublishable. ReceiptView reconstructs
+already validated command identity and observed sequence for the existing
+untimed readback oracle, without retaining receipt objects. Each attempt helper
+returns only its compact value and releases the complete response graph before
+the worker's next call. Maximum16 live decoded responses remains mandatory.
+
+Ordinary measured errors retain actual latency and allow remaining planned calls
+without retry; setup/warmup/cell cancellation leaves explicit NotStarted slots
+without invented latency. Stop repetition wall only after every loop's verification
+and compact publication; useful throughput includes that validation/backpressure.
+Nearest-rank percentiles include all actual attempted latencies per repetition,
+five-repetition medians use sorted index2. Preserve accumulated concurrent validation
+time separately; incomplete/error repetitions cannot produce publishable success.
+Final append readbacks and whole-series count remain mandatory and untimed; native
+copy/image/process/resource/public-negative proof belongs to the host/adapters.
+
+Execution owner publisher_archive_review writes only NEW TimeSeriesIntensive*
+TargetContracts/Scenario/Attempt/Failure/Hash/Expectations/RunResult/Runner/
+PhaseExecutor/AttemptExecutor/AttemptLedger/Summary/AppendValidation/ReceiptView
+files and cohesive prefixed helpers under the current Comparisons Intensive slice,
+and NEW matching UnitTests/Intensive tests. All existing files/shared interfaces/
+resources/Git/config/docs are root-owned and forbidden in this worker. Tests first
+independently derive every16-worker index partition, expectation preparation,
+ledger completeness/default/duplicate rejection, sequence bijection, fixed
+hash/SQLSTATE encoding and failed-latency/nearest-rank/five-summary statistics.
+Algorithm input values are allowed; fake targets/injected clocks/runtime/local
+tests are prohibited. Genuine concurrency/lifetime/deadline/drain/readback/wall
+proof is explicitly deferred to real native SDK/Npgsql tests, not claimed by
+these pure cases. Escalate undefined framing/public DTO/upstream defects/overlap
+or scope changes. Root reviews all diffs and joins full solution source checks,
+exact-SHA normal/scalar/recovery/RF3, later6 preflights/all30/native coverage.
+Rollback removes only this additive coherent source unit; no persistence migration.
+ADR remains Accepted until the complete implementation/evidence chain passes.

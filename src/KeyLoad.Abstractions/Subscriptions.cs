@@ -17,13 +17,17 @@ public enum EventSourceKind
 /// <param name="Kind">The type of event source.</param>
 /// <param name="StreamId">The stream identifier when the source is a stream.</param>
 /// <param name="Generation">The source generation used to detect replacement.</param>
-public sealed record EventSourceRef(PartitionRef Partition, string Resource, EventSourceKind Kind, string? StreamId = null, long Generation = 1);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.EventSourceRef)]
+public sealed record EventSourceRef([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Resource, [property: Orleans.Id(2)] EventSourceKind Kind, [property: Orleans.Id(3)] string? StreamId = null, [property: Orleans.Id(4)] long Generation = 1);
 
 /// <summary>Reports the retained range and current tail of an event source.</summary>
 /// <param name="TailPosition">The latest position assigned by the source.</param>
 /// <param name="FirstAvailablePosition">The earliest position still available for reading.</param>
 /// <param name="Generation">The current source generation.</param>
-public sealed record EventSourceHead(long TailPosition, long FirstAvailablePosition, long Generation);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.EventSourceHead)]
+public sealed record EventSourceHead([property: Orleans.Id(0)] long TailPosition, [property: Orleans.Id(1)] long FirstAvailablePosition, [property: Orleans.Id(2)] long Generation);
 
 /// <summary>Represents one recorded event from a topic or stream.</summary>
 /// <param name="Source">The event source that recorded the event.</param>
@@ -31,14 +35,18 @@ public sealed record EventSourceHead(long TailPosition, long FirstAvailablePosit
 /// <param name="EventSequence">The sequence number within the source transaction.</param>
 /// <param name="Data">The event payload and metadata.</param>
 /// <param name="RecordedAt">The time at which the event was recorded.</param>
-public sealed record SourceEventRecord(EventSourceRef Source, long Position, long EventSequence, EventData Data, DateTimeOffset RecordedAt);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SourceEventRecord)]
+public sealed record SourceEventRecord([property: Orleans.Id(0)] EventSourceRef Source, [property: Orleans.Id(1)] long Position, [property: Orleans.Id(2)] long EventSequence, [property: Orleans.Id(3)] EventData Data, [property: Orleans.Id(4)] DateTimeOffset RecordedAt);
 
 /// <summary>Describes a bounded read from an event source.</summary>
 /// <param name="Source">The source to read.</param>
 /// <param name="AfterPosition">The exclusive source position from which to continue.</param>
 /// <param name="Limit">The maximum number of events to return.</param>
 /// <param name="Cursor">The continuation cursor for a prior page, if any.</param>
-public sealed record ReadEventSourceRequest(EventSourceRef Source, long AfterPosition = 0, int Limit = 100, string? Cursor = null);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ReadEventSourceRequest)]
+public sealed record ReadEventSourceRequest([property: Orleans.Id(0)] EventSourceRef Source, [property: Orleans.Id(1)] long AfterPosition = 0, [property: Orleans.Id(2)] int Limit = 100, [property: Orleans.Id(3)] string? Cursor = null);
 
 /// <summary>Contains a page of events and source continuation metadata.</summary>
 /// <param name="Source">The source that was read.</param>
@@ -47,15 +55,21 @@ public sealed record ReadEventSourceRequest(EventSourceRef Source, long AfterPos
 /// <param name="Cursor">The continuation cursor.</param>
 /// <param name="CutPosition">The committed position at which this page was read.</param>
 /// <param name="HasMore">Whether additional events are available.</param>
-public sealed record EventSourcePage(EventSourceRef Source, EventSourceHead Head, ImmutableArray<SourceEventRecord> Events, string Cursor,
-    long CutPosition, bool HasMore);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.EventSourcePage)]
+public sealed record EventSourcePage([property: Orleans.Id(0)] EventSourceRef Source, [property: Orleans.Id(1)] EventSourceHead Head, [property: Orleans.Id(2)] ImmutableArray<SourceEventRecord> Events, [property: Orleans.Id(3)] string Cursor,
+    [property: Orleans.Id(4)] long CutPosition, [property: Orleans.Id(5)] bool HasMore);
 
 /// <summary>Configures event retention bounds.</summary>
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.EventRetentionPolicy)]
 public sealed record EventRetentionPolicy
 {
     /// <summary>Gets or sets the maximum number of retained events.</summary>
+    [Orleans.Id(0)]
     public long MaxEvents { get; init; } = 100_000;
     /// <summary>Gets or sets the maximum number of retained event bytes.</summary>
+    [Orleans.Id(1)]
     public long MaxBytes { get; init; } = 1_073_741_824;
 }
 
@@ -63,12 +77,16 @@ public sealed record EventRetentionPolicy
 /// <param name="Topic">The topic name.</param>
 /// <param name="Events">The events to publish.</param>
 /// <param name="Generation">The topic generation expected by the operation.</param>
-public sealed record PublishTopic(string Topic, ImmutableArray<EventData> Events, long Generation = 1) : Mutation(Topic);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.PublishTopic)]
+public sealed record PublishTopic([property: Orleans.Id(0)] string Topic, [property: Orleans.Id(1)] ImmutableArray<EventData> Events, [property: Orleans.Id(2)] long Generation = 1) : Mutation(Topic);
 
 /// <summary>Identifies one subscription group on an event source.</summary>
 /// <param name="Source">The subscribed event source.</param>
 /// <param name="GroupId">The subscription group identifier.</param>
-public sealed record SubscriptionRef(EventSourceRef Source, string GroupId);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SubscriptionRef)]
+public sealed record SubscriptionRef([property: Orleans.Id(0)] EventSourceRef Source, [property: Orleans.Id(1)] string GroupId);
 
 /// <summary>Defines the starting point used when configuring or seeking a subscription.</summary>
 public enum SubscriptionStart
@@ -82,27 +100,38 @@ public enum SubscriptionStart
 }
 
 /// <summary>Configures retry and lease behavior for a subscription.</summary>
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SubscriptionPolicy)]
 public sealed record SubscriptionPolicy
 {
     /// <summary>Gets or sets the maximum number of outstanding deliveries.</summary>
+    [Orleans.Id(0)]
     public int MaxWindow { get; init; } = 1_024;
     /// <summary>Gets or sets the maximum lease duration in seconds.</summary>
+    [Orleans.Id(1)]
     public int MaxLeaseSeconds { get; init; } = 300;
     /// <summary>Gets or sets the maximum delivery attempts.</summary>
+    [Orleans.Id(2)]
     public int MaxAttempts { get; init; } = 5;
     /// <summary>Gets or sets the base delay between retries in milliseconds.</summary>
+    [Orleans.Id(3)]
     public int RetryBaseMilliseconds { get; init; } = 1_000;
     /// <summary>Gets or sets the maximum delay between retries in milliseconds.</summary>
+    [Orleans.Id(4)]
     public int RetryMaxMilliseconds { get; init; } = 300_000;
 }
 
 /// <summary>Defines the principal and event-type filter for a subscription.</summary>
 /// <param name="DataPrincipalId">The data principal whose scope owns the subscription.</param>
-public sealed record SubscriptionDefinition(string DataPrincipalId)
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SubscriptionDefinition)]
+public sealed record SubscriptionDefinition([property: Orleans.Id(0)] string DataPrincipalId)
 {
     /// <summary>Gets or initializes the subscription retry and lease policy.</summary>
+    [Orleans.Id(1)]
     public SubscriptionPolicy Policy { get; init; } = new();
     /// <summary>Gets or initializes the event type names accepted by the subscription.</summary>
+    [Orleans.Id(2)]
     public ImmutableArray<string> EventTypes { get; init; } = [];
 }
 
@@ -112,8 +141,10 @@ public sealed record SubscriptionDefinition(string DataPrincipalId)
 /// <param name="Definition">The principal, policy, and event filter definition.</param>
 /// <param name="Start">The initial source position policy.</param>
 /// <param name="Cursor">The position cursor when <paramref name="Start"/> is <see cref="SubscriptionStart.FromCursor"/>.</param>
-public sealed record ConfigureSubscriptionRequest(Guid CommandId, SubscriptionRef Subscription, SubscriptionDefinition Definition,
-    SubscriptionStart Start = SubscriptionStart.FromBeginning, string? Cursor = null);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ConfigureSubscriptionRequest)]
+public sealed record ConfigureSubscriptionRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] SubscriptionRef Subscription, [property: Orleans.Id(2)] SubscriptionDefinition Definition,
+    [property: Orleans.Id(3)] SubscriptionStart Start = SubscriptionStart.FromBeginning, [property: Orleans.Id(4)] string? Cursor = null);
 
 /// <summary>Requests moving the checkpoint of a subscription.</summary>
 /// <param name="CommandId">The idempotent command identifier.</param>
@@ -121,15 +152,19 @@ public sealed record ConfigureSubscriptionRequest(Guid CommandId, SubscriptionRe
 /// <param name="ExpectedGeneration">The subscription generation expected by the caller.</param>
 /// <param name="Start">The source position policy to apply.</param>
 /// <param name="Cursor">The position cursor when <paramref name="Start"/> is <see cref="SubscriptionStart.FromCursor"/>.</param>
-public sealed record SeekSubscriptionRequest(Guid CommandId, SubscriptionRef Subscription, long ExpectedGeneration,
-    SubscriptionStart Start, string? Cursor = null);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SeekSubscriptionRequest)]
+public sealed record SeekSubscriptionRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] SubscriptionRef Subscription, [property: Orleans.Id(2)] long ExpectedGeneration,
+    [property: Orleans.Id(3)] SubscriptionStart Start, [property: Orleans.Id(4)] string? Cursor = null);
 
 /// <summary>Requests pausing or resuming a subscription.</summary>
 /// <param name="CommandId">The idempotent command identifier.</param>
 /// <param name="Subscription">The subscription to update.</param>
 /// <param name="ExpectedGeneration">The subscription generation expected by the caller.</param>
 /// <param name="Paused">Whether to pause delivery.</param>
-public sealed record SetSubscriptionPausedRequest(Guid CommandId, SubscriptionRef Subscription, long ExpectedGeneration, bool Paused);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SetSubscriptionPausedRequest)]
+public sealed record SetSubscriptionPausedRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] SubscriptionRef Subscription, [property: Orleans.Id(2)] long ExpectedGeneration, [property: Orleans.Id(3)] bool Paused);
 
 /// <summary>Reports the current checkpoint, delivery position, and state of a subscription.</summary>
 /// <param name="Subscription">The subscription identity.</param>
@@ -141,8 +176,10 @@ public sealed record SetSubscriptionPausedRequest(Guid CommandId, SubscriptionRe
 /// <param name="TailPosition">The latest source position observed.</param>
 /// <param name="Paused">Whether delivery is paused.</param>
 /// <param name="SafeFailureCode">A safe failure code when processing has failed.</param>
-public sealed record SubscriptionInfo(SubscriptionRef Subscription, SubscriptionDefinition Definition, long Generation,
-    long OwnershipEpoch, long Checkpoint, long IssuedPosition, long TailPosition, bool Paused, string? SafeFailureCode);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SubscriptionInfo)]
+public sealed record SubscriptionInfo([property: Orleans.Id(0)] SubscriptionRef Subscription, [property: Orleans.Id(1)] SubscriptionDefinition Definition, [property: Orleans.Id(2)] long Generation,
+    [property: Orleans.Id(3)] long OwnershipEpoch, [property: Orleans.Id(4)] long Checkpoint, [property: Orleans.Id(5)] long IssuedPosition, [property: Orleans.Id(6)] long TailPosition, [property: Orleans.Id(7)] bool Paused, [property: Orleans.Id(8)] string? SafeFailureCode);
 
 /// <summary>Requests a bounded batch of subscription deliveries.</summary>
 /// <param name="RequestId">The idempotent request identifier.</param>
@@ -150,8 +187,10 @@ public sealed record SubscriptionInfo(SubscriptionRef Subscription, Subscription
 /// <param name="MaxEvents">The maximum number of events to return.</param>
 /// <param name="MaxBytes">The maximum payload bytes to return.</param>
 /// <param name="LeaseSeconds">The requested delivery lease duration in seconds.</param>
-public sealed record ReceiveSubscriptionRequest(Guid RequestId, SubscriptionRef Subscription, int MaxEvents = 1,
-    int MaxBytes = 1_048_576, int LeaseSeconds = 30);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ReceiveSubscriptionRequest)]
+public sealed record ReceiveSubscriptionRequest([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] SubscriptionRef Subscription, [property: Orleans.Id(2)] int MaxEvents = 1,
+    [property: Orleans.Id(3)] int MaxBytes = 1_048_576, [property: Orleans.Id(4)] int LeaseSeconds = 30);
 
 /// <summary>Represents one leased event delivery.</summary>
 /// <param name="Event">The delivered event.</param>
@@ -159,14 +198,18 @@ public sealed record ReceiveSubscriptionRequest(Guid RequestId, SubscriptionRef 
 /// <param name="LeaseVersion">The lease version used to reject stale acknowledgements.</param>
 /// <param name="LeaseUntil">The lease expiration time.</param>
 /// <param name="Attempt">The one-based delivery attempt number.</param>
-public sealed record SubscriptionDelivery(SourceEventRecord Event, string Token, long LeaseVersion, DateTimeOffset LeaseUntil, int Attempt);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SubscriptionDelivery)]
+public sealed record SubscriptionDelivery([property: Orleans.Id(0)] SourceEventRecord Event, [property: Orleans.Id(1)] string Token, [property: Orleans.Id(2)] long LeaseVersion, [property: Orleans.Id(3)] DateTimeOffset LeaseUntil, [property: Orleans.Id(4)] int Attempt);
 
 /// <summary>Contains deliveries and subscription status returned by a receive operation.</summary>
 /// <param name="RequestId">The idempotent request identifier.</param>
 /// <param name="Deliveries">The leased deliveries returned.</param>
 /// <param name="Status">The subscription status observed for the request.</param>
 /// <param name="Token">The commit token for the receive operation.</param>
-public sealed record ReceiveSubscriptionResult(Guid RequestId, ImmutableArray<SubscriptionDelivery> Deliveries, SubscriptionInfo Status, CommitToken Token);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ReceiveSubscriptionResult)]
+public sealed record ReceiveSubscriptionResult([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] ImmutableArray<SubscriptionDelivery> Deliveries, [property: Orleans.Id(2)] SubscriptionInfo Status, [property: Orleans.Id(3)] CommitToken Token);
 
 /// <summary>Requests an action on a leased subscription delivery.</summary>
 /// <param name="CommandId">The idempotent command identifier.</param>
@@ -174,8 +217,10 @@ public sealed record ReceiveSubscriptionResult(Guid RequestId, ImmutableArray<Su
 /// <param name="Token">The delivery acknowledgement token.</param>
 /// <param name="Action">The action to apply to the delivery.</param>
 /// <param name="LeaseSeconds">An optional replacement lease duration in seconds.</param>
-public sealed record SubscriptionDeliveryCommand(Guid CommandId, SubscriptionRef Subscription, string Token, DeliveryAction Action,
-    int? LeaseSeconds = null);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SubscriptionDeliveryCommand)]
+public sealed record SubscriptionDeliveryCommand([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] SubscriptionRef Subscription, [property: Orleans.Id(2)] string Token, [property: Orleans.Id(3)] DeliveryAction Action,
+    [property: Orleans.Id(4)] int? LeaseSeconds = null);
 
 /// <summary>Requests processing a delivered event and applying its resulting mutations.</summary>
 /// <param name="CommandId">The idempotent command identifier.</param>
@@ -184,15 +229,21 @@ public sealed record SubscriptionDeliveryCommand(Guid CommandId, SubscriptionRef
 /// <param name="HandlerScope">The stable scope identifying the event handler.</param>
 /// <param name="ExecutionGeneration">The handler execution generation.</param>
 /// <param name="Effects">The mutations produced by processing the event.</param>
-public sealed record SubscriptionProcessingRequest(Guid CommandId, SubscriptionRef Subscription, string Token, string HandlerScope,
-    long ExecutionGeneration, ImmutableArray<Mutation> Effects);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SubscriptionProcessingRequest)]
+public sealed record SubscriptionProcessingRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] SubscriptionRef Subscription, [property: Orleans.Id(2)] string Token, [property: Orleans.Id(3)] string HandlerScope,
+    [property: Orleans.Id(4)] long ExecutionGeneration, [property: Orleans.Id(5)] ImmutableArray<Mutation> Effects);
 
 /// <summary>Reports the committed result of subscription event processing.</summary>
 /// <param name="Receipt">The commit receipt for the processing effects.</param>
 /// <param name="AlreadyProcessed">Whether the event had already been processed.</param>
 /// <param name="OriginalEffectsToken">The token of the original processing effects.</param>
-public sealed record SubscriptionProcessingResult(CommitReceipt Receipt, bool AlreadyProcessed, CommitToken OriginalEffectsToken);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SubscriptionProcessingResult)]
+public sealed record SubscriptionProcessingResult([property: Orleans.Id(0)] CommitReceipt Receipt, [property: Orleans.Id(1)] bool AlreadyProcessed, [property: Orleans.Id(2)] CommitToken OriginalEffectsToken);
 
 /// <summary>Identifies the subscription whose status is requested.</summary>
 /// <param name="Subscription">The subscription to retrieve.</param>
-public sealed record GetSubscriptionRequest(SubscriptionRef Subscription);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.GetSubscriptionRequest)]
+public sealed record GetSubscriptionRequest([property: Orleans.Id(0)] SubscriptionRef Subscription);

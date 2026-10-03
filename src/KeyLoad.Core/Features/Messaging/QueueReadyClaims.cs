@@ -18,9 +18,6 @@ public sealed partial class DatabaseEngine
         public bool CountersChanged { get; set; }
     }
 
-    private sealed record ReadyClaimInput(byte[] ReadyKey, byte[] MetadataKey, MessageMetadata Metadata,
-        byte[] TransitionKey, bool DeletesBody);
-
     private ReceiveResult ClaimReadyMessages(IAtomicTransaction tx, PrincipalRecord principal,
         ReceiveRequest request, ResourceDefinition resource, DateTimeOffset now, long position)
     {

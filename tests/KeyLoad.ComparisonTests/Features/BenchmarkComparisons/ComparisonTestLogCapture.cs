@@ -18,7 +18,8 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     private readonly Dictionary<string, ComparisonResourceLogBuffer> logs;
     private readonly ConcurrentDictionary<string, Task> logCaptures = new(StringComparer.Ordinal);
     private readonly Task capture;
-    private int stopped;
+    private readonly object stopGate = new();
+    private Task? stopping;
     private int disposed;
 
     public ComparisonTestLogCapture(DistributedApplication application, IEnumerable<string>? selectedResources = null)
@@ -37,17 +38,48 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
         capture = Task.Run(() => CaptureResourcesAsync(logger), CancellationToken.None);
     }
 
-    public async Task StopAsync()
+    public Task StopAsync()
     {
-        if (Interlocked.Exchange(ref stopped, 1) != 0)
+        lock (stopGate)
         {
-            return;
+            if (stopping is null)
+            {
+                var registered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                stopping = StopCoreAsync(registered.Task);
+                registered.SetResult();
+            }
+            return stopping;
         }
-
-        await lifetime.CancelAsync();
-        await capture;
-        await Task.WhenAll(logCaptures.Values);
     }
+
+    private async Task StopCoreAsync(Task registered)
+    {
+        await registered;
+        try
+        {
+            await lifetime.CancelAsync();
+        }
+        finally
+        {
+            await JoinCapturesAsync();
+        }
+    }
+
+    private async Task JoinCapturesAsync()
+    {
+        try
+        {
+            await capture;
+        }
+        finally
+        {
+            await Task.WhenAll(logCaptures.Values);
+        }
+    }
+
+    internal bool HasCapturedLine(string resource, string marker)
+        => logs.TryGetValue(resource, out var buffer)
+            && buffer.Snapshot().Any(line => line.Contains(marker, StringComparison.Ordinal));
 
     public async Task WriteToAsync(string path)
     {

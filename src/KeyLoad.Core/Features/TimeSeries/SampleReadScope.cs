@@ -2,7 +2,12 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.TimeSeries;
 
-internal sealed record SampleReadScope(PrincipalRecord Principal, ResourceDefinition Resource, byte[] Prefix)
+[global::Orleans.GenerateSerializer]
+[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.SampleReadScope)]
+internal sealed record SampleReadScope(
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.SampleReadScopeFields.Principal)] PrincipalRecord Principal,
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.SampleReadScopeFields.Resource)] ResourceDefinition Resource,
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.SampleReadScopeFields.Prefix)] byte[] Prefix)
 {
     private const string InvalidSeriesIdentity = "The time-series read identity is invalid.";
 

@@ -140,3 +140,19 @@ coherent complete solution Release build passes0warnings/0errors. The worker's
 qualification. No native intensive runner/adapter or measured acceleration claim.
 TASK-ISO-TS007R is read-only planning of compact bounded attempts and real client
 cancellation/response ownership; no further source writes are approved yet.
+
+
+| Task | REQ/AC / owner / tier / permission | Start / artifacts / verification / join |
+|---|---|---|---|
+|TASK-ISO-TS007R|BC060/062,TSI002/004/005/008; publisher_archive_review inherited capable read-only|Complete: exact DTO interface, preparation/response/cancellation ownership and compact fixed records proposal; no source/runtime/Git. Root inspected current DTOs, SDK/no-retry and pure API before approval.|
+|TASK-ISO-TS007B|Same; same capable worker, disjoint NEW prefixed Comparisons and UnitTests Intensive files only|Start after accepted ADR059/acceptance packet and genuine2f normal/scalar/source baseline. Tests first, internal16-loop compact runner and pure tests; no adapters/shared/native/protocol/Git. Terminal exact files/hashes/diff/source diagnostics; root combined source review/build/format, exact-SHA normal/scalar/recovery/RF3 and later real6/30 native lifetime/cancellation proof.|
+
+Existing agent inheritance is the available capable route; new model-tier
+routing is unavailable in this constrained four-slot tree. Safe NEW-file ownership
+is disjoint from active foreign serialization/cache/log work. Root alone owns
+contracts shared outside this new internal unit, docs, orchestration and evidence.
+
+- [x] TS007R read-only proposal complete; root froze exact bounded source packet.
+- [ ] TS007B acceptance-derived pure regressions first, source runner and full diff join.
+- [ ] TS007B exact-SHA source and normal/scalar/recovery gates.
+- [ ] Real SDK/Npgsql16-worker lifetime/deadline/late-success/drain/wall/readback proof.

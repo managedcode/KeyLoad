@@ -6,18 +6,24 @@ namespace KeyLoad;
 /// <param name="EventId">Identifies the event.</param>
 /// <param name="Timestamp">Specifies the timestamp value.</param>
 /// <param name="Value">Specifies the value value.</param>
-public sealed record SampleData(string EventId, DateTimeOffset Timestamp, double Value);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SampleData)]
+public sealed record SampleData([property: Orleans.Id(0)] string EventId, [property: Orleans.Id(1)] DateTimeOffset Timestamp, [property: Orleans.Id(2)] double Value);
 
 /// <summary>Appends samples and tags to a time-series resource.</summary>
 /// <param name="SeriesSet">Identifies the time-series set.</param>
 /// <param name="SeriesId">Identifies the time series.</param>
 /// <param name="Samples">Lists samples to append.</param>
 /// <param name="TagsJson">Contains the sample tags as JSON.</param>
-public sealed record AppendSamples(string SeriesSet, string SeriesId, ImmutableArray<SampleData> Samples, string TagsJson = "{}") : Mutation(SeriesSet);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.AppendSamples)]
+public sealed record AppendSamples([property: Orleans.Id(0)] string SeriesSet, [property: Orleans.Id(1)] string SeriesId, [property: Orleans.Id(2)] ImmutableArray<SampleData> Samples, [property: Orleans.Id(3)] string TagsJson = "{}") : Mutation(SeriesSet);
 
 /// <summary>Represents a stored time-series sample and its sequence and tags.</summary>
 /// <param name="SeriesId">Identifies the time series.</param>
 /// <param name="Sample">Specifies the sample value.</param>
 /// <param name="Sequence">Specifies the sequence value.</param>
 /// <param name="TagsJson">Contains the sample tags as JSON.</param>
-public sealed record SampleRecord(string SeriesId, SampleData Sample, long Sequence, string TagsJson);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SampleRecord)]
+public sealed record SampleRecord([property: Orleans.Id(0)] string SeriesId, [property: Orleans.Id(1)] SampleData Sample, [property: Orleans.Id(2)] long Sequence, [property: Orleans.Id(3)] string TagsJson);

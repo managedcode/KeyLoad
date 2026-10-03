@@ -5,14 +5,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private sealed record GroupState(SubscriptionDefinition Definition, long Generation, long OwnershipEpoch,
-        long Checkpoint, long IssuedPosition, bool Paused = false, string? SafeFailureCode = null);
-    private enum GroupDeliveryState { Pending, Leased, Acked, Filtered, Parked }
-    private sealed record GroupDelivery(long Position, GroupDeliveryState State, int Attempts, long LeaseVersion,
-        DateTimeOffset? AvailableAt = null, DateTimeOffset? LeaseUntil = null, string? PrincipalId = null);
-    private sealed record GroupClaims(string Purpose, Guid Incarnation, SubscriptionRef Subscription, long Generation, long OwnershipEpoch,
-        long Position, long LeaseVersion, string PrincipalId, long PolicyEpoch, long DataPolicyEpoch);
-    private sealed record SubscriptionCompletion(long Generation, long Position, string Outcome, long PolicyEpoch);
+
     private static byte[] GroupKey(string space, SubscriptionRef subscription, params object?[] suffix)
     {
         var source = subscription.Source;

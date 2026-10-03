@@ -7,23 +7,25 @@ internal static class ReplicaMaterializerLifecycleErrors
     internal static async Task AttemptAsync(Func<Task> action, List<Exception> failures)
     {
         try
-        { await action(); }
-        catch (IOException error) { Add(error, failures); }
-        catch (InvalidOperationException error) { Add(error, failures); }
-        catch (OperationCanceledException error) { Add(error, failures); }
-        catch (TimeoutException error) { Add(error, failures); }
-        catch (KeyLoadException error) { Add(error, failures); }
+        { await RunOrWrapAsync(action); }
+        catch (AggregateException wrapper)
+        { AddWrapped(wrapper, failures); }
     }
 
     internal static void Attempt(Action action, List<Exception> failures)
     {
         try
-        { action(); }
-        catch (IOException error) { Add(error, failures); }
-        catch (UnauthorizedAccessException error) { Add(error, failures); }
-        catch (ObjectDisposedException error) { Add(error, failures); }
-        catch (InvalidOperationException error) { Add(error, failures); }
-        catch (KeyLoadException error) { Add(error, failures); }
+        { RunOrWrap(action); }
+        catch (AggregateException wrapper)
+        { AddWrapped(wrapper, failures); }
+    }
+
+    internal static void AddWrapped(AggregateException wrapper, List<Exception> failures)
+    {
+        foreach (var original in wrapper.InnerExceptions)
+        {
+            Add(original, failures);
+        }
     }
 
     internal static void Add(Exception error, List<Exception> failures)
@@ -44,5 +46,21 @@ internal static class ReplicaMaterializerLifecycleErrors
         {
             throw new AggregateException(failures);
         }
+    }
+
+    private static async Task RunOrWrapAsync(Func<Task> action)
+    {
+        try
+        { await action(); }
+        catch (Exception original)
+        { throw new AggregateException(original); }
+    }
+
+    private static void RunOrWrap(Action action)
+    {
+        try
+        { action(); }
+        catch (Exception original)
+        { throw new AggregateException(original); }
     }
 }

@@ -764,6 +764,46 @@ joins genuine same-SHA native regression and complete cohort; no local runtime/
 tests, Git writes, shared workflow/doc changes or broad cleanup are delegated.
 
 
+TASK-ISO-013V-STOP-R41 is an approved AC-ISO-006 task-ownership refinement from
+independent R38 source review. Root exclusively joins ComparisonTestLogCapture.cs
+and IsolatedNativeTeardown.cs: StopAsync returns the same owned completion Task
+for every caller; every bounded wait retains and observes its original Task on
+failure/timeout. Output/disposal joins that same stop rather than a started latch.
+Keep30s per-stage bounds, independent failedStages and the primary assertion.
+A Luna worker owns only a NEW IsolatedResourceLogCaptureStopTests.cs: use a real
+Aspire DistributedApplication and native logger services, no mocks or resources
+started locally, and assert shared Task identity, completion and subsequent output
+and repeated disposal. The existing unforced simultaneous native-fault exception
+covers an unavailable reproducible delayed-fault driver; source control-flow review
+and genuine native cells remain required, and no forced-fault pass is invented.
+Root owns the combined development build/format/governance, exact-SHA GitHub
+composition/native regression gates, full requested main checkpoint and review.
+
+R41 regression synchronization uses an internal bounded owned-buffer observation,
+HasCapturedLine(resource, marker), before canceling capture. A subscription event
+alone does not prove a published native log batch was consumed. Wait for both
+real markers under the existing finite test deadline; no scheduling sleeps as
+proof, reflection, fake logger or output assertion weakening. Root owns this
+small test-helper join; observation copies remain bounded by the existing buffers.
+
+TASK-ISO-013V-STOP-SOURCE-R49 refines the same AC-ISO-006 regression ownership
+after the actual full formatter/analyzer attempt reported CA2000 disposal and
+CA1848 logger diagnostics. Root approves a preserving test-only repair: explicit
+unconditional fixture disposal in finally, independent primary/cleanup failure
+collection, genuine application/capture ownership at construction and shutdown,
+and a cached LoggerMessage delegate for both native markers. Keep every shared
+Task, marker-consumption, retained-file and repeated-disposal assertion and all
+finite original-task fault observations. Split the fixture/helpers to meet the
+numeric limits; never suppress or weaken these diagnostics.
+
+Luna owns only IsolatedResourceLogCaptureStopTests.cs and new
+IsolatedResourceLogCaptureStopFixture.cs plus, if needed, new
+IsolatedResourceLogCaptureStopSupport.cs in ComparisonTests/BenchmarkComparisons.
+No production logger/teardown, package, config, docs, Git, CI or local runtime/test/
+build changes are delegated. Root reviews every line and repeats the integrated
+source gates, then genuine exact-SHA GitHub composition/native qualification.
+Unrelated pending ADR-060 source migration cannot be disguised as a passing
+solution build or resolved by adding a compatibility fallback.
 ## Native b474 public document oracle correction
 
 TASK-ISO-019J implements AC-ISO-004/005 under the existing canonical JSON contract
@@ -784,6 +824,32 @@ Verify scoped source format/build, then the complete native1/2/3 PointRead publi
 regressions and required exact-SHA CI. There is no product/schema/wire migration;
 rollback removes only the wrong oracle's correction. Native2/3 failures remain
 separately tracked and cannot be closed by this test correction.
+
+## Accepted native subscriber task-ownership refinement (R59)
+
+TASK-ISO-013V-SUBSCRIBER-R59 preserves AC-ISO-006 after the R57 independent
+source review identified an original subscriber MoveNext task which could be
+skipped when the preceding native PublishUpdate operation failed. The real
+Aspire logger/notification flow and all marker, shared-stop, retained-output and
+repeated-disposal assertions remain mandatory. Register each original move and
+publication operation before awaiting either; failed synchronous publication must
+still leave the already-created move owned. On failure cancel the real linked
+subscriber lifetime, independently collect original-operation and subscriber
+disposal failures, and retain the initiating failure first. Dispose the enumerator
+only after its owned moves settle; if a bounded cleanup expires, retain and observe
+the original operations and deferred disposal task rather than concurrently
+disposing an active enumerator or reporting a timeout wrapper as completion.
+
+Luna owns only the existing StopTests and StopSupport plus one optional new
+IsolatedResourceLogSubscriberScope.cs under the same ComparisonTests slice.
+Fixture, production capture/teardown, shared contracts/config/docs/Git/CI are
+excluded. Root freezes this ownership refinement, reviews the whole diff and
+repeats source gates and exact-SHA GitHub composition/native qualification. Native
+normal logger/subscriber flow remains automated by the actual Aspire regression.
+Unavailable deterministic simultaneous native faults remain the existing explicit
+manual source-review/native-cell evidence exception; no fake logger, notification,
+enumerator or invented forced-fault runtime result is allowed.
+
 
 ## TASK-ISO-020RM accepted diagnostics-first implementation contract
 

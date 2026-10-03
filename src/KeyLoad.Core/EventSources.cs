@@ -6,9 +6,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private sealed record TopicHead(long TailPosition, long FirstAvailablePosition, long Generation, long StoredBytes);
-    private sealed record SourceCursor(string Purpose, Guid Incarnation, EventSourceRef Source, string PrincipalId,
-        long PolicyEpoch, long SchemaVersion, long Position, DateTimeOffset ExpiresAt);
+
     private const string SourceCursorPurpose = "event-source-page";
     private const string SourceReadStartInvalidMessage = "The event source read budget or start position is invalid.";
     private const string SourceReadResultExceededMessage = "The event source result exceeds its byte budget.";

@@ -22,6 +22,8 @@ public static class SqlOperationProtocol
 /// <param name="AllowFullScan">Explicit Q1 full-scan consent.</param>
 /// <param name="Cursor">Optional Q1 continuation; unavailable for CALL.</param>
 /// <param name="Version">Unified SQL envelope version.</param>
-public sealed record SqlOperationRequest(PartitionRef Partition, string Sql,
-    Dictionary<string, JsonElement>? Parameters = null, bool AllowFullScan = false,
-    string? Cursor = null, int Version = SqlOperationProtocol.Version);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.SqlOperationRequest)]
+public sealed record SqlOperationRequest([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Sql,
+    [property: Orleans.Id(2)] Dictionary<string, JsonElement>? Parameters = null, [property: Orleans.Id(3)] bool AllowFullScan = false,
+    [property: Orleans.Id(4)] string? Cursor = null, [property: Orleans.Id(5)] int Version = SqlOperationProtocol.Version);

@@ -26,6 +26,147 @@ Status: Accepted contract; implementation and qualification in progress.
 [ADR-035](../ADR/ADR-035-memory-performance.md) owns scoped read/resource/lifetime
 decisions. Full requirements and test strategy: [acceptance](../../memory-performance.acceptance.md).
 
+The staged disposable-cache contract and ordered task graph are accepted in
+[ADR-058](../ADR/ADR-058-orleans-coordinated-cache-memory.md). The common pool and
+explicit embedded positive-point stage are approved source scopes; authenticated
+Orleans control still needs its exact lead-reviewed contract before coding.
+Local brainstorm/acceptance/plan scaffolds remain ignored by owner policy; these
+durable requirements and the ADR are the reviewable source of truth. No cache or
+performance capability is qualified yet. UI/HTTP/SDK/MCP cache administration is
+N/A in this stage; existing public database operations remain the visible boundary.
+
+| Cache requirement | Acceptance | Task and automated proof |
+|---|---|---|
+| REQ-CACHE-001: shared validated retained-byte/entry reservations and lifetime | AC-CACHE-001/002 | TASK-CACHE-MEMORY-R26; real CacheMemoryBudget capacity/overflow/index/concurrent/disposal TUnit |
+| REQ-CACHE-002: exact-key coherence and store-generation/recovery fencing | AC-CACHE-003/004 | TASK-CACHE-PROVIDER/PROVIDER-TESTS/INTEGRATION-R28; actual ZoneTree transactions/snapshots/reopen |
+| REQ-CACHE-003: owned/scoped buffers and bounded local work | AC-CACHE-005/006 | TASK-CACHE-PROVIDER/PROVIDER-TESTS/INTEGRATION-R28; real pins/callbacks/eviction/logical-charge tests |
+| REQ-CACHE-004: bounded authenticated Orleans physical-node policy coordination | AC-CACHE-007/011/012 | TASK-CACHE-CONTROL-R26; native RF3 grain/service restart/migration/forged-message tests; R69 genuine local receipt/provider prerequisites remain separately qualified |
+| REQ-CACHE-005: current grants, barriers and field/tenant decisions | AC-CACHE-008 | TASK-CACHE-CONTROL-R26; current public SDK/MCP authorization flows |
+| REQ-CACHE-006: honest closed resource metrics and comparable benefit | AC-CACHE-009 | TASK-CACHE-NATIVE-R26; repeated GitHub cache-on/off resource JSON |
+| REQ-CACHE-007: complete delivered-source/native qualification | AC-CACHE-010 | TASK-CACHE-NATIVE-R26; build/format/analyzers/complexity/governance + unit/scalar/recovery/RF3 and real coverage |
+
+#### Cache acceptance and testing methodology
+
+AC-CACHE-011 adds the exact local provider binding under ADR-058 R69. An actual
+opened store creates one configured-cold control with no index charge. Embedded
+or existing owners reject another configuration; held/same-thread storage gates
+return Busy, and permanent close cannot reopen. Exact ready receipt application
+is idempotent; genuine continuous predecessor renewal retains entries/counters,
+while skipped predecessor, withdrawal or expiry makes a fresh cold helper.
+Dispose the old helper under the real writer before reserving a new index. Real
+one-index-budget and pressure-release cases must progress without lost native data.
+Delayed old retirement cannot disable a newer binding. Withdraw in an actual
+native observer must perform one lookup/charge/callback and publish no candidate;
+already admitted pinned readers retain charges until completion or exception.
+Actual Dispose publishes admission-close before draining its held reader; all
+owned charges release after the real drain. R75 rejects Dispose inside the same
+thread's actual Read/Commit callback with LockRecursionException before closing
+publication. Rejection leaves current eligibility, data and charges intact;
+external close and same-directory reopen must then succeed. The exact preserving
+repair, ownership and regression sequence are in ADR-058 R75.
+Tests use genuine ZoneTree/files,
+CacheMemoryBudget and System-clock CacheReadPermit in new
+`ZoneTreeCoordinatedPointCache*Tests.cs` and real fixture/support files under
+UnitTests/ResourceExecution, executed only by GitHub unit normal/scalar.
+
+AC-CACHE-012 requires `IsCurrentAcceptance` to validate the complete immutable
+accepted receipt and existing prepare-origin15second lease from one state read.
+Default, stale, altered PreviousRevision/Continuous, withdrawn, expired or closed
+receipts reject. The10second ceiling is acceptance-only. Real
+`CacheReadPermitAcceptanceTests.cs` and the provider expiry cases cover this
+local prerequisite; freely constructed equal values do not certify wire origin.
+
+TASK-CACHE-BINDING-INTEGRATION-R69 is root-only: shared contracts, permit join,
+public control/facade/runtime/lifecycle/read admission and durable docs.
+TASK-CACHE-BINDING-STATE-R69 owns only new private ResourceExecution binding/state
+helpers; TASK-CACHE-BINDING-TESTS-R69 owns only the new acceptance-led real tests.
+The full ordered implementation, exact APIs/result subsets, disjoint file owners,
+dependencies, rollback and join gates are in ADR-058 R69. Shared lifecycle and
+transition order and tiny post-pin/create-close interleavings receive explicit
+independent source review because deterministic forcing would require forbidden
+production hooks. Real callback, pressure, revoke, close and concurrent lifecycle
+tests remain mandatory; that exception does not substitute for signed RF3 proof.
+
+Coordinated snapshots report effective eligibility and configured-cold state.
+Closed means permanent admission closure; retained pinned/index bytes remain
+visible until actual release. Current-helper counters reset on cold replacement
+and have no-helper gaps; Hits counts successful pins, including rejected pins.
+Store diagnostics remain cumulative logical read work across both cache hits and
+native reads. A fresh local RuntimeId is not actual RF3 readiness, membership or
+physical permit certification. Production composition remains cold.
+
+- AC-CACHE-001 passes only when one shared node pool atomically reserves validated
+  positive modeled bytes/nonnegative entries before optional owned allocations;
+  exact byte/entry caps succeed, one-over and overflow fail without mutation, and
+  real concurrent consumers cannot exceed either ceiling. Positive index charges
+  may reserve zero entries. Invalid limits/requests must reject explicitly.
+- AC-CACHE-002 requires idempotent/concurrent reservation release and coherent
+  snapshots after closure. Closing admission or retiring an entry cannot release
+  any charge while a reader/candidate still owns its bytes. Real public pool tests
+  and genuine pinned-store callbacks prove cleanup on success and exceptions.
+- AC-CACHE-003 requires privately owned positive bytes keyed by complete encoded
+  content, physical runtime and ReadGeneration. Every Apply invalidates before
+  native mutation; unrelated commits retain coherent entries. Real staged
+  put/delete/reset/rejection, multi-key commits, tombstones/reinsert and replay
+  tests fail if staged or old data appears as a committed hit.
+- AC-CACHE-004 requires independent Clear before authority/tree replacement,
+  including warm keys absent from a snapshot and interrupted install. Corrupt or
+  stale snapshots preserve existing typed failure/authority behavior; known poison
+  cannot be bypassed. Same-cut compaction/export may retain entries. Real files,
+  recovery observers and cold reopen/disposal prove unchanged durable results.
+- AC-CACHE-005 requires caller-owned output copies, the existing scoped readonly
+  borrowing boundary and no allocated hit lease. Index/live/retired-pinned/fill
+  ownership stays charged; immutable key binding precedes callbacks. Observer and
+  consumer execute outside cache/budget locks, with finally release on throw,
+  cancellation and eviction. Real synchronized readers prove pin/duplicate-fill
+  lifetime rather than inferring it from final occupancy.
+- AC-CACHE-006 requires the sole StoreGate -> CacheGate -> budget order and no
+  cross-store callbacks/eviction. Admission checks current revision/generation,
+  makes at most16 local victim attempts and preserves native results when full,
+  oversized, disabled, pin-limited or unavailable. Logical charges/observer order
+  and typed errors remain exact; unexpected invalidation failures fail closed.
+  Real native diagnostics and shared-store pressure cases prove these conditions.
+- AC-CACHE-007 requires authenticated bounded Orleans exchange binding actual
+  fixed-voter readiness, silo generation, physical store/incarnation, exact local
+  policy and receiver-owned finite lease. Server starts cold. Forged/replayed,
+  stale/expired/wrong-node, unavailable control, restart and migration cannot
+  enable a node without its own valid acceptance. No grant precedes complete RF3
+  readiness and cohort preparation. Partial final acceptance stops renewals and
+  attempts bounded revocation; nodes without acceptance stay cold, while an
+  already accepted node may remain locally accelerated only until its receiver
+  lease expires within15seconds. Instant atomic RF3 cache activation/revocation
+  is not promised. Every request still uses the original fresh quorum and current
+  authorization path. No control message moves data/files or grants access.
+  Actual RF3 grain/service SDK/MCP tests are mandatory; embedded opt-in is separate.
+- AC-CACHE-008 requires fresh current authentication, credential time/revocation,
+  quorum, row/field policy and command replay fingerprint/incarnation checks on
+  every public operation. Coherent raw principal/StoredOutcome bytes may be
+  retained; grants, final authorized objects and negative lookups may not. Real
+  authority changes and cross-tenant/hidden-field/error flows must keep exact results.
+- AC-CACHE-009 requires closed data-free counters and repeated matched exact-SHA
+  on/off cold/warm/mixed/pressure GitHub profiles with the same topology/ACK/read
+  contracts. Retained modeled bytes, allocations/GC, per-node RSS, native lookups,
+  latency, throughput, contention and backlog remain distinct. Missing or mixed
+  measurements fail any speed/RSS claim; a build is never measurement evidence.
+- AC-CACHE-010 requires the delivered-SHA full build/format/governance/analyzer,
+  normal/scalar TUnit, real process recovery and Docker/Aspire RF3 SDK/MCP gates,
+  plus actual compatible coverage before claiming numeric thresholds. Skipped
+  suites, fake providers, local load or unpublished packages cannot count as pass.
+
+Automated sources live in matching ResourceExecution tests; storage/domain tests
+retain their original owners. Unit execution is through `ci.yml` normal/scalar;
+recovery and RF3 execute their real process/container projects in that workflow.
+The accepted R28 task graph supplies exact disjoint files and joins in ADR-058.
+Lock order, secret-free metadata and physical ownership have a source-review
+exception requiring independent inspection; it does not replace native cases.
+Rollback disables ephemeral admission, drains readers and removes optional joins
+together. No persisted format, authorization, ACK or production RF3 migration.
+
+Baseline63ac27c run37082449440 failed the solution build with IDE0032/IDE0290
+in the website receipt source; normal/scalar/recovery/comparisons were skipped.
+Separate native analyzer118/118 and RF3 63/63 passed, including new dependency
+consumption on that source. Current cache source awaits a later exact-SHA run.
+
 | Requirement | Acceptance | Task / test ownership |
 |---|---|---|
 | REQ-MP-001: all current operation/resource paths reviewed and evidenced defects closed | AC-MP-001 | TASK-MP-001/002/003/004; located inventory and independent final review |

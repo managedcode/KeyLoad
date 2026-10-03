@@ -8,8 +8,25 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
     public byte[]? ReadOwnedValue(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);
+        var admission = runtime.CacheLifecycle.CaptureReadAdmission();
+        var generation = runtime.Identity.ReadGeneration;
+        if (admission.TryPin(key, generation, out var entry))
+        {
+            try
+            {
+                runtime.ReadCounters.Point(owned: true, (long)key.Length + entry.Value.Length);
+                return entry.Value.ToArray();
+            }
+            finally
+            {
+                admission.Unpin(entry);
+            }
+        }
+
         Memory<byte> memory = key;
-        if (!runtime.Tree.TryGet(memory, out var value))
+        var found = runtime.Tree.TryGet(memory, out var value);
+        admission.RecordNativeLookup(found);
+        if (!found)
         {
             runtime.ReadCounters.Point(owned: true, key.Length);
             return null;
@@ -17,6 +34,12 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
 
         var borrowed = value.Span[StorageValueHeaderBytes..];
         runtime.ReadCounters.Point(owned: true, (long)key.Length + borrowed.Length);
+        using var candidate = admission.TryPrepare(key, borrowed.Length, generation);
+        if (candidate is not null)
+        {
+            admission.Publish(candidate, borrowed, generation);
+        }
+
         return borrowed.ToArray();
     }
 
@@ -24,8 +47,27 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(reader);
+        var admission = runtime.CacheLifecycle.CaptureReadAdmission();
+        var generation = runtime.Identity.ReadGeneration;
+        if (admission.TryPin(key, generation, out var entry))
+        {
+            try
+            {
+                runtime.ReadCounters.Point(owned: false, (long)key.Length + entry.Value.Length);
+                observer?.Invoke((long)key.Length + entry.Value.Length);
+                reader(entry.Value);
+                return true;
+            }
+            finally
+            {
+                admission.Unpin(entry);
+            }
+        }
+
         Memory<byte> memory = key;
-        if (!runtime.Tree.TryGet(memory, out var value))
+        var found = runtime.Tree.TryGet(memory, out var value);
+        admission.RecordNativeLookup(found);
+        if (!found)
         {
             runtime.ReadCounters.Point(owned: false, key.Length);
             observer?.Invoke(key.Length);
@@ -34,7 +76,13 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
 
         var borrowed = value.Span[StorageValueHeaderBytes..];
         runtime.ReadCounters.Point(owned: false, (long)key.Length + borrowed.Length);
+        using var candidate = admission.TryPrepare(key, borrowed.Length, generation);
         observer?.Invoke((long)key.Length + borrowed.Length);
+        if (candidate is not null)
+        {
+            admission.Publish(candidate, borrowed, generation);
+        }
+
         reader(borrowed);
         return true;
     }

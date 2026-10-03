@@ -1,3 +1,5 @@
+using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+
 namespace KeyLoad.Storage.ZoneTree;
 
 /// <summary>Durable journal and snapshot transitions exposed to deterministic recovery observers.</summary>
@@ -37,4 +39,7 @@ public sealed record ZoneTreeStoreOptions(string Directory)
     public int MaxFrameBytes { get; init; } = ZoneTreePersistenceFormat.DefaultMaxFrameBytes;
     /// <summary>Maximum complete snapshot file size.</summary>
     public long MaxSnapshotBytes { get; init; } = ZoneTreePersistenceFormat.DefaultMaxSnapshotBytes;
+    /// <summary>Explicit embedded-only cache opt-in with an externally owned shared node budget.</summary>
+    /// <remarks>RF3 server composition stays cold until authenticated Orleans coordination is enabled.</remarks>
+    public ZoneTreePointCacheOptions? EmbeddedPointCache { get; init; }
 }

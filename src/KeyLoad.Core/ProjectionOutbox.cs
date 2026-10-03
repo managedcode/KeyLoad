@@ -6,9 +6,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private sealed record ProjectionBatchClaims(string Purpose, Guid Incarnation, ProjectionConsumerRef Consumer,
-        long IndexGeneration, long After, long Through, DateTimeOffset ExpiresAt);
-    private sealed record ProjectionReceipt(string Fingerprint, CommitReceipt Receipt, long Checkpoint);
+
     private static byte[] OutboxKey(PartitionRef partition, long sequence) => KeySpace.Partition("outbox", partition, sequence);
     private static byte[] ConsumerKey(ProjectionConsumerRef consumer) => KeySpace.Partition("projection-consumer", consumer.Partition, consumer.Name);
     /// <summary>Reads persisted outbox head metadata from the current storage cut.</summary>

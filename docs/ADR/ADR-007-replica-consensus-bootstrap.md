@@ -85,3 +85,55 @@ flowchart LR
     Materializer[Materializer borrows gate] --> Drain[Apply drain without gate disposal]
     Drain --> Owner[Physical log owner disposes after consensus drain]
 ```
+
+## TASK-REP-051-PLANNING-R45: genuine planning-scope regression join
+
+The independent R43 source review found no confirmed production lock-order
+defect, but the checkpoint regressions held the semaphore directly. AC-REP-051
+requires an actual protocol planning scope. Root approves this test-only join:
+use the real internal `ReplicaState.LockedAsync` over the existing real
+materializer/log and ZoneTree fixture. Run its synchronous planning action on one
+owned task; capture state, term and suffix inside that action, signal entry, and
+hold it with a bounded test-owned synchronization primitive. Start both existing
+Create and incoming Complete cases after entry. Preserve native-image flush,
+verified image, blocked-publication, unchanged metadata and final tail/term/vote/
+applied-cut assertions. Release and join the planning and publication tasks on
+every success or failure path before disposing the physical log owner.
+
+The Luna worker owns only the four existing
+`tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaCheckpointProtocolGate*.cs`
+files and, if needed for the numeric maintainability limits, one new
+`ReplicaCheckpointProtocolPlanningScope.cs` in that same slice. Root alone owns
+shared source, docs, integration and delivery. No production hook, fake protocol,
+reflection, gate replacement, API/format change, suppressed diagnostic or weaker
+assertion is authorized. Stop on any need to expand ownership. Root reviews the
+complete diff and full development build/formatter; only exact-SHA GitHub
+Recovery/RF3 execution can close the runtime criterion. Existing cf630751 native
+recovery evidence is the baseline, not qualification of this new test source.
+
+R74 independent actual-source review found that the shared async test-lifecycle
+collector omitted AggregateException and UnauthorizedAccessException, although
+the scenario collector and synchronous filesystem cleanup already anticipate
+those failures. Root preserves both original task failures in that owning helper
+so a failed planning/publication join cannot skip physical-node/source/directory
+cleanup. This is a test-only correction under TASK-REP-051-PLANNING-R45; no
+production or gate/format change. The genuine checkpoint planning regressions
+remain required in GitHub; simultaneous native cleanup faults have source-review
+evidence only and are not represented as forced or executed runtime scenarios.
+
+The R74 call-chain join includes constructor/store ownership and both node/source
+disposal. Root owns the same-slice LifecycleErrors, LifecycleStores, GateNode and
+GateFixture test helpers: collect every original exception through an immediate
+throwing AggregateException wrapper and typed outer collector, preserving the
+original exception objects. Constructor failure independently closes both opened
+stores; disposal attempts both stores and each fixture owner/directory before
+the final retained failure is thrown. This replaces incomplete duplicate typed
+lists, expands no product API and suppresses no error. Genuine R45 planning and
+checkpoint assertions stay unchanged; unforced multiple native filesystem errors
+retain their explicit independent-source-review evidence exception.
+
+R76 preserves that same contract with direct field disposal in GateNode and
+GateFixture, so CA2213 can verify the actual owned stores/source cleanup.
+Immediate throwing wrappers and the typed collector still retain each original
+failure and allow every subsequent independent cleanup attempt. Delegating an
+owned field's disposal must not hide its ownership from the enabled analyzers.

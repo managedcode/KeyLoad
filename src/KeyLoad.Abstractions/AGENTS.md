@@ -19,6 +19,7 @@
 - Preserve net10.0/C# 14 and central package pins. Security, serialization, compatibility and trust-boundary changes require explicit contract review.
 
 ## Read-first and canonical slice ownership
+- Shared disposable cache limits, reservation interfaces and modeled snapshots belong to `Features/ResourceExecution/` under ADR-058. They grant no database authority and contain no private store signing material; the integration lead alone owns these shared contracts.
 - Owns `Features/RelationalStorage/` immutable schema metadata under ADR-055 and `Features/QueryExecution/` versioned SQL operation-envelope contracts under ADR-054. Null schema metadata preserves existing resource JSON; these contracts do not grant roles or introduce a second storage engine.
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned contract slices: `DocumentStorage`, `EventStreams`, `Messaging`, `Authorization`, `Search`, and `GraphTraversal`; target paths are `Features/<SliceName>/` for each named slice.

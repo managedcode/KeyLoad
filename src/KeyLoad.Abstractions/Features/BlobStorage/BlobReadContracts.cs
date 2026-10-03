@@ -4,27 +4,35 @@ namespace KeyLoad;
 
 /// <summary>Requests current authorized object metadata without binary payload.</summary>
 /// <param name="Blob">The complete atomic object scope.</param>
-public sealed record BlobMetadataRequest(BlobRef Blob);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.BlobMetadataRequest)]
+public sealed record BlobMetadataRequest([property: Orleans.Id(0)] BlobRef Blob);
 
 /// <summary>Requests authorized creator-scoped upload progress.</summary>
 /// <param name="Blob">The complete atomic object scope.</param>
 /// <param name="UploadId">The upload identity.</param>
-public sealed record BlobUploadInfoRequest(BlobRef Blob, Guid UploadId);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.BlobUploadInfoRequest)]
+public sealed record BlobUploadInfoRequest([property: Orleans.Id(0)] BlobRef Blob, [property: Orleans.Id(1)] Guid UploadId);
 
 /// <summary>Requests a bounded raw range at one required current object revision.</summary>
 /// <param name="Blob">The complete atomic object scope.</param>
 /// <param name="ExpectedRevision">The positive revision required for this read cut.</param>
 /// <param name="Offset">The zero-based raw byte offset, including an empty EOF range.</param>
 /// <param name="Count">The exact bounded number of requested bytes.</param>
-public sealed record BlobReadRequest(BlobRef Blob, long ExpectedRevision, long Offset, int Count);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.BlobReadRequest)]
+public sealed record BlobReadRequest([property: Orleans.Id(0)] BlobRef Blob, [property: Orleans.Id(1)] long ExpectedRevision, [property: Orleans.Id(2)] long Offset, [property: Orleans.Id(3)] int Count);
 
 /// <summary>Requests a bounded ordered listing of authorized live object metadata.</summary>
 /// <param name="Partition">The complete atomic partition scope.</param>
 /// <param name="Resource">The configured binary resource.</param>
 /// <param name="Limit">The maximum returned visible metadata rows.</param>
 /// <param name="AfterId">The optional exclusive last-visited object identifier.</param>
-public sealed record BlobListRequest(PartitionRef Partition, string Resource,
-    int Limit = BlobLimits.MaxListItems, string? AfterId = null);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.BlobListRequest)]
+public sealed record BlobListRequest([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Resource,
+    [property: Orleans.Id(2)] int Limit = BlobLimits.MaxListItems, [property: Orleans.Id(3)] string? AfterId = null);
 
 /// <summary>Returns immutable scoped upload progress without raw bytes.</summary>
 /// <param name="Blob">The complete atomic object scope.</param>
@@ -36,9 +44,11 @@ public sealed record BlobListRequest(PartitionRef Partition, string Resource,
 /// <param name="ExpiresAt">The trusted evaluated upload expiry.</param>
 /// <param name="Status">The persisted public upload lifecycle.</param>
 /// <param name="IntegrityHash">The current sha256-chain-v1 value.</param>
-public sealed record BlobUploadInfo(BlobRef Blob, Guid UploadId, long DeclaredLength,
-    long ExpectedRevision, int NextOrdinal, long StoredBytes, DateTimeOffset ExpiresAt,
-    BlobUploadStatus Status, string IntegrityHash);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.BlobUploadInfo)]
+public sealed record BlobUploadInfo([property: Orleans.Id(0)] BlobRef Blob, [property: Orleans.Id(1)] Guid UploadId, [property: Orleans.Id(2)] long DeclaredLength,
+    [property: Orleans.Id(3)] long ExpectedRevision, [property: Orleans.Id(4)] int NextOrdinal, [property: Orleans.Id(5)] long StoredBytes, [property: Orleans.Id(6)] DateTimeOffset ExpiresAt,
+    [property: Orleans.Id(7)] BlobUploadStatus Status, [property: Orleans.Id(8)] string IntegrityHash);
 
 /// <summary>Describes one authorized current head or positive-revision tombstone.</summary>
 /// <param name="Blob">The complete atomic object scope.</param>
@@ -50,19 +60,25 @@ public sealed record BlobUploadInfo(BlobRef Blob, Guid UploadId, long DeclaredLe
 /// <param name="Access">The persisted row access authority.</param>
 /// <param name="UpdatedAt">The trusted publication or deletion time.</param>
 /// <param name="Deleted">Whether this metadata represents a revision tombstone.</param>
-public sealed record BlobMetadata(BlobRef Blob, long Revision, Guid? VersionId, long Length,
-    int PartCount, string? IntegrityHash, RowAccess Access, DateTimeOffset UpdatedAt, bool Deleted = false);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.BlobMetadata)]
+public sealed record BlobMetadata([property: Orleans.Id(0)] BlobRef Blob, [property: Orleans.Id(1)] long Revision, [property: Orleans.Id(2)] Guid? VersionId, [property: Orleans.Id(3)] long Length,
+    [property: Orleans.Id(4)] int PartCount, [property: Orleans.Id(5)] string? IntegrityHash, [property: Orleans.Id(6)] RowAccess Access, [property: Orleans.Id(7)] DateTimeOffset UpdatedAt, [property: Orleans.Id(8)] bool Deleted = false);
 
 /// <summary>Returns exact requested bytes and metadata from one scoped read cut.</summary>
 /// <param name="Metadata">The authorized required head revision.</param>
 /// <param name="Offset">The requested raw starting offset.</param>
 /// <param name="Bytes">The independent bounded raw range.</param>
-public sealed record BlobReadResult(BlobMetadata Metadata, long Offset, ReadOnlyMemory<byte> Bytes);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.BlobReadResult)]
+public sealed record BlobReadResult([property: Orleans.Id(0)] BlobMetadata Metadata, [property: Orleans.Id(1)] long Offset, [property: Orleans.Id(2)] ReadOnlyMemory<byte> Bytes);
 
 /// <summary>Returns a bounded visible metadata page and an exclusive progress cursor.</summary>
 /// <param name="Items">The authorized live metadata rows.</param>
 /// <param name="NextAfterId">The last visited ID, or null after exhaustion.</param>
-public sealed record BlobListPage(ImmutableArray<BlobMetadata> Items, string? NextAfterId);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.BlobListPage)]
+public sealed record BlobListPage([property: Orleans.Id(0)] ImmutableArray<BlobMetadata> Items, [property: Orleans.Id(1)] string? NextAfterId);
 
 /// <summary>Returns logical deletion progress without reclaiming a current version.</summary>
 /// <param name="UploadId">The selected upload/version identity.</param>
@@ -70,5 +86,7 @@ public sealed record BlobListPage(ImmutableArray<BlobMetadata> Items, string? Ne
 /// <param name="RemainingParts">The remaining accepted parts.</param>
 /// <param name="ReleasedBytes">The unused reservation and deleted logical bytes released now.</param>
 /// <param name="Complete">Whether this version has no remaining state or parts.</param>
-public sealed record BlobReclaimResult(Guid UploadId, int DeletedParts, int RemainingParts,
-    long ReleasedBytes, bool Complete);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.BlobReclaimResult)]
+public sealed record BlobReclaimResult([property: Orleans.Id(0)] Guid UploadId, [property: Orleans.Id(1)] int DeletedParts, [property: Orleans.Id(2)] int RemainingParts,
+    [property: Orleans.Id(3)] long ReleasedBytes, [property: Orleans.Id(4)] bool Complete);

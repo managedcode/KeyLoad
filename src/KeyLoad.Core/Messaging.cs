@@ -200,7 +200,7 @@ public sealed partial class DatabaseEngine
         tx.PutRecord(inboxKey, new InboxRecord(fingerprint, receipt));
         return receipt;
     }
-    private sealed record InboxRecord(string Fingerprint, CommitReceipt Receipt);
+
     /// <summary>Reads authorized queue metadata and projected message content.</summary>
     /// <param name="principalId">Persisted principal identifier.</param>
     /// <param name="lane">Queue lane identity.</param>

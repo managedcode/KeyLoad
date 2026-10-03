@@ -62,6 +62,22 @@
       "qualification": "exact_b21_run37065200835_three_OS_136_of136_recovery_and1000_unique_atomic_trial_receipts_each_OS_no_skips_process_fault_only",
       "evidence": "docs/implementation/performance-source-r11.json",
       "qualificationReceipt": "docs/implementation/runtime-qualification-37065200835.json"
+    },
+    "nativeInternalSerialization": {
+      "status": "attributes-partly-applied-runtime-held-staged-installation-blocked",
+      "decision": "docs/ADR/ADR-060-native-internal-serialization.md",
+      "feature": "docs/Features/InternalSerialization.md",
+      "staticPreview": "docs/implementation/native-internal-static-preview.json",
+      "qualified": false,
+      "runtimeTestsExecuted": false,
+      "approvalRequired": "Explicit consent for codec persisted formats, KLT2 token invalidation and homogeneous replica2 rollout after automatic approval rejection.",
+      "open": [
+        "Strict native pre-admission and remaining full joins",
+        "Offline old-store conversion",
+        "Complete exact-source native mandatory gates",
+        "Measured performance"
+      ],
+      "activeRuntime": "Previous typed persistence/metadata/wire formats held; qualified WAL source unchanged by hold. Native runtime candidates and exact pre-images remain staged separately."
     }
   },
   "KL-004": {
@@ -107,7 +123,9 @@
       "docs/implementation/runtime-qualification-37065200835.json",
       "docs/implementation/runtime-qualification-37074392471.json",
       "docs/implementation/runtime-qualification-37077856823.json",
-      "docs/implementation/runtime-qualification-37079707413.json"
+      "docs/implementation/runtime-qualification-37079707413.json",
+      "docs/implementation/runtime-qualification-37082449440.json",
+      "docs/implementation/runtime-qualification-37084177131.json"
     ],
     "latestJoinedBaseline": {
       "sha": "c10c48e40d8a9b452c9d131da549cab1e336692d",
@@ -173,7 +191,24 @@
         "imageFailureReceipt": "docs/implementation/image-preflight-failure-37073331174.json",
         "recoveryFailure": "Windows_ProjectionCrash_MutationApplied3_TaskCanceled_cause_unconfirmed"
       }
-    ]
+    ],
+    "latestPartialSourceBaseline": {
+      "sha": "b47409e73427c1394ccf705f398a541f2e7cb08b",
+      "run": 37087909605,
+      "attempt": 1,
+      "conclusion": "failure",
+      "solutionBuildFormatGovernance": "success_exact_source_GitHub",
+      "normalUnitsLinux": "1407_of1407_native_unique_IDs",
+      "scalarUnitsLinux": "1407_of1407_same_native_ID_status_set_intrinsics_disabled",
+      "recoveryLinux": "138_of138_plus1000_original_seeded_process_crash_rows",
+      "analyzersLinux": "118_of118_native_verify_artifact_separate_analyzer_job_success",
+      "rf3": "63_of63_real_Docker_Aspire_SDK_MCP",
+      "preflights": "17_of27_job_success_10_failed",
+      "intensive270": "not_qualified_after_failed_preflights",
+      "consumerTimeSeriesVersion": "10.0.3",
+      "receipt": "docs/implementation/runtime-qualification-37087909605.json",
+      "cacheSource": "outside_measured_SHA_native_cache_gates_pending"
+    }
   },
   "KL-007": {
     "title": "KeyCodec і storage envelopes",
@@ -523,7 +558,19 @@
       "tests/KeyLoad.UnitTests/ReadExecutionTests.cs",
       "docs/design/bounded-reads.md",
       "docs/design/command-admission.md"
-    ]
+    ],
+    "disposableCacheWorkstream": {
+      "status": "local_source_reviewed_build_format_passed_native_qualification_pending",
+      "decision": "docs/ADR/ADR-058-orleans-coordinated-cache-memory.md",
+      "slice": "ResourceExecution",
+      "pool": "one_node_owned_atomic_modeled_retained_bytes_entries_idempotent_reservations",
+      "providerStage": "explicit_embedded_positive_point_values_index_pins_fills_charged_per_key_apply_invalidation_snapshot_generation_cold_recovery",
+      "localBindingStage": "R79_source_integrated_opened_store_factory_complete_receipt_binding_zero_wait_writer_pre_drain_close_safe_disposal_entry_real_tests_native_gates_pending",
+      "sourceReceipt": "docs/implementation/cache-memory-source-r79.json",
+      "clusterStage": "disabled_pending_authenticated_Orleans_physical_store_silo_policy_lease_and_real_RF3_tests",
+      "metrics": "modeled_retention_distinct_from_native_lookup_allocations_RSS_no_speed_claim",
+      "gates": "complete_exact_SHA_build_format_unit_scalar_recovery_RF3_coverage_and_matched_profiles_pending"
+    }
   },
   "KL-041": {
     "title": "Chaos і corruption suite",

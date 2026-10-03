@@ -1,0 +1,45 @@
+{
+  "kind": "isolated-compiler-only-preview",
+  "recordedAt": "2026-10-03T02:51:08.845170+00:00",
+  "framework": "net10.0",
+  "orleansVersion": "10.3.1",
+  "configuration": "Release",
+  "warnings": 0,
+  "errors": 0,
+  "command": "dotnet build NativeCompilerPreview.csproj --no-restore --configuration Release --disable-build-servers -m:1",
+  "scope": "Nine candidate native codec files, existing alias constants, attributed Abstractions closure and operation Id5/result Id3 joins in a separate temporary compiler project.",
+  "reviewPatchSha256": "71a3df8fdfe2732e96cd389497839ed496e1e298480268e1069430e345ef904c",
+  "compiledCodecFiles": {
+    "JsonElementSurrogate.cs": "51e3744e51980047a9b6f97fda2bc81e694763d6abae576315a407c499633487",
+    "JsonElementSurrogateConverter.cs": "d3021cb7bdf68cfb4a9f3ad4003b8a42b2e72d2a09c324cde6202dae43dfe819",
+    "NativeContractValidation.cs": "7cd03c0002cd1bf4ab0645ccd4da29e1dd6f819ab2633e7f2151dfdf1f428608",
+    "NativeCountingWriter.cs": "bc486426507afb2406ed8816dc36aa1f7976601cffbf9ff7729b201344be1875",
+    "NativePayload.cs": "580e77a5cfed7c41d5964c2c15d43f36eebc689035dd1ad4773a65ea7d848d1e",
+    "NativePayloadInspectionCodec.cs": "6af4d51f218cee544324cb60c24881ed9969fd05708d5f4ef45fff1077203e1d",
+    "NativePayloadSyntax.cs": "64e3de011aae9ed1cc3c2a9a73c54fbcc509c14768456690428ccc1c1e90067f",
+    "NativeSerialization.cs": "b8b06367c510d4ec9c1be854e62ef0c63f6f43a690d38d5f7ab2efa0b22cc0c3",
+    "NativeSerializerProviders.cs": "0a57dcd39a414aac17d4737961dd8504be766a808f3c768517ea52aeabfa2dc9"
+  },
+  "ownerInstallation": false,
+  "runtimeExecuted": false,
+  "testsExecuted": false,
+  "expandedQualification": false,
+  "stagedCodecCases": 42,
+  "blockers": [
+    "Automatic approval rejected shared-codec persisted-format installation.",
+    "Automatic approval rejected KLT2 old-token invalidation.",
+    "Automatic approval rejected mixed-version inter-node binary rollout.",
+    "Strict native pre-admission/security joins and full integration remain incomplete.",
+    "Offline conversion is not delivered; Compact cannot convert opaque record values.",
+    "Exact-source normal/scalar/recovery/analyzer/RF3 gates remain required."
+  ],
+  "ownerAnalyzersEnabledInThisPreview": false,
+  "activeCheckout": {
+    "runtimeMigration": "held pending direct format/rollout consent",
+    "preservationPatch": "/private/tmp/keyload-native-checkout-hold/preserve-applied.patch",
+    "heldRuntimeFiles": 52,
+    "valueOperandAttributesHeld": true,
+    "qualifiedWalSourceChangedByHold": false,
+    "productTestsExecuted": false
+  }
+}

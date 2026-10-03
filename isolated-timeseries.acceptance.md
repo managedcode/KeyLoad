@@ -227,3 +227,13 @@ format, exact-SHA full normal/scalar GitHub suites, later actual all30 native
 responses. No local tests/runtime/benchmarks/Git or invented allocation/speed
 result. Additive source rollback removes this coherent owned unit; no persistence
 migration. ADR remains Accepted; source and native gates stay distinct.
+
+
+TS007B clarification (REQ-BC-060/062, AC-TSI-002/004/005/008): the exact accepted
+compact runner/interface/error/ownership contract is ADR059 TASK-ISO-TS007B.
+Every actual attempted failure keeps its latency and native observed error facts;
+NotStarted has no latency. Missing/default/duplicate ledger publications fail.
+No timeout may detach a still-live original client Task. Host lifetime includes
+readiness; cancellation/drain/late-success rejection and max16 live decoded
+responses require genuine native SDK/Npgsql evidence. Pure index/ledger/hash/
+SQLSTATE/sequence/summary tests are a separate source gate and cannot replace it.

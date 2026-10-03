@@ -21,11 +21,9 @@ internal static class IsolatedNativeTeardown
             IsolatedNativeReportAssertions.CopyRawIfPresent(output, evidence);
             return Task.CompletedTask;
         }, "raw", failures);
-        await AttemptAsync(() => capture.StopAsync().WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds)), "logs-close", failures);
-        await AttemptAsync(() => capture.WriteToAsync(Path.Combine(evidence, LogFile))
-            .WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds)), "logs-retain", failures);
-        await AttemptAsync(() => capture.WriteResourcesToAsync(evidence)
-            .WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds)), "node-logs-retain", failures);
+        await AttemptAsync(() => AwaitBoundedAsync(capture.StopAsync()), "logs-close", failures);
+        await AttemptAsync(() => AwaitBoundedAsync(capture.WriteToAsync(Path.Combine(evidence, LogFile))), "logs-retain", failures);
+        await AttemptAsync(() => AwaitBoundedAsync(capture.WriteResourcesToAsync(evidence)), "node-logs-retain", failures);
         var stopped = await StopAsync(app, failures);
         await AttemptAsync(() => DisposeAsync(capture), "capture-dispose", failures);
         await AttemptAsync(() => DisposeAsync(app), "app-dispose", failures);
@@ -62,15 +60,17 @@ internal static class IsolatedNativeTeardown
     }
 
     private static async Task DisposeAsync(IAsyncDisposable resource)
+        => await AwaitBoundedAsync(resource.DisposeAsync().AsTask());
+
+    private static async Task AwaitBoundedAsync(Task pending)
     {
-        var disposal = resource.DisposeAsync().AsTask();
         try
         {
-            await disposal.WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds));
+            await pending.WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds));
         }
         catch (Exception)
         {
-            _ = disposal.ContinueWith(static completed => _ = completed.Exception, CancellationToken.None,
+            _ = pending.ContinueWith(static completed => _ = completed.Exception, CancellationToken.None,
                 TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
             throw new ComparisonFailureException(Failure);
         }

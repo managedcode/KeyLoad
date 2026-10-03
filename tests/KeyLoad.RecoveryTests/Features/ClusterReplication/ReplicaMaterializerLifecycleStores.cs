@@ -23,10 +23,13 @@ internal sealed class ReplicaMaterializerLifecycleStores(ZoneTreeStore canonical
             replica = null;
             return owners;
         }
-        finally
+        catch (Exception original)
         {
-            replica?.Dispose();
-            canonical?.Dispose();
+            List<Exception> failures = [original];
+            ReplicaMaterializerLifecycleErrors.Attempt(() => replica?.Dispose(), failures);
+            ReplicaMaterializerLifecycleErrors.Attempt(() => canonical?.Dispose(), failures);
+            ReplicaMaterializerLifecycleErrors.Throw(failures);
+            throw;
         }
     }
 
@@ -51,13 +54,5 @@ internal sealed class ReplicaMaterializerLifecycleStores(ZoneTreeStore canonical
     }
 
     private static void DisposeStore(ZoneTreeStore store, List<Exception> failures)
-    {
-        try
-        { store.Dispose(); }
-        catch (IOException error) { failures.Add(error); }
-        catch (UnauthorizedAccessException error) { failures.Add(error); }
-        catch (ObjectDisposedException error) { failures.Add(error); }
-        catch (InvalidOperationException error) { failures.Add(error); }
-        catch (KeyLoadException error) { failures.Add(error); }
-    }
+        => ReplicaMaterializerLifecycleErrors.Attempt(store.Dispose, failures);
 }

@@ -19,7 +19,9 @@ public enum DistanceMetric
 /// <param name="Metric">Selects the vector distance metric.</param>
 /// <param name="Model">Identifies the embedding model.</param>
 /// <param name="Version">Identifies the embedding model version.</param>
-public sealed record VectorSpace(string Id, int Dimension, DistanceMetric Metric, string Model, string Version);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.VectorSpace)]
+public sealed record VectorSpace([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] int Dimension, [property: Orleans.Id(2)] DistanceMetric Metric, [property: Orleans.Id(3)] string Model, [property: Orleans.Id(4)] string Version);
 
 /// <summary>Stores a vector associated with a document field and revision.</summary>
 /// <param name="Collection">Identifies the document collection.</param>
@@ -28,8 +30,10 @@ public sealed record VectorSpace(string Id, int Dimension, DistanceMetric Metric
 /// <param name="Values">Contains vector components.</param>
 /// <param name="Space">Defines the vector space.</param>
 /// <param name="ExpectedDocumentRevision">Specifies the expected document revision value.</param>
-public sealed record PutVector(string Collection, string Id, string Field, ImmutableArray<float> Values, VectorSpace Space,
-    long ExpectedDocumentRevision) : Mutation(Collection);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.PutVector)]
+public sealed record PutVector([property: Orleans.Id(0)] string Collection, [property: Orleans.Id(1)] string Id, [property: Orleans.Id(2)] string Field, [property: Orleans.Id(3)] ImmutableArray<float> Values, [property: Orleans.Id(4)] VectorSpace Space,
+    [property: Orleans.Id(5)] long ExpectedDocumentRevision) : Mutation(Collection);
 
 /// <summary>Represents a stored vector associated with its document revision.</summary>
 /// <param name="DocumentId">Specifies the document id value.</param>
@@ -37,9 +41,13 @@ public sealed record PutVector(string Collection, string Id, string Field, Immut
 /// <param name="Space">Defines the vector space.</param>
 /// <param name="Values">Contains vector components.</param>
 /// <param name="DocumentRevision">Identifies the associated document revision.</param>
-public sealed record VectorRecord(string DocumentId, string Field, VectorSpace Space, ImmutableArray<float> Values, long DocumentRevision);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.VectorRecord)]
+public sealed record VectorRecord([property: Orleans.Id(0)] string DocumentId, [property: Orleans.Id(1)] string Field, [property: Orleans.Id(2)] VectorSpace Space, [property: Orleans.Id(3)] ImmutableArray<float> Values, [property: Orleans.Id(4)] long DocumentRevision);
 
 /// <summary>Pairs a redacted document result with its search score.</summary>
 /// <param name="Document">Contains the ranked document result.</param>
 /// <param name="Score">Contains the ranking score.</param>
-public sealed record RankedDocument(DocumentResult Document, double Score);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.RankedDocument)]
+public sealed record RankedDocument([property: Orleans.Id(0)] DocumentResult Document, [property: Orleans.Id(1)] double Score);

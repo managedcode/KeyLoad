@@ -26,6 +26,7 @@ KeyLoad поєднує документи, історію подій, надій
 | [ClusterReplication](Features/ClusterReplication.md) | Orleans RF3 durable protocol, quorum/read barriers, snapshots, minority denial та protected control capacity |
 | [ClusterRouting](Features/ClusterRouting.md) | Distinct request grain, distributed directory/repartitioning, membership, atomic identity/physical placement і planned movement |
 | [StorageRecovery](Features/StorageRecovery.md) | Node-local stores/journals/locks/apply/read lifetime, codec/checkpoints/corruption і process recovery |
+| [InternalSerialization](Features/InternalSerialization.md) | Generated Orleans DTO closure, internal binary formats, strict boundaries and explicit migration; partially applied and staged, runtime qualification pending |
 | [ClientApi](Features/ClientApi.md) | Typed .NET/CLI transport і retries/errors; official MCP/simple agent source and Accepted mapping, qualification pending |
 | [AdminDashboard](Features/AdminDashboard.md) | Захищена read-only адмінпанель: фізичні розміри файлів, фактичний HTTP throughput, каталог/документи/blob metadata та черги без споживання; GitHub qualification pending |
 | [ResourceExecution](Features/ResourceExecution.md) | Bounded work/memory/lifetimes, multi-tenant admission/control reserve та honest metrics/telemetry |

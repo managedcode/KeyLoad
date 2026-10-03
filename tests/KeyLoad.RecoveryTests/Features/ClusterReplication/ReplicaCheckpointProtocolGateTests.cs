@@ -1,3 +1,5 @@
+using KeyLoad.Replication;
+
 namespace KeyLoad.RecoveryTests;
 
 /// <summary>AC-REP-051: native checkpoint IO precedes metadata publication through the node's planning gate.</summary>
@@ -24,10 +26,12 @@ internal sealed class ReplicaCheckpointProtocolGateTests
             await fixture.PrepareAsync(incoming, linked.Token);
             var log = fixture.Node.Log;
             await Assert.That(fixture.Node.Materializer.ProtocolGate).IsSameReferenceAs(log.ProtocolGate);
-            await log.ProtocolGate.WaitAsync(linked.Token);
+            fixture.StartPlanning(linked.Token);
+            var planning = await fixture.WaitForPlanningAsync(linked.Token);
+            var before = log.State;
+            await AssertPlanningAsync(planning, before, fixture.Node.Configuration);
             try
             {
-                var before = log.State;
                 fixture.StartPublication(incoming, linked.Token);
                 await fixture.NativeFlushed.WaitAsync(linked.Token);
                 fixture.ReleaseNativeFlush();
@@ -35,17 +39,33 @@ internal sealed class ReplicaCheckpointProtocolGateTests
                 await Assert.That(fixture.Node.Canonical.VerifySnapshot(path).AppliedPosition).IsEqualTo(ReplicaCheckpointProtocolGateNode.SnapshotCut);
                 await Task.Delay(PublicationObservation, TimeProvider.System, linked.Token);
                 await Assert.That(fixture.Publication.IsCompleted).IsFalse();
-                await Assert.That(log.State).IsEqualTo(before);
+                await Assert.That(log.State).IsEqualTo(planning.State);
                 await Assert.That(log.TermAt(1)).IsEqualTo(ReplicaCheckpointProtocolGateNode.Term);
                 await Assert.That(log.Read(2, fixture.Node.Configuration.MaxAppendEntries, fixture.Node.Configuration.MaxAppendBytes).Length).IsEqualTo(3);
             }
             finally
             {
                 fixture.ReleaseNativeFlush();
-                log.ProtocolGate.Release();
+                fixture.ReleasePlanning();
             }
+            var joinedPlanning = await fixture.JoinPlanningAsync();
+            await AssertPlanningAsync(joinedPlanning, before, fixture.Node.Configuration);
             var snapshot = await fixture.Publication.WaitAsync(linked.Token);
             await fixture.AssertPublishedAsync(snapshot!, linked.Token);
         });
+    }
+
+    private static async Task AssertPlanningAsync(ReplicaCheckpointProtocolPlanningObservation planning,
+        ReplicaHardState expectedState, ReplicaConfiguration configuration)
+    {
+        await Assert.That(planning.State).IsEqualTo(expectedState);
+        await Assert.That(planning.Term).IsEqualTo(ReplicaCheckpointProtocolGateNode.Term);
+        await Assert.That(planning.Suffix.Length).IsEqualTo(3);
+        await Assert.That(planning.Suffix[0]).IsEqualTo(new ReplicaEntry(2, ReplicaCheckpointProtocolGateNode.Term, null));
+        await Assert.That(planning.Suffix[1]).IsEqualTo(new ReplicaEntry(ReplicaCheckpointProtocolGateNode.SnapshotCut,
+            ReplicaCheckpointProtocolGateNode.Term, null));
+        await Assert.That(planning.Suffix[^1]).IsEqualTo(new ReplicaEntry(ReplicaCheckpointProtocolGateNode.TailIndex,
+            ReplicaCheckpointProtocolGateNode.Term, null));
+        await Assert.That(expectedState.VotedFor).IsEqualTo(configuration.LocalId);
     }
 }

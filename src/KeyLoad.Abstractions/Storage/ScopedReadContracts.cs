@@ -19,4 +19,6 @@ public delegate void StorageReadObserver(long byteCount);
 /// <param name="HasMore">Whether a record-limit lookahead found another logical record.</param>
 /// <param name="StoppedByVisitor">Whether the visitor explicitly stopped the traversal.</param>
 /// <param name="ReadBytes">Examined raw key/value bytes, including charged lookahead work.</param>
-public readonly record struct StorageScanResult(int Records, bool HasMore, bool StoppedByVisitor, long ReadBytes);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.StorageScanResult)]
+public readonly record struct StorageScanResult([property: Orleans.Id(0)] int Records, [property: Orleans.Id(1)] bool HasMore, [property: Orleans.Id(2)] bool StoppedByVisitor, [property: Orleans.Id(3)] long ReadBytes);

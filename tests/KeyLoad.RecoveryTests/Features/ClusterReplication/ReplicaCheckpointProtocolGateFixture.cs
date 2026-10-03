@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using KeyLoad.CrashHost;
 using KeyLoad.Replication;
-using TUnit.Assertions.Exceptions;
 
 namespace KeyLoad.RecoveryTests;
 
@@ -10,13 +9,16 @@ internal sealed class ReplicaCheckpointProtocolGateFixture : IAsyncDisposable
     private const string DirectoryPrefix = "keyload-checkpoint-protocol-";
     private const string TargetDirectory = "target";
     private const string SourceDirectory = "source";
+    private const string PlanningNotStarted = "Protocol planning scope has not started.";
     private static readonly TimeSpan ImagePollInterval = TimeSpan.FromMilliseconds(10);
+    private static readonly TimeSpan PlanningTimeout = TimeSpan.FromSeconds(15);
     private readonly string directory = ReplicaFixturePaths.NewDirectory(DirectoryPrefix);
     private readonly ReplicaCheckpointProtocolGatePause pause = new();
     private readonly List<Exception> failures = [];
     private ReplicaCheckpointProtocolGateNode? source;
     private ReplicaSnapshot? incoming;
     private Task<ReplicaSnapshot?>? publication;
+    private ReplicaCheckpointProtocolPlanningScope? planning;
     private Task? cleanup;
     private bool runStarted;
 
@@ -39,6 +41,20 @@ internal sealed class ReplicaCheckpointProtocolGateFixture : IAsyncDisposable
     internal Task NativeFlushed => pause.Entered;
     internal Task<ReplicaSnapshot?> Publication => publication ?? throw new InvalidOperationException("Checkpoint publication has not started.");
     internal void ReleaseNativeFlush() => pause.Release();
+
+    internal void StartPlanning(CancellationToken cancellationToken)
+        => planning = new(Node, PlanningTimeout, cancellationToken);
+
+    internal Task<ReplicaCheckpointProtocolPlanningObservation> WaitForPlanningAsync(CancellationToken cancellationToken)
+        => RequiredPlanning.WaitForEntryAsync(cancellationToken);
+
+    internal void ReleasePlanning() => RequiredPlanning.Release();
+
+    internal Task<ReplicaCheckpointProtocolPlanningObservation> JoinPlanningAsync()
+        => RequiredPlanning.JoinAsync();
+
+    private ReplicaCheckpointProtocolPlanningScope RequiredPlanning
+        => planning ?? throw new InvalidOperationException(PlanningNotStarted);
 
     internal async Task PrepareAsync(bool receive, CancellationToken cancellationToken)
     {
@@ -116,15 +132,8 @@ internal sealed class ReplicaCheckpointProtocolGateFixture : IAsyncDisposable
         runStarted = true;
         try
         {
-            await scenario();
+            await ReplicaMaterializerLifecycleErrors.AttemptAsync(scenario, failures);
         }
-        catch (AssertionException error) { failures.Add(error); }
-        catch (AggregateException error) { failures.Add(error); }
-        catch (IOException error) { failures.Add(error); }
-        catch (InvalidOperationException error) { failures.Add(error); }
-        catch (OperationCanceledException error) { failures.Add(error); }
-        catch (TimeoutException error) { failures.Add(error); }
-        catch (KeyLoadException error) { failures.Add(error); }
         finally { await DisposeAsync(); }
         ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
@@ -142,28 +151,28 @@ internal sealed class ReplicaCheckpointProtocolGateFixture : IAsyncDisposable
     private async Task CleanupAsync()
     {
         pause.Release();
+        var activePlanning = planning;
+        if (activePlanning is not null)
+        {
+            activePlanning.Release();
+            await ReplicaMaterializerLifecycleErrors.AttemptAsync(async () => { _ = await activePlanning.JoinAsync(); }, failures);
+        }
         if (publication is not null)
         {
             await ReplicaMaterializerLifecycleErrors.AttemptAsync(async () => { _ = await publication; }, failures);
         }
-        try
-        { await Node.DisposeAsync(); }
-        catch (AggregateException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        catch (IOException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        catch (InvalidOperationException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        catch (OperationCanceledException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        catch (TimeoutException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        catch (KeyLoadException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
+        await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => Node.DisposeAsync().AsTask(), failures);
         if (source is not null)
         {
             try
-            { await source.DisposeAsync(); }
-            catch (AggregateException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-            catch (IOException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-            catch (InvalidOperationException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-            catch (OperationCanceledException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-            catch (TimeoutException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-            catch (KeyLoadException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
+            {
+                try
+                { await source.DisposeAsync(); }
+                catch (Exception original)
+                { throw new AggregateException(original); }
+            }
+            catch (AggregateException wrapper)
+            { ReplicaMaterializerLifecycleErrors.AddWrapped(wrapper, failures); }
         }
         ReplicaMaterializerLifecycleErrors.Attempt(() => Directory.Delete(directory, true), failures);
     }

@@ -5,21 +5,29 @@ namespace KeyLoad.Storage;
 /// <summary>Owns one independent key and value copied from a gated storage view.</summary>
 /// <param name="Key">Encoded record key owned by this result.</param>
 /// <param name="Value">Logical record bytes owned by this result.</param>
-public sealed record KeyValueRecord(ReadOnlyMemory<byte> Key, ReadOnlyMemory<byte> Value);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.KeyValueRecord)]
+public sealed record KeyValueRecord([property: Orleans.Id(0)] ReadOnlyMemory<byte> Key, [property: Orleans.Id(1)] ReadOnlyMemory<byte> Value);
 /// <summary>Describes an ordered atomic record write or tombstone.</summary>
 /// <param name="Key">Encoded record key included in the commit.</param>
 /// <param name="Value">New logical bytes, or null to delete the key.</param>
-public sealed record StorageMutation(ReadOnlyMemory<byte> Key, ReadOnlyMemory<byte>? Value);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.StorageMutation)]
+public sealed record StorageMutation([property: Orleans.Id(0)] ReadOnlyMemory<byte> Key, [property: Orleans.Id(1)] ReadOnlyMemory<byte>? Value);
 /// <summary>Owns a bounded ordered page and its logical limit-lookahead result.</summary>
 /// <param name="Records">Independent key/value copies in encoded key order.</param>
 /// <param name="HasMore">True when another live matching record was examined.</param>
-public sealed record ScanPage(ImmutableArray<KeyValueRecord> Records, bool HasMore);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ScanPage)]
+public sealed record ScanPage([property: Orleans.Id(0)] ImmutableArray<KeyValueRecord> Records, [property: Orleans.Id(1)] bool HasMore);
 /// <summary>Identifies the verified store cut represented by a snapshot.</summary>
 /// <param name="Incarnation">Storage incarnation recorded in the snapshot.</param>
 /// <param name="Position">Local durable storage position of the captured cut.</param>
 /// <param name="AppliedPosition">Replicated operation position captured in the cut.</param>
 /// <param name="RecordCount">Number of logical records included in the snapshot.</param>
-public sealed record StorageSnapshot(Guid Incarnation, long Position, long AppliedPosition, long RecordCount);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.StorageSnapshot)]
+public sealed record StorageSnapshot([property: Orleans.Id(0)] Guid Incarnation, [property: Orleans.Id(1)] long Position, [property: Orleans.Id(2)] long AppliedPosition, [property: Orleans.Id(3)] long RecordCount);
 /// <summary>Reads a consistent view only inside its owning store action.</summary>
 public interface IKeyValueView
 {
@@ -92,8 +100,10 @@ public interface IAtomicTransaction : IKeyValueView
 /// <param name="Durability">Acknowledgement guarantee supplied by the provider.</param>
 /// <param name="DispatchPaused">Whether restored dispatch remains paused.</param>
 /// <param name="ReadGeneration">Generation fencing restored or replaced read authority.</param>
-public sealed record StoreIdentity(int FormatVersion, int KeyCodecVersion, Guid NodeId, Guid Incarnation,
-    ReadOnlyMemory<byte> SigningKey, DurabilityProfile Durability, bool DispatchPaused = false, long ReadGeneration = 0);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.StoreIdentity)]
+public sealed record StoreIdentity([property: Orleans.Id(0)] int FormatVersion, [property: Orleans.Id(1)] int KeyCodecVersion, [property: Orleans.Id(2)] Guid NodeId, [property: Orleans.Id(3)] Guid Incarnation,
+    [property: Orleans.Id(4)] ReadOnlyMemory<byte> SigningKey, [property: Orleans.Id(5)] DurabilityProfile Durability, [property: Orleans.Id(6)] bool DispatchPaused = false, [property: Orleans.Id(7)] long ReadGeneration = 0);
 /// <summary>Owns durable records, store gates and snapshot/backup publication.</summary>
 public interface IAtomicStore : IDisposable
 {

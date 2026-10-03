@@ -5,26 +5,38 @@ namespace KeyLoad;
 /// <summary>Identifies a work queue in an atomic partition.</summary>
 /// <param name="Partition">Identifies the atomic partition containing the resource.</param>
 /// <param name="Queue">Identifies the work queue.</param>
-public sealed record QueueLaneRef(PartitionRef Partition, string Queue);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.QueueLaneRef)]
+public sealed record QueueLaneRef([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Queue);
 
 /// <summary>Defines storage, delivery, lease, and retry limits for a work queue.</summary>
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.QueuePolicy)]
 public sealed record QueuePolicy
 {
     /// <summary>Gets or sets the max attempts value.</summary>
+    [Orleans.Id(0)]
     public int MaxAttempts { get; init; } = 5;
     /// <summary>Gets or sets the max stored messages value.</summary>
+    [Orleans.Id(1)]
     public long MaxStoredMessages { get; init; } = 100_000;
     /// <summary>Gets or sets the max stored bytes value.</summary>
+    [Orleans.Id(2)]
     public long MaxStoredBytes { get; init; } = 1_073_741_824;
     /// <summary>Gets or sets the max in flight messages value.</summary>
+    [Orleans.Id(3)]
     public int MaxInFlightMessages { get; init; } = 1_000;
     /// <summary>Gets or sets the max in flight bytes value.</summary>
+    [Orleans.Id(4)]
     public long MaxInFlightBytes { get; init; } = 67_108_864;
     /// <summary>Gets or sets the max lease seconds value.</summary>
+    [Orleans.Id(5)]
     public int MaxLeaseSeconds { get; init; } = 300;
     /// <summary>Gets or sets the retry base milliseconds value.</summary>
+    [Orleans.Id(6)]
     public int RetryBaseMilliseconds { get; init; } = 1_000;
     /// <summary>Gets or sets the retry max milliseconds value.</summary>
+    [Orleans.Id(7)]
     public int RetryMaxMilliseconds { get; init; } = 300_000;
 }
 
@@ -36,8 +48,10 @@ public sealed record QueuePolicy
 /// <param name="NotBefore">Sets the optional earliest delivery time.</param>
 /// <param name="ExpiresAt">Sets the optional expiration time.</param>
 /// <param name="OrderingKey">Groups messages that must retain their ordering.</param>
-public sealed record EnqueueMessage(string Queue, string MessageId, string PayloadJson, string HeadersJson = "{}",
-    DateTimeOffset? NotBefore = null, DateTimeOffset? ExpiresAt = null, string? OrderingKey = null) : Mutation(Queue);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.EnqueueMessage)]
+public sealed record EnqueueMessage([property: Orleans.Id(0)] string Queue, [property: Orleans.Id(1)] string MessageId, [property: Orleans.Id(2)] string PayloadJson, [property: Orleans.Id(3)] string HeadersJson = "{}",
+    [property: Orleans.Id(4)] DateTimeOffset? NotBefore = null, [property: Orleans.Id(5)] DateTimeOffset? ExpiresAt = null, [property: Orleans.Id(6)] string? OrderingKey = null) : Mutation(Queue);
 
 /// <summary>Identifies the persisted lifecycle state of a queued message.</summary>
 public enum MessageState
@@ -64,7 +78,9 @@ public enum MessageState
 /// <param name="HeadersJson">Contains optional JSON headers.</param>
 /// <param name="OrderingKey">Groups messages that must retain their ordering.</param>
 /// <param name="Fingerprint">Identifies the canonical command fingerprint.</param>
-public sealed record MessageBody(string Id, string PayloadJson, string HeadersJson, string? OrderingKey, string Fingerprint);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.MessageBody)]
+public sealed record MessageBody([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] string PayloadJson, [property: Orleans.Id(2)] string HeadersJson, [property: Orleans.Id(3)] string? OrderingKey, [property: Orleans.Id(4)] string Fingerprint);
 
 /// <summary>Stores queue delivery state, sequencing, lease, and failure metadata.</summary>
 /// <param name="Id">Identifies the entity, document, key, message, event, or operation.</param>
@@ -79,9 +95,11 @@ public sealed record MessageBody(string Id, string PayloadJson, string HeadersJs
 /// <param name="LeaseUntil">Specifies the lease until value.</param>
 /// <param name="DeliveryGeneration">Identifies the delivery generation.</param>
 /// <param name="SafeFailureCode">Specifies the safe failure code value.</param>
-public sealed record MessageMetadata(string Id, MessageState State, int Attempts, long StateVersion, long ReadySequence,
-    DateTimeOffset? NotBefore, DateTimeOffset? ExpiresAt, string? LeaseOwner = null, long LeaseVersion = 0,
-    DateTimeOffset? LeaseUntil = null, long DeliveryGeneration = 1, string? SafeFailureCode = null);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.MessageMetadata)]
+public sealed record MessageMetadata([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] MessageState State, [property: Orleans.Id(2)] int Attempts, [property: Orleans.Id(3)] long StateVersion, [property: Orleans.Id(4)] long ReadySequence,
+    [property: Orleans.Id(5)] DateTimeOffset? NotBefore, [property: Orleans.Id(6)] DateTimeOffset? ExpiresAt, [property: Orleans.Id(7)] string? LeaseOwner = null, [property: Orleans.Id(8)] long LeaseVersion = 0,
+    [property: Orleans.Id(9)] DateTimeOffset? LeaseUntil = null, [property: Orleans.Id(10)] long DeliveryGeneration = 1, [property: Orleans.Id(11)] string? SafeFailureCode = null);
 
 /// <summary>Reports queue storage and in-flight usage and the next ready sequence.</summary>
 /// <param name="StoredMessages">Specifies the stored messages value.</param>
@@ -89,7 +107,9 @@ public sealed record MessageMetadata(string Id, MessageState State, int Attempts
 /// <param name="InFlightMessages">Specifies the in flight messages value.</param>
 /// <param name="InFlightBytes">Specifies the in flight bytes value.</param>
 /// <param name="NextReadySequence">Specifies the next ready sequence value.</param>
-public sealed record QueueCounters(long StoredMessages, long StoredBytes, long InFlightMessages, long InFlightBytes, long NextReadySequence);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.QueueCounters)]
+public sealed record QueueCounters([property: Orleans.Id(0)] long StoredMessages, [property: Orleans.Id(1)] long StoredBytes, [property: Orleans.Id(2)] long InFlightMessages, [property: Orleans.Id(3)] long InFlightBytes, [property: Orleans.Id(4)] long NextReadySequence);
 
 /// <summary>Returns a leased message and the token and generation needed to process it.</summary>
 /// <param name="Id">Identifies the entity, document, key, message, event, or operation.</param>
@@ -100,8 +120,10 @@ public sealed record QueueCounters(long StoredMessages, long StoredBytes, long I
 /// <param name="LeaseUntil">Specifies the lease until value.</param>
 /// <param name="Attempt">Specifies the attempt value.</param>
 /// <param name="DeliveryGeneration">Identifies the delivery generation.</param>
-public sealed record Delivery(string Id, string PayloadJson, string HeadersJson, string Token, long LeaseVersion,
-    DateTimeOffset LeaseUntil, int Attempt, long DeliveryGeneration);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.Delivery)]
+public sealed record Delivery([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] string PayloadJson, [property: Orleans.Id(2)] string HeadersJson, [property: Orleans.Id(3)] string Token, [property: Orleans.Id(4)] long LeaseVersion,
+    [property: Orleans.Id(5)] DateTimeOffset LeaseUntil, [property: Orleans.Id(6)] int Attempt, [property: Orleans.Id(7)] long DeliveryGeneration);
 
 /// <summary>Requests a bounded number of messages from one queue lane.</summary>
 /// <param name="RequestId">Identifies this receive request.</param>
@@ -109,14 +131,18 @@ public sealed record Delivery(string Id, string PayloadJson, string HeadersJson,
 /// <param name="MaxMessages">Limits deliveries returned by the request.</param>
 /// <param name="MaxBytes">Limits returned payload bytes.</param>
 /// <param name="LeaseSeconds">Requests the message lease duration.</param>
-public sealed record ReceiveRequest(Guid RequestId, QueueLaneRef Lane, int MaxMessages = 1,
-    int MaxBytes = 1_048_576, int LeaseSeconds = 30);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ReceiveRequest)]
+public sealed record ReceiveRequest([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] QueueLaneRef Lane, [property: Orleans.Id(2)] int MaxMessages = 1,
+    [property: Orleans.Id(3)] int MaxBytes = 1_048_576, [property: Orleans.Id(4)] int LeaseSeconds = 30);
 
 /// <summary>Returns leased deliveries and their committed receive token.</summary>
 /// <param name="RequestId">Identifies this receive request.</param>
 /// <param name="Deliveries">Contains leased messages.</param>
 /// <param name="Token">Carries the delivery token.</param>
-public sealed record ReceiveResult(Guid RequestId, ImmutableArray<Delivery> Deliveries, CommitToken Token);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ReceiveResult)]
+public sealed record ReceiveResult([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] ImmutableArray<Delivery> Deliveries, [property: Orleans.Id(2)] CommitToken Token);
 
 /// <summary>Binds a delivery token to its lane, principal, lease, and incarnation.</summary>
 /// <param name="Lane">Identifies the queue lane.</param>
@@ -125,8 +151,10 @@ public sealed record ReceiveResult(Guid RequestId, ImmutableArray<Delivery> Deli
 /// <param name="LeaseVersion">Identifies the lease version.</param>
 /// <param name="DeliveryGeneration">Identifies the delivery generation.</param>
 /// <param name="Incarnation">Identifies the issuing storage incarnation.</param>
-public sealed record DeliveryClaims(QueueLaneRef Lane, string MessageId, string PrincipalId, long LeaseVersion,
-    long DeliveryGeneration, Guid Incarnation);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.DeliveryClaims)]
+public sealed record DeliveryClaims([property: Orleans.Id(0)] QueueLaneRef Lane, [property: Orleans.Id(1)] string MessageId, [property: Orleans.Id(2)] string PrincipalId, [property: Orleans.Id(3)] long LeaseVersion,
+    [property: Orleans.Id(4)] long DeliveryGeneration, [property: Orleans.Id(5)] Guid Incarnation);
 
 /// <summary>Selects the acknowledgement action for a delivery.</summary>
 public enum DeliveryAction
@@ -146,8 +174,10 @@ public enum DeliveryAction
 /// <param name="Action">Selects the delivery action.</param>
 /// <param name="LeaseSeconds">Requests the message lease duration.</param>
 /// <param name="FailureCode">Provides a safe handler failure code.</param>
-public sealed record DeliveryCommand(Guid CommandId, QueueLaneRef Lane, string Token, DeliveryAction Action,
-    int? LeaseSeconds = null, string? FailureCode = null);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.DeliveryCommand)]
+public sealed record DeliveryCommand([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] QueueLaneRef Lane, [property: Orleans.Id(2)] string Token, [property: Orleans.Id(3)] DeliveryAction Action,
+    [property: Orleans.Id(4)] int? LeaseSeconds = null, [property: Orleans.Id(5)] string? FailureCode = null);
 
 /// <summary>Requests an idempotent handler execution with its declared effects.</summary>
 /// <param name="CommandId">Identifies the command for deduplication.</param>
@@ -156,11 +186,15 @@ public sealed record DeliveryCommand(Guid CommandId, QueueLaneRef Lane, string T
 /// <param name="HandlerScope">Identifies the idempotent handler scope.</param>
 /// <param name="ExecutionGeneration">Identifies the handler execution generation.</param>
 /// <param name="Effects">Lists mutations committed with handler processing.</param>
-public sealed record ProcessingRequest(Guid CommandId, QueueLaneRef Lane, string Token, string HandlerScope,
-    long ExecutionGeneration, ImmutableArray<Mutation> Effects);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ProcessingRequest)]
+public sealed record ProcessingRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] QueueLaneRef Lane, [property: Orleans.Id(2)] string Token, [property: Orleans.Id(3)] string HandlerScope,
+    [property: Orleans.Id(4)] long ExecutionGeneration, [property: Orleans.Id(5)] ImmutableArray<Mutation> Effects);
 
 /// <summary>Returns message metadata with any requested payload and headers.</summary>
 /// <param name="Metadata">Contains the message state metadata.</param>
 /// <param name="PayloadJson">Contains the optional message payload.</param>
 /// <param name="HeadersJson">Contains optional JSON headers.</param>
-public sealed record MessageInspection(MessageMetadata Metadata, string? PayloadJson, string? HeadersJson);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.MessageInspection)]
+public sealed record MessageInspection([property: Orleans.Id(0)] MessageMetadata Metadata, [property: Orleans.Id(1)] string? PayloadJson, [property: Orleans.Id(2)] string? HeadersJson);

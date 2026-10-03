@@ -62,6 +62,7 @@
 | [ADR-055 typed relational rows](ADR-055-typed-relational-rows.md) | Accepted, source implemented; complete qualification pending | RelationalStorage |
 | [ADR-056 isolated Linux comparison cells](ADR-056-isolated-linux-comparison-cells.md) | Accepted, implementation and qualification pending | BenchmarkComparisons, ClusterReplication |
 | [ADR-059 intensive native TimeSeries family](ADR-059-isolated-intensive-timeseries.md) | Accepted staged contract; implementation and native qualification pending | BenchmarkComparisons |
+| [ADR-060 native internal serialization](ADR-060-native-internal-serialization.md) | Accepted; format installation/rollout approval and native qualification pending | InternalSerialization |
 
 ## Ідентичність і пріоритет
 
@@ -104,3 +105,9 @@ and GitHub TUnit/Dry qualification; implementation and exact-SHA proof are pendi
 REQ/AC-AD-008..010 and REQ/AC-BC-029 apply. Exact-SHA qualification is pending.
 
 [ADR-057](ADR-057-orleans-atomic-wal.md) accepts private Orleans binary atomic WAL payloads with format3 fencing and offline checkpoint-only upgrades; source and exact-SHA qualification pending.
+
+[ADR-058](ADR-058-orleans-coordinated-cache-memory.md) accepts staged disposable
+cache memory and authenticated Orleans coordination. The shared retained pool
+and explicitly configured embedded point cache are implemented in source; RF3
+server admission remains cold pending authenticated cluster control. Native
+cache correctness, coverage and matched performance qualification remain open.

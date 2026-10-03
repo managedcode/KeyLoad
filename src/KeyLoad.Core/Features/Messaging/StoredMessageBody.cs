@@ -3,7 +3,12 @@ using KeyLoad.Storage;
 namespace KeyLoad.Core.Features.Messaging;
 
 /// <summary>Owns one decoded body and its exact persisted UTF-8 length.</summary>
-internal readonly record struct StoredMessageBody(MessageBody Body, long Bytes)
+
+[global::Orleans.GenerateSerializer]
+[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.StoredMessageBody)]
+internal readonly record struct StoredMessageBody(
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredMessageBodyFields.Body)] MessageBody Body,
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredMessageBodyFields.Bytes)] long Bytes)
 {
     /// <summary>Decodes borrowed bytes once without retaining the storage-owned span.</summary>
     internal static StoredMessageBody? Read(IKeyValueView view, byte[] key)

@@ -26,6 +26,11 @@ internal static class ZoneTreeCheckpointGeneration
 
     private static string? Prepare(ZoneTreeStoreRuntime runtime, bool replaceTree)
     {
+        if (replaceTree)
+        {
+            runtime.PointCache?.Clear();
+        }
+
         runtime.Identity = runtime.Identity with
         {
             FormatVersion = BinaryJournalIdentityVersion,

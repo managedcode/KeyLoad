@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using ZoneTree;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
@@ -7,18 +8,19 @@ namespace KeyLoad.Storage.ZoneTree;
 internal sealed class ZoneTreeStoreRuntime : IDisposable
 {
     private bool disposed;
-    private int disposeStarted;
     private long position;
 
     internal ZoneTreeStoreRuntime(ZoneTreeStoreOptions options)
     {
         Options = options;
+        CacheLifecycle = new(this);
         try
         {
             View = new(this);
             Checkpoints = new(this);
             Backups = new(this);
             ZoneTreeStoreInitializer.Open(this);
+            EmbeddedPointCache = OpenPointCache();
         }
         catch (Exception)
         {
@@ -35,6 +37,9 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
     internal IMaintainer Maintainer { get; set; } = null!;
     internal StoreIdentity Identity { get; set; } = null!;
     internal ZoneTreeReadCounters ReadCounters { get; } = new();
+    internal ZoneTreePointCache? EmbeddedPointCache { get; }
+    internal ZoneTreePointCacheLifecycle CacheLifecycle { get; }
+    internal ZoneTreePointCache? PointCache => CacheLifecycle.MaintenanceCache;
     internal ZoneTreeReadView View { get; }
     internal ZoneTreeCheckpointManager Checkpoints { get; }
     internal ZoneTreeBackupRestore Backups { get; }
@@ -53,6 +58,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
 
     internal void Apply(StorageMutation mutation)
     {
+        PointCache?.Invalidate(mutation.Key.Span);
         var key = MemoryMarshal.AsMemory(mutation.Key);
         if (mutation.Value is null)
         {
@@ -69,11 +75,24 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
 
     public void Dispose()
     {
-        if (Interlocked.Exchange(ref disposeStarted, 1) != 0)
+        if (!ZoneTreePointCacheStoreGate.CanBeginDisposal(this, CacheLifecycle)
+            || !CacheLifecycle.TryBeginClose(out var control))
         {
             return;
         }
 
+        var failures = new List<Exception>();
+        ZoneTreePointCacheCleanup.Capture(() =>
+        {
+            if (control is not null)
+            {
+                control.CloseAdmission();
+            }
+            else
+            {
+                EmbeddedPointCache?.Disable();
+            }
+        }, failures);
         Gate.EnterWriteLock();
         try
         {
@@ -83,12 +102,32 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
             }
 
             disposed = true;
-            ZoneTreeStoreHandleDisposal.Normal(this);
+            ZoneTreePointCacheCleanup.Capture(() => ZoneTreeStoreHandleDisposal.Normal(this), failures);
+            ZoneTreePointCacheCleanup.Capture(CacheLifecycle.DisposeCacheUnderWrite, failures);
         }
         finally
         {
-            Gate.ExitWriteLock();
-            Gate.Dispose();
+            ZoneTreePointCacheCleanup.Capture(Gate.ExitWriteLock, failures);
+            ZoneTreePointCacheCleanup.Capture(Gate.Dispose, failures);
+        }
+        ZoneTreePointCacheCleanup.ThrowFailures(failures);
+    }
+
+    private ZoneTreePointCache? OpenPointCache()
+    {
+        if (Options.EmbeddedPointCache is not { } options)
+        {
+            return null;
+        }
+
+        try
+        {
+            return new(options);
+        }
+        catch (Exception)
+        {
+            ZoneTreeStoreHandleDisposal.FailedOpen(this);
+            throw;
         }
     }
 }

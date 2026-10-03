@@ -110,9 +110,14 @@ internal static class ZoneTreeBackupRestoreFiles
     }
 }
 
+[global::Orleans.GenerateSerializer, global::Orleans.Alias(ZoneTreeMetadataAliases.BackupManifest)]
 internal sealed record ZoneTreeBackupRestoreManifest(
-    int Version,
-    long Position,
-    ZoneTreeBackupRestoreManifestFile[] Files);
+    [property: global::Orleans.Id(0)] int Version,
+    [property: global::Orleans.Id(1)] long Position,
+    [property: global::Orleans.Id(2)] ZoneTreeBackupRestoreManifestFile[] Files);
 
-internal sealed record ZoneTreeBackupRestoreManifestFile(string Name, long Length, string Checksum);
+[global::Orleans.GenerateSerializer, global::Orleans.Alias(ZoneTreeMetadataAliases.BackupFile)]
+internal sealed record ZoneTreeBackupRestoreManifestFile(
+    [property: global::Orleans.Id(0)] string Name,
+    [property: global::Orleans.Id(1)] long Length,
+    [property: global::Orleans.Id(2)] string Checksum);

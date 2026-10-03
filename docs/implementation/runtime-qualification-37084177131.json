@@ -1,0 +1,719 @@
+{
+  "schemaVersion": 1,
+  "repository": "managedcode/KeyLoad",
+  "sourceSha": "cf630751e0f24e4d8183e55510add9c7207e377f",
+  "runId": 37084177131,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131",
+  "runStatus": "completed",
+  "runConclusion": "failure",
+  "scope": "partial_native_kernel_and_comparison_preflight_baseline_not_complete_performance_or_cache_qualification",
+  "rootJoinedAtUtc": "2026-10-03T01:42:49.447948+00:00",
+  "sourceOwnedReports": [
+    {
+      "artifact": 11260212931,
+      "artifactName": "docker-rf3-qualification",
+      "path": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "sha256": "c9da34713343079c238a6982dd80d377f370889f0cc9343742d16b50dda02c25",
+      "assembly": "KeyLoad.IntegrationTests",
+      "count": 63,
+      "statuses": {
+        "passed": 63
+      },
+      "idStatusSha256": "3030a8173ed1e66b73cb184db8fdf3f69f42e69b9809a890c67e2174a9501bef"
+    },
+    {
+      "artifact": 11260138571,
+      "artifactName": "comparison-images-qualification",
+      "path": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "sha256": "b257dce8a4c5c9db9092893914f8f42f112e70d657534b37d184acf7e4fee738",
+      "assembly": "KeyLoad.ComparisonTests",
+      "count": 1,
+      "statuses": {
+        "passed": 1
+      },
+      "idStatusSha256": "d2314ff199755994518d43d44dec5804f190bac261769cedb5e3bdc6c2b317a1"
+    },
+    {
+      "artifact": 11260087442,
+      "artifactName": "analyzer-rule-evidence",
+      "path": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "2b994b77476a796a0d06607b8f75a785dfb8d8cef342721fb43513348196d011",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "count": 118,
+      "statuses": {
+        "passed": 118
+      },
+      "idStatusSha256": "649533a027c16a122e0a06034e742ed22488fab1bcd5ceeaf84fe29e79b378b7"
+    },
+    {
+      "artifact": 11259853414,
+      "artifactName": "test-results-ubuntu-latest",
+      "path": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "c501cc2ff254506c6d203ca415ab5887a48204eb9592444694271dca900bd25f",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "count": 118,
+      "statuses": {
+        "passed": 118
+      },
+      "idStatusSha256": "649533a027c16a122e0a06034e742ed22488fab1bcd5ceeaf84fe29e79b378b7"
+    },
+    {
+      "artifact": 11259853414,
+      "artifactName": "test-results-ubuntu-latest",
+      "path": "TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "sha256": "6b33b205d20445fe2556a764e3a681e59f16de1fae3288c86de4c6117895e65e",
+      "assembly": "KeyLoad.RecoveryTests",
+      "count": 136,
+      "statuses": {
+        "passed": 136
+      },
+      "idStatusSha256": "985d1d8681663c6d3f81edf058d3bd121cb0d025b2f941274b96cd7be63b6c9a"
+    },
+    {
+      "artifact": 11259853414,
+      "artifactName": "test-results-ubuntu-latest",
+      "path": "TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "32df681bbf8d949f3e486ac5f5b7277caa2a195f7dd7e40b315350c9b2e1d536",
+      "assembly": "KeyLoad.UnitTests",
+      "count": 1407,
+      "statuses": {
+        "passed": 1407
+      },
+      "idStatusSha256": "08507cbbe441e9923bd0e33875761f7d518676a6534fdff0a379ed1a9105762b"
+    },
+    {
+      "artifact": 11259853414,
+      "artifactName": "test-results-ubuntu-latest",
+      "path": "TestResults/unit-scalar/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "e2218cbaa5545c6a0b774d0c8cf18ab415bc82e55c3df7b31d5b13d63c9d1284",
+      "assembly": "KeyLoad.UnitTests",
+      "count": 1407,
+      "statuses": {
+        "passed": 1407
+      },
+      "idStatusSha256": "08507cbbe441e9923bd0e33875761f7d518676a6534fdff0a379ed1a9105762b"
+    }
+  ],
+  "normalScalarIdStatusEquality": true,
+  "analyzerInvocationsIdStatusEquality": true,
+  "seededProcessRecovery": {
+    "rows": 1000,
+    "originalFiles": [
+      {
+        "path": "artifacts/qualification/crash-trials-00.jsonl",
+        "sha256": "f2f26deca8da92e201f03edc8f13a4c1ddf4f5268c2c60b52c04cedfa33524c9",
+        "seed": 1701,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-01.jsonl",
+        "sha256": "8ea55b453d0f9dde7b0e74f21a58affcfaa4ae104cd21efec10cd3d98aeb9e59",
+        "seed": 1702,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-02.jsonl",
+        "sha256": "73e10f70ba263be9edb067fda0a1b0b454fca4ac531c689fa0c7846c1d341333",
+        "seed": 1703,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-03.jsonl",
+        "sha256": "83c5780373665491cf0b1b291cc83d7f77b2b34aa27289100a1c1561d3bd969a",
+        "seed": 1704,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-04.jsonl",
+        "sha256": "6ebfc4286acce8beb1126d18e0e8d865dc5efc38f67182b557e5ff2acf5cc93a",
+        "seed": 1705,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-05.jsonl",
+        "sha256": "bdb5f21d60c3efc99545e14a739c99c85dee6a301419e2460911525f7d98a4ec",
+        "seed": 1706,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-06.jsonl",
+        "sha256": "65c224e48e14a9a199e4bb812d9b8f7b11321334dd0b91a41b9fd579bd2171ca",
+        "seed": 1707,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-07.jsonl",
+        "sha256": "83f319bc15091a90be7406e2b4fa6fe0c573e8fe73281fc085fcdfaed4eea182",
+        "seed": 1708,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-08.jsonl",
+        "sha256": "83c06b8918f4459167dafe4e03f8040d24c6bc81729d61a132dcc2ab5641523d",
+        "seed": 1709,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-09.jsonl",
+        "sha256": "d32eb5db639981f3c89a7ea75aa1d73f0a504daaf26b409e0b10142c9c2a9b2e",
+        "seed": 1710,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-10.jsonl",
+        "sha256": "e412147323788eff0288f29a5338224ddbbca5976e10188bf8833a82aa9741fa",
+        "seed": 1711,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-11.jsonl",
+        "sha256": "51900d675f847eda21b670bbc1c6f28e2fc15d8bbcf56e8b69f9f758a7015c90",
+        "seed": 1712,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-12.jsonl",
+        "sha256": "74ab690c8a9668d0c00bd551574c0528675e7d93533f29c62850a3091bd7b0ab",
+        "seed": 1713,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-13.jsonl",
+        "sha256": "4a6e25f54c325dfdd97c6b4801226ad6f5bfc75ac052e80329eef7664402c145",
+        "seed": 1714,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-14.jsonl",
+        "sha256": "ff41d82c1b327128f2bba429d3cbda568459b5bba43350a4898e0fb04d4eac1b",
+        "seed": 1715,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-15.jsonl",
+        "sha256": "3769afd07c7f7a8bbb2abb74af39bca4fcd205c59100a2428700ddaa11abbb88",
+        "seed": 1716,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-16.jsonl",
+        "sha256": "e12db85f19a1f2c301b4adbdaa891e67df94eb78adce104cf6c092e2fda8ad23",
+        "seed": 1717,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-17.jsonl",
+        "sha256": "634710e41e28626d5e6ae0db826af23a91444c50d3e35ebaf83e882a283bd5bf",
+        "seed": 1718,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-18.jsonl",
+        "sha256": "c76c973a05a98e203733a9bdcad8103863796b28a51f3f8eb8288ea10264f893",
+        "seed": 1719,
+        "rows": 50
+      },
+      {
+        "path": "artifacts/qualification/crash-trials-19.jsonl",
+        "sha256": "cb90441f4a7937bf6345f066eb383217f79b9800710c651dc26b976e41fe7f59",
+        "seed": 1720,
+        "rows": 50
+      }
+    ],
+    "qualification": "process_kill_not_power_loss"
+  },
+  "finalPreflightJobs": [
+    {
+      "id": 111094622918,
+      "name": "preflight / keyload-n2-point-read",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622918"
+    },
+    {
+      "id": 111094622921,
+      "name": "preflight / postgresql-pgvector-n1-point-read",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622921"
+    },
+    {
+      "id": 111094622927,
+      "name": "preflight / postgresql-pgvector-n3-point-read",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622927"
+    },
+    {
+      "id": 111094622934,
+      "name": "preflight / neo4j-n2-point-read",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622934"
+    },
+    {
+      "id": 111094622936,
+      "name": "preflight / keyload-n3-point-read",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622936"
+    },
+    {
+      "id": 111094622945,
+      "name": "preflight / redis-n2-point-read",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622945"
+    },
+    {
+      "id": 111094622946,
+      "name": "preflight / postgresql-pgvector-n2-point-read",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622946"
+    },
+    {
+      "id": 111094622953,
+      "name": "preflight / opensearch-n1-point-read",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622953"
+    },
+    {
+      "id": 111094622962,
+      "name": "preflight / mongodb-n3-point-read",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622962"
+    },
+    {
+      "id": 111094622970,
+      "name": "preflight / mongodb-n2-point-read",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622970"
+    },
+    {
+      "id": 111094622972,
+      "name": "preflight / keyload-n1-point-read",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622972"
+    },
+    {
+      "id": 111094622975,
+      "name": "preflight / mongodb-n1-point-read",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622975"
+    },
+    {
+      "id": 111094622981,
+      "name": "preflight / redis-n1-point-read",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622981"
+    },
+    {
+      "id": 111094622998,
+      "name": "preflight / neo4j-n3-point-read",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094622998"
+    },
+    {
+      "id": 111094623016,
+      "name": "preflight / redis-n3-point-read",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094623016"
+    },
+    {
+      "id": 111094623024,
+      "name": "preflight / neo4j-n1-point-read",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094623024"
+    },
+    {
+      "id": 111094623890,
+      "name": "preflight / opensearch-n3-point-read",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094623890"
+    },
+    {
+      "id": 111094623928,
+      "name": "preflight / opensearch-n2-point-read",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094623928"
+    },
+    {
+      "id": 111094623958,
+      "name": "preflight / qdrant-n1-vector-exact",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094623958"
+    },
+    {
+      "id": 111094623964,
+      "name": "preflight / qdrant-n2-vector-exact",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094623964"
+    },
+    {
+      "id": 111094623987,
+      "name": "preflight / qdrant-n3-vector-exact",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094623987"
+    },
+    {
+      "id": 111094623998,
+      "name": "preflight / rabbitmq-n2-queue-cycle",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094623998"
+    },
+    {
+      "id": 111094624050,
+      "name": "preflight / rabbitmq-n1-queue-cycle",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094624050"
+    },
+    {
+      "id": 111094624106,
+      "name": "preflight / rabbitmq-n3-queue-cycle",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094624106"
+    },
+    {
+      "id": 111094624150,
+      "name": "preflight / kurrentdb-n1-stream-append",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094624150"
+    },
+    {
+      "id": 111094624217,
+      "name": "preflight / kurrentdb-n2-stream-append",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094624217"
+    },
+    {
+      "id": 111094624589,
+      "name": "preflight / kurrentdb-n3-stream-append",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131/job/111094624589"
+    }
+  ],
+  "authenticatedArtifactsSnapshot": {
+    "apiPath": "repos/managedcode/KeyLoad/actions/runs/37084177131/artifacts",
+    "archiveCount": 55,
+    "allListedOriginalZipDigestsMatchApi": true,
+    "sourceAndRunBound": true,
+    "snapshotIsNotFullFinalArtifactInventory": true,
+    "archives": [
+      {
+        "id": 11261110237,
+        "name": "comparison-preflight-kurrentdb-n1-stream-append",
+        "sha256": "ddb870dd1cbf0c4881e85f33c227ad9d1912a82719a402484beeee0460213447"
+      },
+      {
+        "id": 11260880166,
+        "name": "comparison-preflight-opensearch-n2-point-read",
+        "sha256": "2f3d14610149be9b1938e94043aecb809f997a8ab29b152334f2f530cd8458b0"
+      },
+      {
+        "id": 11260860603,
+        "name": "comparison-preflight-qualification-kurrentdb-n1-stream-append",
+        "sha256": "0990fc6559d0c98decf796c7e4d429b3ab442c2e2bd439591116066651e90080"
+      },
+      {
+        "id": 11260790322,
+        "name": "comparison-preflight-opensearch-n3-point-read",
+        "sha256": "11efeeafb5e5a0c46fd86a176834cefb7f7b8a3ea2d23c7e4578e57c331465df"
+      },
+      {
+        "id": 11260760331,
+        "name": "comparison-preflight-opensearch-n1-point-read",
+        "sha256": "b88b8d258cae9c84ba44cc33d7da541c80ca652c06108d669cf576bd0073fb5b"
+      },
+      {
+        "id": 11260662273,
+        "name": "comparison-preflight-neo4j-n1-point-read",
+        "sha256": "f5ac68b8dfcb9bce15bac80d908c8daa14b364cdbcd3c147e6ecfd175bfeb4cb"
+      },
+      {
+        "id": 11260557232,
+        "name": "comparison-preflight-qualification-keyload-n3-point-read",
+        "sha256": "597ca4fd9f176422f91d876bda172ff35ad3000c5c621a56327adcb57ffac685"
+      },
+      {
+        "id": 11260549411,
+        "name": "comparison-preflight-qualification-opensearch-n2-point-read",
+        "sha256": "2f677208e78eff978c6ec2fde6aa68f4348eb854a5b390b4bf4e46925223f667"
+      },
+      {
+        "id": 11260533810,
+        "name": "comparison-preflight-redis-n1-point-read",
+        "sha256": "a0c5bdeeb959db451bd073e6fb056a3c00e3bc9deb7ffc62e966e6ede67ef879"
+      },
+      {
+        "id": 11260528994,
+        "name": "comparison-preflight-mongodb-n2-point-read",
+        "sha256": "1834030b79c167ec9d6a1b1550ddca36c64c63cd8f8677a55941366fa7c97943"
+      },
+      {
+        "id": 11260502981,
+        "name": "comparison-preflight-qualification-qdrant-n1-vector-exact",
+        "sha256": "ca9747045301af2d2656dfba201fc25326cc70c9e15ce4295f4565ffe9b181ec"
+      },
+      {
+        "id": 11260463960,
+        "name": "comparison-preflight-neo4j-n3-point-read",
+        "sha256": "0ee674fdd1d4ccc609b68206f80299c4f77e45e9fd4883979ced2bd23ed18c9d"
+      },
+      {
+        "id": 11260363211,
+        "name": "comparison-preflight-rabbitmq-n1-queue-cycle",
+        "sha256": "16f900006533afa7a3ab349eada8c16fceceaf2d04dd97184ae81fc75a37e330"
+      },
+      {
+        "id": 11260348728,
+        "name": "comparison-preflight-qualification-keyload-n2-point-read",
+        "sha256": "83dd4d61d245bd9f90eac60371d065c4aa7b14e5e8f2b2d3ae47e44f4838bb3b"
+      },
+      {
+        "id": 11260309746,
+        "name": "comparison-preflight-qdrant-n1-vector-exact",
+        "sha256": "462841882801f0f0ba58a7b0bb2818dd762d2f5942b618a71e17256402d19709"
+      },
+      {
+        "id": 11260303381,
+        "name": "comparison-image-bundle",
+        "sha256": "38f3e932373f8918fa12d5abe16d0deaeefd43eb35464d2d6d9d4268f0ee2800"
+      },
+      {
+        "id": 11260268948,
+        "name": "comparison-preflight-redis-n3-point-read",
+        "sha256": "15373acee0f1bd82f24ee8f3568b53820613b6d8ed062bc12bdc966b4d3f8947"
+      },
+      {
+        "id": 11260212931,
+        "name": "docker-rf3-qualification",
+        "sha256": "bcc2a0f41542f5db5af0bd6756484e2265ddaea9744676eb384cbf7fbb896529"
+      },
+      {
+        "id": 11260174192,
+        "name": "comparison-preflight-qualification-redis-n1-point-read",
+        "sha256": "cd47e6691661413edd43e52a9cdeae108f37150172cd822b745d6bdcf4c7526f"
+      },
+      {
+        "id": 11260152716,
+        "name": "comparison-preflight-qualification-neo4j-n2-point-read",
+        "sha256": "df8dc07ed603cef8f704250b762bd0fcee0e1254538f54073b158508227c3858"
+      },
+      {
+        "id": 11260139859,
+        "name": "comparison-preflight-qualification-opensearch-n3-point-read",
+        "sha256": "44ac952d27f339c09aa1afe23e652795fdce905084a1ee3dbbdf00bf2c3bde34"
+      },
+      {
+        "id": 11260138571,
+        "name": "comparison-images-qualification",
+        "sha256": "2600292e0663085be85742127dae820ee9214e0e6bb7f0542d66b58208758757"
+      },
+      {
+        "id": 11260132463,
+        "name": "comparison-preflight-qualification-postgresql-pgvector-n3-point-read",
+        "sha256": "03397e2a285bf7679d91d5641c05fe024c6d312402f5b98edc3cff16985fe14e"
+      },
+      {
+        "id": 11260117675,
+        "name": "comparison-preflight-qualification-redis-n2-point-read",
+        "sha256": "b9ada90706975fc8f6abdbe20e12dac0e5a9ff42b4a350692f092c15a3ed850e"
+      },
+      {
+        "id": 11260087442,
+        "name": "analyzer-rule-evidence",
+        "sha256": "07bf2b45d5d31410209e417c70ee07922d38893c065f013dc4de92234f10eaaf"
+      },
+      {
+        "id": 11260062574,
+        "name": "comparison-preflight-keyload-n1-point-read",
+        "sha256": "39d1fd404f69ae7110928ab179735f0b6a353a53ae9fc55478b40a2891c4053d"
+      },
+      {
+        "id": 11260057670,
+        "name": "comparison-preflight-qualification-keyload-n1-point-read",
+        "sha256": "8d0ef98b2006ec5e70b47128723ed904141630df25ba03fc9df196baff136e84"
+      },
+      {
+        "id": 11260053284,
+        "name": "comparison-preflight-qdrant-n3-vector-exact",
+        "sha256": "ef81481cc8949c545aa2f403c3b96443cf7a10b0fdf391391c9ff5e0aa22e1c5"
+      },
+      {
+        "id": 11260028339,
+        "name": "comparison-preflight-qualification-qdrant-n3-vector-exact",
+        "sha256": "663a6350aa1133debaf8057b0eae3e0a389572e0fd4f654436e5b8928072d855"
+      },
+      {
+        "id": 11259983928,
+        "name": "comparison-preflight-postgresql-pgvector-n1-point-read",
+        "sha256": "7aef980a8ecf48feedadd4f46eeaa18a99054efc9c3a4b82860fc0512889a84c"
+      },
+      {
+        "id": 11259962906,
+        "name": "comparison-preflight-redis-n2-point-read",
+        "sha256": "0052c4ed3fe0036984404dde12d2107daf77d09926c3c25797014a8c4e331b66"
+      },
+      {
+        "id": 11259953961,
+        "name": "comparison-preflight-keyload-n2-point-read",
+        "sha256": "78582c9e756876d7aa32368b157fa30415497d2477d682ebfd1a4a57b78275ff"
+      },
+      {
+        "id": 11259938554,
+        "name": "comparison-preflight-qualification-rabbitmq-n1-queue-cycle",
+        "sha256": "e2794ec308a8b723b94016147086c75e88c12d170c2b829f09683518d57660ea"
+      },
+      {
+        "id": 11259924544,
+        "name": "comparison-preflight-mongodb-n1-point-read",
+        "sha256": "0a2ada0bf50391d5bd01f4662b648b5e03bed29a2ae1b5745b76b723a692d657"
+      },
+      {
+        "id": 11259924516,
+        "name": "comparison-preflight-qualification-mongodb-n2-point-read",
+        "sha256": "bc60ab29b643abe8418c1672fc9c0dfb7a847c4cb94b3d75da4a3ed855d5f458"
+      },
+      {
+        "id": 11259853423,
+        "name": "code-quality-ubuntu-latest",
+        "sha256": "faf96e7890116aefcca7b17a3e09e10099105093df7e2d8722e0e143a1932c50"
+      },
+      {
+        "id": 11259853414,
+        "name": "test-results-ubuntu-latest",
+        "sha256": "a8a732551ee8f771940bee5007cfd130ca618ff38e41bc307e0624ea7269e965"
+      },
+      {
+        "id": 11259849090,
+        "name": "comparison-preflight-postgresql-pgvector-n3-point-read",
+        "sha256": "8fe577a16223cebffaa2ed6821439347b6fc6f7236a061f8adaef9311e484b68"
+      },
+      {
+        "id": 11259774297,
+        "name": "comparison-preflight-qualification-postgresql-pgvector-n1-point-read",
+        "sha256": "6bd83e56747b17be2f4b18d557a478f7fe71d9343b6797e10f55f9cfa02cdb04"
+      },
+      {
+        "id": 11259757535,
+        "name": "comparison-plan",
+        "sha256": "52445809074ec8c6f2389956b567141a5aeebb69fe02562ba94ad0ef067e623c"
+      },
+      {
+        "id": 11259748533,
+        "name": "comparison-preflight-qualification-qdrant-n2-vector-exact",
+        "sha256": "b97249bc948d2a0ca4682a488426db2e057fd826dd72a43564c237d140651728"
+      },
+      {
+        "id": 11259734654,
+        "name": "comparison-preflight-qualification-redis-n3-point-read",
+        "sha256": "44fdcb0514448db3f6a9ea89af1d7ed2066794ee25b64f61f3fb9185713b6d9f"
+      },
+      {
+        "id": 11259719842,
+        "name": "comparison-preflight-qualification-mongodb-n1-point-read",
+        "sha256": "c1fe7848a1426f34bbb88ec1176abce3e4901129590ed41c098ebdbc8f44a4a2"
+      },
+      {
+        "id": 11259683345,
+        "name": "comparison-preflight-mongodb-n3-point-read",
+        "sha256": "aedf41396d741b76f5bc6eaa4f105d559c15787b2d1d70039ee7ab19cd77ef54"
+      },
+      {
+        "id": 11259629973,
+        "name": "comparison-preflight-qualification-mongodb-n3-point-read",
+        "sha256": "0dcc927c0e5bd71ab6a10e12078f9f427e2615914b34f86179d87a43eafc6d90"
+      },
+      {
+        "id": 11259618442,
+        "name": "comparison-preflight-qdrant-n2-vector-exact",
+        "sha256": "909dc2ef208cb89194ed9f04b8738c944d298f9b8cd426b1351e8c90417f61fc"
+      },
+      {
+        "id": 11259613101,
+        "name": "comparison-preflight-qualification-neo4j-n3-point-read",
+        "sha256": "b92336d2d51351ab68e36aa8dbcc6e4a01c619ef866ce57c60fc968ee221504f"
+      },
+      {
+        "id": 11259612883,
+        "name": "comparison-preflight-keyload-n3-point-read",
+        "sha256": "f589f21c4429878250099d069e02059bf93844bcb044c71aedb8bc47d95fa5c1"
+      },
+      {
+        "id": 11259603127,
+        "name": "comparison-preflight-neo4j-n2-point-read",
+        "sha256": "3476fbeab08796486b6d6c081cbd7126d30178aa0fa332e8bf736287bdc7e7ad"
+      },
+      {
+        "id": 11259589425,
+        "name": "comparison-preflight-qualification-postgresql-pgvector-n2-point-read",
+        "sha256": "9076a874dd8dde13bab4a135e25a04d6093eb4483d3fb756fc356fe6b2655f61"
+      },
+      {
+        "id": 11259578564,
+        "name": "docker-rf3-image-evidence",
+        "sha256": "ec675b8a0f3305a80061410bd3f30f7f4fc5605b58e53b88dcb1e1a15cac772c"
+      },
+      {
+        "id": 11259554462,
+        "name": "comparison-preflight-postgresql-pgvector-n2-point-read",
+        "sha256": "4456cb3962cb4d1b5d23b8893b7a4181c0556eecb5e5b4332cee33d9ca64f4f0"
+      },
+      {
+        "id": 11259488496,
+        "name": "comparison-preflight-qualification-neo4j-n1-point-read",
+        "sha256": "02c2c5a0b274438e1b3c8747319b2d01767aa95a814fb646063c01b40ee687cf"
+      },
+      {
+        "id": 11259483793,
+        "name": "code-quality-docker-rf3",
+        "sha256": "852b157f598950cf7b36c21ab356c3ae266483bd11eed771fe4b11c44c658c4d"
+      },
+      {
+        "id": 11259468813,
+        "name": "comparison-preflight-qualification-opensearch-n1-point-read",
+        "sha256": "b52d499cfee408525eff1b502ec9f143d203c12dc016cb2fce4873abd9d6e47e"
+      }
+    ]
+  },
+  "sourceEvidence": {
+    "runApiSha256": "ebe7325d73b9277b2a765a94f4a884e6f917797a5c5bf5270499c7b6575907f9",
+    "jobsApiSha256": "d5a1ffba1899234a75365af128800df8c065a81be0340910f5dafbb83f4294a8",
+    "artifactApiSha256": "823e69874649198df8961da6965876087c8b5f781da6f61336ef9ce7046f1308",
+    "rootPrivateIndependentJoinSha256": "e6a103f83c08845d28399d6f48d03d0590cb9623f951caa404870f5092b5821e"
+  },
+  "consumerTimeSeries": {
+    "centralPin": "10.0.3",
+    "nativeLoadedAssemblyMetadataTestPassed": true,
+    "retainedReportDoesNotSerializeActualComparedValue": true
+  },
+  "limitations": [
+    "12_of27_native_preflight_jobs_failed",
+    "intensive270_aggregate_and_current_performance_publication_not_qualified",
+    "uncommitted_cache_source_is_outside_this_source_SHA",
+    "no_native_KeyLoad_numeric_coverage_threshold_evidence",
+    "no_power_loss_endurance_or_performance_leadership_claim"
+  ]
+}

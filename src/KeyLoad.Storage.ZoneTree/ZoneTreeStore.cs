@@ -1,3 +1,4 @@
+using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
@@ -21,6 +22,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Directory);
+        options.EmbeddedPointCache?.Validate();
         runtime = new(options);
     }
 
@@ -145,6 +147,28 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     /// </remarks>
     /// <returns>An immutable snapshot without keys, payloads, credentials or storage paths.</returns>
     public ZoneTreeReadSnapshot GetReadDiagnostics() => runtime.ReadCounters.Snapshot();
+
+    /// <summary>Returns disposable point-cache work and modeled ownership without data or secrets.</summary>
+    /// <remarks>Current-helper counters reset on coordinated cold replacement; snapshots remain readable after disposal.</remarks>
+    public ZoneTreePointCacheSnapshot GetPointCacheDiagnostics() => runtime.CacheLifecycle.Snapshot();
+
+    /// <summary>Creates this opened runtime's sole, initially cold local point-cache control.</summary>
+    /// <param name="options">Fixed limits and externally owned shared retention budget.</param>
+    /// <param name="permit">Fixed receiver-owned eligibility capability; it grants no read authority.</param>
+    /// <param name="control">The created control only for Created; null for every other result.</param>
+    /// <returns>Created, AlreadyConfigured, Busy or Closed; invalid options and provider failures remain exceptions.</returns>
+    public ZoneTreePointCacheControlResult TryCreateCoordinatedPointCache(ZoneTreePointCacheOptions options,
+        ICacheReadPermit permit, out ZoneTreePointCacheControl? control)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(permit);
+        options.Validate();
+        return runtime.CacheLifecycle.TryCreate(options, permit, out control);
+    }
+
+    /// <summary>Disables acceleration and retires entries, preserving charges held by active readers.</summary>
+    /// <remarks>Does not acquire the store gate, wait for callbacks or change durable data.</remarks>
+    public void DisablePointCache() => runtime.CacheLifecycle.DisableAdmission();
 
     /// <summary>Closes the store handles and releases its exclusive directory lock.</summary>
     public void Dispose() => runtime.Dispose();

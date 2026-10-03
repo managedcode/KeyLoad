@@ -69,10 +69,14 @@ internal sealed class ReplicaCheckpointProtocolGateNode : IAsyncDisposable
         await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => Materializer.DisposeAsync().AsTask(), failures);
         ReplicaMaterializerLifecycleErrors.Attempt(Log.Dispose, failures);
         try
-        { stores.Dispose(); }
-        catch (AggregateException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        catch (IOException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        catch (InvalidOperationException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
+        {
+            try
+            { stores.Dispose(); }
+            catch (Exception original)
+            { throw new AggregateException(original); }
+        }
+        catch (AggregateException wrapper)
+        { ReplicaMaterializerLifecycleErrors.AddWrapped(wrapper, failures); }
         ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 }

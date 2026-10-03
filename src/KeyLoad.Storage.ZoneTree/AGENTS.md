@@ -18,6 +18,7 @@
 - Preserve atomicity, ordering, crash-recovery and disposal invariants. Do not add fake storage proofs, local qualification runs or unlocked dependency versions.
 
 ## Read-first and canonical slice ownership
+- Disposable point-cache infrastructure belongs to `Features/ResourceExecution/` under ADR-058. StorageRecovery still owns the real gate, Apply, snapshots and recovery joins; the cache cannot replace native records/WAL, scoped reads or authorization. Explicit embedded opt-in uses an externally shared pool; RF3 admission remains cold until the authenticated Orleans control contract is delivered and qualified. Index, fills and retired pinned bytes remain charged for their actual owned lifetime.
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned slice: `StorageRecovery`; target feature path: `Features/StorageRecovery/`, matching `docs/Features/StorageRecovery.md`.
 - `ZoneTreeStore.cs` is the public provider entry point; private behavior, including the replaced `Checkpoints.cs`, MUST remain under the named slice. Local backup/restore is owned by the matching `Features/BackupRestore/` slice.

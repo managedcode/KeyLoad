@@ -370,7 +370,9 @@ Retain this exact failed log and repeat complete gates at the formatting repair 
 - [ ] Verify EditorConfig: actual890 WHITESPACE failure; source fix authored,
   corrected exact-source GitHub formatter gate pending.
 
+- TASK-ISO-013V-STOP-R41 [AC-ISO-006]: root owns shared logger/teardown lifetime repair; Luna owns only NEW IsolatedResourceLogCaptureStopTests.cs from the approved ADR packet. Start: R38 finding joined; tests first. Disjoint new test source only, no local qualification/Git/CI/config/doubles. Artifacts: real-Aspire stop/output/disposal caller-flow regression; root full source review/gates and exact-SHA native CI. State: implementation pending; unforced delayed native fault remains documented review exception.
 
+- TASK-ISO-013V-STOP-SOURCE-R49 [AC-ISO-006]: accepted ADR-056 preserving repair after actual full formatter CA2000/CA1848 findings. Luna sole test writer owns StopTests.cs and two explicitly named optional new fixture/support files from the ADR. Start: current regression and R44 independent review exist; source diagnostic reproduction is retained at /private/tmp/keyload-r48-integrated-development-format.log. Output: proper unconditional disposal/constructor ownership and cached native log delegate with all original assertions and bounded task observation. No production/shared/config/docs/Git/CI/local execution. Root reviews every diff and current source gates, then exact-SHA GitHub. State: approved, unqualified. R44 production lifetime findings remain closed; diagnostic repair is a separate source gate.
 ## Native b474 baseline and continued source repair
 
 Run37087909605 atb47409e73427c1394ccf705f398a541f2e7cb08b passes complete
@@ -397,6 +399,7 @@ their failed jobs prevent270 allocation and publication.
 |TASK-ISO-CI-018|ISO003/005/007; gates_audit read-only capable|Actual b474 job/archive logs and exact hashes, topology-specific failures and approved source repair proposal. No retries, local qualification or test relaxation.|
 |TASK-ISO-019J|ISO004/005; root serialized existing public regression files|Accepted canonical JSON contract and native n1 failing regression; two source files plus docs. Scoped source gates then genuine same-SHA1/2/3 full public/native checks. Pending qualification.|
 
+- TASK-ISO-013V-SUBSCRIBER-R59 [AC-ISO-006]: approved ADR-056 R57 real subscriber original-task ownership finding. Luna owns only StopTests.cs, StopSupport.cs and one optional new IsolatedResourceLogSubscriberScope.cs. Register actual MoveNext/publish tasks before waits, retain synchronous/asynchronous primary publication failures, cancel the real subscriber lifetime, join/observe originals and defer enumerator disposal until moves settle, with independent finite cleanup bounds and fault observers. No fake service/enumerator, production/fixture/shared/config/docs/Git/CI or local execution. Root joins every diff and independent final review/source gates; original simultaneous-fault manual exception remains explicit, genuine GitHub proof pending.
 
 
 | Task | REQ/AC / owner / tier / permissions | Dependencies and join |

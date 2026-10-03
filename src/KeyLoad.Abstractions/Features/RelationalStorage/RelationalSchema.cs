@@ -21,9 +21,13 @@ public enum RelationalColumnType
 /// <param name="Name">Case-sensitive column identity.</param>
 /// <param name="Type">Exact scalar type.</param>
 /// <param name="Nullable">Whether absent and explicit null values are allowed.</param>
-public sealed record RelationalColumn(string Name, RelationalColumnType Type, bool Nullable = false);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.RelationalColumn)]
+public sealed record RelationalColumn([property: Orleans.Id(0)] string Name, [property: Orleans.Id(1)] RelationalColumnType Type, [property: Orleans.Id(2)] bool Nullable = false);
 
 /// <summary>Constrains canonical entity rows without introducing another storage engine.</summary>
 /// <param name="PrimaryKey">Required nonnullable Text column matching EntityRef.Id.</param>
 /// <param name="Columns">Closed immutable top-level column definitions.</param>
-public sealed record RelationalSchema(string PrimaryKey, ImmutableArray<RelationalColumn> Columns);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.RelationalSchema)]
+public sealed record RelationalSchema([property: Orleans.Id(0)] string PrimaryKey, [property: Orleans.Id(1)] ImmutableArray<RelationalColumn> Columns);

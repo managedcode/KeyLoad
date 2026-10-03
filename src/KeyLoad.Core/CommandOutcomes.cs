@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Storage;
 
@@ -10,11 +9,7 @@ public sealed partial class DatabaseEngine
     private const string EarlierOutcomeIncarnationMessage = "The command belongs to an earlier incarnation.";
     private const string ChangedOutcomePrincipalPolicyMessage = "The principal policy changed since this command was evaluated.";
     private const string EarlierSubscriptionGenerationMessage = "The cached receive belongs to an earlier subscription generation.";
-    private sealed record StoredOutcome(string Fingerprint, Guid Incarnation, long PolicyEpoch, OperationResult Result)
-    {
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public BlobOutcomeAuthority? BlobAuthority { get; init; }
-    }
+
     /// <summary>Reads a stored operation outcome scoped to its verified principal.</summary>
     /// <param name="principal">Verified principal identifier.</param>
     /// <param name="id">Stable operation identifier.</param>

@@ -1,0 +1,406 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "63ac27c37061c17b05813b5b0a3d2dbee7c9087c",
+  "runId": 37082449440,
+  "attempt": 1,
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440",
+  "conclusion": "failure",
+  "scope": "partial_native_qualification_full_solution_build_failed_not_RAM_cache_qualification",
+  "jobs": [
+    {
+      "name": "comparison-plan",
+      "id": 111087495760,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440/job/111087495760",
+      "conclusion": "success"
+    },
+    {
+      "name": "analyzer-rules",
+      "id": 111087495981,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440/job/111087495981",
+      "conclusion": "success"
+    },
+    {
+      "name": "docker-rf3",
+      "id": 111087495992,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440/job/111087495992",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (ubuntu-latest)",
+      "id": 111087496013,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440/job/111087496013",
+      "conclusion": "failure"
+    },
+    {
+      "name": "comparison-images",
+      "id": 111087853727,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440/job/111087853727",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "preflight / ${{ matrix.id }}",
+      "id": 111087854383,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440/job/111087854383",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "case / ${{ matrix.id }}",
+      "id": 111087854723,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440/job/111087854723",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "case / ${{ matrix.id }}",
+      "id": 111087855035,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440/job/111087855035",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "comparison-aggregate",
+      "id": 111087855382,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440/job/111087855382",
+      "conclusion": "skipped"
+    }
+  ],
+  "verifiedOriginalArchives": [
+    {
+      "id": 11258369590,
+      "name": "code-quality-ubuntu-latest",
+      "bytes": 1396983,
+      "sha256": "5ebcd5150696e77fe672c1b2e513481dc26540e4ad3ac75e977994a9256a205a",
+      "members": [
+        {
+          "path": "KeyLoad.Abstractions/Release/net10.0/diagnostics.sarif",
+          "bytes": 491613,
+          "sha256": "65056a3be449763c70d80e8c8e84aa36beb24a4682d2153a42b132c6dd4eff57"
+        },
+        {
+          "path": "KeyLoad.Analyzers.Tests/Release/net10.0/diagnostics.sarif",
+          "bytes": 1035930,
+          "sha256": "7503962090897da4db58897413cfbbb332059d14e637b86f40dfbf6f3c48e490"
+        },
+        {
+          "path": "KeyLoad.Analyzers/Release/net10.0/diagnostics.sarif",
+          "bytes": 483395,
+          "sha256": "17481dbd757650b32b64ca742ab80c8cd3405a06238fa4c6d40ee753f5c3fa1b"
+        },
+        {
+          "path": "KeyLoad.AppHost/Release/net10.0/diagnostics.sarif",
+          "bytes": 620680,
+          "sha256": "1d32cbe00982795b58792fc3d3df223e7814313bcf62bdf29a571c634f8b4b8c"
+        },
+        {
+          "path": "KeyLoad.Artifacts/Release/net10.0/diagnostics.sarif",
+          "bytes": 493201,
+          "sha256": "d8149147441bbf950cca1705befd42d21cca27b868ee38f92a41ca1661aba0a1"
+        },
+        {
+          "path": "KeyLoad.BenchmarkScenarios/Release/net10.0/diagnostics.sarif",
+          "bytes": 562819,
+          "sha256": "c74254e62869d0bee4c10a857b79a16856560c8f773c3d82bdbec2f59f754349"
+        },
+        {
+          "path": "KeyLoad.Benchmarks/Release/net10.0/diagnostics.sarif",
+          "bytes": 564322,
+          "sha256": "57b82c42ba0f14a42d5448948fb4def0a5be06d8dfefae1efa30df50acbd5dd1"
+        },
+        {
+          "path": "KeyLoad.Cli/Release/net10.0/diagnostics.sarif",
+          "bytes": 543531,
+          "sha256": "87790b16a4de9136834054cfb13759826931dad53118fa13a3ccb221d746d9f2"
+        },
+        {
+          "path": "KeyLoad.Client/Release/net10.0/diagnostics.sarif",
+          "bytes": 493010,
+          "sha256": "29ac6eacd8d39dd799d1b0823cac99f3f7e0526d6be0d6b6852cf8bf2e99f98f"
+        },
+        {
+          "path": "KeyLoad.ComparisonHost/Release/net10.0/diagnostics.sarif",
+          "bytes": 522920,
+          "sha256": "eac5b5e59d9094d774b8193818d93b033d57f81640bc142ad5f1d84346f9a7dc"
+        },
+        {
+          "path": "KeyLoad.ComparisonTests/Release/net10.0/diagnostics.sarif",
+          "bytes": 1418051,
+          "sha256": "d479f39e33f06cc56f4c7673f216f4827cc487a2e635f2c8529af0a8deb6f23f"
+        },
+        {
+          "path": "KeyLoad.Comparisons/Release/net10.0/diagnostics.sarif",
+          "bytes": 516239,
+          "sha256": "6cf98a5f4b53d30907a2213103529c3243116952ae38aa4b9e978305dbb39940"
+        },
+        {
+          "path": "KeyLoad.Core/Release/net10.0/diagnostics.sarif",
+          "bytes": 498174,
+          "sha256": "868734583a3ee4d8d790ab17d46ce86ab91850411a8f2cebbcd41a139aaaef0c"
+        },
+        {
+          "path": "KeyLoad.CrashHost/Release/net10.0/diagnostics.sarif",
+          "bytes": 588653,
+          "sha256": "5411af431b09311bfa00b433a5c5caec628d3327b5c6b882c80e4046dc38517c"
+        },
+        {
+          "path": "KeyLoad.IntegrationTests/Release/net10.0/diagnostics.sarif",
+          "bytes": 1344953,
+          "sha256": "39cacd3588bb99e5a942dbba1a9c638ea56c362147ca1823136e0f93cda790b4"
+        },
+        {
+          "path": "KeyLoad.Orleans/Release/net10.0/diagnostics.sarif",
+          "bytes": 749923,
+          "sha256": "548300dc63cb04df228a0b080486b9b1e919b7b62ba589c07b2d894e22e4dd16"
+        },
+        {
+          "path": "KeyLoad.Query/Release/net10.0/diagnostics.sarif",
+          "bytes": 491635,
+          "sha256": "61ee187486f6dc86bf10fac34d9830b02d0be741b5636ce5ed90ea1fd022e376"
+        },
+        {
+          "path": "KeyLoad.RecoveryTests/Release/net10.0/diagnostics.sarif",
+          "bytes": 1025715,
+          "sha256": "eae0d55c2868d4ec14c11781b6b4a73ac69e8cb841ab2e63fe3acfe6fe71959b"
+        },
+        {
+          "path": "KeyLoad.Replication/Release/net10.0/diagnostics.sarif",
+          "bytes": 517722,
+          "sha256": "1306e89e5d14b97e17d0ac66dafae69fcb1dae979ded1c56eab95c005fce1461"
+        },
+        {
+          "path": "KeyLoad.Security/Release/net10.0/diagnostics.sarif",
+          "bytes": 491730,
+          "sha256": "d9e05adb761a474bb6e7f204323ca29cd5e72dd74b01b68e727cd8b1caf1e971"
+        },
+        {
+          "path": "KeyLoad.Server/Release/net10.0/diagnostics.sarif",
+          "bytes": 603491,
+          "sha256": "4ad2b42a7d5bd42218855ba016a3e27d63d5a309e69b60e239634a3418681a54"
+        },
+        {
+          "path": "KeyLoad.ServiceDefaults/Release/net10.0/diagnostics.sarif",
+          "bytes": 514360,
+          "sha256": "4462b474ffba2a9edcf5e378ca9b53141d781bcb23dbce1df01cec87ff146767"
+        },
+        {
+          "path": "KeyLoad.SiteTests/Release/net10.0/diagnostics.sarif",
+          "bytes": 1425621,
+          "sha256": "89bc93b09e24f120d1e13746702b577d4710e4ef14f8865ceb5dd1b47a6b0bae"
+        },
+        {
+          "path": "KeyLoad.Storage.ZoneTree/Release/net10.0/diagnostics.sarif",
+          "bytes": 547092,
+          "sha256": "cce96b96fe897e1ca40901301f60cfe574b2aeac817b015664ef7e154a0497ba"
+        },
+        {
+          "path": "KeyLoad.UnitTests/Release/net10.0/diagnostics.sarif",
+          "bytes": 5882018,
+          "sha256": "a6af87a25fcdc1f9aba81760302f49a84c4f1fe5c3826500a862c4c093fdc7f9"
+        }
+      ]
+    },
+    {
+      "id": 11258728912,
+      "name": "analyzer-rule-evidence",
+      "bytes": 207550,
+      "sha256": "1ff54c85e302b5f78ffc7272a4d23e86739ad7128d0ecde7d324565f3c129e3c",
+      "members": [
+        {
+          "path": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0-report.html",
+          "bytes": 182419,
+          "sha256": "06cbc06a0b1877f5578cc7a597c44c75c75d64f93c7a7cbc47e3a98ddecfc113"
+        },
+        {
+          "path": "artifacts/code-quality/KeyLoad.Analyzers/Release/net10.0/diagnostics.sarif",
+          "bytes": 483346,
+          "sha256": "458567260bbaffd4a7350f4534d8db14f57833fec8bbe725472d5f628f39c4fb"
+        },
+        {
+          "path": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+          "bytes": 354875,
+          "sha256": "408e42ca16e8de6bb0a0a4b472911f8bc4652aec8558731a21d2e8f1512339a2"
+        },
+        {
+          "path": "artifacts/code-quality/KeyLoad.Analyzers.Tests/Release/net10.0/diagnostics.sarif",
+          "bytes": 1035796,
+          "sha256": "8bce1ebd230cc08beb50d22237572432acc9197ccceb1327867e0712a9124e64"
+        }
+      ]
+    },
+    {
+      "id": 11259239898,
+      "name": "docker-rf3-image-evidence",
+      "bytes": 32602,
+      "sha256": "100f6a2175e2319c73a34f38388ed7b48abfbd2a6160827454e8c72a6c833af5",
+      "members": [
+        {
+          "path": "comparisons-manifest.json",
+          "bytes": 1997,
+          "sha256": "cb359153eb6ec07424ba7a4d78a3bcb7589c9d59dde79daaf46f21cac5bada17"
+        },
+        {
+          "path": "image-receipt.json",
+          "bytes": 1846,
+          "sha256": "3d75b3e2f0ba0fd8252ef31c8f39c57c4fbfa2ce1422f7107d3869323b625c54"
+        },
+        {
+          "path": "native-commands.jsonl",
+          "bytes": 204592,
+          "sha256": "f125124750708b2fcc812d7c981859377de2e966263b175bc96e75d3c44635fe"
+        },
+        {
+          "path": "registry-cleanup.json",
+          "bytes": 210,
+          "sha256": "e9d6b539f88ada1a53b3495501301fdfad4ce2680b19a07a63fbfb228f1f1b57"
+        },
+        {
+          "path": "registry-headers.jsonl",
+          "bytes": 419,
+          "sha256": "45851ba1d93e99f6ca464b2b4c5834706962a1698885df7d77bfb44f335dc02e"
+        },
+        {
+          "path": "registry-state.json",
+          "bytes": 269,
+          "sha256": "24f76d110e007b09ff5b61b711323e11f9cbdac6e9547bc991ee31fa7df70a05"
+        },
+        {
+          "path": "registry.log",
+          "bytes": 131072,
+          "sha256": "9b47a54853567887131497563d734a695a2d00d5f2ba6cb9491bb4366ecc426b"
+        },
+        {
+          "path": "server-manifest.json",
+          "bytes": 1997,
+          "sha256": "bf81573c86ae82e771227a425ea8d346a04045aa77c423d45e31b00a0150e855"
+        }
+      ]
+    },
+    {
+      "id": 11259770356,
+      "name": "docker-rf3-qualification",
+      "bytes": 477419,
+      "sha256": "4a15865534a8f84fb9da50a8616b28a13529a5a216c89cd2a9c970c6687dd5fa",
+      "members": [
+        {
+          "path": "TestResults/KeyLoad.IntegrationTests-linux-net10.0-report.html",
+          "bytes": 229761,
+          "sha256": "516cf584b915ee9b565ac7e666944fc812d4ea564ae6bfc2c3a0231885decc9f"
+        },
+        {
+          "path": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+          "bytes": 1075639,
+          "sha256": "684a21157c1c13d7fd87d73d7cfc3067a52523d68ee43d6923cdbfdf5df98ca0"
+        },
+        {
+          "path": "artifacts/qualification/admin-dashboard/desktop.png",
+          "bytes": 191903,
+          "sha256": "5a4e8799aea69391ede859753c07c02044b5cb1082cdbd686f099bfe2ce42f3b"
+        },
+        {
+          "path": "artifacts/qualification/admin-dashboard/mobile.png",
+          "bytes": 97518,
+          "sha256": "739ec3e45e0ce11a3582e5047fe8d9b225f43fd39fe02991a04a12910b01760f"
+        },
+        {
+          "path": "artifacts/qualification/rf3-container-restart-leader-election-minority-node1.json",
+          "bytes": 1446,
+          "sha256": "c577aeeff8441c815249125db155eac0a8720df8425cb35bcafffe63aa271aef"
+        },
+        {
+          "path": "artifacts/qualification/rf3-container-restart-leader-election-minority-node3.json",
+          "bytes": 1446,
+          "sha256": "736453ff267b6ac4db56c11437d280366f6d06f689141dd396217071bf5829f7"
+        },
+        {
+          "path": "artifacts/qualification/rf3-container-restart-retained-replica-restart-node2.json",
+          "bytes": 1446,
+          "sha256": "4e687c1f23dd6d196dfbf85cbcd778da51f9787b7b55506b0d6ea996ead71808"
+        },
+        {
+          "path": "artifacts/qualification/rf3-container-restart-series-follower-restart-node1.json",
+          "bytes": 1445,
+          "sha256": "3c2c9460be420a707a5a36b5065a617175c190c6d74bd41986a2c9035bdecf3f"
+        },
+        {
+          "path": "artifacts/qualification/rf3-failure-0001.log",
+          "bytes": 8190,
+          "sha256": "2058c1c55901586ac4e510e525b78c896eecac585a490622d88783d089e77b0e"
+        },
+        {
+          "path": "artifacts/qualification/rf3-failure.log",
+          "bytes": 8190,
+          "sha256": "2058c1c55901586ac4e510e525b78c896eecac585a490622d88783d089e77b0e"
+        }
+      ]
+    }
+  ],
+  "nativeReports": [
+    {
+      "member": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "archiveId": 11258728912,
+      "publicationGeneration": "51c1e588140f438cb6062974752c4c4b",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "total": 118,
+      "uniqueIds": 118,
+      "statusCounts": {
+        "passed": 118
+      },
+      "sha256": "408e42ca16e8de6bb0a0a4b472911f8bc4652aec8558731a21d2e8f1512339a2",
+      "runtimeVersion": ".NET 10.0.12",
+      "operatingSystem": "Ubuntu 24.04.5 LTS",
+      "testIdsSha256": "1356304715ef4aa69ba127eebc70dca6694e7adb8300d2fc9b4bfdb8f086bf53"
+    },
+    {
+      "member": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "archiveId": 11259770356,
+      "publicationGeneration": "3891fdbb277a443aae764d7daca74e35",
+      "assembly": "KeyLoad.IntegrationTests",
+      "total": 63,
+      "uniqueIds": 63,
+      "statusCounts": {
+        "passed": 63
+      },
+      "sha256": "684a21157c1c13d7fd87d73d7cfc3067a52523d68ee43d6923cdbfdf5df98ca0",
+      "runtimeVersion": ".NET 10.0.12",
+      "operatingSystem": "Ubuntu 24.04.5 LTS",
+      "testIdsSha256": "d993a59fa54db5e8665c3791e4e0cc6d9234ed49bb09f3c94e56f3801cc0b394"
+    }
+  ],
+  "buildFailure": {
+    "jobId": 111087496013,
+    "diagnostics": [
+      {
+        "id": "IDE0032",
+        "source": "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteIsolatedGitHubArchiveReceipt.cs",
+        "line": 11,
+        "column": 5,
+        "message": "Use auto property"
+      },
+      {
+        "id": "IDE0290",
+        "source": "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteIsolatedGitHubArchiveReceipt.cs",
+        "line": 13,
+        "column": 12,
+        "message": "Use primary constructor"
+      }
+    ],
+    "logBytes": 5991,
+    "logSha256": "78deb652daf7e9f9a825c73678291d992ffbaf1b5ebc921b3bb4d97536c9a4c4",
+    "repair": "current_source_shapes_corrected_new_complete_exact_SHA_qualification_required"
+  },
+  "skippedGates": [
+    "solution_formatter",
+    "repository_governance",
+    "verify_job_analyzer_invocation",
+    "unit_normal",
+    "unit_scalar",
+    "process_recovery",
+    "comparison_images",
+    "native_comparison_preflight",
+    "native_comparison_cells",
+    "comparison_aggregate"
+  ],
+  "limitations": [
+    "No normal/scalar/recovery result from this run",
+    "RF3 and analyzer scoped builds do not replace failed solution gate",
+    "No cache/control/performance/coverage/power-loss/endurance qualification",
+    "270-cell and separate native TimeSeries/Timescale family remain open"
+  ]
+}

@@ -1,8 +1,6 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using KeyLoad.Features.ResourceExecution;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 
@@ -161,55 +159,14 @@ public static class Errors
     public static KeyLoadException Fail(ErrorCode code, string detail) => new(code, detail, Status(code));
 }
 
-/// <summary>Provides the canonical JSON options and persistence serialization helpers.</summary>
-public static class JsonDefaults
-{
-    private const string MissingRecordMessage = "A persisted record has no value.";
-    /// <summary>Gets the canonical serializer options.</summary>
-    public static JsonSerializerOptions Options { get; } = Create();
-    private static JsonSerializerOptions Create()
-    {
-        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
-        {
-            MaxDepth = 64,
-            PropertyNameCaseInsensitive = false,
-            UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
-            RespectNullableAnnotations = true,
-            RespectRequiredConstructorParameters = true
-        };
-        options.Converters.Add(new StrictByteMemoryJsonConverter());
-        options.Converters.Add(new StrictImmutableArrayJsonConverterFactory());
-        options.Converters.Add(new JsonStringEnumConverter());
-        return options;
-    }
-    /// <summary>Serializes a value using the canonical KeyLoad JSON options.</summary>
-    /// <typeparam name="T">Specifies the value type.</typeparam>
-    /// <param name="value">Provides the value to serialize.</param>
-    /// <returns>The serialized UTF-8 JSON bytes.</returns>
-    public static byte[] Serialize<T>(T value) => JsonSerializer.SerializeToUtf8Bytes(value, Options);
-    /// <summary>Deserializes persisted JSON using the canonical options and rejects an empty result.</summary>
-    /// <typeparam name="T">Specifies the type to deserialize.</typeparam>
-    /// <param name="value">Provides the persisted UTF-8 JSON bytes.</param>
-    /// <returns>The deserialized value.</returns>
-    /// <exception cref="KeyLoadException">The persisted value is missing or corrupt.</exception>
-    public static T Deserialize<T>(ReadOnlySpan<byte> value) => JsonSerializer.Deserialize<T>(value, Options)
-        ?? throw Errors.Fail(ErrorCode.Corruption, MissingRecordMessage);
-
-    /// <summary>Deserializes canonical JSON text with a scoped, cleared UTF-8 input loan.</summary>
-    /// <typeparam name="T">Specifies the type to deserialize.</typeparam>
-    /// <param name="value">Provides JSON text with the existing UTF-8 replacement encoding semantics.</param>
-    /// <returns>The deserialized value, owning any retained data independently of the input loan.</returns>
-    /// <exception cref="ArgumentNullException">The JSON text argument is null.</exception>
-    /// <exception cref="KeyLoadException">The serialized value is missing or corrupt.</exception>
-    public static T Deserialize<T>(string value) => PooledJsonText.Deserialize<T>(value);
-}
-
 /// <summary>Identifies an atomic partition by tenant, database, transaction domain, and partition key.</summary>
 /// <param name="TenantId">Identifies the owning tenant.</param>
 /// <param name="DatabaseId">Identifies the database.</param>
 /// <param name="TransactionDomainId">Identifies the transaction domain.</param>
 /// <param name="PartitionKey">Provides the caller-visible partition key.</param>
-public sealed record PartitionRef(string TenantId, string DatabaseId, string TransactionDomainId, string PartitionKey)
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.PartitionRef)]
+public sealed record PartitionRef([property: Orleans.Id(0)] string TenantId, [property: Orleans.Id(1)] string DatabaseId, [property: Orleans.Id(2)] string TransactionDomainId, [property: Orleans.Id(3)] string PartitionKey)
 {
     /// <summary>Gets the stable hash of the partition identity.</summary>
     public string AtomicPartitionId => Convert.ToHexStringLower(SHA256.HashData(
@@ -236,21 +193,27 @@ public enum DurabilityProfile
 /// <param name="AtomicPartitionId">Identifies the atomic partition.</param>
 /// <param name="Position">Identifies the committed position.</param>
 /// <param name="OwnershipEpoch">Identifies the active ownership epoch.</param>
-public sealed record CommitToken(Guid Incarnation, string AtomicPartitionId, long Position, long OwnershipEpoch);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.CommitToken)]
+public sealed record CommitToken([property: Orleans.Id(0)] Guid Incarnation, [property: Orleans.Id(1)] string AtomicPartitionId, [property: Orleans.Id(2)] long Position, [property: Orleans.Id(3)] long OwnershipEpoch);
 
 /// <summary>Describes the resource effect produced by one committed mutation.</summary>
 /// <param name="Kind">Identifies the mutation or trusted operation kind.</param>
 /// <param name="Resource">Identifies the resource scope or mutation target.</param>
 /// <param name="Id">Identifies the entity, document, key, message, event, or operation.</param>
 /// <param name="Revision">Identifies the document, stream, or edge revision.</param>
-public sealed record MutationReceipt(string Kind, string Resource, string Id, long Revision);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.MutationReceipt)]
+public sealed record MutationReceipt([property: Orleans.Id(0)] string Kind, [property: Orleans.Id(1)] string Resource, [property: Orleans.Id(2)] string Id, [property: Orleans.Id(3)] long Revision);
 
 /// <summary>Describes the durable result of a command and its mutation effects.</summary>
 /// <param name="CommandId">Identifies the command for deduplication.</param>
 /// <param name="Token">Carries the token associated with this operation.</param>
 /// <param name="Mutations">Lists committed mutation results or requested mutations.</param>
 /// <param name="Durability">Identifies the achieved durability profile.</param>
-public sealed record CommitReceipt(Guid CommandId, CommitToken Token, ImmutableArray<MutationReceipt> Mutations, DurabilityProfile Durability);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.CommitReceipt)]
+public sealed record CommitReceipt([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] CommitToken Token, [property: Orleans.Id(2)] ImmutableArray<MutationReceipt> Mutations, [property: Orleans.Id(3)] DurabilityProfile Durability);
 
 /// <summary>Records the replayable result of a command for its principal and fingerprint.</summary>
 /// <param name="Fingerprint">Identifies the canonical command fingerprint.</param>
@@ -258,52 +221,9 @@ public sealed record CommitReceipt(Guid CommandId, CommitToken Token, ImmutableA
 /// <param name="Receipt">Contains the committed command receipt when successful.</param>
 /// <param name="Error">Contains the domain failure when rejected.</param>
 /// <param name="SafeDetail">Contains safe caller-visible failure detail.</param>
-public sealed record CommandOutcome(string Fingerprint, string PrincipalId, CommitReceipt? Receipt, ErrorCode? Error, string? SafeDetail);
-
-/// <summary>Defines server-side limits applied to database operations.</summary>
-public sealed record DatabaseLimits
-{
-    /// <summary>Gets or sets the max document bytes value.</summary>
-    public int MaxDocumentBytes { get; init; } = 1_048_576;
-    /// <summary>Gets or sets the max json depth value.</summary>
-    public int MaxJsonDepth { get; init; } = 32;
-    /// <summary>Gets or sets the max batch mutations value.</summary>
-    public int MaxBatchMutations { get; init; } = 256;
-    /// <summary>Gets or sets the max batch bytes value.</summary>
-    public int MaxBatchBytes { get; init; } = 8_388_608;
-    /// <summary>Gets or sets the max scan records value.</summary>
-    public int MaxScanRecords { get; init; } = 10_000;
-    /// <summary>Gets or sets the max results value.</summary>
-    public int MaxResults { get; init; } = 1_000;
-    /// <summary>Gets or sets the writer queue capacity value.</summary>
-    public int WriterQueueCapacity { get; init; } = 256;
-    /// <summary>Gets or sets the max concurrent queries value.</summary>
-    public int MaxConcurrentQueries { get; init; } = 16;
-    /// <summary>Gets or sets the max query bytes value.</summary>
-    public int MaxQueryBytes { get; init; } = 65_536;
-    /// <summary>Gets or sets the max query depth value.</summary>
-    public int MaxQueryDepth { get; init; } = 32;
-    /// <summary>Gets or sets the max query tokens value.</summary>
-    public int MaxQueryTokens { get; init; } = 2_048;
-    /// <summary>Gets or sets the query deadline seconds value.</summary>
-    public int QueryDeadlineSeconds { get; init; } = 30;
-    /// <summary>Gets or sets the max query read bytes value.</summary>
-    public long MaxQueryReadBytes { get; init; } = 67_108_864;
-    /// <summary>Gets or sets the max search text tokens value.</summary>
-    public long MaxSearchTextTokens { get; init; } = 1_048_576;
-    /// <summary>Gets or sets the max outbox records value.</summary>
-    public long MaxOutboxRecords { get; init; } = 100_000;
-    /// <summary>Gets or sets the max outbox bytes value.</summary>
-    public long MaxOutboxBytes { get; init; } = 1_073_741_824;
-    /// <summary>Gets or sets the reserved outbox records value.</summary>
-    public long ReservedOutboxRecords { get; init; } = 16_384;
-    /// <summary>Gets or sets the reserved outbox bytes value.</summary>
-    public long ReservedOutboxBytes { get; init; } = 2_147_483_648;
-    /// <summary>Gets or sets the max projection consumers value.</summary>
-    public int MaxProjectionConsumers { get; init; } = 64;
-    /// <summary>Gets or sets the max projection batch bytes value.</summary>
-    public int MaxProjectionBatchBytes { get; init; } = 16_777_216;
-}
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.CommandOutcome)]
+public sealed record CommandOutcome([property: Orleans.Id(0)] string Fingerprint, [property: Orleans.Id(1)] string PrincipalId, [property: Orleans.Id(2)] CommitReceipt? Receipt, [property: Orleans.Id(3)] ErrorCode? Error, [property: Orleans.Id(4)] string? SafeDetail);
 
 /// <summary>Defines one resource mutation included in a command.</summary>
 /// <param name="Resource">Identifies the resource scope or mutation target.</param>
@@ -318,14 +238,18 @@ public sealed record DatabaseLimits
 [JsonDerivedType(typeof(DeleteEdge), MutationDiscriminatorNames.DeleteEdge)]
 [JsonDerivedType(typeof(AppendSamples), MutationDiscriminatorNames.AppendSamples)]
 [JsonDerivedType(typeof(PutVector), MutationDiscriminatorNames.PutVector)]
-public abstract record Mutation(string Resource);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.Mutation)]
+public abstract record Mutation([property: Orleans.Id(0)] string Resource);
 
 /// <summary>Carries one identified command, its mutations, and partition ownership epoch.</summary>
 /// <param name="CommandId">Identifies the command for deduplication.</param>
 /// <param name="Partition">Identifies the atomic partition containing the resource.</param>
 /// <param name="Mutations">Lists committed mutation results or requested mutations.</param>
 /// <param name="OwnershipEpoch">Identifies the active ownership epoch.</param>
-public sealed record CommandRequest(Guid CommandId, PartitionRef Partition, ImmutableArray<Mutation> Mutations, long OwnershipEpoch = 1);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.CommandRequest)]
+public sealed record CommandRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] PartitionRef Partition, [property: Orleans.Id(2)] ImmutableArray<Mutation> Mutations, [property: Orleans.Id(3)] long OwnershipEpoch = 1);
 
 // Only the trusted server constructs this envelope. Caller roles and timestamps never come from public JSON.
 /// <summary>Identifies a trusted operation recorded in the replicated command envelope.</summary>
@@ -389,13 +313,17 @@ public enum OperationKind
 /// <param name="PrincipalId">Identifies the principal receiving the delivery.</param>
 /// <param name="EvaluatedAt">Records when authorization evaluated the operation.</param>
 /// <param name="PayloadJson">Contains the optional message payload.</param>
-public sealed record ReplicatedOperation(Guid Id, OperationKind Kind, string PrincipalId, DateTimeOffset EvaluatedAt, string PayloadJson);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ReplicatedOperation)]
+public sealed record ReplicatedOperation([property: Orleans.Id(0)] Guid Id, [property: Orleans.Id(1)] OperationKind Kind, [property: Orleans.Id(2)] string PrincipalId, [property: Orleans.Id(3)] DateTimeOffset EvaluatedAt, [property: Orleans.Id(4)] string PayloadJson);
 
 /// <summary>Carries a serialized operation result or a safe domain failure.</summary>
 /// <param name="Json">Contains the JSON representation of the associated value.</param>
 /// <param name="Error">Contains the domain failure when rejected.</param>
 /// <param name="SafeDetail">Contains safe caller-visible failure detail.</param>
-public sealed record OperationResult(string? Json, ErrorCode? Error = null, string? SafeDetail = null)
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.OperationResult)]
+public sealed record OperationResult([property: Orleans.Id(0)] string? Json, [property: Orleans.Id(1)] ErrorCode? Error = null, [property: Orleans.Id(2)] string? SafeDetail = null)
 {
     private const string RejectedOperationMessage = "The operation was rejected.";
     private const string NullResultJson = "null";

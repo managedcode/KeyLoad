@@ -84,28 +84,39 @@ public enum Capability : long
 /// <param name="Database">Identifies the database scope.</param>
 /// <param name="Resource">Identifies the resource scope or mutation target.</param>
 /// <param name="Capabilities">Lists the granted operations.</param>
-public sealed record ScopeGrant(string Database, string Resource, Capability Capabilities);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ScopeGrant)]
+public sealed record ScopeGrant([property: Orleans.Id(0)] string Database, [property: Orleans.Id(1)] string Resource, [property: Orleans.Id(2)] Capability Capabilities);
 
 /// <summary>Persists a principal identity, grants, and authorization policy state.</summary>
 /// <param name="Id">Identifies the entity, document, key, message, event, or operation.</param>
 /// <param name="TenantId">Identifies the owning tenant.</param>
 /// <param name="Grants">Lists scoped capabilities.</param>
 /// <param name="FieldGrants">Lists field-level grants.</param>
-public sealed record PrincipalRecord(string Id, string TenantId, ImmutableArray<ScopeGrant> Grants, ImmutableArray<string> FieldGrants)
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.PrincipalRecord)]
+public sealed record PrincipalRecord([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] string TenantId, [property: Orleans.Id(2)] ImmutableArray<ScopeGrant> Grants, [property: Orleans.Id(3)] ImmutableArray<string> FieldGrants)
 {
     /// <summary>Gets whether the principal has cluster administration rights.</summary>
+    [Orleans.Id(4)]
     public bool ClusterAdministrator { get; init; }
     /// <summary>Gets the optional owner identity.</summary>
+    [Orleans.Id(5)]
     public string? OwnerId { get; init; }
     /// <summary>Gets the projects visible to the principal.</summary>
+    [Orleans.Id(6)]
     public ImmutableArray<string> Projects { get; init; } = [];
     /// <summary>Gets whether row-level restrictions are enabled.</summary>
+    [Orleans.Id(7)]
     public bool RestrictRows { get; init; }
     /// <summary>Gets whether the principal is revoked.</summary>
+    [Orleans.Id(8)]
     public bool Revoked { get; init; }
     /// <summary>Gets the optional expiration time.</summary>
+    [Orleans.Id(9)]
     public DateTimeOffset? ExpiresAt { get; init; }
     /// <summary>Gets the principal policy epoch.</summary>
+    [Orleans.Id(10)]
     public long PolicyEpoch { get; init; } = 1;
 }
 
@@ -115,17 +126,25 @@ public sealed record PrincipalRecord(string Id, string TenantId, ImmutableArray<
 /// <param name="Verifier">Stores the non-secret API key verifier.</param>
 /// <param name="ExpiresAt">Sets the optional expiration time.</param>
 /// <param name="Revoked">Marks the identity as revoked when true.</param>
-public sealed record ApiKeyRecord(string Id, string PrincipalId, string Verifier, DateTimeOffset? ExpiresAt = null, bool Revoked = false);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ApiKeyRecord)]
+public sealed record ApiKeyRecord([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] string PrincipalId, [property: Orleans.Id(2)] string Verifier, [property: Orleans.Id(3)] DateTimeOffset? ExpiresAt = null, [property: Orleans.Id(4)] bool Revoked = false);
 
 /// <summary>Returns the identifier and one-time secret of a newly created API key.</summary>
 /// <param name="Id">Identifies the entity, document, key, message, event, or operation.</param>
 /// <param name="Secret">Contains the one-time API key secret.</param>
-public sealed record ApiKeyCreated(string Id, string Secret);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ApiKeyCreated)]
+public sealed record ApiKeyCreated([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] string Secret);
 
 /// <summary>Requests persistence of a principal configuration.</summary>
 /// <param name="Principal">Specifies the principal value.</param>
-public sealed record ConfigurePrincipalRequest(PrincipalRecord Principal);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ConfigurePrincipalRequest)]
+public sealed record ConfigurePrincipalRequest([property: Orleans.Id(0)] PrincipalRecord Principal);
 
 /// <summary>Requests persistence of an API key configuration.</summary>
 /// <param name="ApiKey">Specifies the api key value.</param>
-public sealed record ConfigureApiKeyRequest(ApiKeyRecord ApiKey);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.ConfigureApiKeyRequest)]
+public sealed record ConfigureApiKeyRequest([property: Orleans.Id(0)] ApiKeyRecord ApiKey);

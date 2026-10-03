@@ -16,9 +16,6 @@ public sealed partial class DatabaseEngine
     private const string StaleSourceGenerationMessage = "The event source generation is stale.";
     private const int MaximumTopicEventCount = 256;
 
-    private readonly record struct TopicHeadSnapshot(EventSourceHead Head, long StoredBytes);
-    private readonly record struct TopicPublicationProgress(long Tail, long Sequence, long StoredBytes);
-
     private static TopicHeadSnapshot ReadTopicHead(IKeyValueView view, EventSourceRef source)
     {
         var topic = view.GetRecord<TopicHead>(KeySpace.Partition(TopicHeadKeySpace, source.Partition, source.Resource));

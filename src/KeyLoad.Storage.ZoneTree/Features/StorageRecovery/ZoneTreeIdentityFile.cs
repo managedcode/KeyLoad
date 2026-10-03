@@ -58,7 +58,7 @@ internal static class ZoneTreeIdentityFile
 
     internal static StoreIdentity Read(ReadOnlySpan<byte> bytes)
     {
-        var envelope = JsonDefaults.Deserialize<IdentityEnvelope>(bytes);
+        var envelope = JsonDefaults.Deserialize<ZoneTreeIdentityEnvelope>(bytes);
         if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Checksum))
         {
             throw Errors.Fail(ErrorCode.Corruption, IdentityChecksumInvalid);
@@ -70,7 +70,7 @@ internal static class ZoneTreeIdentityFile
     internal static void Write(string path, StoreIdentity identity)
     {
         var payload = JsonDefaults.Serialize(identity);
-        var bytes = JsonDefaults.Serialize(new IdentityEnvelope(payload, SHA256.HashData(payload)));
+        var bytes = JsonDefaults.Serialize(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)));
         var temporary = path + TemporaryFileSuffix;
         using (var file = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None,
             IdentityBufferBytes, FileOptions.WriteThrough))
@@ -82,5 +82,9 @@ internal static class ZoneTreeIdentityFile
         File.Move(temporary, path, true);
     }
 
-    private sealed record IdentityEnvelope(byte[] Payload, byte[] Checksum);
 }
+
+[global::Orleans.GenerateSerializer, global::Orleans.Alias(ZoneTreeMetadataAliases.IdentityEnvelope)]
+internal sealed record ZoneTreeIdentityEnvelope(
+    [property: global::Orleans.Id(0)] byte[] Payload,
+    [property: global::Orleans.Id(1)] byte[] Checksum);

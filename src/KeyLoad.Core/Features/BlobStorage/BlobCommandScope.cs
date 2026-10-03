@@ -2,7 +2,12 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.BlobStorage;
 
-internal sealed record BlobCommandScope(Guid CommandId, BlobRef Blob, Guid? UploadId)
+[global::Orleans.GenerateSerializer]
+[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.BlobCommandScope)]
+internal sealed record BlobCommandScope(
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.BlobCommandScopeFields.CommandId)] Guid CommandId,
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.BlobCommandScopeFields.Blob)] BlobRef Blob,
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.BlobCommandScopeFields.UploadId)] Guid? UploadId)
 {
     internal static T Payload<T>(ReplicatedOperation operation) => JsonDefaults.Deserialize<T>(operation.PayloadJson);
     internal static BlobCommandScope From(ReplicatedOperation operation) => operation.Kind switch

@@ -4,7 +4,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private sealed record EventIdentity(string StreamId, long Generation, long Revision);
+
     private static void RejectDuplicateEvent(EventData existing, EventData incoming)
         => throw (JsonData.Fingerprint(existing) == JsonData.Fingerprint(incoming)
             ? Errors.Fail(ErrorCode.DuplicateEventId, "The event ID is already retained in this source generation.")
