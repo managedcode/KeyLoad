@@ -1,0 +1,911 @@
+{
+  "schemaVersion": 1,
+  "kind": "exact-source-native-runtime-qualification",
+  "repository": "managedcode/KeyLoad",
+  "branch": "main",
+  "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
+  "runId": 37079707413,
+  "attempt": 1,
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413",
+  "conclusion": "failure",
+  "nativeFormat": "Original TUnit 1.72.10 JSON; no conversion or invented TRX. TRX absence alone is not a failed gate.",
+  "archives": [
+    {
+      "id": 11258640144,
+      "name": "docker-rf3-image-evidence",
+      "size_in_bytes": 32660,
+      "digest": "sha256:bfbefb102858a4a59ebbe0dc36c702dbfa2c166f079b1773a56a3c1b725b88b8",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258640144",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258640144/zip",
+      "workflow_run": {
+        "id": 37079707413,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "c10c48e40d8a9b452c9d131da549cab1e336692d"
+      }
+    },
+    {
+      "id": 11258580357,
+      "name": "docker-rf3-qualification",
+      "size_in_bytes": 477898,
+      "digest": "sha256:12761348d70dee3906c1bf27613627e66c366486fa30b84f02e51fc3daffde81",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258580357",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258580357/zip",
+      "workflow_run": {
+        "id": 37079707413,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "c10c48e40d8a9b452c9d131da549cab1e336692d"
+      }
+    },
+    {
+      "id": 11258505436,
+      "name": "code-quality-docker-rf3",
+      "size_in_bytes": 688888,
+      "digest": "sha256:b56d12e56d2a3290ec51f5fc7617c219fedda99ee58768242b2bc49232ec7b93",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258505436",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258505436/zip",
+      "workflow_run": {
+        "id": 37079707413,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "c10c48e40d8a9b452c9d131da549cab1e336692d"
+      }
+    },
+    {
+      "id": 11258238195,
+      "name": "comparison-suite",
+      "size_in_bytes": 41075,
+      "digest": "sha256:2c67ab1e5fc2350ca4103aa5bd1a7e6e01061658446523d3fbfe406c1c8d333c",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258238195",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258238195/zip",
+      "workflow_run": {
+        "id": 37079707413,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "c10c48e40d8a9b452c9d131da549cab1e336692d"
+      }
+    },
+    {
+      "id": 11258233300,
+      "name": "comparison-image-evidence",
+      "size_in_bytes": 31592,
+      "digest": "sha256:8f33e93d6b25ad3956b70fc50797e2309a084b388b6c56b8c44d0fb95a280c3a",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258233300",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258233300/zip",
+      "workflow_run": {
+        "id": 37079707413,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "c10c48e40d8a9b452c9d131da549cab1e336692d"
+      }
+    },
+    {
+      "id": 11258173211,
+      "name": "analyzer-rule-evidence",
+      "size_in_bytes": 206801,
+      "digest": "sha256:4044f89a09bf741081b061c9bd67097b1a6353eb481420d772e0b55616c9de9d",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258173211",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258173211/zip",
+      "workflow_run": {
+        "id": 37079707413,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "c10c48e40d8a9b452c9d131da549cab1e336692d"
+      }
+    },
+    {
+      "id": 11258033822,
+      "name": "comparison-test-results",
+      "size_in_bytes": 86033,
+      "digest": "sha256:ddf82d7534fa09db08367782c5b96104e89561287d55f9dab67184b575b6fca7",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258033822",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258033822/zip",
+      "workflow_run": {
+        "id": 37079707413,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "c10c48e40d8a9b452c9d131da549cab1e336692d"
+      }
+    },
+    {
+      "id": 11257978891,
+      "name": "code-quality-comparisons",
+      "size_in_bytes": 680790,
+      "digest": "sha256:e8220a40ff0ad15c059086616f070287abc6b3dc3e986fd1a3b8fb324b8e89e9",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257978891",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257978891/zip",
+      "workflow_run": {
+        "id": 37079707413,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "c10c48e40d8a9b452c9d131da549cab1e336692d"
+      }
+    },
+    {
+      "id": 11257974577,
+      "name": "test-results-ubuntu-latest",
+      "size_in_bytes": 1541082,
+      "digest": "sha256:6b733410c61ba889bdd0baaf87c0258f23d856f9e9858a653fda6748365d255a",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257974577",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257974577/zip",
+      "workflow_run": {
+        "id": 37079707413,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "c10c48e40d8a9b452c9d131da549cab1e336692d"
+      }
+    },
+    {
+      "id": 11257884749,
+      "name": "code-quality-ubuntu-latest",
+      "size_in_bytes": 1368213,
+      "digest": "sha256:3b05e1b9453719c2958c4b10e43dcf8ca59d823cdad1812ef205cf763cd93d42",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257884749",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257884749/zip",
+      "workflow_run": {
+        "id": 37079707413,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "c10c48e40d8a9b452c9d131da549cab1e336692d"
+      }
+    }
+  ],
+  "reports": [
+    {
+      "assembly": "KeyLoad.IntegrationTests",
+      "mode": "normal",
+      "publicationGeneration": "2fb6c75eca1448fa9116fd0121652d6d",
+      "artifactId": 11258580357,
+      "member": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "sha256": "84f717ecfbabd61518c0bcf954817278fcfa910bdf618cce1484bcf2bc6144fd",
+      "jobId": 111077292089,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292089",
+      "summary": {
+        "total": 63,
+        "passed": 63,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 63,
+      "sortedUniqueIdsSha256": "37c487f70e98a27c06bcff919dcac9310d6f9a6dc6acfa19a08326151c937178",
+      "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    },
+    {
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "mode": "normal",
+      "publicationGeneration": "e059bc6e92334b70a206f956f702e28f",
+      "artifactId": 11258173211,
+      "member": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "7480d3612c5e313d59d192e0561f100715bf65236ceaa3f6070792ceb43e0a63",
+      "jobId": 111077291856,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077291856",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 118,
+      "sortedUniqueIdsSha256": "2500efdc068d6702107b28fbc67fe77eb20dcdb6ccb5cbe1128c8f0aa5c0d8a7",
+      "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    },
+    {
+      "assembly": "KeyLoad.ComparisonTests",
+      "mode": "normal",
+      "publicationGeneration": "d1bf62eaa9e4435289abb116d2b8d577",
+      "artifactId": 11258033822,
+      "member": "TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "sha256": "407ac52d9c5bb2cad5fda5bd7d0666cd201b7f6a59d9a32e5147dea9f0260de2",
+      "jobId": 111077292051,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292051",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 4,
+      "sortedUniqueIdsSha256": "45bebbf2e4aebc54b3e6b86658f7a9a3ccd060e8cf63118377dea5f02a57e91e",
+      "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    },
+    {
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "mode": "normal",
+      "publicationGeneration": "fd7f5253fd7a4059a6a71c51f1536c26",
+      "artifactId": 11257974577,
+      "member": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "b84b116915177361f08f5a04079e79594a27c625e568f95c7c8867b55eb44a5e",
+      "jobId": 111077292063,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292063",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 118,
+      "sortedUniqueIdsSha256": "2500efdc068d6702107b28fbc67fe77eb20dcdb6ccb5cbe1128c8f0aa5c0d8a7",
+      "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    },
+    {
+      "assembly": "KeyLoad.RecoveryTests",
+      "mode": "normal",
+      "publicationGeneration": "6bd23c4c02ca44639453206cdb14ed49",
+      "artifactId": 11257974577,
+      "member": "TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "sha256": "105eea81d3446e19225847cc03fcd0d90931d20f236907e72a675b10618be5ee",
+      "jobId": 111077292063,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292063",
+      "summary": {
+        "total": 136,
+        "passed": 136,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 136,
+      "sortedUniqueIdsSha256": "32ab238d126792374aed121c4e887b5dcbd6cc2ba8c8ed097e661ce3802d4dcd",
+      "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "mode": "normal",
+      "publicationGeneration": "7e5995abe9b140a3b2d5757a907d833c",
+      "artifactId": 11257974577,
+      "member": "TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "2d04a1f54c0617b3b8bb2e27ded64da61fc0fc6bdf3a38d2ac070bc60181c7db",
+      "jobId": 111077292063,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292063",
+      "summary": {
+        "total": 1088,
+        "passed": 1088,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 1088,
+      "sortedUniqueIdsSha256": "de8239c0d9c7ed4b38bac13a78a7f176ae224401016019170d1d27232a9a311c",
+      "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "mode": "scalar",
+      "publicationGeneration": "603c4fe5a07941ddbe0c7e4253322ec0",
+      "artifactId": 11257974577,
+      "member": "TestResults/unit-scalar/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "dcab4d005ff2a9489f66911227e797d95caf5e05c5709f636b789b7fd7b7d8f3",
+      "jobId": 111077292063,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292063",
+      "summary": {
+        "total": 1088,
+        "passed": 1088,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 1088,
+      "sortedUniqueIdsSha256": "de8239c0d9c7ed4b38bac13a78a7f176ae224401016019170d1d27232a9a311c",
+      "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    }
+  ],
+  "failures": [
+    {
+      "id": "KeyLoad.ComparisonTests.RealComparisonSuite.1.1.AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines.1.1.0",
+      "method": "AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines",
+      "status": "error",
+      "type": "KeyLoad.Comparisons.ComparisonFailureException",
+      "message": "KeyLoad:Cancelled",
+      "sourcePath": "tests/KeyLoad.ComparisonTests/ComparisonTests.cs",
+      "line": 23,
+      "artifactId": 11258033822,
+      "reportSha256": "407ac52d9c5bb2cad5fda5bd7d0666cd201b7f6a59d9a32e5147dea9f0260de2",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292051"
+    }
+  ],
+  "gates": [
+    {
+      "name": "Release solution build",
+      "qualificationStatus": "passed",
+      "jobId": 111077292063,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292063",
+      "step": {
+        "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-02T23:54:17Z",
+        "completed_at": "2026-10-02T23:55:50Z"
+      },
+      "proof": "Original build log:Build succeeded;0 warnings;0 errors.25 native SARIF source reports retained."
+    },
+    {
+      "name": "Formatter",
+      "qualificationStatus": "passed",
+      "jobId": 111077292063,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292063",
+      "step": {
+        "name": "Verify EditorConfig and analyzer fixes",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-02T23:55:50Z",
+        "completed_at": "2026-10-02T23:57:30Z"
+      },
+      "proof": "Original dotnet format --verify-no-changes command plus terminal successful exit; no formatter diagnostic emitted. Static gate only."
+    },
+    {
+      "name": "Governance",
+      "qualificationStatus": "passed",
+      "jobId": 111077292063,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292063",
+      "step": {
+        "name": "Verify repository governance",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-02T23:57:30Z",
+        "completed_at": "2026-10-02T23:57:31Z"
+      },
+      "proof": "Original static source-owned governance PASS."
+    },
+    {
+      "name": "Analyzer rules dedicated invocation",
+      "qualificationStatus": "passed",
+      "jobId": 111077291856,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077291856",
+      "step": {
+        "name": "Run dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-02T23:54:34Z",
+        "completed_at": "2026-10-02T23:55:42Z"
+      },
+      "proof": "Native TUnit118 unique cases passed,zero skipped/cancelled/timedOut/flaky."
+    },
+    {
+      "name": "Analyzer rules verify invocation",
+      "qualificationStatus": "passed",
+      "jobId": 111077292063,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292063",
+      "step": {
+        "name": "Verify source-owned Roslyn rules",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-02T23:57:31Z",
+        "completed_at": "2026-10-02T23:58:42Z"
+      },
+      "proof": "Independent native publication of same118 IDs all passed; not additional unique coverage."
+    },
+    {
+      "name": "Unit normal",
+      "qualificationStatus": "passed",
+      "jobId": 111077292063,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292063",
+      "step": {
+        "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9,
+        "started_at": "2026-10-02T23:58:42Z",
+        "completed_at": "2026-10-02T23:59:34Z"
+      },
+      "proof": "Native TUnit1088/1088,zero skipped/cancelled/timedOut/flaky."
+    },
+    {
+      "name": "Unit scalar",
+      "qualificationStatus": "passed",
+      "jobId": 111077292063,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292063",
+      "step": {
+        "name": "Qualify the full unit suite with hardware intrinsics disabled",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10,
+        "started_at": "2026-10-02T23:59:34Z",
+        "completed_at": "2026-10-03T00:00:51Z"
+      },
+      "proof": "Native TUnit1088/1088; identical ID set; original log DOTNET_EnableHWIntrinsic=0;zero skipped/cancelled/timedOut/flaky."
+    },
+    {
+      "name": "Real process recovery",
+      "qualificationStatus": "passed",
+      "jobId": 111077292063,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292063",
+      "step": {
+        "name": "Qualify real process recovery after a successful build",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11,
+        "started_at": "2026-10-03T00:00:51Z",
+        "completed_at": "2026-10-03T00:03:01Z"
+      },
+      "proof": "Native TUnit136/136 plus20 passed full batches and1000 exact-source validated seeded rows. Process-kill only."
+    },
+    {
+      "name": "Docker Aspire RF3 SDK MCP",
+      "qualificationStatus": "passed",
+      "jobId": 111077292089,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292089",
+      "step": {
+        "name": "Qualify RF3 through the real SDK clients",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10,
+        "started_at": "2026-10-02T23:55:52Z",
+        "completed_at": "2026-10-02T23:59:59Z"
+      },
+      "proof": "Native TUnit63/63,zero skipped/cancelled/timedOut/flaky; source-bound native image and container restart receipts retained."
+    },
+    {
+      "name": "Initial comparison suite",
+      "qualificationStatus": "failure",
+      "jobId": 111077292051,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292051",
+      "step": {
+        "name": "Run dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 8,
+        "started_at": "2026-10-02T23:56:28Z",
+        "completed_at": "2026-10-02T23:57:53Z"
+      },
+      "proof": "Native TUnit3/4; real SDK cancellation regression fails with ComparisonFailureException/KeyLoad:Cancelled."
+    },
+    {
+      "name": "Comparison1KiB/8clients/3hops",
+      "qualificationStatus": "skipped",
+      "jobId": 111077292051,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292051",
+      "step": {
+        "name": "Measure 1 KiB documents, eight clients and three graph hops",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 9,
+        "started_at": "2026-10-02T23:57:53Z",
+        "completed_at": "2026-10-02T23:57:53Z"
+      },
+      "proof": "Terminal step skipped; no native profile report exists."
+    },
+    {
+      "name": "Comparison16KiB/4clients/5hops",
+      "qualificationStatus": "skipped",
+      "jobId": 111077292051,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413/job/111077292051",
+      "step": {
+        "name": "Measure 16 KiB documents, four clients and five graph hops",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 10,
+        "started_at": "2026-10-02T23:57:53Z",
+        "completed_at": "2026-10-02T23:57:53Z"
+      },
+      "proof": "Terminal step skipped; no native profile report exists."
+    }
+  ],
+  "processRecoveryTrials": {
+    "files": [
+      {
+        "member": "artifacts/qualification/crash-trials-00.jsonl",
+        "sha256": "f2f26deca8da92e201f03edc8f13a4c1ddf4f5268c2c60b52c04cedfa33524c9",
+        "batch": 0,
+        "seed": 1701,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-01.jsonl",
+        "sha256": "8ea55b453d0f9dde7b0e74f21a58affcfaa4ae104cd21efec10cd3d98aeb9e59",
+        "batch": 1,
+        "seed": 1702,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-02.jsonl",
+        "sha256": "73e10f70ba263be9edb067fda0a1b0b454fca4ac531c689fa0c7846c1d341333",
+        "batch": 2,
+        "seed": 1703,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-03.jsonl",
+        "sha256": "5733713afb2c4e1decf357f09d660b580891fdf4203945ffdcb5601bd3f9f1e9",
+        "batch": 3,
+        "seed": 1704,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-04.jsonl",
+        "sha256": "daaae6746845e8e2466a37a4157073cd1aa79bb4855ea021838cd92c26e18f40",
+        "batch": 4,
+        "seed": 1705,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-05.jsonl",
+        "sha256": "b165615b61ac039849b8afac1daf51e204d8535c117499d40200815384e06dc0",
+        "batch": 5,
+        "seed": 1706,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-06.jsonl",
+        "sha256": "65c224e48e14a9a199e4bb812d9b8f7b11321334dd0b91a41b9fd579bd2171ca",
+        "batch": 6,
+        "seed": 1707,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-07.jsonl",
+        "sha256": "83f319bc15091a90be7406e2b4fa6fe0c573e8fe73281fc085fcdfaed4eea182",
+        "batch": 7,
+        "seed": 1708,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-08.jsonl",
+        "sha256": "83c06b8918f4459167dafe4e03f8040d24c6bc81729d61a132dcc2ab5641523d",
+        "batch": 8,
+        "seed": 1709,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-09.jsonl",
+        "sha256": "d32eb5db639981f3c89a7ea75aa1d73f0a504daaf26b409e0b10142c9c2a9b2e",
+        "batch": 9,
+        "seed": 1710,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-10.jsonl",
+        "sha256": "e412147323788eff0288f29a5338224ddbbca5976e10188bf8833a82aa9741fa",
+        "batch": 10,
+        "seed": 1711,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-11.jsonl",
+        "sha256": "51900d675f847eda21b670bbc1c6f28e2fc15d8bbcf56e8b69f9f758a7015c90",
+        "batch": 11,
+        "seed": 1712,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-12.jsonl",
+        "sha256": "785be3c530735c753806e373f9e05a743110fa144022cb41321f9b7413c61326",
+        "batch": 12,
+        "seed": 1713,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-13.jsonl",
+        "sha256": "4a6e25f54c325dfdd97c6b4801226ad6f5bfc75ac052e80329eef7664402c145",
+        "batch": 13,
+        "seed": 1714,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-14.jsonl",
+        "sha256": "ff41d82c1b327128f2bba429d3cbda568459b5bba43350a4898e0fb04d4eac1b",
+        "batch": 14,
+        "seed": 1715,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-15.jsonl",
+        "sha256": "3769afd07c7f7a8bbb2abb74af39bca4fcd205c59100a2428700ddaa11abbb88",
+        "batch": 15,
+        "seed": 1716,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-16.jsonl",
+        "sha256": "e12db85f19a1f2c301b4adbdaa891e67df94eb78adce104cf6c092e2fda8ad23",
+        "batch": 16,
+        "seed": 1717,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-17.jsonl",
+        "sha256": "634710e41e28626d5e6ae0db826af23a91444c50d3e35ebaf83e882a283bd5bf",
+        "batch": 17,
+        "seed": 1718,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-18.jsonl",
+        "sha256": "c76c973a05a98e203733a9bdcad8103863796b28a51f3f8eb8288ea10264f893",
+        "batch": 18,
+        "seed": 1719,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-19.jsonl",
+        "sha256": "cb90441f4a7937bf6345f066eb383217f79b9800710c651dc26b976e41fe7f59",
+        "batch": 19,
+        "seed": 1720,
+        "rows": 50
+      }
+    ],
+    "rows": 1000,
+    "seedRange": [
+      1701,
+      1720
+    ],
+    "trialsPerSeed": 50,
+    "stages": {
+      "MutationApplied": 206,
+      "JournalFlushed": 163,
+      "HeaderWritten": 214,
+      "ApplyCompleted": 214,
+      "PayloadWritten": 203
+    },
+    "valueCuts": {
+      "(1, 1, 1)": 583,
+      "(0, 0, 0)": 417
+    },
+    "mutationIndices": {
+      "0": 332,
+      "1": 318,
+      "2": 350
+    },
+    "atOrAfterJournalFlushRows": 583,
+    "maximumConcurrentStorageTrials": 4,
+    "rootRecomputedExactSourceSeedChoices": true,
+    "allCutsAtomic": true,
+    "scope": "Process-kill/reopen only; no power-loss, endurance or production-readiness proof."
+  },
+  "sourceEvidence": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "1f29e31958f130d5ea676edd9974beb8137d661113676559f0f759e4c9178ef0",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/.github/workflows/ci.yml"
+    },
+    {
+      "path": "Directory.Packages.props",
+      "sha256": "cf91cfaac7dbe069cb9204d4523944ec61663f7652bb68b4389895df95fb92c7",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/Directory.Packages.props"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+      "sha256": "f2c98b2f17d3198f34155b8b2098f1f786b900dc89753196824e0a9729f300d7",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/StorageTrialAdmission.cs",
+      "sha256": "a2763d59f269e212a29f660015d456d555690ab7b07e5b30a3461dd360b6a02c",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.RecoveryTests/Features/StorageRecovery/StorageTrialAdmission.cs"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreOptions.cs",
+      "sha256": "7451043768eb7d08c894e706c7a9d574a7fd6ccc33d95a7fa96e15bdfaecf858",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreOptions.cs"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalCodec.cs",
+      "sha256": "fee139a5e278f121915159b32807133ba22e37873085c9a9d0c2e9338c3c9d26",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalCodec.cs"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalMutation.cs",
+      "sha256": "5e50c5891edea536a9d86a22ffd2b0a82cdee2b5e317348a10ea23a4ca87db6f",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalMutation.cs"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalBufferWriter.cs",
+      "sha256": "1ca101945eb618dd6f9002779d5e7935655d6bb78b480c00005aabb6e99349d5",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalBufferWriter.cs"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalRecovery.cs",
+      "sha256": "5bc9f268af79eecf00fe35b27e4d967eefca9d6d34623ada18c8f931ebbd42ac",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalRecovery.cs"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreePersistenceFormat.cs",
+      "sha256": "feca0d766eb95ac18bdb7db0e1aeaf2a470431ec82b2ffd3a919e35fa33ec53e",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreePersistenceFormat.cs"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTreeFactory.cs",
+      "sha256": "8a2c60a28db679e50ea6cc0e868851fb31513f1042601f3d5be50f7349741953",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTreeFactory.cs"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/WalSerializerFixture.cs",
+      "sha256": "a941f8558ac176acacdc70c9df05d54ea171d0a2a66a3e613a903dc5e9cee46c",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.UnitTests/Features/StorageRecovery/WalSerializerFixture.cs"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/WalFileFixture.cs",
+      "sha256": "886c2a66f6d059f6ec870b656b0ae6824f3c94d0df73ebae9ac1a0a3eaedd20a",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.UnitTests/Features/StorageRecovery/WalFileFixture.cs"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalSuccessorTests.cs",
+      "sha256": "f1eb9f2766f1bcab5200beb185ee6580fad9b5936ef2b6ae14028625acd8d563",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalSuccessorTests.cs"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalRoundTripTests.cs",
+      "sha256": "922a249e7af8d073d06843564c5795ce52ede0907f060713f77dc8005cf6200d",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalRoundTripTests.cs"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalUpgradeTests.cs",
+      "sha256": "26772ae5f9fd02dea8f6cc1ff1e5c925c1f54cae53d1d7085fc14bedf0ed2672",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalUpgradeTests.cs"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalLegacyBinaryTests.cs",
+      "sha256": "e69848d56cf1683e8ca2c9bd08ce203fbe443d0787f4498c0ced69fdea5f6ad9",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalLegacyBinaryTests.cs"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalLifecycleTests.cs",
+      "sha256": "1db3be372607c6848583c9821c7fd4a79a31065c73437ba312f6ca8a8ee9f47e",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalLifecycleTests.cs"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalCorruptionTests.cs",
+      "sha256": "c6e81425fb6cec976fe9b6247abd506197c223f659630994e198c464244f8ede",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalCorruptionTests.cs"
+    },
+    {
+      "path": "src/KeyLoad.Core/KeyLoad.Core.csproj",
+      "sha256": "1a772c9c02903e0e4761660b9514f83fdc745441eb899565b97d60c0d8ab588c",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/src/KeyLoad.Core/KeyLoad.Core.csproj"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj",
+      "sha256": "f884c2cc99ae9653125a09edd9fb802dd594b1a8f99ca4d8768b3592e635b8c3",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/ManagedCodeTimeSeriesAggregation.cs",
+      "sha256": "f48f0eca1f6387be7601efc1f524083de0e6724e996cb4c957e098e4166081a4",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/ManagedCodeTimeSeriesAggregation.cs"
+    },
+    {
+      "path": "Directory.Build.props",
+      "sha256": "8577a384f92cf2b77e5926b985af0db7ed0d0f4efafe6e80b0678763ae61db09",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/Directory.Build.props"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "sha256": "be927523cfc85b8b2ac18fb5d08bdf7625aee31d4f8fec37a4cbc2782acc24bf",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/Directory.Build.targets"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/FrameBudgetTests.cs",
+      "sha256": "293409c06f1394b2662b5a64ea5279e7fbfa058b46fa6e1c9ca6b8d01f86c4b4",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.UnitTests/Features/StorageRecovery/FrameBudgetTests.cs"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/PreparedTransactionTests.cs",
+      "sha256": "6eae5569b4b042905dd772701d114327a5ce1ed20950f2fdb10d28849e3a375f",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.UnitTests/Features/StorageRecovery/PreparedTransactionTests.cs"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/TransactionProtocolTests.cs",
+      "sha256": "7b122a961a5e4240cc4f81c3b0451bdf9b85cfe8b0f46f198e771e44d6cf0c2f",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/tests/KeyLoad.UnitTests/Features/ResourceExecution/TransactionProtocolTests.cs"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalPublication.cs",
+      "sha256": "714c03db5e04fe0d7032f67c8f68173826fff1539c162b429dd695e650b7d884",
+      "url": "https://github.com/managedcode/KeyLoad/blob/c10c48e40d8a9b452c9d131da549cab1e336692d/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalPublication.cs"
+    }
+  ],
+  "wal": {
+    "nativeCasesPerMode": {
+      "normal": 66,
+      "scalar": 66
+    },
+    "uniqueSourceMethods": 19,
+    "sourceClassesAndCounts": {
+      "OrleansWalCorruptionTests": 17,
+      "OrleansWalLegacyBinaryTests": 12,
+      "OrleansWalLifecycleTests": 3,
+      "OrleansWalRoundTripTests": 2,
+      "OrleansWalSuccessorTests": 2,
+      "OrleansWalUpgradeTests": 30
+    },
+    "rootRecomputedSourceArgumentsAndNativeIds": true,
+    "sizeRegressionPassed": true,
+    "successorGuardAndNativeByteCodecInThisSource": true,
+    "sourceContract": "Frame3/identity4; official closed ReadOnlyMemoryOfByteCodec; native Sync ZoneTree WAL plus separate atomic Flush(true) journal.",
+    "remaining": [
+      "decoded-memory/work bounds",
+      "frozen independent deployed-binary/legacy migration fixtures",
+      "complete malformed-envelope/torn-header matrix",
+      "qualified speed/allocations and power-loss/endurance"
+    ]
+  },
+  "consumer": {
+    "package": "ManagedCode.TimeSeries",
+    "exactSourcePin": "10.0.0",
+    "nativeReportPackageVersion": "10.0.0",
+    "nativeArtifactId": 11258238195,
+    "member": "timeseries/timeseries-results.json",
+    "sha256": "8c7ebf57799e86786c0bec560c970d2bbf63e5c8763bb52cafa5e16178cecc12",
+    "later10_0_3ConsumerQualified": false
+  },
+  "coverage": {
+    "qualificationStatus": "unavailable",
+    "collectorReportsPresent": false,
+    "actualCollectedMetrics": null,
+    "coverageMembers": [],
+    "thresholdsQualified": false,
+    "workflowCollectorInvocationPresent": false,
+    "interpretation": "No original coverage report/metric or recorded collector invocation; test counts and analyzer coverage-inventory names do not prove numeric coverage."
+  },
+  "rootReview": {
+    "freshAuthenticatedRunMetadataSha256": "8c398733437abcff63edb399a539d851209bc08cbb91b7d04efd9a2afaf29b50",
+    "freshAuthenticatedArtifactsMetadataSha256": "30d7edb807189908a6cf73a501133add5d945aced801f58b1ada8965f92c725b",
+    "freshAuthenticatedAttemptJobsMetadataSha256": "f31611985c5b3e5bb3460d09399f3ff9841450e9e826e8c74e35d928449e813a",
+    "privateFullJoinSha256": "ea66f639431cf9af5080a34c48ed1c8175b08f38f615a2b7d2dd3b5860722816",
+    "rootArchiveDigestAndCrcVerified": 10,
+    "rootNativeSourceIdsSummariesAndHashesVerified": 7,
+    "nativeExecutions": 2615,
+    "distinctNativeIds": 1409,
+    "duplicateAnalyzerIds": 118,
+    "note": "Two genuine analyzer invocations are separate executions, not 236 distinct cases."
+  },
+  "limits": [
+    "Normal/scalar units and RF3 passed; comparison failed and two remaining measured profiles skipped. Complete qualification is false.",
+    "No recorded collector invocation or collected coverage report; mandatory numeric coverage thresholds remain unqualified.",
+    "RF3/comparison images were built separately; no common immutable-image cohort or performance-winner claim.",
+    "Published TimeSeries10.0.3/current dirty KeyLoad/isolated270-cell source are outside this measured SHA."
+  ]
+}

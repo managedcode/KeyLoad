@@ -25,7 +25,7 @@
       "decision": "docs/ADR/ADR-057-orleans-atomic-wal.md",
       "source": "generated_Orleans10.3.1_binary_mutations_closed_native_ReadOnlyMemoryOfByteCodec_explicit_kind_full_consumption_frame3_identity4_native_ZoneTree_unchanged",
       "upgrade": "offline_old_binary_compact_verified_backup_homogeneous_RF3_no_JSON_fallback",
-      "verification": "c10_Release_build_full_formatter_governance_analyzers118_normal1088_scalar1088_recovery136_RF3_63_pass_zero_skips_comparison3_of4_failed_exact_SDK_cancel_contract_locally_corrected_scoped_format_and_independent_review_pass_final_GitHub_full_gate_pending",
+      "verification": "current_published_TimeSeries10_0_3_consumer_restore_and_full_combined_Release_build_formatter_pending_exact_source_GitHub_unit_process_RF3_qualification_pending_prior6ad_frame2_identity3_failures_preserved",
       "performance": "encoded_size_regression_authored_no_acceleration_power_loss_or_endurance_claim",
       "successorSequenceRepair": "source_guard_rejects_terminal_MaxValue_successor_before_decode_apply_or_truncation_real_checkpoint_legal_limit_wrapped_negative_unchanged_authority_and_ownership_regressions_GitHub_pending",
       "sourceReviewGaps": [
@@ -39,39 +39,6 @@
         "runId": 37077856823,
         "url": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823",
         "conclusion": "failure"
-      },
-      "secondRun": {
-        "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
-        "runId": 37079707413,
-        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413",
-        "conclusion": "failure",
-        "normalUnit": {
-          "passed": 1088,
-          "total": 1088,
-          "skipped": 0
-        },
-        "scalarUnit": {
-          "passed": 1088,
-          "total": 1088,
-          "skipped": 0
-        },
-        "processRecovery": {
-          "passed": 136,
-          "total": 136,
-          "skipped": 0
-        },
-        "rf3": {
-          "passed": 63,
-          "total": 63,
-          "skipped": 0
-        },
-        "comparison": {
-          "passed": 3,
-          "total": 4,
-          "skipped": 0,
-          "failure": "KeyLoadStreamPublicRegression expected exception instead of exact SDK Cancelled result"
-        },
-        "measuredProfiles": "skipped_after_comparison_failure"
       }
     },
     "evidence": [
@@ -129,22 +96,76 @@
       "docs/implementation/runtime-qualification-37060131271.json",
       "docs/implementation/performance-diagnosis-37060131271.json",
       "docs/implementation/performance-source-r11.json",
-      "docs/implementation/runtime-qualification-37065200835.json"
+      "docs/implementation/runtime-qualification-37065200835.json",
+      "docs/implementation/runtime-qualification-37074392471.json",
+      "docs/implementation/runtime-qualification-37077856823.json",
+      "docs/implementation/runtime-qualification-37079707413.json"
     ],
     "latestJoinedBaseline": {
-      "sha": "b21c9eeaed701b7b2e267d4690fb3ac302c06c17",
-      "run": 37065200835,
+      "sha": "c10c48e40d8a9b452c9d131da549cab1e336692d",
+      "run": 37079707413,
+      "attempt": 1,
       "conclusion": "failure",
-      "normalUnitsEachOs": "885_of885",
-      "scalarUnitsEachOs": "885_of885",
-      "recoveryEachOs": "136_of136",
-      "rf3": "45_of46",
-      "comparison": "2_of4",
-      "measuredProfiles": "skipped_after_native_comparison_failure",
-      "receipt": "docs/implementation/runtime-qualification-37065200835.json"
+      "normalUnitsLinux": "1088_of1088",
+      "scalarUnitsLinux": "1088_of1088_same_native_ID_set_intrinsics_disabled",
+      "recoveryLinux": "136_of136",
+      "analyzersLinux": "118_unique_cases_passed_in_two_native_invocations",
+      "seededProcessRecovery": "1000_unique_source_recomputed_rows_atomic_process_kill_only",
+      "rf3": "63_of63_real_Docker_Aspire_SDK_MCP",
+      "comparison": "3_of4",
+      "wal": "66_of66_source_cases_each_normal_scalar_mode_19_source_methods_all_arguments_matched",
+      "consumerTimeSeriesVersion": "10.0.0_not_current10.0.3",
+      "measuredProfiles": "two_later_profiles_skipped_after_comparison_failure",
+      "receipt": "docs/implementation/runtime-qualification-37079707413.json",
+      "nativeFormat": "original_TUnit_JSON_not_converted_TRX",
+      "coverage": "no_collector_invocation_or_collected_report_thresholds_unqualified",
+      "failures": [
+        "AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines_KeyLoadCancelled_test_contract"
+      ],
+      "currentAssertionRepair": "407619362db859e14d7a678d4441b8d4a77862e4_pending_exact_source_native_GitHub_qualification"
     },
-    "sourceStageAwaitingQualification": "immutable_source_bound_container_images_native_runner_provenance_bounded_RF3_diagnostics_KeyLoad_stream_readback",
-    "remainingPerformanceQualification": "complete_nine_engine_single_and_native_replicated_six_profiles_equivalent_durability_resources_repeated_exact_source_results_no_winner_claim"
+    "sourceStageAwaitingQualification": "common_immutable_images_isolated_native_1_2_3_node_270_cell_CRUD_specialized_source_genuine_faults_authenticated_complete_aggregation_site_contracts_TimeSeries10.0.3_consumer",
+    "remainingPerformanceQualification": "complete_same_source_270_cell_native_isolated_cohort_plus_separately_isolated_TimeSeries_Timescale_profile_equivalent_ACK_durability_resources_repeated_results_no_winner_claim",
+    "previousJoinedBaselines": [
+      {
+        "sha": "6ad4741a713ac3376868aef146ed60a199e97b93",
+        "run": 37077856823,
+        "attempt": 1,
+        "conclusion": "failure",
+        "normalUnitsLinux": "1064_of1066",
+        "scalarUnitsLinux": "skipped_after_normal_unit_failure",
+        "recoveryLinux": "136_of136",
+        "analyzersLinux": "118_unique_cases_passed_in_two_native_invocations",
+        "seededProcessRecovery": "1000_unique_source_recomputed_rows_atomic_process_kill_only",
+        "rf3": "62_of63_real_Docker_Aspire_SDK_MCP",
+        "comparison": "2_of4",
+        "measuredProfiles": "two_later_profiles_skipped_after_comparison_failure",
+        "receipt": "docs/implementation/runtime-qualification-37077856823.json",
+        "nativeFormat": "original_TUnit_JSON_not_converted_TRX",
+        "coverage": "no_collector_invocation_or_collected_report_thresholds_unqualified",
+        "failures": [
+          "OversizedCompiledFramePersistsItsFailureAndAdvancesTheRaftApplyPosition",
+          "AcWal001RealBinaryPayloadUsesFewerEncodedBytesThanEquivalentRepresentativeJson",
+          "AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica",
+          "AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema",
+          "AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines"
+        ]
+      },
+      {
+        "sha": "c06291b94c3ff2763ebc723a1b363c9eade42901",
+        "run": 37074392471,
+        "conclusion": "failure",
+        "normalUnitsEachOs": "Linux_macOS1021_of1022_Windows1016_of1022",
+        "scalarUnitsEachOs": "skipped_after_normal_unit_failure",
+        "recoveryEachOs": "Linux_macOS136_of136_Windows135_of136",
+        "rf3": "skipped_after_image_preparation_failure",
+        "comparison": "skipped_after_image_preparation_failure",
+        "measuredProfiles": "skipped_after_image_preparation_failure",
+        "receipt": "docs/implementation/runtime-qualification-37074392471.json",
+        "imageFailureReceipt": "docs/implementation/image-preflight-failure-37073331174.json",
+        "recoveryFailure": "Windows_ProjectionCrash_MutationApplied3_TaskCanceled_cause_unconfirmed"
+      }
+    ]
   },
   "KL-007": {
     "title": "KeyCodec і storage envelopes",
@@ -316,23 +337,74 @@
       "tests/KeyLoad.IntegrationTests/Features/TimeSeries",
       "docs/implementation/runtime-qualification-37057708780.json",
       "docs/implementation/qualification-source-r9.json",
-      "docs/implementation/runtime-qualification-37060131271.json"
+      "docs/implementation/runtime-qualification-37060131271.json",
+      "docs/implementation/timeseries-dependency-10.0.2.json",
+      "docs/implementation/timeseries-dependency-10.0.3.json"
     ],
     "boundedReads": {
       "requirements": "REQ-SERIES-008..012",
       "acceptance": "AC-SERIES-008..012",
-      "source": "latest_raw_half_open_aggregates_dense_UTC_windows_published_ManagedCode_TimeSeries10_0_0_SDK_HTTP_MCP_reverse_storage_shared_budgets",
+      "source": "latest_raw_half_open_aggregates_dense_UTC_windows_published_ManagedCode_TimeSeries10_0_3_SDK_HTTP_MCP_reverse_storage_shared_budgets",
       "qualification": "exactc486_run37060131271_871_of871_units_each_OS_46_of46_RF3_SDK_MCP_including_additive_series_cases_no_skips",
       "remaining": "retention_rollups_SQL_compression_coverage_resource_performance_endurance_fault_work_not_qualified",
       "sourceRepairReceipt": "docs/implementation/qualification-source-r9.json",
-      "qualificationReceipt": "docs/implementation/runtime-qualification-37060131271.json"
+      "qualificationReceipt": "docs/implementation/runtime-qualification-37060131271.json",
+      "dependencyUpdateQualification": "published10_0_3_signed_feed_and_owning_full_tests_profiles_verified_new_KeyLoad_source_unit_recovery_RF3_SDK_MCP_GitHub_run_pending_prior_c48610_0_0_results_historical"
     },
     "libraryPerformance": {
       "owner": "managedcode/TimeSeries",
-      "sourceSha": "23632b9f8d49d5a7feb337caa6cbeb5b22d7575a",
-      "stage": "read_only_arithmetic_capacity_and_summer_allocation_review_complete_no_source_or_release_change_yet",
-      "consumingVersion": "10.0.0",
-      "delivery": "owning_regressions_profile_canonical_patch_successful_release_verified_NuGet_then_consumer_join_required"
+      "sourceSha": "de44e91ecf38779b61fe79a51153ce7b7b4db0ea",
+      "stage": "owning_temporal_and_summer_allocation_repairs_full_tests_coverage_four_native_profiles_release_signed_feed_verified_KeyLoad10_0_3_pin_joined_consumer_qualification_pending",
+      "consumingVersion": "10.0.3",
+      "baseline": {
+        "releaseRun": "https://github.com/managedcode/TimeSeries/actions/runs/37072786703",
+        "testTotal": 1104,
+        "passed": 1035,
+        "failed": 69,
+        "failureKinds": [
+          "63_unrepresentable_rounded_TimeSpan_results_did_not_throw",
+          "4_unknown_rounding_mode_fast_paths_did_not_reject",
+          "2_nonzero_DateTimeOffset_rounds_did_not_preserve_offset"
+        ],
+        "performanceRun": "https://github.com/managedcode/TimeSeries/actions/runs/37072786670",
+        "performance": "five_jobs_formatter_IDE0060_failed_tests_coverage_and_BDN_skipped_no_measurements",
+        "publication": "release_publish_skipped_no_candidate_feed_receipt",
+        "sourceSha": "f443bf0c7efe53c381bc7925e93cd411911fa87d"
+      },
+      "executionOwner": "timeseries_dependency_delivery_luna_after_explicit_owner_delegation_2026_10_03",
+      "review": "root_reviewed_UInt64_temporal_representability_offset_and_static_generic_state_CAS_callbacks_public_contract_unchanged_unique_native_tests_coverage_tag_actual_assets_signed_feed_and_four_profile_iterations_independently_reconciled",
+      "delivery": "owning10_0_3_fresh_core_orleans_release_and_actual_signed_feed_verified_new_KeyLoad_consumer_GitHub_regressions_pending",
+      "deliveryReceipt": "docs/implementation/timeseries-dependency-10.0.3.json",
+      "releaseRun": "https://github.com/managedcode/TimeSeries/actions/runs/37077860613",
+      "owningTests": "1107_of1107_no_skips",
+      "owningLineCoverage": {
+        "core": "687_of725_94_76_percent",
+        "orleans": "205_of212_96_70_percent"
+      },
+      "nextCandidate": "capacity_algorithm_deferred_requires_independent_baseline_acceptance_safety_and_profile_review_SIMD_batch_stages_separate_no_KeyLoad_database_winner_claim",
+      "performanceRun": "https://github.com/managedcode/TimeSeries/actions/runs/37077860508",
+      "performanceQualification": "four_candidate_and_four_baseline_profiles16_unique_cases_each_two_launches10_result_iterations_each_exact_source_native_ZIP_digests_and_fixture_hashes_verified64_summer_checksums_recomputed_BDN_already_per_update_three_actual_CPU_pairs24_summer_comparisons_capped_checksums_unverified",
+      "summerAllocatedBytesPerUpdate": {
+        "Int32": 0,
+        "Int64": 0,
+        "Double": 0,
+        "Decimal": 64,
+        "normalization": "BDN_OperationsPerInvoke64_already_per_update"
+      },
+      "previousTemporalRelease": {
+        "sourceSha": "2c9118b6fbd45a5170682d345d66cba4ad6e8f2d",
+        "version": "10.0.2",
+        "deliveryReceipt": "docs/implementation/timeseries-dependency-10.0.2.json"
+      },
+      "summerAllocationImprovement": {
+        "Int32": "160_to0_bytes_per_update",
+        "Int64": "160_to0_bytes_per_update",
+        "Double": "160_to0_bytes_per_update",
+        "Decimal": "232_to64_bytes_per_update",
+        "scope": "same_and_multiple_existing_bucket_updates_in_published_owning_library_only",
+        "normalSameBucketInt32Ns": "9V74_52_77_to35_22_7763_58_25_to39_43",
+        "scalarPair": "baseline_rep2_to_candidate_rep1_same_EPYC7763_other_CPU_cohorts_unpaired"
+      }
     }
   },
   "KL-026": {

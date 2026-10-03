@@ -1,0 +1,824 @@
+{
+  "schemaVersion": 1,
+  "kind": "exact-source-native-runtime-qualification",
+  "repository": "managedcode/KeyLoad",
+  "branch": "main",
+  "sourceRevision": "6ad4741a713ac3376868aef146ed60a199e97b93",
+  "runId": 37077856823,
+  "attempt": 1,
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823",
+  "conclusion": "failure",
+  "nativeFormat": "Original TUnit 1.72.10 JSON; no conversion or invented TRX. TRX absence alone is not a failed gate.",
+  "archives": [
+    {
+      "id": 11258071363,
+      "name": "test-results-ubuntu-latest",
+      "size_in_bytes": 877458,
+      "digest": "sha256:5f5d7264df3b0bd79baede2867c05bbca32bd552aa0e2a77a7dcbed5afed37d8",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258071363",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258071363/zip",
+      "workflow_run": {
+        "id": 37077856823,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "6ad4741a713ac3376868aef146ed60a199e97b93"
+      }
+    },
+    {
+      "id": 11258025687,
+      "name": "code-quality-comparisons",
+      "size_in_bytes": 681984,
+      "digest": "sha256:44f9c272d447566f5e47d7e8890da088252a29ff0534a717ef480510be405fcc",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258025687",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11258025687/zip",
+      "workflow_run": {
+        "id": 37077856823,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "6ad4741a713ac3376868aef146ed60a199e97b93"
+      }
+    },
+    {
+      "id": 11257965740,
+      "name": "comparison-image-evidence",
+      "size_in_bytes": 33620,
+      "digest": "sha256:d84393befa65930ff53e727e1d0b4d1b9feccb82ee976ba9f2de66fa6013c25f",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257965740",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257965740/zip",
+      "workflow_run": {
+        "id": 37077856823,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "6ad4741a713ac3376868aef146ed60a199e97b93"
+      }
+    },
+    {
+      "id": 11257895397,
+      "name": "analyzer-rule-evidence",
+      "size_in_bytes": 207061,
+      "digest": "sha256:c299388e8bbd1a8742ff662bbb4f3cef75243700f93cb99a3be8985d344be6ac",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257895397",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257895397/zip",
+      "workflow_run": {
+        "id": 37077856823,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "6ad4741a713ac3376868aef146ed60a199e97b93"
+      }
+    },
+    {
+      "id": 11257776034,
+      "name": "comparison-suite",
+      "size_in_bytes": 41727,
+      "digest": "sha256:ae6bff1b2faf43e207da8ed1bf806fc88b4dd966a6d6120172bc1da1a78ab5f9",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257776034",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257776034/zip",
+      "workflow_run": {
+        "id": 37077856823,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "6ad4741a713ac3376868aef146ed60a199e97b93"
+      }
+    },
+    {
+      "id": 11257721782,
+      "name": "code-quality-ubuntu-latest",
+      "size_in_bytes": 1367727,
+      "digest": "sha256:d30a280dd7f4e565657397783a98ca772b1362e8972bc160b2e2c9ce92c4c021",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257721782",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257721782/zip",
+      "workflow_run": {
+        "id": 37077856823,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "6ad4741a713ac3376868aef146ed60a199e97b93"
+      }
+    },
+    {
+      "id": 11257606242,
+      "name": "comparison-test-results",
+      "size_in_bytes": 88682,
+      "digest": "sha256:1200815e6fccad84b23158e409beaa95fe6c26bcd8d0329cc90b76add257a933",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257606242",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257606242/zip",
+      "workflow_run": {
+        "id": 37077856823,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "6ad4741a713ac3376868aef146ed60a199e97b93"
+      }
+    },
+    {
+      "id": 11257373097,
+      "name": "docker-rf3-qualification",
+      "size_in_bytes": 482472,
+      "digest": "sha256:e106a39f8291dafc5b7a3f70a5dc25158704ba91380fb60561f2819fdeb5fd81",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257373097",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257373097/zip",
+      "workflow_run": {
+        "id": 37077856823,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "6ad4741a713ac3376868aef146ed60a199e97b93"
+      }
+    },
+    {
+      "id": 11257318024,
+      "name": "code-quality-docker-rf3",
+      "size_in_bytes": 690760,
+      "digest": "sha256:bc8509a5184e80e8af9de84ecfb100ce9c5de7a5d550d6dab0bb049c03b9cd1b",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257318024",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257318024/zip",
+      "workflow_run": {
+        "id": 37077856823,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "6ad4741a713ac3376868aef146ed60a199e97b93"
+      }
+    },
+    {
+      "id": 11257253062,
+      "name": "docker-rf3-image-evidence",
+      "size_in_bytes": 32667,
+      "digest": "sha256:b23e074d524780743ff7e5e095b6858fea72744c492b404948981eb723b15bef",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257253062",
+      "archive_download_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11257253062/zip",
+      "workflow_run": {
+        "id": 37077856823,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "6ad4741a713ac3376868aef146ed60a199e97b93"
+      }
+    }
+  ],
+  "reports": [
+    {
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "publicationGeneration": "e5f5fc31f8bf45d3a8f8d68d367b40ae",
+      "artifactId": 11258071363,
+      "member": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "e21b49b0b18f43b1cd6babcc7bb8affb4b9201e5fc84544ad0dcc512e97193c3",
+      "jobId": 111071644865,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 118,
+      "sortedUniqueIdsSha256": "2500efdc068d6702107b28fbc67fe77eb20dcdb6ccb5cbe1128c8f0aa5c0d8a7",
+      "sourceRevision": "6ad4741a713ac3376868aef146ed60a199e97b93",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    },
+    {
+      "assembly": "KeyLoad.RecoveryTests",
+      "publicationGeneration": "47ccb4032be7461ea9df2dc090142e64",
+      "artifactId": 11258071363,
+      "member": "TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "sha256": "397480933f91ea0465a92a8bd41571b057e75cc32bf59eb1dad23670e2a1c4a7",
+      "jobId": 111071644865,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865",
+      "summary": {
+        "total": 136,
+        "passed": 136,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 136,
+      "sortedUniqueIdsSha256": "32ab238d126792374aed121c4e887b5dcbd6cc2ba8c8ed097e661ce3802d4dcd",
+      "sourceRevision": "6ad4741a713ac3376868aef146ed60a199e97b93",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "publicationGeneration": "2f4707190a644ff1b99d0343abc22b83",
+      "artifactId": 11258071363,
+      "member": "TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "ce0f1b892b608081dece2ad10124fae4bb2b9d855e58d3af88d847a913c7c954",
+      "jobId": 111071644865,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865",
+      "summary": {
+        "total": 1066,
+        "passed": 1064,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 1066,
+      "sortedUniqueIdsSha256": "9b8c2fc82eaa5cc86ef6be6a8d1d19696da5246e7a36f023dc10cedc8e5bc73c",
+      "sourceRevision": "6ad4741a713ac3376868aef146ed60a199e97b93",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    },
+    {
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "publicationGeneration": "664142e466444bb093c16b903b5ad0c4",
+      "artifactId": 11257895397,
+      "member": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "ee471aed45c263b847e248780f6fc4e01f7238bd2e61df29576702276044eb70",
+      "jobId": 111071644586,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644586",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 118,
+      "sortedUniqueIdsSha256": "2500efdc068d6702107b28fbc67fe77eb20dcdb6ccb5cbe1128c8f0aa5c0d8a7",
+      "sourceRevision": "6ad4741a713ac3376868aef146ed60a199e97b93",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    },
+    {
+      "assembly": "KeyLoad.ComparisonTests",
+      "publicationGeneration": "1ebc53afc22f4b81a75df43d24a00e7e",
+      "artifactId": 11257606242,
+      "member": "TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "sha256": "d3a3e888b155932b4c1f39db1e0269d41c5fbf579a32b46add6347b3dfa827c8",
+      "jobId": 111071644622,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644622",
+      "summary": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 4,
+      "sortedUniqueIdsSha256": "45bebbf2e4aebc54b3e6b86658f7a9a3ccd060e8cf63118377dea5f02a57e91e",
+      "sourceRevision": "6ad4741a713ac3376868aef146ed60a199e97b93",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    },
+    {
+      "assembly": "KeyLoad.IntegrationTests",
+      "publicationGeneration": "769fb04f67b54873a52e7211e92ba646",
+      "artifactId": 11257373097,
+      "member": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "sha256": "64842fd4709ce2dcea92df65aa3ce64e9267fd129799c934f7c3f04dad7c381d",
+      "jobId": 111071644703,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644703",
+      "summary": {
+        "total": 63,
+        "passed": 62,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeUniqueIds": 63,
+      "sortedUniqueIdsSha256": "37c487f70e98a27c06bcff919dcac9310d6f9a6dc6acfa19a08326151c937178",
+      "sourceRevision": "6ad4741a713ac3376868aef146ed60a199e97b93",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0"
+    }
+  ],
+  "failures": [
+    {
+      "id": "KeyLoad.UnitTests.Features.ResourceExecution.TransactionProtocolTests.1.1.OversizedCompiledFramePersistsItsFailureAndAdvancesTheRaftApplyPosition.1.1.0",
+      "method": "OversizedCompiledFramePersistsItsFailureAndAdvancesTheRaftApplyPosition",
+      "status": "error",
+      "type": "KeyLoad.KeyLoadException",
+      "message": "The compiled transaction exceeds the journal frame limit.",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/TransactionProtocolTests.cs",
+      "line": 45,
+      "artifactId": 11258071363,
+      "reportSha256": "ce0f1b892b608081dece2ad10124fae4bb2b9d855e58d3af88d847a913c7c954",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865"
+    },
+    {
+      "id": "KeyLoad.UnitTests.Features.StorageRecovery.OrleansWalRoundTripTests.1.1.AcWal001RealBinaryPayloadUsesFewerEncodedBytesThanEquivalentRepresentativeJson.1.1.0",
+      "method": "AcWal001RealBinaryPayloadUsesFewerEncodedBytesThanEquivalentRepresentativeJson",
+      "status": "error",
+      "type": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to be true\nbut found False\n\nat Assert.That(payload.Length < json.Length).IsTrue()",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/OrleansWalRoundTripTests.cs",
+      "line": 52,
+      "artifactId": 11258071363,
+      "reportSha256": "ce0f1b892b608081dece2ad10124fae4bb2b9d855e58d3af88d847a913c7c954",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865"
+    },
+    {
+      "id": "KeyLoad.ComparisonTests.RealComparisonSuite.1.1.AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines.1.1.0",
+      "method": "AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines",
+      "status": "error",
+      "type": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to be equal to \"KeyLoad:Conflict\"\nbut received \"KeyLoad:RevisionConflict\"\n\nat Assert.That(duplicateFailure?.Message).IsEqualTo(ConflictCode)",
+      "sourcePath": "tests/KeyLoad.ComparisonTests/ComparisonTests.cs",
+      "line": 23,
+      "artifactId": 11257606242,
+      "reportSha256": "d3a3e888b155932b4c1f39db1e0269d41c5fbf579a32b46add6347b3dfa827c8",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644622"
+    },
+    {
+      "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.TimeSeriesAspireProfileTests.1.1.AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema.1.1.0",
+      "method": "AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema",
+      "status": "error",
+      "type": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to contain \"single-node\"\nbut received \"Container-lifetime TimescaleDB hypertable; no cross-run volume and no replica guarantee\"\n\nat Assert.That(timescale.GetProperty(PersistenceGuaranteeProperty).GetString()).Contains(\"single-node\")",
+      "sourcePath": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/TimeSeriesAspireProfileTests.cs",
+      "line": 21,
+      "artifactId": 11257606242,
+      "reportSha256": "d3a3e888b155932b4c1f39db1e0269d41c5fbf579a32b46add6347b3dfa827c8",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644622"
+    },
+    {
+      "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3ReplicaRestartTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica.1.1.0",
+      "method": "AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica",
+      "status": "error",
+      "type": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to be true\nbut found False\n\nat Assert.That(committed.IsSuccess).IsTrue()",
+      "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/TimeSeriesRf3ReplicaRestartTests.cs",
+      "line": 23,
+      "artifactId": 11257373097,
+      "reportSha256": "64842fd4709ce2dcea92df65aa3ce64e9267fd129799c934f7c3f04dad7c381d",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644703"
+    }
+  ],
+  "gates": [
+    {
+      "gate": "solution-release-build",
+      "qualificationStatus": "passed",
+      "jobId": 111071644865,
+      "jobName": "verify (ubuntu-latest)",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865",
+      "nativeStep": {
+        "name": "Run dotnet build KeyLoad.slnx --no-restore --configuration Release",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-02T23:30:20Z",
+        "completed_at": "2026-10-02T23:32:22Z"
+      },
+      "proof": "Original build log records Build succeeded, 0 Warning(s), 0 Error(s); 25 retained solution SARIF files, no unsuppressed error/warning results."
+    },
+    {
+      "gate": "formatter",
+      "qualificationStatus": "passed",
+      "jobId": 111071644865,
+      "jobName": "verify (ubuntu-latest)",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865",
+      "nativeStep": {
+        "name": "Verify EditorConfig and analyzer fixes",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-02T23:32:22Z",
+        "completed_at": "2026-10-02T23:34:38Z"
+      },
+      "proof": "Original log records dotnet format KeyLoad.slnx --verify-no-changes --no-restore; final job metadata records successful completion with no emitted formatter errors. This is a formatter check, not runtime test qualification."
+    },
+    {
+      "gate": "repository-governance",
+      "qualificationStatus": "passed",
+      "jobId": 111071644865,
+      "jobName": "verify (ubuntu-latest)",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865",
+      "nativeStep": {
+        "name": "Verify repository governance",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-02T23:34:38Z",
+        "completed_at": "2026-10-02T23:34:38Z"
+      },
+      "proof": "Original log records source-owned static governance PASS; not runtime qualification."
+    },
+    {
+      "gate": "analyzer-native-tests",
+      "qualificationStatus": "passed",
+      "jobId": 111071644586,
+      "jobName": "analyzer-rules",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644586",
+      "nativeStep": {
+        "name": "Run dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-02T23:30:24Z",
+        "completed_at": "2026-10-02T23:31:54Z"
+      },
+      "proof": "Original native TUnit unique test IDs/summary: 118 passed /118, zero skipped/cancelled/timed-out/flaky.",
+      "nativeReportSha256": "ee471aed45c263b847e248780f6fc4e01f7238bd2e61df29576702276044eb70"
+    },
+    {
+      "gate": "analyzer-native-tests-verify-job",
+      "qualificationStatus": "passed",
+      "jobId": 111071644865,
+      "jobName": "verify (ubuntu-latest)",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865",
+      "nativeStep": {
+        "name": "Verify source-owned Roslyn rules",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-02T23:34:38Z",
+        "completed_at": "2026-10-02T23:36:20Z"
+      },
+      "proof": "Independent second native invocation: same 118 IDs all pass, distinct publicationGeneration/report hash; not 236 distinct test cases.",
+      "nativeReportSha256": "e21b49b0b18f43b1cd6babcc7bb8affb4b9201e5fc84544ad0dcc512e97193c3"
+    },
+    {
+      "gate": "unit-normal",
+      "qualificationStatus": "failed",
+      "jobId": 111071644865,
+      "jobName": "verify (ubuntu-latest)",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865",
+      "nativeStep": {
+        "name": "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 9,
+        "started_at": "2026-10-02T23:36:20Z",
+        "completed_at": "2026-10-02T23:37:24Z"
+      },
+      "proof": "Original native TUnit:1066 total,1064 passed,2 failed; all cases executed with no skip/cancel/timeout/flaky.",
+      "nativeReportSha256": "ce0f1b892b608081dece2ad10124fae4bb2b9d855e58d3af88d847a913c7c954"
+    },
+    {
+      "gate": "unit-scalar-hardware-intrinsics-disabled",
+      "qualificationStatus": "skipped",
+      "jobId": 111071644865,
+      "jobName": "verify (ubuntu-latest)",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865",
+      "nativeStep": {
+        "name": "Qualify the full unit suite with hardware intrinsics disabled",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 10,
+        "started_at": "2026-10-02T23:37:24Z",
+        "completed_at": "2026-10-02T23:37:24Z"
+      },
+      "proof": "Final native step skipped; no scalar results directory/report/TRX exists among all original ZIP members. DOTNET_EnableHWIntrinsic=0 is configured in exact-SHA workflow but did not run.",
+      "nativeReportSha256": null
+    },
+    {
+      "gate": "real-process-recovery",
+      "qualificationStatus": "passed",
+      "jobId": 111071644865,
+      "jobName": "verify (ubuntu-latest)",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644865",
+      "nativeStep": {
+        "name": "Qualify real process recovery after a successful build",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11,
+        "started_at": "2026-10-02T23:37:24Z",
+        "completed_at": "2026-10-02T23:40:21Z"
+      },
+      "proof": "Original native TUnit:136/136 passed,zero skipped/cancelled/timed-out/flaky. Exact-SHA source-owned seeded recovery:20 full-batch native tests and1000 validated JSONL rows; process-kill only.",
+      "nativeReportSha256": "397480933f91ea0465a92a8bd41571b057e75cc32bf59eb1dad23670e2a1c4a7"
+    },
+    {
+      "gate": "comparison-initial-profile",
+      "qualificationStatus": "failed",
+      "jobId": 111071644622,
+      "jobName": "comparison-smoke",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644622",
+      "nativeStep": {
+        "name": "Run dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 8,
+        "started_at": "2026-10-02T23:32:58Z",
+        "completed_at": "2026-10-02T23:34:39Z"
+      },
+      "proof": "Original native TUnit:4 total,2 passed,2 failed; emitted comparison data does not convert failing public behavior/oracle assertions into qualified results.",
+      "nativeReportSha256": "d3a3e888b155932b4c1f39db1e0269d41c5fbf579a32b46add6347b3dfa827c8"
+    },
+    {
+      "gate": "comparison-1KiB-8clients-3hops",
+      "qualificationStatus": "skipped",
+      "jobId": 111071644622,
+      "jobName": "comparison-smoke",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644622",
+      "nativeStep": {
+        "name": "Measure 1 KiB documents, eight clients and three graph hops",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 9,
+        "started_at": "2026-10-02T23:34:39Z",
+        "completed_at": "2026-10-02T23:34:39Z"
+      },
+      "proof": "Final native step skipped; no original profile report retained."
+    },
+    {
+      "gate": "comparison-16KiB-4clients-5hops",
+      "qualificationStatus": "skipped",
+      "jobId": 111071644622,
+      "jobName": "comparison-smoke",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644622",
+      "nativeStep": {
+        "name": "Measure 16 KiB documents, four clients and five graph hops",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 10,
+        "started_at": "2026-10-02T23:34:39Z",
+        "completed_at": "2026-10-02T23:34:39Z"
+      },
+      "proof": "Final native step skipped; no original profile report retained."
+    },
+    {
+      "gate": "docker-aspire-rf3-sdk-mcp",
+      "qualificationStatus": "failed",
+      "jobId": 111071644703,
+      "jobName": "docker-rf3",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823/job/111071644703",
+      "nativeStep": {
+        "name": "Qualify RF3 through the real SDK clients",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 10,
+        "started_at": "2026-10-02T23:32:36Z",
+        "completed_at": "2026-10-02T23:36:48Z"
+      },
+      "proof": "Original native TUnit:63 total,62 passed,1 failed. Source-bound immutable-image and4 successful native container restart receipts support provenance but do not pass the whole suite.",
+      "nativeReportSha256": "64842fd4709ce2dcea92df65aa3ce64e9267fd129799c934f7c3f04dad7c381d"
+    }
+  ],
+  "processRecoveryTrials": {
+    "files": [
+      {
+        "member": "artifacts/qualification/crash-trials-00.jsonl",
+        "sha256": "f2f26deca8da92e201f03edc8f13a4c1ddf4f5268c2c60b52c04cedfa33524c9",
+        "batch": 0,
+        "seed": 1701,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-01.jsonl",
+        "sha256": "8ea55b453d0f9dde7b0e74f21a58affcfaa4ae104cd21efec10cd3d98aeb9e59",
+        "batch": 1,
+        "seed": 1702,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-02.jsonl",
+        "sha256": "73e10f70ba263be9edb067fda0a1b0b454fca4ac531c689fa0c7846c1d341333",
+        "batch": 2,
+        "seed": 1703,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-03.jsonl",
+        "sha256": "c5ef2b456bd4b763de3ed08c0e1b80e5170507af9b5c45da7e1e3cd286e0ec65",
+        "batch": 3,
+        "seed": 1704,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-04.jsonl",
+        "sha256": "daaae6746845e8e2466a37a4157073cd1aa79bb4855ea021838cd92c26e18f40",
+        "batch": 4,
+        "seed": 1705,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-05.jsonl",
+        "sha256": "b165615b61ac039849b8afac1daf51e204d8535c117499d40200815384e06dc0",
+        "batch": 5,
+        "seed": 1706,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-06.jsonl",
+        "sha256": "65c224e48e14a9a199e4bb812d9b8f7b11321334dd0b91a41b9fd579bd2171ca",
+        "batch": 6,
+        "seed": 1707,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-07.jsonl",
+        "sha256": "83f319bc15091a90be7406e2b4fa6fe0c573e8fe73281fc085fcdfaed4eea182",
+        "batch": 7,
+        "seed": 1708,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-08.jsonl",
+        "sha256": "83c06b8918f4459167dafe4e03f8040d24c6bc81729d61a132dcc2ab5641523d",
+        "batch": 8,
+        "seed": 1709,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-09.jsonl",
+        "sha256": "d32eb5db639981f3c89a7ea75aa1d73f0a504daaf26b409e0b10142c9c2a9b2e",
+        "batch": 9,
+        "seed": 1710,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-10.jsonl",
+        "sha256": "e412147323788eff0288f29a5338224ddbbca5976e10188bf8833a82aa9741fa",
+        "batch": 10,
+        "seed": 1711,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-11.jsonl",
+        "sha256": "51900d675f847eda21b670bbc1c6f28e2fc15d8bbcf56e8b69f9f758a7015c90",
+        "batch": 11,
+        "seed": 1712,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-12.jsonl",
+        "sha256": "eb37bcb5640b02348718856af9708530c1a77087c07c599cdcf53d2f4d18f0fc",
+        "batch": 12,
+        "seed": 1713,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-13.jsonl",
+        "sha256": "4a6e25f54c325dfdd97c6b4801226ad6f5bfc75ac052e80329eef7664402c145",
+        "batch": 13,
+        "seed": 1714,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-14.jsonl",
+        "sha256": "ff41d82c1b327128f2bba429d3cbda568459b5bba43350a4898e0fb04d4eac1b",
+        "batch": 14,
+        "seed": 1715,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-15.jsonl",
+        "sha256": "3769afd07c7f7a8bbb2abb74af39bca4fcd205c59100a2428700ddaa11abbb88",
+        "batch": 15,
+        "seed": 1716,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-16.jsonl",
+        "sha256": "e12db85f19a1f2c301b4adbdaa891e67df94eb78adce104cf6c092e2fda8ad23",
+        "batch": 16,
+        "seed": 1717,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-17.jsonl",
+        "sha256": "634710e41e28626d5e6ae0db826af23a91444c50d3e35ebaf83e882a283bd5bf",
+        "batch": 17,
+        "seed": 1718,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-18.jsonl",
+        "sha256": "c76c973a05a98e203733a9bdcad8103863796b28a51f3f8eb8288ea10264f893",
+        "batch": 18,
+        "seed": 1719,
+        "rows": 50
+      },
+      {
+        "member": "artifacts/qualification/crash-trials-19.jsonl",
+        "sha256": "cb90441f4a7937bf6345f066eb383217f79b9800710c651dc26b976e41fe7f59",
+        "batch": 19,
+        "seed": 1720,
+        "rows": 50
+      }
+    ],
+    "rows": 1000,
+    "seedRange": [
+      1701,
+      1720
+    ],
+    "trialsPerSeed": 50,
+    "stages": {
+      "MutationApplied": 206,
+      "JournalFlushed": 163,
+      "HeaderWritten": 214,
+      "ApplyCompleted": 214,
+      "PayloadWritten": 203
+    },
+    "valueCuts": {
+      "(1, 1, 1)": 583,
+      "(0, 0, 0)": 417
+    },
+    "mutationIndices": {
+      "0": 332,
+      "1": 318,
+      "2": 350
+    },
+    "atOrAfterJournalFlushRows": 583,
+    "maximumConcurrentStorageTrials": 4,
+    "rootRecomputedExactSourceSeedChoices": true,
+    "allCutsAtomic": true,
+    "scope": "Process-kill/reopen only; no power-loss, endurance or production-readiness proof."
+  },
+  "sourceEvidence": [
+    {
+      "path": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+      "sha256": "f2c98b2f17d3198f34155b8b2098f1f786b900dc89753196824e0a9729f300d7",
+      "url": "https://github.com/managedcode/KeyLoad/blob/6ad4741a713ac3376868aef146ed60a199e97b93/tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/StorageTrialAdmission.cs",
+      "sha256": "a2763d59f269e212a29f660015d456d555690ab7b07e5b30a3461dd360b6a02c",
+      "url": "https://github.com/managedcode/KeyLoad/blob/6ad4741a713ac3376868aef146ed60a199e97b93/tests/KeyLoad.RecoveryTests/Features/StorageRecovery/StorageTrialAdmission.cs"
+    },
+    {
+      "path": "Directory.Build.props",
+      "sha256": "8577a384f92cf2b77e5926b985af0db7ed0d0f4efafe6e80b0678763ae61db09",
+      "url": "https://github.com/managedcode/KeyLoad/blob/6ad4741a713ac3376868aef146ed60a199e97b93/Directory.Build.props"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "sha256": "be927523cfc85b8b2ac18fb5d08bdf7625aee31d4f8fec37a4cbc2782acc24bf",
+      "url": "https://github.com/managedcode/KeyLoad/blob/6ad4741a713ac3376868aef146ed60a199e97b93/Directory.Build.targets"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj",
+      "sha256": "197df5f109ec1c70a574df63e76d6916166c81441dfeaad5b830b156c9d75f51",
+      "url": "https://github.com/managedcode/KeyLoad/blob/6ad4741a713ac3376868aef146ed60a199e97b93/tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj",
+      "sha256": "3609f3a45a3534f37585ee64316d8ff0135932e113e06071e98737436c39b333",
+      "url": "https://github.com/managedcode/KeyLoad/blob/6ad4741a713ac3376868aef146ed60a199e97b93/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalRecovery.cs",
+      "sha256": "c365db0c8b9cb3e0c10bce5bf537ff935f9f2800290529b9005ea6033d04e492",
+      "url": "https://github.com/managedcode/KeyLoad/blob/6ad4741a713ac3376868aef146ed60a199e97b93/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalRecovery.cs"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreOptions.cs",
+      "sha256": "7451043768eb7d08c894e706c7a9d574a7fd6ccc33d95a7fa96e15bdfaecf858",
+      "url": "https://github.com/managedcode/KeyLoad/blob/6ad4741a713ac3376868aef146ed60a199e97b93/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreOptions.cs"
+    }
+  ],
+  "wal": {
+    "nativeCases": 44,
+    "passed": 43,
+    "failed": 1,
+    "sizeRegressionPassed": false,
+    "laterSuccessorGuardAndNativeByteCodecInThisSource": false,
+    "nextSource": "c10c48e40d8a9b452c9d131da549cab1e336692d requires independent native join",
+    "remaining": [
+      "decoded-memory/work bounds",
+      "frozen independent binary/legacy fixtures",
+      "complete malformed-envelope/torn-header matrix"
+    ]
+  },
+  "coverage": {
+    "qualificationStatus": "unavailable",
+    "coverageMembers": [],
+    "collectorReportPresent": false,
+    "collectedMetrics": null,
+    "thresholdsQualified": false,
+    "sourceWorkflowCollectorInvocationPresent": false,
+    "interpretation": "No original coverage/Cobertura/OpenCover/lcov/.coverage member, no recorded collector invocation, and no actual collector metric is available. Passing test counts or SiteAnalyzerCoverageInventoryTests names do not constitute line/branch coverage."
+  },
+  "rootReview": {
+    "freshAuthenticatedRunMetadataSha256": "b4ede0abf60cb8db1733a7e2cc05c3bb3980a3fffbd317280562d47d30abc247",
+    "privateFullJoinSha256": "b6bebb8a5fd295199726b425909c13e216e49576f2ad5240b27fefbe53575b1b",
+    "rootArchiveDigestAndCrcVerified": 10,
+    "rootNativeSourceIdsSummariesAndHashesVerified": 6,
+    "nativeExecutions": 1505,
+    "distinctNativeIds": 1387,
+    "duplicateAnalyzerIds": 118,
+    "note": "Two genuine analyzer invocations are separate executions, not 236 distinct cases."
+  },
+  "limits": [
+    "Failed normal units, comparison and RF3; scalar and two remaining measured profiles skipped. Complete qualification is false.",
+    "No recorded collector invocation or collected coverage report; mandatory numeric coverage thresholds remain unqualified.",
+    "RF3/comparison images were built separately; no common immutable-image cohort or performance-winner claim.",
+    "Published TimeSeries10.0.3/current dirty KeyLoad/isolated270-cell source are outside this measured SHA."
+  ]
+}

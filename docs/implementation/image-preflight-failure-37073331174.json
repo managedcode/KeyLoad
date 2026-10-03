@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "kind": "failed-image-preflight-source-audit",
+  "run": {
+    "id": 37073331174,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37073331174",
+    "workflow": "KeyLoad CI",
+    "event": "push",
+    "ref": "refs/heads/main",
+    "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d"
+  },
+  "jobs": [
+    {
+      "name": "docker-rf3",
+      "id": 111057583789,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37073331174/job/111057583789",
+      "artifact": {
+        "id": 11255457348,
+        "name": "docker-rf3-image-evidence",
+        "sizeBytes": 528,
+        "sha256": "2dc1fe6f7d779d159069f033d0ac1f64000f4ae19f8e3f754d3fae01d2cb3cde"
+      },
+      "rawLogSha256": "a2b160d932c769c2ddcefc65ed11f3d1d8e95ceefca7c53028ef814c7990cc36"
+    },
+    {
+      "name": "comparison-smoke",
+      "id": 111057583487,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37073331174/job/111057583487",
+      "artifact": {
+        "id": 11255767259,
+        "name": "comparison-image-evidence",
+        "sizeBytes": 528,
+        "sha256": "975f3da86a09cb626353d5b82ede8d78696956dc4964854ba25b538cc3ab4815"
+      },
+      "rawLogSha256": "6b738843c0d1352f610f66e2ca4c1158903309247632dc0daef3ace5409c0c96"
+    }
+  ],
+  "archives": [
+    {
+      "id": 11255457348,
+      "name": "docker-rf3-image-evidence",
+      "bytes": 528,
+      "digest": "sha256:2dc1fe6f7d779d159069f033d0ac1f64000f4ae19f8e3f754d3fae01d2cb3cde",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "commands": [
+        {
+          "operation": "docker-context-show",
+          "exitCode": 0,
+          "signal": null,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "spawnFailed": false,
+          "outputTruncated": false,
+          "stdoutBytes": 8,
+          "stderrBytes": 0,
+          "stdoutSha256": "01666ec060466c14b9fa06c613fbac449163f2a2017558fe16526209ab78c6b0",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdoutBase64": null,
+          "stderrBase64": null
+        },
+        {
+          "operation": "docker-context-inspect",
+          "exitCode": 1,
+          "signal": null,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "spawnFailed": false,
+          "outputTruncated": false,
+          "stdoutBytes": 391,
+          "stderrBytes": 393,
+          "stdoutSha256": "ee957e0747d2328a52b4c9210052a1fddf721cdeaebbaddc288f438c65c54057",
+          "stderrSha256": "106d07162fb42f18186106a6bcafed6758c2039cd4f0584f8836a35f0e80bdc6",
+          "stdoutBase64": null,
+          "stderrBase64": null
+        },
+        {
+          "operation": "docker-context-show",
+          "exitCode": 0,
+          "signal": null,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "spawnFailed": false,
+          "outputTruncated": false,
+          "stdoutBytes": 8,
+          "stderrBytes": 0,
+          "stdoutSha256": "01666ec060466c14b9fa06c613fbac449163f2a2017558fe16526209ab78c6b0",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdoutBase64": null,
+          "stderrBase64": null
+        },
+        {
+          "operation": "docker-context-inspect",
+          "exitCode": 1,
+          "signal": null,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "spawnFailed": false,
+          "outputTruncated": false,
+          "stdoutBytes": 391,
+          "stderrBytes": 393,
+          "stdoutSha256": "ee957e0747d2328a52b4c9210052a1fddf721cdeaebbaddc288f438c65c54057",
+          "stderrSha256": "106d07162fb42f18186106a6bcafed6758c2039cd4f0584f8836a35f0e80bdc6",
+          "stdoutBase64": null,
+          "stderrBase64": null
+        }
+      ]
+    },
+    {
+      "id": 11255767259,
+      "name": "comparison-image-evidence",
+      "bytes": 528,
+      "digest": "sha256:975f3da86a09cb626353d5b82ede8d78696956dc4964854ba25b538cc3ab4815",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "commands": [
+        {
+          "operation": "docker-context-show",
+          "exitCode": 0,
+          "signal": null,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "spawnFailed": false,
+          "outputTruncated": false,
+          "stdoutBytes": 8,
+          "stderrBytes": 0,
+          "stdoutSha256": "01666ec060466c14b9fa06c613fbac449163f2a2017558fe16526209ab78c6b0",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdoutBase64": null,
+          "stderrBase64": null
+        },
+        {
+          "operation": "docker-context-inspect",
+          "exitCode": 1,
+          "signal": null,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "spawnFailed": false,
+          "outputTruncated": false,
+          "stdoutBytes": 391,
+          "stderrBytes": 393,
+          "stdoutSha256": "ee957e0747d2328a52b4c9210052a1fddf721cdeaebbaddc288f438c65c54057",
+          "stderrSha256": "106d07162fb42f18186106a6bcafed6758c2039cd4f0584f8836a35f0e80bdc6",
+          "stdoutBase64": null,
+          "stderrBase64": null
+        },
+        {
+          "operation": "docker-context-show",
+          "exitCode": 0,
+          "signal": null,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "spawnFailed": false,
+          "outputTruncated": false,
+          "stdoutBytes": 8,
+          "stderrBytes": 0,
+          "stdoutSha256": "01666ec060466c14b9fa06c613fbac449163f2a2017558fe16526209ab78c6b0",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdoutBase64": null,
+          "stderrBase64": null
+        },
+        {
+          "operation": "docker-context-inspect",
+          "exitCode": 1,
+          "signal": null,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "spawnFailed": false,
+          "outputTruncated": false,
+          "stdoutBytes": 391,
+          "stderrBytes": 393,
+          "stdoutSha256": "ee957e0747d2328a52b4c9210052a1fddf721cdeaebbaddc288f438c65c54057",
+          "stderrSha256": "106d07162fb42f18186106a6bcafed6758c2039cd4f0584f8836a35f0e80bdc6",
+          "stdoutBase64": null,
+          "stderrBase64": null
+        }
+      ]
+    }
+  ],
+  "firstFailure": {
+    "evidence": "Both native command receipts record docker-context-show exitCode 0 followed by docker-context-inspect exitCode 1; no subsequent engine, buildx, registry, image build, push, report, or test command is recorded. The workflow logs report 'A required image preparation command failed.' immediately after the prepare-images invocation and after the cleanup-images invocation.",
+    "nativeCommandReceiptSha256": "b86356a450fd1b07d36f407fc58aaa6a9bf119a136f3987f910e8bcfca744176",
+    "contextInspectStderrBytes": 393,
+    "contextInspectStderrSha256": "106d07162fb42f18186106a6bcafed6758c2039cd4f0584f8836a35f0e80bdc6",
+    "stderrBody": "Not captured by the exact source: engine verification sets captureOutput:false; only byte count and digest are present in the bounded job-owned artifact."
+  },
+  "sourceDiagnosis": {
+    "exactSourceRetrievedFrom": "GitHub contents API at sourceRevision above",
+    "relevantFiles": [
+      {
+        "path": "scripts/Features/BenchmarkComparisons/image-contracts.mjs",
+        "sha256": "f9afff8bfa45e3fecbd9f0bcc0a3f8ba69fd4fdbe8d9cdc96a913dc74f95c9e5",
+        "finding": "buildArgument defines format='--format'; dockerArgument does not define format"
+      },
+      {
+        "path": "scripts/Features/BenchmarkComparisons/image-engine.mjs",
+        "sha256": "bc008dc5ecaf24e438094a5673432251b2849650721f944eb9cec670d7c66890",
+        "finding": "verifyDockerEngine's context-inspect and docker-info-inspect argument arrays reference undefined dockerArgument.format; context-inspect is the first failing operation"
+      },
+      {
+        "path": "scripts/Features/BenchmarkComparisons/image-process.mjs",
+        "sha256": "8df0098254d3c0651f2ba5015a2256cd95c752a5f3824737aabf9f9dc855be3a",
+        "finding": "bounded process runner spawns shell=false and returns nonzero native command results to the evidence recorder"
+      },
+      {
+        "path": "scripts/Features/BenchmarkComparisons/prepare-images.mjs",
+        "sha256": "47e65a93363a962762e42acef080955ce2ef55233f1a1820078919d18408ab29",
+        "finding": "verifyDockerEngine runs before Buildx verification, registry start, image builds, and pushes"
+      },
+      {
+        "path": "scripts/Features/BenchmarkComparisons/cleanup-images.mjs",
+        "sha256": "bdccd0ba914a3e6f3c9a9fbd0c7ad9627d22925110a5c2e7935eb6d7268af6ce",
+        "finding": "cleanup calls verifyDockerEngine before inspecting the run-owned registry container; its failure explains cleanup failure without reaching ownership/removal logic"
+      }
+    ],
+    "smallestRepairProposal": "Add the named format: '--format' argument to the frozen dockerArgument object, preserving preflight order, fixed error handling, evidence redaction, and cleanup ownership checks. Then rerun the exact workflow to qualify behavior."
+  },
+  "sourceRepair": {
+    "docker": "named_format_argument_added_without_changing_engine_ownership_or_time_bounds",
+    "regression": "metadata_parser_configImageId_asserted_separately_from_manifest_receipt_configId",
+    "qualification": "new_pushed_SHA_required_no_RF3_or_measurement_was_executed_in_this_baseline"
+  },
+  "limitations": [
+    "Engine probe stderr bodies were not retained; native exit, byte/hash, ordered operations and exact-source arguments are retained.",
+    "Local development build and static checks do not qualify real container runtime."
+  ]
+}

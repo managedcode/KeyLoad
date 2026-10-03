@@ -251,7 +251,7 @@ internal static class TimeSeriesProfileReportAssertions
         await Assert.That(timescale.GetProperty(PersistenceGuaranteeProperty).GetString()).Contains("single-node");
         await Assert.That(timescale.GetProperty(AcknowledgementGuaranteeProperty).GetString()).Contains("one server");
         await Assert.That(timescale.GetProperty(ImageProperty).GetString()).Contains(TimescaleImageIdentity);
-        await Assert.That(library.GetProperty(PackageVersionProperty).GetString()).IsEqualTo("10.0.0");
+        await Assert.That(library.GetProperty(PackageVersionProperty).GetString()).IsEqualTo("10.0.3");
         await Assert.That(library.GetProperty(StorageModelProperty).GetString()).IsEqualTo("in-memory bucket aggregation");
         await Assert.That(library.GetProperty(PersistenceGuaranteeProperty).GetString()).Contains("no persistence, recovery, or replication");
         await Assert.That(library.GetProperty(AcknowledgementGuaranteeProperty).GetString()).Contains("in-process");

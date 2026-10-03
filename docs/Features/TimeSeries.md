@@ -51,7 +51,15 @@ REQ-SERIES-007 / AC-SERIES-007 map to REQ-BC-026 and AC-TSC-001..006 under
 [time-series comparison acceptance](../../timeseries-comparison.acceptance.md).
 The profile exercises KeyLoad's existing persisted RF3 sample API, a real
 TimescaleDB hypertable, and the published `ManagedCode.TimeSeries` 10.0.0 library
-for in-memory bucket aggregation. The library is not KeyLoad's persistence layer.
+for in-memory bucket aggregation at the original baseline. The current central
+pin is published10.0.3 after the owning temporal and summer-allocation repairs;
+its [delivery receipt](../implementation/timeseries-dependency-10.0.3.json)
+verifies1107/1107 tests, module coverage, release/tag and actual signed NuGet
+content before consumption. Four16-case native normal/scalar profiles qualify
+the owning allocation change; they do not measure KeyLoad database throughput. REQ-SERIES-007/009/010/011 and AC-SERIES-007/009/010/011 retain their
+existing real comparison and raw/window/date-edge/budget/security regression
+oracles. Their new consumer-SHA GitHub execution is pending. The library is not
+KeyLoad's persistence layer.
 Reports keep persistence, recovery, replication, and acknowledgement guarantees
 distinct; the public API and existing nine-engine matrix remain unchanged. The
 comparison implementation and TUnit cases compile in the full Release solution.

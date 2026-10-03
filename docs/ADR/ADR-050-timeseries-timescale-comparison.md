@@ -19,6 +19,16 @@ Primary source: [Aspire ContainerImageAnnotation](https://source.dot.net/Aspire.
 
 ## Decision
 
+R18 preserving metadata repair (REQ/AC-TSC-003/004): the existing PackageVersion
+field must use the real loaded library's AssemblyInformationalVersion package
+component before `+`, rejecting missing metadata. The canonical consumer now
+uses published10.0.3; remove the stale10.0.0 literal and keep report schema1,
+memory/ACK guarantees, targets, timings and numerical oracles unchanged. The
+bounded worker owns only recorder and existing workload/Aspire version tests;
+root owns shared docs/config and final GitHub qualification. No format/API or
+topology migration is introduced; rollback restores code and central package
+together, never relabels an already measured immutable report.
+
 ### Accepted digest-backed execution continuation (AC-IMAGE-002/004/005)
 
 The isolated schema1 TimeSeries report adds optional GitHubProvenance and
@@ -51,7 +61,7 @@ flowchart LR
 
 ## Implementation contract
 
-1. Root adds `ManagedCode.TimeSeries` to `Directory.Packages.props`, adds its reference only to `benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj`, and owns shared comparison profile/report registration. Pin the published `10.0.0` version after NuGet availability verification.
+1. Root adds `ManagedCode.TimeSeries` to `Directory.Packages.props`, adds its reference only to `benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj`, and owns shared comparison profile/report registration. The original pin was published `10.0.0`; the temporal repair is published `10.0.2` and the current shared pin advances to `10.0.3` after the owning summer allocation repair and independently verified [release/feed receipt](../implementation/timeseries-dependency-10.0.3.json). Historical reports keep their original package identity; new exact-source comparison and consumer regression execution is mandatory.
 2. Root owns `src/KeyLoad.AppHost/BenchmarkResources.cs` and `src/KeyLoad.AppHost/Features/BenchmarkComparisons/TimeSeriesBenchmarkResources.cs`. Register the Timescale resource only for the `timeseries` benchmark profile; use `timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e`, parameterized Aspire connections, and readiness ordering. The container is ephemeral and has no cross-run data volume; the report claims persistence only for committed rows during that container's lifetime. Do not start it in ordinary RF3 product fixtures.
 3. Root owns deterministic profile contracts/data/report and `benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/` composition. The shared oracle checks UTC buckets, exact values, order, range edges and duplicate identity. Timings separate persistent append/read/aggregate work from in-memory aggregation; retain every failure.
 4. A bounded implementation task owns new Timescale Npgsql and ManagedCode.TimeSeries target files under `benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/`. Use parameterized SQL, isolated per-run namespace/owner marker, hypertable-aware identity and cleanup only after positive ownership acknowledgement.

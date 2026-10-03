@@ -1,6 +1,8 @@
 using System.Collections.Immutable;
 using System.Globalization;
+using System.Reflection;
 using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
+using ManagedCode.TimeSeries.Summers;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries;
@@ -45,6 +47,29 @@ internal sealed class TimeSeriesWorkloadTests
             .IsEqualTo(DateTimeOffset.Parse("2026-01-01T00:55:00Z", CultureInfo.InvariantCulture));
         await Assert.That(actual[0].Sum).IsEqualTo(2.5);
         await Assert.That(actual[^1].Sum).IsEqualTo(442.5);
+    }
+
+    [Test]
+    public async Task ReportUsesTheLoadedPublishedLibraryPackageVersion()
+    {
+        var assembly = typeof(DoubleTimeSeriesSummer).Assembly;
+        var informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        await Assert.That(string.IsNullOrWhiteSpace(informationalVersion)).IsFalse();
+
+        var loadedVersion = informationalVersion
+            ?? throw new InvalidOperationException("The loaded TimeSeries assembly has no informational version.");
+        var separator = loadedVersion.IndexOf('+', StringComparison.Ordinal);
+        var packageVersion = separator < 0 ? loadedVersion : loadedVersion[..separator];
+        await Assert.That(packageVersion).IsEqualTo("10.0.3");
+
+        var workload = TimeSeriesComparisonWorkloadFactory.Create("package-version-run");
+        var recorder = new TimeSeriesComparisonRecorder(workload, TimeProvider.System);
+        recorder.AddLibraryTarget();
+        var library = recorder.CreateReport("0123456789abcdef0123456789abcdef01234567")
+            .Targets.Single(target => target.Name == "ManagedCode.TimeSeries");
+
+        await Assert.That(library.PackageVersion).IsEqualTo(packageVersion);
+        await Assert.That(library.PackageVersion).IsEqualTo("10.0.3");
     }
 
     private static ImmutableArray<TimeSeriesBucketValue> Oracle(

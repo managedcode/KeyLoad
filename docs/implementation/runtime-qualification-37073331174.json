@@ -1,0 +1,756 @@
+{
+  "schemaVersion": 1,
+  "kind": "exact-source-failed-runtime-baseline",
+  "repository": "managedcode/KeyLoad",
+  "branch": "main",
+  "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+  "runId": 37073331174,
+  "attempt": 1,
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37073331174",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 111057583487,
+      "name": "comparison-smoke",
+      "conclusion": "failure",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37073331174/job/111057583487",
+      "failedSteps": [
+        "Prepare immutable source-bound runtime images",
+        "Capture and remove only the job-owned registry",
+        "Retain comparison compiler diagnostic reports"
+      ],
+      "skippedSteps": [
+        "Bind the verified runtime image receipt",
+        "Run dotnet restore KeyLoad.slnx",
+        "Run dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release",
+        "Run dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release",
+        "Measure 1 KiB documents, eight clients and three graph hops",
+        "Measure 16 KiB documents, four clients and five graph hops"
+      ]
+    },
+    {
+      "id": 111057583646,
+      "name": "analyzer-rules",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37073331174/job/111057583646",
+      "failedSteps": [],
+      "skippedSteps": []
+    },
+    {
+      "id": 111057583696,
+      "name": "verify (ubuntu-latest)",
+      "conclusion": "failure",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37073331174/job/111057583696",
+      "failedSteps": [
+        "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release"
+      ],
+      "skippedSteps": [
+        "Qualify the full unit suite with hardware intrinsics disabled"
+      ]
+    },
+    {
+      "id": 111057583699,
+      "name": "verify (windows-latest)",
+      "conclusion": "failure",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37073331174/job/111057583699",
+      "failedSteps": [
+        "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release"
+      ],
+      "skippedSteps": [
+        "Qualify the full unit suite with hardware intrinsics disabled"
+      ]
+    },
+    {
+      "id": 111057583716,
+      "name": "verify (macos-latest)",
+      "conclusion": "failure",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37073331174/job/111057583716",
+      "failedSteps": [
+        "Run dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release"
+      ],
+      "skippedSteps": [
+        "Qualify the full unit suite with hardware intrinsics disabled"
+      ]
+    },
+    {
+      "id": 111057583789,
+      "name": "docker-rf3",
+      "conclusion": "failure",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37073331174/job/111057583789",
+      "failedSteps": [
+        "Prepare immutable source-bound runtime images",
+        "Capture and remove only the job-owned registry",
+        "Retain real topology and fault receipts",
+        "Retain RF3 compiler diagnostic reports"
+      ],
+      "skippedSteps": [
+        "Bind the verified runtime image receipt",
+        "Require the actual administration browser",
+        "Run dotnet restore KeyLoad.slnx",
+        "Run dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release",
+        "Qualify RF3 through the real SDK clients"
+      ]
+    }
+  ],
+  "archives": [
+    {
+      "id": 11255342668,
+      "name": "test-results-ubuntu-latest",
+      "bytes": 852859,
+      "digest": "sha256:61f02716698de4dbcb70b399198081bf691ba12f2451224b348402f0c9cfa328",
+      "metadataUrl": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11255342668",
+      "archiveUrl": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11255342668/zip"
+    },
+    {
+      "id": 11255602121,
+      "name": "test-results-macos-latest",
+      "bytes": 837973,
+      "digest": "sha256:544a52df765b432bef25c74fdc459b4bee2a62503b11bc951831593bde3de02e",
+      "metadataUrl": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11255602121",
+      "archiveUrl": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11255602121/zip"
+    },
+    {
+      "id": 11255924312,
+      "name": "test-results-windows-latest",
+      "bytes": 859618,
+      "digest": "sha256:448b9e7183f4fef90fde45d2d6de6cc05d89a0789587ea63e541fc087370ad00",
+      "metadataUrl": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11255924312",
+      "archiveUrl": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11255924312/zip"
+    },
+    {
+      "id": 11255546642,
+      "name": "analyzer-rule-evidence",
+      "bytes": 207309,
+      "digest": "sha256:44c4fc7a034eff0bf7cf0b51dabb7a8b07b80416fb3f095ba2d7950f7493906a",
+      "metadataUrl": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11255546642",
+      "archiveUrl": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11255546642/zip"
+    }
+  ],
+  "reports": [
+    {
+      "artifactId": 11255342668,
+      "path": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "b24aba9580c8e12893b37c1bfdc5cb6b05bf12a0e333313604a798302ef61e3d",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "publicationGeneration": "6f32dc19f86b467f952cd6f2268b3714",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "artifactId": 11255342668,
+      "path": "TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "sha256": "21ed9f5ef90fb0534d32208df435d7263fb76e2f0251e2610946e6b209144d73",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "assembly": "KeyLoad.RecoveryTests",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "publicationGeneration": "a48e8c9c3db24a938a4685ab3f1b9648",
+      "summary": {
+        "total": 136,
+        "passed": 136,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "artifactId": 11255342668,
+      "path": "TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "sha256": "810964653233c62bee0f315ccb47611606d50248fadb7c585ba58ff0fceead25",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "assembly": "KeyLoad.UnitTests",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "publicationGeneration": "3dbf0979e95a46279f9621e3d8e7fce1",
+      "summary": {
+        "total": 1022,
+        "passed": 1021,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": [
+        {
+          "method": "AC_IMAGE_002_MetadataRequiresAValidConfigIdAndExactSourceRevision",
+          "class": "ImageToolingEvidenceContractTests",
+          "status": "error",
+          "source": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageToolingContractTests.cs",
+          "line": 186
+        }
+      ]
+    },
+    {
+      "artifactId": 11255602121,
+      "path": "TestResults/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json",
+      "sha256": "78ec84c305153e9148efd3f678cbdf9fa4adaf86875dd66048977e996851a162",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "os": "macOS 26.6.2",
+      "runtime": ".NET 10.0.12",
+      "publicationGeneration": "4337da6f12304ed0a3ed4d24c8f2648c",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "artifactId": 11255602121,
+      "path": "TestResults/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+      "sha256": "bbc349fb8726ade684e5aed21357db478feaf3e7371078ae0ce042503bef8793",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "assembly": "KeyLoad.RecoveryTests",
+      "os": "macOS 26.6.2",
+      "runtime": ".NET 10.0.12",
+      "publicationGeneration": "e243a1f22368492b9244140624f9050d",
+      "summary": {
+        "total": 136,
+        "passed": 136,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "artifactId": 11255602121,
+      "path": "TestResults/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "sha256": "8689de0d7c24d4f3816ca5bff8a81a9ffd7939d75b0643169f27119717b9433f",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "assembly": "KeyLoad.UnitTests",
+      "os": "macOS 26.6.2",
+      "runtime": ".NET 10.0.12",
+      "publicationGeneration": "cb39407f0e444b3e9e741c2335340a34",
+      "summary": {
+        "total": 1022,
+        "passed": 1021,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": [
+        {
+          "method": "AC_IMAGE_002_MetadataRequiresAValidConfigIdAndExactSourceRevision",
+          "class": "ImageToolingEvidenceContractTests",
+          "status": "error",
+          "source": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageToolingContractTests.cs",
+          "line": 186
+        }
+      ]
+    },
+    {
+      "artifactId": 11255924312,
+      "path": "TestResults/KeyLoad.Analyzers.Tests-windows-net10.0.tunit-report.json",
+      "sha256": "c534f630ec2aaa7b8225a52c2cd59a202c5b83f67e44622f16580097416e90bb",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "os": "Microsoft Windows 10.0.26100",
+      "runtime": ".NET 10.0.12",
+      "publicationGeneration": "bc4a63df587a47c7a9138b7e132d0ea8",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "artifactId": 11255924312,
+      "path": "TestResults/KeyLoad.RecoveryTests-windows-net10.0.tunit-report.json",
+      "sha256": "a7c5bd84a66a87e2fea1e0e9d8b1b9b6954109fece517da5c804fe2465d0d6f4",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "assembly": "KeyLoad.RecoveryTests",
+      "os": "Microsoft Windows 10.0.26100",
+      "runtime": ".NET 10.0.12",
+      "publicationGeneration": "4fb6da7f53c94dc197abbaadde9cdc4f",
+      "summary": {
+        "total": 136,
+        "passed": 136,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    },
+    {
+      "artifactId": 11255924312,
+      "path": "TestResults/KeyLoad.UnitTests-windows-net10.0.tunit-report.json",
+      "sha256": "5e07eeef963df2533df1ca05e426252f5c799c9fb8237add863bd553f3b64320",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "assembly": "KeyLoad.UnitTests",
+      "os": "Microsoft Windows 10.0.26100",
+      "runtime": ".NET 10.0.12",
+      "publicationGeneration": "d387e8da0d2a435992a680b5ae1bfc2b",
+      "summary": {
+        "total": 1022,
+        "passed": 1016,
+        "failed": 6,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": [
+        {
+          "method": "AC_IMAGE_006_BoundedDiagnosticsRedactCredentialShapes",
+          "class": "ImageToolingEvidenceContractTests",
+          "status": "error",
+          "source": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageToolingContractTests.cs",
+          "line": 249
+        },
+        {
+          "method": "AC_IMAGE_002_ManifestBytesMustMatchHeaderConfigAndImmutableReference",
+          "class": "ImageToolingEvidenceContractTests",
+          "status": "error",
+          "source": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageToolingContractTests.cs",
+          "line": 217
+        },
+        {
+          "method": "AC_IMAGE_002_MetadataRequiresAValidConfigIdAndExactSourceRevision",
+          "class": "ImageToolingEvidenceContractTests",
+          "status": "error",
+          "source": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageToolingContractTests.cs",
+          "line": 186
+        },
+        {
+          "method": "AC_IMAGE_001_ContextRejectsUnsafeInputsWithoutEchoingSecrets",
+          "class": "ImageToolingContractTests",
+          "status": "error",
+          "source": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageToolingContractTests.cs",
+          "line": 41
+        },
+        {
+          "method": "AC_IMAGE_001_OnlyMatchingLocalUnixEngineEndpointIsAccepted",
+          "class": "ImageToolingContractTests",
+          "status": "error",
+          "source": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageToolingContractTests.cs",
+          "line": 124
+        },
+        {
+          "method": "AC_IMAGE_001_SourceRevisionMustMatchAndBeClean",
+          "class": "ImageToolingContractTests",
+          "status": "error",
+          "source": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageToolingContractTests.cs",
+          "line": 74
+        }
+      ]
+    },
+    {
+      "artifactId": 11255546642,
+      "path": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "0f6816e4d4f6354e9ccaf851c8512c3fe5d74f71bc256012109c8c41c1011d6d",
+      "sourceRevision": "06a9b6311442434520fddb1084b1775364d5299d",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runtime": ".NET 10.0.12",
+      "publicationGeneration": "dffee79b203249639e9da6d648809f74",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failed": []
+    }
+  ],
+  "processRecoveryTrials": [
+    {
+      "artifactId": 11255342668,
+      "platform": "ubuntu",
+      "files": 20,
+      "rows": 1000,
+      "uniqueSeedTrialPairs": 1000,
+      "stages": {
+        "MutationApplied": 206,
+        "JournalFlushed": 163,
+        "HeaderWritten": 214,
+        "ApplyCompleted": 214,
+        "PayloadWritten": 203
+      },
+      "maximumObservedStorageTrials": 4,
+      "powerLossQualified": false,
+      "entries": [
+        {
+          "path": "artifacts/qualification/crash-trials-00.jsonl",
+          "sha256": "f2f26deca8da92e201f03edc8f13a4c1ddf4f5268c2c60b52c04cedfa33524c9",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-01.jsonl",
+          "sha256": "8ea55b453d0f9dde7b0e74f21a58affcfaa4ae104cd21efec10cd3d98aeb9e59",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-02.jsonl",
+          "sha256": "73e10f70ba263be9edb067fda0a1b0b454fca4ac531c689fa0c7846c1d341333",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-03.jsonl",
+          "sha256": "b6aba497a01bf20abb994a219e4cc5a70eec0d13180d022b629b55185226ba7c",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-04.jsonl",
+          "sha256": "daaae6746845e8e2466a37a4157073cd1aa79bb4855ea021838cd92c26e18f40",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-05.jsonl",
+          "sha256": "23e7846c6859adcea750d1d74983c2f83b05bbc189feef138b58787a415e6681",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-06.jsonl",
+          "sha256": "65c224e48e14a9a199e4bb812d9b8f7b11321334dd0b91a41b9fd579bd2171ca",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-07.jsonl",
+          "sha256": "83f319bc15091a90be7406e2b4fa6fe0c573e8fe73281fc085fcdfaed4eea182",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-08.jsonl",
+          "sha256": "83c06b8918f4459167dafe4e03f8040d24c6bc81729d61a132dcc2ab5641523d",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-09.jsonl",
+          "sha256": "d32eb5db639981f3c89a7ea75aa1d73f0a504daaf26b409e0b10142c9c2a9b2e",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-10.jsonl",
+          "sha256": "e412147323788eff0288f29a5338224ddbbca5976e10188bf8833a82aa9741fa",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-11.jsonl",
+          "sha256": "51900d675f847eda21b670bbc1c6f28e2fc15d8bbcf56e8b69f9f758a7015c90",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-12.jsonl",
+          "sha256": "eb37bcb5640b02348718856af9708530c1a77087c07c599cdcf53d2f4d18f0fc",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-13.jsonl",
+          "sha256": "4a6e25f54c325dfdd97c6b4801226ad6f5bfc75ac052e80329eef7664402c145",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-14.jsonl",
+          "sha256": "ff41d82c1b327128f2bba429d3cbda568459b5bba43350a4898e0fb04d4eac1b",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-15.jsonl",
+          "sha256": "3769afd07c7f7a8bbb2abb74af39bca4fcd205c59100a2428700ddaa11abbb88",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-16.jsonl",
+          "sha256": "e12db85f19a1f2c301b4adbdaa891e67df94eb78adce104cf6c092e2fda8ad23",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-17.jsonl",
+          "sha256": "634710e41e28626d5e6ae0db826af23a91444c50d3e35ebaf83e882a283bd5bf",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-18.jsonl",
+          "sha256": "c76c973a05a98e203733a9bdcad8103863796b28a51f3f8eb8288ea10264f893",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-19.jsonl",
+          "sha256": "cb90441f4a7937bf6345f066eb383217f79b9800710c651dc26b976e41fe7f59",
+          "rows": 50
+        }
+      ]
+    },
+    {
+      "artifactId": 11255602121,
+      "platform": "macos",
+      "files": 20,
+      "rows": 1000,
+      "uniqueSeedTrialPairs": 1000,
+      "stages": {
+        "MutationApplied": 206,
+        "JournalFlushed": 163,
+        "HeaderWritten": 214,
+        "ApplyCompleted": 214,
+        "PayloadWritten": 203
+      },
+      "maximumObservedStorageTrials": 4,
+      "powerLossQualified": false,
+      "entries": [
+        {
+          "path": "artifacts/qualification/crash-trials-00.jsonl",
+          "sha256": "b688f3fef27b3079fe6a6eb132edc2979c97bfd19549a71c74c2671530360cc6",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-01.jsonl",
+          "sha256": "86a532b24c5258959a7f69046c85356d5bb370bda3b6e6ac730c1d08af27d5e4",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-02.jsonl",
+          "sha256": "97d973a0589cf313601f7d189df0027ba537fc295c2bb7b070c47642e68f1b34",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-03.jsonl",
+          "sha256": "f1667653fc6e2fa89d85f30020da7632ebc0737658775cc09908124450fea59b",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-04.jsonl",
+          "sha256": "d2aed8170dde4ca93261c3f60ab3f23772d11c2122269b023057546e905177ff",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-05.jsonl",
+          "sha256": "bdb03b84fef4a12af1cf87084f8b09c508a46fefb4f902e34ea7461def56b321",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-06.jsonl",
+          "sha256": "12ae20ca9de7f4ee630ef6073b796c719f58ddda079e62636c65275cc06ba146",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-07.jsonl",
+          "sha256": "4716e07e9b712fbd4e8b7c83186240731502cdeb7d6c6ff2beb4f47aad9ca1de",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-08.jsonl",
+          "sha256": "4475d115dfffc2658f487edcca100916634b5dc548119d4f67fee5700dc6976f",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-09.jsonl",
+          "sha256": "ffd558a02e79c17bd80936978858bcf27e51ef7f205331eb17b01022d9a29823",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-10.jsonl",
+          "sha256": "e213dbac8cf332ff1d83620660ecb56bbb901a586ee81e3e7d403e41632da60e",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-11.jsonl",
+          "sha256": "0b59b3a013aa862c00790d45acf8c22e9086e1326d6d865dc81ea95cea3f2511",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-12.jsonl",
+          "sha256": "765498f1adf5de212041e809666378d8652643cf5cb6fba9793987c2e2b1812f",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-13.jsonl",
+          "sha256": "52881fc3e86068dba1211fe569193dde25741bbac8caa857de02a46b36fb905d",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-14.jsonl",
+          "sha256": "510e0b4b365ea8a013890e1caf6d0c947cfca6c12b3aff31290cb376736d1e93",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-15.jsonl",
+          "sha256": "a589cd8c445556da6a9b9ecfb9b6956d793a6657abd65d71cec7634c0cd3ec0c",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-16.jsonl",
+          "sha256": "064d87f6d891327af59156a2865ecdb9a347909fb170195a10f25591ceda91fd",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-17.jsonl",
+          "sha256": "0d30fa688c7b633123b2773ea7b0751519d8c4c6b95a4f227095ab5936917fd6",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-18.jsonl",
+          "sha256": "41472b5271ec0b637279fab2ca78a4a12685e52047c1d1aa9ab8f8a7bfd9340c",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-19.jsonl",
+          "sha256": "64899d974da45cc087dd4e82bf3cd6f560e260a30180e36e6c32b4d63cd8fc3f",
+          "rows": 50
+        }
+      ]
+    },
+    {
+      "artifactId": 11255924312,
+      "platform": "windows",
+      "files": 20,
+      "rows": 1000,
+      "uniqueSeedTrialPairs": 1000,
+      "stages": {
+        "MutationApplied": 206,
+        "JournalFlushed": 163,
+        "HeaderWritten": 214,
+        "ApplyCompleted": 214,
+        "PayloadWritten": 203
+      },
+      "maximumObservedStorageTrials": 4,
+      "powerLossQualified": false,
+      "entries": [
+        {
+          "path": "artifacts/qualification/crash-trials-00.jsonl",
+          "sha256": "587e7162af1d7e02770c4f81608f04a2b750e718c452d2179e417d12b82983ad",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-01.jsonl",
+          "sha256": "f7ab819fce5ac5efe37bf48844fa9c90f930cf1f952698f27d98dd369defe6a1",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-02.jsonl",
+          "sha256": "a63d2cff7fd69fd059d23482cdd3b663b0d87e0d2a21507b99652e33b18adbcc",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-03.jsonl",
+          "sha256": "ccbc3774148166347cb77f989157bc1768dcd3d662196e398e934c64e081c3c5",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-04.jsonl",
+          "sha256": "28cd1d3deea85be46bc1ee5c828f1138df1324e26daaa896feb37a167945bfc1",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-05.jsonl",
+          "sha256": "17f781cd61bc808d10c7444ce76fb10c3c5e19cb8d2a47505ce1a4eab2e2bd9e",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-06.jsonl",
+          "sha256": "6064f75e19c4f8cf207b970f2cbe6eb54f52d4fd1131ba8b2c33616430abb4ad",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-07.jsonl",
+          "sha256": "fcccde584762287d5b3e68052a49600d8205e5bde84dcbec405d50fd91c10dd8",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-08.jsonl",
+          "sha256": "d1d87caab12cc45c7f9fcab488631a42e8f354de9a24b59c6e24fec2a569a4d3",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-09.jsonl",
+          "sha256": "c66d5f09fa084c7795a3a686b0ba52236ab834a6d641d21439361bb0be717b0e",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-10.jsonl",
+          "sha256": "4be1f6f7e485ebbf654c7daadd413efc042e53e07e8885a136cae653fefe597c",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-11.jsonl",
+          "sha256": "7cde6fcb841731e48d7b3a492cdcd3bc61cbd94e3cadc8d6367a04946ea2affe",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-12.jsonl",
+          "sha256": "321f03accc58bff693c9aecf6a9db351ce803542f40a8e0d551dca28995d2302",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-13.jsonl",
+          "sha256": "56a6d4ff9a80f3a3ffde02e664e70508b3106203bc00fb93887d0496b2442794",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-14.jsonl",
+          "sha256": "d00669e5a4b8739865b8479357142c62bf703f5021e8f33afb82501cb57a76a8",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-15.jsonl",
+          "sha256": "5a00ec033b6f81b8591407bd09a8e9df8933e843919825da99f5baba9b705ede",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-16.jsonl",
+          "sha256": "d53954e79f75011df9665979aa561671befd90efb9ad94699b6e0a871f2dcf34",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-17.jsonl",
+          "sha256": "87400d56c992f01eaad384857ab0119353667982660f28e3808961dee6050294",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-18.jsonl",
+          "sha256": "9552aa09b460ad1550e78cea70bc4cae9894e8d9680b9bd4a89dc72f6f40208a",
+          "rows": 50
+        },
+        {
+          "path": "artifacts/qualification/crash-trials-19.jsonl",
+          "sha256": "67f7396a7bedac90f2cddd9468ae2ed21914eb4b620e0c5264d37fec4bca0712",
+          "rows": 50
+        }
+      ]
+    }
+  ],
+  "imagePreflightReceipt": "docs/implementation/image-preflight-failure-37073331174.json",
+  "limits": [
+    "Normal units: Linux and macOS1021/1022; Windows1016/1022. All recovery136/136 and analyzers118/118 passed. No report had skipped, cancelled, timed-out or flaky cases.",
+    "Scalar unit invocation skipped after the normal unit failure; no scalar qualification exists at this source.",
+    "RF3 client qualification, comparison suite and both measured profiles were skipped after image preparation failed.",
+    "The shared Docker format argument omission and metadata test-key mismatch have source repairs awaiting a new exact-SHA GitHub run. Windows five additional generic Node probe failures remain unattributed.",
+    "Embedded unit-test dry-run benchmark files are diagnostic fixtures, not real database comparison evidence.",
+    "Process-kill recovery is not power-loss durability. Numeric product coverage, endurance, activation movement and complete native comparison qualification remain open.",
+    "This run predates the owner-directed Linux-only/native isolated1/2/3-node qualification policy; its historical OS results do not qualify that new source."
+  ]
+}

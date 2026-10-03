@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
 using KeyLoad.Query;
 using ManagedCode.Communication;
@@ -102,7 +103,7 @@ internal static class LeaderLossRecoveryScenario
                 return current.IsSuccess && current.Value!.RoutingReady;
             }, cancellationToken);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(
-                ClusterReplicationTestSupport.NodeName(index + 1), cancellationToken);
+                ClusterReplicationTestSupport.NodeName(index + 1), WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
             await Assert.That(ClusterReplicationTestSupport.Success(
                 await state.Clients[index].SubscriptionStatusAsync(state.Subscription, cancellationToken)).Checkpoint).IsEqualTo(3);
             await Assert.That(ClusterReplicationTestSupport.Success(

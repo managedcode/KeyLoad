@@ -1,0 +1,1237 @@
+{
+  "schemaVersion": 1,
+  "ownerRepository": "managedcode/TimeSeries",
+  "sourceRevision": "de44e91ecf38779b61fe79a51153ce7b7b4db0ea",
+  "version": "10.0.3",
+  "releaseRun": {
+    "id": 37077860613,
+    "attempt": 1,
+    "url": "https://github.com/managedcode/TimeSeries/actions/runs/37077860613",
+    "conclusion": "success"
+  },
+  "releaseTag": {
+    "name": "v10.0.3",
+    "annotatedTagSha": "0f597f9b18f759cbf1ceb17e0b1d01a92f61b057",
+    "commit": "de44e91ecf38779b61fe79a51153ce7b7b4db0ea",
+    "url": "https://github.com/managedcode/TimeSeries/releases/tag/v10.0.3"
+  },
+  "artifacts": [
+    {
+      "id": 11257975140,
+      "name": "timeseries-release-package-receipt-37077860613-1",
+      "sha256": "d5892c39dc0a639aa0b422b8b121c18318cb7edc4ecb34c8bdd405b8af5f90bf",
+      "bytes": 293,
+      "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11257975140"
+    },
+    {
+      "id": 11257940207,
+      "name": "timeseries-nuget-publish-37077860613-1",
+      "sha256": "4922a0f84814f56ef41d8a884d33a8940d71e4f5bbb5add35632d26a285e1958",
+      "bytes": 2041,
+      "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11257940207"
+    },
+    {
+      "id": 11256979621,
+      "name": "nuget-packages",
+      "sha256": "f0606f244e99a385d22cd022d665f116db9067c10b0ad944f6918b319a53ea3f",
+      "bytes": 91731,
+      "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11256979621"
+    },
+    {
+      "id": 11256884932,
+      "name": "timeseries-release-qualification-37077860613-1",
+      "sha256": "7c85f0205bd79ce306c6992748f7d0803b6e6b8ca46fc5ac73057de0e8d78285",
+      "bytes": 210580,
+      "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11256884932"
+    }
+  ],
+  "qualification": {
+    "framework": "xUnit",
+    "runner": "VSTest in owning repository",
+    "tests": {
+      "total": 1107,
+      "executed": 1107,
+      "passed": 1107,
+      "failed": 0,
+      "error": 0,
+      "timeout": 0,
+      "aborted": 0,
+      "inconclusive": 0,
+      "passedButRunAborted": 0,
+      "notRunnable": 0,
+      "notExecuted": 0,
+      "disconnected": 0,
+      "warning": 0,
+      "completed": 0,
+      "inProgress": 0,
+      "pending": 0
+    },
+    "trxSha256": "62a213d63f9e06d6f291b77abde2771a57606637897dd50283c1ee4a61d469b1",
+    "coverageSha256": "1e6954156b2738b4ec892e12f6a572690dcd777f309553014c61f3502f0fbf2d",
+    "coverage": [
+      {
+        "module": "ManagedCode.TimeSeries.Orleans.dll",
+        "coveredLines": 205,
+        "totalLines": 212,
+        "linePercent": 96.6981,
+        "thresholdPercent": 90
+      },
+      {
+        "module": "ManagedCode.TimeSeries.dll",
+        "coveredLines": 687,
+        "totalLines": 725,
+        "linePercent": 94.7586,
+        "thresholdPercent": 90
+      }
+    ],
+    "runtimeSha256": "aa8e76f974c0bd7a2a9ee8f58eb4a71dda789f03ca17c3d65338e05f73ac8fd8"
+  },
+  "packages": [
+    {
+      "id": "ManagedCode.TimeSeries",
+      "version": "10.0.3",
+      "publication": "fresh",
+      "unsignedSha256": "9d85a18439749cf81e3288d0d59ddc601c1500d4c3db0cdaccf50b480c916c3a",
+      "releaseAssetId": 606711880,
+      "releaseAssetUrl": "https://github.com/managedcode/TimeSeries/releases/download/v10.0.3/ManagedCode.TimeSeries.10.0.3.nupkg",
+      "feedUrl": "https://api.nuget.org/v3-flatcontainer/managedcode.timeseries/10.0.3/managedcode.timeseries.10.0.3.nupkg",
+      "signedFeedSha256": "5c1f986038a594268757ab01f6e2c70ba8fc675ab4123fe0a4fac93e6d670c5b",
+      "feedPayloadMatchesRelease": true,
+      "signatureOnlyAddedEntry": ".signature.p7s",
+      "assemblyEntry": "lib/net10.0/ManagedCode.TimeSeries.dll",
+      "assemblySha256": "841ea9580676522231c5061e395c40d0d0255bab2473c825f5e641c8fba7ac71"
+    },
+    {
+      "id": "ManagedCode.TimeSeries.Orleans",
+      "version": "10.0.3",
+      "publication": "fresh",
+      "unsignedSha256": "4a47615f59b59dec97c428e05d1083a39564f39b4d577ed98d67cacc72dae8e6",
+      "releaseAssetId": 606711882,
+      "releaseAssetUrl": "https://github.com/managedcode/TimeSeries/releases/download/v10.0.3/ManagedCode.TimeSeries.Orleans.10.0.3.nupkg",
+      "feedUrl": "https://api.nuget.org/v3-flatcontainer/managedcode.timeseries.orleans/10.0.3/managedcode.timeseries.orleans.10.0.3.nupkg",
+      "signedFeedSha256": "0c76441dc4452b646838b62b8589c46f6db7c3057ef490b82274b2f9cefecfe2",
+      "feedPayloadMatchesRelease": true,
+      "signatureOnlyAddedEntry": ".signature.p7s",
+      "assemblyEntry": "lib/net10.0/ManagedCode.TimeSeries.Orleans.dll",
+      "assemblySha256": "8c3c8f3fdbd794612040971adb5df6d3e452769bc9e03517c04d82179aeb8db8"
+    }
+  ],
+  "signatureVerification": {
+    "command": "dotnet nuget verify --all <both signed feed packages>",
+    "exitCode": 0,
+    "signatureType": "Repository",
+    "signer": "NuGet.org Repository by Microsoft",
+    "certificateSha256": "1F4B311D9ACC115C8DC8018B5A49E00FCE6DA8E2855F9F014CA6F34570BC482D",
+    "verification": "native macOS certificate store; no warnings/errors in independently executed signature verification"
+  },
+  "review": "Lead independently authenticated raw native ZIP sizes/digests/source and reconciled unique passing TRX cases, per-file/line module coverage, annotated tag commit, actual GitHub assets and signed feed contents.",
+  "performance": {
+    "run": {
+      "id": 37077860508,
+      "attempt": 1,
+      "url": "https://github.com/managedcode/TimeSeries/actions/runs/37077860508",
+      "conclusion": "success",
+      "sourceRevision": "de44e91ecf38779b61fe79a51153ce7b7b4db0ea"
+    },
+    "artifacts": [
+      {
+        "id": 11257851267,
+        "name": "timeseries-ingestion-scalar-2-37077860508-1",
+        "sha256": "a37f7cc85eb21e5d6742b76614b384c5144c42b64e6f68b6d18917ac5b1ec0dc",
+        "bytes": 105376,
+        "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11257851267"
+      },
+      {
+        "id": 11257826287,
+        "name": "timeseries-ingestion-scalar-1-37077860508-1",
+        "sha256": "4105c70d566276048051a44021ebfa3fecf0565c03ec544ef8d7a6921adfa1ef",
+        "bytes": 104673,
+        "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11257826287"
+      },
+      {
+        "id": 11257735465,
+        "name": "timeseries-correctness-37077860508-1",
+        "sha256": "347f995e2cc48154856a2dcd2dc37bffbb67d7fd37ba728108457aad26a20ff1",
+        "bytes": 209724,
+        "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11257735465"
+      },
+      {
+        "id": 11257368059,
+        "name": "timeseries-ingestion-normal-2-37077860508-1",
+        "sha256": "2960bf816364836b5c7655f71bbe3927562140f35389eab50e20a0b50ef5385b",
+        "bytes": 105308,
+        "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11257368059"
+      },
+      {
+        "id": 11257253083,
+        "name": "timeseries-ingestion-normal-1-37077860508-1",
+        "sha256": "16a581ba0f2598f0e098108e13208e5b0dacbb81470a599f59aa1bcaf6787b26",
+        "bytes": 106480,
+        "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11257253083"
+      }
+    ],
+    "fixtureSha256": {
+      "ManagedCode.TimeSeries.Benchmark/Benchmarks/TimeSeriesIngressSummerBenchmark.cs": "5302a1246793ed33ca634c23dd0196a5b2cd02136ed94d991fbbfbce115cae3d",
+      "ManagedCode.TimeSeries.Benchmark/Benchmarks/TimeSeriesIngressCapacityBenchmark.cs": "683902f3ef6c5a820bc5ad04d6a9feb41ce9d1ee3f3ed35b309001417767db99",
+      "ManagedCode.TimeSeries.Benchmark/Benchmarks/TimeSeriesIngressEvidence.cs": "02d101cc599321e23bb1b9638230be58bc206485efaa5f7b49f371ec1ce78e76"
+    },
+    "normalization": "BenchmarkDotNet OperationsPerInvoke=64 already normalizes reported ns and allocated bytes per update; no second division.",
+    "profiles": [
+      {
+        "mode": "normal",
+        "repetition": 1,
+        "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+        "artifactId": 11257253083,
+        "nativeReportSha256": "9e47c97d74b4f7bfe4aa2c169705179eb3bf1fd5593822ad5bc83654154b348b",
+        "checksumSha256": "b866f09d76e748887820f20f5eaa545516f9ca79762b5955ec19bada60c1929d",
+        "checksumRecords": 32,
+        "cases": [
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 63.79267644882202,
+            "allocatedBytesPerUpdate": 64,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Double>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 35.41010931432247,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 35.21719720065594,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 36.14608336389065,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 63.90591700077057,
+            "allocatedBytesPerUpdate": 64,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Double>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 37.80620004236698,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 36.54295650422573,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 36.40960258245468,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedAccumulatorIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 2720.3560958862304,
+            "allocatedBytesPerUpdate": 5472,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedSummerIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 2609.998574638367,
+            "allocatedBytesPerUpdate": 4888,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedAccumulatorIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 1721.3798007965088,
+            "allocatedBytesPerUpdate": 5472,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedSummerIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 1522.5203046798706,
+            "allocatedBytesPerUpdate": 4888,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedAccumulatorIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 103908.16864624023,
+            "allocatedBytesPerUpdate": 279689,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedSummerIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 95313.44740600586,
+            "allocatedBytesPerUpdate": 279104,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedAccumulatorIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 96484.82522583008,
+            "allocatedBytesPerUpdate": 279688,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedSummerIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 96991.35523681641,
+            "allocatedBytesPerUpdate": 279104,
+            "resultIterations": 20
+          }
+        ],
+        "runtimeSha256": "0c48454d80581329ee60af60d29bfa8b62348a0aad0b3b7155eb28f9e2bc2eb2"
+      },
+      {
+        "mode": "normal",
+        "repetition": 2,
+        "cpuModel": "AMD EPYC 7763 64-Core Processor",
+        "artifactId": 11257368059,
+        "nativeReportSha256": "a51c5859d822b848c464dfee9a813b4f930a39aa2fca3d6c12b39d033b6c498c",
+        "checksumSha256": "89d84fa7fa5649f2fc2fc6f756958e9a81da5480b726e703d786ef57e085be0e",
+        "checksumRecords": 32,
+        "cases": [
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 64.19708378314972,
+            "allocatedBytesPerUpdate": 64,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Double>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 40.384700909256935,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 39.43482702970505,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 39.5138677239418,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 65.98521980643272,
+            "allocatedBytesPerUpdate": 64,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Double>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 41.86379708647728,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 38.7915482968092,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 38.47051702737808,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedAccumulatorIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 2638.548408317566,
+            "allocatedBytesPerUpdate": 5472,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedSummerIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 2622.4286031723022,
+            "allocatedBytesPerUpdate": 4888,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedAccumulatorIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 1672.74000749588,
+            "allocatedBytesPerUpdate": 5472,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedSummerIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 1574.8542259216308,
+            "allocatedBytesPerUpdate": 4888,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedAccumulatorIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 112902.1569519043,
+            "allocatedBytesPerUpdate": 279688,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedSummerIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 98452.49553833008,
+            "allocatedBytesPerUpdate": 279104,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedAccumulatorIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 101142.64630126953,
+            "allocatedBytesPerUpdate": 279688,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedSummerIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 94997.81088256836,
+            "allocatedBytesPerUpdate": 279104,
+            "resultIterations": 20
+          }
+        ],
+        "runtimeSha256": "0c48454d80581329ee60af60d29bfa8b62348a0aad0b3b7155eb28f9e2bc2eb2"
+      },
+      {
+        "mode": "scalar",
+        "repetition": 1,
+        "cpuModel": "AMD EPYC 7763 64-Core Processor",
+        "artifactId": 11257826287,
+        "nativeReportSha256": "4539f467da48b237c23527451a121e470f5bbc6010d647f597806db959e5841c",
+        "checksumSha256": "7849cdbfb5ddbd6dced739ec504f65a9185f967222ae4c9eeeb98c323d21a4ce",
+        "checksumRecords": 32,
+        "cases": [
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 64.02710081338883,
+            "allocatedBytesPerUpdate": 64,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Double>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 41.36214594244957,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 39.76567345559597,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 39.51743220090866,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 65.58730918765067,
+            "allocatedBytesPerUpdate": 64,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Double>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 40.93865252137184,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 38.94441821277142,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 38.649669989943504,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedAccumulatorIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 2878.560806274414,
+            "allocatedBytesPerUpdate": 5472,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedSummerIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 2749.019654083252,
+            "allocatedBytesPerUpdate": 4888,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedAccumulatorIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 1794.4984429359436,
+            "allocatedBytesPerUpdate": 5472,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedSummerIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 1616.110848903656,
+            "allocatedBytesPerUpdate": 4888,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedAccumulatorIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 113111.23229370118,
+            "allocatedBytesPerUpdate": 279688,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedSummerIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 100847.28049316406,
+            "allocatedBytesPerUpdate": 279104,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedAccumulatorIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 100668.14278564454,
+            "allocatedBytesPerUpdate": 279688,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedSummerIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 98931.48380126953,
+            "allocatedBytesPerUpdate": 279104,
+            "resultIterations": 20
+          }
+        ],
+        "runtimeSha256": "69a16bcb670f8bc11a13f2fd2bdf0a1edb1a749d1d44f2864e811d30a7384c01"
+      },
+      {
+        "mode": "scalar",
+        "repetition": 2,
+        "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+        "artifactId": 11257851267,
+        "nativeReportSha256": "0ebad5cb552c54441c632732c74ad24e2a5a446dd02135a287d85a66aa5cc744",
+        "checksumSha256": "cb5d376292cfd9313befd3275093971e9daf73718587368efd9138c98fa5c163",
+        "checksumRecords": 32,
+        "cases": [
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 61.58476615548134,
+            "allocatedBytesPerUpdate": 64,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Double>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 35.222868552803995,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 35.163302490115164,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>",
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 36.437224972248075,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 62.946321326494214,
+            "allocatedBytesPerUpdate": 64,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Double>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 39.26452416479587,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 35.90222643613815,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>",
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "meanNanosecondsPerUpdate": 36.892601904273036,
+            "allocatedBytesPerUpdate": 0,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedAccumulatorIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 2822.5344491958617,
+            "allocatedBytesPerUpdate": 5472,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedSummerIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 2770.939946937561,
+            "allocatedBytesPerUpdate": 4888,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedAccumulatorIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 1787.5699239730834,
+            "allocatedBytesPerUpdate": 5472,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedSummerIngress",
+            "parameters": "Capacity=64",
+            "meanNanosecondsPerUpdate": 1722.9286566734313,
+            "allocatedBytesPerUpdate": 4888,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedAccumulatorIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 105666.33331298828,
+            "allocatedBytesPerUpdate": 279689,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "SequentialCappedSummerIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 96175.7640197754,
+            "allocatedBytesPerUpdate": 279104,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedAccumulatorIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 98364.30180664062,
+            "allocatedBytesPerUpdate": 279688,
+            "resultIterations": 20
+          },
+          {
+            "type": "TimeSeriesIngressCapacityBenchmark",
+            "method": "LateCappedSummerIngress",
+            "parameters": "Capacity=4096",
+            "meanNanosecondsPerUpdate": 100518.61063232421,
+            "allocatedBytesPerUpdate": 279104,
+            "resultIterations": 20
+          }
+        ],
+        "runtimeSha256": "69a16bcb670f8bc11a13f2fd2bdf0a1edb1a749d1d44f2864e811d30a7384c01"
+      }
+    ],
+    "checksumValidation": "Lead reviewed and reran the bounded native artifact parser: all64 summer checksum records across four baseline and four candidate profiles recomputed from each own DataCount, exact UTC bucket sequence and FNV digest; capped checksums remain retained but independently unverified.",
+    "comparison": "No KeyLoad database, RF3 or competing engine throughput conclusion follows from these owning-library ingress profiles.",
+    "independentJoin": {
+      "receiptSha256": "c57ab8b4222fe39bfbb123c83d28331a05aef2a8a73be8e0fee0a4d6edb4c9f8",
+      "parserSha256": "f9bbcc542b5968e7223da783722a58d55df1ae85d964712beba342fc12a0c6a8",
+      "baselineRun": {
+        "id": 37076109824,
+        "sourceRevision": "2c9118b6fbd45a5170682d345d66cba4ad6e8f2d",
+        "url": "https://github.com/managedcode/TimeSeries/actions/runs/37076109824"
+      },
+      "baselineArtifacts": [
+        {
+          "id": 11256373581,
+          "name": "timeseries-ingestion-normal-1-37076109824-1",
+          "sha256": "79f7f5f17a42b09efc1d40500fb4aebb847f29a171bcb81443c59976451ce639",
+          "bytes": 109858,
+          "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11256373581"
+        },
+        {
+          "id": 11257310964,
+          "name": "timeseries-ingestion-normal-2-37076109824-1",
+          "sha256": "4cf79ca90202b0d1ae250685fd809e0495847588fa7b213d07850357737930ea",
+          "bytes": 110259,
+          "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11257310964"
+        },
+        {
+          "id": 11257370861,
+          "name": "timeseries-ingestion-scalar-1-37076109824-1",
+          "sha256": "c3d72758fac562c1a340361c731a837493f74d9b27e9fa7e12b90f46a15f767b",
+          "bytes": 103908,
+          "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11257370861"
+        },
+        {
+          "id": 11256738188,
+          "name": "timeseries-ingestion-scalar-2-37076109824-1",
+          "sha256": "cc2a43da0121400819cb07909a7ecc1ea7679d2a8191fb75dccc9abf139f540b",
+          "bytes": 105296,
+          "url": "https://api.github.com/repos/managedcode/TimeSeries/actions/artifacts/11256738188"
+        }
+      ],
+      "profilesValidated": 8,
+      "uniqueCasesPerProfile": 16,
+      "rawCaseRows": 128,
+      "sameCpuPairs": [
+        {
+          "baselineProfile": "normal-1",
+          "candidateProfile": "normal-1",
+          "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+          "mode": "normal",
+          "pairing": "same actual CPU model; normal also same repetition"
+        },
+        {
+          "baselineProfile": "normal-2",
+          "candidateProfile": "normal-2",
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "mode": "normal",
+          "pairing": "same actual CPU model; normal also same repetition"
+        },
+        {
+          "baselineProfile": "scalar-2",
+          "candidateProfile": "scalar-1",
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "mode": "scalar",
+          "pairing": "same actual CPU model; repetition ignored"
+        }
+      ],
+      "normalization": {
+        "operationsPerInvoke": 64,
+        "unit": "per update",
+        "validation": "for each profile-case record, the arithmetic mean of each raw Result iteration Nanoseconds divided by that iteration Operations equals BenchmarkDotNet Statistics.Mean; each Result Operations count and Memory.TotalOperations is divisible by 64, confirming BDN includes OperationsPerInvoke in its operation counts. Different launches may calibrate distinct operation totals. No extra divide/multiply by 64 is applied."
+      },
+      "summerChecksumRecordsRecomputed": 64,
+      "cappedChecksumRecomputation": "unverified; capacity algorithm unchanged; no capped-performance improvement claim",
+      "matchedSummerComparisons": [
+        {
+          "allocationPercentChange": -72.41379310344827,
+          "baselineAllocatedBytesPerUpdate": 232,
+          "baselineMeanNsPerUpdate": 92.55637065172195,
+          "baselineProfile": "normal-1",
+          "candidateAllocatedBytesPerUpdate": 64,
+          "candidateMeanNsPerUpdate": 63.90591700077057,
+          "candidateProfile": "normal-1",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>"
+          },
+          "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+          "meanPercentChange": -30.95459928821048,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -72.41379310344827,
+          "baselineAllocatedBytesPerUpdate": 232,
+          "baselineMeanNsPerUpdate": 84.50963117480278,
+          "baselineProfile": "normal-1",
+          "candidateAllocatedBytesPerUpdate": 64,
+          "candidateMeanNsPerUpdate": 63.79267644882202,
+          "candidateProfile": "normal-1",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>"
+          },
+          "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+          "meanPercentChange": -24.51431208252354,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 59.382005769014356,
+          "baselineProfile": "normal-1",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 37.80620004236698,
+          "candidateProfile": "normal-1",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Double>"
+          },
+          "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+          "meanPercentChange": -36.33391201128081,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 53.92467077672482,
+          "baselineProfile": "normal-1",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 35.41010931432247,
+          "candidateProfile": "normal-1",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Double>"
+          },
+          "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+          "meanPercentChange": -34.3341205346657,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 58.82182676792145,
+          "baselineProfile": "normal-1",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 36.54295650422573,
+          "candidateProfile": "normal-1",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>"
+          },
+          "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+          "meanPercentChange": -37.87517574317418,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 52.768968775868416,
+          "baselineProfile": "normal-1",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 35.21719720065594,
+          "candidateProfile": "normal-1",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>"
+          },
+          "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+          "meanPercentChange": -33.261539845059495,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 57.210889318585394,
+          "baselineProfile": "normal-1",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 36.40960258245468,
+          "candidateProfile": "normal-1",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>"
+          },
+          "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+          "meanPercentChange": -36.35896414805993,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 53.62932272255421,
+          "baselineProfile": "normal-1",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 36.14608336389065,
+          "candidateProfile": "normal-1",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>"
+          },
+          "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+          "meanPercentChange": -32.60014945389354,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -72.41379310344827,
+          "baselineAllocatedBytesPerUpdate": 232,
+          "baselineMeanNsPerUpdate": 84.95746182203293,
+          "baselineProfile": "normal-2",
+          "candidateAllocatedBytesPerUpdate": 64,
+          "candidateMeanNsPerUpdate": 65.98521980643272,
+          "candidateProfile": "normal-2",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -22.331460484710398,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -72.41379310344827,
+          "baselineAllocatedBytesPerUpdate": 232,
+          "baselineMeanNsPerUpdate": 82.50794851779938,
+          "baselineProfile": "normal-2",
+          "candidateAllocatedBytesPerUpdate": 64,
+          "candidateMeanNsPerUpdate": 64.19708378314972,
+          "candidateProfile": "normal-2",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -22.19284937220256,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 60.39174456596375,
+          "baselineProfile": "normal-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 41.86379708647728,
+          "candidateProfile": "normal-2",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Double>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -30.679603003104262,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 59.43867874145508,
+          "baselineProfile": "normal-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 40.384700909256935,
+          "candidateProfile": "normal-2",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Double>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -32.05652991561047,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 61.54399211406708,
+          "baselineProfile": "normal-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 38.7915482968092,
+          "candidateProfile": "normal-2",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -36.969398694657265,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 58.24618781208992,
+          "baselineProfile": "normal-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 39.43482702970505,
+          "candidateProfile": "normal-2",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -32.296295240939834,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 58.952201491594316,
+          "baselineProfile": "normal-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 38.47051702737808,
+          "candidateProfile": "normal-2",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -34.74286616274477,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 58.71122071444988,
+          "baselineProfile": "normal-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 39.5138677239418,
+          "candidateProfile": "normal-2",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -32.69792853375857,
+          "mode": "normal"
+        },
+        {
+          "allocationPercentChange": -72.41379310344827,
+          "baselineAllocatedBytesPerUpdate": 232,
+          "baselineMeanNsPerUpdate": 84.78127366304398,
+          "baselineProfile": "scalar-2",
+          "candidateAllocatedBytesPerUpdate": 64,
+          "candidateMeanNsPerUpdate": 65.58730918765067,
+          "candidateProfile": "scalar-1",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -22.63939151430786,
+          "mode": "scalar"
+        },
+        {
+          "allocationPercentChange": -72.41379310344827,
+          "baselineAllocatedBytesPerUpdate": 232,
+          "baselineMeanNsPerUpdate": 81.97341250181198,
+          "baselineProfile": "scalar-2",
+          "candidateAllocatedBytesPerUpdate": 64,
+          "candidateMeanNsPerUpdate": 64.02710081338883,
+          "candidateProfile": "scalar-1",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Decimal>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -21.892844448834502,
+          "mode": "scalar"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 61.10090969204903,
+          "baselineProfile": "scalar-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 40.93865252137184,
+          "candidateProfile": "scalar-1",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Double>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -32.99829294243858,
+          "mode": "scalar"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 60.096908909082416,
+          "baselineProfile": "scalar-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 41.36214594244957,
+          "candidateProfile": "scalar-1",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Double>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -31.174253895446967,
+          "mode": "scalar"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 60.09889667034149,
+          "baselineProfile": "scalar-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 38.94441821277142,
+          "candidateProfile": "scalar-1",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -35.199445629772605,
+          "mode": "scalar"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 57.556624084711075,
+          "baselineProfile": "scalar-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 39.76567345559597,
+          "candidateProfile": "scalar-1",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int32>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -30.91034422541985,
+          "mode": "scalar"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 59.67984784543514,
+          "baselineProfile": "scalar-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 38.649669989943504,
+          "candidateProfile": "scalar-1",
+          "case": {
+            "method": "MultipleExistingBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -35.238323512415285,
+          "mode": "scalar"
+        },
+        {
+          "allocationPercentChange": -100.0,
+          "baselineAllocatedBytesPerUpdate": 160,
+          "baselineMeanNsPerUpdate": 59.01407035291195,
+          "baselineProfile": "scalar-2",
+          "candidateAllocatedBytesPerUpdate": 0,
+          "candidateMeanNsPerUpdate": 39.51743220090866,
+          "candidateProfile": "scalar-1",
+          "case": {
+            "method": "SameBucketUpdates",
+            "parameters": "",
+            "type": "TimeSeriesIngressSummerBenchmark<Int64>"
+          },
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "meanPercentChange": -33.03727066343809,
+          "mode": "scalar"
+        }
+      ]
+    }
+  },
+  "consumer": {
+    "repository": "managedcode/KeyLoad",
+    "centralVersion": "10.0.3",
+    "regressions": "Existing real TimeSeries raw/window/date-edge/resource/auth cases and genuine RF3 SDK/official MCP through KeyLoad GitHub CI; pending new source delivery.",
+    "qualification": "Owning dependency tests/publication completed; updated KeyLoad exact-source qualification is pending."
+  },
+  "limitations": [
+    "No local tests, recovery or benchmarks executed.",
+    "Capacity algorithm is unchanged; SIMD and further owning optimizations require separate profiles.",
+    "These owning-library measurements do not establish KeyLoad superiority, RF3 scaling, power-loss durability, full RAM caches or production readiness."
+  ]
+}

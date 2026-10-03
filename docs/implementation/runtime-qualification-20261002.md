@@ -1,5 +1,58 @@
 # Runtime qualification, 2026-10-02
 
+## Latest joined baseline: c06291b94
+
+[Run37074392471](https://github.com/managedcode/KeyLoad/actions/runs/37074392471)
+completed with failure. The lead independently reconciled six native ZIP archives
+against authenticated GitHub source/run metadata, byte lengths and SHA256 digests,
+then checked ten report identities, unique cases and native summaries. Normal
+units pass1021/1022 Linux/macOS and1016/1022 Windows; scalar execution is skipped.
+Recovery passes136/136 Linux/macOS and135/136 Windows. The one Windows projection
+case `ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether`
+at MutationApplied3 reports TaskCanceledException; retained evidence does not
+establish its cause. Each OS still has1000 unique successful seeded atomic
+process-trial rows; those rows do not erase the separate failed projection case.
+All118 analyzer cases pass in each OS report and in the standalone analyzer job.
+[The exact receipt](runtime-qualification-37074392471.json) retains all archives,
+jobs, report hashes and failed case identities.
+
+Both image jobs again fail at native context-inspect before client/runtime/load
+execution. Their source has the same absent Docker format argument documented
+below; native stderr bytes were not captured, so no more specific runtime cause
+is invented. RF3, comparisons and measured profiles are skipped. The source
+repairs, new binary WAL, isolated Linux cell pipeline and published TimeSeries
+consumer update each require qualification at a new delivered source. Historical
+three-OS reports remain unchanged by the owner's future Linux-only direction.
+
+## Joined main baseline: 06a9b631
+
+[Run37073331174](https://github.com/managedcode/KeyLoad/actions/runs/37073331174)
+completed with failure. Root independently verified all four native test archives
+against authenticated GitHub byte lengths, SHA-256 digests and source/run metadata,
+then checked ten reports' source revisions, unique case identities and summaries.
+Normal units pass1021/1022 on Linux/macOS and1016/1022 on Windows. All136 recovery
+and118 analyzer cases pass on each OS; each OS retains1000 unique process-trial
+rows within four concurrent storage trials. No native report contains skipped,
+cancelled, timed-out or flaky cases. Scalar invocation was skipped after the
+normal unit failure. [Exact jobs, reports and archive receipts](runtime-qualification-37073331174.json)
+preserve these boundaries.
+
+RF3 and comparison preparation both fail before restore/build/client/workload
+execution: native context-show exits0, then context-inspect exits1. The exact
+source reads `dockerArgument.format` but never defines it. The
+[byte-verified image receipt](image-preflight-failure-37073331174.json) preserves
+both command sequences. Add the named `--format` value without weakening Engine,
+image, cleanup or ownership checks. The Linux/macOS metadata regression reads
+`configId` from a parser that returns `configImageId`; its source correction
+keeps manifest receipt assertions on `configId`. Five additional Windows Node
+contract failures have only generic retained errors; their cause remains open.
+
+Neither repair is qualified until it is included in a new pushed SHA and its
+GitHub gates pass. Both measured profiles were skipped; dry-run benchmark JSON
+inside unit artifacts is not real comparison evidence. Process-kill trials do
+not qualify power-loss durability. The owner-directed Linux-only isolated native
+one/two/three-node matrix is newer source and remains unqualified by this run.
+
 ## Main runtime baseline: c486d9ddd
 
 [Run37060131271](https://github.com/managedcode/KeyLoad/actions/runs/37060131271)

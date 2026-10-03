@@ -87,7 +87,8 @@ internal sealed class ContainerRuntimeControl(
 
         capture.StartSucceeded();
         progress.Stage = ContainerRestartStage.HealthWait;
-        await app.ResourceNotifications.WaitForResourceHealthyAsync(resourceName, cancellationToken);
+        await app.ResourceNotifications.WaitForResourceHealthyAsync(resourceName,
+            WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
         progress.Stage = ContainerRestartStage.RuntimeInspection;
         var after = await ContainerRuntimeDocker.InspectRunningAsync(receipt.ContainerName, resourceName, cancellationToken);
         progress.Stage = ContainerRestartStage.IdentityValidation;

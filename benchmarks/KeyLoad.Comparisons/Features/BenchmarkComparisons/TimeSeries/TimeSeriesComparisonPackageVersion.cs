@@ -18,6 +18,11 @@ internal static class TimeSeriesComparisonPackageVersion
         }
 
         var separator = informational.IndexOf(BuildMetadataSeparator, StringComparison.Ordinal);
+        if (separator == 0)
+        {
+            throw new InvalidOperationException(MissingVersion);
+        }
+
         return separator < 0 ? informational : informational[..separator];
     }
 }

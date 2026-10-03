@@ -13,11 +13,26 @@ ReadSamples operation unchanged. Every new public request keeps its separate
 Orleans request/read actors; physical node-local storage and the existing RF3
 authority/consistent-cut behavior remain the owners of records and reads.
 
-Use the published centrally pinned ManagedCode.TimeSeries 10.0.0 inside Core as
+Use the published centrally pinned ManagedCode.TimeSeries 10.0.3 inside Core as
 a bounded temporary numeric accumulator. It does not replace KeyLoad storage,
-ordering, event deduplication, persisted authorization or replication. The owning
-source at published commit23632b9f8d49d5a7feb337caa6cbeb5b22d7575a was inspected;
-no dependency defect has been established and no consumer workaround is approved.
+ordering, event deduplication, persisted authorization or replication. The initial
+10.0.0 implementation used published source23632b9f8d49d5a7feb337caa6cbeb5b22d7575a.
+Temporal rounding defects were subsequently repaired in the owning repository;
+published10.0.2 source2c9118b6fbd45a5170682d345d66cba4ad6e8f2d passed1104/1104
+native tests and90% coverage in each module. The lead independently verified the
+release/tag, actual package contents, NuGet signatures and duplicate-publication
+fence in the [delivery receipt](../implementation/timeseries-dependency-10.0.2.json).
+The following summer allocation patch is published10.0.3 at source
+de44e91ecf38779b61fe79a51153ce7b7b4db0ea. Its owning Release run37077860613
+passes1107/1107 tests, Core687/725 and Orleans205/212 covered lines. The lead
+independently verifies the annotated tag, actual GitHub assets and both signed
+NuGet payloads before the new central pin. Four native repeated normal/scalar
+profiles complete16 cases each, with20 result iterations per case; the
+[10.0.3 receipt](../implementation/timeseries-dependency-10.0.3.json) keeps
+source, package and measurement proof separate. The private static generic-state
+callbacks preserve the public accumulator contract and add no consumer
+workaround. The KeyLoad10.0.3 consumer change requires a new exact-SHA GitHub
+unit/recovery/RF3 qualification; earlier10.0.0 consumer results remain historical.
 
 Three native DoubleTimeSeriesSummer instances use Strategy.Sum/Min/Max,
 TimeSpan.MaxValue and maximum bucket count1. Pass each real sample timestamp and
