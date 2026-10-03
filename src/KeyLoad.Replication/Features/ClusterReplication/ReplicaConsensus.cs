@@ -102,6 +102,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(operation);
         using var active = activity.Enter();
+        operation = ReplicaOperationAuthority.Verify(operation, state.Materializer.Database)!;
         using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
         request.CancelAfter(ReplicaProtocol.CommandTimeout);
         await TransportReady.WaitAsync(request.Token).ConfigureAwait(false);
@@ -139,9 +140,8 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     }
 
     /// <inheritdoc />
-    public async Task<string> HandleAsync(ReplicaRpc method, string payloadJson, CancellationToken cancellationToken)
+    public async Task<ReadOnlyMemory<byte>> HandleAsync(ReplicaRpc method, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(payloadJson);
         using var active = activity.Enter();
         using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
         request.CancelAfter(ReplicaProtocol.CommandTimeout);
@@ -150,7 +150,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         }
-        return await dispatcher.HandleAsync(method, payloadJson, request.Token).ConfigureAwait(false);
+        return await dispatcher.HandleAsync(method, payload, request.Token).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

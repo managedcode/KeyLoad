@@ -11,11 +11,10 @@ internal static class ZoneTreeStoreInitializer
         {
             runtime.Ownership = new FileStream(Path.Combine(runtime.Options.Directory, OwnerLockFileName),
                 FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-            runtime.Identity = ZoneTreeIdentityFile.Open(runtime.Options);
+            runtime.Identity = ZoneTreeIdentityFile.Open(runtime.Options, runtime.Ownership);
             runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options);
             runtime.Journal = ZoneTreeStoreFiles.OpenJournal(runtime.Options);
             ZoneTreeJournalRecovery.Recover(runtime);
-            runtime.Identity = ZoneTreeIdentityFile.Promote(runtime.Options.Directory, runtime.Identity);
             runtime.Maintainer = runtime.Tree.CreateMaintainer();
             ZoneTreeCheckpointReclaimer.Reclaim(runtime.Options.Directory);
         }

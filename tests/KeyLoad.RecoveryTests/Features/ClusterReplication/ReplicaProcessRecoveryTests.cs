@@ -29,7 +29,7 @@ internal sealed class ReplicaProcessRecoveryTests
         await ReplicaProcessAssertions.DocumentAsync(node, 2);
         if (boundary != ReplicaCrashBoundary.TermSaved)
         {
-            await Assert.That(node.Log.ReadEntry(3)!.Operation).IsEqualTo(ReplicaCrashModel.Operation(3));
+            await ReplicaProcessAssertions.OperationAsync(node.Database, node.Log.ReadEntry(3)!.Operation, ReplicaCrashModel.Operation(3));
         }
         if (boundary == ReplicaCrashBoundary.TermSaved)
         {
@@ -118,7 +118,7 @@ internal sealed class ReplicaSnapshotProcessRecoveryTests
             await Assert.That(empty.Canonical.Position).IsEqualTo(sourcePosition);
             await Assert.That(empty.Log.State.LastIndex).IsEqualTo(4);
             await ReplicaProcessAssertions.ReceiptAsync(empty, 4);
-            empty.Log.Append([new(5, 1, ReplicaCrashModel.Operation(5))]);
+            empty.Log.Append([new(5, 1, empty.Database.NormalizeOperation(ReplicaCrashModel.Operation(5)))]);
             await Assert.That(empty.Database.Outcome(ReplicaCrashModel.PrincipalId, ReplicaCrashModel.Operation(5).Id)).IsNull();
             await using var materializer = new ReplicaMaterializer(empty.Database, empty.Log, empty.Snapshots);
             materializer.Commit(5);
@@ -168,7 +168,7 @@ internal sealed class ReplicaSnapshotProcessRecoveryTests
             await ReplicaProcessAssertions.SnapshotAsync(node, trial, 4);
             await Assert.That(node.Log.TermAt(4)).IsEqualTo(1);
             await Assert.That(node.Log.ReadEntry(4)).IsNull();
-            await Assert.That(node.Log.ReadEntry(5)!.Operation).IsEqualTo(ReplicaCrashModel.Operation(5));
+            await ReplicaProcessAssertions.OperationAsync(node.Database, node.Log.ReadEntry(5)!.Operation, ReplicaCrashModel.Operation(5));
             await Assert.That(node.Database.Outcome(ReplicaCrashModel.PrincipalId, ReplicaCrashModel.Operation(5).Id)).IsNull();
             await ReplicaProcessAssertions.ReceiptAsync(node, 4);
             materializer.Commit(5);

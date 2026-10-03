@@ -22,7 +22,7 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
     /// <summary>Gets or sets the acknowledgement durability reported in commit receipts.</summary>
     public DurabilityProfile Durability { get; set; } = store.Identity.Durability;
     /// <summary>Gets the canonical store's last applied replicated position.</summary>
-    public long LastApplied => Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? JsonDefaults.Deserialize<long>(bytes) : 0);
+    public long LastApplied => Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0);
 
     /// <summary>Reads a configured resource and checks its transaction domain and optional kind.</summary>
     /// <param name="view">Current gated storage view.</param>

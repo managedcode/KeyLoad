@@ -45,7 +45,7 @@ internal sealed class McpPolymorphicSchemaTests
         {
             [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
         };
-        var decoded = JsonDefaults.Deserialize<CommandRequest>(descriptor.Decode(arguments).Payload.Span);
+        var decoded = NativeSerialization.Deserialize<CommandRequest>(descriptor.Decode(arguments).Payload.Span);
         await Assert.That(decoded.Mutations.Length).IsEqualTo(MutationCount);
         await Assert.That(decoded.Mutations.Select(item => item.GetType()))
             .IsEquivalentTo(request.Mutations.Select(item => item.GetType()));

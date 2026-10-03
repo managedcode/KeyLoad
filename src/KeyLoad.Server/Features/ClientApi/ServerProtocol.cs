@@ -13,6 +13,7 @@ internal static class ServerProtocol
     internal const string RequestHeader = "X-KeyLoad-Request-Id";
     internal const string NonceHeader = "X-KeyLoad-Nonce";
     internal const string BearerPrefix = "Bearer ";
+    internal const string BinaryContentType = "application/octet-stream";
     internal const string JsonContentType = "application/json; charset=utf-8";
     internal const string MissingCredential = "An API key is required.";
     internal const string StableCommandRequired = "A stable X-KeyLoad-Command-Id header is required.";

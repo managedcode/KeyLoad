@@ -26,7 +26,7 @@ public static class ClusterPrincipalPolicy
         database.Store.Commit((transaction, _) =>
         {
             var appliedCut = transaction.ReadOwnedValue(KeySpace.AppliedBytes) is { } appliedBytes
-                ? JsonDefaults.Deserialize<long>(appliedBytes)
+                ? NativeSerialization.Deserialize<long>(appliedBytes)
                 : 0;
 
             PrincipalRecord? principal;

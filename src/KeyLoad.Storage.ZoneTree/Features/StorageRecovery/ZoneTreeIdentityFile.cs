@@ -5,20 +5,46 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeIdentityFile
 {
-    internal static StoreIdentity Open(ZoneTreeStoreOptions options)
+    internal static StoreIdentity Open(ZoneTreeStoreOptions options, FileStream ownership)
     {
         var path = Path.Combine(options.Directory, IdentityFileName);
-        var identity = File.Exists(path) ? Read(path) : new(BinaryJournalIdentityVersion, KeyCodec.Version,
+        if (File.Exists(path))
+        {
+            var existing = Read(path);
+            Validate(existing, options);
+            return existing;
+        }
+
+        RequireEmptyOwnedDirectory(options.Directory, ownership);
+        var identity = new StoreIdentity(BinaryJournalIdentityVersion, KeyCodec.Version,
             Guid.NewGuid(), options.Incarnation ?? Guid.NewGuid(),
             options.SigningKey is { } configuredKey ? configuredKey.ToArray() : RandomNumberGenerator.GetBytes(SigningKeyBytes),
             DurabilityProfile.ProcessDurable);
         Validate(identity, options);
-        if (!File.Exists(path))
-        {
-            Write(path, identity);
-        }
+        Write(path, identity);
 
         return identity;
+    }
+
+    private static void RequireEmptyOwnedDirectory(string directory, FileStream ownership)
+    {
+        ArgumentNullException.ThrowIfNull(ownership);
+        var ownerPath = Path.GetFullPath(Path.Combine(directory, OwnerLockFileName));
+        if (!ownership.CanRead || !ownership.CanWrite
+            || !string.Equals(ownership.Name, ownerPath, StringComparison.Ordinal)
+            || ownership.Length != 0
+            || (File.GetAttributes(ownerPath) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != 0)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
+        }
+
+        foreach (var entry in Directory.EnumerateFileSystemEntries(directory))
+        {
+            if (!string.Equals(Path.GetFullPath(entry), ownerPath, StringComparison.Ordinal))
+            {
+                throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
+            }
+        }
     }
 
     internal static StoreIdentity OpenExisting(ZoneTreeStoreOptions options, Guid expectedNodeId)
@@ -36,22 +62,9 @@ internal static class ZoneTreeIdentityFile
         return identity;
     }
 
-    internal static StoreIdentity Promote(string directory, StoreIdentity identity)
-    {
-        if (identity.FormatVersion == BinaryJournalIdentityVersion)
-        {
-            return identity;
-        }
-
-        var promoted = identity with { FormatVersion = BinaryJournalIdentityVersion };
-        Write(Path.Combine(directory, IdentityFileName), promoted);
-        return promoted;
-    }
-
     private static void Validate(StoreIdentity identity, ZoneTreeStoreOptions options)
     {
-        if (identity.FormatVersion is not (InitialIdentityVersion or CheckpointVersion or LegacyBinaryJournalIdentityVersion
-            or BinaryJournalIdentityVersion)
+        if (identity.FormatVersion != BinaryJournalIdentityVersion
             || identity.KeyCodecVersion != KeyCodec.Version)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
@@ -73,19 +86,30 @@ internal static class ZoneTreeIdentityFile
 
     internal static StoreIdentity Read(ReadOnlySpan<byte> bytes)
     {
-        var envelope = JsonDefaults.Deserialize<ZoneTreeIdentityEnvelope>(bytes);
+        var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeIdentityEnvelope>(bytes, ZoneTreeMetadataBinary.IdentityMagic, IdentityFormatUnsupported);
         if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Checksum))
         {
             throw Errors.Fail(ErrorCode.Corruption, IdentityChecksumInvalid);
         }
 
-        return JsonDefaults.Deserialize<StoreIdentity>(envelope.Payload);
+        var identity = NativeSerialization.Deserialize<StoreIdentity>(envelope.Payload);
+        if (identity.FormatVersion != BinaryJournalIdentityVersion || identity.KeyCodecVersion != KeyCodec.Version)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
+        }
+
+        if (identity.SigningKey.Length != SigningKeyBytes || identity.NodeId == Guid.Empty || identity.Incarnation == Guid.Empty)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, IdentityChecksumInvalid);
+        }
+
+        return identity;
     }
 
     internal static void Write(string path, StoreIdentity identity)
     {
-        var payload = JsonDefaults.Serialize(identity);
-        var bytes = JsonDefaults.Serialize(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)));
+        var payload = NativeSerialization.Serialize(identity);
+        var bytes = ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)), ZoneTreeMetadataBinary.IdentityMagic);
         var temporary = path + TemporaryFileSuffix;
         using (var file = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None,
             IdentityBufferBytes, FileOptions.WriteThrough))

@@ -19,7 +19,7 @@ public sealed partial class DatabaseEngine
     {
         var head = ReadOutboxHead(tx, partition);
         entry = entry with { Sequence = checked(head.Tail + 1) };
-        var payload = JsonDefaults.Serialize(entry);
+        var payload = NativeSerialization.Serialize(entry);
         var maxRecords = checked(Limits.MaxOutboxRecords + (allowProgressReserve ? Limits.ReservedOutboxRecords : 0));
         var maxBytes = checked(Limits.MaxOutboxBytes + (allowProgressReserve ? Limits.ReservedOutboxBytes : 0));
         if (head.StoredRecords >= maxRecords || payload.Length > maxBytes - head.StoredBytes)
@@ -46,7 +46,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Corruption, "The projection consumer limit is inconsistent.");
         }
 
-        return page.Records.Select(record => JsonDefaults.Deserialize<ProjectionConsumerInfo>(record.Value.Span)).ToImmutableArray();
+        return page.Records.Select(record => NativeSerialization.Deserialize<ProjectionConsumerInfo>(record.Value.Span)).ToImmutableArray();
     }
     private ProjectionConsumerInfo ConfigureProjectionConsumer(IAtomicTransaction tx, ConfigureProjectionConsumerRequest request)
     {

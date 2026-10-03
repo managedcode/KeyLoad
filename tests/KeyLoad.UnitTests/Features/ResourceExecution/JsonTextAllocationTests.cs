@@ -17,20 +17,20 @@ internal sealed class JsonTextAllocationTests
     private const string HealthyValue = "healthy";
 
     [Test]
-    public async Task AcMp006WarmedGetAvoidsOwnedUtf8InputPerResult()
+    public async Task AcMp006WarmedPublicTextDecodeAvoidsOwnedUtf8InputPerResult()
     {
         var value = new string(PayloadCharacter, ReusableResultCharacters);
-        var result = new OperationResult(JsonSerializer.Serialize(value, JsonDefaults.Options));
+        var result = JsonSerializer.Serialize(value, JsonDefaults.Options);
         for (var index = 0; index < Warmups; index++)
         {
-            result.Get<string>();
+            JsonDefaults.Deserialize<string>(result);
         }
 
         var length = 0;
         var before = GC.GetAllocatedBytesForCurrentThread();
         for (var index = 0; index < Iterations; index++)
         {
-            length += result.Get<string>().Length;
+            length += JsonDefaults.Deserialize<string>(result).Length;
         }
         var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
         var maximum = Iterations * (2L * ReusableResultCharacters + PerResultAllowance);
@@ -42,8 +42,8 @@ internal sealed class JsonTextAllocationTests
     [Test]
     public async Task AcMp006MalformedParseReturnsReusableLoanAndHealthyCallStillSucceeds()
     {
-        var malformed = new OperationResult(OpeningQuote + new string(PayloadCharacter, MalformedInputCharacters));
-        var healthy = new OperationResult(HealthyResultJson);
+        var malformed = OpeningQuote + new string(PayloadCharacter, MalformedInputCharacters);
+        var healthy = HealthyResultJson;
         for (var index = 0; index < Warmups; index++)
         {
             ExpectMalformed(malformed);
@@ -55,7 +55,7 @@ internal sealed class JsonTextAllocationTests
         {
             try
             {
-                malformed.Get<string>();
+                JsonDefaults.Deserialize<string>(malformed);
             }
             catch (JsonException)
             {
@@ -66,14 +66,14 @@ internal sealed class JsonTextAllocationTests
 
         await Assert.That(failures).IsEqualTo(Iterations);
         await Assert.That(allocated).IsLessThan(Iterations * PerMalformedAllowance);
-        await Assert.That(healthy.Get<string>()).IsEqualTo(HealthyValue);
+        await Assert.That(JsonDefaults.Deserialize<string>(healthy)).IsEqualTo(HealthyValue);
     }
 
-    private static void ExpectMalformed(OperationResult result)
+    private static void ExpectMalformed(string result)
     {
         try
         {
-            result.Get<string>();
+            JsonDefaults.Deserialize<string>(result);
         }
         catch (JsonException)
         {

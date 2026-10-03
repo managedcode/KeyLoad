@@ -28,7 +28,7 @@ internal sealed class ArtifactTests
             BackupArtifact.Unpack(artifact, Path.Combine(root, "unpacked"));
             ZoneTreeStore.Restore(Path.Combine(root, "unpacked"), Path.Combine(root, "restored"));
             using var recovered = new ZoneTreeStore(new(Path.Combine(root, "restored")));
-            await Assert.That(recovered.Read(view => JsonDefaults.Deserialize<string>(view.ReadOwnedValue(KeyLoad.Storage.KeyCodec.Encode("large"))!).Length)).IsEqualTo(10_000);
+            await Assert.That(recovered.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyLoad.Storage.KeyCodec.Encode("large"))!).Length)).IsEqualTo(10_000);
             var copied = await ArtifactTransfer.CopyToFileStorageAsync(artifact, Path.Combine(root, "archive"), TestContext.Current!.Execution.CancellationToken);
             await Assert.That(copied.IsSuccess).IsTrue();
             var copiedBytes = await File.ReadAllBytesAsync(Path.Combine(root, "archive", "backup.ctg"));

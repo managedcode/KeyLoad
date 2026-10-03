@@ -36,7 +36,7 @@ public sealed partial class DatabaseEngine
         ResourceDefinition resource, DateTimeOffset now, ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value, ReadyClaimState state)
     {
-        var id = JsonDefaults.Deserialize<string>(value);
+        var id = NativeSerialization.Deserialize<string>(value);
         var metadataKey = QueueKey(MessageMetadataSpace, request.Lane, id);
         var metadata = tx.GetRecord<MessageMetadata>(metadataKey)
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingReadyMetadata);

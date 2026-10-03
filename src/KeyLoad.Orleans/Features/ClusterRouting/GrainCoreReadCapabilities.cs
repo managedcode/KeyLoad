@@ -9,20 +9,20 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
         cancellationToken.ThrowIfCancellationRequested();
         return kind switch
         {
-            GrainReadKind.Document => database.GetDocument(principal, GrainPayloadJson.Read<GetDocumentRequest>(payload).Reference),
-            GrainReadKind.Stream => Stream(principal, GrainPayloadJson.Read<ReadStreamRequest>(payload), cancellationToken),
-            GrainReadKind.EventSource => database.ReadEventSource(principal, GrainPayloadJson.Read<ReadEventSourceRequest>(payload), cancellationToken),
-            GrainReadKind.Subscription => database.GetSubscription(principal, GrainPayloadJson.Read<GetSubscriptionRequest>(payload).Subscription),
-            GrainReadKind.Message => Message(principal, GrainPayloadJson.Read<InspectMessageRequest>(payload)),
-            GrainReadKind.Traverse => Traverse(principal, GrainPayloadJson.Read<TraverseRequest>(payload), cancellationToken),
-            GrainReadKind.Samples => Samples(principal, GrainPayloadJson.Read<ReadSamplesRequest>(payload), cancellationToken),
-            GrainReadKind.LatestSample => database.ReadLatestSample(principal, GrainPayloadJson.Read<ReadLatestSampleRequest>(payload), cancellationToken),
-            GrainReadKind.AggregateSamples => database.AggregateSamples(principal, GrainPayloadJson.Read<AggregateSamplesRequest>(payload), cancellationToken),
+            GrainReadKind.Document => database.GetDocument(principal, GrainNativePayload.Read<GetDocumentRequest>(payload).Reference),
+            GrainReadKind.Stream => Stream(principal, GrainNativePayload.Read<ReadStreamRequest>(payload), cancellationToken),
+            GrainReadKind.EventSource => database.ReadEventSource(principal, GrainNativePayload.Read<ReadEventSourceRequest>(payload), cancellationToken),
+            GrainReadKind.Subscription => database.GetSubscription(principal, GrainNativePayload.Read<GetSubscriptionRequest>(payload).Subscription),
+            GrainReadKind.Message => Message(principal, GrainNativePayload.Read<InspectMessageRequest>(payload)),
+            GrainReadKind.Traverse => Traverse(principal, GrainNativePayload.ReadPublicInput<TraverseRequest>(payload), cancellationToken),
+            GrainReadKind.Samples => Samples(principal, GrainNativePayload.Read<ReadSamplesRequest>(payload), cancellationToken),
+            GrainReadKind.LatestSample => database.ReadLatestSample(principal, GrainNativePayload.Read<ReadLatestSampleRequest>(payload), cancellationToken),
+            GrainReadKind.AggregateSamples => database.AggregateSamples(principal, GrainNativePayload.Read<AggregateSamplesRequest>(payload), cancellationToken),
             GrainReadKind.AggregateSampleWindows => database.AggregateSampleWindows(principal,
-                GrainPayloadJson.Read<AggregateSampleWindowsRequest>(payload), cancellationToken),
-            GrainReadKind.ChangeFeed => database.ReadChangeFeed(principal, GrainPayloadJson.Read<ReadChangeFeedRequest>(payload)),
-            GrainReadKind.OutboxStatus => database.GetOutboxStatus(principal, GrainPayloadJson.Read<GetOutboxStatusRequest>(payload).Partition),
-            GrainReadKind.ProjectionBatch => database.ReadProjectionBatch(principal, GrainPayloadJson.Read<ReadProjectionBatchRequest>(payload)),
+                GrainNativePayload.Read<AggregateSampleWindowsRequest>(payload), cancellationToken),
+            GrainReadKind.ChangeFeed => database.ReadChangeFeed(principal, GrainNativePayload.Read<ReadChangeFeedRequest>(payload)),
+            GrainReadKind.OutboxStatus => database.GetOutboxStatus(principal, GrainNativePayload.Read<GetOutboxStatusRequest>(payload).Partition),
+            GrainReadKind.ProjectionBatch => database.ReadProjectionBatch(principal, GrainNativePayload.Read<ReadProjectionBatchRequest>(payload)),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

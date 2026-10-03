@@ -9,7 +9,7 @@ internal sealed class BlobAgentDecodeTests
     private const string InvalidBytes = "not-base64!";
     private const int CommandCount = 6;
 
-    /// <summary>All ten canonical DTOs round-trip byte-for-byte without changing the native arguments.</summary>
+    /// <summary>All ten typed DTOs become exact native bytes while their public JSON arguments remain unchanged.</summary>
     [Test]
     public async Task AcBlob006EveryAgentOperationKeepsExactCanonicalPayloadAndStableCommandIdentity()
     {
@@ -20,7 +20,7 @@ internal sealed class BlobAgentDecodeTests
             var arguments = item.Arguments();
             var original = arguments[BlobAgentCases.Request].GetRawText();
             var decoded = BlobAgentCatalogTests.Find(item.Name).Decode(arguments);
-            await Assert.That(decoded.Payload.Span.SequenceEqual(item.Payload.Span)).IsTrue();
+            await Assert.That(decoded.Payload.Span.SequenceEqual(item.NativePayload.Span)).IsTrue();
             await Assert.That(decoded.CommandId).IsEqualTo(item.CommandKind.HasValue ? BlobAgentCases.CommandId : Guid.Empty);
             await Assert.That(decoded.CommandKind).IsEqualTo(item.CommandKind);
             await Assert.That(decoded.ReadKind).IsEqualTo(item.ReadKind);

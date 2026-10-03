@@ -57,5 +57,5 @@ internal static class SampleAggregateReader
         }
     }
 
-    internal static SampleRecord ReadSample(ReadOnlySpan<byte> value) => JsonDefaults.Deserialize<SampleRecord>(value);
+    internal static SampleRecord ReadSample(ReadOnlySpan<byte> value) => NativeSerialization.Deserialize<SampleRecord>(value);
 }

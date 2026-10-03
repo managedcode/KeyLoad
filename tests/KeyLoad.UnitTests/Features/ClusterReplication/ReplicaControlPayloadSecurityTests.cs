@@ -30,7 +30,8 @@ internal sealed class ReplicaControlPayloadSecurityTests
             MaxControlPayloadBytes = payloadBytes - ExcessPayloadBytes,
             ReplayLimits = fixture.Options.ReplayLimits with { CriticalPerVoter = ReservedCapacity }
         };
-        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System);
+        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System,
+            canonicalDatabase: fixture.Database);
         var request = method == ReplicaRpc.Forward ? fixture.Forward(kind) : fixture.Append(kind);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => receiver.VerifyRequest(request));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
@@ -52,7 +53,8 @@ internal sealed class ReplicaControlPayloadSecurityTests
             MaxControlPayloadBytes = ReplicaSecurityFixture.OperationPayload.Length,
             ReplayLimits = fixture.Options.ReplayLimits with { CriticalPerVoter = ReservedCapacity }
         };
-        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System);
+        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System,
+            canonicalDatabase: fixture.Database);
         receiver.VerifyRequest(fixture.Forward(OperationKind.Membership));
         receiver.VerifyRequest(fixture.Forward(OperationKind.Batch));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => receiver.VerifyRequest(fixture.Vote())).Code)

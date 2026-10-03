@@ -6,6 +6,10 @@ public interface ICommitCoordinator
     /// <summary>Submits one stable command identity and verified principal to the owning coordinator.</summary>
     /// <returns>The persisted command result or an explicit acceptance failure.</returns>
     Task<OperationResult> SubmitAsync(OperationKind kind, Guid id, string principalId, string payloadJson, CancellationToken cancellationToken = default);
+    /// <summary>Submits an attributed native command without internal JSON decoding.</summary>
+    /// <returns>The persisted typed command result or an explicit acceptance failure.</returns>
+    Task<OperationResult> SubmitNativeAsync(OperationKind kind, Guid id, string principalId,
+        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default);
     /// <summary>Establishes the coordinator's committed read cut.</summary>
     /// <returns>A task completing when the read barrier is established.</returns>
     Task ReadBarrierAsync(CancellationToken cancellationToken = default);

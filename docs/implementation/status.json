@@ -64,21 +64,20 @@
       "qualificationReceipt": "docs/implementation/runtime-qualification-37065200835.json"
     },
     "nativeInternalSerialization": {
-      "status": "attributes-partly-applied-runtime-held-staged-installation-blocked",
+      "status": "native-source-installed-owner-directed-resumption-validation-repairs-in-progress",
       "decision": "docs/ADR/ADR-060-native-internal-serialization.md",
       "feature": "docs/Features/InternalSerialization.md",
       "staticPreview": "docs/implementation/native-internal-static-preview.json",
       "qualified": false,
       "runtimeTestsExecuted": false,
-      "approvalRequired": "Explicit consent for codec persisted formats, KLT2 token invalidation and homogeneous replica2 rollout after automatic approval rejection.",
+      "approvalRequired": "Owner explicitly directed continued implementation and GitHub testing on 2026-10-03; prior denied attempts are historical. No running-store conversion or product release is authorized by source installation.",
       "open": [
-        "Direct persisted-format/token/homogeneous replica rollout consent after automatic approval rejection",
         "Qualified offline old-store conversion and reverse/rollback tooling",
         "General nested native type/reference/default/count/decoded-memory/work bounds",
         "Complete exact-source native mandatory GitHub gates",
         "Measured performance and fault evidence"
       ],
-      "activeRuntime": "Previous persistence/claims/metadata/wire formats held under the executed source hold; qualified WAL source unchanged. Complete native candidate is joined and statically compiled separately, with moving unrelated work excluded from its review delta.",
+      "activeRuntime": "Generated native candidate rebased into current checkout; preserved term observation, SQL friendship and phase telemetry. Structural collection/reference/depth/graph/DOM and missing-identity/backup-cut repairs precede exact-SHA CI. Runtime tests for this source not yet executed.",
       "candidateStaticValidation": {
         "scope": "Exact captured TMP source closure only; not latest owner source",
         "projectsCompiled": 25,
@@ -89,6 +88,13 @@
         "reviewPatchSha256": "0cf3f82068c9deeb596199ca96698a430371ba08fdd5fd32ccdf4c7d887af4e0",
         "sourceClosureSha256": "a75b363ed0d0869c7700fa3129499571ec1b27f01f8f4f2843ea1129af80dd02",
         "freshRebaseRequired": true
+      },
+      "baseline": {
+        "sourceRevision": "ec3399ef279fda1f4cf510e5ce2a0650684776f9",
+        "runId": 37117886564,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37117886564",
+        "conclusion": "success",
+        "scope": "Baseline only; does not qualify expanded native candidate"
       }
     }
   },

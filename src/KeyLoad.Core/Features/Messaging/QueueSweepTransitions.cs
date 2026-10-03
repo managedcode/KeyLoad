@@ -65,7 +65,7 @@ public sealed partial class DatabaseEngine
     private static QueueCounters ApplyDueEntry(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
         DateTimeOffset now, bool leased, KeyValueRecord item, QueueCounters? counters)
     {
-        var id = JsonDefaults.Deserialize<string>(item.Value.Span);
+        var id = NativeSerialization.Deserialize<string>(item.Value.Span);
         var metadataKey = QueueKey(MessageMetadataSpace, lane, id);
         var metadata = tx.GetRecord<MessageMetadata>(metadataKey)
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedMetadata);

@@ -19,7 +19,7 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
                 : await AppendAsync(voter, term, plan.Append!, purpose, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception error) when (ReplicaRpcClient.Unavailable(error)) { return false; }
-        catch (Exception error) when (error is KeyLoadException or IOException or System.Text.Json.JsonException)
+        catch (Exception error) when (error is KeyLoadException or IOException)
         { state.Poison(error); return false; }
         finally { gates[voter].Release(); }
     }

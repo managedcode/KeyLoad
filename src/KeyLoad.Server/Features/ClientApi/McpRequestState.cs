@@ -34,10 +34,10 @@ internal sealed class McpRequestState : IDisposable
     internal void Authenticate(ReadOnlyMemory<byte> reply, CancellationToken cancellationToken)
     {
         admission.CoverAuthenticationScan(capacity, reply.Length, cancellationToken);
-        authenticationShape = McpFrameBounds.InspectValue(reply.Span, McpFramingProtocol.MaximumDataReplyBytes);
+        authenticationShape = McpNativeAuthentication.Inspect(reply.Span, cancellationToken);
         admission.CoverAuthentication(capacity, reply.Length, authenticationShape, cancellationToken);
         authentication = reply;
-        Principal = JsonDefaults.Deserialize<PrincipalRecord>(reply.Span);
+        Principal = McpNativeAuthentication.ReadAdmittedPrincipal(reply.Span, cancellationToken);
     }
 
     /// <summary>Takes exclusive replay-body lifetime ownership.</summary>

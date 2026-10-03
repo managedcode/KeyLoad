@@ -1,11 +1,11 @@
 using System.Security.Cryptography;
-using System.Text.Json.Nodes;
+using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class MetadataTestFiles
 {
-    internal static async Task PadWithWhitespaceAsync(string path, int targetLength)
+    internal static async Task PadWithTrailingBytesAsync(string path, int targetLength)
     {
         await using var file = new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.None);
         if (file.Length > targetLength)
@@ -15,8 +15,8 @@ internal static class MetadataTestFiles
 
         var remaining = targetLength - (int)file.Length;
         file.Position = file.Length;
-        var whitespace = new byte[Math.Min(MetadataTestContract.WhitespaceChunkBytes, remaining)];
-        Array.Fill(whitespace, MetadataTestContract.JsonWhitespace);
+        var whitespace = new byte[Math.Min(MetadataTestContract.PaddingChunkBytes, remaining)];
+        Array.Fill(whitespace, MetadataTestContract.TrailingPaddingByte);
         while (remaining > 0)
         {
             var count = Math.Min(remaining, whitespace.Length);
@@ -25,28 +25,35 @@ internal static class MetadataTestFiles
         }
     }
 
+    internal static async Task<ZoneTreeBackupRestoreManifest> ReadManifestAsync(string backupDirectory)
+        => ZoneTreeMetadataBinary.Read<ZoneTreeBackupRestoreManifest>(
+            await File.ReadAllBytesAsync(Path.Combine(backupDirectory, MetadataTestContract.ManifestFileName)),
+            ZoneTreeMetadataBinary.BackupMagic, MetadataTestContract.ManifestUnsupportedDetail);
+
+    internal static Task WriteManifestAsync(string backupDirectory, ZoneTreeBackupRestoreManifest manifest)
+        => File.WriteAllBytesAsync(Path.Combine(backupDirectory, MetadataTestContract.ManifestFileName),
+            ZoneTreeMetadataBinary.Write(manifest, ZoneTreeMetadataBinary.BackupMagic));
+
     internal static async Task UpdateManifestFileAsync(string backupDirectory, string fileName)
     {
         var path = Path.Combine(backupDirectory, fileName);
-        var manifestPath = Path.Combine(backupDirectory, MetadataTestContract.ManifestFileName);
-        var manifest = JsonNode.Parse(await File.ReadAllBytesAsync(manifestPath))!.AsObject();
-        var files = manifest[MetadataTestContract.FilesJsonKey]!.AsArray();
-        var entry = files.Single(candidate =>
-            candidate![MetadataTestContract.NameJsonKey]!.GetValue<string>() == fileName)!.AsObject();
+        var manifest = await ReadManifestAsync(backupDirectory);
         await using var file = File.OpenRead(path);
-        entry[MetadataTestContract.LengthJsonKey] = file.Length;
-        entry[MetadataTestContract.ChecksumJsonKey] = Convert.ToHexStringLower(await SHA256.HashDataAsync(file));
-        await File.WriteAllBytesAsync(manifestPath, JsonDefaults.Serialize(manifest));
+        var replacement = new ZoneTreeBackupRestoreManifestFile(fileName, file.Length,
+            Convert.ToHexStringLower(await SHA256.HashDataAsync(file)));
+        await WriteManifestAsync(backupDirectory, manifest with
+        { Files = manifest.Files.Select(entry => entry.Name == fileName ? replacement : entry).ToArray() });
     }
 
     internal static async Task BreakIdentityEnvelopeChecksumAsync(string backupDirectory)
     {
         var path = Path.Combine(backupDirectory, MetadataTestContract.IdentityFileName);
-        var envelope = JsonNode.Parse(await File.ReadAllBytesAsync(path))!.AsObject();
-        var checksum = Convert.FromBase64String(envelope[MetadataTestContract.ChecksumJsonKey]!.GetValue<string>());
+        var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeIdentityEnvelope>(await File.ReadAllBytesAsync(path),
+            ZoneTreeMetadataBinary.IdentityMagic, MetadataTestContract.IdentityFormatUnsupportedDetail);
+        var checksum = envelope.Checksum.ToArray();
         checksum[0] ^= 1;
-        envelope[MetadataTestContract.ChecksumJsonKey] = Convert.ToBase64String(checksum);
-        await File.WriteAllBytesAsync(path, JsonDefaults.Serialize(envelope));
+        await File.WriteAllBytesAsync(path, ZoneTreeMetadataBinary.Write(
+            envelope with { Checksum = checksum }, ZoneTreeMetadataBinary.IdentityMagic));
         await UpdateManifestFileAsync(backupDirectory, MetadataTestContract.IdentityFileName);
     }
 }

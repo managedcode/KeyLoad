@@ -23,8 +23,8 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             var principal = GrainRequestAuthority.Reload(database, envelope.PrincipalId!, clock);
             var kind = envelope.CommandKind ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             stage = GrainFailureStage.CapabilityExecution;
-            var result = await coordinator.SubmitAsync(kind, envelope.CommandId, principal.Id,
-                GrainPayloadJson.Utf8.GetString(request.Payload), cancellationToken).ConfigureAwait(true);
+            var result = await coordinator.SubmitNativeAsync(kind, envelope.CommandId, principal.Id,
+                request.Payload, cancellationToken).ConfigureAwait(true);
             stage = GrainFailureStage.ReplyEncoding;
             return GrainReplyFactory.Operation(result, cancellationToken);
         }

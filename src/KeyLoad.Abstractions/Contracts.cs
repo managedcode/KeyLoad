@@ -315,7 +315,13 @@ public enum OperationKind
 /// <param name="PayloadJson">Contains the optional message payload.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ReplicatedOperation)]
-public sealed record ReplicatedOperation([property: Orleans.Id(0)] Guid Id, [property: Orleans.Id(1)] OperationKind Kind, [property: Orleans.Id(2)] string PrincipalId, [property: Orleans.Id(3)] DateTimeOffset EvaluatedAt, [property: Orleans.Id(4)] string PayloadJson);
+public sealed record ReplicatedOperation([property: Orleans.Id(0)] Guid Id, [property: Orleans.Id(1)] OperationKind Kind, [property: Orleans.Id(2)] string PrincipalId, [property: Orleans.Id(3)] DateTimeOffset EvaluatedAt, [property: Orleans.Id(4)] string PayloadJson)
+{
+    /// <summary>Gets the native internal operation body after authorized public-ingress normalization.</summary>
+    [Orleans.Id(5)]
+    [JsonIgnore]
+    public ReadOnlyMemory<byte> NativePayload { get; init; }
+}
 
 /// <summary>Carries a serialized operation result or a safe domain failure.</summary>
 /// <param name="Json">Contains the JSON representation of the associated value.</param>
@@ -325,8 +331,13 @@ public sealed record ReplicatedOperation([property: Orleans.Id(0)] Guid Id, [pro
 [Orleans.Alias(NativeContractAliases.OperationResult)]
 public sealed record OperationResult([property: Orleans.Id(0)] string? Json, [property: Orleans.Id(1)] ErrorCode? Error = null, [property: Orleans.Id(2)] string? SafeDetail = null)
 {
+    /// <summary>Gets the owned typed result for native internal dispatch.</summary>
+    [Orleans.Id(3)]
+    [JsonIgnore]
+    public object? NativeValue { get; init; }
+
+    private const string WrongNativeResultMessage = "The internal operation result type is invalid.";
     private const string RejectedOperationMessage = "The operation was rejected.";
-    private const string NullResultJson = "null";
     /// <summary>Deserializes the successful result or throws the stored domain failure.</summary>
     /// <typeparam name="T">Specifies the type of result.</typeparam>
     /// <returns>The requested value.</returns>
@@ -336,6 +347,10 @@ public sealed record OperationResult([property: Orleans.Id(0)] string? Json, [pr
         {
             throw Errors.Fail(code, SafeDetail ?? RejectedOperationMessage);
         }
-        return JsonDefaults.Deserialize<T>(Json ?? NullResultJson);
+        if (NativeValue is T value)
+        {
+            return value;
+        }
+        throw Errors.Fail(ErrorCode.Corruption, WrongNativeResultMessage);
     }
 }

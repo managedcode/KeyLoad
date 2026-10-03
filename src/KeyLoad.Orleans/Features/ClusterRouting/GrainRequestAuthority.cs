@@ -22,7 +22,7 @@ internal static class GrainRequestAuthority
     {
         try
         {
-            var secret = GrainPayloadJson.Read<string>(payload);
+            var secret = GrainNativePayload.Read<string>(payload);
             var principalId = database.Authenticate(secret, clock.GetUtcNow());
             return Reload(database, principalId, clock);
         }

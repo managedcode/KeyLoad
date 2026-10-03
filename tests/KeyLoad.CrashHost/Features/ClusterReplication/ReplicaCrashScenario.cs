@@ -56,7 +56,7 @@ internal static class ReplicaCrashScenario
             return;
         }
         armed = boundary == ReplicaCrashBoundary.EntryAcknowledged;
-        target.Log.Append([new(3, 1, ReplicaCrashModel.Operation(3))]);
+        target.Log.Append([new(3, 1, target.Database.NormalizeOperation(ReplicaCrashModel.Operation(3)))]);
         armed = true;
         target.Log.Commit(3);
     }

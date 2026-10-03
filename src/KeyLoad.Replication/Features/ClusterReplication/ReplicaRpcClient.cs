@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace KeyLoad.Replication;
 
 internal sealed class ReplicaRpcClient(ReplicaConfiguration configuration, CancellationToken stoppingToken)
@@ -27,8 +25,8 @@ internal sealed class ReplicaRpcClient(ReplicaConfiguration configuration, Cance
         deadline.CancelAfter(configuration.RpcTimeout);
         try
         {
-            var reply = await active.InvokeAsync(voter, method, Encoding.UTF8.GetString(payload), deadline.Token).ConfigureAwait(false);
-            return ReplicaProtocolCodec.Deserialize<TReply>(Encoding.UTF8.GetBytes(reply));
+            var reply = await active.InvokeAsync(voter, method, payload, deadline.Token).ConfigureAwait(false);
+            return ReplicaProtocolCodec.Deserialize<TReply>(reply.Span);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         { throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader); }

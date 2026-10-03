@@ -8,8 +8,13 @@ namespace KeyLoad.Orleans;
 /// <param name="Incarnation">The database incarnation served by this silo.</param>
 /// <param name="SiloAddress">The actual Orleans address including runtime generation.</param>
 /// <param name="TransportReady">Whether the local node-owned endpoint has attached this silo transport.</param>
-public sealed record ReplicaSiloDiscovery(string VoterId, string ClusterId, Guid Incarnation,
-    string SiloAddress, bool TransportReady);
+[global::Orleans.GenerateSerializer, global::Orleans.Alias(ReplicaNativeWireContracts.DiscoveryAlias)]
+public sealed record ReplicaSiloDiscovery(
+    [property: global::Orleans.Id(0)] string VoterId,
+    [property: global::Orleans.Id(1)] string ClusterId,
+    [property: global::Orleans.Id(2)] Guid Incarnation,
+    [property: global::Orleans.Id(3)] string SiloAddress,
+    [property: global::Orleans.Id(4)] bool TransportReady);
 
 /// <summary>Publishes the actual local Orleans runtime generation after early service initialization.</summary>
 /// <param name="configuration">The local voter and current database incarnation.</param>

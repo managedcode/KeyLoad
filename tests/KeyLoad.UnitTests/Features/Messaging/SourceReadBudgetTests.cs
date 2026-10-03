@@ -73,17 +73,8 @@ internal sealed class SourceReadBudgetTests
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal("root")))!;
         var resource = database.Store.Read(view => view.GetRecord<ResourceDefinition>(
             KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, TopicName)))!;
-        var expired = database.Database.Sign(new
-        {
-            Purpose = CursorPurpose,
-            Incarnation = database.Store.Identity.Incarnation,
-            Source = source,
-            PrincipalId = principal.Id,
-            PolicyEpoch = principal.PolicyEpoch,
-            SchemaVersion = resource.SchemaVersion,
-            Position = 0L,
-            ExpiresAt = DateTimeOffset.UnixEpoch
-        });
+        var expired = database.Database.Sign(new SourceCursor(CursorPurpose, database.Store.Identity.Incarnation,
+            source, principal.Id, principal.PolicyEpoch, resource.SchemaVersion, 0L, DateTimeOffset.UnixEpoch));
         var expiredError = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.ReadEventSource("root",
             new(source, Cursor: expired)));
         await Assert.That(expiredError.Code).IsEqualTo(ErrorCode.CursorExpired);

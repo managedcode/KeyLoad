@@ -9,21 +9,21 @@ internal static class GrainAdminDashboardCapabilities
         or GrainReadKind.AdminResources or GrainReadKind.AdminQueue;
 
     internal static async Task<object> ExecuteAsync(DatabaseEngine database, INodeAdministration administration,
-        PrincipalRecord principal, GrainReadKind kind, byte[] payload, CancellationToken cancellationToken)
+        PrincipalRecord principal, GrainReadKind kind, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         GrainRequestAuthority.RequireAdministrator(principal);
         cancellationToken.ThrowIfCancellationRequested();
         if (kind == GrainReadKind.AdminDashboard)
         {
-            GrainPayloadJson.RequireNull(payload);
+            GrainNativePayload.RequireNoDto(payload);
             return await administration.DashboardAsync(cancellationToken).ConfigureAwait(true);
         }
         return kind switch
         {
             GrainReadKind.AdminResources => new AdminCatalogReader(database).Read(principal.Id,
-                GrainPayloadJson.Read<AdminResourcesRequest>(payload), cancellationToken),
+                GrainNativePayload.Read<AdminResourcesRequest>(payload), cancellationToken),
             GrainReadKind.AdminQueue => new AdminQueueReader(database).Read(principal.Id,
-                GrainPayloadJson.Read<AdminQueueRequest>(payload), cancellationToken),
+                GrainNativePayload.Read<AdminQueueRequest>(payload), cancellationToken),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

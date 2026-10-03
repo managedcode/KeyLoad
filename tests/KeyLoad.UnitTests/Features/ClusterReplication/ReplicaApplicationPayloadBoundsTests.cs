@@ -11,9 +11,8 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
     private const int ReceiverControlPayloadBytes = ReceiverAppendBytes;
     private const int SingleSlot = 1;
     private const int OneByte = 1;
-    private const int Base64QuartetCharacters = 4;
+    private const int PayloadLengthStepBytes = 4;
     private const char PayloadPadding = 'x';
-    private const string EmptyJsonBase64 = "e30=";
     private const string AdvertisedBoundFailure = "SignRequest did not accept the complete advertised payload bound.";
     private const string MetadataAllowanceFailure = "The valid application envelope did not exercise the metadata allowance.";
     private const string AppendMetadataFailure = "Could not construct an Append payload in the metadata allowance.";
@@ -29,7 +28,7 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
         using var fixture = new ReplicaSecurityFixture();
         var configuration = fixture.Configuration with { MaxAppendBytes = ReceiverAppendBytes };
         var options = Options(fixture.Options);
-        using var receiver = new ReplicaEnvelopeAuthenticator(configuration, options, fixture.Discovery, TimeProvider.System);
+        using var receiver = new ReplicaEnvelopeAuthenticator(configuration, options, fixture.Discovery, TimeProvider.System, canonicalDatabase: fixture.Database);
         using var sender = Sender(fixture, configuration, options);
         var maximumPayloadBytes = ReceiverMaximumPayloadBytes(configuration);
         await Assert.That(receiver.MaximumPayloadBytes).IsEqualTo(maximumPayloadBytes);
@@ -68,7 +67,7 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
         ReplicaPeerOptions options)
     {
         var senderConfiguration = receiverConfiguration with { LocalId = ReplicaSecurityFixture.VoterA };
-        return new(senderConfiguration, options, fixture.Discovery, TimeProvider.System);
+        return new(senderConfiguration, options, fixture.Discovery, TimeProvider.System, canonicalDatabase: fixture.Database);
     }
 
     private static async Task AssertSenderBoundaryAsync(ReplicaSecurityFixture fixture, ReplicaEnvelopeAuthenticator sender, ReplicaRpc method,
@@ -92,7 +91,7 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
     private static ReplicaPeerEnvelope OversizedEnvelope(ReplicaSecurityFixture fixture, ReplicaRpc method, int maximumPayloadBytes)
     {
         var template = ApplicationEnvelope(fixture, method);
-        var payload = PayloadWithOperationSize(template, method, maximumPayloadBytes);
+        var payload = PayloadWithOperationSize(fixture, template, method, maximumPayloadBytes);
         return fixture.Resign(template with { Payload = payload });
     }
 
@@ -101,8 +100,8 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
     {
         var template = ApplicationEnvelope(fixture, method);
         var payload = method == ReplicaRpc.Forward
-            ? ForwardWithPayloadLength(template, configuration.MaxAppendBytes)
-            : AppendWithinEntryBound(template, configuration.MaxAppendBytes, maximumPayloadBytes);
+            ? ForwardWithPayloadLength(fixture, template, configuration.MaxAppendBytes)
+            : AppendWithinEntryBound(fixture, template, configuration.MaxAppendBytes, maximumPayloadBytes);
         if (payload.Length <= configuration.MaxAppendBytes || payload.Length > maximumPayloadBytes)
         {
             throw new InvalidOperationException(MetadataAllowanceFailure);
@@ -110,36 +109,36 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
         return fixture.Resign(template with { Nonce = nonce, Payload = payload });
     }
 
-    private static byte[] PayloadWithOperationSize(ReplicaPeerEnvelope template, ReplicaRpc method, int payloadLength)
+    private static byte[] PayloadWithOperationSize(ReplicaSecurityFixture fixture, ReplicaPeerEnvelope template, ReplicaRpc method, int payloadLength)
     {
         var padding = new string(PayloadPadding, payloadLength);
         if (method == ReplicaRpc.Forward)
         {
             var operation = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(template.Payload.Span);
-            return ReplicaProtocolCodec.Serialize(operation with { PayloadJson = padding });
+            return ReplicaProtocolCodec.Serialize(WithPayload(fixture, operation, padding));
         }
 
         var append = ReplicaProtocolCodec.Deserialize<AppendRequest>(template.Payload.Span);
-        return SerializeAppend(append, padding);
+        return SerializeAppend(fixture, append, padding);
     }
 
-    private static byte[] ForwardWithPayloadLength(ReplicaPeerEnvelope template, int payloadLength)
+    private static byte[] ForwardWithPayloadLength(ReplicaSecurityFixture fixture, ReplicaPeerEnvelope template, int payloadLength)
     {
         var operation = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(template.Payload.Span);
-        return ReplicaProtocolCodec.Serialize(operation with { PayloadJson = new string(PayloadPadding, payloadLength) });
+        return ReplicaProtocolCodec.Serialize(WithPayload(fixture, operation, new string(PayloadPadding, payloadLength)));
     }
 
-    private static byte[] AppendWithinEntryBound(ReplicaPeerEnvelope template, int maximumAppendBytes, int maximumPayloadBytes)
+    private static byte[] AppendWithinEntryBound(ReplicaSecurityFixture fixture, ReplicaPeerEnvelope template, int maximumAppendBytes, int maximumPayloadBytes)
     {
         var append = ReplicaProtocolCodec.Deserialize<AppendRequest>(template.Payload.Span);
         var minimum = 0;
-        var maximum = maximumAppendBytes / Base64QuartetCharacters;
+        var maximum = maximumAppendBytes / PayloadLengthStepBytes;
         byte[]? best = null;
         while (minimum <= maximum)
         {
-            var payloadLength = (minimum + (maximum - minimum) / 2) * Base64QuartetCharacters;
-            var candidate = append with { Entries = AppendEntries(append, payloadLength) };
-            var encodedEntries = ReplicaProtocolCodec.Serialize(candidate.Entries);
+            var payloadLength = (minimum + (maximum - minimum) / 2) * PayloadLengthStepBytes;
+            var candidate = append with { Entries = AppendEntries(fixture, append, payloadLength) };
+            var encodedEntries = ReplicaProtocolCodec.SerializeEntries(candidate.Entries);
             if (encodedEntries.Length <= maximumAppendBytes)
             {
                 var encoded = ReplicaProtocolCodec.Serialize(candidate);
@@ -147,50 +146,38 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
                 {
                     best = encoded;
                 }
-                minimum = payloadLength / Base64QuartetCharacters + 1;
+                minimum = payloadLength / PayloadLengthStepBytes + 1;
             }
             else
             {
-                maximum = payloadLength / Base64QuartetCharacters - 1;
+                maximum = payloadLength / PayloadLengthStepBytes - 1;
             }
         }
 
         return best ?? throw new InvalidOperationException(AppendMetadataFailure);
     }
 
-    private static byte[] SerializeAppend(AppendRequest append, string payloadJson) =>
-        ReplicaProtocolCodec.Serialize(append with { Entries = AppendEntries(append, payloadJson.Length, payloadJson) });
+    private static byte[] SerializeAppend(ReplicaSecurityFixture fixture, AppendRequest append, string payloadJson) =>
+        ReplicaProtocolCodec.Serialize(append with { Entries = AppendEntries(fixture, append, payloadJson.Length, payloadJson) });
 
-    private static ImmutableArray<ReplicaEntry> AppendEntries(AppendRequest append, int payloadLength, string? payloadJson = null)
+    private static ImmutableArray<ReplicaEntry> AppendEntries(ReplicaSecurityFixture fixture, AppendRequest append, int payloadLength, string? payloadJson = null)
     {
         var entries = append.Entries.ToArray();
         var operation = entries[0].Operation ?? throw new InvalidOperationException(MissingOperationFailure);
         entries[0] = entries[0] with
         {
-            Operation = operation with { PayloadJson = payloadJson ?? new string(PayloadPadding, payloadLength) }
+            Operation = WithPayload(fixture, operation, payloadJson ?? new string(PayloadPadding, payloadLength))
         };
         return [.. entries];
     }
 
-    private static ReplicaPeerEnvelope ApplicationEnvelope(ReplicaSecurityFixture fixture, ReplicaRpc method)
-    {
-        var request = method switch
-        {
-            ReplicaRpc.Forward => fixture.Forward(OperationKind.Batch),
-            ReplicaRpc.Append => fixture.Append(OperationKind.Batch),
-            _ => throw new ArgumentOutOfRangeException(nameof(method))
-        };
-        if (method == ReplicaRpc.Forward)
-        {
-            var payload = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(request.Payload.Span);
-            var validPayload = ReplicaProtocolCodec.Serialize(payload with { PayloadJson = EmptyJsonBase64 });
-            return fixture.Resign(request with { Payload = validPayload });
-        }
+    private static ReplicatedOperation WithPayload(ReplicaSecurityFixture fixture, ReplicatedOperation operation, string payloadJson)
+        => fixture.Database.NormalizeOperation(operation with { PayloadJson = payloadJson, NativePayload = ReadOnlyMemory<byte>.Empty });
 
-        var append = ReplicaProtocolCodec.Deserialize<AppendRequest>(request.Payload.Span);
-        var entries = append.Entries.ToArray();
-        var operation = entries[0].Operation ?? throw new InvalidOperationException(MissingOperationFailure);
-        entries[0] = entries[0] with { Operation = operation with { PayloadJson = EmptyJsonBase64 } };
-        return fixture.Resign(request with { Payload = ReplicaProtocolCodec.Serialize(append with { Entries = [.. entries] }) });
-    }
+    private static ReplicaPeerEnvelope ApplicationEnvelope(ReplicaSecurityFixture fixture, ReplicaRpc method) => method switch
+    {
+        ReplicaRpc.Forward => fixture.Forward(OperationKind.Batch),
+        ReplicaRpc.Append => fixture.Append(OperationKind.Batch),
+        _ => throw new ArgumentOutOfRangeException(nameof(method))
+    };
 }

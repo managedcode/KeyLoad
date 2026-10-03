@@ -23,5 +23,5 @@ internal static class AdminReadAuthority
     }
 
     internal static long Position(IKeyValueView view) => view.ReadOwnedValue(KeySpace.Applied.ToArray()) is { } value
-        ? JsonDefaults.Deserialize<long>(value) : 0;
+        ? NativeSerialization.Deserialize<long>(value) : 0;
 }

@@ -21,7 +21,7 @@ public sealed partial class DatabaseEngine
     public OperationResult ResolveOutcome(ReplicatedOperation operation)
     {
         ArgumentNullException.ThrowIfNull(operation);
-        return ResolveOutcomeCore(operation);
+        return ResolveOutcomeCore(NormalizeOperation(operation));
     }
     private OperationResult ResolveOutcomeCore(ReplicatedOperation operation) => Store.Read(view =>
     {

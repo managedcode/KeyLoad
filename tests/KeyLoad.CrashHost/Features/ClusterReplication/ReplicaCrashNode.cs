@@ -32,8 +32,8 @@ internal sealed class ReplicaCrashNode : IDisposable
             replicaStore = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation });
             try
             {
-                Log = new(replicaStore, Configuration, observer);
                 Database = new(Canonical, new AuthorizationPolicy());
+                Log = new(replicaStore, Configuration, observer, canonicalDatabase: Database);
                 Bootstrap();
                 Snapshots = new(Canonical, Log, Configuration, observer);
             }
@@ -100,9 +100,10 @@ internal sealed class ReplicaCrashNode : IDisposable
         Log.SaveTermAndVote(1, null);
         for (var index = 1; index <= cut; index++)
         {
-            Log.Append([new(index, 1, ReplicaCrashModel.Operation(index))]);
+            var operation = Database.NormalizeOperation(ReplicaCrashModel.Operation(index));
+            Log.Append([new(index, 1, operation)]);
             Log.Commit(index);
-            var result = Database.Apply(ReplicaCrashModel.Operation(index), index);
+            var result = Database.Apply(operation, index);
             if (index == 1)
             {
                 result.Get<ResourceDefinition>();

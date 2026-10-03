@@ -50,8 +50,8 @@ internal sealed class QueryAdapterValidationTests
         {
             Query = query with
             {
-                Filter = new Logical(new Comparison(new FieldOperand("/number"), "=", new ValueOperand(1)),
-            "XOR", new Comparison(new FieldOperand("/number"), "=", new ValueOperand(2)))
+                Filter = new Logical(new Comparison(new FieldOperand("/number"), "=", ValueOperand.Create(1)),
+            "XOR", new Comparison(new FieldOperand("/number"), "=", ValueOperand.Create(2)))
             }
         };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", wrong)).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
@@ -72,7 +72,7 @@ internal sealed class QueryAdapterValidationTests
             deep = new Negation(deep);
         }
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", request with { Query = query with { Filter = deep } })).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        var huge = request with { Query = query with { Filter = new Comparison(new FieldOperand("/status"), "=", new ValueOperand(new string('x', 70_000))) } };
+        var huge = request with { Query = query with { Filter = new Comparison(new FieldOperand("/status"), "=", ValueOperand.Create(new string('x', 70_000))) } };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", huge)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 

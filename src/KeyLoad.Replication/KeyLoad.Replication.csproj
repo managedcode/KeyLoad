@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
+    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.Orleans" />
+    <PackageReference Include="Microsoft.Orleans.Sdk" PrivateAssets="all" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
   </ItemGroup>

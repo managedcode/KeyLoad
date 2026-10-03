@@ -17,10 +17,10 @@ internal sealed class GrainBlobReadCapabilities(DatabaseEngine database)
         cancellationToken.ThrowIfCancellationRequested();
         return kind switch
         {
-            GrainReadKind.BlobMetadata => blobs.Metadata(principal, GrainPayloadJson.Read<BlobMetadataRequest>(payload), cancellationToken),
-            GrainReadKind.BlobUploadInfo => blobs.UploadInfo(principal, GrainPayloadJson.Read<BlobUploadInfoRequest>(payload), cancellationToken),
-            GrainReadKind.BlobRange => blobs.Read(principal, GrainPayloadJson.Read<BlobReadRequest>(payload), cancellationToken),
-            GrainReadKind.BlobList => blobs.List(principal, GrainPayloadJson.Read<BlobListRequest>(payload), cancellationToken),
+            GrainReadKind.BlobMetadata => blobs.Metadata(principal, GrainNativePayload.Read<BlobMetadataRequest>(payload), cancellationToken),
+            GrainReadKind.BlobUploadInfo => blobs.UploadInfo(principal, GrainNativePayload.Read<BlobUploadInfoRequest>(payload), cancellationToken),
+            GrainReadKind.BlobRange => blobs.Read(principal, GrainNativePayload.Read<BlobReadRequest>(payload), cancellationToken),
+            GrainReadKind.BlobList => blobs.List(principal, GrainNativePayload.Read<BlobListRequest>(payload), cancellationToken),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

@@ -103,7 +103,7 @@ public sealed class ReadExecutionBudget
         ArgumentNullException.ThrowIfNull(view);
         Check();
         T? record = null;
-        view.ReadValue(key, value => record = JsonDefaults.Deserialize<T>(value), ChargeBytes);
+        view.ReadValue(key, value => record = NativeSerialization.Deserialize<T>(value), ChargeBytes);
         Check();
         return record;
     }

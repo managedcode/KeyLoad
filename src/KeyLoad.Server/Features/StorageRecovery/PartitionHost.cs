@@ -35,7 +35,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         try
         {
             Database = new(stores.Canonical, authorization);
-            log = openedLog = new(stores.Replica, Configuration);
+            log = openedLog = new(stores.Replica, Configuration, canonicalDatabase: Database);
             var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, Configuration);
             snapshots.Recover();
             new BlobStorageOperations(Database).NormalizeRestoredStore();

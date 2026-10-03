@@ -42,8 +42,8 @@ internal sealed class DocumentMutationImageTests
                 mutations[ordinal], receipt.Mutations[ordinal], ordinal == 0 ? null : images[ordinal - 1], images[ordinal]);
             var bytes = db.Store.Read(view => view.ReadOwnedValue(
                 KeySpace.Partition(OutboxSpace, db.Partition, ordinal + FirstSequence))!);
-            await Assert.That(bytes.SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-            await Assert.That(JsonDefaults.Deserialize<OutboxEntry>(bytes).After).IsEqualTo(images[ordinal]);
+            await Assert.That(bytes.SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+            await Assert.That(NativeSerialization.Deserialize<OutboxEntry>(bytes).After).IsEqualTo(images[ordinal]);
         }
 
         await Assert.That(db.Database.GetDocument("root", reference)).IsNull();

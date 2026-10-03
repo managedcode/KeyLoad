@@ -10,7 +10,14 @@ internal sealed class SignedEnvelopeTests
     private const char ReplacementSignatureCharacter = 'A';
     private const char AlternateSignatureCharacter = 'B';
 
-    private sealed record Claims(string Purpose, string Payload);
+    private const string ClaimsAlias = "keyload.tests.v1.SignedEnvelopeClaims";
+    private const uint PurposeId = 0;
+    private const uint PayloadId = 1;
+
+    [global::Orleans.GenerateSerializer]
+    [global::Orleans.Alias(ClaimsAlias)]
+    internal sealed record Claims([property: global::Orleans.Id(PurposeId)] string Purpose,
+        [property: global::Orleans.Id(PayloadId)] string Payload);
 
     [Test]
     public async Task LargerTrustedEnvelopeBudgetPreservesSmallTokenLimitAndMacValidation()
@@ -24,7 +31,7 @@ internal sealed class SignedEnvelopeTests
         await Assert.That(database.Database.Verify<Claims>(token, token.Length)).IsEqualTo(claims);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Verify<Claims>(token, token.Length - 1)).Code)
             .IsEqualTo(ErrorCode.TokenInvalidated);
-        var signature = token.IndexOf(TokenSeparator.ToString(), StringComparison.Ordinal) + 1;
+        var signature = token.LastIndexOf(TokenSeparator) + 1;
         var replacement = token[signature] == ReplacementSignatureCharacter
             ? AlternateSignatureCharacter
             : ReplacementSignatureCharacter;

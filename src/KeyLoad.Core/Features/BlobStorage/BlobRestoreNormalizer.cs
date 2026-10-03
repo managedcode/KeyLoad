@@ -174,7 +174,7 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
         var current = BlobRecordReader.Get<BlobRestoreMarker>(view, BlobRestoreFence.MarkerKey)
             ?? throw BlobErrors.Corruption();
         BlobRestoreFence.Validate(current);
-        if (!JsonDefaults.Serialize(current).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))
+        if (!NativeSerialization.Serialize(current).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected)))
         { throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced); }
     }
 }

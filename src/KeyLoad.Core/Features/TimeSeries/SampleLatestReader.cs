@@ -26,7 +26,7 @@ internal static class SampleLatestReader
 
     private static SampleRecord Project(DatabaseEngine database, SampleReadScope scope, ReadOnlySpan<byte> value)
     {
-        var sample = JsonDefaults.Deserialize<SampleRecord>(value);
+        var sample = NativeSerialization.Deserialize<SampleRecord>(value);
         return sample with
         {
             TagsJson = database.Authorization.Project(scope.Principal, scope.Resource.FieldPolicies,

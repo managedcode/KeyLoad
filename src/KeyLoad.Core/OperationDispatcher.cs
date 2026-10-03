@@ -58,7 +58,7 @@ public sealed partial class DatabaseEngine
         {
             return Result(false);
         }
-        transaction.PutRecord(key, new MembershipRecord((row?.Version ?? 0) + 1, membership.Json));
+        transaction.PutRecord(key, new MembershipRecord((row?.Version ?? 0) + 1, membership.Payload));
         return Result(true);
     }
 

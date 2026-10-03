@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using KeyLoad.Core;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Logging;
 
@@ -15,6 +16,7 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
     private readonly HashSet<string> voters;
     private readonly int maximumControlPayloadBytes;
     private readonly ReplicaReplayAdmissionDiagnostics? diagnostics;
+    private readonly DatabaseEngine? canonicalDatabase;
 
     /// <summary>Creates authentication for one node, fixed voter scope and system clock.</summary>
     /// <param name="configuration">The node identity, voter set, incarnation and payload limits.</param>
@@ -22,16 +24,23 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
     /// <param name="local">The actual local Orleans runtime generation.</param>
     /// <param name="clock">The system clock used for envelope freshness.</param>
     /// <param name="logger">Optional closed numeric replay-admission diagnostics.</param>
+    /// <param name="canonicalDatabase">Optional borrowed canonical authority; required for non-null native operations.</param>
     public ReplicaEnvelopeAuthenticator(ReplicaConfiguration configuration, ReplicaPeerOptions options,
-        ReplicaSiloDiscoveryState local, TimeProvider clock, ILogger<ReplicaEnvelopeAuthenticator>? logger = null)
+        ReplicaSiloDiscoveryState local, TimeProvider clock, ILogger<ReplicaEnvelopeAuthenticator>? logger = null,
+        DatabaseEngine? canonicalDatabase = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         options.Validate(configuration);
         ArgumentNullException.ThrowIfNull(local);
         ArgumentNullException.ThrowIfNull(clock);
+        if (canonicalDatabase is not null && canonicalDatabase.Store.Identity.Incarnation != configuration.Incarnation)
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.InvalidPeer);
+        }
         this.configuration = configuration;
         this.local = local;
         this.clock = clock;
+        this.canonicalDatabase = canonicalDatabase;
         voters = new(configuration.VoterIds, StringComparer.Ordinal);
         mac = new(options.Secret, options.ClusterId);
         replay = new(configuration.VoterIds, options.ReplayLimits);
@@ -70,11 +79,34 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
         return request with { Signature = mac.Request(request) };
     }
 
-    /// <summary>Checks signature, recipient generation, lifetime and replay before payload dispatch.</summary>
-    /// <param name="request">The candidate request envelope.</param>
-    public void VerifyRequest(ReplicaPeerEnvelope request)
+    /// <summary>Checks borrowed bytes, then owns and rechecks the exact admitted request before payload dispatch.</summary>
+    /// <param name="request">The candidate request whose original buffers must not flow across an await.</param>
+    /// <returns>The fully verified owned payload and signature snapshot; retain this result for dispatch.</returns>
+    public ReplicaPeerEnvelope VerifyRequest(ReplicaPeerEnvelope request)
+    {
+        _ = ClassifyBorrowedRequest(request);
+        var owned = request with { Payload = request.Payload.ToArray(), Signature = request.Signature.ToArray() };
+        ValidateRequestScope(owned);
+        var pool = ValidateRequestPayload(owned);
+        if (!replay.TryAdmit(owned.Sender, owned.Nonce, owned.Timestamp, Now(), pool, owned.Method, out var failure))
+        {
+            diagnostics?.Report(failure);
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.ReplayCapacityExceeded);
+        }
+        return owned;
+    }
+
+    // The same production pre-copy stage is independently measurable; no nonce is retained here.
+    internal ReplicaReplayPool ClassifyBorrowedRequest(ReplicaPeerEnvelope request)
     {
         ArgumentNullException.ThrowIfNull(request);
+        ValidateRequestScope(request);
+        replay.RejectReplay(request.Sender, request.Nonce, Now());
+        return ValidateRequestPayload(request);
+    }
+
+    private void ValidateRequestScope(ReplicaPeerEnvelope request)
+    {
         ValidatePayload(request.Payload);
         if (request.Version != ReplicaTransportProtocol.Version || request.Incarnation != configuration.Incarnation
             || request.Recipient != configuration.LocalId || !voters.Contains(request.Sender)
@@ -84,20 +116,18 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaProtocol.InvalidPeer);
         }
+    }
 
-        replay.RejectReplay(request.Sender, request.Nonce, Now());
-        ReplicaSenderValidator.Validate(request.Method, request.Payload.Span, request.Sender);
-        var pool = ReplicaReplayClassifier.Classify(request.Method, request.Payload.Span, configuration, maximumControlPayloadBytes);
+    private ReplicaReplayPool ValidateRequestPayload(ReplicaPeerEnvelope request)
+    {
+        ReplicaSenderValidator.Validate(request.Method, request.Payload, request.Sender, configuration);
+        var pool = ReplicaReplayClassifier.Classify(request.Method, request.Payload, configuration,
+            maximumControlPayloadBytes, canonicalDatabase);
         if (!Fresh(request.Timestamp))
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaProtocol.InvalidPeer);
         }
-
-        if (!replay.TryAdmit(request.Sender, request.Nonce, request.Timestamp, Now(), pool, request.Method, out var failure))
-        {
-            diagnostics?.Report(failure);
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.ReplayCapacityExceeded);
-        }
+        return pool;
     }
 
     /// <summary>Signs successful bytes or a bounded error without serializing exception objects.</summary>

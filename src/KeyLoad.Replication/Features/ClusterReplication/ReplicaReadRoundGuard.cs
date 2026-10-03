@@ -1,13 +1,8 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
 namespace KeyLoad.Replication;
 
 internal static class ReplicaReadRoundGuard
 {
-    private static readonly JsonSerializerOptions Options = CreateOptions();
-
-    internal static AppendRequest Probe(ReadOnlySpan<byte> bytes, ReplicaConfiguration configuration)
+    internal static AppendRequest Probe(ReadOnlyMemory<byte> bytes, ReplicaConfiguration configuration)
     {
         if (bytes.Length > (long)configuration.MaxAppendBytes + ReplicaProtocol.PayloadMetadataBytes)
         {
@@ -25,7 +20,7 @@ internal static class ReplicaReadRoundGuard
         return request;
     }
 
-    internal static void Empty(ReadOnlySpan<byte> bytes)
+    internal static void Empty(ReadOnlyMemory<byte> bytes)
     {
         if (bytes.Length > ReplicaProtocol.PayloadMetadataBytes || Read<string>(bytes).Length != 0)
         {
@@ -33,29 +28,15 @@ internal static class ReplicaReadRoundGuard
         }
     }
 
-    private static T Read<T>(ReadOnlySpan<byte> bytes) where T : class
+    private static T Read<T>(ReadOnlyMemory<byte> bytes) where T : class
     {
         try
         {
-            return JsonSerializer.Deserialize<T>(bytes, Options)
-                ?? throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidAppend);
+            return ReplicaProtocolCodec.DeserializeStored<T>(bytes, maximumEntries: 0);
         }
-        catch (JsonException)
+        catch (KeyLoadException error) when (error.Code is ErrorCode.Corruption or ErrorCode.FormatUnsupported)
         {
             throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidAppend);
         }
-    }
-
-    private static JsonSerializerOptions CreateOptions()
-    {
-        var options = new JsonSerializerOptions(JsonDefaults.Options)
-        {
-            AllowDuplicateProperties = false,
-            PropertyNameCaseInsensitive = false,
-            RespectRequiredConstructorParameters = true,
-            UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow
-        };
-        options.Converters.Insert(0, new ReplicaOperationJsonConverter());
-        return options;
     }
 }

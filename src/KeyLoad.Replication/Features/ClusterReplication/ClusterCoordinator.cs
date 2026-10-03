@@ -38,34 +38,35 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     }
 
     /// <inheritdoc />
-    public async Task<OperationResult> SubmitAsync(OperationKind kind, Guid id, string principalId, string payloadJson,
+    public Task<OperationResult> SubmitAsync(OperationKind kind, Guid id, string principalId, string payloadJson,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(principalId);
         ArgumentNullException.ThrowIfNull(payloadJson);
+        return AdmitAsync(database.NormalizeOperation(new(id, kind, principalId, clock.GetUtcNow(), payloadJson)),
+            cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<OperationResult> SubmitNativeAsync(OperationKind kind, Guid id, string principalId,
+        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
+        => AdmitAsync(database.CreateNativeOperation(kind, id, principalId, clock.GetUtcNow(), payload), cancellationToken);
+
+    private async Task<OperationResult> AdmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(operation.PrincipalId);
         cancellationToken.ThrowIfCancellationRequested();
         if (worker is null || worker.IsCompleted)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
-        }
-
-        var bytes = Encoding.UTF8.GetByteCount(payloadJson);
-        if (id == Guid.Empty || bytes > database.Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidAppend);
-        }
-
-        var principal = database.Store.Read(view => database.Principal(view, principalId, clock.GetUtcNow()));
-        var pending = commands.Enqueue(new(id, kind, principalId, clock.GetUtcNow(), payloadJson), principal, bytes,
-            cancellationToken);
+        { throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader); }
+        var bytes = Math.Max(Encoding.UTF8.GetByteCount(operation.PayloadJson), operation.NativePayload.Length);
+        if (operation.Id == Guid.Empty || bytes > database.Limits.MaxBatchBytes)
+        { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidAppend); }
+        var evaluated = operation with { EvaluatedAt = clock.GetUtcNow() };
+        var principal = database.Store.Read(view => database.Principal(view, evaluated.PrincipalId, evaluated.EvaluatedAt));
+        var pending = commands.Enqueue(evaluated, principal, bytes, cancellationToken);
         try
-        {
-            return await pending.Completion.WaitAsync(cancellationToken).ConfigureAwait(false);
-        }
+        { return await pending.Completion.WaitAsync(cancellationToken).ConfigureAwait(false); }
         catch (OperationCanceledException)
-        {
-            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite);
-        }
+        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite); }
     }
 
     /// <summary>Admits an authenticated forwarded operation only on a ready current leader.</summary>
@@ -80,8 +81,7 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         }
 
-        return await SubmitAsync(operation.Kind, operation.Id, operation.PrincipalId, operation.PayloadJson,
-            cancellationToken).ConfigureAwait(false);
+        return await AdmitAsync(database.NormalizeOperation(operation), cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

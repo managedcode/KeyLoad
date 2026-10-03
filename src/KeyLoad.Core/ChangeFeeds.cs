@@ -6,10 +6,8 @@ namespace KeyLoad.Core;
 /// <summary>Provides authorized change-feed reads over the database engine.</summary>
 public sealed partial class DatabaseEngine
 {
-    private sealed record ChangeFeedClaims(string Purpose, Guid Incarnation, PartitionRef Partition, string Collection,
-        string PrincipalId, long PolicyEpoch, long SchemaVersion, long VisibilityEpoch, long After, DateTimeOffset ExpiresAt);
     private static long VisibilityEpoch(IKeyValueView view, PartitionRef partition, string collection)
-        => view.ReadOwnedValue(KeySpace.Partition("visibility-epoch", partition, collection)) is { } bytes ? JsonDefaults.Deserialize<long>(bytes) : 0;
+        => view.ReadOwnedValue(KeySpace.Partition("visibility-epoch", partition, collection)) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0;
     private static void AdvanceVisibilityEpoch(IAtomicTransaction tx, PartitionRef partition, string collection)
         => tx.PutRecord(KeySpace.Partition("visibility-epoch", partition, collection), checked(VisibilityEpoch(tx, partition, collection) + 1));
     private string ChangeCursor(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, PartitionRef partition, long after)

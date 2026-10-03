@@ -26,7 +26,7 @@ internal static class SampleRangeReader
         var resultBytes = 0L;
         budget.VisitRange(view, prefix, request.Limit, (key, value) =>
         {
-            var sample = JsonDefaults.Deserialize<SampleRecord>(value);
+            var sample = NativeSerialization.Deserialize<SampleRecord>(value);
             var projected = sample with { TagsJson = database.Authorization.Project(principal, resource.FieldPolicies, sample.TagsJson, out _) };
             resultBytes += budget.MeasureResult(projected);
             if (resultBytes > database.Limits.MaxBatchBytes)

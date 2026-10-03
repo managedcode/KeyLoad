@@ -11,10 +11,22 @@ public static class ReplicaProtocol
     public static readonly TimeSpan ReadBarrierTimeout = TimeSpan.FromSeconds(10);
     /// <summary>Maximum encoded metadata allowance around a replica payload.</summary>
     public const int PayloadMetadataBytes = 65_536;
+    /// <summary>Existing authenticated peer identity bound, in UTF16 code units.</summary>
+    public const int MaximumIdentityCharacters = 2_048;
+    /// <summary>Existing public-safe peer detail bound, in UTF16 code units.</summary>
+    public const int MaximumDetailCharacters = 4_096;
+    /// <summary>Existing safe rejection detail for a peer payload byte-budget failure.</summary>
+    public const string PayloadExceeded = "The replica payload exceeds its transport byte budget.";
     /// <summary>Maximum snapshot chunks sent to one follower in a maintenance round.</summary>
     public const int SnapshotChunksPerRound = 4;
     /// <summary>Persisted replica metadata format.</summary>
-    public const int FormatVersion = 1;
+    public const int FormatVersion = 2;
+    /// <summary>Fixed little-endian replica format fence, identifying native version two.</summary>
+    public const ulong PayloadMagic = 0x0032504C52444C4B;
+    /// <summary>Number of fixed bytes before every native replica value.</summary>
+    public const int PayloadPrefixBytes = sizeof(ulong);
+    /// <summary>Safe upgrade detail for legacy or unknown replica encodings.</summary>
+    public const string UnsupportedFormat = "The replica format is unsupported. Stop the cluster, preserve the original files and use the documented offline upgrade before starting matching-version voters.";
     /// <summary>Absolute maximum acknowledged snapshot chunk size.</summary>
     public const int MaximumChunkBytes = 1_048_576;
     /// <summary>Safe rejection detail for invalid fixed voter topology.</summary>

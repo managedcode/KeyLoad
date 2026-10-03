@@ -1,4 +1,3 @@
-using System.Text.Json;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -23,10 +22,7 @@ internal sealed class MetadataIdentityFormatFailureTests
     public async Task UnknownIdentityMemberFailsWithValidWalAndRefreshedOuterMetadata()
     {
         using var fixture = new MetadataBackupFixture();
-        var identity = await ReadIdentity(fixture);
-        var unknown = identity[..^MetadataTestContract.OneByte] + MetadataTestContract.JsonMemberSeparator
-            + MetadataTestContract.UnknownJsonBooleanMember
-            + MetadataTestContract.JsonObjectClose;
+        var unknown = MetadataTestContract.LegacyUnknownObjectJson;
         await AssertIdentityJsonFailure(fixture, unknown);
     }
 
@@ -34,17 +30,12 @@ internal sealed class MetadataIdentityFormatFailureTests
     public async Task DeeplyNestedIdentityJsonIsRejectedWithValidWalAndRefreshedOuterMetadata()
     {
         using var fixture = new MetadataBackupFixture();
-        var identity = await ReadIdentity(fixture);
         var nested = new string('[', MetadataTestContract.NestedDepth) + MetadataTestContract.NestedJsonScalar
             + new string(']', MetadataTestContract.NestedDepth);
-        var deepUnknown = identity[..^MetadataTestContract.OneByte] + MetadataTestContract.JsonMemberSeparator
-            + MetadataTestContract.UnknownJsonMemberPrefix + nested + MetadataTestContract.JsonObjectClose;
+        var deepUnknown = MetadataTestContract.JsonObjectOpen + MetadataTestContract.UnknownJsonMemberPrefix
+            + nested + MetadataTestContract.JsonObjectClose;
         await AssertIdentityJsonFailure(fixture, deepUnknown);
     }
-
-    private static async Task<string> ReadIdentity(MetadataBackupFixture fixture) =>
-        await File.ReadAllTextAsync(Path.Combine(fixture.BackupDirectory,
-            MetadataTestContract.IdentityFileName));
 
     private static async Task AssertIdentityNullFailure(MetadataBackupFixture fixture, string content)
     {
@@ -53,7 +44,7 @@ internal sealed class MetadataIdentityFormatFailureTests
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
 
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(Directory.Exists(destination)).IsFalse();
     }
 
@@ -61,10 +52,10 @@ internal sealed class MetadataIdentityFormatFailureTests
     {
         await PrepareIdentity(fixture, content);
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.IdentityJsonRestorePath);
-        var failure = Assert.ThrowsExactly<JsonException>(() =>
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
 
-        await Assert.That(failure).IsNotNull();
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(Directory.Exists(destination)).IsFalse();
     }
 

@@ -1,16 +1,13 @@
-using System.Buffers;
 using System.Buffers.Text;
 using KeyLoad.Core;
 
 namespace KeyLoad.Orleans;
 
-/// <summary>Issues and verifies database-signed authority while preserving bounded exact UTF8 payload bytes.</summary>
+/// <summary>Issues and verifies database-signed authority while preserving bounded exact native payload bytes.</summary>
 public sealed class GrainRequestCodec
 {
     private const int SignatureBytes = 32;
     private const int SeparatorCharacters = 1;
-    private const string PayloadAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-    private static readonly SearchValues<char> PayloadCharacters = SearchValues.Create(PayloadAlphabet);
     private readonly DatabaseEngine database;
     private readonly TimeProvider clock;
     private readonly int maximumTokenCharacters;
@@ -24,27 +21,26 @@ public sealed class GrainRequestCodec
         ArgumentNullException.ThrowIfNull(clock);
         this.database = database;
         this.clock = clock;
-        var payloadCharacters = Base64Url.GetEncodedLength(database.Limits.MaxBatchBytes);
-        var envelopeBytes = checked(payloadCharacters + GrainRoutingProtocol.EnvelopeMetadataBytes);
+        var envelopeBytes = checked(database.Limits.MaxBatchBytes + GrainRoutingProtocol.EnvelopeMetadataBytes);
         maximumTokenCharacters = checked(Base64Url.GetEncodedLength(envelopeBytes)
-            + SeparatorCharacters + Base64Url.GetEncodedLength(SignatureBytes));
+            + GrainNativeContracts.SignedTokenPrefix.Length + SeparatorCharacters + Base64Url.GetEncodedLength(SignatureBytes));
     }
 
     /// <summary>Signs one GUID read request; API-key authentication alone has no principal identifier.</summary>
     /// <param name="requestId">Unique GUID for both the request actor and its independent read actor.</param>
     /// <param name="principalId">Persisted principal ID, or null for API-key authentication.</param>
     /// <param name="kind">Exactly one defined read capability.</param>
-    /// <param name="payload">Exact UTF8 JSON, including JSON null for no-DTO capabilities.</param>
+    /// <param name="payload">Exact native typed bytes, including the native zero marker for no-DTO capabilities.</param>
     /// <returns>A bounded database-signed envelope with the current incarnation and expiry.</returns>
     public string CreateRead(Guid requestId, string? principalId, GrainReadKind kind, ReadOnlyMemory<byte> payload)
         => Issue(new GrainRequestEnvelope
         {
-            Purpose = GrainRoutingProtocol.RequestPurpose,
+            Purpose = GrainNativeContracts.RequestPurpose,
             RequestId = requestId,
             Incarnation = database.Store.Identity.Incarnation,
             PrincipalId = principalId,
             ReadKind = kind,
-            EncodedPayload = Encode(payload),
+            Payload = Encode(payload),
             ExpiresAt = clock.GetUtcNow() + GrainRoutingProtocol.RequestLifetime
         });
 
@@ -53,18 +49,18 @@ public sealed class GrainRequestCodec
     /// <param name="principalId">Current persisted principal identifier.</param>
     /// <param name="kind">Public operation kind; Membership is forbidden.</param>
     /// <param name="commandId">Stable nonempty command ID reused when resolving an uncertain write.</param>
-    /// <param name="payload">Exact bounded UTF8 JSON for the existing public operation contract.</param>
+    /// <param name="payload">Exact bounded native bytes for the typed operation contract.</param>
     /// <returns>A bounded signed request for canonical partition routing.</returns>
     public string CreateCommand(Guid requestId, string principalId, OperationKind kind, Guid commandId, ReadOnlyMemory<byte> payload)
         => Issue(new GrainRequestEnvelope
         {
-            Purpose = GrainRoutingProtocol.RequestPurpose,
+            Purpose = GrainNativeContracts.RequestPurpose,
             RequestId = requestId,
             Incarnation = database.Store.Identity.Incarnation,
             PrincipalId = principalId,
             CommandKind = kind,
             CommandId = commandId,
-            EncodedPayload = Encode(payload),
+            Payload = Encode(payload),
             ExpiresAt = clock.GetUtcNow() + GrainRoutingProtocol.RequestLifetime
         });
 
@@ -77,20 +73,13 @@ public sealed class GrainRequestCodec
 
         var request = database.Verify<GrainRequestEnvelope>(signedRequest, maximumTokenCharacters);
         GrainRequestScope.Validate(request, database.Store.Identity.Incarnation, clock.GetUtcNow());
-        var encoded = request.EncodedPayload.AsSpan();
-        if (encoded.ContainsAnyExcept(PayloadCharacters) || !Base64Url.IsValid(encoded, out var length))
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
-
-        if (length > database.Limits.MaxBatchBytes)
+        if (request.Payload.Length > database.Limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
         }
 
-        var payload = Base64Url.DecodeFromChars(encoded);
-        GrainPayloadJson.Validate(payload);
-        return new(request, payload);
+        GrainNativePayload.Validate(request.Payload.Span);
+        return new(request, request.Payload);
     }
 
     internal DecodedGrainRequest VerifyRead(string signedRequest, Guid actorId)
@@ -115,15 +104,15 @@ public sealed class GrainRequestCodec
         return request;
     }
 
-    private string Encode(ReadOnlyMemory<byte> payload)
+    private ReadOnlyMemory<byte> Encode(ReadOnlyMemory<byte> payload)
     {
         if (payload.Length > database.Limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
         }
 
-        GrainPayloadJson.Validate(payload.Span);
-        return Base64Url.EncodeToString(payload.Span);
+        GrainNativePayload.Validate(payload.Span);
+        return payload.ToArray();
     }
 
     private string Issue(GrainRequestEnvelope request)
@@ -133,4 +122,4 @@ public sealed class GrainRequestCodec
     }
 }
 
-internal readonly record struct DecodedGrainRequest(GrainRequestEnvelope Envelope, byte[] Payload);
+internal readonly record struct DecodedGrainRequest(GrainRequestEnvelope Envelope, ReadOnlyMemory<byte> Payload);

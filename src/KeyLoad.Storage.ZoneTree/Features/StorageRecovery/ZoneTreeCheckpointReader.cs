@@ -59,7 +59,7 @@ internal static class ZoneTreeCheckpointReader
             throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.CheckpointFormatUnsupported);
         }
 
-        var metadata = JsonDefaults.Deserialize<ZoneTreeCheckpointMetadata>(frame.Payload);
+        var metadata = NativeSerialization.Deserialize<ZoneTreeCheckpointMetadata>(frame.Payload);
         if (metadata.Version != ZoneTreePersistenceFormat.CheckpointVersion || metadata.CodecVersion != KeyCodec.Version)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.SnapshotFormatUnsupported);
@@ -82,23 +82,30 @@ internal static class ZoneTreeCheckpointReader
         ref long applied,
         ref ReadOnlyMemory<byte>? previousKey)
     {
-        foreach (var mutation in JsonDefaults.Deserialize<StorageMutation[]>(payload))
+        var records = NativeSerialization.Deserialize<StorageMutation[]>(payload);
+        var lastKey = previousKey;
+        var nextApplied = applied;
+        if (records.Length == 0)
+        { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid); }
+        foreach (var mutation in records)
         {
-            if (mutation.Key.Length == 0 || mutation.Value is null
-                || previousKey is { } priorKey && priorKey.Span.SequenceCompareTo(mutation.Key.Span) >= 0)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid);
-            }
-
-            previousKey = mutation.Key;
+            if (mutation is null || mutation.Key.Length == 0 || mutation.Value is null
+                || lastKey is { } priorKey && priorKey.Span.SequenceCompareTo(mutation.Key.Span) >= 0)
+            { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid); }
+            lastKey = mutation.Key;
             if (mutation.Key.Span.SequenceEqual(appliedKey.Span))
             {
-                applied = JsonDefaults.Deserialize<long>(mutation.Value.Value.Span);
+                nextApplied = NativeSerialization.Deserialize<long>(mutation.Value.Value.Span);
+                if (nextApplied < 0)
+                { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid); }
             }
-
-            count++;
-            apply?.Invoke(mutation);
         }
+        var nextCount = checked(count + records.LongLength);
+        foreach (var mutation in records)
+        { apply?.Invoke(mutation); }
+        previousKey = lastKey;
+        applied = nextApplied;
+        count = nextCount;
     }
 
     private static StorageSnapshot ReadFooter(
@@ -108,7 +115,7 @@ internal static class ZoneTreeCheckpointReader
         long applied,
         IncrementalHash digest)
     {
-        var footer = JsonDefaults.Deserialize<ZoneTreeCheckpointFooter>(payload);
+        var footer = NativeSerialization.Deserialize<ZoneTreeCheckpointFooter>(payload);
         if (footer.Records != count || metadata.AppliedPosition != applied
             || footer.Checksum != Convert.ToHexStringLower(digest.GetHashAndReset()))
         {

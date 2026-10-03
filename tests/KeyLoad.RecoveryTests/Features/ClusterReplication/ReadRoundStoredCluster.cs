@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using KeyLoad.CrashHost;
 
 namespace KeyLoad.RecoveryTests;
@@ -8,6 +9,7 @@ internal sealed class ReadRoundStoredCluster : IAsyncDisposable
     internal const string VoterB = "read-round-b";
     private const string VoterC = "read-round-c";
     private const string Prefix = "keyload-read-round-";
+    private const int CanonicalSigningKeyBytes = 32;
     private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(20);
     private readonly string directory = ReplicaFixturePaths.NewDirectory(Prefix);
     private readonly List<ReadRoundStoredNode> nodes = [];
@@ -20,11 +22,12 @@ internal sealed class ReadRoundStoredCluster : IAsyncDisposable
         string[] voters = [VoterA, VoterB, VoterC];
         voters = voters[..count];
         var incarnation = Guid.NewGuid();
+        var signingKey = RandomNumberGenerator.GetBytes(CanonicalSigningKeyBytes);
         try
         {
             foreach (var voter in voters)
             {
-                nodes.Add(new(Path.Combine(directory, voter), voter, voters, incarnation));
+                nodes.Add(new(Path.Combine(directory, voter), voter, voters, incarnation, signingKey));
             }
         }
         catch (Exception error)
@@ -82,11 +85,7 @@ internal sealed class ReadRoundStoredCluster : IAsyncDisposable
         List<Exception> failures = [];
         foreach (var node in nodes)
         {
-            try
-            {
-                await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => node.Consensus.StopAsync(CancellationToken.None), failures);
-            }
-            catch (AggregateException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
+            await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => node.Consensus.StopAsync(CancellationToken.None), failures);
         }
         foreach (var node in nodes)
         {

@@ -34,7 +34,7 @@ public sealed partial class DatabaseEngine
 
         var tail = head?.TailRevision ?? 0;
         var sequenceKey = KeySpace.Partition("event-sequence", partition);
-        var sequence = tx.ReadOwnedValue(sequenceKey) is { } bytes ? JsonDefaults.Deserialize<long>(bytes) : 0;
+        var sequence = tx.ReadOwnedValue(sequenceKey) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0;
         foreach (var item in append.Events)
         {
             AppendEvent(tx, principal, partition, append, resource, stream, item, now, ref tail, ref sequence);

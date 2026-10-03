@@ -1,4 +1,3 @@
-using System.Text.Json;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -6,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 internal sealed class MetadataFormatFailureTests
 {
     [Test]
-    public async Task NullManifestFailsAsCorruptionBeforeDestinationCreation()
+    public async Task LegacyNullJsonManifestFailsAsUnsupportedBeforeDestinationCreation()
     {
         using var fixture = new MetadataBackupFixture();
         await AssertNullManifestFailure(fixture, MetadataTestContract.NullManifestJson);
@@ -23,12 +22,7 @@ internal sealed class MetadataFormatFailureTests
     public async Task UnknownManifestMemberFailsBeforeDestinationCreation()
     {
         using var fixture = new MetadataBackupFixture();
-        var path = Path.Combine(fixture.BackupDirectory, MetadataTestContract.ManifestFileName);
-        var manifest = await File.ReadAllTextAsync(path);
-        await AssertMalformedManifestFailure(fixture,
-            manifest[..^MetadataTestContract.OneByte] + MetadataTestContract.JsonMemberSeparator
-            + MetadataTestContract.UnknownJsonBooleanMember
-            + MetadataTestContract.JsonObjectClose);
+        await AssertMalformedManifestFailure(fixture, MetadataTestContract.LegacyUnknownObjectJson);
     }
 
     [Test]
@@ -62,7 +56,7 @@ internal sealed class MetadataFormatFailureTests
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
 
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(Directory.Exists(destination)).IsFalse();
     }
 
@@ -71,10 +65,10 @@ internal sealed class MetadataFormatFailureTests
         await File.WriteAllTextAsync(Path.Combine(fixture.BackupDirectory,
             MetadataTestContract.ManifestFileName), content);
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.MalformedManifestRestorePath);
-        var failure = Assert.ThrowsExactly<JsonException>(() =>
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
 
-        await Assert.That(failure).IsNotNull();
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(Directory.Exists(destination)).IsFalse();
     }
 }

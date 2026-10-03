@@ -80,7 +80,7 @@ public sealed partial class DatabaseEngine
         ValidateTopicPublication(principal, resource, publish.Events);
         var headKey = KeySpace.Partition(TopicHeadKeySpace, partition, publish.Topic);
         var sequenceKey = KeySpace.Partition(EventSequenceKeySpace, partition);
-        var sequence = tx.ReadOwnedValue(sequenceKey) is { } prior ? JsonDefaults.Deserialize<long>(prior) : 0;
+        var sequence = tx.ReadOwnedValue(sequenceKey) is { } prior ? NativeSerialization.Deserialize<long>(prior) : 0;
         var progress = AppendTopicEvents(tx, source, resource, publish.Events, now,
             head.TailPosition, sequence, head.FirstAvailablePosition, topicHead.StoredBytes);
         tx.PutRecord(headKey, new TopicHead(progress.Tail, head.FirstAvailablePosition, publish.Generation, progress.StoredBytes));

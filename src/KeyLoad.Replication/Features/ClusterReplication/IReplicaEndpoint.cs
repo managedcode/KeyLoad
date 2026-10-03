@@ -12,10 +12,10 @@ public interface IReplicaEndpoint
 
     /// <summary>Executes one authenticated and scope-checked internal replica request.</summary>
     /// <param name="method">Replica control or data operation to dispatch.</param>
-    /// <param name="payloadJson">Encoded typed replica request.</param>
+    /// <param name="payload">Encoded native typed replica request.</param>
     /// <param name="cancellationToken">Caller cancellation while protocol work remains node-owned.</param>
     /// <returns>The encoded typed replica response.</returns>
-    Task<string> HandleAsync(ReplicaRpc method, string payloadJson, CancellationToken cancellationToken);
+    Task<ReadOnlyMemory<byte>> HandleAsync(ReplicaRpc method, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken);
 
     /// <summary>Drains replica maintenance after Orleans membership shutdown.</summary>
     /// <param name="cancellationToken">Cancellation of the caller's wait for the shared shutdown task.</param>

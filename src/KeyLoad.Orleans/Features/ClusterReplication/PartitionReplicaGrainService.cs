@@ -1,4 +1,3 @@
-using System.Text;
 using KeyLoad.Replication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -40,16 +39,15 @@ public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerF
     {
         try
         {
-            authentication.VerifyRequest(request);
+            request = authentication.VerifyRequest(request);
             await endpoint.TransportReady.WaitAsync(cancellationToken).ConfigureAwait(true);
-            var payload = ReplicaTransportProtocol.Utf8.GetString(request.Payload.Span);
-            var result = await endpoint.HandleAsync(request.Method, payload, cancellationToken).ConfigureAwait(true);
-            if (ReplicaTransportProtocol.Utf8.GetByteCount(result) > authentication.MaximumPayloadBytes)
+            var result = await endpoint.HandleAsync(request.Method, request.Payload, cancellationToken).ConfigureAwait(true);
+            if (result.Length > authentication.MaximumPayloadBytes)
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.PayloadExceeded);
             }
 
-            return authentication.CreateReply(request, ReplicaTransportProtocol.Utf8.GetBytes(result));
+            return authentication.CreateReply(request, result);
         }
         catch (KeyLoadException error)
         {
@@ -58,10 +56,6 @@ public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerF
         catch (OperationCanceledException)
         {
             return authentication.CreateReply(request, ReadOnlyMemory<byte>.Empty, ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite);
-        }
-        catch (DecoderFallbackException)
-        {
-            return authentication.CreateReply(request, ReadOnlyMemory<byte>.Empty, ErrorCode.Validation, ReplicaTransportProtocol.InvalidPayload);
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {

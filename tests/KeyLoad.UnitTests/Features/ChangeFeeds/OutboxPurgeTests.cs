@@ -54,11 +54,11 @@ internal sealed class OutboxPurgeTests
         database.Commit(new PutDocument("orders", "first", "{}"));
         var entryKey = EntryKey(database.Partition, 1);
         var bytes = database.Store.Read(view => view.ReadOwnedValue(entryKey)!);
-        var entry = JsonDefaults.Deserialize<OutboxEntry>(bytes);
+        var entry = NativeSerialization.Deserialize<OutboxEntry>(bytes);
         var wrongPartition = entry with { Commit = entry.Commit with { AtomicPartitionId = ForeignPartitionId } };
         database.Store.Commit((transaction, _) =>
         {
-            transaction.Put(entryKey, JsonDefaults.Serialize(wrongPartition));
+            transaction.Put(entryKey, NativeSerialization.Serialize(wrongPartition));
             return 0;
         });
         var before = database.Database.GetOutboxStatus("root", database.Partition).Head;
@@ -186,10 +186,10 @@ internal sealed class OutboxPurgeTests
         else
         {
             var bytes = database.Store.Read(view => view.ReadOwnedValue(key)!);
-            var entry = JsonDefaults.Deserialize<OutboxEntry>(bytes) with { Sequence = 3 };
+            var entry = NativeSerialization.Deserialize<OutboxEntry>(bytes) with { Sequence = 3 };
             database.Store.Commit((transaction, _) =>
             {
-                transaction.Put(key, JsonDefaults.Serialize(entry));
+                transaction.Put(key, NativeSerialization.Serialize(entry));
                 return 0;
             });
         }

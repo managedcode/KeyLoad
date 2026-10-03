@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Replication;
 using TUnit.Assertions.Enums;
@@ -34,6 +35,19 @@ internal static class ReplicaProcessAssertions
         await Assert.That(replayed.Token.Position).IsEqualTo(cut);
         await Assert.That(replayed.Token.Incarnation).IsEqualTo(node.Configuration.Incarnation);
         await Assert.That(replayed.Mutations.Single().Revision).IsEqualTo(cut - 1);
+    }
+
+    internal static async Task OperationAsync(DatabaseEngine database, ReplicatedOperation? actual, ReplicatedOperation expected)
+    {
+        expected = database.NormalizeOperation(expected);
+        await Assert.That(actual).IsNotNull();
+        var observed = actual!;
+        await Assert.That(database.NativeOperationsEqual(observed, expected)).IsTrue();
+        await Assert.That(observed.Id).IsEqualTo(expected.Id);
+        await Assert.That(observed.Kind).IsEqualTo(expected.Kind);
+        await Assert.That(observed.PrincipalId).IsEqualTo(expected.PrincipalId);
+        await Assert.That(observed.EvaluatedAt).IsEqualTo(expected.EvaluatedAt);
+        await Assert.That(observed.PayloadJson).IsEqualTo(expected.PayloadJson);
     }
 
     internal static async Task SnapshotAsync(ReplicaCrashNode node, ReplicaProcessTrial trial, long applied)

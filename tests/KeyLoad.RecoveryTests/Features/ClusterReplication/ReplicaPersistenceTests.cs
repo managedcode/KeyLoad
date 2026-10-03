@@ -1,8 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Replication;
+using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
@@ -97,24 +99,26 @@ internal sealed class ReplicaPersistenceTests
         try
         {
             using var store = Store(directory, configuration.Incarnation);
-            using var log = new DurableReplicaLog(store, configuration);
+            using var canonical = Store(Path.Combine(directory, CanonicalDirectory), configuration.Incarnation);
+            var database = new DatabaseEngine(canonical, new AuthorizationPolicy());
+            using var log = new DurableReplicaLog(store, configuration, canonicalDatabase: database);
             log.SaveTermAndVote(1, null);
             var payload = ReplicaMaximumPayload.Create(token, MaximumCommandBytes);
             using var parsed = JsonDocument.Parse(payload);
             await Assert.That(parsed.RootElement.ValueKind).IsEqualTo(JsonValueKind.Object);
             await Assert.That(Encoding.UTF8.GetByteCount(payload)).IsEqualTo(MaximumCommandBytes);
-            var operation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.Batch, VoterA, DateTimeOffset.UnixEpoch, payload);
+            var operation = database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.Batch, VoterA, DateTimeOffset.UnixEpoch, payload));
             var encoded = ReplicaProtocolCodec.Serialize(operation);
             var decoded = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(encoded);
             await Assert.That(decoded.PayloadJson).IsEqualTo(payload);
             await Assert.That(Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(decoded.PayloadJson)))).IsEqualTo(Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(payload))));
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(JsonDefaults.Serialize(operation))).Code).IsEqualTo(ErrorCode.Corruption);
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(ReplicaMaximumPayload.AddField(encoded, ReplicaMaximumPayload.UnknownField))).Code).IsEqualTo(ErrorCode.Corruption);
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(ReplicaMaximumPayload.AddField(encoded, ReplicaMaximumPayload.DuplicateField))).Code).IsEqualTo(ErrorCode.Corruption);
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(ReplicaMaximumPayload.LegacyJson(operation))).Code).IsEqualTo(ErrorCode.FormatUnsupported);
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.DeserializeStored<ReplicatedOperation>(ReplicaMaximumPayload.Malformed(operation, ReplicaMaximumPayload.UnknownField), configuration.MaxAppendEntries)).Code).IsEqualTo(ErrorCode.Corruption);
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.DeserializeStored<ReplicatedOperation>(ReplicaMaximumPayload.Malformed(operation, ReplicaMaximumPayload.DuplicateField), configuration.MaxAppendEntries)).Code).IsEqualTo(ErrorCode.Corruption);
             log.Append([new(1, 1, operation)]);
             log.Commit(1);
             log.Append([new(1, 1, decoded)]);
-            await Assert.That(log.Read(1, 1, configuration.MaxAppendBytes)[0].Operation).IsEqualTo(operation);
+            await ReplicaProcessAssertions.OperationAsync(database, log.Read(1, 1, configuration.MaxAppendBytes)[0].Operation, operation);
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => log.Read(1, 1, MaximumCommandBytes)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         }
         finally { Directory.Delete(directory, true); }
@@ -134,7 +138,7 @@ internal sealed class ReplicaPersistenceTests
                 log.SaveTermAndVote(1, null);
                 log.Append([new(1, 1, null)]);
             }
-            store.Commit((tx, _) => { tx.PutRecord(ReplicaProtocol.EntryStorageKey(1), new ReplicaEntry(2, 1, null)); return true; });
+            store.Commit((tx, _) => { tx.Put(ReplicaProtocol.EntryStorageKey(1), ReplicaProtocolCodec.Serialize(new ReplicaEntry(2, 1, null))); return true; });
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             {
                 using var rejected = new DurableReplicaLog(store, configuration);
@@ -166,29 +170,12 @@ internal sealed class ReplicaPersistenceTests
     private const string VoterB = "b";
     private const string VoterC = "c";
     private const string Prefix = "keyload-replica-persistence-";
+    private const string CanonicalDirectory = "canonical";
     private const string UnknownVoter = "unknown";
     private const int MaximumCommandBytes = 8_388_608;
     private static string NewDirectory() => ReplicaFixturePaths.NewDirectory(Prefix);
     private static ReplicaConfiguration Configuration(string directory) => new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid());
     private static ZoneTreeStore Store(string directory, Guid incarnation) => new(new(directory) { Incarnation = incarnation });
-}
-
-internal static class ReplicaMaximumPayload
-{
-    internal const string Quotes = "\\\"";
-    internal const string Unicode = "Ж";
-    internal const string UnknownField = ",\"unknown\":true}";
-    internal const string DuplicateField = ",\"kind\":\"Batch\"}";
-    private const string Prefix = " { \"value\": \"";
-    private const string Suffix = "\" }\n";
-    internal static byte[] AddField(byte[] bytes, string field) => Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(bytes.AsSpan(0, bytes.Length - 1)) + field);
-    internal static string Create(string token, int maxBytes)
-    {
-        var available = maxBytes - Encoding.UTF8.GetByteCount(Prefix + Suffix);
-        var count = available / Encoding.UTF8.GetByteCount(token);
-        var payload = Prefix + string.Concat(Enumerable.Repeat(token, count)) + Suffix;
-        return payload + new string(' ', maxBytes - Encoding.UTF8.GetByteCount(payload));
-    }
 }
 
 /// <summary>AC-REP-004: rejection and interruption regressions for real canonical snapshot transfers.</summary>
@@ -281,7 +268,7 @@ internal sealed class ReplicaSnapshotRecoveryTests
         trial.Target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode(ReplicaSnapshotTrial.SystemKey, ReplicaSnapshotTrial.AppliedKey), 2L); return true; });
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(receiver.ResetIncoming).Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(trial.TargetLog.State.Snapshot).IsNull();
-        await Assert.That(trial.Target.Read(view => JsonDefaults.Deserialize<long>(view.ReadOwnedValue(KeyCodec.Encode(ReplicaSnapshotTrial.SystemKey, ReplicaSnapshotTrial.AppliedKey))!))).IsEqualTo(2);
+        await Assert.That(trial.Target.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeyCodec.Encode(ReplicaSnapshotTrial.SystemKey, ReplicaSnapshotTrial.AppliedKey))!))).IsEqualTo(2);
         await Assert.That(trial.Target.Identity.ReadGeneration).IsEqualTo(0);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => receiver.Begin(trial.Image)).Code).IsEqualTo(ErrorCode.Conflict);
     }
@@ -304,7 +291,7 @@ internal sealed class ReplicaSnapshotRecoveryTests
         await Assert.That(receiver.Current).IsEqualTo(trial.Image);
         await Assert.That(File.Exists(trial.TargetImagePath(trial.Image))).IsTrue();
         await Assert.That(trial.TargetLog.State.CommittedIndex).IsEqualTo(1);
-        await Assert.That(trial.Target.Read(view => JsonDefaults.Deserialize<long>(view.ReadOwnedValue(KeyCodec.Encode(ReplicaSnapshotTrial.SystemKey, ReplicaSnapshotTrial.AppliedKey))!))).IsEqualTo(1);
+        await Assert.That(trial.Target.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeyCodec.Encode(ReplicaSnapshotTrial.SystemKey, ReplicaSnapshotTrial.AppliedKey))!))).IsEqualTo(1);
         await Assert.That(trial.Target.Read(view => view.GetRecord<string>(KeyCodec.Encode(ReplicaSnapshotTrial.ValueKey)))).IsEqualTo(ReplicaSnapshotTrial.NewValue);
         await Assert.That(receiver.Begin(replacement)).IsEqualTo(0);
         trial.Transfer(receiver, replacement);

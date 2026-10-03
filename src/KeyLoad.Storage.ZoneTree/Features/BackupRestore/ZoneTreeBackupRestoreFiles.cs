@@ -26,12 +26,12 @@ internal static class ZoneTreeBackupRestoreFiles
         return runtime.Position;
     }
 
-    internal static StoreIdentity ReadAndVerify(string backup)
+    internal static StoreIdentity ReadAndVerify(string backup, string staging)
     {
         var manifestBytes = ZoneTreeMetadataFile.Read(Path.Combine(backup, BackupManifestFileName),
             MaximumBackupManifestBytes, BackupManifestUnsupported);
-        var manifest = JsonDefaults.Deserialize<ZoneTreeBackupRestoreManifest>(manifestBytes.Span);
-        if (manifest.Version != BackupManifestVersion || manifest.Files.Length != SourceFiles.Length
+        var manifest = ZoneTreeMetadataBinary.Read<ZoneTreeBackupRestoreManifest>(manifestBytes.Span, ZoneTreeMetadataBinary.BackupMagic, BackupManifestUnsupported);
+        if (manifest.Version != BackupManifestVersion || manifest.Position < 0 || manifest.Files.Length != SourceFiles.Length
             || !manifest.Files.Select(file => file.Name).Order().SequenceEqual(SourceFiles.Order()))
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, BackupManifestUnsupported);
@@ -46,11 +46,14 @@ internal static class ZoneTreeBackupRestoreFiles
             }
             else
             {
-                VerifyFile(backup, item);
+                CopyAndVerifyJournal(backup, staging, item);
             }
         }
 
-        return ZoneTreeIdentityFile.Read(identityBytes.Span);
+        var identity = ZoneTreeIdentityFile.Read(identityBytes.Span);
+        using var journal = File.OpenRead(Path.Combine(staging, JournalFileName));
+        ZoneTreeBackupJournalValidation.Verify(journal, identity, manifest.Position);
+        return identity;
     }
 
     private static ZoneTreeBackupRestoreManifestFile CopyAndDescribe(string sourceDirectory, string backupDirectory,
@@ -69,11 +72,11 @@ internal static class ZoneTreeBackupRestoreFiles
     {
         using var file = new FileStream(Path.Combine(directory, BackupManifestFileName),
             FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        file.Write(JsonDefaults.Serialize(manifest));
+        file.Write(ZoneTreeMetadataBinary.Write(manifest, ZoneTreeMetadataBinary.BackupMagic));
         file.Flush(true);
     }
 
-    private static void VerifyFile(string backup, ZoneTreeBackupRestoreManifestFile item)
+    private static void CopyAndVerifyJournal(string backup, string staging, ZoneTreeBackupRestoreManifestFile item)
     {
         var source = Path.Combine(backup, item.Name);
         if ((File.GetAttributes(source) & FileAttributes.ReparsePoint) != 0)
@@ -81,9 +84,37 @@ internal static class ZoneTreeBackupRestoreFiles
             throw Errors.Fail(ErrorCode.Corruption, BackupFileIsLink);
         }
 
-        using var file = File.OpenRead(source);
+        using var sourceFile = File.OpenRead(source);
+        if (sourceFile.Length != item.Length)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);
+        }
+        using var file = new FileStream(Path.Combine(staging, JournalFileName),
+            FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
+        CopyExactBytes(sourceFile, file, item.Length);
+        file.Flush(true);
+        file.Position = 0;
         if (file.Length != item.Length
             || !string.Equals(Convert.ToHexStringLower(SHA256.HashData(file)), item.Checksum, StringComparison.Ordinal))
+        {
+            throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);
+        }
+    }
+
+    private static void CopyExactBytes(FileStream source, FileStream destination, long remaining)
+    {
+        var buffer = new byte[FileBufferBytes];
+        while (remaining > 0)
+        {
+            var read = source.Read(buffer.AsSpan(0, (int)Math.Min(remaining, buffer.Length)));
+            if (read == 0)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);
+            }
+            destination.Write(buffer.AsSpan(0, read));
+            remaining -= read;
+        }
+        if (source.ReadByte() != -1)
         {
             throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);
         }

@@ -167,7 +167,7 @@ public static class StorageRecords
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(key);
         T? record = null;
-        view.ReadValue(key, value => record = JsonDefaults.Deserialize<T>(value));
+        view.ReadValue(key, value => record = NativeSerialization.Deserialize<T>(value));
         return record;
     }
     /// <summary>Serializes and stages one typed value through the provider-owned write.</summary>
@@ -179,6 +179,6 @@ public static class StorageRecords
     {
         ArgumentNullException.ThrowIfNull(tx);
         ArgumentNullException.ThrowIfNull(key);
-        tx.Put(key, JsonDefaults.Serialize(value));
+        tx.Put(key, NativeSerialization.Serialize(value));
     }
 }

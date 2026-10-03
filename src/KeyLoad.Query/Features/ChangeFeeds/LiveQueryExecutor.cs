@@ -8,8 +8,6 @@ namespace KeyLoad.Query.Features.ChangeFeeds;
 /// <summary>Owns live-query snapshot and delta mapping over the caller's existing database cut.</summary>
 internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine queryEngine)
 {
-    private sealed record LiveCursorClaims(string Purpose, string QueryHash, string ChangeCursor);
-
     internal LiveQuerySnapshot Start(string principalId, StartLiveQueryRequest request,
         TimeProvider? timeProvider, CancellationToken cancellationToken)
     {
@@ -53,7 +51,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
                 "The live-query snapshot exceeds its complete result-set budget.");
         }
         var snapshot = new LiveQuerySnapshot(page.Rows,
-            database.Sign(new LiveCursorClaims("scalar-live-query", hash, capture.Cursor)), capture.Tail,
+            database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, capture.Cursor)), capture.Tail,
             page.CutPosition);
         budget.CheckResult(snapshot);
         return snapshot;
@@ -66,7 +64,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         budget.Check();
         queryEngine.Bind(principal, resource, query);
         var claims = database.Verify<LiveCursorClaims>(request.Cursor);
-        if (claims.Purpose != "scalar-live-query" || claims.QueryHash != hash)
+        if (claims.Purpose != LiveCursorContract.Purpose || claims.QueryHash != hash)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, "The live-query cursor belongs to a different query.");
         }
@@ -75,7 +73,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
                 MaxBytes: request.MaxBytes),
             (schema, change) => MapChange(principal, schema, change, query, prepared, budget));
         var result = new LiveQueryPage(page.Changes,
-            database.Sign(new LiveCursorClaims("scalar-live-query", hash, page.Cursor)), page.ThroughSequence,
+            database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, page.Cursor)), page.ThroughSequence,
             page.HasMore, page.CutPosition);
         budget.CheckResult(result);
         return result;

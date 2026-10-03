@@ -1,5 +1,6 @@
 using System.Text;
 using KeyLoad.Core;
+using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 
@@ -20,7 +21,7 @@ internal sealed class McpUnknownLengthAdmissionTests
     {
         using var database = new TestDatabase();
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(RootPrincipalId)))!;
-        var principalBytes = JsonDefaults.Serialize(principal);
+        var principalBytes = NativeSerialization.Serialize(new GrainValue(principal));
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(limits.DataBytes, limits.ControlBytes, limits.IngressBytes);
         var governor = new HttpAdmissionGovernor();

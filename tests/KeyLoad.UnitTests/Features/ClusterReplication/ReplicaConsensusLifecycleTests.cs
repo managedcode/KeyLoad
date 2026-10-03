@@ -59,7 +59,7 @@ internal sealed class ReplicaConsensusLifecycleTests
         var submit = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => fixture.Consensus.SubmitAsync(operation, CancellationToken.None));
         var barrier = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => fixture.Consensus.ReadBarrierAsync(CancellationToken.None));
         var incoming = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => fixture.Consensus.HandleAsync(ReplicaRpc.RequestVote,
-            EmptyPayload, CancellationToken.None));
+            ReadOnlyMemory<byte>.Empty, CancellationToken.None));
         await Assert.That(submit!.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await Assert.That(barrier!.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await Assert.That(incoming!.Code).IsEqualTo(ErrorCode.OwnershipLost);

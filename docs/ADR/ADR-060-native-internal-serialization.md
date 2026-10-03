@@ -32,3 +32,64 @@ The old Compact operation preserves opaque JSON values; it is not a migration. N
 Authenticate exact peer scope and sender before replay-slot admission. Native header projection/skipping may not allocate decoded opaque payloads or grant a malformed message a nonce slot; control/data pools and all external capacity contracts stay exact. Existing state ownership, synchronous barriers, unknown outcomes, cancellation and caller-visible sanitized diagnostics remain.
 
 Native codec/type-family/DOM tests, exact record byte accounting, actual metadata corruption/legacy fixtures, claims/tamper/version tests, replica admission allocation/malformed/scope tests, existing canonical hashes, real-process recovery and genuine RF3 SDK/MCP form the acceptance chain. Required commands are enabled solution restore/build and formatter/static governance, then canonical GitHub normal/scalar/recovery/analyzer/RF3 jobs. No local runtime tests, no removed assertions or invented load tests. Performance, full memory amplification, power-loss, endurance and production proof are separately unqualified. Publication is not attempted again without explicit approval after the previous automatic-review rejection.
+
+## Resumption repair contract, 2026-10-03
+
+The owner directs continuation, concrete implementation and GitHub qualification
+after reviewing the held candidate. TASK-IS-R4A implements missing-identity
+fail-closed creation with an actual acquired owner handle and real-file regressions
+(AC-IS-004/008). TASK-IS-R4B verifies the complete backup journal and manifest cut
+before destination publication, using existing checkpoint and atomic WAL readers,
+no source modification/truncation and bounded per-frame memory (AC-IS-004).
+The restore owner retains explicit new identity/incarnation/signing authority and
+paused dispatch; malformed or incompatible backups leave destination unchanged.
+Native scalar/count/type/reference/depth/work validation repairs stay in the shared
+InternalSerialization slice and preserve official generated wire encoding.
+No old-store conversion, running-cluster rollout or product release is inferred
+from development-source installation. Existing required qualification remains.
+
+TASK-IS-R4C shared preflight retains generated encoding and official scalar
+readers. It validates expected root compatibility before dynamic dispatch, walks
+wire tags iteratively, rejects invalid reference IDs and requires native collection
+counts/completion before allocation. Wire depth is bounded at264 (four structural
+array/property/node wrappers per existing64-level semantic depth plus8 envelope
+levels); this is an explicit safety fence, not full heap qualification.
+TASK-IS-R4D validates semantic graphs once per applicable nullability context,
+rejects cycles/depth overflow and bounds DOM expansion before materialization.
+DOM retains64 semantic levels and a32MiB encoded output ceiling corresponding to
+the existing maximum configurable public HTTP body. Actual lower domain/public
+admission and reply budgets still apply; these structural fences never grant
+capacity or replace required heap, allocation and performance measurements.
+Each worker owns disjoint code/tests; only lead owns this shared limits file.
+
+Final source closure removes OperationResult.Get's internal JSON fallback. Typed
+Core results and retained outcomes carry NativeValue; JSON-only or absent typed
+results fail with Corruption, while stored domain errors retain precedence.
+The already-applied/no-retained-outcome sentinel remains an empty internal result.
+HTTP/MCP still materialize typed JSON at their existing boundaries. Existing
+public JSON text/unicode/ownership/allocation regressions call JsonDefaults
+directly with unchanged thresholds; native result rejection/roundtrip tests cover
+the removed fallback under AC-IS-001/003. No test is skipped or removed.
+
+Native v2 evolution accepts bounded unknown fields but rejects a known typed
+reference to an opaque omitted-type unknown field. Orleans otherwise replays that
+field under the later expected type, potentially bypassing the first count scan.
+No homogeneous v2 generated producer requires this ambiguous deferred decode;
+support for it requires a separately specified bounded replay contract. Ordinary
+known-schema references remain supported. AC-IS-002 includes the concrete hidden
+underfilled float-array reference regression before native allocation.
+
+TASK-IS-R4E aligns replica inspection and malformed fixtures with Orleans10.3.1:
+explicit property Ids are body members, preceded by the empty constructor scope.
+The Server authentication projection follows the same genuine generated record
+shape. Official generated writer-to-inspector positive tests cover these joins;
+hand-authored malformed tests retain exactly their intended corruption and bounds.
+
+The inspected native type closure is intentionally limited to owned generated
+KeyLoad DTOs, existing scalar/date/byte/JSON DOM codecs, rank-one arrays, and the
+exact collection/surrogate shapes used by the contracts (ImmutableArray, List,
+Dictionary, KeyValuePair and Memory/ReadOnlyMemory). Other System surrogates and
+derived collection codecs fail closed before generated allocation, even below an
+object-typed field. Extending this closure requires a native shape specification,
+preflight/count/reference tests and homogeneous compatibility qualification.
+This is an internal concrete contract, not arbitrary Orleans codec compatibility.

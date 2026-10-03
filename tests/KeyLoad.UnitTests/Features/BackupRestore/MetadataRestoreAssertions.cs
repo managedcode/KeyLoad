@@ -12,7 +12,7 @@ internal static class MetadataRestoreAssertions
         await Assert.That(restoredIdentity.DispatchPaused).IsTrue();
 
         using var reopened = new ZoneTreeStore(new(destination));
-        await Assert.That(reopened.Read(view => JsonDefaults.Deserialize<string>(
+        await Assert.That(reopened.Read(view => NativeSerialization.Deserialize<string>(
                 view.ReadOwnedValue(MetadataBackupFixture.StoredKeyBytes)!)))
             .IsEqualTo(MetadataBackupFixture.ExpectedValue);
         await Assert.That(reopened.Identity.Incarnation).IsEqualTo(restoredIdentity.Incarnation);

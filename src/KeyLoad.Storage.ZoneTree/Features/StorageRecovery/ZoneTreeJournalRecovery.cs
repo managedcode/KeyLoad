@@ -75,10 +75,10 @@ internal static class ZoneTreeJournalRecovery
         return true;
     }
 
-    private static (int Length, long Sequence) ValidateHeader(byte[] header, long position, int maxFrameBytes, int identityVersion)
+    internal static (int Length, long Sequence) ValidateHeader(byte[] header, long position, int maxFrameBytes, int identityVersion)
     {
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
-        if (magic is LegacyJournalMagic or LegacyBinaryJournalMagic
+        if (magic is LegacyJournalMagic or LegacyBinaryJournalMagic or LegacyNativeMutationJournalMagic
             || magic == JournalMagic && identityVersion != BinaryJournalIdentityVersion)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, JournalFormatUpgradeRequired);

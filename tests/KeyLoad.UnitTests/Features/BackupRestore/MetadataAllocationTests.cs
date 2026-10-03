@@ -9,7 +9,7 @@ internal sealed class MetadataAllocationTests
     {
         using var fixture = new MetadataBackupFixture();
         var manifestPath = Path.Combine(fixture.BackupDirectory, MetadataTestContract.ManifestFileName);
-        await MetadataTestFiles.PadWithWhitespaceAsync(manifestPath, MetadataTestContract.OversizedMetadataBytes);
+        await MetadataTestFiles.PadWithTrailingBytesAsync(manifestPath, MetadataTestContract.OversizedMetadataBytes);
 
         var destination = MetadataTestContract.OversizedManifestRestorePath(fixture.RestoredDirectory);
         var inputLength = new FileInfo(manifestPath).Length;
@@ -29,7 +29,7 @@ internal sealed class MetadataAllocationTests
     {
         using var fixture = new MetadataBackupFixture();
         var identityPath = Path.Combine(fixture.BackupDirectory, MetadataTestContract.IdentityFileName);
-        await MetadataTestFiles.PadWithWhitespaceAsync(identityPath, MetadataTestContract.OversizedMetadataBytes);
+        await MetadataTestFiles.PadWithTrailingBytesAsync(identityPath, MetadataTestContract.OversizedMetadataBytes);
         await MetadataTestFiles.UpdateManifestFileAsync(fixture.BackupDirectory, MetadataTestContract.IdentityFileName);
 
         var destination = MetadataTestContract.OversizedIdentityRestorePath(fixture.RestoredDirectory);

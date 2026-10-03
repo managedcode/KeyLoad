@@ -1,4 +1,5 @@
 using System.Text;
+using KeyLoad.Replication;
 
 namespace KeyLoad.Orleans;
 
@@ -6,7 +7,7 @@ namespace KeyLoad.Orleans;
 public static class ReplicaTransportProtocol
 {
     /// <summary>Authenticated envelope format version.</summary>
-    public const int Version = 1;
+    public const int Version = 2;
     /// <summary>Orleans replica service interface version.</summary>
     public const ushort InterfaceVersion = 1;
     /// <summary>Required cluster peer credential length.</summary>
@@ -16,16 +17,16 @@ public static class ReplicaTransportProtocol
     /// <summary>Discovery signature hexadecimal length.</summary>
     public const int HashHexCharacters = HashBytes * 2;
     /// <summary>Maximum configured voter identity length in UTF16 code units.</summary>
-    public const int MaximumIdentityCharacters = 2_048;
+    public const int MaximumIdentityCharacters = ReplicaProtocol.MaximumIdentityCharacters;
     /// <summary>Maximum cluster identity length in UTF16 code units.</summary>
     public const int MaximumClusterCharacters = 256;
     /// <summary>Maximum serialized silo address length.</summary>
     public const int MaximumAddressCharacters = 256;
     /// <summary>Maximum public-safe error detail length.</summary>
-    public const int MaximumDetailCharacters = 4_096;
+    public const int MaximumDetailCharacters = ReplicaProtocol.MaximumDetailCharacters;
     /// <summary>Maximum discovery response byte count.</summary>
     public const int MaximumDiscoveryBytes = 16_384;
-    /// <summary>Maximum replica JSON metadata allowance above the append budget.</summary>
+    /// <summary>Maximum replica native metadata allowance above the append budget.</summary>
     public const int MaximumMetadataBytes = 65_536;
     /// <summary>Bounded Orleans envelope allowance above the exact payload byte count.</summary>
     public const int MaximumEnvelopeOverheadBytes = MaximumMetadataBytes;
@@ -52,21 +53,17 @@ public static class ReplicaTransportProtocol
     /// <summary>Stable RPC method identity.</summary>
     public const string ExchangeAlias = "keyload.replica.exchange.v1";
     /// <summary>Request HMAC domain separator.</summary>
-    public const string RequestPurpose = "keyload-replica-request-v1";
+    public const string RequestPurpose = "keyload-replica-request-v2";
     /// <summary>Reply HMAC domain separator.</summary>
-    public const string ReplyPurpose = "keyload-replica-reply-v1";
+    public const string ReplyPurpose = "keyload-replica-reply-v2";
     /// <summary>Discovery response HMAC domain separator.</summary>
-    public const string DiscoveryPurpose = "keyload-replica-discovery-v1";
+    public const string DiscoveryPurpose = "keyload-replica-discovery-v2";
     /// <summary>Exact discovery response signature header.</summary>
     public const string DiscoverySignatureHeader = "X-KeyLoad-Discovery-Signature";
     /// <summary>Nonce set by the shared signed HTTP handler.</summary>
     public const string HttpNonceHeader = "X-KeyLoad-Nonce";
     /// <summary>Canonical HTTP request nonce representation.</summary>
     public const string NonceFormat = "N";
-    /// <summary>Replica-only JSON candidate identity field.</summary>
-    public const string CandidateIdField = "candidateId";
-    /// <summary>Replica-only JSON leader identity field.</summary>
-    public const string LeaderIdField = "leaderId";
     /// <summary>Invalid replay configuration failure detail.</summary>
     public const string InvalidReplayLimits = "Replica replay pools must be positive and fit the fixed-voter memory budget.";
     /// <summary>Authenticated capacity failure detail, distinct from nonce reuse.</summary>
@@ -76,7 +73,7 @@ public static class ReplicaTransportProtocol
     /// <summary>Unavailable or unauthenticated discovery failure detail.</summary>
     public const string InvalidDiscovery = "Replica discovery returned an invalid, unauthenticated or unavailable runtime address.";
     /// <summary>Payload budget failure detail.</summary>
-    public const string PayloadExceeded = "The replica payload exceeds its transport byte budget.";
+    public const string PayloadExceeded = ReplicaProtocol.PayloadExceeded;
     /// <summary>Malformed exact-byte protocol failure detail.</summary>
     public const string InvalidPayload = "The replica payload is not a valid bounded protocol request.";
     /// <summary>Authenticated sender and embedded identity mismatch detail.</summary>

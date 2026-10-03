@@ -22,7 +22,7 @@ internal sealed class BlobGrainRoutingTests
             await Assert.That(first.Envelope.RequestId).IsNotEqualTo(second.Envelope.RequestId);
             await Assert.That(first.Envelope.CommandId).IsEqualTo(BlobAgentCases.CommandId);
             await Assert.That(second.Envelope.CommandId).IsEqualTo(BlobAgentCases.CommandId);
-            await Assert.That(first.Payload.AsSpan().SequenceEqual(item.Payload.Span)).IsTrue();
+            await Assert.That(first.Payload.Span.SequenceEqual(item.NativePayload.Span)).IsTrue();
             await Assert.That(GrainPartitionResolver.Resolve(first)).IsEqualTo(BlobAgentCases.Partition.AtomicPartitionId);
         }
     }
@@ -36,9 +36,9 @@ internal sealed class BlobGrainRoutingTests
         foreach (var item in BlobAgentCases.All().Where(item => item.ReadKind.HasValue))
         {
             var id = Guid.NewGuid();
-            var token = codec.CreateRead(id, BlobAgentCases.Principal, item.ReadKind!.Value, item.Payload);
+            var token = codec.CreateRead(id, BlobAgentCases.Principal, item.ReadKind!.Value, item.NativePayload);
             var decoded = codec.VerifyRead(token, id);
-            await Assert.That(decoded.Payload.AsSpan().SequenceEqual(item.Payload.Span)).IsTrue();
+            await Assert.That(decoded.Payload.Span.SequenceEqual(item.NativePayload.Span)).IsTrue();
             await Assert.That(decoded.Envelope.CommandId).IsEqualTo(Guid.Empty);
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.VerifyRead(token, Guid.NewGuid())).Code)
                 .IsEqualTo(ErrorCode.TokenInvalidated);
@@ -60,7 +60,7 @@ internal sealed class BlobGrainRoutingTests
         foreach (var item in BlobAgentCases.All().Where(item => item.CommandKind.HasValue))
         {
             var badId = codec.Verify(codec.CreateCommand(Guid.NewGuid(), BlobAgentCases.Principal,
-                item.CommandKind!.Value, Guid.NewGuid(), item.Payload));
+                item.CommandKind!.Value, Guid.NewGuid(), item.NativePayload));
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainPartitionResolver.Resolve(badId)).Code)
                 .IsEqualTo(ErrorCode.TokenInvalidated);
             var valid = codec.Verify(Sign(codec, item, Guid.NewGuid()));
@@ -75,5 +75,5 @@ internal sealed class BlobGrainRoutingTests
     }
 
     private static string Sign(GrainRequestCodec codec, BlobAgentCase item, Guid requestId) =>
-        codec.CreateCommand(requestId, BlobAgentCases.Principal, item.CommandKind!.Value, BlobAgentCases.CommandId, item.Payload);
+        codec.CreateCommand(requestId, BlobAgentCases.Principal, item.CommandKind!.Value, BlobAgentCases.CommandId, item.NativePayload);
 }

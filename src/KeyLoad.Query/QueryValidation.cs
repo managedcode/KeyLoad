@@ -129,7 +129,7 @@ internal static class QueryValidation
                     Path(field.Path, limits);
                     return new FieldOperand(field.Path);
                 case ValueOperand value:
-                    return new ValueOperand(Scalar(value.Value));
+                    return ValueOperand.Create(Scalar(value.Value));
                 case ParameterOperand parameter:
                     JsonData.Identifier(parameter.Name);
                     return new ParameterOperand(parameter.Name);

@@ -19,6 +19,7 @@
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <ProjectReference Include="../KeyLoad.CrashHost/KeyLoad.CrashHost.csproj" />
     <PackageReference Include="TUnit" />
+    <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 </Project>

@@ -12,7 +12,6 @@ public sealed partial class DatabaseEngine
     private const string CommandContentConflictMessage = "The command ID was already used with different content.";
     private const string CommittedClockAheadMessage = "The leader clock is behind the committed clock.";
     private const string InvalidCommandJsonMessage = "The operation contains invalid protocol JSON.";
-    private const string NullResultJson = "null";
 
     /// <summary>Atomically applies one stable command identity or returns its persisted outcome.</summary>
     /// <param name="operation">Authenticated operation with its evaluated business time.</param>
@@ -25,6 +24,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidCommandBudgetMessage);
         }
+        operation = NormalizeOperation(operation);
         return Store.Commit((transaction, position) => ApplyCommittedCommand(transaction, operation, position, replicationIndex));
     }
 
@@ -33,9 +33,9 @@ public sealed partial class DatabaseEngine
     {
         var resultKey = KeySpace.Outcome(operation.PrincipalId, operation.Id);
         if (replicationIndex > 0 && transaction.ReadOwnedValue(KeySpace.AppliedBytes) is { } appliedBytes
-            && JsonDefaults.Deserialize<long>(appliedBytes) >= replicationIndex)
+            && NativeSerialization.Deserialize<long>(appliedBytes) >= replicationIndex)
         {
-            return transaction.GetRecord<StoredOutcome>(resultKey)?.Result ?? new(NullResultJson);
+            return transaction.GetRecord<StoredOutcome>(resultKey)?.Result ?? new(null);
         }
         var fingerprint = CommandFingerprint(operation);
         long policyEpoch = 0;
@@ -95,7 +95,7 @@ public sealed partial class DatabaseEngine
 
     private static void ValidateCommandClock(IKeyValueView view, DateTimeOffset evaluatedAt)
     {
-        if (view.ReadOwnedValue(KeySpace.ClockBytes) is { } clock && evaluatedAt < JsonDefaults.Deserialize<DateTimeOffset>(clock))
+        if (view.ReadOwnedValue(KeySpace.ClockBytes) is { } clock && evaluatedAt < NativeSerialization.Deserialize<DateTimeOffset>(clock))
         {
             throw Errors.Fail(ErrorCode.ClockUncertain, CommittedClockAheadMessage);
         }
@@ -114,7 +114,7 @@ public sealed partial class DatabaseEngine
             transaction.PutRecord(KeySpace.AppliedBytes, replicationIndex);
         }
         if (transaction.ReadOwnedValue(KeySpace.ClockBytes) is not { } clock
-            || operation.EvaluatedAt >= JsonDefaults.Deserialize<DateTimeOffset>(clock))
+            || operation.EvaluatedAt >= NativeSerialization.Deserialize<DateTimeOffset>(clock))
         {
             transaction.PutRecord(KeySpace.ClockBytes, operation.EvaluatedAt);
         }

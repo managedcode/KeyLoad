@@ -1,4 +1,3 @@
-using System.Text.Json;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.BlobStorage;
@@ -17,11 +16,12 @@ internal sealed class BlobRecordReader(Guid incarnation)
         BlobMetadataRules.BeforeDecode<T>(bytes);
         try
         {
-            var record = JsonDefaults.Deserialize<T>(bytes);
+            var record = NativeSerialization.Deserialize<T>(bytes);
             BlobMetadataRules.AfterDecode(record);
             return record;
         }
-        catch (JsonException) { throw BlobErrors.Corruption(); }
+        catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
+        { throw BlobErrors.Corruption(); }
     }
 
     internal BlobHead? Head(IKeyValueView view, BlobRef blob)

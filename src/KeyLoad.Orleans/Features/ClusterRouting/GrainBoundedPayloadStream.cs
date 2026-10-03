@@ -1,6 +1,6 @@
 namespace KeyLoad.Orleans;
 
-internal sealed class GrainBoundedJsonStream(int maximumBytes, CancellationToken cancellationToken) : Stream
+internal sealed class GrainBoundedPayloadStream(int maximumBytes, CancellationToken cancellationToken) : Stream
 {
     private const int InitialCapacity = 4_096;
     private const int GrowthFactor = 2;

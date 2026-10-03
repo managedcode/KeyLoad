@@ -28,9 +28,9 @@ internal static class ReplicaDiscoveryEndpoints
         {
             return Results.Unauthorized();
         }
-        var payload = JsonDefaults.Serialize(state);
+        var payload = NativeSerialization.Serialize(state);
         context.Response.Headers[ReplicaTransportProtocol.DiscoverySignatureHeader] = authentication.SignDiscovery(payload, nonce);
-        return new GrainJsonResult(payload);
+        return Results.Bytes(payload, ServerProtocol.BinaryContentType);
     }
 
     private static async Task<IResult> ReadyAsync(PartitionHost partition, OrleansNode node, CancellationToken cancellationToken)

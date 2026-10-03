@@ -92,7 +92,7 @@ internal static class AuthorizedQueryScenario
     }
 
     private static SelectQuery CreateQueryAst() => new(Collection, null, [new("*", "*")],
-        new Comparison(new FieldOperand("/status"), "=", new ValueOperand("open")), [new("/number", false)], 1);
+        new Comparison(new FieldOperand("/status"), "=", ValueOperand.Create("open")), [new("/number", false)], 1);
 
     private static string SerializeOrder(decimal number, string status) =>
         Encoding.UTF8.GetString(JsonDefaults.Serialize(new QueryOrder(number, status, Canary)));
@@ -101,7 +101,7 @@ internal static class AuthorizedQueryScenario
         PartitionRef partition, SelectQuery ast, CancellationToken cancellationToken)
     {
         var denied = await client.QueryAstAsync(new(partition,
-            ast with { Filter = new Comparison(new FieldOperand("/secret"), "=", new ValueOperand(Canary)) }), cancellationToken);
+            ast with { Filter = new Comparison(new FieldOperand("/secret"), "=", ValueOperand.Create(Canary)) }), cancellationToken);
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         var liveRequest = new AstQueryRequest(partition, ast with { Order = [], Limit = 100 });
         var snapshot = Success(await client.StartLiveQueryAsync(new(liveRequest), cancellationToken));

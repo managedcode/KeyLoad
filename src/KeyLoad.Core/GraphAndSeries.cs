@@ -120,7 +120,7 @@ public sealed partial class DatabaseEngine
 
         var tags = JsonData.Validate(append.TagsJson, Limits);
         var sequenceKey = KeySpace.Partition("sample-sequence", partition, append.SeriesSet, append.SeriesId);
-        var sequence = tx.ReadOwnedValue(sequenceKey) is { } bytes ? JsonDefaults.Deserialize<long>(bytes) : 0;
+        var sequence = tx.ReadOwnedValue(sequenceKey) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0;
         foreach (var sample in append.Samples)
         {
             JsonData.Identifier(sample.EventId);
@@ -133,7 +133,7 @@ public sealed partial class DatabaseEngine
             var fingerprint = JsonData.Fingerprint(new { sample, Tags = tags });
             if (tx.ReadOwnedValue(idKey) is { } existing)
             {
-                if (JsonDefaults.Deserialize<string>(existing) != fingerprint)
+                if (NativeSerialization.Deserialize<string>(existing) != fingerprint)
                 {
                     throw Errors.Fail(ErrorCode.Conflict, "A sample ID was reused with different content.");
                 }

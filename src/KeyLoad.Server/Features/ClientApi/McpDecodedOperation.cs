@@ -6,6 +6,6 @@ namespace KeyLoad.Server;
 /// <param name="ReadKind">Public read capability, mutually exclusive with the command capability.</param>
 /// <param name="CommandKind">Public command capability, mutually exclusive with the read capability.</param>
 /// <param name="CommandId">Caller stable write identity; empty for read-dispatch operations.</param>
-/// <param name="Payload">Owned canonical UTF8 JSON, independent of the native argument document.</param>
+/// <param name="Payload">Owned native Orleans bytes, independent of the public argument document.</param>
 internal sealed record McpDecodedOperation(GrainReadKind? ReadKind, OperationKind? CommandKind,
     Guid CommandId, ReadOnlyMemory<byte> Payload);

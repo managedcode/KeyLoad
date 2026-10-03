@@ -13,6 +13,15 @@ public sealed class EmbeddedCoordinator(DatabaseEngine database) : ICommitCoordi
     }
 
     /// <inheritdoc />
+    public Task<OperationResult> SubmitNativeAsync(OperationKind kind, Guid id, string principalId,
+        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(database.Apply(database.CreateNativeOperation(kind, id, principalId,
+            TimeProvider.System.GetUtcNow(), payload)));
+    }
+
+    /// <inheritdoc />
     public Task ReadBarrierAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

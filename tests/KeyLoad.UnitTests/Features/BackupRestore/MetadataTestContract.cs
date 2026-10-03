@@ -1,3 +1,5 @@
+using KeyLoad.Storage.ZoneTree;
+
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class MetadataTestContract
@@ -7,9 +9,9 @@ internal static class MetadataTestContract
     internal const int OversizedMetadataBytes = 8_388_608;
     internal const int OneByte = 1;
     internal const int NestedDepth = 65;
-    internal const int UnsupportedManifestVersion = 2;
-    internal const int WhitespaceChunkBytes = 4_096;
-    internal const byte JsonWhitespace = (byte)' ';
+    internal const int UnsupportedManifestVersion = 3;
+    internal const int PaddingChunkBytes = 4_096;
+    internal const byte TrailingPaddingByte = (byte)' ';
 
     internal const string DirectoryPrefix = "keyload-metadata-";
     internal const string GuidFormat = "N";
@@ -40,14 +42,8 @@ internal static class MetadataTestContract
     internal const string OversizedManifestSuffix = "-oversized-manifest";
     internal const string OversizedIdentitySuffix = "-oversized-identity";
 
-    internal const string FilesJsonKey = "files";
-    internal const string NameJsonKey = "name";
-    internal const string LengthJsonKey = "length";
-    internal const string ChecksumJsonKey = "checksum";
-    internal const string VersionJsonKey = "version";
-
     internal const string ManifestUnsupportedDetail = "The backup manifest is unsupported.";
-    internal const string IdentityFormatUnsupportedDetail = "This database requires a different storage format.";
+    internal const string IdentityFormatUnsupportedDetail = ZoneTreePersistenceFormat.IdentityFormatUnsupported;
     internal const string IdentityChecksumInvalidDetail = "The database identity checksum is invalid.";
     internal const string BackupFileLinkDetail = "Backup files cannot be links.";
     internal const string BackupFileVerificationFailedDetail = "A backup file failed verification.";
@@ -56,12 +52,13 @@ internal static class MetadataTestContract
     internal const string NullManifestJson = "null";
     internal const string MalformedJson = "{not-json";
     internal const string IdentityNullJson = "null";
-    internal const string JsonMemberSeparator = ",";
     internal const string JsonObjectClose = "}";
-    internal const string JsonBooleanTrue = "true";
+    internal const string JsonObjectOpen = "{";
     internal const string UnknownJsonMemberPrefix = "\"unknown\":";
-    internal const string UnknownJsonBooleanMember = UnknownJsonMemberPrefix + JsonBooleanTrue;
     internal const string NestedJsonScalar = "0";
+    internal const string ManifestAtLimitPath = "manifest-at-limit";
+    internal const string IdentityAtLimitPath = "identity-at-limit";
+    internal const string LegacyUnknownObjectJson = "{\"unknown\":true}";
     internal const string FixtureSizeError = "The metadata file exceeds the requested fixture size.";
 
     internal static string OversizedManifestRestorePath(string path) => path + OversizedManifestSuffix;

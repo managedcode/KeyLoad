@@ -36,7 +36,7 @@ public sealed class AdminQueueReader(DatabaseEngine database)
         var scan = view.VisitRange(KeySpace.Partition(MetadataSpace, lane.Partition, lane.Queue), request.Limit,
             (_, value) =>
             {
-                var metadata = JsonDefaults.Deserialize<MessageMetadata>(value);
+                var metadata = NativeSerialization.Deserialize<MessageMetadata>(value);
                 items.Add(new(metadata.Id, metadata.State, metadata.Attempts, metadata.StateVersion,
                     metadata.NotBefore, metadata.ExpiresAt, metadata.LeaseUntil));
                 return true;

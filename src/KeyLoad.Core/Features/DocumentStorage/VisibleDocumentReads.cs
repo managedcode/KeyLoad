@@ -19,7 +19,7 @@ internal static class VisibleDocumentReads
         var range = budget.VisitRange(view, DocumentStorageKeys.Prefix(partition, collection),
             database.Limits.MaxScanRecords, (key, value) =>
             {
-                var document = JsonDefaults.Deserialize<DocumentRecord>(value);
+                var document = NativeSerialization.Deserialize<DocumentRecord>(value);
                 if (!document.Deleted && database.Authorization.CanReadRow(principal, document.Access))
                 {
                     budget.Check();

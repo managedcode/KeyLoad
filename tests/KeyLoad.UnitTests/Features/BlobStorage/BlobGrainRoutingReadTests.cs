@@ -40,17 +40,17 @@ internal sealed class BlobGrainRoutingReadTests
         var cases = BlobAgentCases.All();
         foreach (var item in cases.Where(item => item.Name is BlobAgentCases.Metadata or BlobAgentCases.UploadInfo))
         {
-            await Assert.That(helper.Execute(item.ReadKind!.Value, BlobAgentCases.Principal, item.Payload,
+            await Assert.That(helper.Execute(item.ReadKind!.Value, BlobAgentCases.Principal, item.NativePayload,
                 TestContext.Current!.Execution.CancellationToken)).IsNull();
         }
         var list = cases.Single(item => item.Name == BlobAgentCases.List);
-        var result = (BlobListPage)helper.Execute(list.ReadKind!.Value, BlobAgentCases.Principal, list.Payload,
+        var result = (BlobListPage)helper.Execute(list.ReadKind!.Value, BlobAgentCases.Principal, list.NativePayload,
             TestContext.Current!.Execution.CancellationToken)!;
         await Assert.That(result.Items.IsEmpty).IsTrue();
         await Assert.That(result.NextAfterId).IsNull();
         var range = cases.Single(item => item.Name == BlobAgentCases.Range);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => helper.Execute(range.ReadKind!.Value,
-            BlobAgentCases.Principal, range.Payload, TestContext.Current!.Execution.CancellationToken)).Code).IsEqualTo(ErrorCode.NotFound);
+            BlobAgentCases.Principal, range.NativePayload, TestContext.Current!.Execution.CancellationToken)).Code).IsEqualTo(ErrorCode.NotFound);
     }
 
     /// <summary>Cancellation stops every read, missing persisted authority is denied, and unrelated capabilities are unsupported.</summary>
@@ -65,12 +65,12 @@ internal sealed class BlobGrainRoutingReadTests
         foreach (var item in BlobAgentCases.All().Where(item => item.ReadKind.HasValue))
         {
             await Assert.That(Assert.ThrowsExactly<OperationCanceledException>(() => helper.Execute(item.ReadKind!.Value,
-                BlobAgentCases.Principal, item.Payload, cancellation.Token))).IsNotNull();
+                BlobAgentCases.Principal, item.NativePayload, cancellation.Token))).IsNotNull();
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => helper.Execute(item.ReadKind!.Value,
-                MissingPrincipal, item.Payload, TestContext.Current!.Execution.CancellationToken)).Code).IsEqualTo(ErrorCode.Unauthenticated);
+                MissingPrincipal, item.NativePayload, TestContext.Current!.Execution.CancellationToken)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         }
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => helper.Execute(GrainReadKind.Document,
-            BlobAgentCases.Principal, BlobAgentCases.All()[0].Payload, TestContext.Current!.Execution.CancellationToken)).Code)
+            BlobAgentCases.Principal, BlobAgentCases.All()[0].NativePayload, TestContext.Current!.Execution.CancellationToken)).Code)
             .IsEqualTo(ErrorCode.UnsupportedCapability);
     }
 }

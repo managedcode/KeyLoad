@@ -16,8 +16,6 @@ public sealed partial class QueryEngine
     private const string ExplainId = "explain";
     private const string ResultLimitExceeded = "The query result byte budget is exceeded.";
     private static readonly TimeSpan CursorLifetime = TimeSpan.FromMinutes(5);
-    private sealed record CursorClaims(string Purpose, Guid Incarnation, Guid NodeId, long ReadGeneration, string PrincipalId, long PolicyEpoch,
-        long SchemaVersion, string QueryHash, long CutPosition, long SourceEpoch, int Offset, DateTimeOffset ExpiresAt);
     private readonly record struct CursorState(int Offset, long Cut, long SourceEpoch);
     private readonly DatabaseEngine database;
     private readonly LiveQueryExecutor liveQueries;
@@ -121,9 +119,9 @@ public sealed partial class QueryEngine
         var sourceEpoch = database.DocumentEpoch(view, request.Partition, request.Query.Collection);
         if (request.Cursor is { } cursor)
         {
-            CursorClaims claims;
+            QueryCursorClaims claims;
             try
-            { claims = database.Verify<CursorClaims>(cursor); }
+            { claims = database.Verify<QueryCursorClaims>(cursor); }
             catch (KeyLoadException exception) when (exception.Code == ErrorCode.TokenInvalidated)
             { throw Errors.Fail(ErrorCode.CursorExpired, "The query cursor is invalid."); }
             if (claims.Purpose != CursorPurpose || claims.Incarnation != database.Store.Identity.Incarnation
@@ -159,7 +157,7 @@ public sealed partial class QueryEngine
             rows.Add(projected);
         }
         var next = cursor.Offset + rows.Count;
-        var token = next < prepared.EligibleCount ? database.Sign(new CursorClaims(CursorPurpose, database.Store.Identity.Incarnation,
+        var token = next < prepared.EligibleCount ? database.Sign(new QueryCursorClaims(CursorPurpose, database.Store.Identity.Incarnation,
             database.Store.Identity.NodeId, database.Store.Identity.ReadGeneration, principal.Id,
             principal.PolicyEpoch, resource.SchemaVersion, hash, cursor.Cut, cursor.SourceEpoch, next,
             clock.GetUtcNow().Add(CursorLifetime))) : null;

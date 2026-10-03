@@ -55,7 +55,7 @@ internal static class SourceEventReader
 
     private static SourceEventRecord DecodeTopic(ReadOnlySpan<byte> bytes, EventSourceRef source, long position)
     {
-        var record = JsonDefaults.Deserialize<SourceEventRecord>(bytes);
+        var record = NativeSerialization.Deserialize<SourceEventRecord>(bytes);
         if (record.Source != source || record.Position != position)
         {
             throw Errors.Fail(ErrorCode.Corruption, EventRecordCorruptMessage);
@@ -65,7 +65,7 @@ internal static class SourceEventReader
 
     private static SourceEventRecord DecodeStream(ReadOnlySpan<byte> bytes, EventSourceRef source, long position)
     {
-        var record = JsonDefaults.Deserialize<EventRecord>(bytes);
+        var record = NativeSerialization.Deserialize<EventRecord>(bytes);
         var expectedStream = new StreamRef(source.Partition, source.Resource, source.StreamId!, source.Generation);
         if (record.Stream != expectedStream || record.Revision != position)
         {

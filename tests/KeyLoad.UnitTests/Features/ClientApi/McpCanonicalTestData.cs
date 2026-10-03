@@ -4,7 +4,7 @@ using KeyLoad.Query;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Actual public contract instances for canonical JSON and stable-identity assertions.</summary>
+/// <summary>Actual public contract instances for public JSON, native payload and stable-identity assertions.</summary>
 internal static class McpCanonicalTestData
 {
     internal const string RequestKey = "request";
@@ -92,10 +92,10 @@ internal static class McpCanonicalTestData
     private static ImmutableArray<Mutation> Effects() => [new PutDocument(Resource, Entity, EmptyJson)];
 
     private static McpDecodeCase Case<T>(string name, T request, string? idMember) =>
-        new(name, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), JsonDefaults.Serialize(request), StableId, idMember);
+        new(name, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), NativeSerialization.Serialize(request), StableId, idMember);
 
     private static McpDecodeCase Read<T>(string name, T request) =>
-        new(name, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), JsonDefaults.Serialize(request), Guid.Empty, null);
+        new(name, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), NativeSerialization.Serialize(request), Guid.Empty, null);
 }
 
 /// <summary>Owned canonical input and its exact expected bytes; no service or protocol substitute.</summary>

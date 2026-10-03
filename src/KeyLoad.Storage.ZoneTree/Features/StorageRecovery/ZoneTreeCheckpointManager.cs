@@ -32,7 +32,7 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
     }
 
     private long AppliedPosition() => runtime.View.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, LastAppliedKey)) is { } value
-        ? JsonDefaults.Deserialize<long>(value) : 0;
+        ? NativeSerialization.Deserialize<long>(value) : 0;
 
     internal StorageSnapshot Compact()
     {

@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace KeyLoad.Replication;
 
 internal sealed class ReplicaAppendReceiver(ReplicaState state)
@@ -8,6 +10,7 @@ internal sealed class ReplicaAppendReceiver(ReplicaState state)
     private AppendReply Receive(AppendRequest request)
     {
         var log = state.Log;
+        request = OwnEntries(request);
         if (!state.ObserveLeader(request.Term, request.LeaderId))
         {
             return Reject(log.State.LastIndex + 1);
@@ -42,6 +45,24 @@ internal sealed class ReplicaAppendReceiver(ReplicaState state)
         return new(log.State.Term, true, matched, checked(matched + 1));
     }
 
+    private AppendRequest OwnEntries(AppendRequest request)
+    {
+        if (request.Entries.IsDefault || request.Entries.Length > state.Configuration.MaxAppendEntries)
+        {
+            throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidAppend);
+        }
+        var owned = ImmutableArray.CreateBuilder<ReplicaEntry>(request.Entries.Length);
+        foreach (var entry in request.Entries)
+        {
+            if (entry is null)
+            {
+                throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidAppend);
+            }
+            owned.Add(ReplicaOperationAuthority.Own(entry, state.Materializer.Database));
+        }
+        return request with { Entries = owned.MoveToImmutable() };
+    }
+
     private void ValidateEntries(AppendRequest request)
     {
         for (var position = 0; position < request.Entries.Length; position++)
@@ -53,7 +74,7 @@ internal sealed class ReplicaAppendReceiver(ReplicaState state)
             }
             var existing = state.Log.ReadEntry(incoming.Index);
             if (existing is not null && existing.Term == incoming.Term
-                && !ReplicaProtocolCodec.Serialize(existing).AsSpan().SequenceEqual(ReplicaProtocolCodec.Serialize(incoming)))
+                && !ReplicaOperationAuthority.Equal(existing, incoming, state.Materializer.Database))
             {
                 throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
             }

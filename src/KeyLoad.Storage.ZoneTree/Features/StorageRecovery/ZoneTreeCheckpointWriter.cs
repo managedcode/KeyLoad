@@ -29,11 +29,11 @@ internal static class ZoneTreeCheckpointWriter
         SetPrivateMode(path);
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         WriteFrame(output, options, ZoneTreePersistenceFormat.CheckpointMagic, metadata.Position,
-            JsonDefaults.Serialize(metadata), digest);
+            NativeSerialization.Serialize(metadata), digest);
         var records = WriteRecords(output, options, metadata.Position, tree, digest);
         var footer = new ZoneTreeCheckpointFooter(records, Convert.ToHexStringLower(digest.GetHashAndReset()));
         WriteFrame(output, options, ZoneTreePersistenceFormat.CheckpointEndMagic, metadata.Position,
-            JsonDefaults.Serialize(footer), null);
+            NativeSerialization.Serialize(footer), null);
         options.FaultObserver?.Invoke(CommitStage.SnapshotWritten, metadata.Position, 0);
         output.Flush(true);
         options.FaultObserver?.Invoke(CommitStage.SnapshotFlushed, metadata.Position, 0);
@@ -87,7 +87,7 @@ internal static class ZoneTreeCheckpointWriter
             options,
             ZoneTreePersistenceFormat.CheckpointDataMagic,
             position,
-            JsonDefaults.Serialize(batch),
+            NativeSerialization.Serialize(batch.ToArray()),
             digest);
 
     private static void WriteFrame(

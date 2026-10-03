@@ -40,7 +40,7 @@ internal sealed class ClusterPrincipalPolicyTests
         var storedCredentials = database.Database.Store.Read(view => view
             .Scan(KeyCodec.Encode(ApiKeyStorageSpace), 100)
             .Records
-            .Select(record => JsonDefaults.Deserialize<ApiKeyRecord>(record.Value.Span))
+            .Select(record => NativeSerialization.Deserialize<ApiKeyRecord>(record.Value.Span))
             .Where(credential => credential.PrincipalId == ClusterPrincipalPolicy.InternalPrincipalId)
             .ToArray());
         await Assert.That(storedCredentials).IsEmpty();
@@ -140,9 +140,9 @@ internal sealed class ClusterPrincipalAuthorizationTests
             .Get<PrincipalRecord>();
 
         var ordinaryResult = Apply(database.Database, OperationKind.Membership,
-            new MembershipMutation(MembershipKey, 0, EmptyJson), OrdinaryPrincipalId);
+            new MembershipMutation(MembershipKey, 0, NativeSerialization.Serialize(EmptyJson)), OrdinaryPrincipalId);
         var administratorResult = Apply(database.Database, OperationKind.Membership,
-            new MembershipMutation(MembershipKey, 0, EmptyJson), RootPrincipalId);
+            new MembershipMutation(MembershipKey, 0, NativeSerialization.Serialize(EmptyJson)), RootPrincipalId);
 
         await Assert.That(ordinaryResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(administratorResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
@@ -200,7 +200,7 @@ internal sealed class ClusterPrincipalAuthorizationTests
         await Assert.That(revokeResult.Error).IsNull();
 
         var membershipResult = Apply(database.Database, OperationKind.Membership,
-            new MembershipMutation(MembershipKey, 0, EmptyJson), ClusterPrincipalPolicy.InternalPrincipalId, 2);
+            new MembershipMutation(MembershipKey, 0, NativeSerialization.Serialize(EmptyJson)), ClusterPrincipalPolicy.InternalPrincipalId, 2);
         await Assert.That(membershipResult.Error).IsNull();
         await Assert.That(membershipResult.Get<bool>()).IsTrue();
 
@@ -208,6 +208,7 @@ internal sealed class ClusterPrincipalAuthorizationTests
             KeyCodec.Encode(MembershipStorageSpace, MembershipKey)));
         await Assert.That(membership).IsNotNull();
         await Assert.That(membership!.Version).IsEqualTo(1L);
+        await Assert.That(NativeSerialization.Deserialize<string>(membership.Payload.Span)).IsEqualTo(EmptyJson);
         var revokedRoot = database.Database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(RootPrincipalId)));
         await Assert.That(revokedRoot!.Revoked).IsTrue();
     }

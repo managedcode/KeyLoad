@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using System.Security.Cryptography;
+using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -12,7 +12,7 @@ public sealed partial class DatabaseEngine
     private static QueueCounters Counters(IKeyValueView view, QueueLaneRef lane)
         => view.GetRecord<QueueCounters>(QueueKey("queue-counters", lane)) ?? new(0, 0, 0, 0, 0);
     private bool DispatchPaused(IKeyValueView view) => view.ReadOwnedValue(KeyCodec.Encode("system", "dispatch-paused")) is { } value
-        ? JsonDefaults.Deserialize<bool>(value) : Store.Identity.DispatchPaused;
+        ? NativeSerialization.Deserialize<bool>(value) : Store.Identity.DispatchPaused;
     private MutationReceipt Enqueue(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, EnqueueMessage message, DateTimeOffset now)
     {
         JsonData.Identifier(message.MessageId);
@@ -48,7 +48,7 @@ public sealed partial class DatabaseEngine
         ResourceDefinition resource, MessageBody body, DateTimeOffset now)
     {
         var counters = Counters(tx, lane);
-        var payload = JsonDefaults.Serialize(body);
+        var payload = NativeSerialization.Serialize(body);
         var size = payload.LongLength;
         if (counters.StoredMessages >= resource.QueuePolicy.MaxStoredMessages
             || size > resource.QueuePolicy.MaxStoredBytes - counters.StoredBytes)
@@ -91,51 +91,19 @@ public sealed partial class DatabaseEngine
         return ClaimReadyMessages(tx, principal, request, resource, now, position);
     }
 
-    /// <summary>Signs canonical claim bytes with the persisted store signing key.</summary>
+    /// <summary>Signs versioned native claim bytes with the persisted store signing key.</summary>
     /// <typeparam name="T">Claim type.</typeparam>
     /// <param name="claims">Claim value to sign.</param>
     /// <returns>Signed URL-safe token.</returns>
     public string Sign<T>(T claims)
-    {
-        var bytes = JsonDefaults.Serialize(claims);
-        return Base64Url(bytes) + "." + Base64Url(HMACSHA256.HashData(Store.Identity.SigningKey.Span, bytes));
-    }
-    /// <summary>Verifies a signed token and restores its claims.</summary>
+        => CoreNativeClaims.Sign(Store.Identity.SigningKey.Span, claims);
+    /// <summary>Verifies a signed token and restores its native claims.</summary>
     /// <typeparam name="T">Claim type.</typeparam>
     /// <param name="token">Signed token.</param>
     /// <param name="maximumCharacters">Maximum accepted token length.</param>
     /// <returns>Verified claims.</returns>
-    public T Verify<T>(string token, int maximumCharacters = 8_192)
-    {
-        ArgumentNullException.ThrowIfNull(token);
-        ArgumentOutOfRangeException.ThrowIfLessThan(maximumCharacters, 1);
-        try
-        {
-            if (token.Length > maximumCharacters)
-            {
-                throw new FormatException();
-            }
-
-            var parts = token.Split('.');
-            if (parts.Length != 2)
-            {
-                throw new FormatException();
-            }
-
-            var bytes = Convert.FromBase64String(Pad(parts[0]));
-            var mac = Convert.FromBase64String(Pad(parts[1]));
-            if (!CryptographicOperations.FixedTimeEquals(HMACSHA256.HashData(Store.Identity.SigningKey.Span, bytes), mac))
-            {
-                throw new FormatException();
-            }
-
-            return JsonDefaults.Deserialize<T>(bytes);
-        }
-        catch (Exception e) when (e is FormatException or System.Text.Json.JsonException)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, "The signed token is invalid."); }
-    }
-    private static string Base64Url(byte[] value) => Convert.ToBase64String(value).TrimEnd('=').Replace('+', '-').Replace('/', '_');
-    private static string Pad(string value) { var padded = value.Replace('-', '+').Replace('_', '/'); return padded.PadRight((padded.Length + 3) / 4 * 4, '='); }
+    public T Verify<T>(string token, int maximumCharacters = CoreNativeClaims.DefaultMaximumCharacters)
+        => CoreNativeClaims.Verify<T>(Store.Identity.SigningKey.Span, token, maximumCharacters);
     private ValidatedQueueLease Lease(IKeyValueView view, PrincipalRecord principal,
         QueueLaneRef lane, string token, DateTimeOffset now)
         => Lease(view, principal, lane, Verify<DeliveryClaims>(token), now);

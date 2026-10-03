@@ -1,11 +1,7 @@
-using System.Collections.Immutable;
-using System.Net;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Orleans.Configuration;
 
 namespace KeyLoad.UnitTests;
 
@@ -97,9 +93,9 @@ internal sealed class ReplicaTransportSecurityTests
         var request = fixture.Vote();
         var credential = RandomNumberGenerator.GetBytes(ReplicaTransportProtocol.SecretBytes);
         var options = fixture.Options with { Secret = credential };
-        using var wrongCredential = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System);
+        using var wrongCredential = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System, canonicalDatabase: fixture.Database);
         using var wrongCluster = new ReplicaEnvelopeAuthenticator(fixture.Configuration,
-            fixture.Options with { ClusterId = ReplicaSecurityFixture.OtherClusterId }, fixture.Discovery, TimeProvider.System);
+            fixture.Options with { ClusterId = ReplicaSecurityFixture.OtherClusterId }, fixture.Discovery, TimeProvider.System, canonicalDatabase: fixture.Database);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => wrongCredential.VerifyRequest(request)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => wrongCluster.VerifyRequest(request)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         CryptographicOperations.ZeroMemory(credential);
@@ -150,7 +146,11 @@ internal sealed class ReplicaReplayCapacityTests
         fixture.Receiver.VerifyRequest(original);
         var read = fixture.Resign(fixture.Read() with { Nonce = original.Nonce });
         var vote = fixture.Resign(fixture.Vote() with { Nonce = original.Nonce });
-        var malformed = fixture.Resign(original with { Payload = ReplicaTransportProtocol.Utf8.GetBytes(ReplicaSecurityFixture.MissingOperationFields) });
+        var malformed = fixture.Resign(original with
+        {
+            Payload = ReplicaSecurityWireFixture.Operation(
+            ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(original.Payload.Span), ReplicaSecurityFixture.MissingOperationFields)
+        });
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(read)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(vote)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(original)).Code).IsEqualTo(ErrorCode.Unauthenticated);
@@ -191,11 +191,7 @@ internal sealed class ReplicaReplayCapacityTests
     public async Task DuplicateAppendFieldsCannotConsumeCriticalCapacity(bool operation)
     {
         using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1 });
-        var request = fixture.Append(OperationKind.Membership);
-        var source = ReplicaTransportProtocol.Utf8.GetString(request.Payload.Span);
-        var changed = operation ? source.Replace(ReplicaSecurityFixture.OperationToken, ReplicaSecurityFixture.DuplicateOperationToken, StringComparison.Ordinal)
-            : source.Replace(ReplicaSecurityFixture.EntriesToken, ReplicaSecurityFixture.DuplicateEntriesToken, StringComparison.Ordinal);
-        var invalid = fixture.Resign(request with { Payload = ReplicaTransportProtocol.Utf8.GetBytes(changed) });
+        var invalid = fixture.DuplicateAppend(operation);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(invalid)).Code).IsEqualTo(ErrorCode.Validation);
         fixture.Receiver.VerifyRequest(fixture.Vote());
     }
@@ -216,20 +212,21 @@ internal sealed class ReplicaReplayCapacityTests
         await Assert.That(results.Count(result => result == ErrorCode.Unauthenticated)).IsEqualTo(ReplicaSecurityFixture.ReservedCapacity - 1);
     }
 
-    /// <summary>AC-REP-006: escaped base64 remains valid wire JSON without allocating a decoded payload to classify it.</summary>
+    /// <summary>AC-REP-006: independently owned native bytes retain control classification and exact frozen operation content.</summary>
     [Test]
-    public async Task ValidEscapedBase64RetainsControlClassificationAndOriginalOperationBytes()
+    public async Task ValidOwnedNativeBytesRetainControlClassificationAndOriginalOperationBytes()
     {
         using var fixture = new ReplicaSecurityFixture();
         var request = fixture.Forward(OperationKind.Membership);
-        var payload = ReplicaTransportProtocol.Utf8.GetString(request.Payload.Span).Replace(ReplicaSecurityFixture.PayloadToken,
-            ReplicaSecurityFixture.EscapedPayloadToken, StringComparison.Ordinal);
-        request = fixture.Resign(request with { Payload = ReplicaTransportProtocol.Utf8.GetBytes(payload) });
+        var operation = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(request.Payload.Span);
+        request = fixture.Resign(request with { Payload = ReplicaProtocolCodec.Serialize(operation) });
         fixture.Receiver.VerifyRequest(request);
         await Assert.That(ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(request.Payload.Span).PayloadJson).IsEqualTo(ReplicaSecurityFixture.OperationPayload);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(
+            ReplicaSecurityWireFixture.LegacyEscapedOperation)).Code).IsEqualTo(ErrorCode.FormatUnsupported);
     }
 
-    /// <summary>AC-REP-006: maximum operation classification scans encoded bytes without allocating the decoded command.</summary>
+    /// <summary>AC-REP-006: warmed borrowed classification avoids decoded content; accepted requests own independent buffers.</summary>
     [Test]
     public async Task MaximumOperationClassificationDoesNotAllocateItsDecodedPayload()
     {
@@ -238,11 +235,30 @@ internal sealed class ReplicaReplayCapacityTests
         var payload = JsonDefaults.Serialize(new string(ReplicaSecurityFixture.PayloadPadding, limits.MaxBatchBytes - ReplicaSecurityFixture.JsonStringQuoteBytes));
         var operation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.Batch, ReplicaSecurityFixture.VoterA,
             TimeProvider.System.GetUtcNow(), ReplicaTransportProtocol.Utf8.GetString(payload));
+        operation = fixture.Database.NormalizeOperation(operation);
         var request = fixture.Request(ReplicaRpc.Forward, operation);
+        _ = fixture.Receiver.ClassifyBorrowedRequest(fixture.Forward(OperationKind.Batch));
         var before = GC.GetAllocatedBytesForCurrentThread();
-        fixture.Receiver.VerifyRequest(request);
+        var pool = fixture.Receiver.ClassifyBorrowedRequest(request);
         var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
         await Assert.That(allocated).IsLessThan(ReplicaSecurityFixture.MaximumClassificationAllocationBytes);
+        await Assert.That(pool).IsEqualTo(ReplicaReplayPool.Forward);
+        var owned = fixture.Receiver.VerifyRequest(request);
+        await Assert.That(owned.Payload.Span.SequenceEqual(request.Payload.Span)).IsTrue();
+        await Assert.That(owned.Signature.Span.SequenceEqual(request.Signature.Span)).IsTrue();
+        await Assert.That(MemoryMarshal.TryGetArray(request.Payload, out var callerPayload)).IsTrue();
+        await Assert.That(MemoryMarshal.TryGetArray(owned.Payload, out var ownedPayload)).IsTrue();
+        await Assert.That(MemoryMarshal.TryGetArray(request.Signature, out var callerSignature)).IsTrue();
+        await Assert.That(MemoryMarshal.TryGetArray(owned.Signature, out var ownedSignature)).IsTrue();
+        await Assert.That(ReferenceEquals(callerPayload.Array, ownedPayload.Array)).IsFalse();
+        await Assert.That(ReferenceEquals(callerSignature.Array, ownedSignature.Array)).IsFalse();
+        var firstPayloadByte = owned.Payload.Span[0];
+        var firstSignatureByte = owned.Signature.Span[0];
+        callerPayload.Array![callerPayload.Offset] ^= ReplicaSecurityFixture.MutationBit;
+        callerSignature.Array![callerSignature.Offset] ^= ReplicaSecurityFixture.MutationBit;
+        await Assert.That(owned.Payload.Span[0]).IsEqualTo(firstPayloadByte);
+        await Assert.That(owned.Signature.Span[0]).IsEqualTo(firstSignatureByte);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(owned)).Code).IsEqualTo(ErrorCode.Unauthenticated);
     }
 }
 
@@ -303,94 +319,4 @@ internal enum ReplicaSecurityMutation
     Voter,
     /// <summary>Authenticated error code.</summary>
     Error
-}
-
-internal sealed class ReplicaSecurityFixture : IDisposable
-{
-    internal const string VoterA = "http://voter-a:8080";
-    internal const string VoterB = "http://voter-b:8080";
-    internal const string VoterC = "http://voter-c:8080";
-    internal const string UnknownVoter = "http://unknown-voter:8080";
-    internal const string ClusterId = "replica-transport-security";
-    internal const string OtherClusterId = "other-replica-cluster";
-    internal const string OperationPayload = "{}";
-    internal const string DuplicateKind = "{\"kind\":\"Batch\",\"kind\":\"Membership\"}";
-    internal const string UnknownKind = "{\"kind\":\"Unknown\"}";
-    internal const string MissingOperationFields = "{\"kind\":\"Membership\"}";
-    internal const string InvalidPayload = "{\"id\":\"00000000-0000-0000-0000-000000000001\",\"kind\":\"Membership\",\"principalId\":\"root\",\"evaluatedAt\":\"2026-10-01T00:00:00Z\",\"payloadJson\":false}";
-    internal const string UnknownField = "unknown-field";
-    internal const string KindToken = "\"kind\":\"Membership\"";
-    internal const string PayloadToken = "\"payloadJson\":\"e30=\"";
-    internal const string InvalidPayloadToken = "\"payloadJson\":false";
-    internal const string EscapedPayloadToken = "\"payloadJson\":\"\\u0065\\u0033\\u0030\\u003D\"";
-    internal const string UnknownFieldToken = "\"unknown\":true,\"kind\":\"Membership\"";
-    internal const string OperationToken = "\"operation\":";
-    internal const string DuplicateOperationToken = "\"operation\":null,\"operation\":";
-    internal const string EntriesToken = "\"entries\":";
-    internal const string DuplicateEntriesToken = "\"entries\":[],\"entries\":";
-    internal const int SiloPort = 11_111;
-    internal const int ReservedCapacity = 32;
-    internal const int TimeMarginMilliseconds = 1_000;
-    internal const int JsonStringQuoteBytes = 2;
-    internal const long MaximumClassificationAllocationBytes = 1_048_576;
-    internal const char PayloadPadding = 'x';
-    internal const byte SnapshotByte = 1;
-    internal static byte[] EmptyRead { get; } = ReplicaProtocolCodec.Serialize(string.Empty);
-    private readonly IHost host;
-    private readonly ReplicaMessageMac mac;
-    private readonly byte[] credential;
-    internal ReplicaConfiguration Configuration { get; }
-    internal ReplicaPeerOptions Options { get; }
-    internal ReplicaSiloDiscoveryState Discovery { get; }
-    internal ReplicaEnvelopeAuthenticator Sender { get; }
-    internal ReplicaEnvelopeAuthenticator Receiver { get; }
-    internal string OtherGeneration { get; }
-
-    internal ReplicaSecurityFixture(ReplicaReplayLimits? limits = null)
-    {
-        host = new HostBuilder().UseOrleans(silo => silo.Services.Configure<EndpointOptions>(endpoint =>
-        { endpoint.AdvertisedIPAddress = IPAddress.Loopback; endpoint.SiloPort = SiloPort; endpoint.GatewayPort = 0; })).Build();
-        var local = host.Services.GetRequiredService<ILocalSiloDetails>();
-        Configuration = new(VoterB, [VoterA, VoterB, VoterC], Path.GetTempPath(), Guid.NewGuid());
-        credential = RandomNumberGenerator.GetBytes(ReplicaTransportProtocol.SecretBytes);
-        Options = new(new() { [VoterA] = new(VoterA), [VoterB] = new(VoterB), [VoterC] = new(VoterC) },
-            credential, ClusterId)
-        { ReplayLimits = limits ?? new() { CriticalPerVoter = ReservedCapacity, ForwardPerVoter = 1, ReadBarrierPerVoter = 1, DataAppendPerVoter = 1 } };
-        Discovery = new(Configuration, Options, local);
-        Receiver = new(Configuration, Options, Discovery, TimeProvider.System);
-        var senderConfiguration = Configuration with { LocalId = VoterA };
-        Sender = new(senderConfiguration, Options, new(senderConfiguration, Options, local), TimeProvider.System);
-        OtherGeneration = SiloAddress.New(local.SiloAddress.Endpoint, checked(local.SiloAddress.Generation + 1)).ToParsableString();
-        mac = new(Options.Secret, Options.ClusterId);
-    }
-
-    internal ReplicaPeerEnvelope Vote() => Request(ReplicaRpc.RequestVote, new VoteRequest(VoterA, 1, 0, 0));
-    internal ReplicaPeerEnvelope Read() => Request(ReplicaRpc.ReadBarrier, string.Empty);
-    internal ReplicaPeerEnvelope Forward(OperationKind kind) => Request(ReplicaRpc.Forward, Operation(kind));
-    internal ReplicaPeerEnvelope Append(params OperationKind?[] kinds) => Request(ReplicaRpc.Append,
-        new AppendRequest(VoterA, 1, 0, 0, 0, kinds.Select((kind, index) => new ReplicaEntry(index + 1L, 1,
-            kind is { } value ? Operation(value) : null)).ToImmutableArray()));
-    internal ReplicaPeerEnvelope Request<T>(ReplicaRpc method, T payload, string? sender = null)
-    {
-        var request = Sender.SignRequest(VoterB, method, Discovery.RuntimeAddress, ReplicaProtocolCodec.Serialize(payload));
-        return sender is null ? request : Resign(request with { Sender = sender });
-    }
-    internal ReplicaPeerEnvelope Resign(ReplicaPeerEnvelope request) => request with { Signature = mac.Request(request) };
-    internal ReplicaPeerEnvelope InvalidControl(string scenario)
-    {
-        var request = Forward(OperationKind.Membership);
-        var source = ReplicaTransportProtocol.Utf8.GetString(request.Payload.Span);
-        var payload = scenario switch
-        {
-            DuplicateKind => source.Replace(KindToken, DuplicateKind.TrimStart('{').TrimEnd('}'), StringComparison.Ordinal),
-            UnknownKind => source.Replace(KindToken, UnknownKind.TrimStart('{').TrimEnd('}'), StringComparison.Ordinal),
-            InvalidPayload => source.Replace(PayloadToken, InvalidPayloadToken, StringComparison.Ordinal),
-            UnknownField => source.Replace(KindToken, UnknownFieldToken, StringComparison.Ordinal),
-            _ => MissingOperationFields
-        };
-        return Resign(request with { Payload = ReplicaTransportProtocol.Utf8.GetBytes(payload) });
-    }
-    private static ReplicatedOperation Operation(OperationKind kind) => new(Guid.NewGuid(), kind, VoterA, TimeProvider.System.GetUtcNow(), OperationPayload);
-    /// <inheritdoc />
-    public void Dispose() { Sender.Dispose(); Receiver.Dispose(); mac.Dispose(); host.Dispose(); CryptographicOperations.ZeroMemory(credential); }
 }

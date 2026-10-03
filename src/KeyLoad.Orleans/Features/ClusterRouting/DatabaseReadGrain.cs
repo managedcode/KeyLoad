@@ -83,7 +83,7 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
             return query.Execute(kind, principal.Id, request.Payload, cancellationToken);
         }
 
-        GrainPayloadJson.RequireNull(request.Payload);
+        GrainNativePayload.RequireNoDto(request.Payload);
         GrainRequestAuthority.RequireAdministrator(principal);
         cancellationToken.ThrowIfCancellationRequested();
         return kind switch

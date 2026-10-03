@@ -6,9 +6,9 @@ internal static class GrainRequestScope
 {
     internal static void Validate(GrainRequestEnvelope request, Guid incarnation, DateTimeOffset now)
     {
-        if (request.Purpose != GrainRoutingProtocol.RequestPurpose || request.Incarnation != incarnation
+        if (request.Purpose != GrainNativeContracts.RequestPurpose || request.Incarnation != incarnation
             || request.RequestId == Guid.Empty || request.ExpiresAt <= now || request.ExpiresAt > now + GrainRoutingProtocol.MaximumFuture
-            || (request.ReadKind is null) == (request.CommandKind is null) || string.IsNullOrEmpty(request.EncodedPayload))
+            || (request.ReadKind is null) == (request.CommandKind is null) || request.Payload.IsEmpty)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }

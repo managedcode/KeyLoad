@@ -4,4 +4,11 @@
     <PackageReference Include="Microsoft.Orleans.Serialization" />
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="KeyLoad.Server" />
+    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.Core" />
+    <InternalsVisibleTo Include="KeyLoad.Orleans" />
+    <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
+  </ItemGroup>
 </Project>

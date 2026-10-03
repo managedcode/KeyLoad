@@ -18,7 +18,7 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(collection);
         return view.ReadOwnedValue(KeySpace.Partition("document-epoch", partition, collection)) is { } bytes
-            ? JsonDefaults.Deserialize<long>(bytes) : 0;
+            ? NativeSerialization.Deserialize<long>(bytes) : 0;
     }
     private static void CheckRevision(long actual, long? expected)
     {
@@ -52,7 +52,7 @@ public sealed partial class DatabaseEngine
             if (index.Unique)
             {
                 var uniqueKey = UniqueKey(after.Reference.Partition, resource.Name, index, values);
-                if (tx.ReadOwnedValue(uniqueKey) is { } occupant && JsonDefaults.Deserialize<string>(occupant) != after.Reference.Id)
+                if (tx.ReadOwnedValue(uniqueKey) is { } occupant && NativeSerialization.Deserialize<string>(occupant) != after.Reference.Id)
                 {
                     throw Errors.Fail(ErrorCode.Conflict, "A partition-scoped unique index value is already present.");
                 }

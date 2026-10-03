@@ -1,4 +1,3 @@
-using System.Text;
 using KeyLoad.Replication;
 
 namespace KeyLoad.RecoveryTests;
@@ -9,7 +8,7 @@ internal sealed class ReadRoundGuardTests
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(15);
 
     /// <summary>Invalid probes fail while the real apply/protocol gate is held, leaving durable term/log/cut unchanged.</summary>
-    /// <param name="payload">A concrete invalid existing append JSON shape.</param>
+    /// <param name="payload">The native append field or semantic boundary to reject.</param>
     [Test]
     [Arguments(ReadRoundGuardPayloads.Nonempty)]
     [Arguments(ReadRoundGuardPayloads.NullEntries)]
@@ -36,8 +35,9 @@ internal sealed class ReadRoundGuardTests
         try
         {
             var before = node.Log.State;
+            var bytes = ReadRoundGuardWireFixture.Probe(payload);
             var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => node.Consensus.HandleAsync(
-                ReplicaRpc.ReadProbe, payload, linked.Token));
+                ReplicaRpc.ReadProbe, bytes, linked.Token));
             await Assert.That(failure!.Code).IsEqualTo(ErrorCode.Validation);
             await Assert.That(node.Log.State).IsEqualTo(before);
             await Assert.That(node.Database.LastApplied).IsEqualTo(0);
@@ -46,7 +46,7 @@ internal sealed class ReadRoundGuardTests
     }
 
     /// <summary>Control payloads must be the serialized empty string before the leader gate can run.</summary>
-    /// <param name="payload">A concrete nonempty, malformed or wrong-type JSON value.</param>
+    /// <param name="payload">The native control root or trailing-byte boundary to reject.</param>
     [Test]
     [Arguments(ReadRoundGuardPayloads.NonemptyString)]
     [Arguments(ReadRoundGuardPayloads.Null)]
@@ -63,8 +63,9 @@ internal sealed class ReadRoundGuardTests
         try
         {
             var before = node.Log.State;
+            var bytes = ReadRoundGuardWireFixture.Control(payload);
             var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => node.Consensus.HandleAsync(
-                ReplicaRpc.ControlReadBarrier, payload, linked.Token));
+                ReplicaRpc.ControlReadBarrier, bytes, linked.Token));
             await Assert.That(failure!.Code).IsEqualTo(ErrorCode.Validation);
             await Assert.That(node.Log.State).IsEqualTo(before);
         }
@@ -78,9 +79,24 @@ internal sealed class ReadRoundGuardTests
     [Arguments(2)]
     public async Task NonemptyRealOperationCannotUseProbe(int index)
     {
-        var operation = KeyLoad.CrashHost.ReplicaCrashModel.Operation(index);
+        await using var cluster = new ReadRoundStoredCluster(1);
+        using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);
+        cluster.Attach();
+        var node = cluster.Nodes[0];
+        var operation = node.Database.NormalizeOperation(KeyLoad.CrashHost.ReplicaCrashModel.Operation(index));
         var request = new AppendRequest(ReadRoundStoredCluster.VoterA, 3, 0, 0, 0, [new(1, 3, operation)]);
-        await InvalidProbeCannotReachReceiverOrMutateStoredAuthority(Encoding.UTF8.GetString(ReplicaProtocolCodec.Serialize(request)));
+        await node.Materializer.ProtocolGate.WaitAsync(linked.Token);
+        try
+        {
+            var before = node.Log.State;
+            var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => node.Consensus.HandleAsync(
+                ReplicaRpc.ReadProbe, ReplicaProtocolCodec.Serialize(request), linked.Token));
+            await Assert.That(failure!.Code).IsEqualTo(ErrorCode.Validation);
+            await Assert.That(node.Log.State).IsEqualTo(before);
+            await Assert.That(node.Database.LastApplied).IsEqualTo(0);
+        }
+        finally { node.Materializer.ProtocolGate.Release(); }
     }
 
     /// <summary>Both read APIs preserve genuine caller cancellation while transport readiness is pending.</summary>
@@ -103,25 +119,25 @@ internal sealed class ReadRoundGuardTests
     }
 }
 
+// Case labels select authentic native malformed frames; none is runtime JSON.
 internal static class ReadRoundGuardPayloads
 {
-    private const string Header = "\"leaderId\":\"read-round-a\",\"term\":3,\"previousIndex\":0,\"previousTerm\":0,\"committedIndex\":0";
-    internal const string Nonempty = "{" + Header + ",\"entries\":[{\"index\":1,\"term\":3,\"operation\":null}]}";
-    internal const string NullEntries = "{" + Header + ",\"entries\":null}";
-    internal const string MissingEntries = "{" + Header + "}";
-    internal const string MissingLeader = "{\"term\":3,\"previousIndex\":0,\"previousTerm\":0,\"committedIndex\":0,\"entries\":[]}";
-    internal const string MissingTerm = "{\"leaderId\":\"read-round-a\",\"previousIndex\":0,\"previousTerm\":0,\"committedIndex\":0,\"entries\":[]}";
-    internal const string MissingPreviousIndex = "{\"leaderId\":\"read-round-a\",\"term\":3,\"previousTerm\":0,\"committedIndex\":0,\"entries\":[]}";
-    internal const string MissingPreviousTerm = "{\"leaderId\":\"read-round-a\",\"term\":3,\"previousIndex\":0,\"committedIndex\":0,\"entries\":[]}";
-    internal const string MissingCommittedIndex = "{\"leaderId\":\"read-round-a\",\"term\":3,\"previousIndex\":0,\"previousTerm\":0,\"entries\":[]}";
-    internal const string Duplicate = "{" + Header + ",\"entries\":[],\"entries\":[]}";
-    internal const string Unknown = "{" + Header + ",\"entries\":[],\"unknown\":true}";
-    internal const string CaseMutated = "{\"LeaderId\":\"read-round-a\",\"term\":3,\"previousIndex\":0,\"previousTerm\":0,\"committedIndex\":0,\"entries\":[]}";
-    internal const string InvalidTerm = "{\"leaderId\":\"read-round-a\",\"term\":0,\"previousIndex\":0,\"previousTerm\":0,\"committedIndex\":0,\"entries\":[]}";
-    internal const string InvalidPrevious = "{\"leaderId\":\"read-round-a\",\"term\":3,\"previousIndex\":1,\"previousTerm\":0,\"committedIndex\":0,\"entries\":[]}";
-    internal const string Trailing = "{" + Header + ",\"entries\":[]} true";
-    internal const string NonemptyString = "\"nonempty\"";
-    internal const string Null = "null";
-    internal const string Object = "{}";
-    internal const string TrailingString = "\"\" true";
+    internal const string Nonempty = "nonempty";
+    internal const string NullEntries = "null-entries";
+    internal const string MissingEntries = "missing-entries";
+    internal const string MissingLeader = "missing-leader";
+    internal const string MissingTerm = "missing-term";
+    internal const string MissingPreviousIndex = "missing-previous-index";
+    internal const string MissingPreviousTerm = "missing-previous-term";
+    internal const string MissingCommittedIndex = "missing-committed-index";
+    internal const string Duplicate = "duplicate";
+    internal const string Unknown = "unknown";
+    internal const string CaseMutated = "case-mutated-alias";
+    internal const string InvalidTerm = "invalid-term";
+    internal const string InvalidPrevious = "invalid-previous";
+    internal const string Trailing = "trailing";
+    internal const string NonemptyString = "nonempty-string";
+    internal const string Null = "null-root";
+    internal const string Object = "object-root";
+    internal const string TrailingString = "trailing-string";
 }

@@ -17,7 +17,8 @@ internal static class ReplicaCrashTransfer
         var image = source.Snapshots.Create(4, 1);
         target.Populate(3);
         target.AddObsoleteRecord();
-        target.Log.Append([new(4, 1, ReplicaCrashModel.Operation(4)), new(5, 1, ReplicaCrashModel.Operation(5))]);
+        target.Log.Append([new(4, 1, target.Database.NormalizeOperation(ReplicaCrashModel.Operation(4))),
+            new(5, 1, target.Database.NormalizeOperation(ReplicaCrashModel.Operation(5)))]);
         var offset = target.Snapshots.Begin(image);
         var limit = boundary == ReplicaCrashBoundary.SnapshotChunkAcknowledged ? PrefixSize : target.Configuration.SnapshotChunkBytes;
         while (offset < image.Length)

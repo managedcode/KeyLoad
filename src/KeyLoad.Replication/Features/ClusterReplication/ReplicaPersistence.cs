@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text.Json;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Replication;
@@ -19,13 +18,13 @@ internal static class ReplicaPersistence
     internal const int ManifestMaxBytes = 4_096;
     internal const int HashHexLength = 64;
 
-    internal static T Decode<T>(byte[] bytes)
+    internal static T Decode<T>(byte[] bytes, int maximumEntries)
     {
         try
         {
-            return JsonDefaults.Deserialize<T>(bytes);
+            return ReplicaProtocolCodec.DeserializeStored<T>(bytes, maximumEntries);
         }
-        catch (JsonException)
+        catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
         {
             throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
         }
@@ -44,7 +43,7 @@ internal static class ReplicaPersistence
     }
 
     internal static long AppliedPosition(IAtomicStore store) => store.Read(view =>
-        view.ReadOwnedValue(KeyCodec.Encode(SystemKey, AppliedKey)) is { } bytes ? Decode<long>(bytes) : 0);
+        view.ReadOwnedValue(KeyCodec.Encode(SystemKey, AppliedKey)) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0);
 
     internal static void VerifyImage(IAtomicStore store, string path, ReplicaSnapshot snapshot)
     {
@@ -59,7 +58,7 @@ internal static class ReplicaPersistence
         StorageSnapshot cut;
         try
         { cut = store.VerifySnapshot(path); }
-        catch (JsonException)
+        catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
         {
             throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot);
         }

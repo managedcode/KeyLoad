@@ -1,4 +1,3 @@
-using System.Text;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.BlobStorage;
@@ -106,7 +105,7 @@ public sealed class BlobStorageOperations(DatabaseEngine database, TimeProvider?
     private OperationResult Result<T>(ReplicatedOperation operation, BlobCommandScope scope, long position, T value)
     {
         var receipt = new CommitReceipt(operation.Id, database.Token(scope.Blob.Partition, position), [], database.Durability);
-        return new(Encoding.UTF8.GetString(JsonDefaults.Serialize(new BlobCommitResult<T>(receipt, value))));
+        return new(null) { NativeValue = new BlobCommitResult<T>(receipt, value) };
     }
 
     /// <summary>Reads authorized current metadata from one bounded storage cut.</summary>

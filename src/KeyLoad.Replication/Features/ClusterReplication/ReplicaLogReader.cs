@@ -13,19 +13,18 @@ internal static class ReplicaLogReader
             throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidAppend);
         }
         var entries = new List<ReplicaEntry>();
-        var bytes = 2L;
         var index = firstIndex;
         while (index <= state.LastIndex && entries.Count < maxEntries)
         {
             var entry = load(index);
-            var length = ReplicaProtocolCodec.Serialize(entry).Length;
-            if (length + 2L > maxBytes)
+            if (ReplicaProtocolCodec.MeasureEntries([entry]) > maxBytes)
             { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaPersistence.ReadLimit); }
-            var separator = entries.Count == 0 ? 0 : 1;
-            if (bytes + length + separator > maxBytes)
-            { break; }
             entries.Add(entry);
-            bytes += length + separator;
+            if (ReplicaProtocolCodec.MeasureEntries(entries) > maxBytes)
+            {
+                entries.RemoveAt(entries.Count - 1);
+                break;
+            }
             if (index == long.MaxValue)
             { break; }
             index++;

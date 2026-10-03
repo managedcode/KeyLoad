@@ -91,7 +91,7 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, DatabaseLimits 
         if (token.Kind == SqlTokenKind.String)
         {
             cursor.Advance();
-            return new ValueOperand(token.Text);
+            return ValueOperand.Create(token.Text);
         }
         if (token.Kind == SqlTokenKind.Number)
         {
@@ -100,7 +100,7 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, DatabaseLimits 
             {
                 throw SqlSyntax.Invalid();
             }
-            return new ValueOperand(number);
+            return ValueOperand.Create(number);
         }
         if (token.Kind == SqlTokenKind.Parameter)
         {
@@ -109,15 +109,15 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, DatabaseLimits 
         }
         if (cursor.Eat(SqlSyntax.Null))
         {
-            return new ValueOperand(null);
+            return ValueOperand.Create(null);
         }
         if (cursor.Eat(SqlSyntax.True))
         {
-            return new ValueOperand(true);
+            return ValueOperand.Create(true);
         }
         if (cursor.Eat(SqlSyntax.False))
         {
-            return new ValueOperand(false);
+            return ValueOperand.Create(false);
         }
         return Field();
     }

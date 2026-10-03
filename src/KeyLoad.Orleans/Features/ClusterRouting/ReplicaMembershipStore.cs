@@ -1,4 +1,3 @@
-using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
@@ -37,8 +36,8 @@ internal sealed class ReplicaMembershipStore
     {
         cancellationToken.ThrowIfCancellationRequested();
         var mutation = new MembershipMutation(ReplicaMembershipProtocol.TableKey, snapshot.ExpectedVersion, snapshot.Serialize());
-        var result = await coordinator.SubmitAsync(OperationKind.Membership, Guid.NewGuid(), principal,
-            JsonSerializer.Serialize(mutation, JsonDefaults.Options), cancellationToken).ConfigureAwait(false);
+        var result = await coordinator.SubmitNativeAsync(OperationKind.Membership, Guid.NewGuid(), principal,
+            NativeSerialization.Serialize(mutation), cancellationToken).ConfigureAwait(false);
         return result.Get<bool>();
     }
 }

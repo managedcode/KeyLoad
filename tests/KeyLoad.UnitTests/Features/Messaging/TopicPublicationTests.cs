@@ -57,7 +57,7 @@ internal sealed class TopicPublicationTests
         var headKey = KeySpace.Partition(TopicHeadSpace, stale.Partition, TopicName);
         stale.Store.Commit((transaction, _) =>
         {
-            transaction.Put(headKey, JsonDefaults.Serialize(new { TailPosition = 0L, FirstAvailablePosition = 1L, Generation = 2L, StoredBytes = 0L }));
+            transaction.Put(headKey, NativeSerialization.Serialize(new TopicHead(0L, 1L, 2L, 0L)));
             return 0;
         });
         var staleId = Guid.NewGuid();
@@ -105,7 +105,7 @@ internal sealed class TopicPublicationTests
         ConfigureTopic(database, long.MaxValue, maxEvents: 1);
         var publicationTime = SourceReadBusinessTime.Next(database);
         Publish(database, [new("first", EventType, "{}")], Guid.NewGuid(), publicationTime);
-        var priorSequence = database.Store.Read(view => JsonDefaults.Deserialize<long>(view.ReadOwnedValue(KeySpace.Partition(EventSequenceSpace, database.Partition))!));
+        var priorSequence = database.Store.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.Partition(EventSequenceSpace, database.Partition))!));
         var failedId = Guid.NewGuid();
         var failed = database.Submit(OperationKind.Batch, new CommandRequest(failedId, database.Partition,
             [new PutDocument(ResourceName, "rolled-back", "{}"), new PublishTopic(TopicName, [new("overflow", EventType, "{}")])]),
@@ -113,7 +113,7 @@ internal sealed class TopicPublicationTests
         await Assert.That(failed.Error).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(database.Database.GetDocument("root", new(database.Partition, ResourceName, "rolled-back"))).IsNull();
         await Assert.That(database.Database.ReadEventSource("root", new(new(database.Partition, TopicName, EventSourceKind.Topic))).Head.TailPosition).IsEqualTo(1L);
-        var currentSequence = database.Store.Read(view => JsonDefaults.Deserialize<long>(view.ReadOwnedValue(KeySpace.Partition(EventSequenceSpace, database.Partition))!));
+        var currentSequence = database.Store.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.Partition(EventSequenceSpace, database.Partition))!));
         await Assert.That(currentSequence).IsEqualTo(priorSequence);
     }
 
@@ -133,8 +133,8 @@ internal sealed class TopicPublicationTests
     private static long ExpectedRawEventBytes(TestDatabase database, EventData[] events, DateTimeOffset publicationTime)
     {
         var source = new EventSourceRef(database.Partition, TopicName, EventSourceKind.Topic);
-        var first = JsonDefaults.Serialize(new SourceEventRecord(source, 1, 1, events[0], publicationTime)).LongLength;
-        var second = JsonDefaults.Serialize(new SourceEventRecord(source, 2, 2, events[1], publicationTime)).LongLength;
+        var first = NativeSerialization.Serialize(new SourceEventRecord(source, 1, 1, events[0], publicationTime)).LongLength;
+        var second = NativeSerialization.Serialize(new SourceEventRecord(source, 2, 2, events[1], publicationTime)).LongLength;
         return first + second;
     }
 

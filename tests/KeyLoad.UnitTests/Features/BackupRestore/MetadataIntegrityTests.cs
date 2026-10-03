@@ -1,4 +1,3 @@
-using System.Text.Json.Nodes;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -13,7 +12,7 @@ internal sealed class MetadataIntegrityTests
                          MetadataTestContract.IdentityFileName),
                    FileMode.Append, FileAccess.Write, FileShare.None))
         {
-            await identity.WriteAsync(new[] { MetadataTestContract.JsonWhitespace });
+            await identity.WriteAsync(new[] { MetadataTestContract.TrailingPaddingByte });
         }
 
         await AssertOuterVerificationFailure(fixture, MetadataTestContract.IdentityLengthRestorePath);
@@ -91,7 +90,7 @@ internal sealed class MetadataIntegrityTests
     public async Task NonemptyDestinationConflictsBeforeOversizedManifestIsRead()
     {
         using var fixture = new MetadataBackupFixture();
-        await MetadataTestFiles.PadWithWhitespaceAsync(
+        await MetadataTestFiles.PadWithTrailingBytesAsync(
             Path.Combine(fixture.BackupDirectory, MetadataTestContract.ManifestFileName),
             MetadataTestContract.ManifestLimitBytes + MetadataTestContract.OneByte);
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.ExistingDestinationPath);
@@ -112,10 +111,9 @@ internal sealed class MetadataIntegrityTests
     public async Task UnsupportedManifestVersionFailsBeforeDestinationCreation()
     {
         using var fixture = new MetadataBackupFixture();
-        var manifestPath = Path.Combine(fixture.BackupDirectory, MetadataTestContract.ManifestFileName);
-        var manifest = JsonNode.Parse(await File.ReadAllBytesAsync(manifestPath))!.AsObject();
-        manifest[MetadataTestContract.VersionJsonKey] = MetadataTestContract.UnsupportedManifestVersion;
-        await File.WriteAllBytesAsync(manifestPath, JsonDefaults.Serialize(manifest));
+        var manifest = await MetadataTestFiles.ReadManifestAsync(fixture.BackupDirectory);
+        await MetadataTestFiles.WriteManifestAsync(fixture.BackupDirectory,
+            manifest with { Version = MetadataTestContract.UnsupportedManifestVersion });
         var destination = Path.Combine(fixture.BackupDirectory,
             MetadataTestContract.UnsupportedVersionRestorePath);
 

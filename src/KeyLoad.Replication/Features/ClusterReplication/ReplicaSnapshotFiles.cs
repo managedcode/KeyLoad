@@ -71,10 +71,15 @@ internal sealed class ReplicaSnapshotFiles(ReplicaConfiguration configuration)
 
     internal void WriteManifest(ReplicaSnapshot snapshot)
     {
+        var bytes = ReplicaProtocolCodec.Serialize(snapshot);
+        if (bytes.Length > ReplicaPersistence.ManifestMaxBytes)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidSnapshot);
+        }
         var staged = PathFor(ReplicaProtocol.IncomingManifest + ReplicaProtocol.TemporarySuffix);
         using (var file = OpenPrivate(staged, FileMode.Create))
         {
-            file.Write(JsonDefaults.Serialize(snapshot));
+            file.Write(bytes);
             file.Flush(true);
         }
         File.Move(staged, ManifestPath, true);
@@ -92,7 +97,7 @@ internal sealed class ReplicaSnapshotFiles(ReplicaConfiguration configuration)
         }
         var bytes = new byte[checked((int)file.Length)];
         file.ReadExactly(bytes);
-        var snapshot = ReplicaPersistence.Decode<ReplicaSnapshot>(bytes);
+        var snapshot = ReplicaPersistence.Decode<ReplicaSnapshot>(bytes, configuration.MaxAppendEntries);
         ReplicaPersistence.ValidateSnapshot(snapshot, configuration);
         return snapshot;
     }

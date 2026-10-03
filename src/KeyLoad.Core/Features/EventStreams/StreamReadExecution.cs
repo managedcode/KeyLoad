@@ -64,7 +64,7 @@ public sealed partial class DatabaseEngine
         var projectedBytes = 0L;
         var result = budget.VisitRange(view, prefix, limit, (_, value) =>
         {
-            var record = JsonDefaults.Deserialize<EventRecord>(value);
+            var record = NativeSerialization.Deserialize<EventRecord>(value);
             var projected = ProjectEvent(principal, resource, record);
             projectedBytes = AddProjectedEvent(events, projected, budget, projectedBytes);
             return true;

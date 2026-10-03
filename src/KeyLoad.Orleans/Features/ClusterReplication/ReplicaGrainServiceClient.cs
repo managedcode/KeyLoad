@@ -1,5 +1,3 @@
-using System.Text;
-using System.Text.Json;
 using KeyLoad.Replication;
 using Orleans.Runtime.Services;
 
@@ -14,15 +12,15 @@ public sealed class ReplicaGrainServiceClient(IServiceProvider services, Replica
     ReplicaSiloDiscoveryClient discovery, ReplicaEnvelopeAuthenticator authentication)
     : GrainServiceClient<IPartitionReplicaGrainService>(services), IReplicaTransport
 {
-    /// <summary>Transports exact UTF8 bytes and retries only fenced/unavailable generation failures.</summary>
+    /// <summary>Transports exact native bytes and retries only fenced/unavailable generation failures.</summary>
     /// <param name="voterId">The configured destination voter.</param>
     /// <param name="method">The replica operation to send.</param>
-    /// <param name="payloadJson">The exact protocol JSON string to encode as UTF8.</param>
+    /// <param name="payloadBytes">The exact native protocol payload.</param>
     /// <param name="cancellationToken">Caller cancellation for discovery and Orleans RPC.</param>
-    /// <returns>The exact UTF8 reply text after authentication and error handling.</returns>
-    public async Task<string> InvokeAsync(string voterId, ReplicaRpc method, string payloadJson, CancellationToken cancellationToken)
+    /// <returns>The exact native reply bytes after authentication and error handling.</returns>
+    public async Task<ReadOnlyMemory<byte>> InvokeAsync(string voterId, ReplicaRpc method, ReadOnlyMemory<byte> payloadBytes, CancellationToken cancellationToken)
     {
-        var payload = EncodePayload(payloadJson);
+        var payload = EncodePayload(payloadBytes);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(configuration.RpcTimeout);
         try
@@ -49,13 +47,10 @@ public sealed class ReplicaGrainServiceClient(IServiceProvider services, Replica
         {
             throw Errors.Fail(InterruptedCode(method), ReplicaTransportProtocol.TransportUnavailable);
         }
-        catch (Exception error) when (error is DecoderFallbackException or JsonException or FormatException)
-        {
-            throw Errors.Fail(ErrorCode.Validation, ReplicaTransportProtocol.InvalidDiscovery);
-        }
+
     }
 
-    private async Task<string> ExchangeAsync(string voterId, ReplicaRpc method, byte[] payload, bool refresh,
+    private async Task<ReadOnlyMemory<byte>> ExchangeAsync(string voterId, ReplicaRpc method, byte[] payload, bool refresh,
         CancellationToken cancellationToken)
     {
         var address = await discovery.ResolveAsync(voterId, refresh, cancellationToken).ConfigureAwait(false);
@@ -63,29 +58,21 @@ public sealed class ReplicaGrainServiceClient(IServiceProvider services, Replica
         var reply = await GetGrainService(address).ExchangeAsync(request, cancellationToken)
             .WaitAsync(cancellationToken).ConfigureAwait(false);
         authentication.VerifyReply(request, reply);
+        reply = reply with { Payload = reply.Payload.ToArray(), Signature = reply.Signature.ToArray() };
+        authentication.VerifyReply(request, reply);
         if (reply.Error is { } error)
         {
             throw Errors.Fail(error, reply.SafeDetail ?? ReplicaTransportProtocol.EndpointFailure);
         }
 
-        return ReplicaTransportProtocol.Utf8.GetString(reply.Payload.Span);
+        return reply.Payload;
     }
 
-    private byte[] EncodePayload(string payloadJson)
+    private byte[] EncodePayload(ReadOnlyMemory<byte> payload)
     {
-        try
-        {
-            if (ReplicaTransportProtocol.Utf8.GetByteCount(payloadJson) > authentication.MaximumPayloadBytes)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.PayloadExceeded);
-            }
-
-            return ReplicaTransportProtocol.Utf8.GetBytes(payloadJson);
-        }
-        catch (EncoderFallbackException)
-        {
-            throw Errors.Fail(ErrorCode.Validation, ReplicaTransportProtocol.InvalidPayload);
-        }
+        if (payload.Length > authentication.MaximumPayloadBytes)
+        { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.PayloadExceeded); }
+        return payload.ToArray();
     }
 
     private static ErrorCode InterruptedCode(ReplicaRpc method) => method == ReplicaRpc.Forward

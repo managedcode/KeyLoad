@@ -90,7 +90,7 @@ internal sealed class McpCommandDecodeTests
     {
         var item = McpCanonicalTestData.Commands()[0];
         McpDecodedOperation decoded;
-        using (var document = JsonDocument.Parse(item.ExpectedPayload))
+        using (var document = JsonDocument.Parse(item.Request.GetRawText()))
         {
             decoded = Find(item.Name).Decode(new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             {
@@ -98,7 +98,7 @@ internal sealed class McpCommandDecodeTests
             });
         }
         await Assert.That(decoded.Payload.Span.SequenceEqual(item.ExpectedPayload.Span)).IsTrue();
-        await Assert.That(JsonDefaults.Deserialize<CommandRequest>(decoded.Payload.Span).CommandId).IsEqualTo(item.CommandId);
+        await Assert.That(NativeSerialization.Deserialize<CommandRequest>(decoded.Payload.Span).CommandId).IsEqualTo(item.CommandId);
     }
 
     private static McpOperationDescriptor Find(string name)

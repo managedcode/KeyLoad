@@ -1,5 +1,3 @@
-using System.Text.Json;
-using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.BlobStorage;
@@ -43,14 +41,9 @@ internal static class BlobMetadataRules
 
     internal static byte[] Encode<T>(T record)
     {
-        try
-        {
-            using var counter = new ResultByteCounterStream(BlobLimits.MaxMetadataRecordBytes, static () => { });
-            JsonSerializer.Serialize(counter, record, JsonDefaults.Options);
-        }
-        catch (KeyLoadException exception) when (exception.Code == ErrorCode.BudgetExceeded)
+        if (NativeSerialization.Measure(record) > BlobLimits.MaxMetadataRecordBytes)
         { throw BlobErrors.Validation(); }
-        return JsonDefaults.Serialize(record);
+        return NativeSerialization.Serialize(record);
     }
 
     internal static void Put<T>(IAtomicTransaction tx, byte[] key, T record)

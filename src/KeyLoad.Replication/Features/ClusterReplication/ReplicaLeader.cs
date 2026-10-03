@@ -9,6 +9,7 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
 
     internal async Task<OperationResult> SubmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
     {
+        operation = ReplicaOperationAuthority.Verify(operation, state.Materializer.Database)!;
         await rounds.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {

@@ -32,7 +32,7 @@ public sealed class AdminCatalogReader(DatabaseEngine database)
         var scan = view.VisitRange(KeyCodec.Encode(CatalogSpace, request.TenantId, request.DatabaseId), request.Limit,
             (_, value) =>
             {
-                var resource = JsonDefaults.Deserialize<ResourceDefinition>(value);
+                var resource = NativeSerialization.Deserialize<ResourceDefinition>(value);
                 items.Add(new(resource.Name, resource.Kind, resource.TransactionDomainId,
                     resource.SchemaVersion, resource.Indexes.Length, resource.Paused));
                 return true;

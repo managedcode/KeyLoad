@@ -14,8 +14,8 @@ internal sealed class GrainRoutingAuthorizationTests
     private const string DocumentId = "order-1";
     private const string DocumentJson = "{\"value\":42}";
     private const string OtherDomain = "another-domain";
-    private const string NullJson = "null";
-    private const string WhitespaceNull = " null";
+    private const int NoDtoMarker = 0;
+    private const int InvalidMarker = 1;
     private const char Padding = 'x';
     private const int FirstRevision = 1;
     private const long BackupPosition = 42;
@@ -26,12 +26,12 @@ internal sealed class GrainRoutingAuthorizationTests
     public async Task AuthenticationReloadsPersistedPrincipalAndRevocationIsImmediate()
     {
         using var fixture = new TestDatabase();
-        var principal = GrainRequestAuthority.Authenticate(fixture.Database, JsonDefaults.Serialize(Credential), TimeProvider.System);
+        var principal = GrainRequestAuthority.Authenticate(fixture.Database, NativeSerialization.Serialize(Credential), TimeProvider.System);
         await Assert.That(principal.Id).IsEqualTo(Root);
         await Assert.That(principal.ClusterAdministrator).IsTrue();
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal with { Revoked = true, PolicyEpoch = principal.PolicyEpoch + PolicyEpochIncrement }));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainRequestAuthority.Authenticate(fixture.Database,
-            JsonDefaults.Serialize(Credential), TimeProvider.System)).Code).IsEqualTo(ErrorCode.Unauthenticated);
+            NativeSerialization.Serialize(Credential), TimeProvider.System)).Code).IsEqualTo(ErrorCode.Unauthenticated);
     }
 
     /// <summary>AC-AUTH-001: a signed principal ID still requires a current persisted row and administrator grant.</summary>
@@ -57,8 +57,8 @@ internal sealed class GrainRoutingAuthorizationTests
         var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System);
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, fixture.Partition, [new PutDocument(Collection, DocumentId, DocumentJson)]);
-        var first = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, commandId, JsonDefaults.Serialize(command)));
-        var second = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, commandId, JsonDefaults.Serialize(command)));
+        var first = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, commandId, NativeSerialization.Serialize(command)));
+        var second = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, commandId, NativeSerialization.Serialize(command)));
         var key = GrainPartitionResolver.Resolve(first);
         await Assert.That(first.Envelope.RequestId).IsNotEqualTo(second.Envelope.RequestId);
         var initial = await executor.ExecuteAsync(first, key, CancellationToken.None);
@@ -80,7 +80,7 @@ internal sealed class GrainRoutingAuthorizationTests
         var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System);
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, fixture.Partition, [new PutDocument(Collection, DocumentId, DocumentJson)]);
-        var request = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, commandId, JsonDefaults.Serialize(command)));
+        var request = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, commandId, NativeSerialization.Serialize(command)));
         var principal = GrainRequestAuthority.Reload(fixture.Database, Root, TimeProvider.System);
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal with
         {
@@ -102,9 +102,9 @@ internal sealed class GrainRoutingAuthorizationTests
         using var fixture = new TestDatabase();
         var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System);
         var command = new CommandRequest(Guid.NewGuid(), fixture.Partition, []);
-        var request = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, Guid.NewGuid(), JsonDefaults.Serialize(command)));
+        var request = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, Guid.NewGuid(), NativeSerialization.Serialize(command)));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainPartitionResolver.Resolve(request)).Code).IsEqualTo(ErrorCode.TokenInvalidated);
-        var valid = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, command.CommandId, JsonDefaults.Serialize(command)));
+        var valid = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, command.CommandId, NativeSerialization.Serialize(command)));
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System);
@@ -113,15 +113,15 @@ internal sealed class GrainRoutingAuthorizationTests
         await Assert.That(fixture.Database.Outcome(Root, command.CommandId)).IsNull();
     }
 
-    /// <summary>AC-ROUTE-001: no-DTO requests use exact JSON null and replies enforce actual encoded byte bounds.</summary>
+    /// <summary>AC-ROUTE-001: no-DTO requests use the exact native zero marker and replies enforce actual encoded byte bounds.</summary>
     [Test]
-    public async Task ExactNullAndBoundedRepliesPreservePublicJson()
+    public async Task ExactMarkerAndBoundedRepliesPreserveTypedValues()
     {
-        GrainPayloadJson.RequireNull(GrainPayloadJson.Utf8.GetBytes(NullJson));
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainPayloadJson.RequireNull(
-            GrainPayloadJson.Utf8.GetBytes(WhitespaceNull))).Code).IsEqualTo(ErrorCode.Validation);
+        GrainNativePayload.RequireNoDto(NativeSerialization.Serialize(NoDtoMarker));
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainNativePayload.RequireNoDto(
+            NativeSerialization.Serialize(InvalidMarker))).Code).IsEqualTo(ErrorCode.Validation);
         var reply = GrainReplyFactory.Value(new BackupReceipt(DocumentId, BackupPosition), CancellationToken.None);
-        await Assert.That(GrainPayloadJson.Read<BackupReceipt>(reply.Payload).Id).IsEqualTo(DocumentId);
+        await Assert.That(((BackupReceipt)NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value!).Id).IsEqualTo(DocumentId);
         await Assert.That(reply.Error).IsNull();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainReplyFactory.Value(
             new string(Padding, GrainRoutingProtocol.MaximumReplyBytes), CancellationToken.None)).Code).IsEqualTo(ErrorCode.ResourceExhausted);

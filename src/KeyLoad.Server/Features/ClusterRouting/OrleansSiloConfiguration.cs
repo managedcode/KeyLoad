@@ -36,7 +36,9 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton<SearchEngine>();
         services.AddSingleton<GrainRequestCodec>();
         services.AddSingleton<ReplicaSiloDiscoveryState>();
-        services.AddSingleton<ReplicaEnvelopeAuthenticator>();
+        services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(partition.Configuration, peers,
+            provider.GetRequiredService<ReplicaSiloDiscoveryState>(), TimeProvider.System,
+            logger: provider.GetService<ILogger<ReplicaEnvelopeAuthenticator>>(), canonicalDatabase: partition.Database));
         services.AddSingleton<ReplicaSiloDiscoveryClient>();
         services.AddSingleton<ReplicaGrainServiceClient>();
         services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>, ReplicaTransportLifecycle>();

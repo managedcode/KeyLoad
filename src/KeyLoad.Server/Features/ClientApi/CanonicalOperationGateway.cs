@@ -30,7 +30,9 @@ internal static class CanonicalOperationGateway
         RequestFailureDiagnostic.MarkOperationDispatch(context, commandKind.HasValue);
         var reply = await context.RequestServices.GetRequiredService<OrleansNode>()
             .ExecuteAsync(requestId, signed, commandKind.HasValue, cancellationToken).ConfigureAwait(false);
-        return new(requestId, reply.Payload);
+        var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span);
+        cancellationToken.ThrowIfCancellationRequested();
+        return new(requestId, McpBoundedJson.Serialize(value.Value, McpFramingProtocol.MaximumDataReplyBytes));
     }
 
     /// <summary>Returns the actual operation identity, or null before actor dispatch began.</summary>

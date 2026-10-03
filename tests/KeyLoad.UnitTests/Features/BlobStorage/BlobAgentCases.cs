@@ -91,15 +91,15 @@ internal static class BlobAgentCases
     };
 
     private static BlobAgentCase Command<T>(string name, string route, OperationKind kind, T request) =>
-        new(name, route, null, kind, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), JsonDefaults.Serialize(request));
+        new(name, route, null, kind, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), JsonDefaults.Serialize(request), NativeSerialization.Serialize(request));
 
     private static BlobAgentCase Read<T>(string name, string route, GrainReadKind kind, T request) =>
-        new(name, route, kind, null, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), JsonDefaults.Serialize(request));
+        new(name, route, kind, null, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), JsonDefaults.Serialize(request), NativeSerialization.Serialize(request));
 }
 
-/// <summary>One independent operation and its caller-owned canonical DTO bytes.</summary>
+/// <summary>One operation retaining public JSON arguments/bytes and separately encoded native typed payload.</summary>
 internal sealed record BlobAgentCase(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind,
-    JsonElement Request, ReadOnlyMemory<byte> Payload)
+    JsonElement Request, ReadOnlyMemory<byte> Payload, ReadOnlyMemory<byte> NativePayload)
 {
     internal Dictionary<string, JsonElement> Arguments() => new(StringComparer.Ordinal) { [BlobAgentCases.Request] = Request };
 }

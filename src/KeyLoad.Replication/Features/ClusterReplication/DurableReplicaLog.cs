@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.Core;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Replication;
@@ -9,15 +10,18 @@ namespace KeyLoad.Replication;
 /// callback must fence writes, replacement and restore as specified by ADR-061.</param>
 /// <param name="configuration">Fixed voter scope and bounded log persistence settings.</param>
 /// <param name="faultObserver">Optional observer invoked after durable crash boundaries.</param>
+/// <param name="canonicalDatabase">Borrowed canonical authority required for every nonnull native operation.</param>
 public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration configuration,
-    Action<ReplicaCrashBoundary>? faultObserver = null) : IDurableReplicaLog
+    Action<ReplicaCrashBoundary>? faultObserver = null, DatabaseEngine? canonicalDatabase = null) : IDurableReplicaLog
 {
     private readonly object gate = new();
-    private ReplicaHardState state = ReplicaLogValidation.Open(store, configuration);
+    private ReplicaHardState state = ReplicaLogValidation.Open(store, configuration, canonicalDatabase);
     private ReplicaTermObservation? termObservation;
     private bool disposed;
     /// <inheritdoc />
     public SemaphoreSlim ProtocolGate { get; } = new(1, 1);
+    /// <summary>Gets the externally owned canonical engine used to validate operation authority and semantic retries.</summary>
+    public DatabaseEngine? CanonicalDatabase { get; } = canonicalDatabase;
     /// <inheritdoc />
     public ReplicaHardState State
     {
@@ -63,12 +67,12 @@ public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration c
     {
         var bytes = store.Read(view => view.ReadOwnedValue(ReplicaProtocol.EntryStorageKey(index)))
             ?? throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
-        var entry = ReplicaProtocolCodec.Deserialize<ReplicaEntry>(bytes);
+        var entry = ReplicaProtocolCodec.DeserializeStored<ReplicaEntry>(bytes, configuration.MaxAppendEntries);
         if (entry.Index != index || entry.Term <= 0 || entry.Term > state.Term)
         {
             throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
         }
-        return entry;
+        return ReplicaOperationAuthority.Own(entry, CanonicalDatabase);
     }
 
     /// <inheritdoc />
@@ -107,15 +111,15 @@ public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration c
             Check();
             if (entries.Count == 0)
             { return; }
-            var encoded = ReplicaAppendCompiler.Validate(entries, state, configuration, Term);
-            var next = ReplicaAppendCompiler.NextState(entries, encoded, state, Load);
+            var batch = ReplicaAppendCompiler.Validate(entries, state, configuration, Term, CanonicalDatabase);
+            var next = ReplicaAppendCompiler.NextState(batch.Entries, state, Load, CanonicalDatabase);
             store.Commit((tx, _) =>
             {
-                for (var position = 0; position < entries.Count; position++)
+                for (var position = 0; position < batch.Entries.Length; position++)
                 {
-                    tx.Put(ReplicaProtocol.EntryStorageKey(entries[position].Index), encoded[position]);
+                    tx.Put(ReplicaProtocol.EntryStorageKey(batch.Entries[position].Index), batch.Encoded[position]);
                 }
-                tx.PutRecord(ReplicaProtocol.StateStorageKey, next);
+                tx.Put(ReplicaProtocol.StateStorageKey, ReplicaProtocolCodec.Serialize(next));
                 return true;
             });
             state = next;
@@ -173,7 +177,7 @@ public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration c
 
     private void Save(ReplicaHardState next)
     {
-        store.Commit((tx, _) => { tx.PutRecord(ReplicaProtocol.StateStorageKey, next); return true; });
+        store.Commit((tx, _) => { tx.Put(ReplicaProtocol.StateStorageKey, ReplicaProtocolCodec.Serialize(next)); return true; });
         state = next;
     }
 

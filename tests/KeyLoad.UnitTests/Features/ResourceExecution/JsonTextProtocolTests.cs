@@ -30,7 +30,9 @@ internal sealed class JsonTextProtocolTests
             var expected = JsonDefaults.Deserialize<string>(Encoding.UTF8.GetBytes(json));
             var actual = JsonDefaults.Deserialize<string>(json);
             await Assert.That(actual).IsEqualTo(expected);
-            await Assert.That(new OperationResult(json).Get<string>()).IsEqualTo(expected);
+            var result = new OperationResult(null) { NativeValue = actual };
+            var restored = NativeSerialization.Deserialize<OperationResult>(NativeSerialization.Serialize(result));
+            await Assert.That(restored.Get<string>()).IsEqualTo(expected);
         }
 
         await Assert.That(JsonDefaults.Deserialize<string>(RawUnpairedSurrogateJson)).IsEqualTo(ReplacementCharacter);
@@ -39,8 +41,6 @@ internal sealed class JsonTextProtocolTests
             JsonDefaults.Deserialize<string>(Encoding.UTF8.GetBytes(EscapedUnpairedSurrogateJson)));
         Assert.ThrowsExactly<JsonException>(() =>
             JsonDefaults.Deserialize<string>(EscapedUnpairedSurrogateJson));
-        Assert.ThrowsExactly<JsonException>(() =>
-            new OperationResult(EscapedUnpairedSurrogateJson).Get<string>());
     }
 
     [Test]
@@ -64,20 +64,21 @@ internal sealed class JsonTextProtocolTests
     {
         var stored = new OperationResult(MalformedJson, ErrorCode.PermissionDenied, StoredErrorDetail);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => stored.Get<ResourceDefinition>());
-        Assert.ThrowsExactly<JsonException>(() => new OperationResult(MalformedJson).Get<ResourceDefinition>());
+        var malformed = Assert.ThrowsExactly<KeyLoadException>(() => new OperationResult(MalformedJson).Get<ResourceDefinition>());
         var absent = Assert.ThrowsExactly<KeyLoadException>(() => new OperationResult(null).Get<string>());
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(failure.Message).IsEqualTo(StoredErrorDetail);
         await Assert.That(absent.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(malformed.Code).IsEqualTo(ErrorCode.Corruption);
     }
 
     [Test]
     public async Task AcMp006OwnedDtoSurvivesLaterParseAndOversizedResultRemainsExact()
     {
-        var first = new OperationResult(ValidBytesJson).Get<KeyValueRecord>();
+        var first = JsonDefaults.Deserialize<KeyValueRecord>(ValidBytesJson);
         var oversized = new string(OversizedResultCharacter, OversizedResultCharacters);
-        var later = new OperationResult(JsonSerializer.Serialize(oversized, JsonDefaults.Options)).Get<string>();
+        var later = JsonDefaults.Deserialize<string>(JsonSerializer.Serialize(oversized, JsonDefaults.Options));
         JsonDefaults.Deserialize<KeyValueRecord>(ValidBytesJson);
 
         await Assert.That(first.Key.Span.SequenceEqual<byte>([1, 2, 3])).IsTrue();

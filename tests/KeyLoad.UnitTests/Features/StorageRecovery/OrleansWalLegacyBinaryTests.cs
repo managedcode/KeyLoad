@@ -5,6 +5,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 internal sealed class OrleansWalLegacyBinaryTests
 {
     private const ulong LegacyBinaryMagic = 0x324C4157444C4BUL;
+    private const ulong LegacyNativeMagic = 0x334C4157444C4BUL;
 
     [Test]
     [Arguments(1, PayloadState.Complete)]
@@ -19,11 +20,16 @@ internal sealed class OrleansWalLegacyBinaryTests
     [Arguments(2, PayloadState.Torn)]
     [Arguments(3, PayloadState.Torn)]
     [Arguments(4, PayloadState.Torn)]
+    [Arguments(5, PayloadState.Complete)]
+    [Arguments(5, PayloadState.Missing)]
+    [Arguments(5, PayloadState.Torn)]
     public async Task AcWal003And004GenericFrameTwoIsRefusedWithoutRewritingOrTruncatingFiles(
         int version, PayloadState state)
     {
         using var files = new WalFileFixture();
-        await files.WriteIdentityAsync(files.Initialize() with { FormatVersion = version });
+        var identity = files.Initialize() with { FormatVersion = version };
+        await (version == WalFileFixture.CurrentIdentityVersion
+            ? files.WriteIdentityAsync(identity) : files.WriteLegacyJsonIdentityAsync(identity));
         using var legacySerializer = new WalSerializerFixture(useNativeByteCodec: false);
         var payload = legacySerializer.Serialize([new()
         {
@@ -41,7 +47,36 @@ internal sealed class OrleansWalLegacyBinaryTests
         };
         await File.WriteAllBytesAsync(files.JournalPath, journal);
 
+        var before = await files.CaptureFilesAsync();
         await files.AssertRejectedUnchanged(journal, await File.ReadAllBytesAsync(files.IdentityPath), ErrorCode.FormatUnsupported);
+        await files.AssertFilesUnchangedAsync(before);
+    }
+
+    [Test]
+    [Arguments(PayloadState.Complete)]
+    [Arguments(PayloadState.Missing)]
+    [Arguments(PayloadState.Torn)]
+    public async Task AcIs007NativeFrameThreeRefusesWithoutReinterpretationOnCurrentIdentity(PayloadState state)
+    {
+        using var files = new WalFileFixture();
+        files.Initialize();
+        using var serializer = new WalSerializerFixture();
+        var payload = serializer.Serialize([new()
+        {
+            Key = new byte[] { 0x10 }, Value = new byte[] { 0x30, 0x00, 0xFF }, Kind = ZoneTreeJournalMutation.PutKind
+        }]);
+        var complete = WalFileFixture.CreateFrame(payload, magic: LegacyNativeMagic);
+        var journal = state switch
+        {
+            PayloadState.Complete => complete,
+            PayloadState.Missing => complete[..WalFileFixture.HeaderBytes],
+            PayloadState.Torn => complete[..^1],
+            _ => throw new ArgumentOutOfRangeException(nameof(state))
+        };
+        await File.WriteAllBytesAsync(files.JournalPath, journal);
+        var before = await files.CaptureFilesAsync();
+        await files.AssertRejectedUnchanged(journal, await File.ReadAllBytesAsync(files.IdentityPath), ErrorCode.FormatUnsupported);
+        await files.AssertFilesUnchangedAsync(before);
     }
 
     internal enum PayloadState

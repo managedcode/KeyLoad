@@ -111,7 +111,7 @@ public sealed class ReplicaSiloDiscoveryClient : IDisposable
 
         var bytes = await ReadBoundedAsync(response, cancellationToken).ConfigureAwait(false);
         authentication.VerifyDiscovery(voterId, bytes, nonce, SingleHeader(signatures));
-        var discovered = JsonDefaults.Deserialize<ReplicaSiloDiscovery>(bytes);
+        var discovered = NativeSerialization.Deserialize<ReplicaSiloDiscovery>(bytes);
         return ValidateDiscovery(voterId, discovered);
     }
 

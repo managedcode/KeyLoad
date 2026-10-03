@@ -34,7 +34,7 @@ internal static class GrainPartitionResolver
 
     private static string Route<T>(DecodedGrainRequest request, Func<T, (Guid CommandId, PartitionRef Partition)> identity)
     {
-        var command = GrainPayloadJson.Read<T>(request.Payload);
+        var command = GrainNativePayload.ReadCommand<T>(request.Payload);
         var (commandId, partition) = identity(command);
         if (commandId != request.Envelope.CommandId)
         {

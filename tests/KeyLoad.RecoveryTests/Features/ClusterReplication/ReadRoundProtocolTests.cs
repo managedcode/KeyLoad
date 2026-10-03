@@ -21,8 +21,8 @@ internal sealed class ReadRoundProtocolTests
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);
         cluster.Attach();
         var leader = await cluster.ReadyLeaderAsync(linked.Token);
-        await leader.Consensus.SubmitAsync(ReplicaCrashModel.Operation(1), linked.Token);
-        var committed = await leader.Consensus.SubmitAsync(ReplicaCrashModel.Operation(2), linked.Token);
+        await leader.Consensus.SubmitAsync(leader.Database.NormalizeOperation(ReplicaCrashModel.Operation(1)), linked.Token);
+        var committed = await leader.Consensus.SubmitAsync(leader.Database.NormalizeOperation(ReplicaCrashModel.Operation(2)), linked.Token);
         var receipt = committed.Get<CommitReceipt>();
         await leader.Consensus.ReadBarrierAsync(linked.Token);
         await leader.Consensus.ReadControlBarrierAsync(linked.Token);
@@ -38,7 +38,7 @@ internal sealed class ReadRoundProtocolTests
             }
         }
         await Assert.That(leader.Transport.Count(ReplicaRpc.ReadProbe) > 0).IsEqualTo(count > 1);
-        var replayed = (await leader.Consensus.SubmitAsync(ReplicaCrashModel.Operation(2), linked.Token)).Get<CommitReceipt>();
+        var replayed = (await leader.Consensus.SubmitAsync(leader.Database.NormalizeOperation(ReplicaCrashModel.Operation(2)), linked.Token)).Get<CommitReceipt>();
         await Assert.That(replayed.CommandId).IsEqualTo(receipt.CommandId);
         await Assert.That(replayed.Token).IsEqualTo(receipt.Token);
         await Assert.That(replayed.Mutations).IsEquivalentTo(receipt.Mutations);

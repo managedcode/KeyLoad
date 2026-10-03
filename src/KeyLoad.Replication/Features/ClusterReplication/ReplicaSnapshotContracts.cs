@@ -8,30 +8,62 @@ namespace KeyLoad.Replication;
 /// <param name="Length">Exact encoded image length.</param>
 /// <param name="Sha256">Hexadecimal checksum of the complete image.</param>
 /// <param name="FileName">Validated image basename derived from its transfer identity.</param>
-public sealed record ReplicaSnapshot(Guid TransferId, Guid Incarnation, long Index, long Term, long Length, string Sha256, string FileName);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(ReplicaSerializationAliases.ReplicaSnapshot)]
+public sealed record ReplicaSnapshot(
+    [property: Orleans.Id(0)] Guid TransferId,
+    [property: Orleans.Id(1)] Guid Incarnation,
+    [property: Orleans.Id(2)] long Index,
+    [property: Orleans.Id(3)] long Term,
+    [property: Orleans.Id(4)] long Length,
+    [property: Orleans.Id(5)] string Sha256,
+    [property: Orleans.Id(6)] string FileName);
 /// <summary>Starts or resumes a fenced incoming canonical image.</summary>
 /// <param name="LeaderId">Configured voter sending the image.</param>
 /// <param name="Term">Sender's current leadership term.</param>
 /// <param name="Snapshot">Complete expected image and cut description.</param>
-public sealed record SnapshotBeginRequest(string LeaderId, long Term, ReplicaSnapshot Snapshot);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(ReplicaSerializationAliases.SnapshotBeginRequest)]
+public sealed record SnapshotBeginRequest(
+    [property: Orleans.Id(0)] string LeaderId,
+    [property: Orleans.Id(1)] long Term,
+    [property: Orleans.Id(2)] ReplicaSnapshot Snapshot);
 /// <summary>Supplies exact bytes at an acknowledged transfer offset.</summary>
 /// <param name="LeaderId">Configured voter sending the chunk.</param>
 /// <param name="Term">Sender's current leadership term.</param>
 /// <param name="TransferId">Identity of the fenced transfer.</param>
 /// <param name="Offset">Expected contiguous image byte offset.</param>
 /// <param name="Bytes">Read-only chunk bytes owned by this request.</param>
-public sealed record SnapshotChunkRequest(string LeaderId, long Term, Guid TransferId, long Offset, ReadOnlyMemory<byte> Bytes);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(ReplicaSerializationAliases.SnapshotChunkRequest)]
+public sealed record SnapshotChunkRequest(
+    [property: Orleans.Id(0)] string LeaderId,
+    [property: Orleans.Id(1)] long Term,
+    [property: Orleans.Id(2)] Guid TransferId,
+    [property: Orleans.Id(3)] long Offset,
+    [property: Orleans.Id(4)] ReadOnlyMemory<byte> Bytes);
 /// <summary>Requests complete image verification and canonical installation.</summary>
 /// <param name="LeaderId">Configured voter completing the image.</param>
 /// <param name="Term">Sender's current leadership term.</param>
 /// <param name="TransferId">Identity of the completed transfer.</param>
-public sealed record SnapshotCompleteRequest(string LeaderId, long Term, Guid TransferId);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(ReplicaSerializationAliases.SnapshotCompleteRequest)]
+public sealed record SnapshotCompleteRequest(
+    [property: Orleans.Id(0)] string LeaderId,
+    [property: Orleans.Id(1)] long Term,
+    [property: Orleans.Id(2)] Guid TransferId);
 /// <summary>Returns durable transfer progress or the verified installed cut.</summary>
 /// <param name="Term">Receiver's current term.</param>
 /// <param name="Offset">Durably acknowledged image byte prefix.</param>
 /// <param name="Installed">Whether the complete image has been installed.</param>
 /// <param name="Index">Installed replica position, or zero during upload.</param>
-public sealed record SnapshotReply(long Term, long Offset, bool Installed, long Index);
+[Orleans.GenerateSerializer]
+[Orleans.Alias(ReplicaSerializationAliases.SnapshotReply)]
+public sealed record SnapshotReply(
+    [property: Orleans.Id(0)] long Term,
+    [property: Orleans.Id(1)] long Offset,
+    [property: Orleans.Id(2)] bool Installed,
+    [property: Orleans.Id(3)] long Index);
 
 /// <summary>Transfers bounded verified images while borrowing the node's canonical store and durable log.</summary>
 public interface IReplicaSnapshotStore

@@ -9,12 +9,11 @@ internal static class GrainReplyFactory
     private const string Cancelled = "The database request was cancelled.";
     private const string Unavailable = "The database request could not complete. Retry the same command ID for writes.";
     private const string InterruptedWrite = "The write outcome is unknown. Retry the same command ID.";
-    private const string NullJson = "null";
 
     internal static GrainOperationReply Value(object? value, CancellationToken cancellationToken)
     {
-        using var stream = new GrainBoundedJsonStream(GrainRoutingProtocol.MaximumReplyBytes, cancellationToken);
-        JsonSerializer.Serialize(stream, value, JsonDefaults.Options);
+        using var stream = new GrainBoundedPayloadStream(GrainRoutingProtocol.MaximumReplyBytes, cancellationToken);
+        NativeSerialization.Serialize(new GrainValue(value), stream);
         return new() { Payload = stream.Complete() };
     }
 
@@ -26,13 +25,7 @@ internal static class GrainReplyFactory
         }
 
         cancellationToken.ThrowIfCancellationRequested();
-        var json = result.Json ?? NullJson;
-        if (GrainPayloadJson.Utf8.GetByteCount(json) > GrainRoutingProtocol.MaximumReplyBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.ReplyBudgetExceeded);
-        }
-
-        return new() { Payload = GrainPayloadJson.Utf8.GetBytes(json) };
+        return Value(result.NativeValue, cancellationToken);
     }
 
     internal static GrainOperationReply Failure(Exception error, bool command, ILogger? diagnostics,
