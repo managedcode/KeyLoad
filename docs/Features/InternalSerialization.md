@@ -39,3 +39,8 @@ Native preflight supports the owning generated DTO closure and its specified
 scalar/array/collection/surrogate shapes. Unmodeled System surrogate and derived
 collection codecs are rejected before decode; they cannot bypass count guards
 through an object-typed member. General heap amplification remains unqualified.
+
+REQ-IS-010 / AC-IS-010 requires actual diagnostic measurement before selecting
+shared hot-path optimizations. It maps to the full [native serialization diagnostic
+contract](BenchmarkComparisons/NativeSerialization.md), with source-bound
+BenchmarkDotNet results separate from mandatory RF3/full competitor qualification.

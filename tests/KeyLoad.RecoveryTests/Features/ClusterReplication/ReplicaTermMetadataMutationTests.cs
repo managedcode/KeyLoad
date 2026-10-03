@@ -140,15 +140,16 @@ internal sealed class ReplicaTermMetadataMutationTests
         var context = NativeSerializerProviders.CreateInspection(typeof(ReplicaEntry), builder =>
         {
             builder.AddAssembly(typeof(ReplicaEntry).Assembly);
-            builder.Services.AddSingleton<ReplicaEntryInspectionCodec>();
-            builder.Services.AddSingleton(new ReplicaMaximumOperationCodec(ReplicaMaximumPayload.UnknownField));
+            var operationCodec = new ReplicaMaximumOperationCodec(ReplicaMaximumPayload.UnknownField);
+            builder.Services.AddSingleton(operationCodec);
+            builder.Services.AddSingleton(new ReplicaTermMetadataEntryCodec(operationCodec));
             builder.Configure(options =>
             {
-                options.FieldCodecs.Add(typeof(ReplicaEntryInspectionCodec));
+                options.FieldCodecs.Add(typeof(ReplicaTermMetadataEntryCodec));
                 options.FieldCodecs.Add(typeof(ReplicaMaximumOperationCodec));
             });
         });
-        // Route the entry's nested operation through the provider so the malformed field codec is honored.
+        // Write the nested operation explicitly so the malformed field codec is honored.
         var body = context.Serializer.SerializeToArray(new NativePayload { Version = NativePayloadVersion.Current, Value = entry });
         var framed = new byte[checked(ReplicaProtocol.PayloadPrefixBytes + body.Length)];
         BinaryPrimitives.WriteUInt64LittleEndian(framed, ReplicaProtocol.PayloadMagic);

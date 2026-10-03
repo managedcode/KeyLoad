@@ -17,6 +17,7 @@ internal static class ReplicaMaximumPayload
 {
     internal const string Quotes = "\\\"";
     internal const string Unicode = "Ж";
+    internal const string ValidFields = "valid-fields";
     internal const string UnknownField = "unknown-field";
     internal const string DuplicateField = "duplicate-kind";
     private const string Prefix = " { \"value\": \"";
@@ -69,6 +70,8 @@ internal static class ReplicaMaximumPayload
 // Fixture-only native writer preserves the existing 8 MiB identity while authoring exact field defects.
 internal sealed class ReplicaMaximumOperationCodec(string shape) : IFieldCodec<ReplicatedOperation>
 {
+    private readonly IFieldCodec<ReadOnlyMemory<byte>> bytesCodec = new ReadOnlyMemoryOfByteCodec();
+
     public ReplicatedOperation ReadValue<TInput>(ref Reader<TInput> reader, Field field) => throw new NotSupportedException();
 
     public void WriteField<TWriter>(ref Writer<TWriter> writer, uint delta, [AllowNull] Type expectedType,
@@ -85,7 +88,7 @@ internal sealed class ReplicaMaximumOperationCodec(string shape) : IFieldCodec<R
         Write(ref writer, 1, value.PrincipalId);
         Write(ref writer, 1, value.EvaluatedAt);
         Write(ref writer, 1, value.PayloadJson);
-        Write(ref writer, 1, value.NativePayload);
+        bytesCodec.WriteField(ref writer, 1, typeof(ReadOnlyMemory<byte>), value.NativePayload);
         if (shape == ReplicaMaximumPayload.UnknownField)
         { Write(ref writer, 1, true); }
         writer.WriteEndObject();

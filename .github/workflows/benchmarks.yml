@@ -3,11 +3,16 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      native_serialization_only:
+        description: Run only source checks and native serialization diagnostics
+        type: boolean
+        default: false
 permissions:
   contents: read
   actions: read
 concurrency:
-  group: keyload-benchmarks-${{ github.ref }}
+  group: keyload-benchmarks-${{ github.ref }}${{ inputs.native_serialization_only && '-native-serialization' || '' }}
   cancel-in-progress: false
 jobs:
   comparison-build:
@@ -38,7 +43,7 @@ jobs:
           if-no-files-found: error
   comparison-plan:
     name: Plan benchmark runs
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && !inputs.native_serialization_only
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -60,7 +65,7 @@ jobs:
           retention-days: 90
   comparison-images:
     name: Build Docker images
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && !inputs.native_serialization_only
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions: {contents: read, actions: read}
@@ -310,6 +315,60 @@ jobs:
         with:
           setup-outcome: ${{ steps.images.outcome }}
           artifact-name: comparison-case-qualification-${{ matrix.id }}
+  native-serialization:
+    name: Measure native serialization
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && inputs.native_serialization_only
+    needs: comparison-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions: {contents: read, actions: read}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+        with:
+          global-json-file: global.json
+      - name: Restore .NET packages
+        run: dotnet restore KeyLoad.slnx
+      - name: Build diagnostic tests and generated benchmark host
+        run: dotnet build KeyLoad.slnx --no-restore --configuration Release
+      - name: Test native diagnostic contracts and generated consumers
+        run: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/NativeSerialization*/*' --results-directory artifacts/native-diagnostic-tests/normal
+      - name: Test diagnostic contracts without hardware intrinsics
+        env:
+          DOTNET_EnableHWIntrinsic: 0
+        run: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/NativeSerialization*/*' --results-directory artifacts/native-diagnostic-tests/scalar
+      - name: Record source packages runtime and execution identity
+        env:
+          KEYLOAD_NATIVE_SERIALIZATION_CORPUS_DIRECTORY: ${{ github.workspace }}/artifacts/native-serialization/corpus
+        run: node scripts/Features/BenchmarkComparisons/native-serialization-evidence.mjs --mode=prepare --directory=artifacts/native-serialization
+      - name: Measure all native and historical JSON diagnostic cases
+        env:
+          KEYLOAD_NATIVE_SERIALIZATION_CORPUS_DIRECTORY: ${{ github.workspace }}/artifacts/native-serialization/corpus
+        run: |
+          status=0
+          dotnet benchmarks/KeyLoad.Benchmarks/bin/Release/net10.0/KeyLoad.Benchmarks.dll --filter '*Native*SerializationBenchmarks*' --exporters fulljson csv --memory --keepFiles --logBuildOutput --stopOnFirstError --artifacts artifacts/native-serialization > artifacts/native-serialization/stdout.txt 2> artifacts/native-serialization/stderr.txt || status=$?
+          cat artifacts/native-serialization/stdout.txt
+          cat artifacts/native-serialization/stderr.txt >&2
+          exit "$status"
+      - name: Require all original measurements and their provenance
+        env:
+          KEYLOAD_NATIVE_SERIALIZATION_CORPUS_DIRECTORY: ${{ github.workspace }}/artifacts/native-serialization/corpus
+        run: node scripts/Features/BenchmarkComparisons/native-serialization-evidence.mjs --mode=verify --directory=artifacts/native-serialization
+      - name: Save original measurements diagnostics and failures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: native-serialization-measurements
+          path: |
+            artifacts/native-serialization/**
+            artifacts/native-diagnostic-tests/**
+            artifacts/code-quality/**
+          if-no-files-found: error
+          retention-days: 90
   comparison-aggregate:
     name: Combine benchmark results
     needs: [comparison-build, comparison-plan, comparison-images, comparison-preflight, comparison-crud, comparison-specialized]

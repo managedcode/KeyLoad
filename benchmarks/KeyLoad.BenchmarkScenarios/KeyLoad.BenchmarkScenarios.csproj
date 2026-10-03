@@ -7,5 +7,6 @@
     <ProjectReference Include="../../src/KeyLoad.Security/KeyLoad.Security.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <PackageReference Include="BenchmarkDotNet" />
+    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
   </ItemGroup>
 </Project>

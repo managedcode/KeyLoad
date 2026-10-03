@@ -1,0 +1,60 @@
+namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+
+/// <summary>Retains exact JSON property names used by native serialization diagnostic fixtures.</summary>
+internal static class NativeSerializationReportFields
+{
+    internal const string Architecture = "Architecture";
+    internal const string BenchmarkDotNetVersion = "BenchmarkDotNetVersion";
+    internal const string Benchmarks = "Benchmarks";
+    internal const string BytesAllocatedPerOperation = "BytesAllocatedPerOperation";
+    internal const string Configuration = "Configuration";
+    internal const string DisplayInfo = "DisplayInfo";
+    internal const string Gen0Collections = "Gen0Collections";
+    internal const string Gen1Collections = "Gen1Collections";
+    internal const string Gen2Collections = "Gen2Collections";
+    internal const string HasAttachedDebugger = "HasAttachedDebugger";
+    internal const string HostEnvironmentInfo = "HostEnvironmentInfo";
+    internal const string HasRyuJit = "HasRyuJit";
+    internal const string DotNetCliVersion = "DotNetCliVersion";
+    internal const string IterationIndex = "IterationIndex";
+    internal const string IterationMode = "IterationMode";
+    internal const string IterationStage = "IterationStage";
+    internal const string LaunchIndex = "LaunchIndex";
+    internal const string LogicalCoreCount = "LogicalCoreCount";
+    internal const string Mean = "Mean";
+    internal const string Measurements = "Measurements";
+    internal const string Median = "Median";
+    internal const string Memory = "Memory";
+    internal const string Method = "Method";
+    internal const string N = "N";
+    internal const string Namespace = "Namespace";
+    internal const string Nanoseconds = "Nanoseconds";
+    internal const string Operations = "Operations";
+    internal const string OriginalValues = "OriginalValues";
+    internal const string OsVersion = "OsVersion";
+    internal const string Parameters = "Parameters";
+    internal const string ProcessorName = "ProcessorName";
+    internal const string RuntimeVersion = "RuntimeVersion";
+    internal const string StandardDeviation = "StandardDeviation";
+    internal const string StandardError = "StandardError";
+    internal const string Statistics = "Statistics";
+    internal const string TotalOperations = "TotalOperations";
+    internal const string Type = "Type";
+    internal const string Accepted = "accepted";
+    internal const string CorpusSha256 = "corpusSha256";
+    internal const string Error = "error";
+    internal const string Fixture = "fixture";
+    internal const string JsonBytes = "jsonBytes";
+    internal const string JsonSha256 = "jsonSha256";
+    internal const string Mode = "mode";
+    internal const string NativeBytes = "nativeBytes";
+    internal const string NativeSha256 = "nativeSha256";
+    internal const string Nonfinite = "nonfinite";
+    internal const string Number = "number";
+    internal const string PayloadBytes = "payloadBytes";
+    internal const string Text = "text";
+    internal const string Unchanged = "unchanged";
+    internal const string Unexpected = "unexpected";
+    internal const string Corpus = "corpus";
+    internal const string Reports = "reports";
+}

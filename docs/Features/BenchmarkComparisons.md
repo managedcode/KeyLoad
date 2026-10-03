@@ -613,3 +613,8 @@ The accepted TS009W stage in [ADR-059](../ADR/ADR-059-isolated-intensive-timeser
 retains all1280 real warmup attempt/ACK/sequence slots for REQ-BC060/061/062 and
 AC-TW009001..003; pure source tests and exact-source normal/scalar qualification
 remain separate from the still-undelivered30 native-cell warmup/copy oracle.
+
+The additive [native serialization diagnostics](BenchmarkComparisons/NativeSerialization.md)
+map REQ-IS-PERF-001..004 to AC-IS-PERF-001..004 under ADR060/ADR047. They retain
+the complete native topology/workload aggregate and publish separate codec
+diagnostics; they never masquerade as cluster throughput or website evidence.

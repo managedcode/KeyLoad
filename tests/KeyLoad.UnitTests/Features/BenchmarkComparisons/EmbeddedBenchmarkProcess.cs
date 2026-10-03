@@ -19,7 +19,7 @@ internal static class EmbeddedBenchmarkProcess
     private const string ExporterOption = "--exporters";
     private const string FullJsonExporterName = "fulljson";
     private const string FilterOption = "--filter";
-    private const string AllBenchmarksFilter = "*";
+    private const string AllBenchmarksFilter = "*EmbeddedBenchmarks*";
     private const string ArtifactsOption = "--artifacts";
     private const string WorkingDirectoryMissingMessage = "The KeyLoad solution root is unavailable.";
     private const string ExecutableMissingMessage = "The Release embedded benchmark executable is not built.";

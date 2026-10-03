@@ -94,6 +94,28 @@ object-typed field. Extending this closure requires a native shape specification
 preflight/count/reference tests and homogeneous compatibility qualification.
 This is an internal concrete contract, not arbitrary Orleans codec compatibility.
 
+## Owner performance extension, 2026-10-03
+
+Accepted REQ-IS-010/AC-IS-010 and REQ-IS-PERF-001..004 / AC-IS-PERF-001..004 add baseline diagnostics
+for all shared serialization consumers. Ordered stages NSP001 contracts; NSP002
+authentic public generated BDN fixtures and TUnit cases; NSP003 original result
+validation/provenance; NSP004 sole lead workflow integration; NSP005 exact-source
+CI and Linux measurement; NSP006 only evidence-selected bounded optimization.
+BenchmarkScenarios owns Features/BenchmarkComparisons/Native*Serialization*;
+UnitTests mirrors BenchmarkComparisons; scripts owns new native-serialization-*
+helpers; root alone owns shared benchmarks.yml/docs/acceptance. Existing ADR047
+public/unsealed generated-child contract and central package pins remain. A
+scoped UnitTests friend declaration permits direct corpus/manifest regressions;
+generated consumers still use public fixture methods and concrete return types.
+
+No database format/API/routing/authority change. JSON is benchmark-only historical
+typed UTF8 baseline and does not replace native runtime or claim equal fault
+contracts. Default workflow retains full matrix/aggregate/site proof; diagnostic
+mode is explicitly separate and cannot refresh published website metrics.
+Rollback removes additive diagnostics, without user data changes. Real generated
+Dry execution and genuine24-case measured JSON/CSV plus executor/source/environment
+receipts are required; local build or exit0 cannot qualify measurements.
+
 ## Accepted qualification repair contract
 
 R11/R12 preserve AC-IS002/004/007 and the existing formats. Actual GitHub
@@ -111,6 +133,11 @@ during preflight; ordinary ordered recovery alone applies/truncates it afterward
 Unsupported complete legacy frames and complete corruption must fail without
 changing journal/identity/provider files. Reset the journal position before
 ordinary recovery; keep startup preflight distinct from acknowledged write gates.
+
+The malformed nested-operation fixture must use the official specialized byte
+writer for otherwise-valid native fields; positive controls from the same writer
+prove that unknown/duplicate variants reach their intended guard. Preserve its
+original8MiB budgets and both direct/stored corruption assertions.
 
 StorageRecovery owns the initializer and new preflight helper; UnitTests owns
 NativeStoreOpenPreflight regressions using real files plus unchanged historical
