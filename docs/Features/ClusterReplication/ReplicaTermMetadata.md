@@ -1,7 +1,8 @@
 # ReplicaTermMetadata within ClusterReplication
 
-Status: accepted preserving implementation contract; source and native gates
-pending. Owner: KeyLoad lead. Decision: [ADR-061](../../ADR/ADR-061-bounded-replica-term-metadata.md).
+Status: source implementation and independent review complete; development
+build/formatter pass; exact-source native and performance gates pending.
+Owner: KeyLoad lead. Decision: [ADR-061](../../ADR/ADR-061-bounded-replica-term-metadata.md).
 Working acceptance/plan: `database-hotpath.acceptance.md` / `database-hotpath.plan.md`.
 
 REQ-REP-052: retained-entry term queries reuse only one bounded scalar observation
@@ -19,6 +20,15 @@ optimization; throughput/resource benefit requires actual native measurements.
 No new API/role/configuration, protocol, storage format, WAL/ACK or dependency.
 Each node-local log owns one scalar observation; Orleans activation movement
 does not transfer it or physical files.
+
+Provider preconditions: Position and scalar Identity fields must belong to the
+same protected cut inside Read; every effective record publication advances
+Position; same-position replacement advances a nonreused generation or changes
+authority; failed or uncertain live publication/replacement rejects subsequent
+reads until recovery. Pure prepublication validation/compile/verification errors
+preserve the unchanged healthy cut.
+ADR-061 freezes these explicitly. Actual ZoneTree is the only current provider;
+unknown/nonhonoring providers require a separate decision/regressions before use.
 
 ```mermaid
 sequenceDiagram
@@ -44,7 +54,7 @@ sequenceDiagram
 |Surface|Paths and owner|
 |---|---|
 |Backend|`src/KeyLoad.Replication/Features/ClusterReplication/DurableReplicaLog.cs` and NEW `ReplicaTermObservation.cs`; bounded dependency Luna after test-source/root start|
-|Contracts|Existing `ReplicaLogContracts.cs` and provider contract unchanged; root only if an approved contract delta becomes necessary|
+|Contracts|Existing signatures, wire and data shapes unchanged; root documents the required existing provider fence semantics in `StorageContracts.cs`|
 |Tests|NEW `tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaTermMetadata*.cs`; R15 Luna; existing full unit/scalar/recovery and RF3 remain mandatory|
 |Frontend|N/A: private physical log metadata has no independent UI|
 |Public SDK/MCP|Existing RF3 real clients and authorization/failover flows; no client/wire change|
@@ -64,7 +74,7 @@ tests. Shared source/config/Git/gates are serialized through root.
 |AC-DBHP-002|Real-store TermAt preserves zero/negative/missing/snapshot/retained suffix and strict decode errors; cold/warm/alternating indices, term/commit/vote advance and replacement tests return exact terms or established error. Wrong/stale term or weaker parser fails.|
 |AC-DBHP-003|Real ZoneTree counters prove one borrowed cold entry lookup, zero additional point lookups/bytes for repeated warm same-cut term calls with a large valid payload. Independent source review proves exactly one scalar cell and no payload/key/StoreIdentity/signing retention. No allocation/RSS/latency claim inferred.|
 |AC-DBHP-004|Direct record change/delete/corruption and same-position/different-valid-entry snapshot install force a strict fresh observation using Position/generation/authority; old term or hidden corruption fails. Restore NodeId and actual same-incarnation behavior require real restore evidence or documented source-only exception alongside existing restore tests.|
-|AC-DBHP-005|A warmed cell cannot serve after real provider poison/failed install, provider/log disposal, or through another opened log. Real supported fault-boundary/installation and reopen tests preserve exact error; existing real-process crash suite remains required.|
+|AC-DBHP-005|A warmed retained-entry cell cannot serve after real provider poison/failed install, provider/log disposal, or through another opened log. Real supported fault-boundary/installation and reopen tests preserve exact error; existing real-process crash suite remains required. Original zero/snapshot/invalid-range special branches and their prior error order remain unchanged.|
 |AC-DBHP-006|Existing log-monitor→provider read-gate order, protocol snapshot gate, all writes/ACK/crash hooks and borrowed lifetime remain. Full independent source review and genuine concurrent planning/publication/process/lifecycle regressions required; unforced cleanup failures are not fake runtime proof.|
 |AC-DBHP-007|Complete enabled solution build/formatter/analyzers/complexity/governance and exact-SHA GitHub TUnit/MTP normal/scalar/recovery/Docker Aspire RF3 real .NET/official MCP suites execute with no skips/failures. Numeric coverage is open until actual compatible collection exists.|
 |AC-DBHP-008|Repeated matched native PointRead1/2/3 and complete cohort retain source/workload/read/ACK/concurrency and client/per-node resource scopes. Server phases/CPU/alloc/GC profile gaps stay explicit. Unmatched samples/source counters cannot prove causal speedup, winner or maximum scalability.|
@@ -87,10 +97,18 @@ until implementation, every regression and authentic qualification exist.
 Actual source discovery: public read has authentication plus operation quorum
 rounds; write adds its pre-write barrier and append round. The shared leader gate
 and sequential write pump are profile targets. Empty warm read probes do not
-persist no-op metadata. TermAt copies/decodes the entire retained entry solely
-for its term. Benchmark replay capacity196608 differs from default16384; capacity
+persist no-op metadata. Before this repair TermAt copied/decoded the entire
+retained entry solely for its term. Benchmark replay capacity196608 entry slots
+per voter differs from default16384; capacity
 arithmetic alone does not attribute native throughput.
 
-Retained d45 native PointRead data and original failed complete270 cohort are
-being independently joined. New product/test source, exact-SHA qualification,
-matched current-source/server-resource profiles and numeric coverage remain open.
+The [d45 native baseline](../../implementation/database-hotpath-baseline-d45-r115.json)
+independently joins original artifacts and all15 PointRead repetitions, including
+the original failed complete270 cohort. The [source receipt](../../implementation/database-term-metadata-source-r119.json)
+binds the two product files, seven real-store test files and independent review.
+Sixteen test methods expand to18 authored cases; this is a source inventory, not
+native test discovery or execution. Full development build and formatter pass.
+The single scalar observation avoids a repeated point lookup at an identical
+verified cut; logical-read assertions do not establish CPU, allocation or speed
+improvement. Exact-source native qualification, matched current-source/server
+profiles, numeric coverage, endurance and power-loss gates remain open.

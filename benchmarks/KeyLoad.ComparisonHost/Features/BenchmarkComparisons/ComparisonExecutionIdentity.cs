@@ -1,5 +1,6 @@
 using System.Globalization;
 using KeyLoad.Comparisons;
+using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
@@ -65,8 +66,13 @@ internal sealed record ComparisonExecutionIdentity(
         ComparisonTopology topology)
         => ReadIdentity(configuration, sourceRevision, topology, isTimeSeries: false, isIsolated: true);
 
+    /// <summary>Requires the separate intensive TimeSeries family identity.</summary>
+    internal static ComparisonExecutionIdentity ReadTimeSeriesIntensive(IConfiguration configuration, string sourceRevision)
+        => ReadIdentity(configuration, sourceRevision, topology: null, isTimeSeries: false, isIntensiveTimeSeries: true)
+            ?? throw InvalidIdentity();
+
     private static ComparisonExecutionIdentity? ReadIdentity(IConfiguration configuration, string? sourceRevision,
-        ComparisonTopology? topology, bool isTimeSeries, bool isIsolated = false)
+        ComparisonTopology? topology, bool isTimeSeries, bool isIsolated = false, bool isIntensiveTimeSeries = false)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         var loadGeneratorImage = configuration[LoadGeneratorImageSetting];
@@ -83,7 +89,8 @@ internal sealed record ComparisonExecutionIdentity(
         var workflow = Nonempty(Required(configuration, WorkflowSetting));
         var gitHubSha = Required(configuration, GitHubShaSetting);
         var configuredRevision = Required(configuration, SourceRevisionSetting);
-        var profile = Required(configuration, EvidenceProfileSetting);
+        var profile = Required(configuration, isIntensiveTimeSeries
+            ? TimeSeriesIntensiveSelection.EvidenceProfileSetting : EvidenceProfileSetting);
 
         if (!ComparisonExecutionIdentityImageReference.IsValid(keyLoadImage)
             || !ComparisonExecutionIdentityImageReference.IsValid(loadGeneratorImage)
@@ -91,9 +98,7 @@ internal sealed record ComparisonExecutionIdentity(
             || !string.Equals(sourceRevision, configuredRevision, StringComparison.Ordinal)
             || !IsRevision(gitHubSha)
             || !string.Equals(sourceRevision, gitHubSha, StringComparison.Ordinal)
-            || !(isIsolated ? topology is { } selected && Enum.IsDefined(selected)
-                && profile == IsolatedComparisonContract.Current.Profile
-                : IsAcceptedProfile(profile, topology, isTimeSeries)))
+            || !IsAcceptedExecutionProfile(profile, topology, isTimeSeries, isIsolated, isIntensiveTimeSeries))
         {
             throw InvalidIdentity();
         }
@@ -101,6 +106,14 @@ internal sealed record ComparisonExecutionIdentity(
         return new(new GitHubProvenance(runId, runAttempt, repository, gitHubRef, workflow, profile),
             keyLoadImage, loadGeneratorImage);
     }
+
+    private static bool IsAcceptedExecutionProfile(string profile, ComparisonTopology? topology,
+        bool isTimeSeries, bool isIsolated, bool isIntensiveTimeSeries)
+        => isIntensiveTimeSeries
+            ? profile == TimeSeriesIntensiveFamilyContract.Current.EvidenceProfile
+            : isIsolated ? topology is { } selected && Enum.IsDefined(selected)
+                && profile == IsolatedComparisonContract.Current.Profile
+                : IsAcceptedProfile(profile, topology, isTimeSeries);
 
     private static string Required(IConfiguration configuration, string key)
         => configuration[key] ?? throw new InvalidOperationException(MissingSettingPrefix + key);

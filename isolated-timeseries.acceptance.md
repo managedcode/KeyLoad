@@ -1,5 +1,63 @@
 # Isolated intensive TimeSeries acceptance
 
+## TS009H input joins (REQ-BC059/061/064, AC-TSI001/003/007/008)
+
+- AC-TH009-001: NEW IsolatedTimeSeriesBenchmarkResources.Add validates the exact
+  existing selection, explicit Enabled=true and unique cell in Current family
+  plan before directories/runner/native allocation. One runner and only selected
+  KeyLoad or Timescale physical1/2/3 resources. Bind the existing six selection
+  keys (omit Scenario in Preflight), exact family CellId and ContractSha256,
+  private absolute output/root and storage description. If CellId/ContractSha256
+  inputs are supplied, require exact computed equality before allocation.
+  Require Root/native to be absent (file or directory); reject existing native
+  data without deleting/reusing it. Existing owned reports/control may remain.
+  Preserve current native
+  waits, images, ownership and default/legacy composition. Actual Aspire model
+  tests cover6 native selections with both phases/all5 scenarios, binding identity
+  and invalid/mixed/disabled selections without added resources/directories.
+- AC-TH009-002: ComparisonHost typed settings reuse the existing provenance and
+  immutable image-reference validator via a new nonnullable ReadTimeSeriesIntensive
+  entry. Exact source/configured/GITHUB_SHA, positive actual run/attempt/job,
+  nonempty repository/ref/workflow, family evidence profile, unique actual family
+  CellId/ContractSha256, absolute output and exact fixed storage description are required. No local fallback,
+  old270 worker envelope, copied fabricated provenance or private input echo.
+- AC-TH009-003: typed native settings retain selected immutable image and exactly
+  contiguous/distinct indexed native endpoints. KeyLoad requires HTTP(S) authority
+  endpoints, exactly count HTTP(S) voter origins, nonempty canonical GUID incarnation
+  and private admin; rejects Timescale ConnectionString. Timescale requires TCP
+  authority endpoints with explicit1..65535 port and private nonempty single-host
+  Npgsql connection (valid port/user/password); rejects KeyLoad admin/incarnation/
+  voter inputs. Validation covers the merged IConfiguration view; pre-merge duplicate keys
+  are not observable evidence. Reject nested indexed children, userinfo/path
+  beyond /, query, fragment, sparse/alias indices,
+  duplicate authorities, empty/extra values or unowned target credential accepted.
+  Typed settings neither connect/allocate a target nor log secrets. Override
+  ToString on both records to a fixed type label; no generated record diagnostic
+  may expose private credentials. Normalize selection/identity/parser expected
+  input errors to the fixed settings code without secret-bearing inner errors.
+- AC-TH009-004: actual ConfigurationManager/typed reader TUnit cases prove both
+  targets1/2/3, preflight/all intensive selections, source/job/image/cell mismatch,
+  absent/malformed inputs and safe diagnostics. No service doubles. Root enables
+  an internal UnitTests friend and the existing host ProjectReference output only;
+  production public CLR and old CLI/process tests remain. Source build/format is
+  distinct from exact-SHA normal/scalar TUnit and native6/30 qualification.
+
+Root accepts these source stages; existing dispatches stay unchanged until the
+original target/control/copy lifecycle is implemented and reviewed. Tests/reader
+values are input fixtures, never provider evidence. Rollback removes new additive
+classes/method/friend and restores the project-reference metadata; no data/API
+migration. All remaining AC-TSI criteria remain required.
+
+AC-TB009-001 (TSI001/003/006): for each native1/2/3 KeyLoad resource model, runner
+Benchmarks__Native__Incarnation references the actual existing incarnation
+ParameterResource, matching each node's KeyLoad__Incarnation. Each indexed
+Benchmarks__Native__VoterIds__i equals the selected node's actual canonical voter
+origin and each node's KeyLoad__Peers__i; exactly the selected count exists.
+Preserve independent expected http://nodeN:8080 values, private storage/waits/
+image/admin and every original model assertion. Updated existing three TUnit
+cases execute only in exact-source GitHub; models never establish native copies.
+No alternate profile, public API, secret value, port or default RF3 change.
+
 ## TS009J settled-run raw payload
 
 TJ009003 pre-output refinement: reject undefined run stage/failure origin/nullable

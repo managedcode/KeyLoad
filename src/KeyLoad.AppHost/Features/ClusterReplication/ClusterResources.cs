@@ -110,6 +110,6 @@ internal static class ClusterResources
         }
     }
 
-    private static string Origin(string node) => string.Format(CultureInfo.InvariantCulture, OriginCompositeFormat,
+    internal static string Origin(string node) => string.Format(CultureInfo.InvariantCulture, OriginCompositeFormat,
         Uri.UriSchemeHttp, node, HttpPort);
 }

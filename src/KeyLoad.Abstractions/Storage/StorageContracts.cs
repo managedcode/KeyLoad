@@ -105,6 +105,14 @@ public interface IAtomicTransaction : IKeyValueView
 public sealed record StoreIdentity([property: Orleans.Id(0)] int FormatVersion, [property: Orleans.Id(1)] int KeyCodecVersion, [property: Orleans.Id(2)] Guid NodeId, [property: Orleans.Id(3)] Guid Incarnation,
     [property: Orleans.Id(4)] ReadOnlyMemory<byte> SigningKey, [property: Orleans.Id(5)] DurabilityProfile Durability, [property: Orleans.Id(6)] bool DispatchPaused = false, [property: Orleans.Id(7)] long ReadGeneration = 0);
 /// <summary>Owns durable records, store gates and snapshot/backup publication.</summary>
+/// <remarks>
+/// Inside a read callback, Position and the scalar Identity fields describe the same protected cut as the view.
+/// Effective record publications advance Position. Replacement which can reuse a position must advance a nonreused
+/// ReadGeneration or change the incarnation or node identity before another read. Uncertain or failed live journal/tree
+/// publication or live replacement must reject subsequent reads until recovery.
+/// Pure validation, compile or snapshot verification rejection before publication preserves the unchanged healthy cut.
+/// Node-local replica term observations depend on these provider guarantees.
+/// </remarks>
 public interface IAtomicStore : IDisposable
 {
     /// <summary>Gets the current persisted store and token-signing identity.</summary>

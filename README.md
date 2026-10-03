@@ -12,13 +12,14 @@ The product is one database server for AI agents with linked documents, typed re
 
 ## Development status
 
-The latest [eeef54b source qualification](docs/implementation/isolated-source-qualification-37107911987.json)
-passes118 analyzer and63 RF3 cases, but its full solution build fails29 Site and
-Recovery diagnostics. Normal/scalar/recovery and native27/270 did not execute;
-Pages rejected the incomplete cohort. The [reviewed039 source repair](docs/implementation/isolated-source-repairs-039.json)
-adds the explicit50,000-slot TimeSeries raw writer and fixes Site test keys;
-scoped project builds/formatting pass, while exact-source GitHub and native family
-host/copy/coverage/publication qualification remain open.
+The latest [1353482 source qualification](docs/implementation/isolated-source-qualification-37108640954.json)
+passes118 analyzer and63 RF3 cases, but its full solution build fails8 Recovery
+diagnostics. Prior21 Site errors are resolved; normal/scalar/recovery, the8 raw
+writer cases and native27/270 did not execute. The [reviewed039 source](docs/implementation/isolated-source-repairs-039.json)
+retains all50,000 TimeSeries attempt slots. The [native identity input join](docs/implementation/isolated-timeseries-identity-source-040.json)
+binds actual cluster incarnation and voters for1/2/3-node models; scoped development
+build/formatting passes. Genuine native family host/copies/coverage and complete
+cohort/site publication remain open.
 
 This is an early implementation of the clustered kernel. The default server topology has three persistent voting nodes and requires a majority for writes and strong reads. It needs no external database, Redis or message broker.
 
@@ -319,11 +320,14 @@ and891ops/s forRF3, at16 closed-loop clients and five10000-operation repetitions
 Each group runs on one Docker host; this is not multi-host scaling or a complete
 competitor comparison. Server CPU/allocations and phase timings are unavailable.
 The [first preserving repair](docs/Features/ClusterReplication/ReplicaTermMetadata.md)
-targets repeated full-entry decoding during term checks, retaining both public
-authorized quorum barriers. New regressions, implementation and measured benefit
-remain pending. [Current source ownership evidence](docs/implementation/image-http-owner-source-r115.json)
-closes the Node-helper source review; the full R113 development build still fails
-21 other SiteTests diagnostics, and delivered-SHA native tests remain required.
+now avoids repeated full-entry decoding during term checks at an identical
+verified store cut, retaining both public authorized quorum barriers. Its
+[source receipt](docs/implementation/database-term-metadata-source-r119.json)
+records independent review,18 authored real-store cases and full development
+build/formatter passes. Earlier Node-helper, SiteTests and term-test compilation
+failures are repaired in current source. Delivered-SHA native tests, server
+profiles and measured benefit remain required; this source change establishes
+no throughput increase or competitor ranking.
 
 
 The delivered `2f374fc34` [Linux run37093197474](https://github.com/managedcode/KeyLoad/actions/runs/37093197474) now passes the complete source gates,118 analyzer cases,1483 normal and1483 scalar unit cases,164 process-recovery cases and63 Docker RF3 cases without skips. The [original-source receipt](docs/implementation/isolated-source-qualification-37093197474.json) retains exact report/artifact hashes. Comparative image and diagnostic gates pass;27 native preflights finish16 job successes and11 failures, including two explicit unavailable Neo4j topologies among the successes. Complete270 performance and site publication remain unqualified. The separate TimeSeries pure30 cases pass in both modes, while its bounded runner has36 new declared TUnit cases prepared in source and native adapters/all30 cells remain pending.

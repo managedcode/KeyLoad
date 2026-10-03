@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "task": "TASK-ISO-TS009B-S root integration",
+  "baselineSourceRevision": "13534824145e8cc905a68e6321af701a283caf76",
+  "qualification": false,
+  "criteria": [
+    "AC-TB009-001",
+    "AC-TSI-001",
+    "AC-TSI-003",
+    "AC-TSI-006"
+  ],
+  "files": [
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesKeyLoadResourceTests.cs",
+      "sha256": "20cdfcea7002cc2cf88dbb9c15740b0f1f954601fecbf43b855dbe0898661621",
+      "bytes": 7706,
+      "lines": 123
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedTimeSeriesKeyLoadResources.cs",
+      "sha256": "861c45718222a651f70638ac7fecde22f406916e163a87980180caafe4d816e7",
+      "bytes": 2118,
+      "lines": 40
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/ClusterReplication/ClusterResources.cs",
+      "sha256": "80adac350b1b64b6916ca5b4cc6ab9769f26812779b58a698943a10bf769c6b9",
+      "bytes": 6739,
+      "lines": 115
+    }
+  ],
+  "registeredResourceModelCases": 3,
+  "newCases": 0,
+  "originalAssertionsPreserved": true,
+  "testsFirst": true,
+  "independentCandidateManifestSha256": "999ea0096e567db67258b87876abfe9e1ef5d9c5786ba7434c2e7e980abc51ee",
+  "checks": {
+    "developmentComparisonTestsBuild": {
+      "status": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 33.45,
+      "logSha256": "10e61518158fba4a4f1122ba5165ee83ac4e475711a5bec74800ac06c6f39c62",
+      "projection": "eeef54b archived source plus exact reviewed135 raw/site repair and three TS009B source files; foreign working-tree Recovery/hot-path excluded"
+    },
+    "scopedFormatter": {
+      "status": "passed",
+      "files": 3,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "staticGovernance": "passed25projects4modules",
+    "diffWhitespace": "passed"
+  },
+  "hashGuardCorrection": "Candidate hash text typo was rejected before any copy. Source hashes were recomputed before integration. Stale pre-integration ComparisonTests build r1 is excluded from TS009B proof.",
+  "limits": "Development source/model review only. The three model cases are unexecuted in exact-source GitHub. No native membership, actual data copies, ACKs, TimeSeries6/30, new270, coverage, site/provider or measured performance proof."
+}

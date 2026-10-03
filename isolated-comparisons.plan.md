@@ -1,5 +1,23 @@
 # Isolated Linux comparisons plan
 
+## Actual1353482 terminal source and TS009B source join
+
+Run37108640954 attempt1 fails full Release8Recovery errors; prior21Site diagnostics
+are absent. Genuine original118 analyzer and63 RF3 cases all pass with no skips.
+Root independently verifies all6 original provider ZIP sizes/digests/job upload
+bindings,63 entry hashes,31 sealed inputs,17 checkpoint blobs and181 actual unique
+case IDs. Raw8/normal/scalar/recovery/images/native27/270/TimeSeries6/30 remain
+unexecuted; compiler diagnostics are not failed TUnit cases. Durable evidence:
+docs/implementation/isolated-source-qualification-37108640954.json. Preserve the
+owning concurrent Recovery/hot-path repair; source gate remains failed until its
+new delivered source qualifies in Actions.
+
+TS009B source/model review is complete, with three original native1/2/3 model
+cases preserved and extended. ComparisonTests development build0warnings/0errors
+33.45s, three-file scoped formatter and static governance/diff pass. No local
+runtime/test was run. Three-case exact-source GitHub and genuine native copy/ACK
+joins remain pending. Receipt: docs/implementation/isolated-timeseries-identity-source-040.json.
+
 Derived from [brainstorm](isolated-comparisons.brainstorm.md) and [acceptance](isolated-comparisons.acceptance.md). Root approves this implementation contract under explicit owner2026-10-03 direction. Canonical slice BenchmarkComparisons; replication refinement remains ClusterReplication. Required ADR-056 and ADR-007/034/040 amendments precede relevant source edits.
 
 ## Ordered graph / ownership

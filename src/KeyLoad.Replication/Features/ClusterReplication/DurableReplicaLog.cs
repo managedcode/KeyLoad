@@ -4,7 +4,9 @@ using KeyLoad.Storage;
 namespace KeyLoad.Replication;
 
 /// <summary>Node-owned metadata persisted by the supplied checksummed atomic store; the caller owns that store.</summary>
-/// <param name="store">Node-owned store that durably commits replica entries and hard state.</param>
+/// <param name="store">Node-owned store that durably commits replica entries and hard state. Its Read must check
+/// poison/disposal and hold a consistent cut. Position and Identity.NodeId, Incarnation and ReadGeneration inside the
+/// callback must fence writes, replacement and restore as specified by ADR-061.</param>
 /// <param name="configuration">Fixed voter scope and bounded log persistence settings.</param>
 /// <param name="faultObserver">Optional observer invoked after durable crash boundaries.</param>
 public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration configuration,
@@ -12,6 +14,7 @@ public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration c
 {
     private readonly object gate = new();
     private ReplicaHardState state = ReplicaLogValidation.Open(store, configuration);
+    private ReplicaTermObservation? termObservation;
     private bool disposed;
     /// <inheritdoc />
     public SemaphoreSlim ProtocolGate { get; } = new(1, 1);
@@ -51,7 +54,9 @@ public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration c
         {
             throw Errors.Fail(ErrorCode.NotFound, ReplicaPersistence.MissingEntry);
         }
-        return Load(index).Term;
+        var result = ReplicaTermObservationReader.Read(store, index, state.Term, termObservation);
+        termObservation = result.Observation;
+        return result.Term;
     }
 
     private ReplicaEntry Load(long index)

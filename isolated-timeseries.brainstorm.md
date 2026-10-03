@@ -1,5 +1,25 @@
 # Isolated intensive TimeSeries comparisons
 
+## TS009H staged composition and validated host inputs
+
+The closed family plan, native resource models and adapters exist but neither
+executable dispatch joins them. Implement two independent bounded input stages
+before native checkpoint ownership: AppHost selected resource composition and
+ComparisonHost typed validated settings. Reuse the canonical family plan and
+shared source/image provenance validator, rather than creating an alternate
+family identity. Strict invalid/mixed inputs must fail before resource allocation.
+The input stages cannot certify native copies or become a publishable result.
+Physical-copy checkpoints, parent/child deadlines, outer raw envelope and actual
+native6/30 gates remain ordered follow-up work, not waived acceptance criteria.
+
+TS009B native identity binding: the prepared KeyLoad runner has HTTP endpoints
+and its private admin parameter, but lacks the actual cluster incarnation and
+fixed voter addresses required by the intensive target context. Bind the existing
+incarnation ParameterResource and actual ClusterResources canonical voter-origin
+function. Do not guess logical voter IDs from HTTP proxy URLs or duplicate port
+configuration. Keep this additive configuration/source stage distinct from
+membership/copy/ACK proof and native host dispatch.
+
 TS009J raw-data boundary: default serialization omits internal ACK and cleanup
 facts. Use an explicit bounded JSON writer over the original settled run result.
 Encode all50000 planned slots; distinguish NotStarted from observed attempts and

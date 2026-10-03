@@ -1,3 +1,4 @@
+using System.Globalization;
 using KeyLoad.AppHost.Features.ClusterReplication;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
@@ -7,6 +8,9 @@ internal static class IsolatedTimeSeriesKeyLoadResources
     private const int FirstEndpointIndex = 0;
     private const string DataDirectory = "keyload";
     private const string AdminParameter = "admin-key";
+    private const string IncarnationParameter = "incarnation";
+    private const string NativeIncarnationSetting = "Incarnation";
+    private const string NativeVoterIdsPrefix = "VoterIds__";
     private const string AdminEnvironment = "Benchmarks__AdminKey";
     private const string HttpEndpoint = "http";
 
@@ -20,11 +24,16 @@ internal static class IsolatedTimeSeriesKeyLoadResources
             benchmarkNodeCount: context.NodeCount);
         var admin = context.Builder.CreateResourceBuilder(context.Builder.Resources.OfType<ParameterResource>()
             .Single(parameter => parameter.Name == AdminParameter));
+        var incarnation = context.Builder.CreateResourceBuilder(context.Builder.Resources.OfType<ParameterResource>()
+            .Single(parameter => parameter.Name == IncarnationParameter));
         context.Runner.WithEnvironment(AdminEnvironment, admin);
+        context.BindSetting(NativeIncarnationSetting, incarnation);
         context.BindImage(image.Reference);
         for (var index = FirstEndpointIndex; index < nodes.Length; index++)
         {
             IsolatedKeyLoadAdmission.Apply(nodes[index]);
+            context.BindSetting(NativeVoterIdsPrefix + index.ToString(CultureInfo.InvariantCulture),
+                ClusterResources.Origin(nodes[index].Resource.Name));
             context.BindEndpoint(index, nodes[index], HttpEndpoint);
         }
     }

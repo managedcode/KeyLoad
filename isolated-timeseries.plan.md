@@ -1,5 +1,53 @@
 # Isolated intensive TimeSeries plan
 
+## Actual1353482 terminal source and TS009B source join
+
+Run37108640954 attempt1 fails full Release8Recovery errors; prior21Site diagnostics
+are absent. Genuine original118 analyzer and63 RF3 cases all pass with no skips.
+Root independently verifies all6 original provider ZIP sizes/digests/job upload
+bindings,63 entry hashes,31 sealed inputs,17 checkpoint blobs and181 actual unique
+case IDs. Raw8/normal/scalar/recovery/images/native27/270/TimeSeries6/30 remain
+unexecuted; compiler diagnostics are not failed TUnit cases. Durable evidence:
+docs/implementation/isolated-source-qualification-37108640954.json. Preserve the
+owning concurrent Recovery/hot-path repair; source gate remains failed until its
+new delivered source qualifies in Actions.
+
+TS009B source/model review is complete, with three original native1/2/3 model
+cases preserved and extended. ComparisonTests development build0warnings/0errors
+33.45s, three-file scoped formatter and static governance/diff pass. No local
+runtime/test was run. Three-case exact-source GitHub and genuine native copy/ACK
+joins remain pending. Receipt: docs/implementation/isolated-timeseries-identity-source-040.json.
+
+## TS009H parallel input stages
+
+Root-approved brainstorm/acceptance/ADR059 input contracts precede write work.
+Native host lifecycle, original task settlement, physical copies, outer envelope,
+SDK/MCP/telemetry/coverage/native6/30/cohort/site remain pending ordered joins.
+
+| Task | REQ/AC / owner / model / permissions | Dependencies, artifacts, verification and join |
+|---|---|---|
+|TASK-ISO-TS009H-A|BC059/061/064; TH009001/004; timeseries_resources_worker, existing capable cheaper worker; temporary NEW source/tests only|Current approved input contract and TS009B review. NEW AppHost composition and genuine model tests, hashes/patch. Root every diff/source build/formatter; exact-source GitHub models then native6/30. No existing-file/shared edits.|
+|TASK-ISO-TS009H-S|BC059/061/064; TH009002/003/004; publisher_archive_review inherited high-capability, independent private/provenance ambiguity; temporary NEW source/tests only|Accepted signature/native key validation contract. NEW typed settings and direct real-configuration TUnit, helpers/keys. Root shared validator/friend/ref, every diff/build/formatter; normal/scalar GitHub then genuine host. No implementation of control/copy/lifecycle.|
+|TASK-ISO-TS009H-I|All TH009; root strongest integration; shared code/docs/Git only|Both candidates terminal complete, combined every diff/limits/source gates; dispatch still deferred. Failed sources/native gates cannot unblock dependants.|
+
+- [x] Read-only63-source host/native lifecycle discovery reviewed; physical owner and deadline proposals remain explicitly unfrozen.
+- [x] Freeze additive input signatures, exact validation and tests before writes.
+- [ ] H-A tests first and canonical composition source integrated/reviewed.
+- [ ] H-S tests first, private typed settings and root shared identity/friend join.
+- [ ] Development source gates, exact-SHA GitHub models/normal/scalar and all native joins.
+
+TASK-ISO-TS009B-S: AC-TB009-001/TSI001/003/006, timeseries_resources_worker
+existing capable worker, temporary-only two existing KeyLoad resource/test files;
+root single owner of ClusterResources canonical-origin visibility/shared docs.
+Start after accepted ADR059 exact binding contract. Tests first preserve all
+three original model cases and independent address oracles. Candidate hashes/
+diff packet; root every diff/integration/development build/format/static, then
+exact-source GitHub. No worker repository/Git/runtime/package action. Native
+host/membership/copies/ACK/preflight/public negatives remain separate joins.
+
+- [ ] TS009B root visibility, reviewed two-file candidate and source gates.
+- [ ] TS009B exact-source GitHub model and genuine native identity qualification.
+
 |Task|REQ/AC and owner/permissions|Dependencies, artifacts, verification and join|
 |---|---|---|
 |TASK-ISO-TS009J-S|BC059/060/064,TSI002/004/007/008,TJ009001..004; publisher_archive_review existing capable worker; temporary-only NEW writer/helpers/tests|Accepted ADR059 exact inner schema/original DTOs. Tests first actual ledger/DTO/writer data; at most4 new source/2 new tests. No repository/existing files/Git/build/test/native/provider/package edits. Frozen hash/AC packet; root every diff/integration/development gates; exact-source normal/scalar GitHub. Outer native/source-job/telemetry/copy/publication joins remain root-owned.|

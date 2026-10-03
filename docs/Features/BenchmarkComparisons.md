@@ -508,3 +508,18 @@ TASK-ISO-031M traces REQ-BC-052/055 and AC-ISO-002/003/006/007 to AC-MR-031-001.
 The accepted ADR059 TS009S/TS007R packet adds a closed internal preflight/intensive TimeSeries selection, dedicated node-local composition context and real Timescale primary/physical-standby model for1/2/3. Matching selection and resource-model TUnit cases map AC-TSI-001/003/008; configuration and model assertions are source checks, not native role, copy or ACK proof. Root owns actual SDK/official MCP/Npgsql native6 host, separate raw family/protocol/workflow/collector/site joins before the30 measured cells can qualify. Old270 reports and productionRF3 stay under their existing contracts.
 
 ADR056 TASK-ISO-032H/AC-HT-032-001..003 retains one referenced original HTTP lifetime timer until the original promise settles after abort. The real Node regression uses an unreferenced completion timer and preserves original result/reason plus process-exit assertions. Source code/build is separate from exact-SHA actual registry import and full27/270 provenance.
+
+
+REQ-BC059/061/063/064 and AC-TSI001/003/006/007/008 now map staged
+AC-TB009-001/AC-TH009-001..004 to ADR059 TASK-ISO-TS009B/H-A/H-S/H-I. The
+[TS009B source receipt](../implementation/isolated-timeseries-identity-source-040.json)
+records the actual incarnation parameter and canonical voter bindings, all three
+original model cases, development build/formatter and explicit native limitations.
+H-A owns one selected native composition and original family hash/cell identity;
+H-S owns closed private settings using shared actual source/image provenance.
+Neither dispatches the incomplete native lifecycle. Caller-visible positive,
+negative/edge/mixed/secret-safe input assertions are in the canonical acceptance;
+exact-source GitHub model/normal/scalar and later real6/30 checks are required.
+No new product public CLR, persistence, credential authority or defaultRF3 change.
+Frontend publication is N/A for these input stages because no new measured family
+is qualified; the complete native family site stage remains mandatory.

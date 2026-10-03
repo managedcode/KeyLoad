@@ -43,7 +43,7 @@ flowchart LR
 
 Read the root and nearest project-local AGENTS.md before changing this solution. The product specification is [architecture v0.3](design/architecture-v0.3.uk.md). This document is a navigation map, not a replacement specification or a readiness claim.
 
-The [documentation index](README.md) is the complete entry point for 22 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 57 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
+The [documentation index](README.md) is the complete entry point for 22 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) records decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
 
 Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
 
@@ -746,3 +746,37 @@ Implementation/new real-store term regressions, delivered-SHA native full gates
 and matched performance/server profiles remain pending. Per-request Orleans
 actors never own the cell or files. No distributed data-cache enablement is
 inferred from this separate private log optimization.
+
+## Intensive TimeSeries executable input ownership
+
+The staged [ADR059 input contract](ADR/ADR-059-isolated-intensive-timeseries.md)
+links the closed6-preflight/30-cell family plan to one native engine/group and
+private host settings. AppHost owns selected resource composition, Host owns
+validated input/lifetime, Comparisons owns common corpus/oracles/attempts, and
+ComparisonTests owns later actual member/copy/SDK/MCP qualification. Existing
+productionRF3 and270 comparison contracts remain. Input source/model readiness
+does not establish native copies, completed measurements or publication.
+
+```mermaid
+flowchart LR
+    Configuration[Selected family configuration] --> Plan[FamilyPlan and original contract hash]
+    Plan --> Resources[AppHost native group and one runner]
+    Plan --> Settings[ComparisonHost validated private settings]
+    Resources --> Native[Pending actual member ACK and copy checks]
+    Settings --> Native
+    Native --> Raw[Original settled run JSON]
+    Raw --> Cohort[Pending authenticated complete family and site]
+```
+
+```mermaid
+classDiagram
+    class TimeSeriesIntensiveFamilyPlan
+    class IsolatedTimeSeriesBenchmarkResources
+    class TimeSeriesIntensiveHostSettings
+    class TimeSeriesIntensiveHostNativeSettings
+    class ComparisonExecutionIdentity
+    TimeSeriesIntensiveFamilyPlan --> IsolatedTimeSeriesBenchmarkResources
+    TimeSeriesIntensiveFamilyPlan --> TimeSeriesIntensiveHostSettings
+    TimeSeriesIntensiveHostSettings --> TimeSeriesIntensiveHostNativeSettings
+    TimeSeriesIntensiveHostSettings --> ComparisonExecutionIdentity
+```

@@ -1,5 +1,108 @@
 # ADR-059: separate native intensive TimeSeries family
 
+## TS009H staged executable input contract
+
+Accepted TH009001..004, REQ-BC059/061/064 and TSI001/003/007/008. Root owns all
+existing files, shared identity method, friend/project reference, dispatches,
+control protocol/native copy and durable/Git/workflow joins. Two disjoint workers
+own temporary NEW files only; no repository, Git, build/test/native/provider or
+package action. Stop on missing signatures, shared overlap or design expansion.
+
+H-A: IsolatedTimeSeriesBenchmarkResources.Add(IDistributedApplicationBuilder)
+under AppHost BenchmarkComparisons. Selection.Read then explicit Enabled, Current
+contract/FamilyPlan unique matching Selection; require private full-qualified
+root/output if explicitly supplied (missing uses fresh private root/reports).
+If configured CellId/ContractSha256 are supplied, reject contradictory values
+before allocation; absence uses exact computed identities. Require Root/native
+to be absent (file or directory) before runner/directory allocation; reject and
+preserve existing native inputs. Parent-owned reports/control may already exist.
+Bind selection keys replacing ':' with '__', omit Preflight Scenario, and NEW
+Benchmarks:TimeSeries:CellId/ContractSha256. Benchmarks:Storage equals exactly "Fresh TimeSeries cell-owned native directories; no shared database"
+(a description, not a path). Reuse BenchmarkRunnerContainer.Create and existing
+selected TimeSeries resources/context. No dispatch/host/native qualification yet.
+Root later installs routing which rejects any partial intensive selection before
+legacy/default allocation; that is a separate reviewed join.
+
+H-S: NEW TimeSeriesIntensiveHostSettings(Selection, Cell, ContractSha256, Identity,
+JobId, Image, OutputDirectory, Storage, RunId, Native), internal immutable record.
+Read(IConfiguration) uses Current/FamilyPlan to resolve unique Cell, requires
+configured CellId/ContractSha256 exact equality, new shared
+ComparisonExecutionIdentity.ReadTimeSeriesIntensive(configuration, sourceRevision)
+(nonnullable), positive canonical KEYLOAD_COMPARISON_JOB_ID and actual native image
+(valid immutable; KeyLoad equals Identity.KeyLoadImage). Private RunId is fresh
+Guid N, separate from actual GitHub RunId and workload hash. Root adds identity
+entry to existing validator using the selection EvidenceProfile key and Current
+family profile; missing runner identity rejects. Legacy methods unchanged.
+
+NEW TimeSeriesIntensiveHostNativeSettings(Image, ImmutableArray<Uri> Endpoints,
+ImmutableArray<string> VoterIds, Guid? Incarnation, string? AdminKey,
+string? ConnectionString). Read(configuration, selection, image). Exact contiguous
+0..N-1 arrays with no scalar/extra/duplicate/alias keys, URI authority restrictions
+from TH009003. Incarnation canonical D GUID, nonempty; secret fields private
+nonempty/no CRLF. Timescale Npgsql parser checks one Host (no comma), valid port,
+nonempty Username/Password without connecting; malformed connection produces the
+same safe code, never private parse message. Opposite-engine credentials reject.
+Read arrays from the merged IConfiguration view; reject nested indexed children,
+while pre-merge duplicate/case-equivalent keys cannot be observed or certified.
+Storage must equal the exact H-A description; only output/root are paths.
+All required/invalid settings throw InvalidOperationException with fixed
+TimeSeriesIntensiveHostSettingsInvalid; null IConfiguration ArgumentNullException.
+Both positional records override ToString to the fixed type name, preventing
+auto-generated private credential diagnostic echoes. Normalize expected selection,
+shared identity and parser input exceptions to the fixed settings code without
+private inner exceptions. Test safe ToString and both normalized boundaries.
+Use named constants/helpers,400/200/50/depth3 limits and genuine TUnit inputs.
+
+Stages: tests first temporary candidates; root every diff integration; development
+build/scoped formatter/governance; exact-source GitHub normal/scalar/models; later
+original native host/control/copy/SDK/MCP/6/30 joins. Root creates host internal
+UnitTests friend and enables ReferenceOutputAssembly on its already existing
+UnitTests ProjectReference; workers edit neither. Every source stage remains
+pending native qualification. No feature/interface/data/production migration;
+rollback additive source and metadata only. ADR remains Accepted.
+
+```mermaid
+flowchart LR
+    Config[Exact selected family configuration] --> Plan[Canonical six and thirty cells]
+    Plan --> Compose[One runner and selected native group]
+    Plan --> Settings[Typed private host settings]
+    Provenance[Shared actual source and image identity] --> Settings
+    Compose --> Later[Pending native control copy and evidence joins]
+    Settings --> Later
+```
+
+## TS009B native KeyLoad identity configuration join
+
+Accepted REQ-BC059/061/063, AC-TSI001/003/006 and AC-TB009-001. Existing
+ClusterResources.Origin(string node) becomes internal with identical body, so
+the comparison composition consumes the canonical owner of voter addresses.
+IsolatedTimeSeriesKeyLoadResources.Add binds Native Incarnation to the existing
+incarnation ParameterResource created by ClusterResources, and binds indexed
+Native VoterIds__i to ClusterResources.Origin(nodes[i].Resource.Name). Existing
+HTTP endpoints/private admin, image, exact fixed group, waits/storage and default
+RF3 remain. Incarnation is not synthesized from a resource name or run identity.
+
+Root owns the existing ClusterResources visibility and shared docs/Git joins.
+timeseries_resources_worker owns only temporary revised copies of existing
+IsolatedTimeSeriesKeyLoadResources.cs and its matching resource tests under
+/private/tmp/keyload-ts009b-candidate. Tests first extend the original three cases
+with independent address values and actual node/runner incarnation reference
+equality; retain every assertion. Source limits/constants apply. No repository,
+other file, package, local test/native/Git or provider action. Root reviews every
+diff, integrates and builds/formats/static-checks; exact-SHA GitHub models and
+later genuine host/preflight/copy/ACK joins qualify behaviour. Rollback removes
+only new bindings and restores private visibility; no data or public migration.
+Stop on an unspecified signature or source ownership overlap.
+
+```mermaid
+flowchart LR
+    Cluster[Actual cluster composition] --> Incarnation[Existing incarnation parameter]
+    Cluster --> Origins[Canonical fixed voter origins]
+    Incarnation --> Runner[One selected TimeSeries runner]
+    Origins --> Runner
+    Runner --> Later[Later actual membership and copy qualification]
+```
+
 ## TS009J explicit settled-run raw payload contract
 
 TJ009003 source refinement: full pre-output validation also rejects undefined

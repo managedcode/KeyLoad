@@ -1,6 +1,7 @@
 # ADR-061: bounded node-owned replica term metadata
 
-Status: Accepted; implementation and exact-SHA GitHub qualification pending.
+Status: Accepted; source implementation/review and development checks complete;
+exact-SHA GitHub and measured performance qualification pending.
 Owner: KeyLoad lead. Related [ClusterReplication](../Features/ClusterReplication.md),
 [term feature contract](../Features/ClusterReplication/ReplicaTermMetadata.md),
 [ADR-007](ADR-007-replica-consensus-bootstrap.md),
@@ -10,7 +11,7 @@ Owner: KeyLoad lead. Related [ClusterReplication](../Features/ClusterReplication
 ## Decision and preserved boundaries
 
 REQ-REP-052 / AC-DBHP-001..008 extend REQ-MP-001/002/005 and
-AC-MP-001/004/006/011/012. Current TermAt fully copies and strictly decodes the
+AC-MP-001/004/006/011/012. Before this repair TermAt fully copied and strictly decoded the
 last retained entry to read its scalar term. Application authentication and
 operation each retain their own authorized quorum round; do not merge or cache
 those boundaries here. The node-wide write pump, shared leader round gate,
@@ -41,6 +42,21 @@ ordinary compaction preserves identical logical records. Tests must prove these
 actual fences rather than trusting an ungated property observation. Alternative
 providers that cannot honor this contract require a separate decision; no fake
 provider is accepted as proof.
+
+Required provider preconditions are explicit for this DurableReplicaLog use:
+inside its Read callback, Position and the extracted Identity fields describe
+the same protected cut as the view; every effective record-changing publication
+advances Position before returning success; replacement that can reuse a local
+position advances a nonreused ReadGeneration or changes incarnation/NodeId before
+another read can observe it; failed or uncertain live journal/tree publication
+or live replacement rejects subsequent reads until recovery. Pure validation,
+compile or snapshot verification rejection before live publication preserves the
+unchanged healthy cut. These are required provider semantics, not inferred from an interface
+name. Root documents them in the existing shared storage contract and the log's
+store parameter; signatures/wire/data do not change. Actual ZoneTree is the only
+current inspected provider; real fence-test/native qualification is pending. An unknown/nonhonoring
+provider is not silently qualified or enabled by this optimization and requires
+a separate decision and real provider regressions before DurableReplicaLog use.
 
 ```mermaid
 flowchart LR
@@ -76,6 +92,10 @@ flowchart LR
 4. Strong reviewer reads every joined product/test diff and exact current hash;
    root integrates code, fixes actionable findings and owns shared docs/config,
    Git and gates. No worker may run local tests or alter diagnostics/limits.
+   Root alone owns the semantic documentation of the existing shared
+   `src/KeyLoad.Abstractions/Storage/StorageContracts.cs` provider fields/read gate;
+   the worker documents the accepted store preconditions in its already owned
+   DurableReplicaLog constructor parameter without new signatures or interfaces.
 5. Root runs enabled full development build, formatter/governance/static checks,
    commits ALL eligible current scope on main and ordinary pushes. Authenticate
    exact-SHA native CI artifacts for complete unit/scalar, process recovery and
