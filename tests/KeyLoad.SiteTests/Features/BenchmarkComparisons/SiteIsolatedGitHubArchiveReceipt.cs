@@ -5,29 +5,21 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed record SiteIsolatedGitHubArchiveFile(string Path, long Bytes, string Sha256);
 
-internal sealed class SiteIsolatedGitHubArchiveReceipt
+internal sealed class SiteIsolatedGitHubArchiveReceipt(string capture, string receiptPath,
+    JsonObject value, SiteIsolatedGitHubArchiveFile[] files)
 {
-    private readonly JsonObject originalValue;
-    private readonly SiteIsolatedGitHubArchiveFile[] originalFiles;
+    private JsonObject OriginalValue { get; } = value.DeepClone().AsObject();
+    private SiteIsolatedGitHubArchiveFile[] OriginalFiles { get; } = [.. files];
 
-    public SiteIsolatedGitHubArchiveReceipt(string capture, string receiptPath,
-        JsonObject value, SiteIsolatedGitHubArchiveFile[] files)
-    {
-        Capture = capture;
-        ReceiptPath = receiptPath;
-        originalValue = value.DeepClone().AsObject();
-        originalFiles = [.. files];
-    }
+    public string Capture { get; } = capture;
 
-    public string Capture { get; }
+    public string ReceiptPath { get; } = receiptPath;
 
-    public string ReceiptPath { get; }
+    public JsonObject Value => OriginalValue.DeepClone().AsObject();
 
-    public JsonObject Value => originalValue.DeepClone().AsObject();
+    public SiteIsolatedGitHubArchiveFile[] Files => [.. OriginalFiles];
 
-    public SiteIsolatedGitHubArchiveFile[] Files => [.. originalFiles];
-
-    internal bool Matches(JsonNode? value) => JsonNode.DeepEquals(originalValue, value);
+    internal bool Matches(JsonNode? value) => JsonNode.DeepEquals(OriginalValue, value);
 }
 
 internal static class SiteIsolatedGitHubReceiptReader
