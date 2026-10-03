@@ -75,11 +75,12 @@
   },
   "gitHubQualification": {
     "state": "blocked_before_site_checkout",
-    "runId": 37112008157,
-    "sourceRevision": "9b3bd8ed64b42e7e3bd37d454face7984dfc6b5f",
-    "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37112008157",
-    "artifactId": 11270013705,
-    "artifactName": "site-qualification-9b3bd8ed64b42e7e3bd37d454face7984dfc6b5f-1",
+    "runId": 37112504216,
+    "sourceRevision": "0549b63e86d4016993502511596bc1afceeae7e0",
+    "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37112504216",
+    "artifactId": 11270535247,
+    "artifactName": "site-qualification-0549b63e86d4016993502511596bc1afceeae7e0-1",
+    "localArtifact": "/private/tmp/keyload-vector-pages-37112504216-artifacts",
     "reason": "Isolated Pages GitHub evidence rejected.",
     "siteTestsExecuted": false,
     "nativeCoverageQualified": false,
@@ -91,5 +92,23 @@
     "AC-VEC-003": "source and manual fallback implemented; real HTTP404 regression written but unexecuted",
     "AC-VEC-004": "development checks and manual renderer budgets pass; GitHub gates pending",
     "AC-VEC-005": "publication blocked by rejected isolated evidence"
+  },
+  "gitHubQualificationBaseline": {
+    "state": "blocked_before_site_checkout",
+    "runId": 37112008157,
+    "sourceRevision": "9b3bd8ed64b42e7e3bd37d454face7984dfc6b5f",
+    "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37112008157",
+    "artifactId": 11270013705,
+    "artifactName": "site-qualification-9b3bd8ed64b42e7e3bd37d454face7984dfc6b5f-1",
+    "reason": "Isolated Pages GitHub evidence rejected.",
+    "siteTestsExecuted": false,
+    "nativeCoverageQualified": false,
+    "published": false
+  },
+  "repairCommit": "0549b63e86d4016993502511596bc1afceeae7e0",
+  "publishedInspection": {
+    "url": "https://www.keyload.cloud/",
+    "websiteSourceRevision": "6ad4741a713ac3376868aef146ed60a199e97b93",
+    "liveSvgCount": 0
   }
 }
