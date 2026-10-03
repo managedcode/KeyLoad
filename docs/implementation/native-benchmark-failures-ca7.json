@@ -93,5 +93,209 @@
   "initiatingCauseProven": false,
   "stageEOutboxObservationIncluded": false,
   "fullCohortQualified": false,
-  "scope": "Actual failed original current-source cell. Original timed samples retained; failed final preparation has no fabricated timing. No older f403 cause is inferred and no successful cohort/site claim follows."
+  "scope": "First original failed n1 delete cell retained; complete eight-cell failure inventory independently binds all original bytes. No underlying cause or successful cohort/site claim.",
+  "completeRetainedFailureInventory": {
+    "observedAtUtc": "2026-10-03T14:36:01Z",
+    "failedJobs": 8,
+    "originalZipCount": 16,
+    "independentlyVerifiedManifestFiles": 161,
+    "originalInventorySealSha256": "4ea729e0e6296893b82238b8da81e069be161b5c6d025f46f743f8f16b51c1b6",
+    "rootOriginalVerificationSha256": "60d1bbbef684dbca1a3c5506f1b22811e89e00d4d6c35f71085b9feb19b5e9f0",
+    "terminalRun": {
+      "status": "completed",
+      "conclusion": "cancelled",
+      "jobCounts": {
+        "success": 126,
+        "failure": 8,
+        "cancelled": 169,
+        "skipped": 3
+      },
+      "scenarioProviderStatuses": {
+        "success": 96,
+        "failure": 8,
+        "cancelled": 166
+      },
+      "preflightProviderSuccesses": 27,
+      "aggregateConclusion": "cancelled",
+      "websiteChecksConclusion": "cancelled",
+      "publishConclusion": "cancelled",
+      "originalProviderSealSha256": "34435a0b12625dbed7a67593ba539debf8a68f99e8e552f2f051e43b67e50c29",
+      "countsAreMeasuredCaseQualification": false
+    },
+    "underlyingCauseProven": false,
+    "quotaCountersAvailable": false,
+    "stageEObservationIncluded": false,
+    "fullCohortQualified": false,
+    "websiteRefreshed": false,
+    "cells": [
+      {
+        "jobId": 111215394473,
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562961/job/111215394473",
+        "physicalNodes": 1,
+        "scenario": "DocumentUpdate",
+        "profile": "intensive-1k-c16",
+        "originalLogSha256": "42286a981c16a0ea57909a82770ef2f37f4f0a0e96eb5fe33088687cb3938f39",
+        "originalWorkerSha256": "d91ade6f8ed0534bff8ad0ea3e2f88b106a4d7af5829242a674395587593fbda",
+        "originalTeardownSha256": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4",
+        "artifacts": [
+          {"artifactId": 11276196471,"name": "comparison-worker-keyload-n1-document-update","providerAndZipSha256": "03008c665843755e30ba0a1fe6976e398411d4b0924c4c3973dbf26cc1667257","reports": [],"uploadLines": [908,909,910,906]},
+          {"artifactId": 11275907075,"name": "comparison-case-qualification-keyload-n1-document-update","providerAndZipSha256": "65214b383aa0efc1e436236501cb8a5d84aeacb06b1a8816ae07dbd398ababef","reports": [{"entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json","sha256": "273b88f0e6a7a90a1d2c94405fd65f036cf34475e2c8a143ce13b5b20683918c","counts": {"error": 1}}],"uploadLines": [990,991,992,988]}
+        ],
+        "actualRepetitions": [
+          {"repetition": 0,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 61.3108422},
+          {"repetition": 1,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 70.4426556},
+          {"repetition": 2,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 76.1332387},
+          {"repetition": 3,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 82.3335638},
+          {"repetition": 4,"status": "failed","detail": "KeyLoad:ResourceExhausted","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null}
+        ]
+      },
+      {
+        "jobId": 111215394485,
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562961/job/111215394485",
+        "physicalNodes": 1,
+        "scenario": "DocumentDelete",
+        "profile": "intensive-1k-c16",
+        "originalLogSha256": "16c0f43d13a09c7cb6d412ec895c14f5b8aee95dbce9c8b03ce2316a7d9ea934",
+        "originalWorkerSha256": "9575cd11b7e8535eff7df4fa198f29972f15a8e84291b36b40562b8eeeb3b998",
+        "originalTeardownSha256": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4",
+        "artifacts": [
+          {"artifactId": 11275916516,"name": "comparison-worker-keyload-n1-document-delete","providerAndZipSha256": "aba0d7d95c8c4ff96fc7f515f54a3798bdea619f25f306d297e1a8d92474bdb6","reports": [],"uploadLines": [910,911,912,908]},
+          {"artifactId": 11275763647,"name": "comparison-case-qualification-keyload-n1-document-delete","providerAndZipSha256": "d6fc66b71dfb8ffe70b30cd0b5bdeb3f8378ddee70876795259355d4ed2fb4de","reports": [{"entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json","sha256": "276e0112b528f087d31a15e9e2c31941641e3ec6b77a6992e85068194d6e773e","counts": {"error": 1}}],"uploadLines": [992,993,994,990]}
+        ],
+        "actualRepetitions": [
+          {"repetition": 0,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 54.3574722},
+          {"repetition": 1,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 61.7200151},
+          {"repetition": 2,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 64.4029768},
+          {"repetition": 3,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 74.2657905},
+          {"repetition": 4,"status": "failed","detail": "KeyLoad:ResourceExhausted","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null}
+        ]
+      },
+      {
+        "jobId": 111215394507,
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562961/job/111215394507",
+        "physicalNodes": 2,
+        "scenario": "DocumentDelete",
+        "profile": "intensive-1k-c16",
+        "originalLogSha256": "d297413cdd1410887fcdcae9bbe05eba9e1f5178bdf72eb076bb5778e0fd7178",
+        "originalWorkerSha256": "d7e0079701810ca2c37cf7d40bb840038ee66e1955d2106cde4a2648458e2f17",
+        "originalTeardownSha256": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4",
+        "artifacts": [
+          {"artifactId": 11276277160,"name": "comparison-worker-keyload-n2-document-delete","providerAndZipSha256": "51c981dd48e8388b29fb6c18688b02c1ace5093ddd3af61a2279419313114513","reports": [],"uploadLines": [931,932,933,929]},
+          {"artifactId": 11276062601,"name": "comparison-case-qualification-keyload-n2-document-delete","providerAndZipSha256": "6f47f8d62e0715ceb65a1e9d2b11e130f61c3e4a278e8169c88c3f99b5e573c6","reports": [{"entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json","sha256": "e3dade468b3559e5d21ed479cedb98a55c79e6b49dda7d46119ec79df8504d58","counts": {"error": 1}}],"uploadLines": [1013,1014,1015,1011]}
+        ],
+        "actualRepetitions": [
+          {"repetition": 0,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 121.5002567},
+          {"repetition": 1,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 125.4485097},
+          {"repetition": 2,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 3,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 4,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null}
+        ]
+      },
+      {
+        "jobId": 111215394523,
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562961/job/111215394523",
+        "physicalNodes": 3,
+        "scenario": "DocumentUpdate",
+        "profile": "intensive-1k-c16",
+        "originalLogSha256": "ab44f2e0bd80724dc63db081bbae2b5ffd973b5d277e2926c4d1f2f1dd260d16",
+        "originalWorkerSha256": "54f660f9988e696bd81e706223e89e69015d5d4f38583d168917140bcc5acd1c",
+        "originalTeardownSha256": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4",
+        "artifacts": [
+          {"artifactId": 11275912483,"name": "comparison-case-qualification-keyload-n3-document-update","providerAndZipSha256": "1be9861981cb3de7ce787b7773e157a9bc182ba7fda8e5b61a5cabcd6ecce70b","reports": [{"entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json","sha256": "4da4153cf8b0de61df96cf83f419052cb8870a3218e65304cbdaf02e50078b83","counts": {"error": 1}}],"uploadLines": [1052,1053,1054,1050]},
+          {"artifactId": 11275872552,"name": "comparison-worker-keyload-n3-document-update","providerAndZipSha256": "ca24c7b972d2480f7662f83815adccc4b166b8b93ee78900c5745e2ce89fc52a","reports": [],"uploadLines": [970,971,972,968]}
+        ],
+        "actualRepetitions": [
+          {"repetition": 0,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 145.6250134},
+          {"repetition": 1,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 2,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 3,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 4,"status": "failed","detail": "KeyLoad:UnknownWriteOutcome","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null}
+        ]
+      },
+      {
+        "jobId": 111215394532,
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562961/job/111215394532",
+        "physicalNodes": 3,
+        "scenario": "DocumentWrite",
+        "profile": "intensive-1k-c16",
+        "originalLogSha256": "b6b66754f64fe70c3c8e47f2d727fd2a2f91263e4f6c793213f654afd8b96c02",
+        "originalWorkerSha256": "cb855efc720ecd2f0582dacddb5bcd31f447a05fc8265c5ab65ef83d9868fb40",
+        "originalTeardownSha256": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4",
+        "artifacts": [
+          {"artifactId": 11276321649,"name": "comparison-case-qualification-keyload-n3-document-write","providerAndZipSha256": "47be90da30c213f7c8744c3dae2b547292b3008e43c33362dbfe6f4441d2849d","reports": [{"entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json","sha256": "cf0d5d928f48db7be8418f30c1bfcb5a4181edcff303e141154275362b647c33","counts": {"error": 1}}],"uploadLines": [1132,1133,1134,1130]},
+          {"artifactId": 11276301581,"name": "comparison-worker-keyload-n3-document-write","providerAndZipSha256": "87381e1225088d32b8179b618fd38877ac368696f030f11702de626d552d97cb","reports": [],"uploadLines": [1050,1051,1052,1048]}
+        ],
+        "actualRepetitions": [
+          {"repetition": 0,"status": "failed","detail": "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.","attempts": 10000,"successes": 9996,"failures": 4,"samples": 10000,"sampleFailures": {"KeyLoad:UnknownWriteOutcome": 1,"KeyLoad:OwnershipLost": 3},"elapsedSeconds": 164.6817042},
+          {"repetition": 1,"status": "failed","detail": "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.","attempts": 10000,"successes": 9531,"failures": 469,"samples": 10000,"sampleFailures": {"KeyLoad:OwnershipLost": 469},"elapsedSeconds": 151.4761178},
+          {"repetition": 2,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 3,"status": "failed","detail": "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.","attempts": 10000,"successes": 4855,"failures": 5145,"samples": 10000,"sampleFailures": {"KeyLoad:OwnershipLost": 5145},"elapsedSeconds": 168.2527391},
+          {"repetition": 4,"status": "failed","detail": "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.","attempts": 10000,"successes": 1300,"failures": 8700,"samples": 10000,"sampleFailures": {"KeyLoad:OwnershipLost": 8700},"elapsedSeconds": 67.9767998}
+        ]
+      },
+      {
+        "jobId": 111215394549,
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562961/job/111215394549",
+        "physicalNodes": 3,
+        "scenario": "DocumentDelete",
+        "profile": "intensive-1k-c16",
+        "originalLogSha256": "57b6a47a2df1b0f1c639240e29f993dd62bd52b6bd284823db9384beeed1a1fa",
+        "originalWorkerSha256": "ab5c367e2b47457716b957f181fcd22aca7a2e857f197bcb33acffe7f291a21b",
+        "originalTeardownSha256": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4",
+        "artifacts": [
+          {"artifactId": 11276102003,"name": "comparison-worker-keyload-n3-document-delete","providerAndZipSha256": "4eb58f524d0a235c491c745804c15858255bc88bcd6e49c38ccab6cda3cc764c","reports": [],"uploadLines": [957,958,959,955]},
+          {"artifactId": 11275877529,"name": "comparison-case-qualification-keyload-n3-document-delete","providerAndZipSha256": "c1cc7dcbe7f97ebe0fac70ce038020950e9804cfa6701d95b09718378f57c523","reports": [{"entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json","sha256": "49eb9f1b1977b300b691140e29395fa33f28e231f754c1eff46524bdc63335f1","counts": {"error": 1}}],"uploadLines": [1039,1040,1041,1037]}
+        ],
+        "actualRepetitions": [
+          {"repetition": 0,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 1,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 2,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 3,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 4,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null}
+        ]
+      },
+      {
+        "jobId": 111215394559,
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562961/job/111215394559",
+        "physicalNodes": 2,
+        "scenario": "DocumentUpdate",
+        "profile": "intensive-1k-c16",
+        "originalLogSha256": "c9447555cbf519ad4b9b3b6983877fc48cfbb29c383350171dccfd0b286020c6",
+        "originalWorkerSha256": "4dfeeb29d0a8d538942d751928f40bee5ff3b371791911c7fd7447ff4204f155",
+        "originalTeardownSha256": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4",
+        "artifacts": [
+          {"artifactId": 11276282143,"name": "comparison-worker-keyload-n2-document-update","providerAndZipSha256": "97bf7d45ad8abf6720a3c72acec555caac2efbfcab61e47243d76aaff3ba066d","reports": [],"uploadLines": [926,927,928,924]},
+          {"artifactId": 11276122555,"name": "comparison-case-qualification-keyload-n2-document-update","providerAndZipSha256": "1eb35b67eb4601af17adb821bbfc1cd5f274c864b02cbeaafb253d78533a2232","reports": [{"entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json","sha256": "8f9a81ab011b452c39244d39493bec3727b951b0fa8f81ed824a3e1ac8e98802","counts": {"error": 1}}],"uploadLines": [1008,1009,1010,1006]}
+        ],
+        "actualRepetitions": [
+          {"repetition": 0,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 124.3138489},
+          {"repetition": 1,"status": "failed","detail": "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.","attempts": 10000,"successes": 9991,"failures": 9,"samples": 10000,"sampleFailures": {"KeyLoad:OwnershipLost": 8,"KeyLoad:UnknownWriteOutcome": 1},"elapsedSeconds": 127.3688152},
+          {"repetition": 2,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 3,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null},
+          {"repetition": 4,"status": "failed","detail": "KeyLoad:OwnershipLost","attempts": null,"successes": null,"failures": null,"samples": 0,"sampleFailures": {},"elapsedSeconds": null}
+        ]
+      },
+      {
+        "jobId": 111215394489,
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562961/job/111215394489",
+        "physicalNodes": 2,
+        "scenario": "DocumentWrite",
+        "profile": "intensive-1k-c16",
+        "originalLogSha256": "a939ed49d35fd3874b6ef6d7d9300386166a50fad3cca9b5636ff0a2d065ebba",
+        "originalWorkerSha256": "ffe19e0cb831ba6cfe2fd760ad5bcbea5effdcc4f6c56b14e7c8905a04c3fb93",
+        "originalTeardownSha256": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4",
+        "artifacts": [
+          {"artifactId": 11275997855,"name": "comparison-worker-keyload-n2-document-write","providerAndZipSha256": "67ca7318f2924302f9ee37448af1eedd757c91beddbdd46d4d1a2b9307ed15a8","reports": [],"uploadLines": [980,981,982,978]},
+          {"artifactId": 11275803300,"name": "comparison-case-qualification-keyload-n2-document-write","providerAndZipSha256": "dd1f7c502734e6e6a15e2f0f4d00689594c0e16d0ec84c2f6b77bc5e06d9b74b","reports": [{"entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json","sha256": "338a6e46df8d2a99c864d34249d144c02df792757a888d0ddd4ad86caea9ef43","counts": {"error": 1}}],"uploadLines": [1062,1063,1064,1060]}
+        ],
+        "actualRepetitions": [
+          {"repetition": 0,"status": "measured","detail": null,"attempts": 10000,"successes": 10000,"failures": 0,"samples": 10000,"sampleFailures": {},"elapsedSeconds": 151.6900339},
+          {"repetition": 1,"status": "failed","detail": "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.","attempts": 10000,"successes": 9993,"failures": 7,"samples": 10000,"sampleFailures": {"KeyLoad:OwnershipLost": 7},"elapsedSeconds": 157.0668827},
+          {"repetition": 2,"status": "failed","detail": "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.","attempts": 10000,"successes": 9992,"failures": 8,"samples": 10000,"sampleFailures": {"KeyLoad:OwnershipLost": 8},"elapsedSeconds": 169.7208681},
+          {"repetition": 3,"status": "failed","detail": "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.","attempts": 10000,"successes": 9979,"failures": 21,"samples": 10000,"sampleFailures": {"KeyLoad:OwnershipLost": 20,"KeyLoad:UnknownWriteOutcome": 1},"elapsedSeconds": 198.4548186},
+          {"repetition": 4,"status": "failed","detail": "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.","attempts": 10000,"successes": 9992,"failures": 8,"samples": 10000,"sampleFailures": {"KeyLoad:OwnershipLost": 8},"elapsedSeconds": 166.1938333}
+        ]
+      }
+    ]
+  }
 }

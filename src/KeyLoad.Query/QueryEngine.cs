@@ -49,7 +49,7 @@ public sealed partial class QueryEngine
         CancellationToken cancellationToken = default) => Execute(principalId, _ => request, timeProvider, cancellationToken);
     /// <summary>Describes the supported query language and configured budgets.</summary>
     public QueryCapabilityManifest Capabilities => new(1, 1, "Q1", "atomicPartition", "decimal", "distinctFromNull",
-        ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "IS NULL", "IS MISSING"],
+        ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS MISSING"],
         database.Limits.MaxResults, database.Limits.MaxScanRecords, database.Limits.MaxQueryBytes, database.Limits.MaxQueryDepth, true, true,
         database.Limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery"]);
     private QueryPage Execute(string principalId, Func<ReadExecutionBudget, AstQueryRequest> adapt, TimeProvider? timeProvider,

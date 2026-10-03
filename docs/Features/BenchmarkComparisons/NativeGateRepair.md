@@ -95,13 +95,28 @@ path, full SQL/protocol, FullTextSearch, complete comparison or publication.
 
 StageE [source-stage receipt](../../implementation/native-benchmark-gates-source-stage-003.json)
 binds all seven source/test files to complete26-project Release/format/static
-checks and final independent review. Thirteen new pure cases await GitHub
-execution; no native failure counters or acceleration are qualified. Initial
+checks and final independent review. At that delivery, thirteen new pure cases
+awaited GitHub execution; no native failure counters or acceleration were qualified. Initial
 270cell reports do not satisfy the additional mandatory100k/1m/5m dataset and
 at least100k measured-operation scale gates; those remain open.
 
-The [ca7 failed cell](../../implementation/native-benchmark-failures-ca7.json)
-independently retains the original n1 DocumentDelete ResourceExhausted failure:
-four measured10000-success repetitions, then failed preparation with no samples
-or timing. Cause and actual quota counters remain unproven; publication stays
-unqualified. This source predates stageE observation.
+The [ca7 failure receipt](../../implementation/native-benchmark-failures-ca7.json)
+retains all eight actual failed KeyLoad cells across1/2/3nodes, with16 original
+ZIPs independently bound to source/run/attempt/job/upload/digest and exact reports,
+worker JSON and teardown. The126success/8failure/169cancelled/3skipped terminal
+job statuses do not qualify measurements. All270scenario jobs are96provider
+success/8failure/166cancelled; aggregation and site are cancelled. The n1 update/
+delete final preparation ResourceExhausted has no invented samples/timing; multi-
+node OwnershipLost/UnknownWriteOutcome retain every actual failed sample. Cause
+and numeric quota counters remain unproven. This source predates stageE observation.
+
+The [3ae original CI receipt](../../implementation/sql-client-qualification-3ae.json)
+now binds2637/2637 normal and2637/2637 scalar,194/194 process recovery,67/67 RF3
+and118/118 unique analyzer cases, with no nonpass cases. All thirteen stageE
+classifier/formatter cases pass in each mode. Root independently rehashed the
+provider ZIP digests, upload/job/source bindings and actual report/case bytes.
+This qualifies those pure diagnostic cases; native failed-case observation,
+numeric budget cause and the complete isolated cohort remain open. Automatic
+Benchmarks37129421599 cancelled all27 preflight and270 scenario jobs without
+steps, so it supplies no native measurement or website refresh. Later source
+changes and working-tree SQL BETWEEN are outside this exact3ae qualification.

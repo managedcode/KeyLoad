@@ -1,0 +1,345 @@
+{
+  "sourceRevision": "3ae408fe173bf0dd69dd335e688c17fe99457ad3",
+  "runId": 37129421675,
+  "attempt": 1,
+  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37129421675",
+  "conclusion": "success",
+  "artifacts": [
+    {
+      "artifactId": 11276487918,
+      "name": "code-quality-ubuntu-latest",
+      "jobId": 111222405070,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37129421675/job/111222405070",
+      "providerAndZipSha256": "443deacb9e115bd6e1d3c345f984526ef477014f3f6af9425c5287d0e49aceed",
+      "jobLogSha256": "c9f0171f2c059ad973b5cc24813fda99f9012c4cd58359c4973adab8f49fb00d",
+      "uploadLines": [
+        333,
+        334,
+        335,
+        331
+      ],
+      "reports": []
+    },
+    {
+      "artifactId": 11276911732,
+      "name": "test-results-ubuntu-latest",
+      "jobId": 111222405070,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37129421675/job/111222405070",
+      "providerAndZipSha256": "dd621e9cf8a79bee4f9f6d70a3803301b33f8231e593380258982650cfb7ae5f",
+      "jobLogSha256": "c9f0171f2c059ad973b5cc24813fda99f9012c4cd58359c4973adab8f49fb00d",
+      "uploadLines": [
+        309,
+        310,
+        311,
+        307
+      ],
+      "reports": [
+        {
+          "entry": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+          "sha256": "09b31b5fc36e43a75de3cc355d82d3becec36b6e00345912cc994ea6412c5489",
+          "counts": {
+            "passed": 118
+          }
+        },
+        {
+          "entry": "TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+          "sha256": "547d68c0f943041befc3ae5459d01c9645efaf0b318b850d04c32c308c5ba8c8",
+          "counts": {
+            "passed": 194
+          }
+        },
+        {
+          "entry": "TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "sha256": "225a66797d3112760b3f97b2a94d7e9e2d3838f201dff523182cb8e6637d8d4b",
+          "counts": {
+            "passed": 2637
+          }
+        },
+        {
+          "entry": "TestResults/unit-scalar/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+          "sha256": "6021274cd058b90b3ff8bbd470fa766fbffd8ad53402574999221078f44e4aeb",
+          "counts": {
+            "passed": 2637
+          }
+        }
+      ]
+    },
+    {
+      "artifactId": 11276686048,
+      "name": "analyzer-rule-evidence",
+      "jobId": 111221642809,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37129421675/job/111221642809",
+      "providerAndZipSha256": "ca40480b4a530ce98b02deef41bed57954323ca4368fe0894758dbf6414934b4",
+      "jobLogSha256": "f97bf48a28da6ec65ec1d1ae3595413474b30d11968be809fb534ed5f5ba3c21",
+      "uploadLines": [
+        196,
+        197,
+        198,
+        194
+      ],
+      "reports": [
+        {
+          "entry": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+          "sha256": "16ee524a0db3033e881dcdfef3d5e68fad91c2da205fe97876c49abf87287d6d",
+          "counts": {
+            "passed": 118
+          }
+        }
+      ]
+    },
+    {
+      "artifactId": 11276526841,
+      "name": "docker-rf3-image-evidence",
+      "jobId": 111221642818,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37129421675/job/111221642818",
+      "providerAndZipSha256": "93d1b0bb98eb8a5e029b61d4350fff3b83d10b151fd388c10e695b76482904dd",
+      "jobLogSha256": "6730b9036dffd6568efa570c6a0d273829b71c1ea23f3efae86ed69a773f244d",
+      "uploadLines": [
+        316,
+        317,
+        318,
+        314
+      ],
+      "reports": []
+    },
+    {
+      "artifactId": 11276601689,
+      "name": "code-quality-docker-rf3",
+      "jobId": 111221642818,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37129421675/job/111221642818",
+      "providerAndZipSha256": "7079b8c9900f834940dabd59b92ff3f6f4037facda624892c858316188fc7895",
+      "jobLogSha256": "6730b9036dffd6568efa570c6a0d273829b71c1ea23f3efae86ed69a773f244d",
+      "uploadLines": [
+        377,
+        378,
+        379,
+        375
+      ],
+      "reports": []
+    },
+    {
+      "artifactId": 11276891059,
+      "name": "docker-rf3-qualification",
+      "jobId": 111221642818,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37129421675/job/111221642818",
+      "providerAndZipSha256": "ca32281943f91c906e98c01bc119272d8e954ad70279b71111e38b52ecf78ff7",
+      "jobLogSha256": "6730b9036dffd6568efa570c6a0d273829b71c1ea23f3efae86ed69a773f244d",
+      "uploadLines": [
+        349,
+        350,
+        351,
+        347
+      ],
+      "reports": [
+        {
+          "entry": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+          "sha256": "4d58884e4e7be38923f5ff60a17e52cfc58bde9e62f6377596c3cd95579118f9",
+          "counts": {
+            "passed": 67
+          }
+        }
+      ]
+    }
+  ],
+  "normal": {
+    "total": 2637,
+    "passed": 2637,
+    "nonpass": 0
+  },
+  "scalar": {
+    "total": 2637,
+    "passed": 2637,
+    "nonpass": 0,
+    "originalHardwareIntrinsicsSetting": "DOTNET_EnableHWIntrinsic=0"
+  },
+  "recovery": {
+    "total": 194,
+    "passed": 194,
+    "nonpass": 0
+  },
+  "rf3": {
+    "total": 67,
+    "passed": 67,
+    "nonpass": 0
+  },
+  "analyzer": {
+    "uniqueCases": 118,
+    "passed": 118,
+    "nonpass": 0,
+    "sourceAndDedicatedReportsAreSeparateExecutions": true
+  },
+  "stageECases": [
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.CleanupFailureWithResourceExhaustedSampleIsIneligible.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.SetupPrefixedExactResourceExhaustedFailureIsEligible.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.ExactResourceExhaustedFailureIsEligible.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.SampleCodeDoesNotQualifyWithoutFailedSampleOrMeasurement.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.ExactFailedSampleCodeQualifiesAnAlreadyFailedMeasuredCase.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.NullSampleDoesNotThrowOrQualify.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.OtherCodesStatusesAndMalformedPrefixesAreIneligible.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.MaximumPublicCounterValuesStillFitTheOutputBudget.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.NumericFieldsAreInvariantAcrossCurrentCultures.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.DefaultAndOversizedConsumerCollectionsAreRejectedAsUnavailableInputs.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.TypedStatusFormatsOnlyClosedScenarioAndNumericFields.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.NegativeCountersAndUnclosedCaseNumbersAreRejected.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "normal",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.EmptyStatusUsesNoActiveConsumerSentinel.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.CleanupFailureWithResourceExhaustedSampleIsIneligible.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.NullSampleDoesNotThrowOrQualify.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.OtherCodesStatusesAndMalformedPrefixesAreIneligible.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.SetupPrefixedExactResourceExhaustedFailureIsEligible.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.ExactFailedSampleCodeQualifiesAnAlreadyFailedMeasuredCase.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.ExactResourceExhaustedFailureIsEligible.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticClassifierTests.1.1.SampleCodeDoesNotQualifyWithoutFailedSampleOrMeasurement.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.MaximumPublicCounterValuesStillFitTheOutputBudget.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.NumericFieldsAreInvariantAcrossCurrentCultures.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.DefaultAndOversizedConsumerCollectionsAreRejectedAsUnavailableInputs.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.TypedStatusFormatsOnlyClosedScenarioAndNumericFields.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.NegativeCountersAndUnclosedCaseNumbersAreRejected.1.1.0",
+      "status": "passed"
+    },
+    {
+      "mode": "scalar",
+      "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.OutboxFailureDiagnosticFormatterTests.1.1.EmptyStatusUsesNoActiveConsumerSentinel.1.1.0",
+      "status": "passed"
+    }
+  ],
+  "rootOriginalVerificationReceipts": [
+    "2c995f7b8379fc26f2eea167f0dcea8b8f5872c5086cb36e73f58ecd9e464586",
+    "845643a8fc1361fc1feb992c29268fd8be577e5ee7e0c0aeed17fd81286b82ce"
+  ],
+  "providerTerminalSealSha256": "45f252c25bbc444732bb1383ec1b8f58fcdcedb889fa672b3cfb533c6d6dec8e",
+  "limits": [
+    "Exact 3ae source only; later 7d985 site/policy changes and new working-tree BETWEEN fixtures excluded.",
+    "Stage E classifier/formatter pass 13 cases in each mode; native failed-case observer/counter path remains unqualified.",
+    "Automatic Benchmarks 37129421599 cancelled all 27 preflight and 270 scenario jobs without steps; complete cohort and website qualification false.",
+    "Initial 10k-operation cohort cannot satisfy the mandatory 100k/1m/5m record and at least 100k measured-operation scale gates.",
+    "Full SQL, native client protocol, FullTextSearch selection, numeric coverage, endurance and power-loss gates remain open."
+  ],
+  "selectedCompositionReports": [
+    {
+      "entry": "TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "547d68c0f943041befc3ae5459d01c9645efaf0b318b850d04c32c308c5ba8c8",
+      "passed": 7,
+      "classPrefix": "DatabaseComposition",
+      "orderedCaseIdsSha256": "701e92d3d25175efd8f9cc7bf3d90a3e2a414a72ae873d0bc370fdcde7c1932a"
+    },
+    {
+      "entry": "TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "225a66797d3112760b3f97b2a94d7e9e2d3838f201dff523182cb8e6637d8d4b",
+      "passed": 32,
+      "classPrefix": "DatabaseComposition",
+      "orderedCaseIdsSha256": "e5f84c2429414370ec8267ffdac419e0ffaaafb1f52d65d7106f7db6a76971c0"
+    },
+    {
+      "entry": "TestResults/unit-scalar/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "6021274cd058b90b3ff8bbd470fa766fbffd8ad53402574999221078f44e4aeb",
+      "passed": 32,
+      "classPrefix": "DatabaseComposition",
+      "orderedCaseIdsSha256": "64e6acaf6d077b319f1cf83d26b3c3854b36399e2565fe4a81fa2c29a7785476"
+    },
+    {
+      "entry": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "4d58884e4e7be38923f5ff60a17e52cfc58bde9e62f6377596c3cd95579118f9",
+      "passed": 2,
+      "classPrefix": "DatabaseComposition",
+      "orderedCaseIdsSha256": "87a3edb89f15338e605d7d39ab4b0483affe2881e2c5962d4343be7f4d23eace"
+    }
+  ]
+}

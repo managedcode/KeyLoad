@@ -236,3 +236,54 @@ corresponding complete exact-source evidence. Manual source review and DBeaver U
 login/query evidence are explicit review exceptions, not substitutes for driver
 tests or numeric coverage. Dependencies: ADR-004/009/010/012/013/014/020/022/024/
 035/036/039/042/054/055/056/059; root preserves independent benchmark work.
+
+## Accepted bounded BETWEEN stage
+
+REQ-SQLC-006 / AC-SQLC-006A / TASK-SQLC-BETWEEN is the next additive Q1
+expression stage under [SqlBetween](../Features/QueryExecution/SqlBetween.md).
+The owning feature fixes the complete truth/error/budget/test and ordered
+execution contract; strongest TASK-SQLC-R23 review joins before delegated code.
+Status remains Accepted, with all runtime gates pending.
+
+1. Review the current parser/normalizer/evaluator/candidate/permission/cursor
+   sources and retained ca7 baseline. R22 corrects partial-bound truth: UNKNOWN
+   AND FALSE is FALSE, NOT that is TRUE; UNKNOWN AND TRUE stays UNKNOWN. Eager
+   non-null scalar mismatch errors and null-before-type checks remain current Q1.
+2. First-author real grammar and ZoneTree TUnit tests, then lower unquoted
+   `value [NOT] BETWEEN lower AND upper` to existing >=/<= AND and optional
+   outer Negation. Existing Operand reads all three operands; consume only the
+   delimiter AND inside the condition. No new AST/version/normalizer/evaluator,
+   SQL coercion/collation/function/optimizer or keyword cleanup.
+3. gpt-6-luna/high worker owns ONLY Query Features/QueryExecution/
+   SqlExpressionParser.cs and SqlSyntax.cs, plus NEW UnitTests matching slice
+   SqlBetween-prefixed files. No Git/packages/tests/build/runtime/workflows or
+   other files. Root owns QueryEngine capability metadata, NEW IntegrationTests
+   matching slice SqlRf3BetweenTests and optional helper, docs/Git/integration.
+4. Root reviews all diffs against independent literal and hand-built-AST oracles,
+   correct inclusive/reversed/null/missing/typed errors, quoted operators,
+   configured raw/token/normalized-byte/expanded7/8node and3/4depth budgets,
+   permission checks on every operand, cancellation/recovery and cursor parity.
+   Strongest independent review is required before frozen full solution source
+   build, formatter, static governance and scoped stable delivery.
+5. Actual GitHub normal/scalar/recovery/RF3/analyzer qualification retains source/
+   run/attempt/job/ZIP/report/case identities. RF3 uses genuine SDK and official
+   MCP, independent positive/negative/null truth results, manifest and error/next
+   request. No skipped suite or development build satisfies execution.
+
+No persisted data, native wire, serializer or public DTO migration. Rollback
+parser/manifest/new fixtures together; existing old AST/operators remain valid.
+Dependencies are existing Q1 and ADR012/054, typed AST/scalar comparison, resource
+limits, field authorization and SDK/MCP RF3 infrastructure. New performance
+claims require actual matched scale cohorts; this stage does not add an index
+range access path or complete SQL/native transport. Root keeps all independent
+benchmark/serialization/profiling/Garnet edits untouched.
+
+```mermaid
+flowchart LR
+    Range[SQL BETWEEN operands] --> Lower[Existing typed comparisons]
+    Lower --> Truth[Existing eager three valued AND]
+    Truth --> Negation[Optional whole predicate NOT]
+    Negation --> Gate[Existing budgets and persisted field authority]
+    Gate --> Read[Canonical authorized read cut]
+    Read --> Public[Real SDK and official MCP results]
+```

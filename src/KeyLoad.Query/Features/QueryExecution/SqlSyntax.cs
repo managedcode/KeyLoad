@@ -18,6 +18,7 @@ internal static class SqlSyntax
     internal const string Missing = "MISSING";
     internal const string Null = "NULL";
     internal const string In = "IN";
+    internal const string Between = "BETWEEN";
     internal const string And = "AND";
     internal const string Or = "OR";
     internal const string True = "TRUE";

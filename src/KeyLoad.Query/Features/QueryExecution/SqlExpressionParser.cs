@@ -60,6 +60,17 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, DatabaseLimits 
         {
             return Membership(value, negated);
         }
+        if (cursor.Eat(SqlSyntax.Between))
+        {
+            var lower = Operand();
+            cursor.Need(SqlSyntax.And);
+            var upper = Operand();
+            var range = new Logical(
+                new Comparison(value, SqlSyntax.GreaterOrEqual, lower),
+                SqlSyntax.And,
+                new Comparison(value, SqlSyntax.LessOrEqual, upper));
+            return negated ? new Negation(range) : range;
+        }
         if (negated || cursor.Current.Text is not (SqlSyntax.Equals or SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals or SqlSyntax.Greater or SqlSyntax.GreaterOrEqual or SqlSyntax.Less or SqlSyntax.LessOrEqual))
         {
             throw SqlSyntax.Invalid();
