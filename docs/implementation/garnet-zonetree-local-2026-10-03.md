@@ -23,6 +23,8 @@ The separate native-serialization suite also passed 59/59 with no skips, includi
 
 The broader local baseline launched after the delivered f403bf61e checkpoint passed all 194 process-recovery tests, with no skips. The full unit suite failed: 2494 total, 2425 passed, 69 failed, no skips. Those failures are recorded individually in the working plan and original failure inventory; focused passes do not make this baseline green. This is development evidence in a shared, concurrently changing checkout, not exact-source Linux qualification. Process recovery does not prove power-loss durability, RF3 or endurance.
 
+After the native and fixture repairs, the complete local unit rerun at 13:28 UTC executed 2574 tests: 2570 passed, four failed, no skips. The earlier 13 CLI deadline cases passed in this rerun, so this receipt does not establish a current CLI lifetime defect. Open failures are the unknown native well-known type 58 guard, GitHub step pending-status rejection, malformed stored queue-body fixture, and membership cancellation's TaskCanceledException versus exact OperationCanceledException assertion. The unchanged strict assertions remain failures; no complete-suite pass is claimed. The integrated 26-project Release build and required formatter passed, and all current eligible source was committed/pushed to main at bfb04d64bf9c0ca8a1ab6e0c703194e1813250f0. Authentication reader regressions separately passed 24/24 in both normal/scalar modes. These are local development checks, with exact-source CI still required.
+
 The authentic [GitHub diagnostic run 37124585233](https://github.com/managedcode/KeyLoad/actions/runs/37124585233), at exact f403bf61e730919a7b6e4b811539b870b8c8433d, passed the full Release build, formatter and governance job and all 32 raw-contract tests in each normal/scalar mode, with no skips. At 13:20 UTC both engine measurement jobs were queued; this receipt contains no GitHub speed numbers. The diagnostic run intentionally omits RF3 comparisons and website publication. Its original correctness archive 11274790938 has SHA-256 1b69f807ee076a895d3fe5bf4ab1374662effabc4439c1d067de5af3481fb36c, matching the GitHub artifact digest. Local means above remain excluded from website/global data.
 
 Original local TRX SHA-256:
@@ -33,6 +35,7 @@ Original local TRX SHA-256:
 - native-serialization59: 8504133e16809e7eb9d5c545dc6b5f8159eab6332db7ce00a64be974e6c49f88 (artifacts/local/native-serialization-correctness/final/KeyLoad.UnitTests_net10.0_arm64.trx).
 - full-process-recovery194: de322978570f722da5fe4451e886eee0de949ce01871bea9bbe9ac0fe9334bb6 (artifacts/local/full-recovery-f403/KeyLoad.RecoveryTests_net10.0_arm64.trx).
 - full-unit2494: b0e910db49a85e86da07967c62cf6fc1c35f04c7ecbbdca6955a471875ce8d89 (artifacts/local/full-unit-f403/KeyLoad.UnitTests_net10.0_arm64.trx); failure inventory c82a01381826cc1578312b438a5db1c02dee2f36dedef10169492b5d2150f6f4.
+- full-unit2574: 4d1882673a7d812e68aef7bf68d9c474fd1c6539317e3c779a0091efa44295e2 (artifacts/local/full-unit-nar001-joined/KeyLoad.UnitTests_net10.0_arm64.trx).
 
 Original long-read report SHA-256:
 

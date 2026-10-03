@@ -1,0 +1,175 @@
+{
+  "receiptType": "original_bound_CI_qualification",
+  "state": "partial_runtime_passes_full_required_gates_failed",
+  "source": {
+    "sha": "ca22b1baa919198c81749d86ffab56df24ec9317",
+    "workflow": "CI",
+    "runId": 37124217640,
+    "attempt": 1,
+    "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640/attempts/1",
+    "conclusion": "failure"
+  },
+  "ciJob": {
+    "jobId": 111207262778,
+    "artifactId": 11275655112,
+    "artifactName": "test-results-ubuntu-latest",
+    "artifactZipSha256": "e76ea89faa5733cfbeb2d85268007caa1d65d25116dba5146e7d068da628196a",
+    "reports": [
+      {
+        "suite": "KeyLoad.UnitTests",
+        "entry": "TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+        "total": 2402,
+        "passed": 2357,
+        "errors": 45,
+        "skipped": 0,
+        "reportSha256": "37dff3dbcb1801dac6d4b229b09dd7622473596e2da313c8ee4fd9c8295f771e"
+      },
+      {
+        "suite": "KeyLoad.RecoveryTests",
+        "entry": "TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+        "total": 190,
+        "passed": 189,
+        "errors": 1,
+        "skipped": 0,
+        "reportSha256": "062794104f2db5d106a578c8eb92f7441fb49660ae54c9f72d4bc527d8fddbf9"
+      }
+    ],
+    "jobConclusion": "failure",
+    "sourceChecks": {
+      "build": "success",
+      "format": "success",
+      "repositoryRules": "success",
+      "unitTests": "failure",
+      "unitTestsWithoutCpuIntrinsics": "skipped",
+      "processRecovery": "failure"
+    },
+    "providerDigest": "sha256:e76ea89faa5733cfbeb2d85268007caa1d65d25116dba5146e7d068da628196a",
+    "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640/artifacts/11275655112",
+    "uploadLogLines": [
+      949,
+      950,
+      951,
+      947
+    ],
+    "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640/job/111207262778"
+  },
+  "analyzerJob": {
+    "jobId": 111206386939,
+    "artifactId": 11274064960,
+    "artifactName": "analyzer-rule-evidence",
+    "artifactZipSha256": "fbc2fa4cc90d1d803385bc39f91f0daa088fe92f95aae4f9d5ee22bdf41503f4",
+    "entry": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+    "total": 118,
+    "passed": 118,
+    "errors": 0,
+    "skipped": 0,
+    "reportSha256": "e25bf2985c29c4b70b7ae51399c72828f1426dfd202b8aeef945d02f5352d0e0",
+    "providerDigest": "sha256:fbc2fa4cc90d1d803385bc39f91f0daa088fe92f95aae4f9d5ee22bdf41503f4",
+    "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640/artifacts/11274064960",
+    "uploadLogLines": [
+      196,
+      197,
+      198,
+      194
+    ],
+    "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640/job/111206386939"
+  },
+  "rf3Job": {
+    "jobId": 111206387125,
+    "qualificationArtifact": {
+      "artifactId": 11274444675,
+      "artifactName": "docker-rf3-qualification",
+      "zipSha256": "fe3ff64da75430d353963c5ec8e55d73d47624f6e9052df89deb74d0af2d7238",
+      "entry": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "total": 67,
+      "passed": 66,
+      "errors": 1,
+      "skipped": 0,
+      "reportSha256": "0a29cc8c3c5d29db4f1135277856af42c23a584a83a232b0358c8636b74f1ad1",
+      "providerDigest": "sha256:fe3ff64da75430d353963c5ec8e55d73d47624f6e9052df89deb74d0af2d7238",
+      "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640/artifacts/11274444675",
+      "uploadLogLines": [
+        373,
+        374,
+        375,
+        371
+      ]
+    },
+    "imageEvidenceArtifact": {
+      "artifactId": 11274519429,
+      "artifactName": "docker-rf3-image-evidence",
+      "zipSha256": "d09b80c707694b2135ea3d6c33a10efe63e6354c30351dbe65236b75fe638597",
+      "reports": []
+    },
+    "namedSqlRf3Passes": [
+      "AC_SQLC_003_CommentedWriteReplaysAndReadsThroughRealSdkAndOfficialMcp",
+      "AC_SQLC_003_MalformedCommentsAndSecondStatementCannotConsumeTheStableWrite"
+    ],
+    "singleFailure": {
+      "caseId": "KeyLoad.IntegrationTests.Features.DatabaseComposition.DatabaseCompositionRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AC_COMP_007_SqlReadsQueuedLinksAndWritesGraphThenOfficialMcpEnqueuesGraphActions.1.1.0",
+      "type": "TUnit.Assertions.Exceptions.AssertionException",
+      "location": "DatabaseCompositionRf3Tests.VerifyForwardAsync, line 89",
+      "observed": "Queued QueueGraphLink JSON is ordinally canonicalized; expected JSON retained DTO insertion order. The failure precedes reverse graph-to-queue assertions; this run does not qualify that reverse flow."
+    },
+    "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640/job/111206387125"
+  },
+  "g1": {
+    "suite": "IsolatedCurrentJobTests",
+    "sourcePath": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedCurrentJobTests.cs",
+    "total": 19,
+    "passed": 19,
+    "errors": 0,
+    "skipped": 0,
+    "reportSha256": "37dff3dbcb1801dac6d4b229b09dd7622473596e2da313c8ee4fd9c8295f771e",
+    "scope": "19 original policy-record cases; authenticated HTTP refresh/exhaustion remains distinct qualification."
+  },
+  "sqlNativePayloadOracle": {
+    "failedCase": "SqlOperationCommentCompilerTests.AcSqlc003EveryCanonicalReadAndCommandPreservesKindsIdentityAndPayload",
+    "sourceSha": "ca22b1baa919198c81749d86ffab56df24ec9317",
+    "jobId": 111207262778,
+    "artifactId": 11275655112,
+    "reportSha256": "37dff3dbcb1801dac6d4b229b09dd7622473596e2da313c8ee4fd9c8295f771e",
+    "failure": "The preceding SqlOperationTestData.Same(actual, expected) checks kinds, command identity, and exact SQL-compiled-versus-canonical-descriptor native bytes; the later comparison fails against item.ExpectedPayload, independently native-serialized from the pre-JSON DTO. This does not isolate stream/array writer behavior or establish a compiler payload defect.",
+    "separateNativeJsonLimitation": "Native payload bytes are binary and are not a JSON-byte oracle. The original no-body test attempts NativeSerialization.Deserialize<JsonElement> on the native sentinel and fails with KeyLoadException (invalid internal binary payload); it cannot establish JSON null semantics. The recursive AST failure compares a separately constructed typed DTO's native serialization against descriptor output; its byte mismatch alone does not establish public JSON semantic loss."
+  },
+  "qualificationLimits": {
+    "fullSql": "not qualified",
+    "coverage": "not qualified",
+    "wholeCiGate": "not qualified; normal and recovery contain errors, scalar suite skipped",
+    "wholeRf3Gate": "not qualified; 1 of 67 cases failed",
+    "powerLossDurability": "not established by these results",
+    "productionReadiness": "not established"
+  },
+  "localOriginalPacketHashes": {
+    "sourceTerminal": {
+      "qualification.json": "e9cf48d2fddf5d92e9df9f5ed3d76754c32a9f28ebdf9e1bdd589c5679fd1eaa",
+      "original-bindings-summary.json": "c97a08ca609a388d01c04e619b1151ec4e5ee77c6326cd4d4dbfac37f3cbfaef",
+      "original-selected-owned-cases.json": "32386e14cd419c4f915753ff2fd30a807a93d509ed6feaf9fbd9a253fea0f4de",
+      "original-source-failure-ownership.json": "eaa9d55fcbaf66d86749cdd96c445e751fadb95e717ad8bfbf6e27f135872d98",
+      "artifact-11275655112-binding.json": "3b973d0e7afccce04ffabcfda4e76f33ce419eb085f6b9268456648eb8b932aa",
+      "artifact-11275655112-entries.json": "e5fdee79b513687a65bed72adb6dc2819f4252a25b43f1a2ac5c03e7d219ee21",
+      "artifact-11275655112-failed-cases.json": "31a9b70b730b1dd7f4a39750de530042450b127fe67cd7a735e704f451d7a21e",
+      "artifact-11275655112-reports.json": "b3e4c71d5be39b7f8db36d04a0a880934e3749412d84d4ebf71dbc3d9554104a",
+      "artifact-11275655112.zip": "e76ea89faa5733cfbeb2d85268007caa1d65d25116dba5146e7d068da628196a",
+      "job-111207262778.log": "2821c521535942194cd6a214f2c50f0c5c19930a73c9a9887a963f189ee8cf38"
+    },
+    "rf3": {
+      "qualification.json": "adaf743a70dfc8cd71522087b5bd5de69d9921ba19a4b174b70d117f373eea7e",
+      "original-bindings-summary.json": "9a448a3ec6137994eb4e74e2fbdaf80567ba285a346872d2b837a693385b3f82",
+      "original-sql-composition-cases.json": "c6442d63ee42d1ecdd51d5667fa1635e3d441700d9c6aa5cf16d14866aed86f7",
+      "artifact-11274444675.zip": "fe3ff64da75430d353963c5ec8e55d73d47624f6e9052df89deb74d0af2d7238",
+      "artifact-11274519429.zip": "d09b80c707694b2135ea3d6c33a10efe63e6354c30351dbe65236b75fe638597",
+      "job-111206387125.log": "bacb79da5f3078fe39d7806363b09505efc7d1de32c70faa0e5a38f17d1c6e5e",
+      "original-case-inventory.json": "02422dfdee71b74fe02ce860c8dc6eb6698942a36e1c2298dc4f63226ad142d3"
+    },
+    "analyzer": {
+      "original-bindings-summary.json": "7c6d49dcde73101739f69d81958a76b62c56076df8c68285215040d1aabe0446",
+      "artifact-11274064960.zip": "fbc2fa4cc90d1d803385bc39f91f0daa088fe92f95aae4f9d5ee22bdf41503f4",
+      "analyzerReportSha256": "e25bf2985c29c4b70b7ae51399c72828f1426dfd202b8aeef945d02f5352d0e0",
+      "job-111206386939.log": "2eccce87122f36a2aed9c1e6e8b4a3d744959b7f0caf06c5d00e32485345f160",
+      "qualification.md": "c0408bd12edc75a925c1cd224b5e0d1176cd9f9d982d3d50c8f5e54f7508ac07"
+    }
+  },
+  "selectedPassingCasesAreNotWholeSuiteQualification": true,
+  "sourceDevelopmentStage": "docs/implementation/native-benchmark-gates-source-stage-001.json"
+}

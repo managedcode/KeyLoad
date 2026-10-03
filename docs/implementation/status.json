@@ -764,7 +764,7 @@
         "nugetPackageSha256": "cc11bd69f27417f09c42e2927598efd834b4d03919ba0eb29ce6e1d3251b7230",
         "zoneTreeVersion": "1.9.8",
         "firstLane": "public_raw_Tsavorite_and_raw_ZoneTree_resident_cache_single_worker_isolated_Linux",
-        "qualification": "Local normal32/scalar32 and process-recovery194 pass with no skips; full local unit baseline failed69/2494. Local long reads favor Tsavorite hot hits and ZoneTree misses. Exact f403 GitHub run37124585233 passed build/format/governance and raw normal32/scalar32 with original authenticated artifact; engine measurements were queued at13:20UTC. No GitHub speed numbers, overall winner, production storage replacement, service/AOF, concurrency, RF3 or multi-host claim."
+        "qualification": "Local normal32/scalar32 and process-recovery194 pass with no skips; full local unit baseline failed69/2494, followed by joined rerun2570pass/4fail/2574total/0skip. Local long reads favor Tsavorite hot hits and ZoneTree misses. Exact f403 GitHub run37124585233 passed build/format/governance and raw normal32/scalar32 with original authenticated artifact; engine measurements were still queued at13:28UTC. New all-current-source main checkpoint bfb04d64b is pushed; exact-source CI remains required. No GitHub speed numbers, overall winner, production storage replacement, service/AOF, concurrency, RF3 or multi-host claim."
       },
       "phaseProfiling": {
         "decision": "docs/ADR/ADR-063-bounded-database-phase-profiling.md",
