@@ -7,6 +7,35 @@ records alternatives/risks; [plan](../../storage-quality.plan.md) is the ordered
 graph, exact file ownership, signatures, test matrix and verification join.
 This decision remains Accepted until delivered-source qualification is complete.
 
+## Retired generation ownership repair
+
+REQ-STORAGE-020 / AC-DBHP-009 extends AC-SQ-004 and AC-DBHP-005/006.
+Exact40f87 run37109874881 discovers a real post-InstallPrepared cleanup failure:
+the old maintainer/tree were successfully disposed during generation preparation
+but remain referenced as live owners; final disposal repeats the maintainer call.
+This is KeyLoad handle ownership, not a replacement or workaround for ZoneTree.
+
+Ordered preserving contract: (1) root retains the original native failure and
+freezes the real-store two-stage regression before product edits; (2) bounded
+Luna owns only `ReplicaTermMetadataFailureTests.cs` for InstallPrepared and
+JournalSwapped, exact poison checks, explicit closing and repeated actual Dispose;
+(3) after root test-packet approval, the same worker owns only existing
+`ZoneTreeStoreHandleDisposal.cs` and `ZoneTreeCheckpointGeneration.cs` to clear
+successfully retired handle ownership before the later fault boundaries; (4)
+root independently reviews all three files, builds/formats/static-checks, commits
+all eligible current main scope and verifies exact-source native full suites.
+Other helpers, runtime/public interfaces, options, packages, callbacks and formats
+are out of scope; stop and escalate if a wider ownership change is necessary.
+
+Keep failed-open maintainer/journal/tree/ownership and normal
+maintainer/tree/journal/ownership orders, independently required cleanup,
+generation/identity publication, journal swap, poison and recovery semantics.
+No swallowed ObjectDisposedException, diagnostics waiver, new callback, data or
+deployment migration. Root owns shared docs/Git/gates. Rollback both product
+helpers together after drain; retain the regression and native failure evidence.
+The decision remains Accepted until actual qualification; process kills do not
+qualify power-loss durability.
+
 ## Decision
 
 Preserve the public ZoneTreeStore facade and every format/caller contract. Compose

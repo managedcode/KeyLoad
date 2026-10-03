@@ -1,7 +1,8 @@
 # ADR-061: bounded node-owned replica term metadata
 
 Status: Accepted; source implementation/review and development checks complete;
-exact-SHA GitHub and measured performance qualification pending.
+native40f term cases17/18 pass, full qualification fails. Preserving lifecycle
+repairs, complete exact-SHA qualification and measured performance remain open.
 Owner: KeyLoad lead. Related [ClusterReplication](../Features/ClusterReplication.md),
 [term feature contract](../Features/ClusterReplication/ReplicaTermMetadata.md),
 [ADR-007](ADR-007-replica-consensus-bootstrap.md),
@@ -106,6 +107,15 @@ flowchart LR
    elimination from actual database throughput and server/client resources.
    Keep absent server CPU/alloc/GC, gate/quorum/codec/WAL profiles and coverage
    explicit; do not claim maximum performance or causal percentages from source.
+
+Native run37109874881 at40f87fc3c486718f4e4e3f916dc209e42e32a0ca exposed
+post-install repeated maintainer disposal; preserve that error in the
+[original receipt](../implementation/database-term-metadata-native-40f-r122.json).
+REQ-STORAGE-020 / AC-DBHP-009 repair belongs to ADR-046 and its two existing
+storage owners, not the term observation or a dependency workaround. AC-DBHP-010
+only repairs the real-clock regression wait without changing the permit.
+Both repairs require the same complete new-source native join; a partial pass
+or a skipped scalar/comparison gate cannot close this decision.
 
 ## Migration, rollout, rollback and joins
 

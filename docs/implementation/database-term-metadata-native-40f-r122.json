@@ -1,0 +1,378 @@
+{
+  "schemaVersion": 1,
+  "task": "TASK-PERF-TERM-NATIVE",
+  "qualification": false,
+  "sourceSha": "40f87fc3c486718f4e4e3f916dc209e42e32a0ca",
+  "runId": 37109874881,
+  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881",
+  "conclusion": "failure",
+  "apiManifestSha256": "9b4d227ae9f17dd146cbb54ce46323280a1a378a838c974ff529145ca0f62063",
+  "verification": "Root independently rehashed all seven original ZIPs against refreshed GitHub API size/digest/source and enumerated every raw TUnit case; source changes after this SHA are unqualified.",
+  "jobs": [
+    {
+      "id": 111165544082,
+      "name": "analyzer-rules",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881/job/111165544082"
+    },
+    {
+      "id": 111165544154,
+      "name": "docker-rf3",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881/job/111165544154"
+    },
+    {
+      "id": 111165544205,
+      "name": "verify (ubuntu-latest)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881/job/111165544205"
+    },
+    {
+      "id": 111165544212,
+      "name": "comparison-plan",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881/job/111165544212"
+    },
+    {
+      "id": 111166828377,
+      "name": "comparison-images",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881/job/111166828377"
+    },
+    {
+      "id": 111166828648,
+      "name": "preflight / ${{ matrix.id }}",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881/job/111166828648"
+    },
+    {
+      "id": 111166829055,
+      "name": "case / ${{ matrix.id }}",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881/job/111166829055"
+    },
+    {
+      "id": 111166829359,
+      "name": "case / ${{ matrix.id }}",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881/job/111166829359"
+    },
+    {
+      "id": 111166829895,
+      "name": "comparison-aggregate",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881/job/111166829895"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11269970924,
+      "name": "docker-rf3-qualification",
+      "sizeBytes": 485873,
+      "zipSha256": "884989540379766bb0250323207b177ed5d8464537d3a4a79ddccd75f9d0e0fb"
+    },
+    {
+      "id": 11269951007,
+      "name": "docker-rf3-image-evidence",
+      "sizeBytes": 33168,
+      "zipSha256": "d268de4edf7f3309446b31f4fc73eb76f0901d6a0a6b18e93ef2b373c723b15a"
+    },
+    {
+      "id": 11269751233,
+      "name": "test-results-ubuntu-latest",
+      "sizeBytes": 1264547,
+      "zipSha256": "2f1be089b5aa376ebfe9e02a9114cf9a889f20d5cd24e83ccd0144fe97c3eb11"
+    },
+    {
+      "id": 11269726340,
+      "name": "code-quality-docker-rf3",
+      "sizeBytes": 779056,
+      "zipSha256": "574c911163482a8b753475cc4e904a7b4fe986db59d1c34f6cadd49bab59f6cd"
+    },
+    {
+      "id": 11269706238,
+      "name": "code-quality-ubuntu-latest",
+      "sizeBytes": 1564932,
+      "zipSha256": "844aba176b9baf31980391f7f877a86052c917f2c37854d85911e0f22bc7fa1d"
+    },
+    {
+      "id": 11269585712,
+      "name": "comparison-plan",
+      "sizeBytes": 5140,
+      "zipSha256": "86edbe69801f160085a36d68f4f49a1e5ede0d286afa69ba132c0f8d1cc81c30"
+    },
+    {
+      "id": 11269371819,
+      "name": "analyzer-rule-evidence",
+      "sizeBytes": 206744,
+      "zipSha256": "cc46658c5253b1b0e1cf91eb767623d29b9dad6cf623ecfe882125596d8bcb4e"
+    }
+  ],
+  "reports": [
+    {
+      "artifactId": 11269970924,
+      "entry": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "jsonSha256": "954c02a4f09f1cb13ca2502e3a2d34503192f8602612c33a368703f4bfa90ad4",
+      "sourceSha": "40f87fc3c486718f4e4e3f916dc209e42e32a0ca",
+      "summary": {
+        "total": 63,
+        "passed": 63,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualCaseStatuses": {
+        "passed": 63
+      },
+      "nonpassingCases": []
+    },
+    {
+      "artifactId": 11269751233,
+      "entry": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "jsonSha256": "615365124d2b908e8ba9515d837c44c51676031cf6cabc3554f51cc6415d3d24",
+      "sourceSha": "40f87fc3c486718f4e4e3f916dc209e42e32a0ca",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualCaseStatuses": {
+        "passed": 118
+      },
+      "nonpassingCases": []
+    },
+    {
+      "artifactId": 11269751233,
+      "entry": "TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "jsonSha256": "d2e0ff7f64dc2c3730b962cd021d6a0bed7dac3f6adaf33591932b36f8f9ae1a",
+      "sourceSha": "40f87fc3c486718f4e4e3f916dc209e42e32a0ca",
+      "summary": {
+        "total": 182,
+        "passed": 181,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualCaseStatuses": {
+        "passed": 181,
+        "error": 1
+      },
+      "nonpassingCases": [
+        {
+          "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataFailureTests.1.1.FailedSnapshotInstallationPoisonsBeforeTheWarmTermCanBeReused.1.1.0",
+          "method": "FailedSnapshotInstallationPoisonsBeforeTheWarmTermCanBeReused",
+          "class": "ReplicaTermMetadataFailureTests",
+          "status": "error",
+          "exceptionType": "System.ObjectDisposedException",
+          "message": "The CancellationTokenSource has been disposed."
+        }
+      ]
+    },
+    {
+      "artifactId": 11269751233,
+      "entry": "TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "jsonSha256": "7a1b881520566a9f1e06902af7eddddb170ae0d8688eb44e600245a99ee7aa80",
+      "sourceSha": "40f87fc3c486718f4e4e3f916dc209e42e32a0ca",
+      "summary": {
+        "total": 1739,
+        "passed": 1737,
+        "failed": 2,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualCaseStatuses": {
+        "passed": 1737,
+        "error": 2
+      },
+      "nonpassingCases": [
+        {
+          "id": "KeyLoad.UnitTests.Features.BenchmarkComparisons.TimeSeries.Intensive.KeyLoadTimeSeriesIntensiveResultTests.1.1.AcTsi006UnknownProblemNamesAndUnavailableStatusStayUnknown.1.1.0",
+          "method": "AcTsi006UnknownProblemNamesAndUnavailableStatusStayUnknown",
+          "class": "KeyLoadTimeSeriesIntensiveResultTests",
+          "status": "error",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected to be null\nbut found 500\n\nat Assert.That(missing.HttpStatus).IsNull()"
+        },
+        {
+          "id": "KeyLoad.UnitTests.Features.ResourceExecution.CacheReadPermitExpiryTests.1.1.LeaseExpiresAtFifteenSecondsFromItsPrepareTimestamp.1.1.0",
+          "method": "LeaseExpiresAtFifteenSecondsFromItsPrepareTimestamp",
+          "class": "CacheReadPermitExpiryTests",
+          "status": "error",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+          "message": "Expected to be true\nbut found False\n\nat Assert.That(ageAtReceipt >= GrantPreparationDelay).IsTrue()"
+        }
+      ]
+    },
+    {
+      "artifactId": 11269371819,
+      "entry": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "jsonSha256": "cdee598e953f9e5cfcac07542d0cbd60625bdc7fbaae06cec57f312d7b13e6d3",
+      "sourceSha": "40f87fc3c486718f4e4e3f916dc209e42e32a0ca",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualCaseStatuses": {
+        "passed": 118
+      },
+      "nonpassingCases": []
+    }
+  ],
+  "termCases": [
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataMutationTests.1.1.ReplacingAnUncommittedSuffixHidesItsPreviouslyObservedTerm.1.1.0",
+      "method": "ReplacingAnUncommittedSuffixHidesItsPreviouslyObservedTerm",
+      "class": "ReplicaTermMetadataMutationTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataMutationTests.1.1.StoredIndexAndTermMustRemainValidOnEveryMiss(System.Int64, System.Int64).3.1.0",
+      "method": "StoredIndexAndTermMustRemainValidOnEveryMiss",
+      "class": "ReplicaTermMetadataMutationTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataMutationTests.1.1.StoredIndexAndTermMustRemainValidOnEveryMiss(System.Int64, System.Int64).2.1.0",
+      "method": "StoredIndexAndTermMustRemainValidOnEveryMiss",
+      "class": "ReplicaTermMetadataMutationTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataMutationTests.1.1.StoredIndexAndTermMustRemainValidOnEveryMiss(System.Int64, System.Int64).1.1.0",
+      "method": "StoredIndexAndTermMustRemainValidOnEveryMiss",
+      "class": "ReplicaTermMetadataMutationTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataMutationTests.1.1.NormalTermAdvanceAndCommitCannotReuseThePreviousCutObservation.1.1.0",
+      "method": "NormalTermAdvanceAndCommitCannotReuseThePreviousCutObservation",
+      "class": "ReplicaTermMetadataMutationTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataMutationTests.1.1.MalformedNestedOperationCannotBeSkippedOnTheStrictTermMiss.1.1.0",
+      "method": "MalformedNestedOperationCannotBeSkippedOnTheStrictTermMiss",
+      "class": "ReplicaTermMetadataMutationTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataMutationTests.1.1.DirectChangeDeleteAndRepairAlwaysRevalidateTheStoredEntry.1.1.0",
+      "method": "DirectChangeDeleteAndRepairAlwaysRevalidateTheStoredEntry",
+      "class": "ReplicaTermMetadataMutationTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataReadTests.1.1.LargeValidRetainedEntryUsesOneBorrowedColdLookupAndNoWarmPointLookups.1.1.0",
+      "method": "LargeValidRetainedEntryUsesOneBorrowedColdLookupAndNoWarmPointLookups",
+      "class": "ReplicaTermMetadataReadTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataReadTests.1.1.AlternatingRetainedIndicesReplaceTheSingleObservation.1.1.0",
+      "method": "AlternatingRetainedIndicesReplaceTheSingleObservation",
+      "class": "ReplicaTermMetadataReadTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataSnapshotTests.1.1.SamePositionValidSnapshotReplacementInvalidatesTheOldEntryObservation.1.1.0",
+      "method": "SamePositionValidSnapshotReplacementInvalidatesTheOldEntryObservation",
+      "class": "ReplicaTermMetadataSnapshotTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataSnapshotTests.1.1.SameCutCompactionPreservesTheWarmEntryObservation.1.1.0",
+      "method": "SameCutCompactionPreservesTheWarmEntryObservation",
+      "class": "ReplicaTermMetadataSnapshotTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataSnapshotTests.1.1.WrongAppliedPositionRejectsVerifiedSnapshotWithoutChangingTheWarmCut.1.1.0",
+      "method": "WrongAppliedPositionRejectsVerifiedSnapshotWithoutChangingTheWarmCut",
+      "class": "ReplicaTermMetadataSnapshotTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataFailureTests.1.1.PrepublicationKeyValidationKeepsTheOldCommittedCutHealthy.1.1.0",
+      "method": "PrepublicationKeyValidationKeepsTheOldCommittedCutHealthy",
+      "class": "ReplicaTermMetadataFailureTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataFailureTests.1.1.FailedSnapshotInstallationPoisonsBeforeTheWarmTermCanBeReused.1.1.0",
+      "method": "FailedSnapshotInstallationPoisonsBeforeTheWarmTermCanBeReused",
+      "class": "ReplicaTermMetadataFailureTests",
+      "status": "error"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataFailureTests.1.1.ProviderPublicationPoisonCannotServeAPreviouslyWarmTerm.1.1.0",
+      "method": "ProviderPublicationPoisonCannotServeAPreviouslyWarmTerm",
+      "class": "ReplicaTermMetadataFailureTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataLifetimeTests.1.1.LogDisposalRejectsAFormerlyWarmTermAndReopenStartsCold.1.1.0",
+      "method": "LogDisposalRejectsAFormerlyWarmTermAndReopenStartsCold",
+      "class": "ReplicaTermMetadataLifetimeTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataBoundsTests.1.1.InvalidSnapshotTermIsRejectedWithoutChangingTheCut.1.1.0",
+      "method": "InvalidSnapshotTermIsRejectedWithoutChangingTheCut",
+      "class": "ReplicaTermMetadataBoundsTests",
+      "status": "passed"
+    },
+    {
+      "id": "KeyLoad.RecoveryTests.ReplicaTermMetadataBoundsTests.1.1.ZeroInvalidAndSnapshotTermsKeepExistingBoundaries.1.1.0",
+      "method": "ZeroInvalidAndSnapshotTermsKeepExistingBoundaries",
+      "class": "ReplicaTermMetadataBoundsTests",
+      "status": "passed"
+    }
+  ],
+  "termSummary": {
+    "discovered": 18,
+    "passed": 17,
+    "error": 1,
+    "skipped": 0
+  },
+  "sourceGates": "Full Release build, formatter, static governance and source-owned analyzer checks passed in exact native verify job111165544205.",
+  "scalar": "skipped_after_normal_unit_failure",
+  "comparison": "images_preflight_full270_and_aggregate_skipped_no_new_measurements",
+  "repairContracts": {
+    "retiredGeneration": {
+      "requirement": "REQ-STORAGE-020",
+      "criteria": "AC-DBHP-005/006/009",
+      "decision": "docs/ADR/ADR-046-storage-private-owners.md",
+      "actualFailure": "Successful old maintainer/tree retirement retained the old ownership slots; physical cleanup disposes maintainer again and throws disposed CTS. Preserve genuine fault/poison assertions; fix KeyLoad ownership rather than swallowing cleanup or changing ZoneTree."
+    },
+    "leaseClock": {
+      "criteria": "AC-DBHP-010",
+      "actualFailure": "Real Task.Delay preparatory wakeup occurs before exact two-second monotonic age; preserve every age/lease/revision assertion and wait against actual System TimeProvider elapsed time."
+    },
+    "timeSeries": "Other app root owns the actual intensive Result/status and ManagedCode dependency join; no consumer workaround or concurrent overwrite."
+  },
+  "limits": "17 passing term cases include real cold/warm logical-read and authority/corruption/lifetime oracles; they do not prove throughput/CPU/allocation benefit. Failed full suites and skipped scalar/comparisons remain unqualified. Server profiles, numeric coverage, complete cohort, endurance and power-loss remain open."
+}

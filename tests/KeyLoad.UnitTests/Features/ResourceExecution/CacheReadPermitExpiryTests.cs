@@ -17,7 +17,8 @@ internal sealed class CacheReadPermitExpiryTests
         using var permit = new CacheReadPermit(TimeProvider.System);
         var grant = Guid.NewGuid();
         var stalePrepared = TimeProvider.System.GetTimestamp();
-        await Task.Delay(CacheReadPermitLimits.PrepareValidity + Margin, TimeProvider.System, linked.Token);
+        await WaitForPreparedAgeAsync(TimeProvider.System, stalePrepared,
+            CacheReadPermitLimits.PrepareValidity + Margin, linked.Token);
 
         await Assert.That(permit.TryAccept(grant, 1, stalePrepared, out _)).IsFalse();
         await Assert.That(permit.TryCapture(out _)).IsFalse();
@@ -36,7 +37,7 @@ internal sealed class CacheReadPermitExpiryTests
         using var permit = new CacheReadPermit(TimeProvider.System);
         var clock = TimeProvider.System;
         var prepared = clock.GetTimestamp();
-        await Task.Delay(GrantPreparationDelay, clock, linked.Token);
+        await WaitForPreparedAgeAsync(clock, prepared, GrantPreparationDelay, linked.Token);
         var acceptStartedAt = clock.GetTimestamp();
         var accepted = permit.TryAccept(Guid.NewGuid(), 1, prepared, out _);
         await Assert.That(accepted).IsTrue();
@@ -46,12 +47,7 @@ internal sealed class CacheReadPermitExpiryTests
         var ageAtReceipt = clock.GetElapsedTime(prepared, acceptStartedAt);
         await Assert.That(ageAtReceipt >= GrantPreparationDelay).IsTrue();
         await Assert.That(ageAtReceipt < CacheReadPermitLimits.PrepareValidity).IsTrue();
-        var currentPrepareAge = clock.GetElapsedTime(prepared, clock.GetTimestamp());
-        var remaining = CacheReadPermitLimits.LeaseValidity + Margin - currentPrepareAge;
-        if (remaining > TimeSpan.Zero)
-        {
-            await Task.Delay(remaining, clock, linked.Token);
-        }
+        await WaitForPreparedAgeAsync(clock, prepared, CacheReadPermitLimits.LeaseValidity + Margin, linked.Token);
 
         var isCurrent = permit.IsCurrent(revision);
         var captured = permit.TryCapture(out var expiredRevision);
@@ -68,5 +64,22 @@ internal sealed class CacheReadPermitExpiryTests
         await Assert.That(renewed).IsTrue();
         await Assert.That(receipt).IsEqualTo(new CacheReadPermitAcceptance(2, 1, false));
         await Assert.That(permit.IsCurrent(revision)).IsFalse();
+    }
+
+    private static async Task WaitForPreparedAgeAsync(TimeProvider clock, long prepared, TimeSpan minimumAge,
+        CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var elapsed = clock.GetElapsedTime(prepared, clock.GetTimestamp());
+            if (elapsed >= minimumAge)
+            {
+                return;
+            }
+
+            var remaining = minimumAge - elapsed;
+            await Task.Delay(remaining + Margin, clock, cancellationToken);
+        }
     }
 }

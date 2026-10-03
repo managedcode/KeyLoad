@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "task": "TASK-PERF-RETIRED-HANDLES_and_TASK-PERF-LEASE-CLOCK",
+  "qualification": false,
+  "baseSha": "40f87fc3c486718f4e4e3f916dc209e42e32a0ca",
+  "triggeringNativeReceipt": "docs/implementation/database-term-metadata-native-40f-r122.json",
+  "triggeringNativeReceiptSha256": "b27aa6ce6cb157b0e35509aa4a090735f8404b9b936200a8c709c6fe8a92cfa2",
+  "contracts": {
+    "requirement": "REQ-STORAGE-020",
+    "criteria": [
+      "AC-DBHP-005",
+      "AC-DBHP-006",
+      "AC-DBHP-009",
+      "AC-DBHP-010"
+    ],
+    "decision": "docs/ADR/ADR-046-storage-private-owners.md",
+    "feature": "docs/Features/StorageRecovery.md"
+  },
+  "files": [
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreHandleDisposal.cs",
+      "sha256": "c911f47894e0fa7212ac4cddf6470a0d4ae2d2aecbe7841a8bac64941bea9fd8",
+      "physicalLines": 88
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeCheckpointGeneration.cs",
+      "sha256": "98a7d8dd1df04d4ac6a278d6f5464858b5cd01cfe786bfd202d2d1d2a416bdb3",
+      "physicalLines": 84
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaTermMetadataFailureTests.cs",
+      "sha256": "6d9bb00c71d20f215ccb61ee646bfb318fb1df4cf9ebb20b4bc8b02fb9aa91a9",
+      "physicalLines": 134
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheReadPermitExpiryTests.cs",
+      "sha256": "136c32f599b0d392bb794072aaa0554e0dc61bf3a8b545808eafd32477ebba31",
+      "physicalLines": 85
+    }
+  ],
+  "review": {
+    "privateReport": "/private/tmp/keyload-native40-repair-review-r122.txt",
+    "sha256": "94c966e9de1184f0ee396be33c01d5d515ea038f6f370dde0f205baf0b4a2236",
+    "result": "complete_source_review_no_actionable_blocker_no_runtime_claim"
+  },
+  "rootIntegration": {
+    "scope": "Same four frozen files fully read and independently rehashed; real runtime/fixture/permit joins retained. Clock source additionally migrates the existing ten-second age wait and checks cancellation before every monotonic observation.",
+    "preserved": "Successful-only maintainer/tree ownership clearing; genuine failed close propagates; normal/failed-open ordering, replacement initialization, fault/poison/warm-read rejection and production permit lifetimes unchanged."
+  },
+  "developmentChecks": {
+    "build": {
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 46.08,
+      "privateLog": "/private/tmp/keyload-r123-full-development-build.log",
+      "logSha256": "cc7db594afba5df378c9ddf1d671920e6a86673358104b3d1ecd989feaa9a104"
+    },
+    "formatter": {
+      "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+      "exitCode": 0,
+      "outputBytes": 0,
+      "privateLog": "/private/tmp/keyload-r123-full-formatter.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "governance": "PASS25projects4modules_preserved_policy_and_skill_inventory",
+    "diffCheck": "pass"
+  },
+  "authoredTermInventory": {
+    "methods": 17,
+    "expandedCases": 19,
+    "newSourceNativeExecuted": false
+  },
+  "remaining": "New exact-source normal/scalar/recovery/RF3 SDK and official MCP, TimeSeries status ownership join, matched current server and client performance profiles, complete cohort, numeric coverage, endurance and power-loss. Historical native failures and skips remain failures/skips; source/development evidence proves no speedup."
+}

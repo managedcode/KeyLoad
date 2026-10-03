@@ -323,11 +323,15 @@ The [first preserving repair](docs/Features/ClusterReplication/ReplicaTermMetada
 now avoids repeated full-entry decoding during term checks at an identical
 verified store cut, retaining both public authorized quorum barriers. Its
 [source receipt](docs/implementation/database-term-metadata-source-r119.json)
-records independent review,18 authored real-store cases and full development
-build/formatter passes. Earlier Node-helper, SiteTests and term-test compilation
-failures are repaired in current source. Delivered-SHA native tests, server
-profiles and measured benefit remain required; this source change establishes
-no throughput increase or competitor ranking.
+records independent review,18 authored real-store cases and development
+build/formatter passes. The [40f native receipt](docs/implementation/database-term-metadata-native-40f-r122.json)
+finds all18 term cases:17 pass; one exposes repeated disposal after a failed
+snapshot install. RF363/63 and analyzer118/118 pass; units1737/1739 and
+recovery181/182 leave full qualification failed, with scalar/comparisons skipped.
+Current source repairs retired-handle ownership and exact real-clock waits;
+19 authored term cases now cover both install fault stages. New-source full
+native tests, server profiles and measured benefit remain required; no throughput
+increase or competitor ranking is established.
 
 
 The delivered `2f374fc34` [Linux run37093197474](https://github.com/managedcode/KeyLoad/actions/runs/37093197474) now passes the complete source gates,118 analyzer cases,1483 normal and1483 scalar unit cases,164 process-recovery cases and63 Docker RF3 cases without skips. The [original-source receipt](docs/implementation/isolated-source-qualification-37093197474.json) retains exact report/artifact hashes. Comparative image and diagnostic gates pass;27 native preflights finish16 job successes and11 failures, including two explicit unavailable Neo4j topologies among the successes. Complete270 performance and site publication remain unqualified. The separate TimeSeries pure30 cases pass in both modes, while its bounded runner has36 new declared TUnit cases prepared in source and native adapters/all30 cells remain pending.

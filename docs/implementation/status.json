@@ -590,7 +590,7 @@
       "sourceOwnerReceipt": "docs/implementation/image-http-owner-source-r115.json"
     },
     "databaseHotPathWorkstream": {
-      "status": "source_review_complete_full_development_build_format_pass_exact_source_native_pending",
+      "status": "native40f_failed_term17of18_passed_retired_handle_and_clock_repairs_in_source_new_qualification_pending",
       "priority": "owner_directed_actual_database_throughput_investigation",
       "decision": "docs/ADR/ADR-061-bounded-replica-term-metadata.md",
       "feature": "docs/Features/ClusterReplication/ReplicaTermMetadata.md",
@@ -603,12 +603,21 @@
       "sourceFindings": "public_read2_authorized_quorum_rounds_write3_consensus_rounds_shared_serial_gate_pre_repair_TermAt_full_entry_decode",
       "firstRepair": "one_physical_log_scalar_observation_inside_actual_provider_read_Check_and_position_generation_incarnation_node_fence",
       "preserved": "both_authorized_barriers_RF3_Orleans_request_isolation_strict_decode_WAL_ACK_snapshot_errors",
-      "gates": "new_helper_and18_authored_cases_native_full_gates_matched_server_profiles_numeric_coverage_pending_no_measured_candidate_speedup",
+      "gates": "native40f_units1737of1739_recovery181of182_RF363of63_analyzer118of118_scalar_and_comparisons_skipped_new19_authored_cases_unqualified_no_measured_candidate_speedup",
       "sourceReceipt": "docs/implementation/database-term-metadata-source-r119.json",
+      "nativeReceipt": "docs/implementation/database-term-metadata-native-40f-r122.json",
+      "repairSourceReceipt": "docs/implementation/database-native40-repair-source-r123.json",
       "authoredCaseInventory": {
-        "testMethods": 16,
-        "dataExpandedCases": 18,
+        "testMethods": 17,
+        "dataExpandedCases": 19,
         "nativeExecuted": false
+      },
+      "earlierNativeTermInventory": {
+        "sourceSha": "40f87fc3c486718f4e4e3f916dc209e42e32a0ca",
+        "discovered": 18,
+        "passed": 17,
+        "error": 1,
+        "skipped": 0
       }
     }
   },
@@ -2349,14 +2358,18 @@
         "receipt": "docs/implementation/isolated-timeseries-identity-source-040.json"
       },
       "executableInputJoin": {
-        "state": "contracts_accepted_temp_candidate_work_in_progress",
+        "state": "root_integrated_reviewed_development_only_GitHub_cases_pending",
         "tasks": [
           "TASK-ISO-TS009H-A",
           "TASK-ISO-TS009H-S",
           "TASK-ISO-TS009H-I"
         ],
         "nativeHostDispatchImplemented": false,
-        "nativeOrMeasuredQualification": false
+        "nativeOrMeasuredQualification": false,
+        "authoredUnitParameterizations": 114,
+        "authoredModelParameterizations": 12,
+        "receipt": "docs/implementation/isolated-timeseries-input-source-041.json",
+        "actualGitHubCasesExecuted": 0
       }
     },
     "sourceRepairs": {

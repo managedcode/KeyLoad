@@ -1,5 +1,52 @@
 # StorageRecovery
 
+## Retired checkpoint handle ownership
+
+REQ-STORAGE-020 / AC-DBHP-009 preserves one physical owner for each successfully
+retired native maintainer/tree. [ADR-046](../ADR/ADR-046-storage-private-owners.md)
+freezes the ordered three-file test-first repair after the real40f87 native
+InstallPrepared cleanup failure. The actual failed-install scenario must retain
+exact RecoveryRequired/warm rejection at InstallPrepared and JournalSwapped,
+then close the log/store and repeat actual Dispose without redisposing retired
+handles. New healthy handles and directory locks retain their original lifetime.
+No new interface/package/format, caught cleanup error or relaxed fault oracle.
+Root owns integration and full normal/scalar/recovery/RF3 GitHub qualification;
+development/source review alone does not close this requirement.
+
+```mermaid
+flowchart LR
+    Prepare[Generation under actual write gate] --> Close[Close old maintainer then tree]
+    Close --> Release[Clear successfully retired ownership]
+    Release --> Swap[Existing install and journal swap]
+    Swap --> Healthy[Own replacement tree and maintainer]
+    Swap --> Fault[Existing recovery-required poison]
+    Fault --> Dispose[Close only still owned handles]
+```
+
+## Guarded original-store inspection
+
+REQ-STORAGE-015 maps AC-SG009-001..004 in isolated-timeseries.acceptance.md to
+TASK-ISO-TS009C-G-W/I under [ADR-059](../ADR/ADR-059-isolated-intensive-timeseries.md).
+The private original-store guard rejects missing original files or changed
+identity before provider recovery, uses provider Open rather than OpenOrCreate,
+and preserves ordinary public open/codecs. Real native-file TUnit verifies
+identity/data/position, missing/mismatch/locked/invalid flows and normal reopen.
+Independent registered cleanup retains primary/cleanup failures. Every native
+proof requires a separately owned original inspector process and exit/readers
+join before restart because provider partial open cannot prove handle settlement.
+Source implementation/runtime qualification and parent control/ACK/copy remain
+pending; no power-loss or immutability claim. Rollback removes the additive private
+mode only. Exact ordered ownership/tests/exception evidence live in ADR-059.
+
+```mermaid
+flowchart LR
+    Lock[Original stopped owner] --> Identity[Existing identity and journal]
+    Identity --> Native[Existing native metadata and Open]
+    Native --> Read[Permitted recovery and actual read]
+    Read --> Join[Cleanup and original process settlement]
+    Join --> Restart[Original native restart]
+```
+
 ## Bounded real crash-trial qualification
 
 REQ-STORAGE-014 maps AC-RC-001..004 in recovery-concurrency.acceptance.md

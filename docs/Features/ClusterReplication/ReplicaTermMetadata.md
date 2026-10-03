@@ -1,7 +1,8 @@
 # ReplicaTermMetadata within ClusterReplication
 
-Status: source implementation and independent review complete; development
-build/formatter pass; exact-source native and performance gates pending.
+Status: term implementation/review and development checks complete; exact40f
+native run discovered18 cases with17 passes and one lifecycle error. Preserving
+storage/clock repairs are in source; their native and performance gates are open.
 Owner: KeyLoad lead. Decision: [ADR-061](../../ADR/ADR-061-bounded-replica-term-metadata.md).
 Working acceptance/plan: `database-hotpath.acceptance.md` / `database-hotpath.plan.md`.
 
@@ -78,6 +79,8 @@ tests. Shared source/config/Git/gates are serialized through root.
 |AC-DBHP-006|Existing log-monitor→provider read-gate order, protocol snapshot gate, all writes/ACK/crash hooks and borrowed lifetime remain. Full independent source review and genuine concurrent planning/publication/process/lifecycle regressions required; unforced cleanup failures are not fake runtime proof.|
 |AC-DBHP-007|Complete enabled solution build/formatter/analyzers/complexity/governance and exact-SHA GitHub TUnit/MTP normal/scalar/recovery/Docker Aspire RF3 real .NET/official MCP suites execute with no skips/failures. Numeric coverage is open until actual compatible collection exists.|
 |AC-DBHP-008|Repeated matched native PointRead1/2/3 and complete cohort retain source/workload/read/ACK/concurrency and client/per-node resource scopes. Server phases/CPU/alloc/GC profile gaps stay explicit. Unmatched samples/source counters cannot prove causal speedup, winner or maximum scalability.|
+|AC-DBHP-009|Related REQ-STORAGE-020/[ADR-046](../../ADR/ADR-046-storage-private-owners.md): native InstallPrepared and JournalSwapped faults poison reads while successfully retired maintainer/tree owners are cleared before physical cleanup. Actual explicit close and repeated Dispose must succeed; genuine first-close failures remain errors. `ReplicaTermMetadataFailureTests` exercises both real stages.|
+|AC-DBHP-010|Related cache qualification: `CacheReadPermitExpiryTests` waits for actual monotonic System TimeProvider age within its original30-second bound. All2/10/15-second, stale sequence, revision/renewal and receipt-versus-preparation assertions remain; no fake clock or production permit change.|
 
 Tests are acceptance-derived, authored before the helper and exercise real
 ZoneTree stores/files/provider fault boundaries, plus real process recovery and
@@ -106,9 +109,15 @@ The [d45 native baseline](../../implementation/database-hotpath-baseline-d45-r11
 independently joins original artifacts and all15 PointRead repetitions, including
 the original failed complete270 cohort. The [source receipt](../../implementation/database-term-metadata-source-r119.json)
 binds the two product files, seven real-store test files and independent review.
-Sixteen test methods expand to18 authored cases; this is a source inventory, not
-native test discovery or execution. Full development build and formatter pass.
-The single scalar observation avoids a repeated point lookup at an identical
-verified cut; logical-read assertions do not establish CPU, allocation or speed
-improvement. Exact-source native qualification, matched current-source/server
-profiles, numeric coverage, endurance and power-loss gates remain open.
+That source inventory is16 methods/18 cases. The independently authenticated
+[40f native receipt](../../implementation/database-term-metadata-native-40f-r122.json)
+discovers all18 and passes17, including cold/warm, corruption and authority
+oracles. One real failed-install case discovers repeated disposal of an already
+retired ZoneTree maintainer. Full normal units pass1737/1739; recovery181/182;
+RF363/63 and analyzer118/118 pass. Scalar and comparisons are skipped; full
+qualification fails. Current repair expands the fault test into two actual
+installation stages:17 methods/19 authored term cases, still unqualified.
+The source receipt's development checks describe its earlier snapshot only.
+Logical-read elimination does not establish CPU, allocation or speed improvement.
+New-source native qualification, matched server profiles, numeric coverage,
+complete cohort, endurance and power-loss gates remain open.

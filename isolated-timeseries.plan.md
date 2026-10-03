@@ -1,5 +1,28 @@
 # Isolated intensive TimeSeries plan
 
+## TS009C-G ordered guard execution
+
+Chosen original-process direction derives from the existing brainstorm and
+AC-SG009-001..004 above; provider Open is recovery-capable with incomplete
+partial-open unwind, so a native call must never execute in its parent.
+
+|Task|Owner/model/permissions|Dependencies/start|Artifacts/verification/join|
+|---|---|---|---|
+|TASK-ISO-TS009C-G-W|current_ci_audit inherited capable worker; temp source/tests only, no repo/Git/runtime|Root accepted SG009 contracts and exact original APIs|Five existing private helper candidates, two NEW guard/cleanup classes, real-file TUnit tests/fixture, original/current hashes/full patch; root every diff/limits/source checks|
+|TASK-ISO-TS009C-G-I|root strongest planning/integration; shared facade/docs/Git only|Worker terminal complete; original baselines unchanged|Internal facade ctor, combined builds/format, exact-source GitHub normal/scalar/full recovery; real native process/ACK/copies remain blocked by their missing contract|
+
+- [ ] SG009 real-file tests authored before private implementation; no mocks.
+- [ ] SG009 guarded original open/identity/journal/provider/recovery/disposal source.
+- [ ] Root original-file CAS, complete review, source build/analyzers/format.
+- [ ] Exact-source normal/scalar unit and full recovery qualification.
+- [ ] Separate owned original inspector/process/control contract before native use.
+
+Full relevant test baseline is the actual source40f87/run37109874881: full build,
+formatter/governance passed; unit and recovery steps failed, original reports and
+case-level root causes pending retrieval. Hardware-intrinsics-disabled unit step
+was skipped and cannot count as pass. Every actual failing case will be tracked
+here once provider originals are available; no speculative diagnosis or local test.
+
 ## Actual1353482 terminal source and TS009B source join
 
 Run37108640954 attempt1 fails full Release8Recovery errors; prior21Site diagnostics
@@ -20,6 +43,16 @@ joins remain pending. Receipt: docs/implementation/isolated-timeseries-identity-
 
 ## TS009H parallel input stages
 
+Source join receipt docs/implementation/isolated-timeseries-input-source-041.json
+records ten integrated files, root/independent review, successful scoped Release
+source builds Unit0/0 (38.24s) and Comparison0/0 (3.12s), ten-file formatter and
+static governance/diff. These are development checks; no local tests executed and
+all126 authored parameterizations/native6/30 remain exact-source GitHub pending.
+
+|Task|Owner/model/permission|Dependencies/artifact/verification/join|
+|---|---|---|
+|TASK-ISO-TS009T-R|publisher_archive_review inherited strong readonly native discovery; temp packet only|Current native resources/settings/adapters; exact existing SQL/helper/role/extension/quorum/flush-replay/oracle signatures, input hashes, bounded cleanup; root contract freeze before later code, no native qualification|
+
 Root-approved brainstorm/acceptance/ADR059 input contracts precede write work.
 Native host lifecycle, original task settlement, physical copies, outer envelope,
 SDK/MCP/telemetry/coverage/native6/30/cohort/site remain pending ordered joins.
@@ -32,8 +65,9 @@ SDK/MCP/telemetry/coverage/native6/30/cohort/site remain pending ordered joins.
 
 - [x] Read-only63-source host/native lifecycle discovery reviewed; physical owner and deadline proposals remain explicitly unfrozen.
 - [x] Freeze additive input signatures, exact validation and tests before writes.
-- [ ] H-A tests first and canonical composition source integrated/reviewed.
-- [ ] H-S tests first, private typed settings and root shared identity/friend join.
+- [x] H-A tests first and canonical composition source integrated/reviewed;12 model parameterizations unexecuted.
+- [x] H-S tests first, private typed settings and root shared identity/friend join;114 unit parameterizations unexecuted.
+- [x] Root comparison-images adds three unstarted model classes with unique result directories; all17 existing invocations preserved (20 source invocations; original reports pending).
 - [ ] Development source gates, exact-SHA GitHub models/normal/scalar and all native joins.
 
 TASK-ISO-TS009B-S: AC-TB009-001/TSI001/003/006, timeseries_resources_worker

@@ -43,8 +43,8 @@ internal static class ZoneTreeCheckpointGeneration
             return null;
         }
 
-        runtime.Maintainer.Dispose();
-        runtime.Tree.Dispose();
+        ZoneTreeStoreHandleDisposal.RetireMaintainer(runtime);
+        ZoneTreeStoreHandleDisposal.RetireTree(runtime);
         var retiredTree = Path.Combine(runtime.Options.Directory, RetiredTreePrefix + Guid.NewGuid().ToString(GuidFormat));
         Directory.Move(Path.Combine(runtime.Options.Directory, TreeDirectoryName), retiredTree);
         return retiredTree;

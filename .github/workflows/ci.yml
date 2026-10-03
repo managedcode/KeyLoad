@@ -211,6 +211,11 @@ jobs:
         run: |
           dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesWorkloadTests/*' --results-directory TestResults/comparison-images/timeseries-workload
           dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesPackageVersionTests/*' --results-directory TestResults/comparison-images/timeseries-package
+      - name: Qualify isolated TimeSeries resource models
+        run: |
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedTimeSeriesKeyLoadResourceTests/*' --results-directory TestResults/comparison-images/timeseries-keyload-model
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedTimeSeriesTimescaleResourceTests/*' --results-directory TestResults/comparison-images/timeseries-timescale-model
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedTimeSeriesBenchmarkResourceTests/*' --results-directory TestResults/comparison-images/timeseries-family-model
       - name: Retain common image bundle
         id: bundle
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

@@ -1,5 +1,51 @@
 # Isolated intensive TimeSeries acceptance
 
+## TS009C-G guarded original-store contract
+
+AC-SG009-001 (REQ-STORAGE-015, REQ-BC061/064, TSI003/004): internal
+ZoneTreeExistingStore.Open(ZoneTreeStoreOptions options, Guid expectedNodeId)
+requires an absolute existing canonical directory, nonempty expected node GUID
+and configured incarnation, positive frame/snapshot budgets and no cache/fault
+observer. Require original owner.lock, bounded checksummed identity format4,
+exact captured NodeId/incarnation, original commands.wal and original tree/provider
+metadata. Use existing identity validation/codec, FileMode.Open and provider
+ZoneTreeMetaWAL.Exists plus Open, never OpenOrCreate. Order is owner lock,
+identity, journal, provider metadata/Open, canonical journal recovery. Reject
+missing/mismatched input before provider/recovery; create no replacement original
+file or identity and do not promote/restore/configure/reclaim/start maintainer.
+AC-SG009-002: guarded recovery explicitly may replay/truncate incomplete canonical
+redo and modify/recreate provider-derived WAL, preserving original identity and
+business records. Real-file TUnit tests create/commit/close an actual native store,
+then guarded read/identity/position/dispose/reopen, missing original files/tree/
+metadata, wrong node/incarnation/format, occupied ownership and invalid inputs.
+Assertions verify rejection/no replacement and unchanged identity bytes; ordinary
+public opens and existing recovery tests retain their complete contracts.
+AC-SG009-003: guarded registered-handle cleanup attempts tree, journal, ownership
+and gate independently, retains original failure as the same exception plus every
+cleanup cause (including nested fatal causes), and is idempotent after successful
+handoff. No provider partial-open settlement is inferred from null Tree. Every
+native guarded call must execute in a separately owned inspector process; parent
+holds existing node.owner.lock until actual original process exit/reap and both
+readers settle, before restart. Guard-only source cannot unblock native copies.
+AC-SG009-004: root reviews all candidate diffs, source compile/analyzers/format,
+then exact-source GitHub real-file UnitTests/full recovery. Provider partial-open,
+cleanup-failure and uncooperative child runtime tests belong to the later original
+inspector process contract; no fake handle/fault observer substitutes. Until that
+contract executes, explicit source/lifetime review is the only evidence for rare
+cleanup/fatal/handoff failures, never a passed runtime or coverage criterion.
+
+|Criterion|Verification|Join condition|
+|---|---|---|
+|SG009001|Real native-file positive/missing/mismatch/occupied/invalid TUnit|Exact-source GitHub normal/scalar unit reports, no skipped case|
+|SG009002|Actual original identity bytes, committed data/position and successful normal reopen|Same actual source plus existing recovery suites|
+|SG009003|Independent cleanup/source review; later genuine inspector process fault/kill/readers tests|Native proof forbidden before real process qualification|
+|SG009004|Root diff/build/analyzer/format and original Actions reports|Source checks alone cannot certify native copies|
+
+Root accepts this additive private guard stage. Public APIs/storage codecs/ordinary
+open behavior and productionRF3 do not change. Rollback removes private guard
+classes/branches/constructor only. Node lock/process/control/oracle/ACK/collector
+joins remain required, separately approved stages.
+
 ## TS009H input joins (REQ-BC059/061/064, AC-TSI001/003/007/008)
 
 - AC-TH009-001: NEW IsolatedTimeSeriesBenchmarkResources.Add validates the exact
@@ -11,8 +57,11 @@
   inputs are supplied, require exact computed equality before allocation.
   Require Root/native to be absent (file or directory); reject existing native
   data without deleting/reusing it. Existing owned reports/control may remain.
-  Preserve current native
-  waits, images, ownership and default/legacy composition. Actual Aspire model
+  Newly created Unix root/output directories use0700. Validate existing paths as
+  owner-RWX with no group/other permission before allocation; preserve shared
+  directory modes on rejection instead of chmodding shared paths. The dedicated
+  Unix permission assertion fails explicitly on Windows and executes on Linux.
+  Preserve current native waits, images, ownership and default/legacy composition. Actual Aspire model
   tests cover6 native selections with both phases/all5 scenarios, binding identity
   and invalid/mixed/disabled selections without added resources/directories.
 - AC-TH009-002: ComparisonHost typed settings reuse the existing provenance and
@@ -27,10 +76,13 @@
   and private admin; rejects Timescale ConnectionString. Timescale requires TCP
   authority endpoints with explicit1..65535 port and private nonempty single-host
   Npgsql connection (valid port/user/password); rejects KeyLoad admin/incarnation/
-  voter inputs. Validation covers the merged IConfiguration view; pre-merge duplicate keys
+  voter inputs. Reject scalar Native root, unknown/opposite Native children and nested
+  native scalar fields. Allowed Native keys: KeyLoad Image/Endpoints/VoterIds/
+  Incarnation; Timescale Image/Endpoints/ConnectionString. Field keys use the
+  existing IConfiguration case-insensitive semantics. Validation covers the merged IConfiguration view; pre-merge duplicate keys
   are not observable evidence. Reject nested indexed children, userinfo/path
   beyond /, query, fragment, sparse/alias indices,
-  duplicate authorities, empty/extra values or unowned target credential accepted.
+  duplicate authorities, empty/extra values and unowned target credentials.
   Typed settings neither connect/allocate a target nor log secrets. Override
   ToString on both records to a fixed type label; no generated record diagnostic
   may expose private credentials. Normalize selection/identity/parser expected

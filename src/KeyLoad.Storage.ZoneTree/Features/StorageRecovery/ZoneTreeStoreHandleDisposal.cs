@@ -6,7 +6,7 @@ internal static class ZoneTreeStoreHandleDisposal
     {
         try
         {
-            runtime.Maintainer?.Dispose();
+            RetireMaintainer(runtime);
         }
         finally
         {
@@ -18,12 +18,34 @@ internal static class ZoneTreeStoreHandleDisposal
     {
         try
         {
-            runtime.Maintainer?.Dispose();
+            RetireMaintainer(runtime);
         }
         finally
         {
             DisposeTreeBeforeJournal(runtime);
         }
+    }
+
+    internal static void RetireMaintainer(ZoneTreeStoreRuntime runtime)
+    {
+        if (runtime.Maintainer is not { } maintainer)
+        {
+            return;
+        }
+
+        maintainer.Dispose();
+        runtime.Maintainer = null!;
+    }
+
+    internal static void RetireTree(ZoneTreeStoreRuntime runtime)
+    {
+        if (runtime.Tree is not { } tree)
+        {
+            return;
+        }
+
+        tree.Dispose();
+        runtime.Tree = null!;
     }
 
     private static void DisposeJournalBeforeTree(ZoneTreeStoreRuntime runtime)
@@ -36,7 +58,7 @@ internal static class ZoneTreeStoreHandleDisposal
         {
             try
             {
-                runtime.Tree?.Dispose();
+                RetireTree(runtime);
             }
             finally
             {
@@ -49,7 +71,7 @@ internal static class ZoneTreeStoreHandleDisposal
     {
         try
         {
-            runtime.Tree?.Dispose();
+            RetireTree(runtime);
         }
         finally
         {

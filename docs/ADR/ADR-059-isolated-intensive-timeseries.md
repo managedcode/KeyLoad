@@ -1,5 +1,71 @@
 # ADR-059: separate native intensive TimeSeries family
 
+## TS009C-G implementation stage: guarded original native store
+
+Accepted AC-SG009-001..004 / REQ-STORAGE-015 / REQ-BC061/064. Exact provider
+ZoneTree1.9.8 commit13ee11e19007301fdea72b9210de62f6257f4929 has a public Open
+and provider-owned ZoneTreeMetaWAL.Exists; its recovery-capable loader has no
+general partial-open unwind. The sealed source proposal and primary byte hashes
+are /private/tmp/keyload-ts009c-g-r-existing-store-proposal.md SHA256
+1e6ed969e2cbd113909472edf99e51f757d9ed078678f57f0be94679453e98c3.
+This private guard is never a standalone native-copy proof.
+
+Ordered implementation contract:
+1. Author real native-file TUnit cases under tests/KeyLoad.UnitTests/Features/
+   StorageRecovery/ before production. Cover successful original current-format
+   identity/data/position, missing canonical directory/owner/identity/journal/tree/
+   provider metadata without recreation, wrong expected identity/incarnation/legacy
+   format, occupied ownership, invalid options and normal reopen after guard close.
+2. NEW ZoneTreeExistingStore and ZoneTreeExistingStoreCleanup under StorageRecovery
+   validate and own guarded runtime/handoff; original fault first, independent
+   cleanup causes retained, no discarded cleanup or false provider settlement.
+3. Modify only private ZoneTreeStoreRuntime, ZoneTreeStoreInitializer,
+   ZoneTreeIdentityFile, ZoneTreeStoreFiles and ZoneTreeTreeFactory in that slice.
+   Optional internal expectedNodeId on runtime selects guarded mode; null keeps
+   ordinary open unchanged. Guard owns constructor unwind and successful disposal;
+   starts no maintainer/reclaimer/cache. Guarded allocation cleanup starts
+   before CacheLifecycle/View/checkpoint/backup allocations, retaining original
+   failure and settling the field-allocated gate; ordinary initialization remains
+   unchanged. Reuse actual serializer/comparer/tombstone/
+   Sync-WAL factory configuration once, with ordinary OpenOrCreate unchanged and
+   guarded existing tree/metadata then provider Open. Identity OpenExisting reuses
+   bounded Read/private Validate and requires original format4/GUID/incarnation.
+   Existing journal helper has an internal FileMode parameter defaulting to
+   OpenOrCreate; guard passes Open. No provider metadata filename/codec duplication.
+4. Root alone adds internal ZoneTreeStore(ZoneTreeStoreRuntime runtime, Guid expectedNodeId);
+   guard handoff verifies the already captured node ID. Two arguments preserve
+   existing target-typed new(options) overload resolution in friend callers.
+   no public contract/central package/project/friend edits in worker scope. Root
+   checks every original-file baseline hash and integrations, build/format/limits,
+   then actual GitHub normal/scalar/full recovery. Retain all failed baseline cases.
+5. Before native use root must approve/deliver a separate original inspector process
+   and parent control contract. Parent owns existing node.owner.lock; child owns
+   existing canonical owner.lock. Every call, healthy or failed, uses original
+   delivered executable/image/source/PID/args. Original exit/reap and both readers
+   must settle before outer lock release/restart. Native1/2/3 seed/final business
+   oracle and actual LastApplied versus validated ACK remain separately required.
+
+No filesystem/data migration or signing material output; rollback removes additive
+private mode/classes/constructor and retains ordinary opens. Provider recovery is
+explicitly permitted to replay/modify derived WAL, not claimed forensic immutability
+or power-loss durability. Guard source/lifetime review covers exceptional partial
+provider open and cleanup/handoff/fatal failure until genuine process fault tests;
+no doubles and no invented executed gate. All source limits50/200/400/depth3 apply.
+
+```mermaid
+flowchart LR
+    Parent[Parent owns original node lock] --> Child[Separate original inspector]
+    Child --> Owner[Existing canonical owner lock]
+    Owner --> Identity[Original format and identity]
+    Identity --> Journal[Existing canonical journal]
+    Journal --> Provider[Existing metadata and provider Open]
+    Provider --> Recovery[Permitted original recovery]
+    Recovery --> Read[Actual data and applied cut]
+    Read --> Close[Independent original cleanup]
+    Close --> Join[Actual process exit and readers]
+    Join --> Restart[Release outer lock then restart]
+```
+
 ## TS009H staged executable input contract
 
 Accepted TH009001..004, REQ-BC059/061/064 and TSI001/003/007/008. Root owns all
@@ -42,6 +108,10 @@ from TH009003. Incarnation canonical D GUID, nonempty; secret fields private
 nonempty/no CRLF. Timescale Npgsql parser checks one Host (no comma), valid port,
 nonempty Username/Password without connecting; malformed connection produces the
 same safe code, never private parse message. Opposite-engine credentials reject.
+Validate the Native section as a bounded closed key set before parsing: no scalar
+root, unknown/opposite children or nested scalar fields. KeyLoad allowed roots:
+Image/Endpoints/VoterIds/Incarnation; Timescale: Image/Endpoints/ConnectionString.
+Use IConfiguration case-insensitive field semantics; index aliases still reject.
 Read arrays from the merged IConfiguration view; reject nested indexed children,
 while pre-merge duplicate/case-equivalent keys cannot be observed or certified.
 Storage must equal the exact H-A description; only output/root are paths.
@@ -57,7 +127,12 @@ Stages: tests first temporary candidates; root every diff integration; developme
 build/scoped formatter/governance; exact-source GitHub normal/scalar/models; later
 original native host/control/copy/SDK/MCP/6/30 joins. Root creates host internal
 UnitTests friend and enables ReferenceOutputAssembly on its already existing
-UnitTests ProjectReference; workers edit neither. Every source stage remains
+UnitTests ProjectReference; workers edit neither. Root adds the three genuine
+unstarted model classes (native KeyLoad, Timescale and family composition) to
+comparison-images with separate results directories, preserving every existing
+invocation/assertion and upload glob. Normal/scalar includes the host input tests.
+These are source/model gates; each real native6/30 cell still requires its own
+independent runner. Every source stage remains
 pending native qualification. No feature/interface/data/production migration;
 rollback additive source and metadata only. ADR remains Accepted.
 

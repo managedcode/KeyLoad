@@ -1,5 +1,23 @@
 # BenchmarkComparisons
 
+## Isolated TimeSeries input source join
+
+REQ-BC059/061/064 and AC-TH009-001..004 under ADR-059 now have additive strict
+private Host settings and one-selected-family Aspire composition source. The
+[source receipt](../implementation/isolated-timeseries-input-source-041.json)
+binds10 files and126 authored unit/model parameterizations; scoped development
+builds/formatter pass. Exact-source GitHub reports, dispatch/original lifecycle,
+physical copies/ACK, native6/30 and complete cohort/site remain pending. Existing
+source/provenance fixtures are input checks and never observed native evidence.
+
+```mermaid
+flowchart LR
+    Selection[Closed family cell] --> Model[One native group and runner]
+    Model --> Input[Strict private host settings]
+    Input --> Pending[Original native lifecycle pending]
+    Pending --> Evidence[Required actual Actions evidence]
+```
+
 The additive TimeSeries family has a strict embedded6/30-cell contract and a
 settled-run JSON writer under ADR059. The writer retains every planned slot and
 original observed ACK/count/failure; unstarted attempts carry no invented timing.

@@ -10,6 +10,7 @@ internal sealed class ReplicaTermMetadataFailureTests
     private const string FaultValue = "fault-trigger";
     private const string SourceDirectoryName = "fault-snapshot-source";
     private const string SnapshotFileName = "fault-snapshot.snapshot";
+    private const string InjectedSnapshotInstallFailure = "Injected native snapshot installation fault.";
     private const long ReplicaIndex = 1;
     private const long EntryTerm = 1;
     private const long RejectedEntryTerm = 2;
@@ -80,9 +81,17 @@ internal sealed class ReplicaTermMetadataFailureTests
     }
 
     [Test]
-    public async Task FailedSnapshotInstallationPoisonsBeforeTheWarmTermCanBeReused()
+    public Task FailedPreparedSnapshotInstallationPoisonsAndRetiresHandles()
+        => AssertFailedSnapshotInstallationPoisonsAndRetiresHandles(CommitStage.InstallPrepared);
+
+    [Test]
+    public Task FailedJournalSwappedSnapshotInstallationPoisonsAndRetiresHandles()
+        => AssertFailedSnapshotInstallationPoisonsAndRetiresHandles(CommitStage.JournalSwapped);
+
+    private static async Task AssertFailedSnapshotInstallationPoisonsAndRetiresHandles(CommitStage failedStage)
     {
         var failInstall = false;
+        var faultObserved = false;
         await ReplicaTermMetadataFixture.RunAsync(async fixture =>
         {
             var sourceDirectory = Path.Combine(fixture.DirectoryPath, SourceDirectoryName);
@@ -107,12 +116,19 @@ internal sealed class ReplicaTermMetadataFailureTests
                 .IsEqualTo(ErrorCode.RecoveryRequired);
             var afterRejectedRead = fixture.Store.GetReadDiagnostics();
             await Assert.That(afterRejectedRead.BorrowedPointLookups).IsEqualTo(beforeFault.BorrowedPointLookups);
+
+            fixture.CloseLog();
+            fixture.CloseStore();
+            fixture.Store.Dispose();
+            fixture.Store.Dispose();
         }, (stage, _, _) =>
         {
-            if (failInstall && stage == CommitStage.InstallPrepared)
+            if (failInstall && stage == failedStage)
             {
-                throw new IOException("Injected native snapshot installation fault.");
+                faultObserved = true;
+                throw new IOException(InjectedSnapshotInstallFailure);
             }
         });
+        await Assert.That(faultObserved).IsTrue();
     }
 }
