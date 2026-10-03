@@ -8,7 +8,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Configure owned qualification directories
+    - name: Create website test folders
       shell: bash
       run: |
         base="$GITHUB_WORKSPACE/artifacts/site-evidence"
@@ -16,7 +16,7 @@ runs:
         printf 'KEYLOAD_SITE_GITHUB_CAPTURE=%s/github-capture\nKEYLOAD_SITE_ARCHIVE=%s/comparison-suite.zip\nKEYLOAD_SITE_ARCHIVE_RECEIPT=%s/archive-receipt.json\n' "$base" "$base" "$base" >> "$GITHUB_ENV"
         printf 'KEYLOAD_SITE_REPORTS=%s/artifacts/comparisons\nKEYLOAD_SITE_COVERAGE=%s/js-coverage\n' "$GITHUB_WORKSPACE" "$base" >> "$GITHUB_ENV"
         printf 'KEYLOAD_SITE_ISOLATED_CAPTURE=%s/isolated-capture\nKEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT=%s/isolated-capture/archive-receipt.json\nKEYLOAD_SITE_ISOLATED_AGGREGATE=%s/isolated-capture/input/aggregate\n' "$base" "$base" "$base" >> "$GITHUB_ENV"
-    - name: Select website source and authenticated comparison evidence
+    - name: Download verified benchmark data
       id: source
       env:
         CONTROL_REVISION: ${{ github.workflow_sha }}
@@ -49,25 +49,25 @@ runs:
         isolated_proof="$KEYLOAD_SITE_ISOLATED_CAPTURE/metadata-proof.json"
         printf 'KEYLOAD_SITE_ISOLATED_MEASURED_REVISION=%s\n' "$(jq -er '.source.measured' "$isolated_proof")" >> "$GITHUB_ENV"
         printf 'isolated_measured_revision=%s\n' "$(jq -er '.source.measured' "$isolated_proof")" >> "$GITHUB_OUTPUT"
-    - name: Checkout website source
+    - name: Download website source
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ steps.source.outputs.revision }}
         path: website
         persist-credentials: false
-    - name: Inspect measured producer source
+    - name: Download historical benchmark source
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ steps.source.outputs.measured_revision }}
         path: measured
         persist-credentials: false
-    - name: Inspect isolated measured producer source
+    - name: Download current benchmark source
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ steps.source.outputs.isolated_measured_revision }}
         path: measured-isolated
         persist-credentials: false
-    - name: Verify checkouts and retain runtime/source receipts
+    - name: Check source revisions and browser tools
       shell: bash
       run: |
         [[ "$(git -C website rev-parse HEAD)" == "$KEYLOAD_SITE_SOURCE_REVISION" ]]
@@ -117,10 +117,11 @@ runs:
         mkdir -p "$KEYLOAD_SITE_COVERAGE/node"
         cd website
         git ls-files -z | xargs -0 sha256sum > "$EVIDENCE_DIR/source.sha256"
-    - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+    - name: Set up .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
       with:
         global-json-file: website/global.json
-    - name: Qualify required analyzer dependency
+    - name: Build and test code analyzers
       working-directory: website
       shell: bash
       run: |
@@ -132,18 +133,18 @@ runs:
         cp scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml "$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml"
         pwsh -NoProfile -File scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Prepare -Repository "$KEYLOAD_SITE_REPOSITORY" -Contract "$KEYLOAD_SITE_REPOSITORY/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$EVIDENCE_DIR/analyzer-coverage"
         dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release --report-trx --results-directory "$EVIDENCE_DIR/analyzer-tests" --coverage --coverage-settings "$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml" --coverage-output-format cobertura --coverage-output "$EVIDENCE_DIR/analyzer-coverage/coverage.cobertura.xml"
-    - name: Enforce native analyzer coverage counts
+    - name: Check analyzer test coverage
       if: success() || failure()
       working-directory: website
       shell: pwsh
       run: ./scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Verify -Repository "$env:KEYLOAD_SITE_REPOSITORY" -Contract "$env:KEYLOAD_SITE_REPOSITORY/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$env:EVIDENCE_DIR/analyzer-coverage" -CoverageReport "$env:EVIDENCE_DIR/analyzer-coverage/coverage.cobertura.xml"
-    - name: Restore and build independent site qualification
+    - name: Build website tests
       working-directory: website
       shell: bash
       run: |
         dotnet restore tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj
         dotnet build tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --no-restore --configuration Release
-    - name: Verify focused format and governance
+    - name: Check website test formatting and repository rules
       working-directory: website
       shell: bash
       run: |
@@ -151,13 +152,13 @@ runs:
         dotnet format tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-analyzer-tests.txt" 2>&1
         dotnet format tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-site-tests.txt" 2>&1
         node scripts/Features/RepositoryGovernance/verify.mjs
-    - name: Run full site TUnit suite with mandatory same-archive preparation
+    - name: Run all website tests
       working-directory: website
       shell: bash
       env:
         NODE_V8_COVERAGE: ${{ github.workspace }}/artifacts/site-evidence/js-coverage/node
       run: dotnet test --project tests/KeyLoad.SiteTests --no-build --no-restore --configuration Release --report-trx --results-directory "$EVIDENCE_DIR/site-tests"
-    - name: Require complete passing test receipts without skips
+    - name: Check every required test passed
       shell: pwsh
       run: |
         $receipts = foreach ($suite in @('analyzer-tests', 'site-tests')) {
@@ -173,14 +174,14 @@ runs:
           [ordered]@{ suite = $suite; total = [int]$counts.total; executed = [int]$counts.executed; passed = [int]$counts.passed; sha256 = (Get-FileHash -LiteralPath $files[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant() }
         }
         ConvertTo-Json -InputObject @($receipts) -Depth 4 | Set-Content -LiteralPath "$env:EVIDENCE_DIR/test-receipts.json" -Encoding utf8NoBOM
-    - name: Build exact qualified historical and isolated website
+    - name: Build website from verified results
       uses: ./control/.github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite
-    - name: Upload exact qualified Pages output
+    - name: Upload website for GitHub Pages
       if: success() && steps.source.outputs.mode == 'publish'
       uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
       with:
         path: _site
-    - name: Retain all qualification and provenance evidence
+    - name: Save website test results
       if: always()
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:

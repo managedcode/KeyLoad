@@ -21,8 +21,8 @@ internal sealed class IsolatedAggregateCliFixture : IDisposable
         const cohort = {sourceRevision:'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',runId:37070000000,attempt:1,
           repository:'managedcode/KeyLoad',ref:'refs/heads/main',workflow:'Benchmarks',profile:plan.profile};
         const cells = plan.cells.map((cell,index)=>({id:cell.id,
-          job:{id:1000+index,name:'case / '+cell.id,url:'https://github.com/managedcode/KeyLoad/actions/runs/'+cohort.runId+'/job/'+(1000+index),
-            conclusion:'success',steps:[{name:'Run isolated native case',conclusion:'success'},{name:'Retain isolated worker evidence',conclusion:'success'}]},
+          job:{id:1000+index,name:'Benchmark / '+cell.id,url:'https://github.com/managedcode/KeyLoad/actions/runs/'+cohort.runId+'/job/'+(1000+index),
+            conclusion:'success',steps:[{name:'Run database workload',conclusion:'success'},{name:'Save benchmark results',conclusion:'success'}]},
           artifact:{id:2000+index,name:'comparison-worker-'+cell.id,sizeInBytes:1,digest:'sha256:'+'d'.repeat(64),expired:false},
           workerSha256:'c'.repeat(64)}));
         writeFileSync(process.argv[1],JSON.stringify(plan));

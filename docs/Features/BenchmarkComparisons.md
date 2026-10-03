@@ -1,5 +1,38 @@
 # BenchmarkComparisons
 
+## Shared parallel performance pipeline
+
+REQ-PIPE-005/006 and AC-UB-001..006 in
+[shared workflow acceptance](../implementation/unified-benchmarks-workflow.md#acceptance) under
+[ADR-064](../ADR/ADR-064-three-pipeline-release-delivery.md) repair orchestration:
+common image preparation includes pinned TimeSeries checks; independent build,
+plan and images start in parallel; preflight, CRUD and specialized matrices share
+only required plan/image inputs and run in parallel without an arbitrary cap.
+Every authored job/step has a concrete readable name. Exact-source display-name
+validators and independent test oracles change together, preserving internal job
+IDs, artifact/schema/permission contracts and historical report bytes.
+
+```mermaid
+flowchart LR
+    Plan[Plan benchmark runs] --> Preflight[Database checks]
+    Plan --> Crud[Document benchmarks]
+    Plan --> Models[Vector queue graph stream benchmarks]
+    Images[Docker images and shared workload checks] --> Preflight
+    Images --> Crud
+    Images --> Models
+    Build[Build and checks] --> Aggregate[Combine all results]
+    Preflight --> Aggregate
+    Crud --> Aggregate
+    Models --> Aggregate
+    Aggregate --> Website[Check and publish website]
+```
+
+The current270-cell matrix contains ten document/vector/queue/graph/stream
+scenarios. Intensive TimeSeries6/30-cell host dispatch, emitted wire, collection,
+aggregation and site joins remain pending under ADR-059. Image/model checks are
+not TimeSeries performance measurements. Source graph regressions and real
+exact-SHA GitHub jobs/artifacts qualify this repair; local source checks do not.
+
 ## Isolated TimeSeries input source join
 
 REQ-BC059/061/064 and AC-TH009-001..004 under ADR-059 now have additive strict
@@ -547,6 +580,15 @@ Frontend publication is N/A for these input stages because no new measured famil
 is qualified; the complete native family site stage remains mandatory.
 
 ## Shared comparison pipeline
+
+The owner's Garnet evaluation is specified in
+[GarnetStorageEvaluation](BenchmarkComparisons/GarnetStorageEvaluation.md) and
+[ADR-066](../ADR/ADR-066-garnet-storage-evaluation.md). Its first diagnostic stage
+compares actual public raw Tsavorite2.2.0 and raw ZoneTree1.9.8 resident cache
+operations in isolated Linux jobs. It remains separate from the270 service
+cells and product RF3; no measured engine winner or storage migration is
+established. Full Garnet RESP/AOF/recovery and representative concurrency/
+multi-host stages remain required.
 
 The latest owner correction2026-10-03 uses exactly three workflows under
 [ADR-064](../ADR/ADR-064-three-pipeline-release-delivery.md): `ci.yml` combines

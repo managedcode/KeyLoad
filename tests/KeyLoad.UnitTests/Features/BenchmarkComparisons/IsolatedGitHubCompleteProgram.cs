@@ -21,16 +21,16 @@ internal static class IsolatedGitHubCompleteProgram
         const makeArtifact = (id, name) => ({ id, name, size_in_bytes: 100, digest: 'sha256:' + 'b'.repeat(64), expired: false,
           created_at: '2026-10-03T10:02:00Z', workflow_run: { id: 123, head_sha: cohort.sourceRevision,
             head_branch: 'main', repository_id: 7, head_repository_id: 7 } });
-        const jobs = plan.cells.map((cell, i) => makeJob(1001 + i, 'case / ' + cell.id,
-          ['Run isolated native case', 'Retain isolated worker evidence']));
+        const jobs = plan.cells.map((cell, i) => makeJob(1001 + i, 'Benchmark / ' + cell.id,
+          ['Run database workload', 'Save benchmark results']));
         const artifacts = plan.cells.map((cell, i) => makeArtifact(2001 + i, 'comparison-worker-' + cell.id));
-        const image = makeJob(5000, 'comparison-images', ['Qualify native image export and import', 'Retain common image bundle']);
+        const image = makeJob(5000, 'Build Docker images', ['Check Docker image export and import', 'Save Docker images']);
         const imageArtifact = makeArtifact(6000, 'comparison-image-bundle');
         jobs.push(image); artifacts.push(imageArtifact);
         if (corruption === 'missing-cell-job') jobs.shift();
         if (corruption === 'missing-cell-artifact') artifacts.shift();
         if (corruption === 'duplicate-case-name') jobs[1].name = jobs[0].name;
-        if (corruption === 'unknown-case') jobs[0].name = 'case / foreign-n1-point-read';
+        if (corruption === 'unknown-case') jobs[0].name = 'Benchmark / foreign-n1-point-read';
         if (corruption === 'unknown-worker') artifacts[0].name = 'comparison-worker-foreign-n1-point-read';
         if (corruption === 'image-job-failed') image.conclusion = 'failure';
         if (corruption === 'image-step-missing') image.steps.pop();

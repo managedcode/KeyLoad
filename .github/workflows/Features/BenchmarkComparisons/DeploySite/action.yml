@@ -6,11 +6,12 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+    - name: Download checked website files
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
       with:
         name: site-qualification-${{ env.QUALIFIED_REVISION }}-${{ github.run_attempt }}
         path: qualification
-    - name: Recheck current website and immutable comparison evidence
+    - name: Recheck source and benchmark results before publishing
       shell: bash
       run: |
         revision=$(timeout 120s gh api "repos/$GH_REPO/git/ref/heads/main" --jq .object.sha)
@@ -24,11 +25,12 @@ runs:
         node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs fresh --before="$GITHUB_WORKSPACE/qualification/artifacts/site-evidence/isolated-capture/archive-receipt.json" --after="$isolated_capture/metadata-proof.json" > predeploy-isolated-proof.json
         jq -e '.ok == true' predeploy-isolated-proof.json > /dev/null
         date --utc --iso-8601=seconds > predeploy-checked-at.txt
-    - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
-    - name: Publish qualified website
+    - name: Configure GitHub Pages
+      uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+    - name: Deploy website to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
-    - name: Record actual Pages deployment result
+    - name: Record website deployment result
       if: always()
       env:
         DEPLOYMENT_OUTCOME: ${{ steps.deployment.outcome }}
@@ -37,7 +39,7 @@ runs:
       shell: bash
       run: |
         jq -n --arg outcome "$DEPLOYMENT_OUTCOME" --arg url "$DEPLOYMENT_URL" --arg revision "$SITE_REVISION" --arg run_url "https://github.com/$GH_REPO/actions/runs/$GITHUB_RUN_ID" --argjson attempt "$GITHUB_RUN_ATTEMPT" '{schemaVersion:1,siteSourceRevision:$revision,qualification:{runUrl:$run_url,attempt:$attempt},provider:{outcome:$outcome,pageUrl:$url}}' > deployment-receipt.json
-    - name: Retain freshness and deployment receipt
+    - name: Save website deployment results
       if: always()
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:

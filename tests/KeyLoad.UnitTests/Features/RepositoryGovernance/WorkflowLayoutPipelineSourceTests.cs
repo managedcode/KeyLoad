@@ -20,7 +20,7 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         var expectedJobs = new[]
         {
             "comparison-build", "comparison-plan", "comparison-images", "comparison-preflight",
-            "comparison-crud", "comparison-specialized", "comparison-aggregate", "timeseries-image-facts",
+            "comparison-crud", "comparison-specialized", "comparison-aggregate",
             "qualify", "deploy",
         }.Order(StringComparer.Ordinal).ToArray();
         await Assert.That(jobs.Order(StringComparer.Ordinal).SequenceEqual(expectedJobs)).IsTrue();
@@ -33,12 +33,12 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         await Assert.That(build.Contains("node scripts/Features/RepositoryGovernance/verify.mjs",
             StringComparison.Ordinal)).IsTrue();
         await Assert.That(WorkflowLayoutSource.JobBlock(benchmarks, "comparison-images")
-            .Contains("needs: [comparison-build, comparison-plan]", StringComparison.Ordinal)).IsTrue();
+            .Contains("\n    needs:", StringComparison.Ordinal)).IsFalse();
         await AssertNativeJob(benchmarks, "comparison-preflight");
         await AssertNativeJob(benchmarks, "comparison-crud");
         await AssertNativeJob(benchmarks, "comparison-specialized");
         await AssertAggregate(WorkflowLayoutSource.JobBlock(benchmarks, "comparison-aggregate"));
-        await AssertPinnedImage(WorkflowLayoutSource.JobBlock(benchmarks, "timeseries-image-facts"));
+        await AssertPinnedImage(WorkflowLayoutSource.JobBlock(benchmarks, "comparison-images"));
         await AssertWebsiteDependency(benchmarks);
     }
 
@@ -69,7 +69,7 @@ internal sealed class WorkflowLayoutPipelineSourceTests
 
     private static async Task AssertAggregate(string job)
     {
-        await Assert.That(job.Contains("needs: [comparison-plan, comparison-images, comparison-crud, comparison-specialized]",
+        await Assert.That(job.Contains("needs: [comparison-build, comparison-plan, comparison-images, comparison-preflight, comparison-crud, comparison-specialized]",
             StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("comparison-crud, comparison-specialized", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("--isolated=", StringComparison.Ordinal)).IsTrue();
@@ -77,7 +77,7 @@ internal sealed class WorkflowLayoutPipelineSourceTests
 
     private static async Task AssertPinnedImage(string job)
     {
-        await Assert.That(job.Contains("needs: comparison-build", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(job.Contains("\n    needs:", StringComparison.Ordinal)).IsFalse();
         await Assert.That(job.Contains("TimeSeriesIntensivePinnedImageTests", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("timeseries-native-pinned-image-facts", StringComparison.Ordinal)).IsTrue();
     }
@@ -85,7 +85,7 @@ internal sealed class WorkflowLayoutPipelineSourceTests
     private static async Task AssertWebsiteDependency(string workflow)
     {
         var qualify = WorkflowLayoutSource.JobBlock(workflow, "qualify");
-        await Assert.That(qualify.Contains("needs: [comparison-aggregate, timeseries-image-facts]",
+        await Assert.That(qualify.Contains("needs: comparison-aggregate",
             StringComparison.Ordinal)).IsTrue();
         await Assert.That(qualify.Contains(QualifySiteAction, StringComparison.Ordinal)).IsTrue();
         var deploy = WorkflowLayoutSource.JobBlock(workflow, "deploy");
@@ -133,7 +133,7 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         await Assert.That(job.Contains("packages: write", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("actions: read", StringComparison.Ordinal)).IsTrue();
         var ciProof = job.IndexOf("release-github-context.py ci", StringComparison.Ordinal);
-        var firstWrite = job.IndexOf("Create or verify the immutable annotated source tag", StringComparison.Ordinal);
+        var firstWrite = job.IndexOf("Create release tag", StringComparison.Ordinal);
         await Assert.That(ciProof).IsGreaterThan(-1);
         await Assert.That(ciProof < firstWrite).IsTrue();
         await Assert.That(job.Contains("sha256sum --check", StringComparison.Ordinal)).IsTrue();

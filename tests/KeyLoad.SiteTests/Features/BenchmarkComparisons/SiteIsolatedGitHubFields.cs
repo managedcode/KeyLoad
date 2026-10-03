@@ -53,7 +53,7 @@ internal static class SiteIsolatedGitHubFields
     public const string ImageInventory = "image-zip-inventory.txt";
     public const string ZipInventorySuffix = "-zip-inventory.txt";
     public const string BodySuffix = ".body";
-    public const string JobPrefix = "case / ";
+    public const string JobPrefix = "Benchmark / ";
     public const string CliOperation = "cli";
     public const string UnknownCommand = "controlled-unknown";
     public const string VerifyInputs = "verify-inputs";

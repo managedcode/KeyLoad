@@ -38,7 +38,10 @@ flowchart TD
 3. Keep all existing Benchmarks image/27 preflight/108 CRUD/162 specialized/aggregate
    jobs, frozen names/steps/artifacts and actual native topology. Move complete
    Website qualify/deploy jobs unchanged in qualification strength behind successful
-   aggregate and pinned TimeSeries image. Remove pages.yml. Keep job names qualify
+   aggregate and common image preparation. The repeated owner correction places
+   pinned TimeSeries image qualification inside common preparation, removing the
+   feature-specific branch while retaining the actual test and artifact. Remove
+   pages.yml. Keep internal job IDs qualify
    and deploy, read-only qualification and deployment-only Pages/OIDC writes.
 4. Website executor is real Benchmarks/benchmarks.yml. The publication selection
    route authenticates only current run/attempt/SHA from actual GitHub environment,
@@ -72,6 +75,43 @@ flowchart TD
    inventory, commit/push main, inspect actual CI/Benchmarks/Release jobs/artifacts.
    Current pre-existing SDK-status/RF3/Timescale/full-archive gaps remain explicit.
    Accepted cannot become Implemented without all required delivery evidence.
+
+## Readable shared Benchmarks repair contract
+
+REQ-PIPE-005/006 / AC-UB-001..006 under [acceptance](../implementation/unified-benchmarks-workflow.md#acceptance)
+and [task graph](../implementation/unified-benchmarks-workflow.md#execution) implement the owner's subsequent
+job/step correction. The lead owns three workflow files, used composite labels,
+policy and durable docs. A bounded test worker owns existing workflow-source tests
+and new label regressions; a bounded contract worker owns only displayed-name
+collector constants and matching independent oracles after the exact name map is
+frozen. No topology, ACK, credentials, storage, package, workload or release change.
+
+```mermaid
+flowchart LR
+    Build[Build and checks] --> Aggregate[Combine benchmark results]
+    Plan[Plan benchmark runs] --> Preflight[Check each database]
+    Plan --> Crud[Document benchmarks]
+    Plan --> Models[Vector queue graph stream benchmarks]
+    Images[Build Docker images and check all workloads] --> Preflight
+    Images --> Crud
+    Images --> Models
+    Preflight --> Aggregate
+    Crud --> Aggregate
+    Models --> Aggregate
+    Aggregate --> Qualify[Check website]
+    Qualify --> Deploy[Publish website]
+```
+
+Stages: regression first; move actual pinned-image test/facts into common images;
+rename every authored job/step with exact-source displayed-name validation updates;
+review combined diffs; static governance; scoped main delivery; exact-SHA CI and
+Benchmarks evidence. Preserve 270 cells and 27 preflights; intensive TimeSeries
+6/30-cell native delivery remains a pending contract, never asserted present in
+the ten-scenario matrix. Failed/missing inputs still block publication. Rollback
+reverts scoped source, retaining all historical raw records. ADR remains Accepted.
+The latest parallelism correction removes mutual preparation dependencies and
+cross-matrix sequencing/caps; aggregation explicitly includes build and all three
+matrices. GitHub schedules independent isolated Linux jobs within account capacity.
 
 ## Migration, rollback and evidence
 

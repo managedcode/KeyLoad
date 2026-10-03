@@ -19,12 +19,12 @@ internal static class IsolatedGitHubNodeProgram
           head_repository: { id: 7, full_name: cohort.repository } };
         const cell = plan.cells[0];
         const job = { id: 1001, run_id: 123, run_attempt: 1, head_sha: cohort.sourceRevision,
-          name: 'case / ' + cell.id, status: 'completed', conclusion: 'success',
+          name: 'Benchmark / ' + cell.id, status: 'completed', conclusion: 'success',
           started_at: '2026-10-03T10:01:00Z', completed_at: '2026-10-03T10:03:00Z',
           html_url: 'https://github.com/managedcode/KeyLoad/actions/runs/123/job/1001',
           steps: [{ name: 'Set up job', number: 1, status: 'completed', conclusion: 'success' },
-            { name: 'Run isolated native case', number: 2, status: 'completed', conclusion: 'success' },
-            { name: 'Retain isolated worker evidence', number: 3, status: 'completed', conclusion: 'success' }] };
+            { name: 'Run database workload', number: 2, status: 'completed', conclusion: 'success' },
+            { name: 'Save benchmark results', number: 3, status: 'completed', conclusion: 'success' }] };
         const artifact = { id: 2001, name: 'comparison-worker-' + cell.id, size_in_bytes: 100, digest: 'sha256:' + 'b'.repeat(64),
           expired: false, created_at: '2026-10-03T10:02:00Z', updated_at: '2026-10-03T10:02:00Z',
           workflow_run: { id: 123, head_sha: cohort.sourceRevision, head_branch: 'main', repository_id: 7, head_repository_id: 7 } };
@@ -60,7 +60,7 @@ internal static class IsolatedGitHubNodeProgram
           const parsedJobs = api.flattenPages(jobs, 'jobs');
           const parsedArtifacts = api.flattenPages(artifacts, 'artifacts');
           const selected = api.validateSuccessfulJob(parsedJobs.find(item => item.name === job.name), cohort,
-            'case / ' + cell.id, ['Run isolated native case', 'Retain isolated worker evidence']);
+            'Benchmark / ' + cell.id, ['Run database workload', 'Save benchmark results']);
           const matched = parsedArtifacts.find(item => item.name === artifact.name);
           api.validateArtifact(matched, run, selected, 'comparison-worker-' + cell.id, 134217728);
           const proof = api.projectWorkerProof(selected, matched, cell, cohort, 'c'.repeat(64));

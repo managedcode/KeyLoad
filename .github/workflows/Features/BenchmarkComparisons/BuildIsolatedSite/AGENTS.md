@@ -22,3 +22,4 @@
 
 ## Owner-directed three-pipeline join, 2026-10-03
 - The latest explicit owner layout moves this full qualification into Benchmarks/benchmarks.yml behind its own successful aggregate and TimeSeries image jobs, superseding pages.yml placement above. Retain the exact qualify job name, actual inherited executor, every archive/hash/TUnit/browser/coverage check, and downstream least-privilege deployment. Only the exact current benchmark run/attempt/source may refresh native metrics; historical archive validation remains separately authentic.
+- The later owner readability/parallelism correction supersedes only the displayed name and feature-branch placement above: keep internal GITHUB_JOB=qualify while displaying Check website, bind the actual current provider lookup to that display name, and include pinned TimeSeries checks within common images. All preserved identity, archive, test, coverage, freshness and permission gates remain mandatory.

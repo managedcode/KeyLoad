@@ -11,7 +11,7 @@ export const ISOLATED = Object.freeze({
   unsupportedTopologies: Object.freeze([{ target: 'Neo4j', nodeCounts: [2, 3],
     reason: 'Neo4j Community does not provide native clustering; Enterprise licensing is excluded.' }]),
   topology: Object.freeze({ 1: 'Single', 2: 'TwoNode', 3: 'Replicated' }),
-  steps: Object.freeze(['Run isolated native case', 'Retain isolated worker evidence']),
+  steps: Object.freeze(['Run database workload', 'Save benchmark results']),
   catalogBytes: 65_536, projectionBytes: 4_194_304, workers: 270,
   rawLocation: 'githubActionsArtifacts', aggregatePath: 'isolated/aggregate.json', projectionPath: 'isolated/projection.json',
   sha: /^[a-f0-9]{40}$/, hash: /^[a-f0-9]{64}$/, image: /@sha256:[a-f0-9]{64}$/,

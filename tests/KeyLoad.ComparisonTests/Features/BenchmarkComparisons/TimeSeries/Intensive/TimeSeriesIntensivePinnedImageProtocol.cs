@@ -23,7 +23,7 @@ internal static class TimeSeriesIntensivePinnedImageProtocol
     internal const string RunUrlPrefix = "https://github.com/managedcode/KeyLoad/actions/runs/";
     internal const string Workflow = "Benchmarks";
     internal const string WorkflowRef = "managedcode/KeyLoad/.github/workflows/benchmarks.yml@refs/heads/main";
-    internal const string Job = "timeseries-image-facts";
+    internal const string Job = "comparison-images";
     internal const string LinuxRunner = "Linux";
     internal const string Linux = "linux";
     internal const string True = "true";

@@ -2,7 +2,7 @@ import { AGGREGATE, KEYS, exactKeys, matches, positive, requireValue, validateCo
 import { validateIsolatedPlan } from './isolated-plan.mjs';
 
 const ERROR = AGGREGATE.errors.proof;
-const JOB_PREFIX = 'case / ';
+const JOB_PREFIX = 'Benchmark / ';
 const ARTIFACT_PREFIX = 'comparison-worker-';
 const GITHUB = 'https://github.com/';
 

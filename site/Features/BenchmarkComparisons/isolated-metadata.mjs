@@ -15,7 +15,7 @@ export function validateOptions(value, nodeCount) {
 }
 
 function validateJob(job, id, cohort, jobs) {
-  assertIsolated(exact(job, WIRE.job) && positive(job.id) && !jobs.has(job.id) && job.name === 'case / ' + id &&
+  assertIsolated(exact(job, WIRE.job) && positive(job.id) && !jobs.has(job.id) && job.name === 'Benchmark / ' + id &&
     job.url === `${runUrl(cohort)}/job/${job.id}` && job.conclusion === 'success' &&
     Array.isArray(job.steps) && job.steps.length === ISOLATED.steps.length);
   jobs.add(job.id);
