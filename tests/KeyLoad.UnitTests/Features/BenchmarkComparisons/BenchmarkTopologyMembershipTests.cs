@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text.Json;
 using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
@@ -9,9 +8,7 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 /// <summary>AC-ISO-004: fixed benchmark membership is part of the real node-owned replica WAL.</summary>
 internal sealed class BenchmarkTopologyMembershipTests
 {
-    private const string VersionField = "version";
-    private const string IncarnationField = "incarnation";
-    private const string VotersField = "voterIds";
+    private const int CurrentMembershipVersion = 2;
 
     [Test]
     [Arguments(1)]
@@ -29,10 +26,10 @@ internal sealed class BenchmarkTopologyMembershipTests
             await Assert.That(BenchmarkTopologyMembershipFixture.HardState(store)).IsNotNull();
             membership = BenchmarkTopologyMembershipFixture.Membership(store)!;
             await Assert.That(membership).IsNotNull();
-            var record = JsonDefaults.Deserialize<JsonElement>(membership);
-            await Assert.That(record.GetProperty(VersionField).GetInt32()).IsEqualTo(1);
-            await Assert.That(record.GetProperty(IncarnationField).GetGuid()).IsEqualTo(fixture.Incarnation);
-            await Assert.That(record.GetProperty(VotersField).EnumerateArray().Select(value => value.GetString() ?? string.Empty).ToArray())
+            var record = ReplicaProtocolCodec.Deserialize<ReplicaBenchmarkMembershipRecord>(membership);
+            await Assert.That(record.Version).IsEqualTo(CurrentMembershipVersion);
+            await Assert.That(record.Incarnation).IsEqualTo(fixture.Incarnation);
+            await Assert.That(record.VoterIds.ToArray())
                 .IsEquivalentTo(configuration.VoterIds.ToArray(), CollectionOrdering.Matching);
             log.SaveTermAndVote(1, configuration.LocalId);
         }

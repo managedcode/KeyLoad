@@ -86,8 +86,8 @@ internal sealed class FixtureLifetimeTests
         var sentinel = Path.Combine(directory, SentinelFileName);
         try
         {
-            await File.WriteAllTextAsync(sentinel, SentinelContent);
             using var owner = new ZoneTreeStore(new(directory));
+            await File.WriteAllTextAsync(sentinel, SentinelContent);
             owner.Commit((transaction, _) =>
             {
                 transaction.Put([ExistingKey], [ExistingValue]);

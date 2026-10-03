@@ -6,8 +6,6 @@ namespace KeyLoad.RecoveryTests;
 /// <summary>AC-REP-004: real private-transfer metadata failures preserve the canonical cut and permit safe retry.</summary>
 internal sealed class ReplicaSnapshotMetadataRecoveryTests
 {
-    private static readonly byte[] TruncatedManifest = "{"u8.ToArray();
-
     /// <summary>A foreign-incarnation descriptor is rejected before private files or canonical state are changed.</summary>
     [Test]
     public async Task ForeignIncarnationSnapshotIsRejectedWithoutEffectsAndValidDescriptorCanRetry()
@@ -42,7 +40,9 @@ internal sealed class ReplicaSnapshotMetadataRecoveryTests
         var receiver = trial.Receiver();
         await Assert.That(receiver.Begin(trial.Image)).IsEqualTo(0);
         var directory = Path.GetDirectoryName(trial.TargetImagePath(trial.Image))!;
-        await File.WriteAllBytesAsync(Path.Combine(directory, ReplicaProtocol.IncomingManifest), TruncatedManifest,
+        var manifestPath = Path.Combine(directory, ReplicaProtocol.IncomingManifest);
+        var manifest = await File.ReadAllBytesAsync(manifestPath, TestContext.Current!.Execution.CancellationToken);
+        await File.WriteAllBytesAsync(manifestPath, manifest[..^1],
             TestContext.Current!.Execution.CancellationToken);
 
         receiver.Recover();

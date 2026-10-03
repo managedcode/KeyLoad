@@ -52,8 +52,13 @@ internal static class ReplicaNativeInspection
         Register<ReplicaBorrowedBytesCodec>(builder);
         Register<ReplicaEntryInspectionCodec>(builder);
         Register<ReplicaOperationInspectionCodec>(builder);
-        Register<ReplicaEntryArrayInspectionCodec>(builder);
-        Register<ReplicaVoterArrayInspectionCodec>(builder);
+        builder.Services.AddSingleton(provider => new ReplicaEntryArrayInspectionCodec(provider.GetRequiredService<ReplicaEntryInspectionCodec>()));
+        builder.Services.AddSingleton(provider => new ReplicaVoterArrayInspectionCodec(provider.GetRequiredService<ReplicaBorrowedStringCodec>()));
+        builder.Configure(options =>
+        {
+            options.FieldCodecs.Add(typeof(ReplicaEntryArrayInspectionCodec));
+            options.FieldCodecs.Add(typeof(ReplicaVoterArrayInspectionCodec));
+        });
         Register<ReplicaEntriesInspectionCodec>(builder);
         Register<ReplicaVotersInspectionCodec>(builder);
         Register<ReplicaEntryBatchInspectionCodec>(builder);

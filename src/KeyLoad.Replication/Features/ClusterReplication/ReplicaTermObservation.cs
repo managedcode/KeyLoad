@@ -32,7 +32,7 @@ internal readonly struct ReplicaTermObservationRead(long term, ReplicaTermObserv
 
 internal static class ReplicaTermObservationReader
 {
-    internal static ReplicaTermObservationRead Read(IAtomicStore store, long index, long hardStateTerm,
+    internal static ReplicaTermObservationRead Read(IAtomicStore store, long index, long hardStateTerm, int maximumEntries,
         ReplicaTermObservation? current)
     {
         return store.Read<ReplicaTermObservationRead>(view =>
@@ -55,7 +55,7 @@ internal static class ReplicaTermObservationReader
             long term = 0;
             var found = view.ReadValue(ReplicaProtocol.EntryStorageKey(index), bytes =>
             {
-                var entry = ReplicaProtocolCodec.Deserialize<ReplicaEntry>(bytes);
+                var entry = ReplicaProtocolCodec.DeserializeStored<ReplicaEntry>(bytes.ToArray(), maximumEntries);
                 if (entry.Index != index || entry.Term <= 0 || entry.Term > hardStateTerm)
                 {
                     throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);

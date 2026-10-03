@@ -20,6 +20,7 @@ internal sealed class ReadBudgetAllocationTests
     private const string MissingKey = "budget/missing";
     private const string EscapedUnicode = "київ café \"line\"\n";
     private const string TemporaryDirectoryPrefix = "keyload-read-budget-";
+    private const string NativeValueAlias = "keyload.tests.read-budget.value.v1";
 
     [Test]
     public async Task AcMp002PointLimitRejectsBeforeAllocatingAnOwnedLargeValue()
@@ -133,7 +134,8 @@ internal sealed class ReadBudgetAllocationTests
     }
 
     private static byte[] Key(string value) => Encoding.UTF8.GetBytes(value);
-    private sealed record JsonRecord(string Value);
+    [global::Orleans.GenerateSerializer, global::Orleans.Alias(NativeValueAlias)]
+    internal sealed record JsonRecord([property: global::Orleans.Id(0)] string Value);
 
     private sealed class StoreFixture : IDisposable
     {

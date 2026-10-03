@@ -34,14 +34,16 @@ internal sealed class McpReadDecodeTests
 
     /// <summary>The four no-body operations accept empty arguments and produce the exact null sentinel.</summary>
     [Test]
-    public async Task AcMcp003OnlyNoBodyReadsAcceptEmptyArgumentsAndProduceJsonNull()
+    public async Task AcMcp003OnlyNoBodyReadsAcceptEmptyArgumentsAndProduceNativeNullSentinel()
     {
         foreach (var name in NoBodyNames)
         {
             var descriptor = Find(name);
             var absent = descriptor.Decode(null);
             var empty = descriptor.Decode(new Dictionary<string, JsonElement>(StringComparer.Ordinal));
-            await Assert.That(System.Text.Encoding.UTF8.GetString(absent.Payload.Span)).IsEqualTo(McpCanonicalTestData.NullJson);
+            await Assert.That(NativeSerialization.Deserialize<JsonElement>(absent.Payload.Span).ValueKind).IsEqualTo(JsonValueKind.Null);
+            await Assert.That(absent.Payload.Span.SequenceEqual(NativeSerialization.Serialize(
+                JsonSerializer.Deserialize<JsonElement>(McpCanonicalTestData.NullJson)))).IsTrue();
             await Assert.That(empty.Payload.Span.SequenceEqual(absent.Payload.Span)).IsTrue();
             var invalid = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             {

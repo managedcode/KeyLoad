@@ -14,7 +14,7 @@ internal sealed class TombstoneValueTests
     private const int ChecksumOffset = 20;
     private const int ChecksumLength = 32;
     private const long EmptyJournalLength = 0;
-    private const ulong JournalMagic = 0x334C4157444C4BUL;
+    private const ulong JournalMagic = 0x344C4157444C4BUL;
     private const string JournalFileName = "commands.wal";
 
     [Test]

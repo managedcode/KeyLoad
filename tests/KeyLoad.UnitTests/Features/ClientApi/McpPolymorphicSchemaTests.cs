@@ -74,8 +74,8 @@ internal sealed class McpPolymorphicSchemaTests
             [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement(typed, JsonDefaults.Options)
         };
         var payload = Find(McpCatalogExpectations.QueryAst).Decode(arguments).Payload;
-        await Assert.That(payload.Span.SequenceEqual(JsonDefaults.Serialize(typed))).IsTrue();
-        await Assert.That(JsonDefaults.Deserialize<AstQueryRequest>(payload.Span).Query.Filter is Logical
+        await Assert.That(payload.Span.SequenceEqual(NativeSerialization.Serialize(typed))).IsTrue();
+        await Assert.That(NativeSerialization.Deserialize<AstQueryRequest>(payload.Span).Query.Filter is Logical
         { Right: Negation { Inner: NullTest } }).IsTrue();
     }
 
@@ -123,7 +123,7 @@ internal sealed class McpPolymorphicSchemaTests
                 [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
             };
             var payload = Find(McpCatalogExpectations.QueryAst).Decode(arguments).Payload;
-            var decoded = JsonDefaults.Deserialize<AstQueryRequest>(payload.Span);
+            var decoded = NativeSerialization.Deserialize<AstQueryRequest>(payload.Span);
             var actualValue = ((Comparison)decoded.Query.Filter!).Right is ValueOperand valueOperand
                 ? valueOperand.Value : throw new InvalidOperationException(ValueKind);
             await Assert.That(actualValue.ValueKind).IsEqualTo(expectedKinds[index]);

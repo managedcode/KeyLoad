@@ -58,7 +58,7 @@ public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration c
         {
             throw Errors.Fail(ErrorCode.NotFound, ReplicaPersistence.MissingEntry);
         }
-        var result = ReplicaTermObservationReader.Read(store, index, state.Term, termObservation);
+        var result = ReplicaTermObservationReader.Read(store, index, state.Term, configuration.MaxAppendEntries, termObservation);
         termObservation = result.Observation;
         return result.Term;
     }

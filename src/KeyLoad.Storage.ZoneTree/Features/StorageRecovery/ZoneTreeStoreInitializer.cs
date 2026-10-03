@@ -12,8 +12,9 @@ internal static class ZoneTreeStoreInitializer
             runtime.Ownership = new FileStream(Path.Combine(runtime.Options.Directory, OwnerLockFileName),
                 FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
             runtime.Identity = ZoneTreeIdentityFile.Open(runtime.Options, runtime.Ownership);
-            runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options);
             runtime.Journal = ZoneTreeStoreFiles.OpenJournal(runtime.Options);
+            ZoneTreeJournalPreflight.Validate(runtime.Journal, runtime.Options, runtime.Identity.FormatVersion);
+            runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options);
             ZoneTreeJournalRecovery.Recover(runtime);
             runtime.Maintainer = runtime.Tree.CreateMaintainer();
             ZoneTreeCheckpointReclaimer.Reclaim(runtime.Options.Directory);
@@ -31,6 +32,7 @@ internal static class ZoneTreeStoreInitializer
             FileMode.Open, FileAccess.ReadWrite, FileShare.None);
         runtime.Identity = ZoneTreeIdentityFile.OpenExisting(runtime.Options, expectedNodeId);
         runtime.Journal = ZoneTreeStoreFiles.OpenJournal(runtime.Options, FileMode.Open);
+        ZoneTreeJournalPreflight.Validate(runtime.Journal, runtime.Options, runtime.Identity.FormatVersion);
         runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options, requireExisting: true);
         ZoneTreeJournalRecovery.Recover(runtime);
     }

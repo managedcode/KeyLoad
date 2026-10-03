@@ -1,4 +1,5 @@
 using System.Text;
+using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
@@ -26,44 +27,20 @@ internal sealed class ReplicaTermMetadataFixture : IDisposable
     internal const string TestDirectoryPrefix = "keyload-replica-term-metadata-";
     internal const int LargeDocumentCharacters = 1_000_000;
     internal string DirectoryPath { get; }
-    internal ZoneTreeStore Store { get; }
-    internal DurableReplicaLog Log { get; }
+    internal ZoneTreeStore Store => lifetime.BorrowReplica();
+    internal DurableReplicaLog Log => lifetime.BorrowLog();
+    internal DatabaseEngine Database => lifetime.Database;
+    private readonly ReplicaTermMetadataLifetime lifetime;
     private readonly List<IDisposable> subordinateOwners = [];
     private bool disposed;
-    private bool storeDisposed;
-    private bool logDisposed;
 
     internal ReplicaTermMetadataFixture(Action<CommitStage, long, int>? faultObserver = null)
     {
         DirectoryPath = ReplicaFixturePaths.NewDirectory(TestDirectoryPrefix);
-        ZoneTreeStore? openedStore = null;
-        DurableReplicaLog? openedLog = null;
-        try
-        {
-            Configuration = new(VoterA, [VoterA, VoterB, VoterC], DirectoryPath, Guid.NewGuid());
-            openedStore = new(new ZoneTreeStoreOptions(DirectoryPath)
-            {
-                Incarnation = Configuration.Incarnation,
-                FaultObserver = faultObserver
-            });
-            openedLog = new(openedStore, Configuration);
-            Store = openedStore;
-            Log = openedLog;
-            openedStore = null;
-            openedLog = null;
-        }
-        catch (Exception original)
-        {
-            List<Exception> failures = [original];
-            AttemptOwner(openedLog, failures);
-            AttemptOwner(openedStore, failures);
-            ReplicaMaterializerLifecycleErrors.Attempt(() => Directory.Delete(DirectoryPath, true), failures);
-            ReplicaMaterializerLifecycleErrors.Throw(failures);
-            throw;
-        }
+        lifetime = ReplicaTermMetadataLifetime.Open(DirectoryPath, faultObserver);
     }
 
-    internal ReplicaConfiguration Configuration { get; }
+    internal ReplicaConfiguration Configuration => lifetime.Configuration;
 
     internal static async Task RunAsync(Func<ReplicaTermMetadataFixture, Task> scenario,
         Action<CommitStage, long, int>? faultObserver = null)
@@ -71,7 +48,7 @@ internal sealed class ReplicaTermMetadataFixture : IDisposable
         using var fixture = new ReplicaTermMetadataFixture(faultObserver);
         List<Exception> failures = [];
         await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => scenario(fixture), failures);
-        fixture.DisposeInto(failures);
+        ReplicaMaterializerLifecycleErrors.Attempt(fixture.Dispose, failures);
         ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 
@@ -88,17 +65,9 @@ internal sealed class ReplicaTermMetadataFixture : IDisposable
         return resource;
     }
 
-    internal void CloseStore()
-    {
-        Store.Dispose();
-        storeDisposed = true;
-    }
+    internal void CloseStore() => lifetime.CloseReplica();
 
-    internal void CloseLog()
-    {
-        Log.Dispose();
-        logDisposed = true;
-    }
+    internal void CloseLog() => lifetime.CloseLog();
 
     internal static CommandRequest AtomicBatch(string documentJson)
     {
@@ -107,9 +76,9 @@ internal sealed class ReplicaTermMetadataFixture : IDisposable
         return new(commandId, partition, [new PutDocument(DocumentCollection, DocumentId, documentJson)], OwnershipEpoch: 1);
     }
 
-    internal static ReplicatedOperation Operation(CommandRequest batch)
-        => new(batch.CommandId, OperationKind.Batch, VoterA, DateTimeOffset.UnixEpoch,
-            Encoding.UTF8.GetString(JsonDefaults.Serialize(batch)));
+    internal ReplicatedOperation Operation(CommandRequest batch)
+        => Database.NormalizeOperation(new(batch.CommandId, OperationKind.Batch, VoterA, DateTimeOffset.UnixEpoch,
+            Encoding.UTF8.GetString(JsonDefaults.Serialize(batch))));
 
     internal static string LargeDocumentJson()
         => LargeDocumentPrefix + new string('x', LargeDocumentCharacters) + LargeDocumentSuffix;
@@ -142,32 +111,20 @@ internal sealed class ReplicaTermMetadataFixture : IDisposable
 
     public void Dispose()
     {
-        List<Exception> failures = [];
-        DisposeInto(failures);
-        ReplicaMaterializerLifecycleErrors.Throw(failures);
-    }
-
-    private void DisposeInto(List<Exception> failures)
-    {
         if (disposed)
-        {
-            return;
-        }
-
+        { return; }
         disposed = true;
+        List<Exception> failures = [];
         for (var ownerIndex = subordinateOwners.Count - 1; ownerIndex >= 0; ownerIndex--)
         {
             AttemptOwner(subordinateOwners[ownerIndex], failures);
         }
-        if (!logDisposed)
-        {
-            AttemptOwner(Log, failures);
-        }
-        if (!storeDisposed)
-        {
-            AttemptOwner(Store, failures);
-        }
+        try
+        { lifetime.Dispose(); }
+        catch (AggregateException wrapper)
+        { ReplicaMaterializerLifecycleErrors.AddWrapped(wrapper, failures); }
         ReplicaMaterializerLifecycleErrors.Attempt(() => Directory.Delete(DirectoryPath, true), failures);
+        ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 
     private static void AttemptOwner(IDisposable? owner, List<Exception> failures)

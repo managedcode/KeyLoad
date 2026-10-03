@@ -93,3 +93,44 @@ derived collection codecs fail closed before generated allocation, even below an
 object-typed field. Extending this closure requires a native shape specification,
 preflight/count/reference tests and homogeneous compatibility qualification.
 This is an internal concrete contract, not arbitrary Orleans codec compatibility.
+
+## Accepted qualification repair contract
+
+R11/R12 preserve AC-IS002/004/007 and the existing formats. Actual GitHub
+run37120641864 revealed nullable metadata construction, native reader exhaustion
+classification and stale fixtures. Native graph annotations must use .NET10's
+already-unwrapped Nullable<T> metadata; only genuine Orleans Reader buffer
+exhaustion joins coded corruption, while programming/session exceptions escape.
+
+R12F validates the complete recoverable journal/checkpoint prefix before opening
+ZoneTree's native provider. Under the already acquired node owner lock, use the
+same owned journal handle and bounded current codecs to verify complete frames,
+checksums, sequence, checkpoint metadata/footer and record semantics without apply,
+truncation or tree writes. Leave a permitted incomplete current tail untouched
+during preflight; ordinary ordered recovery alone applies/truncates it afterward.
+Unsupported complete legacy frames and complete corruption must fail without
+changing journal/identity/provider files. Reset the journal position before
+ordinary recovery; keep startup preflight distinct from acknowledged write gates.
+
+StorageRecovery owns the initializer and new preflight helper; UnitTests owns
+NativeStoreOpenPreflight regressions using real files plus unchanged historical
+file-preservation assertions. Root owns integration/docs; wire worker owns reader
+normalization; no shared runtime/phase-file overlap. Verify valid checkpoint/tail,
+torn-tail recovery, late complete corruption and legacy rejection through actual
+GitHub normal/scalar/recovery/RF3 suites. No migration or old-store conversion is
+introduced; rollback restores prior binaries for matching stores. Extra startup
+validation cost requires actual recovery/performance evidence and cannot count
+as a speed improvement. All fault assertions and numeric budgets remain.
+
+R12G preserves the existing strict cold-term read contract: the exact stored
+ReplicaEntry must pass the same bounded replica inspection as ordinary stored
+entry reads before its term is observed. Pass the owning configuration's
+MaxAppendEntries through the term reader; preserve its scoped storage identity,
+cut cache, index/term checks and lookup counts. ClusterReplication owns the two
+reader/caller files; the existing genuine-file malformed nested-operation
+recovery test is the acceptance oracle. Unknown nested authority fields remain
+corruption; ordinary bounded persistence evolution does not weaken this check.
+The borrowed storage span is copied for inspection only on a cold miss because
+the profile inspector requires owned ReadOnlyMemory for its borrowed proxies;
+no proxy or storage buffer escapes the read gate. Warm cut observations still
+perform no point lookup. Retain this ownership cost in performance accounting.

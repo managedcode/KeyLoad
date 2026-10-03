@@ -1,7 +1,9 @@
-using System.Text;
+using System.Buffers.Binary;
+using KeyLoad.Features.InternalSerialization;
 using KeyLoad.Replication;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using Microsoft.Extensions.DependencyInjection;
+using Orleans.Serialization;
 
 namespace KeyLoad.RecoveryTests;
 
@@ -13,8 +15,6 @@ internal sealed class ReplicaTermMetadataMutationTests
     private const int FirstIndex = 1;
     private const int ThirdIndex = 3;
     private const string ValidDocumentJson = "{}";
-    private const string BatchKindToken = "\"kind\":\"Batch\"";
-    private const string UnknownOperationField = "\"unknown\":true,";
 
     [Test]
     public async Task DirectChangeDeleteAndRepairAlwaysRevalidateTheStoredEntry()
@@ -46,14 +46,17 @@ internal sealed class ReplicaTermMetadataMutationTests
         await ReplicaTermMetadataFixture.RunAsync(async fixture =>
         {
             fixture.Log.SaveTermAndVote(InitialTerm, null);
-            var operation = ReplicaTermMetadataFixture.Operation(ReplicaTermMetadataFixture.AtomicBatch(ValidDocumentJson));
+            var operation = fixture.Operation(ReplicaTermMetadataFixture.AtomicBatch(ValidDocumentJson));
             fixture.Log.Append([new(FirstIndex, OriginalEntryTerm, operation)]);
             fixture.Log.Commit(FirstIndex);
             await Assert.That(fixture.Log.TermAt(FirstIndex)).IsEqualTo(OriginalEntryTerm);
-            var validJson = Encoding.UTF8.GetString(ReplicaProtocolCodec.Serialize(new ReplicaEntry(FirstIndex, OriginalEntryTerm, operation)));
-            await Assert.That(validJson.Contains(BatchKindToken, StringComparison.Ordinal)).IsTrue();
-            var malformed = Encoding.UTF8.GetBytes(validJson.Replace(BatchKindToken,
-                UnknownOperationField + BatchKindToken, StringComparison.Ordinal));
+            var entry = new ReplicaEntry(FirstIndex, OriginalEntryTerm, operation);
+            var valid = ReplicaProtocolCodec.Serialize(entry);
+            await Assert.That(ReplicaProtocolCodec.Deserialize<ReplicaEntry>(valid).Operation!.Kind).IsEqualTo(OperationKind.Batch);
+            var malformed = UnknownNestedOperation(entry);
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
+                ReplicaProtocolCodec.DeserializeStored<ReplicaEntry>(malformed, fixture.Configuration.MaxAppendEntries)).Code)
+                .IsEqualTo(ErrorCode.Corruption);
             fixture.Store.Commit((transaction, _) =>
             {
                 transaction.Put(ReplicaProtocol.EntryStorageKey(FirstIndex), malformed);
@@ -127,10 +130,31 @@ internal sealed class ReplicaTermMetadataMutationTests
     }
 
     private static void CommitEntry(ZoneTreeStore store, ReplicaEntry entry)
-        => store.Commit((transaction, _) => { transaction.PutRecord(ReplicaProtocol.EntryStorageKey(entry.Index), entry); return true; });
+        => store.Commit((transaction, _) => { transaction.Put(ReplicaProtocol.EntryStorageKey(entry.Index), ReplicaProtocolCodec.Serialize(entry)); return true; });
 
     private static void CommitEntryAtRequestedKey(ZoneTreeStore store, long requestedIndex, ReplicaEntry entry)
-        => store.Commit((transaction, _) => { transaction.PutRecord(ReplicaProtocol.EntryStorageKey(requestedIndex), entry); return true; });
+        => store.Commit((transaction, _) => { transaction.Put(ReplicaProtocol.EntryStorageKey(requestedIndex), ReplicaProtocolCodec.Serialize(entry)); return true; });
+
+    private static byte[] UnknownNestedOperation(ReplicaEntry entry)
+    {
+        var context = NativeSerializerProviders.CreateInspection(typeof(ReplicaEntry), builder =>
+        {
+            builder.AddAssembly(typeof(ReplicaEntry).Assembly);
+            builder.Services.AddSingleton<ReplicaEntryInspectionCodec>();
+            builder.Services.AddSingleton(new ReplicaMaximumOperationCodec(ReplicaMaximumPayload.UnknownField));
+            builder.Configure(options =>
+            {
+                options.FieldCodecs.Add(typeof(ReplicaEntryInspectionCodec));
+                options.FieldCodecs.Add(typeof(ReplicaMaximumOperationCodec));
+            });
+        });
+        // Route the entry's nested operation through the provider so the malformed field codec is honored.
+        var body = context.Serializer.SerializeToArray(new NativePayload { Version = NativePayloadVersion.Current, Value = entry });
+        var framed = new byte[checked(ReplicaProtocol.PayloadPrefixBytes + body.Length)];
+        BinaryPrimitives.WriteUInt64LittleEndian(framed, ReplicaProtocol.PayloadMagic);
+        body.CopyTo(framed, ReplicaProtocol.PayloadPrefixBytes);
+        return framed;
+    }
 
     private static void DeleteEntry(ZoneTreeStore store, long index)
         => store.Commit((transaction, _) => { transaction.Delete(ReplicaProtocol.EntryStorageKey(index)); return true; });

@@ -1,6 +1,5 @@
-using System.Text.Json.Nodes;
+using System.Buffers.Binary;
 using KeyLoad.Replication;
-using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -13,8 +12,6 @@ internal sealed class BenchmarkTopologyMembershipCorruptionTests
     private const string UnknownField = "privateField";
     private const string MalformedJson = "{";
     private const string NullJson = "null";
-    private const string VersionProperty = "\"version\":1";
-    private const string DuplicateVersionProperty = "\"version\":1,\"version\":1";
 
     [Test]
     [Arguments(MalformedJson)]
@@ -28,7 +25,11 @@ internal sealed class BenchmarkTopologyMembershipCorruptionTests
             using var log = new DurableReplicaLog(store, configuration);
             store.Commit((transaction, _) =>
             {
-                transaction.Put(BenchmarkTopologyMembershipFixture.MembershipKey, System.Text.Encoding.UTF8.GetBytes(json));
+                var body = System.Text.Encoding.UTF8.GetBytes(json);
+                var malformed = new byte[ReplicaProtocol.PayloadPrefixBytes + body.Length];
+                BinaryPrimitives.WriteUInt64LittleEndian(malformed, ReplicaProtocol.PayloadMagic);
+                body.CopyTo(malformed, ReplicaProtocol.PayloadPrefixBytes);
+                transaction.Put(BenchmarkTopologyMembershipFixture.MembershipKey, malformed);
                 return true;
             });
         }
@@ -49,11 +50,11 @@ internal sealed class BenchmarkTopologyMembershipCorruptionTests
         using (var store = fixture.Open())
         {
             using var log = new DurableReplicaLog(store, configuration);
-            var record = JsonNode.Parse(BenchmarkTopologyMembershipFixture.Membership(store)!)!.AsObject();
-            Mutate(record, field);
+            var record = ReplicaProtocolCodec.Deserialize<ReplicaBenchmarkMembershipRecord>(BenchmarkTopologyMembershipFixture.Membership(store)!);
+            var malformed = Mutate(record, field);
             store.Commit((transaction, _) =>
             {
-                transaction.PutRecord(BenchmarkTopologyMembershipFixture.MembershipKey, record);
+                transaction.Put(BenchmarkTopologyMembershipFixture.MembershipKey, malformed);
                 return true;
             });
         }
@@ -89,12 +90,12 @@ internal sealed class BenchmarkTopologyMembershipCorruptionTests
         using (var store = fixture.Open())
         {
             using var log = new DurableReplicaLog(store, configuration);
-            var json = System.Text.Encoding.UTF8.GetString(BenchmarkTopologyMembershipFixture.Membership(store)!)
-                .Replace(VersionProperty, DuplicateVersionProperty, StringComparison.Ordinal);
-            await Assert.That(json).Contains(DuplicateVersionProperty);
+            var record = ReplicaProtocolCodec.Deserialize<ReplicaBenchmarkMembershipRecord>(BenchmarkTopologyMembershipFixture.Membership(store)!);
+            var malformed = BenchmarkTopologyMembershipNativeCodec.Encode(record, BenchmarkMembershipDefect.Duplicate);
+            await Assert.That(malformed.AsSpan().SequenceEqual(BenchmarkTopologyMembershipFixture.Membership(store))).IsFalse();
             store.Commit((transaction, _) =>
             {
-                transaction.Put(BenchmarkTopologyMembershipFixture.MembershipKey, System.Text.Encoding.UTF8.GetBytes(json));
+                transaction.Put(BenchmarkTopologyMembershipFixture.MembershipKey, malformed);
                 return true;
             });
         }
@@ -103,23 +104,13 @@ internal sealed class BenchmarkTopologyMembershipCorruptionTests
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
     }
 
-    private static void Mutate(JsonObject record, string field)
-    {
-        if (field == VotersField)
-        {
-            record.Remove(VotersField);
-        }
-        else if (field == VersionField)
-        {
-            record[VersionField] = 2;
-        }
-        else if (field == IncarnationField)
-        {
-            record[IncarnationField] = Guid.NewGuid();
-        }
-        else
-        {
-            record[UnknownField] = BenchmarkTopologyMembershipFixture.PrivateCanary;
-        }
-    }
+    private static byte[] Mutate(ReplicaBenchmarkMembershipRecord record, string field)
+        => field == IncarnationField
+            ? ReplicaProtocolCodec.Serialize(record with { Incarnation = Guid.NewGuid() })
+            : BenchmarkTopologyMembershipNativeCodec.Encode(record, field switch
+            {
+                VersionField => BenchmarkMembershipDefect.WrongVersionScalar,
+                VotersField => BenchmarkMembershipDefect.Missing,
+                _ => BenchmarkMembershipDefect.Unknown
+            });
 }

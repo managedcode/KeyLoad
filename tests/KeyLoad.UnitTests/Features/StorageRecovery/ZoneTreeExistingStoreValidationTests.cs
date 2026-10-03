@@ -42,9 +42,9 @@ internal sealed class ZoneTreeExistingStoreValidationTests
     {
         using var files = new ZoneTreeExistingStoreFixture();
         var original = await File.ReadAllBytesAsync(files.IdentityPath);
-        var envelope = JsonDefaults.Deserialize<ZoneTreeIdentityEnvelope>(original);
+        var envelope = NativeSerialization.Deserialize<ZoneTreeIdentityEnvelope>(original.AsSpan(sizeof(ulong)));
         envelope.Checksum[0] ^= ChecksumCorruptionMask;
-        var corrupted = JsonDefaults.Serialize(envelope);
+        var corrupted = ZoneTreeMetadataBinary.Write(envelope, 0x354449444C4BUL);
         await File.WriteAllBytesAsync(files.IdentityPath, corrupted);
         var result = await files.InspectAsync();
         await ExistingStoreInspectionAssertions.FailedAsync(result, ExistingStoreInspectionExpectedFailures.Corruption, ExistingStoreInspectionExpectedFailures.KeyLoad);

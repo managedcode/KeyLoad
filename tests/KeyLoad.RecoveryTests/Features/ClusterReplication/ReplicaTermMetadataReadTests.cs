@@ -14,7 +14,7 @@ internal sealed class ReplicaTermMetadataReadTests
         {
             fixture.Log.SaveTermAndVote(InitialTerm, null);
             var batch = ReplicaTermMetadataFixture.AtomicBatch(ReplicaTermMetadataFixture.LargeDocumentJson());
-            var operation = ReplicaTermMetadataFixture.Operation(batch);
+            var operation = fixture.Operation(batch);
             var entry = new ReplicaEntry(1, InitialTerm, operation);
             var encoded = ReplicaProtocolCodec.Serialize(entry);
             fixture.Log.Append([entry]);

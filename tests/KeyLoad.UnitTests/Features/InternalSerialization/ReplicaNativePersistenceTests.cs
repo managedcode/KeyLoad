@@ -165,12 +165,14 @@ internal sealed class ReplicaNativeFiles : IDisposable
 
     internal ReplicaNativeFiles(Guid? incarnation = null, ReadOnlyMemory<byte>? signingKey = null)
     {
-        Configuration = new(VoterA, [VoterA, VoterB, VoterC], directory, incarnation ?? Guid.NewGuid()) { MaxAppendBytes = AppendBytes };
+        Configuration = new(VoterA, [VoterA, VoterB, VoterC], Path.Combine(directory, ReplicaProtocol.ReplicaDirectory),
+            incarnation ?? Guid.NewGuid())
+        { MaxAppendBytes = AppendBytes };
         SigningKey = signingKey?.ToArray() ?? RandomNumberGenerator.GetBytes(SigningKeyBytes);
     }
 
     internal ZoneTreeStore Open() => new(new(Configuration.Directory) { Incarnation = Configuration.Incarnation, SigningKey = SigningKey });
-    internal ZoneTreeStore Open(string name) => new(new(Path.Combine(Configuration.Directory, name))
+    internal ZoneTreeStore Open(string name) => new(new(Path.Combine(directory, name))
     { Incarnation = Configuration.Incarnation, SigningKey = SigningKey });
     public void Dispose() => Directory.Delete(directory, true);
 }

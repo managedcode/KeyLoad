@@ -86,7 +86,7 @@ internal sealed class StorageRecoveryProcessTests
     {
         using var store = new ZoneTreeStore(new(root));
         return store.Read(view => Enumerable.Range(0, 3)
-            .Select(i => JsonDefaults.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("item", (long)i))!)).ToArray());
+            .Select(i => NativeSerialization.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("item", (long)i))!)).ToArray());
     }
 
     private static async Task RecordCrashTrialAsync(StreamWriter evidence, int batch, int trial,
@@ -233,7 +233,7 @@ internal sealed class StoragePublicationRecoveryTests
 
     private static int[] ReadCheckpointValues(ZoneTreeStore store) =>
         store.Read(view => Enumerable.Range(0, 3).Select(index =>
-            JsonDefaults.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("item", (long)index))!)).ToArray());
+            NativeSerialization.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("item", (long)index))!)).ToArray());
 
     private static bool IsCheckpointGenerationInstalled(string mode, CommitStage stage) =>
         mode == "install" && stage == CommitStage.JournalSwapped;
@@ -243,7 +243,7 @@ internal sealed class StoragePublicationRecoveryTests
         var obsoleteExists = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode("obsolete")) is not null);
         await Assert.That(obsoleteExists).IsEqualTo(!installed);
         var lastApplied = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode("system", "last-applied")) is { } bytes
-            ? JsonDefaults.Deserialize<long>(bytes) : 0);
+            ? NativeSerialization.Deserialize<long>(bytes) : 0);
         await Assert.That(lastApplied).IsEqualTo(installed ? 9 : 0);
     }
 
@@ -325,7 +325,7 @@ internal sealed class StoragePublicationRecoveryTests
                 await Assert.That(File.GetUnixFileMode(restored)).IsEqualTo(privateMode);
             }
             using var recovered = new ZoneTreeStore(new(restored));
-            await Assert.That(recovered.Read(view => JsonDefaults.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("key"))!))).IsEqualTo("value");
+            await Assert.That(recovered.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("key"))!))).IsEqualTo("value");
             var tampered = await File.ReadAllBytesAsync(Path.Combine(backup, "commands.wal"));
             tampered[^1] ^= 1;
             await File.WriteAllBytesAsync(Path.Combine(backup, "commands.wal"), tampered);

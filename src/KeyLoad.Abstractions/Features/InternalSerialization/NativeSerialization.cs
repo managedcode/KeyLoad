@@ -155,5 +155,6 @@ public static class NativeSerialization
     private static bool IsMalformed(Exception exception)
         => exception is SerializerException
             or ArgumentException or IndexOutOfRangeException or OverflowException or InvalidCastException
-            or FormatException or EndOfStreamException or TypeLoadException;
+            or FormatException or EndOfStreamException or TypeLoadException
+            || NativePayloadSyntax.IsReaderBufferFailure(exception);
 }

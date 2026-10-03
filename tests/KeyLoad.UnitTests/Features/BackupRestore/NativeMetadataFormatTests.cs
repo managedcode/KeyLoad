@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
+using KeyLoad.Features.InternalSerialization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.StorageRecovery;
@@ -160,10 +161,12 @@ internal sealed class NativeMetadataFormatTests
     private static byte[] RawPayload<T>(T value)
     {
         var registrations = new ServiceCollection();
-        registrations.AddSerializer(builder => builder.AddAssembly(typeof(T).Assembly).AddAssembly(typeof(StoreIdentity).Assembly));
+        registrations.AddSerializer(builder => builder.AddAssembly(typeof(NativeSerialization).Assembly)
+            .AddAssembly(typeof(T).Assembly).AddAssembly(typeof(StoreIdentity).Assembly));
         registrations.AddSingleton<IFieldCodec<ReadOnlyMemory<byte>>, ReadOnlyMemoryOfByteCodec>();
         using var services = registrations.BuildServiceProvider();
-        return services.GetRequiredService<Serializer<T>>().SerializeToArray(value!);
+        return services.GetRequiredService<Serializer<NativePayload>>().SerializeToArray(
+            new NativePayload { Version = NativePayloadVersion.Current, Value = value });
     }
 
     private static byte[] NativeFile<T>(T value, ulong magic)
