@@ -271,4 +271,3 @@ internal static class ValidatedQueueLeaseFields
     internal const uint Metadata = 1;
     internal const uint BodyBytes = 2;
 }
-
