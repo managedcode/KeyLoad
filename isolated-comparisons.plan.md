@@ -358,3 +358,14 @@ tracked until native repaired-source results exist.
 - [x] Bounded isolated admission and native per-member/log receipts source joined.
 - [ ] Repaired exact-source Release/format/governance/normal/scalar/recovery/RF3.
 - [ ] Repaired native27 preflights and complete270 original intensive cell cohort.
+
+Actual source890 run37086903499/job111100389518 passes solution Release build but
+fails the formatter at PinnedImageProcess.cs109..110: six WHITESPACE diagnostics
+on the compact record initializer. Root applies only the required multiline
+formatting; no statement/value/lifecycle change. Recovery executes independently
+and passes, but skipped unit/scalar/governance/image/cohort steps do not pass.
+The pending ffa8 repaired-source run37087767502 is not a qualified baseline.
+Retain this exact failed log and repeat complete gates at the formatting repair SHA.
+
+- [ ] Verify EditorConfig: actual890 WHITESPACE failure; source fix authored,
+  corrected exact-source GitHub formatter gate pending.

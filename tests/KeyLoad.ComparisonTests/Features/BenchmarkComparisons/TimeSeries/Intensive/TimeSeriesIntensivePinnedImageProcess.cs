@@ -106,8 +106,14 @@ internal static class TimeSeriesIntensivePinnedImageProcess
         TimeSeriesIntensivePinnedImageOutput error, TimeSeriesIntensivePinnedImageEvidence? evidence, string? label)
     {
         var failure = await FinishAsync(process, deadline, stdout, stderr, failures, primary);
-        var command = initial with { ExitCode = process.HasExited ? process.ExitCode : null,
-            CompletedAt = TimeProvider.System.GetUtcNow(), Output = output.Bytes, Error = error.Bytes, Failures = failures };
+        var command = initial with
+        {
+            ExitCode = process.HasExited ? process.ExitCode : null,
+            CompletedAt = TimeProvider.System.GetUtcNow(),
+            Output = output.Bytes,
+            Error = error.Bytes,
+            Failures = failures
+        };
         failure = await RetainAsync(evidence, label, command, failure);
         if (primary is null && failure is not null)
         {
