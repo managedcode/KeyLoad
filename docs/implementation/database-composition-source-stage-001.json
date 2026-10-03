@@ -330,15 +330,15 @@
       "sameFailureCausesProven": false,
       "caveat": "Ubuntu CI and macOS local baseline differ; same names do not prove identical causes"
     },
-    "latestIntegratedSourceRevision": "ca22b1baa919198c81749d86ffab56df24ec9317",
-    "latestIntegratedCiRunId": 37124217640,
-    "latestIntegratedCiUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640",
+    "latestIntegratedSourceRevision": "ca7e22d9c201304f0b81f59f3a0ae18e4125be37",
+    "latestIntegratedCiRunId": 37126562970,
+    "latestIntegratedCiUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562970",
     "latestIntegratedCiStatus": "failure_original_Linux_reports_verified",
-    "latestIntegratedEvidence": "docs/implementation/database-composition-fixture-stage-002.json"
+    "latestIntegratedEvidence": "docs/implementation/database-composition-integrated-stage-004.json"
   },
   "remainingGates": [
-    "Delivered-source full build/format/governance and TUnit normal/scalar/process recovery",
-    "Genuine Docker/Aspire RF3 SQL/.NET/official MCP cases with original image receipts",
+    "Complete delivered-source Linux normal/scalar gates: see latest integrated receipt for original three unit errors and skipped scalar",
+    "All 67 genuine Docker/Aspire RF3 tests pass on latest integrated source, including both SQL/.NET/official MCP composition cases; retain exact-source proof for subsequent changes",
     "Full SQL model sources, joins, DML and native client-session interoperability",
     "All-model/distributed correctness, endurance, fault and comparable resource/performance qualification",
     "Complete Benchmarks and site pipeline before publication"

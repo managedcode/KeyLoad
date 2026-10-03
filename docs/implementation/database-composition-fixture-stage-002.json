@@ -1,6 +1,6 @@
 {
   "schema": "keyload.database-composition.fixture-stage.v1",
-  "status": "verified_development_snapshot_genuine_RF3_rerun_required",
+  "status": "fixture_source_delivered_RF3_passed_full_qualification_pending",
   "decision": "docs/ADR/ADR-067-composable-agent-database.md",
   "task": "TASK-COMP-007",
   "acceptance": [
@@ -149,17 +149,19 @@
     "pushedTo": "main",
     "ciRunId": 37125791272,
     "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37125791272",
-    "ciStatus": "pending_zero_jobs_original_artifacts_not_yet_available",
+    "ciStatus": "automatically_cancelled_zero_jobs_by_newer_main_source",
     "supersededPushRunId": 37125776668,
     "supersededPushStatus": "automatically_cancelled_zero_jobs_by_explicit_canonical_dispatch",
-    "runtimeQualified": false
+    "runtimeQualified": false,
+    "latestIntegratedEvidence": "docs/implementation/database-composition-integrated-stage-004.json"
   },
   "remainingGates": [
-    "Delivered-source complete normal/scalar/process recovery CI",
-    "Both genuine Docker Aspire RF3 SQL SDK official MCP composition cases",
+    "Complete delivered-source Linux unit/scalar gates; full process recovery and RF3 pass in latest integrated receipt",
+    "Full SQL all-model and distributed composition qualification",
     "Complete Benchmarks/site publication inputs"
   ],
   "fullDeclarativeSqlComplete": false,
   "allModelCompositionQualified": false,
-  "websitePublished": false
+  "websitePublished": false,
+  "latestIntegratedEvidence": "docs/implementation/database-composition-integrated-stage-004.json"
 }

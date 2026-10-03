@@ -126,12 +126,16 @@ lease/ACK composition requires a separate inbox saved-authority replay contract.
 ## Evidence and remaining delivery gates
 
 The [source-stage receipt](../implementation/database-composition-source-stage-001.json)
-binds the proposed source to its pre-change commit, file hashes and original local
-reports. Local Release build, formatter, governance, normal/scalar composition and
-real process-kill checks do not replace delivered-source Linux Actions. The full
-local unit suite retains baseline failures, so its complete gate is failed. RF3
-SQL/.NET/official MCP cases require genuine workflow images and receipts; no local
-image-identity bypass is permitted. Website source is updated; publication waits
-for the existing complete Benchmarks/site gates. Full model SQL sources/joins/DML,
-native client sessions, distributed composition and comparable performance remain
+retains the initial source packet and historical development/Actions results. The
+[latest integrated receipt](../implementation/database-composition-integrated-stage-004.json)
+records original Linux Actions for `ca7e22d9c201304f0b81f59f3a0ae18e4125be37`:
+32/32 composition unit cases, 7/7 composition process-recovery cases and both
+SQL/.NET/official MCP RF3 composition cases pass. The complete process-recovery
+suite passes 194/194 and genuine Docker/Aspire RF3 passes 67/67. Build, formatter,
+governance and analyzers pass. The normal unit suite passes 2573/2576 with three
+errors; the complete scalar suite is skipped, so full qualification remains open.
+Local development results and process kills do not prove GitHub scalar or
+power-loss qualification. Website source is updated; publication waits for the
+existing complete Benchmarks/site gates. Full model SQL sources/joins/DML, native
+client sessions, distributed composition and comparable performance remain
 mandatory future stages.

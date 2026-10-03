@@ -68,15 +68,24 @@
     "pushedTo": "main",
     "ciRunId": 37125791272,
     "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37125791272",
-    "ciStatus": "pending_zero_jobs_original_artifacts_not_yet_available",
+    "ciStatus": "automatically_cancelled_zero_jobs_by_newer_main_source",
     "supersededPushRunId": 37125776668,
     "supersededPushStatus": "automatically_cancelled_zero_jobs_by_explicit_canonical_dispatch",
-    "runtimeQualified": false
+    "runtimeQualified": false,
+    "latestIntegratedEvidence": "docs/implementation/database-composition-integrated-stage-004.json"
   },
   "remainingGates": [
     "Delivered-source complete Linux normal/scalar/recovery/RF3 CI",
     "Same-run complete Benchmarks archive coverage site and publication pipeline"
   ],
   "fullDeclarativeSqlComplete": false,
-  "websitePublished": false
+  "websitePublished": false,
+  "latestIntegratedEvidence": "docs/implementation/database-composition-integrated-stage-004.json",
+  "copySourceDelivery": {
+    "sourceRevision": "bfb04d64bf9c0ca8a1ab6e0c703194e1813250f0",
+    "pushedTo": "main",
+    "sourceScope": "The three reviewed composition copy files and this source-stage receipt were integrated in this revision; mandatory complete site publication gates remain pending",
+    "integratedEvidence": "docs/implementation/database-composition-integrated-stage-004.json",
+    "websitePublished": false
+  }
 }
