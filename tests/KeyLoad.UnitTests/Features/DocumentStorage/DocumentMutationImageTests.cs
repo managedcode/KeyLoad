@@ -42,8 +42,17 @@ internal sealed class DocumentMutationImageTests
                 mutations[ordinal], receipt.Mutations[ordinal], ordinal == 0 ? null : images[ordinal - 1], images[ordinal]);
             var bytes = db.Store.Read(view => view.ReadOwnedValue(
                 KeySpace.Partition(OutboxSpace, db.Partition, ordinal + FirstSequence))!);
-            await Assert.That(bytes.SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
-            await Assert.That(NativeSerialization.Deserialize<OutboxEntry>(bytes).After).IsEqualTo(images[ordinal]);
+            var actual = NativeSerialization.Deserialize<OutboxEntry>(bytes);
+
+            await Assert.That(actual.Sequence).IsEqualTo(expected.Sequence);
+            await Assert.That(actual.Ordinal).IsEqualTo(expected.Ordinal);
+            await Assert.That(actual.CommittedAt).IsEqualTo(expected.CommittedAt);
+            await AssertCommitTokenEqual(actual.Commit, expected.Commit);
+            await AssertMutationEqual(actual.Mutation, expected.Mutation);
+            await AssertMutationReceiptEqual(actual.Receipt, expected.Receipt);
+            await Assert.That(actual.Before).IsEqualTo(expected.Before);
+            await Assert.That(actual.After).IsEqualTo(expected.After);
+            await Assert.That(bytes.SequenceEqual(NativeSerialization.Serialize(actual))).IsTrue();
         }
 
         await Assert.That(db.Database.GetDocument("root", reference)).IsNull();
@@ -75,4 +84,46 @@ internal sealed class DocumentMutationImageTests
         var id = Guid.NewGuid();
         return db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [mutation]), id: id);
     }
+
+    private static async Task AssertCommitTokenEqual(CommitToken actual, CommitToken expected)
+    {
+        await Assert.That(actual.Incarnation).IsEqualTo(expected.Incarnation);
+        await Assert.That(actual.AtomicPartitionId).IsEqualTo(expected.AtomicPartitionId);
+        await Assert.That(actual.Position).IsEqualTo(expected.Position);
+        await Assert.That(actual.OwnershipEpoch).IsEqualTo(expected.OwnershipEpoch);
+    }
+
+    private static async Task AssertMutationReceiptEqual(MutationReceipt actual, MutationReceipt expected)
+    {
+        await Assert.That(actual.Kind).IsEqualTo(expected.Kind);
+        await Assert.That(actual.Resource).IsEqualTo(expected.Resource);
+        await Assert.That(actual.Id).IsEqualTo(expected.Id);
+        await Assert.That(actual.Revision).IsEqualTo(expected.Revision);
+        await Assert.That(actual.CompositionReferences.IsEmpty).IsTrue();
+    }
+
+    private static async Task AssertMutationEqual(Mutation actual, Mutation expected)
+    {
+        await Assert.That(actual.GetType()).IsEqualTo(expected.GetType());
+        await Assert.That(actual.Resource).IsEqualTo(expected.Resource);
+        switch (actual)
+        {
+            case PutDocument put:
+                await Assert.That(put).IsEqualTo((PutDocument)expected);
+                break;
+            case PatchDocument patch:
+                var expectedPatch = (PatchDocument)expected;
+                await Assert.That(patch.Collection).IsEqualTo(expectedPatch.Collection);
+                await Assert.That(patch.Id).IsEqualTo(expectedPatch.Id);
+                await Assert.That(patch.ExpectedRevision).IsEqualTo(expectedPatch.ExpectedRevision);
+                await Assert.That(patch.Patches.SequenceEqual(expectedPatch.Patches)).IsTrue();
+                break;
+            case DeleteDocument delete:
+                await Assert.That(delete).IsEqualTo((DeleteDocument)expected);
+                break;
+            default:
+                throw new InvalidOperationException("The expected document mutation is unsupported.");
+        }
+    }
+
 }

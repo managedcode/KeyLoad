@@ -40,7 +40,7 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
         await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(mcp, sql, deadline.Token));
         await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(
             await sdk.CommitAsync(command, deadline.Token)));
-        await VerifyForwardAsync(sdk, mcp, scenario, payload, deadline.Token);
+        await VerifyForwardAsync(sdk, mcp, scenario, link, deadline.Token);
         await VerifyReverseAsync(sdk, mcp, scenario, link, deadline.Token);
     }
 
@@ -73,7 +73,7 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
     }
 
     private static async Task VerifyForwardAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        RelationalSqlRf3Scenario scenario, string payload, CancellationToken cancellationToken)
+        RelationalSqlRf3Scenario scenario, QueueGraphLink link, CancellationToken cancellationToken)
     {
         var traversal = new TraverseRequest(scenario.Partition, RelationalSqlRf3Tokens.Graph, scenario.First);
         var graph = await McpCallerAssertions.SdkSuccessAsync(await sdk.TraverseAsync(traversal, cancellationToken));
@@ -86,7 +86,7 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
         var source = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(scenario.Inspect(Message), cancellationToken));
         await Assert.That(source!.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(source.Metadata.Attempts).IsEqualTo(RelationalSqlRf3Tokens.NoResults);
-        await Assert.That(source.PayloadJson).IsEqualTo(payload);
+        await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(source.PayloadJson!, JsonDefaults.Options)).IsEqualTo(link);
     }
 
     private static async Task VerifyReverseAsync(KeyLoadClient sdk, McpOfficialClient mcp,

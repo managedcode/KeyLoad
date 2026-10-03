@@ -1,0 +1,159 @@
+{
+  "schema": "keyload.database-composition.fixture-stage.v1",
+  "status": "verified_development_snapshot_genuine_RF3_rerun_required",
+  "decision": "docs/ADR/ADR-067-composable-agent-database.md",
+  "task": "TASK-COMP-007",
+  "acceptance": [
+    "AC-COMP-004",
+    "AC-COMP-007",
+    "AC-COMP-008",
+    "AC-DSTORE-005"
+  ],
+  "sourceBaseRevision": "f403bf61e730919a7b6e4b811539b870b8c8433d",
+  "sourceFiles": [
+    {
+      "path": "docs/ADR/ADR-067-composable-agent-database.md",
+      "sha256": "4149ed64816036e41a79770bd0ecc10a986d0a6baea113db92494bc504aed76b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DocumentStorage/DocumentMutationImageTests.cs",
+      "sha256": "fb4ca4916fe73e43943b225a92da5a868ff9bc3afbfd0b636d72e01137366f72"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/DatabaseComposition/DatabaseCompositionRf3Tests.cs",
+      "sha256": "a3238835d27941268e3d74ef653b4fe43119e543f6463245c3eab6d1bbd33a50"
+    }
+  ],
+  "changes": [
+    "Compare every persisted outbox value and actual decoded native graph byte roundtrip; keep original document and failure assertions",
+    "Compare complete decoded QueueGraphLink after existing queue JSON canonicalization; retain forward reverse and stable retry RF3 assertions"
+  ],
+  "productionBehaviorChanged": false,
+  "localDevelopment": {
+    "fixture": "/private/tmp/keyload-composition-fixture-delivery-check",
+    "os": "macOS/Darwin 27",
+    "architecture": "arm64",
+    "dotnetSdk": "10.0.401",
+    "githubQualification": false,
+    "build": {
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "log": {
+        "path": "/private/tmp/keyload-composition-fixture-delivery-build.log",
+        "sha256": "298458bee44a6811b85db902de30a401253f22f4e4b734903b7374fc29ac3958"
+      }
+    },
+    "format": {
+      "exitCode": 0,
+      "log": {
+        "path": "/private/tmp/keyload-composition-fixture-delivery-format.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "governance": {
+      "exitCode": 0,
+      "projects": 26,
+      "modules": 4,
+      "log": {
+        "path": "/private/tmp/keyload-composition-fixture-delivery-governance.log",
+        "sha256": "76cb9ab8d9569308e691c3b773158a6447ff5fb4be35c6528a3497948ddd31ae"
+      }
+    },
+    "compositionNormal": {
+      "path": "/private/tmp/keyload-composition-fixture-normal-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "sha256": "e7b32d6803496b5b4a33936ee3431de22c542c574e2bb872b7e9218882ffde67",
+      "total": 32,
+      "passed": 32,
+      "failed": 0,
+      "notExecuted": 0
+    },
+    "compositionScalar": {
+      "path": "/private/tmp/keyload-composition-fixture-scalar-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "sha256": "612f16b9bce76de129fbf2b7a36b642dc68b876bfa48526550051e307b0f4cea",
+      "total": 32,
+      "passed": 32,
+      "failed": 0,
+      "notExecuted": 0
+    },
+    "outboxNormal": {
+      "path": "/private/tmp/keyload-composition-fixture-outbox-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "sha256": "7f5dc168097ba4eac0914617ce1ee5113f92e60e6bca341844f049d0f015e314",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "notExecuted": 0
+    },
+    "outboxScalar": {
+      "path": "/private/tmp/keyload-composition-fixture-outbox-scalar-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "sha256": "80740a052681963075fab3c04761d9aa36123ddc196987d902b86c760f03d60e",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "notExecuted": 0
+    },
+    "scalarSetting": "DOTNET_EnableHWIntrinsic=0"
+  },
+  "originalIntegratedActionsBeforeFixtureRepair": {
+    "sourceRevision": "ca22b1baa919198c81749d86ffab56df24ec9317",
+    "runId": 37124217640,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640",
+    "conclusion": "failure",
+    "linuxOnly": true,
+    "buildFormatGovernanceAnalyzers": "passed",
+    "normal": {
+      "total": 2402,
+      "passed": 2357,
+      "failed": 45,
+      "skipped": 0,
+      "compositionPassed": 32,
+      "reportSha256": "37dff3dbcb1801dac6d4b229b09dd7622473596e2da313c8ee4fd9c8295f771e"
+    },
+    "scalar": "skipped_after_normal_failure",
+    "recovery": {
+      "total": 190,
+      "passed": 189,
+      "failed": 1,
+      "skipped": 0,
+      "compositionPassed": 7,
+      "reportSha256": "062794104f2db5d106a578c8eb92f7441fb49660ae54c9f72d4bc527d8fddbf9"
+    },
+    "rf3": {
+      "total": 67,
+      "passed": 66,
+      "failed": 1,
+      "skipped": 0,
+      "compositionPassed": 1,
+      "compositionTotal": 2,
+      "reportSha256": "0a29cc8c3c5d29db4f1135277856af42c23a584a83a232b0358c8636b74f1ad1"
+    },
+    "artifacts": [
+      {
+        "id": 11275655112,
+        "name": "test-results-ubuntu-latest",
+        "sha256": "e76ea89faa5733cfbeb2d85268007caa1d65d25116dba5146e7d068da628196a"
+      },
+      {
+        "id": 11274444675,
+        "name": "docker-rf3-qualification",
+        "sha256": "fe3ff64da75430d353963c5ec8e55d73d47624f6e9052df89deb74d0af2d7238"
+      }
+    ],
+    "rf3Failure": "AC-COMP-007 assertion compares existing canonical queue JSON with original property order; reverse portion not reached",
+    "recoveryFailure": "ReplicaTermMetadataMutationTests.MalformedNestedOperationCannotBeSkippedOnTheStrictTermMiss missing ReplicaOperationInspectionCodec DI registration",
+    "fullGatePassed": false
+  },
+  "review": "Separate read-only review found no fixture blocker; root inspected every owned diff",
+  "delivery": {
+    "status": "scoped_commit_and_original_Actions_rerun_pending",
+    "runtimeQualified": false
+  },
+  "remainingGates": [
+    "Delivered-source complete normal/scalar/process recovery CI",
+    "Both genuine Docker Aspire RF3 SQL SDK official MCP composition cases",
+    "Complete Benchmarks/site publication inputs"
+  ],
+  "fullDeclarativeSqlComplete": false,
+  "allModelCompositionQualified": false,
+  "websitePublished": false
+}

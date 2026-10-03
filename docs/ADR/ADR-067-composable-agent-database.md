@@ -125,3 +125,27 @@ canonical. No old-store conversion or journal removal. Agent ownership/start,
 tests, error flows and join conditions are frozen in this implementation contract
 and the durable feature acceptance below. The local root plan tracks execution.
 Remain Accepted until all required source/migration/tests/GitHub evidence exist.
+
+TASK-COMP-007 / AC-COMP-004/007/008 preserves the existing AC-DSTORE-005
+outbox-image regression after the native format change. Its independently
+constructed expected object graph shares Resource/Collection strings and creates
+separate RowAccess values, while actual canonical decode and document `with`
+clones have different reference sharing. Orleans encodes those relationships;
+value-equal graphs need not have identical bytes. The pre-composition writer
+reproduces this failure. Test-only repair compares every decoded entry/receipt,
+polymorphic mutation and before/after image value, then requires byte-exact native
+reserialization of the actual decoded graph. Preserve the real store, sequential
+same-ID mutations, tombstone/revision/outbox counts and failure/CAS assertions.
+Worker owns only DocumentMutationImageTests.cs; root owns this contract and source
+join. No serializer, production image path or durability behavior changes. Build
+and focused native outbox/composition tests precede scoped delivery; complete
+Linux CI remains required. This corrects a fixture reference-identity assumption,
+not the exact user-content or frozen canonical digest contracts.
+
+RF3 AC-COMP-007 fixture refinement: existing Enqueue canonicalizes the outer
+payload JSON before projection. Compare the complete decoded QueueGraphLink
+against the submitted link, including canonical endpoints, label and exact
+AttributesJson string; preserve source Ready/Attempts and graph assertions.
+Original property ordering is not a queue contract. Do not change queue storage
+or invoke a second projection to bypass the failure. Root owns this RF3 test
+join and must rerun the genuine SDK/MCP workflow before qualification.

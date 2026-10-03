@@ -22,19 +22,25 @@
       "rf3": "cancelled_unqualified",
       "latestIntegratedSourceRevision": "ca22b1baa919198c81749d86ffab56df24ec9317",
       "latestIntegratedCiRunId": 37124217640,
-      "latestIntegratedCiStatus": "queued",
-      "runtimeQualified": false
+      "latestIntegratedCiStatus": "failure_original_Linux_reports_verified",
+      "runtimeQualified": false,
+      "latestIntegratedNormalCompositionPassed": 32,
+      "latestIntegratedRecoveryCompositionPassed": 7,
+      "latestIntegratedRf3CompositionPassed": 1,
+      "latestIntegratedRf3CompositionTotal": 2,
+      "latestIntegratedScalar": "skipped_after_normal_failure"
     },
     "fullDeclarativeCompositionComplete": false,
     "crossPartitionCompositionImplemented": false,
     "newCasesQualified": false,
     "remaining": [
-      "Full unit gate retains 140 failures also present at base 8071148; local composition checks pass",
+      "Latest integrated Linux CI has 45 unit and one recovery failures; own 32 unit and seven recovery cases pass, RF3 fixture repair requires rerun",
       "Exact-source normal scalar process recovery and RF3 SQL SDK official MCP Actions",
       "Full declarative model sources joins DML under ADR-065",
       "All-model and distributed composition correctness fault and comparable performance",
       "Complete Benchmarks and site qualification before publication"
-    ]
+    ],
+    "fixtureReceipt": "docs/implementation/database-composition-fixture-stage-002.json"
   },
   "SQL-CLIENT-001": {
     "title": "Повний SQL, клієнтський протокол та перевірка текстового індексу",

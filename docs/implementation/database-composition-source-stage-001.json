@@ -333,7 +333,8 @@
     "latestIntegratedSourceRevision": "ca22b1baa919198c81749d86ffab56df24ec9317",
     "latestIntegratedCiRunId": 37124217640,
     "latestIntegratedCiUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640",
-    "latestIntegratedCiStatus": "queued"
+    "latestIntegratedCiStatus": "failure_original_Linux_reports_verified",
+    "latestIntegratedEvidence": "docs/implementation/database-composition-fixture-stage-002.json"
   },
   "remainingGates": [
     "Delivered-source full build/format/governance and TUnit normal/scalar/process recovery",
