@@ -5,16 +5,54 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeBackupRestoreRestore
 {
+    private const string RestoreTemporaryPrefix = ".keyload-restore-";
+
     internal static StoreIdentity Restore(string backup, string destination, Guid? newIncarnation,
         byte[]? newSigningKey)
     {
         EnsureDestinationIsEmpty(destination);
-        var identity = CreateRestoredIdentity(ZoneTreeBackupRestoreFiles.ReadAndVerify(backup), newIncarnation,
-            newSigningKey);
-        ZoneTreeStoreFiles.CreatePrivateDirectory(destination);
-        File.Copy(Path.Combine(backup, JournalFileName), Path.Combine(destination, JournalFileName));
-        ZoneTreeIdentityFile.Write(Path.Combine(destination, IdentityFileName), identity);
-        return ApplyRestoreAuthorityState(destination);
+        var destinationPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(destination));
+        var staging = Path.Combine(Path.GetDirectoryName(destinationPath)!,
+            RestoreTemporaryPrefix + Guid.NewGuid().ToString(GuidFormat));
+        ZoneTreeStoreFiles.CreatePrivateDirectory(staging);
+        try
+        {
+            var identity = CreateRestoredIdentity(ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, staging),
+                newIncarnation, newSigningKey);
+            ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), identity);
+            var restoredIdentity = ApplyRestoreAuthorityState(staging);
+            Publish(staging, destinationPath);
+            return restoredIdentity;
+        }
+        finally
+        {
+            if (Directory.Exists(staging))
+            {
+                Directory.Delete(staging, recursive: true);
+            }
+        }
+    }
+
+    private static void Publish(string staging, string destination)
+    {
+        EnsureDestinationIsEmpty(destination);
+        var existed = Directory.Exists(destination);
+        if (existed)
+        {
+            Directory.Delete(destination, recursive: false);
+        }
+        try
+        {
+            Directory.Move(staging, destination);
+        }
+        catch (Exception)
+        {
+            if (existed && !Directory.Exists(destination))
+            {
+                Directory.CreateDirectory(destination);
+            }
+            throw;
+        }
     }
 
     private static void EnsureDestinationIsEmpty(string destination)
