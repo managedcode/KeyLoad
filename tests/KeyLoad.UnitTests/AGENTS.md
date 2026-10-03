@@ -26,3 +26,12 @@
 - Also owns `ResourceExecution` common-budget and canonical-JSON acceptance cases under `Features/ResourceExecution/`; exact bytes, real-store replay and allocation assertions derive from ADR-035 and execute only in GitHub Actions.
 - ADR-058 extends that same ResourceExecution test ownership with actual cache-budget reservations and real ZoneTree point/cache/snapshot/pin/pressure cases. Derive tests from AC-CACHE criteria, use genuine files and bounded real synchronization, and retain native/cache/logical counter distinctions; no mock provider or local execution is qualification.
 - Also owns `Features/BlobStorage/` contract/golden and genuine ZoneTree lifecycle/range/quota/authorization tests under ADR-038/AC-BLOB-001–007. These do not substitute for real-process or Docker RF3 .NET/official MCP proof.
+
+## SG009P original child boundary
+- Guarded original-store tests in Features/StorageRecovery/ MUST launch the actual
+  Release KeyLoad.CrashHost existing-store-inspect helper for every guarded call,
+  including invalid inputs. Preserve original files/data/failure assertions and
+  hold the existing node.owner.lock until actual child exit and both readers
+  settle; no fake parent exception, detached cleanup or direct parent guard open.
+- Normal/scalar Actions reports and full recovery qualify this private test stage;
+  they do not qualify actual benchmark node stop/restart, physical copies or ACKs.

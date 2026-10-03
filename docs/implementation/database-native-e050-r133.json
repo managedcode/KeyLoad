@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "stage": "authentic_partial_native_baseline",
+  "sourceSha": "e050b5e3213ccc007622092587c35fd0a0bbf378",
+  "run": {
+    "id": 37115971892,
+    "attempt": 1,
+    "number": 88,
+    "status": "completed",
+    "conclusion": "failure",
+    "headSha": "e050b5e3213ccc007622092587c35fd0a0bbf378",
+    "branch": "main",
+    "event": "push",
+    "workflowPath": ".github/workflows/ci.yml",
+    "createdAt": "2026-10-03T10:18:18Z",
+    "updatedAt": "2026-10-03T10:26:04Z",
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37115971892"
+  },
+  "jobs": [
+    {
+      "id": 111182749412,
+      "name": "analyzer-rules",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37115971892/job/111182749412"
+    },
+    {
+      "id": 111182749568,
+      "name": "docker-rf3",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37115971892/job/111182749568"
+    },
+    {
+      "id": 111182749597,
+      "name": "Repository checks",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37115971892/job/111182749597"
+    },
+    {
+      "id": 111182767402,
+      "name": "Build and tests (ubuntu-latest)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37115971892/job/111182767402"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11271925966,
+      "name": "docker-rf3-qualification",
+      "apiSizeBytes": 485919,
+      "apiDigest": "sha256:409dd1213ea09c8c60dbe2088e7ee5fd6fc1ff92236b0fe8005d1ce3546e7557",
+      "downloadedSha256": "409dd1213ea09c8c60dbe2088e7ee5fd6fc1ff92236b0fe8005d1ce3546e7557",
+      "expired": false,
+      "workflowRunId": 37115971892,
+      "headSha": "e050b5e3213ccc007622092587c35fd0a0bbf378",
+      "githubArtifactPage": "https://github.com/managedcode/KeyLoad/actions/runs/37115971892/artifacts/11271925966"
+    },
+    {
+      "id": 11271820725,
+      "name": "code-quality-ubuntu-latest",
+      "apiSizeBytes": 1582571,
+      "apiDigest": "sha256:d60d236c3a60bbea6b5feb22fc716869e31fe3de03d82791e9be90eb6f9ef680",
+      "downloadedSha256": "d60d236c3a60bbea6b5feb22fc716869e31fe3de03d82791e9be90eb6f9ef680",
+      "expired": false,
+      "workflowRunId": 37115971892,
+      "headSha": "e050b5e3213ccc007622092587c35fd0a0bbf378",
+      "githubArtifactPage": "https://github.com/managedcode/KeyLoad/actions/runs/37115971892/artifacts/11271820725"
+    },
+    {
+      "id": 11271801143,
+      "name": "code-quality-docker-rf3",
+      "apiSizeBytes": 780793,
+      "apiDigest": "sha256:bdc637365dfebabe0deae6284731234affbfc3a31f8cb5d65728d8bda83b7b6a",
+      "downloadedSha256": "bdc637365dfebabe0deae6284731234affbfc3a31f8cb5d65728d8bda83b7b6a",
+      "expired": false,
+      "workflowRunId": 37115971892,
+      "headSha": "e050b5e3213ccc007622092587c35fd0a0bbf378",
+      "githubArtifactPage": "https://github.com/managedcode/KeyLoad/actions/runs/37115971892/artifacts/11271801143"
+    },
+    {
+      "id": 11271561507,
+      "name": "docker-rf3-image-evidence",
+      "apiSizeBytes": 32490,
+      "apiDigest": "sha256:a115d212be68e3ca667ad38332af7fbf7e6c691a13fd154f81de88f6dc050b23",
+      "downloadedSha256": "a115d212be68e3ca667ad38332af7fbf7e6c691a13fd154f81de88f6dc050b23",
+      "expired": false,
+      "workflowRunId": 37115971892,
+      "headSha": "e050b5e3213ccc007622092587c35fd0a0bbf378",
+      "githubArtifactPage": "https://github.com/managedcode/KeyLoad/actions/runs/37115971892/artifacts/11271561507"
+    },
+    {
+      "id": 11270359780,
+      "name": "analyzer-rule-evidence",
+      "apiSizeBytes": 207110,
+      "apiDigest": "sha256:ddc858e67f17007b97ee91dc51150d073879e4ea05151f37b639b8c1812991b4",
+      "downloadedSha256": "ddc858e67f17007b97ee91dc51150d073879e4ea05151f37b639b8c1812991b4",
+      "expired": false,
+      "workflowRunId": 37115971892,
+      "headSha": "e050b5e3213ccc007622092587c35fd0a0bbf378",
+      "githubArtifactPage": "https://github.com/managedcode/KeyLoad/actions/runs/37115971892/artifacts/11270359780"
+    }
+  ],
+  "reports": {
+    "rf3": {
+      "file": "rf3-tunit-report.json",
+      "sha256": "998e8cdfe48d1ce17ea6346b138f0b3b70f2901df40482b1dec2d175d5c9ff3a",
+      "testCount": 63,
+      "uniqueIdCount": 63,
+      "statusCounts": {
+        "passed": 63
+      },
+      "summary": {
+        "total": 63,
+        "passed": 63,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "assemblyName": "KeyLoad.IntegrationTests",
+      "commitSha": "e050b5e3213ccc007622092587c35fd0a0bbf378"
+    },
+    "analyzerRules": {
+      "file": "analyzer-tunit-report.json",
+      "sha256": "80333239e461f8b11a802a879f3fd1049aebdf4ce8e25939b758657db94cebc2",
+      "testCount": 118,
+      "uniqueIdCount": 118,
+      "statusCounts": {
+        "passed": 118
+      },
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "assemblyName": "KeyLoad.Analyzers.Tests",
+      "commitSha": "e050b5e3213ccc007622092587c35fd0a0bbf378"
+    }
+  },
+  "failedBuild": {
+    "jobId": 111182767402,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37115971892/job/111182767402",
+    "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+    "result": "failure before ordinary unit/scalar/recovery test steps",
+    "logFile": "build-job-111182767402.log",
+    "logBytes": 91512,
+    "logSha256": "aa506d7f78a24262d60b6a5a027301879f3ae671b4b2fe99397351a2afda26c3",
+    "uniqueCompilerDiagnostics": 50,
+    "diagnosticsByCode": {
+      "CS0117": 3,
+      "CA1305": 1,
+      "KLD0001": 46
+    },
+    "diagnosticsByFile": {
+      "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBenchmarkProducerSelectionTests.cs": 4,
+      "tests/KeyLoad.UnitTests/Features/ReleaseDelivery/ReleaseVersionTests.cs": 46
+    },
+    "diagnosticRowsFile": "build-diagnostics.json",
+    "diagnosticRowsSha256": "c3284d0ec36c962ed4330d09f75b509cc25593d1c3910b341478e10e30771e6c",
+    "ownedTestDiagnostics": {
+      "ReleaseVersionTests": "46 KLD0001 inline machine-key diagnostics",
+      "SiteBenchmarkProducerSelectionTests": [
+        "CS0117 missing Workflow, Selected, RunId members (3)",
+        "CA1305 long.ToString() requires invariant IFormatProvider (1)"
+      ]
+    },
+    "reportedErrorSummary": "50 errors, 0 warnings"
+  },
+  "interpretation": {
+    "analyzerRulesJob": "success; native Analyzer TUnit report is 118/118 passed, zero skipped",
+    "dockerRf3Job": "success; native IntegrationTests TUnit report is 63/63 passed, zero skipped",
+    "repositoryChecksJob": "success",
+    "fullBuildAndTestsJob": "failure; restore succeeded, solution build failed; format, repo/analyzer checks inside this job, normal unit, scalar, and recovery steps skipped",
+    "qualificationLimit": "No full CI pass. No normal-unit, scalar, or process-recovery result. No Benchmark/270-cell performance evidence in this CI run. This is a baseline for the new profiling work, not proof of its acceptance or performance."
+  },
+  "rootVerification": "Fresh native API metadata, all five archive digest/size/CRC, raw report archive membership/source/summary/unique IDs/statuses, original API and failed build log hashes verified independently.",
+  "originalReceiptSha256": "54683a3e82417bccf6d18477200b39ffc0d6ad50a3011b794996ec8d0ba3272a",
+  "rootApiHashes": {
+    "keyload-native-e050-artifacts-root-r133.json": "a933703d24b0354e9afa4dce72cbba1e77923b1ccede0b1bcbfeae7ae2f39611",
+    "keyload-native-e050-run-root-r133.json": "09c53a6233b86d987d0d140b747aaf99eac62c6dc62456cec148bdcd74233c8d"
+  },
+  "qualificationLimits": [
+    "Full CI failed. Ordinary unit, scalar and process recovery skipped in this run.",
+    "Phase bank,19 new cases and test-only SDK/SQL fixes are newer working source and not qualified by this run.",
+    "No server phase/resource profile, new throughput, complete270 comparison or performance ranking."
+  ]
+}

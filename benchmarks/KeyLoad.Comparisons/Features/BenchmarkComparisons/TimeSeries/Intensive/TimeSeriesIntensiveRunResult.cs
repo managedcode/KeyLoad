@@ -30,6 +30,8 @@ internal sealed record TimeSeriesIntensiveRunResult(TimeSeriesIntensiveScenario 
     ReadOnlyMemory<TimeSeriesIntensiveAttempt> Attempts, ImmutableArray<TimeSeriesIntensiveRepetitionResult> Repetitions,
     bool SeedVerified, TimeSeriesIntensiveRunFailure? Failure)
 {
+    internal ReadOnlyMemory<TimeSeriesIntensiveAttempt> WarmupAttempts { get; init; }
+
     internal bool Succeeded => SeedVerified && Failure is null && Repetitions.Length == TimeSeriesIntensiveProfile.RepetitionCount
         && Repetitions.All(repetition => repetition.Succeeded);
 }

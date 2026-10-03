@@ -1,5 +1,13 @@
 # ResourceExecution
 
+Actual database phase diagnostics are specified in
+[DatabasePhaseProfiling](ResourceExecution/DatabasePhaseProfiling.md) under
+[ADR-063](../ADR/ADR-063-bounded-database-phase-profiling.md),
+REQ-RESOURCE-003..006 and AC-DBPROF-001..008. The fixed BCL-only Diagnostics
+schema is joined first; bank, preserving producer instrumentation, private
+node capture and genuine source-bound measurements remain open. This optional
+workstream changes no authorized cut, database state, WAL or acknowledgement.
+
 The additive TimeSeries readers under
 [ADR-052](../ADR/ADR-052-timeseries-bounded-aggregates.md) map REQ-MP-002/005 and
 AC-MP-002/005/011/012 to AC-SERIES-011 and AC-RANGE-REV-003. One original read

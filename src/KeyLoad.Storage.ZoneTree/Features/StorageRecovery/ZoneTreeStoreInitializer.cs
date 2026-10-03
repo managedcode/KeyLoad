@@ -26,6 +26,16 @@ internal static class ZoneTreeStoreInitializer
         }
     }
 
+    internal static void OpenExisting(ZoneTreeStoreRuntime runtime, Guid expectedNodeId)
+    {
+        runtime.Ownership = new FileStream(Path.Combine(runtime.Options.Directory, OwnerLockFileName),
+            FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        runtime.Identity = ZoneTreeIdentityFile.OpenExisting(runtime.Options, expectedNodeId);
+        runtime.Journal = ZoneTreeStoreFiles.OpenJournal(runtime.Options, FileMode.Open);
+        runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options, requireExisting: true);
+        ZoneTreeJournalRecovery.Recover(runtime);
+    }
+
     private static void EnsureStoreDirectory(string directory)
     {
         if (!Directory.Exists(directory) && !OperatingSystem.IsWindows())

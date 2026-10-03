@@ -12,14 +12,17 @@ The product is one database server for AI agents with linked documents, typed re
 
 ## Development status
 
-The latest [1353482 source qualification](docs/implementation/isolated-source-qualification-37108640954.json)
-passes118 analyzer and63 RF3 cases, but its full solution build fails8 Recovery
-diagnostics. Prior21 Site errors are resolved; normal/scalar/recovery, the8 raw
-writer cases and native27/270 did not execute. The [reviewed039 source](docs/implementation/isolated-source-repairs-039.json)
-retains all50,000 TimeSeries attempt slots. The [native identity input join](docs/implementation/isolated-timeseries-identity-source-040.json)
-binds actual cluster incarnation and voters for1/2/3-node models; scoped development
-build/formatting passes. Genuine native family host/copies/coverage and complete
-cohort/site publication remain open.
+The retained [9b3bd8ed source qualification](docs/implementation/isolated-source-qualification-37111280400.json)
+passes full build/format/governance,118 analyzer,183 recovery and63 RF3 cases.
+Its normal suite passes1852/1853; the known SDK-status assertion leaves scalar
+and comparison jobs unexecuted. All114 strict input cases pass at that source.
+The [guarded-process and warmup source join](docs/implementation/isolated-process-warmup-source-041.json)
+adds22 actual-child test cases and retains1280 warmup slots; its development
+build passes, while delivered-source Actions and native-copy proof remain pending.
+The latest observed [e050 CI run](https://github.com/managedcode/KeyLoad/actions/runs/37115971892)
+fails the solution build before normal/scalar/process suites. The270-cell plan
+and additional TimeSeries6/30 family do not yet provide a complete measured
+cohort or updated site metrics.
 
 This is an early implementation of the clustered kernel. The default server topology has three persistent voting nodes and requires a majority for writes and strong reads. It needs no external database, Redis or message broker.
 
@@ -348,9 +351,35 @@ finds all18 term cases:17 pass; one exposes repeated disposal after a failed
 snapshot install. RF363/63 and analyzer118/118 pass; units1737/1739 and
 recovery181/182 leave full qualification failed, with scalar/comparisons skipped.
 Current source repairs retired-handle ownership and exact real-clock waits;
-19 authored term cases now cover both install fault stages. New-source full
-native tests, server profiles and measured benefit remain required; no throughput
-increase or competitor ranking is established.
+the later [9b3 native receipt](docs/implementation/database-native9b3-r125.json)
+passes all19 term cases,183 recovery cases and1000 seeded process-cut trials,
+63 RF3 SDK/MCP cases and118 analyzer cases. Both real-clock expiry cases pass.
+Normal units pass1852/1853; the remaining artificial default-SDK status oracle
+is corrected in newer test source, which still needs native qualification.
+Scalar tests and performance jobs were skipped. The optional
+[server phase profiler](docs/Features/ResourceExecution/DatabasePhaseProfiling.md)
+has its bounded bank, arithmetic and process-mode facade implemented in source,
+with19 authored TUnit cases. Producer joins, private native capture and native
+qualification remain pending. Full native tests, actual server profiles
+and measured benefit remain required; no throughput increase or competitor
+ranking is established.
+
+The later [9e053 native receipt](docs/implementation/database-native9e053-r127.json)
+retains1856/1857 normal unit passes,183/183 recovery passes with all19 term cases
+and1000 process-cut rows,118 analyzer passes and62/63 RF3 passes. The remaining
+SDK fallback-status and RF3 control-count observations have test-only source
+corrections awaiting a new exact-source run. Scalar was skipped. Benchmarks
+failed four Timescale resource-model image-tag assertions before any load cells;
+the270-cell plan supplies no new performance measurements.
+
+The current [e050 native receipt](docs/implementation/database-native-e050-r133.json)
+independently verifies63/63 RF3 SDK/MCP cases and118/118 analyzer cases without
+skips. Full CI fails50 compiler/analyzer diagnostics in release/site tests;
+ordinary unit, scalar and recovery steps were skipped. The newer test repairs,
+bounded phase bank and19 authored cases pass the complete26-project development
+build and formatter in the [source checkpoint](docs/implementation/database-phase-bank-source-r133.json).
+Their delivered-source native execution, producer joins and private RF3 profiles
+remain required; these development gates establish no measured performance gain.
 
 
 The delivered `2f374fc34` [Linux run37093197474](https://github.com/managedcode/KeyLoad/actions/runs/37093197474) now passes the complete source gates,118 analyzer cases,1483 normal and1483 scalar unit cases,164 process-recovery cases and63 Docker RF3 cases without skips. The [original-source receipt](docs/implementation/isolated-source-qualification-37093197474.json) retains exact report/artifact hashes. Comparative image and diagnostic gates pass;27 native preflights finish16 job successes and11 failures, including two explicit unavailable Neo4j topologies among the successes. Complete270 performance and site publication remain unqualified. The separate TimeSeries pure30 cases pass in both modes, while its bounded runner has36 new declared TUnit cases prepared in source and native adapters/all30 cells remain pending.

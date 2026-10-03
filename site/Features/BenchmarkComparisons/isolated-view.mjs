@@ -3,7 +3,7 @@ import { artifactUrl, runUrl } from './isolated-contracts.mjs';
 
 const STATUS = Object.freeze({ measured: 'Measured', unsupported: 'Unsupported scenario',
   unsupportedTopology: 'Unsupported native topology', failed: 'Failed' });
-const HEADINGS = Object.freeze(['Engine', 'Native nodes', 'Status', 'Selected metric', 'Attempts', 'Successes', 'Failures', 'Evidence']);
+const HEADINGS = Object.freeze(['Engine', 'Native nodes', 'Status', 'Selected metric', 'Attempts', 'Successes', 'Failures', 'GitHub run']);
 const FORMAT = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
 
 function element(document, tag, text) {

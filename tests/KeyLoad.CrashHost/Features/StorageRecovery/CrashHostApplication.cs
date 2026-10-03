@@ -7,6 +7,10 @@ internal static class CrashHostApplication
 {
     internal static async Task RunAsync(string[] args)
     {
+        if (await ExistingStoreInspector.TryRunAsync(args))
+        {
+            return;
+        }
         if (await ReplicaCrashScenario.TryRunAsync(args))
         {
             return;

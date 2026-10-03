@@ -83,12 +83,30 @@ classDiagram
 
 ## Complete repository boundary
 
+The optional bounded diagnostic workstream is accepted in
+[ADR-063](ADR/ADR-063-bounded-database-phase-profiling.md). Schema is joined;
+producer instrumentation, private capture and native measurements remain open.
+
+```mermaid
+classDiagram
+    class DatabasePhaseKind
+    class DatabasePhaseOutcome
+    class DatabasePhaseBank
+    class DatabasePhaseSnapshot
+    class PrivateNodeExporter
+    DatabasePhaseKind --> DatabasePhaseBank : fixed source boundary
+    DatabasePhaseOutcome --> DatabasePhaseBank : actual owned result
+    DatabasePhaseBank --> DatabasePhaseSnapshot : detached cumulative capture
+    PrivateNodeExporter --> DatabasePhaseSnapshot : outside database gates
+```
+
 All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure and docs live here and are versioned together. Independently owned ManagedCode dependencies remain in their owning repositories; repair/release/verified NuGet publication follows root policy.
 
 | Project/module | Purpose and entry points | Canonical slices / protected boundary |
 |---|---|---|
 | src/KeyLoad.Abstractions | Contracts.cs, Queries.cs, Storage/StorageContracts.cs | Shared public/storage contracts; DocumentStorage, EventStreams, Messaging, Authorization, Search, GraphTraversal. |
 | src/KeyLoad.Core | DatabaseEngine.cs, Documents.cs, Events.cs, Messaging.cs, GraphAndSeries.cs | Node-local engine and atomic transactions; document/event/queue/graph/time-series behavior. |
+| src/KeyLoad.Diagnostics | Features/ResourceExecution/DatabasePhaseKind.cs, DatabasePhaseSnapshot.cs and fixed bank | ResourceExecution; ADR-063 BCL-only callback-free scalar phase observations. No database state, public control endpoint or framework dependency; source integration and genuine native profiling pending. |
 | src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs; Features/StorageRecovery/ZoneTreeStoreRuntime.cs and ZoneTreeCheckpointManager.cs | StorageRecovery and BackupRestore; file/WAL/checkpoint ownership stays node-local. |
 | src/KeyLoad.Security | AuthorizationPolicy.cs | Authorization; trusted principal and row/field policy enforcement. |
 | src/KeyLoad.Query | QueryEngine.cs, SqlParser.cs, SearchEngine.cs; Features/ChangeFeeds/LiveQueryExecutor.cs behind LiveQueries.cs facade | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
@@ -785,6 +803,36 @@ classDiagram
     TimeSeriesIntensiveFamilyPlan --> TimeSeriesIntensiveHostSettings
     TimeSeriesIntensiveHostSettings --> TimeSeriesIntensiveHostNativeSettings
     TimeSeriesIntensiveHostSettings --> ComparisonExecutionIdentity
+```
+
+
+SG009P adds a private real-process qualification boundary for the original-store
+inspection guard (ADR-059 / REQ-STORAGE-015 / AC-SG009P-001..004). Root owns the
+facade/friends/dispatch; child owns guarded original handles, parent owns existing
+outer lock and original process/pipe settlement. Native benchmark control and
+physical business-copy verification remain separate undelivered joins.
+
+```mermaid
+flowchart LR
+    Unit[Real file TUnit fixture] --> Parent[Existing outer lock and process owner]
+    Parent --> Protocol[Bounded private input]
+    Protocol --> Crash[Original Release CrashHost inspector]
+    Crash --> Guard[Original store guard]
+    Guard --> Facts[Safe actual identity data errors]
+    Facts --> Join[Actual exit and both readers]
+    Join --> Reopen[Release then normal reopen]
+```
+
+```mermaid
+classDiagram
+    class ExistingStoreInspectorProcess
+    class ExistingStoreInspector
+    class ExistingStoreInspectorProtocol
+    class ZoneTreeExistingStore
+    ExistingStoreInspectorProcess --> ExistingStoreInspectorProtocol : bounded stdin
+    ExistingStoreInspector --> ExistingStoreInspectorProtocol : safe receipt
+    ExistingStoreInspector --> ZoneTreeExistingStore : owns guarded runtime
+    ExistingStoreInspectorProcess --> ExistingStoreInspector : original child lifetime
 ```
 
 ## Delivery workflows

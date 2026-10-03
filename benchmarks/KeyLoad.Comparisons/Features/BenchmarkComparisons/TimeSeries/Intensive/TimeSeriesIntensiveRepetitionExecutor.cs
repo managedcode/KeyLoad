@@ -2,7 +2,8 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal sealed class TimeSeriesIntensiveRepetitionExecutor(ITimeSeriesIntensiveTarget target,
     TimeSeriesIntensiveExpectations expected, TimeSeriesIntensiveScenario scenario, string runId,
-    int repetition, TimeSeriesIntensiveAttempt[] storage, CancellationToken cellCancellation)
+    int repetition, TimeSeriesIntensiveAttempt[] storage, TimeSeriesIntensiveAttempt[] warmupStorage,
+    CancellationToken cellCancellation)
 {
     internal TimeSeriesIntensiveRunStage Stage { get; private set; } = TimeSeriesIntensiveRunStage.Warmup;
 
@@ -60,7 +61,8 @@ internal sealed class TimeSeriesIntensiveRepetitionExecutor(ITimeSeriesIntensive
             await TimeSeriesIntensiveVerification.EmptyAsync(target, phase.SeriesId, cellCancellation).ConfigureAwait(false);
         }
 
-        var ledger = new TimeSeriesIntensiveAttemptLedger(new TimeSeriesIntensiveAttempt[phase.Count], 0, phase.Count, repetition);
+        var offset = repetition * TimeSeriesIntensiveProfile.WarmupCount;
+        var ledger = new TimeSeriesIntensiveAttemptLedger(warmupStorage, offset, phase.Count, repetition);
         var result = await ExecutePhaseAsync(phase, ledger).ConfigureAwait(false);
         var failure = FirstFailure(ledger, TimeSeriesIntensiveRunStage.Warmup);
         Stage = TimeSeriesIntensiveRunStage.WarmupVerification;

@@ -79,15 +79,30 @@ internal sealed class TimeSeriesIntensiveAttemptLedger
     }
 
     internal static TimeSeriesIntensiveAttempt[] CreateMeasuredStorage()
+        => CreateStorage(TimeSeriesIntensiveProfile.OperationCount);
+
+    internal static TimeSeriesIntensiveAttempt[] CreateWarmupStorage()
+        => CreateStorage(TimeSeriesIntensiveProfile.WarmupCount);
+
+    private static TimeSeriesIntensiveAttempt[] CreateStorage(int attemptsPerRepetition)
     {
-        var storage = new TimeSeriesIntensiveAttempt[TimeSeriesIntensiveRuntimePolicy.TotalAttempts];
+        if (attemptsPerRepetition != TimeSeriesIntensiveProfile.OperationCount
+            && attemptsPerRepetition != TimeSeriesIntensiveProfile.WarmupCount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(attemptsPerRepetition));
+        }
+
+        var storage = new TimeSeriesIntensiveAttempt[checked(TimeSeriesIntensiveProfile.RepetitionCount * attemptsPerRepetition)];
         for (var slot = 0; slot < storage.Length; slot++)
         {
-            var index = slot % TimeSeriesIntensiveProfile.OperationCount;
-            storage[slot] = new(slot / TimeSeriesIntensiveProfile.OperationCount, index, index % TimeSeriesIntensiveProfile.Concurrency,
-                0, 0, TimeSeriesIntensiveOutcome.NotStarted, null, default, 0, default);
+            var index = slot % attemptsPerRepetition;
+            storage[slot] = CreateNotStarted(slot / attemptsPerRepetition, index);
         }
 
         return storage;
     }
+
+    private static TimeSeriesIntensiveAttempt CreateNotStarted(int repetition, int index)
+        => new(repetition, index, index % TimeSeriesIntensiveProfile.Concurrency,
+            0, 0, TimeSeriesIntensiveOutcome.NotStarted, null, default, 0, default);
 }

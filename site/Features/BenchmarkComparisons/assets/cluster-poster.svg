@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1827 794" role="img" aria-labelledby="title description">
   <title id="title">Conceptual KeyLoad engine for AI agents</title>
-  <desc id="description">Cards for SQL, documents, graphs, events, vectors, queues, time series and blobs circle one KeyLoad engine. This is a conceptual illustration, not live data.</desc>
+  <desc id="description">Cards for SQL, documents, graphs, events, vectors, queues, time series and blobs circle one KeyLoad engine.</desc>
   <defs>
     <linearGradient id="keyload-mark-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a3d"/><stop offset="1" stop-color="#0d0e10"/></linearGradient>
     <linearGradient id="keyload-sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
@@ -79,7 +79,6 @@
   <use href="#keyload-mark" x="828" y="170" width="170" height="170"/>
   <text x="913" y="390" text-anchor="middle" class="hero">One engine. Many models.</text>
   <text x="913" y="420" text-anchor="middle" class="caption">One canonical KeyLoad database for connected data.</text>
-  <text x="913" y="448" text-anchor="middle" class="micro">CONCEPTUAL ARCHITECTURE  ·  NOT LIVE DATA</text>
   <path d="M74 720h1679" stroke="url(#rule)" stroke-width="1"/>
   <text x="913.5" y="754" text-anchor="middle" class="micro">A SHARED FOUNDATION FOR EVERY MODEL</text>
 </svg>

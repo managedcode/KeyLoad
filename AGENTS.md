@@ -420,6 +420,8 @@ For changes outside existing owner authorization, obtain direction before changi
 - Installing skills when the owner explicitly prohibited it.
 - For bug-fix and optimization requests, do not spend turns on plans/status documentation without promptly making concrete source-level repairs once the scope is clear.
 - Recolouring tokens or restyling the old layout when the owner asks for a redesign. A landing or `/admin` redesign means a complete new layout, information architecture, visual concept and interaction patterns, delivered for both surfaces (repeated owner correction 2026-10-02).
+- Visible disclaimer chrome on the landing or `/admin`, such as "Conceptual illustration · not live data" pills, captions or poster micro-text, or visible scene status pills. The hero illustration is self-evidently illustrative; keep that honesty in alt/aria/live-region text only. Real evidence provenance labels on measured data remain required (owner correction 2026-10-03).
+- Internal process jargon such as "Evidence" as a visible navigation, button, heading or column label on public surfaces. Use plain product words a visitor expects ("Benchmarks", "Methodology", "GitHub run"); provenance links stay, but are named for what they open (owner correction 2026-10-03).
 
 ## Current additive project inventory
 
@@ -430,5 +432,7 @@ current project count to 24. Its local policy preceded implementation; the exist
 KeyLoad.Comparisons public library and every prior mandatory policy remain covered.
 
 ADR-047 additionally introduces `benchmarks/KeyLoad.BenchmarkScenarios`, bringing the shared workspace count to25. Its local policy preceded implementation. Every existing root/local rule remains mandatory and unchanged.
+
+ADR-063 additionally introduces `src/KeyLoad.Diagnostics`, bringing the shared workspace count to26. Its local policy precedes implementation. The BCL-only ResourceExecution project owns fixed callback-free phase diagnostics; every prior root/local policy, preserved installation prefix and native qualification gate remains mandatory.
 
 A bounded website qualification candidate contains the20-project historical runtime base plus KeyLoad.Analyzers, KeyLoad.Analyzers.Tests and KeyLoad.SiteTests (23projects). Its derived inventory MUST record the shared25-project scope and omitted concurrent projects explicitly, preserve all28 included root/local policy blobs exactly, and qualify only the actual included website/analyzer source. This is an evidence-scope record, never an exception to any solution-wide architecture, project-policy or required product qualification rule.

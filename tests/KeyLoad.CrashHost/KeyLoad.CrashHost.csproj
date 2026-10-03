@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
+    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <ProjectReference Include="../../src/KeyLoad.Security/KeyLoad.Security.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />

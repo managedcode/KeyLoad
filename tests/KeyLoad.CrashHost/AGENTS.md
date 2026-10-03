@@ -21,3 +21,16 @@
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - This project is shared real-process recovery infrastructure; it has no independently owned product slice. Recovery feature scenarios use `Features/StorageRecovery/` in their owning test project.
 - `Program.cs` is the executable entry point. Storage-recovery and replica-crash scenarios live under `Features/StorageRecovery/` and `Features/ClusterReplication/`; preserve their exact process/pipe and filesystem contracts.
+
+## SG009P guarded-store process qualification
+- Also owns the additive private existing-store-inspect test-helper mode under
+  Features/StorageRecovery/ for real-file UnitTests, with AC-SG009P in the
+  isolated-timeseries acceptance and ADR-059. Preserve every existing recovery
+  mode and CLI; this mode provides original child facts, never native cluster copy
+  or power-loss evidence.
+- Its strict bounded private stdin carries the canonical storage path needed for
+  the approved guarded open, but no signing keys or credentials. The safe receipt
+  contains no storage paths or exception diagnostics; every guarded native open
+  happens in this child.
+  The UnitTests parent owns the existing outer lock through actual exit and both
+  pipe drains. Run only as part of GitHub normal/scalar and full recovery gates.

@@ -33,7 +33,8 @@ internal static class TimeSeriesIntensiveRunner
         for (; state.Repetition < TimeSeriesIntensiveProfile.RepetitionCount; state.Repetition++)
         {
             cellCancellation.ThrowIfCancellationRequested();
-            state.Executor = new(target, expected, scenario, runId, state.Repetition, state.Storage, cellCancellation);
+            state.Executor = new(target, expected, scenario, runId, state.Repetition, state.Storage,
+                state.WarmupStorage, cellCancellation);
             var result = await state.Executor.RunAsync().ConfigureAwait(false);
             state.Repetitions.Add(result);
             if (!result.Warmup.Succeeded || result.Measured.WorkersStarted == 0)

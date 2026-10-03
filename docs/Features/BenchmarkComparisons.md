@@ -559,3 +559,9 @@ must authenticate the exact current benchmark run/attempt/source without histori
 fallback; recheck that tuple and current website source before deployment. Native isolated
 job/step/artifact identities, complete workloads and topology remain required;
 authentic historical legacy CI archives are not relabelled.
+
+
+The accepted TS009W stage in [ADR-059](../ADR/ADR-059-isolated-intensive-timeseries.md)
+retains all1280 real warmup attempt/ACK/sequence slots for REQ-BC060/061/062 and
+AC-TW009001..003; pure source tests and exact-source normal/scalar qualification
+remain separate from the still-undelivered30 native-cell warmup/copy oracle.

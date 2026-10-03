@@ -18,6 +18,9 @@ internal sealed class SqlRf3AdmissionTests
     private const string Domain = "agent";
     private const int Voters = 3;
     private const int NoControlCommands = 0;
+    private const string AdmissionDrainTimeout = "HTTP control admission did not drain within the bounded observation window.";
+    private static readonly TimeSpan AdmissionDrainDeadline = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan AdmissionPollInterval = TimeSpan.FromMilliseconds(50);
 
     [Test]
     public async Task AcAisql007InsufficientDataBytesRejectSdkAndOfficialSqlBeforeIdClaimWhileDirectControlKeepsRf3Healthy()
@@ -81,7 +84,7 @@ internal sealed class SqlRf3AdmissionTests
 
     private static async Task VerifyHealthyAsync(KeyLoadClient sdk, CancellationToken cancellationToken)
     {
-        var admission = await McpCallerAssertions.SdkSuccessAsync(await sdk.AdmissionStatusAsync(cancellationToken));
+        var admission = await WaitForControlCommandsDrainedAsync(sdk, cancellationToken);
         await Assert.That(admission.Http!.Limits.MaxReservedBytes).IsEqualTo(DataBytes);
         await Assert.That(admission.Http.Limits.HeavyReadReservedBytes).IsEqualTo(HeavyReadBytes);
         await Assert.That(admission.Http.Node.ControlCommands).IsEqualTo(NoControlCommands);
@@ -89,5 +92,37 @@ internal sealed class SqlRf3AdmissionTests
         var status = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(cancellationToken));
         await Assert.That(status.RoutingReady).IsTrue();
         await Assert.That(status.Voters).IsEqualTo(Voters);
+    }
+
+    private static async Task<NodeAdmissionStatus> WaitForControlCommandsDrainedAsync(KeyLoadClient sdk,
+        CancellationToken cancellationToken)
+    {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(AdmissionDrainDeadline);
+        var started = TimeProvider.System.GetTimestamp();
+        while (true)
+        {
+            deadline.Token.ThrowIfCancellationRequested();
+            ThrowIfAdmissionDrainExpired(started);
+            var admission = await McpCallerAssertions.SdkSuccessAsync(await sdk.AdmissionStatusAsync(deadline.Token));
+            deadline.Token.ThrowIfCancellationRequested();
+            ThrowIfAdmissionDrainExpired(started);
+            var http = admission.Http!;
+            if (http.Node.ControlCommands == NoControlCommands
+                && http.VerifiedScopes.ControlCommands == NoControlCommands)
+            {
+                return admission;
+            }
+
+            await Task.Delay(AdmissionPollInterval, TimeProvider.System, deadline.Token);
+        }
+    }
+
+    private static void ThrowIfAdmissionDrainExpired(long started)
+    {
+        if (TimeProvider.System.GetElapsedTime(started) >= AdmissionDrainDeadline)
+        {
+            throw new TimeoutException(AdmissionDrainTimeout);
+        }
     }
 }

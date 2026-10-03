@@ -23,6 +23,7 @@
     "src/KeyLoad.Cli/KeyLoad.Cli.csproj",
     "src/KeyLoad.Client/KeyLoad.Client.csproj",
     "src/KeyLoad.Core/KeyLoad.Core.csproj",
+    "src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj",
     "src/KeyLoad.Orleans/KeyLoad.Orleans.csproj",
     "src/KeyLoad.Query/KeyLoad.Query.csproj",
     "src/KeyLoad.Replication/KeyLoad.Replication.csproj",
@@ -184,6 +185,13 @@
       "addedProject": "benchmarks/KeyLoad.BenchmarkScenarios/KeyLoad.BenchmarkScenarios.csproj",
       "localPolicy": "benchmarks/KeyLoad.BenchmarkScenarios/AGENTS.md",
       "reason": "Accepted ADR-047 real public BenchmarkDotNet fixture library with centrally enforced analysis; source integration only, generated consumer and full GitHub qualification pending."
+    },
+    {
+      "date": "2026-10-03",
+      "task": "TASK-DBPROF-CONTRACT",
+      "addedProject": "src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj",
+      "localPolicy": "src/KeyLoad.Diagnostics/AGENTS.md",
+      "reason": "Accepted ADR-063 BCL-only bounded callback-free ResourceExecution diagnostics. Prior policies and preserved prefix remain mandatory; source integration only, genuine native profiling pending."
     }
   ]
 }

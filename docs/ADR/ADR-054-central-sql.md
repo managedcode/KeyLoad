@@ -78,3 +78,20 @@ Another disjoint worker removes unnecessary equality-planner nesting, retaining
 all authored native point/index/security/budget tests and iterator semantics.
 Root joins/reviews then repeats exact-SHA build/format/full runtime gates. This is
 pre-delivery source refinement; no published binary/schema migration is claimed.
+
+TASK-DBHP-012 preserves REQ-AISQL-003 and AC-AISQL-007 under AC-DBHP-012.
+Tests run37113337508 at9e0532fdeed7c55a17f9c857f8d5a264215341e7 reports
+62/63 RF3 passes: SqlRf3AdmissionTests observes one active control command after
+the official MCP client receives its result. Native McpHttpPipeline owns its
+admission through endpoint completion; a received result is not a server-drain
+barrier. First retain this failing original, then change only that test to observe
+both node and verified-scope control counts through genuine SDK admission calls.
+The observation has a caller-linked five-second deadline and fifty-millisecond
+polls; successful completion still requires both counts to be exactly zero.
+Keep budget, rejection, unchanged command-ID reuse, actual direct-control success,
+routing and three-voter assertions. SDK errors/cancellation remain failures.
+One bounded worker owns only SqlRf3AdmissionTests.cs; root owns requirements,
+review, build/format, main delivery and new exact-source CI RF3 evidence.
+No production resource lifetime, public contract or storage migration changes;
+rollback reverts the test-only observation. Source analysis cannot establish
+that the native failure is repaired or that no resource leaks exist.

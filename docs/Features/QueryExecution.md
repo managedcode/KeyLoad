@@ -14,6 +14,16 @@ product stages. Exact source/qualification coverage is [central SQL evidence](..
 | REQ-AISQL-003: versioned single-statement SQL preserves canonical authority and resources | AC-AISQL-005–007/011 | TASK-AISQL-006/008/011, rejection/ID/retry/permission/cancellation/admission/metadata and initial-RPC native failure cases |
 | REQ-AISQL-004: native indexed work and honest comparable performance | AC-AISQL-008–010 | TASK-AISQL-007/008, reversed equality real-store regressions and exact GitHub gates |
 
+TASK-DBHP-012/AC-DBHP-012 adds a bounded genuine SDK observation to the existing
+AC-AISQL-007 RF3 admission flow. The node and verified-scope control counts must
+both reach exactly zero within five seconds after completed direct HTTP/MCP
+control operations. Fifty-millisecond polls preserve caller cancellation and
+every SDK failure. The native MCP server retains admission until its endpoint
+drains, so client receipt alone is not the zero-count observation boundary.
+[ADR-054](../ADR/ADR-054-central-sql.md) owns the unchanged lifetime contract and
+ordered test-only repair. Original Tests37113337508 at9e053 RF3 is62/63; new
+exact-source CI qualification is required before claiming this repair passes.
+
 Status: Accepted repair contract; qualification pending. Requirements map to
 [ResourceExecution](ResourceExecution.md), AC-MP-003/012 and
 [ADR-035](../ADR/ADR-035-memory-performance.md).

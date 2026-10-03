@@ -63,6 +63,7 @@
 | [ADR-056 isolated Linux comparison cells](ADR-056-isolated-linux-comparison-cells.md) | Accepted, implementation and qualification pending | BenchmarkComparisons, ClusterReplication |
 | [ADR-059 intensive native TimeSeries family](ADR-059-isolated-intensive-timeseries.md) | Accepted staged contract; implementation and native qualification pending | BenchmarkComparisons |
 | [ADR-060 native internal serialization](ADR-060-native-internal-serialization.md) | Accepted; format installation/rollout approval and native qualification pending | InternalSerialization |
+
 | [ADR-062 workflow separation](ADR-062-workflow-separation.md) | Placement superseded by ADR-064; authentic historical proof retained | RepositoryGovernance, BenchmarkComparisons |
 | [ADR-064 three-pipeline release delivery](ADR-064-three-pipeline-release-delivery.md) | Accepted; exact-SHA CI/site/release qualification pending | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery |
 
@@ -113,3 +114,9 @@ cache memory and authenticated Orleans coordination. The shared retained pool
 and explicitly configured embedded point cache are implemented in source; RF3
 server admission remains cold pending authenticated cluster control. Native
 cache correctness, coverage and matched performance qualification remain open.
+
+[ADR-063](ADR-063-bounded-database-phase-profiling.md) accepts optional BCL-only
+fixed phase diagnostics, preserving actual quorum/gate/tail/WAL ownership.
+Shared schema is registered; bank, producer joins, private native capture and
+measured overhead remain open. Tests owns runtime qualification; Benchmarks
+owns matched performance comparisons under the separate ADR-062 workflow map.

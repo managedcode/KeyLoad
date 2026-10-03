@@ -1,5 +1,33 @@
 # Isolated intensive TimeSeries plan
 
+## Actual40f87 failed baseline and source gates
+
+[Original receipt](docs/implementation/isolated-source-qualification-37109874881.json)
+binds run37109874881 attempt1: root verified all7 provider ZIP byte sizes/SHA/upload
+logs,111 entries,463 exact Git source snapshot records and2220 report entries
+(2102 unique assembly/case IDs; analyzer118 appears in two original reports).
+Full solution Release/formatter/governance pass. Normal1737/1739, recovery181/182;
+analyzer118/RF363 pass. Scalar/images/native27/270/TimeSeries6/30/site skipped.
+Original normal raw8, selection35 and family7 pass; these are source/input gates.
+
+Tracked real failures, owning concurrent repair preserved:
+- [ ] AcTsi006UnknownProblemNamesAndUnavailableStatusStayUnknown: default
+  Communication10.2.6 Result getter returns intentional GenericError500, while
+  original regression incorrectly expects null. ADR contract is returned Problem
+  status, not transport provenance. Preserve mapper/explicit0-null/real500 and
+  failed outcome; no dependency sentinel/workaround or invented server fact.
+- [ ] LeaseExpiresAtFifteenSecondsFromItsPrepareTimestamp: exact2s timer wait
+  undershoots asserted real timestamp; report retains no measured undershoot.
+  Owning test-only real-time wait rechecks original elapsed time and preserves
+  prepare/lease bounds, cancellation, negative and healthy-renewal assertions.
+- [ ] FailedSnapshotInstallationPoisonsBeforeTheWarmTermCanBeReused at
+  InstallPrepared: original ObjectDisposedException stack reaches already retired
+  ZoneTree maintainer during fixture disposal. Owning checkpoint handle transfer/
+  cleanup repair under ADR046 retains fault oracle and actual original ownership.
+
+All three must pass at a later delivered SHA with full normal/scalar/recovery/
+RF3/native gates; pending or source-fixed cases are not counted complete.
+
 ## TS009C-G ordered guard execution
 
 Chosen original-process direction derives from the existing brainstorm and
@@ -422,3 +450,241 @@ hot-path source remains untouched. Full current delivered-source gates stay open
 - [ ] TS009P-C1 root review constants/malformed-input refinement, same five temporary files; all25 missing fields, unknown checksum, primitive/enum/array drift tests. Source-only; original packet historical.
 - [ ] TS009P development source/format/governance and delivered-SHA normal/scalar actual TUnit.
 - [ ] Distinct raw/native host/physical-copy/coverage/native6/30/provider/site joins; plan counts never count as executed performance.
+
+## SG009P ordered process join task graph
+
+Root accepted SG009P001..004 in acceptance and ADR059 before delegation; all
+source/native tests run only in Actions. Prior 40 failed baseline remains tracked.
+
+|Task|Owner/model/permissions|Start dependencies|Artifacts, verification, join|
+|---|---|---|---|
+|TASK-ISO-SG009P-C|current_ci_audit inherited capable worker; temp guard7/NEW child only|Frozen SG009P signatures + original guard packet|Original/candidate hashes, full patch; lexical validation/real child mode; no existing dispatch/project edits; root every diff/source gates|
+|TASK-ISO-SG009P-T|timeseries_resources_worker inherited capable worker; temp tests4/NEW parent only|Frozen SG009P signatures + original guard tests|Original16 cases preserved via actual child + lexical/cancel cases; bounded original pipe/exit ownership; root every diff/source gates|
+|TASK-ISO-SG009P-R|publisher_archive_review inherited strong readonly|Candidates complete|Independent all-file and ordinary behavior/process settlement review; no mutation/runtime|
+|TASK-ISO-SG009P-I|root planning/shared integration/docs/Git|Both source workers complete and reviewed; baseline CAS|Facade/refs/friends/dispatch, full build/format/governance then delivered exact-SHA Actions normal/scalar/full recovery/RF3; native joins remain pending|
+
+- [x] SG009P acceptance/ADR/protocol/task graph frozen before workers.
+- [ ] Process tests preserve original16 cases and add lexical/cancel settlement.
+- [ ] Private guard + genuine child source complete and independently reviewed.
+- [ ] Shared root integration, source build/formatter/governance.
+- [ ] Delivered exact-SHA GitHub normal/scalar/full recovery/RF3 reports verified.
+
+No worker model override is used: the existing inherited capable coding workers
+are reused; changing their established routing would require new agent creation
+under an already reached session thread limit. Disjoint temporary ownership keeps
+concurrent checkout and ordinary storage repair safe.
+
+## TS009T read-only physical-copy discovery joined
+
+TASK-ISO-TS009T-R complete source discovery packet SHA256
+83d300aa0b1145bfd4fb08a412ebfdc101a0fda6a1e26679bab8875f3e704c1b,
+20 owning input hashes. No native or source implementation gate. Two required
+root joins precede any Timescale host/copy code: expose untimed settled seed
+preparation before the five phase clocks; retain all1280 actual successful warmup
+receipt sequences, never reconstruct from concurrent operation ordinals.
+Native direct endpoint snapshots/roles/system-ID/extension/slot/quorum/flush/replay
+and complete rows/counters/identity oracle must run while original target/schema
+remain positively owned and all original workers have settled. Native copies1/2/3
+remain distinct from actual write ACK1/2/2. Root will freeze prepared-run ownership,
+DTOs/control/global deadlines/raw serialization before any write delegation;
+existing SQL/readback helpers and target lifecycle stay source-canonical.
+
+## Actual9b delivered baseline
+
+Root independently verified original7 ZIP sizes/digests/upload bindings,111 entries,
+2335 report entries/2217 unique assembly-case IDs and ten byte-equal H source
+blobs. Receipt docs/implementation/isolated-source-qualification-37111280400.json.
+Normal1852/1853: sole known Result assertion still fails; actual H114 pass.
+Recovery183/analyzer118/RF363 pass. Cache expiry exact historical ID passes;
+original snapshot failure ID is absent, replacement prepared/journal-swapped IDs
+pass and do not relabel that absent old case. Scalar/H12model/native27/270/
+TimeSeries6/30/site remain unexecuted. Keep original40 failure evidence intact.
+SG009P new process source/tests remain under construction and outside these bytes.
+
+SG009P-R may review each sealed worker dependency independently as it completes;
+final review must bind every joined candidate plus the root5 shared files and
+refresh all hashes after any producer correction. An advisory unsealed source
+read cannot satisfy that join. Worker source completion never satisfies native
+qualification or permits local test/process execution.
+
+SG009P-C2: first source-only projection build fails two CA1031 diagnostics in
+Guard.DisposeExisting/Cleanup.Capture; no runtime/test result. Its initial copy
+preceded the child seal and hit a renamed Contracts entry, so that projection is
+not a combined candidate gate. Root accepted real owned-callback classification
+before C2 writes (same original reference, private specific wrapper, no Flatten,
+no analyzer suppression). Child async mode/operation broad catches receive the
+same owned boundary before their compilation gate. Preserve C1 packet; root owns
+complete copy/hash/source build/format; parent12 inventory is within approved NEW
+helper ownership, including failed process-start settlement. No source failures
+may be reported as actual failed TUnit cases.
+
+SG009P-T2: independent parent12 review blocks marker re-index after readiness,
+live-child kill exception bypassing join, and two lexical type-as-code assertions.
+Root accepted scoped genuine corrections before worker writes; T1 packet remains
+immutable. Final R review refreshes C2/T2/shared hashes and all caller-visible
+assertions before integration. Build/test qualifications remain pending.
+
+SG009P-C3: complete C1+C2/root5 projection source build fails4 custom-exception
+CA1064/CA1032 diagnostics,0 warnings,5.94s. Root accepted framework AggregateException
+single outer wrapper/specific catch/one-level original extraction before writes;
+private/public contracts and every configured diagnostic remain intact. This is
+source build evidence, never failed/executed TUnit or native cases.
+
+## SG009P joined source gates and T3 refinement
+
+Effective child C1+C2+C3 plus the original shared5 projection at source9b passes
+Release CrashHost build:0warnings/0errors,20.46s. This is a development build;
+no tests/process/native operation executed. Shared I2 now preserves the fresh
+foreign Diagnostics project reference; it does not relabel the9b projection
+as a qualification of later mutable source.
+
+Final parent T1+T2 projection build fails19 configured diagnostics: CA1308,
+CA1068,CA1849,IDE0032,IDE0011,IDE0200,CA2025,CA2000,CA1822,IDE0005. All original
+22 authored TUnit cases remain unexecuted. Independent final review also blocks
+release without authentic exit observation, settlement/Process.Dispose failure
+overriding an earlier primary failure, and stdin.Close overriding Write/Flush.
+These are source findings, not fabricated failing runtime cases. T3 retains the
+same original child/process/tasks, positive native exit authority, all original
+causes and outer owner through settlement; configured diagnostics remain enabled.
+Root must freeze its private join before source correction and refresh final
+hashes/review/build/format before integration. Tests/tests.yml now owns actual
+normal/scalar/process/RF3 qualification; Benchmarks/benchmarks.yml owns isolated
+native27/270 and future6/30. No complete measured native cohort exists.
+
+
+|Task|Requirements/owner/permissions|Dependencies/start|Artifacts and join|
+|---|---|---|---|
+|TASK-ISO-SG009P-T3|SG009P003/004; current_ci_audit inherited capable coding worker; temporary eight parent files plus one FailureJoin only|WF-REFRESH terminal, accepted T3 contract and exact T1/T2/C3/I2 bindings|No runtime/Git/repo writes; all22 cases preserved, original-stage ownership/error review, exact source hashes/patch; root all-source build/format/governance and delivered Tests gates|
+
+- [x] T3 positive-exit/fail-stop/original-error/private compiler refinement accepted before worker writes; read-only recommendation555906f26e249552ec385d84348ef641784191934db70940ab84c5fbdfa0cb20.
+- [x] T3 sealed source delta, independent review and scoped development source gates; actual Actions remain pending.
+
+
+## TS009 host discovery and independent warmup slice
+
+Read-only host discovery4392fe8121263ed90c8a39a3a58efbe67c5b473ab2ec0a10b4a810759aae1b32
+maps absent AppHost/host routes, prepared seed fence, native observers,6/30 jobs
+and per-cell wire/collector. Those remain pending root contracts. One safely
+independent source slice is accepted first: retain actual1280 warmup attempts
+without changing timing/operations/measured50000 slots or current wire.
+
+|Task|Requirements/owner/permissions|Dependencies/start|Artifacts and join|
+|---|---|---|---|
+|TASK-ISO-TS009W-S|TW009001..003/TSI003..005/008; timeseries_resources_worker inherited capable coding; temp exactfive library +new pure tests|Accepted W contract, actual9b normal-source baseline, discovery complete|Tests-first real ledger pure acceptance data; no target doubles/runtime/Git/repo writes; source/hash/patch/scope review; root source gates +delivered Tests normal/scalar; real warmup proof joins later30 native cells|
+
+- [x] Host source gaps discovered; W private retention contract frozen before worker write.
+- [x] W source/pure tests authored, reviewed and development source gates; actual Actions/native execution remain pending.
+- [ ] Prepared seed/native host/6+30/wire/collector/site contracts and actual qualification.
+
+SG009P-T3 original handle binding: borrow and retain the actual outer owner's
+SafeFileHandle immediately after the live FileStream is assigned to its owner;
+no additional handle ownership. After actual FileStream.DisposeAsync, read only
+that retained handle's IsClosed. Never obtain FileStream.SafeFileHandle after
+closing: [the .NET10 native strategy getter](https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/IO/Strategies/OSFileStreamStrategy.cs)
+performs seek before returning the handle. An initial getter failure remains a
+primary original and still joins actual FileStream disposal independently. Root
+accepted this normal-path source correction before final T3 seal; no local probe.
+
+SG009P-C4 is a constants-only final review amendment under the already accepted
+Fixture ownership and root executable-string policy: add one private
+AllEntriesPattern for the two actual directory/file enumeration calls. Preserve
+the immutable T3 packet, all22 case/assertion/data bytes outside those two calls,
+and native semantics. Root owns this obvious one-file integration amendment;
+separate worker coordination would exceed the change. A new hash-bound one-file
+packet, independent review and refreshed source build are required before join;
+no source review or development build is Actions test qualification.
+
+SG009P-T4 source gate: the complete T3/W projection Release build fails only
+CA2213 for the actual Lifetime deadline field,0warnings/1error,100.04s. The
+existing captured method-group disposal remains a real runtime disposal, but
+does not establish the configured compiler's disposal analysis. Accept a direct
+private owned deadline-disposal call chain with the same one-inner framework
+wrapper/specific extraction and reference-identity cause collection before
+worker writes. Keep independent deadline failure collection, actual owner cleanup,
+every22 case/assertion and all configured diagnostics; no suppression, skipped
+cleanup, artificial completion or public contract change. Only Lifetime and,
+if needed to reuse the existing original-cause collector, FailureJoin may change
+in a new sealed T4 packet. Root reruns the complete source build and later genuine
+GitHub normal/scalar/recovery/RF3 gates; this is not a failed executed test case.
+
+TASK-ISO-TSM009-O follows AC-TSM009-001 and TSI001/003/008. The original79b
+Benchmarks37113520832 model report has94/98 passes and4 errors; currentd316
+Benchmarks37114205100 repeats the4 errors. All fail the obsolete tag oracle after
+real digest pinning. Root verified the pinned Aspire13.6.0 source: SHA256 setsTag
+null. Freeze the independent null-tag/exact-rendered-digest assertion correction
+before delegation; preserve the exact digest, runner tag-plus-digest binding,
+all four original case identities and all other native model assertions. Scope:
+only tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/
+IsolatedTimeSeriesTimescaleResourceTests.cs; temporary worker candidate, root
+independent review/development source build, then delivered-SHA Benchmarks model
+qualification. Existing ADR059 suffices; no production/dependency/pin change.
+
+Tracked genuine Benchmarks37114205100 model regressions (original case bodies,
+arguments and exception graphs in the immutable terminal addendum):
+- [ ] ModelContainsPinnedPhysicalTimescaleNodes(1): obsolete tag oracle; TSM009-O.
+- [ ] ModelContainsPinnedPhysicalTimescaleNodes(2): same root cause; TSM009-O.
+- [ ] ModelContainsPinnedPhysicalTimescaleNodes(3): same root cause; TSM009-O.
+- [ ] EveryClosedFamilySelectionComposesOnePrivateRunnerAndOnlyItsNativeGroup:
+  same original shared assertion; TSM009-O. No actual native workload ran.
+
+|Task|Requirements / owner / permissions|Start / dependencies|Artifacts / join|
+|---|---|---|---|
+|TASK-ISO-TSM009-O|TSM009001 and TSI001/003/008; timeseries_resources_worker inherited capable worker; temp single ComparisonTests file only|Root oracle contract frozen above, original4 failures, PREP discovery terminal|Exact input/output/patch source review; root review/build then genuine exact-SHA Benchmarks model reports; no runtime/Git/repo worker action|
+
+TS009PREP read-only recommendation43ba16a4c0bca1a2a4d63755f3fb916aaeda6aaa9842bba129528fbe5668b3f8
+proposes a borrowed one-shot prepared seed boundary. This is not an accepted API
+or write authorization: typed native proof, actual seed receipt retention and
+host/global deadlines/cleanup/wire contracts still require root decisions.
+
+Joined C3/C4/T4/W/TSM source gate: frozen9b development projection full solution
+Release build succeeds with0warnings/0errors in309.89s; no test/process/native
+work executed. The projection intentionally uses shared-I UnitTests reference
+without the foreign uncommitted Diagnostics module; it is not a qualification of
+mutable main/I2. Final independent38-source review8d6d22d1330d5ac69e9f4ccfcc01ab1e8da3d9479bcd90799defd8ca1332035a
+has no remaining semantic findings; root integrated all38 sources after fresh
+16-existing/22-absent CAS checks, preserving the working Diagnostics reference.
+Actual root static governance passes26projects/4modules; runtime/coverage remain
+unqualified. Formatter source check found Fixture imports order and the empty
+using-block layout. C5 may format only that exact Fixture against sealedC4,
+preserving all original operations/assertions/constants. Root owns this trivial
+one-file integration refinement and retains every prior packet unchanged; fresh
+independent source binding/build/formatter and delivered Actions gates remain.
+
+
+## Current delivery join: three pipelines and final formatting amendment
+
+The current source at e050b5e3213ccc007622092587c35fd0a0bbf378 has the
+owner-directed three-pipeline layout recorded in workflows/AGENTS.md and
+ADR-064. Earlier Tests/tests.yml and Website/pages.yml observations above are
+historical evidence, not current dispatch instructions. Dispatch/inspect
+`ci.yml` for the full build, formatter, unit/scalar/process/RF3 gates and
+`benchmarks.yml` for image/model/native270/aggregate/site gates. `release.yml`
+package/image publication does not qualify database behavior or performance.
+Future receipts must identify the actual source SHA/run/attempt and original
+reports independently of workflow names. The planned TimeSeries6+30 extension
+still has no complete prepared/native/wire/collector/site implementation.
+
+The original full development formatter session67592 settled with exit1 and
+its two original Fixture errors remain preserved. Its owned process chain was
+stopped after the bounded diagnostic; no passing formatter gate is inferred.
+Independent R3 review84091f176cdb7fadf42c8773955f295cf9641005b74b82a523468875705bb313
+binds the sole C5 import/empty-using formatting amendment and all38 source files
+(map e4614df98d43f311da5d65489fa9f3088f4bbef19fa94784aa87f3c0bbe12b7b).
+The prior full development build0/0 and static governance26/4 remain development
+facts. Exact delivered-SHA CI and Benchmarks execution is still required; new
+metrics, complete native cohorts and publication are not claimed.
+
+
+Final development formatter10340 succeeds with exit0 using the complete
+`dotnet format KeyLoad.slnx --verify-no-changes --no-restore` command on the
+frozen25-project projection after C5. The prior failed formatter and bounded
+pipe-permission failure remain separate original evidence; no runtime executed.
+The full build preceded C5's import/empty-block whitespace-only amendment.
+Source041 binds the delivered CrashHost-only Unit reference separately from the
+working Diagnostics reference. Independent scoped delivery review
+0b48453a49d1f55389553864bcce5be03594f7508b7692d68b8faf3268354d94
+has no findings and excludes all foreign website/Diagnostics/SDK/SQL changes.
+Fresh main e089f3ccc77460c0fc6610581025b57651eac96a includes the concurrent
+release/Site build repairs; no successful exact-source Actions verdict is
+inferred. Root will commit only the reviewed source/docs/hunks and inspect the
+actual push-triggered CI and Benchmarks runs before any dependent native join.

@@ -49,9 +49,9 @@ internal static class IsolatedTimeSeriesTimescaleResourceAssertions
 {
     private const string PasswordName = "isolated-timescale-password";
     private const string Image = "timescale/timescaledb";
-    private const string Tag = "2.30.2-pg18";
     private const string Digest = "sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
     private const string ImageReference = "docker.io/timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
+    private const string RenderedImageReference = "docker.io/timescale/timescaledb@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
     private const string Tcp = "tcp";
     private const string DataTarget = "/var/lib/postgresql";
     private const string BootstrapTarget = "/bootstrap/isolated-postgres.sh";
@@ -84,8 +84,10 @@ internal static class IsolatedTimeSeriesTimescaleResourceAssertions
         var image = node.Annotations.OfType<ContainerImageAnnotation>().Single();
         await Assert.That(image.Registry).IsEqualTo("docker.io");
         await Assert.That(image.Image).IsEqualTo(Image);
-        await Assert.That(image.Tag).IsEqualTo(Tag);
+        await Assert.That(image.Tag).IsNull();
         await Assert.That(image.SHA256).IsEqualTo(Digest[7..]);
+        await Assert.That(node.TryGetContainerImageName(out var renderedImage)).IsTrue();
+        await Assert.That(renderedImage).IsEqualTo(RenderedImageReference);
         await Assert.That(node.Annotations.OfType<ContainerNetworkAliasAnnotation>().Single().Alias).IsEqualTo(name);
     }
 

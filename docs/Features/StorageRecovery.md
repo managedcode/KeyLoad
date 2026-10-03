@@ -306,3 +306,13 @@ flowchart LR
 ```
 
 See root zonetree-orleans-wal.acceptance.md and .plan.md for precise pass/fail conditions, disjoint agent scopes, rollout/rollback and verification. No new UI/API/model format; no local tests; all runtime evidence comes from GitHub.
+
+
+REQ-STORAGE-015 also maps AC-SG009P-001..004 / TASK-ISO-SG009P-C/T/R/I under
+ADR-059. Canonical directory is lexical normalized ordinal equality, without a
+symlink/rename resistance claim. Every guard test invokes the genuine Release
+CrashHost using bounded private JSON and actual failure/data facts; original
+process exit and both pipe drains precede outer-lock release and ordinary reopen.
+The cancellation case observes the original ready child, kills/reaps it and
+checks data after normal reopen. Source and process qualification remain pending;
+this test helper is not the native benchmark inspector/control/copy oracle.

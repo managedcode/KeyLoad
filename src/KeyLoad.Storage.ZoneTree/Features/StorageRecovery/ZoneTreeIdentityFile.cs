@@ -21,6 +21,21 @@ internal static class ZoneTreeIdentityFile
         return identity;
     }
 
+    internal static StoreIdentity OpenExisting(ZoneTreeStoreOptions options, Guid expectedNodeId)
+    {
+        var identity = Read(Path.Combine(options.Directory, IdentityFileName));
+        Validate(identity, options);
+        if (identity.FormatVersion != BinaryJournalIdentityVersion)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
+        }
+        if (identity.NodeId != expectedNodeId)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, IdentityScopeInvalid);
+        }
+        return identity;
+    }
+
     internal static StoreIdentity Promote(string directory, StoreIdentity identity)
     {
         if (identity.FormatVersion == BinaryJournalIdentityVersion)

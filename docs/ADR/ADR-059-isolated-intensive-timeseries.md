@@ -1293,3 +1293,328 @@ Disjoint TS007R-S worker owns ONLY NEW IsolatedTimeSeriesTimescaleResources.cs a
 Root serially adds FindScripts(IDistributedApplicationBuilder builder) and an optional final primaryName argument to existing IsolatedPostgresBootstrap.Configure; existing signatures delegate/default to isolated-postgres-1 so old general270 topology is preserved. Configure called by new resources uses isolated-timescale-1 explicitly; no shell rewrite, image fallback or replica relabelling. Quorum configuration occurs only after actual native roles/standbys are ready and before schema install/operations: closed native ANY1 config for2/3, empty for1, then readback. Initial bootstrap avoids synchronous-write deadlock before standbys exist; this phase is untimed and does not claim qualified ACKs. Root native verifier must separately inspect PostgreSQL18, actual Timescale extension, member/slot/app/sync state, actual flush/replay cuts and ordered data copies1/2/3 versus ACK1/2/2. Measured operations stay primary.
 
 Ordered verification: selection acceptance input tests first, then closed selection/context and physical resource model assertions; root reviews every diff and source limits, builds/formats/governs source, delivers exact SHA, then runs real six Linux native preflights with actual SDK/official MCP/Npgsql. Native30/protocol/provider/coverage/site joins remain blocked until six genuine outputs pass. Rollback removes only additive new route/resources/context and restores optional common overload; default RF3, old selectors and all immutable evidence remain. No local tests/build/container/native execution by worker, no source/Git/shared docs edits beyond its two files. Stop and escalate unspecified APIs, overlap or native contract drift.
+
+## SG009P process-only test join (Accepted source contract)
+
+AC-SG009P-001 refines SG009001: canonical means lexical ordinal equality of
+Path.GetFullPath(options.Directory) and options.Directory, plus fully qualified
+and existing directory. Reject dot/dotdot variants before ownership; this makes
+no symlink, rename or hostile filesystem resistance claim.
+AC-SG009P-002 refines SG009002/003: EVERY guarded call, including all valid,
+missing, corrupt and invalid-option tests, executes in the genuine Release
+KeyLoad.CrashHost process. Parent creates the fixture's original node.owner.lock
+once and opens that existing file exclusively before child start. Child owns
+canonical owner.lock. Preserve all original 16 cases and their file/data/failure
+assertions; add lexical-path and actual cancellation/kill/reader settlement cases.
+No fake exception object is reconstructed in the parent.
+AC-SG009P-003: additive private existing-store-inspect mode uses bounded JSON
+stdin (4096 chars); CLI contains only original assembly and mode. New internal
+ExistingStoreInspectionVariant enum: Normal, NullOptions, EmptyNodeId,
+MissingIncarnation, EmptyIncarnation, RelativeDirectory, EmptyDirectory,
+NonCanonicalDirectory, ZeroFrameBudget, ZeroSnapshotBudget, Cache, Observer,
+WaitBeforeOpen. Request(string Directory, Guid ExpectedNodeId, Guid? Incarnation,
+Variant). Variant changes only actual guard inputs, not provider faults. Normal
+reads fixed fixture key guard/committed, actual identity without signing key,
+position and <=256-byte owned value, then double-disposes. Child constructs real
+cache budget/recording observer only for their rejection cases. Receipt schema1
+contains Success, NodeId, Incarnation, FormatVersion, Position, Value, bounded
+FailureTypes (original top/nested types <=64), ErrorCode (enum name or null),
+ObservedStages and RetainedBytes. No exception messages/stacks/path/keys/credentials
+are echoed. Guard and cleanup failures preserve original exception objects in
+child; bounded type receipt is evidence about them, never their replacement.
+Malformed/oversized protocol fails without guard and no exception-secret output.
+AC-SG009P-004: parent independently drains stdout/stderr retaining <=8192 chars
+per pipe, keeps original PID/executable assembly SHA256/exit, and admits one
+child per fixture. Execution deadline30s; cancellation/deadline kills actual
+original child tree. Await actual exit/reap and BOTH original readers before
+return, releasing owner, deleting files or normal reopen. Cleanup warning bound10s
+cannot be mistaken for settlement: on overrun ownership remains retained while
+actual exit/readers are awaited; the GitHub job timeout is the final external
+bound, and no detached task/result claims successful cleanup. WaitBeforeOpen emits
+only fixed stderr readiness then waits; parent cancellation test cancels after
+that genuine readiness, verifies original process exit/readers/lock, and normal
+reopen/data. Cancellation is an expected harness outcome with no successful guard
+receipt. No local execution, mocks, provider corruption injection or weakened
+ordinary recovery. These tests are not actual native node stop/restart/copy proof.
+
+|Criterion|Automated proof|Required evidence|
+|---|---|---|
+|SG009P001|Lexical dot/dotdot rejected with original files retained|Exact-source normal/scalar TUnit|
+|SG009P002|All original positive/missing/corrupt/invalid cases through owned real child|Original actual cases, no skipped/direct parent guard call|
+|SG009P003|Actual identity/data/errors/cache/observer and bounded pipe protocol|Original Release child assembly and returned safe facts|
+|SG009P004|Actual readiness/cancel/kill/exit/readers then ordinary reopen|Normal/scalar plus full recovery; no power-loss/native-copy claim|
+
+Root accepts only this test infrastructure/private guard integration stage;
+physical native inspector, node control, applied ACK/copy oracle and benchmark
+lifecycle remain separately required. Rollback removes additive mode/helper/ref/
+friend/guard branches; existing CrashHost protocols and public storage stay intact.
+
+Ordered implementation/ownership: tests-first original guard candidates exist;
+1. Root freezes this IPC and lexical/process boundary.
+2. current_ci_audit owns only temp revised seven private guard candidates plus NEW
+CrashHost StorageRecovery inspector/protocol files. No shared dispatch/projects.
+3. timeseries_resources_worker owns only temp revised four guard test candidates
+plus NEW UnitTests StorageRecovery genuine process/pipe/lifetime helpers. Both
+workers exchange no shared-file edits; signatures below are frozen.
+4. Root owns facade runtime ctor, CrashHost dispatch, StorageZoneTree friend,
+UnitTests CrashHost reference, CrashHost UnitTests friend, local policies, global
+map/docs and integration. Root compares original5 baselines, preserves concurrent
+ordinary handle/checkpoint repair, reviews every diff and source build/formatter.
+5. Root delivers stable source, then exact-SHA GitHub full normal/scalar/recovery/
+RF3 qualification. Failed or source-only gates cannot unblock native stages.
+
+Frozen child types namespace KeyLoad.CrashHost: internal
+ExistingStoreInspectionRequest(string Directory, Guid ExpectedNodeId,
+Guid? Incarnation, ExistingStoreInspectionVariant Variant);
+ExistingStoreInspectionReceipt(int SchemaVersion, bool Success, Guid NodeId,
+Guid Incarnation, int FormatVersion, long Position, byte[]? Value,
+string[] FailureTypes, string? ErrorCode, int ObservedStages, long RetainedBytes).
+ExistingStoreInspector.TryRunAsync(string[] args) -> Task<bool> recognizes only
+one argument existing-store-inspect, writes one bounded receipt JSON after all
+registered cleanup; invalid protocol sets ExitCode2 without secret diagnostics.
+JSON uses System.Text.Json, strict unmapped member rejection; enum serialized as
+names. Parent NEW ExistingStoreInspectorProcess.RunAsync(request, outerOwnerPath,
+CancellationToken=default, bool cancelWhenReady=false) returns own typed exit facts
+with PID, exit code, canceled flag, assembly SHA256 and original drained strings/
+optional receipt. Root integration alone wires this additive mode before existing
+ReplicaCrashScenario.TryRunAsync; old CLI/modes stay byte-equivalent.
+
+```mermaid
+flowchart LR
+    Fixture[Actual closed native fixture] --> Lock[Existing outer lock held]
+    Lock --> Child[Original Release CrashHost]
+    Child --> Guard[Existing native guard]
+    Guard --> Receipt[Safe actual facts]
+    Receipt --> Exit[Original exit and both readers]
+    Exit --> Release[Release outer lock]
+    Release --> Reopen[Ordinary data reopen assertions]
+```
+
+SG009P frozen wire clarification: internal ExistingStoreInspectorProtocol.JsonOptions
+is the shared getter. System.Text.Json camelCase names, case-sensitive properties,
+RespectRequiredConstructorParameters=true, RespectNullableAnnotations=true,
+UnmappedMemberHandling.Disallow and JsonStringEnumConverter(allowIntegerValues:false).
+Require each of directory/expectedNodeId/incarnation/variant exactly once; reject
+unknown/duplicate/missing fields and undefined variants before guard. Nullable
+incarnation is allowed only as explicit null to exercise the actual input guard.
+Valid requests, including expected guard rejection, emit exactly one <=8192-char
+JSON line after cleanup with process exit0; Success=false and original failure
+facts distinguish rejection. Malformed/oversized protocol exits2 with no stdout
+receipt and no exception-secret diagnostics. Stdout has no other text; fixed
+stderr ready marker exists only for WaitBeforeOpen. Larger than256-byte read values
+fail rather than truncating a successful record; malformed protocol tests retain
+original identity/journal bytes and then genuine ordinary reopen.
+
+SG009P type/path clarification: FailureTypes uses each original exception type's
+FullName, original top first then actual nested/aggregate causes; ErrorCode is the
+actual first KeyLoadException code name. A graph over64 cannot become a truncated
+complete receipt: exit2 after available cleanup, no successful protocol evidence.
+NonCanonicalDirectory constructs Path.Combine(request.Directory, "."); parent
+also exercises dotdot as actual request Directory with Normal. This does not
+change filesystem identity or introduce a provider fault callback.
+
+SG009P console ownership: recognized dedicated inspector process captures its
+original stdout/stderr writers once, then directs Console.Out/Error to
+TextWriter.Null for its entire inspector mode through process exit. It emits
+only the safe protocol JSON/fixed readiness directly through those captured
+original writers. Do not restore console writers before exit, since native
+background diagnostics could race the receipt. Actual exception objects/failure
+facts and cleanup remain preserved. This changes only the dedicated inspector
+mode, never native factory logging or other CrashHost modes; source-only logging
+hygiene does not certify native process settlement.
+
+SG009P stdin settlement clarification: child drains original stdin to EOF while
+retaining at most4096 chars and an overflow flag. Overflow rejects before parsing
+or native guard; no unbounded buffer or early pipe-close rejection. Parent's
+original30s deadline/kill/exit/readers owns the entire read. Parent ready-or-exit
+selection must not leave a faulting WaitAsync wrapper detached from actual owned
+process/input/readers. A failed post-start handoff retains the started original
+process until kill/reap and every initialized original stream task settle.
+
+## SG009P-C2 owned cleanup classification (Accepted)
+
+The source build exposed CA1031 in guarded gate cleanup and generic capture.
+Preserve every diagnostic and all original faults: no suppression, severity
+change or tautological catch filter. Use the existing source-owned throwing
+callback boundary pattern, with a private OwnedCleanupFailureException holding
+the same original reference/InnerException. Invoke catches and rethrows that
+wrapper; Capture catches ONLY the private wrapper and records its Original,
+without Flatten. Guarded gate acquisition runs through this synchronous capture;
+ordinary open/dispose remains literal unchanged. Child operation uses that same
+private capture for its synchronous actual work and cleanup. Its async dedicated
+mode has an analogous private thrown mode-failure wrapper and specific outer
+handler for protocol exit2, preserving original exception cause without diagnostics.
+These internal wrapper types never replace actual failures in returned type facts.
+No operation moves thread, detaches or skips cleanup; no public contract changes.
+Allocation exhaustion during wrapper/list construction cannot certify complete
+fatal cleanup continuation; original inspector process remains the final owner.
+Source/lifetime review and actual corrupt-original process cases are the evidence;
+no fake fatal objects/handles or numeric coverage claim. C1 packet remains sealed.
+C2 worker owns only revised temp guard cleanup/runtime and child mode/operation
+helpers (private nested wrappers allowed); root reviews original identity/flow,
+limits/build/format and joins all C1 unchanged files plus parent12/shared5. Actual
+normal/scalar/full recovery/RF3 qualification stays required before completion.
+
+## SG009P-T2 process settlement corrections (Accepted)
+
+Independent source review identified readiness matching after complete marker,
+kill errors escaping before original joins, and two lexical-case assertions using
+an exception type as an ErrorCode. Preserve T1 sealed packet. T2 temp revisions
+may touch only parent pipe/session/start-failure/lifetime helpers and the lexical
+case test as required. Once ready completes, stop further marker indexing.
+Capture original kill failure but ALWAYS await original exit/input/stdout/stderr
+under retained outer ownership before propagating all original causes; kill
+failure cannot release a live child's owner. Original cleanup10s is warning only,
+job timeout final external bound, no detached/fake settlement. Use specific owned
+throw/catch boundaries if necessary; keep every analyzer enabled. Lexical failures
+have actual ArgumentException type and null ErrorCode; never invented type-as-code.
+Review every revised source/hash and actual flow tests in GitHub; source-only
+rare kill failure review cannot be labelled a runtime or coverage gate.
+
+SG009P-T2 bound/quality refinement: name the two fixed parent diagnostics, preserve
+all configured analyzers and use legitimate owned throw/specific-catch boundaries
+for captured cleanup failures rather than unfiltered nonrethrow generic catches.
+AC-SG009P-003 includes two actual native-record edges: ordinary fixture commits a
+256-byte value and original child returns all256 bytes; commits257 bytes and child
+returns actual InvalidDataException/no ErrorCode/no value, without truncation.
+After actual exit/readers/outer release, ordinary reopen must retain complete
+original256/257 bytes, committed position and identity/journal bytes. These new
+positive/negative cases live only in the existing parent data-test file; actual
+GitHub normal/scalar execution is required, no fake store/provider or local run.
+
+## SG009P-C3 framework-owned single wrapper (Accepted)
+
+Complete C2 projection build reports CA1064 and three CA1032 diagnostics for the
+private custom exception. Preserve all diagnostics/public API boundaries: replace
+only those private custom wrappers with framework AggregateException containing
+exactly one original exception, as in the existing throwing callback pattern.
+Specific outer AggregateException catch extracts exactly its sole immediate
+InnerExceptions[0], preserving the same original aggregate/fatal reference and
+all nested causes; never Flatten, unwrap recursive native aggregates, or invent
+public exception constructors. Private Invoke always creates that one outer
+wrapper before its handler, including async dedicated mode. Ordinary runtime and
+returned actual failure graph remain unchanged. C1/C2 sealed history remains;
+C3 temp changes only guard cleanup and child mode files. Wrapper/list allocation
+exhaustion limitation and original process final ownership remain explicit.
+Parent T2 uses the same legitimate framework owned-callback classification
+pattern where generic nonrethrow catches would violate CA1031, while actual exit/
+input/readers remain independently joined before owner release/propagation.
+
+## SG009P-T3 authentic exit and original-error join (Accepted)
+
+AC-SG009P-004 requires positive native exit authority: the original registered
+WaitForExitAsync must succeed, or its protected synchronous Process.WaitForExit
+fallback must succeed. Faulted/canceled tasks and pipe EOF alone are not exit
+proof. ObserveProcessExitAsync(Process,Task?,List<Exception>) returns Task<bool>;
+all available original input/stdout/stderr tasks and the original WhenAll task
+are independently observed, with reference-deduplicated original causes. Only
+positive exit authority plus these joins permits originalTasksJoined and release.
+If both authorized native exit observers fail, retain the actual Process, original
+failures and outer owner in an explicit awaited fail-stop retention latch until
+external GitHub job termination. The infinite delay is expressly UNSETTLED and
+never substitutes for an exit task, success receipt or reaping evidence; no retry
+or polling loop is authorized. Wrapper/list allocation exhaustion stays an
+explicit limitation, and rare OS observer/release failures have source-review
+exceptions rather than fabricated fault tests or numerical coverage claims.
+
+Session.SettleAsync(List<Exception>,bool) retains the same original tasks and
+records independently captured kill/exit/input/readers. Session.Release(List<Exception>)
+releases the actual Process only after authentic joined settlement and preserves
+its actual disposal cause. Existing fallback DisposeAsync collects settle/release
+causes; no finally may replace a prior primary. Lifetime.RunAsync must explicitly
+join its actual primary operation failure, session settlement/release and actual
+outer owner release before throwing or returning. Its session async-using is
+replaced by this owned join. Startup cleanup follows the same positive-exit rule
+and never fills absent task slots with fake completions. WriteRequestAsync joins
+actual WriteAsync/FlushAsync and independently captured stdin.Close, preserving
+both original causes and actual EOF delivery.
+
+One NEW private ExistingStoreInspectorFailureJoin helper owns Capture(Action,List<Exception>),
+ObserveAsync(Task,List<Exception>)->Task<bool> and Throw(List<Exception>). Closed
+Invoke/Await boundaries throw one framework AggregateException with the same
+original; the outer specific handler extracts only that immediate object. Use
+reference identity to deduplicate repeated observations, preserve a sole original
+with EDI, and aggregate distinct originals without Flatten. No custom/public
+exception type, suppressions, changed analyzer severity, provider doubles or
+fake-process fault fixtures. Source-only review binds every rare error branch.
+
+Compiler/style repairs are accepted in the same private parent boundary:
+CancellationToken last in all parent/fixture signatures and call sites;
+Convert.ToHexStringLower for the actual assembly digest; awaited CancelAsync;
+auto-property pipe character count; actual instance-owned Process setup with
+awaited startup cleanup and explicit ownership transfer/disposal, preserving all
+original registrations; braces and method-group fixes; static fixture directory
+helper with updated genuine calls; remove the unused using. These remove no
+resource operation or diagnostic. Type/file/function/depth limits remain200/400/50/3.
+
+Exact write ownership: effective T1+T2 Session, SessionStartFailure, Lifetime,
+PipeCapture, Process, Fixture, MissingTests and ValidationTests, plus at most the
+one NEW FailureJoin helper. All original22 TUnit cases, eight malformed IPC
+payloads, lexical corrections and genuine256/257 record/identity/journal/reopen
+assertions remain unchanged. Child, storage, shared projects, native benchmark,
+workflow, dependencies and Git belong to root or other owners. Worker writes only
+a separate temporary T3 packet; final all-source review/build/format/governance
+and delivered-SHA Tests normal/scalar/full recovery/RF3 remain required.
+
+## TS009W actual warmup receipts retained (Accepted source contract)
+
+REQ-BC060/061/062 and AC-TSI003/004/005/008 require actual warmup receipt facts
+for the later direct native final oracle. AC-TW009-001: create one fixed1280-slot
+warmup backing array (5repetitions*256operations) before clocks, initialized with
+correct repetition/index/worker and NotStarted. Preserve the same five warmup
+workflows and real validated attempt/ACK/sequence/error/latency facts; never infer
+successful receipt sequences from operation ordinals or discard completed warmup
+ledgers. Each executor writes only its original dedicated256-slot slice using
+the existing ledger's publication/duplicate/identity/concurrency contract.
+
+AC-TW009-002: measured50000-slot storage and its original boundaries are unchanged
+and separate from warmup1280; later repetition setup cannot overwrite earlier
+warmup slots. Unexecuted/failed/canceled warmup slots stay explicit actual outcomes.
+A completed RunState.Finish returns the same live-owned ReadOnlyMemory view as a
+NEW internal init-only RunResult.WarmupAttempts property. All original workers
+have settled before publication. Existing constructor/RunAsync/result schema1
+writer behavior remains compatible; no raw wire/host/native/site claim changes.
+
+Exact library edits: TimeSeriesIntensiveAttemptLedger adds CreateWarmupStorage()
+and factors its existing canonical initializer into a private bounded helper,
+without changing CreateMeasuredStorage/Publish semantics; RunState adds one
+WarmupStorage array and binds it on Finish; RepetitionExecutor receives the same
+array (before final CancellationToken) and uses repetition*WarmupCount offset;
+Runner passes that array. RunResult adds only the init-only property. No target,
+callback, mock/fake, native adapter, failure classifier, timer or operation change.
+
+AC-TW009-003 source-level TUnit tests use real ledger/value contracts as pure
+acceptance data: all1280 initial identities/not-started positions; five disjoint
+warmup slices retaining deliberately non-ordinal supplied sequences/ACKs; measured
+storage byte/value equality and separation; missing/duplicate/wrong-identity
+rejection and retained failed latency; RunState.Finish exposes exactly the owned
+view without fabricating success. Pure inputs are not native executed receipts.
+Actual end-to-end warmup receipt validation remains required in all30 later native
+cells; no doubles or source tests count as that evidence.
+
+Worker ownership is only the five library files named above and NEW
+TimeSeriesIntensiveWarmupStorageTests.cs plus at most one NEW prefixed pure test
+helper under the matching UnitTests Intensive slice. Temporary packet only;
+original baseline hashes and delta preserved, tests first,200/400/50/3 limits.
+Root owns shared docs, all source/build/format/Git and native host/proof/wire joins.
+Exact-source Tests normal/scalar and later Benchmarks native6/30 remain gates.
+
+SG009P-T3 original handle binding: borrow and retain the actual outer owner's
+SafeFileHandle immediately after the live FileStream is assigned to its owner;
+no additional handle ownership. After actual FileStream.DisposeAsync, read only
+that retained handle's IsClosed. Never obtain FileStream.SafeFileHandle after
+closing: [the .NET10 native strategy getter](https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/IO/Strategies/OSFileStreamStrategy.cs)
+performs seek before returning the handle. An initial getter failure remains a
+primary original and still joins actual FileStream disposal independently. Root
+accepted this normal-path source correction before final T3 seal; no local probe.
+
+AC-TSM009-001 / TASK-ISO-TSM009-O corrects only the independent Timescale
+Aspire model test oracle under TSI001/003/008. Pinned Aspire13.6.0 intentionally
+clears Tag when SHA256 is set, as its [source](https://raw.githubusercontent.com/dotnet/aspire/v13.6.0/src/Aspire.Hosting/ApplicationModel/ContainerImageAnnotation.cs)
+shows. Assert null Tag, exact registry/image/digest and actual rendered
+digest-qualified identity; keep the tag-plus-digest runner binding and every
+native placement/credential/bootstrap check. Original real GitHub model failures
+are the failing regression baseline. Scope is solely ComparisonTests
+IsolatedTimeSeriesTimescaleResourceTests.cs, sealed temporary worker source then
+root review/build/integration; no dependency or production change. Genuine
+exact-SHA Benchmarks model reports remain required before claiming pass.

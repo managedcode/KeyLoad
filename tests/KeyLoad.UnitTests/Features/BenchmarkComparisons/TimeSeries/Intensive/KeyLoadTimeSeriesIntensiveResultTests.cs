@@ -38,15 +38,25 @@ internal sealed class KeyLoadTimeSeriesIntensiveResultTests
             await Assert.That(error.HttpStatus).IsNull();
         }
 
-        var missing = Assert.ThrowsExactly<KeyLoadTimeSeriesIntensiveProblemException>(() =>
-            KeyLoadTimeSeriesIntensiveResult.Value(default(Result<SampleAggregate>)));
-        await Assert.That(missing.Code).IsNull();
-        await Assert.That(missing.HttpStatus).IsNull();
-
         var unknownWithStatus = Assert.ThrowsExactly<KeyLoadTimeSeriesIntensiveProblemException>(() =>
             KeyLoadTimeSeriesIntensiveResult.Value(Failed<SampleAggregate>(Problem("future-code", 418))));
         await Assert.That(unknownWithStatus.Code).IsNull();
         await Assert.That(unknownWithStatus.HttpStatus).IsEqualTo(418);
+    }
+
+    [Test]
+    public async Task AcTsi006DefaultFailurePreservesTheSdkGenericProblemStatus()
+    {
+        var result = default(Result<SampleAggregate>);
+        var sdkProblem = result.Problem;
+        await Assert.That(result.IsSuccess).IsFalse();
+        await Assert.That(sdkProblem).IsNotNull();
+        await Assert.That(sdkProblem!.StatusCode).IsEqualTo(500);
+
+        var error = Assert.ThrowsExactly<KeyLoadTimeSeriesIntensiveProblemException>(() =>
+            KeyLoadTimeSeriesIntensiveResult.Value(result));
+        await Assert.That(error.Code).IsNull();
+        await Assert.That(error.HttpStatus).IsEqualTo(sdkProblem.StatusCode);
     }
 
     [Test]

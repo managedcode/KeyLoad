@@ -6,6 +6,7 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 internal sealed class TimeSeriesIntensiveRunState(TimeSeriesIntensiveScenario scenario)
 {
     internal TimeSeriesIntensiveAttempt[] Storage { get; } = TimeSeriesIntensiveAttemptLedger.CreateMeasuredStorage();
+    internal TimeSeriesIntensiveAttempt[] WarmupStorage { get; } = TimeSeriesIntensiveAttemptLedger.CreateWarmupStorage();
     internal ImmutableArray<TimeSeriesIntensiveRepetitionResult>.Builder Repetitions { get; } =
         ImmutableArray.CreateBuilder<TimeSeriesIntensiveRepetitionResult>(TimeSeriesIntensiveProfile.RepetitionCount);
     internal TimeSeriesIntensiveRunStage Stage { get; set; } = TimeSeriesIntensiveRunStage.Preparation;
@@ -19,6 +20,9 @@ internal sealed class TimeSeriesIntensiveRunState(TimeSeriesIntensiveScenario sc
         TimeSeriesIntensiveRunFailure? failure = error is null ? null : new(Executor?.Stage ?? Stage,
             Math.Min(Repetition, TimeSeriesIntensiveProfile.RepetitionCount - 1),
             captured.Outcome, captured.Failure);
-        return new(scenario, Stopwatch.Frequency, Storage, Repetitions.ToImmutable(), SeedVerified, failure);
+        return new(scenario, Stopwatch.Frequency, Storage, Repetitions.ToImmutable(), SeedVerified, failure)
+        {
+            WarmupAttempts = WarmupStorage
+        };
     }
 }

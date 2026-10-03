@@ -26,6 +26,16 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
         runtime = new(options);
     }
 
+    internal ZoneTreeStore(ZoneTreeStoreRuntime runtime, Guid expectedNodeId)
+    {
+        ArgumentNullException.ThrowIfNull(runtime);
+        if (expectedNodeId == Guid.Empty || runtime.Identity.NodeId != expectedNodeId)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, IdentityScopeInvalid);
+        }
+        this.runtime = runtime;
+    }
+
     /// <summary>Runs a read callback while the consistent provider gate is held.</summary>
     /// <typeparam name="T">Owned result returned by the callback.</typeparam>
     /// <param name="read">Synchronous callback that cannot retain the view.</param>

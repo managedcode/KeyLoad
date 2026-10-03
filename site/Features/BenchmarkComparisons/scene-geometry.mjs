@@ -64,7 +64,7 @@ export const SCENE = Object.freeze({
 export const SCENE_TEXT = Object.freeze({
   poster: 'Static illustration.',
   loading: 'Loading the illustration.',
-  ready: 'Conceptual illustration · not live data.',
+  ready: 'Illustration running.',
   paused: 'Illustration paused.',
   zeroSize: 'The illustration is waiting for visible space.',
   error: 'The 3D illustration is unavailable; the static illustration remains visible.',
