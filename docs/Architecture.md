@@ -785,7 +785,7 @@ classDiagram
 
 [ADR-062](ADR/ADR-062-workflow-separation.md) separates PR CI, project Tests, all Benchmarks, Release
 package builds and Website publication. `ci.yml` (`CI`) always checks repository rules on PR/manual runs.
-`tests.yml` (`Tests`) retains main/manual full build/format/unit/scalar/recovery/
+`tests.yml` (`Tests`) retains main/PR/manual full build/format/unit/scalar/recovery/
 Docker RF3 gates. `release.yml` (`Release`) builds actual NuGet package artifacts.
 `benchmarks.yml` (`Benchmarks`) owns every native comparison and TimeSeries image
 check, with its own full build/format/rules prerequisite and isolated Linux cells.

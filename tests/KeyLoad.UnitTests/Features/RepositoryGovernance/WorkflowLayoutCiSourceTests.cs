@@ -40,6 +40,7 @@ internal sealed class WorkflowLayoutCiSourceTests
         var tests = WorkflowLayoutSource.Read(TestsFile);
         await Assert.That(tests.StartsWith("name: Tests\n", StringComparison.Ordinal)).IsTrue();
         var testEvents = WorkflowLayoutSource.EventBlock(tests);
+        await Assert.That(testEvents.Contains("pull_request:", StringComparison.Ordinal)).IsTrue();
         await Assert.That(testEvents.Contains("workflow_dispatch:", StringComparison.Ordinal)).IsTrue();
         await Assert.That(testEvents.Contains("branches: [main]", StringComparison.Ordinal)).IsTrue();
         var testJobs = WorkflowLayoutSource.JobIds(tests);

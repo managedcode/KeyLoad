@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "scope": "Workflow roles and exact producer identities; not complete database or performance qualification",
+  "sourceRevision": "9e0532fdeed7c55a17f9c857f8d5a264215341e7",
+  "delivery": "pushed-to-main",
+  "activeWorkflows": [
+    {
+      "name": "CI",
+      "path": ".github/workflows/ci.yml",
+      "id": 372183043
+    },
+    {
+      "name": "Tests",
+      "path": ".github/workflows/tests.yml",
+      "id": 373808966
+    },
+    {
+      "name": "Benchmarks",
+      "path": ".github/workflows/benchmarks.yml",
+      "id": 373808964
+    },
+    {
+      "name": "Release",
+      "path": ".github/workflows/release.yml",
+      "id": 373808965
+    },
+    {
+      "name": "Website",
+      "path": ".github/workflows/pages.yml",
+      "id": 372547499
+    }
+  ],
+  "ci": {
+    "runId": 37113420787,
+    "attempt": 1,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37113420787",
+    "conclusion": "success",
+    "jobIds": {
+      "analyzers": 111175550784,
+      "repositoryChecks": 111175550969,
+      "completeBuildAndFormat": 111175579013
+    }
+  },
+  "release": {
+    "runId": 37113424709,
+    "attempt": 1,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37113424709",
+    "conclusion": "success",
+    "jobId": 111175559567,
+    "artifact": {
+      "id": 11271266373,
+      "name": "packages-0.1.0-dev",
+      "digest": "sha256:c095c1a378ebabfc88c7419795d969983315cb9e9a3bb027b8da7517ee0cdbcf"
+    },
+    "downloadVerification": "All nine files match manifest SHA256/size and embedded nuspec version",
+    "manifest": {
+      "sourceRevision": "9e0532fdeed7c55a17f9c857f8d5a264215341e7",
+      "runId": "37113424709",
+      "runAttempt": "1",
+      "version": "0.1.0-dev",
+      "packages": [
+        {
+          "file": "KeyLoad.Abstractions.0.1.0-dev.nupkg",
+          "bytes": 299678,
+          "sha256": "acd0988eb239f8e9749f4709b5fafcef6c9fe1431a88de2851281bfbebf8cdc1"
+        },
+        {
+          "file": "KeyLoad.Artifacts.0.1.0-dev.nupkg",
+          "bytes": 11113,
+          "sha256": "20e09d3cc364c7451dd6100273820f193a9a768ca0210d6946e982ed260f3f4c"
+        },
+        {
+          "file": "KeyLoad.Client.0.1.0-dev.nupkg",
+          "bytes": 23808,
+          "sha256": "48ae3f7e1d2d664c52825bcbe35277e64e01091f9c1ca398b45e335f158e65d9"
+        },
+        {
+          "file": "KeyLoad.Core.0.1.0-dev.nupkg",
+          "bytes": 164947,
+          "sha256": "9e288123a2c2429848d2635535685c20b1bb1b79aa19202d829d7858d827a7e5"
+        },
+        {
+          "file": "KeyLoad.Orleans.0.1.0-dev.nupkg",
+          "bytes": 112358,
+          "sha256": "5aec3e75fc2609d00deb68548bfdb4a549e4f97e3481a7c49867f6348e83d632"
+        },
+        {
+          "file": "KeyLoad.Query.0.1.0-dev.nupkg",
+          "bytes": 42808,
+          "sha256": "dfbfbc759eb35403fa057ea37cbfdfcf2d4c3402c63ef14a5b03475bac32f9cf"
+        },
+        {
+          "file": "KeyLoad.Replication.0.1.0-dev.nupkg",
+          "bytes": 80706,
+          "sha256": "8bf7d003ec629551a3ad2c080d12dcf1e4b3d11b4cf53def2dfc4cc0b90e66c5"
+        },
+        {
+          "file": "KeyLoad.Security.0.1.0-dev.nupkg",
+          "bytes": 8058,
+          "sha256": "52b1ae571c15400ec69810690fdfe1d7e78fa49f997e9c2f764aafac58531563"
+        },
+        {
+          "file": "KeyLoad.Storage.ZoneTree.0.1.0-dev.nupkg",
+          "bytes": 59517,
+          "sha256": "91d09b17d98f659daa0b966579d75b9f1b0f7b871761e6c8ec212b26d5a20470"
+        }
+      ]
+    },
+    "feedPublication": "not-requested-or-performed"
+  },
+  "benchmarks": {
+    "runId": 37113337516,
+    "attempt": 1,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37113337516",
+    "conclusion": "failure",
+    "completeBuildAndFormatJob": {
+      "id": 111175309107,
+      "conclusion": "success"
+    },
+    "pinnedImage": {
+      "jobId": 111176089078,
+      "conclusion": "success",
+      "artifactId": 11270701273,
+      "artifactDigest": "sha256:266bb2f735969a70e02a1f60a2d020c9422ccef32fd480dd65c4a2899be6e20e",
+      "factsSha256": "8e12eb3c53baa95c36f3188e3a52c254730256f1cf463b4f254867c7883e38b3",
+      "context": {
+        "sourceRevision": "9e0532fdeed7c55a17f9c857f8d5a264215341e7",
+        "runId": 37113337516,
+        "attempt": 1,
+        "repository": "managedcode/KeyLoad",
+        "ref": "refs/heads/main",
+        "event": "push",
+        "workflow": "Benchmarks",
+        "job": "timeseries-image-facts",
+        "runnerOs": "Linux",
+        "hostOs": "Ubuntu 24.04.5 LTS",
+        "hostArchitecture": "X64",
+        "observedAt": "2026-10-03T09:38:22.252593+00:00",
+        "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37113337516"
+      },
+      "imageReference": "docker.io/timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e",
+      "cleanupCompleted": true,
+      "tunitSummary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    "nativeModels": {
+      "jobId": 111176089115,
+      "failedCases": 4,
+      "reason": "Unchanged Timescale resource-model assertions expect tag 2.30.2-pg18; actual image annotation has empty tag."
+    },
+    "completeCohort": "unavailable; measured target jobs and aggregate skipped"
+  },
+  "tests": {
+    "runId": 37113337508,
+    "attempt": 1,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37113337508",
+    "statusAtInspection": "completed",
+    "ordinaryUnitStep": "failure",
+    "scalarStep": "skipped",
+    "recoveryStep": "success",
+    "rf3": {
+      "jobId": 111175308931,
+      "conclusion": "failure",
+      "failedCases": 1,
+      "case": "AcAisql007InsufficientDataBytesRejectSdkAndOfficialSqlBeforeIdClaimWhileDirectControlKeepsRf3Healthy",
+      "totalCases": 63,
+      "passedCases": 62
+    },
+    "fullQualification": "not-passing",
+    "conclusion": "failure",
+    "unitSummary": {
+      "total": 1857,
+      "passed": 1856,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "unitFailure": "AcTsi006UnknownProblemNamesAndUnavailableStatusStayUnknown; identical pre-task baseline assertion",
+    "workflowLayoutCases": [
+      {
+        "class": "WorkflowLayoutCiSourceTests",
+        "case": "AcWf001OnlyFiveWorkflowsRemainWithSeparateCiAndTestGates",
+        "status": "passed"
+      },
+      {
+        "class": "WorkflowLayoutPipelineSourceTests",
+        "case": "AcWf005ReleaseBuildsAndRetainsNuGetPackagesWithoutPublishing",
+        "status": "passed"
+      },
+      {
+        "class": "WorkflowLayoutPipelineSourceTests",
+        "case": "AcWf002BenchmarksRetainsTheIsolatedAndPinnedImageGraph",
+        "status": "passed"
+      },
+      {
+        "class": "WorkflowLayoutPipelineSourceTests",
+        "case": "AcWf004WebsiteFollowsBenchmarks",
+        "status": "passed"
+      }
+    ],
+    "recoverySummary": {
+      "total": 183,
+      "passed": 183,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "artifactName": "test-results-ubuntu-latest",
+    "tunitReportSha256": {
+      "KeyLoad.UnitTests-linux-net10.0.tunit-report.json": "06c3f05698f86c2dc944351eb89a014a92331a757e4b662ee84668c31c7c42e4",
+      "KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json": "27f808bd6ad4acc59974f587ed7a08f5f5637f674f53674d97829b3983eaf221"
+    }
+  },
+  "website": {
+    "runId": 37113337499,
+    "attempt": 1,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37113337499",
+    "conclusion": "failure",
+    "qualificationJobId": 111175308778,
+    "reason": "No complete authenticated isolated cohort and native coverage inputs; publication skipped. Same publication blocker before task.",
+    "newSiteRegression": "compiled by full solution build; runtime blocked by mandatory before-session authentic complete-cohort inputs"
+  },
+  "followUp": "Preserve original PR test trigger and cancellation in separate Tests; evidence above is bound only to its stated milestone SHA."
+}

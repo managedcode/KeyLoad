@@ -7,7 +7,7 @@ Requirements: REQ-WF-001..006. Acceptance: AC-WF-001..006.
 
 Use five plainly named pipelines with distinct responsibilities:
 CI handles pull requests/manual build, format, analyzers and repository rules;
-Tests handles main/manual project unit/scalar, process recovery and Docker/Aspire
+Tests handles main/PR/manual project unit/scalar, process recovery and Docker/Aspire
 RF3 qualification; Benchmarks handles every comparative performance test,
 including TimeSeries image checks; Release builds NuGet package artifacts from
 version tags/manual source; Website separately qualifies and publishes the site.
@@ -16,6 +16,7 @@ Remove standalone governance and per-feature TimeSeries workflows.
 ```mermaid
 flowchart LR
     PR[Pull request] --> CI[CI rules build format analyzers]
+    PR --> Tests[Tests ordinary unit recovery RF3]
     Main[Exact main source] --> Tests[Tests ordinary unit recovery RF3]
     Main --> Benchmarks[Benchmarks isolated native cells and image checks]
     Tag[Version tag or manual source] --> Release[Release NuGet package artifacts]
@@ -32,7 +33,7 @@ flowchart LR
    reviews every diff and owns combined evidence. Workers cannot commit/push.
 2. CI retains an independent always-triggered repository-checks job, full Release/
    formatter checks and real analyzer regressions. It has PR/manual triggers and
-   no push trigger. Tests retains all original ordinary main qualification gates,
+   no push trigger. Tests retains all original ordinary main/PR qualification gates,
    including full Release, formatter, rules, analyzers, normal/scalar units,
    real-process recovery and genuine RF3 through real .NET/official MCP SDKs.
 3. Move every existing native comparison job to benchmarks.yml unchanged except
@@ -42,7 +43,7 @@ flowchart LR
    image test/job/artifact there under the same build prerequisite.
 4. New isolated contracts bind to exact Benchmarks/benchmarks.yml identity; C#
    native/fault/image admission and unit fixtures match. TimeSeries also validates
-   the exact workflow ref and retains it in its context. Positive/negative
+   the exact workflow ref without changing the retained receipt shape. Positive/negative
    provenance regressions remain; no producer-name fallback is introduced.
 5. Historical legacy report producer runs retain KeyLoad CI/ci.yml identity.
    Current metadata is explicitly named CI via a separate workflowDisplayName

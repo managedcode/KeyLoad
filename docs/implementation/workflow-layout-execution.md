@@ -31,11 +31,11 @@ Ordered steps and done conditions:
   exact native job/step/artifact names. Workers cannot commit or push.
 - [x] Run static governance, syntax/whitespace and integrated source review. Preserve
   all pre-existing dirty work; stage only task-owned hunks/files.
-- [ ] Commit and push the stable layout milestone on current main. Inspect actual
+- [x] Commit and push the stable layout milestone on current main. Inspect actual
   push-triggered Tests/Benchmarks, manual CI/Release and Website exact-SHA jobs. No duplicate full dispatch.
-- [ ] Download changed-job artifacts, record actual SHA/run/job URLs and gate status;
+- [x] Download changed-job artifacts, record actual SHA/run/job URLs and gate status;
   fix layout/provenance failures and repeat relevant GitHub checks if required.
-- [ ] Close all AC or state exact pre-existing/external blockers without claiming
+- [x] Close all AC or state exact pre-existing/external blockers without claiming
   failed/skipped/incomplete measurement, readiness or publication success.
 
 Baseline failures: main9b3bd8ed64b42e7e3bd37d454face7984dfc6b5f CI37111280400 and
@@ -56,7 +56,7 @@ Existing incomplete product qualifications are not silently included as new repa
 
 ## Final owner clarification and task graph extension
 
-- [x] TASK-WF-ROOT separates CI PR checks from Tests main/manual project suites,
+- [x] TASK-WF-ROOT separates CI PR checks from Tests main/PR/manual project suites,
   names Benchmarks/Website plainly, and adds Release tag/manual package builds.
 - [x] TASK-WF-CS updates the bounded C# fixtures and minimal source-contract
   regressions to all five final workflow roles/names; no runtime behavior changes.
@@ -84,3 +84,46 @@ HEAD archive plus only this task's source changes passes the existing validator:
 The sandboxed development build returned exit1 with0 warnings/0 errors after
 5min and is not a passing build result. Required compilation/runtime evidence
 comes from the exact delivered GitHub workflows. No local tests were run.
+
+## Delivered GitHub milestone
+
+Commit `9e0532fdeed7c55a17f9c857f8d5a264215341e7` is pushed to main.
+The authenticated workflow inventory contains exactly the five active names
+CI, Tests, Benchmarks, Release and Website. CI run
+[37113420787](https://github.com/managedcode/KeyLoad/actions/runs/37113420787)
+passes repository rules, the complete Release/format build and analyzer tests.
+Release run
+[37113424709](https://github.com/managedcode/KeyLoad/actions/runs/37113424709)
+passes and retains nine actual `0.1.0-dev` NuGet packages. Downloaded package
+versions, sizes and SHA256 values agree with its source/run-bound `packages.json`.
+Artifact `packages-0.1.0-dev` has authenticated id `11271266373`.
+The [qualification receipt](workflow-layout-qualification.json) retains the exact
+run/job/artifact identities, verified package manifest and real image test summary.
+
+Benchmarks run
+[37113337516](https://github.com/managedcode/KeyLoad/actions/runs/37113337516)
+passes its complete build/format/rules prerequisite and the moved real pinned
+TimeSeries image job `111176089078`. The unchanged native resource-model suite
+then fails four Timescale image-tag assertions (expected `2.30.2-pg18`, actual
+empty tag). The incomplete cohort cannot refresh website metrics.
+
+Tests run
+[37113337508](https://github.com/managedcode/KeyLoad/actions/runs/37113337508)
+passes complete build/format/rules and 118 analyzer cases. All four new
+workflow-layout regression cases pass, as do all 183 process-recovery cases.
+The ordinary unit suite passes 1856/1857; its sole failure is the same pre-task
+SDK-status assertion listed in the baseline above. RF3 passes 62/63 and reports
+one existing SQL admission assertion
+`AcAisql007InsufficientDataBytesRejectSdkAndOfficialSqlBeforeIdClaimWhileDirectControlKeepsRf3Healthy`.
+The moved RF3 job definition is unchanged. Downloaded genuine TUnit reports bind
+these counts and focused assertions to the exact milestone source SHA.
+
+Website run
+[37113337499](https://github.com/managedcode/KeyLoad/actions/runs/37113337499)
+fails authenticated comparison selection and missing coverage inputs, matching
+the pre-task publication blocker. The complete isolated archive needed by the
+SiteTests before-session setup remains unavailable, so a new source/provenance
+test is compiled but cannot be counted as runtime-qualified. Publication gates
+remain intact. These failures do not establish successful database, benchmark
+or website qualification. The follow-up preserves the original PR trigger and
+PR cancellation in the separate Tests workflow.

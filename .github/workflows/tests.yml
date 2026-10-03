@@ -2,12 +2,13 @@ name: Tests
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
   group: keyload-tests-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   repository-checks:
     name: Repository checks

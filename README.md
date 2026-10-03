@@ -347,7 +347,7 @@ The later `5bbf30f70` [Linux source run37104211481](docs/implementation/isolated
 
 - **CI** (`ci.yml`): PR build, formatting, analyzers and repository rules.
 - **Tests** (`tests.yml`): project unit/scalar tests, process recovery and
-  Docker/Aspire RF3 SDK/MCP checks on main or manual runs.
+  Docker/Aspire RF3 SDK/MCP checks on main, PR or manual runs.
 - **Benchmarks** (`benchmarks.yml`): all performance comparisons and TimeSeries
   image checks, with isolated Linux runners and authenticated result artifacts.
 - **Release** (`release.yml`): builds NuGet packages from a version tag or the

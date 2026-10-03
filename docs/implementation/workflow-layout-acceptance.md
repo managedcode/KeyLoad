@@ -14,7 +14,7 @@ public NuGet publication is presumed from the request to build packages.
 - AC-WF-001 / REQ-WF-001: exactly ci.yml, tests.yml, benchmarks.yml, release.yml
   and pages.yml exist at top level with names CI, Tests, Benchmarks, Release,
   Website. CI is PR/manual checks: repository rules, full Release/formatter and
-  analyzer regression checks. Tests is main/manual project qualification:
+  analyzer regression checks. Tests is main/PR/manual project qualification:
   full Release/format/rules/analyzer, unit/scalar, process recovery and genuine
   Docker/Aspire RF3. Repository rules are inside those pipelines, never standalone.
 - AC-WF-002 / REQ-WF-002: Benchmarks is main/manual performance qualification;
