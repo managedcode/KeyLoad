@@ -80,7 +80,7 @@ internal sealed class ZoneTreePointCacheFileFixture : IDisposable
         var store = new ZoneTreeStore(new ZoneTreeStoreOptions(directory)
         {
             Incarnation = incarnation,
-            SigningKey = signingKey is null ? null : new ReadOnlyMemory<byte>(signingKey),
+            SigningKey = signingKey is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(signingKey),
             EmbeddedPointCache = new ZoneTreePointCacheOptions(Budget)
             {
                 MaxEntries = maxEntries,
