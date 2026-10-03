@@ -151,6 +151,8 @@ pending; source compilation is a development check only.
 |---|---|---|---|
 | TASK-ISO-012P | ISO007/008/009; gates_audit capable trust-boundary worker | ONLY NEW site-isolated-github-* and SiteIsolatedGitHub* prefixes; approved written contract after010G/011 source; root shared integration | Tests-first genuine archive/metadata, bounded capture/selection, exact BCL277-file preparation, immutable receipts/freshness; source review then actual native full site/browser80/70/90. Pending |
 | TASK-ISO-012PJ | ISO007/008/009; root strongest integration | Shared before/after hooks, source/coverage/workflow/env joins, publication receipt | Preserve legacy12-file gates independently; capture2 isolated ZIPs, verified277 inputs, complete site suite, both final source/identity freshness checks, actual Pages/live evidence. Pending |
+| TASK-ISO-012PB | ISO007/008/009; gates_audit inherited capable infrastructure worker | ONLY NEW workflows/Features/BenchmarkComparisons/BuildIsolatedSite/AGENTS.md and action.yml, approved012P contract; root owns calling workflow | Move the existing bounded12-file final-build checks intact into one composite; add277-file native before/after verification, original isolated manifest comparison and separate publication field. Static review then actual Pages suite/provider proof. Pending |
+| TASK-ISO-015U | ISO003/006 and HOST007; foundation_review inherited capable worker | ONLY ComparisonHostCleanupTests.cs after read-only cause/ADR043 approval | Tighten exact unusable-endpoint cardinality and all-failed/setup/zero-sample oracle; preserve safe cleanup/secret checks. Root review then full actual Unit and required GitHub gates. Pending |
 
 TASK011 manual exception: deterministic source mutation precisely during the
 sequential producer has no legitimate native observable synchronization point.
@@ -215,6 +217,14 @@ tree. Root corrected sourceChild to the actual canonical site root, preserving
 the production boundary and expected rejection. Native GitHub execution remains
 mandatory; source correction alone is not a passing test.
 
+TASK-ISO-015U implementation routing was unavailable: the platform returned
+`agent thread limit reached` when resuming the approved reviewer with the bounded
+test-only write task. Root implements the single-file correction after completed
+read-only cause analysis. The fixture has six genuine clients and ten scenarios
+at one repetition, so exact expected cardinality is60; every unusable native
+endpoint must report failed/setup/null measurement/zero samples. This cannot
+weaken the independent isolated setup-precedence regression.
+
 Both read-only reviews are complete with the fixture correction joined. Root
 closed the remaining unbounded implicit-disposal risk under AC-ISO-006: explicit
 capture/application disposal now runs as independently attempted30s teardown
@@ -229,3 +239,38 @@ and syntax checks of51 staged JavaScript modules passed. These are source checks
 not native test/runtime qualification. The stopped foundation contains328 scoped
 paths; the active publisher and foreign owning work remain excluded from this
 coherent checkpoint. Next required gate is actual GitHub source qualification.
+
+
+## Native1978/63ac and publisher source join
+
+Foundation1978d0af9453dd1b2c93be074daac6408f46da84 was pushed with328 scoped
+paths. Authentic run37082268730 failed1/1405 Unit cases at the stale cleanup
+unsupported assertion;118 analyzer cases and136 process-recovery cases passed,
+without skips. RF3 failed1/63 after intentional kill/restart because native Aspire
+health wait failed before the restarting resource became healthy. Source63ac
+includes the native WaitOnResourceUnavailable correction; actual run37082449440
+passes63/63 RF3 without skips, but full build fails old publisher Receipt IDE0032/
+IDE0290. Fresh source corrects these without suppression. The exact durable
+record is docs/implementation/isolated-comparison-source-qualification.json.
+Neither run started images/preflight/intensive aggregation; there are no new
+performance or publication receipts to claim.
+
+TASK012P and012PB are source-complete after independent reviews. Root joins
+mandatory before/after BCL preparation, immutable original receipt bytes, exact
+39-source/31-critical native inventory, closed49-file executed dependency hash
+comparison, separate actual measured-source checkouts, bounded final composite,
+and both evidence freshness checks before Pages. A genuine Node/V8 TUnit
+regression rejects unregistered legacy and new publisher sources. SiteTests
+native development compilation passes0warnings/0errors10.33s; governance/YAML/
+Bash/whitespace pass. Full Unit development compilation was blocked solely by
+concurrently untracked CacheMemoryBudget.cs KLD0024; those foreign files are not
+part of this checkpoint. Actual exact-source GitHub remains the qualification.
+
+- [x] Source TASK012P worker prefix and native27 authored cases reviewed.
+- [x] Source TASK012PB composite and preserved legacy12-file gates reviewed.
+- [x] Root source hooks/inventory/environment/checkouts/final builder/freshness joined.
+- [x] Tightened TASK015U real cleanup regression after authentic failing test.
+- [ ] Complete corrected exact-SHA required CI, images and27 native preflights.
+- [ ] Complete270 measured cells and authenticated aggregation.
+- [ ] Qualify full site/native80/70/90/Chrome/no-skip and actual Pages/live metrics.
+- [ ] Isolated TimeSeries native cohort and matched backend coverage.

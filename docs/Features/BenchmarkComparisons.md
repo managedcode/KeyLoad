@@ -397,3 +397,15 @@ flowchart LR
     Proof --> Aggregate[All cells authenticated and complete]
     Aggregate --> Website[Generate metrics and qualify site]
 ```
+
+The reviewed TASK-ISO-012P/012PB/012PJ source join is under Accepted ADR056,
+REQ-BC-056/057/058 and AC-ISO-007/008/009. Mandatory SiteCoverageGate prepares
+two authenticated immutable isolated ZIPs through BCL before source capture and
+rechecks the private original receipt bytes plus277 inputs after the full suite.
+SiteIsolatedCoverageInventoryTests exercises actual Node/V8 and rejects omitted
+legacy/new publisher sources. All39 production and31 critical sources retain
+native80/70/90 gates;49 executed dependencies and the final composite are compared
+against trusted control source. Historical12-file evidence remains independent.
+Both evidence identities and current website SHA must still match before Pages.
+Source readiness is not native coverage,270-cell, publication or live proof;
+actual partial failures are in the source qualification record under implementation.

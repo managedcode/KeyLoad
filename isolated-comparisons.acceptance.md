@@ -435,6 +435,16 @@ the explicit teardown attempt, its stopped guard makes final disposal an
 immediate idempotent token-source release, with no native wait. Application
 disposal has no implicit second invocation. Preserve CA2000 without suppression.
 
+TASK-ISO-012P resource refinement: corruption-only fixture scopes may use native
+filesystem hardlinks to the immutable genuine ZIPs/277 prepared files. Before
+mutating any one file, replace its private link with an exclusive real copy;
+never mutate original linked bytes. Keep private original receipt authority and
+whole-source unchanged checks. The genuine native capture test still downloads
+the actual two ZIPs, checks authenticated digest/metadata, and cleans its owned
+scope; it does not duplicate277-file extraction. Serialize that positive test
+and require the actual two ZIP sizes plus1GiB available disk before downloads.
+Metadata/parser cases copy only metadata; no synthetic positive or fake provider.
+
 ## TASK-ISO-011 approved compact publication contract, 2026-10-03
 
 AC-ISO-008/009: the complete schema4 aggregate and its270 byte-preserved workers

@@ -19,6 +19,10 @@ on:
         description: Historical comparison run for validation only; blank selects latest comparison
         required: false
         type: string
+      isolated_evidence_run:
+        description: Historical isolated aggregate run for validation only; blank selects latest qualified cohort
+        required: false
+        type: string
 permissions:
   contents: read
   actions: read
@@ -28,7 +32,7 @@ concurrency:
 jobs:
   qualify:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 180
     outputs:
       mode: ${{ steps.source.outputs.mode }}
       site_revision: ${{ steps.source.outputs.revision }}
@@ -42,6 +46,9 @@ jobs:
       KEYLOAD_SITE_ARCHIVE_RECEIPT: ${{ github.workspace }}/artifacts/site-evidence/archive-receipt.json
       KEYLOAD_SITE_REPORTS: ${{ github.workspace }}/artifacts/comparisons
       KEYLOAD_SITE_COVERAGE: ${{ github.workspace }}/artifacts/site-evidence/js-coverage
+      KEYLOAD_SITE_ISOLATED_CAPTURE: ${{ github.workspace }}/artifacts/site-evidence/isolated-capture
+      KEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT: ${{ github.workspace }}/artifacts/site-evidence/isolated-capture/archive-receipt.json
+      KEYLOAD_SITE_ISOLATED_AGGREGATE: ${{ github.workspace }}/artifacts/site-evidence/isolated-capture/input/aggregate
     steps:
       - name: Checkout trusted workflow control source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -55,6 +62,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           REQUESTED_MODE: ${{ inputs.mode }}
           REQUESTED_RUN: ${{ inputs.evidence_run }}
+          ISOLATED_REQUESTED_RUN: ${{ inputs.isolated_evidence_run }}
           CONTROL_REVISION: ${{ github.workflow_sha }}
         shell: bash
         run: |
@@ -62,7 +70,7 @@ jobs:
           if [[ "$EVENT_NAME" == workflow_dispatch ]]; then mode="$REQUESTED_MODE"; fi
           revision="$GITHUB_SHA"
           if [[ "$mode" == publish ]]; then
-            [[ "$GITHUB_REF" == refs/heads/main && -z "$REQUESTED_RUN" ]]
+            [[ "$GITHUB_REF" == refs/heads/main && -z "$REQUESTED_RUN" && -z "$ISOLATED_REQUESTED_RUN" ]]
             revision=$(timeout 120s gh api "repos/$GH_REPO/git/ref/heads/main" --jq .object.sha)
           fi
           [[ "$revision" =~ ^[a-f0-9]{40}$ && "$CONTROL_REVISION" =~ ^[a-f0-9]{40}$ ]]
@@ -81,6 +89,13 @@ jobs:
           jq '.result' "$EVIDENCE_DIR/archive-envelope.json" > "$KEYLOAD_SITE_ARCHIVE_RECEIPT"
           printf 'KEYLOAD_SITE_EVIDENCE_RUN=%s\nKEYLOAD_SITE_MEASURED_REVISION=%s\n' "$(jq -r '.run.id' "$proof")" "$(jq -r '.measuredSourceRevision' "$proof")" >> "$GITHUB_ENV"
           printf 'measured_revision=%s\n' "$(jq -r '.measuredSourceRevision' "$proof")" >> "$GITHUB_OUTPUT"
+          isolated_args=("--input=$KEYLOAD_SITE_ISOLATED_CAPTURE" "--mode=$mode" "--site-revision=$revision" "--workflow-revision=$CONTROL_REVISION")
+          if [[ -n "$ISOLATED_REQUESTED_RUN" ]]; then isolated_args+=("--requested-run=$ISOLATED_REQUESTED_RUN"); fi
+          node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs capture "${isolated_args[@]}" > "$EVIDENCE_DIR/isolated-capture-envelope.json"
+          jq -e '.ok == true' "$EVIDENCE_DIR/isolated-capture-envelope.json" > /dev/null
+          isolated_proof="$KEYLOAD_SITE_ISOLATED_CAPTURE/metadata-proof.json"
+          printf 'KEYLOAD_SITE_ISOLATED_MEASURED_REVISION=%s\n' "$(jq -er '.source.measured' "$isolated_proof")" >> "$GITHUB_ENV"
+          printf 'isolated_measured_revision=%s\n' "$(jq -er '.source.measured' "$isolated_proof")" >> "$GITHUB_OUTPUT"
       - name: Checkout website source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -93,22 +108,51 @@ jobs:
           ref: ${{ steps.source.outputs.measured_revision }}
           path: measured
           persist-credentials: false
+      - name: Inspect isolated measured producer source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.source.outputs.isolated_measured_revision }}
+          path: measured-isolated
+          persist-credentials: false
       - name: Verify checkouts and retain runtime/source receipts
         shell: bash
         run: |
           [[ "$(git -C website rev-parse HEAD)" == "$KEYLOAD_SITE_SOURCE_REVISION" ]]
           [[ "$(git -C measured rev-parse HEAD)" == "$KEYLOAD_SITE_MEASURED_REVISION" ]]
+          [[ "$(git -C measured-isolated rev-parse HEAD)" == "$KEYLOAD_SITE_ISOLATED_MEASURED_REVISION" ]]
           test -f measured/.github/workflows/ci.yml
           git -C website rev-parse HEAD > "$EVIDENCE_DIR/website-revision.txt"
           git -C measured rev-parse HEAD > "$EVIDENCE_DIR/measured-revision.txt"
           git -C control rev-parse HEAD > "$EVIDENCE_DIR/control-revision.txt"
+          git -C measured-isolated rev-parse HEAD > "$EVIDENCE_DIR/isolated-measured-revision.txt"
           tools=(collect-github-evidence.sh github-evidence-contracts.mjs github-evidence-runs.mjs github-evidence-proof.mjs github-evidence.mjs)
           for file in "${tools[@]}"; do
             relative="scripts/Features/BenchmarkComparisons/$file"
             cmp "control/$relative" "website/$relative"
             sha256sum "website/$relative" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
           done
+          closure="scripts/Features/BenchmarkComparisons/site-isolated-dependencies.txt"
+          cmp "control/$closure" "website/$closure"
+          [[ "$(wc -l < "control/$closure")" == 49 ]]
+          LC_ALL=C sort -u "control/$closure" > "$EVIDENCE_DIR/isolated-dependencies.txt"
+          cmp "control/$closure" "$EVIDENCE_DIR/isolated-dependencies.txt"
+          sha256sum "website/$closure" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
+          while IFS= read -r relative; do
+            [[ "$relative" =~ ^(scripts/Features/BenchmarkComparisons/[^/]+\.mjs|site/Features/BenchmarkComparisons/[^/]+\.mjs|benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/isolated-contract\.json)$ ]]
+            for root in control website; do
+              [[ -f "$root/$relative" && ! -L "$root/$relative" ]]
+              [[ "$(realpath -e "$root/$relative")" == "$GITHUB_WORKSPACE/$root/$relative" ]]
+            done
+            cmp "control/$relative" "website/$relative"
+            sha256sum "website/$relative" >> "$EVIDENCE_DIR/executed-isolated-dependencies.sha256"
+          done < "control/$closure"
+          for file in AGENTS.md action.yml; do
+            relative=".github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite/$file"
+            cmp "control/$relative" "website/$relative"
+            sha256sum "website/$relative" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
+          done
           cp measured/.github/workflows/ci.yml "$EVIDENCE_DIR/measured-producer.yml"
+          cp measured-isolated/.github/workflows/ci.yml "$EVIDENCE_DIR/isolated-measured-producer.yml"
           node --version > "$EVIDENCE_DIR/node-version.txt"
           chrome=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
           test -n "$chrome" && test -x "$chrome"
@@ -171,48 +215,8 @@ jobs:
             [ordered]@{ suite = $suite; total = [int]$counts.total; executed = [int]$counts.executed; passed = [int]$counts.passed; sha256 = (Get-FileHash -LiteralPath $files[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant() }
           }
           ConvertTo-Json -InputObject @($receipts) -Depth 4 | Set-Content -LiteralPath "$env:EVIDENCE_DIR/test-receipts.json" -Encoding utf8NoBOM
-      - name: Build exact qualified website and publication receipt
-        working-directory: website
-        shell: bash
-        run: |
-          jq -e '.passed == true' "$EVIDENCE_DIR/analyzer-coverage/report.json"
-          jq -e '.passed == true' "$KEYLOAD_SITE_COVERAGE/report.json"
-          receipt="$EVIDENCE_DIR/archive-inputs/extraction.json"
-          verify_inputs() {
-            jq -e --arg root "$KEYLOAD_SITE_REPORTS" --slurpfile verified "$KEYLOAD_SITE_ARCHIVE_RECEIPT" '
-              .schemaVersion == 1 and .reportsRoot == $root and .archive == $verified[0].archive and
-              (.files | type == "array" and length == 12) and
-              ([.files[].path] | sort) == (["smoke", "json-1k-c8", "json-16k-c4"] as $profiles |
-                ["results.json", "samples.csv", "results.md", "runner.log"] as $names |
-                [$profiles[] as $profile | $names[] | $profile + "/" + .] | sort) and
-              all(.files[]; (.sha256 | type == "string" and test("^[a-f0-9]{64}$")) and
-                (.bytes | type == "number" and . >= 0 and . <= 8388608 and floor == .)) and
-              ([.files[].bytes] | add) <= 67108864
-            ' "$receipt" > /dev/null
-            jq -er '.files[] | [.path,.sha256,.bytes] | @tsv' "$receipt" > "$EVIDENCE_DIR/input-recheck.tsv"
-            [[ "$(sha256sum "$KEYLOAD_SITE_ARCHIVE" | cut -d' ' -f1)" == "$(jq -r '.archive.sha256' "$KEYLOAD_SITE_ARCHIVE_RECEIPT")" ]]
-            [[ "$(stat -c %s "$KEYLOAD_SITE_ARCHIVE")" == "$(jq -r '.archive.bytes' "$KEYLOAD_SITE_ARCHIVE_RECEIPT")" ]]
-            local checked=0
-            while IFS=$'\t' read -r path digest bytes; do
-              [[ "$(sha256sum "$KEYLOAD_SITE_REPORTS/$path" | cut -d' ' -f1)" == "$digest" ]]
-              [[ "$(stat -c %s "$KEYLOAD_SITE_REPORTS/$path")" == "$bytes" ]]
-              checked=$((checked + 1))
-            done < "$EVIDENCE_DIR/input-recheck.tsv"
-            [[ "$checked" == 12 ]]
-          }
-          verify_inputs
-          node site/scripts/build.mjs --reports="$KEYLOAD_SITE_REPORTS" --output="$GITHUB_WORKSPACE/_site" --revision="$KEYLOAD_SITE_MEASURED_REVISION" --evidence-url="https://github.com/$GH_REPO/actions/runs/$KEYLOAD_SITE_EVIDENCE_RUN" --site-revision="$KEYLOAD_SITE_SOURCE_REVISION" > "$EVIDENCE_DIR/final-builder.json"
-          for profile in smoke json-1k-c8 json-16k-c4; do
-            for file in results.json samples.csv results.md; do
-              cmp "$KEYLOAD_SITE_REPORTS/$profile/$file" "$GITHUB_WORKSPACE/_site/data/runs/$profile/$file"
-            done
-          done
-          verify_inputs
-          timeout 120s gh api --paginate --slurp "repos/$GH_REPO/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100" > "$EVIDENCE_DIR/qualification-jobs-pages.json"
-          job_url=$(jq -er '[.[].jobs[] | select(.name == "qualify")] | select(length == 1) | .[0].html_url' "$EVIDENCE_DIR/qualification-jobs-pages.json")
-          native_hash=$(sha256sum "$EVIDENCE_DIR/analyzer-coverage/report.json" | cut -d' ' -f1)
-          site_hash=$(sha256sum "$KEYLOAD_SITE_COVERAGE/report.json" | cut -d' ' -f1)
-          jq -n --slurpfile proof "$KEYLOAD_SITE_ARCHIVE_RECEIPT" --slurpfile inputs "$receipt" --slurpfile tests "$EVIDENCE_DIR/test-receipts.json" --arg run_url "https://github.com/$GH_REPO/actions/runs/$GITHUB_RUN_ID" --arg job_url "$job_url" --arg native_hash "$native_hash" --arg site_hash "$site_hash" '{schemaVersion:1,source:{website:$proof[0].siteSourceRevision,measured:$proof[0].measuredSourceRevision,control:$proof[0].controlWorkflowRevision},evidence:{run:$proof[0].run,comparisonJob:$proof[0].comparisonJob,artifact:$proof[0].artifact,archive:$proof[0].archive},reports:[$inputs[0].files[]|select(.path|endswith("/runner.log")|not)],qualification:{runUrl:$run_url,jobUrl:$job_url,nativeReportSha256:$native_hash,siteReportSha256:$site_hash,tests:$tests[0]}}' > "$GITHUB_WORKSPACE/_site/data/publication.json"
+      - name: Build exact qualified historical and isolated website
+        uses: ./control/.github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite
       - name: Upload exact qualified Pages output
         if: success() && steps.source.outputs.mode == 'publish'
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
@@ -235,7 +239,7 @@ jobs:
     needs: qualify
     if: needs.qualify.result == 'success' && needs.qualify.outputs.mode == 'publish'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 90
     permissions:
       contents: read
       actions: read
@@ -268,6 +272,11 @@ jobs:
           capture="$GITHUB_WORKSPACE/predeploy-capture"
           bash control/scripts/Features/BenchmarkComparisons/collect-github-evidence.sh --input="$capture" --mode=publish --site-revision="$revision" --workflow-revision="$CONTROL_REVISION"
           node control/scripts/Features/BenchmarkComparisons/github-evidence.mjs fresh --before="$GITHUB_WORKSPACE/qualification/artifacts/site-evidence/archive-receipt.json" --after="$capture/metadata-proof.json" > predeploy-proof.json
+          isolated_capture="$GITHUB_WORKSPACE/predeploy-isolated-capture"
+          node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs capture-metadata --input="$isolated_capture" --mode=publish --site-revision="$revision" --workflow-revision="$CONTROL_REVISION" > predeploy-isolated-capture-envelope.json
+          jq -e '.ok == true' predeploy-isolated-capture-envelope.json > /dev/null
+          node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs fresh --before="$GITHUB_WORKSPACE/qualification/artifacts/site-evidence/isolated-capture/archive-receipt.json" --after="$isolated_capture/metadata-proof.json" > predeploy-isolated-proof.json
+          jq -e '.ok == true' predeploy-isolated-proof.json > /dev/null
           date --utc --iso-8601=seconds > predeploy-checked-at.txt
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - name: Publish qualified website
@@ -290,5 +299,8 @@ jobs:
           path: |
             predeploy-capture
             predeploy-proof.json
+            predeploy-isolated-capture
+            predeploy-isolated-capture-envelope.json
+            predeploy-isolated-proof.json
             predeploy-checked-at.txt
             deployment-receipt.json

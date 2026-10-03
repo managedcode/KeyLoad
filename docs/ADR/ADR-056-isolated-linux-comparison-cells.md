@@ -661,3 +661,12 @@ observation. No implicit disposer may override the primary assertion afterward.
 Root owns IsolatedNativeCase/Teardown; every genuine cell exercises success.
 Unforced simultaneous disposal failure has the existing native fault/control-flow
 review exception, with no service double or fabricated runtime evidence.
+
+TASK-ISO-012P native fixture ownership: controlled corruption may hardlink genuine
+immutable archives/277 files into a confined private scope, replacing only a
+mutated private link with an exclusive copy before writing. Original authority
+and unchanged-source gates remain mandatory. The real native capture test still
+downloads both authenticated ZIPs and checks their identities/digests, serialized
+with actual ZIP-size-plus1GiB disk preflight and exclusive cleanup. It does not
+repeat BCL277-file extraction. Parser tests copy metadata only. This reduces test
+resource duplication without replacing genuine transport or coverage evidence.

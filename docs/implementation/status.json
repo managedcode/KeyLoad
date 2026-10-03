@@ -2147,7 +2147,13 @@
       "Linux27Preflight108Crud162SpecializedWorkflowGraph",
       "authenticatedGitHubTransportSource",
       "fixedMembershipNativeFaultAssertions",
-      "compactProjectionAndNativeBrowserSource"
+      "compactProjectionAndNativeBrowserSource",
+      "nativeIsolatedPagesCaptureAndBcl277FilePreparation",
+      "privateOriginalReceiptByteAuthority",
+      "39SiteProductionAnd31CriticalCoverageInventory",
+      "49FileExecutedDependencyClosure",
+      "boundedLegacyAndIsolatedFinalBuilderComposite",
+      "independentEvidenceFreshnessBeforePagesDeployment"
     ],
     "pending": [
       "nativeImageImportAndProviderQualification",
@@ -2171,11 +2177,12 @@
       "limits": "Historical all-OS verification passed; RF3 59/60 and comparison failed. This is not an isolated intensive cohort."
     },
     "latestBaseline": {
-      "runId": 37079707413,
-      "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
-      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413",
+      "sourceRevision": "63ac27c37061c17b05813b5b0a3d2dbee7c9087c",
+      "runId": 37082449440,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440",
       "conclusion": "failure",
-      "limits": "Exact historical Linux build/format/governance/analyzers/unit/scalar/recovery and RF3 passed; legacy comparison cancellation failed. New isolated intensive cohort not run."
-    }
+      "limits": "Actual RF3 job passed; Linux full build failed Receipt IDE0032/IDE0290. Intensive images, preflight and270 cohort did not run. Corrected source and full publication join need exact-SHA GitHub qualification."
+    },
+    "sourceEvidence": "docs/implementation/isolated-comparison-source-qualification.json"
   }
 }

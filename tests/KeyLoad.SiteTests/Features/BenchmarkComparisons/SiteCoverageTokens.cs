@@ -176,6 +176,17 @@ internal static class SiteCoverageTokens
         $"{SitePublicationTokens.EvidenceToolsPrefix}github-evidence-runs.mjs",
         $"{SitePublicationTokens.EvidenceToolsPrefix}github-evidence-proof.mjs",
         $"{SitePublicationTokens.EvidenceToolsPrefix}github-evidence.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-api.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-capture.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-cli.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-context.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-contract.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-files.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-fresh.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-native-proof.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-proof.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-receipt.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-runs.mjs",
     ];
 
     public static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)

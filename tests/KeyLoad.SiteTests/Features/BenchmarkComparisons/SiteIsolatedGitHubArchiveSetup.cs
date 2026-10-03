@@ -1,5 +1,3 @@
-using System.Text.Json.Nodes;
-
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal static class SiteIsolatedGitHubArchiveSetup
@@ -33,8 +31,9 @@ internal static class SiteIsolatedGitHubArchiveSetup
     {
         ArgumentNullException.ThrowIfNull(receipt);
         SiteIsolatedGitHubReceiptReader.RequireCallerSources(receipt.Value);
-        var value = JsonNode.Parse(await File.ReadAllBytesAsync(receipt.ReceiptPath, token));
-        if (!receipt.Matches(value))
+        SiteIsolatedGitHubFileOperations.RequireRegular(receipt.ReceiptPath);
+        if (new FileInfo(receipt.ReceiptPath).Length > SiteIsolatedGitHubTokens.JsonBytes ||
+            !receipt.MatchesBytes(await File.ReadAllBytesAsync(receipt.ReceiptPath, token)))
         {
             throw new InvalidDataException(SiteIsolatedGitHubTokens.Changed);
         }

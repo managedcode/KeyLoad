@@ -4,7 +4,13 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal static class SiteIsolatedGitHubNativeProcess
 {
-    public static async Task<SiteProcessResult> RunAsync(ProcessStartInfo start, CancellationToken token)
+    public static Task<SiteProcessResult> RunAsync(ProcessStartInfo start, CancellationToken token) =>
+        RunAsync(start, TimeSpan.FromMinutes(SiteIsolatedGitHubTokens.NativeDeadlineMinutes), token);
+
+    public static Task<SiteProcessResult> RunProbeAsync(ProcessStartInfo start, CancellationToken token) =>
+        RunAsync(start, TimeSpan.FromSeconds(SiteIsolatedGitHubTokens.DeadlineSeconds), token);
+
+    private static async Task<SiteProcessResult> RunAsync(ProcessStartInfo start, TimeSpan bound, CancellationToken token)
     {
         using var process = new Process { StartInfo = start, EnableRaisingEvents = true };
         if (!process.Start())
@@ -13,9 +19,11 @@ internal static class SiteIsolatedGitHubNativeProcess
         }
 
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(TimeSpan.FromMinutes(SiteIsolatedGitHubTokens.NativeDeadlineMinutes));
-        var stdout = SiteProcessOutput.ReadAsync(process.StandardOutput, SiteIsolatedGitHubTokens.NodeFailure, deadline.Token);
-        var stderr = SiteProcessOutput.ReadAsync(process.StandardError, SiteIsolatedGitHubTokens.NodeFailure, deadline.Token);
+        deadline.CancelAfter(bound);
+        var stdout = SiteIsolatedGitHubProcessOutput.ReadAsync(process.StandardOutput,
+            SiteIsolatedGitHubProcessOutput.MaximumOutputCharacters, deadline.Token);
+        var stderr = SiteIsolatedGitHubProcessOutput.ReadAsync(process.StandardError,
+            SiteIsolatedGitHubProcessOutput.MaximumErrorCharacters, deadline.Token);
         try
         {
             var exit = process.WaitForExitAsync(deadline.Token);

@@ -66,6 +66,7 @@ internal static class SiteIsolatedGitHubTokens
     public const string Digest = "digest";
     public const string DigestPrefix = "sha256:";
     public const string InputFiles = "inputFiles";
+    public const string FileCountField = "files";
     public const string AggregateJob = "aggregateJob";
     public const string Conclusion = "conclusion";
     public const string Mode = "mode";

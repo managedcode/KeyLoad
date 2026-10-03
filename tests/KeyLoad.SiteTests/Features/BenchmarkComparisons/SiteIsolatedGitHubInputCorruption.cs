@@ -29,6 +29,7 @@ internal static class SiteIsolatedGitHubInputCorruption
         string relative, CancellationToken token)
     {
         var path = SiteIsolatedGitHubFileOperations.FixedTarget(receipt.Capture, relative);
+        await DetachAsync(path, token);
         var original = await File.ReadAllBytesAsync(path, token);
         var originalReceipt = await File.ReadAllBytesAsync(receipt.ReceiptPath, token);
         var altered = JsonNode.Parse(original)!.AsObject();
@@ -54,6 +55,16 @@ internal static class SiteIsolatedGitHubInputCorruption
         {
             await File.WriteAllBytesAsync(path, original, CancellationToken.None);
             await File.WriteAllBytesAsync(receipt.ReceiptPath, originalReceipt, CancellationToken.None);
+        }
+    }
+
+    private static async Task DetachAsync(string path, CancellationToken token)
+    {
+        var result = await SiteIsolatedGitHubScope.RunAsync(SiteIsolatedGitHubFields.DetachOperation,
+            new { path }, token);
+        if (!result.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean())
+        {
+            throw new InvalidDataException(SiteIsolatedGitHubTokens.Changed);
         }
     }
 

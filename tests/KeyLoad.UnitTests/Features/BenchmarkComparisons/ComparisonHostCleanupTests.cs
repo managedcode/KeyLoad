@@ -45,7 +45,9 @@ internal sealed class ComparisonHostCleanupTests
     private const string SafeCleanupFailureCode = "ComparisonTargetCleanupFailed";
     private const string QdrantCleanupDiagnostic = "Qdrant cleanup failed: HttpRequestException";
     private const string FailedStatus = "failed";
-    private const string UnsupportedStatus = "unsupported";
+    private const string SetupPrefix = "setup:";
+    private const int ExpectedTargets = 6;
+    private const int ExpectedCases = 60;
     private const string UnavailableEndpoint = "http://127.0.0.1:0";
     private const string AdminKey = "cleanup-admin-secret";
     private const string QdrantApiKey = "cleanup-qdrant-secret";
@@ -123,12 +125,12 @@ internal sealed class ComparisonHostCleanupTests
         await Assert.That(result.ExitCode).IsNotEqualTo(0);
         await Assert.That(result.Stderr.Contains(SafeCleanupFailureCode, StringComparison.Ordinal)).IsTrue();
         await Assert.That(result.Stderr.Contains(QdrantCleanupDiagnostic, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(report.Cases.Length).IsNotEqualTo(0);
-        await Assert.That(report.Cases.Any(item => item.Status == FailedStatus)).IsTrue();
-        await Assert.That(report.Cases.Any(item => item.Status == UnsupportedStatus)).IsTrue();
+        await Assert.That(report.Targets.Length).IsEqualTo(ExpectedTargets);
+        await Assert.That(report.Cases.Length).IsEqualTo(ExpectedCases);
         foreach (var item in report.Cases)
         {
-            await Assert.That(item.Status is FailedStatus or UnsupportedStatus).IsTrue();
+            await Assert.That(item.Status).IsEqualTo(FailedStatus);
+            await Assert.That(item.Detail).StartsWith(SetupPrefix);
             await Assert.That(item.Measurement).IsNull();
             await Assert.That(item.Samples.IsEmpty).IsTrue();
         }

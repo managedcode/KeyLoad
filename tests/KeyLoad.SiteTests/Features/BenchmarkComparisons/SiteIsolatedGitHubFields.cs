@@ -65,4 +65,9 @@ internal static class SiteIsolatedGitHubFields
     public const string RelativeInput = "--input=relative";
     public const string MetadataCapture = "metadata-capture";
     public const string UnknownCellInventory = "controlled-unknown-n1-create-zip-inventory.txt";
+    public const string CloneOperation = "clone";
+    public const string DetachOperation = "detach";
+    public const string NativeFixtureKey = "KeyLoad.SiteTests.IsolatedGitHubNativeFixture";
+    public const string Repository = "repository";
+    public const string WorkflowKey = "workflow";
 }

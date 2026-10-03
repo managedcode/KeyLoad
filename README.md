@@ -281,3 +281,10 @@ JSON and complete authenticated aggregation before site generation. The initial
 unsupported Community topology has an explicit reason and no measurement.
 Source integration is in progress. No new intensive cohort or performance claim
 is qualified yet; production default remains RF3.
+
+The isolated publication path now requires the complete270-worker cohort and
+277 original files, keeps its measured SHA separate from website/control and
+historical measurements, and rechecks both evidence identities before Pages.
+The [native source qualification record](docs/implementation/isolated-comparison-source-qualification.json)
+records RF3 passing63/63 on63ac while full qualification remains incomplete.
+No new intensive performance or live publication result is claimed.

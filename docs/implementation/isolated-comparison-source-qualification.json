@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "status": "in_progress",
+  "scope": "isolated_linux_native_1_2_3_node_intensive_comparisons",
+  "runs": [
+    {
+      "sourceRevision": "1978d0af9453dd1b2c93be074daac6408f46da84",
+      "runId": 37082268730,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082268730",
+      "conclusion": "failure",
+      "linuxVerify": {
+        "jobId": 111085164945,
+        "conclusion": "failure",
+        "unit": {
+          "total": 1405,
+          "passed": 1404,
+          "failed": 1,
+          "skipped": 0,
+          "failure": "AcHost007QdrantCleanupFailureFailsSafelyAfterZeroSampleReport stale unsupported expectation after native initialization failure"
+        },
+        "analyzerTests": {
+          "total": 118,
+          "passed": 118,
+          "failed": 0,
+          "skipped": 0
+        },
+        "processRecovery": {
+          "total": 136,
+          "passed": 136,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
+      "rf3": {
+        "jobId": 111085164984,
+        "conclusion": "failure",
+        "total": 63,
+        "passed": 62,
+        "failed": 1,
+        "skipped": 0,
+        "failure": "post-kill native container restart health wait failed fast before restarted resource became healthy"
+      }
+    },
+    {
+      "sourceRevision": "63ac27c37061c17b05813b5b0a3d2dbee7c9087c",
+      "runId": 37082449440,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440",
+      "conclusion": "failure",
+      "linuxVerify": {
+        "jobId": 111087496013,
+        "conclusion": "failure",
+        "failure": "full solution build: SiteIsolatedGitHubArchiveReceipt IDE0032 and IDE0290"
+      },
+      "rf3": {
+        "jobId": 111087495992,
+        "conclusion": "success",
+        "total": 63,
+        "passed": 63,
+        "failed": 0,
+        "skipped": 0
+      }
+    }
+  ],
+  "unqualified": [
+    "immutable_image_roundtrip",
+    "27_native_preflights",
+    "complete270_intensive_cells",
+    "authenticated270_aggregation",
+    "isolated_TimeSeries_native_cohort",
+    "numeric_matched_backend_coverage",
+    "full_site_browser_coverage",
+    "Pages_publication_and_live_metrics"
+  ],
+  "claims": {
+    "performanceWinner": false,
+    "productionReady": false,
+    "powerLossDurability": false
+  }
+}

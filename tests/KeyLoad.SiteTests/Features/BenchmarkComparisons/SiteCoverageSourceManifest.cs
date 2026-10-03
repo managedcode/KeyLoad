@@ -81,6 +81,8 @@ internal static class SiteCoverageSourceManifestWriter
             .ToArray();
         var actualTools = SiteCoverageSourcePaths.EnumerateModules(repository,
             SitePublicationTokens.EvidenceToolsPrefix, SitePublicationTokens.EvidenceModulePrefix)
+            .Concat(SiteCoverageSourcePaths.EnumerateModules(repository,
+                SitePublicationTokens.EvidenceToolsPrefix, SitePublicationTokens.IsolatedEvidenceModulePrefix))
             .Order(StringComparer.Ordinal).ToArray();
         var expectedTools = expected.Where(path => path.StartsWith(SitePublicationTokens.EvidenceToolsPrefix,
             StringComparison.Ordinal)).ToArray();

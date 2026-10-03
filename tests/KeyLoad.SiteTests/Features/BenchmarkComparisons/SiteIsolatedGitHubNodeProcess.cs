@@ -5,21 +5,20 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal static class SiteIsolatedGitHubNodeProcess
 {
-    private const string Failure = "The real isolated GitHub Node probe failed.";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public static async Task<JsonElement> RunAsync(string repository, object request, CancellationToken token,
         bool captureCoverage = true)
     {
         await using var temporary = SiteTempDirectory.Create();
-        var script = Path.Combine(temporary.Path, "isolated-github-probe.mjs");
-        var requestPath = Path.Combine(temporary.Path, "request.json");
+        var script = Path.Combine(temporary.Path, SiteIsolatedGitHubTokens.Probe);
+        var requestPath = Path.Combine(temporary.Path, SiteIsolatedGitHubTokens.Request);
         await File.WriteAllTextAsync(script, SiteIsolatedGitHubNodeProgram.Source, token);
         await File.WriteAllBytesAsync(requestPath, JsonSerializer.SerializeToUtf8Bytes(request, JsonOptions), token);
-        var result = await SiteIsolatedNodeProcess.RunProcessAsync(CreateStart(repository, script, requestPath, captureCoverage), token);
+        var result = await SiteIsolatedGitHubNativeProcess.RunProbeAsync(CreateStart(repository, script, requestPath, captureCoverage), token);
         if (result.ExitCode != 0 || result.StandardError.Length != 0)
         {
-            throw new InvalidOperationException(Failure);
+            throw new InvalidOperationException(SiteIsolatedGitHubTokens.NodeFailure);
         }
 
         using var document = JsonDocument.Parse(result.StandardOutput);

@@ -12,4 +12,5 @@ internal static class SitePublicationTokens
     public const string MissingArchivePreparation = "Mandatory authenticated GitHub archive preparation did not complete.";
     public const string EvidenceToolsPrefix = "scripts/Features/BenchmarkComparisons/";
     public const string EvidenceModulePrefix = "github-evidence";
+    public const string IsolatedEvidenceModulePrefix = "site-isolated-github-";
 }

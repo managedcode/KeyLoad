@@ -67,3 +67,14 @@ The exact disjoint task graph, first-authored real process negative regression,
 manual private-lifetime review exception, development builds and mandatory GitHub
 qualification are in the host acceptance/plan. Keep this ADR Accepted; source
 packets and clean builds alone do not satisfy the real process/engine gates.
+
+TASK-ISO-015U joins ADR056 AC-ISO-003/006 with REQ-BC-019/AC-HOST-007 after
+authentic1978 unit failure. Failed native initialization precedes capability
+classification, as required by the independent IsolatedSetupFailureTests flow.
+The cleanup regression must require exact case cardinality, failed setup details,
+null measurements and zero samples for every unusable endpoint; retain all safe
+cleanup diagnostics, nonzero exit and credential absence assertions. A bounded
+worker owns only ComparisonHostCleanupTests.cs; root joins acceptance/plan/docs
+and reviews the diff. No runner/adapter/settings/report contract change. The
+actual full Unit and required GitHub suites are the proof; rollback cannot restore
+an assertion that hides setup failure behind unsupported capability.

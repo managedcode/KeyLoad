@@ -44,7 +44,8 @@ internal static class SiteCoverageNativeSourceResolver
         var portablePath = fullPath.Replace(Path.DirectorySeparatorChar, SiteCoverageTokens.RelativeSeparator);
         if (IsWithin(fullPath, siteRoot) && !portablePath.Contains(SiteCoverageTokens.VendorSourcePrefix,
                 StringComparison.Ordinal) || IsWithin(fullPath, evidenceRoot) &&
-            Path.GetFileName(fullPath).StartsWith(SitePublicationTokens.EvidenceModulePrefix, StringComparison.Ordinal))
+            (Path.GetFileName(fullPath).StartsWith(SitePublicationTokens.EvidenceModulePrefix, StringComparison.Ordinal) ||
+                Path.GetFileName(fullPath).StartsWith(SitePublicationTokens.IsolatedEvidenceModulePrefix, StringComparison.Ordinal)))
         {
             throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.UnexpectedProductionScriptFailure);
         }

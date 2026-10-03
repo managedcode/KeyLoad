@@ -8,6 +8,7 @@ internal sealed record SiteIsolatedGitHubArchiveFile(string Path, long Bytes, st
 internal sealed class SiteIsolatedGitHubArchiveReceipt(string capture, string receiptPath,
     JsonObject value, SiteIsolatedGitHubArchiveFile[] files)
 {
+    private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web);
     private JsonObject OriginalValue { get; } = value.DeepClone().AsObject();
     private SiteIsolatedGitHubArchiveFile[] OriginalFiles { get; } = [.. files];
 
@@ -19,7 +20,10 @@ internal sealed class SiteIsolatedGitHubArchiveReceipt(string capture, string re
 
     public SiteIsolatedGitHubArchiveFile[] Files => [.. OriginalFiles];
 
-    internal bool Matches(JsonNode? value) => JsonNode.DeepEquals(OriginalValue, value);
+    internal bool Matches(JsonNode? candidate) => JsonNode.DeepEquals(OriginalValue, candidate);
+
+    internal bool MatchesBytes(ReadOnlySpan<byte> candidate) =>
+        candidate.SequenceEqual(JsonSerializer.SerializeToUtf8Bytes(OriginalValue, Options));
 }
 
 internal static class SiteIsolatedGitHubReceiptReader

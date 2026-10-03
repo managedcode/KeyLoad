@@ -25,3 +25,8 @@
 - The new publication qualification path MUST prepare authentic reports from the same digest-verified immutable GitHub ZIP through mandatory BCL before-session setup, with complete confinement/file-set/bounds preflight before owned output. No pre-extracted fallback, fake transport or custom ZIP parser.
 - Preserve archive/raw-file hashes across extraction/tests/final build and every existing numerical/browser assertion. Controlled malformed metadata/ZIP copies are rejection data only, never provider/publication proof.
 - `KEYLOAD_SITE_SOURCE_REVISION` MUST identify and match actual checkout HEAD in the new path. All four authored Node evidence modules MUST enter the closed source inventory and individual critical90 gate; no existing denominator may be removed.
+
+## Isolated270 publication inputs
+- ADR056/TASK-ISO-012P adds an independent authenticated270-cell cohort alongside the required legacy12-file archive. Mandatory before-session BCL preparation consumes the exact two isolated ZIPs and verifies277 inputs; immutable original receipt, archives and raw hashes are rechecked after the complete suite and around the final builder.
+- Root supplies KEYLOAD_SITE_ISOLATED_CAPTURE and KEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT. No pre-extracted fallback, skipped unavailable cohort, forged CI executor environment or fabricated metrics may satisfy these gates.
+- All eleven site-isolated-github- production modules enter the existing native80/70 coverage denominator and individual critical90 gate. Preserve all28 earlier production sources and20 earlier critical sources. Root owns hooks, source inventory, workflow and dependency closure joins.
