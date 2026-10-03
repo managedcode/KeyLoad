@@ -1,5 +1,17 @@
 # ClientApi
 
+REQ-SQLC-005/007/008 and AC-SQLC-005/007/008 extend SQL clients under
+[ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md). Existing transport is
+HTTP/JSON plus official MCP; no PostgreSQL native listener/session is implemented.
+The working native target requires real Npgsql/psql/DBeaver bootstrap, typed
+results, prepared/portal flows, persisted credential revalidation, original
+execution drain and bounded state. The current API-key SHA256 verifier is not
+SCRAM. Native security/transaction/gateway contracts must be frozen before code.
+TASK-SQLC-C1 first preserves conservative unknown-write outcomes for commented
+CALL/unknown roots with genuine Kestrel tests; TASK-SQLC-FULL owns native client
+interoperability. [Inventory](../implementation/sql-client-conformance.json)
+keeps both native and full SQL qualification false until actual evidence exists.
+
 REQ-CLIENT-010 / AC-CLIENT-010 / AC-DIAG-001..004 add bounded internal RF3
 dispatch evidence under [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 Closed credential/read/command phases and failure categories correlate the

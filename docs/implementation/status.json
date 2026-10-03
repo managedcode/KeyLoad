@@ -1,4 +1,54 @@
 {
+  "SQL-CLIENT-001": {
+    "title": "Повний SQL, клієнтський протокол та перевірка текстового індексу",
+    "status": "in_progress",
+    "decision": "docs/ADR/ADR-065-full-sql-client-compatibility.md",
+    "conformance": "docs/implementation/sql-client-conformance.json",
+    "sourceStage": "bounded_line_and_nested_block_comments_shared_internal_reader_and_conservative_SDK_outcome_repair",
+    "sourceReceipt": "docs/implementation/sql-client-source-stage-002.json",
+    "backupPrerequisite": "staged_restore_independently_delivered_dbd01269_further_four_actual_file_cases_source_only",
+    "fullSqlComplete": false,
+    "nativeProtocolImplemented": false,
+    "newCasesQualified": false,
+    "lastQualifiedBase": {
+      "sourceRevision": "86e58128a3c6e9b246c19425d1e7093b9657a5ba",
+      "receipt": "docs/implementation/sql-client-baseline-86e581.json",
+      "ciRunId": 37118356012,
+      "ciConclusion": "success",
+      "normalPassed": 1907,
+      "scalarPassed": 1907,
+      "recoveryPassed": 183,
+      "rf3Passed": 63,
+      "analyzerPassed": 118,
+      "newSqlCasesQualified": false,
+      "benchmarkRunId": 37118356008,
+      "benchmarkConclusion": "cancelled_complete_native_cohort_and_site_unqualified"
+    },
+    "searchCandidate": "source_review_complete_pinned_ZoneTree.FullTextSearch_integration_and_runtime_qualification_pending",
+    "baseline": {
+      "sourceRevision": "c2415755d8de27019e4add8e148320389e382ba0",
+      "ciRunId": 37117316968,
+      "ciConclusion": "cancelled_zero_jobs_and_original_runtime_reports_unavailable",
+      "benchmarkRunId": 37117317113,
+      "benchmarkConclusion": "failure_model_98_total_95_pass_3_registry_errors_native_jobs_skipped",
+      "registryRepair": "delivered_separately_in_86e58128a3c6e9b246c19425d1e7093b9657a5ba_not_new_runtime_proof"
+    },
+    "remaining": [
+      "Complete PostgreSQL18 command-by-command syntax and typed execution",
+      "Relational DDL/DML joins expressions aggregates windows transactions and every model",
+      "Accepted native authentication session transaction gateway and numeric bounds contracts",
+      "Real Npgsql psql DBeaver client interoperability on RF3",
+      "Exact-source full CI normal scalar recovery RF3 and configured coverage",
+      "FullTextSearch projection freshness recovery parity and genuine isolated measurements",
+      "Complete authenticated comparison JSON cohort and site refresh"
+    ],
+    "evidence": [
+      "docs/Features/QueryExecution.md",
+      "docs/Features/ClientApi.md",
+      "docs/Features/Search.md",
+      "docs/implementation/zonetree-fulltextsearch-review.md"
+    ]
+  },
   "KL-001": {
     "title": "Версії, ліцензії та platform matrix",
     "status": "in_progress",

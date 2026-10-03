@@ -10,6 +10,16 @@ The [documentation index](docs/README.md) covers all 22 Feature specifications w
 
 The product is one database server for AI agents with linked documents, typed relational rows, graphs, vectors/search, files/blobs, events and queues. SQL is the central language. The new [SQL and relational contracts](docs/implementation/central-sql.md) add a versioned SELECT/CALL adapter over the existing operations and schema-constrained canonical rows. Arbitrary SQL JOIN, foreign keys and declarative cross-model SELECT remain required future stages; this source is not yet qualified by an exact-SHA GitHub run.
 
+Full SQL syntax and a native client protocol are required under
+[ADR-065](docs/ADR/ADR-065-full-sql-client-compatibility.md), with
+[separate execution and client gates](docs/implementation/sql-client-conformance.json).
+The current source adds bounded SQL line/nested block comments and conservative
+SDK write outcomes; fresh GitHub qualification remains pending. Full relational
+syntax/execution and native PostgreSQL client interoperability are still pending.
+[ZoneTree.FullTextSearch](docs/implementation/zonetree-fulltextsearch-review.md)
+is an evaluated text-index candidate; integration and comparable performance
+must pass its correctness, recovery and resource gates.
+
 ## Development status
 
 The retained [9b3bd8ed source qualification](docs/implementation/isolated-source-qualification-37111280400.json)

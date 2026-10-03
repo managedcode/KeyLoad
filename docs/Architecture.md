@@ -9,6 +9,25 @@ Typed rows reuse Collection entity storage so graph/vector references retain one
 identity. [RelationalStorage](Features/RelationalStorage.md) defines schemas and
 native constraints; QueryExecution owns the SQL adapter over canonical operations.
 
+Owner clarification2026-10-03 requires full SQL and a client connection protocol.
+[ADR-065](ADR/ADR-065-full-sql-client-compatibility.md) extends the existing stages
+with explicit typed execution/native-client gates and
+[versioned conformance inventory](implementation/sql-client-conformance.json).
+The first lexical repair shares an internal bounded trivia reader between Query,
+Server and SDK; quoted content, authority, envelope1 and storage remain exact.
+Full PostgreSQL-compatible execution and native transport are pending. The
+[ZoneTree.FullTextSearch candidate review](implementation/zonetree-fulltextsearch-review.md)
+adds search integration/correctness/recovery/resource/performance gates without
+selecting a provider or promising acceleration.
+
+```mermaid
+classDiagram
+    SqlParser --> SqlTriviaReader : bounded token trivia
+    SqlOperationSyntaxReader --> SqlTriviaReader : canonical CALL trivia
+    SqlWriteClassifier --> SqlTriviaReader : conservative SDK outcomes
+    SqlOperationCompiler --> CanonicalOperationGateway : unchanged authority
+```
+
 ```mermaid
 flowchart LR
     Agent[AI agent SQL SDK MCP] --> Server[One server API]

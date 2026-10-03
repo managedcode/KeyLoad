@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "scope": "historical exact-source baseline; no new SQL stage qualification",
+  "sourceRevision": "c2415755d8de27019e4add8e148320389e382ba0",
+  "snapshotUtc": "2026-10-03T11:00:21.600942+00:00",
+  "runs": [
+    {
+      "run": 37117316968,
+      "name": "CI",
+      "path": ".github/workflows/ci.yml",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37117316968",
+      "headSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "attempt": 1,
+      "event": "push",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "jobsTotal": 0,
+      "artifactsTotal": 0
+    },
+    {
+      "run": 37117317113,
+      "name": "Benchmarks",
+      "path": ".github/workflows/benchmarks.yml",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37117317113",
+      "headSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "attempt": 1,
+      "event": "push",
+      "status": "completed",
+      "conclusion": "failure",
+      "jobsTotal": 10,
+      "artifactsTotal": 4
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11272546401,
+      "name": "comparison-images-qualification",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37117317113/artifacts/11272546401",
+      "sourceSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "run": 37117317113,
+      "attempt": 1,
+      "uploadJob": 111187647295,
+      "size": 1046168,
+      "sha256": "e9a40716a4359c9944981a0ef712b4757035679ac0f22ccd243b8de3b02e569f",
+      "providerDigest": "sha256:e9a40716a4359c9944981a0ef712b4757035679ac0f22ccd243b8de3b02e569f",
+      "digestMatches": true
+    },
+    {
+      "id": 11272241650,
+      "name": "code-quality-comparisons",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37117317113/artifacts/11272241650",
+      "sourceSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "run": 37117317113,
+      "attempt": 1,
+      "uploadJob": 111187089551,
+      "size": 1631997,
+      "sha256": "27cb48a18e133205d047a99fc30f5d8ef2d25fcac5d5994ceef1c01026eaaa61",
+      "providerDigest": "sha256:27cb48a18e133205d047a99fc30f5d8ef2d25fcac5d5994ceef1c01026eaaa61",
+      "digestMatches": true
+    },
+    {
+      "id": 11271439415,
+      "name": "timeseries-native-pinned-image-facts",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37117317113/artifacts/11271439415",
+      "sourceSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "run": 37117317113,
+      "attempt": 1,
+      "uploadJob": 111187647319,
+      "size": 861682,
+      "sha256": "eb37fa05dbc3b88d6d4205836750a9c24966de0e6d793d7bb56a02b069e697ed",
+      "providerDigest": "sha256:eb37fa05dbc3b88d6d4205836750a9c24966de0e6d793d7bb56a02b069e697ed",
+      "digestMatches": true
+    }
+  ],
+  "reports": [
+    {
+      "artifactId": 11272546401,
+      "entry": "KeyLoad/KeyLoad/TestResults/comparison-images/image-roundtrip/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "entrySha256": "ae91bb7387f476eb31831d9932a3811fcca0f08fa6d313b0ee1612cde6070464",
+      "commitSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "artifactId": 11272546401,
+      "entry": "KeyLoad/KeyLoad/TestResults/comparison-images/job-identity/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "entrySha256": "2ca014be57d455917976d29664a99385c25ce4da18c4913a7c199338af0d1cd0",
+      "commitSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "artifactId": 11272546401,
+      "entry": "KeyLoad/KeyLoad/TestResults/comparison-images/resource-models/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "entrySha256": "1d0b6cb1a779a5f81b13c60f48f89e1808c923657e92734742098ceba70fa8da",
+      "commitSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "summary": {
+        "total": 98,
+        "passed": 95,
+        "failed": 3,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "artifactId": 11271439415,
+      "entry": "KeyLoad/KeyLoad/TestResults/timeseries-image/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "entrySha256": "8bd6c02ae7b3e9c927ec188088905a0e895dd858c5bfcb51c358c719ca1ca4ed",
+      "commitSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    }
+  ],
+  "failedCases": [
+    {
+      "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedTimeSeriesBenchmarkResourceTests.1.1.EveryClosedFamilySelectionComposesOnePrivateRunnerAndOnlyItsNativeGroup.1.1.0",
+      "argumentsAndDisplayName": "EveryClosedFamilySelectionComposesOnePrivateRunnerAndOnlyItsNativeGroup",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "actualSymptom": "Expected to be equal to \"docker.io\"\nbut received \"\"\n\nat Assert.That(image.Registry).IsEqualTo(\"docker.io\")",
+      "testOwner": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesBenchmarkResourceTests.cs",
+      "firstOwnedFailurePath": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesTimescaleResourceTests.cs",
+      "reportSha256": "1d0b6cb1a779a5f81b13c60f48f89e1808c923657e92734742098ceba70fa8da",
+      "artifactId": 11272546401,
+      "uploadJob": 111187647295,
+      "sourceSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "run": 37117317113,
+      "attempt": 1
+    },
+    {
+      "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedTimeSeriesTimescaleResourceTests.1.1.ModelContainsPinnedPhysicalTimescaleNodes(System.Int32).3.1.0",
+      "argumentsAndDisplayName": "ModelContainsPinnedPhysicalTimescaleNodes(3)",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "actualSymptom": "Expected to be equal to \"docker.io\"\nbut received \"\"\n\nat Assert.That(image.Registry).IsEqualTo(\"docker.io\")",
+      "testOwner": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesTimescaleResourceTests.cs",
+      "firstOwnedFailurePath": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesTimescaleResourceTests.cs",
+      "reportSha256": "1d0b6cb1a779a5f81b13c60f48f89e1808c923657e92734742098ceba70fa8da",
+      "artifactId": 11272546401,
+      "uploadJob": 111187647295,
+      "sourceSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "run": 37117317113,
+      "attempt": 1
+    },
+    {
+      "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedTimeSeriesTimescaleResourceTests.1.1.ModelContainsPinnedPhysicalTimescaleNodes(System.Int32).2.1.0",
+      "argumentsAndDisplayName": "ModelContainsPinnedPhysicalTimescaleNodes(2)",
+      "status": "error",
+      "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+      "actualSymptom": "Expected to be equal to \"docker.io\"\nbut received \"\"\n\nat Assert.That(image.Registry).IsEqualTo(\"docker.io\")",
+      "testOwner": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesTimescaleResourceTests.cs",
+      "firstOwnedFailurePath": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesTimescaleResourceTests.cs",
+      "reportSha256": "1d0b6cb1a779a5f81b13c60f48f89e1808c923657e92734742098ceba70fa8da",
+      "artifactId": 11272546401,
+      "uploadJob": 111187647295,
+      "sourceSha": "c2415755d8de27019e4add8e148320389e382ba0",
+      "run": 37117317113,
+      "attempt": 1
+    }
+  ],
+  "unavailable": {
+    "Unit normal": {
+      "counts": null,
+      "reason": "exact c241 CI completed/cancelled with zero jobs and zero artifacts; no original report"
+    },
+    "Unit scalar": {
+      "counts": null,
+      "reason": "exact c241 CI completed/cancelled with zero jobs and zero artifacts; no original report"
+    },
+    "SQL": {
+      "counts": null,
+      "reason": "exact c241 CI completed/cancelled with zero jobs and zero artifacts; no original report"
+    },
+    "Relational": {
+      "counts": null,
+      "reason": "exact c241 CI completed/cancelled with zero jobs and zero artifacts; no original report"
+    },
+    "Guarded existing-store": {
+      "counts": null,
+      "reason": "exact c241 CI completed/cancelled with zero jobs and zero artifacts; no original report"
+    },
+    "Recovery": {
+      "counts": null,
+      "reason": "exact c241 CI completed/cancelled with zero jobs and zero artifacts; no original report"
+    },
+    "RF3": {
+      "counts": null,
+      "reason": "exact c241 CI completed/cancelled with zero jobs and zero artifacts; no original report"
+    },
+    "Analyzer compiler fixture": {
+      "counts": null,
+      "reason": "exact c241 CI completed/cancelled with zero jobs and zero artifacts; no original report"
+    }
+  },
+  "nativeCells": {
+    "preflight27": "skipped; no native preflight reports",
+    "scenario270": "skipped; no scenario reports",
+    "timeSeries6and30": "no native preflight or scenario reports; one pinned image test only"
+  },
+  "registrySourceRepair": {
+    "sourceRevision": "86e58128a3c6e9b246c19425d1e7093b9657a5ba",
+    "owner": "separate shared-checkout delivery",
+    "source": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedTimeSeriesTimescaleResources.cs",
+    "qualification": "pending; source repair is not rerun proof"
+  },
+  "newSqlCasesExecuted": null,
+  "newSqlCompatibilityQualified": false
+}

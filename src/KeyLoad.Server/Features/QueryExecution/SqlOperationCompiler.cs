@@ -10,7 +10,7 @@ internal static class SqlOperationCompiler
         int maximumPayloadBytes, CancellationToken cancellationToken = default)
     {
         SqlOperationBounds.Validate(request, limits, maximumPayloadBytes, cancellationToken);
-        var reader = new SqlOperationSyntaxReader(request.Sql, limits.MaxQueryTokens, cancellationToken);
+        var reader = new SqlOperationSyntaxReader(request.Sql, limits.MaxQueryTokens, limits.MaxQueryDepth, cancellationToken);
         var statement = ReadStatement(reader);
         if (statement.Equals(SqlOperationSyntax.Select, StringComparison.OrdinalIgnoreCase)
             || statement.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase))
@@ -35,6 +35,7 @@ internal static class SqlOperationCompiler
 
     private static string ReadStatement(SqlOperationSyntaxReader reader)
     {
+        reader.SkipTrivia();
         try
         { return reader.Identifier(); }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Validation)

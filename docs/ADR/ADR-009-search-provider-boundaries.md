@@ -4,6 +4,13 @@ Status: **Proposed**; provider selection and format choices remain unresolved. E
 
 ## Context
 
+Owner suggestion2026-10-03 explicitly adds ZoneTree.FullTextSearch as an evaluated
+text-index candidate. [Pinned source review](../implementation/zonetree-fulltextsearch-review.md)
+records TASK-SQLC-R4 / REQ-SQLC-010 / AC-SQLC-010 under ADR-065. Its independent
+postings writes, token/hash/order and partial-cancellation behavior require the
+existing projection/freshness/semantic contracts to be frozen and tested; no
+package/provider decision or speed claim follows from source inspection.
+
 Search combines canonical documents with scalar, text, vector, graph, and hybrid candidate paths. Provider choice affects native dependencies, index format, authorization, freshness, recovery, and performance. The product design prefers managed-first ANN exploration with an exact oracle but requires a qualified provider and dependency audit before selection.
 
 ## Proposed decision boundary

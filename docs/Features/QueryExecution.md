@@ -1,5 +1,26 @@
 # QueryExecution
 
+Owner clarification2026-10-03 makes full SQL syntax and a client connection
+protocol required. [ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md) owns
+the ordered implementation contract; [conformance inventory](../implementation/sql-client-conformance.json)
+distinguishes syntax, executed semantics and native interoperability. Current
+Q1/SELECT/CALL is a stage; full SQL and native protocol remain pending.
+
+| Requirement | Acceptance | Task/test/evidence |
+|---|---|---|
+| REQ-SQLC-001/006: full versioned typed SQL | AC-SQLC-001/006 | TASK-SQLC-R7/FULL; [183-command index](../implementation/sql-client-commands-postgresql18.json), explicit semantic stages and real differential fixtures pending |
+| REQ-SQLC-002/003/004: bounded comments preserve canonical results/authority | AC-SQLC-002–004 | TASK-SQLC-I1/Q1/S1/I2; first-authored shared/parser/compiler real-store and RF3 SDK/official MCP comment cases; source/qualification pending |
+| REQ-SQLC-005: conservative SQL transport outcomes | AC-SQLC-005 | TASK-SQLC-C1; exact commented/unknown-root write outcomes over genuine Kestrel, pending |
+| REQ-SQLC-009/010: honest native performance and search choice | AC-SQLC-009/010 | TASK-SQLC-R4/FULL; pinned ZoneTree.FullTextSearch review then genuine correctness/fault/isolated workloads, pending |
+
+The lexical stage uses one internal allocation-free scalar trivia reader and
+existing configured byte/token/depth/cancellation budgets; quote readers retain
+their exact contents. No second statement, DTO/data format, package or alternate
+authority. Backend Query/Server/Abstractions, Client and matching tests use the
+same QueryExecution slice; frontend N/A because callers use APIs. Root owns shared
+contracts/docs/Git and actual final evidence; disjoint worker scopes and rollback
+are fixed by ADR-065. TUnit/MTP runs only in GitHub; source checks are not passes.
+
 Owner direction2026-10-02 requires SQL as the central language for one linked AI
 database. [ADR-054](../ADR/ADR-054-central-sql.md) adds a versioned unified SQL
 operation envelope: existing Q1 SELECT plus CALL into the sole canonical public

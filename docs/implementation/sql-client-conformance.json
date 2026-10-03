@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "ownerRequirementDate": "2026-10-03",
+  "decision": "ADR-065",
+  "workingDialect": "PostgreSQL18",
+  "dialectSelectedBy": "integration-planning-owner; optional owner preference unanswered",
+  "targetDefinition": "https://www.postgresql.org/docs/18/sql.html",
+  "fullSqlComplete": false,
+  "nativeClientProtocolQualified": false,
+  "currentTransport": [
+    "HTTP JSON",
+    "official MCP Streamable HTTP"
+  ],
+  "nativeWireTarget": {
+    "initial": "3.0",
+    "laterNegotiation": "3.2",
+    "implementation": "pending"
+  },
+  "inventoryStatus": "family inventory; command-by-command expansion and execution fixtures pending",
+  "families": [
+    {
+      "id": "SQLC-LEX",
+      "name": "lexical comments, quoting, identifiers, literals, parameters",
+      "syntax": "Q1 subset plus line and nested block comment source implemented; exact GitHub qualification pending",
+      "execution": "Q1 subset",
+      "evidence": "AC-SQLC-002/004 pending"
+    },
+    {
+      "id": "SQLC-READ",
+      "name": "SELECT expressions, types, casts, nulls, collations, scalar functions",
+      "syntax": "Q1 fields and predicates only",
+      "execution": "Q1 only",
+      "evidence": "AC-SQLC-006 pending"
+    },
+    {
+      "id": "SQLC-JOIN",
+      "name": "joins, subqueries, correlated queries, CTEs including recursive/data modifying",
+      "syntax": "pending",
+      "execution": "pending",
+      "evidence": "AC-SQLC-006 pending"
+    },
+    {
+      "id": "SQLC-GROUP",
+      "name": "aggregates, grouping sets, having, windows",
+      "syntax": "pending",
+      "execution": "pending",
+      "evidence": "AC-SQLC-006 pending"
+    },
+    {
+      "id": "SQLC-SET",
+      "name": "set operations, distinct, order, offset, fetch, limit",
+      "syntax": "Q1 order and limit only",
+      "execution": "Q1 order and limit only",
+      "evidence": "AC-SQLC-006 pending"
+    },
+    {
+      "id": "SQLC-DML",
+      "name": "INSERT, UPDATE, DELETE, MERGE, conflict handling, RETURNING, COPY",
+      "syntax": "pending",
+      "execution": "typed canonical row APIs only",
+      "evidence": "AC-SQLC-006 pending"
+    },
+    {
+      "id": "SQLC-DDL",
+      "name": "database/schema/table/type/domain/index/view/materialized view/sequence create alter drop",
+      "syntax": "pending",
+      "execution": "canonical resource/schema APIs only",
+      "evidence": "AC-SQLC-006 pending"
+    },
+    {
+      "id": "SQLC-INTEGRITY",
+      "name": "primary unique check foreign keys, deferred constraints, triggers, rules",
+      "syntax": "pending",
+      "execution": "typed row required/type/key checks only",
+      "evidence": "AC-SQLC-006 pending"
+    },
+    {
+      "id": "SQLC-TXN",
+      "name": "BEGIN, COMMIT, ROLLBACK, SAVEPOINT, isolation, locks, prepared transactions",
+      "syntax": "pending",
+      "execution": "canonical atomic command boundary only",
+      "evidence": "AC-SQLC-006/008 pending"
+    },
+    {
+      "id": "SQLC-ROUTINE",
+      "name": "functions, procedures, DO, CALL",
+      "syntax": "canonical CALL envelope only",
+      "execution": "sole canonical operation catalog only",
+      "evidence": "full routine execution pending"
+    },
+    {
+      "id": "SQLC-SESSION",
+      "name": "SET, RESET, SHOW, PREPARE, EXECUTE, DEALLOCATE, cursor lifecycle",
+      "syntax": "pending",
+      "execution": "pending",
+      "evidence": "AC-SQLC-007/008 pending"
+    },
+    {
+      "id": "SQLC-AUTH",
+      "name": "roles, GRANT, REVOKE, row security and policy DDL",
+      "syntax": "pending",
+      "execution": "persisted canonical authorization APIs only",
+      "evidence": "AC-SQLC-006/008 pending"
+    },
+    {
+      "id": "SQLC-META",
+      "name": "EXPLAIN, catalog/information_schema, diagnostics and client bootstrap",
+      "syntax": "Q1 EXPLAIN only",
+      "execution": "Q1 EXPLAIN only",
+      "evidence": "AC-SQLC-006/007 pending"
+    },
+    {
+      "id": "SQLC-ADMIN",
+      "name": "maintenance, notifications, publication/subscription, extensions and remaining PostgreSQL18 SQL commands",
+      "syntax": "pending",
+      "execution": "pending",
+      "evidence": "complete command inventory and AC-SQLC-001/006 pending"
+    },
+    {
+      "id": "SQLC-MODELS",
+      "name": "linked documents, rows, graph, vector/text search, series, blobs, queues, events",
+      "syntax": "canonical CALL only",
+      "execution": "existing canonical operations only",
+      "evidence": "declarative typed execution AC-SQLC-006 pending"
+    }
+  ],
+  "searchCandidate": {
+    "repository": "https://github.com/ZoneTree/ZoneTree.FullTextSearch",
+    "decision": "evaluate",
+    "sourceReview": "completed pinned 6d7710a4845608a5ab266342c3e93808f53a8695; docs/implementation/zonetree-fulltextsearch-review.md",
+    "integration": "pending",
+    "performanceQualification": "pending"
+  },
+  "qualification": {
+    "testsLocation": "GitHub Actions only",
+    "newLexicalCasesExecuted": null,
+    "coverage": "collector unavailable; pending",
+    "fullNativeClientEvidence": null,
+    "completePerformanceCohort": null
+  },
+  "commandInventory": "docs/implementation/sql-client-commands-postgresql18.json",
+  "officialCommandCount": 183,
+  "commandInventoryStatus": "all official names mapped for planning; semantic contracts and real execution fixtures pending; family mappings are research inference"
+}

@@ -1,5 +1,15 @@
 # Search
 
+Owner suggestion2026-10-03 adds ZoneTree.FullTextSearch to the provider evaluation
+under [ADR-009](../ADR/ADR-009-search-provider-boundaries.md) and
+[ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md).
+REQ-SQLC-010 / AC-SQLC-010 maps TASK-SQLC-R4 source review to
+[the pinned candidate findings and real test gates](../implementation/zonetree-fulltextsearch-review.md).
+Research is complete; provider integration and native performance are pending.
+Freeze canonical-commit/index-generation freshness, tokenizer/hash/rank parity,
+nonpartial cancellation, authorization/read cuts, rebuild/rollback and resource
+bounds before implementation. The candidate's language is not full SQL.
+
 Status: Accepted resource repair contract; implementation and CI qualification pending.
 Decision: [ADR-035](../ADR/ADR-035-memory-performance.md), TASK-MP-006B.
 Scope: exact persisted-policy text/vector/hybrid reads under one committed apply cut.

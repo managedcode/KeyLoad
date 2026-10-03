@@ -1,5 +1,6 @@
 using System.Text;
 using KeyLoad.Core;
+using KeyLoad.Features.QueryExecution;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
@@ -14,18 +15,27 @@ internal static class SqlTokenizer
 {
     private const int BudgetCheckInterval = 256;
 
-    internal static List<SqlToken> Lex(string sql, int maximum, ReadExecutionBudget? budget = null)
+    internal static List<SqlToken> Lex(string sql, int maximum, int maximumDepth, ReadExecutionBudget? budget = null)
     {
         var result = new List<SqlToken>();
+        var triviaState = default(SqlTriviaState);
         for (var index = 0; index < sql.Length;)
         {
-            CheckBudget(budget, index);
-            var current = sql[index];
-            if (char.IsWhiteSpace(current))
+            budget?.Check();
+            var status = ReadTrivia(sql, ref index, ref triviaState, maximumDepth, budget);
+            if (status == SqlTriviaStatus.UnterminatedComment)
             {
-                index++;
-                continue;
+                throw Errors.Fail(ErrorCode.Validation, SqlCommentSyntax.UnterminatedBlockDetail);
             }
+            if (status == SqlTriviaStatus.DepthLimitExceeded)
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, SqlCommentSyntax.BlockDepthDetail);
+            }
+            if (index >= sql.Length)
+            {
+                break;
+            }
+            var current = sql[index];
             if (result.Count >= maximum)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, SqlSyntax.TokenBudgetDetail);
@@ -41,6 +51,21 @@ internal static class SqlTokenizer
         }
         result.Add(new(SqlTokenKind.End, string.Empty));
         return result;
+    }
+
+    private static SqlTriviaStatus ReadTrivia(string sql, ref int index, ref SqlTriviaState state,
+        int maximumDepth, ReadExecutionBudget? budget)
+    {
+        SqlTriviaStatus status;
+        do
+        {
+            status = SqlTriviaReader.Read(sql.AsSpan(), ref index, ref state, maximumDepth);
+            if (status == SqlTriviaStatus.More)
+            {
+                budget?.Check();
+            }
+        } while (status == SqlTriviaStatus.More);
+        return status;
     }
 
     private static SqlToken Quoted(string sql, ref int index, ReadExecutionBudget? budget)
@@ -91,13 +116,17 @@ internal static class SqlTokenizer
     private static SqlToken Number(string sql, ref int index, ReadExecutionBudget? budget)
     {
         var start = index++;
-        while (index < sql.Length && (char.IsDigit(sql[index]) || sql[index] is '.' or 'e' or 'E' or '+' or '-'))
+        while (index < sql.Length && !StartsLineComment(sql, index)
+            && (char.IsDigit(sql[index]) || sql[index] is '.' or 'e' or 'E' or '+' or '-'))
         {
             index++;
             CheckBudget(budget, index);
         }
         return new(SqlTokenKind.Number, sql[start..index]);
     }
+
+    private static bool StartsLineComment(string sql, int index)
+        => sql[index] == SqlTriviaSyntax.Dash && index + 1 < sql.Length && sql[index + 1] == SqlTriviaSyntax.Dash;
 
     private static SqlToken Symbol(string sql, ref int index)
     {

@@ -29,7 +29,7 @@ public sealed class SqlParser
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SqlSyntax.ByteBudgetDetail);
         }
-        cursor = new(SqlTokenizer.Lex(sql, limits.MaxQueryTokens, budget));
+        cursor = new(SqlTokenizer.Lex(sql, limits.MaxQueryTokens, limits.MaxQueryDepth, budget));
     }
 
     /// <summary>Parses the SQL text into a typed, bounded query.</summary>

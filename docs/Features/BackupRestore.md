@@ -1,5 +1,14 @@
 # BackupRestore
 
+TASK-SQLC-NATIVE-JOIN / AC-SQLC-011 under
+[ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md) closes the omitted restore
+caller for ADR-060's two-argument native backup verifier. This remains the
+BackupRestore slice under REQ-BACKUP-002 / AC-BACKUP-002 and AC-IS-004. Root joins
+the existing private staged restore; BackupRestoreStagingJoinTests adds genuine
+absent/empty-target positive byte/source/readability/identity/pause/cleanup proof,
+with all delivered NativeBackupCut negatives and recovery checks retained.
+No new format or migration is defined; exact-source GitHub execution is pending.
+
 AC-CQ-018 preserves the complete original ManagedCode file-storage transfer byte
 oracle in ArtifactTests through ordered content equivalence under pinned TUnit.
 Both real awaited file reads remain; a partial checksum or reference comparison

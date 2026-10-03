@@ -66,6 +66,7 @@
 
 | [ADR-062 workflow separation](ADR-062-workflow-separation.md) | Placement superseded by ADR-064; authentic historical proof retained | RepositoryGovernance, BenchmarkComparisons |
 | [ADR-064 three-pipeline release delivery](ADR-064-three-pipeline-release-delivery.md) | Accepted; exact-SHA CI/site/release qualification pending | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery |
+| [ADR-065 full SQL and client protocol](ADR-065-full-sql-client-compatibility.md) | Accepted staged lexical contract; full execution/native qualification pending | QueryExecution, ClientApi, RelationalStorage, Search |
 
 ## Ідентичність і пріоритет
 

@@ -5,7 +5,9 @@
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="KeyLoad.Query" />
     <InternalsVisibleTo Include="KeyLoad.Server" />
+    <InternalsVisibleTo Include="KeyLoad.Client" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <InternalsVisibleTo Include="KeyLoad.Core" />
     <InternalsVisibleTo Include="KeyLoad.Orleans" />

@@ -12,7 +12,6 @@ internal sealed class SqlOperationRejectionTests
     private const string MissingParenthesis = "CALL keyload_query_capabilities(@arguments";
     private const string MultipleStatements = "CALL keyload_query_capabilities(@arguments); SELECT * FROM orders";
     private const string MultipleArguments = "CALL keyload_query_capabilities(@arguments,@extra)";
-    private const string CommentCall = "CALL keyload_query_capabilities(@arguments) -- comment";
     private const string QuotedSelect = "\"SELECT\" * FROM orders";
     private const string MutationSql = "UPDATE internal_queue SET state = 'Completed'";
     private const string EmptySql = " \t\r\n";
@@ -38,7 +37,7 @@ internal sealed class SqlOperationRejectionTests
     {
         var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
         foreach (var sql in new[] { QuotedCall, LiteralCall, MissingParenthesis, MultipleStatements,
-                     MultipleArguments, CommentCall, EmptySql })
+                     MultipleArguments, EmptySql })
         {
             await SqlOperationTestData.Reject(request with { Sql = sql }, ErrorCode.Validation);
         }

@@ -1,14 +1,17 @@
+using KeyLoad.Features.QueryExecution;
+
 namespace KeyLoad.Server;
 
 /// <summary>Scans the bounded CALL grammar without allocating tokens or evaluating application code.</summary>
-internal sealed class SqlOperationSyntaxReader(string sql, int maximumTokens, CancellationToken cancellationToken)
+internal sealed class SqlOperationSyntaxReader(string sql, int maximumTokens, int maximumDepth,
+    CancellationToken cancellationToken)
 {
     private int offset;
     private int tokens;
 
     internal string Identifier()
     {
-        Whitespace();
+        SkipTrivia();
         if (offset == sql.Length || !IdentifierStart(sql[offset]))
         { throw SqlOperationSyntax.InvalidInput(); }
         CountToken();
@@ -20,7 +23,7 @@ internal sealed class SqlOperationSyntaxReader(string sql, int maximumTokens, Ca
 
     internal void Need(char symbol)
     {
-        Whitespace();
+        SkipTrivia();
         if (offset == sql.Length || sql[offset] != symbol)
         { throw SqlOperationSyntax.InvalidInput(); }
         CountToken();
@@ -29,23 +32,33 @@ internal sealed class SqlOperationSyntaxReader(string sql, int maximumTokens, Ca
 
     internal void Complete()
     {
-        Whitespace();
+        SkipTrivia();
         if (offset < sql.Length && sql[offset] == SqlOperationSyntax.Terminator)
         {
             CountToken();
             Advance();
-            Whitespace();
+            SkipTrivia();
         }
         if (offset != sql.Length)
         { throw SqlOperationSyntax.InvalidInput(); }
         cancellationToken.ThrowIfCancellationRequested();
     }
 
-    private void Whitespace()
+    internal void SkipTrivia()
     {
+        var state = default(SqlTriviaState);
+        SqlTriviaStatus status;
+        do
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            status = SqlTriviaReader.Read(sql.AsSpan(), ref offset, ref state, maximumDepth);
+        }
+        while (status == SqlTriviaStatus.More);
         cancellationToken.ThrowIfCancellationRequested();
-        while (offset < sql.Length && char.IsWhiteSpace(sql[offset]))
-        { Advance(); }
+        if (status == SqlTriviaStatus.UnterminatedComment)
+        { throw SqlOperationSyntax.InvalidInput(); }
+        if (status == SqlTriviaStatus.DepthLimitExceeded)
+        { throw Errors.Fail(ErrorCode.BudgetExceeded, SqlOperationSyntax.StructureExceeded); }
     }
 
     private void Advance()
