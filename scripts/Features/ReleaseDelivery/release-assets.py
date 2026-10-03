@@ -72,9 +72,9 @@ def read_json(path, maximum):
 
 def validate_reservation(value):
     keys = {"schemaVersion", "repository", "sourceRevision", "runId", "baseVersion", "major", "minor", "date",
-            "sequence", "version", "tag", "assemblyVersion", "fileVersion"}
+            "sequence", "version", "packageVersion", "tag", "assemblyVersion", "fileVersion"}
     if not is_plain_object(value) or set(value) != keys or type(value["schemaVersion"]) is not int \
-            or value["schemaVersion"] != 1 or value["repository"] != REPOSITORY:
+            or value["schemaVersion"] != 2 or value["repository"] != REPOSITORY:
         fail("Release reservation has an unsupported shape or repository.")
     if not isinstance(value["sourceRevision"], str) or not re.fullmatch(r"[a-f0-9]{40}", value["sourceRevision"]):
         fail("Release reservation source revision is invalid.")
@@ -97,7 +97,7 @@ def validate_reservation(value):
     if parsed.strftime("%y%m%d") != value["date"]:
         fail("Release reservation UTC date is not canonical.")
     version = f"{major}.{minor}.{value['date']}.{sequence}"
-    expected = {"major": major, "minor": minor, "version": version, "tag": f"v{version}",
+    expected = {"major": major, "minor": minor, "version": version, "packageVersion": f"{version}-dev", "tag": f"v{version}",
                 "assemblyVersion": f"{major}.{minor}.0.0", "fileVersion": f"{major}.{minor}.0.{sequence}"}
     if any(value[key] != expectedValue for key, expectedValue in expected.items()):
         fail("Release reservation derived version fields do not agree.")
@@ -331,9 +331,9 @@ def write_immutable(path, content):
 
 
 def build_manifest(reservation, packages, database, images):
-    return {"schemaVersion": 1, "repository": REPOSITORY, "sourceRevision": reservation["sourceRevision"],
+    return {"schemaVersion": 2, "repository": REPOSITORY, "sourceRevision": reservation["sourceRevision"],
             "runId": reservation["runId"], "baseVersion": reservation["baseVersion"],
-            "version": reservation["version"], "tag": reservation["tag"],
+            "version": reservation["version"], "packageVersion": reservation["packageVersion"], "tag": reservation["tag"],
             "assemblyVersion": reservation["assemblyVersion"], "fileVersion": reservation["fileVersion"],
             "packages": packages, "database": database, "images": images}
 
@@ -363,7 +363,7 @@ def main():
                 f"keyload-server-{version}-linux-amd64.docker.tar.gz",
                 f"keyload-benchmarks-{version}-linux-amd64.docker.tar.gz"}
     validate_asset_directory(asset_root, expected)
-    packages = [read_package(item, version) for item in package_paths]
+    packages = [read_package(item, reservation["packageVersion"]) for item in package_paths]
     if len({item["id"].casefold() for item in packages}) != len(packages):
         fail("NuGet package ids must be unique within the release.")
     database = verify_database_distribution(database_path, reservation)

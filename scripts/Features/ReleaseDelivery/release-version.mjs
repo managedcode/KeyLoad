@@ -1,9 +1,9 @@
 const RELEASE_REPOSITORY = 'managedcode/KeyLoad';
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 const MAX_VERSION_COMPONENT = 65534;
 const MAX_INVENTORY_ITEMS = 10000;
 const RESERVATION_KEYS = Object.freeze(['schemaVersion', 'repository', 'sourceRevision', 'runId', 'baseVersion',
-  'major', 'minor', 'date', 'sequence', 'version', 'tag', 'assemblyVersion', 'fileVersion']);
+  'major', 'minor', 'date', 'sequence', 'version', 'packageVersion', 'tag', 'assemblyVersion', 'fileVersion']);
 
 export const RELEASE_VERSION_ERRORS = Object.freeze({
   input: 'E_RELEASE_INPUT', date: 'E_RELEASE_DATE', dailyRuns: 'E_RELEASE_DAILY_RUNS', tags: 'E_RELEASE_TAGS',
@@ -101,7 +101,7 @@ function makeReservation({ baseVersion, sourceRevision, runId, major, minor, dat
   const version = `${major}.${minor}.${date}.${sequence}`;
   return {
     schemaVersion: SCHEMA_VERSION, repository: RELEASE_REPOSITORY, sourceRevision, runId, baseVersion,
-    major, minor, date, sequence, version, tag: `v${version}`,
+    major, minor, date, sequence, version, packageVersion: `${version}-dev`, tag: `v${version}`,
     assemblyVersion: `${major}.${minor}.0.0`, fileVersion: `${major}.${minor}.0.${sequence}`,
   };
 }

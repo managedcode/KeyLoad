@@ -99,6 +99,8 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         await Assert.That(job.Contains("release-github-context.py", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("release-version-cli.mjs", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("--reservation=", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(job.Contains("package_version: ${{ steps.reserve.outputs.package_version }}",
+            StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("release-version-${{ github.run_id }}", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("actions/upload-artifact", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("GITHUB_RUN_ATTEMPT", StringComparison.Ordinal)).IsTrue();
@@ -112,7 +114,9 @@ internal sealed class WorkflowLayoutPipelineSourceTests
             "node scripts/Features/RepositoryGovernance/verify.mjs",
             "dotnet build KeyLoad.slnx", "dotnet format KeyLoad.slnx", "dotnet pack KeyLoad.slnx",
             "dotnet publish src/KeyLoad.Server", "dotnet publish src/KeyLoad.Cli", "compose.yml",
-            "docker build", "docker save", "release-manifest.json",
+            "docker build", "docker save", "release-manifest.json", "RELEASE_PACKAGE_VERSION",
+            "-p:PackageVersion=\"$RELEASE_PACKAGE_VERSION\"",
+            "jq -e --arg expected \"$RELEASE_PACKAGE_VERSION\" '.packageVersion == $expected'",
         })
         {
             await Assert.That(job.Contains(required, StringComparison.Ordinal)).IsTrue();

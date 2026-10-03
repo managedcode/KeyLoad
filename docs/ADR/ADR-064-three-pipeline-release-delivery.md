@@ -3,6 +3,9 @@
 Status: Accepted. Date: 2026-10-03. Owner: KeyLoad lead/integrator.
 Requirements/acceptance: REQ/AC-PIPE-001..004 and REQ/AC-REL-001..003.
 Supersedes ADR-062's five-workflow placement under explicit owner direction.
+The later owner correction defers actual Release packaging/publication until product
+readiness or an explicit release request; retain this implementation contract for
+the prepared manual workflow. Provider qualification remains deferred.
 
 ## Decision and implementation contract
 
@@ -47,7 +50,10 @@ flowchart TD
    date/run/source/version in an immutable same-run artifact. Daily N starts at 1,
    is >= actual daily run ordinal and > existing dated tag counters. Reruns recover
    the exact reservation; malformed/foreign/colliding/exhausted identity fails.
-   Package/informational/image/tag use M.m.yyMMdd.N; CLR versions use M.m.0.0 and
+   Informational/image/tag use M.m.yyMMdd.N. NuGet retains the configured source
+   development stage as M.m.yyMMdd.N-dev, because the existing third-party Cartograph
+   dependency is alpha-only; do not suppress NU5104 or pretend it is stable. Freeze
+   this derived package version in the reservation and inspect real nuspecs. CLR versions use M.m.0.0 and
    M.m.0.N so components remain <=65534. Never edit source version to count builds.
 6. Read-only build restores/builds/formats/governs full source, packs actual projects,
    publishes Linux x64 server distribution, builds/exports existing server and

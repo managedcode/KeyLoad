@@ -18,6 +18,7 @@ jobs:
     timeout-minutes: 10
     outputs:
       version: ${{ steps.reserve.outputs.version }}
+      package_version: ${{ steps.reserve.outputs.package_version }}
       tag: ${{ steps.reserve.outputs.tag }}
       assembly_version: ${{ steps.reserve.outputs.assembly_version }}
       file_version: ${{ steps.reserve.outputs.file_version }}
@@ -66,6 +67,7 @@ jobs:
     timeout-minutes: 60
     env:
       RELEASE_VERSION: ${{ needs.version.outputs.version }}
+      RELEASE_PACKAGE_VERSION: ${{ needs.version.outputs.package_version }}
       RELEASE_ASSEMBLY_VERSION: ${{ needs.version.outputs.assembly_version }}
       RELEASE_FILE_VERSION: ${{ needs.version.outputs.file_version }}
     steps:
@@ -99,13 +101,13 @@ jobs:
         run: |
           node scripts/Features/RepositoryGovernance/verify.mjs
           dotnet restore KeyLoad.slnx
-          dotnet build KeyLoad.slnx --no-restore --configuration Release -p:Version="$RELEASE_VERSION" -p:AssemblyVersion="$RELEASE_ASSEMBLY_VERSION" -p:FileVersion="$RELEASE_FILE_VERSION"
+          dotnet build KeyLoad.slnx --no-restore --configuration Release -p:Version="$RELEASE_VERSION" -p:PackageVersion="$RELEASE_PACKAGE_VERSION" -p:AssemblyVersion="$RELEASE_ASSEMBLY_VERSION" -p:FileVersion="$RELEASE_FILE_VERSION"
           dotnet format KeyLoad.slnx --verify-no-changes --no-restore
       - name: Build all NuGet packages and the Linux x64 RF3 database distribution
         if: env.RELEASE_ASSETS_EXISTS == '0'
         shell: bash
         run: |
-          args=(-p:Version="$RELEASE_VERSION" -p:AssemblyVersion="$RELEASE_ASSEMBLY_VERSION" -p:FileVersion="$RELEASE_FILE_VERSION")
+          args=(-p:Version="$RELEASE_VERSION" -p:PackageVersion="$RELEASE_PACKAGE_VERSION" -p:AssemblyVersion="$RELEASE_ASSEMBLY_VERSION" -p:FileVersion="$RELEASE_FILE_VERSION")
           dotnet pack KeyLoad.slnx --no-build --no-restore --configuration Release "${args[@]}" --output artifacts/assets
           dotnet publish src/KeyLoad.Server/KeyLoad.Server.csproj --configuration Release --runtime linux-x64 --self-contained true "${args[@]}" --output artifacts/distribution/server
           dotnet publish src/KeyLoad.Cli/KeyLoad.Cli.csproj --configuration Release --runtime linux-x64 --self-contained true "${args[@]}" --output artifacts/distribution/cli
@@ -136,6 +138,7 @@ jobs:
             (cd artifacts/assets && sha256sum --check SHA256SUMS)
           fi
           python3 scripts/Features/ReleaseDelivery/release-assets.py --reservation=artifacts/reservation/release-version.json --assets=artifacts/assets --images=artifacts/images.json
+          jq -e --arg expected "$RELEASE_PACKAGE_VERSION" '.packageVersion == $expected' artifacts/assets/release-manifest.json
       - name: Retain immutable release packages, distribution and image exports
         if: env.RELEASE_ASSETS_EXISTS == '0'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

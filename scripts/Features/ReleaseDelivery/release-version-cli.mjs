@@ -8,9 +8,11 @@ const INPUT_KEYS = Object.freeze(['baseVersion', 'sourceRevision', 'runId', 'utc
 const ENV_VALUES = Object.freeze([
   ['RELEASE_VERSION', 'version'], ['RELEASE_TAG', 'tag'],
   ['RELEASE_ASSEMBLY_VERSION', 'assemblyVersion'], ['RELEASE_FILE_VERSION', 'fileVersion'],
+  ['RELEASE_PACKAGE_VERSION', 'packageVersion'],
 ]);
 const OUTPUT_VALUES = Object.freeze([
   ['version', 'version'], ['tag', 'tag'], ['assembly_version', 'assemblyVersion'], ['file_version', 'fileVersion'],
+  ['package_version', 'packageVersion'],
 ]);
 
 function fail(message) { throw new Error(message); }

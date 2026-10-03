@@ -17,6 +17,7 @@ internal static class ReleaseVersionFields
     internal const string Repository = "repository";
     internal const string Date = "date";
     internal const string Sequence = "sequence";
+    internal const string PackageVersion = "packageVersion";
     internal const string Foreign = "foreign";
     internal const string Id = "id";
     internal const string RunNumber = "run_number";

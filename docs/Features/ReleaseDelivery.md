@@ -8,6 +8,15 @@ frozen to the authenticated release run. Example: `v0.1.261003.1` for the curren
 have smaller bounds, so use stable `M.m.0.0` / `M.m.0.N` and full informational
 version ([NuGet](https://learn.microsoft.com/en-us/nuget/concepts/package-versioning),
 [CLR metadata](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.assemblyversionattribute)).
+NuGet packages retain the current source's development stage as `M.m.yyMMdd.N-dev`;
+tag, image and informational versions retain the requested four numeric components.
+This keeps the alpha-only Cartograph dependency visible and respects
+[NU5104](https://learn.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5104)
+without suppressing diagnostics or claiming stable packages.
+
+The owner subsequently deferred packaging because the product is unfinished.
+Release remains manual and prepared for a later explicit release/readiness request;
+current workflow implementation and CI checks do not authorize dispatch or publication.
 
 Requirements/acceptance are REQ/AC-PIPE-001..004 and REQ/AC-REL-001..003 in the
 [acceptance matrix](../implementation/pipeline-release-v2-acceptance.md).

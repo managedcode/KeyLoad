@@ -13,6 +13,12 @@ Benchmarks; a manual own-main Release can reserve/build, with write privileges o
 at publication. UTC is the daily counter boundary; configured source major/minor
 remain owner controlled. All qualification executes in Linux GitHub Actions.
 
+Owner correction 2026-10-03: the product is not ready for packaging. Current scope
+is the prepared three-pipeline implementation and CI verification. Actual Release
+dispatch, package/image builds, tag creation and provider publication are deferred
+until a later explicit release/readiness instruction. Retain the future release
+requirements and report their provider qualification as deferred, never passing.
+
 - AC-PIPE-001 / REQ-PIPE-001: exactly ci.yml, benchmarks.yml and release.yml remain;
   names are CI, Benchmarks and Release. CI runs push(main), pull_request and manual;
   preserve full build/format/rules/analyzer/unit/scalar/recovery/real SDK/MCP RF3.
@@ -42,6 +48,10 @@ remain owner controlled. All qualification executes in Linux GitHub Actions.
   Check nonempty files, embedded package versions, hashes, image digest/labels and
   source/run provenance before publication. CLR version mapping remains bounded;
   package/informational/image/git identities retain the complete owner version.
+  Preserve the source's `dev` package stage: NuGet versions append `-dev` to the
+  same four numeric components; git tags and image versions retain the exact
+  requested numeric format. Inspect this derived package version in reservation,
+  nuspecs and manifest. Never suppress NU5104 or hide alpha dependencies.
 - AC-REL-003 / REQ-REL-003: final publication authenticates successful exact-source
   CI and owned build artifacts, pushes immutable versioned GHCR image(s), creates
   source-bound annotated git tag and GitHub Release with real database/package/

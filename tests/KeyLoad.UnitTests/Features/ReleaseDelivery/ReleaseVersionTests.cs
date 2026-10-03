@@ -21,16 +21,19 @@ internal sealed class ReleaseVersionTests
     public async Task AcRel001CreatesCanonicalDatedVersionAndClrVersions()
     {
         var result = await ResolveAsync(Request(), TestContext.Current!.Execution.CancellationToken);
-        await Assert.That(result.GetProperty(ReleaseVersionFields.Version).GetString()).IsEqualTo("0.1." + Date + ".1");
+        var expectedVersion = "0.1." + Date + ".1";
+        await Assert.That(result.GetProperty(ReleaseVersionFields.Version).GetString()).IsEqualTo(expectedVersion);
         await Assert.That(result.GetProperty(ReleaseVersionFields.Tag).GetString()).IsEqualTo("v0.1." + Date + ".1");
         await Assert.That(result.GetProperty(ReleaseVersionFields.AssemblyVersion).GetString()).IsEqualTo("0.1.0.0");
         await Assert.That(result.GetProperty(ReleaseVersionFields.FileVersion).GetString()).IsEqualTo("0.1.0.1");
         await Assert.That(result.GetProperty(ReleaseVersionFields.SourceRevision).GetString()).IsEqualTo(Sha);
         await Assert.That(result.GetProperty(ReleaseVersionFields.RunId).GetString()).IsEqualTo(RunId);
-        await Assert.That(result.GetProperty(ReleaseVersionFields.SchemaVersion).GetInt32()).IsEqualTo(1);
+        await Assert.That(result.GetProperty(ReleaseVersionFields.SchemaVersion).GetInt32()).IsEqualTo(2);
         await Assert.That(result.GetProperty(ReleaseVersionFields.Repository).GetString()).IsEqualTo(Repository);
         await Assert.That(result.GetProperty(ReleaseVersionFields.Date).GetString()).IsEqualTo(Date);
         await Assert.That(result.GetProperty(ReleaseVersionFields.Sequence).GetInt32()).IsEqualTo(1);
+        await Assert.That(result.GetProperty(ReleaseVersionFields.PackageVersion).GetString())
+            .IsEqualTo(expectedVersion + "-dev");
     }
 
     [Test]
@@ -78,6 +81,24 @@ internal sealed class ReleaseVersionTests
         request = Request();
         var invalidReservation = JsonNode.Parse(reservation.GetRawText())!.AsObject();
         invalidReservation[ReleaseVersionFields.Foreign] = true;
+        request[ReleaseVersionFields.Reservation] = invalidReservation;
+        await AssertFailureAsync(request, ReservationError, token);
+
+        request = Request();
+        invalidReservation = JsonNode.Parse(reservation.GetRawText())!.AsObject();
+        invalidReservation[ReleaseVersionFields.PackageVersion] = "0.1." + Date + ".1";
+        request[ReleaseVersionFields.Reservation] = invalidReservation;
+        await AssertFailureAsync(request, ReservationError, token);
+
+        request = Request();
+        invalidReservation = JsonNode.Parse(reservation.GetRawText())!.AsObject();
+        invalidReservation[ReleaseVersionFields.SchemaVersion] = 1;
+        request[ReleaseVersionFields.Reservation] = invalidReservation;
+        await AssertFailureAsync(request, ReservationError, token);
+
+        request = Request();
+        invalidReservation = JsonNode.Parse(reservation.GetRawText())!.AsObject();
+        invalidReservation.Remove(ReleaseVersionFields.PackageVersion);
         request[ReleaseVersionFields.Reservation] = invalidReservation;
         await AssertFailureAsync(request, ReservationError, token);
     }
