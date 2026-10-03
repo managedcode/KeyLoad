@@ -117,8 +117,6 @@ KeyLoad is developed by [Managed Code](https://www.managed-code.com/) and builds
 
 Development and presentation also use [Aspire](https://github.com/dotnet/aspire) for Docker orchestration, [TUnit](https://github.com/thomhurst/TUnit) for tests, [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet) for microbenchmarks, and [Three.js](https://github.com/mrdoob/three.js) for the website's cluster illustration.
 
-Dependency versions are maintained in [Directory.Packages.props](Directory.Packages.props). Each dependency retains its own license.
-
 ## License
 
 KeyLoad is licensed under [MIT](LICENSE).
