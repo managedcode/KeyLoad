@@ -25,11 +25,11 @@
 
 ## ADR-040 migration execution
 - The old entry/command listings above describe the pre-migration state. Preserve these rules and their provenance; the stricter root TUnit requirement controls execution. The replacement canonical HTML/modules/styles are `Features/BenchmarkComparisons/`, with `scripts/build.mjs` as the thin build entry and `tests/KeyLoad.SiteTests` as the only qualification runner. Remove the superseded flat assets and Node test only after all replacement packets are joined and inspected.
-- Read `site-design.acceptance.md`, `site-design.plan.md`, ADR-040 and the frozen feature `protocol.md`. Site validation remains in `pages.yml`; its explicit validation mode must not deploy. Successful source/run verification precedes report download; website and measured revisions remain separate. No DNS/publication in the design task.
+- Read the design/acceptance/execution contracts in `docs/Features/BenchmarkComparisons.md`, ADR-040 and the frozen feature `protocol.md`. Site validation remains in `pages.yml`; its explicit validation mode must not deploy. Successful source/run verification precedes report download; website and measured revisions remain separate. No DNS/publication in the design task.
 - A local isolated static build and real-browser design/graphics inspection are the narrowly specified ADR-040 manual exceptions. They cannot qualify numeric tests, database behavior, coverage, publication or durability.
 
 ## Subsequent fresh-evidence publication task
-- The owner's subsequent instruction requests a separate post-test Pages publication workflow, recorded in `site-publication.acceptance.md`, `site-publication.plan.md` and REQ/AC-BC-028/ADR-040. The earlier design task's no-publication rule remains its scope record; DNS remains excluded from this new task.
+- The owner's subsequent instruction requests a separate post-test Pages publication workflow, recorded in the BenchmarkComparisons publication contract and REQ/AC-BC-028/ADR-040. The earlier design task's no-publication rule remains its scope record; DNS remains excluded from this new task.
 - Publication MUST preserve qualified measured-source checkout and independently accurate site/measured/control-workflow SHA fields. Validate-only candidate source MUST NOT deploy. Every figure MUST be computed from the actual authenticated comparison-job JSON; unsupported/missing/failed values remain unavailable.
 - The new publication route MUST consume the exact verified archive/raw bytes, complete site/browser/native qualification, a current-run/attempt/artifact freshness check, and least-privilege Pages deployment. Never restore the old independent publisher bypass or treat configuration as a deployment receipt.
 

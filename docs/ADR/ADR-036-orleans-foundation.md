@@ -153,7 +153,7 @@ sequenceDiagram
     Request-->>API: Public result
 ```
 
-Ownership: lead alone owns central config, shared contracts, docs and final integration. TASK-TEST-MIGRATE owns only existing test sources; TASK-REP-LOG owns only the new ClusterReplication durable-log/snapshot slice after contracts are fixed; transport research is read-only. Task graph, permissions, start/join conditions and test mapping are in the [execution plan](../implementation/orleans-foundation.plan.md).
+Ownership: lead alone owns central config, shared contracts, docs and final integration. TASK-TEST-MIGRATE owns only existing test sources; TASK-REP-LOG owns only the new ClusterReplication durable-log/snapshot slice after contracts are fixed; transport research is read-only. Task graph, permissions, start/join conditions and test mapping are in the [execution plan](ADR-036-orleans-foundation.md).
 
 TASK-ROUTE-REQUEST freezes generated request/reply contracts before delegated writes.
 Every public operation uses a unique, non-reentrant GUID request actor; it invokes a

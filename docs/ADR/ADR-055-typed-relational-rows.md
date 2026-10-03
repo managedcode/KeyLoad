@@ -54,7 +54,7 @@ flowchart LR
 ## Implementation contract
 
 REQ-REL-001/002/003 -> AC-AISQL-002–004/009/010 in
-[RelationalStorage](../Features/RelationalStorage.md) and root acceptance.
+[RelationalStorage](../Features/RelationalStorage.md) and this ADR.
 Ordered tasks:004 freezes metadata DTOs;005 writes real-ZoneTree schema/row/
 atomicity/linkage regression sources then validators;008 joins configuration and
 PUT/PATCH validation once per final image, client/MCP/RF3/evidence.

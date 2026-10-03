@@ -656,18 +656,6 @@ MigrationBackup/
 _site/
 
 
-#plans
-*.plan.md
-
-# Local task scaffolding; durable specifications remain in docs/.
-/*.brainstorm.md
-/*.acceptance.md
-
-# Required source artifacts checked by RepositoryGovernance in CI.
-!/mcaf-governance.brainstorm.md
-!/mcaf-governance.acceptance.md
-!/mcaf-governance.plan.md
-
 # KeyLoad local databases, credentials and qualification artifacts
 artifacts/
 data/
@@ -685,3 +673,8 @@ output/playwright/
 *.ctg
 *.tmp
 *.binlog
+
+# Agent working notes; durable contracts live in docs/Features/ and docs/ADR/.
+*.plan.md
+*.brainstorm.md
+*.acceptance.md

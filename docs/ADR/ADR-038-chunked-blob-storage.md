@@ -2,8 +2,8 @@
 
 Status: Accepted; implementation/qualification pending. Date:2026-10-02.
 Owner: KeyLoad integration owner. Related: [BlobStorage](../Features/BlobStorage.md),
-REQ/AC-BLOB-001–007, [format matrix](ADR-011-format-upgrades.md), [acceptance](../../blob-storage.acceptance.md),
-[execution graph](../implementation/blob-storage.plan.md), ADR-035/036/039/041/042.
+REQ/AC-BLOB-001–007, [format matrix](ADR-011-format-upgrades.md), [acceptance](../Features/BlobStorage.md),
+[execution graph](../Features/BlobStorage.md), ADR-035/036/039/041/042.
 Acceptance is the integrator's decision within the authorized full rewrite;
 it is not passing storage, RF3, coverage or endurance evidence.
 
@@ -215,7 +215,7 @@ validated ID, not historical snapshot/authority; ordering is KeyCodec UTF8 order
 
 ## Implementation, migration and qualification
 
-[Plan](../implementation/blob-storage.plan.md) freezes task/owner/dependencies.
+[Plan](../Features/BlobStorage.md) freezes task/owner/dependencies.
 Root owns contracts/shared adapters; workers own disjoint new feature files.
 First real provider/golden AC tests, then engine, current-authority configuration/
 dispatch, fresh-grain routes, SDK/native MCP, recovery and RF3 callers.

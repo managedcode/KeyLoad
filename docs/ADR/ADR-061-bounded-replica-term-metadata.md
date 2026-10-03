@@ -73,7 +73,7 @@ flowchart LR
 
 ## Ordered implementation contract
 
-1. Root freezes brainstorm, acceptance, task graph and this contract before
+1. Root freezes design analysis, acceptance and the task graph in the owning Feature and this ADR before
    delegated writes. Independent actual-provider review checks same-position
    replacement, restore, poison/disposal and gate order. Source findings are not
    native profile attribution.

@@ -13,10 +13,8 @@ const REQUIRED_FILES = [
   'docs/Features/RepositoryGovernance.md',
   'docs/ADR/ADR-032-mcaf-governance.md',
   'docs/Architecture.md',
-  'mcaf-governance.brainstorm.md',
-  'mcaf-governance.acceptance.md',
-  'mcaf-governance.plan.md',
 ];
+const WORKING_FILE_SUFFIXES = ['.plan.md', '.brainstorm.md', '.acceptance.md'];
 const REQUIRED_POLICY_IDS = [
   'MCAF-GOV-001',
   'MCAF-ARCH-001',
@@ -73,6 +71,7 @@ const namedMessages = {
   incompletePolicy: value => `${value} must document purpose, entry points, boundaries, commands, skills policy and protected risks.`,
   unresolvedPlaceholder: value => `${value} contains an unresolved placeholder.`,
   missingGovernanceFile: value => `Required governance file is missing: ${value}`,
+  workingFile: value => `Working planning file is present: ${value}`,
   missingRootPolicy: value => `Root AGENTS.md is missing required policy ${value}.`,
   missingCommand: value => `Root AGENTS.md is missing the required command: ${value}.`,
   rootPlaceholder: 'Root AGENTS.md contains an unresolved template placeholder.',
@@ -136,6 +135,7 @@ async function walkRepository(root, currentDirectory, inventory) {
     }
     if (!entry.isFile()) continue;
     const repositoryPath = toRepositoryPath(root, absolutePath);
+    if (WORKING_FILE_SUFFIXES.some(suffix => entry.name.endsWith(suffix))) inventory.workingFiles.push(repositoryPath);
     if (entry.name.endsWith('.csproj')) inventory.projects.push(repositoryPath);
     if (entry.name === 'SKILL.md') inventory.skillFiles.push(repositoryPath);
   }
@@ -272,11 +272,13 @@ async function validate(root) {
   const loadedRecord = JSON.parse(await readUtf8(root, RECORD_PATH));
   const record = loadedRecord && typeof loadedRecord === 'object' && !Array.isArray(loadedRecord) ? loadedRecord : {};
   if (record !== loadedRecord) diagnostics.push(namedMessages.invalidRecord);
-  const inventory = { projects: [], skillFiles: [], skillDirectories: [] };
+  const inventory = { projects: [], skillFiles: [], skillDirectories: [], workingFiles: [] };
   await walkRepository(root, root, inventory);
   inventory.projects.sort();
   inventory.skillFiles.sort();
   inventory.skillDirectories.sort();
+  inventory.workingFiles.sort();
+  for (const repositoryPath of inventory.workingFiles) diagnostics.push(namedMessages.workingFile(repositoryPath));
   const collections = await validateRecordAndInventory(root, record, inventory, diagnostics);
   await validateRootPolicy(root, diagnostics);
   await validateRequiredFiles(root, diagnostics);

@@ -34,8 +34,8 @@ flowchart LR
 
 ## Implementation contract
 
-Ordered stages and exact task graph are [benchmark-contracts.plan.md](../../benchmark-contracts.plan.md),
-derived from detailed [acceptance](../../benchmark-contracts.acceptance.md) and its
+Ordered stages and exact task graph are [ADR-044-benchmark-immutable-contracts.md](ADR-044-benchmark-immutable-contracts.md),
+derived from detailed [acceptance](ADR-044-benchmark-immutable-contracts.md) and its
 criterion/test matrix. Author real serializer/configuration/corpus/exception fixture
 inputs first; then one shared contract owner; then disjoint engine consumers and
 single lead shared runner/report join; exact diff/build/formatter review; actual

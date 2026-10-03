@@ -451,8 +451,8 @@ existing public metric and persisted search behavior. The lead accepts the
 validation-only optimization under the owner's operation-efficiency objective.
 On 2026-10-02 the owner confirmed the earlier SMID wording means SIMD, .NET
 intrinsics first and Rust only after profiling. The mapped owning Search stage is
-[AC-SIMD-001–004](../../simd-validation.acceptance.md) with its
-[ordered protected-source task graph](../../simd-validation.plan.md).
+[AC-SIMD-001–004](../Features/Search.md) with its
+[ordered protected-source task graph](../Features/Search.md).
 Root independently verified unchanged c486 run37060131271's five metric cases
 passing on each of three OS unit suites (871/871 each), and real RF3 SDK/MCP46/46.
 Windows recovery20errors and two native comparison completion errors remain open;
@@ -615,7 +615,7 @@ The economical worker owns only transaction, exact facade projection call and NE
 StorageRecovery PreparedTransactionTests, authored before implementation. Lead owns
 shared documentation, whole source review and all enabled gates. The ordered plan,
 test/error/no-op/byte/ownership matrix and current baseline/source-debt evidence are
-in prepared-storage-write.acceptance.md and prepared-storage-write.plan.md. Rollback
+in [StorageRecovery](../Features/StorageRecovery.md). Rollback
 the coherent cache source unit without data conversion or weakened analysis. Exact-
 SHA GitHub unit/recovery/Docker RF3 SDK/MCP remains mandatory; source is not a measured
 allocation win, numeric coverage or power-loss proof.
@@ -651,7 +651,7 @@ Ordered stages:
    evidence; no local test/benchmark result can qualify the feature.
 
 The implementation task is TASK-MP-011B in
-`memory-performance.plan.md`; it depends on TASK-MP-010's integrated correctness,
+`ADR-035-memory-performance.md`; it depends on TASK-MP-010's integrated correctness,
 build and governance joins. The lead is the sole owner of shared
 `src/KeyLoad.ServiceDefaults/` instrument registration,
 `src/KeyLoad.Orleans/Features/ClusterRouting/` hop instrumentation,

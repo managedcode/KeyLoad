@@ -35,7 +35,7 @@ sequenceDiagram
 ```
 
 Exact pass/fail, positive/negative/edge/error/type/null/migration/rollback and
-test methodology are canonical in [root acceptance](../../ai-database-sql.acceptance.md)
-and [plan](../../ai-database-sql.plan.md). Rows require current persisted authority;
+test methodology are canonical in [SQL acceptance](QueryExecution.md)
+and [execution contract](QueryExecution.md). Rows require current persisted authority;
 schema constraints are not row-level grants. Compile and runtime checks run in
 GitHub only; coverage/endurance/power-loss and later JOIN/FK gates stay explicit.

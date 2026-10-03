@@ -15,6 +15,8 @@ All requirements are mandatory. IDs remain stable when implementation changes.
 | REQ-MCAF-005 | Orchestration / P0 | Plan before delegated writes, use capability/cost tiers, disjoint ownership and joined integrated proof. | AC-MCAF-005: task graph precedes writes and all required task results are reviewed. |
 | REQ-MCAF-006 | Constraint / P0 | Install no skills, including .NET skills, for this owner-requested bootstrap. | AC-MCAF-006: skill inventory is unchanged. |
 | REQ-MCAF-007 | Evidence / P0 | Keep conflicts, migration gaps and CI qualification explicit; publish only GitHub Actions performance JSON. | AC-MCAF-007: no unsupported readiness or benchmark claim is introduced. |
+| REQ-MCAF-008 | Repository hygiene / P0 | Remove temporary planning Markdown files and keep requirements, acceptance and execution contracts in canonical Feature/ADR documents. | AC-MCAF-008: no tracked or checkout `*.plan.md`, `*.brainstorm.md` or `*.acceptance.md`; all three patterns are ignored without exceptions. |
+| REQ-MCAF-009 | Validation / P0 | Repository rules validate durable documents and reject reintroduced working planning files. | AC-MCAF-009: the real Node validator passes without planning files and fails for each suffix at root or nested paths; prefix, ownership and skill checks remain. |
 
 ## Slice surfaces
 
@@ -38,7 +40,7 @@ flowchart LR
 
 ## ADR and execution contract
 
-[ADR-032](../ADR/ADR-032-mcaf-governance.md) owns installation and time-bounded layout migration. Detailed acceptance is in ../../mcaf-governance.acceptance.md; ordered work and terminal evidence are in ../../mcaf-governance.plan.md.
+[ADR-032](../ADR/ADR-032-mcaf-governance.md) owns installation and time-bounded layout migration. This specification owns stable acceptance criteria; its execution table and the ADR own ordered work, while the installation record retains terminal evidence.
 
 | Task | Requirement / acceptance | Owner / tier | Write scope | Dependency and join |
 |---|---|---|---|---|
@@ -46,7 +48,7 @@ flowchart LR
 | TASK-MCAF-REVIEW-005 | All requirements and acceptance | Highest-capability independent read-only reviewer | None | Starts on the merged contracts; joins only after all local files, validator and integrated evidence are reviewed. |
 | TASK-MCAF-LOCAL-002 | REQ-MCAF-003/006; AC-MCAF-003/006 | Least expensive capable documentation worker | Only new project/module AGENTS.md | Starts after root/spec/ADR contracts exist; joins after every local file is inspected and inventory passes. |
 | TASK-MCAF-CHECK-003 | REQ-MCAF-001/002/003/006; AC-MCAF-001/002/003/006 | Least expensive capable Node worker | Only scripts/Features/RepositoryGovernance/verify.mjs and new scripts/AGENTS.md | Starts after audit contract exists; joins with real-repository validation and meaningful negative validation evidence. |
-| TASK-MCAF-INTEGRATE-004 | All requirements and acceptance | Lead planner/integrator | Root policy, central docs, installation audit and plans | Joins all required complete workers, inspects all diffs, validates combined state and reports conflicts. |
+| TASK-MCAF-INTEGRATE-004 | All requirements and acceptance | Lead planner/integrator | Root policy, central docs, installation audit and execution contracts | Joins all required complete workers, inspects all diffs, validates combined state and reports conflicts. |
 
 Workers must stop on ambiguity, overlapping ownership, changed contracts or a policy conflict. No worker may edit central config, product source, README, existing dirty files, or skills. States are pending, running, complete, blocked, failed or cancelled; only reviewed complete outputs unblock integration.
 
@@ -56,7 +58,7 @@ Every REQ maps to its same-numbered AC above, ADR-032, tasks in the execution ta
 
 ## Повне покриття функцій та рішень
 
-Власник вимагає описувати весь продукт через Features та ADR. Це розширення governance, а не зміна runtime. Контракт: [ADR-037](../ADR/ADR-037-documentation-coverage.md), [acceptance](../../documentation-coverage.acceptance.md), [ordered plan](../../documentation-coverage.plan.md). Старі REQ-MCAF/AC-MCAF зберігаються.
+Власник вимагає описувати весь продукт через Features та ADR. Це розширення governance, а не зміна runtime. Контракт: [ADR-037](../ADR/ADR-037-documentation-coverage.md) та requirements/acceptance і execution contracts цієї owning Feature-специфікації. Старі REQ-MCAF/AC-MCAF зберігаються.
 
 | Вимога | Критерій | Перевірка |
 |---|---|---|
@@ -75,7 +77,7 @@ Owning executable-artifact convention для цієї документаційн
 
 Позитивний flow: читач проходить README → docs index → Feature → ADR → source/test/evidence. Негативний/error flow: missing/duplicate doc, broken path, unknown KL, неіснуючий test або неподтверджений Implemented зупиняє completion. Edge flow: required capability без реалізації має Proposed ADR, планований test і явний pending status; historical GitHub proof залишається historical.
 
-TASK-DOC-AUTHOR-004/005 мають тільки нові, різні файли; лід володіє існуючими документами/індексами й join, TASK-DOC-REVIEW-007 — strongest read-only review. Повний task graph, моделі, start/join/terminal/escalation contracts — у плані. Product tests лишаються real TUnit/Recovery/Docker-Aspire RF3 через SDK/MCP у GitHub Actions; документаційні criteria мають статичну перевірку та explicit full-source-review exception.
+TASK-DOC-AUTHOR-004/005 мають тільки нові, різні файли; лід володіє існуючими документами/індексами й join, TASK-DOC-REVIEW-007 — strongest read-only review. Повний task graph, моделі, start/join/terminal/escalation contracts — у цьому Feature та ADR-037. Product tests лишаються real TUnit/Recovery/Docker-Aspire RF3 через SDK/MCP у GitHub Actions; документаційні criteria мають статичну перевірку та explicit full-source-review exception.
 
 Актори та entry points: власник задає scope, contributor/agent читає root/local AGENTS та Architecture перед task, strongest planner фіксує contracts, bounded worker повертає evidence, integrator/reviewer joins всі результати; CI запускає static validator. Required/planned policy або source migration не оголошується виконаною від створення spec чи локального validator pass. Installed-by-bootstrap status і delivered-source qualification залишаються в owning audit records.
 
@@ -102,3 +104,19 @@ packages/distribution/images and creates an immutable dated tag/GitHub Release a
 successful exact-source CI. TUnit source/version/current-producer regressions and
 actual GitHub run/job/artifact/provider records own verification. Static checks do
 not establish successful qualification, site publication or database release.
+
+## Working-file removal, owner correction 2026-10-03
+
+REQ-MCAF-008/009 and AC-MCAF-008/009 supersede only the earlier requirement for separate working Markdown files. Durable REQ/AC, ordered execution, test mapping, ADRs, policy preservation and qualification remain mandatory. No working plans are renamed or relocated into documentation.
+
+| Task | Owner / permission | Dependency / completion |
+|---|---|---|
+| TASK-MCAF-CLEAN-001 | Root; policy, ignore rules, deletion, canonical governance contracts and integration | Owner request; all planning files absent and ignored, unrelated work preserved |
+| TASK-MCAF-CLEAN-002 | Node/TUnit worker; only RepositoryGovernance validator and matching test slice | Approved AC-008/009 and ADR-032 contract; original validator runs against actual positive/negative filesystem roots |
+| TASK-MCAF-CLEAN-003 | Documentation worker; Feature/ADR/live Markdown references, excluding these two governance contracts | Frozen ownership; references point to existing canonical contracts, no capability or qualification claim changes |
+| TASK-MCAF-CLEAN-004 | Catalog worker; live documentation coverage and implementation status pointers | Frozen ownership; temporary source pointers removed/replaced; historical measured receipts untouched |
+| TASK-MCAF-CLEAN-005 | Root; final review, static checks, focused TUnit, formatter, scoped commit/push | Every required worker complete and reviewed; no staging of unrelated changes |
+
+Testing methodology: AC-008 uses complete file/Git inventory and real `git check-ignore` checks at root/nested paths for every suffix. AC-009 uses TUnit/Microsoft.Testing.Platform to execute the original Node validator on real filesystem copies of the current repository's required policy/inventory documents, with no planning files (pass) and each suffix at root or nested paths (fail). Existing prefix, project/module, required document and skill rejection checks remain. Static review verifies live links and that only the explicitly authorized file-placement policy changed. Local development checks do not establish RF3, recovery, performance or production qualification.
+
+Local verification, 2026-10-03: removed 59 tracked files and 123 additional checkout files; all three suffixes are ignored at root and nested paths, including the former governance exceptions. The live Node validator passes with 26 projects and four modules. The original nine TUnit cases pass with no failures or skips; their focused Release build has zero warnings/errors and the scoped formatter passes. Reference review preserves existing REQ/AC occurrences and Markdown fences and resolves every new local link. The shared solution build is blocked by concurrent, untracked scaled-storage tests requiring unfinished Fixture/Snapshot types; those files are outside this delivery.

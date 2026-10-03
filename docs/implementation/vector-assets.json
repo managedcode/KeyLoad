@@ -8,8 +8,8 @@
     "REQ-VEC-002",
     "REQ-VEC-003"
   ],
-  "acceptance": "vector-assets.acceptance.md",
-  "plan": "vector-assets.plan.md",
+  "acceptance": "docs/Features/BenchmarkComparisons/VectorAssets.md",
+  "plan": "docs/ADR/ADR-053-unified-visual-identity.md",
   "sourceHashes": {
     "site/favicon.svg": "7d93c0d681b1b2a0c29708bcf6055242b8d57d3931282ef11a203ed5988ce459",
     "src/KeyLoad.Server/Features/AdminDashboard/Assets/logo.svg": "7d93c0d681b1b2a0c29708bcf6055242b8d57d3931282ef11a203ed5988ce459",

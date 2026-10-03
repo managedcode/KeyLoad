@@ -25,8 +25,8 @@ flowchart LR
 ## Implementation contract
 
 REQ-BC-019 maps to AC-HOST-001..006, existing AC-CQ-001/005/006 and AC-MP-010/012.
-The detailed [acceptance](../../comparison-host.acceptance.md) and
-[ordered task graph](../../comparison-host.plan.md) define pass/fail and evidence.
+The detailed [acceptance](ADR-043-comparison-library-host.md) and
+[ordered task graph](ADR-043-comparison-library-host.md) define pass/fail and evidence.
 
 Ordered stages: lead policy/contract and frozen entry-point review; new real process
 regressions before CLI implementation; worker source review; single lead project/

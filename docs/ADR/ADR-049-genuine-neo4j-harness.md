@@ -4,8 +4,8 @@ Status: Accepted; implementation and exact-source qualification pending.
 Owner: KeyLoad benchmark lead. Date: 2026-10-02.
 Related: REQ-BC-023 / AC-GH-001–007, REQ-BC-001/002/009,
 ADR032/033/034/035/043/044. Detailed contract:
-[acceptance](../../genuine-comparison-harness.acceptance.md) and
-[ordered graph](../../genuine-comparison-harness.plan.md).
+[acceptance](ADR-049-genuine-neo4j-harness.md) and
+[ordered graph](ADR-049-genuine-neo4j-harness.md).
 
 ## Context and decision
 

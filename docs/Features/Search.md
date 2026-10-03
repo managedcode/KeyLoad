@@ -79,8 +79,8 @@ RF3/MCP public integration and measured server memory remain required join gates
 On 2026-10-02 the owner explicitly mapped the earlier SMID wording to SIMD and
 directed .NET intrinsics first, Rust only after profiling. The existing Accepted
 ADR-035 TASK-MP-006D validation stage is now executed under
-[AC-SIMD-001–004](../../simd-validation.acceptance.md) and its
-[protected-source/CI task graph](../../simd-validation.plan.md). Unchanged c486
+[AC-SIMD-001–004](Search.md) and its
+[protected-source/CI task graph](Search.md). Unchanged c486
 run37060131271 has all five first-authored public/real-ZoneTree metric regressions
 passing on every OS (normal units871/871 each), and RF3 SDK/MCP46/46. Root independently
 verified all native report byte/source/count identities in

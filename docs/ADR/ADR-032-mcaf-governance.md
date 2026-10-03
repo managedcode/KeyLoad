@@ -23,14 +23,14 @@ flowchart TD
 ## Implementation contract
 
 1. Read all existing policy, the full current template and tutorial; save an exact pre-installation byte-count/hash baseline. Lead owns the root and shared docs.
-2. Create brainstorm, acceptance, feature specification, architecture map and this ADR before any delegated write task starts.
+2. Define design analysis, acceptance and execution contracts in the owning feature specification and this ADR, and review the architecture map before any delegated write task starts. The owner correction below removes separate working planning files.
 3. Merge root policy. Record conflicts rather than silently selecting weaker wording. A read-only highest-capability architect reviews the decisions.
 4. TASK-MCAF-LOCAL-002 owns only new local AGENTS.md in the 20 csproj roots, site, .github/workflows and docs. It must name entry points, boundaries, commands, protected risks and no-install skill policy.
 5. TASK-MCAF-CHECK-003 owns only scripts/Features/RepositoryGovernance/verify.mjs and new scripts/AGENTS.md. It uses Node built-ins, consumes docs/implementation/mcaf-installation.json and scans the real repository for project/module coverage, prefix preservation, policy IDs, required documents and unexpected skills.
 6. Lead waits for every required result, inspects every diff, fixes integration issues, runs the validator, reviews links and Mermaid sources, and records acceptance evidence. TASK-MCAF-REVIEW-005 supplies the highest-capability independent final review. Workers cannot commit, push or install anything.
 7. Qualification and published performance data remain GitHub Actions evidence. A governance bootstrap cannot mark unrelated product migrations complete.
 
-Start condition: feature, acceptance, plan and ADR contracts exist. Shared contracts and central docs have one integration owner. Terminal states: complete, blocked, failed or cancelled. Only a reviewed complete evidence packet can satisfy a join condition. Ambiguity, unsafe file overlap or missing credentials must be escalated immediately.
+Start condition: the owning feature specification contains acceptance and ordered execution contracts, and required ADR contracts exist. Shared contracts and central docs have one integration owner. Terminal states: complete, blocked, failed or cancelled. Only a reviewed complete evidence packet can satisfy a join condition. Ambiguity, unsafe file overlap or missing credentials must be escalated immediately.
 
 ## Existing architecture migration debt
 
@@ -46,7 +46,7 @@ New feature-owned artifacts must use the target layout. Existing runtime diverge
 
 ### Static site migration join (2026-10-02)
 
-[ADR-040](ADR-040-static-site-threejs-evidence.md) and [the site plan](../../site-design.plan.md) now own the website portion of this debt: feature HTML/modules/styles, pinned same-origin Three.js, independent TUnit `KeyLoad.SiteTests`, atomic historical-evidence loading and a validation-only Pages job. The new project's local policy was created before code. Replacement packets, static/raw-byte proof, manual browser evidence and the exact-source GitHub suite must all join before that portion is marked complete. This extension does not close the benchmark/runtime migrations in the table or qualify new database topologies.
+[ADR-040](ADR-040-static-site-threejs-evidence.md) and [BenchmarkComparisons](../Features/BenchmarkComparisons.md) now own the website portion of this debt: feature HTML/modules/styles, pinned same-origin Three.js, independent TUnit `KeyLoad.SiteTests`, atomic historical-evidence loading and a validation-only Pages job. The new project's local policy was created before code. Replacement packets, static/raw-byte proof, manual browser evidence and the exact-source GitHub suite must all join before that portion is marked complete. This extension does not close the benchmark/runtime migrations in the table or qualify new database topologies.
 
 ## Conflict register
 
@@ -61,3 +61,22 @@ New feature-owned artifacts must use the target layout. Existing runtime diverge
 Installation adds documentation and a static validator only; it neither changes persisted data nor publishes fabricated metrics. Root policy rollback/removal requires explicit rule-specific owner direction. No preexisting source/config file is reset.
 
 Verification: run node scripts/Features/RepositoryGovernance/verify.mjs; inspect all local files and the root diff; inspect native worker statuses and final evidence; confirm no skill changes. Baseline runtime proof is GitHub Actions 36926803549 at 9c570f8c33a7a9667507a8e1c0ca68860de3be45. Unconfigured complexity/coverage gates are reported as gaps, never green checks.
+
+## Owner-directed working-file removal, 2026-10-03
+
+The owner explicitly requests removal of all working plans, brainstorms and acceptance files and ignore rules preventing their return. This changes artifact placement only: canonical Feature/ADR requirements, pass/fail criteria, execution order, test mappings and qualification remain mandatory. The original preserved root prefix remains exact; its hash is not replaced.
+
+Implementation contract: REQ-MCAF-008/009 and AC-MCAF-008/009 in [RepositoryGovernance](../Features/RepositoryGovernance.md), TASK-MCAF-CLEAN-001..005. Root owns AGENTS, ignore rules, file deletion, shared contracts and final staging. The validator/test worker owns only scripts/Features/RepositoryGovernance/verify.mjs and tests/KeyLoad.UnitTests/Features/RepositoryGovernance/. The documentation and catalog workers have disjoint frozen paths and preserve concurrent changes.
+
+Ordered stages: update owner policy and these contracts; capture current paths and unrelated changes; remove all three suffix families without relocating plans; ignore root/nested matches without exceptions; replace live references with canonical Feature/ADR contracts; stop requiring planning artifacts and reject their reintroduction; run the original Node validator and focused real-process TUnit cases; review combined diffs and scoped stage/commit/push.
+
+Migration affects documentation and repository validation only, with no runtime/API/data/dependency/topology change. Historical receipts retain original source descriptions. Deleted tracked files remain recoverable in Git history; rollback of the new owner rule requires owner direction. Required regressions include positive absence, each suffix at root/nested paths, original prefix/inventory/policy/skill protections, actual ignore behavior and live link checks. Local tests are development evidence; GitHub qualification is separate. The working-file cleanup and local verification are complete; the owning Feature records the nine passing TUnit cases, formatter, inventory, ignore and link evidence and the unrelated shared-build limitation. This does not close the ADR's other migration or product-qualification stages.
+
+```mermaid
+flowchart LR
+    Owner[Owner removes temporary planning files] --> Policy[Canonical Feature and ADR contracts]
+    Policy --> Remove[Delete files and ignore suffixes]
+    Remove --> Links[Repair live references]
+    Links --> Verify[Real Node validator and TUnit checks]
+    Verify --> Deliver[Reviewed scoped Git delivery]
+```

@@ -25,7 +25,7 @@ flowchart LR
 
 ## Guarded original-store inspection
 
-REQ-STORAGE-015 maps AC-SG009-001..004 in isolated-timeseries.acceptance.md to
+REQ-STORAGE-015 maps AC-SG009-001..004 in ../ADR/ADR-059-isolated-intensive-timeseries.md to
 TASK-ISO-TS009C-G-W/I under [ADR-059](../ADR/ADR-059-isolated-intensive-timeseries.md).
 The private original-store guard rejects missing original files or changed
 identity before provider recovery, uses provider Open rather than OpenOrCreate,
@@ -49,7 +49,7 @@ flowchart LR
 
 ## Bounded real crash-trial qualification
 
-REQ-STORAGE-014 maps AC-RC-001..004 in recovery-concurrency.acceptance.md
+REQ-STORAGE-014 maps AC-RC-001..004 in StorageRecovery.md
 to TASK-REC-ADMIT-002 under [ADR-035](../ADR/ADR-035-memory-performance.md).
 Exact c486/run37060131271 Windows reports19 seeded batch errors (0..18)
 and subscription MutationApplied3 cancellation; Linux/macOS recovery passes.
@@ -175,8 +175,8 @@ standard marker-exception constructors and cohesive internal types satisfy the
 enabled policy. The journal repair retains its real synchronous Flush(true)
 barrier through an awaited complete truncate/flush/dispose operation. Explicit
 IAtomicStore dispatch and view identity remain tested. Exact scope, acceptance,
-method/assertion audit, rollback and required GitHub proof are in CQ015's root
-quality-gates.acceptance.md and quality-gates.plan.md. ADR033/032 suffice for this
+method/assertion audit, rollback and required GitHub proof are in CQ015's
+[CodeQuality](CodeQuality.md) acceptance and execution contract. ADR033/032 suffice for this
 test-source-only refinement; production/data/API/ownership contracts stay exact.
 
 Node-local journals, owned values, committed read cuts, checkpoint/recovery and
@@ -189,7 +189,7 @@ new scoped-read contract; ADR-032 records existing layout migration debt.
 | REQ-STORAGE-002: exact prefix/exclusive-bound/order/overlay semantics without global overfetch | AC-MP-002 | Real transaction replacement/deletion/insert/out-of-range cases; TASK-MP-005A |
 | REQ-STORAGE-003: cancellation/early stop release iterator and preserve canonical data | AC-MP-002/012 | Real store cancel/visitor failure, subsequent read/commit and recovery CI |
 | REQ-STORAGE-004: the physical node owns canonical and replica stores, locks, ordered apply and shutdown | AC-REP-002/004; AC-ROUTE-002 | CrashHost/Recovery and Docker RF3 reopen, failover and migration scenarios under ADR-036 |
-| REQ-STORAGE-008: cohesive private provider owners meet numeric gates without changing storage/caller contracts | AC-SQ-001..008 in storage-quality.acceptance.md | ADR-046 TASK-MP-010AF-R/T/C/L/B; source join and real lifetime test source exist; enabled provider development build clean, complete exact-SHA runtime qualification pending |
+| REQ-STORAGE-008: cohesive private provider owners meet numeric gates without changing storage/caller contracts | AC-SQ-001..008 in StorageRecovery.md | ADR-046 TASK-MP-010AF-R/T/C/L/B; source join and real lifetime test source exist; enabled provider development build clean, complete exact-SHA runtime qualification pending |
 | REQ-STORAGE-009: validation and apply share one private mutation projection per staged generation | AC-PSW-001..004, AC-MP-006/012 | ADR-035 TASK-MP-016P-W/L; first-authored PreparedTransactionTests plus existing FrameBudget/recovery/RF3 proof; source and qualification pending |
 | REQ-STORAGE-011: startup identity metadata is finite and failed read releases physical ownership | AC-BSM-001/003/005 | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), Metadata* real-file constructor/restore/reopen checks under BackupRestore; complete source and GitHub execution pending |
 | REQ-STORAGE-012: killed-child readiness includes the real metadata WAL when present, permits only precise sanctioned metadata absence, and preserves cancellation and the original failure bound | AC-STORAGE-012 | `tests/KeyLoad.RecoveryTests/Features/StorageRecovery/KilledProcessFileReadinessTests.cs`: actual closed-store pending/release, cancellation, pre-cancellation, permanent-lock, missing optional directory/file without creation and missing required file cases; `RecoveryTests.cs` retains every process-kill scenario; TASK-RUNTIME-WINDOWS-RECOVERY-W3 and TASK-RUNTIME-RECOVERY-W4, full three-OS GitHub recovery qualification pending |
@@ -208,12 +208,12 @@ No schema, UI or business-authorization change applies.
 facade partial behavior with one runtime plus real StorageRecovery initialization,
 journal, view/transaction/range and checkpoint owners. BackupRestore owns the
 separate local backup component. Exact signatures, file/task ownership, disposal
-orders, test matrix and join are in the [acceptance](../../storage-quality.acceptance.md)
-and [plan](../../storage-quality.plan.md). No public/format/placement change or
+orders, test matrix and join are in the [acceptance](StorageRecovery.md)
+and [plan](StorageRecovery.md). No public/format/placement change or
 numeric exception is authorized; source-only decomposition is not qualification.
 
-The [prepared-write contract](../../prepared-storage-write.acceptance.md) and
-[ordered plan](../../prepared-storage-write.plan.md) govern removal of the duplicate
+The [prepared-write contract](StorageRecovery.md) and
+[ordered plan](StorageRecovery.md) govern removal of the duplicate
 mutation projection. Only transaction-private prepared arrays are cached; accepted
 Stage/Reset invalidate them, rejected admission preserves the prior valid set,
 and Stage retains caller-array ownership copies. WAL/apply/fault order and bytes
@@ -305,7 +305,7 @@ flowchart LR
     Validate --> Apply[Apply verified mutations]
 ```
 
-See root zonetree-orleans-wal.acceptance.md and .plan.md for precise pass/fail conditions, disjoint agent scopes, rollout/rollback and verification. No new UI/API/model format; no local tests; all runtime evidence comes from GitHub.
+This feature and its linked ADRs define the precise pass/fail conditions, disjoint ownership, rollout, rollback and verification. No new UI/API/model format; no local tests; all runtime evidence comes from GitHub.
 
 
 REQ-STORAGE-015 also maps AC-SG009P-001..004 / TASK-ISO-SG009P-C/T/R/I under

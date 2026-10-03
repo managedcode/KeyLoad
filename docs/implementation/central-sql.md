@@ -13,8 +13,8 @@ Owner direction2026-10-02: one server/database supports all models and their
 links; SQL is central and performance has first priority. This is not a request
 for a new single physical file. [ADR-054](../ADR/ADR-054-central-sql.md),
 [ADR-055](../ADR/ADR-055-typed-relational-rows.md),
-[acceptance](../../ai-database-sql.acceptance.md) and
-[plan](../../ai-database-sql.plan.md) define the current delivery contract.
+[acceptance](../Features/QueryExecution.md) and
+[plan](../Features/QueryExecution.md) define the current delivery contract.
 
 | Model | Existing canonical behavior | Current SQL / relational source stage | Remaining product boundary |
 |---|---|---|---|

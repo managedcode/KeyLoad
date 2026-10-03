@@ -5,8 +5,8 @@
   "status": "website_qualified_and_published",
   "feature": "docs/Features/BenchmarkComparisons.md",
   "decision": "docs/ADR/ADR-040-static-site-threejs-evidence.md",
-  "acceptance": "site-design.acceptance.md",
-  "plan": "site-design.plan.md",
+  "acceptance": "docs/Features/BenchmarkComparisons.md",
+  "plan": "docs/ADR/ADR-040-static-site-threejs-evidence.md",
   "originalMeasuredEvidence": {
     "run": 36926803549,
     "sourceRevision": "9c570f8c33a7a9667507a8e1c0ca68860de3be45",

@@ -1,7 +1,7 @@
 # Memory and read-work repair evidence
 
 Status: in progress. The complete scope is [ResourceExecution](../Features/ResourceExecution.md),
-[ADR-035](../ADR/ADR-035-memory-performance.md) and [AC-MP-001..012](../../memory-performance.acceptance.md).
+[ADR-035](../ADR/ADR-035-memory-performance.md) and [AC-MP-001..012](../ADR/ADR-035-memory-performance.md).
 This inventory distinguishes authored repairs from compiled source and runtime qualification.
 No row is closed by a worker report, an old-main CI result or a development build.
 

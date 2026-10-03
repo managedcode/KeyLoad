@@ -2,7 +2,7 @@
 
 Status: Accepted contract; implementation and native measurements pending.
 Decision [ADR-063](../../ADR/ADR-063-bounded-database-phase-profiling.md).
-Working acceptance/plan: database-profiling.acceptance.md/.plan.md.
+Requirements and acceptance: this Feature and the ADR-063 implementation contract.
 REQ-RESOURCE-003 actual preserved phase ownership → AC-DBPROF-001/003.
 REQ-RESOURCE-004 bounded callback-free bank → AC-DBPROF-002/004.
 REQ-RESOURCE-005 private honest node capture → AC-DBPROF-005/007.

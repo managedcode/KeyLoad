@@ -7,8 +7,8 @@
   "specification": "docs/design/architecture-v0.3.uk.md",
   "featureIndex": "docs/README.md",
   "decisionIndex": "docs/ADR/README.md",
-  "acceptanceSource": "documentation-coverage.acceptance.md",
-  "planSource": "documentation-coverage.plan.md",
+  "acceptanceSource": "docs/ADR/ADR-037-documentation-coverage.md",
+  "planSource": "docs/ADR/ADR-037-documentation-coverage.md",
   "counts": {
     "features": 20,
     "decisions": 40,
@@ -371,7 +371,7 @@
           "acceptanceText": "AC-BC-001; stable hash and verified documents/vectors/graph/events.",
           "testOrReviewMapping": "AC-BC-001; stable hash and verified documents/vectors/graph/events.",
           "acceptanceSources": [
-            "benchmark-comparisons.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -391,7 +391,7 @@
           "acceptanceText": "AC-BC-002; container model and runtime evidence.",
           "testOrReviewMapping": "AC-BC-002; container model and runtime evidence.",
           "acceptanceSources": [
-            "benchmark-comparisons.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -411,7 +411,7 @@
           "acceptanceText": "AC-BC-003; real connected cluster proof before timing.",
           "testOrReviewMapping": "AC-BC-003; real connected cluster proof before timing.",
           "acceptanceSources": [
-            "benchmark-comparisons.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -431,7 +431,7 @@
           "acceptanceText": "AC-BC-004; nine honest profiles/support matrix.",
           "testOrReviewMapping": "AC-BC-004; nine honest profiles/support matrix.",
           "acceptanceSources": [
-            "benchmark-comparisons.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -451,7 +451,7 @@
           "acceptanceText": "AC-BC-005; four supported engine implementations and readback.",
           "testOrReviewMapping": "AC-BC-005; four supported engine implementations and readback.",
           "acceptanceSources": [
-            "benchmark-comparisons.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -471,7 +471,7 @@
           "acceptanceText": "AC-BC-006; immutable evidence, successful-source gate and no hand-coded measured values.",
           "testOrReviewMapping": "AC-BC-006; immutable evidence, successful-source gate and no hand-coded measured values.",
           "acceptanceSources": [
-            "benchmark-comparisons.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -491,7 +491,7 @@
           "acceptanceText": "AC-BC-007; generated SVGs, public links and real first-render proof.",
           "testOrReviewMapping": "AC-BC-007; generated SVGs, public links and real first-render proof.",
           "acceptanceSources": [
-            "benchmark-comparisons.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -511,7 +511,7 @@
           "acceptanceText": "AC-BC-008; comparable CI reports and focused correctness/security proof.",
           "testOrReviewMapping": "AC-BC-008; comparable CI reports and focused correctness/security proof.",
           "acceptanceSources": [
-            "benchmark-comparisons.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -531,7 +531,7 @@
           "acceptanceText": "AC-BC-009; exact delivered-source GitHub results and status docs.",
           "testOrReviewMapping": "AC-BC-009; exact delivered-source GitHub results and status docs.",
           "acceptanceSources": [
-            "benchmark-comparisons.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -551,7 +551,7 @@
           "acceptanceText": "AC-MP-010; real-file roundtrip/quoting/cancellation regressions and CI resource evidence under ADR-035.",
           "testOrReviewMapping": "AC-MP-010; real-file roundtrip/quoting/cancellation regressions and CI resource evidence under ADR-035.",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -571,7 +571,7 @@
           "acceptanceText": "AC-BC-011: purpose/status/navigation visible at1440/768/390/320px, no page overflow or clipped controls; labelled table scroll only",
           "testOrReviewMapping": "Planned SiteBuildTests plus explicit real-browser desktop/mobile visual review",
           "acceptanceSources": [
-            "site-design.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-SITE-INTEGRATE-006",
           "evidenceState": "implementation_in_progress_not_qualification",
@@ -590,7 +590,7 @@
           "acceptanceText": "AC-BC-012: Three0.186.1 native backend recorded; one renderer/canvas, correct cancellation/disposal/resize/pause; DPR≤1.5,≤1M pixels,≤30 calls,≤5K triangles, no idle loop",
           "testOrReviewMapping": "Planned vendor/build TUnit contracts; explicit real-browser graphics lifecycle/device evidence exception",
           "acceptanceSources": [
-            "site-design.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-SITE-INTEGRATE-006",
           "evidenceState": "implementation_in_progress_not_qualification",
@@ -609,7 +609,7 @@
           "acceptanceText": "AC-BC-013: semantic labels/focus/tabs and no-JS/reduced/coarse/unavailable-graphics retain text/poster/evidence access",
           "testOrReviewMapping": "Planned SiteBuildTests plus required keyboard/no-JS/reduced-motion browser review",
           "acceptanceSources": [
-            "site-design.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-SITE-INTEGRATE-006",
           "evidenceState": "implementation_in_progress_not_qualification",
@@ -628,7 +628,7 @@
           "acceptanceText": "AC-BC-014: all6 scenarios/11 metrics/profile/repetition/log/whiskers/table/downloads match independent oracle over authentic successful-CI reports",
           "testOrReviewMapping": "Planned SiteMeasurementTests/SiteMeasurementOracle using actual JS child process; real browser control review",
           "acceptanceSources": [
-            "site-design.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-SITE-INTEGRATE-006",
           "evidenceState": "implementation_in_progress_not_qualification",
@@ -647,7 +647,7 @@
           "acceptanceText": "AC-BC-015: invalid/path/hash/rapid/error loads never mix data/provenance/downloads; abort and stale generation fencing",
           "testOrReviewMapping": "Planned SiteEvidenceValidationTests over real production validators and controlled corrupt inputs; required rapid/error browser review",
           "acceptanceSources": [
-            "site-design.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-SITE-INTEGRATE-006",
           "evidenceState": "implementation_in_progress_not_qualification",
@@ -666,7 +666,7 @@
           "acceptanceText": "AC-BC-016: feature-owned assets, exact verified vendor/raw bytes and clean isolated output; authored JS≤40KiB gzip/CSS≤20KiB gzip; vendor lazy and separately recorded",
           "testOrReviewMapping": "Planned SiteBuildTests and source/static/vendor/size/raw-byte checks",
           "acceptanceSources": [
-            "site-design.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-SITE-INTEGRATE-006",
           "evidenceState": "implementation_in_progress_not_qualification",
@@ -685,7 +685,7 @@
           "acceptanceText": "AC-BC-017: independent centrally pinned TUnit/MTP/net10 suite, real bounded Node probe, preserved old edge intentions; only exact GitHub run qualifies",
           "testOrReviewMapping": "Planned KeyLoad.SiteTests full suite in GitHub; explicit visual/lifecycle review exception; numeric coverage remains pending",
           "acceptanceSources": [
-            "site-design.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-SITE-INTEGRATE-006",
           "evidenceState": "implementation_in_progress_not_qualification",
@@ -704,7 +704,7 @@
           "acceptanceText": "AC-BC-018: site/measured revisions, successful run and hashes distinct; no historical→current/schema3/publication/CLI-model inference",
           "testOrReviewMapping": "Planned SiteEvidenceValidationTests and strongest complete source/evidence review",
           "acceptanceSources": [
-            "site-design.acceptance.md"
+            "docs/Features/BenchmarkComparisons.md"
           ],
           "documentationTask": "TASK-SITE-INTEGRATE-006",
           "evidenceState": "implementation_in_progress_not_qualification",
@@ -985,7 +985,7 @@
           "testOrReviewMapping": "TASK-MP-007D stored-byte reclamation, bounded prefix purge, pin/corruption/rollback/reopen and healthy-producer cases; planned GitHub qualification.",
           "acceptanceSources": [
             "docs/Features/ChangeFeeds.md",
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-AUTHOR-005",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1027,7 +1027,7 @@
           "acceptanceText": "AC-MP-009",
           "testOrReviewMapping": "Real Kestrel chunked/delayed typed response; RF3 SDK public calls",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1048,7 +1048,7 @@
           "acceptanceText": "AC-MP-009",
           "testOrReviewMapping": "Real server malformed/oversized errors, mid-body cancellation, subsequent request",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1069,7 +1069,7 @@
           "acceptanceText": "AC-MP-010",
           "testOrReviewMapping": "Real temporary profile files in TUnit, oversized rejection before full allocation",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1113,7 +1113,7 @@
           "testOrReviewMapping": "Existing `ReplicatedAtomicBatchSurvivesLeaderProcessKillAndMinorityRejectsWrites` у ClusterTests; transport edge/error cases з AC-MP-009 PLANNED/GitHub pending",
           "acceptanceSources": [
             "docs/Features/ClientApi.md",
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1189,7 +1189,7 @@
           ],
           "requirementText": "REQ-REP-001: Orleans carries votes, ordered appends, read barriers, forwarding and snapshot transfer. No DotNext runtime/package remains.",
           "acceptanceText": "AC-REP-001: dependency/source inventory contains no DotNext reference; three Docker silos accept .NET SDK operations through request grains.",
-          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [execution plan](../implementation/orleans-foundation.plan.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
+          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [ClusterReplication](../Features/ClusterReplication.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
           "acceptanceSources": [
             "docs/Features/ClusterReplication.md"
           ],
@@ -1212,7 +1212,7 @@
           ],
           "requirementText": "REQ-REP-002: terms, votes, log entries and commit positions are node-owned and process durable before acknowledgement.",
           "acceptanceText": "AC-REP-002: real-process append/vote/commit interruption tests reopen the acknowledged prefix and reject complete-record corruption.",
-          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [execution plan](../implementation/orleans-foundation.plan.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
+          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [ClusterReplication](../Features/ClusterReplication.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
           "acceptanceSources": [
             "docs/Features/ClusterReplication.md"
           ],
@@ -1235,7 +1235,7 @@
           ],
           "requirementText": "REQ-REP-003: an odd fixed RF3 voter set commits only with a majority; a current-term quorum barrier precedes public reads.",
           "acceptanceText": "AC-REP-003: leader kill preserves acknowledged commands and stable-ID outcomes; an isolated minority rejects reads and writes.",
-          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [execution plan](../implementation/orleans-foundation.plan.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
+          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [ClusterReplication](../Features/ClusterReplication.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
           "acceptanceSources": [
             "docs/Features/ClusterReplication.md"
           ],
@@ -1258,7 +1258,7 @@
           ],
           "requirementText": "REQ-REP-004: a restarted/empty replica catches up by a verified bounded snapshot followed by the ordered tail.",
           "acceptanceText": "AC-REP-004: SDK-visible documents, topic/checkpoint/outbox/inbox outcomes survive replica erase/restart; interrupted/corrupt transfers preserve a complete recoverable cut.",
-          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [execution plan](../implementation/orleans-foundation.plan.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
+          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [ClusterReplication](../Features/ClusterReplication.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
           "acceptanceSources": [
             "docs/Features/ClusterReplication.md"
           ],
@@ -1281,7 +1281,7 @@
           ],
           "requirementText": "REQ-REP-005: replicated principals and grants remain authoritative, including after leadership changes and snapshot catch-up.",
           "acceptanceText": "AC-REP-005: SDK/MCP unauthorized and protected-field requests fail without canonical effects before and after failover.",
-          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [execution plan](../implementation/orleans-foundation.plan.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
+          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [ClusterReplication](../Features/ClusterReplication.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
           "acceptanceSources": [
             "docs/Features/ClusterReplication.md"
           ],
@@ -1304,7 +1304,7 @@
           ],
           "requirementText": "REQ-REP-006: bounded anti-replay admission retains reserved capacity for votes, heartbeats, noop/current-term establishment and membership/lease control when application traffic saturates.",
           "acceptanceText": "AC-REP-006: signed replay/tamper requests are rejected; saturated forward/read/data-append traffic is throttled without exhausting control capacity; real RF3 client load preserves leadership and minority denial.",
-          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [execution plan](../implementation/orleans-foundation.plan.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
+          "testOrReviewMapping": "Traceability: AC-REP-001/003/004 map to `ClusterTests` and the new replica recovery tests; AC-REP-002 maps to real CrashHost interruption scenarios; AC-REP-005 maps to authorization/failover client cases. TASK-REP-LOG, TASK-REP-TRANSPORT, TASK-REP-INTEGRATE and TASK-REP-VERIFY are defined in [ClusterReplication](../Features/ClusterReplication.md). Qualification is GitHub Actions only. Historical CI 36926803549 qualifies the old implementation, not this replacement. Power-loss and endurance remain pending.",
           "acceptanceSources": [
             "docs/Features/ClusterReplication.md"
           ],
@@ -1470,7 +1470,7 @@
           "acceptanceText": "AC-CQ-001",
           "testOrReviewMapping": "TASK-006; MSBuild evaluation, import SHA and solution build",
           "acceptanceSources": [
-            "code-quality.acceptance.md"
+            "docs/Features/CodeQuality.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1490,7 +1490,7 @@
           "acceptanceText": "AC-CQ-002/004",
           "testOrReviewMapping": "TASK-004/005; TUnit analyzer project and CI results",
           "acceptanceSources": [
-            "code-quality.acceptance.md"
+            "docs/Features/CodeQuality.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1509,7 +1509,7 @@
           "acceptanceText": "AC-CQ-003",
           "testOrReviewMapping": "TASK-006; compiler reports and CI always-upload",
           "acceptanceSources": [
-            "code-quality.acceptance.md"
+            "docs/Features/CodeQuality.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1529,7 +1529,7 @@
           "acceptanceText": "AC-CQ-005/006",
           "testOrReviewMapping": "TASK-006; workflow, architecture/status/docs and governance",
           "acceptanceSources": [
-            "code-quality.acceptance.md"
+            "docs/Features/CodeQuality.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1691,7 +1691,7 @@
           "acceptanceText": "AC-MP-005",
           "testOrReviewMapping": "Real-store bounded ranges, point/scan work, cancellation and subsequent store health",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1715,7 +1715,7 @@
           "acceptanceText": "AC-MP-005",
           "testOrReviewMapping": "Exact positive/empty/edge response and over-budget event/protocol metadata cases",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1740,7 +1740,7 @@
           "acceptanceText": "AC-MP-005/012",
           "testOrReviewMapping": "Existing event/processing recovery and new real persisted-policy redaction cases",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1815,7 +1815,7 @@
           "testOrReviewMapping": "Existing [StreamReadResourceTests](../../tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceTests.cs), `FromNowAndTailCursorIncludeEveryLaterAppend` у SubscriptionTests; AC-MP-005/012 збережені",
           "acceptanceSources": [
             "docs/Features/EventStreams.md",
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -1991,7 +1991,7 @@
           "testOrReviewMapping": "TASK-MP-007C real-store visibility, cycle/budget/cancel and healthy-follow-up cases; planned GitHub qualification.",
           "acceptanceSources": [
             "docs/Features/GraphTraversal.md",
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-AUTHOR-004",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2246,7 +2246,7 @@
           "testOrReviewMapping": "TASK-MP-007F real-store stored body bytes/quota, lease/ACK/NACK/renew, atomic rollback/inbox replay and healthy-claim cases; planned GitHub qualification.",
           "acceptanceSources": [
             "docs/Features/Messaging.md",
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-AUTHOR-004",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2283,7 +2283,7 @@
           "testOrReviewMapping": "TASK-MP-007G topic head/retained byte quota, duplicate IDs/generation, producer rollback and unchanged sequence cases; planned GitHub qualification.",
           "acceptanceSources": [
             "docs/Features/Messaging.md",
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-AUTHOR-004",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2333,7 +2333,7 @@
           "acceptanceText": "AC-MP-003",
           "testOrReviewMapping": "Real-store SQL/AST index-plus-point accounting, full-scan rejection before page copies and cancellation",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2358,7 +2358,7 @@
           "acceptanceText": "AC-MP-003",
           "testOrReviewMapping": "Real-store mixed scalar ordering, ties, filters, page concatenation and large-value allocation cases",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2384,7 +2384,7 @@
           "acceptanceText": "AC-MP-003/012",
           "testOrReviewMapping": "Existing QueryAdapter/Security/LiveQuery cases plus new exact metadata/output and negative cases",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2521,7 +2521,7 @@
           "acceptanceText": "AC-MCAF-001: original root prefix hash and complete diff are preserved.",
           "testOrReviewMapping": "Static governance validator and full-diff/source review; see canonical MCAF acceptance.",
           "acceptanceSources": [
-            "mcaf-governance.acceptance.md"
+            "docs/Features/RepositoryGovernance.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2541,7 +2541,7 @@
           "acceptanceText": "AC-MCAF-002: all policy IDs and customized commands exist; no TODO placeholders.",
           "testOrReviewMapping": "Static governance validator and full-diff/source review; see canonical MCAF acceptance.",
           "acceptanceSources": [
-            "mcaf-governance.acceptance.md"
+            "docs/Features/RepositoryGovernance.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2561,7 +2561,7 @@
           "acceptanceText": "AC-MCAF-003: all 22 current csproj roots plus site, workflows, docs and scripts pass inventory validation.",
           "testOrReviewMapping": "Static governance validator and full-diff/source review; see canonical MCAF acceptance.",
           "acceptanceSources": [
-            "mcaf-governance.acceptance.md"
+            "docs/Features/RepositoryGovernance.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2581,7 +2581,7 @@
           "acceptanceText": "AC-MCAF-004: diagrams, slice map and dated ADR cover all surfaces.",
           "testOrReviewMapping": "Static governance validator and full-diff/source review; see canonical MCAF acceptance.",
           "acceptanceSources": [
-            "mcaf-governance.acceptance.md"
+            "docs/Features/RepositoryGovernance.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2601,7 +2601,7 @@
           "acceptanceText": "AC-MCAF-005: task graph precedes writes and all required task results are reviewed.",
           "testOrReviewMapping": "Static governance validator and full-diff/source review; see canonical MCAF acceptance.",
           "acceptanceSources": [
-            "mcaf-governance.acceptance.md"
+            "docs/Features/RepositoryGovernance.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2621,7 +2621,7 @@
           "acceptanceText": "AC-MCAF-006: skill inventory is unchanged.",
           "testOrReviewMapping": "Static governance validator and full-diff/source review; see canonical MCAF acceptance.",
           "acceptanceSources": [
-            "mcaf-governance.acceptance.md"
+            "docs/Features/RepositoryGovernance.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2641,7 +2641,7 @@
           "acceptanceText": "AC-MCAF-007: no unsupported readiness or benchmark claim is introduced.",
           "testOrReviewMapping": "Static governance validator and full-diff/source review; see canonical MCAF acceptance.",
           "acceptanceSources": [
-            "mcaf-governance.acceptance.md"
+            "docs/Features/RepositoryGovernance.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2661,7 +2661,7 @@
           "acceptanceText": "AC-DOCS-001: рівно 20 owning Feature-specs індексовані, включно з required BlobStorage",
           "testOrReviewMapping": "File/index inventory",
           "acceptanceSources": [
-            "documentation-coverage.acceptance.md"
+            "docs/ADR/ADR-037-documentation-coverage.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2681,7 +2681,7 @@
           "acceptanceText": "AC-DOCS-002: actors, entry points, stable REQ/AC, flows, slice/N/A, source/target/planned, tests і Mermaid",
           "testOrReviewMapping": "Full-file review та REQ/AC mapping",
           "acceptanceSources": [
-            "documentation-coverage.acceptance.md"
+            "docs/ADR/ADR-037-documentation-coverage.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2701,7 +2701,7 @@
           "acceptanceText": "AC-DOCS-003: ADR-001–039 мають context/rationale/alternatives/consequences, implementation contracts та verification",
           "testOrReviewMapping": "ADR inventory і contract review",
           "acceptanceSources": [
-            "documentation-coverage.acceptance.md"
+            "docs/ADR/ADR-037-documentation-coverage.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2721,7 +2721,7 @@
           "acceptanceText": "AC-DOCS-004: comparisons034, foundation036; filename/header і всі залежні links узгоджені",
           "testOrReviewMapping": "Number/reference inventory",
           "acceptanceSources": [
-            "documentation-coverage.acceptance.md"
+            "docs/ADR/ADR-037-documentation-coverage.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2741,7 +2741,7 @@
           "acceptanceText": "AC-DOCS-005: усі 104 KL мапляться на existing Feature/ADR; кожен new REQ → measurable AC → existing/planned test або explicit review exception",
           "testOrReviewMapping": "JSON/source/test inventory",
           "acceptanceSources": [
-            "documentation-coverage.acceptance.md"
+            "docs/ADR/ADR-037-documentation-coverage.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2761,7 +2761,7 @@
           "acceptanceText": "AC-DOCS-006: source не названий GitHub-qualified; public blobs/MCP та нерозв'язані choices не вигадані",
           "testOrReviewMapping": "Independent source/evidence review",
           "acceptanceSources": [
-            "documentation-coverage.acceptance.md"
+            "docs/ADR/ADR-037-documentation-coverage.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2781,7 +2781,7 @@
           "acceptanceText": "AC-DOCS-007: immutable original hashes усіх 27 policies, незмінність ними цього task, full original/current hashes і повний старий текст при поясненому зовнішньому additive drift; попередні Feature IDs збережені; workers тільки у disjoint new docs",
           "testOrReviewMapping": "SHA256/full diff/ownership review; unexplained drift або rule loss/weakening — fail",
           "acceptanceSources": [
-            "documentation-coverage.acceptance.md"
+            "docs/ADR/ADR-037-documentation-coverage.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2801,7 +2801,7 @@
           "acceptanceText": "AC-DOCS-008: links/indexes/diagrams/governance/whitespace pass, COMPLETE packets joined, strongest-model review complete",
           "testOrReviewMapping": "Combined static checks і cached Mermaid render",
           "acceptanceSources": [
-            "documentation-coverage.acceptance.md"
+            "docs/ADR/ADR-037-documentation-coverage.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2835,7 +2835,7 @@
           "acceptanceText": "AC-MP-001",
           "testOrReviewMapping": "TASK-MP-001/002/003/004; located inventory and independent final review",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2861,7 +2861,7 @@
           "acceptanceText": "AC-MP-002..006",
           "testOrReviewMapping": "TASK-MP-005/006/007; real StoreRecovery, QueryExecution, Search, core feature tests",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2884,7 +2884,7 @@
           "acceptanceText": "AC-MP-007/008",
           "testOrReviewMapping": "TASK-MP-009; real ClusterReplication persistence, recovery and RF3",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2907,7 +2907,7 @@
           "acceptanceText": "AC-MP-009/010",
           "testOrReviewMapping": "TASK-MP-008; ClientApi and BenchmarkComparisons real contracts",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -2930,7 +2930,7 @@
           "acceptanceText": "AC-MP-011/012",
           "testOrReviewMapping": "TASK-MP-010/011; exact-SHA GitHub full suites and resource JSON",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3012,7 +3012,7 @@
           "acceptanceText": "AC-MP-004: every visible corpus document still affects BM25 count/average/term frequency, including missing fields; ranks, ordinal ID ties, normalization and query-term accumulation are exact",
           "testOrReviewMapping": "Real-store Unicode/repeated/missing/nonmatching corpus and golden score/rank cases; GitHub TUnit",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3036,7 +3036,7 @@
           "acceptanceText": "AC-MP-004: vector candidates obey space/revision/row/field authorization; query finite/dimension/metric validation occurs once; selected SIMD/scalar metric preserves accumulation",
           "testOrReviewMapping": "Real-store stale/hidden/mismatched-space cases plus finite/zero/large-vector metric golden cases",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3061,7 +3061,7 @@
           "acceptanceText": "AC-MP-003/004: scans consume scoped borrowed records; retained rank state contains identity/statistics/scores rather than full corpus JSON/vector arrays",
           "testOrReviewMapping": "Real large-payload rank cases, bounded read failures and allocation/resource artifacts",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3086,7 +3086,7 @@
           "acceptanceText": "AC-MP-004/005: branch ranks and text-then-vector RRF accumulation are unchanged; select at most Limit results before decoding/projecting final payloads and account actual final point reads",
           "testOrReviewMapping": "Exact text/vector/hybrid ranks, ties/weights, shared-budget and output boundary cases",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3111,7 +3111,7 @@
           "acceptanceText": "AC-MP-004/012: cancellation/work/result exhaustion leaves the committed position unchanged and a following call succeeds; no unbounded gate/iterator lifetime",
           "testOrReviewMapping": "Real persisted-policy cancellation/overflow/healthy-following-call tests; RF3 SDK/MCP integration",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3296,7 +3296,7 @@
           "acceptanceText": "AC-MP-002",
           "testOrReviewMapping": "Real ZoneTree scoped point/range byte and lifetime cases; TASK-MP-005/005A",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3321,7 +3321,7 @@
           "acceptanceText": "AC-MP-002",
           "testOrReviewMapping": "Real transaction replacement/deletion/insert/out-of-range cases; TASK-MP-005A",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3347,7 +3347,7 @@
           "acceptanceText": "AC-MP-002/012",
           "testOrReviewMapping": "Real store cancel/visitor failure, subsequent read/commit and recovery CI",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3426,7 +3426,7 @@
           "acceptanceText": "AC-STORAGE-006: golden keys, escaped UTF-8 components, signed/decimal ordering та scope не колідують; invalid/corrupt format відхиляється, borrowed spans не escape gate | Existing `GoldenKeysRemainStable`, `TenThousandSeededDecimalKeysRoundTripAndSortNumerically`, `StringsUseUtf8OrdinalOrderingAndEscapedComponentsDoNotCollide` у [KeyCodecTests](../../tests/KeyLoad.UnitTests/KeyCodecTests.cs); scoped-read cases AC-MP-002",
           "testOrReviewMapping": "Existing `GoldenKeysRemainStable`, `TenThousandSeededDecimalKeysRoundTripAndSortNumerically`, `StringsUseUtf8OrdinalOrderingAndEscapedComponentsDoNotCollide` у [KeyCodecTests](../../tests/KeyLoad.UnitTests/KeyCodecTests.cs); scoped-read cases AC-MP-002",
           "acceptanceSources": [
-            "memory-performance.acceptance.md",
+            "docs/Features/ResourceExecution.md",
             "docs/Features/StorageRecovery.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
@@ -3605,7 +3605,7 @@
           "acceptanceText": "AC-MP-005",
           "testOrReviewMapping": "Real-store narrow range with large later values, equal timestamps and min/max/offset boundaries",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3629,7 +3629,7 @@
           "acceptanceText": "AC-MP-005",
           "testOrReviewMapping": "Small raw/result budget failures, exact serialized boundary and cancellation with a healthy following operation",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3654,7 +3654,7 @@
           "acceptanceText": "AC-MP-005/012",
           "testOrReviewMapping": "Existing real append/dedup tests plus persisted-policy range cases",
           "acceptanceSources": [
-            "memory-performance.acceptance.md"
+            "docs/Features/ResourceExecution.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
@@ -3704,7 +3704,7 @@
           "acceptanceText": "AC-SERIES-005: equal/min/max timestamps, empty range, limit і exact byte boundary дають визначений результат; unauthorized tags omit/deny за policy; exhausted/cancelled read не змінює data та не псує наступний read | Existing [TimeSeriesReadResourceTests](../../tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs); REQ-SERIES-001–003 та AC-MP-005/012 не замінюються",
           "testOrReviewMapping": "Existing [TimeSeriesReadResourceTests](../../tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs); REQ-SERIES-001–003 та AC-MP-005/012 не замінюються",
           "acceptanceSources": [
-            "memory-performance.acceptance.md",
+            "docs/Features/ResourceExecution.md",
             "docs/Features/TimeSeries.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
@@ -7546,7 +7546,7 @@
     "sourceConfigTestsOrPoliciesEditedByThisTask": false,
     "unrelatedConcurrentChangesPreserved": true,
     "siteAndDns": "deferred_by_owner",
-    "ignoredPlanningFiles": "Canonical *.plan.md files are currently ignored; the future scoped delivery owner must explicitly include referenced plans when committing documentation."
+    "ignoredPlanningFiles": "Owner correction: temporary planning Markdown files are removed and all three suffix patterns are ignored without exceptions."
   },
   "completedAt": "2026-10-01T23:51:04.170Z",
   "siteExtension": {
@@ -7573,8 +7573,8 @@
       "docs/ADR/ADR-055-typed-relational-rows.md",
       "docs/ADR/ADR-036-orleans-foundation.md"
     ],
-    "acceptanceSource": "ai-database-sql.acceptance.md",
-    "planSource": "ai-database-sql.plan.md",
+    "acceptanceSource": "docs/Features/QueryExecution.md",
+    "planSource": "docs/Features/QueryExecution.md",
     "status": "source_integrated_RF3_14_new_scenarios_pass_complete_gates_pending",
     "qualificationAuthority": "docs/implementation/status.json",
     "existingCatalog": "preserved_historical_104_KL_mapping",

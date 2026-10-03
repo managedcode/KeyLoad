@@ -65,7 +65,7 @@ flowchart LR
     Safe --> Rethrow[Same caught exception and failed case]
 ```
 Related REQ-NGR-001..004 / AC-NGR-001..004 in
-benchmark-native-gates-repair.acceptance.md; existing REQ-BC-006/009/050..058,
+ADR-068-native-benchmark-gate-repair.md; existing REQ-BC-006/009/050..058,
 ADR-056/062/064 and native ownership/ACK contracts remain mandatory.
 
 ## Decision and actual baseline

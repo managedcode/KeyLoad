@@ -175,9 +175,9 @@ expansion. CI, numeric coverage/complexity and production proof remain pending.
 ### Accepted numeric source analysis extension
 
 REQ-CQ-006 / AC-CQ-008/009 and
-[quality-gates.acceptance.md](../../quality-gates.acceptance.md) define the exact
+[CodeQuality](../Features/CodeQuality.md) define the exact
 token-LOC, aggregate partial-type, executable-unit and control-flow-depth metrics.
-The [working plan](../../quality-gates.plan.md) owns task graph, test-first sequence
+The [execution contract](../Features/CodeQuality.md) owns task graph, test-first sequence
 and join. Add KLD0030/31/32/33 as enabled errors at400/200/50/3 respectively, preserving
 all eight imported rules and the exact copied EditorConfig. Only the exact existing
 KeyLoad.Core / KeyLoad.Core.DatabaseEngine aggregate type exception applies before
@@ -318,7 +318,7 @@ Rollback the adapter's scoped source as one unit with pinned versions unchanged.
 
 Accepted numeric consumer substage TASK-MP-010AG-N uses AC-CQ-008 and
 AC-BCT-005/006. The exact engine-readiness/immutable-binding ownership, start
-condition and join are in quality-gates.plan.md. An economical capable worker
+condition and join are in ../Features/CodeQuality.md. An economical capable worker
 extracts only private cohesive readiness helpers or preserving guards; retain
 native requests, policy/receipt assertions, polling, cancellation filters, failure
 codes, immutable ownership and exact successful order. Lead owns all shared
@@ -335,7 +335,7 @@ actual enabled graph, complete diff review and exact-SHA real-client qualificati
 no new public surface, compatibility shim, exception or suppression is authorized.
 
 The later actual54-error solution cut accepts TASK-MP-010AH-C/Q/L under
-AC-CQ-010/011 in quality-gates.acceptance.md and its detailed disjoint task graph.
+AC-CQ-010/011 in ../Features/CodeQuality.md and its detailed disjoint task graph.
 CLI feature dispatch migrates from Program to a thin aggregate runner and actual
 ClientApi/BackupRestore owners, preserving every command/arity/message/exit/path/
 credential/operation; original English localizable messages use resources. Query
@@ -372,7 +372,7 @@ numeric inputs and awaited cancellation preserve caller intent. Lead owns bounde
 process cleanup and listener transfer/finally paths with first-authored real
 lifetime regressions; unexpected cleanup errors cannot be silently swallowed.
 The exact disjoint scopes, hash-overlap stop conditions, source-review exception,
-development gates and mandatory GitHub qualification are in quality-gates.plan.md.
+development gates and mandatory GitHub qualification are in ../Features/CodeQuality.md.
 Rollback is the coherent scoped test-source unit; existing assertions and every
 mandatory quality/site contract remain. ADR040 browser/visual evidence is separate.
 
@@ -651,7 +651,7 @@ regenerated after source repair; no red result or source-only join qualifies017.
 ### Accepted main qualification scheduling continuation
 
 REQ-CQ-008 / AC-CQ-017 and AC-QUAL-001..003 in the frozen
-product-qualification.acceptance.md govern TASK-QUAL-CI-QUEUE-R9. Root accepts
+../Features/CodeQuality.md govern TASK-QUAL-CI-QUEUE-R9. Root accepts
 this preserving cross-cutting workflow contract before the one-line source join.
 The full v0.3 objective and every previous mandatory policy remain unchanged.
 

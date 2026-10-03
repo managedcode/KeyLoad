@@ -47,7 +47,8 @@ flowchart LR
 
 ## Implementation contract
 
-REQ-AISQL-001/003/004 -> AC-AISQL-001/005–010 in root acceptance;
+REQ-AISQL-001/003/004 -> AC-AISQL-001/005–010 in this ADR and
+[QueryExecution](../Features/QueryExecution.md);
 QueryExecution owns language, existing model slices own effects. Ordered tasks:
 TASK-AISQL-004 freezes DTOs/grammar;006 authors strict compiler tests and compiler;
 007 preserves native equality planner efficiency;008 joins endpoint, SDK, official

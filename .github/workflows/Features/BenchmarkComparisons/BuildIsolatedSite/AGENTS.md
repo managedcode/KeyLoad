@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Own the final BenchmarkComparisons website build composite action; entry point: action.yml.
-- Read the root AGENTS.md, workflows/AGENTS.md, docs/Architecture.md, BenchmarkComparisons feature, isolated-comparisons.acceptance.md TASK-ISO-012P and ADR-056 before changes.
+- Read the root AGENTS.md, workflows/AGENTS.md, docs/Architecture.md, BenchmarkComparisons feature with TASK-ISO-012P acceptance/execution contracts and ADR-056 before changes.
 
 ## Boundaries
 - Run from the actual qualified website checkout after all native site/analyzer TUnit, coverage and no-skip gates pass. Keep website, historical measured, isolated measured and workflow-control revisions independent.

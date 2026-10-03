@@ -2,9 +2,9 @@
 
 Status: Accepted. Owner: lead benchmark integrator. Date: 2026-10-02.
 
-REQ-BC-021 and AC-PG-001..006 in [acceptance](../../postgres-schema.acceptance.md).
-[Brainstorm](../../postgres-schema.brainstorm.md) records options/trade-offs;
-[working plan](../../postgres-schema.plan.md) contains TASK-MP-010AC-R/T/C/L and
+REQ-BC-021 and AC-PG-001..006 in [acceptance](ADR-045-postgres-schema-ownership.md).
+[Brainstorm](ADR-045-postgres-schema-ownership.md) records options/trade-offs;
+[working plan](ADR-045-postgres-schema-ownership.md) contains TASK-MP-010AC-R/T/C/L and
 criterion-to-test/verification joins. Feature: BenchmarkComparisons. Source and
 runtime qualification remain incomplete; this ADR must not be marked Implemented
 from a source packet or development build.

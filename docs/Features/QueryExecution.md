@@ -91,7 +91,7 @@ forwarding is serialized through the lead; no database schema or SQL/AST wire
 format change. UI: N/A, typed caller operations are the entry point.
 
 The preserving quality join is specified by AC-CQ-011/012 in
-[quality-gates acceptance](../../quality-gates.acceptance.md) and ADR-033.
+[quality-gates acceptance](CodeQuality.md) and ADR-033.
 QueryEngine keeps the public SQL/AST/live facade; its private live owner is
 `Features/ChangeFeeds/LiveQueryExecutor.cs`. First-authored
 `Features/QueryExecution/QueryConstructionTests.cs` asserts the explicit invalid
@@ -104,7 +104,7 @@ coverage remains, with internal cohesive classes, invariant inputs and explicit
 deterministic200-document/50-query and100-mutation/12-identity flow assertions.
 REQ-QUERY-003..006 map to this additional test-source acceptance and TASK-MP-010UQ;
 the detailed matrix, exact worker ownership and required GitHub proof are in
-quality-gates.acceptance.md and quality-gates.plan.md at the repository root.
+the [CodeQuality](CodeQuality.md) acceptance and execution contract.
 Existing QueryConstruction/SqlParserContract/QueryResource cases retain their
 constructor, error-precedence, cancellation and budget boundary assertions.
 ADR-033/032 suffice: only test ownership/input selection changes, no production

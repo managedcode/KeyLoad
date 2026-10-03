@@ -89,8 +89,8 @@ AppHost config is `KeyLoad:ContainerImages:Server` and
 `Benchmarks:ContainerImages:LoadGenerator`; missing/invalid refs fail safely and
 cannot select a host-process fallback. Root owns shared contracts, AppHost/CI/docs
 and final source/evidence review; bounded image tooling/runner Dockerfile worker
-scope is frozen in [acceptance](../../docker-comparison-images.acceptance.md) and
-[task graph](../../docker-comparison-images.plan.md). TUnit resource/metadata
+scope is frozen in [acceptance](BenchmarkComparisons.md) and
+[task graph](BenchmarkComparisons.md). TUnit resource/metadata
 assertions and actual registry/Aspire execution prove the criteria in GitHub only.
 No public engine API/schema/ACK change, external registry publication, local runtime,
 tool installation, secret logging or test/bound weakening. Full nine-engine,
@@ -122,7 +122,7 @@ flowchart LR
 ```
 
 The site candidate's observed analyzer dependency failure loop is traced under
-REQ/AC-BC-027 in [site acceptance](../../site-design.acceptance.md) and its working
+REQ/AC-BC-027 in [site acceptance](../ADR/ADR-040-static-site-threejs-evidence.md) and its working
 plan. TASK014/015/016 preserve all diagnostics/tests/native thresholds while
 repairing genuine decimal display parsing, independent token-start location
 oracles, cohesive test classes and uncovered real diagnostic flows. The exact
@@ -147,13 +147,13 @@ Status: in progress. Owner: lead benchmark integrator. Product scope and authori
 | REQ-BC-009 | Qualification / P0 | Keep all required gates and unsupported readiness/durability boundaries honest. | AC-BC-009; exact delivered-source GitHub results and status docs. |
 | REQ-BC-010 | Resource bounds / P0 | Stream JSON and raw CSV reports without creating a complete second copy of sample data as text; preserve every attempt and the report schema. | AC-MP-010; real-file roundtrip/quoting/cancellation regressions and CI resource evidence under ADR-035. |
 | REQ-BC-022 | Tooling / P0 | Keep embedded microbenchmarks externally consumable by BenchmarkDotNet's generated child while all source quality rules and real fixture lifetime apply. | AC-EM-001..004; real metadata/store/TUnit process Dry proof under Accepted ADR-047, never comparative/RF3 evidence. |
-| REQ-BC-023 | Correctness and ownership / P0 | Replace fake harness verification with genuine pinned Neo4j public runner/native response/data checks and limit cleanup to acknowledged acquired resources. | AC-GH-001..007 under [ADR-049](../ADR/ADR-049-genuine-neo4j-harness.md), [acceptance](../../genuine-comparison-harness.acceptance.md) and [ordered graph](../../genuine-comparison-harness.plan.md); implementation and exact-SHA GitHub proof pending. |
-| REQ-BC-026 | Time-series comparison / P0 | Compare persisted KeyLoad and Timescale paths over one deterministic UTC sample set, and exercise ManagedCode.TimeSeries as an in-memory aggregation library with separate guarantee metadata. | AC-BC-026 / AC-TSC-001..006 under [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md) and [acceptance](../../timeseries-comparison.acceptance.md); source implementation and full Release build are complete, exact-SHA GitHub proof is pending. |
+| REQ-BC-023 | Correctness and ownership / P0 | Replace fake harness verification with genuine pinned Neo4j public runner/native response/data checks and limit cleanup to acknowledged acquired resources. | AC-GH-001..007 under [ADR-049](../ADR/ADR-049-genuine-neo4j-harness.md), [acceptance](../ADR/ADR-049-genuine-neo4j-harness.md) and [ordered graph](../ADR/ADR-049-genuine-neo4j-harness.md); implementation and exact-SHA GitHub proof pending. |
+| REQ-BC-026 | Time-series comparison / P0 | Compare persisted KeyLoad and Timescale paths over one deterministic UTC sample set, and exercise ManagedCode.TimeSeries as an in-memory aggregation library with separate guarantee metadata. | AC-BC-026 / AC-TSC-001..006 under [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md) and [acceptance](../ADR/ADR-050-timeseries-timescale-comparison.md); source implementation and full Release build are complete, exact-SHA GitHub proof is pending. |
 
 ## Slice map
 
 - Harness/adapters: benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/; existing flat files are migration debt tracked by ADR-032.
-- Embedded scenario library: benchmarks/KeyLoad.BenchmarkScenarios/Features/BenchmarkComparisons/; existing KeyLoad.Benchmarks retains only its typed executable runner under ADR-047. New boundary implementation/qualification is pending; exact accepted contract is embedded-benchmark.acceptance.md and its ordered working plan.
+- Embedded scenario library: benchmarks/KeyLoad.BenchmarkScenarios/Features/BenchmarkComparisons/; existing KeyLoad.Benchmarks retains only its typed executable runner under ADR-047. New boundary implementation/qualification is pending; exact accepted contract is ../ADR/ADR-047-embedded-benchmark-host.md and its ordered working plan.
 - Aspire engine resources: src/KeyLoad.AppHost/Features/BenchmarkComparisons/; shared Program.cs composition has one integration owner.
 - Tests: tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/ and tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/; existing fixtures are shared.
 - Evidence/chart tooling: scripts/Features/BenchmarkComparisons/.
@@ -165,7 +165,7 @@ Status: in progress. Owner: lead benchmark integrator. Product scope and authori
 ## Immutable harness collection and naming repair
 
 REQ-BC-020 maps to AC-BCT-001..006 in
-[benchmark-contracts.acceptance.md](../../benchmark-contracts.acceptance.md),
+[../ADR/ADR-044-benchmark-immutable-contracts.md](../ADR/ADR-044-benchmark-immutable-contracts.md),
 the explicit task graph in its working plan and
 [ADR-044](../ADR/ADR-044-benchmark-immutable-contracts.md). This accepted stage owns
 the nine diagnosed mutable collection properties/cached oracles and solution-only
@@ -177,8 +177,8 @@ fixtures are authored first; exact-source GitHub engine/full suites remain pendi
 ## PostgreSQL schema lifecycle and constant SQL
 
 REQ-BC-021 maps to AC-PG-001..006 in
-[postgres-schema.acceptance.md](../../postgres-schema.acceptance.md),
-[task graph](../../postgres-schema.plan.md) and Accepted
+[../ADR/ADR-045-postgres-schema-ownership.md](../ADR/ADR-045-postgres-schema-ownership.md),
+[task graph](../ADR/ADR-045-postgres-schema-ownership.md) and Accepted
 [ADR-045](../ADR/ADR-045-postgres-schema-ownership.md). A duplicate run-ID target
 must never delete another target's schema after failed initialization. Constant
 client commands bind native values; a transaction-local server context, namespace
@@ -229,8 +229,8 @@ Least expensive capable coding tiers must be chosen per SDK/protocol risk; ambig
 ## Actual caller composition repair (2026-10-02)
 
 REQ-BC-001/002/003/005/009/019/021 map to AC-PERF-001–009 in
-[performance acceptance](../../performance-composition.acceptance.md) and its
-[ordered task graph](../../performance-composition.plan.md). ADR-034's Accepted
+[performance acceptance](../ADR/ADR-034-cluster-comparisons.md) and its
+[ordered task graph](../ADR/ADR-034-cluster-comparisons.md). ADR-034's Accepted
 repair continuation freezes the three actual RF3 endpoint bindings, authenticated
 Rabbit management client ownership and PostgreSQL public event readback. This
 repairs located caller failures; it does not close the existing nine-engine,
@@ -278,7 +278,7 @@ flowchart LR
 
 ## Product website and conceptual RF3 presentation
 
-The owner requested a proper product design and Three.js. [ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md), [site acceptance](../../site-design.acceptance.md) and [ordered plan](../../site-design.plan.md) own this bounded extension. The existing BC001–010 and all product/evidence criteria remain mandatory. Reader, keyboard/screen-reader user, constrained browser and evidence publisher are the actors; generated index is the entry, with independent graphics and report mounts. Backend/public API/persistence N/A: no database behavior changes.
+The owner requested a proper product design and Three.js. [ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md), [site acceptance](../ADR/ADR-040-static-site-threejs-evidence.md) and [ordered plan](../ADR/ADR-040-static-site-threejs-evidence.md) own this bounded extension. The existing BC001–010 and all product/evidence criteria remain mandatory. Reader, keyboard/screen-reader user, constrained browser and evidence publisher are the actors; generated index is the entry, with independent graphics and report mounts. Backend/public API/persistence N/A: no database behavior changes.
 
 | Requirement | Measurable acceptance | Test or review mapping |
 |---|---|---|
@@ -305,17 +305,17 @@ The strongest coverage review found that manual design proof does not waive nume
 The actual SiteTests run36994330874 exposed a shared vendor-gzip portability
 failure before browser launch. REQ/AC-BC-016/017/024/025 retain their existing
 requirements; the strict byte-identity/current-runtime compression receipt and
-bounded persistent builder diagnostics are frozen in [site acceptance](../../site-design.acceptance.md),
+bounded persistent builder diagnostics are frozen in [site acceptance](../ADR/ADR-040-static-site-threejs-evidence.md),
 [ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md) and TASK019/020 in the
-[site plan](../../site-design.plan.md). Real isolated-builder success/corruption
+[site plan](../ADR/ADR-040-static-site-threejs-evidence.md). Real isolated-builder success/corruption
 regressions and specific intended negative errors map to those criteria. Every
 source/worker/strongest join and full GitHub Analyzer/native/site/Chrome/coverage
 gate is required; the failed baseline and missing hosted gzip length stay honest.
 
 ## Fresh GitHub evidence and separate website deployment
 
-REQ-BC-028 maps to AC-BC-028 in [publication acceptance](../../site-publication.acceptance.md),
-[ordered plan](../../site-publication.plan.md) and [ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md).
+REQ-BC-028 maps to AC-BC-028 in [publication acceptance](../ADR/ADR-040-static-site-threejs-evidence.md),
+[ordered plan](../ADR/ADR-040-static-site-threejs-evidence.md) and [ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md).
 The owner's subsequent request adds a separate post-test publication workflow;
 earlier design/DNS exclusions and all BC001–027 requirements remain recorded.
 Every number is read from actual comparison-job JSON. Select the highest successful
@@ -359,8 +359,8 @@ inventory, numeric threshold and complete real-browser assertion remains require
 
 ## Required analyzer dependency for the website candidate
 
-REQ-BC-027 maps to AC-BC-027 in [site acceptance](../../site-design.acceptance.md),
-TASK-SITE-ANALYZER-COVERAGE-011 in the [site plan](../../site-design.plan.md), and
+REQ-BC-027 maps to AC-BC-027 in [site acceptance](../ADR/ADR-040-static-site-threejs-evidence.md),
+TASK-SITE-ANALYZER-COVERAGE-011 in the [site plan](../ADR/ADR-040-static-site-threejs-evidence.md), and
 [ADR-033](../ADR/ADR-033-code-quality.md). The bounded website candidate must
 qualify its actual KeyLoad.Analyzers dependency using the complete real TUnit
 suite and native MTP18.11.2 Cobertura counts at the same candidate SHA. Freeze
@@ -379,7 +379,7 @@ TimeSeries requirements and their scope were preserved.
 
 ## Preserving library and CLI prerequisite
 
-REQ-BC-019 maps to AC-HOST-001..007 in [host acceptance](../../comparison-host.acceptance.md)
+REQ-BC-019 maps to AC-HOST-001..007 in [host acceptance](../ADR/ADR-043-comparison-library-host.md)
 and Accepted [ADR-043](../ADR/ADR-043-comparison-library-host.md). The existing
 KeyLoad.Comparisons assembly/public API becomes a library; the new host owns sole
 CLI composition/lifecycle. Aspire retains its comparisons resource and existing
@@ -388,7 +388,7 @@ this stage. Host tests use actual child processes; success/cleanup/cancellation
 qualification uses the real GitHub comparison suite. Private construction ownership
 requires explicit source review plus runtime evidence as stated in acceptance.
 Frontend/persistence/auth surfaces are N/A because this prerequisite changes only
-build/CLI ownership. [Host task graph](../../comparison-host.plan.md) records exact
+build/CLI ownership. [Host task graph](../ADR/ADR-043-comparison-library-host.md) records exact
 disjoint scopes and lead-only join; existing nine-engine criteria remain mandatory.
 
 Current website delivery consumes authenticated successful schema2 evidence and
@@ -402,7 +402,7 @@ real Chrome evidence is required, with every existing oracle and numeric gate.
 
 ## Qualified website delivery, 2026-10-02
 
-**Website scope only: REQ/AC-BC-011–018/024/025/027/028.** Exact H `6a82c86d0113270335368bbfbff0080ea1c1800a` passed complete GitHub validation37011817610 and both separate automatic Pages publications: site-path push37013009381 and producer-completion workflow_run37014111869. Full118 analyzer and70 site tests pass without skips, together with all required native/JavaScript thresholds and source inventories. [Canonical immutable evidence](../implementation/site-design.json), [design closure](../../site-design.plan.md) and [publication closure](../../site-publication.plan.md) map criteria, tasks, exact artifacts and actual provider/live proof; strongest TASK-SITE-REVIEW-007 documentation/evidence review is COMPLETE.
+**Website scope only: REQ/AC-BC-011–018/024/025/027/028.** Exact H `6a82c86d0113270335368bbfbff0080ea1c1800a` passed complete GitHub validation37011817610 and both separate automatic Pages publications: site-path push37013009381 and producer-completion workflow_run37014111869. Full118 analyzer and70 site tests pass without skips, together with all required native/JavaScript thresholds and source inventories. [Canonical immutable evidence](../implementation/site-design.json), [design closure](../ADR/ADR-040-static-site-threejs-evidence.md) and [publication closure](../ADR/ADR-040-static-site-threejs-evidence.md) map criteria, tasks, exact artifacts and actual provider/live proof; strongest TASK-SITE-REVIEW-007 documentation/evidence review is COMPLETE.
 
 The live responsive product page includes the bounded independent Three.js scene, accessible charts/tables, workload/metric/repetition controls and exact JSON/CSV/Markdown downloads. Current published measurements are the authentic successful comparison36926803549 at9c570f8c33a7a9667507a8e1c0ca68860de3be45; failed current producer37013008931 supplies no new results. Website/control/measured revisions and run/job/artifact hashes remain distinct. Every performance number is derived from these raw reports; unsupported values stay unavailable.
 
@@ -458,7 +458,7 @@ is [SiteMetadata](BenchmarkComparisons/SiteMetadata.md), REQ-SEO-001..006 /
 AC-SEO-001..007 under ADR053. It preserves every benchmark/evidence gate.
 
 [ADR-056](../ADR/ADR-056-isolated-linux-comparison-cells.md) and the canonical
-[acceptance](../../isolated-comparisons.acceptance.md)/[plan](../../isolated-comparisons.plan.md)
+[acceptance](../ADR/ADR-056-isolated-linux-comparison-cells.md)/[plan](../ADR/ADR-056-isolated-linux-comparison-cells.md)
 replace the three-OS and all-engine-on-one-runner producer for new qualification.
 Historical evidence retains its original topology/source/format; it is not
 qualification of the new matrix. Source and full GitHub/publication gates are pending.
@@ -505,7 +505,7 @@ actual partial failures are in the source qualification record under implementat
 ## Separate intensive TimeSeries family
 
 [ADR-059](../ADR/ADR-059-isolated-intensive-timeseries.md) and the canonical
-[acceptance](../../isolated-timeseries.acceptance.md)/[plan](../../isolated-timeseries.plan.md)
+[acceptance](../ADR/ADR-059-isolated-intensive-timeseries.md)/[plan](../ADR/ADR-059-isolated-intensive-timeseries.md)
 specify30 additional isolated cells: KeyLoad/TimescaleDB × native1/2/3 nodes ×
 Append/RawRangeRead/Latest/Aggregate/Windows, preceded by six private preflights.
 REQ-BC-059..064 map to AC-TSI-001..008 and TASK-ISO-TS005..011. Their exact corpus,

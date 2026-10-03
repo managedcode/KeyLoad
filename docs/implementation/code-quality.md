@@ -2,7 +2,7 @@
 
 Configuration and rule contract: [CodeQuality](../Features/CodeQuality.md).
 Implementation decision: [ADR-033](../ADR/ADR-033-code-quality.md).
-Working verification: [plan](../../code-quality.plan.md).
+Working verification: [plan](../Features/CodeQuality.md).
 
 The owner-selected Prostir EditorConfig was imported byte for byte on 2026-10-01;
 the final byte comparison passed on 2026-10-02. SHA256:
@@ -160,7 +160,7 @@ at the concurrently edited protected Core prerequisite. Neither one-error cut is
 an exhaustive current solution inventory. The previous broad formatter's112
 findings included protected BlobStorage; that raw static cut is preserved and is
 not this stage's write scope or a compiler result. Accepted source joins and their
-open combined gates are in [quality plan](../../quality-gates.plan.md).
+open combined gates are in [quality plan](../Features/CodeQuality.md).
 
 ## Canonical CI baseline
 

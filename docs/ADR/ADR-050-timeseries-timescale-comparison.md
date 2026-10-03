@@ -1,6 +1,6 @@
 # ADR-050: Isolated TimeSeries and Timescale comparison profile
 
-Status: Accepted; source implementation and full Release build complete, exact-SHA qualification pending. Date: 2026-10-02. Owner: BenchmarkComparisons lead. Related: REQ-TSC-001..006, AC-TSC-001..006, REQ-SERIES-007, AC-SERIES-007, REQ-BC-026, AC-BC-026; [TimeSeries](../Features/TimeSeries.md), [BenchmarkComparisons](../Features/BenchmarkComparisons.md), [acceptance](../../timeseries-comparison.acceptance.md), [plan](../../timeseries-comparison.plan.md).
+Status: Accepted; source implementation and full Release build complete, exact-SHA qualification pending. Date: 2026-10-02. Owner: BenchmarkComparisons lead. Related: REQ-TSC-001..006, AC-TSC-001..006, REQ-SERIES-007, AC-SERIES-007, REQ-BC-026, AC-BC-026; [TimeSeries](../Features/TimeSeries.md), [BenchmarkComparisons](../Features/BenchmarkComparisons.md), [acceptance](ADR-050-timeseries-timescale-comparison.md), [plan](ADR-050-timeseries-timescale-comparison.md).
 
 ## Accepted native digest assertion refinement
 

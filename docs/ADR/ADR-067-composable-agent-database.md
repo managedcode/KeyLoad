@@ -34,7 +34,7 @@ flowchart LR
 ## Implementation contract
 
 1. TASK-COMP-001 freezes requirements, DTOs, states, grants, bounds and errors in
-   root acceptance/plan. Root owns AGENTS, shared contracts, architecture/design,
+   this ADR and [DatabaseComposition](../Features/DatabaseComposition.md). Root owns AGENTS, shared contracts, architecture/design,
    ADR/index/status and final evidence. No dependency or format substitution.
 2. TASK-COMP-004 adds attributed native DTOs in Abstractions/Features/DatabaseComposition,
    stable v1 aliases/field IDs and additive JSON mutation discriminators. Root
@@ -123,7 +123,7 @@ issue them. Primitive stored data and existing digest format remain unchanged.
 Rollback stops new producers/advertisement; committed graph/queue data remain
 canonical. No old-store conversion or journal removal. Agent ownership/start,
 tests, error flows and join conditions are frozen in this implementation contract
-and the durable feature acceptance below. The local root plan tracks execution.
+and the durable feature acceptance below.
 Remain Accepted until all required source/migration/tests/GitHub evidence exist.
 
 TASK-COMP-007 / AC-COMP-004/007/008 preserves the existing AC-DSTORE-005

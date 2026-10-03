@@ -76,8 +76,8 @@ The owner's screenshot reports a pixelated K. REQ-VEC-001..003 and
 AC-VEC-001..005 refine the existing public-site identity without changing its
 canonical logo, layout, data or runtime contracts. See the exact
 [feature continuation](../Features/BenchmarkComparisons/VectorAssets.md),
-[acceptance](../../vector-assets.acceptance.md) and
-[ordered task graph](../../vector-assets.plan.md).
+[acceptance](ADR-053-unified-visual-identity.md) and
+[ordered task graph](ADR-053-unified-visual-identity.md).
 
 Use a real vector poster, and the existing canonical favicon as one decorative
 DOM SVG image projected by the existing Three camera/root. Remove the separately

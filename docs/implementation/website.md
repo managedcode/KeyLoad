@@ -16,7 +16,7 @@ The default aggregation is the median of per-repetition values with min/max whis
 
 ## Design and implementation boundaries
 
-The canonical HTML/modules/styles live in `site/Features/BenchmarkComparisons/`; `site/scripts/build.mjs` is the thin build entry. The product introduction precedes the benchmark workspace. Three.js 0.186.1 and its MIT license are pinned, integrity checked and served from the same origin. The lazy RF3 illustration is conceptual architecture, with physical hosts and logical partitions distinguished; it is never live telemetry or measured performance. A static illustration and readable content remain when graphics or JavaScript is unavailable. See [ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md), [acceptance](../../site-design.acceptance.md) and [the frozen protocol](../../site/Features/BenchmarkComparisons/protocol.md).
+The canonical HTML/modules/styles live in `site/Features/BenchmarkComparisons/`; `site/scripts/build.mjs` is the thin build entry. The product introduction precedes the benchmark workspace. Three.js 0.186.1 and its MIT license are pinned, integrity checked and served from the same origin. The lazy RF3 illustration is conceptual architecture, with physical hosts and logical partitions distinguished; it is never live telemetry or measured performance. A static illustration and readable content remain when graphics or JavaScript is unavailable. See [ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md), [acceptance](../ADR/ADR-040-static-site-threejs-evidence.md) and [the frozen protocol](../../site/Features/BenchmarkComparisons/protocol.md).
 
 ## Development preview and GitHub qualification
 

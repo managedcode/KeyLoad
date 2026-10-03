@@ -32,7 +32,7 @@ capture and shared joins; worker owns middleware/new helper/UnitTests. GitHub
 qualification is pending; native cause cannot be inferred from the generic503.
 
 Shared authenticated .NET SDK/CLI transport. [ADR-035](../ADR/ADR-035-memory-performance.md)
-and [memory/performance acceptance](../../memory-performance.acceptance.md) govern
+and [memory/performance acceptance](../ADR/ADR-035-memory-performance.md) govern
 the current transport repair. The typed operation contracts and server authority
 remain unchanged.
 ADR-041 governs the explicit read-only CLR migration and the strict-analysis
@@ -55,7 +55,7 @@ Frontend/database/schema changes: N/A, transport decoding only.
 CLI composition now lives in `src/KeyLoad.Cli/Hosting/KeyLoadCliApplication.cs`;
 status/profile/help behavior lives in its `Features/ClientApi/CliClientApi.cs` and
 original-text resource. The preserving contract and review exception are
-AC-CQ-010 in [quality-gates acceptance](../../quality-gates.acceptance.md), under
+AC-CQ-010 in [quality-gates acceptance](CodeQuality.md), under
 ADR-033. The actual CLI build is clean; its process qualification remains pending.
 
 ```mermaid
@@ -187,7 +187,7 @@ dependency patch, broad exception fallback, trusted caller role or timeout chang
 | REQ-CLIENT-007: simple agent/worker API має bounded capability та processing contract | AC-CLIENT-007: PLANNED versioned agent calls користуються тим самим persisted principal, typed operations, quotas і outcome semantics; queue worker stale lease/duplicate handler, empty input та cancellation не дають unauthorized/duplicate effects | Existing processing semantics у [MessagingTests](../../tests/KeyLoad.UnitTests/MessagingTests.cs); agent surface tests PLANNED після ADR-039 acceptance |
 
 MCP і agent surface required; accepted contracts, exact names and wrappers are in
-ADR-039 and [MCP acceptance](../../mcp-agent-api.acceptance.md). Implementation and
+ADR-039 and [MCP acceptance](ClientApi.md). Implementation and
 runtime qualification remain pending. SDK bearer/API key не містить trusted roles;
 credentials/authorization — [Authorization](Authorization.md). Every operation має
 окремий Orleans request grain, тоді node-local host виконує операцію;

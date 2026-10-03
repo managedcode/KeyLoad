@@ -2,8 +2,8 @@
 
 Status: Accepted; implementation and qualification pending.
 Related: REQ-BACKUP-005, REQ-STORAGE-011, AC-BSM-001..005, AC-MP-006/012;
-ADR008/011/033/035/046. Exact tasks/tests: root bounded-storage-metadata.plan.md
-and bounded-storage-metadata.acceptance.md, accepted before writes.
+ADR008/011/033/035/046. This ADR's implementation contract defines exact
+tasks and tests, accepted before writes.
 
 Private manifest/identity readers must not allocate according to untrusted file
 size. Restore also must parse the same identity bytes whose outer manifest hash

@@ -241,61 +241,53 @@ Local `AGENTS.md` files may tighten these values, but they must not loosen them 
   - current state
   - required change
   - constraints and risks
-- Before starting a brainstorm, decide whether the task is actually non-trivial.
-- For non-trivial work, create a root-level `<slug>.brainstorm.md` file before making code or doc changes.
-- For simple, short, or obvious work, skip the brainstorm and go directly to execution.
-- Use `<slug>.brainstorm.md` to capture the problem framing, options, trade-offs, risks, open questions, and the recommended direction.
-- Think through the task in the brainstorm before committing to implementation details.
-- Before creating `<slug>.plan.md`, create a root-level `<slug>.acceptance.md` file.
-- The acceptance criteria file MUST be detailed enough that another agent or maintainer can implement and test the task without rereading the conversation.
-- The acceptance criteria file MUST contain:
+- Before starting design analysis, decide whether the task is actually non-trivial.
+- For non-trivial work, record problem framing, options, trade-offs, risks, open questions and the recommended direction in the owning feature specification and required ADR before code or doc implementation.
+- For simple, short or obvious work, go directly to execution.
+- Keep temporary brainstorms and working checklists in agent context or outside the checkout; do not create separate planning Markdown files in the repository.
+- Think through options before committing to implementation details.
+- Before ordering implementation, define the acceptance contract in the owning feature specification.
+- The acceptance contract MUST be detailed enough that another agent or maintainer can implement and test the task without rereading the conversation.
+- The acceptance contract MUST contain:
   - task goal and user-visible outcome
   - in-scope and out-of-scope behaviour
   - assumptions and open questions
-  - actors, entry points, permissions, and affected boundaries
-  - numbered criteria with stable IDs such as `AC-001`, `AC-002`, and `AC-003`
+  - actors, entry points, permissions and affected boundaries
+  - numbered criteria with stable IDs such as `AC-001`, `AC-002` and `AC-003`
   - clear pass and fail conditions for every criterion
-  - positive flows, negative flows, edge cases, and unexpected/error paths
-  - data, contract, API, UI, persistence, performance, security, and observability expectations where relevant
-  - migration, compatibility, and rollback expectations where relevant
-  - a criterion-to-test matrix that maps each `AC-*` item to planned automated tests, test level, assertions, and verification commands
-  - explicit criteria that will not receive automated coverage, with the reason and required manual or review evidence
-- Do not start implementation until the acceptance criteria file exists and the test strategy maps back to it.
-- After the acceptance criteria are written, create a root-level `<slug>.plan.md` file derived from `<slug>.acceptance.md`.
-- Keep the `<slug>.plan.md` file as the working plan for the task until completion.
-- The plan file MUST contain:
-  - a link or reference to the chosen brainstorm
-  - a link or reference to the acceptance criteria file
+  - positive flows, negative flows, edge cases and unexpected/error paths
+  - data, contract, API, UI, persistence, performance, security and observability expectations where relevant
+  - migration, compatibility and rollback expectations where relevant
+  - a criterion-to-test matrix mapping each `AC-*` to automated tests, test level, assertions and verification commands
+  - explicit criteria without automated coverage, with the reason and required manual or review evidence
+- Do not start implementation until the acceptance contract exists and the test strategy maps back to it.
+- Derive the ordered execution contract from the accepted criteria and keep it in the feature specification and required ADR, with one canonical source for each fact.
+- The execution contract MUST contain:
+  - the chosen design analysis and acceptance contract
   - implementation steps derived from the accepted `AC-*` criteria
   - task goal and scope
-  - a detailed implementation plan with detailed ordered steps
-  - constraints and risks
-  - explicit test steps as part of the ordered plan, not as a later add-on
-  - a test plan derived from the `AC-*` criteria, with every criterion covered by tests or a documented exception
-  - the test and verification strategy for each planned step
-  - the testing methodology for the task: what flows will be tested, how they will be tested, and what quality bar the tests must meet
-  - an explicit full-test baseline step after the plan is prepared
-  - a tracked list of already failing tests, with one checklist item per failing test
-  - root-cause notes and intended fix path for each failing test that must be addressed
-  - a checklist with explicit done criteria for each step
-  - ordered final validation skills and commands, with reason for each
+  - detailed ordered implementation steps, constraints and risks
+  - explicit test steps within the ordered implementation, not as a later add-on
+  - a test strategy for every step, covering each `AC-*` with a test or documented exception
+  - the testing methodology: flows, commands and quality bar
+  - a full relevant test baseline before implementation
+  - a tracked list of already failing tests, their failure symptoms, suspected causes and intended fixes
+  - checklist completion conditions
+  - ordered final validation skills and commands, with the reason for each
 - Use the Ralph Loop for every non-trivial task:
-  - brainstorm in `<slug>.brainstorm.md` before coding or document edits
-  - think through options and choose the intended direction before planning
-  - turn the chosen direction into detailed acceptance criteria in `<slug>.acceptance.md`
-  - map every acceptance criterion to planned automated tests or a documented test exception before coding
-  - turn the chosen direction into a detailed `<slug>.plan.md`
-  - include test creation, test updates, and verification work in the ordered steps from the start
-  - once the initial plan is ready, run the full relevant test suite to establish the real baseline
-  - if tests are already failing, add each failing test back into `<slug>.plan.md` as a tracked item with its failure symptom, suspected cause, and fix status
-  - work through failing tests one by one: reproduce, find the root cause, apply the fix, rerun, and update the plan file
-  - include ordered final validation skills in the plan file, with reason for each skill
-  - require each selected skill to produce a concrete action, artifact, or verification outcome
-  - execute one planned step at a time
-  - mark checklist items in `<slug>.plan.md` as work progresses
-  - update `<slug>.acceptance.md` when the criteria change, then update the mapped tests and plan before continuing
-  - review findings, apply fixes, and rerun relevant verification
-  - update the plan file and repeat until done criteria are met; document blockers explicitly without weakening an acceptance criterion or mandatory rule.
+  - analyze the problem and options before implementation
+  - write detailed acceptance criteria in the owning feature specification
+  - map every criterion to automated tests or a documented exception before coding
+  - derive the ordered execution contract in the feature specification and required ADR
+  - include test creation, updates and verification from the start
+  - run the full relevant suite to establish the real baseline once the execution contract is ready
+  - record existing failures, symptoms, suspected causes and fix status in the execution contract
+  - reproduce and fix failures one by one, rerun the tests and update their status
+  - include ordered final validation skills, with each producing a concrete action, artifact or verification outcome
+  - execute one step at a time and track its completion
+  - when criteria change, update the acceptance contract, mapped tests and execution contract before continuing
+  - review findings, apply fixes and rerun relevant verification
+  - repeat until all completion conditions pass; document blockers without weakening an acceptance criterion or mandatory rule
 - Implement code and tests together.
 - Run verification in layers:
   - changed tests
@@ -320,7 +312,7 @@ Local `AGENTS.md` files may tighten these values, but they must not loosen them 
 - Update ADRs when architecture, boundaries, or standards change.
 - Every non-trivial feature doc MUST satisfy `MCAF-REQ-001`: stable `REQ-*` and `AC-*`, explicit ADR decision, multi-agent execution contract when applicable, and requirement-to-test evidence traceability.
 - Every architecture-affecting ADR MUST include its implementation contract and MUST remain `Accepted` until implementation and verification are complete.
-- For non-trivial work, the acceptance criteria file, plan file, feature doc, or ADR MUST document the testing methodology:
+- For non-trivial work, the owning feature specification and required ADR MUST document the testing methodology:
   - what flows are covered
   - how they are tested
   - which commands prove them
@@ -334,7 +326,7 @@ Local `AGENTS.md` files may tighten these values, but they must not loosen them 
 - TDD is the default for new behaviour and bug fixes: write the failing test first, make it pass, then refactor.
 - Bug fixes start with a failing regression test that reproduces the issue.
 - Tests MUST be written from acceptance criteria, not from implementation details.
-- Each `AC-*` criterion in `<slug>.acceptance.md` MUST be covered by one or more automated tests or by an explicit written exception.
+- Each `AC-*` criterion in the owning feature specification MUST be covered by one or more automated tests or by an explicit written exception.
 - Test names, display names, or comments should reference the relevant `AC-*` ID when that improves traceability.
 - Every behaviour change needs new or updated automated tests with meaningful assertions. New tests are mandatory for new behaviour and bug fixes.
 - Tests must prove the real user flow or caller-visible system flow, not only internal implementation details.
@@ -416,6 +408,7 @@ For changes outside existing owner authorization, obtain direction before changi
 - The central KeyLoad K MUST use the canonical true SVG outside the bounded 3D raster buffer so it stays sharp on Retina displays. An SVG wrapper around a bitmap or a CanvasTexture logo does not satisfy this requirement (repeated owner correction 2026-10-03).
 ### Dislikes
 - Repeated permission questions for already authorized work.
+- Working `*.plan.md`, `*.brainstorm.md` and `*.acceptance.md` files MUST NOT be created or committed anywhere in this checkout. Remove existing copies and ignore these patterns without exceptions. Keep durable requirements, acceptance criteria and execution/verification contracts in the owning `docs/Features/` specification and required ADR; agent working notes stay outside the repository. This explicit owner correction on 2026-10-03 supersedes every root/local instruction requiring separate planning files without weakening feature, test, architecture or qualification requirements.
 - The root README MUST NOT accumulate CI run histories, test counts, internal implementation receipts, governance procedures, or package/version dumps. Keep a concise honest development-status statement and link to the canonical status and qualification records instead (owner correction 2026-10-03).
 - GitHub Actions MUST expose exactly three plainly named workflows: CI combines build and ordinary project tests for PR/push/manual checks; Benchmarks runs all load/comparison suites, produces complete authenticated measurements and then qualifies/publishes the website; Release builds the solution, real database images/distribution and packages, then creates a GitHub Release and immutable version tag. Do not split Tests or Website into additional workflows (explicit owner correction 2026-10-03 supersedes the earlier five-workflow layout).
 - Release tags MUST be `v<major>.<minor>.<yyMMdd>.<daily-build>`: major/minor are configured in source, the third component is the UTC date and the fourth starts at 1 each day and increases without tag reuse or overwrite. Build/package/image/manifest identities MUST agree; reruns recover their original reservation. Release automation is authorized to create the corresponding Git tag, GitHub Release and versioned database image/package assets; preserve protections and qualification gates (owner direction 2026-10-03).

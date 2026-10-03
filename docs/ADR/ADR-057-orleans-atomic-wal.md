@@ -52,7 +52,8 @@ and fully verifies real checkpoint bytes, uses the official generated frame
 fixture, checks whole recovered values and authoritative-byte preservation,
 probes released handles, and reopens the same failed-attempt derived tree after
 removing only the corrupt tail to detect premature apply. TASK-WAL-SUCCESSOR-
-TEST/JOIN-R15 in the working plan trace those cases to exact-SHA GitHub gates.
+TEST/JOIN-R15 in this ADR's implementation contract trace those cases
+to exact-SHA GitHub gates.
 This preserving reader fix introduces no format, ACK or serializer change.
 
 Independent source review identified remaining decoded-memory/work admission,

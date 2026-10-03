@@ -1,6 +1,6 @@
 # ADR-040: Static product website, conceptual Three.js and qualified evidence
 
-Status: Implemented for the website scope; exact-H GitHub qualification, automatic publication and strongest final review complete. Date: 2026-10-02. Owner: website lead. Related: REQ-BC-011–018 / AC-BC-011–018, [BenchmarkComparisons](../Features/BenchmarkComparisons.md), [acceptance](../../site-design.acceptance.md), [plan](../../site-design.plan.md), ADR-021/032/034.
+Status: Implemented for the website scope; exact-H GitHub qualification, automatic publication and strongest final review complete. Date: 2026-10-02. Owner: website lead. Related: REQ-BC-011–018 / AC-BC-011–018, [BenchmarkComparisons](../Features/BenchmarkComparisons.md), [acceptance](ADR-040-static-site-threejs-evidence.md), [plan](ADR-040-static-site-threejs-evidence.md), ADR-021/032/034.
 
 ## Context and decision
 
@@ -154,7 +154,7 @@ Related REQ/AC-BC-016/017/024/025: actual run36994330874 proves that historical
 gzip length is not vendor byte identity. The accepted repair preserves original
 vendor/manifest bytes and all fixed identity checks, validates historical
 compression as a positive safe integer, and measures current compression in the
-separate CLI `compression` receipt frozen in site-design.acceptance.md.
+separate CLI `compression` receipt frozen in ADR-040-static-site-threejs-evidence.md.
 
 1. Root records the actual failing positive-build/browser baseline, acceptance
    schema and exact bounded task graph. Strongest contract review must be COMPLETE
@@ -185,8 +185,8 @@ until the owner's subsequent fresh-evidence extension is frozen and qualified.
 ### Fresh-evidence publication implementation contract
 
 The owner's subsequent request introduces REQ/AC-BC-028 in the same canonical
-slice. [Publication brainstorm](../../site-publication.brainstorm.md),
-[acceptance](../../site-publication.acceptance.md) and [plan](../../site-publication.plan.md)
+slice. [Publication brainstorm](ADR-040-static-site-threejs-evidence.md),
+[acceptance](ADR-040-static-site-threejs-evidence.md) and [plan](ADR-040-static-site-threejs-evidence.md)
 preserve the earlier design task's scope records; this new workflow task resumes
 publication implementation. DNS remains excluded. Mandatory measured-source
 checkout is preserved: site/measured SHA fields are separately recorded and equal
@@ -433,7 +433,7 @@ mutation or fake execution. Positive retains every byte/hash with zero empty
 credit; controlled second sessions prove empty-only/anonymous-only/missing/
 non-array/foreign-origin and empty Node rejection even beside valid evidence.
 Ownership, dependencies, commands, terminal states and required evidence are
-tracked in site-publication.plan.md. No public API/data/runtime/dependency
+tracked in ADR-040-static-site-threejs-evidence.md. No public API/data/runtime/dependency
 migration. Rollback restores the coherent parser/reader/tests and previous verified
 public output, retaining failed evidence; this ADR remains Accepted until actual
 publication and complete acceptance evidence exist.

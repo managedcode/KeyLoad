@@ -1,7 +1,7 @@
 # CodeQuality
 
 REQ-CQ-006 maps to AC-CQ-008/009 in
-[quality-gates.acceptance.md](../../quality-gates.acceptance.md) and its working plan,
+this Feature and the ADR-033 execution contract,
 under the accepted ADR-033 numeric extension. Four source-editable enabled error
 rules enforce file/type/function/nesting400/200/50/3 with real Roslyn boundary
 fixtures. Actual numeric coverage, RF3 container collection and a matched numeric
@@ -10,7 +10,7 @@ baseline remain pending; restored collector presence is not coverage proof.
 Developers author executable Roslyn rules in this repository and receive located
 diagnostics in the IDE, compiler and CI artifacts. [ADR-033](../ADR/ADR-033-code-quality.md)
 owns the import and build-policy decision. Detailed measurable acceptance and
-verification cases: [working acceptance](../../code-quality.acceptance.md).
+verification cases: [working acceptance](CodeQuality.md).
 
 ## Requirements and acceptance traceability
 
@@ -26,7 +26,7 @@ verification cases: [working acceptance](../../code-quality.acceptance.md).
 | REQ-CQ-008: started main qualification survives subsequent main submissions within bounded workflow concurrency | AC-CQ-017 / AC-QUAL-001..003 | TASK-QUAL-CI-QUEUE-R9; exact workflow review and live same-group run/SHA/job/native evidence under the ADR033 continuation |
 
 The website candidate's REQ/AC-BC-027 is a bounded REQ-CQ-006 dependency substage,
-owned by TASK-SITE-ANALYZER-COVERAGE-011 in the [site plan](../../site-design.plan.md).
+owned by TASK-SITE-ANALYZER-COVERAGE-011 in the [site plan](../ADR/ADR-040-static-site-threejs-evidence.md).
 Tooling lives under `scripts/Features/CodeQuality/`; tests use new
 SiteAnalyzerCoverage-prefixed files in this slice. The frozen JSON inventory and
 ADR-033 candidate implementation contract require the native collector, immutable
@@ -54,7 +54,7 @@ unblocks final acceptance.
 
 ## Canonical slice map
 
-AC-CQ-017 follows the frozen product-qualification.acceptance.md and plan. Main
+AC-CQ-017 follows the acceptance and execution contract in this Feature. Main
 push/dispatch submissions retain one running and the default one pending workflow
 per existing workflow/ref group; a newer pending submission can replace the prior
 pending one without cancelling the started run. PR replacement retains its prior
@@ -170,5 +170,5 @@ Actual native coverage is889/942lines,472/570branches; KLD0001passes205/224,
 KLD0022fails25/30. Changed production needs fresh native source hashes and
 denominators. SiteTests and final qualification remain pending; source repair
 alone cannot close AC-CQ-009 or AC-BC-027. Exact failed artifacts and joins live
-in the [site plan](../../site-design.plan.md) and
+in the [site plan](../ADR/ADR-040-static-site-threejs-evidence.md) and
 [site status](../implementation/site-design.json).

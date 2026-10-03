@@ -31,7 +31,7 @@ flowchart LR
 
 ## Implementation contract
 
-Requirements REQ-GE-001..006 and AC-GE-001..006 are defined in [GarnetStorageEvaluation](../Features/BenchmarkComparisons/GarnetStorageEvaluation.md) and root garnet-storage-evaluation.acceptance.md. Canonical slice BenchmarkComparisons; frontend N/A because these diagnostics are not yet qualified public service measurements. Existing270-cell comparisons and site publication are unchanged.
+Requirements REQ-GE-001..006 and AC-GE-001..006 are defined in [GarnetStorageEvaluation](../Features/BenchmarkComparisons/GarnetStorageEvaluation.md) and this ADR. Canonical slice BenchmarkComparisons; frontend N/A because these diagnostics are not yet qualified public service measurements. Existing270-cell comparisons and site publication are unchanged.
 
 1. Root freezes criteria/API/task graph and retains actual native full baseline before implementation. Ordered test-first stage GE001-T owns only NEW UnitTests RawStorage-prefixed sources. GE001-E starts after root test review and owns only NEW BenchmarkScenarios RawStorage-prefixed sources. Root owns all shared config/workflow/ADR/status joins.
 2. Frozen internal RawStorageEngineKind/RawStorageCorpus/RawStorageFixture API and public unsealed XML-documented RawStorageBenchmarks generated-consumer fixture are specified in the feature. No new product API. Real public Tsavorite sessions and native ZoneTree factories only; no reflection, vendor copy, unsafe epoch, global serializing gate or fake dependency.
@@ -48,7 +48,7 @@ GE005-V regression input crosses the existing bounded real Node-process boundary
 
 Temporary maintainability exception: the existing398-line benchmarks.yml composition root may grow to at most500lines for the three diagnostic job/input declarations. Root owns extraction of reused setup/measurement code into the new scoped composite action immediately; remaining job composition refactoring must preserve every service/site dependency/test and restore400lines by2026-10-10. This is limited migration debt, not a target-layout exception or permission to suppress diagnostics; all new C#/action/helper files retain ordinary limits.
 
-Task graph/roles/permissions/dependencies/start/join conditions: root garnet-storage-evaluation.plan.md. Workers stop on API/ownership ambiguity and may not expand frozen scope. Root owns final integration/review and authentic CI evidence. Full relevant baseline is the actual observed c241 CI/Benchmarks state plus retained earlier exact-SHA receipts; local builds are explicitly not qualification.
+Task graph/roles/permissions/dependencies/start/join conditions: this ADR's implementation contract. Workers stop on API/ownership ambiguity and may not expand frozen scope. Root owns final integration/review and authentic CI evidence. Full relevant baseline is the actual observed c241 CI/Benchmarks state plus retained earlier exact-SHA receipts; local builds are explicitly not qualification.
 
 ## Migration, rollback and remaining decision
 

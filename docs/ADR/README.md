@@ -103,7 +103,7 @@ flowchart LR
     Proposed --> Decision
 ```
 
-Full coverage/verification: [catalog](../implementation/documentation-coverage.json), [RepositoryGovernance](../Features/RepositoryGovernance.md), [documentation plan](../../documentation-coverage.plan.md). Product tracker залишається canonical status authority. Passed doc links/render чи наявні test methods не виконують product AC; current qualification, power-loss/endurance та advanced capability gaps мають explicit pending evidence.
+Full coverage/verification: [catalog](../implementation/documentation-coverage.json), [RepositoryGovernance](../Features/RepositoryGovernance.md), [documentation plan](../Features/RepositoryGovernance.md). Product tracker залишається canonical status authority. Passed doc links/render чи наявні test methods не виконують product AC; current qualification, power-loss/endurance та advanced capability gaps мають explicit pending evidence.
 
 [ADR-047](ADR-047-embedded-benchmark-host.md) accepts the public embedded scenario
 library and existing typed executable boundary required by BenchmarkDotNet's real

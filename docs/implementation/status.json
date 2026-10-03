@@ -372,8 +372,8 @@
       "docs/Features/BenchmarkComparisons.md",
       "docs/ADR/ADR-034-cluster-comparisons.md",
       "docs/ADR/ADR-050-timeseries-timescale-comparison.md",
-      "timeseries-comparison.acceptance.md",
-      "timeseries-comparison.plan.md",
+      "docs/Features/TimeSeries.md",
+      "docs/ADR/ADR-050-timeseries-timescale-comparison.md",
       "src/KeyLoad.AppHost/BenchmarkResources.cs",
       "tests/KeyLoad.UnitTests/ComparisonHarnessTests.cs",
       "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/",
@@ -612,7 +612,7 @@
     "evidence": [
       "src/KeyLoad.Core/GraphAndSeries.cs",
       "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs",
-      "timeseries-comparison.acceptance.md",
+      "docs/Features/TimeSeries.md",
       "docs/ADR/ADR-050-timeseries-timescale-comparison.md"
     ]
   },
@@ -2360,9 +2360,9 @@
     },
     "ownerPriorities": {
       "SMID": "owner_confirmed_SIMD_2026_10_02_dotNET_intrinsics_first_Rust_only_after_profiling",
-      "SMIDAcceptance": "keyload-project.acceptance.md#AC-011",
+      "SMIDAcceptance": "docs/Features/ResourceExecution.md",
       "operationEfficiency": "system_wide_per_operation_RF3_performance_and_resource_measurements_open_under_AC-010",
-      "operationEfficiencyAcceptance": "keyload-project.acceptance.md#AC-010",
+      "operationEfficiencyAcceptance": "docs/Features/ResourceExecution.md",
       "orleansScale": "request_isolation_RF3_hosts_directory_and_repartitioner_configured_in_source_actual_activation_movement_and_per_operation_server_cost_not_qualified",
       "streamBoundary": "KeyLoad_EventStreams_are_persisted_database_records_no_Orleans_runtime_provider_configured_provider_delivery_restart_backpressure_contract_open",
       "vectorSimd": "five_validation_golden_real_store_cases_pass_each_OS_exactc486_existing_scoring_unchanged_new_validation_blocks_full_hardware_disabled_suite_pending",
@@ -2513,8 +2513,8 @@
       "docs/ADR/ADR-054-central-sql.md",
       "docs/ADR/ADR-055-typed-relational-rows.md",
       "docs/implementation/central-sql.md",
-      "ai-database-sql.acceptance.md",
-      "ai-database-sql.plan.md",
+      "docs/Features/QueryExecution.md",
+      "docs/Features/QueryExecution.md",
       "docs/implementation/ai-sql-qualification-37070004864.json"
     ],
     "remaining": [
@@ -2529,7 +2529,7 @@
     "scope": "Linux-only isolated native engine x1/2/3 nodes x one scenario, common intensive workload, raw worker schema4, authenticated complete aggregation and site regeneration",
     "specification": "docs/Features/BenchmarkComparisons.md#owner2026-10-03-isolated-linux-intensive-comparisons",
     "adr": "docs/ADR/ADR-056-isolated-linux-comparison-cells.md",
-    "plan": "isolated-comparisons.plan.md",
+    "plan": "docs/Features/BenchmarkComparisons.md",
     "sourceReady": [
       "closed270cellPlanner",
       "rawEnvelopeValidatorAndBoundedAggregator",
@@ -2585,7 +2585,7 @@
     "intensiveTimeSeries": {
       "status": "native_pinned_image_feasibility_passed_database_family_pending",
       "adr": "docs/ADR/ADR-059-isolated-intensive-timeseries.md",
-      "plan": "isolated-timeseries.plan.md",
+      "plan": "docs/ADR/ADR-059-isolated-intensive-timeseries.md",
       "cells": 30,
       "preflights": 6,
       "sourceImageProbe": "14_bounded_native_TUnit_source_helpers_and_independent_Linux_workflow",
@@ -2713,7 +2713,7 @@
         "TASK-ISO-038N-IR",
         "TASK-ISO-039-Site"
       ],
-      "contracts": "isolated-comparisons.acceptance.md",
+      "contracts": "docs/Features/BenchmarkComparisons.md",
       "limits": "Full Release/format/governance pass; normal1852/1853 with sole known Result null-vs500 failure; recovery183/analyzer118/RF363 all pass. H114 normal passed, scalar/H12models/native27/270/TimeSeries6/30/site unexecuted. Original snapshot failure ID is absent; replacement prepared/journal-swapped cases passed and remain separate from historical failed case.",
       "sourceRepairReceipt039": "docs/implementation/isolated-source-repairs-039.json"
     },

@@ -19,7 +19,7 @@ all wrong-owner/creator/revoked-principal denials and exact error codes. The wor
 owns this test file only; ADR-038 authority and all product code stay unchanged.
 Lead source review/build and full exact-SHA GitHub tests qualify the correction.
 
-Status: contract Accepted; canonical engine/server/MCP and typed SDK source present, exact-SHA runtime qualification pending. Owner: BlobStorage feature lead, with the KeyLoad integrator owning shared contracts. Decision: [ADR-038](../ADR/ADR-038-chunked-blob-storage.md). Authority: [root policy](../../AGENTS.md). Detailed criteria: [acceptance](../../blob-storage.acceptance.md); execution graph: [plan](../implementation/blob-storage.plan.md).
+Status: contract Accepted; canonical engine/server/MCP and typed SDK source present, exact-SHA runtime qualification pending. Owner: BlobStorage feature lead, with the KeyLoad integrator owning shared contracts. Decision: [ADR-038](../ADR/ADR-038-chunked-blob-storage.md). Authority: [root policy](../../AGENTS.md). Detailed criteria: [acceptance](BlobStorage.md); execution graph: [plan](BlobStorage.md).
 
 ## Призначення, актори та межі
 

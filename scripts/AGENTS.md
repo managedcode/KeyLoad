@@ -38,7 +38,7 @@ No repository skills are installed or applicable to this tooling module. Do not 
 - Also owns `BenchmarkComparisons` tooling under `Features/BenchmarkComparisons/`. Read `../docs/Features/BenchmarkComparisons.md` and `../docs/ADR/ADR-034-cluster-comparisons.md` before editing that slice. Derive all published measurements and chart values from validated successful GitHub Actions JSON; preserve exact source/run/profile links.
 
 ## CodeQuality candidate coverage tooling
-- Owns `Features/CodeQuality/site-analyzer-coverage*.ps1` and its frozen JSON contract under the accepted ADR-033 candidate substage. Read `../docs/Features/CodeQuality.md`, ADR-033 and the site-design plan before implementation.
+- Owns `Features/CodeQuality/site-analyzer-coverage*.ps1` and its frozen JSON contract under the accepted ADR-033 candidate substage. Read `../docs/Features/CodeQuality.md`, ADR-033 and the BenchmarkComparisons design contract in ADR-040 before implementation.
 - Use the existing GitHub runner PowerShell and native MTP collector. Prepare exact source hashes before tests; verify unchanged inventory and raw Cobertura integer counts after the complete process exits. Fail on missing/ambiguous evidence or unmet80/70/90 thresholds; never rewrite collector XML, exclude executable sources or substitute coverage for diagnostic regressions.
 - Parsing/threshold regressions belong to real TUnit AnalyzerTests and run only in GitHub. Controlled XML inputs remain test data and cannot become published measurements. Root alone owns workflow/configuration/contract/docs integration; scripts cannot change them.
 

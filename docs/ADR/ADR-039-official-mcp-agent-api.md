@@ -64,9 +64,9 @@ Root policy вимагає простий agent API та інтегровани�
 Прийнято official SDK 2.2.0, native stateless Streamable HTTP `/mcp`, explicit
 typed version-one catalog нижче та shared canonical Orleans gateway. Простий
 agent API — той самий discoverable tool catalog; окремого engine/session authority
-немає. Acceptance і execution graph: [acceptance](../../mcp-agent-api.acceptance.md),
-[brainstorm](../../mcp-agent-api.brainstorm.md),
-[plan](../implementation/mcp-agent-api.plan.md).
+немає. Acceptance і execution graph: [acceptance](../Features/ClientApi.md),
+[brainstorm](../Features/ClientApi.md),
+[plan](../Features/ClientApi.md).
 
 У Server centrally pin `ModelContextProtocol.AspNetCore` 2.2.0; official integration
 caller uses `ModelContextProtocol.Core` 2.2.0. Source was reviewed at official tag

@@ -1,6 +1,6 @@
 # ADR-056: Isolated Linux comparison cells and complete evidence aggregation
 
-Status: Accepted. Owner: lead integration. Date:2026-10-03. Related: REQ-BC-050..058 / AC-ISO-001..009, [acceptance](../../isolated-comparisons.acceptance.md), [ordered task graph](../../isolated-comparisons.plan.md), [BenchmarkComparisons](../Features/BenchmarkComparisons.md). Refines ADR-007/034/040; no source or qualification claim follows from this decision.
+Status: Accepted. Owner: lead integration. Date:2026-10-03. Related: REQ-BC-050..058 / AC-ISO-001..009, [acceptance](ADR-056-isolated-linux-comparison-cells.md), [ordered task graph](ADR-056-isolated-linux-comparison-cells.md), [BenchmarkComparisons](../Features/BenchmarkComparisons.md). Refines ADR-007/034/040; no source or qualification claim follows from this decision.
 
 ## Decision
 

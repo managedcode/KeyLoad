@@ -35,7 +35,7 @@ Implementation contract, accepted before writes:
 1. Lead owns new policy, this ADR, feature/architecture and central project/solution
    references/inventory/CI/status. W owns only new library source/csproj, existing
    microbenchmark Program/csproj/new typed runner and NEW EmbeddedBenchmark* TUnit
-   sources. Exact permissions/task graph are in embedded-benchmark.plan.md.
+   sources. Exact permissions/task graph are in ADR-047-embedded-benchmark-host.md.
 2. W authors metadata/lifetime/actual-process assertions first, archives source
    and tests-first hashes, then coherent fixture move and ownership/clock/keys/XML
    repairs. Preserve seeding and every timed input/call/MemoryDiagnoser. Dispose

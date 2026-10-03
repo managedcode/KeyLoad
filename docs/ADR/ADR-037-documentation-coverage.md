@@ -1,6 +1,6 @@
 # ADR-037: Повний каталог функцій і архітектурних рішень
 
-Status: Accepted, documentation complete locally and independently reviewed; GitHub delivery pending. Date: 2026-10-02. Owner: KeyLoad documentation lead. Related: [RepositoryGovernance](../Features/RepositoryGovernance.md), REQ-DOCS-001–008 / AC-DOCS-001–008, [acceptance](../../documentation-coverage.acceptance.md), [plan](../../documentation-coverage.plan.md).
+Status: Accepted, documentation complete locally and independently reviewed; GitHub delivery pending. Date: 2026-10-02. Owner: KeyLoad documentation lead. Related: [RepositoryGovernance](../Features/RepositoryGovernance.md), REQ-DOCS-001–008 / AC-DOCS-001–008, [acceptance](../Features/RepositoryGovernance.md), [plan](../Features/RepositoryGovernance.md).
 
 ## Контекст і рішення
 

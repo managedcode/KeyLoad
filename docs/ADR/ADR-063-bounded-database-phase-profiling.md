@@ -5,7 +5,7 @@ Owner: KeyLoad lead. REQ-RESOURCE-003..006 / AC-DBPROF-001..008; related
 [ResourceExecution](../Features/ResourceExecution.md),
 [profile contract](../Features/ResourceExecution/DatabasePhaseProfiling.md),
 [ADR-035](ADR-035-memory-performance.md), [ADR-061](ADR-061-bounded-replica-term-metadata.md).
-Working acceptance/ordered task graph: database-profiling.acceptance.md/.plan.md.
+Requirements and acceptance: [DatabasePhaseProfiling](../Features/ResourceExecution/DatabasePhaseProfiling.md) and this ADR.
 
 ## Decision
 

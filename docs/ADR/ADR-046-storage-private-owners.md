@@ -1,9 +1,9 @@
 # ADR-046: Cohesive node-local storage owners under numeric gates
 
 Status: Accepted. Date: 2026-10-02. Owner: lead storage integrator.
-REQ-STORAGE-008; AC-SQ-001..008 in [acceptance](../../storage-quality.acceptance.md),
-AC-CQ-008 and AC-MP-001/002/012. [Brainstorm](../../storage-quality.brainstorm.md)
-records alternatives/risks; [plan](../../storage-quality.plan.md) is the ordered task
+REQ-STORAGE-008; AC-SQ-001..008 in [acceptance](../Features/StorageRecovery.md),
+AC-CQ-008 and AC-MP-001/002/012. [Brainstorm](../Features/StorageRecovery.md)
+records alternatives/risks; [plan](../Features/StorageRecovery.md) is the ordered task
 graph, exact file ownership, signatures, test matrix and verification join.
 This decision remains Accepted until delivered-source qualification is complete.
 

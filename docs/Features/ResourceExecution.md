@@ -32,7 +32,7 @@ full new exact-SHA GitHub suite qualify the final result.
 
 Status: Accepted contract; implementation and qualification in progress.
 [ADR-035](../ADR/ADR-035-memory-performance.md) owns scoped read/resource/lifetime
-decisions. Full requirements and test strategy: [acceptance](../../memory-performance.acceptance.md).
+decisions. Full requirements and test strategy: [acceptance](../ADR/ADR-035-memory-performance.md).
 
 The staged disposable-cache contract and ordered task graph are accepted in
 [ADR-058](../ADR/ADR-058-orleans-coordinated-cache-memory.md). The common pool and

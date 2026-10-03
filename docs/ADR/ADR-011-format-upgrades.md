@@ -124,7 +124,7 @@ gate, not a source-present retention guarantee.
 ## Implementation, rollout and rollback
 
 REQ-STORAGE-006/007, AC-STORAGE-006/007; REQ/AC-BLOB-001–007. Exact task graph:
-[blob plan](../implementation/blob-storage.plan.md). Root owns private outcome
+[blob plan](../Features/BlobStorage.md). Root owns private outcome
 addition, current replay hook, feature versions and physical-host restore join.
 Workers own disjoint Core/Features/BlobStorage records/normalizer and real unit/
 recovery/RF3 tests. Other format upgrades need their own accepted matrix first.

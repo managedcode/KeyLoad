@@ -79,8 +79,8 @@ Workers receive exact paths, REQ/AC IDs, constructor/result contracts, primary s
 ### Accepted digest-backed container execution stage (2026-10-02)
 
 REQ-BC-001/003/005/009/019/021 and AC-PERF-006/009 map to AC-IMAGE-001..007 in
-[image acceptance](../../docker-comparison-images.acceptance.md), with the ordered
-[task graph](../../docker-comparison-images.plan.md). The integration lead approves
+[image acceptance](../Features/BenchmarkComparisons.md), with the ordered
+[task graph](../Features/BenchmarkComparisons.md). The integration lead approves
 this bounded source stage under the owner's existing full-product authorization;
 the nine-engine, native Single/Replicated and complete six-profile gates stay open.
 
@@ -148,8 +148,8 @@ all required native/topology/profile, coverage and actual verification work join
 ### Accepted caller-composition repair continuation (2026-10-02)
 
 Related REQ-BC-001/002/003/005/009/019/021; AC-PERF-001–009 in
-[acceptance](../../performance-composition.acceptance.md) and
-[ordered task graph](../../performance-composition.plan.md). The lead approves
+[acceptance](ADR-034-cluster-comparisons.md) and
+[ordered task graph](ADR-034-cluster-comparisons.md). The lead approves
 this bounded implementation packet under the existing owner-authorized product
 work. This decision remains Accepted: full nine-engine/native/full-Docker and
 six-profile qualification is still required. No new product public API, schema,

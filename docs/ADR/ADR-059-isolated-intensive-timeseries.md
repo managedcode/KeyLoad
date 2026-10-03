@@ -292,8 +292,8 @@ Status: Accepted staged implementation contract; native evidence pending.
 Owner: KeyLoad integration lead. Canonical feature: BenchmarkComparisons.
 Related: ADR050/052/056, ADR007/034/035/039/054 and CodeQuality ADR033.
 Requirements REQ-BC-059..064; criteria AC-TSI-001..008 in
-[acceptance](../../isolated-timeseries.acceptance.md); ordered roles/join/checklist
-in [plan](../../isolated-timeseries.plan.md). Owner directs serious isolated Linux
+[acceptance](ADR-059-isolated-intensive-timeseries.md); ordered roles/join/checklist
+in [plan](ADR-059-isolated-intensive-timeseries.md). Owner directs serious isolated Linux
 native1/2/3-node workloads, one database/scenario per runner and measured site data.
 
 ## Decision

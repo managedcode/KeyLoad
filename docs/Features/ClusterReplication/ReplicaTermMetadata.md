@@ -4,7 +4,7 @@ Status: term implementation/review and development checks complete; exact40f
 native run discovered18 cases with17 passes and one lifecycle error. Preserving
 storage/clock repairs are in source; their native and performance gates are open.
 Owner: KeyLoad lead. Decision: [ADR-061](../../ADR/ADR-061-bounded-replica-term-metadata.md).
-Working acceptance/plan: `database-hotpath.acceptance.md` / `database-hotpath.plan.md`.
+Requirements and acceptance: this Feature and the ADR-061 implementation contract.
 
 REQ-REP-052: retained-entry term queries reuse only one bounded scalar observation
 at an identical verified physical-store authority/cut, preserving complete strict

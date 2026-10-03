@@ -53,8 +53,8 @@ qualification and the still-planned cluster restore gates.
 cohesive internal ZoneTreeBackupRestore owner under this slice, borrowing the one
 node-local runtime and retaining the existing public facade entry points. Exact
 source-only migration, file ownership, unchanged two-file manifest/identity/paused
-restore recipe and AC-SQ-005/007 joins are in storage-quality.acceptance.md and its
-plan. Existing AC-BACKUP-001/002/003 remain mandatory; this decomposition adds no
+restore recipe and AC-SQ-005/007 joins are in the [StorageRecovery](StorageRecovery.md)
+implementation contract. Existing AC-BACKUP-001/002/003 remain mandatory; this decomposition adds no
 cluster-cut, power-loss, bounded-manifest-memory or performance claim.
 
 ## Current behavior, accepted target, and planned work
@@ -73,7 +73,7 @@ cluster-cut, power-loss, bounded-manifest-memory or performance claim.
 | REQ-BACKUP-002: restore only verified data to a clean target | AC-BACKUP-002 passes when a valid backup restores canonical data to a clean location; missing/tampered files and nonempty or unsafe destinations fail without publishing a usable partial database. | Existing test source: `RecoveryTests.VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch` checks data restore and rejects a backup whose `commands.wal` is corrupted. Cartograph catalog/archive corruption, clean-target/path-safety, and partial-failure cases remain planned. |
 | REQ-BACKUP-003: fence old identity and pause delivery after restore | AC-BACKUP-003 passes when restore produces a different incarnation, sets dispatch paused, and invalidates old cursor/lease identities until explicit operator reconciliation. | Existing `VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch`; planned auth/feed/lease token invalidation and explicit resume integration cases. |
 | REQ-BACKUP-004: restore a declared cluster cut with capability invariants | AC-BACKUP-004 passes when a captured per-partition cut restores document/event/outbox/inbox/queue/group state consistently, reports unavailable history explicitly, and performs no automatic external redelivery before resume. | Planned Docker/Aspire RF3 backup/restore and process-recovery scenarios under KL-042/KL-098; no current test or GitHub artifact establishes this acceptance. |
-| REQ-BACKUP-005: bound local metadata and parse the verified identity region once | AC-BSM-001..005: inclusive16KiB manifest/4KiB identity limits, same-owned-region outer/inner checksum, preserved error/destination/lock ordering and real allocation/restore proof | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), [acceptance](../../bounded-storage-metadata.acceptance.md) and [task graph](../../bounded-storage-metadata.plan.md); Metadata* real-file test source and exact-SHA GitHub qualification pending |
+| REQ-BACKUP-005: bound local metadata and parse the verified identity region once | AC-BSM-001..005: inclusive16KiB manifest/4KiB identity limits, same-owned-region outer/inner checksum, preserved error/destination/lock ordering and real allocation/restore proof | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), [acceptance](../ADR/ADR-048-bounded-storage-metadata.md) and [task graph](../ADR/ADR-048-bounded-storage-metadata.md); Metadata* real-file test source and exact-SHA GitHub qualification pending |
 
 ## Negative and boundary flows
 

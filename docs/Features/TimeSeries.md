@@ -48,7 +48,7 @@ Source-present baseline: sample append/order/dedup і inclusive bounded read. Pl
 
 REQ-SERIES-007 / AC-SERIES-007 map to REQ-BC-026 and AC-TSC-001..006 under
 [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md) and the
-[time-series comparison acceptance](../../timeseries-comparison.acceptance.md).
+[time-series comparison acceptance](../ADR/ADR-050-timeseries-timescale-comparison.md).
 The profile exercises KeyLoad's existing persisted RF3 sample API, a real
 TimescaleDB hypertable, and the published `ManagedCode.TimeSeries` 10.0.0 library
 for in-memory bucket aggregation at the original baseline. The current central
@@ -80,8 +80,8 @@ flowchart LR
 
 [ADR-052](../ADR/ADR-052-timeseries-bounded-aggregates.md) is Accepted before
 implementation. It freezes exact DTOs, boundary/overflow/budget/security rules,
-dependencies, ordered task graph, disjoint ownership and rollback. Working
-acceptance/plan are timeseries-aggregates.acceptance.md and its plan; durable
+dependencies, ordered task graph, disjoint ownership and rollback. Acceptance
+and execution criteria live in this Feature and the ADR; the durable
 normative contract remains the ADR and this Feature. The comparison baseline's
 existing API statement above describes ADR-050; it does not erase these additive
 product APIs or relabel caller-folded benchmark statistics as server measurements.
