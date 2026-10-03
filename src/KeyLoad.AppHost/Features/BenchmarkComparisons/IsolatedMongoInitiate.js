@@ -114,16 +114,18 @@ function printDiagnostic() {
 }
 
 async function admin(host) {
-    if (clients.has(host)) return clients.get(host);
     rememberDiagnostic(MongoDiagnosticStage.authentication, host, null);
-    const connection = await new Mongo('mongodb://' + host + '/admin?directConnection=true&serverSelectionTimeoutMS=2000&connectTimeoutMS=2000&socketTimeoutMS=2000');
-    const database = connection.getDB('admin');
+    let database = clients.get(host);
+    if (!database) {
+        const connection = await new Mongo('mongodb://' + host + '/admin?directConnection=true&serverSelectionTimeoutMS=2000&connectTimeoutMS=2000&socketTimeoutMS=2000');
+        database = connection.getDB('admin');
+        clients.set(host, database);
+    }
     const authenticated = await database.auth(username, password);
     rememberDiagnostic(MongoDiagnosticStage.authentication, host, authenticated);
     if (authenticated.ok !== 1) {
         throw new Error('MongoNativeAuthenticationFailed');
     }
-    clients.set(host, database);
     return database;
 }
 

@@ -237,3 +237,36 @@ No timeout may detach a still-live original client Task. Host lifetime includes
 readiness; cancellation/drain/late-success rejection and max16 live decoded
 responses require genuine native SDK/Npgsql evidence. Pure index/ledger/hash/
 SQLSTATE/sequence/summary tests are a separate source gate and cannot replace it.
+
+
+AC-TSI-004/008 TS007B failure boundary: fatal memory/stack/access violations
+propagate after cancellation and observation of all owned loops; ordinary
+failures retain exact compact attempts. Deadline state is captured at actual
+observed call completion, before post-call verification. Pure filter tests
+are algorithm proof; native cancellation/response-lifetime proof is mandatory.
+
+
+TS007B-D AC-TSI-004/008: original setup and readback task faults must retain
+actual native codes while recording own30s deadline versus caller cancellation
+correctly at observed completion, including OCE and late native errors. Fatal
+causes propagate. Pure closed outcome/error tests and real later native blocking/
+cancel gates are required; no fake target/clock or detached task qualification.
+
+
+TS007B-D AC-TSI-004 refinement: cancellation observed before invocation produces
+NotStarted and zero latency with no target call; after the accepted entry
+decision an actual caller attempt may fail/cancel. Pure entry-state proof and
+later genuine native cancellation-boundary evidence are required. Percentile
+goldens must distinguish all-attempt from successes-only ranks by failure
+placement, including p50/p95/p99.
+
+
+TS007B-D AC-TSI-004/008: nonfatal final-readback cancellation/failure must
+retain completed/drained phase wall/peaks/attempts with FinalVerified=false and
+actual failure. Unknown or uncompleted phases remain missing; native failure
+does not permit fabricated success or additional readback allowance.
+TS007B-D root review also requires preserving a successfully observed warmup
+when measured-entry cancellation or empty-series readback fails. Return the
+actual warmup and failure, with no invented measured phase. Pure phase evidence
+tests plus source review cover the retention rule; actual SDK/Npgsql cancelled
+entry/readback/healthy followup remains a native qualification requirement.

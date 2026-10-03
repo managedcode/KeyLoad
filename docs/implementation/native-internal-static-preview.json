@@ -1,45 +1,107 @@
 {
-  "kind": "isolated-compiler-only-preview",
-  "recordedAt": "2026-10-03T02:51:08.845170+00:00",
+  "kind": "joined-compiler-only-native-review-snapshot",
+  "recordedAt": "2026-10-03T04:26:28.557061+00:00",
   "framework": "net10.0",
   "orleansVersion": "10.3.1",
   "configuration": "Release",
+  "projectsCompiled": 25,
   "warnings": 0,
   "errors": 0,
-  "command": "dotnet build NativeCompilerPreview.csproj --no-restore --configuration Release --disable-build-servers -m:1",
-  "scope": "Nine candidate native codec files, existing alias constants, attributed Abstractions closure and operation Id5/result Id3 joins in a separate temporary compiler project.",
-  "reviewPatchSha256": "71a3df8fdfe2732e96cd389497839ed496e1e298480268e1069430e345ef904c",
-  "compiledCodecFiles": {
-    "JsonElementSurrogate.cs": "51e3744e51980047a9b6f97fda2bc81e694763d6abae576315a407c499633487",
-    "JsonElementSurrogateConverter.cs": "d3021cb7bdf68cfb4a9f3ad4003b8a42b2e72d2a09c324cde6202dae43dfe819",
-    "NativeContractValidation.cs": "7cd03c0002cd1bf4ab0645ccd4da29e1dd6f819ab2633e7f2151dfdf1f428608",
-    "NativeCountingWriter.cs": "bc486426507afb2406ed8816dc36aa1f7976601cffbf9ff7729b201344be1875",
-    "NativePayload.cs": "580e77a5cfed7c41d5964c2c15d43f36eebc689035dd1ad4773a65ea7d848d1e",
-    "NativePayloadInspectionCodec.cs": "6af4d51f218cee544324cb60c24881ed9969fd05708d5f4ef45fff1077203e1d",
-    "NativePayloadSyntax.cs": "64e3de011aae9ed1cc3c2a9a73c54fbcc509c14768456690428ccc1c1e90067f",
-    "NativeSerialization.cs": "b8b06367c510d4ec9c1be854e62ef0c63f6f43a690d38d5f7ab2efa0b22cc0c3",
-    "NativeSerializerProviders.cs": "0a57dcd39a414aac17d4737961dd8504be766a808f3c768517ea52aeabfa2dc9"
+  "ownerAnalyzersEnabledInThisPreview": true,
+  "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --disable-build-servers -m:1",
+  "compilerLogSha256": "10a0a07667597cc49f5dd58eb6287beb19ad3a17dacfd01386c691439d246e8b",
+  "formatter": {
+    "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+    "exitCode": 0,
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
+  "sourceScope": "Exact separate TMP source closure only; later independent owner changes are excluded and require fresh rebase/build before installation.",
+  "review": {
+    "directory": "/private/tmp/keyload-native-final-review-v3",
+    "ownerHeadAtCapture": "2ecbeee4d7b969129b93346d2863d50072976a68",
+    "patchSha256": "0cf3f82068c9deeb596199ca96698a430371ba08fdd5fd32ccdf4c7d887af4e0",
+    "sourceClosureSha256": "a75b363ed0d0869c7700fa3129499571ec1b27f01f8f4f2843ea1129af80dd02",
+    "capturedSourceFiles": 1687,
+    "reviewDeltaPaths": 279,
+    "excludedConcurrentPaths": 24,
+    "readOnlyApplyCheck": "passed_at_capture"
+  },
+  "stagedFixtureDeclarations": {
+    "nativeFiles": 106,
+    "testDeclarations": 296,
+    "argumentsAttributes": 301,
+    "executed": false,
+    "meaning": "Source inventory only; not test passes or runtime case qualification."
+  },
+  "joinedSource": [
+    "Shared generated codec/JsonElement surrogate and full attributed DTO joins",
+    "Core native records/scalars/accounting/authority and KLT2 claims, including ChangeFeedClaims",
+    "Replica native wire/state/snapshots, owned authentication and before-admission joins",
+    "Storage metadata/checkpoint/identity/backup fences and actual-file fixtures",
+    "Native grain/membership/results, HTTP/MCP principal binding and retained admission accounting",
+    "Public-input null collection-element compatibility and known official enum backing-header fixes"
+  ],
   "ownerInstallation": false,
   "runtimeExecuted": false,
   "testsExecuted": false,
   "expandedQualification": false,
-  "stagedCodecCases": 42,
-  "blockers": [
-    "Automatic approval rejected shared-codec persisted-format installation.",
-    "Automatic approval rejected KLT2 old-token invalidation.",
-    "Automatic approval rejected mixed-version inter-node binary rollout.",
-    "Strict native pre-admission/security joins and full integration remain incomplete.",
-    "Offline conversion is not delivered; Compact cannot convert opaque record values.",
-    "Exact-source normal/scalar/recovery/analyzer/RF3 gates remain required."
-  ],
-  "ownerAnalyzersEnabledInThisPreview": false,
   "activeCheckout": {
-    "runtimeMigration": "held pending direct format/rollout consent",
-    "preservationPatch": "/private/tmp/keyload-native-checkout-hold/preserve-applied.patch",
-    "heldRuntimeFiles": 52,
+    "runtimeMigration": "Previous runtime formats retained under the already executed source hold; dependent native calls are not installed.",
+    "holdStatus": "executed",
     "valueOperandAttributesHeld": true,
     "qualifiedWalSourceChangedByHold": false,
     "productTestsExecuted": false
+  },
+  "blockers": [
+    "Direct consent for persisted formats, KLT2 old-token invalidation and homogeneous replica rollout after automatic approval rejection",
+    "Qualified offline old-store conversion and reverse/rollback tooling; Compact preserves opaque values and is not conversion",
+    "Full nested native type/reference/default/count/decoded-memory/work bounds",
+    "Exact-source native normal/scalar/recovery/analyzer/RF3 GitHub qualification",
+    "Measured performance, allocation and fault evidence"
+  ],
+  "historicalIsolatedCodecPreview": {
+    "kind": "isolated-compiler-only-preview",
+    "recordedAt": "2026-10-03T02:51:08.845170+00:00",
+    "framework": "net10.0",
+    "orleansVersion": "10.3.1",
+    "configuration": "Release",
+    "warnings": 0,
+    "errors": 0,
+    "command": "dotnet build NativeCompilerPreview.csproj --no-restore --configuration Release --disable-build-servers -m:1",
+    "scope": "Nine candidate native codec files, existing alias constants, attributed Abstractions closure and operation Id5/result Id3 joins in a separate temporary compiler project.",
+    "reviewPatchSha256": "71a3df8fdfe2732e96cd389497839ed496e1e298480268e1069430e345ef904c",
+    "compiledCodecFiles": {
+      "JsonElementSurrogate.cs": "51e3744e51980047a9b6f97fda2bc81e694763d6abae576315a407c499633487",
+      "JsonElementSurrogateConverter.cs": "d3021cb7bdf68cfb4a9f3ad4003b8a42b2e72d2a09c324cde6202dae43dfe819",
+      "NativeContractValidation.cs": "7cd03c0002cd1bf4ab0645ccd4da29e1dd6f819ab2633e7f2151dfdf1f428608",
+      "NativeCountingWriter.cs": "bc486426507afb2406ed8816dc36aa1f7976601cffbf9ff7729b201344be1875",
+      "NativePayload.cs": "580e77a5cfed7c41d5964c2c15d43f36eebc689035dd1ad4773a65ea7d848d1e",
+      "NativePayloadInspectionCodec.cs": "6af4d51f218cee544324cb60c24881ed9969fd05708d5f4ef45fff1077203e1d",
+      "NativePayloadSyntax.cs": "64e3de011aae9ed1cc3c2a9a73c54fbcc509c14768456690428ccc1c1e90067f",
+      "NativeSerialization.cs": "b8b06367c510d4ec9c1be854e62ef0c63f6f43a690d38d5f7ab2efa0b22cc0c3",
+      "NativeSerializerProviders.cs": "0a57dcd39a414aac17d4737961dd8504be766a808f3c768517ea52aeabfa2dc9"
+    },
+    "ownerInstallation": false,
+    "runtimeExecuted": false,
+    "testsExecuted": false,
+    "expandedQualification": false,
+    "stagedCodecCases": 42,
+    "blockers": [
+      "Automatic approval rejected shared-codec persisted-format installation.",
+      "Automatic approval rejected KLT2 old-token invalidation.",
+      "Automatic approval rejected mixed-version inter-node binary rollout.",
+      "Strict native pre-admission/security joins and full integration remain incomplete.",
+      "Offline conversion is not delivered; Compact cannot convert opaque record values.",
+      "Exact-source normal/scalar/recovery/analyzer/RF3 gates remain required."
+    ],
+    "ownerAnalyzersEnabledInThisPreview": false,
+    "activeCheckout": {
+      "runtimeMigration": "held pending direct format/rollout consent",
+      "preservationPatch": "/private/tmp/keyload-native-checkout-hold/preserve-applied.patch",
+      "heldRuntimeFiles": 52,
+      "valueOperandAttributesHeld": true,
+      "qualifiedWalSourceChangedByHold": false,
+      "productTestsExecuted": false
+    }
   }
 }

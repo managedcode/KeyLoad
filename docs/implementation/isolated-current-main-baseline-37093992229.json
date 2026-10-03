@@ -1,0 +1,536 @@
+{
+  "schemaVersion": 1,
+  "state": "original_current_main_failure_diagnosis_preserved_not_qualified",
+  "run": {
+    "id": 37093992229,
+    "run_attempt": 1,
+    "head_sha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+    "head_branch": "main",
+    "status": "completed",
+    "conclusion": "failure",
+    "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229",
+    "created_at": "2026-10-03T03:40:30Z",
+    "updated_at": "2026-10-03T04:13:00Z"
+  },
+  "jobs": [
+    {
+      "id": 111123331918,
+      "name": "comparison-plan",
+      "run_attempt": 1,
+      "head_sha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/job/111123331918"
+    },
+    {
+      "id": 111123331977,
+      "name": "verify (ubuntu-latest)",
+      "run_attempt": 1,
+      "head_sha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/job/111123331977"
+    },
+    {
+      "id": 111123331985,
+      "name": "docker-rf3",
+      "run_attempt": 1,
+      "head_sha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/job/111123331985"
+    },
+    {
+      "id": 111123332034,
+      "name": "analyzer-rules",
+      "run_attempt": 1,
+      "head_sha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/job/111123332034"
+    },
+    {
+      "id": 111125329540,
+      "name": "comparison-images",
+      "run_attempt": 1,
+      "head_sha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/job/111125329540"
+    },
+    {
+      "id": 111125330276,
+      "name": "preflight / ${{ matrix.id }}",
+      "run_attempt": 1,
+      "head_sha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/job/111125330276"
+    },
+    {
+      "id": 111125330979,
+      "name": "case / ${{ matrix.id }}",
+      "run_attempt": 1,
+      "head_sha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/job/111125330979"
+    },
+    {
+      "id": 111125331222,
+      "name": "comparison-aggregate",
+      "run_attempt": 1,
+      "head_sha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/job/111125331222"
+    },
+    {
+      "id": 111125331586,
+      "name": "case / ${{ matrix.id }}",
+      "run_attempt": 1,
+      "head_sha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/job/111125331586"
+    }
+  ],
+  "reports": [
+    {
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "commitSha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "sha256": "cf1283a39cdfd0938b43e7b4f62cc2f326dca1802037f90f8147e05b64a941f5",
+      "bytes": 354807
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "commitSha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "summary": {
+        "total": 1539,
+        "passed": 1522,
+        "failed": 17,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "sha256": "4d33c4386113e12a5315b781d5845fa77819627aaad429a397234eb6502479f1",
+      "bytes": 4724514
+    },
+    {
+      "assembly": "KeyLoad.RecoveryTests",
+      "commitSha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "summary": {
+        "total": 164,
+        "passed": 164,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "sha256": "9aafc15d25cc1ffb60a247c8c9d4b26ff5635d81a5cbd960200a508681a8207e",
+      "bytes": 470499
+    },
+    {
+      "assembly": "KeyLoad.IntegrationTests",
+      "commitSha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "summary": {
+        "total": 63,
+        "passed": 62,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "sha256": "c3c780d01a68dd5feb71c0a59a31ae4120ed06cb421bd787f950849801a6bb31",
+      "bytes": 1085082
+    }
+  ],
+  "originalFailures": [
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheCoherenceTests",
+      "methodName": "SameCutCompactionRetainsWarmEntriesButSnapshotReplacementAndReopenAreCold",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCoherenceTests.cs",
+      "lineNumber": 63
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheCoherenceTests",
+      "methodName": "StagedPutDeleteResetAndRejectedCompilerCannotWarmOrChangeCommittedValues",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCoherenceTests.cs",
+      "lineNumber": 35
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheCoherenceTests",
+      "methodName": "ChangedApplyInvalidatesAWhileUnrelatedWarmBRemains",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCoherenceTests.cs",
+      "lineNumber": 14
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheFillLifetimeTests",
+      "methodName": "DuplicateConcurrentFillsKeepBothCandidatesChargedAndReleaseTheLoser",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFillLifetimeTests.cs",
+      "lineNumber": 13
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheFillLifetimeTests",
+      "methodName": "PinnedLruVictimStaysChargedAndNewValueFallsBackToNative",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFillLifetimeTests.cs",
+      "lineNumber": 65
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheReadTests",
+      "methodName": "BorrowedWarmReadPreservesLogicalObserverChargeAndCapturedKeyMutationCannotRebindFill",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheReadTests.cs",
+      "lineNumber": 49
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheReadTests",
+      "methodName": "ColdOwnedReadWarmsExactKeyAndWarmOwnedReadReturnsIndependentBytes",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheReadTests.cs",
+      "lineNumber": 14
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheReadTests",
+      "methodName": "EmptyPositiveValueWarmsWhileMissingAndTombstoneRemainNativeMisses",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheReadTests.cs",
+      "lineNumber": 79
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheCapacityTests",
+      "methodName": "OversizedKeyValueAndUnavailableIndexReturnNativeBytesWithoutRetention",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs",
+      "lineNumber": 10
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheCapacityTests",
+      "methodName": "TwoStoresShareTheExactPoolEntryCapAndResumeAdmissionAfterOwnerDisposal",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs",
+      "lineNumber": 50
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheCapacityTests",
+      "methodName": "ClearAndDisableKeepIndexChargeUntilActualStoreDisposal",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs",
+      "lineNumber": 78
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheCapacityTests",
+      "methodName": "SeventeenPinnedVictimsBoundOneAdmissionToSixteenAttempts",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs",
+      "lineNumber": 100
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheLifetimeTests",
+      "methodName": "DisableDuringPinnedBorrowRetiresEntryUntilBorrowerReleases",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheLifetimeTests.cs",
+      "lineNumber": 47
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheLifetimeTests",
+      "methodName": "ReaderAndObserverFailuresReleasePinsAndCandidatesBeforeHealthyReads",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheLifetimeTests.cs",
+      "lineNumber": 11
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheDeletionTests",
+      "methodName": "WarmDeleteMissesNativeTwiceThenDifferentReinsertIsColdAndWarmsCorrectly",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheDeletionTests.cs",
+      "lineNumber": 11
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreeCoordinatedPointCacheReadTests",
+      "methodName": "ReadyReceiptIsIdempotentAndWarmOwnedReadsReturnIndependentCopies",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreeCoordinatedPointCacheReadTests.cs",
+      "lineNumber": 12
+    },
+    {
+      "assembly": "KeyLoad.UnitTests",
+      "className": "ZoneTreePointCacheAuthorizationTests",
+      "methodName": "WarmRawPrincipalAndCredentialBytesNeverBypassExpiryOrRevocationChecks",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheAuthorizationTests.cs",
+      "lineNumber": 20
+    },
+    {
+      "assembly": "KeyLoad.IntegrationTests",
+      "className": "ClusterTests(ClusterFixture)",
+      "methodName": "ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites",
+      "status": "error",
+      "sourceRelativePath": "tests/KeyLoad.IntegrationTests/ClusterTests.cs",
+      "lineNumber": 17
+    }
+  ],
+  "unitDiagnosis": {
+    "identityRejected": 16,
+    "distinctTypedAssertionFailure": 1,
+    "typedAssertionInnerCause": "TUnit implicit conversion rejects Byte to Int32 for ownedFirst[0].IsEqualTo(77), exact source line36. Native cache value corruption is not proved.",
+    "identityCauseLimit": "All16 preserved native errors are ZoneTreeIdentityFile.Validate:49 via new fixture OpenStoreAt:58. Report establishes identity rejection, not performance/cache correctness failure."
+  },
+  "rf3Diagnosis": {
+    "test": "ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites",
+    "originalOutcome": "UnknownWriteOutcome",
+    "sourceOperation": "LeaderLossScenario.RetryCommandAndProcessQueueAsync:162 asserts queue ReceiveAsync success after command retry and document Get; exact source retained.",
+    "traceId": "f07897005e09b399effd50235d2a543c",
+    "httpTimeline": [
+      {
+        "spanId": "ab78f03dbe46b1b5",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:20.096631+00:00",
+        "durationMs": 17.6678,
+        "httpStatus": "503",
+        "url": "http://localhost:16254/v1/status"
+      },
+      {
+        "spanId": "bc12a0ea7dc2f902",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:20.364677+00:00",
+        "durationMs": 12.4697,
+        "httpStatus": "503",
+        "url": "http://localhost:16254/v1/status"
+      },
+      {
+        "spanId": "1c2c4d58994398b1",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:20.627924+00:00",
+        "durationMs": 5.7842,
+        "httpStatus": "503",
+        "url": "http://localhost:16254/v1/status"
+      },
+      {
+        "spanId": "60660a7878ea558d",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:20.883524+00:00",
+        "durationMs": 11.3845,
+        "httpStatus": "200",
+        "url": "http://localhost:16254/v1/status"
+      },
+      {
+        "spanId": "59aa86f1da1d8bce",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:20.897464+00:00",
+        "durationMs": 14.8522,
+        "httpStatus": "200",
+        "url": "http://localhost:16254/v1/commands"
+      },
+      {
+        "spanId": "16c41ad4700d21b1",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:20.912818+00:00",
+        "durationMs": 8.7191,
+        "httpStatus": "200",
+        "url": "http://localhost:16254/v1/documents/get"
+      },
+      {
+        "spanId": "95cbdd0e9bb90d84",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:20.923391+00:00",
+        "durationMs": 4705.346,
+        "httpStatus": "503",
+        "url": "http://localhost:16254/v1/queues/receive"
+      },
+      {
+        "spanId": "b5057181f293cdae",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:25.638401+00:00",
+        "durationMs": 1.3366,
+        "httpStatus": "200",
+        "url": "https://[::1]:45405/apis/usvc-dev.developer.microsoft.com/v1/containers/keyload-6ab215aef7ae40768e31092d08db4c3d-node3"
+      },
+      {
+        "spanId": "8a8d5db748b9f38c",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:25.640172+00:00",
+        "durationMs": 0.7379,
+        "httpStatus": "200",
+        "url": "https://[::1]:45405/apis/usvc-dev.developer.microsoft.com/v1/containers/keyload-6ab215aef7ae40768e31092d08db4c3d-node3"
+      },
+      {
+        "spanId": "cdf4153bef26bb29",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:25.765499+00:00",
+        "durationMs": 1.2497,
+        "httpStatus": "200",
+        "url": "https://[::1]:45405/apis/usvc-dev.developer.microsoft.com/v1/containers/keyload-6ab215aef7ae40768e31092d08db4c3d-node3"
+      },
+      {
+        "spanId": "34526eff1793aee8",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:25.767195+00:00",
+        "durationMs": 0.8901,
+        "httpStatus": "200",
+        "url": "https://[::1]:45405/apis/usvc-dev.developer.microsoft.com/v1/containers/keyload-6ab215aef7ae40768e31092d08db4c3d-node3"
+      },
+      {
+        "spanId": "8bce349cc899ea75",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:26.036864+00:00",
+        "durationMs": 1.0175,
+        "httpStatus": "404",
+        "url": "https://[::1]:45405/apis/usvc-dev.developer.microsoft.com/v1/containers/keyload-6ab215aef7ae40768e31092d08db4c3d-node3"
+      },
+      {
+        "spanId": "dddd8349a512e886",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:26.039221+00:00",
+        "durationMs": 2.1254,
+        "httpStatus": "201",
+        "url": "https://[::1]:45405/apis/usvc-dev.developer.microsoft.com/v1/containers"
+      },
+      {
+        "spanId": "8d16ca5e659aeb97",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:28.518283+00:00",
+        "durationMs": 43.5624,
+        "httpStatus": "200",
+        "url": "http://localhost:16254/v1/status"
+      },
+      {
+        "spanId": "e79028ea2f2e0258",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:28.562645+00:00",
+        "durationMs": 8.166,
+        "httpStatus": "200",
+        "url": "http://localhost:16256/v1/status"
+      },
+      {
+        "spanId": "87865a486494b4a3",
+        "traceId": "f07897005e09b399effd50235d2a543c",
+        "startedAt": "2026-10-03T04:06:28.570916+00:00",
+        "durationMs": 180.3115,
+        "httpStatus": "200",
+        "url": "http://localhost:16258/v1/status"
+      }
+    ],
+    "nativeObservedEvent": {
+      "path": "/private/tmp/keyload-newbaseline-37093992229-extracted/rf3-qualification/artifacts/qualification/rf3-failure-0002.log",
+      "time": "2026-10-03T04:06:25.6274347Z",
+      "node": "node1",
+      "requestId": "0544eef7-07b8-4d27-bec5-b9efdf91c33f",
+      "stage": "Initial Orleans RPC",
+      "classification": "Cancellation",
+      "code": "UnknownWriteOutcome"
+    },
+    "nativeCauseLimit": "Original trace proves queue receive HTTP503 and the assertion. Matching fixture/time native log reports RPC cancellation, but request UUID is not linked in HTTP spans and full cause/term/quorum/apply cuts are absent. Capped8190-byte failure logs mix later suite activity. No deeper cause or cache/serializer/comparison-repair attribution is established.",
+    "missingDiagnostics": [
+      "Original RPC exception/cancellation-token source at receive completion",
+      "Receive command UUID correlation to server request trace",
+      "Leader term, quorum/commit/apply indices at failure",
+      "Complete relevant Orleans directory/transport state near04:06:20-25"
+    ]
+  },
+  "skippedGates": {
+    "scalarUnit": "original verify step10 skipped; no scalar qualification",
+    "comparisonImagesJob": 111125329540,
+    "reason": "exact-SHA workflow comparison-images needs verify and comparison-plan; verify failed. Job metadata conclusion skipped; no comparison model/native-case qualification from this run.",
+    "downstream": "preflight, case, comparison-aggregate jobs skipped"
+  },
+  "artifacts": [
+    {
+      "id": 11264341178,
+      "name": "docker-rf3-image-evidence",
+      "size_in_bytes": 32460,
+      "digest": "sha256:9501b6f251058c2d9f5d1cb49ba71c851330273c1859116f0814991c85e49cfa",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/artifacts/11264341178",
+      "downloaded": true,
+      "actualSha256": "sha256:9501b6f251058c2d9f5d1cb49ba71c851330273c1859116f0814991c85e49cfa",
+      "providerDigestMatched": true
+    },
+    {
+      "id": 11264321186,
+      "name": "code-quality-docker-rf3",
+      "size_in_bytes": 778484,
+      "digest": "sha256:ece1c4ff8b48557154de9d363cf391ae4b1556356c840e19f4b917c92a1ca018",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/artifacts/11264321186",
+      "downloaded": false
+    },
+    {
+      "id": 11264311688,
+      "name": "code-quality-ubuntu-latest",
+      "size_in_bytes": 1527678,
+      "digest": "sha256:0640a02b76888d7948499a7ae9735b2b6a17cc01168441de223a1a7968ec9484",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/artifacts/11264311688",
+      "downloaded": false
+    },
+    {
+      "id": 11264001594,
+      "name": "docker-rf3-qualification",
+      "size_in_bytes": 484722,
+      "digest": "sha256:ec959ca3bada1bceebb5a8ffc7e0c7a20f3f27608616ec92fd16caa885dccb55",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/artifacts/11264001594",
+      "downloaded": true,
+      "actualSha256": "sha256:ec959ca3bada1bceebb5a8ffc7e0c7a20f3f27608616ec92fd16caa885dccb55",
+      "providerDigestMatched": true
+    },
+    {
+      "id": 11263922245,
+      "name": "test-results-ubuntu-latest",
+      "size_in_bytes": 1158767,
+      "digest": "sha256:3fc42bd71ee5f3557bdba056c769d3a62fa2c8f3d8cadc7d3ff04a635b099c4b",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/artifacts/11263922245",
+      "downloaded": true,
+      "actualSha256": "sha256:3fc42bd71ee5f3557bdba056c769d3a62fa2c8f3d8cadc7d3ff04a635b099c4b",
+      "providerDigestMatched": true
+    },
+    {
+      "id": 11262979132,
+      "name": "comparison-plan",
+      "size_in_bytes": 5140,
+      "digest": "sha256:383cbb1ff615b74ab54d05152cd6911f03eede8754894b6d19a3b571379a757e",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/artifacts/11262979132",
+      "downloaded": false
+    },
+    {
+      "id": 11262794638,
+      "name": "analyzer-rule-evidence",
+      "size_in_bytes": 207326,
+      "digest": "sha256:56eff8b5cb77dadd90d3b8e5aeb4ebe0ef3297dcf14f5811b17e8b862d7d8602",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229/artifacts/11262794638",
+      "downloaded": false
+    }
+  ],
+  "originalEvidencePacketSha256": "acd1ccffb27bf3b2abdb451876c285c753f2374dbf666d5d04a5765431b95ed0",
+  "limits": "Build and formatter pass; scalar and downstream native comparisons skipped. Current uncommitted cache fixture and LeaderLoss repair scopes are preserved outside this isolated-comparison change. No deeper queue-receive quorum/term/apply cause or native performance claim is inferred."
+}

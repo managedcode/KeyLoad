@@ -1013,3 +1013,294 @@ The job's retained original results/logs must show every selected case executed
 at the repaired SHA before the dependent27 preflights and full270 can qualify.
 Rollback removes only this additive selection step with its coherent test unit.
 ADR remains Accepted until every source and actual runtime gate exists.
+
+
+## TASK-ISO-026K accepted complete canonical payload oracle repair
+
+REQ-BC-053/055 and AC-ISO-004/005 retain deliberate unsorted input and exact
+SDK/official MCP/SQL event/queue parity. Genuine2f/run37093197474/attempt1
+KeyLoad RF1 preflight111120507599 completes all50000 reads without failures,
+then fails VerifyStreamAsync: returned payload is independently specified
+InitialStoredJson, while the remaining Messaging oracle expects InitialJson.
+Original worker artifact11262763634 has SHA256
+90e7891725df6bd415431e09e6259b87152b582bb4acc9db7f9b677f071345f9.
+Core Events and Messaging use JsonData.Validate for stored payloads. The previous
+document-only assertion repair missed stream/inspection/delivery expectations.
+
+Root owns the narrow existing IsolatedKeyLoadPublicRegressionMessaging.cs
+change: all three returned stream/inspection/delivery payload assertions use
+the independent InitialStoredJson constant. Submitted AppendEvents and
+EnqueueMessage inputs stay InitialJson. Do not normalize actual output, change
+product canonicalization, skip any protocol, weaken exact identity/head/receipt/
+lease/cut/state/error assertions or touch unrelated serialization work. Search
+every scenario.InitialJson/UpdatedJson use and classify request versus returned
+output; no other returned noncanonical expectation may remain. The original
+real RF1 failure is the failing regression; original native public SDK/MCP/SQL
+flows on all1/2/3 topologies are the acceptance-derived rerun proof. No fake/pure
+mirror oracle test or local runtime qualification. Ordered stages: preserve
+original failure/sample bytes, root source correction/static/build/format,
+scoped stable commit/push, exact-SHA full required gates and native1/2/3 public
+regressions. No persistence/API migration; rollback reverts only this coherent
+test-oracle correction. Root reviews every diff; ADR remains Accepted until
+all native/evidence tasks complete.
+
+
+## TASK-ISO-026R accepted native Redis readiness repair
+
+REQ-BC-052/055, AC-ISO-002/003/006. Original2f run37093197474 jobs
+111120507514/111120507593 fail the strict InfoLink identity predicate while
+actual native replicas are still handshaking; their original logs prove full
+sync completes about1.6seconds later. Native host/port identity matches, and
+no credential/DNS defect is established. Preserve those original failures.
+
+Root accepts the existing60second/200millisecond copy-observation barrier
+before the unchanged strict final INFO/ROLE/AOF/identity checks. Poll native
+INFO replication and require actual link-up before issuing direct GET, to avoid
+reading during RDB loading. Do not infer readiness from TCP or wait a fixed
+sleep. Native failures, caller cancellation, wrong role/host/port/version/runID,
+AOF or missing copies remain failures; no measured retry, new timeout budget,
+configuration change or weakened predicate. Final identity unchanged checks
+and WAITAOF measurement remain intact. No persistence/public contract migration.
+
+Disjoint gates_audit worker owns only RedisReplicaProof.cs and
+RedisCopyObservation.cs under Comparisons/Features/BenchmarkComparisons, plus
+NEW RedisNativeReadinessRegression*.cs under matching ComparisonTests. Root
+serializes IsolatedNativeRegressions.cs join. Internal VerifyAsync(app,nodeCount,
+token) consumes actual selected Redis resources, primary and0/1/2 direct replicas.
+After the measured preflight, verify a unique expiring native primary probe
+through the repaired full proof and direct copies. For replicated selections,
+a different absent probe must await observations and respect a linked1second
+caller cancellation, observing the original returned task and requiring
+OperationCanceledException; no fake transport or local execution. Dispose every
+owned connection and remove only the private probe. No topology mutation.
+Existing original native setup failures are the baseline; these new genuine
+regressions and isolated1/2/3 jobs prove the positive/cancellation flows.
+
+Ordered stages: acceptance/docs before writes; new native regression source
+first, two-file correction, worker source build/static review, root full diff
+and complete Release/format/governance, scoped stable main delivery, exact-SHA
+normal/scalar/RF3/comparison/native1/2/3 proof before full270 publication. Worker
+has no Git/workflow/docs/other-source/runtime permissions, escalates undefined
+contracts or overlap. Root owns integration and final evidence. Rollback removes
+only this coherent correction/regression; retain original raw facts. ADR stays
+Accepted until qualification completes.
+
+
+TASK-ISO-026R execution-boundary refinement before worker writes: full strict
+RedisReplicaProof executes inside the genuine selected comparison container,
+where transport and observed primary.dev.internal:6379 are the native endpoints.
+The new host-side regression uses actual external Aspire connection strings
+only for direct-copy/cancellation operations; it must not call the full proof
+with localhost and normalize the native identity. Native setup already requires
+the unchanged full strict proof before any measured repetition. The additive
+regression proves positive direct copies and absent-probe cancellation through
+RedisCopyObservation with real connections. Do not change proof signatures,
+invent in-network executors, translate identity or duplicate strict predicates.
+
+
+## TASK-ISO-026PG accepted pre-reserved physical WAL slots
+
+REQ-BC-052/055, AC-ISO-002/003/006. Original2f PostgreSQL3 job
+111120507602 fails native pg_basebackup because WAL segment
+000000010000000000000002 has already been removed after two parallel backup
+checkpoints. Jobs1/2 pass. Original raw11263094777 hash
+c554cd8e293bbc2391de57441ff9d52155fad098a563aaf2c3b757fc933d0f99
+is retained. pg_basebackup's automatic temporary slot starts after obtaining
+BASE_BACKUP startLSN; merely adding --create-slot leaves this boundary open.
+
+Root owns existing IsolatedPostgresBootstrap.cs/Resources.cs/Entry.sh/
+Replication.sh, existing resource-model test and IsolatedNativeRegressions.cs
+join plus NEW IsolatedPostgresSlotRegression*.cs. Freeze exact0/1/2 permanent
+physical slots benchmark_standby1/2 from validated selected nodeCount before
+primary readiness, with pg_create_physical_replication_slot(name,true,false).
+Each standby uses that already-reserved --slot=PGAPPNAME and --write-recovery-conf;
+never --create-slot. Native max_slot_wal_keep_size=512MB applies to primary and
+standbys; PostgreSQL enforces this at checkpoints, so this is not a hard total
+pg_wal-directory byte quota. Slot loss/exceeded retention remains a failure.
+Secret SCRAM, fsync=on, synchronous_commit=on, native120second bootstrap limit,
+actual ACK1/2/2, direct1/2/3 copies, unique owned directories and productionRF3
+remain unchanged. Closed shell selection rejects invalid counts/slot names.
+
+Tests first: actual Aspire models require exact primary-only standby count,
+slot binding, bounded setting and original contracts. New genuine per-engine
+post-measure regression consumes the actual primary connection and selected
+count; observe native exactly0/1/2 physical, nontemporary, active slots with
+reserved restartLSN, safe nonlost WAL state, matching named streaming replicas,
+and actual512MB retention. Force native WAL switch and CHECKPOINT, then verify
+slots remain valid and replica flush/replay reaches the actual captured WAL cut
+within the existing60second/200millisecond observation envelope. No sleeps that
+stand in for readiness, fake database, standby identity translation, retries,
+expanded budgets or ignored failure. Native setup's original parallel3-node
+bootstrap is the failing regression and mandatory rerun proof. No API/product
+persistence migration; rollback only this coherent isolated bootstrap/test unit.
+
+Ordered stages: frozen acceptance before writes; model/native regression source,
+root bootstrap repair, complete reviewed Release/format/governance; scoped main
+commit/push then same-SHA GitHub required tests/native1/2/3/full270. Root owns
+final integration/evidence; native facts and all source tests must pass before
+qualification claim. ADR remains Accepted until complete.
+
+
+## TASK-ISO-026M accepted native bootstrap reauthentication
+
+REQ-BC-052/055, AC-ISO-002/003/006. Genuine2f run37093197474
+Mongo2/3 jobs111120507627/111120507545 fail ReplicaStatus NativeException13
+Unauthorized on node2. Original native logs show successful benchmark/admin
+auth, initial sync dropping admin.system.users, then20245 UserNotFound11
+clears that connection's authenticated user after UUID replacement. Bounded
+cached admin(host) early-return then skips auth for every remaining poll.
+Raw artifacts11263965303/11264085124 hashes bcb8460ad7ab6b4ac97f959eec7b9ed5f98d15e938292dea1ff4462625cf58db
+and d40f25d8e4338ec60709e9f2c565c4286e6c770e59742550cc1e5ea5ab02e5e4
+remain original evidence. Voting/count predicates have not yet been reached.
+
+Disjoint gates_audit worker owns ONLY existing IsolatedMongoInitiate.js and
+NEW MongoNativeAuthenticationRegression*.cs in matching ComparisonTests slice.
+Retain exactly one actual Mongo/database shell object per closed configured
+host; authenticate using actual credentials on every existing admin(host) call,
+including cached objects. Retain the object in the bounded map before auth so
+a failed auth cannot create unbounded shell objects. Pinned mongosh2.10.0 auth
+renews its actual MongoClient and closes the prior connection; never construct
+a fresh Mongo object per poll. Keep existing120s/500ms/2s native bounds, strict
+SCRAM, exact memberships/voters/majorities/copy/ACK, no measured retries, no
+credential/exception-message logging or normalized native counts.
+
+New genuine post-measure helper VerifyAsync(app,nodeCount,password,token) uses
+actual external Aspire endpoints of exactly1/2/3 selected containers, official
+MongoDB C# driver direct connections, persisted benchmark/admin credentials,
+retryReads/Writes=false,2second connect/server/socket bounds and maxpool4.
+Read actual usersInfo with showCredentials=false/showCustomData=false and ping
+on every node, require exactly one benchmark/admin user, no credentials in
+returned result, native UUID binary subtype and identical actual userId across
+replicas. Dispose every owned client and retain no secrets/native user documents.
+Do not normalize identities or alter users/topology. Native bootstrap itself
+reproduces initial sync; actual all1/2/3 setup and this real post-sync auth/user
+identity regression prove the repair. No fake server or local execution.
+
+Ordered stages: acceptance before writes, new native regression source first,
+small shell-auth correction, worker source/static evidence, root serialized
+native selector join/review/full Release/format/governance, scoped main delivery,
+exact-SHA normal/scalar/RF3/comparison/native1/2/3 before270 publication. Root
+owns shared docs/selection/workflow/Git; worker escalates undefined contracts/
+upstream defect/overlap. No product persistence/API migration; rollback this
+coherent auth/regression unit only. ADR remains Accepted until qualification.
+
+
+## TASK-ISO-026KC accepted bounded native stream cleanup
+
+REQ-BC-054/055, AC-ISO-005/006. Exact2f Kurrent1/2/3 jobs111120508748/
+111120508753/111120509356 each retain50000 successful native appends and
+complete strict version/member/copy/full-event proof, then fail target-owner
+disposal after atomic worker.json. Source derives55378 tracked streams from
+actual4096+5*(10000+256)+2 inputs; observed delete ACK counts are missing.
+Specific timeout remains unproven; do not infer it from20second timing.
+
+Disjoint build_action_review worker owns ONLY existing KurrentTarget.cs/
+KurrentConstants.cs in Comparisons BenchmarkComparisons, NEW Kurrent*Cleanup*
+helpers there, NEW KurrentCleanupDiagnosticTests.cs and
+IsolatedKurrentCleanupRegression*.cs under matching ComparisonTests. Root owns
+existing selector/docs/workflow/Git. Keep original aggregate20second deletion
+budget and outer30second host envelope, every tracked stream, StreamState.Any,
+original measurement/SDK/native image/auth/gossip/copy/ACK contracts.
+
+At most16 fixed original cleanup tasks traverse the finite tracked name
+snapshot; no task-per-stream, unbounded fanout, retry, sleep or extra allowance.
+Await each original DeleteAsync response, count ACK only on native completion.
+On first fault/deadline stop submissions, cancel linked owned operations, join
+all original workers. Partial/unknown effects remain failure. Attempt every
+owned native and HTTP client disposal independently, preserve initiating
+exception and collect subsequent failures in bounded diagnostics. No abandoned
+task may grant successful cleanup; source/native drain must fit existing30s.
+
+Emit one closed owning-boundary final record, at most4096characters, with
+schema/stage/outcome/reason, tracked/submitted/ACKed/faulted/pending counts,
+peak concurrency, integer elapsed milliseconds, actual cleanup cancellation
+and nullable actual numeric gRPC status, later disposal failure count. Never
+include stream/run identity, address/URI, arbitrary native type/message/detail/
+trailer/stack/credential or infer a code. Diagnostic-writer failure preserves
+the original exception. Root can retain the original log without changing raw
+schema or passing failed cohorts. Pure projection/counter validation tests are
+algorithm inputs, not fake cleanup services. No local test execution.
+
+Tests first: existing actual55378-stream teardown is intensive native regression.
+New helper VerifyAsync(app,nodeCount,token), selected Kurrent StreamAppend job
+after target cleanup while real nodes remain live, creates only a few unique
+NoStream SDK streams plus one disjoint foreign probe. Read actual ready gossip
+through external Aspire HTTP endpoints, select the actually observed Leader,
+and bind the SDK directly to that mapped node with existing CreateDirectNode
+TLS/endpoint guard; never normalize native advertised identity, use insecure
+certificate bypass or invoke native full proof against translated identities.
+Call actual production cleanup helper for the private selected streams, use
+fresh direct SDK read to require StreamNotFound for every one, and preserve
+foreign eventID/revision/fullpayload exactly. Finally remove only own foreign
+probe and independently dispose owned clients. Native strict proof remains
+mandatory inside the measured container. Missing leader/membership/version,
+unknown ACK, deadline or cleanup error fails. Existing workload is not repeated.
+
+Adjacent pre-ACK stream ownership tracking is explicitly an unresolved separate
+correctness task; no collision-safety claim follows from unrelated-prefix probe
+or these cleanup changes. Root tracks ACK/conflict/unknown-outcome ownership
+repair with real same-prefix collision tests before overall completion. Worker
+must not silently expand ownership semantics or soften existing failures.
+
+Ordered stages: accepted contract before writes, pure/native tests, bounded
+cleanup/closed diagnostic implementation, worker source/static evidence; root
+full diff/lifetime review, complete Release/format/governance, scoped main
+delivery then same-SHA required gates and realKurrent1/2/3 cleanup proof. Genuine
+quorum-loss fault phase remains an explicit subsequent root-frozen task; source
+changes alone cannot qualify failure drain behavior. No product persistence/API
+migration; rollback only coherent cleanup unit, retain original failures. ADR
+stays Accepted until required implementation and verification evidence exist.
+
+
+026KC native host transport refinement before writes: preserve existing
+KurrentGossipView.ReadAsync unchanged because it correctly rejects an advertised
+native identity when compared with a mapped host endpoint. NEW regression gossip
+helper fetches original JSON through each actual external Aspire HTTP endpoint,
+redirects off, validates unmodified wrapper/member identities against each
+source-owned containerName.dev.internal:2113, exact native version/live/readwrite/
+unique members/oneLeader and nodeCount-1Followers plus cross-view agreement.
+Reuse existing native member parsers/validators where their boundary permits;
+never rewrite body identities. Only the observed owning Leader resource is
+selected for mapped direct SDK transport. This additive helper is native test
+transport proof, not a relaxation of measured full native cluster predicates.
+
+
+026KC root execution join: comparison-images already selects closed Redis/Mongo
+projections explicitly. Add the exact KurrentCleanupDiagnosticTests TUnit filter
+to that existing gated step so new pure closed projection/counter cases actually
+execute. Preserve all original filters/gates/images/matrices and permissions;
+no missing-filter success inference. The separate native helper remains selected
+only in its genuine Kurrent StreamAppend topology jobs after successful teardown.
+## TASK-ISO-026KC source-diagnostic lifetime refinement
+
+The scoped development build reports CA1031, CA2025 and CA2213 in the new
+cleanup unit. Preserve the accepted first-error, original-task and finite-budget
+contract: catches record the actual native failure and rethrow, while finally
+independently schedules all actual disposals and emits the closed diagnostic.
+An expired drain retains and observes original worker, cancellation-callback
+and disposal tasks; their cancellation sources remain owned until those original
+tasks settle. The target supplies its actual writer.DisposeAsync operation to
+the internal lifetime helper and excludes that writer from the other-client
+list, so the writer is disposed exactly once. This internal ownership join
+introduces no configurable target or disposal double. No analyzer suppression,
+new retry, extended deadline, native-error replacement or successful-drain claim
+is allowed. The existing REQ-BC-054/055 and AC-ISO-005/006 tests and genuine
+1/2/3 cleanup qualification remain mandatory; source compilation is not that
+qualification. The worker owns only the already frozen Kurrent paths and the
+new Kurrent*Cleanup* helper glob; root owns integration and final review.
+### 026KC explicit native writer disposal integration
+
+CA2213 does not recognize disposal delegated through a nested callback. Root
+accepts a deletion-stage owner followed by a final original-task drain, using
+the same cleanup clock, 20-second deletion budget and 30-second total budget.
+KurrentTarget.DisposeAsync directly starts its actual writer.DisposeAsync
+operation after the deletion stage and transfers that original task to the
+shared drain. Other native and HTTP disposals start independently, so a writer
+fault cannot prevent them. The deletion-stage owner retains the original
+workers, callback task, cancellation sources and first EDI until final drain;
+expired drain observes originals and defers source disposal until settlement.
+Final diagnostic and rethrow preserve the initiating error. The small native
+regression uses this same deletion/drain unit over actual SDK clients; no
+configurable disposal callback or double remains. Only the accepted two Kurrent
+files and Kurrent*Cleanup* helper glob are writable. Root reviews all structure
+and native selector joins; genuine 1/2/3 cleanup evidence remains pending.

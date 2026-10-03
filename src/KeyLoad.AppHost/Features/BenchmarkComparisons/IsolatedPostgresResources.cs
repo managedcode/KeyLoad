@@ -35,7 +35,8 @@ internal static class IsolatedPostgresResources
         var primary = context.Builder.AddPostgres(primaryName, password: password)
             .WithImage(Image).WithImageTag(Tag).WithImageSHA256(BenchmarkResources.PostgresDigest[DigestPrefixLength..])
             .WithContainerNetworkAlias(primaryName);
-        IsolatedPostgresBootstrap.Configure(primary, context.DataDirectory(primaryName), scripts, password, null);
+        IsolatedPostgresBootstrap.Configure(primary, context.DataDirectory(primaryName), scripts, password, null,
+            context.Selection.NodeCount - 1);
         context.BindSetting(Connection, primary.Resource.ConnectionStringExpression);
         context.BindEndpoint(0, primary, Tcp);
         for (var index = 1; index < context.Selection.NodeCount; index++)
@@ -44,7 +45,7 @@ internal static class IsolatedPostgresResources
             var standby = context.Builder.AddContainer(name, Image, Tag).WithImageSHA256(BenchmarkResources.PostgresDigest[DigestPrefixLength..])
                 .WithContainerNetworkAlias(name).WithEndpoint(targetPort: Port, name: Tcp, scheme: Tcp).WaitFor(primary);
             IsolatedPostgresBootstrap.Configure(standby, context.DataDirectory(name), scripts, password,
-                index.ToString(CultureInfo.InvariantCulture));
+                index.ToString(CultureInfo.InvariantCulture), context.Selection.NodeCount - 1);
             context.BindEndpoint(index, standby, Tcp);
         }
         context.BindImage(Registry + Image + TagSeparator + Tag + DigestSeparator + BenchmarkResources.PostgresDigest);

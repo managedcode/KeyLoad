@@ -99,6 +99,20 @@ Actors are authenticated SDK/MCP callers, the node-local replica host, fixed vot
 
 Positive flow: an authorized command reaches its own request grain, the physical host orders and persists it, a majority crosses the declared acknowledgement barrier, and canonical apply returns the stable outcome. Negative flow: minority, stale term/owner, invalid peer MAC/replay or denied principal cannot establish committed success. Edge/error flow: an unknown response is resolved by stable command ID; interrupted/corrupt append or snapshot reopens one verified cut or fails explicitly; cancellation drains owned work without transferring locks to a migrating activation.
 
+TASK-RF3-ELECTION-RETRY-R80 preserves AC-REP-003 after exact2ecbeee4d /
+run37093992229/job111123331985:62 of63 tests passed, and LeaderLossScenario queue
+Receive returned UnknownWriteOutcome with the documented same-command-ID retry.
+Freeze queue Receive/Processing and projection replay requests before using the
+existing election helper, as subscription writes already do. Preserve its strict
+UnknownWriteOutcome/OwnershipLost whitelist,250ms cadence, original two-minute
+scenario deadline and every receipt/single-delivery/ACK/minority/recovery oracle.
+No new IDs inside retries, added sleeps, product retry/shim or exception waiver.
+Existing leader-kill RF3 is the failing regression; actual later delivered-SHA
+GitHub RF3 success closes it. Cohesive LeaderLossQueueScenario owns only this queue
+flow, called with the existing fixed collection/queue names; all original exact
+data/effect/ACK checks remain, while the original scenario stays under200LOC.
+ADR-003/007/036 cover the unchanged fault contract.
+
 AC-REP-006 additionally maps to existing cryptographic/replay source cases in the [ClusterReplication unit slice](../../tests/KeyLoad.UnitTests/Features/ClusterReplication/) and planned real RF3 saturation/failover cases. Pure envelope tests do not prove liveness under load. Every acknowledgement/recovery assertion needs the exact delivered GitHub run; fault/endurance/power-loss claims remain separate.
 
 Related invariants: [ADR-003](../ADR/ADR-003-durability-ack-barrier.md) ACK/profile barriers, [ADR-007](../ADR/ADR-007-replica-consensus-bootstrap.md) consensus/bootstrap, [ADR-016](../ADR/ADR-016-atomic-physical-placement.md) atomic identity/placement and Proposed [ADR-017](../ADR/ADR-017-migration-tokens.md) movement lineage. Proposed token translation does not block the existing fixed RF3 scope; dependent physical movement must wait for its contract.

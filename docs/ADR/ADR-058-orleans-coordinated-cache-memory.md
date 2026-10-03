@@ -1,7 +1,7 @@
 # ADR-058: Orleans-coordinated disposable cache memory
 
 Status: Accepted, staged implementation contract; no runtime/performance claim.
-Related requirements: REQ-CACHE-001..007 / AC-CACHE-001..012 in
+Related requirements: REQ-CACHE-001..007 / AC-CACHE-001..015 in
 [ResourceExecution](../Features/ResourceExecution.md), REQ-MP-002/005,
 AC-MP-002/011/012 and [ResourceExecution](../Features/ResourceExecution.md).
 
@@ -404,3 +404,153 @@ before any physical cleanup, so subsequent using-finally cleanup is a no-op.
 This satisfies CA2000 without allowing an outer cleanup to mask the retained
 scenario/cleanup report. No assertion, failure collection or diagnostic is
 suppressed; combined enabled source and native gates remain mandatory.
+
+## Accepted physical-owner observation prerequisite (R81)
+
+REQ-CACHE-004/007 and AC-CACHE-010/013. Root joins the R80 independent review
+(`b388d7b9911a084ec0345e29778a0cdeed4e4860ff120c7a494402f0c83caf8e`)
+for this local prerequisite only. Signed controls/server composition/native probe
+remain separate pending contracts. Existing blocking Store.Read and cache
+Snapshot cannot implement the zero-wait metadata check.
+
+Frozen local API: readonly `ZoneTreePointCacheOwnerIdentity(Guid NodeId, Guid
+Incarnation, Guid RuntimeId)` and closed `ZoneTreePointCacheOwnerStatus` values
+Healthy/Busy/Closed. `ZoneTreePointCacheControl.TryReadOwnerIdentity(out identity)`
+returns the status; every unsuccessful or throwing path leaves identity default.
+The three GUIDs are copied only from this internally constructed actual runtime
+and control. Never project full StoreIdentity, SigningKey, ReadGeneration, path,
+payload, position, caller identity or lease. Healthy is a point-in-time physical
+observation, not full silo readiness, quorum/authorization or wire certification.
+
+Use direct volatile store-closing/control-closed reads, then the actual
+ReaderWriterLockSlim.TryEnterReadLock(0). Current-thread Read/Write/Upgradeable
+ownership is Busy without recursion; foreign writer is Busy; foreign reader may
+coexist. Under the acquired reader check closing and runtime.Check, capture only
+the actual tuple, recheck closing/control closure and release the reader in
+finally. Catch ObjectDisposedException only when actual closing is published.
+Known poison remains the original RecoveryRequired provider exception. A later
+close after observation is permitted; future receiver lifecycle/owner checks
+still precede proof/acceptance. No Snapshot/transition/cache/pool lock, index,
+lookup, lease mutation, callback, native file work, network or waiting queue.
+
+Ordered contract and disjoint task graph:
+1. Root freezes brainstorm, AC013/matrix/plan and this contract before writes.
+2. TASK-CACHE-OWNER-TESTS-R81: Luna owns only new matching
+   UnitTests/ResourceExecution/ZoneTreePointCacheOwner*Tests.cs. Author acceptance
+   tests first using existing genuine fixture/support and actual tasks; no source,
+   config, docs, Git, CI or local execution. Escalate missing contracts/unsafe
+   cleanup rather than inventing product hooks or weakening assertions.
+3. TASK-CACHE-OWNER-INTEGRATION-R81: root owns local value/status, public control,
+   real gate/observation helper and existing fixture fault-observer extension.
+   Preserve source max400/type200/function50/nesting3 and all native errors.
+4. TASK-CACHE-OWNER-REVIEW-R81 independently reads the combined source/tests,
+   checks exact projection, closure/gate race, poison and owned task cleanup.
+   Root resolves every finding and runs enabled build/format/static governance.
+5. Root ordinary main delivery and exact-SHA GitHub normal/scalar/recovery/
+   genuine Docker/Aspire RF3 SDK/MCP artifacts qualify the joined source.
+
+AC013 automated pass/fail: actual cold/warm owner identities and unchanged
+charges/read/cache counters; same-directory reopen retains persisted IDs with
+new control RuntimeId; held writer Busy/default before release, foreign reader
+Healthy, same-thread Read/Commit Busy/default with healthy follow-up; permanent
+control/full-dispose/pre-drain close Closed/default before reader release; genuine
+apply observer failure preserves RecoveryRequired and durable cold reopen data.
+Use actual System permit, real files and finite registered original tasks with
+independent body/final cleanup collection. No fake provider, reflection, test-only
+production hook or local test. Tiny final-check/close and exceptional simultaneous
+cleanup interleavings receive independent source review as explicit exceptions;
+real concurrency/error regressions remain mandatory. Coverage stays unqualified
+until genuinely collected. Rollback removes this unused local observation only;
+native formats, storage owners, data/auth/ACK and public request flows are unchanged.
+
+```mermaid
+flowchart LR
+    Control[Actual local cache control] --> Gate[Real reader timeout zero]
+    Gate --> Check[Native health and closure check]
+    Check --> Tuple[Node incarnation runtime GUIDs]
+    Gate --> Busy[Busy with default tuple]
+    Check --> Closed[Closed with default tuple]
+```
+
+## Native fixture repair contract (R83)
+
+REQ-CACHE-002/003/007 / AC-CACHE-015. Exact native baseline, original ZIP
+digests,17 unit failure IDs and the distinct RF3 failure are retained in
+[run37093992229](../implementation/runtime-qualification-37093992229.json).
+This test-only repair preserves existing provider identity/copy/error contracts.
+
+1. Root freezes AC015 before delegated writes; the existing native failures
+   establish the failing regression baseline. No local test execution.
+2. TASK-CACHE-NATIVE-FIXTURES-R83 owns only UnitTests/ResourceExecution existing
+   ZoneTreePointCacheFileFixture.cs, ZoneTreeCoordinatedPointCacheReadTests.cs and
+   new ZoneTreePointCacheFixtureIdentityTests.cs. Luna authors genuine identity
+   tests first, then explicitly projects null as absent and nonnull bytes as
+   present ReadOnlyMemory; empty remains invalid. Use one named byte77 oracle.
+3. Fixture RunAsync independently retains the body failure and all physical
+   cleanup failures; Dispose starts once before attempting every store,
+   directory and shared budget. No suppression, secret output, test double,
+   product key-generation change or dependency workaround.
+4. Root and independent reviewer inspect this exact bounded diff together with
+   the R81 style fixes; enabled full build/format/governance precede ordinary
+   complete eligible main delivery.
+5. New exact-SHA GitHub normal/scalar must pass all17 formerly failing IDs and
+   the new identity cases; required recovery/RF3 remain independent mandatory
+   gates. Authenticated controls, coverage, endurance and profiles stay open.
+
+No data/API/topology/version migration. Rollback reverts these test-side changes
+only; product identity validation cannot be relaxed. Existing ADR035/041 cover
+the unchanged exception and lifetime boundaries. This ADR remains Accepted.
+
+## Accepted unused wire/primitive prerequisite (R82)
+
+REQ-CACHE-004/007 / AC-CACHE-007/010/014. Root joined complete independent
+review e02ad6e40d20e09b2d38919a5b26ead48a677c40ec56d4337c195f7f2b6ba0b0
+of candidate8adca2e05910c6f21d5fe7e2a6f65fedc37d27b490c2c7a4096ed55db7817bf4.
+The accepted [CacheControlV1](../Features/ResourceExecution/CacheControlV1.md)
+is the exact alias/Id/type/status/shape/byte/key/correlation/lifetime source of
+truth. No receiver/server/probe or production cache activation is approved here.
+
+Ordered implementation and join contract:
+1. Root publishes brainstorm, AC014/test matrix/plan, this ADR contract and the
+   Orleans ResourceExecution local policy before any code worker writes.
+2. TASK-CACHE-WIRE-TESTS-R85: Luna/high owns only NEW
+   UnitTests/Features/ResourceExecution/CacheControlWire* files. Write real
+   pinned native serializer cases and independent golden/crypto/correlation/
+   shape/lifetime tests first; no provider doubles, reflection hooks, local
+   execution, existing fixture edits, source/config/docs/Git/CI mutation.
+   Escalate missing APIs or ambiguous contract rather than inventing it.
+3. TASK-CACHE-WIRE-INTEGRATION-R85: root alone owns NEW
+   Orleans/Features/ResourceExecution generated13 metadata types, enums,
+   marker interfaces, cohesive validation/size/transcript/authenticator/
+   correlation helpers, shared docs and source joining. Preserve all existing
+   replica/storage/token/auth bytes and the held native-format migration.
+4. TASK-CACHE-WIRE-REVIEW-R85 independently reviews every included/omitted
+   field, raw digest/RFC Guid byte rule, nested MAC, exact correlation, private
+   key closure, complete size preflight and caller-owned output. Root closes
+   findings and runs full enabled build/format/governance before ordinary
+   complete eligible main delivery and exact remote confirmation.
+5. Authentic new exact-SHA GitHub normal/scalar/recovery/RF3 and real native
+   generated-codec/golden/lifetime cases qualify these primitives only. Coverage
+   and later control/replay/clock/discovery/migration/IPC gates remain open.
+
+Testing methodology: actual Serializer/DI, sealed immutable DTOs and real .NET
+crypto; fixed nonsecret independent byte vectors; valid/negative/edge and
+unexpected shape/mutation paths; original concurrent compute/dispose tasks
+bounded/joined with independent failure retention. Complete schema bounds are
+reviewed independently: conservative maximum C5547/S5550/correlation-input5588
+bytes, below65536; impossible exact-cap edge is source arithmetic, not an
+invented runtime test. Native predecode queues/allocations/RSS remain unmeasured.
+
+Rollout adds unused internal source only; no public/persisted/protocol migration.
+Rollback removes these unused helpers/tests together. Shared contracts and all
+cross-cutting docs have one integration owner. No artifact/build/source claim
+marks this ADR Implemented without all required verification evidence.
+
+```mermaid
+flowchart LR
+    Native[Immutable generated metadata] --> Shape[Closed shape and size preflight]
+    Shape --> Bytes[Dedicated canonical bytes]
+    Bytes --> MAC[Nested and outer authentication]
+    MAC --> Match[Exact original request correlation]
+    Match --> Pending[Future physical receiver contract]
+```

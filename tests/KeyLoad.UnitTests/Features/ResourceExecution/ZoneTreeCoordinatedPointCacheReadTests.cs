@@ -6,6 +6,7 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal sealed class ZoneTreeCoordinatedPointCacheReadTests
 {
     private const string OwnedResultFailure = "The real ZoneTree read returned no owned result.";
+    private const byte MutatedFirstByte = 77;
     private static readonly byte[] Key = "cache/coordinated/value"u8.ToArray();
     private static readonly byte[] Value = [0, 9, 128, 255];
 
@@ -27,13 +28,13 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
             var afterIdempotentApply = control.GetDiagnostics();
             await Assert.That(first).IsNotNull();
             var ownedFirst = first ?? throw new InvalidOperationException(OwnedResultFailure);
-            ownedFirst[0] = 77;
+            ownedFirst[0] = MutatedFirstByte;
             var warm = store.Read(view => view.ReadOwnedValue(Key.ToArray()));
             var afterWarm = control.GetDiagnostics();
 
             await Assert.That(applied).IsEqualTo(ZoneTreePointCacheControlResult.Applied);
             await Assert.That(repeated).IsEqualTo(ZoneTreePointCacheControlResult.AlreadyApplied);
-            await Assert.That(ownedFirst[0]).IsEqualTo(77);
+            await Assert.That(ownedFirst[0]).IsEqualTo(MutatedFirstByte);
             await Assert.That(warm).IsNotNull();
             await Assert.That(warm!.SequenceEqual(Value)).IsTrue();
             await Assert.That(afterCold.Admissions).IsEqualTo(1L);

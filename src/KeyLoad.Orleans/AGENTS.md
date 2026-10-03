@@ -22,3 +22,10 @@
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned slice: `ClusterRouting`; target feature path: `Features/ClusterRouting/`, matching `docs/Features/ClusterRouting.md`.
 - `CommandRouterGrain.cs` and `ConsensusMembershipTable.cs` are current entry points; grain routing belongs in the named slice.
+
+## ResourceExecution ownership
+- `Features/ResourceExecution/` owns the accepted ADR-058 internal cache-control metadata and bounded wire/authentication/correlation prerequisites, with matching ResourceExecution feature docs and tests.
+- Root is the sole integration owner of shared generated types, stable aliases/Ids, primitives, configuration and later lifecycle/composition. Test workers own only their explicitly assigned new test files.
+- The R82 primitive stage has no production caller, eligibility side effect, receiver, timers, DI/cache enablement or persisted/public/replica format migration. Later stages require a separately frozen contract and genuine RF3 evidence.
+- Read [the local slice policy](Features/ResourceExecution/AGENTS.md) and [CacheControlV1](../../docs/Features/ResourceExecution/CacheControlV1.md) before implementation.
+- The earlier bootstrap statement about no installed skills does not negate the explicitly owner-authorized Orleans skill listed above; keep the prohibition on any other unapproved installation.

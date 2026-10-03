@@ -25,7 +25,7 @@ internal static class LeaderLossScenario
         {
             state = await PrepareAsync(fixture, timeout.Token);
             state = await RemoveLeaderAsync(fixture, state, stoppedContainers, timeout.Token);
-            await RetryCommandAndProcessQueueAsync(state, timeout.Token);
+            await LeaderLossQueueScenario.ProcessAsync(state, Collection, Jobs, timeout.Token);
             var projectionBatch = await ProcessSubscriptionAsync(state, timeout.Token);
             var projectionThroughSequence = await CommitProjectionAsync(state, projectionBatch, timeout.Token);
             await LeaderLossRecoveryScenario.VerifyMinorityAndRecoveryAsync(
@@ -152,22 +152,6 @@ internal static class LeaderLossScenario
         }
     }
 
-    private static async Task RetryCommandAndProcessQueueAsync(LeaderLossRunState state, CancellationToken cancellationToken)
-    {
-        var surviving = state.Clients[state.Survivors[0]];
-        var retried = await RetryDuringElectionAsync(() => surviving.CommitAsync(state.Command, cancellationToken), cancellationToken);
-        await Assert.That(Success(retried).Token).IsEqualTo(state.Receipt.Token);
-        await Assert.That(Success(await surviving.GetAsync(new(state.Partition, Collection, "o1"), cancellationToken))!.Revision).IsEqualTo(1);
-        var receiveId = Guid.NewGuid();
-        var delivery = await Assert.That(Success(await surviving.ReceiveAsync(new(receiveId, new(state.Partition, Jobs)), cancellationToken)).Deliveries)
-            .HasSingleItem();
-        var processingId = Guid.NewGuid();
-        Success(await surviving.CommitProcessingAsync(new(processingId, new(state.Partition, Jobs), delivery.Token, "worker", 1,
-            [new PatchDocument(Collection, "o1", [new("/status", PatchKind.Set, "\"done\"")], 1)]), cancellationToken));
-        await Assert.That(Success(await state.Clients[state.Survivors[1]].InspectAsync(new(new(state.Partition, Jobs), "m1"), cancellationToken))!
-            .Metadata.State).IsEqualTo(MessageState.Acked);
-    }
-
     private static async Task<ProjectionBatch> ProcessSubscriptionAsync(LeaderLossRunState state, CancellationToken cancellationToken)
     {
         var surviving = state.Clients[state.Survivors[0]];
@@ -211,7 +195,9 @@ internal static class LeaderLossScenario
             [new PutDocument(Materialized, "o1", "{\"projected\":true}", 0)]);
         var outboxEffect = Success(await RetryDuringElectionAsync(() => surviving.CommitProjectionAsync(projectionRequest, cancellationToken),
             cancellationToken));
-        var duplicateEffect = Success(await surviving.CommitProjectionAsync(projectionRequest with { CommandId = Guid.NewGuid() }, cancellationToken));
+        var replay = projectionRequest with { CommandId = Guid.NewGuid() };
+        var duplicateEffect = Success(await RetryDuringElectionAsync(() => surviving.CommitProjectionAsync(replay, cancellationToken),
+            cancellationToken));
         await Assert.That(duplicateEffect.AlreadyProcessed).IsTrue();
         await Assert.That(duplicateEffect.Receipt.Token).IsEqualTo(outboxEffect.Receipt.Token);
         return projectionBatch.ThroughSequence;

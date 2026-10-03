@@ -14,6 +14,8 @@ internal sealed class IsolatedDocumentResourcePostgresTests
     private const string Data = "/var/lib/postgresql";
     private const string EntryScript = "/bootstrap/isolated-postgres.sh";
     private const string InitScript = "/docker-entrypoint-initdb.d/isolated-replication.sh";
+    private const string StandbyCount = "KEYLOAD_POSTGRES_STANDBYS";
+    private const string SlotRetention = "max_slot_wal_keep_size=512MB";
 
     /// <summary>AC-ISO-002/003/006: authentic PG18 bootstrap, private native copies and secret-only authentication.</summary>
     [Test]
@@ -43,16 +45,23 @@ internal sealed class IsolatedDocumentResourcePostgresTests
             await Assert.That(node.Entrypoint).IsEqualTo(T.CommandShell);
             var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(node);
             await Assert.That(configuration.Arguments.Select(argument => argument.Value).SequenceEqual(
-                new[] { EntryScript, T.Postgres, T.PostgresConfiguration, T.Fsync, T.PostgresConfiguration, T.Commit }, StringComparer.Ordinal)).IsTrue();
+                new[] { EntryScript, T.Postgres, T.PostgresConfiguration, T.Fsync, T.PostgresConfiguration, T.Commit,
+                    T.PostgresConfiguration, SlotRetention }, StringComparer.Ordinal)).IsTrue();
             await Assert.That(configuration.EnvironmentVariables.ToDictionary()[T.PgDataEnvironment]).IsEqualTo(T.PgData);
         }
-        await IsolatedDocumentResourceAssertions.VerifyScriptAsync(primary, InitScript, "host replication", "scram-sha-256");
+        await IsolatedDocumentResourceAssertions.VerifyScriptAsync(primary, InitScript,
+            "host replication", "scram-sha-256", "pg_create_physical_replication_slot", "true, false");
+        var primaryEnvironment = await IsolatedResourceTopologyFixture.EnvironmentAsync(primary);
+        await Assert.That(primaryEnvironment[StandbyCount]).IsEqualTo(
+            (count - 1).ToString(System.Globalization.CultureInfo.InvariantCulture));
         for (var index = 1; index < count; index++)
         {
             var node = nodes[index];
             await Assert.That(await IsolatedDocumentResourceAssertions.SecretAsync(node, StandbyPassword)).IsSameReferenceAs(password);
             var settings = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
             await Assert.That(settings[ApplicationName]).IsEqualTo("benchmark_standby" + index);
+            await Assert.That(settings.ContainsKey(StandbyCount)).IsFalse();
+            await IsolatedDocumentResourceAssertions.VerifyScriptAsync(node, EntryScript, "--slot=\"$PGAPPNAME\"");
             await Assert.That(node.Annotations.OfType<WaitAnnotation>().Single().Resource).IsSameReferenceAs(primary);
         }
     }

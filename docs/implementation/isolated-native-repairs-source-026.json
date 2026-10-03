@@ -1,0 +1,534 @@
+{
+  "schemaVersion": 1,
+  "state": "source_prepared_native_qualification_pending",
+  "baseRevision": "2ecbeee4d7b969129b93346d2863d50072976a68",
+  "scope": "Accepted026K/R/PG/M/KC native causal repairs and TS007B-D bounded runner source",
+  "localTestsRun": false,
+  "performanceQualified": false,
+  "nativeQualified": false,
+  "runner": {
+    "files": 47,
+    "newDeclaredTUnitCases": 36,
+    "source": [
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAppendValidation.cs",
+        "sha256": "4464558442cc0071268053445082924fdd10a76e5e7134f7dda60c82134b417a"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAttempt.cs",
+        "sha256": "fc633f3db00a5b543424532bfd2a831e769be6345847e52f449c42b3cce21ec7"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAttemptExecutor.cs",
+        "sha256": "a1a8dfe9ec06ecb98ad669cdd52ad439da81afa5006ae25416be6c0d854c49f9"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAttemptLedger.cs",
+        "sha256": "1220d2e42fc584a1995ec17d14111180a25cb9167c784738f5f562df681ac662"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveCallDeadlineException.cs",
+        "sha256": "4b582110b01baf0cdc3efc4df01b1b30328f4dc4d4386598691ea3f9d2ac5783"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveCallScope.cs",
+        "sha256": "f004022bc4d897aeadb5fdcece974b121254a352f3d0c9aa24a0e838f7abf811"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveConcurrency.cs",
+        "sha256": "35cd0ae1f97dd57e50af1598e36769be7f5051eeee4f575b99fe48269d7b378d"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveExceptionBoundary.cs",
+        "sha256": "3a245a7f74881404c186dd5fc022bd7e3a08801288a0b051bb60b5f741406f45"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveExpectations.cs",
+        "sha256": "cb7f18c13b4df5fc2ad3789a5a4e13547f6887b5edba3efcfb720063eed5ea16"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveFailure.cs",
+        "sha256": "c6d15defd4c2c8e6ca611975623de88d15d55961851349d12d1a53b5cbf0cc05"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveHash.cs",
+        "sha256": "bdf539f07c4a55e40a0402611e28d2e91cb395d255a202e4f700eb4fc4040cfa"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveMeasurement.cs",
+        "sha256": "cb9aa424134f65a38658cf9fa52041ef948cc9e892329723ccfcd5c343a6880e"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveObservedFailureException.cs",
+        "sha256": "20e9bb6c7fd46341ddd83604683d91a3975afd0a6ac9e7c6f0d40f5d0e5e1ada"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePhaseExecutor.cs",
+        "sha256": "61a71e9164ab0ff1cd4f5fc0d7392fc9315901021f199564e3b30dfd6c823b77"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePhaseResult.cs",
+        "sha256": "b41f8aaec5461c01c8a6cf148f07dfd30adcf075009d3ca0dbd69c8be04f8d7d"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePhaseWorkers.cs",
+        "sha256": "4b0a4bc7a664445b7f00e6c1a70763b940f60b75ed8ae7a6c23991c8f674a6ac"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePreparedPhase.cs",
+        "sha256": "e0390224252b98423f03e8b2df80708dd8e7ce7ca3e83c8925226bae1509f514"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveReceiptView.cs",
+        "sha256": "102cbd72ca20c5d63dd9e20ce0fe6fa7f1835a2b935eadbd4c9cfb0b864632d9"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRepetitionExecutor.cs",
+        "sha256": "b19ad91447d409562580922e15d5fb7264e6ae325c496af76b2ec93fd00eedc6"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveResponse.cs",
+        "sha256": "387de0dbf9fce678883cbe628d943acdd3db6c5e3e674927881b32e62f1c614a"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveResponseReader.cs",
+        "sha256": "f134b6c415d88c0236a022cce12a751ea8ff823333440abf324a9d15ee001bbf"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveResponseVerifier.cs",
+        "sha256": "354fb85a514182ac9a528773f5c4c25256e4a48c28fab1d75eb630dba4a12d58"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunResult.cs",
+        "sha256": "a63ed9af219244a91c4dfcae9258fc9d2b4bf3d5645c27cd0dc5d73fae7d6f95"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunState.cs",
+        "sha256": "4693bd75a73d6e77c1b54253107599ee187f8f0f6497bd295c7d5cd4a4052128"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunner.cs",
+        "sha256": "be090d7af59aab3eb3724e7aec4ed565e87a59a879e2b883ad448d6afb2a145c"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRuntimeErrors.cs",
+        "sha256": "903429d4b4d7fd518558b60be97dce28c072cbf026c67e2c3b0a1f5ab843149f"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRuntimePolicy.cs",
+        "sha256": "05eafd7bade32e49850a9728cd37822b1187409961af868c531ca93859cb48f8"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveScenario.cs",
+        "sha256": "aa286395749622fcd63a53eb3cf0248294f63ab1b8ad85add8e97113c8622fbb"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveSetupExecutor.cs",
+        "sha256": "32869c55655df86670879d21959e0038fd646a6ec2908b541e1a4e79e012f8b7"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveSummary.cs",
+        "sha256": "ed033bc3163950432a0821363e65f1be5c21c7930ac38950ee89b542b55b99d1"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveTargetContracts.cs",
+        "sha256": "8463a7f87c884f0d1dd9809bc8b5ea373c6bf84f956721d0e01cd38f4279c146"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveVerification.cs",
+        "sha256": "fe8512f0d5c845ab8a5765952ef5e31a754a4a9fd610082b7ee8ad58eb717557"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveVerificationReader.cs",
+        "sha256": "61c0e3565d0168121ab0fb9ef7de9c6cecabb453738c1d7fb290df3f22bbacad"
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveWorkerPartition.cs",
+        "sha256": "0183f7448fa158c370ef43e9a224d4e3f8bf96f004fb22e887928b6e74e711fd"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAppendValidationTests.cs",
+        "sha256": "d4dc44b42cff469bc3d98d0942f755cc3b897504a91a82bc63583dd04200f15b"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAttemptLedgerTests.cs",
+        "sha256": "84bc238aab3dee4727227872ddcc842cd0ce65f88c941f8e9fc3343fac04416d"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAttemptValues.cs",
+        "sha256": "5dc8b332cdd3a2dd9dbc071015d2b8d41854c0ccd4b222bacadec8b4023b751e"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveCallScopeTests.cs",
+        "sha256": "9e89ad6b955bf5e40febc08492bdd53c05e50a04af8aefce7a97e5eb9f0cef3c"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveCompactEncodingTests.cs",
+        "sha256": "a46fa717e85ef3164c99a39c2ea66200dc13215e3a477b4663082b620efeab24"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveExceptionBoundaryTests.cs",
+        "sha256": "60fe875eabaf707878c2ec1bdedcec2decbccf4a964daf659109760a8287da46"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveFailureMappingTests.cs",
+        "sha256": "e483cd87f7d5e7cd7fb1808d6f0d39fe95cd46be8f7cc0bd0fa2804dd9f53a01"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveObservedFailureTests.cs",
+        "sha256": "63972040cb3ba0861beebac8908a17acb48df99aef37ef2b8311f4005d3a35fe"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePhaseEvidenceTests.cs",
+        "sha256": "3e1db2654862d857159ae97d60053cbd990986dac82629311f8c5172238ed14d"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePreparedExpectationTests.cs",
+        "sha256": "729d554ad2e1b1246bfdd4459800ad1fad9b58c35f135cd0eb81739b59393592"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePreparedPhaseTests.cs",
+        "sha256": "2c197317e820224f101d41416e928dde2bc85c73d261f1976e1ea8f271beb134"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveSummaryTests.cs",
+        "sha256": "333aebbbdfc4908820b7c578f6456c79d614c781d1e043cbadbd0779134dd97c"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveWorkerPartitionTests.cs",
+        "sha256": "b3b75cda8fd027227433b4428830d2958372b64ba3488291b501e0b19c521cbb"
+      }
+    ]
+  },
+  "kurrentDeclaredTUnitCases": 9,
+  "rootReview": {
+    "task": "TASK-ISO-026-JR",
+    "sha256": "ff0e1added17dfb6ca7fdb58eca5e0b84d7a7b3f435db723f4a4340732feddf0",
+    "state": "source_review_complete_no_concrete_blocker"
+  },
+  "combinedDevelopmentBuild": {
+    "exitCode": 0,
+    "warnings": 0,
+    "errors": 0,
+    "elapsed": "00:00:21.74",
+    "logSha256": "2e4f09cb72738a6d6ed0e14b8c53c388a422b96b58f9dd0af08cbd5880e94ed9"
+  },
+  "combinedFormatter": {
+    "exitCode": 0,
+    "verifyOnly": true
+  },
+  "staticGovernance": {
+    "state": "pass",
+    "projects": 25,
+    "modules": 4
+  },
+  "ownedSourceFiles": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "a8f8eeb3d9e51b38b59daffadfa85bfdd51732ebe2c93105ccc6a849aad941d5"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentCleanupCancellation.cs",
+      "sha256": "b2fb518b13b953648138dc62c34fb9df9a4a8c13ae2c8c3272012511b082fa99"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentCleanupCounts.cs",
+      "sha256": "7be75c3a601153c470f2ff8093fff39692dbad2de245e9f6866f69318133f102"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentCleanupDiagnostics.cs",
+      "sha256": "47218c3dab2f093b17a6a0f4f799260e281fe6f8951c5fa4c55a2167472ad745"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentCleanupLifetime.cs",
+      "sha256": "90711befbbd37e9a112af1a5d0092b47fae78b55fac9b25805b9e2e814bfbe36"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentCleanupOperation.cs",
+      "sha256": "6b9eda9b68df6b337ef17fa9ad43ce865a4f3e02779bd41649c229c03b6561f5"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentCleanupState.cs",
+      "sha256": "fea2b9464af99699bb98b400281bf46d1a75a17d9440323fec470ca60e31b37b"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentConstants.cs",
+      "sha256": "51f3c584fc1426da02528730e9f921852d38ed0836ce6cfc30c05bbe2694c150"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentOwnedStreamCleanup.cs",
+      "sha256": "50bf169dec9b842afcf202311c6668567d47352eb00e83ffdad702e1c331eb42"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentTarget.cs",
+      "sha256": "9014b5f9f933d726cc48eed0edfa6b70bca2043a95eced44f819370eaaab7018"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/RedisCopyObservation.cs",
+      "sha256": "bb156ced998111fb541c92c86209c99061baae0c16161bb640c0c8b27f7c7fce"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/RedisReplicaProof.cs",
+      "sha256": "3e18cebfb9362d13a94c13716e93703686e8093c9ebcd181eaad21f001ee0477"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAppendValidation.cs",
+      "sha256": "4464558442cc0071268053445082924fdd10a76e5e7134f7dda60c82134b417a"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAttempt.cs",
+      "sha256": "fc633f3db00a5b543424532bfd2a831e769be6345847e52f449c42b3cce21ec7"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAttemptExecutor.cs",
+      "sha256": "a1a8dfe9ec06ecb98ad669cdd52ad439da81afa5006ae25416be6c0d854c49f9"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAttemptLedger.cs",
+      "sha256": "1220d2e42fc584a1995ec17d14111180a25cb9167c784738f5f562df681ac662"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveCallDeadlineException.cs",
+      "sha256": "4b582110b01baf0cdc3efc4df01b1b30328f4dc4d4386598691ea3f9d2ac5783"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveCallScope.cs",
+      "sha256": "f004022bc4d897aeadb5fdcece974b121254a352f3d0c9aa24a0e838f7abf811"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveConcurrency.cs",
+      "sha256": "35cd0ae1f97dd57e50af1598e36769be7f5051eeee4f575b99fe48269d7b378d"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveExceptionBoundary.cs",
+      "sha256": "3a245a7f74881404c186dd5fc022bd7e3a08801288a0b051bb60b5f741406f45"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveExpectations.cs",
+      "sha256": "cb7f18c13b4df5fc2ad3789a5a4e13547f6887b5edba3efcfb720063eed5ea16"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveFailure.cs",
+      "sha256": "c6d15defd4c2c8e6ca611975623de88d15d55961851349d12d1a53b5cbf0cc05"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveHash.cs",
+      "sha256": "bdf539f07c4a55e40a0402611e28d2e91cb395d255a202e4f700eb4fc4040cfa"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveMeasurement.cs",
+      "sha256": "cb9aa424134f65a38658cf9fa52041ef948cc9e892329723ccfcd5c343a6880e"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveObservedFailureException.cs",
+      "sha256": "20e9bb6c7fd46341ddd83604683d91a3975afd0a6ac9e7c6f0d40f5d0e5e1ada"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePhaseExecutor.cs",
+      "sha256": "61a71e9164ab0ff1cd4f5fc0d7392fc9315901021f199564e3b30dfd6c823b77"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePhaseResult.cs",
+      "sha256": "b41f8aaec5461c01c8a6cf148f07dfd30adcf075009d3ca0dbd69c8be04f8d7d"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePhaseWorkers.cs",
+      "sha256": "4b0a4bc7a664445b7f00e6c1a70763b940f60b75ed8ae7a6c23991c8f674a6ac"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePreparedPhase.cs",
+      "sha256": "e0390224252b98423f03e8b2df80708dd8e7ce7ca3e83c8925226bae1509f514"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveReceiptView.cs",
+      "sha256": "102cbd72ca20c5d63dd9e20ce0fe6fa7f1835a2b935eadbd4c9cfb0b864632d9"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRepetitionExecutor.cs",
+      "sha256": "b19ad91447d409562580922e15d5fb7264e6ae325c496af76b2ec93fd00eedc6"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveResponse.cs",
+      "sha256": "387de0dbf9fce678883cbe628d943acdd3db6c5e3e674927881b32e62f1c614a"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveResponseReader.cs",
+      "sha256": "f134b6c415d88c0236a022cce12a751ea8ff823333440abf324a9d15ee001bbf"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveResponseVerifier.cs",
+      "sha256": "354fb85a514182ac9a528773f5c4c25256e4a48c28fab1d75eb630dba4a12d58"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunResult.cs",
+      "sha256": "a63ed9af219244a91c4dfcae9258fc9d2b4bf3d5645c27cd0dc5d73fae7d6f95"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunState.cs",
+      "sha256": "4693bd75a73d6e77c1b54253107599ee187f8f0f6497bd295c7d5cd4a4052128"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunner.cs",
+      "sha256": "be090d7af59aab3eb3724e7aec4ed565e87a59a879e2b883ad448d6afb2a145c"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRuntimeErrors.cs",
+      "sha256": "903429d4b4d7fd518558b60be97dce28c072cbf026c67e2c3b0a1f5ab843149f"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRuntimePolicy.cs",
+      "sha256": "05eafd7bade32e49850a9728cd37822b1187409961af868c531ca93859cb48f8"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveScenario.cs",
+      "sha256": "aa286395749622fcd63a53eb3cf0248294f63ab1b8ad85add8e97113c8622fbb"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveSetupExecutor.cs",
+      "sha256": "32869c55655df86670879d21959e0038fd646a6ec2908b541e1a4e79e012f8b7"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveSummary.cs",
+      "sha256": "ed033bc3163950432a0821363e65f1be5c21c7930ac38950ee89b542b55b99d1"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveTargetContracts.cs",
+      "sha256": "8463a7f87c884f0d1dd9809bc8b5ea373c6bf84f956721d0e01cd38f4279c146"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveVerification.cs",
+      "sha256": "fe8512f0d5c845ab8a5765952ef5e31a754a4a9fd610082b7ee8ad58eb717557"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveVerificationReader.cs",
+      "sha256": "61c0e3565d0168121ab0fb9ef7de9c6cecabb453738c1d7fb290df3f22bbacad"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveWorkerPartition.cs",
+      "sha256": "0183f7448fa158c370ef43e9a224d4e3f8bf96f004fb22e887928b6e74e711fd"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedMongoInitiate.js",
+      "sha256": "0e12cc2325a091b2b2208a1ea905b6d63655d1f2562bcb2fbcb92342809cb867"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedPostgresBootstrap.cs",
+      "sha256": "f4f32c0d235f08e4e46daa969ece98a590b4950fbd67412570144af8d7cb9171"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedPostgresEntry.sh",
+      "sha256": "cf4bfdcd35d52519d09664dbc1be91da5862919bc08b40019f5fb96638ff5a51"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedPostgresReplication.sh",
+      "sha256": "11e757e19841cf4a8bec7f6e77a9a5fa66b0fd28452c8231516c182df503be10"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedPostgresResources.cs",
+      "sha256": "8c14234025c73770e6e9d1b2c2f9a1e4f4384dce5bdb1ec722475aed5cbe6781"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedDocumentResourcePostgresTests.cs",
+      "sha256": "de0df988572ade47141d0d536c813f5af0ac818f620749adb2e1b0959b28ec83"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedKeyLoadPublicRegressionMessaging.cs",
+      "sha256": "951c1aaa102e235cfdc0dcf83ec677fb2b775e7ef853d3c5cb8404364b7c7e51"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedKurrentCleanupRegression.cs",
+      "sha256": "5ac52aa5b438e56360117a1a1ba40a9052e1293910fedc571cebc06fb09dc7c9"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedKurrentCleanupRegressionGossip.cs",
+      "sha256": "1a05751a37f3021f8d11323d6bff2d4e4248118c3e19b02bf9006f50d3d9c56a"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedKurrentCleanupRegressionNative.cs",
+      "sha256": "cb1d15fa02fb2589b7f1566acc937fe7df9db8cf4cf7b801bc7e7bdf72f37517"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedNativeRegressions.cs",
+      "sha256": "12b01dff2dc7c3a076f646f22f7b4114760031cbbc909252f5d079d81061d4c4"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedPostgresSlotRegression.cs",
+      "sha256": "d8dfc5dda20e72b63b803efcbcbb74a9c5816ae9429f5e93bd21a4134f3398b3"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/KurrentCleanupDiagnosticTests.cs",
+      "sha256": "3fea26ddbd99fab5771829ae395c4ff67ef19058150e3505454d515009474ffb"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/MongoNativeAuthenticationRegression.cs",
+      "sha256": "8a7ab09fe598c984aa565952c19fc1ed24edda1baa958510f536ff1531e7371e"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/RedisNativeReadinessRegression.cs",
+      "sha256": "6e73dffe1ffb945bb35a924ec48c57febee734c36eab87bcc9f95aaf6aa25a88"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/RedisNativeReadinessRegressionConnections.cs",
+      "sha256": "e4942209f42f800d9c82a6df03b12f53fd7fb292b21ef7e0019e2a05a4d09c71"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAppendValidationTests.cs",
+      "sha256": "d4dc44b42cff469bc3d98d0942f755cc3b897504a91a82bc63583dd04200f15b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAttemptLedgerTests.cs",
+      "sha256": "84bc238aab3dee4727227872ddcc842cd0ce65f88c941f8e9fc3343fac04416d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAttemptValues.cs",
+      "sha256": "5dc8b332cdd3a2dd9dbc071015d2b8d41854c0ccd4b222bacadec8b4023b751e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveCallScopeTests.cs",
+      "sha256": "9e89ad6b955bf5e40febc08492bdd53c05e50a04af8aefce7a97e5eb9f0cef3c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveCompactEncodingTests.cs",
+      "sha256": "a46fa717e85ef3164c99a39c2ea66200dc13215e3a477b4663082b620efeab24"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveExceptionBoundaryTests.cs",
+      "sha256": "60fe875eabaf707878c2ec1bdedcec2decbccf4a964daf659109760a8287da46"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveFailureMappingTests.cs",
+      "sha256": "e483cd87f7d5e7cd7fb1808d6f0d39fe95cd46be8f7cc0bd0fa2804dd9f53a01"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveObservedFailureTests.cs",
+      "sha256": "63972040cb3ba0861beebac8908a17acb48df99aef37ef2b8311f4005d3a35fe"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePhaseEvidenceTests.cs",
+      "sha256": "3e1db2654862d857159ae97d60053cbd990986dac82629311f8c5172238ed14d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePreparedExpectationTests.cs",
+      "sha256": "729d554ad2e1b1246bfdd4459800ad1fad9b58c35f135cd0eb81739b59393592"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensivePreparedPhaseTests.cs",
+      "sha256": "2c197317e820224f101d41416e928dde2bc85c73d261f1976e1ea8f271beb134"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveSummaryTests.cs",
+      "sha256": "333aebbbdfc4908820b7c578f6456c79d614c781d1e043cbadbd0779134dd97c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveWorkerPartitionTests.cs",
+      "sha256": "b3b75cda8fd027227433b4428830d2958372b64ba3488291b501e0b19c521cbb"
+    }
+  ],
+  "remaining": [
+    "exact_SHA_full_Linux_gates",
+    "native27_and_complete270",
+    "Kurrent026KO_pre_ACK_ownership",
+    "Kurrent026KF_quorum_fault_and_drain",
+    "TimeSeries_adapters_resources_host_protocol_six_preflights_all30_site"
+  ]
+}

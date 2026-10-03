@@ -554,3 +554,139 @@ cases with replay profile and Redis/Mongo diagnostic regressions. Foreign
 cache/serialization/checkpoint/logger-lifetime changes remain visible and out
 of the scoped commit. Native pressure/control and separate TimeSeries runner/
 adapters remain explicit unqualified dependent workstreams.
+
+
+Exact2f source gates completed: run37093197474 attempt1 verify111117715444
+normal1483/scalar1483/recovery164 and analyzer118, all failures/skips/cancellations/
+timeouts/flaky0; native RF3 job111117715354 passes63/63. Original reports prove
+TS006C30 cases each normal/scalar mode and ReadRoundGuard22/Protocol4. See
+[committed-source receipt](docs/implementation/isolated-source-qualification-37093197474.json).
+This completes the TS006C source/correctness join; new TS007B source, comparison
+diagnostics, native27/270, TimeSeries6/30 and site remain separate pending gates.
+
+
+Exact2f comparison-images job111119723225 passes. Original per-invocation log
+qualifies ImageBundle1/currentJob1/resourceModels77/httpAdmission2/logBuffer1,
+replayAdmission4/RedisDiagnostics22/MongoDiagnostics25/replayGrammar42/
+replayRetention9 and legacyTimeSeries3/packageVersion1, all no failures/skips.
+See source receipt for original log hash and distinct-invocation counts.
+TASK-ISO-020RM diagnostics and TASK-ISO-023L grammar/retention source cases
+are qualified; actualRedis/Mongo faults and nativeKeyLoad pressure are separate
+27 preflights now running. Full270/cohort/site remain pending.
+
+
+| Task | REQ/AC / owner / permission | Dependencies / artifacts / verification / join |
+|---|---|---|
+|TASK-ISO-026K|BC053/055,ISO004/005; root integration owner, narrow existing Messaging oracle only|Original2f RF1 stream canonical payload failure retained after50000 successful reads; ADR056 accepted before fix. Correct three returned-payload expectations, preserve unsorted requests and every assertion. Full source gates then exact-SHA real native1/2/3 SDK/MCP/SQL; no local tests. Root owns join.|
+|TASK-ISO-026PG|BC052/055,ISO002/003/006; build_action_review capable read-only|Original2f PostgreSQL n3 bootstrap fails requested WAL segment already removed, n1/n2 success. Retain provider/raw/log hashes; inspect genuine native slot/retention contract before any root shared-bootstrap writes. No retry/deadline/assertion weakening.|
+
+- [ ] 026K RF1 stream assertion: initial repair covered documents only; extend
+  independent canonical expectations to stream and queue inspection/delivery.
+- [ ] 026PG native PostgreSQL3 bootstrap: WAL000000010000000000000002 removed
+  before pg_basebackup completed; native retention root cause/repair proof pending.
+
+
+| Task | REQ/AC / owner / permissions | Dependencies and join |
+|---|---|---|
+|TASK-ISO-026R|BC052/055,ISO002/003/006; gates_audit inherited capable; two frozen Redis files and NEW native readiness regression only|Accepted ADR056/AC before write. Original2f link handshake failure retained; tests first, copy-before-final-proof and INFO link guard inside original60s/200ms barrier. Root joins native helper in existing per-engine job, reviews source/build/format, delivers and qualifies native1/2/3; no Git/local runtime/workflow rights.|
+
+- [ ] 026R Redis2/3 initial sync: final strict proof ran before bounded copy
+  observation; preserve exact native predicates and qualify ordered readiness.
+
+
+TASK-ISO-026PG root accepted repair after read-only actual WAL diagnosis.
+Root serialized shared bootstrap/resources/shell/models/native-regression join;
+0/1/2 early physical slots and existing-slot recovery with native512MB retention.
+Tests first, source gates then genuine1/2/3 parallel bootstrap and WAL cut proof.
+No public persistence/API migration or production topology change.
+
+- [ ] Native reserved-slot source/models/WAL-cut regression and root review.
+- [ ] Exact-SHA original PostgreSQL3 bootstrap and1/2/3 slot qualification.
+
+
+| Task | REQ/AC / owner / permission | Dependencies and join |
+|---|---|---|
+|TASK-ISO-026M|BC052/055,ISO002/003/006; gates_audit inherited capable; existing Mongo native shell auth and NEW auth regression only|Native20245 cleared-user event and13Unauthorized original2f proof; accepted ADR056 before write. Tests first, bound cached objects and renew actualauth in existingpoll. Root joins existingper-engine native selector, reviews/builds/delivers/qualifies actual1/2/3. No localruntime/Git/workflow/docs/other edits.|
+
+- [ ] 026M Mongo2/3 stale authenticated native shell after initial-sync UUID
+  replacement; renew real auth and qualify unchanged strict membership/copies.
+
+
+Exact2f terminal baseline:27 native preflights finish16 job successes and11
+failures, with two unavailable Neo4j Community topologies among the successes.
+Actual Qdrant/Rabbit/OpenSearch1/2/3 and PostgreSQL1/2/Mongo1/Redis1 succeed.
+KeyLoad1/2/3 and Kurrent1/2/3 each complete50000 intensive operations with0
+failures, but later public-oracle/target-disposal errors invalidate those jobs.
+Retain every failed result; full270/aggregation/site remain unqualified.
+
+- [x] 026K all three returned Messaging payload expectations corrected in source.
+- [x] 026R reviewed source ordering/link guard and genuine copy/cancel helper joined.
+- [x] 026PG early0/1/2 permanent slots, bounded native setting, models and native
+  WAL-switch/checkpoint/copy-cut regression authored/joined. Source build pending.
+- [ ] 026KC Kurrent1/2/3 disposal after complete measurements: specific cleanup
+  native error not yet visible; do not call it a proved timeout from timing alone.
+
+
+| Task | REQ/AC / owner / permissions | Dependencies and join |
+|---|---|---|
+|TASK-ISO-026KC|BC054/055,ISO005/006; build_action_review inherited capable; two frozen existingKurrent files, NEW cleanup/diagnostic/native regressions only|Original2f all50000successfulthenproveddisposal failure; acceptedADR056 beforewrite. Testsfirst,16originalcleanupworkers under20s/30s, fullack/drain/disposal/error preservation. Rootselectorjoin/review/sourcegates/native1/2/3, no localruntime/Git/workflow/docs.|
+
+- [x] 026KC bounded cleanup/closed diagnostics and small native oracle source complete; nine TUnit cases and Kurrent StreamAppend1/2/3 selector joined. Native execution remains pending.
+- [ ] 026KO separate pre-ACK stream ownership: real same-prefix conflict and
+  unknown-ACK behavior must preserve foreign data; exact contract still pending.
+- [ ] 026KF genuine quorum-loss cleanup fault/drain: exact timing/ownership
+  contract and native evidence pending; no fault behavior claim from source.
+
+
+026 source join complete development build records0warnings/four errors:
+
+- [x] Root selector KLD0033: else-if accumulation counted nesting5; use closed
+  switch cases with identical target/PointRead conditions and original flows.
+- [x] Root native slot helper CA2100: remove arbitrary SQL helper parameter;
+  instantiate only the two exact constant native commands.
+- [ ] Foreign ongoing ZoneTreePointCacheOwnerGateHold CA1822 and
+  ZoneTreePointCacheOwnerIdentityTests IDE0005: preserved outside owned scope.
+  No qualification claim until actual integrated and exact delivered source pass.
+
+
+## Original current-main baseline 2ec / run37093992229
+
+Exact source2ecbeee4d7b969129b93346d2863d50072976a68, attempt1.
+Source build/format pass; normal1522/1539, recovery164/164 and analyzer118/118.
+RF362/63; scalar and downstream native comparison gates skipped.
+See [original receipt](docs/implementation/isolated-current-main-baseline-37093992229.json).
+
+Each original failure remains tracked until a causal repair and exact-SHA
+qualification exists. Concurrent fixture/queue repairs are outside this
+comparison source scope; preserve them and join their delivered evidence.
+
+- [ ] ZoneTreePointCacheCoherenceTests.SameCutCompactionRetainsWarmEntriesButSnapshotReplacementAndReopenAreCold: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheCoherenceTests.StagedPutDeleteResetAndRejectedCompilerCannotWarmOrChangeCommittedValues: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheCoherenceTests.ChangedApplyInvalidatesAWhileUnrelatedWarmBRemains: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheFillLifetimeTests.DuplicateConcurrentFillsKeepBothCandidatesChargedAndReleaseTheLoser: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheFillLifetimeTests.PinnedLruVictimStaysChargedAndNewValueFallsBackToNative: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheReadTests.BorrowedWarmReadPreservesLogicalObserverChargeAndCapturedKeyMutationCannotRebindFill: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheReadTests.ColdOwnedReadWarmsExactKeyAndWarmOwnedReadReturnsIndependentBytes: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheReadTests.EmptyPositiveValueWarmsWhileMissingAndTombstoneRemainNativeMisses: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheCapacityTests.OversizedKeyValueAndUnavailableIndexReturnNativeBytesWithoutRetention: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheCapacityTests.TwoStoresShareTheExactPoolEntryCapAndResumeAdmissionAfterOwnerDisposal: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheCapacityTests.ClearAndDisableKeepIndexChargeUntilActualStoreDisposal: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheCapacityTests.SeventeenPinnedVictimsBoundOneAdmissionToSixteenAttempts: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheLifetimeTests.DisableDuringPinnedBorrowRetiresEntryUntilBorrowerReleases: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheLifetimeTests.ReaderAndObserverFailuresReleasePinsAndCandidatesBeforeHealthyReads: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreePointCacheDeletionTests.WarmDeleteMissesNativeTwiceThenDifferentReinsertIsColdAndWarmsCorrectly: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ZoneTreeCoordinatedPointCacheReadTests.ReadyReceiptIsIdempotentAndWarmOwnedReadsReturnIndependentCopies: actual TUnit Byte-to-Int32 assertion conversion. Intended path: typed byte assertion in its owning cache fixture scope; no cache-value corruption conclusion.
+- [ ] ZoneTreePointCacheAuthorizationTests.WarmRawPrincipalAndCredentialBytesNeverBypassExpiryOrRevocationChecks: actual fixture OpenStoreAt identity rejection. Intended path: preserve and correct fixture persisted cluster identity in its owning cache scope.
+- [ ] ClusterTests(ClusterFixture).ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites: actual queue Receive HTTP503/UnknownWriteOutcome after leader kill; original Orleans RPC cancellation observed, deeper quorum/term/apply cause unresolved. Intended path: causal public queue/leader-loss repair and exact RF3 fault proof.
+
+
+| Task | REQ/AC / owner / permissions | Dependencies and join |
+|---|---|---|
+|TASK-ISO-026-JR|BC054/055/062/064,ISO005/006,TSI004/008; gates_audit capable, read-only integration review|Frozen worker source joined by root: review only six root runner repairs and native selector against accepted contracts, actual file hashes and TUnit assertions. No code/docs/Git/build/runtime writes. Report concrete blockers or complete with reviewed inventory; root owns final source and exact-SHA qualification.|
+
+- [x] 026-JR final root runner/native selector source review complete; seven file hashes and meaningful17-case subinventory checked, native qualification pending.
+- [ ] 026 source-only milestone: owned HEAD projection build/format/governance, preserved foreign tree, scoped main commit/push, exact run capture.
+
+|TASK-ISO-026KO-R|BC054/055,ISO005/006; build_action_review capable, read-only stream ownership planning|Frozen026KC source complete. Inspect every actual TrackStream/NoStream append path and pinned native SDK conflict/unknown-ACK contract. Propose exact ownership and real same-prefix foreign-data/unknown-outcome test contract, disjoint write scopes and root joins. No edits, tests, builds, runtime or Git. Root freezes ADR056 before implementation.|
+
+Root combined development build after the final selector join passes0warnings/0errors (21.74s). This includes current concurrent source and is not test/native qualification; an owned HEAD projection is required before the scoped milestone commit. The foreign CA1822/IDE0005 findings are absent from this build but their owning delivered-source qualification remains pending.

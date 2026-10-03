@@ -17,6 +17,13 @@ public sealed class ZoneTreePointCacheControl
     /// <summary>Gets this nonpersisted local configuration generation, excluding physical readiness claims.</summary>
     public Guid RuntimeId { get; }
 
+    /// <summary>Attempts a zero-wait actual physical owner and health observation.</summary>
+    /// <param name="identity">Actual nonsecret identities for Healthy; default for failure or closure.</param>
+    /// <returns>Healthy, Busy or Closed; native recovery failures remain exceptions.</returns>
+    /// <remarks>Healthy is an observation, not full silo readiness, read authority or remote lease eligibility.</remarks>
+    public ZoneTreePointCacheOwnerStatus TryReadOwnerIdentity(out ZoneTreePointCacheOwnerIdentity identity)
+        => ZoneTreePointCacheOwnerObservation.TryRead(runtime, state, RuntimeId, out identity);
+
     /// <summary>Attempts exact eligible binding under a zero-wait physical storage writer.</summary>
     /// <param name="acceptance">Complete local receipt returned by this owner's fixed permit.</param>
     /// <returns>Applied, AlreadyApplied, Busy, Rejected, Unavailable or Closed.</returns>

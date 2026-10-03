@@ -491,6 +491,14 @@ in source, with coherence fences and real-file regression cases. Server RF3
 composition remains cold while the authenticated cluster-control contract and
 implementation remain open. ADR-058 R69 approves only a local opened-store
 factory, exact accepted-receipt validation and finite binding prerequisites.
+R81 adds a zero-wait actual canonical owner/health observation returning only
+NodeId/incarnation/control RuntimeId. It cannot certify full silo readiness or a
+lease; native poison and physical storage ownership remain authoritative.
+The accepted [R82 v1 contract](Features/ResourceExecution/CacheControlV1.md)
+adds only unused immutable generated metadata and bounded shape/transcript/
+authentication/correlation primitives under Orleans/Features/ResourceExecution.
+Dedicated bytes and exact original-request binding preserve existing database
+and replica formats; source/native implementation qualification is pending.
 Positive point-value caches remain disposable provider state; logical policy grains and actual
 per-silo services must authenticate physical host IDs and leases before cluster
 admission. They never move files/handles or replace current authorization/read
@@ -517,6 +525,7 @@ classDiagram
         IsCurrentAcceptance(receipt)
     }
     class ZoneTreePointCacheControl {
+        TryReadOwnerIdentity(identity)
         TryApply(receipt)
         Retire(withdrawnRevision)
         CloseAdmission()
@@ -525,6 +534,9 @@ classDiagram
     ZoneTreeStoreRuntime --> ZoneTreePointCacheLifecycle
     ZoneTreePointCacheLifecycle --> ZoneTreePointCacheControl
     ZoneTreePointCacheControl --> ZoneTreePointCacheControlState
+    ZoneTreePointCacheControl --> ZoneTreePointCacheOwnerObservation
+    ZoneTreePointCacheOwnerObservation --> ZoneTreePointCacheOwnerIdentity
+    ZoneTreePointCacheOwnerObservation --> ZoneTreeStoreRuntime : actual reader and health
     ZoneTreePointCacheControlState --> ICacheReadPermit
     ZoneTreePointCacheControlState --> ZoneTreePointCacheBinding
     ZoneTreePointCacheBinding --> ZoneTreePointCache
@@ -633,3 +645,17 @@ response after synchronous verification and retain only50000 compact value
 records; wall throughput includes validation. Real target adapters own transport
 drain, the host owns namespace/resources and the original cell lifetime. The
 source stage does not establish the separate6/30 native family or site evidence.
+
+
+```mermaid
+classDiagram
+    class ITimeSeriesIntensiveTarget
+    class TimeSeriesIntensiveRunner
+    class TimeSeriesIntensivePhaseExecutor
+    class TimeSeriesIntensiveAttemptLedger
+    class TimeSeriesIntensiveRunResult
+    TimeSeriesIntensiveRunner --> ITimeSeriesIntensiveTarget : borrows
+    TimeSeriesIntensiveRunner --> TimeSeriesIntensivePhaseExecutor : five repetitions
+    TimeSeriesIntensivePhaseExecutor --> TimeSeriesIntensiveAttemptLedger : sixteen loops
+    TimeSeriesIntensiveAttemptLedger --> TimeSeriesIntensiveRunResult : compact attempts
+```

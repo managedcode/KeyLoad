@@ -72,12 +72,24 @@
       "runtimeTestsExecuted": false,
       "approvalRequired": "Explicit consent for codec persisted formats, KLT2 token invalidation and homogeneous replica2 rollout after automatic approval rejection.",
       "open": [
-        "Strict native pre-admission and remaining full joins",
-        "Offline old-store conversion",
-        "Complete exact-source native mandatory gates",
-        "Measured performance"
+        "Direct persisted-format/token/homogeneous replica rollout consent after automatic approval rejection",
+        "Qualified offline old-store conversion and reverse/rollback tooling",
+        "General nested native type/reference/default/count/decoded-memory/work bounds",
+        "Complete exact-source native mandatory GitHub gates",
+        "Measured performance and fault evidence"
       ],
-      "activeRuntime": "Previous typed persistence/metadata/wire formats held; qualified WAL source unchanged by hold. Native runtime candidates and exact pre-images remain staged separately."
+      "activeRuntime": "Previous persistence/claims/metadata/wire formats held under the executed source hold; qualified WAL source unchanged. Complete native candidate is joined and statically compiled separately, with moving unrelated work excluded from its review delta.",
+      "candidateStaticValidation": {
+        "scope": "Exact captured TMP source closure only; not latest owner source",
+        "projectsCompiled": 25,
+        "warnings": 0,
+        "errors": 0,
+        "ownerAnalyzersEnabled": true,
+        "fullFormatter": "passed",
+        "reviewPatchSha256": "0cf3f82068c9deeb596199ca96698a430371ba08fdd5fd32ccdf4c7d887af4e0",
+        "sourceClosureSha256": "a75b363ed0d0869c7700fa3129499571ec1b27f01f8f4f2843ea1129af80dd02",
+        "freshRebaseRequired": true
+      }
     }
   },
   "KL-004": {
@@ -560,13 +572,17 @@
       "docs/design/command-admission.md"
     ],
     "disposableCacheWorkstream": {
-      "status": "local_source_reviewed_build_format_passed_native_qualification_pending",
+      "status": "source_repairs_development_gates_passed_new_native_qualification_pending",
       "decision": "docs/ADR/ADR-058-orleans-coordinated-cache-memory.md",
       "slice": "ResourceExecution",
       "pool": "one_node_owned_atomic_modeled_retained_bytes_entries_idempotent_reservations",
       "providerStage": "explicit_embedded_positive_point_values_index_pins_fills_charged_per_key_apply_invalidation_snapshot_generation_cold_recovery",
-      "localBindingStage": "R79_source_integrated_opened_store_factory_complete_receipt_binding_zero_wait_writer_pre_drain_close_safe_disposal_entry_real_tests_native_gates_pending",
-      "sourceReceipt": "docs/implementation/cache-memory-source-r79.json",
+      "localBindingStage": "R83_source_integrated_opened_store_factory_complete_receipt_binding_zero_wait_writer_owner_observation_pre_drain_close_safe_disposal_entry_real_tests_native_gates_pending",
+      "sourceReceipt": "docs/implementation/cache-memory-source-r83.json",
+      "nativeBaseline": "docs/implementation/runtime-qualification-37093992229.json",
+      "physicalOwnerStage": "R81_actual_nonsecret_local_owner_zero_wait_gate_observation_source_reviewed_native_pending",
+      "nativeFixtureRepairs": "R83_null_vs_empty_test_key_projection_and_typed_byte_oracle_source_only_next_SHA_required",
+      "wireStage": "R82_exact_contract_accepted_unused_primitive_implementation_and_native_proof_pending",
       "clusterStage": "disabled_pending_authenticated_Orleans_physical_store_silo_policy_lease_and_real_RF3_tests",
       "metrics": "modeled_retention_distinct_from_native_lookup_allocations_RSS_no_speed_claim",
       "gates": "complete_exact_SHA_build_format_unit_scalar_recovery_RF3_coverage_and_matched_profiles_pending"
@@ -2211,7 +2227,7 @@
       "independentEvidenceFreshnessBeforePagesDeployment"
     ],
     "pending": [
-      "repair10AuthenticPreflightFailuresAndRerunExactSource",
+      "repair11AuthenticPreflightFailuresAndRerunExactSource",
       "realSDKMCPFixedMembershipFaultProofs",
       "exactSHAFullLinuxRequiredGates",
       "actualComplete270CellIntensiveCohort",
@@ -2232,11 +2248,11 @@
       "limits": "Historical all-OS verification passed; RF3 59/60 and comparison failed. This is not an isolated intensive cohort."
     },
     "latestBaseline": {
-      "sourceRevision": "b47409e73427c1394ccf705f398a541f2e7cb08b",
-      "runId": 37087909605,
-      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37087909605",
+      "sourceRevision": "2f374fc34276b5915bda92f629ec42f2925891c2",
+      "runId": 37093197474,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37093197474",
       "conclusion": "failure",
-      "limits": "Full Release/format/governance, analyzer118, normal/scalar1407, recovery138 and RF363 pass with zero skips. All27 native preflights completed:17 job successes and10 failures (KeyLoad1/2/3,Redis2/3,Mongo2/3,KurrentDB1/2/3); full270 and aggregation skipped. No new site performance publication or winner is qualified. The earlier RF3 survivor-window failure remains unresolved; a passing repeat is not a causal repair."
+      "limits": "Exact source, analyzer118, normal/scalar1483, recovery164, RF363 and comparison-images pass without skips. Native27 completed:16 job successes (two explicit unavailable Neo4j topologies),11 failures:KeyLoad1/2/3,Redis2/3,Mongo2/3,PostgreSQL3,KurrentDB1/2/3. KeyLoad and Kurrent each complete50000 measured operations per topology, but later public-regression/cleanup failures invalidate their jobs. Complete270/aggregation/site are unqualified; earlier survivor-window flake remains unresolved."
     },
     "sourceEvidence": "docs/implementation/isolated-comparison-source-qualification.json",
     "intensiveTimeSeries": {
@@ -2252,17 +2268,21 @@
       "completeMeasuredFamily": false,
       "nativeFactsReceipt": "docs/implementation/timeseries-image-qualification-37086903497.json",
       "pureCorpusOracleDigest": {
-        "state": "source_authored_exact_SHA_qualification_pending",
+        "state": "qualified_30_cases_each_full_normal_scalar_at_exact2f_run37093197474",
         "tasks": [
           "TASK-ISO-TS006C",
           "TASK-ISO-TS006C-R"
         ],
         "nativeRunnerAndAdaptersImplemented": false,
-        "measuredPerformanceClaim": false
+        "measuredPerformanceClaim": false,
+        "qualificationReceipt": "docs/implementation/isolated-source-qualification-37093197474.json",
+        "nextSourceTask": "TASK-ISO-TS007B_D_47_source_files_36_declared_cases_prepared_native_adapters_family_pending",
+        "runnerSourcePrepared": true,
+        "runnerDeclaredCases": 36
       }
     },
     "sourceRepairs": {
-      "state": "source_authored_exact_SHA_qualification_pending",
+      "state": "accepted_026_native_repairs_source_prepared_exact_SHA_qualification_pending",
       "tasks": [
         "TASK-ISO-019J",
         "TASK-ISO-020RM",
@@ -2270,10 +2290,33 @@
         "TASK-ISO-021T",
         "TASK-ISO-022K",
         "TASK-ISO-023L",
-        "TASK-ISO-023Q"
+        "TASK-ISO-023Q",
+        "TASK-ISO-026K",
+        "TASK-ISO-026R",
+        "TASK-ISO-026PG",
+        "TASK-ISO-026M",
+        "TASK-ISO-026KC"
       ],
       "contracts": "isolated-comparisons.acceptance.md",
-      "limits": "Canonical document oracle, strict application/control read separation, bounded original native diagnostics, exact gossip build identity and explicit GitHub regression selection await genuine repaired-source qualification."
+      "limits": "Exact2f source/diagnostic gates pass; native27 ends16 success11 failure. Accepted026K/026R/026PG/026M/026KC corrections and real native regressions are source-prepared. Combined development build passes0warnings/0errors; delivered-SHA full Linux and native1/2/3 reruns remain pending. Disposal-specific inner cause in the original Kurrent failures remains unobserved; no complete270/site proof."
+    },
+    "latestSourceQualification": {
+      "sourceRevision": "2f374fc34276b5915bda92f629ec42f2925891c2",
+      "runId": 37093197474,
+      "runAttempt": 1,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37093197474",
+      "receipt": "docs/implementation/isolated-source-qualification-37093197474.json",
+      "sourceGates": "passed_full_Release_format_governance_analyzers118_normal1483_scalar1483_recovery164_RF3_63_all_no_skips",
+      "wholeWorkflowAtCapture": "completed_failure_native27_16_job_success11_failure_270_skipped"
+    },
+    "latestObservedCurrentMainBaseline": {
+      "sourceRevision": "2ecbeee4d7b969129b93346d2863d50072976a68",
+      "runId": 37093992229,
+      "runAttempt": 1,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37093992229",
+      "conclusion": "failure",
+      "receipt": "docs/implementation/isolated-current-main-baseline-37093992229.json",
+      "limits": "Original normal1539:1522pass17fail0skip (16 fixture identity errors,1 actual Byte-to-Int32 TUnit conversion); RF363:62pass1fail0skip at queue receive UnknownWriteOutcome. Recovery164/analyzer118 pass. Scalar and native comparison/image jobs skipped; current dirty repairs and future exact-SHA proof remain separate."
     }
   }
 }

@@ -37,7 +37,7 @@ internal static class IsolatedKeyLoadPublicRegressionMessaging
         var official = await mcp.SuccessAsync<StreamPage>(SqlOperationProtocol.ToolName, sql, token);
         await Assert.That(native.Events).HasSingleItem();
         await Assert.That(native.Events[0].Data.EventId).IsEqualTo(scenario.EventId);
-        await Assert.That(native.Events[0].Data.PayloadJson).IsEqualTo(scenario.InitialJson);
+        await Assert.That(native.Events[0].Data.PayloadJson).IsEqualTo(scenario.InitialStoredJson);
         await Assert.That(native.Events[0].Revision).IsEqualTo(1L);
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(native.Events, official.Events);
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(native.Head, official.Head);
@@ -55,7 +55,7 @@ internal static class IsolatedKeyLoadPublicRegressionMessaging
         await Assert.That(before!.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(before.Metadata.Attempts).IsEqualTo(0);
         await Assert.That(before.Metadata.LeaseOwner).IsNull();
-        await Assert.That(before.PayloadJson).IsEqualTo(scenario.InitialJson);
+        await Assert.That(before.PayloadJson).IsEqualTo(scenario.InitialStoredJson);
         var sql = IsolatedKeyLoadPublicRegressionProtocol.Call(scenario.Partition, IsolatedKeyLoadPublicRegressionProtocol.Inspect, request);
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(before,
             await mcp.SuccessAsync<MessageInspection>(SqlOperationProtocol.ToolName, sql, token));
@@ -72,7 +72,7 @@ internal static class IsolatedKeyLoadPublicRegressionMessaging
         await Assert.That(received.Deliveries).HasSingleItem();
         var delivery = received.Deliveries[0];
         await Assert.That(delivery.Id).IsEqualTo(scenario.MessageId);
-        await Assert.That(delivery.PayloadJson).IsEqualTo(scenario.InitialJson);
+        await Assert.That(delivery.PayloadJson).IsEqualTo(scenario.InitialStoredJson);
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(received,
             await mcp.SuccessAsync<ReceiveResult>(IsolatedKeyLoadPublicRegressionProtocol.Receive, request, token));
         var leased = await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.InspectAsync(scenario.Inspect, token));

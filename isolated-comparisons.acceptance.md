@@ -992,3 +992,45 @@ The job's retained original results/logs must show every selected case executed
 at the repaired SHA before the dependent27 preflights and full270 can qualify.
 Rollback removes only this additive selection step with its coherent test unit.
 ADR remains Accepted until every source and actual runtime gate exists.
+
+
+TASK-ISO-026K AC-ISO-004/005 clarification: deliberately unsorted submitted
+JSON remains the request fixture, while exact persisted document, stream,
+message inspection and leased-delivery payloads must all match the independently
+specified canonical stored constant. Never normalize returned output to hide
+defects. Real SDK/MCP/SQL native1/2/3 regression is mandatory; original2f RF1
+stream assertion fails after50000 successful reads and is retained as baseline.
+
+
+TASK-ISO-026R AC-ISO-002/003/006: initial native Redis sync may be pending
+inside the existing bounded setup observation. Positive readiness requires
+actual copies followed by every strict INFO/ROLE/AOF/native identity check.
+Link-down does not permit GET or success; malformed/native errors still fail.
+Real isolated1/2/3 preflights plus RedisNativeReadinessRegression exercise
+a private native probe and replicated absent-probe caller cancellation without
+configuration changes, fake dependencies or measured retries.
+
+
+TASK-ISO-026PG AC-ISO-002/003/006: actual isolated PostgreSQL topology must
+reserve exactly nodeCount-1 named permanent physical slots before initial
+parallel backups, use them in standby recovery, and limit slot retention via
+actual512MB max_slot_wal_keep_size. Native bootstrap1/2/3 and new slot/WAL-switch/
+checkpoint/flush/replay regressions are required; model settings alone do not
+prove native retention. Invalid selections, lost slots and missed copy cuts fail.
+
+
+TASK-ISO-026M AC-ISO-002/003/006: actual Mongo bootstrap must renew
+authorization on bounded cached shell objects after initial-sync user UUID
+replacement, retaining original timeout and strict voting/copy contracts.
+Isolated1/2/3 native setup and MongoNativeAuthenticationRegression require
+actual authenticated ping/usersInfo on every direct node and equal persisted
+user UUIDs, never credentials or fake/normalized auth success.
+
+
+TASK-ISO-026KC AC-ISO-005/006: complete native append samples do not qualify
+a job with failed target disposal. Cleanup uses <=16 original workers,20s
+aggregate/30s host bounds, actual native deletion ACKs and drained tasks; every
+owned client disposal is attempted with original failure retained. Pure closed
+diagnostic tests plus actual55378-stream teardown and small genuine SDK delete/
+foreign-preservation regression execute on each1/2/3 topology. Pre-ACK ownership
+collision and genuine quorum-loss fault drain remain separately tracked gaps.

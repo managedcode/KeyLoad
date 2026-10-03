@@ -120,8 +120,8 @@ work. Tests-only expected records are algorithm inputs, never service doubles.
 
 - [x] Independent source/mathematical/digest proposal complete and reviewed.
 - [x] Root freezes acceptance refinements and exact ordered framing contract.
-- [ ] Tests first for seed/order/endpoints/goldens/finite/tags/framing invariance.
-- [ ] New pure corpus/plans/oracle/streaming workload and actual-result digests.
+- [x] Tests first for seed/order/endpoints/goldens/finite/tags/framing invariance.
+- [x] New pure corpus/plans/oracle/streaming workload and actual-result digests.
 - [ ] Root combined review/source gates and genuine normal/scalar native results.
 
 
@@ -131,7 +131,7 @@ work. Tests-only expected records are algorithm inputs, never service doubles.
 
 - [x] Root fully reviewed original16 production/10 test files and framing/formulas.
 - [x] Freeze bounded validation-cost correction and independent oracle test gaps.
-- [ ] Corrected unit reviewed/built; actual normal/scalar source cases qualified.
+- [x] Corrected unit reviewed/built; actual30 normal/scalar source cases qualified at2f/run37093197474.
 
 
 TASK-ISO-TS006C-R terminal source join: root reviewed all33 new files and the
@@ -153,6 +153,35 @@ is disjoint from active foreign serialization/cache/log work. Root alone owns
 contracts shared outside this new internal unit, docs, orchestration and evidence.
 
 - [x] TS007R read-only proposal complete; root froze exact bounded source packet.
-- [ ] TS007B acceptance-derived pure regressions first, source runner and full diff join.
+- [x] TS007B acceptance-derived source regressions and full runner diff join:47 files,36 new declared cases; source-only.
 - [ ] TS007B exact-SHA source and normal/scalar/recovery gates.
 - [ ] Real SDK/Npgsql16-worker lifetime/deadline/late-success/drain/wall/readback proof.
+
+
+Exact2f source gates completed: run37093197474 attempt1 verify111117715444
+normal1483/scalar1483/recovery164 and analyzer118, all failures/skips/cancellations/
+timeouts/flaky0; native RF3 job111117715354 passes63/63. Original reports prove
+TS006C30 cases each normal/scalar mode and ReadRoundGuard22/Protocol4. See
+[committed-source receipt](docs/implementation/isolated-source-qualification-37093197474.json).
+This completes the TS006C source/correctness join; new TS007B source, comparison
+diagnostics, native27/270, TimeSeries6/30 and site remain separate pending gates.
+
+
+| Task | REQ/AC / owner / permission | Dependencies and join |
+|---|---|---|
+|TASK-ISO-TS007B-D|BC062/064,TSI004/008; gates_audit capable; ten frozen NEW runner/test files plus four NEW observed-failure/phase-evidence files only|Independent review identifies deadline classification, pre-invocation cancellation, weak failed-attempt percentile discrimination and lost completed-phase evidence on final readback failure. Accepted ADR059 before writes; tests first, preserve primary native/fatal original tasks and compact codes; root full diff/source/GitHub/native join.|
+
+- [ ] TS007B-D originalsetup/readback deadline classification with native facts.
+- [ ] TS007B-D cancelled entry remains NotStarted without invoking a target or publishing latency.
+- [ ] TS007B-D percentile regression distinguishes inclusion of a failed low-ranked attempt.
+- [ ] TS007B-D completed warmup/measured evidence survives a nonfatal final-readback failure.
+- [ ] Root TS007B-D measured-entry failure retains the completed warmup and no unobserved measured phase; tests first, source review, exact-SHA/native join.
+
+| Task | REQ/AC / owner / permissions | Dependencies and join |
+|---|---|---|
+|TASK-ISO-TS008TR-R|BC060/061/062, TSI002/003/004/005/008; gates_audit capable, read-only native SQL/lifecycle planning|Start after the frozen TS007B-D source packet. Inspect actual owned lifecycle, typed target interface, PostgreSQL/Npgsql contracts and prior proposal. Produce exact parameter/result SQL, identity/counter/transaction/cancellation/schema ownership and negative/native-test contract with source references and unresolved choices. No code/docs/Git/runtime writes. Root freezes the required ADR implementation contract before any native adapter or lifecycle implementation.|
+|TASK-ISO-TS008K-R|BC060/061/062, TSI002/003/004/005/006/008; publisher_archive_review capable, read-only public SDK adapter planning|Start after original current-main baseline diagnosis completes. Inspect real SDK operation/receipt/error/transport lifetimes and native fixed-member proof. Propose exact constructor/context, five operation bindings, bounded seed/append, response ownership and native negative/cancellation tests. Preserve persisted authority and legacy RF3 contract. No code/docs/Git/runtime writes. Root approves the ADR implementation contract and shared joins before adapter implementation.|
+
+The native SQL workstream can be planned independently of the Kurrent cleanup
+source join and current-main failure diagnosis. Shared schema lifecycle, resource
+topology and future family evidence joins remain solely owned by root.

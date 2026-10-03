@@ -91,37 +91,34 @@ public sealed class KurrentTarget : IComparisonTarget
     /// <returns>A value task that completes when cleanup and client disposal finish.</returns>
     public async ValueTask DisposeAsync()
     {
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(KurrentConstants.CleanupTimeoutSeconds));
+        using var cleanup = new KurrentCleanupOperation(ownedStreams.Keys.ToArray(), CancellationToken.None);
         try
         {
-            if (writer is not null)
-            {
-                foreach (var stream in ownedStreams.Keys)
-                {
-                    await writer.DeleteAsync(stream, StreamState.Any, cancellationToken: cleanup.Token);
-                }
-            }
+            await cleanup.DeleteAsync(writer);
         }
         finally
         {
-            foreach (var client in ownedClients)
+            var otherClients = ownedClients.Where(client => !ReferenceEquals(client, writer)).ToArray();
+            var disposals = cleanup.StartDisposals(otherClients, nodeHttpClients);
+            var writerDisposal = Task.CompletedTask;
+            try
             {
-                if (ReferenceEquals(client, writer))
+                if (writer is not null)
                 {
-                    await writer!.DisposeAsync();
-                }
-                else
-                {
-                    await client.DisposeAsync();
+                    writerDisposal = writer.DisposeAsync().AsTask();
                 }
             }
-
-            foreach (var client in nodeHttpClients)
+            finally
             {
-                client.Dispose();
+                try
+                {
+                    await cleanup.FinishAsync(disposals, writerDisposal);
+                }
+                finally
+                {
+                    ownedClients.Clear();
+                }
             }
-
-            ownedClients.Clear();
         }
     }
 

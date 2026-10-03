@@ -442,3 +442,20 @@ flowchart LR
     Verify --> Raw[Immutable30 cell family]
     Raw --> Site[Authenticated separate TimeSeries metrics]
 ```
+
+
+Native baseline repair traceability is frozen in ADR056 TASK-ISO-026K/R/PG/M:
+REQ-BC-052/053/055 map to AC-ISO-002/003/004/005/006, original failing GitHub
+jobs and new genuine per-engine SDK/Redis-copy/PostgreSQL-slot/Mongo-auth
+regressions. Root joins these only in each selected engine's isolated topology
+job. The [exact2f source/native receipt](../implementation/isolated-source-qualification-37093197474.json)
+distinguishes passing source gates from11 failed native jobs and skipped270.
+Repairs are source implementation until same-SHA real native reruns pass; no
+site metrics or performance verdict follow from incomplete measurements.
+Current-main original baseline is separately retained in
+[run37093992229 receipt](../implementation/isolated-current-main-baseline-37093992229.json).
+Exact2ec normal units have17 failures and RF3 has one queue-receive
+UnknownWriteOutcome; scalar and native comparisons are skipped. This does not
+erase the successful exact2f source gate or qualify the new repairs. Fixture
+identity/typed-assertion and queue fault work require their own causal repairs
+and final delivered-source GitHub proof.

@@ -20,12 +20,13 @@ internal sealed class ZoneTreeCoordinatedPointCacheFileFixture : IDisposable
     internal ZoneTreeCoordinatedPointCacheFileFixture(CacheMemoryLimits? limits = null)
         => Budget = new CacheMemoryBudget(limits ?? new CacheMemoryLimits());
 
-    internal ZoneTreeStore OpenStore(int maxEntries = 8, bool embedded = false)
+    internal ZoneTreeStore OpenStore(int maxEntries = 8, bool embedded = false,
+        Action<CommitStage, long, int>? faultObserver = null)
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref disposeStarted) != 0, this);
         var directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(DirectoryTokenFormat));
         directories.Add(directory);
-        var options = new ZoneTreeStoreOptions(directory);
+        var options = new ZoneTreeStoreOptions(directory) { FaultObserver = faultObserver };
         if (embedded)
         {
             options = options with { EmbeddedPointCache = CreateOptions(maxEntries) };

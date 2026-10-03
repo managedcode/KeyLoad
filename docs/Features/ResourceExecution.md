@@ -38,12 +38,12 @@ N/A in this stage; existing public database operations remain the visible bounda
 | Cache requirement | Acceptance | Task and automated proof |
 |---|---|---|
 | REQ-CACHE-001: shared validated retained-byte/entry reservations and lifetime | AC-CACHE-001/002 | TASK-CACHE-MEMORY-R26; real CacheMemoryBudget capacity/overflow/index/concurrent/disposal TUnit |
-| REQ-CACHE-002: exact-key coherence and store-generation/recovery fencing | AC-CACHE-003/004 | TASK-CACHE-PROVIDER/PROVIDER-TESTS/INTEGRATION-R28; actual ZoneTree transactions/snapshots/reopen |
-| REQ-CACHE-003: owned/scoped buffers and bounded local work | AC-CACHE-005/006 | TASK-CACHE-PROVIDER/PROVIDER-TESTS/INTEGRATION-R28; real pins/callbacks/eviction/logical-charge tests |
-| REQ-CACHE-004: bounded authenticated Orleans physical-node policy coordination | AC-CACHE-007/011/012 | TASK-CACHE-CONTROL-R26; native RF3 grain/service restart/migration/forged-message tests; R69 genuine local receipt/provider prerequisites remain separately qualified |
+| REQ-CACHE-002: exact-key coherence and store-generation/recovery fencing | AC-CACHE-003/004/015 | TASK-CACHE-PROVIDER/PROVIDER-TESTS/INTEGRATION-R28; actual ZoneTree transactions/snapshots/reopen; R83 genuine fixture identity regressions |
+| REQ-CACHE-003: owned/scoped buffers and bounded local work | AC-CACHE-005/006/015 | TASK-CACHE-PROVIDER/PROVIDER-TESTS/INTEGRATION-R28; real pins/callbacks/eviction/logical-charge tests; R83 typed owned-copy oracle |
+| REQ-CACHE-004: bounded authenticated Orleans physical-node policy coordination | AC-CACHE-007/011/012/013/014 | TASK-CACHE-CONTROL-R26; native RF3 grain/service restart/migration/forged-message tests; R69/R81 genuine local prerequisites and R82 bounded wire/crypto remain separately qualified |
 | REQ-CACHE-005: current grants, barriers and field/tenant decisions | AC-CACHE-008 | TASK-CACHE-CONTROL-R26; current public SDK/MCP authorization flows |
 | REQ-CACHE-006: honest closed resource metrics and comparable benefit | AC-CACHE-009 | TASK-CACHE-NATIVE-R26; repeated GitHub cache-on/off resource JSON |
-| REQ-CACHE-007: complete delivered-source/native qualification | AC-CACHE-010 | TASK-CACHE-NATIVE-R26; build/format/analyzers/complexity/governance + unit/scalar/recovery/RF3 and real coverage |
+| REQ-CACHE-007: complete delivered-source/native qualification | AC-CACHE-010/014/015 | TASK-CACHE-NATIVE-R26; build/format/analyzers/complexity/governance + unit/scalar/recovery/RF3 and real coverage |
 
 #### Cache acceptance and testing methodology
 
@@ -75,6 +75,51 @@ Default, stale, altered PreviousRevision/Continuous, withdrawn, expired or close
 receipts reject. The10second ceiling is acceptance-only. Real
 `CacheReadPermitAcceptanceTests.cs` and the provider expiry cases cover this
 local prerequisite; freely constructed equal values do not certify wire origin.
+
+AC-CACHE-013 adds the accepted R81 actual physical-owner observation in ADR-058.
+Control.TryReadOwnerIdentity returns Healthy/Busy/Closed and only actual
+NodeId/incarnation/control RuntimeId. It attempts the actual reader with timeout
+zero; same-thread operations/foreign writer are Busy, foreign reader may coexist,
+closing is Closed, and acquired-gate runtime.Check preserves RecoveryRequired.
+No index/lookup/lease, complete identity, secret, cache/pool lock or I/O is involved.
+Real ZoneTreePointCacheOwner*Tests cover cold/warm counters, callback/held gates,
+pre-drain/permanent closure, faulted apply and same-directory recovery. Root owns
+the local seam/shared fixture; Luna owns only new tests. GitHub normal/scalar and
+required recovery/RF3 qualify the source; tiny closure interleavings require
+independent review. Observation is not full silo readiness or a remote grant.
+
+AC-CACHE-014 implements only the accepted [exact internal v1 wire/primitive
+contract](ResourceExecution/CacheControlV1.md) and ADR-058 R82 stages.
+Thirteen immutable generated metadata types, closed byte enums, dedicated
+bounded canonical bytes/HMAC, nested-proof validation and exact original-request
+correlation have no production caller or eligibility side effect in this stage.
+Actual pinned Orleans serialization and independent literal golden C/S/MAC/digest
+vectors, per-field/null/enum/address/range mutations, signed policy mismatch,
+flat rejection, valid-outer/invalid-nested MAC, accepted binding/sequence and real
+concurrent signer disposal map to new CacheControlWire* TUnit files. Complete
+size preflight and constant-time/private-key/disposal/alias/Id contracts receive
+independent review; the unreachable64KiB edge has the explicit size-arithmetic
+exception recorded in the exact contract. Root owns generated contracts and
+primitives; Luna owns only new acceptance-led tests after freeze. Full enabled
+source gates and a new exact-SHA GitHub run qualify them. Receiver, replay,
+coordinator, timers, DI, native probes and RF3 enablement remain later stages.
+
+AC-CACHE-015 repairs only the native test-fixture and assertion failures from
+exact source2ecbeee4d/run37093992229:1539 normal cases,1522 pass,17 errors;
+scalar skipped. A null byte[] signing key must remain absent nullable
+ReadOnlyMemory, explicit valid32byte keys retain their genuine configured
+incarnation, and explicit empty remains present and rejects TokenInvalidated.
+ZoneTreePointCacheFixtureIdentityTests proves default real-store open/reopen,
+configured valid-key peers and empty-key rejection without emitting secrets.
+ZoneTreeCoordinatedPointCacheReadTests uses one named byte77 for assignment and
+comparison, retaining independent warm copied bytes and all cache counters.
+The existing fixture collects body and every store/directory/pool cleanup
+independently and starts Dispose once before cleanup. Root owns traceability,
+enabled source gates, independent review and exact-SHA normal/scalar/recovery/
+RF3 qualification; Luna owns only these three test files. All17 failing IDs
+must pass on the next delivered source. No product identity validation, key
+generation, provider error, cache data or dependency behavior changes.
+ADR-058/035/041 already govern these unchanged boundaries; no new migration.
 
 TASK-CACHE-BINDING-INTEGRATION-R69 is root-only: shared contracts, permit join,
 public control/facade/runtime/lifecycle/read admission and durable docs.

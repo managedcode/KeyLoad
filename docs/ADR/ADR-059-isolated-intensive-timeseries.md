@@ -478,3 +478,100 @@ or scope changes. Root reviews all diffs and joins full solution source checks,
 exact-SHA normal/scalar/recovery/RF3, later6 preflights/all30/native coverage.
 Rollback removes only this additive coherent source unit; no persistence migration.
 ADR remains Accepted until the complete implementation/evidence chain passes.
+
+
+TS007B boundary refinement before worker repair: only ordinary nonfatal
+exceptions become compact target/transport/validation/unknown records.
+OutOfMemoryException, StackOverflowException and AccessViolationException
+propagate; the owned phase cancels remaining loops and observes every original
+Task before preserving the primary failure. Use a meaningful named semantic
+filter with pure exception-input regression, never blanket suppression or an
+always-true filter. Capture deadline/cell cancellation at observed response
+completion and latency stop: a deadline firing during later verification does
+not reclassify an on-time call. Preserve observed cardinality/receipt sequence
+when validation fails; never invent a successful digest for invalid output.
+
+
+## TASK-ISO-TS007B-D accepted original-task deadline classification repair
+
+Independent TS007B-R source review finds setup/readback Stop/RequireSuccess
+only runs after successful original await. A native task canceled by its own30s
+linked deadline throws OCE while cell remains live and is mislabeled Cancelled.
+Measured ResponseReader already captures observed completion correctly.
+REQ-BC-062/064, AC-TSI-004/008 require distinct deadline/caller/native facts.
+
+Root approves gates_audit disjoint writes ONLY the NEW TS007B source files
+TimeSeriesIntensiveSetupExecutor/VerificationReader/CallScope/Failure, plus
+NEW TimeSeriesIntensiveObservedFailureException and matching NEW pure UnitTests.
+Catch original completion, stop its clock on fault too, exclude fatal causes
+from replacement, and preserve the actual primary error and native code/status
+when observed own-deadline or cell-cancellation overrides outcome. A narrow
+internal observed-failure exception may carry only the closed outcome and
+original InnerException transiently; compact result retains enum/native numeric
+values only. No native error string/wrapper is retained in attempts/results.
+
+Always await the original task; no WaitAsync, fake target/clock, retry or new
+timeout. On-time native errors keep original failure classification; late
+completion is DeadlineExceeded, caller cancellation is Cancelled, underlying
+KeyLoad/Npgsql/HTTP facts remain actual, and fatal runtime errors propagate.
+Pure exception/outcome inputs test this mapping first; genuine native blocked
+operation/cancellation cases remain later6/30 gates. Worker does not edit
+measured reader, old33 oracle files, other shared files, Git or runtime; root
+reviews/full source gates and exact-SHA GitHub before qualification.
+
+
+TS007B-D accepted independent review refinement before further writes: permit
+also the NEW TS007B AttemptExecutor/ResponseReader/PhaseExecutor and existing
+NEW pure SummaryTests. If cell cancellation is already observed at the reader's
+pre-invocation entry decision, no target method is invoked and no clock starts;
+return a nullable not-started result, stop that worker and retain initialized
+NotStarted ledger slots with zero durations. Remove cancellation throw after
+clock start and before invocation. Cancellation after the accepted entry
+decision still invokes the original target with its linked token and records
+that actual caller attempt/failure. Do not publish NotStarted as a completed
+attempt or fabricate latency. Pure already-canceled token/state tests accompany
+the bounded entry helper; real native boundary proof remains mandatory.
+
+Strengthen the all-attempt percentile golden by placing the failed sample below
+the asserted ranks (index17), so excluding it produces different p50/p95/p99
+values. Current summarizer includes failures correctly; do not change its metric
+contract. Native timing, budgets,16workers, compact storage and ownership stay
+unchanged; root reviews the expanded frozen disjoint scope.
+
+
+TS007B-D phase-evidence refinement before writes: also permit the NEW owned
+RepetitionExecutor and narrowly scoped repetition-result/pure tests if needed.
+After a measured phase has completed and original workers are drained, a
+nonfatal append readback cancellation/failure must retain that already observed
+wall/peak/measurement result with FinalVerified=false and actual failure. It
+must not lose phase metadata merely because RunAsync throws before the runner
+adds its repetition. Preserve warmup phase facts similarly where known; no
+extra readback budget, retry, synthesized phase or successful verification.
+Real cancellation/native proof remains required; pure phase-result/error inputs
+can prove retention shape without a fake target/clock. Fatal faults propagate.
+### TS007B-D root integration: known warmup evidence before measured entry
+
+Final source review observes one additional instance of the same phase-evidence
+finding: cancellation or failure during the empty measured-series readback can
+occur after a successful warmup but before a measured phase result exists.
+Root serially adds the acceptance-derived pure known-warmup/unknown-measured
+criterion, then a nonfatal measured-entry boundary retaining the actual warmup
+and original failure. Uncompleted measured metadata remains absent; existing
+attempt storage and fatal original-task behavior remain unchanged. Root owns
+only the frozen RepetitionExecutor and PhaseEvidenceTests join; the worker has
+frozen those files and moved to read-only SQL planning. No service double or
+new budget is introduced. AC-TSI-004/008, exact-SHA normal/scalar and native
+SDK/Npgsql cancellation/phase evidence remain required.
+### TS007B-D source exception contract
+
+The real source compiler reports CA1032/CA1064 for the transient internal
+observed-failure wrapper. Root keeps it internal as an InvalidOperationException
+subtype with the three standard public constructors, consistent with internal
+operation-failure exceptions. Standard construction has closed
+UnexpectedFailure completion and no invented native facts; only Observe assigns
+the accepted deadline/cancellation completion while retaining the real original
+InnerException. A missing inner cause maps to Unexpected with null numeric
+codes. Pure standard-constructor and original-cause tests precede the source
+repair. No public contract, suppression, runtime filter bypass, deadline or
+native failure semantics changes. Root owns these already frozen source/test
+files during integration; exact-SHA native gates remain unchanged.

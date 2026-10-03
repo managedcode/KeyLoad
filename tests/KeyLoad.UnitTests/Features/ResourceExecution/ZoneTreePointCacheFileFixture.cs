@@ -6,9 +6,11 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal sealed class ZoneTreePointCacheFileFixture : IDisposable
 {
+    private const string CleanupFailure = "Real ZoneTree fixture cleanup failed.";
     private const long OwnerByteLimit = 32 * 1024;
     private readonly List<(string Directory, ZoneTreeStore Store)> stores = [];
     private readonly List<string> directories = [];
+    private int disposeStarted;
 
     internal CacheMemoryBudget Budget { get; }
 
@@ -18,13 +20,33 @@ internal sealed class ZoneTreePointCacheFileFixture : IDisposable
     internal ZoneTreeStore OpenStore(int maxEntries = 8, int maxValueBytes = 128, int maxPinsPerEntry = 8,
         Guid? incarnation = null, byte[]? signingKey = null, int maxKeyBytes = 128)
     {
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref disposeStarted) != 0, this);
         var directory = Path.Combine(Path.GetTempPath(), "keyload-point-cache-" + Guid.NewGuid().ToString("N"));
         directories.Add(directory);
         return OpenStoreAt(directory, maxEntries, maxValueBytes, maxPinsPerEntry, incarnation, signingKey, maxKeyBytes);
     }
 
     internal ZoneTreeStore ReopenStore(string directory, int maxEntries = 8, int maxValueBytes = 128)
-        => OpenStoreAt(directory, maxEntries, maxValueBytes, 8);
+    {
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref disposeStarted) != 0, this);
+        return OpenStoreAt(directory, maxEntries, maxValueBytes, 8);
+    }
+
+    internal async Task RunAsync(Func<Task> scenario)
+    {
+        ArgumentNullException.ThrowIfNull(scenario);
+        var failures = new List<Exception>();
+        try
+        {
+            await ZoneTreeCoordinatedPointCacheTestSupport.CollectFailureAsync(scenario, failures);
+        }
+        finally
+        {
+            CaptureCleanup(Dispose, failures);
+        }
+
+        ZoneTreeCoordinatedPointCacheTestSupport.ThrowFailures(failures);
+    }
 
     internal string DirectoryOf(ZoneTreeStore store)
         => stores.Single(entry => ReferenceEquals(entry.Store, store)).Directory;
@@ -58,7 +80,7 @@ internal sealed class ZoneTreePointCacheFileFixture : IDisposable
         var store = new ZoneTreeStore(new ZoneTreeStoreOptions(directory)
         {
             Incarnation = incarnation,
-            SigningKey = signingKey,
+            SigningKey = signingKey is null ? null : new ReadOnlyMemory<byte>(signingKey),
             EmbeddedPointCache = new ZoneTreePointCacheOptions(Budget)
             {
                 MaxEntries = maxEntries,
@@ -74,6 +96,11 @@ internal sealed class ZoneTreePointCacheFileFixture : IDisposable
 
     public void Dispose()
     {
+        if (Interlocked.Exchange(ref disposeStarted, 1) != 0)
+        {
+            return;
+        }
+
         var failures = new List<Exception>();
         foreach (var entry in stores)
         {
@@ -81,22 +108,13 @@ internal sealed class ZoneTreePointCacheFileFixture : IDisposable
         }
 
         stores.Clear();
-        try
+        foreach (var directory in directories)
         {
-            foreach (var directory in directories)
-            {
-                CaptureCleanup(() => DeleteDirectory(directory), failures);
-            }
+            CaptureCleanup(() => DeleteDirectory(directory), failures);
         }
-        finally
-        {
-            Budget.Dispose();
-        }
+        CaptureCleanup(Budget.Dispose, failures);
 
-        if (failures.Count != 0)
-        {
-            throw new AggregateException("Real ZoneTree fixture cleanup failed.", failures);
-        }
+        ZoneTreeCoordinatedPointCacheTestSupport.ThrowFailures(failures);
     }
 
     private static void CaptureCleanup(Action cleanup, List<Exception> failures)
@@ -119,7 +137,7 @@ internal sealed class ZoneTreePointCacheFileFixture : IDisposable
         }
         catch (Exception exception)
         {
-            throw new AggregateException("Real ZoneTree fixture cleanup failed.", exception);
+            throw new AggregateException(CleanupFailure, exception);
         }
     }
 

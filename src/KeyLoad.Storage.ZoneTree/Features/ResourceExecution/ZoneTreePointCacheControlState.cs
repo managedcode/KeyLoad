@@ -20,6 +20,7 @@ internal sealed class ZoneTreePointCacheControlState
     }
 
     internal ZoneTreePointCache? MaintenanceCache => Volatile.Read(ref MaintenanceCacheValue);
+    internal bool IsClosed => Volatile.Read(ref Closed);
 
     internal ZoneTreePointCacheSnapshot Snapshot()
     {

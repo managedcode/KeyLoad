@@ -54,13 +54,13 @@ internal static class RedisReplicaProof
             var identities = await ReadReplicaIdentitiesAsync(replicas, endpoints, primaryEndpoint, token);
             var allIdentities = new[] { primaryIdentity }.Concat(identities).ToArray();
             RedisNodeIdentity.RequireUniqueVersionedSet(allIdentities, primaryIdentity, requiredReplicas + 1);
+            await RedisCopyObservation.VerifyDirectCopiesAsync(replicas, endpoints, primary.GetDatabase().Database,
+                probeKey, payload, token);
             for (var index = 0; index < replicas.Length; index++)
             {
                 await VerifyReplicaAsync(replicas[index].GetServer(endpoints[index]), endpoints[index], primaryEndpoint, token);
             }
 
-            await RedisCopyObservation.VerifyDirectCopiesAsync(replicas, endpoints, primary.GetDatabase().Database,
-                probeKey, payload, token);
             await VerifyIdentitiesUnchangedAsync(primaryServer, primaryIdentity, replicas, endpoints, identities, token);
             return RedisNodeIdentity.ReplicatedEvidence(primaryIdentity, identities, ReplicatedState);
         }

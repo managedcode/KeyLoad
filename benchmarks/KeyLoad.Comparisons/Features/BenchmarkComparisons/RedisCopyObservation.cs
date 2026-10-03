@@ -6,6 +6,7 @@ namespace KeyLoad.Comparisons.Targets;
 internal static class RedisCopyObservation
 {
     private const string GetCommand = "GET";
+    private const string LinkDown = "down";
     private const string ErrorReplicaCopy = "RedisDirectReplicaProbeFailed";
     private const int PollMilliseconds = 200;
     private static readonly TimeSpan ReplicaProbeTimeout = TimeSpan.FromSeconds(60);
@@ -32,6 +33,11 @@ internal static class RedisCopyObservation
         for (var index = 0; index < replicas.Length; index++)
         {
             var server = replicas[index].GetServer(endpoints[index]);
+            if (!await HasUpLinkAsync(server, token))
+            {
+                allPresent = false;
+                continue;
+            }
             var reply = await server.ExecuteAsync(database, GetCommand, new object[] { key }, CommandFlags.DemandReplica)
                 .WaitAsync(token);
             if (reply.ToString() != payload)
@@ -41,6 +47,18 @@ internal static class RedisCopyObservation
         }
 
         return allPresent;
+    }
+
+    private static async Task<bool> HasUpLinkAsync(IServer server, CancellationToken token)
+    {
+        var info = await RedisNativeProtocol.ReadInfoAsync(server, RedisNativeProtocol.ReplicationSection,
+            CommandFlags.DemandReplica, token);
+        return info.GetValueOrDefault(RedisNativeProtocol.LinkField) switch
+        {
+            RedisNativeProtocol.LinkUp => true,
+            LinkDown => false,
+            _ => throw new ComparisonFailureException(ErrorReplicaCopy)
+        };
     }
 
     private static async Task DelayUntilNextProbeAsync(CancellationToken deadline, CancellationToken caller)

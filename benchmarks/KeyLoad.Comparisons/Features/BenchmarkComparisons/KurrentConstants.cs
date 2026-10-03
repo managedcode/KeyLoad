@@ -95,5 +95,10 @@ internal static class KurrentConstants
     public const ulong NativeFirstRevision = 0;
     public const int CanonicalFirstRevision = 1;
     public const int CleanupTimeoutSeconds = 20;
+    public const int CleanupHostTimeoutSeconds = 30;
+    public const int CleanupConcurrency = 16;
+    public const string CleanupIncomplete = "KurrentOwnedStreamCleanupIncomplete";
+    public const string CleanupDrainFailed = "KurrentOwnedStreamCleanupDrainFailed";
+    public const string CleanupInvalidDiagnostic = "KurrentOwnedStreamCleanupInvalidDiagnostic";
     public const int ProbeWaitMilliseconds = 100;
 }
