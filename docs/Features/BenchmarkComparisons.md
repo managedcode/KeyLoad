@@ -409,3 +409,36 @@ against trusted control source. Historical12-file evidence remains independent.
 Both evidence identities and current website SHA must still match before Pages.
 Source readiness is not native coverage,270-cell, publication or live proof;
 actual partial failures are in the source qualification record under implementation.
+
+## Separate intensive TimeSeries family
+
+[ADR-059](../ADR/ADR-059-isolated-intensive-timeseries.md) and the canonical
+[acceptance](../../isolated-timeseries.acceptance.md)/[plan](../../isolated-timeseries.plan.md)
+specify30 additional isolated cells: KeyLoad/TimescaleDB × native1/2/3 nodes ×
+Append/RawRangeRead/Latest/Aggregate/Windows, preceded by six private preflights.
+REQ-BC-059..064 map to AC-TSI-001..008 and TASK-ISO-TS005..011. Their exact corpus,
+direct timestamp/sequence ordering, native SQL ownership, real public negatives,
+ACK versus all-copy proof and bounded response validation are normative in the
+acceptance; the new family does not change the270-cell or historical48-sample wire.
+Native image feasibility and exact internal/SQL/provider contracts precede their
+implementation scopes. The frozen16-client/five-repetition/10000-operation profile
+records latency through complete decode and wall throughput including synchronous
+per-attempt validation. All30 raw results, authentic jobs/images and a separate
+complete family projection are required before new TimeSeries metrics publish.
+
+Canonical technical ownership is BenchmarkComparisons/TimeSeries/Intensive in
+Comparisons, mirrored by new Unit/ComparisonTests files and new AppHost/host
+feature helpers; root owns existing selectors, workflows, JSON, site and docs.
+Product API/data migration isN/A: existing authorized SDK/MCP operations remain.
+Library-only memory aggregation isN/A in this native-node matrix; its historical
+semantic regressions remain. Requirements and all native/publication/coverage
+evidence are pending, with no qualified intensive TimeSeries result.
+
+```mermaid
+flowchart LR
+    Seed[Identical4096 ordered sample corpus] --> Native[One engine and native topology per runner]
+    Native --> Operation[One append read latest aggregate or windows scenario]
+    Operation --> Verify[Bounded direct output and receipt validation]
+    Verify --> Raw[Immutable30 cell family]
+    Raw --> Site[Authenticated separate TimeSeries metrics]
+```
