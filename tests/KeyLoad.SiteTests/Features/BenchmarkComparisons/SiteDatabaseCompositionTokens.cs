@@ -4,14 +4,14 @@ internal static class SiteDatabaseCompositionTokens
 {
     internal const string ReadmePath = "README.md";
     internal const string ReadmeIntroductionStart = "# KeyLoad";
-    internal const string ReadmeIntroductionEnd = "The cluster foundation";
+    internal const string ReadmeIntroductionEnd = "## What you can build";
     internal const string HtmlPath = "site/Features/BenchmarkComparisons/index.html";
     internal const string HeroStart = "<p class=\"hero-summary\">";
     internal const string ParagraphEnd = "</p>";
     internal const string HtmlCompositionStart = "<section class=\"anatomy\" id=\"composition\"";
     internal const string HtmlSectionEnd = "</section>";
     internal const string ReadmeCompositionStart = "## One database, connected models";
-    internal const string ReadmeCompositionEnd = "## Development status";
+    internal const string ReadmeCompositionEnd = "## Get started";
     internal const string MissingRepository = "Composition content tests require the actual site repository path.";
     internal const string MissingSection = "The public database composition section is missing or incomplete.";
     internal const string OneDatabase = "one database for AI agents";
@@ -38,12 +38,20 @@ internal static class SiteDatabaseCompositionTokens
     internal const string NativeClientPending = "native SQL-client protocol";
     internal const string CrossPartitionPending = "cross-partition composition";
     internal const string RequiredPending = "remain required and pending";
+    internal const string ReadmeCurrentApi = "current composition API";
+    internal const string ReadmePreview = "development preview";
+    internal const string AtomicRollback = "succeeds or rolls back together";
+    internal const string ReadmeBlobBoundary = "separate upload and publication operations";
+    internal const string ReadmePendingFeatures = "still in development";
+    internal const string ReadmePendingQualification = "remain under qualification";
     internal const string FeaturePath = "docs/Features/DatabaseComposition.md";
     internal const string AdrPath = "docs/ADR/ADR-067-composable-agent-database.md";
     internal const string GitHubRoot = "https://github.com/managedcode/KeyLoad/blob/main/";
     internal const string HtmlTagPattern = "<[^>]*>";
     internal const string WordSeparator = " ";
     internal const int PatternTimeoutMilliseconds = 1000;
+    internal const int ReadmeSectionIndex = 0;
+    internal const int HtmlSectionIndex = 1;
 
     internal static readonly string[] Models =
         ["documents", "typed tables", "graphs", "blobs", "queues", "events", "vectors/search", "time series"];
@@ -55,4 +63,10 @@ internal static class SiteDatabaseCompositionTokens
         [CanonicalCall, SdkCommit, OfficialMcp, ProceduralStage, QualificationPending, AtomicScope,
             LeaseBoundary, BlobsSameDatabase, BlobOperationsBoundary, FullSqlPending, NativeClientPending,
             CrossPartitionPending, RequiredPending];
+
+    // README uses product language; retain the same scope and readiness assertions.
+    internal static readonly string[] ReadmeStageContracts =
+        [CanonicalCall, SdkCommit, OfficialMcp, ReadmeCurrentApi, ReadmePreview, AtomicScope, AtomicRollback,
+            LeaseBoundary, BlobsSameDatabase, ReadmeBlobBoundary, FullSqlPending, NativeClientPending,
+            CrossPartitionPending, ReadmePendingFeatures, ReadmePendingQualification];
 }

@@ -37,10 +37,10 @@ internal sealed partial class SiteDatabaseCompositionTests
     public async Task AC_COMP_001_008_PublicCompositionRetainsCurrentStageAndAtomicBoundaries()
     {
         var sections = await ReadCompositionSectionsAsync();
-        foreach (var section in sections)
-        {
-            await AssertIncludesAsync(section, SiteDatabaseCompositionTokens.StageContracts);
-        }
+        await AssertIncludesAsync(sections[SiteDatabaseCompositionTokens.ReadmeSectionIndex],
+            SiteDatabaseCompositionTokens.ReadmeStageContracts);
+        await AssertIncludesAsync(sections[SiteDatabaseCompositionTokens.HtmlSectionIndex],
+            SiteDatabaseCompositionTokens.StageContracts);
     }
 
     [Test]
