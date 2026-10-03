@@ -6,16 +6,16 @@ namespace KeyLoad.Orleans;
 /// <summary>Persists Orleans membership through the node-owned replica quorum without constructing an Orleans client.</summary>
 /// <param name="database">Canonical local database whose reads follow an established quorum barrier.</param>
 /// <param name="coordinator">Admission and commit boundary for database membership control operations.</param>
-/// <param name="endpoint">Local replica readiness; it owns neither this table's schema nor routing activations.</param>
+/// <param name="endpoint">Actual node-owned consensus for readiness and trusted native control read cuts.</param>
 /// <param name="clusterId">Exact cluster identity permitted to delete this table.</param>
 /// <param name="internalPrincipal">Persisted trusted principal for internal membership mutations.</param>
 /// <param name="clock">System clock for bounded provider calls and cancellable startup retry delays.</param>
 /// <param name="startupCancellation">Silo startup cancellation, used only by membership initialization.</param>
-public sealed class ReplicaMembershipTable(DatabaseEngine database, ICommitCoordinator coordinator, IReplicaEndpoint endpoint,
+public sealed class ReplicaMembershipTable(DatabaseEngine database, ICommitCoordinator coordinator, ReplicaConsensus endpoint,
     string clusterId, string internalPrincipal, TimeProvider clock, CancellationToken startupCancellation) : IMembershipTable
 {
-    private readonly ReplicaMembershipStore store = new(database, coordinator, internalPrincipal);
-    private readonly IReplicaEndpoint replica = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
+    private readonly ReplicaMembershipStore store = new(database, coordinator, endpoint, internalPrincipal);
+    private readonly ReplicaConsensus replica = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
     private readonly string configuredCluster = ReplicaMembershipProtocol.ClusterIdentity(clusterId);
     private readonly TimeProvider time = clock ?? throw new ArgumentNullException(nameof(clock));
 

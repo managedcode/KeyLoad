@@ -12,8 +12,9 @@ internal static class ReplicaReplayClassifier
         {
             return method switch
             {
-                ReplicaRpc.Forward or ReplicaRpc.Append => Application(method, payload, configuration, maximumControlPayloadBytes),
-                ReplicaRpc.ReadBarrier => Read(payload),
+                ReplicaRpc.Forward or ReplicaRpc.Append or ReplicaRpc.ReadProbe
+                    => Application(method, payload, configuration, maximumControlPayloadBytes),
+                ReplicaRpc.ReadBarrier or ReplicaRpc.ControlReadBarrier => Read(method, payload),
                 _ => Critical(method, payload, configuration)
             };
         }
@@ -28,18 +29,19 @@ internal static class ReplicaReplayClassifier
     {
         var reader = new Utf8JsonReader(payload, new JsonReaderOptions { MaxDepth = JsonDefaults.Options.MaxDepth });
         ReplicaPayloadReader.Require(reader.Read());
-        var pool = method == ReplicaRpc.Append ? ReplicaAppendClassification.Classify(ref reader, configuration, maximumControlPayloadBytes)
+        var pool = method is ReplicaRpc.Append or ReplicaRpc.ReadProbe
+            ? ReplicaAppendClassification.Classify(ref reader, configuration, maximumControlPayloadBytes, method == ReplicaRpc.ReadProbe)
             : ReplicaOperationClassification.IsControl(ref reader, maximumControlPayloadBytes) ? ReplicaReplayPool.Critical : ReplicaReplayPool.Forward;
         ReplicaPayloadReader.Require(!reader.Read());
         return pool;
     }
 
-    private static ReplicaReplayPool Read(ReadOnlySpan<byte> payload)
+    private static ReplicaReplayPool Read(ReplicaRpc method, ReadOnlySpan<byte> payload)
     {
         ReplicaPayloadReader.Require(payload.Length <= ReplicaTransportProtocol.MaximumMetadataBytes);
         var value = JsonSerializer.Deserialize<string>(payload, JsonDefaults.Options);
         ReplicaPayloadReader.Require(value is not null && value.Length == 0);
-        return ReplicaReplayPool.ReadBarrier;
+        return method == ReplicaRpc.ControlReadBarrier ? ReplicaReplayPool.Critical : ReplicaReplayPool.ReadBarrier;
     }
 
     private static ReplicaReplayPool Critical(ReplicaRpc method, ReadOnlySpan<byte> payload, ReplicaConfiguration configuration)

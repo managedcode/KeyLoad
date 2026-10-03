@@ -22,7 +22,7 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
             }, cancellationToken).ConfigureAwait(false);
             while (true)
             {
-                await RoundAsync(entry.Term, cancellationToken).ConfigureAwait(false);
+                await RoundAsync(entry.Term, ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
                 var committed = await state.LockedAsync(() =>
                 { state.RequireLeader(entry.Term); return state.Log.State.CommittedIndex >= entry.Index; }, cancellationToken).ConfigureAwait(false);
                 if (committed)
@@ -37,7 +37,7 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
         finally { rounds.Release(); }
     }
 
-    internal async Task<ReadBarrierReceipt> BarrierAsync(CancellationToken cancellationToken)
+    internal async Task<ReadBarrierReceipt> BarrierAsync(ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
     {
         await rounds.WaitAsync(cancellationToken).ConfigureAwait(false);
         long term;
@@ -45,7 +45,7 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
         try
         {
             term = await state.LockedAsync(() => { state.RequireReadyLeader(); return state.Log.State.Term; }, cancellationToken).ConfigureAwait(false);
-            if (!await RoundAsync(term, cancellationToken).ConfigureAwait(false))
+            if (!await RoundAsync(term, purpose, cancellationToken).ConfigureAwait(false))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
             }
@@ -70,16 +70,16 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
             { return state.Role == ReplicaRole.Leader ? state.Log.State.Term : 0; }, cancellationToken).ConfigureAwait(false);
             if (term > 0)
             {
-                await RoundAsync(term, cancellationToken).ConfigureAwait(false);
+                await RoundAsync(term, ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
             }
         }
         finally { rounds.Release(); }
     }
 
-    private async Task<bool> RoundAsync(long term, CancellationToken cancellationToken)
+    private async Task<bool> RoundAsync(long term, ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
     {
         var pending = state.Configuration.VoterIds.Where(voter => voter != state.Configuration.LocalId)
-            .Select(voter => followers.SynchronizeAsync(voter, term, cancellationToken)).ToList();
+            .Select(voter => followers.SynchronizeAsync(voter, term, purpose, cancellationToken)).ToList();
         var acknowledgements = 1;
         while (pending.Count > 0 && acknowledgements < state.Configuration.Majority)
         {

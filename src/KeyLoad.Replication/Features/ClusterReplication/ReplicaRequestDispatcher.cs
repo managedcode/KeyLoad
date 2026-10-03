@@ -3,7 +3,7 @@ using System.Text;
 namespace KeyLoad.Replication;
 
 internal sealed class ReplicaRequestDispatcher(ReplicaElection election, ReplicaAppendReceiver appends,
-    ReplicaLeader leader, ReplicaSnapshotReceiver snapshots)
+    ReplicaLeader leader, ReplicaSnapshotReceiver snapshots, ReplicaConfiguration configuration)
 {
     private Func<ReplicatedOperation, CancellationToken, Task<OperationResult>>? forwarded;
 
@@ -23,13 +23,21 @@ internal sealed class ReplicaRequestDispatcher(ReplicaElection election, Replica
             ReplicaRpc.RequestVote => await election.ReceiveAsync(ReplicaProtocolCodec.Deserialize<VoteRequest>(bytes), token).ConfigureAwait(false),
             ReplicaRpc.Append => await appends.ReceiveAsync(ReplicaProtocolCodec.Deserialize<AppendRequest>(bytes), token).ConfigureAwait(false),
             ReplicaRpc.Forward => await ForwardAsync(ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(bytes), token).ConfigureAwait(false),
-            ReplicaRpc.ReadBarrier => await leader.BarrierAsync(token).ConfigureAwait(false),
+            ReplicaRpc.ReadBarrier => await ReadAsync(bytes, ReplicaReadRoundPurpose.Application, token).ConfigureAwait(false),
+            ReplicaRpc.ControlReadBarrier => await ReadAsync(bytes, ReplicaReadRoundPurpose.Control, token).ConfigureAwait(false),
+            ReplicaRpc.ReadProbe => await appends.ReceiveAsync(ReplicaReadRoundGuard.Probe(bytes, configuration), token).ConfigureAwait(false),
             ReplicaRpc.SnapshotBegin => await snapshots.BeginAsync(ReplicaProtocolCodec.Deserialize<SnapshotBeginRequest>(bytes), token).ConfigureAwait(false),
             ReplicaRpc.SnapshotChunk => await snapshots.ChunkAsync(ReplicaProtocolCodec.Deserialize<SnapshotChunkRequest>(bytes), token).ConfigureAwait(false),
             ReplicaRpc.SnapshotComplete => await snapshots.CompleteAsync(ReplicaProtocolCodec.Deserialize<SnapshotCompleteRequest>(bytes), token).ConfigureAwait(false),
             _ => throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidPeer)
         };
         return Encoding.UTF8.GetString(ReplicaProtocolCodec.Serialize(result));
+    }
+
+    private Task<ReadBarrierReceipt> ReadAsync(ReadOnlySpan<byte> payload, ReplicaReadRoundPurpose purpose, CancellationToken token)
+    {
+        ReplicaReadRoundGuard.Empty(payload);
+        return leader.BarrierAsync(purpose, token);
     }
 
     private Task<OperationResult> ForwardAsync(ReplicatedOperation operation, CancellationToken cancellationToken)

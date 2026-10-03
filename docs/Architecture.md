@@ -508,3 +508,31 @@ flowchart LR
     Capture --> Raw[Complete raw aggregate]
     Raw --> Compact[Bounded derived website projection]
 ```
+
+
+## Isolated read/control admission integration
+
+[ADR-036](ADR/ADR-036-orleans-foundation.md) TASK-ISO-021 separates signed
+application ReadProbe/ReadBarrier admission from trusted native membership
+ControlReadBarrier and heartbeat reserve. ClusterReplication owns real consensus
+rounds/strict new-method guards; Orleans ClusterReplication owns signed
+classification/replay snapshots, and ClusterRouting owns the same node-owned
+consensus membership read. Production RF3, request-grain isolation, persisted
+authorization, ordered apply and node-local ZoneTree ownership remain required.
+
+```mermaid
+flowchart LR
+  Request[Authorized request grain] --> AppRead[Application read barrier]
+  AppRead --> Probe[Signed empty ReadProbe]
+  Probe --> ReadPool[Bounded ReadBarrier pool]
+  Membership[Native membership table] --> Control[Trusted control read]
+  Control --> Heartbeat[Signed control barrier and empty Append]
+  Heartbeat --> Critical[Reserved Critical pool]
+  ReadPool --> Receiver[Node owned consensus and apply]
+  Critical --> Receiver
+  Receiver --> Store[Committed ZoneTree read cut]
+```
+
+Numeric quota/configuration logs retain actual pool evidence; they cannot alone
+prove successful control execution under pressure. Native Linux1/2/3 and genuine
+Docker/Aspire RF3/fault gates remain required before performance/publication.

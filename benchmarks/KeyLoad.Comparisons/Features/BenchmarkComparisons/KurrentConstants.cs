@@ -4,6 +4,7 @@ internal static class KurrentConstants
 {
     public const string Name = "KurrentDB";
     public const string ExpectedServerVersion = "26.1.2";
+    public const string ExpectedGossipVersion = "26.1.2.3778";
     public const string ImageDigestSeparator = "@";
     public const string ImagePathSeparator = "/";
     public const string ImageTagSeparator = ":";

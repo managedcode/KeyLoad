@@ -20,6 +20,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     private readonly object lifecycle = new();
     private readonly CancellationToken stoppingToken;
     private readonly ReplicaRequestDispatcher dispatcher;
+    private readonly ReplicaReadRoundExecutor reads;
     private Task? worker;
     private Task? shutdown;
     private Task? disposal;
@@ -44,7 +45,8 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         appends = new(state);
         snapshots = new(state);
         maintenance = new(state, election, leader, logger);
-        dispatcher = new(election, appends, leader, snapshots);
+        dispatcher = new(election, appends, leader, snapshots, configuration);
+        reads = new(state, rpc, leader, activity, transportReady.Task, stoppingToken);
     }
 
     /// <inheritdoc />
@@ -118,26 +120,22 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     /// <summary>Establishes a current-term quorum cut and waits for this node's canonical apply.</summary>
     /// <param name="cancellationToken">Caller cancellation within the bounded read barrier deadline.</param>
     /// <returns>Completion after the authenticated quorum cut is applied locally.</returns>
-    public async Task ReadBarrierAsync(CancellationToken cancellationToken)
+    public Task ReadBarrierAsync(CancellationToken cancellationToken)
+        => reads.ExecuteAsync(ReplicaReadRoundPurpose.Application, cancellationToken);
+
+    /// <summary>Acquires a quorum-backed cut for trusted native membership without spending application read admission.</summary>
+    /// <param name="cancellationToken">Native membership caller cancellation within the unchanged read deadline.</param>
+    /// <returns>Completion after the current-term majority cut is applied locally.</returns>
+    public async Task ReadControlBarrierAsync(CancellationToken cancellationToken)
     {
-        using var active = activity.Enter();
-        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
-        request.CancelAfter(ReplicaProtocol.ReadBarrierTimeout);
-        await TransportReady.WaitAsync(request.Token).ConfigureAwait(false);
-        var route = await state.LockedAsync(() => (state.Role, state.LeaderId), request.Token).ConfigureAwait(false);
-        if (route.Role == ReplicaRole.Leader)
-        { await leader.BarrierAsync(request.Token).ConfigureAwait(false); return; }
-        if (route.LeaderId is null)
+        try
+        {
+            await reads.ExecuteAsync(ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         }
-        var barrier = await rpc.InvokeAsync<string, ReadBarrierReceipt>(route.LeaderId, ReplicaRpc.ReadBarrier,
-            string.Empty, request.Token).ConfigureAwait(false);
-        if (barrier.Incarnation != state.Configuration.Incarnation || barrier.Position < 1 || barrier.Term < 1)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidPeer);
-        }
-        await state.Materializer.WaitForApplyAsync(barrier.Position, request.Token).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

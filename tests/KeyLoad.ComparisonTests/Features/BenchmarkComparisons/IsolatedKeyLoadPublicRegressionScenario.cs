@@ -12,7 +12,9 @@ internal sealed record IsolatedKeyLoadPublicRegressionScenario(PartitionRef Part
 
     internal string PrivateValue { get; } = "isolated-private-value";
     internal string InitialJson { get; } = "{\"value\":\"isolated-private-value\",\"oldField\":true}";
+    internal string InitialStoredJson { get; } = "{\"oldField\":true,\"value\":\"isolated-private-value\"}";
     internal string UpdatedJson { get; } = "{\"value\":\"isolated-updated-value\",\"newField\":42}";
+    internal string UpdatedStoredJson { get; } = "{\"newField\":42,\"value\":\"isolated-updated-value\"}";
     internal string SentinelJson { get; } = "{\"value\":\"isolated-unaffected-value\"}";
     internal string EventId { get; } = "public-event";
     internal string MessageId { get; } = "public-message";

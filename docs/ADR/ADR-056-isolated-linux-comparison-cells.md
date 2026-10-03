@@ -762,3 +762,188 @@ validated code only. Original native failures, foreign fixture retention and bot
 zero-sample failed target/runner flows remain strict. Root reviews all diffs and
 joins genuine same-SHA native regression and complete cohort; no local runtime/
 tests, Git writes, shared workflow/doc changes or broad cleanup are delegated.
+
+
+## Native b474 public document oracle correction
+
+TASK-ISO-019J implements AC-ISO-004/005 under the existing canonical JSON contract
+in ADR-035. Genuine run37087909605/job111105163526 completed all five10000-read
+repetitions successfully, then failed Documents.cs27 because the test expected
+input property order rather than the ordinal canonical stored body. The initial
+input remains deliberately unsorted. Add independently written InitialStoredJson
+and UpdatedStoredJson expectations in IsolatedKeyLoadPublicRegressionScenario;
+Documents uses those exact strings for every corresponding SDK/MCP read. Keep
+reference, revision, redaction, command replay, negative mutations, replacement,
+deletion and sentinel checks unchanged. Do not normalize actual returned JSON.
+
+Root owns these two existing shared regression files and this documentation join;
+other available workers have disjoint active native/security and TimeSeries scopes,
+so serial root integration avoids overlapping ownership. The already failing real
+public regression is the acceptance regression; no mock or local test is added.
+Verify scoped source format/build, then the complete native1/2/3 PointRead public
+regressions and required exact-SHA CI. There is no product/schema/wire migration;
+rollback removes only the wrong oracle's correction. Native2/3 failures remain
+separately tracked and cannot be closed by this test correction.
+
+## TASK-ISO-020RM accepted diagnostics-first implementation contract
+
+AC-ISO-003/005/006 retain every existing native identity, role, acknowledgement,
+readiness, deadline and failure assertion. At b474/run37087909605, Redis2/3
+failed RedisReplicaPrimaryIdentityMismatch; Mongo2/3 failed bootstrap after
+genuine election. Their exact failed predicates were discarded. This stage
+adds bounded evidence only; it cannot claim those failures repaired.
+
+Ordered stages: acceptance-derived diagnostic tests; strict closed projections
+at the original failure boundary; root source review/build; exact-SHA Linux
+native Redis/Mongo1/2/3 preflights; inspect original failed predicate evidence
+before authorizing any behavior repair; full270 remains a dependent gate.
+
+Disjoint worker build_action_review owns Comparisons RedisReplicaProof.cs and
+NEW RedisReplicaDiagnostics.cs; AppHost IsolatedMongoInitiate.js; ComparisonTests
+NEW RedisReplicaDiagnosticTests.cs and MongoBootstrapDiagnosticTests.cs, plus
+existing IsolatedDocumentResourceMongoTests.cs where necessary. Root owns docs,
+Git, artifacts and integration. These are BenchmarkComparisons slice paths.
+No connection-string/password/URI/environment/exception-message/stack/raw-body
+logging. Redis projects only validated bounded configured/native host/port,
+role/link/state/cardinality and a closed failed-predicate identifier. Mongo
+retains only last bounded configured-member projection: stage/predicate, typed
+nullable counts, validated expected member names/IDs/states/health/set, native
+numeric code and bounded codeName. Print once on terminal failure alongside
+existing classification; exceptions remain failed probes, never readiness.
+
+No hostname normalization, polling/retry addition, budget extension, native
+image/config/durability/schema/worker-provenance change, or assertion relaxation.
+Keep original120s bootstrap promise barrier, zero-sample failures and owned
+cleanup. Pure projection/privacy edge tests complement real native failures;
+no mocked service/native success. All tests execute in GitHub only. Diagnostic
+records use existing retained native logs; no new durable/wire format. Rollback
+removes these diagnostics together without changing native state. ADR remains
+Accepted; fresh original artifacts and all required gates are the join.
+
+
+## TASK-ISO-022K accepted pinned native gossip build identity repair
+
+AC-ISO-003/005/006 retain strict native membership/endpoint/role/acknowledgement.
+The three original b474 Kurrent jobs fail membership with zero samples. Native
+logs report26.1.2.3778 at server commit1eb5f66721e2a3848933485df8bd586016c16de1;
+exact official MemberInfo.ToString prints ESVersion, ClientClusterInfo assigns
+that same ESVersion and JsonCodec emits esVersion. Existing health comparison
+against image tag26.1.2 therefore rejects the pinned native build identity. This
+is a source-proved rejection; absent retained HTTP body means other readiness
+conditions and a sole-cause claim remain unproved.
+
+Disjoint build_action_review owns KurrentConstants.cs, KurrentClusterMembers.cs
+and bounded existing/new Kurrent native-identity tests in the BenchmarkComparisons
+slices (inventory exact test paths before writing). Add separate named exact
+ExpectedGossipVersion26.1.2.3778 and use it only for native member health equality.
+ExpectedServerVersion26.1.2 remains the exact image-tag/TargetProfile.Version
+contract; raw ClusterEvidence retains four-part observed native versions. No
+SemVer-prefix/range/suffix normalization, image/digest change, endpoint/role/
+member-count/copy/checkpoint weakening, extra retry or timeout extension.
+
+Tests first independently prove exact pinned gossip acceptance and wrong image/
+build/neighboring version rejection, preserving all topology and unhealthy-member
+negative cases. Pure member DTO values are algorithm inputs, not native HTTP
+proof. Root full diff/build/format/governance joins exact-SHA native1/2/3 genuine
+HTTP/member/copy flows and full270 before any site metrics. All tests GitHub only.
+Additive constant and strict comparison have no schema/state/wire migration;
+rollback restores the old source as a coherent unit and retains failed evidence.
+ADR remains Accepted until every required gate is genuinely satisfied.
+
+
+TASK-ISO-020RM root process-ownership join: after the worker's terminal source
+packet, root serially refines MongoBootstrapDiagnosticTests only. Cleanup
+independently collects child cancellation/reaping and both original stdout/
+stderr tasks under finite bounds, observes unsettled originals, and preserves
+the initiating failure first alongside cleanup failures. This is real owned
+Node process lifecycle coverage for pure projection inputs; native Mongo
+readiness/cause remains the exact-SHA real-container gate. No foreign logger/
+teardown/subscriber source is part of this checkpoint.
+
+
+## TASK-ISO-023L accepted bounded original replay diagnostic retention
+
+REQ-BC-055 / AC-ISO-006 retain authentic original resource bytes in the existing
+node .log entries and artifact/schema. Actual b474 RF2/RF3 node1 logs reached
+2000 lines; a first rate-limited denial/configuration can otherwise be displaced
+by thousands of ordinary errors before capture stops. Stop precedes app teardown,
+so a disposal flush cannot prove this evidence retained.
+
+Root freezes this disjoint three-file scope before writes: gates_audit owns only
+ComparisonTests/Features/BenchmarkComparisons/ComparisonResourceLogBuffer.cs,
+NEW ComparisonReplayDiagnosticLog.cs and NEW ComparisonReplayDiagnosticLogTests.cs.
+Existing buffer tests, capture/teardown/Stop/subscriber files, logger/product
+runtime, schemas, selectors, config, workflow and docs are excluded. Root owns
+integration/docs/Git. Inherited capable model handles bounded collection/parser
+risk; existing active slots and disjoint scope avoid another route.
+
+Only closed full original lines can claim protected slots: strictly validated
+28-character UTC yyyy-MM-ddTHH:mm:ss.fffffffZ followed by exactly seven ASCII
+spaces, then the exact numeric ReplicaReplayConfigured or ReplicaReplayCapacity
+message grammar. No arbitrary prefix/substring/category/header association,
+secret-bearing trailing text or generated/reformatted line. b474 proves this
+native console prefix; the new record itself awaits original native observation.
+Unknown/truncated/malformed/extra/overflow/negative fields remain ordinary tail.
+Configuration validates voters1..3, four positive capacities, exact summed
+capacity*voters=nodeMaximum<=1048576. Capacity validates sender0..2/pool0..3/
+method0..8, nonnegative counts/time/suppression, selected count=capacity>0,
+counts sum<=voterMaximum, exact nodeMaximum/voterMaximum ratio1..3 and sender
+within that ratio; all integer arithmetic rejects overflow. Where a retained
+configuration exists, capacities/voter count must also agree. Do not infer
+readiness, role or authenticated identity from this diagnostic grammar.
+
+One chronological retained list plus fixed13 slots (one config and12 configured
+sender/pool pairs) preserves the latest original line for each key. Replacement
+keeps actual capture order. Evict oldest ordinary lines first under the original
+maximumLines/maximumBytes/per-line UTF8 bounds; protected records additionally
+have an8KiB cap and must also be evicted if tiny original budgets cannot hold
+them. Never expand budgets, retain unbounded keys, discard failures from JSON,
+change timing or append invented log metadata. Closed numeric lines contain no
+payload/nonce/MAC/credentials/identity/address/exception text.
+
+AC-ISO-006L pass/fail tests first:10k ordinary lines preserve original config/
+latest quota bytes; repeated same key replaces while independent12 keys stay
+bounded and ordered; exact total/protected/UTF8/tiny limits; malformed timestamp/
+indent/unknown/duplicate/trailing/secret text/overflow/inconsistent counts/
+capacity/voter/sender cannot displace protected evidence. Pure buffer inputs are
+algorithm data, not mocked native services. Original independent resource/tail
+regressions remain. Source full diff/build/format/governance precede exact-SHA
+GitHub normal/scalar/comparison and real native1/2/3 original log proof. No local
+tests or fabricated recorded success. Rollback removes this coherent source/test
+unit; no persisted/wire migration. ADR stays Accepted until required evidence.
+
+
+TASK-ISO-023L config-transition edge: a newly retained valid config demotes any
+incompatible previously protected quota to ordinary in place, clears its fixed
+slot and applies the unchanged budgets. Keep its original capture bytes/order;
+future mismatching quotas remain ordinary. Protection requires full original
+input grammar before truncation (or exact equality with bounded input); a tiny
+line cap must never turn a valid prefix with extra/secret trailing text into a
+protected record. Acceptance tests cover both arrival orders and truncation.
+
+
+TASK-ISO-023L exact token hardening: explicitly require every numeric character
+to be ASCII0..9 before parsing, rather than relying on BCL NumberStyles.None
+alone (which is not the declared byte grammar). Embedded/trailing NUL, tabs
+and non-ASCII digits fail recognition and cannot displace protected originals.
+Same three-file ownership, no native format or pool behavior change; GitHub
+cases and actual original prefix/record qualification remain required.
+
+
+## TASK-ISO-023Q accepted actual GitHub regression selection join
+
+REQ-BC-055 / AC-ISO-003/005/006/006L require execution of every new comparison
+acceptance regression, not merely compilation. The existing comparison-images
+job selects exact old admission/buffer classes and would omit the new replay
+profile, Redis/Mongo projection and closed-retention classes. Root is sole
+serialized owner of .github/workflows/ci.yml (currently no foreign diff) and adds
+one explicit needs-gated contract step invoking those five exact TUnit classes
+with the existing Release/no-build/no-restore command. Preserve all prior steps,
+permissions, pinned actions, topology matrices, image semantics and no-skipped
+suite requirement; no new test framework/local execution or green inference.
+Tests continue against actual AppHost models, real owned Node projection process
+and pure buffer/native DTO algorithm inputs; genuine native1/2/3 stays separate.
+The job's retained original results/logs must show every selected case executed
+at the repaired SHA before the dependent27 preflights and full270 can qualify.
+Rollback removes only this additive selection step with its coherent test unit.
+ADR remains Accepted until every source and actual runtime gate exists.

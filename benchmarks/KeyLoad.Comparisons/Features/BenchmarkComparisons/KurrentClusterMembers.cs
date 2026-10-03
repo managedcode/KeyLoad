@@ -33,7 +33,7 @@ internal static class KurrentClusterMembers
     }
 
     private static bool IsHealthyMember(KurrentGossipMember member)
-        => member.Id.Length > KurrentConstants.EmptyTextLength && member.Version == KurrentConstants.ExpectedServerVersion && member.IsAlive &&
+        => member.Id.Length > KurrentConstants.EmptyTextLength && member.Version == KurrentConstants.ExpectedGossipVersion && member.IsAlive &&
             !member.IsReadOnly && member.HttpEndpointIp.Length > KurrentConstants.EmptyTextLength && member.HttpEndpointPort > KurrentConstants.EmptyTextLength &&
             member.InternalHttpEndpointIp.Length > KurrentConstants.EmptyTextLength && member.InternalHttpEndpointPort > KurrentConstants.EmptyTextLength;
 

@@ -195,6 +195,13 @@ jobs:
           dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/Isolated*Resource*/*'
           dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKeyLoadAdmissionTests/*'
           dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonResourceLogBufferTests/*'
+      - name: Qualify isolated replay admission and native diagnostics
+        run: |
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKeyLoadReplayAdmissionTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/RedisReplicaDiagnosticTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoBootstrapDiagnosticTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonReplayDiagnosticLogTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonReplayDiagnosticRetentionTests/*'
       - name: Qualify time-series workload and aggregation contracts
         run: |
           dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesWorkloadTests/*'

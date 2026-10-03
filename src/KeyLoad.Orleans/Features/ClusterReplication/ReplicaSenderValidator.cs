@@ -10,9 +10,9 @@ internal static class ReplicaSenderValidator
         var field = method switch
         {
             ReplicaRpc.RequestVote => ReplicaTransportProtocol.CandidateIdField,
-            ReplicaRpc.Append or ReplicaRpc.SnapshotBegin or ReplicaRpc.SnapshotChunk or ReplicaRpc.SnapshotComplete
+            ReplicaRpc.Append or ReplicaRpc.ReadProbe or ReplicaRpc.SnapshotBegin or ReplicaRpc.SnapshotChunk or ReplicaRpc.SnapshotComplete
                 => ReplicaTransportProtocol.LeaderIdField,
-            ReplicaRpc.Forward or ReplicaRpc.ReadBarrier => null,
+            ReplicaRpc.Forward or ReplicaRpc.ReadBarrier or ReplicaRpc.ControlReadBarrier => null,
             _ => throw Errors.Fail(ErrorCode.Validation, ReplicaTransportProtocol.InvalidPayload)
         };
         if (field is null)

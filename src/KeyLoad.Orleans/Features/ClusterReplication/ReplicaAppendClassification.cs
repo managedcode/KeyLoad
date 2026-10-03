@@ -19,7 +19,8 @@ internal static class ReplicaAppendClassification
         ReplicaPayloadReader.Name(nameof(ReplicaEntry.Operation))
     ];
 
-    internal static ReplicaReplayPool Classify(ref Utf8JsonReader reader, ReplicaConfiguration configuration, int maximumControlPayloadBytes)
+    internal static ReplicaReplayPool Classify(ref Utf8JsonReader reader, ReplicaConfiguration configuration,
+        int maximumControlPayloadBytes, bool requireEmpty)
     {
         ReplicaPayloadReader.Require(reader.TokenType == JsonTokenType.StartObject);
         ulong seen = 0;
@@ -32,6 +33,11 @@ internal static class ReplicaAppendClassification
 
         ReplicaPayloadReader.CompleteObject(ref reader, Fields, seen);
         Validate(header);
+        if (requireEmpty)
+        {
+            ReplicaPayloadReader.Require(header.Entries.Count == 0 && header.PreviousIndex < long.MaxValue);
+            return ReplicaReplayPool.ReadBarrier;
+        }
         return header.Entries.ControlOnly ? ReplicaReplayPool.Critical : ReplicaReplayPool.DataAppend;
     }
 

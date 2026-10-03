@@ -29,7 +29,11 @@ public enum ReplicaRpc
     /// <summary>Appends an acknowledged snapshot chunk.</summary>
     SnapshotChunk,
     /// <summary>Verifies and installs the completed transfer.</summary>
-    SnapshotComplete
+    SnapshotComplete,
+    /// <summary>Confirms an application read cut with an initialized empty append.</summary>
+    ReadProbe,
+    /// <summary>Acquires a current-term majority cut for trusted native membership.</summary>
+    ControlReadBarrier
 }
 
 /// <summary>Identifies a durable boundary observed by real process-recovery tests.</summary>

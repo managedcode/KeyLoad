@@ -24,7 +24,7 @@ internal static class IsolatedKeyLoadPublicRegressionDocuments
                 IsolatedKeyLoadPublicRegressionProtocol.Call(scenario.Partition, IsolatedKeyLoadPublicRegressionProtocol.Commit, create), token));
         var initial = await mcp.SuccessAsync<DocumentResult>(IsolatedKeyLoadPublicRegressionProtocol.Get,
             new GetDocumentRequest(scenario.Document), token);
-        await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(initial, scenario.Document, scenario.InitialJson, 1);
+        await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(initial, scenario.Document, scenario.InitialStoredJson, 1);
         await VerifyUpdateAsync(sdk, mcp, scenario, token);
         await VerifyRejectedMutationsAsync(sdk, mcp, scenario, token);
         await VerifyDeleteAsync(sdk, mcp, scenario, token);
@@ -41,7 +41,7 @@ internal static class IsolatedKeyLoadPublicRegressionDocuments
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(receipt,
             await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.CommitAsync(update, token)));
         var document = await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetAsync(scenario.Document, token));
-        await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(document!, scenario.Document, scenario.UpdatedJson, 2);
+        await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(document!, scenario.Document, scenario.UpdatedStoredJson, 2);
     }
 
     private static async Task VerifyRejectedMutationsAsync(KeyLoadClient sdk, IsolatedKeyLoadPublicRegressionMcp mcp,
@@ -58,7 +58,7 @@ internal static class IsolatedKeyLoadPublicRegressionDocuments
         await Assert.That(await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetAsync(scenario.Missing, token))).IsNull();
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
             (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetAsync(scenario.Document, token)))!,
-            scenario.Document, scenario.UpdatedJson, 2);
+            scenario.Document, scenario.UpdatedStoredJson, 2);
     }
 
     private static async Task VerifyDeleteAsync(KeyLoadClient sdk, IsolatedKeyLoadPublicRegressionMcp mcp,

@@ -256,3 +256,118 @@ Observed image: Linux/amd64 Alpine3.23.6, PostgreSQL18.6, gosu at
 container removal and retained command hashes pass. This resolves the native
 gosu/path assumption only; Timescale extension installation, real1/2/3 database
 bootstrap/ACK/copies and complete intensive family remain unqualified.
+
+## TS006C approved pure corpus, oracle and digest implementation packet
+
+Root accepts AC-TSI-002/005/008 before writes. This source-only independent stage
+may proceed while the separately tracked twelve270 native preflight failures
+block adapters, measured-family and publication qualification. It cannot unblock
+those native dependants. Internal pure types reuse existing SampleData,
+SampleRecord, SampleAggregate and SampleAggregateWindow; no product/wire/selector
+or old-family changes. Separate gRange=k%224 from gLatest=k%256. Inclusive seed
+readback chunks cover16 groups/256 rows, and append chunks1000q..1000q+999ms.
+Whole-series aggregate/count checks remain required because raw LIMIT can truncate.
+
+Digest v1 labels are themselves UInt32-big-endian-length UTF8 strings. Every
+string/array uses UInt32-big-endian byte length/element count; integers, ticks and
+double IEEE754 bits use Int64-big-endian. Nullable values begin with byte0/1.
+Header order: label domain, domain string, label version, string1. Domains are
+keyload.timeseries-intensive.workload and keyload.timeseries-intensive.result.
+raw/latest/aggregate/windows/append-receipt, with the suffix joined directly to
+the result prefix. Every actual result preserves its returned array order.
+
+Workload ordered labels: profile, randomSeed, epochUtcTicks, sampleCount,
+operationCount, warmupCount, repetitionCount, concurrency, operationTimeoutTicks,
+rawLimit, maxSamples, maxWindows, windowWidthTicks, averageToleranceBits,
+seedInsertion, phasePlans, seedReadbacks, warmupReadbacks, measuredReadbacks.
+Seed/sample ordered labels: seriesId, eventId, timestampUtcTicks, sequence,
+valueBits, tags. This same order applies to seed insertion and result rows.
+PhasePlans has51280 entries: repetition0..4, warmup then measured, ascending k.
+Each entry binds labels repetition, phase, seriesId, index, commandPurpose,
+appendSample, rawFromUtcTicks, rawUntilUtcTicks, latestAtOrBeforeUtcTicks,
+aggregateFromUtcTicks, aggregateUntilExclusiveUtcTicks, windowsFromUtcTicks,
+windowsUntilExclusiveUtcTicks. phase is warmup/measured; series is warm-rN/
+measured-rN. commandPurpose=phase+":"+invariant repetition+":"+invariant index.
+appendSample labels eventId, timestampUtcTicks, valueBits, tags. Query inputs
+bind all five operations in one common hash; profile fields bind caps/width.
+Readback entries bind seriesId, fromUtcTicks, untilUtcTicks, expectedCount;
+seedReadbacks16, warmupReadbacks5, measuredReadbacks50, in natural q/repetition
+order. No selected engine/node/scenario/private namespace/run/GUID/timing enters
+the workload hash. Stream framing into IncrementalHash, retaining no full framed
+workload or phase-plan array.
+
+Raw result begins label samples/array count and sample fields. Latest begins
+label sample/optional marker and sample fields. Aggregate fields: count, sumBits,
+optional minimumBits, maximumBits, averageBits. Windows begins label windows/
+array count; each row fields fromUtcTicks, optional untilExclusiveUtcTicks,
+aggregate followed by aggregate fields. Receipt fields commandId lowercaseN
+Guid string, sequence. Result hashes retain actual averages; allowed numerical
+rounding does not imply cross-engine identical digest. Oracle aggregation uses
+integer quarter-unit sums and compares finite actual statistics before tolerance.
+
+Ordered stages and disjoint ownership: existing capable publisher_archive_review
+authors acceptance-derived tests first and owns only NEW TimeSeriesIntensive*
+files in Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive and NEW
+TimeSeriesIntensive* tests/helpers in UnitTests/Features/BenchmarkComparisons/
+TimeSeries/Intensive. Internal names are TimeSeriesIntensiveProfile, Corpus,
+Plans, ReadPlan, Readback, Oracle, DigestWriter, ResultDigest, WorkloadDigest and
+AppendReceipt. Split cohesive new prefixed helpers as numeric limits require.
+No runner/target/interface/adapter/host/resource/shared file edits in this stage.
+Root owns docs/integration/final review. Stop on framing/DTO/mathematical ambiguity,
+shared-file need, upstream defect or scope change rather than guessing.
+
+Tests independently derive seed formulas, exact endpoint counts and first/last
+records; cover k224 independent latest/range, UTC/culture, direct raw order and
+missing/extra/tie/corrupt/tag rejection, empty/null and finite tolerance. A separate
+test reference framer verifies bytes/labels/endian/null/order and run independence;
+it does not call production framing to construct expected digests. Existing
+goldens include epoch639028224000000000, first s-004095/seq1/-13.25, last
+s-000000/seq4096/7 and k0 aggregate512/84/-17/16.75/0.1640625, windows54/count512.
+Source build/format/static review are permitted; all TUnit execution remains
+GitHub full normal/scalar. No fake target, local test/load/runtime, Git/config/
+package changes or exclusions. Native all30 later proves caller response flows.
+Additive pure types have no persistence migration; rollback removes only this
+coherent source/test unit. ADR remains Accepted until every required gate passes.
+
+
+## TASK-ISO-TS006C-R accepted validation-cost and independent-oracle correction
+
+AC-TSI-002/005/008 keep exact v1 bytes, formulas, ordering, finite numeric
+semantics, seed/window boundaries and all caps. Source review identified repeated
+JSONB whitespace normalization (two validator parses plus one framing parse
+per row); this is a source cost estimate, not a measured performance claim.
+
+NEW TimeSeriesIntensiveTagScope.cs retains only one last successfully validated
+raw spelling and its canonical string within one synchronous validation/digest
+call. Exact Profile.Tags returns directly; equivalent repeated spelling parses
+once. Invalid/changed/extra tags or parse failure never replace a valid memo.
+No dictionary/global cache/parser delegate/counter/retained JSON document/DTO.
+RowVerifier accepts the scope and returns validated canonical tags after full
+identity/order/sequence/time/value/finite checks. ResultFrames writes that exact
+canonical result; no second parse. ResultDigest adds ValidatedRaw(expected,actual)
+and ValidatedLatest(expected,actual), checking cardinality before streaming
+validate/frame of each actual row. Standalone Oracle/digest methods use a local
+scope. No response array/materialization/sort; future runner uses combined API
+after latency stop, includes validation in wall time and releases response before
+next call. Maximum16 live responses remains unchanged.
+
+Disjoint same worker owns these NEW/previously authored TimeSeriesIntensive*
+production and test files only. Introduce cohesive named frame/domain/version/
+label/error/recipe constants within this owned new unit, preserving every
+existing byte/formula; root literal/magic policy applies even without diagnostics.
+No runner/interface/target/native host/shared or old-family writes.
+
+Tests first: repeated516 JSONB spellings, alternating equivalent spellings,
+corruption after memo hit, malformed/extra/changed tags, full identity/cardinality/
+tie/default/null/NaN/Infinity failures, independent-reference combined hashes,
+warmed genuine synchronous CI allocation comparison. NEW ReferenceOracle and
+OracleReferenceTests independently derive every raw row/order over224 ranges,
+all54 window absolute bounds/all statistics, latest256 groups/tie/gap/afterseed,
+and all10000 append receipt identity/value/sequence mappings; reference code
+must not call production profile/corpus/plans/oracle/framer for expected values.
+
+Ordered source join: tests, bounded correction, root full review/scoped build/
+format, exact-SHA full normal/scalar GitHub suites, later actual all30 native
+responses. No local tests/runtime/benchmarks/Git or invented allocation/speed
+result. Additive source rollback removes this coherent owned unit; no persistence
+migration. ADR remains Accepted; source and native gates stay distinct.

@@ -99,3 +99,44 @@ The exact pinned image is Linux/amd64 Alpine3.23.6, native PG18.6, real gosu at
 /usr/local/bin/gosu, postgres UID70 and verified PGDATA18/docker write permission.
 Owned probe container removal is verified. This satisfies only image feasibility;
 extension/schema/database/replication/runtime/30-cell/performance remain pending.
+
+## TS006C independent source stage after read-only mathematical review
+
+Root-approved exact domain/framing packet is in ADR059. Acceptance now explicitly
+separates gRange/gLatest, closes inclusive append endpoints and requires whole
+series counts alongside LIMIT readbacks. The native270 twelve failures remain
+tracked in isolated-comparisons.plan.md; independent pure helpers do not unblock
+native adapters or qualification. Actual repaired source b474 CI is queued.
+
+| Task | REQ/AC / owner / tier / permissions | Dependencies, artifacts, verification and join |
+|---|---|---|
+|TASK-ISO-TS006-R|BC060/TSI002/005; publisher_archive_review high-capability read-only|Complete: independent formulas/counts/endpoints/goldens and exact digest proposal; root reviewed/froze the packet. No source/runtime/Git changes.|
+|TASK-ISO-TS006C|BC060/TSI002/005/008; same available capable agent, write NEW prefixed pure helpers/tests only|Start after accepted ADR059/framing/criteria. Tests first; bounded streaming workload hash, independent oracle, no target/runner. Complete/blocked/failed/cancelled packet with exact files/hashes/diff/source diagnostics. Root full review; exact-SHA full normal/scalar and later real native join.|
+
+The current platform permits resuming this existing capable worker; no cheaper
+new worker route is available in this constrained agent tree. Pure new-file
+ownership is disjoint from root/source integration and concurrent cache/logger
+work. Tests-only expected records are algorithm inputs, never service doubles.
+
+- [x] Independent source/mathematical/digest proposal complete and reviewed.
+- [x] Root freezes acceptance refinements and exact ordered framing contract.
+- [ ] Tests first for seed/order/endpoints/goldens/finite/tags/framing invariance.
+- [ ] New pure corpus/plans/oracle/streaming workload and actual-result digests.
+- [ ] Root combined review/source gates and genuine normal/scalar native results.
+
+
+| Task | REQ/AC / owner / permissions | Dependencies and join |
+|---|---|---|
+|TASK-ISO-TS006C-R|BC060/TSI002/005/008; publisher_archive_review inherited capable tier; owned NEW prefixed source/tests only|Read-only review complete; root accepted single-entry synchronous scope/combined framing/constants/independent full oracle. Tests first, no adapter/runner/native/shared writes; root full diff/build, normal/scalar genuine CI, all30 native later.|
+
+- [x] Root fully reviewed original16 production/10 test files and framing/formulas.
+- [x] Freeze bounded validation-cost correction and independent oracle test gaps.
+- [ ] Corrected unit reviewed/built; actual normal/scalar source cases qualified.
+
+
+TASK-ISO-TS006C-R terminal source join: root reviewed all33 new files and the
+coherent complete solution Release build passes0warnings/0errors. The worker's
+30 declared TUnit cases remain unexecuted until exact-SHA GitHub normal/scalar
+qualification. No native intensive runner/adapter or measured acceleration claim.
+TASK-ISO-TS007R is read-only planning of compact bounded attempts and real client
+cancellation/response ownership; no further source writes are approved yet.

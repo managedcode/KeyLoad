@@ -18,9 +18,11 @@ internal sealed class IsolatedDocumentResourceMongoTests
     private const string BootstrapCompletion = """
         bootstrap().then(
             () => quit(0),
-            () => {
+            error => {
                 // Native failures are retained as a fixed classification without credential-bearing details.
+                if (lastDiagnostic === null || lastDiagnostic.predicate === MongoDiagnosticPredicate.none || lastDiagnostic.predicate === MongoDiagnosticPredicate.awaiting) rememberException(error);
                 print('MongoNativeBootstrapFailed');
+                printDiagnostic();
                 quit(1);
             }
         );

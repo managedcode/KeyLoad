@@ -80,6 +80,16 @@ GUID command identity uses SHA256(UTF8(runId+":"+purpose)) first16 bytes in the
 existing .NET Guid constructor convention; purpose contains phase/repetition/k
 using invariant decimal. Run namespace is excluded from the common workload hash.
 
+TS006C clarification: name the independent groups gRange=k%224 and
+gLatest=k%256. Seed readback chunk q0..15 has inclusive endpoints at group16q
+minute0 and group16q+15 minute3, exactly256 samples. Measured append chunk q0..9
+has inclusive offsets1000q..1000q+999 milliseconds, never a1001-row range.
+Raw Limit1000 permits truncation, so complete readbacks also require separate
+untimed whole-series aggregate/count proof: seed4096, warmup256, measured10000
+with MaxSamples10000. Overflow fails. Append receipt sequences form the exact
+1..10000 bijection independently of submission order. Oracle sums use integer
+quarter-units; reject nonfinite actual statistics before the average tolerance.
+
 ## Timing and resource contract
 
 Use16 bounded closed-loop workers. For each attempt, start Stopwatch immediately
@@ -174,3 +184,46 @@ applicability fact, never a passing missing required metric. Review-only
 exception: unforced simultaneous cleanup filesystem/logger faults and immutable
 source/read races have bounded control-flow/ownership review evidence alongside
 normal genuine lifecycle tests; never add a production test hook or double.
+
+
+## TASK-ISO-TS006C-R accepted validation-cost and independent-oracle correction
+
+AC-TSI-002/005/008 keep exact v1 bytes, formulas, ordering, finite numeric
+semantics, seed/window boundaries and all caps. Source review identified repeated
+JSONB whitespace normalization (two validator parses plus one framing parse
+per row); this is a source cost estimate, not a measured performance claim.
+
+NEW TimeSeriesIntensiveTagScope.cs retains only one last successfully validated
+raw spelling and its canonical string within one synchronous validation/digest
+call. Exact Profile.Tags returns directly; equivalent repeated spelling parses
+once. Invalid/changed/extra tags or parse failure never replace a valid memo.
+No dictionary/global cache/parser delegate/counter/retained JSON document/DTO.
+RowVerifier accepts the scope and returns validated canonical tags after full
+identity/order/sequence/time/value/finite checks. ResultFrames writes that exact
+canonical result; no second parse. ResultDigest adds ValidatedRaw(expected,actual)
+and ValidatedLatest(expected,actual), checking cardinality before streaming
+validate/frame of each actual row. Standalone Oracle/digest methods use a local
+scope. No response array/materialization/sort; future runner uses combined API
+after latency stop, includes validation in wall time and releases response before
+next call. Maximum16 live responses remains unchanged.
+
+Disjoint same worker owns these NEW/previously authored TimeSeriesIntensive*
+production and test files only. Introduce cohesive named frame/domain/version/
+label/error/recipe constants within this owned new unit, preserving every
+existing byte/formula; root literal/magic policy applies even without diagnostics.
+No runner/interface/target/native host/shared or old-family writes.
+
+Tests first: repeated516 JSONB spellings, alternating equivalent spellings,
+corruption after memo hit, malformed/extra/changed tags, full identity/cardinality/
+tie/default/null/NaN/Infinity failures, independent-reference combined hashes,
+warmed genuine synchronous CI allocation comparison. NEW ReferenceOracle and
+OracleReferenceTests independently derive every raw row/order over224 ranges,
+all54 window absolute bounds/all statistics, latest256 groups/tie/gap/afterseed,
+and all10000 append receipt identity/value/sequence mappings; reference code
+must not call production profile/corpus/plans/oracle/framer for expected values.
+
+Ordered source join: tests, bounded correction, root full review/scoped build/
+format, exact-SHA full normal/scalar GitHub suites, later actual all30 native
+responses. No local tests/runtime/benchmarks/Git or invented allocation/speed
+result. Additive source rollback removes this coherent owned unit; no persistence
+migration. ADR remains Accepted; source and native gates stay distinct.

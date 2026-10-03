@@ -2164,7 +2164,7 @@
       "independentEvidenceFreshnessBeforePagesDeployment"
     ],
     "pending": [
-      "repair12AuthenticPreflightFailuresAndRerunExactSource",
+      "repair10AuthenticPreflightFailuresAndRerunExactSource",
       "realSDKMCPFixedMembershipFaultProofs",
       "exactSHAFullLinuxRequiredGates",
       "actualComplete270CellIntensiveCohort",
@@ -2185,11 +2185,11 @@
       "limits": "Historical all-OS verification passed; RF3 59/60 and comparison failed. This is not an isolated intensive cohort."
     },
     "latestBaseline": {
-      "sourceRevision": "cf630751e0f24e4d8183e55510add9c7207e377f",
-      "runId": 37084177131,
-      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131",
+      "sourceRevision": "b47409e73427c1394ccf705f398a541f2e7cb08b",
+      "runId": 37087909605,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37087909605",
       "conclusion": "failure",
-      "limits": "Complete source, recovery, RF3 and immutable image gates pass. Native27 preflights conclude15 job successes and12 failures; full270 intensive cohort and authenticated aggregation are absent. No new site performance publication is qualified."
+      "limits": "Full Release/format/governance, analyzer118, normal/scalar1407, recovery138 and RF363 pass with zero skips. All27 native preflights completed:17 job successes and10 failures (KeyLoad1/2/3,Redis2/3,Mongo2/3,KurrentDB1/2/3); full270 and aggregation skipped. No new site performance publication or winner is qualified. The earlier RF3 survivor-window failure remains unresolved; a passing repeat is not a causal repair."
     },
     "sourceEvidence": "docs/implementation/isolated-comparison-source-qualification.json",
     "intensiveTimeSeries": {
@@ -2203,7 +2203,30 @@
       "actualImageProbeSource": "890047996b651e76b3fbc6bb87dc941f91c9bd2e",
       "qualifiedNativeFacts": true,
       "completeMeasuredFamily": false,
-      "nativeFactsReceipt": "docs/implementation/timeseries-image-qualification-37086903497.json"
+      "nativeFactsReceipt": "docs/implementation/timeseries-image-qualification-37086903497.json",
+      "pureCorpusOracleDigest": {
+        "state": "source_authored_exact_SHA_qualification_pending",
+        "tasks": [
+          "TASK-ISO-TS006C",
+          "TASK-ISO-TS006C-R"
+        ],
+        "nativeRunnerAndAdaptersImplemented": false,
+        "measuredPerformanceClaim": false
+      }
+    },
+    "sourceRepairs": {
+      "state": "source_authored_exact_SHA_qualification_pending",
+      "tasks": [
+        "TASK-ISO-019J",
+        "TASK-ISO-020RM",
+        "TASK-ISO-021P",
+        "TASK-ISO-021T",
+        "TASK-ISO-022K",
+        "TASK-ISO-023L",
+        "TASK-ISO-023Q"
+      ],
+      "contracts": "isolated-comparisons.acceptance.md",
+      "limits": "Canonical document oracle, strict application/control read separation, bounded original native diagnostics, exact gossip build identity and explicit GitHub regression selection await genuine repaired-source qualification."
     }
   }
 }

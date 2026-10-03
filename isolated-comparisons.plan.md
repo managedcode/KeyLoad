@@ -369,3 +369,185 @@ Retain this exact failed log and repeat complete gates at the formatting repair 
 
 - [ ] Verify EditorConfig: actual890 WHITESPACE failure; source fix authored,
   corrected exact-source GitHub formatter gate pending.
+
+
+## Native b474 baseline and continued source repair
+
+Run37087909605 atb47409e73427c1394ccf705f398a541f2e7cb08b passes complete
+Release/formatter/governance, analyzer118/118, normal/scalar1407/1407,
+recovery138/138 and RF363/63, all zero skips. The original ffa8 RF3 survivor
+windows failure remains unresolved timing-sensitive routing evidence; a passing
+repeat is not a causal repair. Native image job111104670277 passes its genuine
+image/job/composition probes. The27 preflights are independently executing;
+their failed jobs prevent270 allocation and publication.
+
+- [ ] KeyLoad n1 job111105163526: all50000 timed reads succeed, then the real
+  SDK/MCP document oracle expects original property order. TASK-ISO-019J root
+  preserves unsorted input and adds exact independent canonical stored strings;
+  source correction authored, native complete public regression still pending.
+- [ ] KeyLoad n2 job111105163562: first10000 attempts4394success/5606OwnershipLost,
+  later four repetitions fail before timing. Native QuorumRead rejection and
+  membership signed no-majority replies retained; precise quota/cause still open.
+- [ ] KeyLoad n3 job111105163601: first10000 attempts5918success/4082ResourceExhausted,
+  later four repetitions fail before timing. Native QuorumRead rejection retained;
+  separate read/critical replay-pool cause requires source and native proof.
+
+| Task | AC / owner / permission | Start, artifacts, verification and join |
+|---|---|---|
+|TASK-ISO-CI-018|ISO003/005/007; gates_audit read-only capable|Actual b474 job/archive logs and exact hashes, topology-specific failures and approved source repair proposal. No retries, local qualification or test relaxation.|
+|TASK-ISO-019J|ISO004/005; root serialized existing public regression files|Accepted canonical JSON contract and native n1 failing regression; two source files plus docs. Scoped source gates then genuine same-SHA1/2/3 full public/native checks. Pending qualification.|
+
+
+
+| Task | REQ/AC / owner / tier / permissions | Dependencies and join |
+|---|---|---|---|
+|TASK-ISO-020RM|ISO003/005/006; build_action_review inherited capable tier; bounded diagnostic/test source writes only|Root accepted ADR056 packet above; preserve exact failed source/native archives. Tests first, source build/static review, root complete diff, exact-SHA native1/2/3. Root owns Git/docs/CI; no behavior fix before native predicate evidence.|
+
+- [x] Four original failed native archives verified; strict source boundary reviewed.
+- [x] Accept diagnostic-only contract before delegated writes.
+- [ ] Diagnostic source/tests reviewed and built; genuine native predicates retained.
+- [ ] Proven behavior repair separately approved and all native gates green.
+
+
+| Task | REQ/AC / owner / permissions | Dependencies and join |
+|---|---|---|---|
+|TASK-ISO-021P|REP006/ISO003/004/005; gates_audit inherited high capability; bounded Replication-only source/new real-node tests|Accepted ADR036 packet; tests first, no shared fixture mutation without approval. Root reviews full diff/source gates; exact-SHA normal/scalar/recovery/RF3/native1/2/3 required.|
+|TASK-ISO-021T|same AC; root serialized Orleans crypto/membership/enum/profile/diagnostic integration|Parallel disjoint Replication worker; keep shared Abstractions and foreign sources untouched. Genuine signed security tests, strict pool evidence and full native join.|
+
+- [x] Native failure/source analysis; approve strict application/control separation.
+- [x] Replication source and acceptance-derived real-node tests reviewed; exact-SHA execution pending.
+- [x] Strict signed classification, membership join and bounded diagnostics reviewed; signed max-index boundary repaired.
+- [ ] Actual full source/recovery/RF3/native1/2/3 and all270 gates green.
+- [ ] Freeze and qualify actual native control execution under sustained pressure.
+
+
+TASK-ISO-021P test instrumentation refinement: NEW RecoveryTests ClusterReplication
+ReadRoundStoredNode.cs owns distinct genuine ZoneTree/replica directories,
+DatabaseEngine/DurableReplicaLog/ReplicaMaterializer/ReplicaConsensus with original
+timing. NEW ReadRoundProtocolTransport.cs maps a fixed immutable set of actual
+stored nodes; InvokeAsync records method/source/destination then awaits actual
+target Consensus.HandleAsync with original payload/token, returning its actual
+result/error. No manufactured reply/fault/delay/retry/dropped target or service
+double. NEW ReadRoundStoredCluster.cs attaches per-node protocol links, waits
+bounded real election/readiness and owns orderly cleanup. NEW ReadRoundProtocolTests.cs
+and ReadRoundGuardTests.cs cover actual RF1 local and RF2/RF3 local/remote read
+purpose, committed cuts, receiver guard-before-mutation and caller cancellation.
+This is real stored protocol integration instrumentation, not native Orleans
+transport, production topology or fault/performance qualification. Separate
+genuine signed admission tests and Docker/Aspire RF3 remain mandatory joins.
+
+
+TASK-ISO-021T source integration details: ReplicaEnvelopeAuthenticator adds an
+optional fifth ILogger<ReplicaEnvelopeAuthenticator> constructor argument; all
+source callers remain coherent and native DI supplies the actual logger. This
+is a homogeneous source/ABI rollout, not a retained legacy constructor shim.
+The exact authenticated quota snapshot and fixed rate state are source-owned
+ReplicaReplayAdmissionFailure/Diagnostics; one numeric configuration record
+retains actual node pool capacities, and at most one rejection record per
+configured sender/pool/30s retains counts/expiry/suppressions. LoggerFactory
+provider AggregateException cannot replace the original authoritative quota
+denial; that defensive provider-failure edge needs real provider evidence,
+not a mocked logging service. Native retained configuration/denial logs remain
+a required join; resource-model tests alone do not prove runtime configuration.
+
+IsolatedKeyLoadReplayProfile explicitly sets all four capacities on each actual
+benchmark resource via existing IsolatedKeyLoadAdmission.Apply. New genuine
+AppHost model cases verify1/2/3 configs and absent production overrides; genuine
+signed security cases verify pool isolation/malformed/replay/MAC/sender edges,
+and actual LoggerFactory/provider capture verifies closed numeric/privacy/rate
+evidence. No public status/worker schema or dependency changed.
+
+
+Final b474/run37087909605 native baseline:27 completed preflights,17success/
+10failure. Failures are KeyLoad1/2/3, Redis2/3, Mongo2/3, KurrentDB1/2/3; all270
+allocation and aggregation skipped by the original strict dependency. Kurrent
+original ZIP digests: n1 artifact11261522797/job111105164606 SHA256
+9896cff17968bc353c0d6db95e911f53b6bc967b75f69527b3010b7da25cb55b;
+n2 artifact11262241672/job111105164603 SHA256
+05a753db8f6191788a7fe1138a7733f637cbab73847a0fd42616a1b78d146bfd;
+n3 artifact11262496282/job111105165089 SHA256
+bbef699135f8aa8aa2a7afff59e4fbfee99d61b1c013aa6b399aa79642f021f8.
+All fail setup:KurrentGossipMembershipMismatch with zero timed samples and clean
+owned teardown. Native membership logs show full26.1.2.3778 build identity;
+the exact gossip predicate requires pinned source/native response evidence.
+
+- [ ] KurrentDB n1 job111105164606: exact native gossip membership failure.
+- [ ] KurrentDB n2 job111105164603: exact native gossip membership failure.
+- [ ] KurrentDB n3 job111105165089: exact native gossip membership failure.
+
+TASK-ISO-022K read-only source/native diagnosis follows020RM completion; same
+build_action_review owns analysis only, preserving original ZIPs and strict
+version/endpoint/member/role/ack assertions. Root freezes any repair separately.
+
+
+| Task | REQ/AC / owner / permissions | Dependencies and join |
+|---|---|---|
+|TASK-ISO-022K|ISO003/005/006; build_action_review bounded constant/comparison/identity test writes|Original3 ZIP hashes/native build + exact official commit prove rejection. Tests first, retain three-part image profile and four-part raw gossip. Root review/source gates, real native1/2/3 HTTP/member/copies then full270 required; other failed predicates not assumed absent.|
+
+
+TASK-ISO-020RM root process-ownership join: after the worker's terminal source
+packet, root serially refines MongoBootstrapDiagnosticTests only. Cleanup
+independently collects child cancellation/reaping and both original stdout/
+stderr tasks under finite bounds, observes unsettled originals, and preserves
+the initiating failure first alongside cleanup failures. This is real owned
+Node process lifecycle coverage for pure projection inputs; native Mongo
+readiness/cause remains the exact-SHA real-container gate. No foreign logger/
+teardown/subscriber source is part of this checkpoint.
+
+## TASK-ISO-023 coherent owned-source checkpoint
+
+Root verifies an immutable HEAD-based projection of the83 approved owned files;
+this is a source verification artifact, not a new implementation checkout. All
+implementation remains in the shared checkout. Foreign cache/serialization/
+checkpoint/logger-lifetime edits remain visible and outside the scoped commit.
+The first projected complete Release build reports0warnings/four owned errors:
+
+- [x] MongoBootstrapDiagnosticTests CollectAsync CA1031: observe and collect the
+  actual task fault/cancellation after bounded await; no broad swallowed catch.
+- [x] ReplicaControlBarrierSecurityTests lines21/22/23 TUnitAssertions0005:
+  assert reflected runtime enum values instead of constant expression assertions.
+- [x] Complete owned-source Release build0/0, full formatter exit0 and governance pass.
+- [ ] Stage only reviewed owned bytes/partial documentation, commit/push main.
+- [ ] Exact new SHA GitHub full normal/scalar/recovery/RF3 and27 preflights.
+- [ ] Inspect strict Redis/Mongo native predicate diagnostics; freeze proven
+  repairs before further behavior writes, then complete270 and publication.
+
+Every source-only pass remains distinct from genuine GitHub qualification.
+
+
+| Task | REQ/AC / owner / permissions | Dependencies and join |
+|---|---|---|
+|TASK-ISO-023L|BC055/ISO006L; gates_audit inherited capable; three frozen log-buffer/parser/new-test files only|Accepted ADR056 before writes; tests first, bounded numeric/original-line collection; root full diff/source gates and genuine same-SHA native logs. No foreign capture/teardown/lifetime writes.|
+
+- [x] Closed original diagnostic parser/13-slot retention:51 acceptance cases authored; actual execution pending.
+- [x] Root complete diff/source build/format/governance (source-only).
+- [ ] Exact-SHA native1/2/3 config/quota original byte retention and full cohort.
+
+The coherent Release retry succeeds0warnings/0errors33.86s, including the complete
+source/test solution. Complete formatter then identifies eight whitespace
+locations in four owned files (ReplayAdmissionDiagnostics, Mongo diagnostic
+process cleanup, ReadRoundStoredNode initializer and ReplayDiagnosticsTests).
+Root applies only scoped canonical whitespace formatting; no semantics change.
+The combined formatter repeat and retention source join remain pending.
+
+
+Final retention-source Release join passes0warnings/0errors70.78s; static
+governance passes. Worker final review requires explicit ASCII numeric tokens
+and NUL/tab/non-ASCII negative cases before final freeze, within the same three
+files. This source boundary hardening precedes the final formatter and commit.
+
+
+| Task | REQ/AC / owner / permissions | Dependencies and join |
+|---|---|---|
+|TASK-ISO-023Q|BC055/ISO003/005/006/006L; root serialized ci.yml selector only|Existing filters omit new5 comparison classes. Accepted additive exact TUnit step; static source review then real same-SHA job/result counts before native27/270. All existing gates and permissions retained.|
+
+
+TASK-ISO-023 final source checkpoint:89 reviewed owned files at HEAD b474,
+complete Release0warnings/0errors23.29s, full dotnet format verify exit0,
+governance PASS25 projects/four modules, exact primary/projection byte inventory
+and owned whitespace diff checks. No local test/runtime/load was executed.
+The explicit new5-class GitHub selector joins the frozen51 closed-retention
+cases with replay profile and Redis/Mongo diagnostic regressions. Foreign
+cache/serialization/checkpoint/logger-lifetime changes remain visible and out
+of the scoped commit. Native pressure/control and separate TimeSeries runner/
+adapters remain explicit unqualified dependent workstreams.

@@ -38,10 +38,12 @@ internal sealed class NativeDocumentTopologyKurrentTests
         await Assert.That(KurrentClusterMembers.IsReady(views, ComparisonTopology.TwoNode)).IsFalse();
     }
 
-    private static KurrentGossipView[] Views(int count)
+    private static KurrentGossipView[] Views(int count) => Views(count, KurrentConstants.ExpectedGossipVersion);
+
+    internal static KurrentGossipView[] Views(int count, string version)
     {
         var members = Enumerable.Range(0, count).Select(index => new KurrentGossipMember(MemberPrefix + index,
-            index == 0 ? KurrentConstants.LeaderState : KurrentConstants.FollowerState, KurrentConstants.ExpectedServerVersion,
+            index == 0 ? KurrentConstants.LeaderState : KurrentConstants.FollowerState, version,
             HostPrefix + index, Port, HostPrefix + index, Port, true, false, 100, 101, 101)).ToArray();
         return members.Select(member => new KurrentGossipView(member.HttpEndpointIp, Port, members.ToArray(), member)).ToArray();
     }

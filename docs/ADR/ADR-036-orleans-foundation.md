@@ -600,3 +600,120 @@ The TimeSeries follower test separately retains safe Problem code/detail on its
 unchanged success assertions; no unobserved response code authorizes a retry.
 Rollback removes only this classification case/tests while preserving native
 Orleans/timeout handling; there is no persisted migration. Qualification pending.
+
+
+## TASK-ISO-021 accepted application/control read separation
+
+REQ/AC-REP-006 and AC-ISO-003/004/005 remain the correctness/qualification gates.
+Source b474 proves application quorum rounds spend Critical capacity via empty
+Append. Actual native RF2 OwnershipLost/RF3 ResourceExhausted do not yet prove
+which replay pool first overflowed; preserve that uncertainty and failed samples.
+
+Append signed method ordinals ReadProbe=7 and ControlReadBarrier=8; old0..6,
+envelope version, exact HMAC method binding, generation, nonce, freshness,
+full-lifetime cross-method replay and durable formats stay unchanged. ReadProbe
+uses the existing strict AppendRequest parser with initialized empty Entries
+and declared LeaderId equal to authenticated sender. Any data/control entry,
+default/null entries, malformed/duplicate/unknown/trailing field, invalid header
+or over-budget body fails before receiver/ObserveLeader/state mutation. Valid
+ReadProbe consumes ReadBarrier. Ordinary heartbeat/control empty Append stays
+Critical. Application-origin nonempty catchup fallback uses empty ReadProbe;
+control/write fallback keeps ordinary Append. Snapshot/data semantics unchanged.
+
+ReplicaLeader uses an internal closed purpose, never a public caller flag.
+ReplicaConsensus adds trusted ReadControlBarrierAsync sharing the actual bounded
+read core/readiness/activity/lifetime/10s/quorum/term/cut/apply semantics. Remote
+control uses signed strict-empty-string ControlReadBarrier/Critical; local
+control round uses ordinary empty Append. Existing public ReadBarrier retains
+application purpose. No ICommitCoordinator/HTTP/SQL/SDK/MCP/authorization change.
+
+ReplicaMembershipTable constructor now requires the actual ReplicaConsensus
+instead of IReplicaEndpoint; the sole production construction already supplies
+partition.Consensus. Change the source signature coherently, with no legacy
+overload/cast/compatibility fallback. ReplicaMembershipStore receives that same
+node-owned consensus and calls trusted control read; membership writes retain
+coordinator/atomic CAS. Preserve true caller cancellation; independent native
+deadline/lifetime cancellation maps OwnershipLost as the original coordinator.
+
+Disjoint ownership: root enum, strict Orleans replay/sender classification,
+membership source join, fixed quota diagnostics, benchmark-only profile/env,
+shared docs and integration. gates_audit owns Replication ReplicaConsensus.cs,
+ReplicaLeader.cs, ReplicaFollowerSender.cs, ReplicaRequestDispatcher.cs and NEW
+cohesive prefixed purpose/guard helpers plus NEW focused real-node tests under
+RecoveryTests/Features/ClusterReplication. Escalate if a test needs a shared
+fixture edit; no synthetic successful transport, gate/quorum/term/retry relaxation
+or public/shared abstraction edits. Tests first use actual stored nodes and
+real protocol. Root new security TUnit tests cover valid signed methods, empty
+guards, wrong sender/MAC, malformed/nonempty/null fields, cross-method replay,
+separate capacity denial and unchanged old method/data/snapshot classification.
+
+Quota diagnostic snapshot is captured atomically at capacity denial and emitted
+after the lock: configured numeric sender index, closed method/pool, counts and
+limits, Unix timestamp/oldest expiry. No identity/address/nonce/payload/credential/
+exception text. Fixed per-sender/pool state emits first then at most once30s,
+with saturating suppressed count; no success-path allocation/unbounded keys/IO.
+Original authenticated ResourceExhausted classification remains unchanged.
+
+Benchmark-only ReadBarrierPerVoter196608 with original Critical16384/Forward32768/
+DataAppend32768 yields278528 per voter,835584 per RF3 node, below1048576.
+Production defaults stay unchanged. Retain actual rolling occupancy/expiry and
+exact node config; this arithmetic does not guarantee complete CRUD/queue cells
+or throughput. Every public successful call still performs two authorized
+quorum barriers; do not remove persisted authorization or cache it here.
+
+Ordered stages: failing acceptance-derived tests; bounded source implementation;
+root review/build/format/governance; exact-SHA full normal/scalar/138 recovery/
+RF3 and native KeyLoad1/2/3; then genuine control-pressure/failover proof and
+all270 before aggregation/site. Native control execution/membership-under-load
+observer remains a separately frozen required join, not inferred from admission
+or absence of warnings. Public auth/lease reserve liveness remains unqualified.
+All test/runtime execution is GitHub only. Homogeneous all-voter rollout and
+rollback preserves local stores/journals; old nodes fail closed on new methods,
+no mixed-version availability promise. ADR remains Accepted pending all evidence.
+
+
+TASK-ISO-021P test instrumentation refinement: NEW RecoveryTests ClusterReplication
+ReadRoundStoredNode.cs owns distinct genuine ZoneTree/replica directories,
+DatabaseEngine/DurableReplicaLog/ReplicaMaterializer/ReplicaConsensus with original
+timing. NEW ReadRoundProtocolTransport.cs maps a fixed immutable set of actual
+stored nodes; InvokeAsync records method/source/destination then awaits actual
+target Consensus.HandleAsync with original payload/token, returning its actual
+result/error. No manufactured reply/fault/delay/retry/dropped target or service
+double. NEW ReadRoundStoredCluster.cs attaches per-node protocol links, waits
+bounded real election/readiness and owns orderly cleanup. NEW ReadRoundProtocolTests.cs
+and ReadRoundGuardTests.cs cover actual RF1 local and RF2/RF3 local/remote read
+purpose, committed cuts, receiver guard-before-mutation and caller cancellation.
+This is real stored protocol integration instrumentation, not native Orleans
+transport, production topology or fault/performance qualification. Separate
+genuine signed admission tests and Docker/Aspire RF3 remain mandatory joins.
+
+
+TASK-ISO-021T source integration details: ReplicaEnvelopeAuthenticator adds an
+optional fifth ILogger<ReplicaEnvelopeAuthenticator> constructor argument; all
+source callers remain coherent and native DI supplies the actual logger. This
+is a homogeneous source/ABI rollout, not a retained legacy constructor shim.
+The exact authenticated quota snapshot and fixed rate state are source-owned
+ReplicaReplayAdmissionFailure/Diagnostics; one numeric configuration record
+retains actual node pool capacities, and at most one rejection record per
+configured sender/pool/30s retains counts/expiry/suppressions. LoggerFactory
+provider AggregateException cannot replace the original authoritative quota
+denial; that defensive provider-failure edge needs real provider evidence,
+not a mocked logging service. Native retained configuration/denial logs remain
+a required join; resource-model tests alone do not prove runtime configuration.
+
+IsolatedKeyLoadReplayProfile explicitly sets all four capacities on each actual
+benchmark resource via existing IsolatedKeyLoadAdmission.Apply. New genuine
+AppHost model cases verify1/2/3 configs and absent production overrides; genuine
+signed security cases verify pool isolation/malformed/replay/MAC/sender edges,
+and actual LoggerFactory/provider capture verifies closed numeric/privacy/rate
+evidence. No public status/worker schema or dependency changed.
+
+
+TASK-ISO-021R source review closes the new-method index overflow boundary:
+ReadProbe rejects PreviousIndex=Int64.MaxValue before replay admission, even
+with otherwise valid positive term/previousTerm and empty entries. Genuine
+signed MaximumPreviousIndexFailsBeforeReplayAdmission asserts Validation and
+both one-slot pools remain available. Existing Append semantics are unchanged.
+Source review also confirms fixed rate state/atomic snapshots and actual native
+DI/Consensus ownership; native control-under-load and provider-failure evidence
+remain open, with no inferred successful runtime result.

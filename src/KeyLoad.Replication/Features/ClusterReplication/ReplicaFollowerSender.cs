@@ -5,7 +5,7 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
     private readonly Dictionary<string, SemaphoreSlim> gates = state.Configuration.VoterIds.ToDictionary(
         voter => voter, _ => new SemaphoreSlim(1, 1), StringComparer.Ordinal);
 
-    internal async Task<bool> SynchronizeAsync(string voter, long term, CancellationToken cancellationToken)
+    internal async Task<bool> SynchronizeAsync(string voter, long term, ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
     {
         if (!await gates[voter].WaitAsync(0, cancellationToken).ConfigureAwait(false))
         {
@@ -16,7 +16,7 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
             var plan = await state.LockedAsync(() => Plan(voter, term), cancellationToken).ConfigureAwait(false);
             return plan.Snapshot is { } snapshot
                 ? await SnapshotAsync(voter, term, snapshot, cancellationToken).ConfigureAwait(false)
-                : await AppendAsync(voter, term, plan.Append!, cancellationToken).ConfigureAwait(false);
+                : await AppendAsync(voter, term, plan.Append!, purpose, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception error) when (ReplicaRpcClient.Unavailable(error)) { return false; }
         catch (Exception error) when (error is KeyLoadException or IOException or System.Text.Json.JsonException)
@@ -38,18 +38,19 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
         return (new(state.Configuration.LocalId, term, next - 1, state.Log.TermAt(next - 1), durable.CommittedIndex, entries), null);
     }
 
-    private async Task<bool> AppendAsync(string voter, long term, AppendRequest request, CancellationToken cancellationToken)
+    private async Task<bool> AppendAsync(string voter, long term, AppendRequest request, ReplicaReadRoundPurpose purpose,
+        CancellationToken cancellationToken)
     {
         AppendReply reply;
         try
         {
-            reply = await rpc.InvokeAsync<AppendRequest, AppendReply>(voter, ReplicaRpc.Append, request, cancellationToken).ConfigureAwait(false);
+            reply = await rpc.InvokeAsync<AppendRequest, AppendReply>(voter, AppendMethod(request, purpose), request, cancellationToken).ConfigureAwait(false);
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.ResourceExhausted && request.Entries.Length > 0)
         {
-            // An exhausted data pool cannot suppress the leader's reserved control heartbeat.
+            // A read-generated fallback remains in application admission; native control retains its reserve.
             request = request with { Entries = [] };
-            reply = await rpc.InvokeAsync<AppendRequest, AppendReply>(voter, ReplicaRpc.Append, request, cancellationToken).ConfigureAwait(false);
+            reply = await rpc.InvokeAsync<AppendRequest, AppendReply>(voter, AppendMethod(request, purpose), request, cancellationToken).ConfigureAwait(false);
         }
 
         return await state.LockedAsync(() =>
@@ -70,6 +71,9 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
             return reply.Accepted;
         }, cancellationToken).ConfigureAwait(false);
     }
+
+    private static ReplicaRpc AppendMethod(AppendRequest request, ReplicaReadRoundPurpose purpose)
+        => purpose == ReplicaReadRoundPurpose.Application && request.Entries.Length == 0 ? ReplicaRpc.ReadProbe : ReplicaRpc.Append;
 
     private async Task<bool> SnapshotAsync(string voter, long term, ReplicaSnapshot snapshot, CancellationToken cancellationToken)
     {

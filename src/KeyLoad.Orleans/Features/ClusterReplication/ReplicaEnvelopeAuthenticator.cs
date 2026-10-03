@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using KeyLoad.Replication;
+using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.Orleans;
 
@@ -13,14 +14,16 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
     private readonly ReplicaReplayWindow replay;
     private readonly HashSet<string> voters;
     private readonly int maximumControlPayloadBytes;
+    private readonly ReplicaReplayAdmissionDiagnostics? diagnostics;
 
     /// <summary>Creates authentication for one node, fixed voter scope and system clock.</summary>
     /// <param name="configuration">The node identity, voter set, incarnation and payload limits.</param>
     /// <param name="options">The fixed-cluster signing secret, control budget and replay capacities.</param>
     /// <param name="local">The actual local Orleans runtime generation.</param>
     /// <param name="clock">The system clock used for envelope freshness.</param>
+    /// <param name="logger">Optional closed numeric replay-admission diagnostics.</param>
     public ReplicaEnvelopeAuthenticator(ReplicaConfiguration configuration, ReplicaPeerOptions options,
-        ReplicaSiloDiscoveryState local, TimeProvider clock)
+        ReplicaSiloDiscoveryState local, TimeProvider clock, ILogger<ReplicaEnvelopeAuthenticator>? logger = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         options.Validate(configuration);
@@ -33,6 +36,11 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
         mac = new(options.Secret, options.ClusterId);
         replay = new(configuration.VoterIds, options.ReplayLimits);
         maximumControlPayloadBytes = options.MaxControlPayloadBytes;
+        if (logger is not null)
+        {
+            diagnostics = new(logger, configuration.VoterIds.Length);
+            diagnostics.Configured(options.ReplayLimits);
+        }
     }
 
     /// <summary>Maximum exact-byte protocol payload including bounded metadata.</summary>
@@ -85,7 +93,11 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
             throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaProtocol.InvalidPeer);
         }
 
-        replay.Admit(request.Sender, request.Nonce, request.Timestamp, Now(), pool);
+        if (!replay.TryAdmit(request.Sender, request.Nonce, request.Timestamp, Now(), pool, request.Method, out var failure))
+        {
+            diagnostics?.Report(failure);
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.ReplayCapacityExceeded);
+        }
     }
 
     /// <summary>Signs successful bytes or a bounded error without serializing exception objects.</summary>

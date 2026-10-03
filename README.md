@@ -293,3 +293,6 @@ failures; two successes are explicit unsupported Neo4j Community topologies.
 Actual admission, bootstrap, endpoint identity and native regression failures
 block the complete270 intensive cohort and authenticated aggregation.
 No new intensive performance or live publication result is claimed.
+
+
+The latest isolated Linux baseline ([run37087909605](https://github.com/managedcode/KeyLoad/actions/runs/37087909605), source `b47409e`) passes source, unit, recovery and RF3 gates. Ten of27 native1/2/3 preflights fail, so the complete270-cell cohort and new performance publication remain blocked. Read/control admission, native diagnostics, document oracle and pinned gossip identity repairs are awaiting exact-source GitHub qualification; the separate intensive TimeSeries corpus/oracle source does not yet implement its native runner/adapters.

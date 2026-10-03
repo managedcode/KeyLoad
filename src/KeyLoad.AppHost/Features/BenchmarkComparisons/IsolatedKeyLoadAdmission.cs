@@ -16,6 +16,7 @@ internal static class IsolatedKeyLoadAdmission
         Set(node, nameof(limits.MaxTenantControlRequests), limits.MaxTenantControlRequests);
         Set(node, nameof(limits.MaxPrincipalControlRequests), limits.MaxPrincipalControlRequests);
         Set(node, nameof(limits.MaxReservedBytes), limits.MaxReservedBytes);
+        IsolatedKeyLoadReplayProfile.Apply(node);
     }
 
     private static void Set(IResourceBuilder<ContainerResource> node, string option, long value)

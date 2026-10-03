@@ -193,6 +193,7 @@ internal static class RedisReplicaProof
             !int.TryParse(role[RedisNativeProtocol.RolePortIndex].ToString(), out var rolePort) || rolePort != port ||
             !RedisNativeProtocol.EndpointMatches(primary, host, port))
         {
+            RedisReplicaDiagnostics.WriteFailure(endpoint, primary, info, role);
             throw new ComparisonFailureException(ErrorReplicaIdentity);
         }
     }
