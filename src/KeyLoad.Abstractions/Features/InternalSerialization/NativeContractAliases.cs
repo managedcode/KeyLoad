@@ -3,6 +3,14 @@ namespace KeyLoad;
 // Persisted aliases are immutable format identifiers, independent of CLR renames.
 internal static class NativeContractAliases
 {
+    internal const string StoreAggregateSnapshot = "keyload.contract.store-aggregate-snapshot.v1";
+    internal const string AggregateSnapshotState = "keyload.contract.aggregate-snapshot-state.v1";
+    internal const string ReadAggregateReplayRequest = "keyload.contract.read-aggregate-replay-request.v1";
+    internal const string AggregateReplayPage = "keyload.contract.aggregate-replay-page.v1";
+    internal const string ModelQuerySource = "keyload.contract.model-query-source.v1";
+    internal const string ExpireSamples = "keyload.contract.expire-samples.v1";
+    internal const string ReadSampleRetentionRequest = "keyload.contract.read-sample-retention-request.v1";
+    internal const string SampleRetentionStatus = "keyload.contract.sample-retention-status.v1";
     internal const string QueueGraphLink = "keyload.contract.queue-graph-link.v1";
     internal const string QueueToGraph = "keyload.contract.queue-to-graph.v1";
     internal const string GraphToQueueMutation = "keyload.contract.graph-to-queue.v1";

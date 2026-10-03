@@ -25,10 +25,12 @@ internal static class QueryAstDiscriminatorNames
 /// <param name="Order">The requested ordering terms.</param>
 /// <param name="Limit">The maximum number of rows to return.</param>
 /// <param name="Explain">Whether to return query plan information.</param>
+/// <param name="ModelSource">Optional read-only event or queue source binding.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.SelectQuery)]
 public sealed record SelectQuery([property: Orleans.Id(0)] string Collection, [property: Orleans.Id(1)] string? Alias, [property: Orleans.Id(2)] ImmutableArray<Selection> Projection, [property: Orleans.Id(3)] Predicate? Filter,
-    [property: Orleans.Id(4)] ImmutableArray<Ordering> Order, [property: Orleans.Id(5)] int Limit, [property: Orleans.Id(6)] bool Explain = false);
+    [property: Orleans.Id(4)] ImmutableArray<Ordering> Order, [property: Orleans.Id(5)] int Limit, [property: Orleans.Id(6)] bool Explain = false,
+    [property: Orleans.Id(7), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ModelQuerySource? ModelSource = null);
 
 /// <summary>Selects one field path and assigns it an output alias.</summary>
 /// <param name="Path">The field path to select.</param>

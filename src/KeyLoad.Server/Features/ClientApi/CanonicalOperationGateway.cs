@@ -1,3 +1,4 @@
+using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
@@ -28,8 +29,24 @@ internal static class CanonicalOperationGateway
             : codec.CreateCommand(requestId, principal.Id, commandKind!.Value, commandId, payload);
         OperationResponseHeaders.Publish(context, requestId);
         RequestFailureDiagnostic.MarkOperationDispatch(context, commandKind.HasValue);
-        var reply = await context.RequestServices.GetRequiredService<OrleansNode>()
-            .ExecuteAsync(requestId, signed, commandKind.HasValue, cancellationToken).ConfigureAwait(false);
+        var started = DatabasePhaseTelemetry.Begin();
+        var outcome = DatabasePhaseOutcome.Faulted;
+        GrainOperationReply reply;
+        try
+        {
+            reply = await context.RequestServices.GetRequiredService<OrleansNode>()
+                .ExecuteAsync(requestId, signed, commandKind.HasValue, cancellationToken).ConfigureAwait(false);
+            outcome = DatabasePhaseOutcome.Completed;
+        }
+        catch (OperationCanceledException)
+        {
+            outcome = DatabasePhaseTelemetry.CancellationOutcome(cancellationToken);
+            throw;
+        }
+        finally
+        {
+            DatabasePhaseTelemetry.End(DatabasePhaseKind.PublicOperationDispatch, outcome, started);
+        }
         var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span);
         cancellationToken.ThrowIfCancellationRequested();
         return new(requestId, McpBoundedJson.Serialize(value.Value, McpFramingProtocol.MaximumDataReplyBytes));

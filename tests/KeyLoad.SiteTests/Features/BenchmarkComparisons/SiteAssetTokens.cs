@@ -3,10 +3,10 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal static class SiteAssetTokens
 {
     public const string ProbeRelativePath = "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/node-probe.mjs";
+    public const string MedianOperation = "median";
     public const string BuilderRelativePath = "site/scripts/build.mjs";
     public const string SiteRootDirectory = "site";
     public const string OutputDirectory = "output";
-    public const string ReportsDirectory = "reports";
     public const string TempDirectoryPrefix = "keyload-site-";
     public const string IndexHtml = "index.html";
     public const string FaviconSvg = "favicon.svg";
@@ -16,7 +16,6 @@ internal static class SiteAssetTokens
     public const string RobotsFile = "robots.txt";
     public const string SitemapFile = "sitemap.xml";
     public const string NoScriptTag = "<noscript>";
-    public const string StaticEvidenceMarker = "KEYLOAD_STATIC_EVIDENCE";
     public const string Files = "files";
     public const string Path = "path";
     public const string SentinelFile = "sentinel.txt";
@@ -26,16 +25,12 @@ internal static class SiteAssetTokens
     public const string LinkedParentDirectory = "linked-parent";
     public const string LinkedInputOutput = "linked-input-output";
     public const string FailedOutput = "failed-output";
-    public const string Profiles = "profiles";
     public const string ThreeVendorRelativePath = "vendor/three/0.186.1";
     public const string ThreeManifestFile = "manifest.json";
     public const string ContractsModule = "contracts.mjs";
     public const string BootstrapModule = "bootstrap.mjs";
     public const string MeasurementModule = "measurements.mjs";
     public const string LoaderModule = "measurement-loader.mjs";
-    public const string LabModule = "benchmark-lab.mjs";
-    public const string ChartModule = "benchmark-chart.mjs";
-    public const string ProfilesModule = "benchmark-profiles.mjs";
     public const string SceneModule = "cluster-scene.mjs";
     public const string GeometryModule = "scene-geometry.mjs";
     public const string LifecycleModule = "scene-lifecycle.mjs";

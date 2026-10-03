@@ -38,7 +38,12 @@ internal static class ZoneTreeJournalPreflight
         }
         journal.ReadExactly(header);
         journal.Position = 0;
-        if (BinaryPrimitives.ReadUInt64LittleEndian(header) != CheckpointMagic)
+        var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
+        if (magic == SourceCheckpointMagic)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, JournalFormatUpgradeRequired);
+        }
+        if (magic != CheckpointMagic)
         {
             return 0;
         }

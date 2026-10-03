@@ -31,9 +31,15 @@ internal sealed class SiteIsolatedBuildTests
         var files = Directory.GetFiles(temporary.Output, "*", SearchOption.AllDirectories);
         await Assert.That(files.All(path => Path.GetFileName(path) is not ("worker.json" or "samples.csv"))).IsTrue();
         await Assert.That(Directory.Exists(Path.Combine(temporary.Output, "data", "runs"))).IsFalse();
+        await Assert.That(File.Exists(Path.Combine(temporary.Output, "data", "catalog.json"))).IsFalse();
         var html = await File.ReadAllTextAsync(Path.Combine(temporary.Output, SiteAssetTokens.IndexHtml), token);
-        await Assert.That(html.Contains("data-historical-unavailable=\"true\"", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(html.Contains("id=\"benchmarks\" class=\"benchmark-section\"", StringComparison.Ordinal)).IsTrue();
         await Assert.That(html.Contains("data-isolated-catalog=\"./data/isolated-catalog.json\"", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(html.Contains("id=\"isolated-lab\"", StringComparison.Ordinal)).IsFalse();
+        await Assert.That(html.Contains("data-historical-unavailable", StringComparison.Ordinal)).IsFalse();
+        await Assert.That(html.Contains("KEYLOAD_ISOLATED_EVIDENCE", StringComparison.Ordinal)).IsFalse();
+        await SiteBuildArtifacts.CompareEmittedAssets(fixture.Inputs.Site, temporary.Output, token);
+        await SiteBuildArtifacts.CompareVendorManifest(fixture.Inputs.Site, temporary.Output, token);
         var response = await SiteIsolatedNodeProcess.RunAsync(fixture.Inputs.Site, new
         {
             operation = "validate",

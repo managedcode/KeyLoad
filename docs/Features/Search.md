@@ -1,14 +1,19 @@
 # Search
 
-Owner suggestion2026-10-03 adds ZoneTree.FullTextSearch to the provider evaluation
-under [ADR-009](../ADR/ADR-009-search-provider-boundaries.md) and
-[ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md).
+Owner decision2026-10-03 selects ZoneTree.FullTextSearch as the full-text provider
+under [ADR-071](../ADR/ADR-071-canonical-zonetree-providers.md) and the remaining
+projection/freshness boundaries of [ADR-009](../ADR/ADR-009-search-provider-boundaries.md).
 REQ-SQLC-010 / AC-SQLC-010 maps TASK-SQLC-R4 source review to
 [the pinned candidate findings and real test gates](../implementation/zonetree-fulltextsearch-review.md).
-Research is complete; provider integration and native performance are pending.
+Research is complete; provider selection is fixed, while integration and native
+performance qualification are pending.
 Freeze canonical-commit/index-generation freshness, tokenizer/hash/rank parity,
 nonpartial cancellation, authorization/read cuts, rebuild/rollback and resource
-bounds before implementation. The candidate's language is not full SQL.
+bounds before implementation. The provider's query language does not replace SQL.
+
+| Requirement | Acceptance | Mapping |
+|---|---|---|
+| REQ-ZT-003: actual selected full-text provider is a bounded derived projection | AC-ZT-003: centrally pinned published/source-bound ZoneTree.FullTextSearch, authorized exact token/identity/rank oracle, nonpartial cancellation and real replay/rebuild/swap/RF3 tests pass; stale/corrupt generations cannot return success | TASK-ZT-FTS-CONTRACT then Search provider tests, process recovery and SDK/official MCP RF3; pending |
 
 Status: Accepted resource repair contract; implementation and CI qualification pending.
 Decision: [ADR-035](../ADR/ADR-035-memory-performance.md), TASK-MP-006B.

@@ -67,8 +67,6 @@ public static class ReplicaProtocol
     public const string BootstrapDirectory = "bootstrap-membership";
     /// <summary>Only authenticated internal HTTP discovery route.</summary>
     public const string DiscoveryPath = "/internal/silo";
-    /// <summary>Versioned native peer authentication purpose.</summary>
-    public const string PeerPurpose = "keyload-replica";
     /// <summary>Safe rejection detail for invalid scope, signature, expiry or replay.</summary>
     public const string InvalidPeer = "The internal replica envelope is invalid, expired or replayed.";
     internal static readonly byte[] StateStorageKey = KeyCodec.Encode(StateKey);

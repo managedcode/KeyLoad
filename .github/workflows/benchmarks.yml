@@ -3,18 +3,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      native_serialization_only:
-        description: Run only source checks and native serialization diagnostics
-        type: boolean
-        default: false
-      raw_storage_only:
-        description: Run only source checks and the isolated raw cache evaluation
-        type: boolean
-        default: false
 permissions: {contents: read, actions: read}
 concurrency:
-  group: keyload-benchmarks-${{ github.ref }}${{ inputs.raw_storage_only && '-raw-storage' || '' }}${{ inputs.native_serialization_only && '-native-serialization' || '' }}
+  group: keyload-benchmarks-${{ github.ref }}
   cancel-in-progress: false
 jobs:
   comparison-build:
@@ -22,13 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Check diagnostic mode selection
-        env: {NATIVE_ONLY: "${{ inputs.native_serialization_only }}", RAW_ONLY: "${{ inputs.raw_storage_only }}"}
-        run: |
-          if [ "$NATIVE_ONLY" = true ] && [ "$RAW_ONLY" = true ]; then
-            echo 'Select only one diagnostic mode.' >&2
-            exit 1
-          fi
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up .NET
@@ -52,7 +36,7 @@ jobs:
           if-no-files-found: error
   comparison-plan:
     name: Plan benchmark runs
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && !inputs.raw_storage_only && !inputs.native_serialization_only
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -74,7 +58,7 @@ jobs:
           retention-days: 90
   comparison-images:
     name: Build Docker images
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && !inputs.raw_storage_only && !inputs.native_serialization_only
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions: {contents: read, actions: read}
@@ -109,7 +93,7 @@ jobs:
       - name: Check TimescaleDB Docker image and startup tools
         env:
           KEYLOAD_TIMESERIES_IMAGE_FACTS_DIRECTORY: ${{ runner.temp }}/keyload-timeseries-image-facts
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesIntensivePinnedImageTests/*' --results-directory TestResults/timeseries-image
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesIntensivePinnedImageTests/*' --KeyLoadTests:ResultsDirectory=TestResults/timeseries-image
       - name: Save TimescaleDB image checks
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -123,47 +107,47 @@ jobs:
           retention-days: 90
       - name: Check Docker image export and import
         id: roundtrip
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ImageBundleRealTests/*' --results-directory TestResults/comparison-images/image-roundtrip
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ImageBundleRealTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/image-roundtrip
       - name: Verify GitHub job identity
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedGitHubCurrentJobTests/*' --results-directory TestResults/comparison-images/job-identity
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedGitHubCurrentJobTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/job-identity
       - name: Test database cluster resource models
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/Isolated*Resource*/*' --results-directory TestResults/comparison-images/resource-models
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/Isolated*Resource*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/resource-models
       - name: Test MongoDB readiness configuration
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessResourceTests/*' --results-directory TestResults/comparison-images/mongo-resource
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-resource
       - name: Test MongoDB node identity
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessIdentityTests/*' --results-directory TestResults/comparison-images/mongo-identity
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessIdentityTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-identity
       - name: Test MongoDB startup failure handling
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessTaskFailureTests/*' --results-directory TestResults/comparison-images/mongo-task-failure
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessTaskFailureTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-task-failure
       - name: Test KurrentDB storage failure handling
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKurrentVolumeRegressionFailureTests/*' --results-directory TestResults/comparison-images/kurrent-volume-failure
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKurrentVolumeRegressionFailureTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-volume-failure
       - name: Test KeyLoad request admission
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKeyLoadAdmissionTests/*' --results-directory TestResults/comparison-images/keyload-admission
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/keyload-admission
       - name: Test bounded database log buffers
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonResourceLogBufferTests/*' --results-directory TestResults/comparison-images/log-buffer
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonResourceLogBufferTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/log-buffer
       - name: Test KeyLoad replay admission
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKeyLoadReplayAdmissionTests/*' --results-directory TestResults/comparison-images/replay-admission
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadReplayAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-admission
       - name: Test Redis replica error reporting
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/RedisReplicaDiagnosticTests/*' --results-directory TestResults/comparison-images/redis-diagnostics
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/RedisReplicaDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/redis-diagnostics
       - name: Test MongoDB startup error reporting
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoBootstrapDiagnosticTests/*' --results-directory TestResults/comparison-images/mongo-diagnostics
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoBootstrapDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-diagnostics
       - name: Test KurrentDB cleanup error reporting
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/KurrentCleanupDiagnosticTests/*' --results-directory TestResults/comparison-images/kurrent-diagnostics
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/KurrentCleanupDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-diagnostics
       - name: Test KurrentDB stream ownership
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/KurrentStreamOwnershipTests/*' --results-directory TestResults/comparison-images/kurrent-stream-ownership
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/KurrentStreamOwnershipTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-stream-ownership
       - name: Test database replay logs
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonReplayDiagnosticLogTests/*' --results-directory TestResults/comparison-images/replay-log
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonReplayDiagnosticLogTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-log
       - name: Test database replay log retention
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonReplayDiagnosticRetentionTests/*' --results-directory TestResults/comparison-images/replay-retention
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonReplayDiagnosticRetentionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-retention
       - name: Test time-series workload correctness
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesWorkloadTests/*' --results-directory TestResults/comparison-images/timeseries-workload
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesWorkloadTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-workload
       - name: Check published time-series package version
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesPackageVersionTests/*' --results-directory TestResults/comparison-images/timeseries-package
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesPackageVersionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-package
       - name: Test KeyLoad time-series cluster configuration
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedTimeSeriesKeyLoadResourceTests/*' --results-directory TestResults/comparison-images/timeseries-keyload-model
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedTimeSeriesKeyLoadResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-keyload-model
       - name: Test TimescaleDB cluster configuration
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedTimeSeriesTimescaleResourceTests/*' --results-directory TestResults/comparison-images/timeseries-timescale-model
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedTimeSeriesTimescaleResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-timescale-model
       - name: Test time-series workload configuration
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedTimeSeriesBenchmarkResourceTests/*' --results-directory TestResults/comparison-images/timeseries-family-model
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedTimeSeriesBenchmarkResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-family-model
       - name: Save Docker images
         id: bundle
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -219,7 +203,7 @@ jobs:
       - name: Build benchmark tests
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Run database workload
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedNativeComparisonTests/*'
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=145
       - name: Save benchmark results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -264,7 +248,7 @@ jobs:
       - name: Build benchmark tests
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Run database workload
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedNativeComparisonTests/*'
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=145
       - name: Save benchmark results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -309,7 +293,7 @@ jobs:
       - name: Build benchmark tests
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Run database workload
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedNativeComparisonTests/*'
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=145
       - name: Save benchmark results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -324,93 +308,6 @@ jobs:
         with:
           setup-outcome: ${{ steps.images.outcome }}
           artifact-name: comparison-case-qualification-${{ matrix.id }}
-  raw-storage-correctness:
-    name: Check raw storage contracts
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && inputs.raw_storage_only && !inputs.native_serialization_only
-    needs: comparison-build
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Qualify real cache and report contracts
-        uses: ./.github/workflows/Features/BenchmarkComparisons/RawStorageEvaluation
-        with:
-          mode: correctness
-  raw-storage:
-    name: Raw cache benchmark / ${{ matrix.engine }}
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && inputs.raw_storage_only && !inputs.native_serialization_only
-    needs: [comparison-build, raw-storage-correctness]
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        engine: [zonetree, tsavorite]
-    env:
-      KEYLOAD_RAW_STORAGE_ENGINE: ${{ matrix.engine }}
-    steps:
-      - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Measure the selected resident engine
-        uses: ./.github/workflows/Features/BenchmarkComparisons/RawStorageEvaluation
-        with:
-          mode: benchmark
-          engine: ${{ matrix.engine }}
-  native-serialization:
-    name: Measure native serialization
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && inputs.native_serialization_only && !inputs.raw_storage_only
-    needs: comparison-build
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    permissions: {contents: read, actions: read}
-    steps:
-      - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Set up .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
-        with:
-          global-json-file: global.json
-      - name: Restore .NET packages
-        run: dotnet restore KeyLoad.slnx
-      - name: Build diagnostic tests and generated benchmark host
-        run: dotnet build KeyLoad.slnx --no-restore --configuration Release
-      - name: Test native diagnostic contracts and generated consumers
-        run: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/NativeSerialization*/*' --results-directory artifacts/native-diagnostic-tests/normal
-      - name: Test diagnostic contracts without hardware intrinsics
-        env:
-          DOTNET_EnableHWIntrinsic: 0
-        run: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/NativeSerialization*/*' --results-directory artifacts/native-diagnostic-tests/scalar
-      - name: Record source packages runtime and execution identity
-        env:
-          GH_TOKEN: ${{ github.token }}
-          KEYLOAD_NATIVE_SERIALIZATION_CORPUS_DIRECTORY: ${{ github.workspace }}/artifacts/native-serialization/corpus
-        run: node scripts/Features/BenchmarkComparisons/native-serialization-evidence.mjs --mode=prepare --directory=artifacts/native-serialization
-      - name: Measure all native and historical JSON diagnostic cases
-        env:
-          KEYLOAD_NATIVE_SERIALIZATION_CORPUS_DIRECTORY: ${{ github.workspace }}/artifacts/native-serialization/corpus
-        run: |
-          status=0
-          dotnet benchmarks/KeyLoad.Benchmarks/bin/Release/net10.0/KeyLoad.Benchmarks.dll --filter '*Native*SerializationBenchmarks*' --exporters fulljson csv --memory --keepFiles --logBuildOutput --stopOnFirstError --artifacts artifacts/native-serialization > artifacts/native-serialization/stdout.txt 2> artifacts/native-serialization/stderr.txt || status=$?
-          cat artifacts/native-serialization/stdout.txt
-          cat artifacts/native-serialization/stderr.txt >&2
-          exit "$status"
-      - name: Require all original measurements and their provenance
-        env:
-          GH_TOKEN: ${{ github.token }}
-          KEYLOAD_NATIVE_SERIALIZATION_CORPUS_DIRECTORY: ${{ github.workspace }}/artifacts/native-serialization/corpus
-        run: node scripts/Features/BenchmarkComparisons/native-serialization-evidence.mjs --mode=verify --directory=artifacts/native-serialization
-      - name: Save original measurements diagnostics and failures
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: native-serialization-measurements
-          path: |
-            artifacts/native-serialization/**
-            artifacts/native-diagnostic-tests/**
-            artifacts/code-quality/**
-          if-no-files-found: error
-          retention-days: 90
   comparison-aggregate:
     name: Combine benchmark results
     needs: [comparison-build, comparison-plan, comparison-images, comparison-preflight, comparison-crud, comparison-specialized]

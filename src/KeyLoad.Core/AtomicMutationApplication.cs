@@ -88,6 +88,8 @@ public sealed partial class DatabaseEngine
             UpsertEdge edge => Upsert(tx, principal, partition, edge),
             DeleteEdge edge => RemoveEdge(tx, principal, partition, edge),
             AppendSamples samples => Append(tx, principal, partition, samples),
+            ExpireSamples samples => Expire(tx, principal, partition, samples, now),
+            StoreAggregateSnapshot snapshot => SaveAggregateSnapshot(tx, principal, partition, snapshot),
             PutVector vector => Upsert(tx, principal, partition, vector),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedMutationMessage)
         };

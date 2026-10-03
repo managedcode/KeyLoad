@@ -1,5 +1,4 @@
 import { IDS, SELECTORS, CONFIG, TEXT } from './contracts.mjs';
-import { mountBenchmarkLab } from './benchmark-lab.mjs';
 import { mountIsolatedLab } from './isolated-lab.mjs';
 
 const EVENTS = Object.freeze({ hide: 'pagehide', show: 'pageshow', click: 'click' });
@@ -7,7 +6,6 @@ const SCENE = Object.freeze({ module: './cluster-scene.mjs', unavailable: 'Stati
   hidden: 'hidden', initialGeneration: 0, nextGeneration: 1 });
 let mounted = false;
 let generation = SCENE.initialGeneration;
-let lab;
 let isolatedLab;
 let scene;
 let deferred;
@@ -18,10 +16,8 @@ function stop() {
   generation += SCENE.nextGeneration;
   clearTimeout(deferred);
   clearTimeout(copyReset);
-  lab?.dispose();
   isolatedLab?.dispose();
   scene?.dispose();
-  lab = undefined;
   isolatedLab = undefined;
   scene = undefined;
 }
@@ -49,10 +45,7 @@ function start() {
   if (mounted) return;
   mounted = true;
   const token = ++generation;
-  if (!document.body.dataset.historicalUnavailable) {
-    lab = mountBenchmarkLab({ root: document, catalogUrl: CONFIG.catalogUrl });
-  }
-  const isolatedRoot = document.getElementById('isolated-lab');
+  const isolatedRoot = document.getElementById(IDS.benchmarks);
   if (isolatedRoot?.dataset.isolatedCatalog) {
     isolatedLab = mountIsolatedLab({ root: isolatedRoot, catalogUrl: isolatedRoot.dataset.isolatedCatalog });
   }

@@ -1,0 +1,56 @@
+namespace KeyLoad.IntegrationTests.Features.EventStreams;
+
+internal static class AggregateReplayRf3Tokens
+{
+    internal const string TenantPrefix = "aggregate-replay-";
+    internal const string WorkerIdPrefix = "aggregate-worker-";
+    internal const string RestrictedWorkerIdPrefix = "aggregate-restricted-";
+    internal const string CredentialIdPrefix = "aggregate-credential-";
+    internal const string Database = "database";
+    internal const string Domain = "orders";
+    internal const string StreamSet = "replay-events";
+    internal const string StreamId = "order-1";
+    internal const string CreatedEventId = "order-created";
+    internal const string PaidEventId = "order-paid";
+    internal const string ShippedEventId = "order-shipped";
+    internal const string DispatchedEventId = "order-dispatched";
+    internal const string DeliveredEventId = "order-delivered";
+    internal const string Reducer = "orders.reducer.v1";
+    internal const string UnknownReducer = "orders.reducer.v2";
+    internal const string EventType = "OrderChanged";
+    internal const string CountProperty = "count";
+    internal const string IncrementProperty = "increment";
+    internal const string SecretProperty = "secret";
+    internal const string PrivateHeaderProperty = "privateHeader";
+    internal const string PayloadSecretPath = "/secret";
+    internal const string HeaderSecretPath = "/privateHeader";
+    internal const string PayloadClassification = "aggregate-payload";
+    internal const string HeaderClassification = "aggregate-header";
+    internal const string PayloadReadGrant = "aggregate.payload.read";
+    internal const string PayloadUseGrant = "aggregate.payload.use";
+    internal const string HeaderReadGrant = "aggregate.header.read";
+    internal const string HeaderUseGrant = "aggregate.header.use";
+    internal const string Secret = "aggregate-replay-private-payload";
+    internal const string PrivateHeader = "aggregate-replay-private-header";
+    internal const string InitialState = "{\"" + CountProperty + "\":1}";
+    internal const string FailoverState = "{\"" + CountProperty + "\":6}";
+    internal const string FailureScenario = "aggregate-replay-leader-loss";
+    internal const string RestartFailureKey = "KeyLoad.AggregateReplayRestartFailure";
+    internal const string DiagnosticsFailureKey = "KeyLoad.AggregateReplayDiagnosticsFailure";
+    internal const string MissingLeaderMessage = "RF3 leader URI is absent.";
+    internal const int NodeCount = 3;
+    internal const int InitialReducedCount = 6;
+    internal const int FailoverReducedCount = 15;
+    internal const int Generation = 1;
+    internal const int StateSchema = 1;
+    internal const int EventSchema = 1;
+    internal const int UnknownStateSchema = 2;
+    internal const long SnapshotSourceRevision = 1;
+    internal const long InitialTailRevision = 3;
+    internal const long ExtendedSnapshotSourceRevision = 3;
+    internal const long FirstSnapshotVersion = 1;
+    internal const long SecondSnapshotVersion = 2;
+    internal const int TailCount = 2;
+    internal const int FailoverTailCount = 2;
+    internal const int TooSmallTail = 1;
+}

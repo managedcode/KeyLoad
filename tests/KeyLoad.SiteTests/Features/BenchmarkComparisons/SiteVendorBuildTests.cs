@@ -3,23 +3,24 @@ using System.Text.Json.Nodes;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-/// <summary>Proves historical vendor compression metadata does not replace exact raw-byte identity.</summary>
+    /// <summary>Proves vendor compression metadata does not replace exact raw-byte identity.</summary>
 internal sealed class SiteVendorBuildTests
 {
     /// <summary>Accepts changed historical sizes while reporting independently measured current gzip output.</summary>
     [Test]
     public async Task AC_BC_016_ValidHistoricalGzipMetadataEmitsIndependentRuntimeCompressionReceipt()
     {
-        var inputs = SiteTestInputs.Read();
+        var fixture = await SiteIsolatedFixture.ReadAsync();
+        var inputs = fixture.Inputs.Site;
         var token = TestContext.Current!.Execution.CancellationToken;
         var sourceManifestPath = ManifestPath(inputs.Repository);
         var originalManifest = await File.ReadAllBytesAsync(sourceManifestPath, token);
-        await using var scope = await SiteVendorTestScope.CreateAsync(inputs, token);
+        await using var scope = await SiteVendorTestScope.CreateAsync(fixture, token);
         var manifest = await scope.ReadManifestAsync(token);
         SetAllGzipValues(manifest, JsonValue.Create(SiteVendorTokens.HistoricalGzipSize));
         await scope.WriteManifestAsync(manifest, token);
         var oracleBytes = await scope.RunIndependentGzipOracleAsync(token);
-        var build = await SiteBuilderProcess.RunAsync(scope.Inputs, scope.Reports, scope.Output, token);
+        var build = await SiteIsolatedBuilderProcess.RunAsync(scope.Fixture, scope.Output, token);
 
         await Assert.That(build.ExitCode).IsEqualTo(SiteTokens.ProcessSuccessExitCode);
         await Assert.That(build.StandardError.Length).IsEqualTo(SiteTokens.Zero);
@@ -33,7 +34,8 @@ internal sealed class SiteVendorBuildTests
         await AssertCompressionEntries(receipt.GetProperty(SiteVendorTokens.Vendor),
             oracle.RootElement.GetProperty(SiteVendorTokens.Vendor));
         await AssertExistingBuildReceipt(actual.RootElement, scope.Output, scope.Inputs, token);
-        await SiteBuildArtifacts.AssertRawReports(scope.Inputs, scope.Output, token);
+        await SiteBuildArtifacts.CompareEmittedAssets(scope.Inputs, scope.Output, token);
+        await SiteBuildArtifacts.CompareVendorManifest(scope.Inputs, scope.Output, token);
         await scope.AssertOriginalVendorUnchangedAsync(token);
         await scope.AssertEmittedManifestMatchesCopyAsync(token);
         await Assert.That((await File.ReadAllBytesAsync(sourceManifestPath, token)).SequenceEqual(originalManifest)).IsTrue();
@@ -43,7 +45,7 @@ internal sealed class SiteVendorBuildTests
     [Test]
     public async Task AC_BC_016_InvalidHistoricalGzipMetadataIsRejectedBeforeOutputCreation()
     {
-        var inputs = SiteTestInputs.Read();
+        var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;
         JsonNode?[] invalidValues =
         [
@@ -57,7 +59,7 @@ internal sealed class SiteVendorBuildTests
 
         foreach (var invalid in invalidValues)
         {
-            await AssertRejectedAsync(inputs, manifest => SetAllGzipValues(manifest, invalid?.DeepClone()), token);
+            await AssertRejectedAsync(fixture, manifest => SetAllGzipValues(manifest, invalid?.DeepClone()), token);
         }
     }
 
@@ -65,7 +67,7 @@ internal sealed class SiteVendorBuildTests
     [Test]
     public async Task AC_BC_016_VendorIdentityAndRawByteCorruptionAreRejectedBeforeOutputCreation()
     {
-        var inputs = SiteTestInputs.Read();
+        var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;
         Action<JsonObject>[] metadataMutations =
         [
@@ -81,10 +83,10 @@ internal sealed class SiteVendorBuildTests
 
         foreach (var mutation in metadataMutations)
         {
-            await AssertRejectedAsync(inputs, mutation, token);
+            await AssertRejectedAsync(fixture, mutation, token);
         }
 
-        await AssertByteCorruptionRejectedAsync(inputs, token);
+        await AssertByteCorruptionRejectedAsync(fixture, token);
     }
 
     private static async Task AssertCompressionEntries(JsonElement actual, JsonElement oracle)
@@ -112,43 +114,36 @@ internal sealed class SiteVendorBuildTests
         SiteTestInputs inputs, CancellationToken token)
     {
         await Assert.That(receipt.GetProperty(SiteVendorTokens.Output).GetString()).IsEqualTo(output);
-        await Assert.That(receipt.GetProperty(SiteVendorTokens.Profiles).GetInt32()).IsEqualTo(SiteTokens.ProfileNames.Length);
         await Assert.That(receipt.GetProperty(SiteVendorTokens.JavascriptGzipBytes).GetInt32()
             <= SiteVendorTokens.AuthoredJavaScriptGzipLimit).IsTrue();
         await Assert.That(receipt.GetProperty(SiteVendorTokens.CssGzipBytes).GetInt32()
             <= SiteVendorTokens.AuthoredCssGzipLimit).IsTrue();
-        foreach (var profile in SiteTokens.ProfileNames)
-        {
-            await Assert.That(File.Exists(Path.Combine(output, SiteTokens.DataDirectory, SiteTokens.RunsDirectory,
-                profile, SiteTokens.ReportFile))).IsTrue();
-        }
-
         using var catalog = JsonDocument.Parse(await File.ReadAllBytesAsync(Path.Combine(output,
-            SiteTokens.DataDirectory, SiteTokens.CatalogFile), token));
+            SiteTokens.DataDirectory, "isolated-catalog.json"), token));
         await Assert.That(catalog.RootElement.GetProperty(SiteTokens.MeasuredSourceRevision).GetString())
             .IsEqualTo(inputs.MeasuredRevision);
-        await Assert.That(catalog.RootElement.GetProperty(SiteTokens.Runs).GetArrayLength())
-            .IsEqualTo(SiteTokens.ProfileNames.Length);
+        await Assert.That(File.Exists(Path.Combine(output, SiteTokens.DataDirectory, "isolated", "aggregate.json"))).IsTrue();
+        await Assert.That(File.Exists(Path.Combine(output, SiteTokens.DataDirectory, "isolated", "projection.json"))).IsTrue();
     }
 
-    private static async Task AssertRejectedAsync(SiteTestInputs inputs, Action<JsonObject> mutation,
+    private static async Task AssertRejectedAsync(SiteIsolatedFixture fixture, Action<JsonObject> mutation,
         CancellationToken token)
     {
-        await using var scope = await SiteVendorTestScope.CreateAsync(inputs, token);
+        await using var scope = await SiteVendorTestScope.CreateAsync(fixture, token);
         var manifest = await scope.ReadManifestAsync(token);
         mutation(manifest);
         await scope.WriteManifestAsync(manifest, token);
-        var build = await SiteBuilderProcess.RunAsync(scope.Inputs, scope.Reports, scope.Output, token);
+        var build = await SiteIsolatedBuilderProcess.RunAsync(scope.Fixture, scope.Output, token);
         await Assert.That(build.ExitCode != SiteTokens.ProcessSuccessExitCode).IsTrue();
         await Assert.That(build.StandardError.Contains(SiteVendorTokens.VendorError, StringComparison.Ordinal)).IsTrue();
         await Assert.That(Directory.Exists(scope.Output)).IsFalse();
     }
 
-    private static async Task AssertByteCorruptionRejectedAsync(SiteTestInputs inputs, CancellationToken token)
+    private static async Task AssertByteCorruptionRejectedAsync(SiteIsolatedFixture fixture, CancellationToken token)
     {
-        await using var scope = await SiteVendorTestScope.CreateAsync(inputs, token);
+        await using var scope = await SiteVendorTestScope.CreateAsync(fixture, token);
         await CorruptFirstVendorByte(scope, token);
-        var build = await SiteBuilderProcess.RunAsync(scope.Inputs, scope.Reports, scope.Output, token);
+        var build = await SiteIsolatedBuilderProcess.RunAsync(scope.Fixture, scope.Output, token);
         await Assert.That(build.ExitCode != SiteTokens.ProcessSuccessExitCode).IsTrue();
         await Assert.That(build.StandardError.Contains(SiteVendorTokens.VendorError, StringComparison.Ordinal)).IsTrue();
         await Assert.That(Directory.Exists(scope.Output)).IsFalse();

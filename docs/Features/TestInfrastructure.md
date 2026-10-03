@@ -1,5 +1,21 @@
 # TestInfrastructure
 
+## Unified Aspire test entry
+
+[ADR-074](../ADR/ADR-074-aspire-owned-test-entry.md) specifies the owner-required
+single test entry and partial-start cleanup. Source and qualification are pending.
+
+| Requirement | Acceptance | Tests / evidence |
+|---|---|---|
+| REQ-TEST-009: Aspire owns suite execution | AC-TEST-009: each closed suite creates one native executable with correct TUnit project/arguments/results and optional original TRX/Cobertura settings; scalar disablement applies to its runner; unknown/explicit-empty suites, invalid bounded paths, incomplete coverage settings and mixed benchmark modes reject before resources; only comparison may pass its existing native target to the child without composing outer database resources | AspireTestEntryModelTests using the actual Aspire builder; original entry-run reports |
+| REQ-TEST-010: test entry preserves outcomes and bounded lifetime | AC-TEST-010: native nonzero/failed-start/missing-exit/cancel/timeout cannot count as success; stop/disposal always run; every existing CI suite and artifact remains | root source lifetime review and actual Linux CI native runner exit/status evidence |
+| REQ-TEST-011: RF3 is owned once and startup failure releases resources | AC-TEST-011: outer test model contains no idle duplicate nodes; tested child AppHost owns three Docker nodes and discovered SDK/MCP endpoints; every partial start is disposed before deleting only its owned directory | real Aspire model tests, ClusterFixture source lifetime review, actual Docker RF3/recovery artifacts |
+
+Canonical source: AppHost Features/TestInfrastructure; actual model regressions:
+ComparisonTests Features/TestInfrastructure; shared IntegrationTests fixture and
+CI composition are root-owned joins. No public database or persisted format change.
+Local entry runs are development evidence; delivered-source Linux gates remain.
+
 Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 
 REQ-TEST-008 / AC-TEST-008 (TASK-RUNTIME-EVENTSOURCE-W3) coordinates the actual

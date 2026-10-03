@@ -117,11 +117,17 @@ public sealed partial class DatabaseEngine
                 UpsertEdge or DeleteEdge or QueueToGraph => Capability.GraphWrite,
                 GraphToQueueMutation => Capability.QueuePublish,
                 AppendSamples => Capability.SeriesAppend,
+                ExpireSamples => Capability.SeriesManage,
+                StoreAggregateSnapshot => Capability.EventsSnapshotsManage | Capability.EventsRead,
                 PutVector => Capability.DocumentsWrite,
                 _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedBatchMutationMessage)
             };
             Authorization.Require(principal, request.Partition, mutation.Resource, capability);
-            Resource(view, request.Partition, mutation.Resource);
+            var resource = Resource(view, request.Partition, mutation.Resource);
+            if (mutation is StoreAggregateSnapshot)
+            {
+                Authorization.RequireReplayInput(principal, resource);
+            }
             AuthorizeComposition(view, principal, request.Partition, mutation);
         }
     }

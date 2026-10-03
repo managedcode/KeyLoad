@@ -7,9 +7,9 @@ internal sealed class SiteVectorAssetBrowserTests
     [Test]
     public async Task AC_VEC_003_RealFavicon404KeepsTheVectorPosterAndNeverBecomesReady()
     {
-        var inputs = SiteTestInputs.Read();
+        var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;
-        await using var browser = await SiteBrowserSession.StartAsync(inputs, token);
+        await using var browser = await SiteIsolatedBrowserStartup.StartAsync(fixture, token);
         var cdp = browser.Chrome.Cdp;
         await browser.Chrome.NavigateAsync(SiteBrowserTokens.BlankUrl, token);
         File.Delete(Path.Combine(browser.Output, SiteAssetTokens.FaviconSvg));

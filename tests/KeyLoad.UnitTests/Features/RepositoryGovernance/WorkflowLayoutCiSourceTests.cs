@@ -43,18 +43,18 @@ internal sealed class WorkflowLayoutCiSourceTests
         {
             "dotnet build KeyLoad.slnx --no-restore --configuration Release",
             "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
-            "dotnet test --project tests/KeyLoad.UnitTests",
-            "tests/KeyLoad.RecoveryTests",
-            "DOTNET_EnableHWIntrinsic: 0",
+            "dotnet run --project src/KeyLoad.AppHost",
+            "--KeyLoadTests:Suite=unit",
+            "--KeyLoadTests:Suite=unit-scalar",
+            "--KeyLoadTests:Suite=recovery",
             "node scripts/Features/RepositoryGovernance/verify.mjs",
-            "tests/KeyLoad.Analyzers.Tests",
         })
         {
             await Assert.That(ordinary.Contains(required, StringComparison.Ordinal)).IsTrue();
         }
 
         await Assert.That(WorkflowLayoutSource.JobBlock(ci, "analyzer-rules")
-            .Contains("dotnet test --project tests/KeyLoad.Analyzers.Tests", StringComparison.Ordinal)).IsTrue();
+            .Contains("--KeyLoadTests:Suite=analyzers", StringComparison.Ordinal)).IsTrue();
     }
 
     private static async Task AssertRf3(string ci)

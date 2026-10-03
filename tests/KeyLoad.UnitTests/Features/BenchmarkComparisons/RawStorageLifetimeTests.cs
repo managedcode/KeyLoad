@@ -11,30 +11,26 @@ internal sealed class RawStorageLifetimeTests
     private const int MaximumWrites = 65_536;
 
     [Test]
-    public async Task AcGe003RejectsInvalidEngineCorpusPayloadAndWriteBudgets()
+    public async Task AcGe003RejectsInvalidCorpusPayloadAndWriteBudgets()
     {
-        await Assert.That(() => CreateFixture((RawStorageEngineKind)99, ValidRecordCount, ValidPayloadBytes, MaximumWrites))
+        await Assert.That(() => CreateFixture(0, ValidPayloadBytes, MaximumWrites))
             .Throws<ArgumentException>();
-        await Assert.That(() => CreateFixture(RawStorageEngineKind.ZoneTree, 0, ValidPayloadBytes, MaximumWrites))
+        await Assert.That(() => CreateFixture(4097, ValidPayloadBytes, MaximumWrites))
             .Throws<ArgumentException>();
-        await Assert.That(() => CreateFixture(RawStorageEngineKind.ZoneTree, 4097, ValidPayloadBytes, MaximumWrites))
+        await Assert.That(() => CreateFixture(ValidRecordCount, 16, MaximumWrites))
             .Throws<ArgumentException>();
-        await Assert.That(() => CreateFixture(RawStorageEngineKind.ZoneTree, ValidRecordCount, 16, MaximumWrites))
+        await Assert.That(() => CreateFixture(ValidRecordCount, ValidPayloadBytes, 0))
             .Throws<ArgumentException>();
-        await Assert.That(() => CreateFixture(RawStorageEngineKind.ZoneTree, ValidRecordCount, ValidPayloadBytes, 0))
+        await Assert.That(() => CreateFixture(ValidRecordCount, ValidPayloadBytes, 1))
             .Throws<ArgumentException>();
-        await Assert.That(() => CreateFixture(RawStorageEngineKind.ZoneTree, ValidRecordCount, ValidPayloadBytes, 1))
-            .Throws<ArgumentException>();
-        await Assert.That(() => CreateFixture(RawStorageEngineKind.ZoneTree, ValidRecordCount, ValidPayloadBytes,
+        await Assert.That(() => CreateFixture(ValidRecordCount, ValidPayloadBytes,
             MaximumWrites + 1)).Throws<ArgumentException>();
     }
 
     [Test]
-    [Arguments(RawStorageEngineKind.ZoneTree)]
-    [Arguments(RawStorageEngineKind.Tsavorite)]
-    public async Task AcGe003SeedConsumesQuotaAndExcessMutationsLeaveDataUnchanged(RawStorageEngineKind engine)
+    public async Task AcGe003SeedConsumesQuotaAndExcessMutationsLeaveDataUnchanged()
     {
-        using var fixture = new RawStorageFixture(engine, 1, ValidPayloadBytes, maximumWrites: 2);
+        using var fixture = new RawStorageFixture(1, ValidPayloadBytes, maximumWrites: 2);
         var alternate = fixture.Corpus.Value(0, alternate: true).ToArray();
 
         await Assert.That(fixture.TryRead(0, out _)).IsTrue();
@@ -47,11 +43,9 @@ internal sealed class RawStorageLifetimeTests
     }
 
     [Test]
-    [Arguments(RawStorageEngineKind.ZoneTree)]
-    [Arguments(RawStorageEngineKind.Tsavorite)]
-    public async Task AcGe003OutOfRangeIndicesFailWithoutChangingSeededRecords(RawStorageEngineKind engine)
+    public async Task AcGe003OutOfRangeIndicesFailWithoutChangingSeededRecords()
     {
-        using var fixture = new RawStorageFixture(engine, ValidRecordCount, ValidPayloadBytes, MaximumWrites);
+        using var fixture = new RawStorageFixture(ValidRecordCount, ValidPayloadBytes, MaximumWrites);
         var original = fixture.Corpus.Value(0).ToArray();
 
         await Assert.That(() => fixture.TryRead(-1, out _)).Throws<ArgumentOutOfRangeException>();
@@ -65,30 +59,17 @@ internal sealed class RawStorageLifetimeTests
     }
 
     [Test]
-    [Arguments(RawStorageEngineKind.ZoneTree)]
-    [Arguments(RawStorageEngineKind.Tsavorite)]
-    public async Task AcGe003DisposedFixtureRejectsOperationsAndCleanupRepeats(RawStorageEngineKind engine)
+    public async Task AcGe003DisposedFixtureRejectsOperationsAndCleanupRepeats()
     {
-        using var fixture = new RawStorageFixture(engine, ValidRecordCount, ValidPayloadBytes, MaximumWrites);
+        using var fixture = new RawStorageFixture(ValidRecordCount, ValidPayloadBytes, MaximumWrites);
         var storageDirectory = fixture.Directory;
-        if (engine == RawStorageEngineKind.ZoneTree)
-        {
-            await Assert.That(storageDirectory is not null).IsTrue();
-            await Assert.That(System.IO.Directory.Exists(storageDirectory)).IsTrue();
-        }
-        else
-        {
-            await Assert.That(storageDirectory).IsNull();
-        }
+        await Assert.That(storageDirectory is not null).IsTrue();
+        await Assert.That(System.IO.Directory.Exists(storageDirectory)).IsTrue();
 
         fixture.Dispose();
         if (storageDirectory is not null)
         {
             await Assert.That(System.IO.Directory.Exists(storageDirectory)).IsFalse();
-        }
-        else
-        {
-            await Assert.That(fixture.Directory).IsNull();
         }
         fixture.Dispose();
 
@@ -98,7 +79,6 @@ internal sealed class RawStorageLifetimeTests
         fixture.Dispose();
     }
 
-    private static RawStorageFixture CreateFixture(RawStorageEngineKind engine, int recordCount, int payloadBytes,
-        int maximumWrites)
-        => new(engine, recordCount, payloadBytes, maximumWrites);
+    private static RawStorageFixture CreateFixture(int recordCount, int payloadBytes, int maximumWrites)
+        => new(recordCount, payloadBytes, maximumWrites);
 }

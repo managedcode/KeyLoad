@@ -11,6 +11,8 @@ internal static class McpCatalogExpectations
     private const string DocumentsGetRoute = "/v1/documents/get";
     internal const string StreamsRead = "keyload_streams_read";
     private const string StreamsReadRoute = "/v1/streams/read";
+    internal const string StreamsReplay = "keyload_streams_replay";
+    private const string StreamsReplayRoute = "/v1/streams/replay";
     internal const string EventsRead = "keyload_events_read";
     private const string EventsReadRoute = "/v1/events/read";
     internal const string SubscriptionsStatus = "keyload_subscriptions_status";
@@ -27,6 +29,8 @@ internal static class McpCatalogExpectations
     private const string SeriesAggregateRoute = "/v1/series/aggregate";
     internal const string SeriesWindows = "keyload_series_windows";
     private const string SeriesWindowsRoute = "/v1/series/windows";
+    internal const string SeriesRetention = "keyload_series_retention";
+    private const string SeriesRetentionRoute = "/v1/series/retention";
     internal const string QueryExecute = "keyload_query_execute";
     private const string QueryExecuteRoute = "/v1/query";
     internal const string QueryAst = "keyload_query_ast";
@@ -94,11 +98,12 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 54;
+    internal const int Count = 56;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
         (StreamsRead, StreamsReadRoute, GrainReadKind.Stream, null),
+        (StreamsReplay, StreamsReplayRoute, GrainReadKind.AggregateReplay, null),
         (EventsRead, EventsReadRoute, GrainReadKind.EventSource, null),
         (SubscriptionsStatus, SubscriptionsStatusRoute, GrainReadKind.Subscription, null),
         (MessagesInspect, MessagesInspectRoute, GrainReadKind.Message, null),
@@ -107,6 +112,7 @@ internal static class McpCatalogExpectations
         (SeriesLatest, SeriesLatestRoute, GrainReadKind.LatestSample, null),
         (SeriesAggregate, SeriesAggregateRoute, GrainReadKind.AggregateSamples, null),
         (SeriesWindows, SeriesWindowsRoute, GrainReadKind.AggregateSampleWindows, null),
+        (SeriesRetention, SeriesRetentionRoute, GrainReadKind.SampleRetention, null),
         (QueryExecute, QueryExecuteRoute, GrainReadKind.Query, null),
         (QueryAst, QueryAstRoute, GrainReadKind.AstQuery, null),
         (QueryCapabilities, QueryCapabilitiesRoute, GrainReadKind.QueryCapabilities, null),

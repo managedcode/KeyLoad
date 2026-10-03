@@ -62,5 +62,9 @@ public enum GrainReadKind
     /// <summary>Read complete bounded raw statistics over a half-open sample range.</summary>
     AggregateSamples,
     /// <summary>Read dense bounded fixed-width UTC sample windows.</summary>
-    AggregateSampleWindows
+    AggregateSampleWindows,
+    /// <summary>Read the persisted exclusive time-series floor and purge progress.</summary>
+    SampleRetention,
+    /// <summary>Read one compatible snapshot and complete bounded event tail.</summary>
+    AggregateReplay
 }

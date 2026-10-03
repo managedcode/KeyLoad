@@ -1,10 +1,11 @@
-# ZoneTree.FullTextSearch candidate review
+# ZoneTree.FullTextSearch source review
 
-Owner suggestion2026-10-03 is included in the active Search/SQL workstream.
-Decision remains evaluation under ADR-009/065, REQ-SQLC-010 / AC-SQLC-010.
+Owner selection2026-10-03 fixes the provider under
+[ADR-071](../ADR/ADR-071-canonical-zonetree-providers.md); the active Search/SQL
+workstream retains REQ-SQLC-010 / AC-SQLC-010 and REQ/AC-ZT-003.
 No package is installed and no production provider integration is implemented.
-The independent [Garnet evaluation](../Features/BenchmarkComparisons/GarnetStorageEvaluation.md)
-remains a separate storage comparison; neither candidate is selected by this review.
+The owner's provider decision is separate from this source inspection and does
+not establish runtime integration or performance qualification.
 
 Official source inspected at commit `6d7710a4845608a5ab266342c3e93808f53a8695`:
 [engine](https://github.com/ZoneTree/ZoneTree.FullTextSearch/blob/6d7710a4845608a5ab266342c3e93808f53a8695/src/ZoneTree.FullTextSearch/SearchEngines/HashedSearchEngine.cs),
@@ -13,8 +14,18 @@ Official source inspected at commit `6d7710a4845608a5ab266342c3e93808f53a8695`:
 [hash](https://github.com/ZoneTree/ZoneTree.FullTextSearch/blob/6d7710a4845608a5ab266342c3e93808f53a8695/src/ZoneTree.FullTextSearch/Hashing/DefaultHashCodeGenerator.cs),
 [MIT license](https://github.com/ZoneTree/ZoneTree.FullTextSearch/blob/6d7710a4845608a5ab266342c3e93808f53a8695/LICENSE).
 NuGet metadata inspected:1.0.9, net8/9/10, ZoneTree>=1.8.7; KeyLoad pins1.9.8.
-Source commit/package provenance equivalence has not been verified. Upstream
-performance figures are not KeyLoad comparative evidence.
+The actual published 1.0.9 package was downloaded and inspected on 2026-10-03.
+Its SHA256 is `7ea1fbb7aba0ad00391d78d2f414166b500335f5b1affe43c305d861b55719ff`.
+The nuspec repository commit and DLL informational version identify
+`c0993e2c65186708f3b087741082545bf49224fd`, the exact release source inspected
+alongside these bytes. The package includes its MIT license and net10 assembly,
+with ZoneTree >=1.8.7; it names the former koculu repository URL. The earlier
+review commit `6d7710a4845608a5ab266342c3e93808f53a8695` is a later descendant
+repository-move merge, not the published package commit. No PDB was included and
+the corresponding public snupkg returned HTTP 404. NuGet signature verification
+on this macOS host failed with CSSM_ModuleLoad/NU3003, so signature qualification
+remains a separate Linux gate. Upstream performance figures are not KeyLoad
+comparative evidence.
 
 The library supplies add/update/delete, boolean/facet/ordered-token queries and
 paging over its own ZoneTree postings. The inspected index uses primary and

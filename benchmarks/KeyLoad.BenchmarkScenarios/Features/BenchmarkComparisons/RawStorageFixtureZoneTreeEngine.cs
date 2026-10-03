@@ -5,7 +5,7 @@ using ZoneTree.Serializers;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-internal sealed class RawStorageFixtureZoneTreeEngine : IRawStorageFixtureEngine
+internal sealed class RawStorageFixtureZoneTreeEngine : IDisposable
 {
     private const string TemporaryDirectoryPrefix = "keyload-raw-storage-";
     private const string GuidFormat = "N";

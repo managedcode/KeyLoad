@@ -28,3 +28,6 @@
 - Existing fixture ownership above records the historical baseline during this coherent migration. Do not keep duplicate or compatibility fixture bodies here after the accepted source join.
 - The library fixture must be public/unsealed for BenchmarkDotNet's actual generated child; this executable contains internal host types and never disables CA1515 or another quality rule.
 - Real generated-process Dry qualification is invoked by TUnit only in GitHub Actions, with exact SHA and raw reports. It is not a performance or RF3 measurement claim.
+
+## Owner-authorized local optimization, 2026-10-03
+- The explicit root owner correction supersedes the historical local execution prohibitions above for development verification. Run genuine local BenchmarkDotNet for code optimization, retaining exact source, settings, machine and original outputs. Internal raw/code measurements must not appear in benchmarks.yml. Website database figures require authenticated original GitHub full-database comparisons and matched verified hardware, resources, topology, durability and workloads; local results remain development evidence.

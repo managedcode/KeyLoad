@@ -1,5 +1,29 @@
 # StorageRecovery
 
+## Native data epoch and explicit offline copy upgrade
+
+[ADR-077](../ADR/ADR-077-offline-native-data-epoch.md) freezes KL-043's supported
+native5 -> separate native6 transition. Source implementation and qualification
+remain pending. This fulfills the downgrade obligation of ADR-073/075 without
+changing user model bytes, RF3 placement or native WAL acknowledgement ordering.
+
+|Requirement|Acceptance and required evidence|
+|---|---|
+|REQ-STORAGE-021 current interpretation is fenced|AC-EPOCH-001: ordinary current open rejects native5/unknown/corrupt identity before journal/tree mutation; exact old executable rejects identity6 and checkpoint4; all compared files remain unchanged|
+|REQ-STORAGE-022 offline conversion preserves authority and data|AC-EPOCH-002: real stopped native5 WAL4/checkpoint3 conversion copies exact raw keys/values, identity authority, positions and pause/generation into a verified separate6 directory; original bytes stay identical; invalid/torn/corrupt source fails without publication|
+|REQ-STORAGE-022 recoverable publication|AC-EPOCH-003: real process kills at five appended upgrade stages leave original intact and target absent or fully current; retry rebuilds only matching owned stage or returns matching published target without erasing later writes|
+|REQ-STORAGE-023 no format downgrade through images|AC-EPOCH-004: current Compact/CreateSnapshot/InstallSnapshot/native backup/restore retain6/checkpoint4; checkpoint3 fails ordinary install, unknown version fails closed and original backup stays unchanged|
+|REQ-STORAGE-024 signed incompatible peers fail closed|AC-EPOCH-005: genuine stale-purpose signed vote/append/snapshot/request/discovery/reply envelopes fail before replay admission or dispatch; valid current signatures pass with permanent aliases/Ids and persisted replica2 unchanged|
+|REQ-STORAGE-007 supported RF3 upgrade matrix|AC-EPOCH-006: exact previous/current process oracle and homogeneous upgraded Docker/Aspire RF3 .NET/official MCP prove reopen, replay/retention, snapshot and restart; supported cold-rollout and unsupported mixed/old-format matrix remains explicit|
+
+Canonical source/test slices are StorageRecovery, with BackupRestore and the
+existing ClusterRouting/ClusterReplication security joins. Public webpage N/A:
+this is an offline server/provider operation. The offline Server command is owned
+by root; the untrusted client CLI does not own physical storage. Task graph,
+stage ordering, exact ownership, rollback, verification and escalation are in
+ADR-077 and the implementation traceability record; no completed gate is inferred
+from authored source.
+
 ## Retired checkpoint handle ownership
 
 REQ-STORAGE-020 / AC-DBHP-009 preserves one physical owner for each successfully

@@ -6,6 +6,7 @@ internal static class McpToolDescriptions
     internal const string StableRetry = " Retry a command only with the same stable ID and canonical payload; timeout or disconnect does not prove rollback.";
     private const string DocumentsGet = "Read one authorized document revision; result is null when absent. Redaction follows current persisted grants.";
     private const string StreamsRead = "Read a bounded event stream page after a revision; continue using the returned revision and hasMore indicator.";
+    private const string StreamsReplay = "Read one exact-versioned aggregate snapshot and its complete bounded event tail under one committed cut. Requires persisted worker capabilities and every raw payload/header grant; incompatible versions or unavailable history fail. Replay invokes no subscription or external effect.";
     private const string EventsRead = "Read a bounded topic or stream page; preserve the returned cursor when continuing.";
     private const string SubscriptionsStatus = "Read current subscription configuration, checkpoint, generation and delivery state.";
     private const string MessagesInspect = "Inspect authorized queue message metadata and visible payload; result is null when absent.";
@@ -14,6 +15,7 @@ internal static class McpToolDescriptions
     private const string SeriesLatest = "Read the latest authorized sample at or before an optional inclusive UTC timestamp; sample is null when absent.";
     private const string SeriesAggregate = "Read complete raw count, sum, minimum, maximum and sum/count average in [from, untilExclusive); null end includes the maximum timestamp. Exceeding maxSamples rejects the whole result.";
     private const string SeriesWindows = "Read dense fixed-width UTC windows anchored at from, including empty windows and a clamped final window. Sample and window caps reject the whole result when exceeded.";
+    private const string SeriesRetention = "Read the persisted exclusive UTC retention floor, cumulative physical purge count and remaining-page status under current series read authorization.";
     private const string QueryExecute = "Execute an authorized read-only query with bounded work; continue with its returned cursor.";
     private const string QueryAst = "Execute the canonical typed query AST. Put polymorphic kind before other object fields and preserve its returned cursor.";
     private const string QueryCapabilities = "Discover supported query versions, predicates, read profiles and bounded execution limits.";
@@ -26,7 +28,7 @@ internal static class McpToolDescriptions
     private const string AdminBackup = "Create an administrator-authorized physical node backup. Retrying can create another archive; this operation has filesystem side effects.";
     private const string AdminAdmission = "Read administrator-authorized admission limits and actual node usage.";
     private const string AdminStatus = "Read administrator-authorized physical node identity, readiness and replication progress.";
-    private const string DocumentsCommit = "Commit one atomic batch containing any of the ten canonical mutation variants. Put each mutation kind before other object fields.";
+    private const string DocumentsCommit = "Commit one authorized atomic batch of supported canonical mutations. Put each mutation kind before other object fields.";
     private const string MessagesReceive = "Receive a bounded set of queue messages. request.requestId is the stable write identity; retain delivery tokens for completion.";
     private const string MessagesComplete = "Acknowledge, reject or renew a queue delivery using its signed token.";
     private const string MessagesProcess = "Atomically complete an idempotent queue handler and its declared mutation effects.";
@@ -49,6 +51,7 @@ internal static class McpToolDescriptions
     {
         McpToolNames.DocumentsGet => DocumentsGet,
         McpToolNames.StreamsRead => StreamsRead,
+        McpToolNames.StreamsReplay => StreamsReplay,
         McpToolNames.EventsRead => EventsRead,
         McpToolNames.SubscriptionsStatus => SubscriptionsStatus,
         McpToolNames.MessagesInspect => MessagesInspect,
@@ -57,6 +60,7 @@ internal static class McpToolDescriptions
         McpToolNames.SeriesLatest => SeriesLatest,
         McpToolNames.SeriesAggregate => SeriesAggregate,
         McpToolNames.SeriesWindows => SeriesWindows,
+        McpToolNames.SeriesRetention => SeriesRetention,
         McpToolNames.QueryExecute => QueryExecute,
         McpToolNames.QueryAst => QueryAst,
         McpToolNames.QueryCapabilities => QueryCapabilities,

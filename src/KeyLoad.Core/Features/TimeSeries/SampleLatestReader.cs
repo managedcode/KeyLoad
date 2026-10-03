@@ -12,14 +12,17 @@ internal static class SampleLatestReader
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);
         var scope = SampleReadScope.Open(database, view, principalId, request.Partition, request.Set, request.SeriesId);
+        var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
         SampleRecord? selected = null;
         budget.Check();
         view.VisitReverseRange(scope.Prefix, OneSample, (_, value) =>
         {
             selected = Project(database, scope, value);
             return false;
-        }, untilKey: SampleReadKeys.ThroughInclusive(request.Partition, request.Set, request.SeriesId,
-            request.AtOrBefore), cancellationToken: budget.Cancellation);
+        }, afterKey: retention is null ? null : SampleReadKeys.FromInclusive(request.Partition, request.Set,
+            request.SeriesId, SampleRetentionStateReader.Before(retention)),
+            untilKey: SampleReadKeys.ThroughInclusive(request.Partition, request.Set, request.SeriesId,
+                request.AtOrBefore), cancellationToken: budget.Cancellation);
         budget.Check();
         return new(selected);
     }

@@ -18,7 +18,8 @@ internal readonly struct ZoneTreeCheckpointFrame
     internal byte[] Header { get; }
     internal byte[] Payload { get; }
 
-    internal static ZoneTreeCheckpointFrame Read(FileStream input, ZoneTreeStoreOptions options)
+    internal static ZoneTreeCheckpointFrame Read(FileStream input, ZoneTreeStoreOptions options,
+        long maximumPosition = long.MaxValue)
     {
         if (input.Length - input.Position < ZoneTreePersistenceFormat.HeaderLength)
         {
@@ -33,6 +34,10 @@ internal readonly struct ZoneTreeCheckpointFrame
         if (length <= 0 || length > options.MaxFrameBytes || input.Length - input.Position < length)
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointLengthInvalid);
+        }
+        if (input.Position > maximumPosition - length)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ZoneTreePersistenceFormat.SnapshotBytesExceeded);
         }
 
         var payload = new byte[length];

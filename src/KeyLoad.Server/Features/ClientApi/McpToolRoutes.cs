@@ -5,6 +5,7 @@ internal static class McpToolRoutes
 {
     internal const string DocumentsGet = "/v1/documents/get";
     internal const string StreamsRead = "/v1/streams/read";
+    internal const string StreamsReplay = AggregateReplayProtocol.Route;
     internal const string EventsRead = "/v1/events/read";
     internal const string SubscriptionsStatus = "/v1/subscriptions/status";
     internal const string MessagesInspect = "/v1/queues/inspect";
@@ -13,6 +14,7 @@ internal static class McpToolRoutes
     internal const string SeriesLatest = TimeSeriesReadProtocol.LatestRoute;
     internal const string SeriesAggregate = TimeSeriesReadProtocol.AggregateRoute;
     internal const string SeriesWindows = TimeSeriesReadProtocol.WindowsRoute;
+    internal const string SeriesRetention = TimeSeriesReadProtocol.RetentionRoute;
     internal const string QueryExecute = "/v1/query";
     internal const string QueryAst = "/v1/query/ast";
     internal const string QueryCapabilities = "/v1/query/capabilities";

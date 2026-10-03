@@ -3,13 +3,10 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal sealed class SiteIsolatedCoverageInventoryTests
 {
     private const string IsolatedPath = SitePublicationTokens.EvidenceToolsPrefix + "site-isolated-github-controlled.mjs";
-    private const string LegacyPath = SitePublicationTokens.EvidenceToolsPrefix + "github-evidence-controlled.mjs";
-
     [Test]
     [Arguments(IsolatedPath, true)]
     [Arguments(IsolatedPath, false)]
-    [Arguments(LegacyPath, false)]
-    public async Task AC_ISO_009_NativeCoverageRequiresBothEvidenceToolInventories(string relative, bool inventoried)
+    public async Task AC_ISO_009_NativeCoverageRequiresCurrentEvidenceToolInventory(string relative, bool inventoried)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var temporary = new SiteCoverageFixtureDirectory();

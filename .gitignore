@@ -663,6 +663,7 @@ data/
 backups/
 **/packages.lock.json
 **/.aspire/
+src/KeyLoad.AppHost/aspire.config.json
 **/coverage/
 BenchmarkDotNet.Artifacts/
 .env

@@ -11,7 +11,7 @@ internal sealed class SiteIsolatedBrowserTests
         var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;
         using var projection = JsonDocument.Parse(await File.ReadAllBytesAsync(fixture.Projection, token));
-        await using var browser = await SiteBrowserSession.StartAsync(fixture.Inputs.Site, token);
+        await using var browser = await SiteIsolatedBrowserStartup.StartAsync(fixture, token);
         await SiteIsolatedBrowserAssertions.WaitAsync(browser.Chrome.Cdp, token);
         await AssertAccessibilityAsync(browser.Chrome.Cdp, token);
         await SiteIsolatedBrowserKeyboardAssertions.AssertNativeNodeSelectionAsync(browser.Chrome.Cdp, projection.RootElement, token);

@@ -52,8 +52,7 @@ internal sealed class RawStorageReportValidatorTests
 
     [Test]
     [Arguments("zonetree")]
-    [Arguments("tsavorite")]
-    public async Task AcGe005AcceptsCompleteEightCellReportWithOutlierReducedStatistics(string engine)
+    public async Task AcGe005AcceptsCompleteEightCellZoneTreeReportWithOutlierReducedStatistics(string engine)
     {
         var report = RawStorageReportData.CreateValidReport(engine);
         var benchmarks = report[RawStorageReportData.BenchmarksKey]!.AsArray();
@@ -109,19 +108,27 @@ internal sealed class RawStorageReportValidatorTests
     [Test]
     public async Task AcGe005AcceptsInclusiveStatisticsSampleCountBoundaries()
     {
-        foreach (var engine in new[] { "zonetree", "tsavorite" })
+        foreach (var sampleCount in new[] { 1, 5 })
         {
-            foreach (var sampleCount in new[] { 1, 5 })
-            {
-                var report = RawStorageReportData.CreateValidReport(engine, sampleCount);
-                var response = await RawStorageReportNodeProcess.ValidateAsync(report, engine, [ValidScenario],
-                    TestContext.Current!.Execution.CancellationToken);
-                await Assert.That(response.ExitCode).IsEqualTo(0);
-                await Assert.That(response.StandardError).IsEqualTo(string.Empty);
-                await Assert.That(response.Cases.Single().Accepted).IsTrue();
-                await Assert.That(response.Cases.Single().Unchanged).IsTrue();
-            }
+            var report = RawStorageReportData.CreateValidReport(RawStorageReportData.Engine, sampleCount);
+            var response = await RawStorageReportNodeProcess.ValidateAsync(report, RawStorageReportData.Engine,
+                [ValidScenario], TestContext.Current!.Execution.CancellationToken);
+            await Assert.That(response.ExitCode).IsEqualTo(0);
+            await Assert.That(response.StandardError).IsEqualTo(string.Empty);
+            await Assert.That(response.Cases.Single().Accepted).IsTrue();
+            await Assert.That(response.Cases.Single().Unchanged).IsTrue();
         }
+    }
+
+    [Test]
+    public async Task AcGe005RejectsRemovedTsavoriteReportLabel()
+    {
+        var report = RawStorageReportData.CreateValidReport(engine: "tsavorite");
+        var response = await RawStorageReportNodeProcess.ValidateAsync(report, "tsavorite", [ValidScenario],
+            TestContext.Current!.Execution.CancellationToken);
+        await Assert.That(response.ExitCode).IsEqualTo(0);
+        await Assert.That(response.Cases.Single().Accepted).IsFalse();
+        await Assert.That(response.Cases.Single().Unchanged).IsTrue();
     }
 
     [Test]

@@ -2,17 +2,7 @@ using System.Buffers.Binary;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-/// <summary>Identifies the two real resident raw storage engines used by GE001.</summary>
-internal enum RawStorageEngineKind
-{
-    /// <summary>The raw ZoneTree byte key/value engine.</summary>
-    ZoneTree,
-
-    /// <summary>The public Tsavorite byte-record engine shipped with Microsoft.Garnet.</summary>
-    Tsavorite
-}
-
-/// <summary>Retains the immutable deterministic binary inputs shared by one raw-engine fixture.</summary>
+/// <summary>Retains the immutable deterministic binary inputs used by one ZoneTree fixture.</summary>
 internal sealed class RawStorageCorpus
 {
     private const int KeyLength = 16;

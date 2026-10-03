@@ -22,3 +22,6 @@
 - All file/type/unit/depth400/200/50/3 limits apply; no partial-type loophole or analyzer severity/threshold weakening.
 - Preserve unrelated shared-checkout source. No local tests/recovery/runtime probes/load benchmarks, secrets, ignored failures, skipped suites or invented resource/performance numbers.
 - Dry/generated-runner qualification establishes execution only; never report RF3, power-loss, matched performance, coverage, endurance or production readiness from it.
+
+## Owner-authorized local optimization, 2026-10-03
+- The explicit root owner correction supersedes the historical local execution prohibitions above for development verification. Use real local BenchmarkDotNet processes and bounded native fixtures to optimize code, retaining actual source, settings, machine and originals. Ordinary correctness tests also execute in CI; internal raw/code measurements must not appear in benchmarks.yml. Public database figures require authenticated original GitHub full-database comparisons with verified comparable hardware, resources, topology, durability and workloads.

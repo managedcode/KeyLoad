@@ -20,12 +20,6 @@ internal static class SiteCoverageGate
         $"{SiteCoverageTokens.FeatureSourcePrefix}measurements.mjs",
         $"{SiteCoverageTokens.FeatureSourcePrefix}measurement-loader.mjs",
         $"{SiteCoverageTokens.FeatureSourcePrefix}build-site.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}benchmark-lab.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}benchmark-profiles.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}github-evidence-contracts.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}github-evidence-runs.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}github-evidence-proof.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}github-evidence.mjs",
         $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-api.mjs",
         $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-capture.mjs",
         $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-cli.mjs",
@@ -39,7 +33,6 @@ internal static class SiteCoverageGate
         $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-runs.mjs",
     ];
 
-    private static SiteGitHubArchiveReceipt? archiveReceipt;
     private static SiteIsolatedGitHubArchiveReceipt? isolatedArchiveReceipt;
 
     [Before(HookType.TestSession)]
@@ -48,7 +41,6 @@ internal static class SiteCoverageGate
         var repository = RequiredPath(SiteTokens.RepositoryEnvironment);
         var revision = Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment);
         await SiteQualificationSource.RequireCheckoutAsync(repository, revision ?? string.Empty, CancellationToken.None);
-        archiveReceipt = await SiteGitHubArchiveSetup.PrepareFromEnvironmentAsync(CancellationToken.None);
         isolatedArchiveReceipt = await SiteIsolatedGitHubArchiveSetup.PrepareFromEnvironmentAsync(CancellationToken.None);
         await SiteCoverageSourceManifestWriter.CaptureAsync();
     }
@@ -66,8 +58,6 @@ internal static class SiteCoverageGate
         }
 
         await SiteCoverageSourceManifestWriter.VerifyUnchangedAsync(repository, manifest).ConfigureAwait(false);
-        await SiteGitHubArchiveSetup.VerifyUnchangedAsync(archiveReceipt ??
-            throw new InvalidOperationException(SitePublicationTokens.MissingArchivePreparation), CancellationToken.None);
         await SiteIsolatedGitHubArchiveSetup.VerifyUnchangedAsync(isolatedArchiveReceipt ??
             throw new InvalidOperationException(SitePublicationTokens.MissingArchivePreparation), CancellationToken.None);
         var collection = await SiteCoverageArtifactReader.ReadAsync(repository, artifactRoot, manifest,

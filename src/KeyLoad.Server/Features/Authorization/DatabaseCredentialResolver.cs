@@ -1,3 +1,4 @@
+using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
@@ -19,8 +20,24 @@ internal static class DatabaseCredentialResolver
         var token = codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
             NativeSerialization.Serialize(key[ServerProtocol.BearerPrefix.Length..]));
         RequestFailureDiagnostic.MarkCredentialDispatch(context);
-        var reply = await context.RequestServices.GetRequiredService<OrleansNode>()
-            .ExecuteAsync(requestId, token, false, context.RequestAborted).ConfigureAwait(false);
+        var started = DatabasePhaseTelemetry.Begin();
+        var outcome = DatabasePhaseOutcome.Faulted;
+        GrainOperationReply reply;
+        try
+        {
+            reply = await context.RequestServices.GetRequiredService<OrleansNode>()
+                .ExecuteAsync(requestId, token, false, context.RequestAborted).ConfigureAwait(false);
+            outcome = DatabasePhaseOutcome.Completed;
+        }
+        catch (OperationCanceledException)
+        {
+            outcome = DatabasePhaseTelemetry.CancellationOutcome(context.RequestAborted);
+            throw;
+        }
+        finally
+        {
+            DatabasePhaseTelemetry.End(DatabasePhaseKind.PublicAuthenticationDispatch, outcome, started);
+        }
         return reply.Payload;
     }
 }

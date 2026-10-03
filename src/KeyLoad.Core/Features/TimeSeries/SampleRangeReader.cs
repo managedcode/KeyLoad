@@ -19,8 +19,11 @@ internal static class SampleRangeReader
         var principal = database.Principal(view, principalId, clock.GetUtcNow());
         database.Authorization.Require(principal, request.Partition, request.Set, Capability.SeriesRead);
         var resource = database.Resource(view, request.Partition, request.Set, ResourceKind.TimeSeries);
+        var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
+        var from = retention is not null && retention.BeforeUtcTicks > request.From.UtcTicks
+            ? SampleRetentionStateReader.Before(retention) : request.From;
         var prefix = KeySpace.Partition(SampleReadKeySpace, request.Partition, request.Set, request.SeriesId);
-        var after = KeySpace.Partition(SampleReadKeySpace, request.Partition, request.Set, request.SeriesId, request.From);
+        var after = KeySpace.Partition(SampleReadKeySpace, request.Partition, request.Set, request.SeriesId, from);
         var until = SampleUpperBound(request);
         var records = new List<SampleRecord>();
         var resultBytes = 0L;

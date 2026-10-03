@@ -29,7 +29,7 @@ internal static class SiteBrowserVisualAssertions
         var cdp = chrome.Cdp;
         await chrome.NavigateAsync(SiteBrowserTokens.BlankUrl, cancellationToken);
         await chrome.NavigateAsync(baseUrl + SiteAssetTokens.IndexHtml + SiteBrowserTokens.PageHideFragment, cancellationToken);
-        await SiteBrowserAssertions.WaitForLoaded(cdp, cancellationToken);
+        await SiteIsolatedBrowserAssertions.WaitAsync(cdp, cancellationToken);
         await AssertLazyScene(cdp, cancellationToken);
         await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollScript, false, cancellationToken);
         var state = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneReadyScript, true, cancellationToken);
@@ -51,8 +51,7 @@ internal static class SiteBrowserVisualAssertions
 
         await chrome.NavigateAsync(SiteBrowserTokens.BlankUrl, cancellationToken);
         await chrome.NavigateAsync(baseUrl + SiteAssetTokens.IndexHtml + SiteBrowserTokens.PageHideFragment, cancellationToken);
-        await SiteBrowserAssertions.WaitForLoaded(cdp, cancellationToken);
-        await Assert.That(await cdp.WaitForExpressionAsync(SiteBrowserBehaviorTokens.ChartReadyScript, cancellationToken)).IsTrue();
+        await SiteIsolatedBrowserAssertions.WaitAsync(cdp, cancellationToken);
         await AssertLazyScene(cdp, cancellationToken);
         await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollScript, false, cancellationToken);
         var restored = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneReadyScript, true, cancellationToken);

@@ -21,8 +21,6 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         {
             "comparison-build", "comparison-plan", "comparison-images", "comparison-preflight",
             "comparison-crud", "comparison-specialized", "comparison-aggregate",
-            "raw-storage-correctness", "raw-storage",
-            "native-serialization",
             "qualify", "deploy",
         }.Order(StringComparer.Ordinal).ToArray();
         await Assert.That(jobs.Order(StringComparer.Ordinal).SequenceEqual(expectedJobs)).IsTrue();

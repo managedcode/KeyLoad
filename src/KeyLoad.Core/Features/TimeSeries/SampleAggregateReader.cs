@@ -16,6 +16,14 @@ internal static class SampleAggregateReader
         ValidateRange(request.From, request.UntilExclusive);
         ValidateSampleLimit(request.MaxSamples, database.Limits.MaxScanRecords);
         var scope = SampleReadScope.Open(database, view, principalId, request.Partition, request.Set, request.SeriesId);
+        var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
+        var from = retention is not null && retention.BeforeUtcTicks > request.From.UtcTicks
+            ? SampleRetentionStateReader.Before(retention) : request.From;
+        if (request.UntilExclusive is { } requestedUntil && from >= requestedUntil)
+        {
+            budget.Check();
+            return SampleAggregateAccumulator.Empty;
+        }
         if (request.UntilExclusive is { } until && request.From.UtcTicks == until.UtcTicks)
         {
             budget.Check();
@@ -29,7 +37,7 @@ internal static class SampleAggregateReader
             budget.Check();
             accumulator.Add(ReadSample(value));
             return true;
-        }, SampleReadKeys.FromInclusive(request.Partition, request.Set, request.SeriesId, request.From),
+        }, SampleReadKeys.FromInclusive(request.Partition, request.Set, request.SeriesId, from),
             SampleReadKeys.UntilExclusive(request.Partition, request.Set, request.SeriesId, request.UntilExclusive),
             cancellationToken: budget.Cancellation);
         if (scan.HasMore)

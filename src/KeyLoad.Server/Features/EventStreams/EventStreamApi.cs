@@ -20,6 +20,8 @@ internal static class EventStreamApi
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.Stream, request));
         app.MapPost(EventReadPath, (ReadEventSourceRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.EventSource, request));
+        app.MapPost(AggregateReplayProtocol.Route, (ReadAggregateReplayRequest request, HttpContext context) =>
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.AggregateReplay, request));
         app.MapPost(ConfigurePath, (ConfigureSubscriptionRequest request, HttpContext context) =>
             ApiGrainDispatch.SubmitAsync(context, OperationKind.ConfigureSubscription, request.CommandId, request));
         app.MapPost(SeekPath, (SeekSubscriptionRequest request, HttpContext context) =>

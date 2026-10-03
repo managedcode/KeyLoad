@@ -121,6 +121,7 @@ public sealed partial class DatabaseEngine
         var tags = JsonData.Validate(append.TagsJson, Limits);
         var sequenceKey = KeySpace.Partition("sample-sequence", partition, append.SeriesSet, append.SeriesId);
         var sequence = tx.ReadOwnedValue(sequenceKey) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0;
+        var retention = SampleRetentionStateReader.Read(tx, partition, append.SeriesSet, append.SeriesId);
         foreach (var sample in append.Samples)
         {
             JsonData.Identifier(sample.EventId);
@@ -139,6 +140,10 @@ public sealed partial class DatabaseEngine
                 }
 
                 continue;
+            }
+            if (retention is not null && sample.Timestamp.UtcTicks < retention.BeforeUtcTicks)
+            {
+                throw Errors.Fail(ErrorCode.HistoryUnavailable, "A sample cannot be appended before the series retention floor.");
             }
             var record = new SampleRecord(append.SeriesId, sample, checked(++sequence), tags);
             tx.PutRecord(KeySpace.Partition("sample", partition, append.SeriesSet, append.SeriesId, sample.Timestamp, sequence), record);

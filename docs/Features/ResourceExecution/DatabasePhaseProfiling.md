@@ -96,7 +96,9 @@ Their full development build and formatter pass with all analyzers enabled;
 the [source receipt](../../implementation/database-phase-producer-source-r134.json)
 binds the exact inputs and preservation review. This does not
 establish actual phase counts, allocations or performance. Default mode remains
-off. The remaining20 producers, private capture, trusted process-mode startup
+off. The newly independently reviewed public/request joins add00..04, bringing
+the source total to17/32; these new boundaries still require direct enabled
+counter/RF3/on-off overhead proof. The remaining15 producers, private capture, trusted process-mode startup
 and actual RF3 profile qualification remain open.
 
 Runtime/allocations/performance qualification is GitHub TUnit/MTP only. Current

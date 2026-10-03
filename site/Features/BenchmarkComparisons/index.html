@@ -213,86 +213,28 @@
       </div>
     </section>
 
-    <section class="evidence" id="benchmarks" aria-labelledby="benchmark-title">
+    <section id="benchmarks" class="benchmark-section" aria-labelledby="benchmark-title" data-isolated-catalog="./data/isolated-catalog.json">
       <header class="section-head">
-        <div><p class="eyebrow">Measurements, with context</p><h2 id="benchmark-title">Measured in public. Every number has a receipt.</h2></div>
-        <p class="section-intro">Reports come from successful GitHub comparison jobs. Each result keeps its source revision, host and workload conditions attached.</p>
-      </header>
-      <div class="qualification-note"><span class="qualification-mark" aria-hidden="true">i</span><p><strong>Early development.</strong> Cluster qualification is in progress. These measurements describe the recorded run conditions; they do not establish production readiness, a winner or power-loss durability.</p></div>
-      <noscript><p>Interactive charts need JavaScript. Download the original measurements or open their GitHub comparison evidence:</p><!-- KEYLOAD_STATIC_EVIDENCE --></noscript>
-
-      <div class="instrument">
-        <div class="instrument-bar" role="group" aria-label="Measurement controls">
-          <label class="control run-control" for="profile">Workload profile<select id="profile" disabled><option>Loading published runs…</option></select></label>
-          <label class="control" for="metric">Measure<select id="metric">
-            <optgroup label="Performance"><option value="throughput">Useful throughput · ops/s</option><option value="p50">Latency p50 · ms</option><option value="p95">Latency p95 · ms</option><option value="p99">Latency p99 · ms</option><option value="errors">Failed attempts · %</option></optgroup>
-            <optgroup label="Queue stages"><option value="enqueue">Enqueue p99 · ms</option><option value="receive">Receive p99 · ms</option><option value="ack">ACK p99 · ms</option></optgroup>
-            <optgroup label="Load generator"><option value="cpu">Generator CPU / attempt · ms</option><option value="alloc">Generator allocation / attempt · KiB</option><option value="rss">Generator observed peak RSS · MiB</option></optgroup>
-          </select></label>
-          <label class="control" for="repetition">Repetition<select id="repetition"><option value="median">Median of repetitions</option></select></label>
-          <label class="scale-control" for="log-scale"><input id="log-scale" type="checkbox"> Log scale</label>
-        </div>
-
-        <div class="instrument-body">
-          <div class="measurement-workspace" id="results-panel" role="tabpanel" aria-labelledby="tab-PointRead" aria-busy="true">
-            <div class="scenario-tabs" role="tablist" aria-label="Benchmark scenario">
-              <button id="tab-PointRead" type="button" role="tab" aria-selected="true" aria-controls="results-panel" data-scenario="PointRead" tabindex="0">Point read</button>
-              <button id="tab-DocumentWrite" type="button" role="tab" aria-selected="false" aria-controls="results-panel" data-scenario="DocumentWrite" tabindex="-1">Document write</button>
-              <button id="tab-VectorExact" type="button" role="tab" aria-selected="false" aria-controls="results-panel" data-scenario="VectorExact" tabindex="-1">Exact vector</button>
-              <button id="tab-QueueCycle" type="button" role="tab" aria-selected="false" aria-controls="results-panel" data-scenario="QueueCycle" tabindex="-1">Queue cycle</button>
-              <button id="tab-GraphNeighbors" type="button" role="tab" aria-selected="false" aria-controls="results-panel" data-scenario="GraphNeighbors" tabindex="-1">Graph neighbors</button>
-              <button id="tab-GraphTraverse" type="button" role="tab" aria-selected="false" aria-controls="results-panel" data-scenario="GraphTraverse" tabindex="-1">Graph traversal</button>
-            </div>
-            <p class="scenario-hint">Keyboard: arrow keys, Home or End switch scenarios.</p>
-            <div class="chart-heading"><div><h3 id="chart-title">Useful throughput</h3><p id="scenario-description">Primary-key reads returning the complete document.</p></div><span id="direction">Higher is faster</span></div>
-            <div id="chart" class="chart" role="group" aria-live="polite" aria-labelledby="chart-title" aria-describedby="metric-note"><p class="empty-state">Loading published measurements…</p></div>
-            <p id="metric-note" class="metric-note">Bars show the median of per-repetition values; whiskers show their range.</p>
-            <div id="conditions" class="condition-strip" aria-label="Selected workload conditions"></div>
-            <div class="table-heading"><h3>Every result, in context.</h3><div class="download-links" aria-label="Download selected report"><a id="json-download" href="#" download aria-disabled="true">JSON <span aria-hidden="true">↓</span></a><a id="csv-download" href="#" download aria-disabled="true">CSV <span aria-hidden="true">↓</span></a><a id="report-download" href="#" download aria-disabled="true">Report <span aria-hidden="true">↓</span></a></div></div>
-            <div class="table-scroll" tabindex="0" role="region" aria-label="Measurement results table; scroll this region horizontally on narrow screens"><table><caption class="sr-only">Per-engine benchmark results for the selected workload, metric and repetition. Failed and timed-out attempts remain in the attempt count.</caption><thead><tr><th scope="col">Engine</th><th scope="col">Useful ops/s</th><th scope="col">p50 ms</th><th scope="col">p95 ms</th><th scope="col">p99 ms</th><th scope="col">Successful / attempts</th><th scope="col">Status</th></tr></thead><tbody id="result-table"></tbody></table></div>
-            <p class="table-note">Only engines that implement the selected workload are compared here; adapters without it stay listed as unsupported in the downloadable report. Failed or timed-out requests remain in the denominator and contribute no useful operations.</p>
-            <p id="load-error" class="load-error" role="alert" aria-live="assertive" hidden></p>
-            <button id="retry-measurements" class="retry-button" type="button" hidden>Retry published measurements</button>
-            <p class="sr-only" id="measurement-announcement" role="status" aria-live="polite" aria-atomic="true"></p>
-          </div>
-
-          <aside class="receipt" aria-label="Published provenance">
-            <p class="receipt-title">Run receipt</p>
-            <dl class="receipt-lines">
-              <div><dt>Selected run</dt><dd id="published-date">Loading measurements…</dd></div>
-              <div><dt>Host</dt><dd id="host-summary">Complete run conditions will appear here.</dd></div>
-              <div><dt>Measured source</dt><dd id="revision-summary"></dd></div>
-              <div><dt>Website source</dt><dd id="site-revision-summary" class="site-revision"></dd></div>
-              <div><dt>Engines recorded</dt><dd><span id="recorded-engine-count">—</span> in this report</dd></div>
-            </dl>
-            <a class="receipt-link" id="workflow-link" href="https://github.com/managedcode/KeyLoad/actions" target="_blank" rel="noopener">Open the GitHub run <span aria-hidden="true">↗</span></a>
-          </aside>
-        </div>
-      </div>
-
-      <section class="engine-profile-section" aria-labelledby="engine-profiles-title">
-        <div class="profile-heading"><div><p class="eyebrow">Configuration follows the report</p><h3 id="engine-profiles-title">Know what each result costs.</h3></div><p class="muted">Versions, topology and guarantees from the selected run.</p></div>
-        <div id="engine-profiles" class="engine-grid" aria-live="polite"><p class="empty-state">Engine profiles will appear with the selected published report.</p></div>
-      </section>
-    </section>
-
-    <section id="isolated-lab" class="benchmark-section" aria-labelledby="isolated-title" hidden>
-      <header class="section-head">
-        <div><p class="eyebrow">Native topology comparisons</p><h2 id="isolated-title">Performance with 1, 2 and 3 nodes.</h2></div>
+        <div><p class="eyebrow">Native topology comparisons</p><h2 id="benchmark-title">Performance with 1, 2 and 3 nodes.</h2></div>
         <p class="section-intro">Each engine, node count and scenario has its own Linux runner. Results show five repetitions of the same intensive workload.</p>
       </header>
-      <div class="instrument-controls">
-        <label class="control" for="isolated-scenario">Scenario<select id="isolated-scenario"></select></label>
-        <label class="control" for="isolated-node-count">Nodes<select id="isolated-node-count"></select></label>
-        <label class="control" for="isolated-target">Engine<select id="isolated-target"></select></label>
-        <label class="control" for="isolated-metric">Metric<select id="isolated-metric"></select></label>
-        <label class="control" for="isolated-repetition">Repetition<select id="isolated-repetition"></select></label>
+      <div class="qualification-note"><span class="qualification-mark" aria-hidden="true">i</span><p><strong>Early development.</strong> Cluster qualification is in progress. These measurements describe the recorded run conditions; they do not establish production readiness, a winner or power-loss durability.</p></div>
+      <noscript><p>Enable JavaScript to explore the measurements. The original aggregate and authenticated GitHub run remain available:</p><!-- KEYLOAD_ISOLATED_EVIDENCE --></noscript>
+      <div class="instrument">
+        <div class="instrument-controls" role="group" aria-label="Native measurement controls">
+          <label class="control" for="isolated-scenario">Scenario<select id="isolated-scenario"></select></label>
+          <label class="control" for="isolated-node-count">Nodes<select id="isolated-node-count"></select></label>
+          <label class="control" for="isolated-target">Engine<select id="isolated-target"></select></label>
+          <label class="control" for="isolated-metric">Metric<select id="isolated-metric"></select></label>
+          <label class="control" for="isolated-repetition">Repetition<select id="isolated-repetition"></select></label>
+        </div>
+        <div class="measurement-workspace">
+          <div id="isolated-results" aria-live="polite"><p class="empty-state">Loading qualified native measurements…</p></div>
+          <p id="isolated-error" class="load-error" role="alert" hidden></p>
+          <button id="isolated-retry" class="retry-button" type="button" hidden>Retry native measurements</button>
+          <p id="isolated-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+        </div>
       </div>
-      <div id="isolated-results" aria-live="polite"><p class="empty-state">Loading qualified native measurements…</p></div>
-      <p id="isolated-error" class="load-error" role="alert" hidden></p>
-      <button id="isolated-retry" class="retry-button" type="button" hidden>Retry native measurements</button>
-      <p id="isolated-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
-      <noscript><!-- KEYLOAD_ISOLATED_EVIDENCE --></noscript>
     </section>
 
     <section class="ledger" aria-labelledby="ledger-title">

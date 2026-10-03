@@ -4,6 +4,14 @@ namespace KeyLoad.Client;
 
 public sealed partial class KeyLoadClient
 {
+    /// <summary>Reads the exclusive retention floor and physical purge progress.</summary>
+    /// <param name="request">Partition and series identity under current persisted rights.</param>
+    /// <param name="cancellationToken">Cancellation throughout the HTTP operation.</param>
+    /// <returns>Persisted UTC floor, cumulative deletion count and remaining-page status.</returns>
+    public Task<Result<SampleRetentionStatus>> ReadSampleRetentionAsync(ReadSampleRetentionRequest request,
+        CancellationToken cancellationToken = default)
+        => Send<SampleRetentionStatus>(TimeSeriesReadProtocol.RetentionRoute, request, false, null, cancellationToken);
+
     /// <summary>Reads the latest projected sample at an optional inclusive timestamp.</summary>
     /// <param name="request">Series identity and optional inclusive timestamp cut.</param>
     /// <param name="cancellationToken">Cancellation throughout the HTTP operation.</param>

@@ -2,23 +2,10 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal static class SiteBrowserUiTokens
 {
-    public const string SelectorProfile = "#profile";
-    public const string SelectorMetric = "#metric";
-    public const string SelectorRepetition = "#repetition";
-    public const string SelectorLog = "#log-scale";
     public const string SelectorResultPanel = "#results-panel";
-    public const string SelectorRetry = "#retry-measurements";
-    public const string SelectorError = "#load-error";
-    public const string SelectorTable = "#result-table";
-    public const string SelectorStatus = ".result-status";
-    public const string SelectorChart = "#chart";
     public const string SelectorScene = "#cluster-scene";
     public const string SelectorSceneStatus = "[data-scene-status]";
     public const string SelectorMotion = "#scene-motion";
-    public const string SelectorScenario = "[data-scenario]";
-    public const string ScenarioTabPrefix = "tab-";
-    public const string FirstScriptArgument = "{0}";
-    public const string SecondScriptArgument = "{1}";
     public const string SceneStateAttribute = "data-scene-state";
     public const string BackendAttribute = "data-graphics-backend";
     public const string FrameAttribute = "data-frame-state";
@@ -53,20 +40,6 @@ internal static class SiteBrowserUiTokens
     public const string KeyboardKeyUp = "keyUp";
     public const string ArrowRight = "ArrowRight";
     public const string ErrorLevel = "error";
-    public const string FailedLabel = "Failed";
-    public const string UnsupportedLabel = "Unsupported";
-    public const string EngineCountField = "engineCount";
-    public const string RevisionField = "revision";
-    public const string DownloadsField = "downloads";
-    public const string TableCaptionField = "tableCaption";
-    public const string HeroDisplayField = "heroDisplay";
-    public const string PosterLoadedField = "posterLoaded";
-    public const string ExpectedGrid = "grid";
-    public const string ChartField = "chart";
-    public const string TableField = "table";
-    public const string NameField = SiteTokens.Name;
-    public const string StatusField = SiteTokens.Status;
-    public const string StatusesField = "statuses";
     public const string CanvasCountField = "canvasCount";
     public const string BackendField = "backend";
     public const string SceneStatusField = "status";
@@ -78,21 +51,9 @@ internal static class SiteBrowserUiTokens
     public const string RenderCallsField = "renderCalls";
     public const string TrianglesField = "triangles";
     public const string NoScriptSelector = "noscript";
-    public const string SelectValueScript = "(()=>{const e=document.querySelector({0});if(!e)return false;e.value={1};e.dispatchEvent(new Event('change',{bubbles:true}));return true;})()";
-    public const string ClickScenarioScript = "(()=>{const e=document.getElementById({0});if(!e)return false;e.click();return true;})()";
-    public const string ClickByIdScript = "(()=>{const e=document.getElementById({0});if(!e)return false;e.click();return true;})()";
-    public const string FocusFirstScenarioScript = "document.querySelector('#tab-PointRead')?.focus() ?? false";
-    public const string FocusedScenarioScript = "document.activeElement.id";
-    public const string InitialEvidenceScript = "({engineCount:document.querySelector('#recorded-engine-count')?.textContent,revision:document.querySelector('#revision-summary')?.textContent,downloads:['#json-download','#csv-download','#report-download'].map(s=>document.querySelector(s)?.getAttribute('href')),tableCaption:document.querySelector('#result-table')?.closest('table')?.querySelector('caption')?.textContent,heroDisplay:getComputedStyle(document.querySelector('.hero')).display,posterLoaded:document.querySelector('.cluster-poster')?.complete&&document.querySelector('.cluster-poster')?.naturalWidth>0})";
-    public const string SnapshotScript = "({chart:[...document.querySelectorAll('#chart .bar-row')].map(r=>{const v=r.querySelector('.bar-value').childNodes[0].textContent.trim();const fill=r.querySelector('.bar-fill');const range=r.querySelector('.bar-range');return{name:r.querySelector('.bar-label').textContent.trim(),value:v,status:v==='Failed'?'failed':v==='Unsupported'?'unsupported':'measured',hasFill:Boolean(fill),width:parseFloat(fill?.style.getPropertyValue('--width')??'0'),hasRange:Boolean(range),minimum:parseFloat(range?.style.getPropertyValue('--min')??'0'),range:parseFloat(range?.style.getPropertyValue('--range')??'0')}}),table:[...document.querySelectorAll('#result-table tr')].map(r=>[...r.cells].map(c=>c.textContent.trim())),statuses:[...document.querySelectorAll('#result-table tr')].map(r=>r.cells[6].querySelector('" + SelectorStatus + "')?.classList[1]),direction:document.querySelector('#direction')?.textContent,axis:[...document.querySelectorAll('#chart .axis-labels span')].map(t=>t.textContent.trim())})";
     public const string OverflowScript = "document.documentElement.scrollWidth>window.innerWidth";
     public const string SceneScrollScript = "document.querySelector('#cluster-scene')?.scrollIntoView({block:'center'})";
     public const string SceneSnapshotScript = "({backend:document.querySelector('#cluster-scene')?.getAttribute('data-graphics-backend'),status:document.querySelector('" + SelectorSceneStatus + "')?.textContent,frame:document.querySelector('#cluster-scene')?.getAttribute('data-frame-state'),canvasCount:document.querySelectorAll('#cluster-scene canvas').length,bufferPixels:Number(document.querySelector('#cluster-scene')?.getAttribute('data-buffer-pixels')??0),drawCalls:Number(document.querySelector('#cluster-scene')?.getAttribute('data-draw-calls')??0),triangles:Number(document.querySelector('#cluster-scene')?.getAttribute('data-triangles')??0)})";
-    public const string FailureStateScript = "({visible:!document.querySelector('#load-error')?.hidden,retryVisible:!document.querySelector('#retry-measurements')?.hidden,rowCount:document.querySelectorAll('#result-table tr').length,downloads:[...document.querySelectorAll('#json-download,#csv-download,#report-download')].map(a=>a.hasAttribute('href')),revision:document.querySelector('#revision-summary')?.textContent})";
-    public const string WaitFailureScript = "(()=>{const e=document.querySelector('#load-error');return Boolean(e&&!e.hidden)})()";
-    public const string RetryFailureScript = "(()=>{const e=document.querySelector('#retry-measurements');if(!e)return false;e.click();return true})()";
-    public const string LogScaleScript = "(()=>{const e=document.querySelector('#log-scale');if(!e)return false;e.checked=!e.checked;e.dispatchEvent(new Event('change',{bubbles:true}));return e.checked})()";
-    public const string QueueMetricDisabledScript = "document.querySelector('#metric option[value={0}]')?.disabled";
     public const string MotionEnableScript = "(()=>{const e=document.querySelector('#scene-motion');if(!e||e.disabled)return false;if(e.getAttribute('aria-pressed')!=='true')e.click();return e.getAttribute('aria-pressed')==='true'})()";
     public const string MotionDisableScript = "(()=>{const e=document.querySelector('#scene-motion');if(!e||e.disabled)return false;if(e.getAttribute('aria-pressed')==='true')e.click();return e.getAttribute('aria-pressed')==='false'})()";
     public const string MotionAvailableScript = "document.querySelector('#scene-motion')?.disabled===false";
@@ -100,8 +61,6 @@ internal static class SiteBrowserUiTokens
     public const string ReducedMotionScript = "matchMedia('(prefers-reduced-motion: reduce)').matches";
     public const string TableScrollLabelScript = "document.querySelector('.table-scroll')?.getAttribute('aria-label')";
     public const string ScrollLabelToken = "scroll";
-    public const string NoScriptReportDirectory = "./data/runs/";
-    public const string NoScriptReportSuffix = "/results.json";
     public const string NoScriptEvidenceLabel = "GitHub comparison evidence";
     public const string HtmlField = "outerHTML";
     public const string SceneScrollAwayScript = "window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'})";
@@ -116,29 +75,6 @@ internal static class SiteBrowserUiTokens
     public const string WaitScriptPrefix = "new Promise(resolve => { const started = performance.now(); const check = () => { if (";
     public const string WaitScriptSuffix = ") resolve(true); else if (performance.now() - started > 15000) resolve(false); else setTimeout(check, 20); }; check(); })";
     public const string BrowserWaitScript = "document.readyState === 'complete' && document.querySelector('#results-panel')?.getAttribute('aria-busy') === 'false'";
-    public const string FormatNumberPattern = "#,##0.##";
-    public const string RoundTripNumberPattern = "R";
-    public const string InvariantCultureName = "en-US";
-    public const string MissingValue = "—";
-    public const int DisplayDecimalPlaces = 2;
-    public const double DisplayBelowHalfValue = 0.47499999999999964d;
-    public const double DisplayHalfValue = 0.475d;
-    public const double DisplayMillisecondTie = 1.005d;
-    public const double DisplayBelowMillisecondTie = 1.0049999999999997d;
-    public const double DisplayZeroValue = 0d;
-    public const double DisplayHalfCentValue = 0.005d;
-    public const double DisplayGroupedValue = 1234.5d;
-    public const string DisplayBelowHalfText = "0.47";
-    public const string DisplayHalfText = "0.48";
-    public const string DisplayMillisecondTieText = "1.01";
-    public const string DisplayBelowMillisecondTieText = "1";
-    public const string DisplayZeroText = "0";
-    public const string DisplayHalfCentText = "0.01";
-    public const string DisplayGroupedText = "1,234.5";
-    public const string AttemptsSeparator = " / ";
-    public const string FailedStatus = SiteTokens.FailedStatus;
-    public const string UnsupportedStatus = SiteTokens.UnsupportedStatus;
-    public const string MeasuredStatus = SiteTokens.MeasuredStatus;
     public const string ReducedMotionFeature = "prefers-reduced-motion";
     public const string ReducedMotionValue = "reduce";
     public const string EmulationFeatureName = "name";
@@ -152,30 +88,10 @@ internal static class SiteBrowserUiTokens
     public const int ViewportMobileWidth = 390;
     public const int ViewportNarrowWidth = 320;
     public const int ViewportMobileHeight = 844;
-    public const int DownloadWaitAttempts = 100;
-    public const int DownloadPollMilliseconds = 50;
-    public const int RevisionPrefixLength = 12;
-    public const int DownloadCount = 3;
-    public const int Four = 4;
-    public const int Five = 5;
     public const int ScenePosterWaitMilliseconds = 1000;
     public const int SceneSettleWaitMilliseconds = 500;
     public const int SceneIdleWaitMilliseconds = 100;
     public const int NoScriptWaitAttempts = 100;
     public const int NoScriptPollMilliseconds = 50;
-    public const int Three = 3;
-    public const int Two = SiteTokens.MedianDivisor;
-    public const int One = SiteTokens.One;
-    public const int Zero = SiteTokens.Zero;
-
     public static readonly int[] ViewportWidths = [ViewportDesktopWidth, ViewportTabletWidth, ViewportMobileWidth, ViewportNarrowWidth];
-    public static readonly string[] DownloadFiles = [SiteTokens.ReportFile, SiteTokens.CsvFile, SiteTokens.MarkdownFile];
-
-    public static string DownloadId(string file) => file switch
-    {
-        SiteTokens.ReportFile => "json-download",
-        SiteTokens.CsvFile => "csv-download",
-        SiteTokens.MarkdownFile => "report-download",
-        _ => throw new ArgumentOutOfRangeException(nameof(file)),
-    };
 }

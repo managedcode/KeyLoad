@@ -5,7 +5,7 @@ using BenchmarkDotNet.Jobs;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-/// <summary>Measures the four frozen resident raw-byte operations on one selected native engine.</summary>
+/// <summary>Measures the four frozen resident raw-byte operations on ZoneTree.</summary>
 [MemoryDiagnoser]
 [SimpleJob(RuntimeMoniker.Net10_0, launchCount: 1, warmupCount: 3, iterationCount: 5, invocationCount: 1024)]
 [Config(typeof(RawStorageUnrollConfiguration))]
@@ -13,7 +13,6 @@ public class RawStorageBenchmarks : IDisposable
 {
     private const string EngineEnvironmentVariable = "KEYLOAD_RAW_STORAGE_ENGINE";
     private const string ZoneTreeLabel = "zonetree";
-    private const string TsavoriteLabel = "tsavorite";
     private const int BenchmarkRecordCount = 4096;
     private const int SmallPayloadBytes = 32;
     private const int LargePayloadBytes = 1024;
@@ -33,7 +32,7 @@ public class RawStorageBenchmarks : IDisposable
     private bool disposed;
     private bool nextOverwriteAlternate = true;
 
-    /// <summary>Gets or sets the one lowercase engine label selected for the generated runner.</summary>
+    /// <summary>Gets or sets the one lowercase ZoneTree label selected for the generated runner.</summary>
     [ParamsSource(nameof(Engines))]
     public string Engine { get; set; } = ZoneTreeLabel;
 
@@ -58,7 +57,8 @@ public class RawStorageBenchmarks : IDisposable
             throw new InvalidOperationException(ActiveSetupMessage);
         }
 
-        var candidate = new RawStorageFixture(ParseEngine(Engine), RecordCount, PayloadBytes, MaximumWrites);
+        ValidateEngine(Engine);
+        var candidate = new RawStorageFixture(RecordCount, PayloadBytes, MaximumWrites);
         try
         {
             VerifySetupOracle(candidate);
@@ -155,17 +155,17 @@ public class RawStorageBenchmarks : IDisposable
     private static string SelectEngine()
     {
         var selected = Environment.GetEnvironmentVariable(EngineEnvironmentVariable) ?? ZoneTreeLabel;
-        _ = ParseEngine(selected);
+        ValidateEngine(selected);
         return selected;
     }
 
-    private static RawStorageEngineKind ParseEngine(string label)
-        => label switch
+    private static void ValidateEngine(string label)
+    {
+        if (label != ZoneTreeLabel)
         {
-            ZoneTreeLabel => RawStorageEngineKind.ZoneTree,
-            TsavoriteLabel => RawStorageEngineKind.Tsavorite,
-            _ => throw new ArgumentException(UnsupportedEngineMessage, nameof(label))
-        };
+            throw new ArgumentException(UnsupportedEngineMessage, nameof(label));
+        }
+    }
 
     private static void VerifySetupOracle(RawStorageFixture candidate)
     {

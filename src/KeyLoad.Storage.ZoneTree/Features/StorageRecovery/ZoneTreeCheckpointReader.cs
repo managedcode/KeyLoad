@@ -8,6 +8,19 @@ internal static class ZoneTreeCheckpointReader
         FileStream input,
         ZoneTreeStoreOptions options,
         Action<StorageMutation>? apply = null)
+        => Read(input, options, apply, CurrentFormat);
+
+    internal static StorageSnapshot ReadNative3ForUpgrade(
+        FileStream input,
+        ZoneTreeStoreOptions options,
+        Action<StorageMutation> apply)
+        => Read(input, options, apply, SourceFormat);
+
+    private static StorageSnapshot Read(
+        FileStream input,
+        ZoneTreeStoreOptions options,
+        Action<StorageMutation>? apply,
+        CheckpointFormat format)
     {
         if (input.Length > options.MaxSnapshotBytes && apply is null)
         {
@@ -22,10 +35,11 @@ internal static class ZoneTreeCheckpointReader
         var appliedKey = KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey);
         while (true)
         {
-            var frame = ZoneTreeCheckpointFrame.Read(input, options);
+            var maximumPosition = format == SourceFormat ? options.MaxSnapshotBytes : long.MaxValue;
+            var frame = ZoneTreeCheckpointFrame.Read(input, options, maximumPosition);
             if (metadata is null)
             {
-                metadata = ReadMetadata(frame);
+                metadata = ReadMetadata(frame, format);
             }
             else
             {
@@ -34,12 +48,12 @@ internal static class ZoneTreeCheckpointReader
                     throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointCutsMismatch);
                 }
 
-                if (frame.Magic == ZoneTreePersistenceFormat.CheckpointEndMagic)
+                if (frame.Magic == format.EndMagic)
                 {
                     return ReadFooter(frame.Payload, metadata, count, applied, digest);
                 }
 
-                if (frame.Magic != ZoneTreePersistenceFormat.CheckpointDataMagic)
+                if (frame.Magic != format.DataMagic)
                 {
                     throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointFrameTypeInvalid);
                 }
@@ -52,15 +66,15 @@ internal static class ZoneTreeCheckpointReader
         }
     }
 
-    private static ZoneTreeCheckpointMetadata ReadMetadata(ZoneTreeCheckpointFrame frame)
+    private static ZoneTreeCheckpointMetadata ReadMetadata(ZoneTreeCheckpointFrame frame, CheckpointFormat format)
     {
-        if (frame.Magic != ZoneTreePersistenceFormat.CheckpointMagic)
+        if (frame.Magic != format.HeaderMagic)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.CheckpointFormatUnsupported);
         }
 
         var metadata = NativeSerialization.Deserialize<ZoneTreeCheckpointMetadata>(frame.Payload);
-        if (metadata.Version != ZoneTreePersistenceFormat.CheckpointVersion || metadata.CodecVersion != KeyCodec.Version)
+        if (metadata.Version != format.Version || metadata.CodecVersion != KeyCodec.Version)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.SnapshotFormatUnsupported);
         }
@@ -73,6 +87,16 @@ internal static class ZoneTreeCheckpointReader
 
         return metadata;
     }
+
+    private static CheckpointFormat CurrentFormat => new(ZoneTreePersistenceFormat.CheckpointVersion,
+        ZoneTreePersistenceFormat.CheckpointMagic, ZoneTreePersistenceFormat.CheckpointDataMagic,
+        ZoneTreePersistenceFormat.CheckpointEndMagic);
+
+    private static CheckpointFormat SourceFormat => new(ZoneTreePersistenceFormat.SourceCheckpointVersion,
+        ZoneTreePersistenceFormat.SourceCheckpointMagic, ZoneTreePersistenceFormat.SourceCheckpointDataMagic,
+        ZoneTreePersistenceFormat.SourceCheckpointEndMagic);
+
+    private readonly record struct CheckpointFormat(int Version, ulong HeaderMagic, ulong DataMagic, ulong EndMagic);
 
     private static void ApplyRecords(
         byte[] payload,

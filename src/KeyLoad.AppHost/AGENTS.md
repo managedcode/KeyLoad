@@ -10,6 +10,7 @@
 - Existing RF3 composition launches host processes and is tracked implementation debt. Do not replace the required Docker/Aspire RF3 topology with an in-memory or single-node demonstration.
 
 ## Commands and evidence
+- The canonical Aspire-owned test entry is defined by root AGENTS.md and ADR-074. AppHost defaults to Release because the pinned Aspire CLI evaluates RunCommand without forwarding outer dotnet-run configuration; verify the actual launched path and native TUnit outcomes. Do not bypass CLI/DCP or count stale Debug output as current qualification.
 - GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
 - Integration/RF3 behavior is invoked by `dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore --configuration Release` in `.github/workflows/ci.yml`; execute qualification only in GitHub Actions.
 

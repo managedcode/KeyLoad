@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Query;
 using Microsoft.Extensions.Logging;
 
@@ -32,27 +33,57 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
     {
         var stage = GrainFailureStage.EnvelopeVerification;
         var requestId = Guid.Empty;
+        var phase = DatabasePhaseKind.AuthorizedReadCapability;
+        var phaseStarted = -1L;
+        var phaseActive = false;
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
             requestId = this.GetPrimaryKey();
             var request = codec.VerifyRead(signedRequest, requestId);
             stage = GrainFailureStage.QuorumRead;
+            phase = request.Envelope.ReadKind == GrainReadKind.Authenticate
+                ? DatabasePhaseKind.AuthorizedAuthenticationBarrier : DatabasePhaseKind.AuthorizedOperationBarrier;
+            phaseStarted = DatabasePhaseTelemetry.Begin();
+            phaseActive = true;
             await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
+            DatabasePhaseTelemetry.End(phase, DatabasePhaseOutcome.Completed, phaseStarted);
+            phaseActive = false;
             cancellationToken.ThrowIfCancellationRequested();
             stage = GrainFailureStage.CapabilityExecution;
+            phase = DatabasePhaseKind.AuthorizedReadCapability;
+            phaseStarted = DatabasePhaseTelemetry.Begin();
+            phaseActive = true;
             var result = await ReadAsync(request, cancellationToken).ConfigureAwait(true);
+            DatabasePhaseTelemetry.End(phase, DatabasePhaseOutcome.Completed, phaseStarted);
+            phaseActive = false;
             stage = GrainFailureStage.ReplyEncoding;
             return GrainReplyFactory.Value(result, cancellationToken);
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {
+            if (phaseActive)
+            {
+                EndFailedPhase(error, phase, phaseStarted, cancellationToken);
+                phaseActive = false;
+            }
             return GrainReplyFactory.Failure(error, false, diagnostics, requestId, stage, cancellationToken);
         }
         finally
         {
+            if (phaseActive)
+            {
+                DatabasePhaseTelemetry.End(phase, DatabasePhaseOutcome.Faulted, phaseStarted);
+            }
             DeactivateOnIdle();
         }
+    }
+
+    private static void EndFailedPhase(Exception error, DatabasePhaseKind phase, long started, CancellationToken cancellationToken)
+    {
+        var outcome = error is OperationCanceledException
+            ? DatabasePhaseTelemetry.CancellationOutcome(cancellationToken) : DatabasePhaseOutcome.Faulted;
+        DatabasePhaseTelemetry.End(phase, outcome, started);
     }
 
     private async Task<object?> ReadAsync(DecodedGrainRequest request, CancellationToken cancellationToken)

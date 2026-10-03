@@ -1,25 +1,5 @@
 import { CONFIG, TEXT } from './contracts.mjs';
 
-const SCENARIO_DESCRIPTIONS = Object.freeze({
-  PointRead: Object.freeze(['Point read', 'Primary-key reads returning the complete document.']),
-  DocumentWrite: Object.freeze(['Document write', 'Unique document creates, with readback validation outside the timer.']),
-  VectorExact: Object.freeze(['Exact vector', 'Exhaustive cosine top-K with the complete document projection, checked against an independent oracle.']),
-  QueueCycle: Object.freeze(['Queue cycle', 'Enqueue → receive → ACK. Useful throughput counts unique, verified completed messages.']),
-  GraphNeighbors: Object.freeze(['Graph neighbors', 'One-hop outgoing neighbors, returned as sorted distinct vertex IDs.']),
-  GraphTraverse: Object.freeze(['Graph traversal', 'Bounded directed reachability with cycles and disconnected components, checked against breadth-first traversal.']),
-});
-
-export const scenarios = SCENARIO_DESCRIPTIONS;
-
-export const colors = Object.freeze({
-  KeyLoad: '#7f6cf0',
-  'PostgreSQL + pgvector': '#8f9198',
-  Qdrant: '#a6a8ae',
-  RabbitMQ: '#bcbec3',
-  Redis: '#76787f',
-  Neo4j: '#5f6168',
-});
-
 const VALUE_FIELDS = Object.freeze({ throughput: 'usefulOperationsPerSecond', p50: 'p50Ms', p95: 'p95Ms', p99: 'p99Ms' });
 const REPORT_FIELDS = Object.freeze({ targets: 'targets', cases: 'cases' });
 const CASE_FIELDS = Object.freeze({ target: 'target', scenario: 'scenario', repetition: 'repetition', measurement: 'measurement',

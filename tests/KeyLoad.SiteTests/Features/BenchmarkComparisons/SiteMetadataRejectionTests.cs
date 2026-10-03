@@ -9,9 +9,9 @@ internal sealed class SiteMetadataRejectionTests
     [Arguments("linked-card")]
     public async Task AC_SEO_005_RealBuilderRejectsMissingOrLinkedMetadataAssetsBeforeOutput(string condition)
     {
-        var inputs = SiteTestInputs.Read();
+        var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;
-        await using var scope = await SiteMetadataTestScope.CreateAsync(inputs, token);
+        await using var scope = await SiteMetadataTestScope.CreateAsync(fixture, token);
         var source = SourcePath(scope.Repository, condition);
         if (condition.StartsWith("missing", StringComparison.Ordinal))
         {
@@ -24,9 +24,7 @@ internal sealed class SiteMetadataRejectionTests
             File.CreateSymbolicLink(source, target);
         }
 
-        var scopedInputs = new SiteTestInputs(scope.Repository, inputs.Reports, inputs.EvidenceRun,
-            inputs.MeasuredRevision, inputs.SiteRevision);
-        var rejected = await SiteBuilderProcess.RunAsync(scopedInputs, inputs.Reports, scope.Output, token);
+        var rejected = await SiteIsolatedBuilderProcess.RunAsync(scope.Fixture, scope.Output, token);
         await Assert.That(rejected.ExitCode).IsNotEqualTo(SiteTokens.ProcessSuccessExitCode);
         await Assert.That(rejected.StandardError.Length).IsGreaterThan(0);
         if (condition.StartsWith("linked", StringComparison.Ordinal))
@@ -51,29 +49,42 @@ internal sealed class SiteMetadataRejectionTests
 
 internal sealed class SiteMetadataTestScope : IAsyncDisposable
 {
-    private SiteMetadataTestScope(string path) => Repository = path;
+    private SiteMetadataTestScope(string path, SiteIsolatedFixture fixture)
+    {
+        Repository = path;
+        Fixture = fixture;
+    }
 
     internal string Repository { get; }
     internal string Output => Repository + "-" + SiteMetadataTokens.OutputName;
+    internal SiteIsolatedFixture Fixture { get; }
 
-    internal static async Task<SiteMetadataTestScope> CreateAsync(SiteTestInputs inputs, CancellationToken token)
+    internal static async Task<SiteMetadataTestScope> CreateAsync(SiteIsolatedFixture sourceFixture, CancellationToken token)
     {
+        var inputs = sourceFixture.Inputs.Site;
         var path = Path.Combine(Path.GetTempPath(), SiteMetadataTokens.TestDirectoryPrefix + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(path);
         try
         {
             await CopyTree(Path.Combine(inputs.Repository, SiteMetadataTokens.FeaturePath),
                 Path.Combine(path, SiteMetadataTokens.FeaturePath), token);
+            var aggregateScriptRoot = Path.Combine(path, SiteMetadataTokens.AggregateDirectoryPath);
             await CopyTree(Path.Combine(inputs.Repository, SiteMetadataTokens.AggregateDirectoryPath),
-                Path.Combine(path, SiteMetadataTokens.AggregateDirectoryPath), token);
+                aggregateScriptRoot, token);
             await CopyTree(Path.Combine(inputs.Repository, "site/scripts"), Path.Combine(path, "site/scripts"), token);
             await CopyFile(inputs.Repository, path, SiteMetadataTokens.FaviconSvgPath, token);
-            await CopyFile(inputs.Repository, path, SiteMetadataTokens.ComparisonContractPath, token);
+            var aggregate = Path.Combine(path, "isolated-capture", "aggregate.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(aggregate)!);
+            await File.WriteAllBytesAsync(aggregate,
+                await File.ReadAllBytesAsync(Path.Combine(inputs.Aggregate, "aggregate.json"), token), token);
             foreach (var asset in SiteMetadataTokens.IconAssetNames)
             {
                 await CopyFile(inputs.Repository, path, Path.Combine(SiteMetadataTokens.SiteDirectory, asset), token);
             }
-            return new(path);
+            var isolatedInputs = new SiteIsolatedInputs(new SiteTestInputs(path, Path.GetDirectoryName(aggregate)!,
+                inputs.EvidenceRun, inputs.MeasuredRevision, inputs.SiteRevision), Path.GetDirectoryName(aggregate)!);
+            var fixture = new SiteIsolatedFixture(isolatedInputs, sourceFixture.Root, sourceFixture.Catalog, sourceFixture.Projection);
+            return new(path, fixture);
         }
         catch (Exception)
         {

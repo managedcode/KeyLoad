@@ -147,7 +147,7 @@ function validateCellSet(benchmarks, engine) {
 
 /** Validates one complete raw-storage BenchmarkDotNet full-JSON report without I/O or mutation. */
 export function validateReport(report, engine) {
-  if (engine !== 'zonetree' && engine !== 'tsavorite') fail('engine');
+  if (engine !== 'zonetree') fail('engine');
   if (!isRecord(report)) fail('report');
   validateHost(report);
   if (!Array.isArray(report.Benchmarks) || report.Benchmarks.length !== methods.size * payloadSizes.size) {

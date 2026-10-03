@@ -53,11 +53,11 @@ public static class ReplicaTransportProtocol
     /// <summary>Stable RPC method identity.</summary>
     public const string ExchangeAlias = "keyload.replica.exchange.v1";
     /// <summary>Request HMAC domain separator.</summary>
-    public const string RequestPurpose = "keyload-replica-request-v2";
+    public const string RequestPurpose = "keyload-replica-request-data-epoch6";
     /// <summary>Reply HMAC domain separator.</summary>
-    public const string ReplyPurpose = "keyload-replica-reply-v2";
+    public const string ReplyPurpose = "keyload-replica-reply-data-epoch6";
     /// <summary>Discovery response HMAC domain separator.</summary>
-    public const string DiscoveryPurpose = "keyload-replica-discovery-v2";
+    public const string DiscoveryPurpose = "keyload-replica-discovery-data-epoch6";
     /// <summary>Exact discovery response signature header.</summary>
     public const string DiscoverySignatureHeader = "X-KeyLoad-Discovery-Signature";
     /// <summary>Nonce set by the shared signed HTTP handler.</summary>

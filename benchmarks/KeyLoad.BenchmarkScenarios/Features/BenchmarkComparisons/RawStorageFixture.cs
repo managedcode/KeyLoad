@@ -2,7 +2,7 @@ using System.Runtime.ExceptionServices;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-/// <summary>Owns one non-concurrent raw ZoneTree or Tsavorite fixture and its exact binary corpus.</summary>
+/// <summary>Owns one non-concurrent raw ZoneTree fixture and its exact binary corpus.</summary>
 internal sealed class RawStorageFixture : IDisposable
 {
     private const int MinimumMaximumWrites = 1;
@@ -13,22 +13,22 @@ internal sealed class RawStorageFixture : IDisposable
     private const string UnavailableMessage = "The raw storage fixture cannot continue after an incomplete native operation.";
     private readonly int maximumWrites;
     private readonly byte[] readScratch;
-    private IRawStorageFixtureEngine? engine;
+    private RawStorageFixtureZoneTreeEngine? engine;
     private bool disposed;
     private bool faulted;
     private int attemptedWrites;
 
-    /// <summary>Creates the selected real engine after validating all caller-supplied bounds.</summary>
-    public RawStorageFixture(RawStorageEngineKind engineKind, int recordCount, int valueBytes,
+    /// <summary>Creates the real ZoneTree engine after validating all caller-supplied bounds.</summary>
+    public RawStorageFixture(int recordCount, int valueBytes,
         int maximumWrites = MaximumWritesLimit)
     {
-        ValidateArguments(engineKind, recordCount, valueBytes, maximumWrites);
+        ValidateArguments(recordCount, valueBytes, maximumWrites);
         this.maximumWrites = maximumWrites;
         Corpus = new(recordCount, valueBytes);
         readScratch = GC.AllocateArray<byte>(valueBytes, pinned: true);
         try
         {
-            engine = RawStorageFixtureEngineFactory.Create(engineKind, Corpus, readScratch);
+            engine = new RawStorageFixtureZoneTreeEngine(Corpus, readScratch);
             SeedCorpus();
         }
         catch (Exception primary)
@@ -41,7 +41,7 @@ internal sealed class RawStorageFixture : IDisposable
     /// <summary>Gets the immutable corpus retained for the fixture lifetime.</summary>
     public RawStorageCorpus Corpus { get; }
 
-    /// <summary>Gets the real ZoneTree directory, or null for Tsavorite's public null-device configuration.</summary>
+    /// <summary>Gets the real ZoneTree directory.</summary>
     public string? Directory => engine?.Directory;
 
     /// <summary>Reads a seeded or reserved index into the one caller-pinned session scratch buffer.</summary>
@@ -107,14 +107,8 @@ internal sealed class RawStorageFixture : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private static void ValidateArguments(RawStorageEngineKind engineKind, int recordCount, int valueBytes,
-        int maximumWrites)
+    private static void ValidateArguments(int recordCount, int valueBytes, int maximumWrites)
     {
-        if (engineKind is not (RawStorageEngineKind.ZoneTree or RawStorageEngineKind.Tsavorite))
-        {
-            throw new ArgumentOutOfRangeException(nameof(engineKind));
-        }
-
         if (recordCount is < 1 or > MaximumRecordCount)
         {
             throw new ArgumentOutOfRangeException(nameof(recordCount));

@@ -7,6 +7,10 @@ internal static class CrashHostApplication
 {
     internal static async Task RunAsync(string[] args)
     {
+        if (await EpochPriorSourceProbe.TryRunAsync(args) || await EpochUpgradeCrashScenario.TryRunAsync(args))
+        {
+            return;
+        }
         if (await ExistingStoreInspector.TryRunAsync(args))
         {
             return;
@@ -21,23 +25,25 @@ internal static class CrashHostApplication
         var mode = args.Length > 3 ? args[3] : CrashFixtureValues.CommitMode;
         var boundary = new CanonicalCrashBoundary(stage, mutationIndex, mode == CrashFixtureValues.CommitMode);
         using var store = new ZoneTreeStore(new(directory) { FaultObserver = boundary.Observe });
-        if (mode == CrashFixtureValues.ProjectionMode)
-        {
-            await ProjectionCrashScenario.RunAsync(directory, store, boundary);
-        }
-        else if (mode == CrashFixtureValues.SubscriptionMode)
-        {
-            await SubscriptionCrashScenario.RunAsync(directory, store, boundary);
-        }
-        else if (mode == DatabaseCompositionCrashScenario.Mode)
-        {
-            await DatabaseCompositionCrashScenario.RunAsync(directory, store, boundary);
-        }
-        else
-        {
-            CanonicalCrashScenario.Run(directory, store, boundary, mode);
-            await CrashHostPause.WaitForKillAsync();
-        }
+        await RunScenarioAsync(directory, store, boundary, mode);
+    }
+
+    private static Task RunScenarioAsync(string directory, ZoneTreeStore store,
+        CanonicalCrashBoundary boundary, string mode) => mode switch
+    {
+        CrashFixtureValues.ProjectionMode => ProjectionCrashScenario.RunAsync(directory, store, boundary),
+        CrashFixtureValues.SubscriptionMode => SubscriptionCrashScenario.RunAsync(directory, store, boundary),
+        DatabaseCompositionCrashScenario.Mode => DatabaseCompositionCrashScenario.RunAsync(directory, store, boundary),
+        AggregateReplayCrashScenario.Mode => AggregateReplayCrashScenario.RunAsync(directory, store, boundary),
+        SampleRetentionCrashScenario.Mode => SampleRetentionCrashScenario.RunAsync(directory, store, boundary),
+        _ => RunCanonicalAsync(directory, store, boundary, mode)
+    };
+
+    private static async Task RunCanonicalAsync(string directory, ZoneTreeStore store,
+        CanonicalCrashBoundary boundary, string mode)
+    {
+        CanonicalCrashScenario.Run(directory, store, boundary, mode);
+        await CrashHostPause.WaitForKillAsync();
     }
 }
 

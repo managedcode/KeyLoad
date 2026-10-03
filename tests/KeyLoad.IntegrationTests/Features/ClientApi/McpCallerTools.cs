@@ -5,6 +5,7 @@ internal static class McpCallerTools
 {
     internal const string DocumentsGet = "keyload_documents_get";
     internal const string StreamsRead = "keyload_streams_read";
+    internal const string StreamsReplay = "keyload_streams_replay";
     internal const string EventsRead = "keyload_events_read";
     internal const string SubscriptionsStatus = "keyload_subscriptions_status";
     internal const string MessagesInspect = "keyload_messages_inspect";
@@ -13,6 +14,7 @@ internal static class McpCallerTools
     internal const string SeriesLatest = "keyload_series_latest";
     internal const string SeriesAggregate = "keyload_series_aggregate";
     internal const string SeriesWindows = "keyload_series_windows";
+    internal const string SeriesRetention = "keyload_series_retention";
     internal const string QueryExecute = "keyload_query_execute";
     internal const string QueryAst = "keyload_query_ast";
     internal const string QueryCapabilities = "keyload_query_capabilities";

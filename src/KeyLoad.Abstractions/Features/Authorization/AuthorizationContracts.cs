@@ -76,8 +76,14 @@ public enum Capability : long
     BlobDelete = 1L << 32,
     /// <summary>Allows bounded cleanup of eligible binary versions.</summary>
     BlobManage = 1L << 33,
+    /// <summary>Allows advancing bounded time-series retention.</summary>
+    SeriesManage = 1L << 34,
+    /// <summary>Allows complete raw worker replay of event streams and derived state.</summary>
+    EventsReplay = 1L << 35,
+    /// <summary>Allows conditional replacement of bounded aggregate snapshots.</summary>
+    EventsSnapshotsManage = 1L << 36,
     /// <summary>Combines every defined capability.</summary>
-    All = (1L << 34) - 1
+    All = (1L << 37) - 1
 }
 
 /// <summary>Grants capabilities for a database and resource scope.</summary>

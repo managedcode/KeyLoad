@@ -1,12 +1,13 @@
 using System.Text.Json.Nodes;
 using KeyLoad.Core;
+using KeyLoad.Security.Features.Authorization;
 
 namespace KeyLoad.Security;
 
 /// <summary>Enforces persisted resource, row, and sensitive-field access policy.</summary>
 public sealed class AuthorizationPolicy : IAuthorizationPolicy
 {
-    private static bool Grant(PrincipalRecord principal, string grant) => principal.ClusterAdministrator
+    internal static bool Grant(PrincipalRecord principal, string grant) => principal.ClusterAdministrator
         || principal.FieldGrants.Contains(grant, StringComparer.Ordinal) || principal.FieldGrants.Contains("*", StringComparer.Ordinal);
     /// <inheritdoc />
     public void Require(PrincipalRecord principal, PartitionRef partition, string resource, Capability capability)
@@ -88,6 +89,9 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
             throw Errors.Fail(ErrorCode.PermissionDenied, "Required worker input is protected by a missing raw-read grant.");
         }
     }
+    /// <inheritdoc />
+    public void RequireReplayInput(PrincipalRecord principal, ResourceDefinition resource)
+        => ReplayInputPolicy.Require(principal, resource);
     /// <inheritdoc />
     public string Project(PrincipalRecord principal, IReadOnlyList<SensitiveFieldPolicy> policies, string json, out string[] omitted)
     {

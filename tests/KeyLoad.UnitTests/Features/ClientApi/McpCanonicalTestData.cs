@@ -73,6 +73,8 @@ internal static class McpCanonicalTestData
     [
         Read(McpCatalogExpectations.DocumentsGet, new GetDocumentRequest(Reference)),
         Read(McpCatalogExpectations.StreamsRead, new ReadStreamRequest(new StreamRef(Partition, Resource, Entity))),
+        Read(McpCatalogExpectations.StreamsReplay,
+            new ReadAggregateReplayRequest(new StreamRef(Partition, Resource, Entity), "worker.v1")),
         Read(McpCatalogExpectations.EventsRead, new ReadEventSourceRequest(Source)),
         Read(McpCatalogExpectations.SubscriptionsStatus, new GetSubscriptionRequest(Subscription)),
         Read(McpCatalogExpectations.MessagesInspect, new InspectMessageRequest(Lane, Entity)),

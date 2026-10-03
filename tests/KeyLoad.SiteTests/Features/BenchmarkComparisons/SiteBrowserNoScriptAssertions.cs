@@ -16,14 +16,10 @@ internal static class SiteBrowserNoScriptAssertions
         {
             [SiteBrowserTokens.NodeIdField] = nodeId,
         }, cancellationToken);
-        var html = outer.GetProperty(SiteBrowserUiTokens.HtmlField).GetString() ?? SiteBrowserBehaviorTokens.EmptyText;
-        foreach (var profile in SiteTokens.ProfileNames)
-        {
-            var path = SiteBrowserUiTokens.NoScriptReportDirectory + profile + SiteBrowserUiTokens.NoScriptReportSuffix;
-            await Assert.That(html.Contains(path, StringComparison.Ordinal)).IsTrue();
-        }
+        var html = outer.GetProperty(SiteBrowserUiTokens.HtmlField).GetString() ?? string.Empty;
+        await Assert.That(html.Contains("./data/isolated/aggregate.json", StringComparison.Ordinal)).IsTrue();
         await Assert.That(html.Contains(inputs.EvidenceUrl, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(html.Contains(SiteBrowserUiTokens.NoScriptEvidenceLabel, StringComparison.OrdinalIgnoreCase)).IsTrue();
+        await Assert.That(html.Contains("GitHub comparison run", StringComparison.OrdinalIgnoreCase)).IsTrue();
     }
 
     private static async Task<int> WaitForNoScriptNode(SiteBrowserCdpClient cdp, CancellationToken cancellationToken)

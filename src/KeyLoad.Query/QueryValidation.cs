@@ -26,6 +26,7 @@ internal static class QueryValidation
         var query = request.Query;
         DatabaseEngine.ValidatePartition(request.Partition);
         JsonData.Identifier(query.Collection);
+        ValidateModelSource(request, query);
         if (query.Projection.IsDefault || query.Order.IsDefault
             || query.Projection is not { Length: >= 1 and <= MaximumProjection }
             || query.Order.Length > MaximumOrdering || query.Limit < 1 || query.Limit > limits.MaxResults
@@ -49,6 +50,33 @@ internal static class QueryValidation
             throw Errors.Fail(ErrorCode.BudgetExceeded, "The query request exceeds its byte budget.");
         }
         return normalized;
+    }
+
+    private static void ValidateModelSource(AstQueryRequest request, SelectQuery query)
+    {
+        if (query.ModelSource is not { } source)
+        {
+            return;
+        }
+        if (!Enum.IsDefined(source.Kind))
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, "The model query source is unsupported.");
+        }
+        JsonData.Identifier(source.Item);
+        if (!request.AllowFullScan)
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, "A model query requires explicit full-scan consent.");
+        }
+        if (request.Cursor is not null)
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, "Model query continuation is not supported.");
+        }
+        if (source.Kind == ModelQuerySourceKind.Events && source.Generation < 1
+            || source.Kind == ModelQuerySourceKind.QueueMessages
+            && (source.Generation != 1 || source.Item != query.Collection))
+        {
+            throw Errors.Fail(ErrorCode.Validation, "The model query source arguments are invalid.");
+        }
     }
 
     private static ImmutableArray<Selection> NormalizeProjection(ImmutableArray<Selection> input, DatabaseLimits limits)

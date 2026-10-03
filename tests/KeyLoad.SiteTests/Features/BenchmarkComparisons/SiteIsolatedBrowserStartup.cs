@@ -30,7 +30,7 @@ internal static class SiteIsolatedBrowserStartup
             SiteBrowserTokens.BrowserSessionPrefix + Guid.NewGuid().ToString("N"));
         var metadata = SiteBrowserCoverageMetadata.Create(fixture.Inputs.Site.SiteRevision, chrome.Version,
             startup.Host.BaseUrl, manifest);
-        await chrome.NavigateAsync(startup.Host.BaseUrl + SiteAssetTokens.IndexHtml, token);
+        await chrome.NavigateAsync(startup.Host.BaseUrl + SiteAssetTokens.IndexHtml + SiteBrowserTokens.PageHideFragment, token);
         return startup.Transfer(session, metadata);
     }
 }

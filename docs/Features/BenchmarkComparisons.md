@@ -1,5 +1,39 @@
 # BenchmarkComparisons
 
+## Current complete-cohort publication
+
+Owner-directed immediate legacy removal is governed by
+[ADR-076](../ADR/ADR-076-current-cohort-publication.md). Its live path supersedes
+the historical comparison-smoke/comparison-suite and three-profile publication
+contracts below; immutable historical evidence keeps its original provenance.
+Source implementation and genuine runtime/publication qualification are distinct.
+
+| Requirement | Measurable acceptance | Tests and evidence |
+|---|---|---|
+| REQ-BC-CURRENT-001: the complete current native cohort is the sole live producer | AC-BC-CURRENT-001: exact current Benchmarks run/attempt/source, all 270 required cells and 277 original inputs pass existing correctness/fairness/provenance checks; missing, expired, mixed, skipped or failed inputs reject | SiteIsolatedGitHub selection/proof/archive/input/authority tests; actual aggregate and original GitHub archives |
+| REQ-BC-CURRENT-002: retire superseded collector, archives and current-profile assets together | AC-BC-CURRENT-002: no active comparison-smoke/comparison-suite collector, twelve-file precondition or three-profile current renderer remains; replacement retains all applicable safety, accessibility, vendor, arithmetic and browser criteria | scoped dependency inventory, workflow source tests and standalone isolated site/browser tests |
+| REQ-BC-CURRENT-003: preserve unchanged qualified authority around final build | AC-BC-CURRENT-003: bounded immutable receipt, original archive and all 277 input hashes match before/after builder; emitted aggregate bytes match; every remaining native coverage/no-skip/source-closure gate passes | SiteIsolatedGitHub integrity/build/coverage tests, original TRX/Cobertura/Node/browser artifacts and schema-v2 publication receipt |
+| REQ-BC-CURRENT-004: deploy only fresh exact-source evidence | AC-BC-CURRENT-004: current main and exact original producer tuple match immediately before needs-gated least-privilege Pages delivery; altered source/attempt/artifact rejects and actual provider receipt records outcome | SiteIsolatedGitHubFreshnessTests, workflow source tests, genuine same-run qualification and Pages provider receipt |
+
+Canonical ownership remains BenchmarkComparisons under site/scripts/workflows and
+SiteTests; the precise disjoint tasks and integration points are in ADR-076.
+
+## Canonical engine decision and candidate cleanup
+
+[ADR-071](../ADR/ADR-071-canonical-zonetree-providers.md) records the owner's
+ZoneTree/ZoneTree.FullTextSearch choice and immediate Garnet/Tsavorite removal.
+
+| Requirement | Acceptance | Mapping |
+|---|---|---|
+| REQ-ZT-001: active storage experiments use the selected canonical engine | AC-ZT-001: no Garnet package or Tsavorite implementation/dispatch remains; real ZoneTree raw/scaled correctness, full loaded-record counts, bounds and cleanup still hold; removed labels fail explicitly | existing RawStorage and ScaledRawStorage TUnit cases, dependency/source inspection |
+| REQ-ZT-002: delete discarded plans and unused pipeline paths immediately | AC-ZT-002: active docs have no dead candidate-plan links; Benchmarks has no raw/internal-codec job or diagnostic-only bypass, and preserves every native comparison/image/aggregate/site gate | workflow contract TUnit cases, governance and root diff review |
+
+Immutable prior result files remain truthful historical evidence. This cleanup
+does not establish performance, RF3 durability or production readiness. Root
+owns package/workflow/docs joins; the bounded worker owns candidate fixture and
+matching report/test removal under ADR-071. UI N/A: internal diagnostics do not
+produce the public comparison website.
+
 [Native gate repair](BenchmarkComparisons/NativeGateRepair.md) / [ADR-068](../ADR/ADR-068-native-benchmark-gate-repair.md)
 preserves full isolated scope while repairing actual stale startup job proof and
 investigating Kurrent metadata/leader failures from dbd01269 original artifacts.
@@ -495,10 +529,11 @@ REQ-BC-056/057/058 and AC-ISO-007/008/009. Mandatory SiteCoverageGate prepares
 two authenticated immutable isolated ZIPs through BCL before source capture and
 rechecks the private original receipt bytes plus277 inputs after the full suite.
 SiteIsolatedCoverageInventoryTests exercises actual Node/V8 and rejects omitted
-legacy/new publisher sources. All39 production and31 critical sources retain
-native80/70/90 gates;49 executed dependencies and the final composite are compared
-against trusted control source. Historical12-file evidence remains independent.
-Both evidence identities and current website SHA must still match before Pages.
+current publisher sources. Every remaining production and critical source retains
+native80/70/90 gates. ADR-076 retires the obsolete historical collector and profile
+renderer; the source closure includes current producer tools and every actual
+builder/browser consumer, compared against trusted control source. The exact
+current original authority and website SHA must still match before Pages.
 Source readiness is not native coverage,270-cell, publication or live proof;
 actual partial failures are in the source qualification record under implementation.
 
@@ -587,15 +622,6 @@ is qualified; the complete native family site stage remains mandatory.
 
 ## Shared comparison pipeline
 
-The owner's Garnet evaluation is specified in
-[GarnetStorageEvaluation](BenchmarkComparisons/GarnetStorageEvaluation.md) and
-[ADR-066](../ADR/ADR-066-garnet-storage-evaluation.md). Its first diagnostic stage
-compares actual public raw Tsavorite2.2.0 and raw ZoneTree1.9.8 resident cache
-operations in isolated Linux jobs. It remains separate from the270 service
-cells and product RF3; no measured engine winner or storage migration is
-established. Full Garnet RESP/AOF/recovery and representative concurrency/
-multi-host stages remain required.
-
 The latest owner correction2026-10-03 uses exactly three workflows under
 [ADR-064](../ADR/ADR-064-three-pipeline-release-delivery.md): `ci.yml` combines
 ordinary build/test/rule gates; `benchmarks.yml` (`Benchmarks`) owns every load/
@@ -615,6 +641,6 @@ AC-TW009001..003; pure source tests and exact-source normal/scalar qualification
 remain separate from the still-undelivered30 native-cell warmup/copy oracle.
 
 The additive [native serialization diagnostics](BenchmarkComparisons/NativeSerialization.md)
-map REQ-IS-PERF-001..004 to AC-IS-PERF-001..004 under ADR060/ADR047. They retain
-the complete native topology/workload aggregate and publish separate codec
-diagnostics; they never masquerade as cluster throughput or website evidence.
+map REQ-IS-PERF-001..004 to AC-IS-PERF-001..004 under ADR060/ADR047. They are
+local development profiling; internal codec jobs and dispatch modes are removed
+from Benchmarks. Public figures require the complete native database cohort.

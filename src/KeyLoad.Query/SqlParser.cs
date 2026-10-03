@@ -40,7 +40,7 @@ public sealed class SqlParser
         cursor.Need(SqlSyntax.Select);
         var projection = ReadProjection();
         cursor.Need(SqlSyntax.From);
-        var collection = cursor.Identifier();
+        var (collection, modelSource) = ReadSource();
         ReadAlias();
         projection = projection.Select(p => p with { Path = BoundPath(p.Path) }).ToList();
         var filter = cursor.Eat(SqlSyntax.Where) ? new SqlExpressionParser(cursor, limits, alias).Parse() : null;
@@ -56,7 +56,63 @@ public sealed class SqlParser
         {
             throw SqlSyntax.Invalid();
         }
-        return new(collection, alias, [.. projection], filter, [.. order], limit, explain);
+        return new(collection, alias, [.. projection], filter, [.. order], limit, explain, modelSource);
+    }
+
+    private (string Collection, ModelQuerySource? Source) ReadSource()
+    {
+        if (!cursor.Current.Quoted && cursor.Is(SqlSyntax.Events))
+        {
+            var collection = cursor.Current.Text;
+            cursor.Advance();
+            if (!cursor.Eat(SqlSyntax.OpenParen))
+            {
+                return (collection, null);
+            }
+            var streamSet = StringArgument();
+            cursor.Need(SqlSyntax.Comma);
+            var streamId = StringArgument();
+            var generation = 1L;
+            if (cursor.Eat(SqlSyntax.Comma))
+            {
+                if (cursor.Current.Kind != SqlTokenKind.Number
+                    || !long.TryParse(cursor.Current.Text, NumberStyles.None, CultureInfo.InvariantCulture, out generation)
+                    || generation < 1)
+                {
+                    throw SqlSyntax.Invalid();
+                }
+                cursor.Advance();
+            }
+            cursor.Need(SqlSyntax.CloseParen);
+            return (streamSet, new(ModelQuerySourceKind.Events, streamId, generation));
+        }
+
+        if (!cursor.Current.Quoted && cursor.Is(SqlSyntax.QueueMessages))
+        {
+            var collection = cursor.Current.Text;
+            cursor.Advance();
+            if (!cursor.Eat(SqlSyntax.OpenParen))
+            {
+                return (collection, null);
+            }
+            var queue = StringArgument();
+            cursor.Need(SqlSyntax.CloseParen);
+            return (queue, new(ModelQuerySourceKind.QueueMessages, queue));
+        }
+
+        return (cursor.Identifier(), null);
+    }
+
+    private string StringArgument()
+    {
+        if (cursor.Current.Kind != SqlTokenKind.String)
+        {
+            throw SqlSyntax.Invalid();
+        }
+        var value = cursor.Current.Text;
+        cursor.Advance();
+        JsonData.Identifier(value);
+        return value;
     }
 
     private List<Selection> ReadProjection()

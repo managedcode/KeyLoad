@@ -3,26 +3,18 @@ using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
-/// <summary>Verifies byte-exact real-engine operations against the immutable fixture corpus.</summary>
+/// <summary>Verifies byte-exact ZoneTree operations against the immutable fixture corpus.</summary>
 [NotInParallel]
 internal sealed class RawStorageCrudTests
 {
     private const int RecordCount = 64;
     private const int WriteBudget = 128;
-    private static readonly RawStorageEngineKind[] Engines =
-    [
-        RawStorageEngineKind.ZoneTree,
-        RawStorageEngineKind.Tsavorite
-    ];
-
     [Test]
-    [Arguments(RawStorageEngineKind.ZoneTree, 32)]
-    [Arguments(RawStorageEngineKind.ZoneTree, 1024)]
-    [Arguments(RawStorageEngineKind.Tsavorite, 32)]
-    [Arguments(RawStorageEngineKind.Tsavorite, 1024)]
-    public async Task AcGe002RealEnginesPreserveBinaryCrudAtBothPayloadSizes(RawStorageEngineKind engine, int valueBytes)
+    [Arguments(32)]
+    [Arguments(1024)]
+    public async Task AcGe002ZoneTreePreservesBinaryCrudAtBothPayloadSizes(int valueBytes)
     {
-        using var fixture = new RawStorageFixture(engine, RecordCount, valueBytes, WriteBudget);
+        using var fixture = new RawStorageFixture(RecordCount, valueBytes, WriteBudget);
         var originals = SnapshotCorpus(fixture.Corpus);
         await AssertCorpusMatchesIndependentVectorAsync(fixture.Corpus, originals, valueBytes);
         await Assert.That(fixture.Corpus.RecordCount).IsEqualTo(RecordCount);
@@ -55,19 +47,16 @@ internal sealed class RawStorageCrudTests
     }
 
     [Test]
-    public async Task AcGe002EachEngineStartsWithEverySeededRecordAndIndependentBinaryBytes()
+    public async Task AcGe002ZoneTreeStartsWithEverySeededRecordAndIndependentBinaryBytes()
     {
-        foreach (var engine in Engines)
+        using var fixture = new RawStorageFixture(RecordCount, 32, WriteBudget);
+        var originals = SnapshotCorpus(fixture.Corpus);
+        for (var index = 0; index < RecordCount; index++)
         {
-            using var fixture = new RawStorageFixture(engine, RecordCount, 32, WriteBudget);
-            var originals = SnapshotCorpus(fixture.Corpus);
-            for (var index = 0; index < RecordCount; index++)
-            {
-                await AssertRecordAsync(fixture, originals, index, alternate: false);
-            }
-
-            await AssertCorpusUnchangedAsync(fixture.Corpus, originals);
+            await AssertRecordAsync(fixture, originals, index, alternate: false);
         }
+
+        await AssertCorpusUnchangedAsync(fixture.Corpus, originals);
     }
 
     private static async Task AssertRecordAsync(RawStorageFixture fixture, CorpusSnapshot[] originals, int index,

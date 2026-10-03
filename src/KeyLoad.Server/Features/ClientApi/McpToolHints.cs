@@ -12,12 +12,14 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
     {
         GrainReadKind.Document => new(true, true, false),
         GrainReadKind.Stream => new(true, true, false),
+        GrainReadKind.AggregateReplay => new(true, true, false),
         GrainReadKind.EventSource => new(true, true, false),
         GrainReadKind.Subscription => new(true, true, false),
         GrainReadKind.Message => new(true, true, false),
         GrainReadKind.Traverse => new(true, true, false),
         GrainReadKind.Samples => new(true, true, false),
         GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows
+            or GrainReadKind.SampleRetention
             => new(true, true, false),
         GrainReadKind.Query => new(true, true, false),
         GrainReadKind.AstQuery => new(true, true, false),

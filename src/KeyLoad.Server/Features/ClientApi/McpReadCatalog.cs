@@ -11,6 +11,8 @@ internal static class McpReadCatalog
     [
         McpOperationFactory.Read<GetDocumentRequest, DocumentResult>(McpToolNames.DocumentsGet, McpToolRoutes.DocumentsGet, GrainReadKind.Document, true),
         McpOperationFactory.Read<ReadStreamRequest, StreamPage>(McpToolNames.StreamsRead, McpToolRoutes.StreamsRead, GrainReadKind.Stream),
+        McpOperationFactory.Read<ReadAggregateReplayRequest, AggregateReplayPage>(McpToolNames.StreamsReplay,
+            McpToolRoutes.StreamsReplay, GrainReadKind.AggregateReplay),
         McpOperationFactory.Read<ReadEventSourceRequest, EventSourcePage>(McpToolNames.EventsRead, McpToolRoutes.EventsRead, GrainReadKind.EventSource),
         McpOperationFactory.Read<GetSubscriptionRequest, SubscriptionInfo>(McpToolNames.SubscriptionsStatus, McpToolRoutes.SubscriptionsStatus, GrainReadKind.Subscription),
         McpOperationFactory.Read<InspectMessageRequest, MessageInspection>(McpToolNames.MessagesInspect, McpToolRoutes.MessagesInspect, GrainReadKind.Message, true),
@@ -20,6 +22,8 @@ internal static class McpReadCatalog
         McpOperationFactory.Read<AggregateSamplesRequest, SampleAggregate>(McpToolNames.SeriesAggregate, McpToolRoutes.SeriesAggregate, GrainReadKind.AggregateSamples),
         McpOperationFactory.Read<AggregateSampleWindowsRequest, SampleAggregateWindowsResult>(McpToolNames.SeriesWindows,
             McpToolRoutes.SeriesWindows, GrainReadKind.AggregateSampleWindows),
+        McpOperationFactory.Read<ReadSampleRetentionRequest, SampleRetentionStatus>(McpToolNames.SeriesRetention,
+            McpToolRoutes.SeriesRetention, GrainReadKind.SampleRetention),
         McpOperationFactory.Read<QueryRequest, QueryPage>(McpToolNames.QueryExecute, McpToolRoutes.QueryExecute, GrainReadKind.Query),
         McpOperationFactory.Read<AstQueryRequest, QueryPage>(McpToolNames.QueryAst, McpToolRoutes.QueryAst, GrainReadKind.AstQuery),
         McpOperationFactory.Read<QueryCapabilityManifest>(McpToolNames.QueryCapabilities, McpToolRoutes.QueryCapabilities, GrainReadKind.QueryCapabilities),

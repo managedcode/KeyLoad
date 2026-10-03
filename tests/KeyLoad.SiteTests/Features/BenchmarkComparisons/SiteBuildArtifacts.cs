@@ -7,15 +7,17 @@ internal static class SiteBuildArtifacts
 {
     private static readonly string[] FeatureAssets =
     [
-        SiteAssetTokens.ContractsModule, SiteAssetTokens.BootstrapModule, SiteAssetTokens.MeasurementModule, SiteAssetTokens.LoaderModule,
-        SiteAssetTokens.LabModule, SiteAssetTokens.ChartModule, SiteAssetTokens.ProfilesModule, SiteAssetTokens.SceneModule,
-        SiteAssetTokens.GeometryModule, SiteAssetTokens.LifecycleModule, SiteAssetTokens.ObserversModule, SiteAssetTokens.Stylesheet,
-        SiteAssetTokens.BrandStylesheet, SiteAssetTokens.TokenStylesheet, SiteAssetTokens.SceneStylesheet, SiteAssetTokens.PosterAsset,
+        "isolated-contracts.mjs", "isolated-metadata.mjs", "isolated-metrics-validation.mjs",
+        "isolated-report-validation.mjs", "isolated-http.mjs", "isolated-loader.mjs", "isolated-measurements.mjs",
+        "isolated-view.mjs", "isolated-controls.mjs", "isolated-lab.mjs", SiteAssetTokens.ContractsModule,
+        SiteAssetTokens.BootstrapModule, SiteAssetTokens.MeasurementModule, SiteAssetTokens.LoaderModule,
+        SiteAssetTokens.SceneModule, SiteAssetTokens.GeometryModule, SiteAssetTokens.LifecycleModule,
+        SiteAssetTokens.ObserversModule, SiteAssetTokens.Stylesheet, SiteAssetTokens.BrandStylesheet,
+        SiteAssetTokens.TokenStylesheet, SiteAssetTokens.SceneStylesheet, SiteAssetTokens.PosterAsset,
         SiteAssetTokens.MobilePosterAsset,
     ];
     private static readonly string[] VendorFiles = [SiteAssetTokens.WebGpuVendorModule, SiteAssetTokens.CoreVendorModule,
         SiteAssetTokens.VendorLicense, SiteAssetTokens.ThreeManifestFile];
-    private static readonly string[] ReportFiles = [SiteTokens.ReportFile, SiteTokens.CsvFile, SiteTokens.MarkdownFile];
     private static readonly string[] GeneratedFiles = [SiteAssetTokens.NoJekyllFile, SiteAssetTokens.CnameFile,
         SiteAssetTokens.RobotsFile, SiteAssetTokens.SitemapFile];
 
@@ -33,8 +35,10 @@ internal static class SiteBuildArtifacts
 
         foreach (var relative in VendorFiles)
         {
-            var source = Path.Combine(inputs.Repository, SiteAssetTokens.FeatureRelativePath, SiteAssetTokens.ThreeVendorRelativePath, relative);
-            var emitted = Path.Combine(output, SiteAssetTokens.EmittedFeatureRelativePath, SiteAssetTokens.ThreeVendorRelativePath, relative);
+            var source = Path.Combine(inputs.Repository, SiteAssetTokens.FeatureRelativePath,
+                SiteAssetTokens.ThreeVendorRelativePath, relative);
+            var emitted = Path.Combine(output, SiteAssetTokens.EmittedFeatureRelativePath,
+                SiteAssetTokens.ThreeVendorRelativePath, relative);
             await Assert.That(File.Exists(emitted)).IsTrue();
             var emittedBytes = await File.ReadAllBytesAsync(emitted, token);
             var sourceBytes = await File.ReadAllBytesAsync(source, token);
@@ -42,10 +46,9 @@ internal static class SiteBuildArtifacts
         }
 
         var sourceFavicon = Path.Combine(inputs.Repository, SiteAssetTokens.FaviconSourcePath);
-        var emittedFavicon = Path.Combine(output, SiteAssetTokens.FaviconSvg);
-        var emittedFaviconBytes = await File.ReadAllBytesAsync(emittedFavicon, token);
-        var sourceFaviconBytes = await File.ReadAllBytesAsync(sourceFavicon, token);
-        await Assert.That(emittedFaviconBytes.SequenceEqual(sourceFaviconBytes)).IsTrue();
+        var emittedFavicon = await File.ReadAllBytesAsync(Path.Combine(output, SiteAssetTokens.FaviconSvg), token);
+        var originalFavicon = await File.ReadAllBytesAsync(sourceFavicon, token);
+        await Assert.That(emittedFavicon.SequenceEqual(originalFavicon)).IsTrue();
         foreach (var file in GeneratedFiles)
         {
             await Assert.That(File.Exists(Path.Combine(output, file))).IsTrue();
@@ -54,50 +57,17 @@ internal static class SiteBuildArtifacts
 
     public static async Task CompareVendorManifest(SiteTestInputs inputs, string output, CancellationToken token)
     {
-        var manifestPath = Path.Combine(output, SiteAssetTokens.EmittedFeatureRelativePath, SiteAssetTokens.ThreeVendorRelativePath, SiteAssetTokens.ThreeManifestFile);
+        var manifestPath = Path.Combine(output, SiteAssetTokens.EmittedFeatureRelativePath,
+            SiteAssetTokens.ThreeVendorRelativePath, SiteAssetTokens.ThreeManifestFile);
         using var manifest = JsonDocument.Parse(await File.ReadAllBytesAsync(manifestPath, token));
         foreach (var entry in manifest.RootElement.GetProperty(SiteAssetTokens.Files).EnumerateArray())
         {
             var relative = entry.GetProperty(SiteAssetTokens.Path).GetString()!;
-            var source = Path.Combine(inputs.Repository, SiteAssetTokens.FeatureRelativePath, SiteAssetTokens.ThreeVendorRelativePath, relative);
+            var source = Path.Combine(inputs.Repository, SiteAssetTokens.FeatureRelativePath,
+                SiteAssetTokens.ThreeVendorRelativePath, relative);
             var expected = entry.GetProperty(SiteTokens.Sha256).GetString();
             var actual = Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(source, token)));
             await Assert.That(actual).IsEqualTo(expected);
-        }
-    }
-
-    public static async Task AssertRawReports(SiteTestInputs inputs, string output, CancellationToken token)
-    {
-        foreach (var profile in SiteTokens.ProfileNames)
-        {
-            foreach (var file in ReportFiles)
-            {
-                var sourceBytes = await File.ReadAllBytesAsync(Path.Combine(inputs.Reports, profile, file), token);
-                var emittedPath = Path.Combine(output, SiteTokens.DataDirectory, SiteTokens.RunsDirectory, profile, file);
-                var emittedBytes = await File.ReadAllBytesAsync(emittedPath, token);
-                await Assert.That(emittedBytes.SequenceEqual(sourceBytes)).IsTrue();
-            }
-        }
-    }
-
-    public static async Task<string> Sha256File(string path, CancellationToken token)
-    {
-        var bytes = await File.ReadAllBytesAsync(path, token);
-        return Convert.ToHexStringLower(SHA256.HashData(bytes));
-    }
-
-    public static async Task CopyReports(string source, string destination, CancellationToken token)
-    {
-        Directory.CreateDirectory(destination);
-        foreach (var profile in SiteTokens.ProfileNames)
-        {
-            var target = Path.Combine(destination, profile);
-            Directory.CreateDirectory(target);
-            foreach (var file in ReportFiles)
-            {
-                var bytes = await File.ReadAllBytesAsync(Path.Combine(source, profile, file), token);
-                await File.WriteAllBytesAsync(Path.Combine(target, file), bytes, token);
-            }
         }
     }
 }

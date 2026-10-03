@@ -9,7 +9,7 @@ internal static class SiteIsolatedBuilderProcess
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
 
     public static async Task<SiteProcessResult> RunAsync(SiteIsolatedFixture fixture, string output,
-        CancellationToken token, string? input = null)
+        CancellationToken token, string? input = null, string? additionalArgument = null)
     {
         using var projection = JsonDocument.Parse(await File.ReadAllBytesAsync(fixture.Projection, token));
         var cohort = projection.RootElement.GetProperty(SiteIsolatedFields.Cohort).Clone();
@@ -21,7 +21,7 @@ internal static class SiteIsolatedBuilderProcess
             UseShellExecute = false,
             CreateNoWindow = true,
         };
-        var arguments = new[]
+        var arguments = new List<string>
         {
             Path.Combine(fixture.Inputs.Site.Repository, SiteAssetTokens.BuilderRelativePath),
             "--isolated=" + (input ?? fixture.Inputs.Aggregate), "--output=" + output,
@@ -29,13 +29,17 @@ internal static class SiteIsolatedBuilderProcess
             "--evidence-url=" + SiteTokens.EvidenceBase + cohort.GetProperty(SiteIsolatedFields.RunId).GetInt64().ToString(CultureInfo.InvariantCulture),
             "--site-revision=" + fixture.Inputs.Site.SiteRevision,
         };
+        if (additionalArgument is not null)
+        {
+            arguments.Add(additionalArgument);
+        }
         foreach (var argument in arguments)
         {
             start.ArgumentList.Add(argument);
         }
         var sources = await SiteBuilderDiagnostics.ReadBuilderSourcesAsync(fixture.Inputs.Site, token);
         var result = await SiteIsolatedNodeProcess.RunProcessAsync(start, token);
-        await RetainAsync(fixture.Inputs.Site.SiteRevision, cohort, arguments, sources, result, token);
+        await RetainAsync(fixture.Inputs.Site.SiteRevision, cohort, arguments.ToArray(), sources, result, token);
         return result;
     }
 

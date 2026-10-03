@@ -1,0 +1,83 @@
+using System.Diagnostics;
+using System.Security.Cryptography;
+
+namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+
+internal static class ScaledRawStorageVerification
+{
+    private const int CancellationCheckStride = 256;
+    private const string MissingMessage = "A seeded scaled record is missing from the native engine.";
+    private const string PresentMessage = "The reserved scaled miss index is present in the native engine.";
+    private const string MismatchMessage = "The native value differs from the complete deterministic value.";
+    private const string DeadlineMessage = "The scaled fixture preparation deadline expired.";
+
+    internal static ScaledRawStorageVerificationResult Run(ScaledRawStorageCorpus corpus,
+        ScaledRawStorageZoneTreeEngine engine, byte[] expectedScratch, int recordCount, ref long readCalls,
+        long deadlineStart, bool enforceBudget, CancellationToken token)
+    {
+        var started = Stopwatch.GetTimestamp();
+        using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        var verified = 0L;
+        for (var index = 0; index < recordCount; index++)
+        {
+            CheckBoundary(index, deadlineStart, enforceBudget, token);
+            readCalls++;
+            if (!engine.TryRead(index, out var actual))
+            {
+                throw new InvalidOperationException(MissingMessage);
+            }
+
+            corpus.WriteValue(index, expectedScratch);
+            if (!actual.Span.SequenceEqual(expectedScratch))
+            {
+                throw new InvalidOperationException(MismatchMessage);
+            }
+
+            digest.AppendData(actual.Span);
+            verified++;
+        }
+
+        CheckBoundary(recordCount, deadlineStart, enforceBudget, token);
+        readCalls++;
+        if (engine.TryRead(recordCount, out _))
+        {
+            throw new InvalidOperationException(PresentMessage);
+        }
+
+        CheckCompletion(deadlineStart, enforceBudget, token);
+        return new ScaledRawStorageVerificationResult(
+            verified,
+            Convert.ToHexStringLower(digest.GetHashAndReset()),
+            Stopwatch.GetTimestamp() - started);
+    }
+
+    private static void CheckBoundary(int operation, long deadlineStart, bool enforceBudget, CancellationToken token)
+    {
+        if (!enforceBudget || operation % CancellationCheckStride != 0)
+        {
+            return;
+        }
+
+        token.ThrowIfCancellationRequested();
+        if (Stopwatch.GetElapsedTime(deadlineStart) >= ScaledRawStorageFixture.PreparationLimit)
+        {
+            throw new TimeoutException(DeadlineMessage);
+        }
+    }
+
+    private static void CheckCompletion(long deadlineStart, bool enforceBudget, CancellationToken token)
+    {
+        if (!enforceBudget)
+        {
+            return;
+        }
+
+        token.ThrowIfCancellationRequested();
+        if (Stopwatch.GetElapsedTime(deadlineStart) >= ScaledRawStorageFixture.PreparationLimit)
+        {
+            throw new TimeoutException(DeadlineMessage);
+        }
+    }
+}
+
+internal readonly record struct ScaledRawStorageVerificationResult(long VerifiedRecords, string Digest, long ElapsedTicks);

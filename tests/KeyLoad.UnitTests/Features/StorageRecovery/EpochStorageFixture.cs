@@ -1,0 +1,188 @@
+using System.Buffers.Binary;
+using System.Security.Cryptography;
+using KeyLoad.Storage;
+using KeyLoad.Storage.ZoneTree;
+
+namespace KeyLoad.UnitTests.Features.StorageRecovery;
+
+internal sealed class EpochStorageFixture : IDisposable
+{
+    internal const int LegacyEpoch = 5;
+    internal const int CurrentEpoch = 6;
+    internal const int LegacyCheckpointVersion = 3;
+    internal const int CurrentCheckpointVersion = 4;
+    internal const long ExpectedReadGeneration = 9;
+    internal const string JournalName = "commands.wal";
+    internal const string UpgradeStageSuffix = ".upgrade";
+    private const string RootPrefix = "keyload-data-epoch-";
+    private const string SourceName = "source";
+    private const string DestinationName = "destination";
+    private const string BackupName = "backup";
+    private const string RestoredName = "restored";
+    private const string SnapshotName = "snapshot.bin";
+    private const int FrameHeaderBytes = 52;
+    private const int FrameLengthOffset = 8;
+    private const int FramePositionOffset = 12;
+    private const int FrameChecksumOffset = 20;
+    private const int ChecksumBytes = 32;
+    private readonly string root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
+
+    internal EpochStorageFixture() => Directory.CreateDirectory(root);
+
+    internal string Source => Path.Combine(root, SourceName);
+    internal string Destination => Path.Combine(root, DestinationName);
+    internal string Backup => Path.Combine(root, BackupName);
+    internal string Restored => Path.Combine(root, RestoredName);
+    internal string Snapshot => Path.Combine(root, SnapshotName);
+    internal ZoneTreeStoreOptions SourceOptions => new(Source);
+    internal ZoneTreeStoreOptions DestinationOptions(StoreIdentity identity)
+        => new(Destination) { Incarnation = identity.Incarnation, SigningKey = identity.SigningKey };
+    internal byte[] FirstKey { get; } = [0x00, 0xFF, 0x31];
+    internal byte[] FirstValue { get; } = [0x80, 0x00, 0x7F];
+    internal byte[] SecondKey { get; } = [0x01, 0x00, 0xFE];
+    internal byte[] SecondValue { get; } = [0xFF, 0x02, 0x00, 0x81];
+
+    internal async Task<StoreIdentity> CreateNativeSourceAsync(bool checkpoint)
+    {
+        StoreIdentity identity;
+        using (var store = new ZoneTreeStore(SourceOptions))
+        {
+            store.Commit((transaction, position) =>
+            {
+                transaction.Put(FirstKey, FirstValue);
+                transaction.Put(SecondKey, SecondValue);
+                transaction.Put(KeyCodec.Encode("system", "last-applied"), NativeSerialization.Serialize(position));
+                return position;
+            });
+            store.SetDispatchPaused(true);
+            if (checkpoint)
+            {
+                store.Compact();
+            }
+            identity = store.Identity with { ReadGeneration = ExpectedReadGeneration };
+        }
+
+        identity = identity with { FormatVersion = LegacyEpoch };
+        ZoneTreeIdentityFile.Write(Path.Combine(Source, "identity.json"), identity);
+        if (checkpoint)
+        {
+            await RewriteCheckpointToLegacyAsync(Path.Combine(Source, JournalName));
+        }
+        return identity;
+    }
+
+    internal async Task<Dictionary<string, byte[]?>> CaptureAsync(string directory)
+    {
+        var result = new Dictionary<string, byte[]?>(StringComparer.Ordinal);
+        foreach (var path in Directory.EnumerateDirectories(directory, "*", SearchOption.AllDirectories))
+        {
+            result.Add(Path.GetRelativePath(directory, path), null);
+        }
+        foreach (var path in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
+        {
+            result.Add(Path.GetRelativePath(directory, path), await File.ReadAllBytesAsync(path));
+        }
+        return result;
+    }
+
+    internal async Task AssertUnchangedAsync(string directory, Dictionary<string, byte[]?> expected)
+    {
+        var actual = await CaptureAsync(directory);
+        await Assert.That(actual.Keys).IsEquivalentTo(expected.Keys);
+        foreach (var (path, bytes) in expected)
+        {
+            if (bytes is null)
+            {
+                await Assert.That(actual[path]).IsNull();
+            }
+            else
+            {
+                await Assert.That(actual[path]!).IsEquivalentTo(bytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            }
+        }
+    }
+
+    internal async Task AssertIdentityPreservedAsync(StoreIdentity expected, StoreIdentity actual)
+    {
+        await Assert.That(actual.FormatVersion).IsEqualTo(CurrentEpoch);
+        await Assert.That(actual.KeyCodecVersion).IsEqualTo(expected.KeyCodecVersion);
+        await Assert.That(actual.NodeId).IsEqualTo(expected.NodeId);
+        await Assert.That(actual.Incarnation).IsEqualTo(expected.Incarnation);
+        await Assert.That(actual.SigningKey.Span.SequenceEqual(expected.SigningKey.Span)).IsTrue();
+        await Assert.That(actual.Durability).IsEqualTo(expected.Durability);
+        await Assert.That(actual.DispatchPaused).IsEqualTo(expected.DispatchPaused);
+        await Assert.That(actual.ReadGeneration).IsEqualTo(expected.ReadGeneration);
+    }
+
+    internal static async Task RewriteCheckpointToLegacyAsync(string journalPath)
+    {
+        var bytes = await File.ReadAllBytesAsync(journalPath);
+        await File.WriteAllBytesAsync(journalPath, CreateCurrentCheckpointAsLegacy(bytes));
+    }
+
+    internal static byte[] CreateCurrentCheckpointAsLegacy(ReadOnlySpan<byte> current)
+    {
+        using var input = new MemoryStream(current.ToArray(), writable: false);
+        using var output = new MemoryStream(current.Length);
+        using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        while (input.Position < input.Length)
+        {
+            var header = new byte[FrameHeaderBytes];
+            input.ReadExactly(header);
+            var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
+            var length = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(FrameLengthOffset));
+            var position = BinaryPrimitives.ReadInt64LittleEndian(header.AsSpan(FramePositionOffset));
+            var payload = new byte[length];
+            input.ReadExactly(payload);
+            var oldMagic = LegacyMagic(magic);
+            if (magic == ZoneTreePersistenceFormat.CheckpointMagic)
+            {
+                var metadata = NativeSerialization.Deserialize<ZoneTreeCheckpointMetadata>(payload);
+                payload = NativeSerialization.Serialize(metadata with { Version = LegacyCheckpointVersion });
+            }
+            else if (magic == ZoneTreePersistenceFormat.CheckpointEndMagic)
+            {
+                var footer = NativeSerialization.Deserialize<ZoneTreeCheckpointFooter>(payload);
+                payload = NativeSerialization.Serialize(footer with
+                { Checksum = Convert.ToHexStringLower(digest.GetHashAndReset()) });
+            }
+            WriteFrame(output, oldMagic, position, payload, digest,
+                magic != ZoneTreePersistenceFormat.CheckpointEndMagic);
+        }
+        return output.ToArray();
+    }
+
+    private static ulong LegacyMagic(ulong current)
+        => current switch
+        {
+            0x34545043444C4BUL => 0x33545043444C4BUL,
+            0x34415444444C4BUL => 0x33415444444C4BUL,
+            0x34444E45444C4BUL => 0x33444E45444C4BUL,
+            _ => throw new InvalidDataException("The current fixture contains an unknown checkpoint frame.")
+        };
+
+    private static void WriteFrame(Stream output, ulong magic, long position, byte[] payload,
+        IncrementalHash digest, bool includeInDigest)
+    {
+        var header = new byte[FrameHeaderBytes];
+        BinaryPrimitives.WriteUInt64LittleEndian(header, magic);
+        BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(FrameLengthOffset), payload.Length);
+        BinaryPrimitives.WriteInt64LittleEndian(header.AsSpan(FramePositionOffset), position);
+        SHA256.HashData(payload, header.AsSpan(FrameChecksumOffset, ChecksumBytes));
+        output.Write(header);
+        output.Write(payload);
+        if (includeInDigest)
+        {
+            digest.AppendData(header);
+            digest.AppendData(payload);
+        }
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(root))
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+}

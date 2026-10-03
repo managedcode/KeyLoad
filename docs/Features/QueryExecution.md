@@ -1,5 +1,27 @@
 # QueryExecution
 
+## Event and queue SQL sources in the 104-task completion
+
+[ADR-072](../ADR/ADR-072-authorized-sql-model-views.md) freezes the following
+concrete implementation stage for KL-095 and SQL/AST/SDK equivalence. Existing
+query/full-SQL requirements remain mandatory. Implementation precedes broad
+stabilization; tests are authored with code and run after coherent self-review.
+
+| Requirement | Acceptance / positive, negative, edge and error | Automated mapping |
+|---|---|---|
+| REQ-SQLVIEW-001: SQL source syntax lowers to one normalized typed AST | AC-SQLVIEW-001: EVENTS/QUEUE_MESSAGES literals, aliases, existing predicates/order/LIMIT/EXPLAIN and JSON AST return equal rows/errors; quoted source-like collection names stay collections; wrong arguments, source enum/generation, extra statements and model UPDATE reject before execution | SqlModelViewParserTests, SqlModelViewAstTests, real SDK/MCP RF3 |
+| REQ-SQLVIEW-002: views are pure authorized reads in one cut | AC-SQLVIEW-002: current Query+EventsRead/QueueInspect are required, dead letters require their grant, SELECT leaves queue states/claims/stream head/store position unchanged, stale generation and corrupt identity/history fail closed | SqlModelViewReadTests, SqlModelViewAuthorityTests |
+| REQ-SQLVIEW-003: protected input/output and delivery authority never leak | AC-SQLVIEW-003: payload/header field use is denied before row scans, unprivileged star/nested/alias output omits protected canaries, full grants expose expected values, no SQL row or Explain includes lease tokens/owner/fingerprint; revocation immediately denies the next request | SqlModelViewAuthorityTests plus actual persisted-policy RF3 SDK/MCP |
+| REQ-SQLVIEW-004: every model operator has bounded work and output | AC-SQLVIEW-004: AllowFullScan is explicit; configured scan/raw/result/depth/token limits and cancellation/deadline reject whole requests, cursor is explicitly unsupported, empty/terminal rows and exact metadata bounds hold; a following authorized read works | SqlModelViewBudgetTests, real ZoneTree and bounded TUnit cancellation |
+| REQ-SQLVIEW-005: deployment preserves canonical RF3 execution | AC-SQLVIEW-005: each SQL/AST/SDK/MCP request uses existing request/read actors and persisted rights; real Aspire RF3 append/enqueue/read and follower restart preserve rows and leave queue delivery state unchanged | root-owned SqlModelViewRf3 parity/authority/validation tests, exact-source CI; source review for unchanged transport/native fields |
+
+Canonical slice map and task graph are in ADR-072. Root owns Abstractions and
+transport/integration/docs/status; one Luna/high worker owns the specified
+Query/Core read helpers and matching new tests. Search, movement, native sessions,
+JOIN/DML and all foreign benchmark changes remain separate stages of the same
+parent plan. Source-stage completion does not close KL-095 until its full mapped
+acceptance and qualification pass. UI N/A; no dependency or persisted migration.
+
 REQ-SQLC-006 / AC-SQLC-006A / TASK-SQLC-BETWEEN adds the bounded typed
 [SqlBetween stage](QueryExecution/SqlBetween.md) under Accepted ADR065. Existing
 scalar/null/eager-error semantics, expanded AST budgets, field authority and

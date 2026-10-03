@@ -46,6 +46,8 @@ public sealed partial class DatabaseEngine
             UpsertEdge edge => edge.Graph,
             DeleteEdge edge => edge.Graph,
             AppendSamples samples => samples.SeriesSet,
+            ExpireSamples samples => samples.SeriesSet,
+            StoreAggregateSnapshot snapshot => snapshot.StreamSet,
             PutVector vector => vector.Collection,
             QueueToGraph projection => projection.Graph,
             GraphToQueueMutation projection => projection.Queue,

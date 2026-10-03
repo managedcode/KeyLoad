@@ -1,5 +1,27 @@
 # TimeSeries
 
+## Logged expiry stage of the 104-task completion
+
+The owner directs completion of all KL tasks, with implementation before broad
+stabilization. [ADR-073](../ADR/ADR-073-logged-series-retention.md) accepts the
+following concrete KL-026 stage. Its predecessor requirements remain mandatory.
+
+| Requirement | Measurable acceptance | Tests and owner |
+|---|---|---|
+| REQ-SERIES-013: logged monotone retention is atomic and bounded | AC-SERIES-013: only SeriesManage may submit expiry; future/backwards/invalid-page cutoffs reject without changing samples/floor; one command advances the floor and deletes <= MaximumDeletes; same-cutoff continuation and command replay preserve exact cumulative counts | SampleRetentionMutationTests, real ZoneTree; root joins RF3 SDK/MCP |
+| REQ-SERIES-014: every series reader obeys the same exclusive floor | AC-SERIES-014: with physically retained older records, inclusive range, latest, half-open raw aggregates and dense windows return only timestamps >= Before; equal timestamp remains visible; Min/Max/offset/empty/request-before-floor cases preserve prior boundaries and dense anchors | SampleRetentionReadTests, all four actual APIs |
+| REQ-SERIES-015: late data cannot resurrect expired history | AC-SERIES-015: a new ID below Before rejects the entire mixed batch; a retained identical ID deduplicates without adding a record; changed content conflicts; equal/newer samples succeed; sample sequence and ID receipts survive purge/reopen | SampleRetentionAppendTests and actual-file reopen; root joins process recovery |
+| REQ-SERIES-016: native lifetime and failure contracts remain explicit | AC-SERIES-016: unknown/corrupt retention state fails closed, shared raw/result/deadline/cancel bounds hold, expiry waits for an actual read gate and leaves the following read healthy, reopen preserves floor/counts; no bucket/handle moves or ID-receipt deletion | SampleRetentionLifecycleTests, real storage gate; root recovery/RF3/format inventory |
+
+Execution graph: TASK-104-SERIES-CONTRACT (root, shared contracts/docs, complete
+before delegation) -> TASK-104-SERIES-EXPIRY (Luna/high, disjoint Core TimeSeries
+and new tests) -> TASK-104-SERIES-JOIN (root, transport/recovery/Aspire RF3,
+build/format/governance/GitHub evidence). Shared engine dispatch/config/docs have
+one root owner. Agent completion means reviewed assigned source and authored tests;
+parent KL-026 remains open until all expiry, rollup and qualification criteria pass.
+Full prior suite baseline is the retained current-source qualification in status;
+new unexecuted cases are not passing evidence. No new dependency or UI applies.
+
 Status: bounded inclusive range source present; additive latest/aggregate/window
 source joined under ADR-052, with its delivered-SHA CI and remaining gates pending.
 [ADR-035](../ADR/ADR-035-memory-performance.md) maps REQ-MP-002 to AC-MP-005/012.

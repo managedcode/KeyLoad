@@ -5,6 +5,10 @@ internal static class SiteVendorTokens
     public const string FeatureDirectory = SiteAssetTokens.FeatureRelativePath;
     public const string FeatureOutputDirectory = "Features/BenchmarkComparisons";
     public const string BuildEntry = SiteAssetTokens.BuilderRelativePath;
+    public const string AggregateDirectory = "isolated-capture";
+    public const string AggregateScriptDirectory = "scripts/Features/BenchmarkComparisons";
+    public static readonly string[] RootAssets =
+    ["favicon.ico", "favicon-32x32.png", "favicon-96x96.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png"];
     public const string ManifestPackage = "package";
     public const string ManifestVersion = "version";
     public const string ManifestLicense = "license";
@@ -29,7 +33,6 @@ internal static class SiteVendorTokens
     public const string ZlibVersion = "zlibVersion";
     public const string Vendor = "vendor";
     public const string Output = "output";
-    public const string Profiles = "profiles";
     public const string RecordedGzipBytesProperty = "recordedGzipBytes";
     public const string RuntimeGzipBytes = "runtimeGzipBytes";
     public const string JsonSha256 = SiteTokens.Sha256;

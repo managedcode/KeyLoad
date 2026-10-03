@@ -1,5 +1,9 @@
 # Каталог архітектурних рішень
 
+[ADR-075: bounded aggregate snapshots and pure replay](ADR-075-bounded-aggregate-snapshot-replay.md)
+фіксує KL-085: latest-slot CAS, complete same-cut tail, worker-only authority,
+exact versions і pure SDK upcasting. Implementation/runtime qualification pending.
+
 [ADR-067: One composable database for AI agents](ADR-067-composable-agent-database.md)
 фіксує головну ідею: всі моделі співіснують, посилаються одна на одну і
 поєднуються через SQL в одному bounded запиті. Перший executable stage читає
@@ -131,7 +135,14 @@ Shared schema is registered; bank, producer joins, private native capture and
 measured overhead remain open. Tests owns runtime qualification; Benchmarks
 owns matched performance comparisons under the separate ADR-062 workflow map.
 
-[ADR-066](ADR-066-garnet-storage-evaluation.md) accepts isolated public raw
-Tsavorite versus ZoneTree cache diagnostics before full Garnet service/fault
-experiments. It does not change product storage or establish a performance
-winner; source and exact-SHA native qualification are pending.
+[ADR-071](ADR-071-canonical-zonetree-providers.md) records selected ZoneTree
+providers and discarded candidate cleanup. ADR-072/073/074 define bounded SQL
+model views, logged series retention and the unified Aspire test entry.
+
+[ADR-076](ADR-076-current-cohort-publication.md) accepts retiring the obsolete
+live collector and profile publisher while preserving complete authenticated
+current-cohort, source, coverage, browser and freshness gates. Qualification pending.
+
+[ADR-077](ADR-077-offline-native-data-epoch.md) accepts an explicit preserving
+native5-to-separate-native6 offline upgrade, checkpoint4 and incompatible signed
+peer fences. Homogeneous rollout, real prior-binary proof and qualification pending.

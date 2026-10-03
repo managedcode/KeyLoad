@@ -7599,5 +7599,1112 @@
       "REQ-STORAGE-014"
     ],
     "qualifiedPartialReceipt": "docs/implementation/ai-sql-qualification-37070004864.json"
+  },
+  "ownerCompletionWave20261003": {
+    "date": "2026-10-03",
+    "scope": "owner_completion_wave_for_104_tasks",
+    "status": "in_progress",
+    "runtimeQualified": false,
+    "completedKlTasks": 0,
+    "requirementMappings": [
+      {
+        "id": "REQ-ZT-001",
+        "feature": "docs/Features/BenchmarkComparisons.md",
+        "sourceLine": 10,
+        "acceptanceIds": [
+          "AC-ZT-001"
+        ],
+        "requirementText": "REQ-ZT-001: active storage experiments use the selected canonical engine",
+        "acceptanceText": "AC-ZT-001: no Garnet package or Tsavorite implementation/dispatch remains; real ZoneTree raw/scaled correctness, full loaded-record counts, bounds and cleanup still hold; removed labels fail explicitly",
+        "testOrReviewMapping": "existing RawStorage and ScaledRawStorage TUnit cases, dependency/source inspection",
+        "documentationTask": "TASK-ZT-CLEANUP",
+        "implementationTask": "TASK-ZT-CLEANUP",
+        "adrs": [
+          "docs/ADR/ADR-071-canonical-zonetree-providers.md"
+        ],
+        "backlog": [
+          "KL-028",
+          "KL-040"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-ZT-002",
+        "feature": "docs/Features/BenchmarkComparisons.md",
+        "sourceLine": 11,
+        "acceptanceIds": [
+          "AC-ZT-002"
+        ],
+        "requirementText": "REQ-ZT-002: delete discarded plans and unused pipeline paths immediately",
+        "acceptanceText": "AC-ZT-002: active docs have no dead candidate-plan links; Benchmarks has no raw/internal-codec job or diagnostic-only bypass, and preserves every native comparison/image/aggregate/site gate",
+        "testOrReviewMapping": "workflow contract TUnit cases, governance and root diff review",
+        "documentationTask": "TASK-ZT-CLEANUP",
+        "implementationTask": "TASK-ZT-CLEANUP",
+        "adrs": [
+          "docs/ADR/ADR-071-canonical-zonetree-providers.md"
+        ],
+        "backlog": [
+          "KL-028",
+          "KL-040"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-ZT-003",
+        "feature": "docs/Features/Search.md",
+        "sourceLine": 16,
+        "acceptanceIds": [
+          "AC-ZT-003"
+        ],
+        "requirementText": "REQ-ZT-003: actual selected full-text provider is a bounded derived projection",
+        "acceptanceText": "AC-ZT-003: centrally pinned published/source-bound ZoneTree.FullTextSearch, authorized exact token/identity/rank oracle, nonpartial cancellation and real replay/rebuild/swap/RF3 tests pass; stale/corrupt generations cannot return success",
+        "testOrReviewMapping": "TASK-ZT-FTS-CONTRACT then Search provider tests, process recovery and SDK/official MCP RF3; pending",
+        "documentationTask": "TASK-ZT-FTS-CONTRACT",
+        "implementationTask": "TASK-ZT-FTS-CONTRACT",
+        "adrs": [
+          "docs/ADR/ADR-071-canonical-zonetree-providers.md"
+        ],
+        "backlog": [
+          "KL-028"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-SQLVIEW-001",
+        "feature": "docs/Features/QueryExecution.md",
+        "sourceLine": 12,
+        "acceptanceIds": [
+          "AC-SQLVIEW-001"
+        ],
+        "requirementText": "REQ-SQLVIEW-001: SQL source syntax lowers to one normalized typed AST",
+        "acceptanceText": "AC-SQLVIEW-001: EVENTS/QUEUE_MESSAGES literals, aliases, existing predicates/order/LIMIT/EXPLAIN and JSON AST return equal rows/errors; quoted source-like collection names stay collections; wrong arguments, source enum/generation, extra statements and model UPDATE reject before execution",
+        "testOrReviewMapping": "SqlModelViewParserTests, SqlModelViewAstTests, real SDK/MCP RF3",
+        "documentationTask": "TASK-SQLVIEW-SOURCE",
+        "implementationTask": "TASK-SQLVIEW-SOURCE",
+        "adrs": [
+          "docs/ADR/ADR-072-authorized-sql-model-views.md"
+        ],
+        "backlog": [
+          "KL-095"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-SQLVIEW-002",
+        "feature": "docs/Features/QueryExecution.md",
+        "sourceLine": 13,
+        "acceptanceIds": [
+          "AC-SQLVIEW-002"
+        ],
+        "requirementText": "REQ-SQLVIEW-002: views are pure authorized reads in one cut",
+        "acceptanceText": "AC-SQLVIEW-002: current Query+EventsRead/QueueInspect are required, dead letters require their grant, SELECT leaves queue states/claims/stream head/store position unchanged, stale generation and corrupt identity/history fail closed",
+        "testOrReviewMapping": "SqlModelViewReadTests, SqlModelViewAuthorityTests",
+        "documentationTask": "TASK-SQLVIEW-SOURCE",
+        "implementationTask": "TASK-SQLVIEW-SOURCE",
+        "adrs": [
+          "docs/ADR/ADR-072-authorized-sql-model-views.md"
+        ],
+        "backlog": [
+          "KL-095"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-SQLVIEW-003",
+        "feature": "docs/Features/QueryExecution.md",
+        "sourceLine": 14,
+        "acceptanceIds": [
+          "AC-SQLVIEW-003"
+        ],
+        "requirementText": "REQ-SQLVIEW-003: protected input/output and delivery authority never leak",
+        "acceptanceText": "AC-SQLVIEW-003: payload/header field use is denied before row scans, unprivileged star/nested/alias output omits protected canaries, full grants expose expected values, no SQL row or Explain includes lease tokens/owner/fingerprint; revocation immediately denies the next request",
+        "testOrReviewMapping": "SqlModelViewAuthorityTests plus actual persisted-policy RF3 SDK/MCP",
+        "documentationTask": "TASK-SQLVIEW-SOURCE",
+        "implementationTask": "TASK-SQLVIEW-SOURCE",
+        "adrs": [
+          "docs/ADR/ADR-072-authorized-sql-model-views.md"
+        ],
+        "backlog": [
+          "KL-095"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-SQLVIEW-004",
+        "feature": "docs/Features/QueryExecution.md",
+        "sourceLine": 15,
+        "acceptanceIds": [
+          "AC-SQLVIEW-004"
+        ],
+        "requirementText": "REQ-SQLVIEW-004: every model operator has bounded work and output",
+        "acceptanceText": "AC-SQLVIEW-004: AllowFullScan is explicit; configured scan/raw/result/depth/token limits and cancellation/deadline reject whole requests, cursor is explicitly unsupported, empty/terminal rows and exact metadata bounds hold; a following authorized read works",
+        "testOrReviewMapping": "SqlModelViewBudgetTests, real ZoneTree and bounded TUnit cancellation",
+        "documentationTask": "TASK-SQLVIEW-SOURCE",
+        "implementationTask": "TASK-SQLVIEW-SOURCE",
+        "adrs": [
+          "docs/ADR/ADR-072-authorized-sql-model-views.md"
+        ],
+        "backlog": [
+          "KL-095"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-SQLVIEW-005",
+        "feature": "docs/Features/QueryExecution.md",
+        "sourceLine": 16,
+        "acceptanceIds": [
+          "AC-SQLVIEW-005"
+        ],
+        "requirementText": "REQ-SQLVIEW-005: deployment preserves canonical RF3 execution",
+        "acceptanceText": "AC-SQLVIEW-005: each SQL/AST/SDK/MCP request uses existing request/read actors and persisted rights; real Aspire RF3 append/enqueue/read and follower restart preserve rows and leave queue delivery state unchanged",
+        "testOrReviewMapping": "root-owned SqlModelViewRf3 parity/authority/validation tests, exact-source CI; source review for unchanged transport/native fields",
+        "documentationTask": "TASK-SQLVIEW-SOURCE",
+        "implementationTask": "TASK-SQLVIEW-SOURCE",
+        "adrs": [
+          "docs/ADR/ADR-072-authorized-sql-model-views.md"
+        ],
+        "backlog": [
+          "KL-095"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-SERIES-013",
+        "feature": "docs/Features/TimeSeries.md",
+        "sourceLine": 11,
+        "acceptanceIds": [
+          "AC-SERIES-013"
+        ],
+        "requirementText": "REQ-SERIES-013: logged monotone retention is atomic and bounded",
+        "acceptanceText": "AC-SERIES-013: only SeriesManage may submit expiry; future/backwards/invalid-page cutoffs reject without changing samples/floor; one command advances the floor and deletes <= MaximumDeletes; same-cutoff continuation and command replay preserve exact cumulative counts",
+        "testOrReviewMapping": "SampleRetentionMutationTests, real ZoneTree; root joins RF3 SDK/MCP",
+        "documentationTask": "TASK-SERIES-RETENTION-SOURCE",
+        "implementationTask": "TASK-SERIES-RETENTION-SOURCE",
+        "adrs": [
+          "docs/ADR/ADR-073-logged-series-retention.md"
+        ],
+        "backlog": [
+          "KL-026"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-SERIES-014",
+        "feature": "docs/Features/TimeSeries.md",
+        "sourceLine": 12,
+        "acceptanceIds": [
+          "AC-SERIES-014"
+        ],
+        "requirementText": "REQ-SERIES-014: every series reader obeys the same exclusive floor",
+        "acceptanceText": "AC-SERIES-014: with physically retained older records, inclusive range, latest, half-open raw aggregates and dense windows return only timestamps >= Before; equal timestamp remains visible; Min/Max/offset/empty/request-before-floor cases preserve prior boundaries and dense anchors",
+        "testOrReviewMapping": "SampleRetentionReadTests, all four actual APIs",
+        "documentationTask": "TASK-SERIES-RETENTION-SOURCE",
+        "implementationTask": "TASK-SERIES-RETENTION-SOURCE",
+        "adrs": [
+          "docs/ADR/ADR-073-logged-series-retention.md"
+        ],
+        "backlog": [
+          "KL-026"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-SERIES-015",
+        "feature": "docs/Features/TimeSeries.md",
+        "sourceLine": 13,
+        "acceptanceIds": [
+          "AC-SERIES-015"
+        ],
+        "requirementText": "REQ-SERIES-015: late data cannot resurrect expired history",
+        "acceptanceText": "AC-SERIES-015: a new ID below Before rejects the entire mixed batch; a retained identical ID deduplicates without adding a record; changed content conflicts; equal/newer samples succeed; sample sequence and ID receipts survive purge/reopen",
+        "testOrReviewMapping": "SampleRetentionAppendTests and actual-file reopen; root joins process recovery",
+        "documentationTask": "TASK-SERIES-RETENTION-SOURCE",
+        "implementationTask": "TASK-SERIES-RETENTION-SOURCE",
+        "adrs": [
+          "docs/ADR/ADR-073-logged-series-retention.md"
+        ],
+        "backlog": [
+          "KL-026"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-SERIES-016",
+        "feature": "docs/Features/TimeSeries.md",
+        "sourceLine": 14,
+        "acceptanceIds": [
+          "AC-SERIES-016"
+        ],
+        "requirementText": "REQ-SERIES-016: native lifetime and failure contracts remain explicit",
+        "acceptanceText": "AC-SERIES-016: unknown/corrupt retention state fails closed, shared raw/result/deadline/cancel bounds hold, expiry waits for an actual read gate and leaves the following read healthy, reopen preserves floor/counts; no bucket/handle moves or ID-receipt deletion",
+        "testOrReviewMapping": "SampleRetentionLifecycleTests, real storage gate; root recovery/RF3/format inventory",
+        "documentationTask": "TASK-SERIES-RETENTION-SOURCE",
+        "implementationTask": "TASK-SERIES-RETENTION-SOURCE",
+        "adrs": [
+          "docs/ADR/ADR-073-logged-series-retention.md"
+        ],
+        "backlog": [
+          "KL-026"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-TEST-009",
+        "feature": "docs/Features/TestInfrastructure.md",
+        "sourceLine": 10,
+        "acceptanceIds": [
+          "AC-TEST-009"
+        ],
+        "requirementText": "REQ-TEST-009: Aspire owns suite execution",
+        "acceptanceText": "AC-TEST-009: each closed suite creates one native executable with correct TUnit project/arguments/results and optional original TRX/Cobertura settings; scalar disablement applies to its runner; unknown/explicit-empty suites, invalid bounded paths, incomplete coverage settings and mixed benchmark modes reject before resources; only comparison may pass its existing native target to the child without composing outer database resources",
+        "testOrReviewMapping": "AspireTestEntryModelTests using the actual Aspire builder; original entry-run reports",
+        "documentationTask": "TASK-TEST-ENTRY",
+        "implementationTask": "TASK-TEST-ENTRY",
+        "adrs": [
+          "docs/ADR/ADR-074-aspire-owned-test-entry.md"
+        ],
+        "backlog": [
+          "KL-080"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-TEST-010",
+        "feature": "docs/Features/TestInfrastructure.md",
+        "sourceLine": 11,
+        "acceptanceIds": [
+          "AC-TEST-010"
+        ],
+        "requirementText": "REQ-TEST-010: test entry preserves outcomes and bounded lifetime",
+        "acceptanceText": "AC-TEST-010: native nonzero/failed-start/missing-exit/cancel/timeout cannot count as success; stop/disposal always run; every existing CI suite and artifact remains",
+        "testOrReviewMapping": "root source lifetime review and actual Linux CI native runner exit/status evidence",
+        "documentationTask": "TASK-TEST-ENTRY",
+        "implementationTask": "TASK-TEST-ENTRY",
+        "adrs": [
+          "docs/ADR/ADR-074-aspire-owned-test-entry.md"
+        ],
+        "backlog": [
+          "KL-080"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-TEST-011",
+        "feature": "docs/Features/TestInfrastructure.md",
+        "sourceLine": 12,
+        "acceptanceIds": [
+          "AC-TEST-011"
+        ],
+        "requirementText": "REQ-TEST-011: RF3 is owned once and startup failure releases resources",
+        "acceptanceText": "AC-TEST-011: outer test model contains no idle duplicate nodes; tested child AppHost owns three Docker nodes and discovered SDK/MCP endpoints; every partial start is disposed before deleting only its owned directory",
+        "testOrReviewMapping": "real Aspire model tests, ClusterFixture source lifetime review, actual Docker RF3/recovery artifacts",
+        "documentationTask": "TASK-TEST-ENTRY",
+        "implementationTask": "TASK-TEST-ENTRY",
+        "adrs": [
+          "docs/ADR/ADR-074-aspire-owned-test-entry.md"
+        ],
+        "backlog": [
+          "KL-080"
+        ],
+        "evidenceState": "source_contract_and_test_mapping_runtime_unqualified"
+      },
+      {
+        "id": "REQ-EVENT-007",
+        "feature": "docs/Features/EventStreams.md",
+        "sourceLine": 39,
+        "acceptanceIds": [
+          "AC-EVENT-007"
+        ],
+        "requirementText": "REQ-EVENT-007: compatible snapshot and complete same-cut tail reproduce an aggregate",
+        "acceptanceText": "AC-EVENT-007: reference equals snapshot+tail reduction; exact reducer/state schema enforced; explicit full replay requires complete history; wrong generation, erased/missing history and invalid identity fail explicitly",
+        "testOrReviewMapping": "ADR-075; AggregateReplay real ZoneTree, pure worker, process recovery and actual RF3 SDK/MCP tests; runtime pending",
+        "documentationTask": "TASK-EVENT-REPLAY-CONTRACT",
+        "implementationTask": "TASK-EVENT-REPLAY-STORE",
+        "adrs": [
+          "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md"
+        ],
+        "backlog": [
+          "KL-085"
+        ],
+        "evidenceState": "accepted_contract_source_in_progress_runtime_unqualified"
+      },
+      {
+        "id": "REQ-EVENT-008",
+        "feature": "docs/Features/EventStreams.md",
+        "sourceLine": 40,
+        "acceptanceIds": [
+          "AC-EVENT-008"
+        ],
+        "requirementText": "REQ-EVENT-008: one bounded snapshot slot has atomic CAS and stable retry",
+        "acceptanceText": "AC-EVENT-008: absent-slot version zero, exact prior version, nondecreasing source revision and tail/floor bounds hold; retry never advances twice; unknown format/checksum corruption fail closed; reopen preserves exact state",
+        "testOrReviewMapping": "ADR-075; AggregateSnapshot CAS/native/reopen/recovery tests; runtime pending",
+        "documentationTask": "TASK-EVENT-REPLAY-CONTRACT",
+        "implementationTask": "TASK-EVENT-REPLAY-STORE",
+        "adrs": [
+          "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md"
+        ],
+        "backlog": [
+          "KL-085"
+        ],
+        "evidenceState": "accepted_contract_source_in_progress_runtime_unqualified"
+      },
+      {
+        "id": "REQ-EVENT-009",
+        "feature": "docs/Features/EventStreams.md",
+        "sourceLine": 41,
+        "acceptanceIds": [
+          "AC-EVENT-009"
+        ],
+        "requirementText": "REQ-EVENT-009: aggregate state requires fully authorized workers",
+        "acceptanceText": "AC-EVENT-009: persisted EventsRead plus EventsReplay or EventsSnapshotsManage and every payload/header raw-read/raw-use grant are checked before bodies; tenant/resource denial and revocation disclose no protected state/events",
+        "testOrReviewMapping": "ADR-075; persisted-policy real-store and official-client RF3 tests; runtime pending",
+        "documentationTask": "TASK-EVENT-REPLAY-CONTRACT",
+        "implementationTask": "TASK-EVENT-REPLAY-STORE",
+        "adrs": [
+          "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md"
+        ],
+        "backlog": [
+          "KL-085"
+        ],
+        "evidenceState": "accepted_contract_source_in_progress_runtime_unqualified"
+      },
+      {
+        "id": "REQ-EVENT-010",
+        "feature": "docs/Features/EventStreams.md",
+        "sourceLine": 42,
+        "acceptanceIds": [
+          "AC-EVENT-010"
+        ],
+        "requirementText": "REQ-EVENT-010: replay is bounded and produces no external effects",
+        "acceptanceText": "AC-EVENT-010: complete tail fits MaximumEvents and shared raw/result/deadline/cancel bounds or fails whole; one cut and exact schema feed deterministic versioned worker upcasting; missing paths fail; no append/enqueue/ack/subscription redrive occurs",
+        "testOrReviewMapping": "ADR-075; AggregateReplay bounds/source invariance and pure SDK worker tests; runtime pending",
+        "documentationTask": "TASK-EVENT-REPLAY-CONTRACT",
+        "implementationTask": "TASK-EVENT-REPLAY-STORE",
+        "adrs": [
+          "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md"
+        ],
+        "backlog": [
+          "KL-085"
+        ],
+        "evidenceState": "accepted_contract_source_in_progress_runtime_unqualified"
+      },
+      {
+        "id": "REQ-BC-CURRENT-001",
+        "feature": "docs/Features/BenchmarkComparisons.md",
+        "sourceLine": 13,
+        "acceptanceIds": [
+          "AC-BC-CURRENT-001"
+        ],
+        "requirementText": "REQ-BC-CURRENT-001: the complete current native cohort is the sole live producer",
+        "acceptanceText": "AC-BC-CURRENT-001: exact current Benchmarks run/attempt/source, all 270 required cells and 277 original inputs pass existing correctness/fairness/provenance checks; missing, expired, mixed, skipped or failed inputs reject",
+        "testOrReviewMapping": "SiteIsolatedGitHub selection/proof/archive/input/authority tests; actual aggregate and original GitHub archives",
+        "documentationTask": "TASK-SITE-CURRENT-CONTRACT",
+        "implementationTask": "TASK-SITE-CURRENT-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-076-current-cohort-publication.md"
+        ],
+        "backlog": [
+          "KL-080"
+        ],
+        "evidenceState": "source_in_progress_runtime_unqualified"
+      },
+      {
+        "id": "REQ-BC-CURRENT-002",
+        "feature": "docs/Features/BenchmarkComparisons.md",
+        "sourceLine": 14,
+        "acceptanceIds": [
+          "AC-BC-CURRENT-002"
+        ],
+        "requirementText": "REQ-BC-CURRENT-002: retire superseded collector, archives and current-profile assets together",
+        "acceptanceText": "AC-BC-CURRENT-002: no active comparison-smoke/comparison-suite collector, twelve-file precondition or three-profile current renderer remains; replacement retains all applicable safety, accessibility, vendor, arithmetic and browser criteria",
+        "testOrReviewMapping": "scoped dependency inventory, workflow source tests and standalone isolated site/browser tests",
+        "documentationTask": "TASK-SITE-CURRENT-CONTRACT",
+        "implementationTask": "TASK-SITE-CURRENT-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-076-current-cohort-publication.md"
+        ],
+        "backlog": [
+          "KL-080"
+        ],
+        "evidenceState": "source_in_progress_runtime_unqualified"
+      },
+      {
+        "id": "REQ-BC-CURRENT-003",
+        "feature": "docs/Features/BenchmarkComparisons.md",
+        "sourceLine": 15,
+        "acceptanceIds": [
+          "AC-BC-CURRENT-003"
+        ],
+        "requirementText": "REQ-BC-CURRENT-003: preserve unchanged qualified authority around final build",
+        "acceptanceText": "AC-BC-CURRENT-003: bounded immutable receipt, original archive and all 277 input hashes match before/after builder; emitted aggregate bytes match; every remaining native coverage/no-skip/source-closure gate passes",
+        "testOrReviewMapping": "SiteIsolatedGitHub integrity/build/coverage tests, original TRX/Cobertura/Node/browser artifacts and schema-v2 publication receipt",
+        "documentationTask": "TASK-SITE-CURRENT-CONTRACT",
+        "implementationTask": "TASK-SITE-CURRENT-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-076-current-cohort-publication.md"
+        ],
+        "backlog": [
+          "KL-080"
+        ],
+        "evidenceState": "source_in_progress_runtime_unqualified"
+      },
+      {
+        "id": "REQ-BC-CURRENT-004",
+        "feature": "docs/Features/BenchmarkComparisons.md",
+        "sourceLine": 16,
+        "acceptanceIds": [
+          "AC-BC-CURRENT-004"
+        ],
+        "requirementText": "REQ-BC-CURRENT-004: deploy only fresh exact-source evidence",
+        "acceptanceText": "AC-BC-CURRENT-004: current main and exact original producer tuple match immediately before needs-gated least-privilege Pages delivery; altered source/attempt/artifact rejects and actual provider receipt records outcome",
+        "testOrReviewMapping": "SiteIsolatedGitHubFreshnessTests, workflow source tests, genuine same-run qualification and Pages provider receipt",
+        "documentationTask": "TASK-SITE-CURRENT-CONTRACT",
+        "implementationTask": "TASK-SITE-CURRENT-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-076-current-cohort-publication.md"
+        ],
+        "backlog": [
+          "KL-080"
+        ],
+        "evidenceState": "source_in_progress_runtime_unqualified"
+      },
+      {
+        "id": "REQ-STORAGE-021",
+        "feature": "docs/Features/StorageRecovery.md",
+        "sourceLine": 12,
+        "acceptanceIds": [
+          "AC-EPOCH-001"
+        ],
+        "requirementText": "Current store and image interpretation is fenced",
+        "acceptanceText": "|REQ-STORAGE-021 current interpretation is fenced|AC-EPOCH-001: ordinary current open rejects native5/unknown/corrupt identity before journal/tree mutation; exact old executable rejects identity6 and checkpoint4; all compared files remain unchanged|",
+        "testOrReviewMapping": "EpochUpgradeFormatTests and exact prior binary oracle",
+        "documentationTask": "TASK-EPOCH-CONTRACT",
+        "implementationTask": "TASK-EPOCH-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "evidenceState": "accepted_contract_source_pending_runtime_unqualified"
+      },
+      {
+        "id": "REQ-STORAGE-022",
+        "feature": "docs/Features/StorageRecovery.md",
+        "sourceLine": 13,
+        "acceptanceIds": [
+          "AC-EPOCH-002",
+          "AC-EPOCH-003"
+        ],
+        "requirementText": "Offline copy preserves exact authority/data and recoverable publication",
+        "acceptanceText": "|REQ-STORAGE-022 offline conversion preserves authority and data|AC-EPOCH-002: real stopped native5 WAL4/checkpoint3 conversion copies exact raw keys/values, identity authority, positions and pause/generation into a verified separate6 directory; original bytes stay identical; invalid/torn/corrupt source fails without publication|; |REQ-STORAGE-022 recoverable publication|AC-EPOCH-003: real process kills at five appended upgrade stages leave original intact and target absent or fully current; retry rebuilds only matching owned stage or returns matching published target without erasing later writes|",
+        "testOrReviewMapping": "EpochUpgradeCopyTests, EpochUpgradeSourceRejectionTests, EpochUpgradeProcessRecoveryTests",
+        "documentationTask": "TASK-EPOCH-CONTRACT",
+        "implementationTask": "TASK-EPOCH-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "evidenceState": "accepted_contract_source_pending_runtime_unqualified"
+      },
+      {
+        "id": "REQ-STORAGE-023",
+        "feature": "docs/Features/StorageRecovery.md",
+        "sourceLine": 15,
+        "acceptanceIds": [
+          "AC-EPOCH-004"
+        ],
+        "requirementText": "Compaction and backup/snapshot/restore never downgrade",
+        "acceptanceText": "|REQ-STORAGE-023 no format downgrade through images|AC-EPOCH-004: current Compact/CreateSnapshot/InstallSnapshot/native backup/restore retain6/checkpoint4; checkpoint3 fails ordinary install, unknown version fails closed and original backup stays unchanged|",
+        "testOrReviewMapping": "EpochUpgradeImageTests and actual Aspire RF3 upgrade/snapshot restore",
+        "documentationTask": "TASK-EPOCH-CONTRACT",
+        "implementationTask": "TASK-EPOCH-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "evidenceState": "accepted_contract_source_pending_runtime_unqualified"
+      },
+      {
+        "id": "REQ-STORAGE-024",
+        "feature": "docs/Features/StorageRecovery.md",
+        "sourceLine": 16,
+        "acceptanceIds": [
+          "AC-EPOCH-005"
+        ],
+        "requirementText": "Incompatible signed peer work fails before dispatch",
+        "acceptanceText": "|REQ-STORAGE-024 signed incompatible peers fail closed|AC-EPOCH-005: genuine stale-purpose signed vote/append/snapshot/request/discovery/reply envelopes fail before replay admission or dispatch; valid current signatures pass with permanent aliases/Ids and persisted replica2 unchanged|",
+        "testOrReviewMapping": "EpochPeerSignatureTests, EpochGrainRequestTests, EpochDiscoverySignatureTests",
+        "documentationTask": "TASK-EPOCH-CONTRACT",
+        "implementationTask": "TASK-EPOCH-JOIN",
+        "adrs": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "evidenceState": "accepted_contract_source_pending_runtime_unqualified"
+      }
+    ],
+    "decisions": [
+      "docs/ADR/ADR-071-canonical-zonetree-providers.md",
+      "docs/ADR/ADR-072-authorized-sql-model-views.md",
+      "docs/ADR/ADR-073-logged-series-retention.md",
+      "docs/ADR/ADR-074-aspire-owned-test-entry.md",
+      "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md",
+      "docs/ADR/ADR-076-current-cohort-publication.md",
+      "docs/ADR/ADR-077-offline-native-data-epoch.md"
+    ],
+    "taskGraph": [
+      {
+        "id": "TASK-ZT-CLEANUP",
+        "owner": "root_with_gpt_6_luna_bounded_workers",
+        "permissions": "authorized_disjoint_source_implementation_and_real_regressions",
+        "contracts": [
+          "docs/ADR/ADR-071-canonical-zonetree-providers.md"
+        ],
+        "backlog": [
+          "KL-028",
+          "KL-040"
+        ],
+        "startCondition": "accepted_owner_implementation_contract",
+        "artifacts": [
+          "source",
+          "real_TUnit_tests",
+          "traceability"
+        ],
+        "verification": [
+          "Release solution build",
+          "formatter",
+          "governance",
+          "Aspire TUnit",
+          "process recovery",
+          "Linux exact_source RF3 SDK and official MCP"
+        ],
+        "state": "source_implemented_runtime_unqualified",
+        "joinCondition": "root_diff_review_and_original_exact_source_results"
+      },
+      {
+        "id": "TASK-ZT-FTS-CONTRACT",
+        "owner": "root_with_gpt_6_luna_bounded_workers",
+        "permissions": "authorized_disjoint_source_implementation_and_real_regressions",
+        "contracts": [
+          "docs/ADR/ADR-071-canonical-zonetree-providers.md"
+        ],
+        "backlog": [
+          "KL-028"
+        ],
+        "startCondition": "accepted_owner_implementation_contract",
+        "artifacts": [
+          "source",
+          "real_TUnit_tests",
+          "traceability"
+        ],
+        "verification": [
+          "Release solution build",
+          "formatter",
+          "governance",
+          "Aspire TUnit",
+          "process recovery",
+          "Linux exact_source RF3 SDK and official MCP"
+        ],
+        "state": "package_source_verified_provider_contract_pending",
+        "joinCondition": "root_diff_review_and_original_exact_source_results"
+      },
+      {
+        "id": "TASK-SQLVIEW-SOURCE",
+        "owner": "root_with_gpt_6_luna_bounded_workers",
+        "permissions": "authorized_disjoint_source_implementation_and_real_regressions",
+        "contracts": [
+          "docs/ADR/ADR-072-authorized-sql-model-views.md"
+        ],
+        "backlog": [
+          "KL-095"
+        ],
+        "startCondition": "accepted_owner_implementation_contract",
+        "artifacts": [
+          "source",
+          "real_TUnit_tests",
+          "traceability"
+        ],
+        "verification": [
+          "Release solution build",
+          "formatter",
+          "governance",
+          "Aspire TUnit",
+          "process recovery",
+          "Linux exact_source RF3 SDK and official MCP"
+        ],
+        "state": "source_implemented_runtime_unqualified",
+        "joinCondition": "root_diff_review_and_original_exact_source_results"
+      },
+      {
+        "id": "TASK-SERIES-RETENTION-SOURCE",
+        "owner": "root_with_gpt_6_luna_bounded_workers",
+        "permissions": "authorized_disjoint_source_implementation_and_real_regressions",
+        "contracts": [
+          "docs/ADR/ADR-073-logged-series-retention.md"
+        ],
+        "backlog": [
+          "KL-026"
+        ],
+        "startCondition": "accepted_owner_implementation_contract",
+        "artifacts": [
+          "source",
+          "real_TUnit_tests",
+          "traceability"
+        ],
+        "verification": [
+          "Release solution build",
+          "formatter",
+          "governance",
+          "Aspire TUnit",
+          "process recovery",
+          "Linux exact_source RF3 SDK and official MCP"
+        ],
+        "state": "source_implemented_runtime_unqualified",
+        "joinCondition": "root_diff_review_and_original_exact_source_results"
+      },
+      {
+        "id": "TASK-TEST-ENTRY",
+        "owner": "root_with_gpt_6_luna_bounded_workers",
+        "permissions": "authorized_disjoint_source_implementation_and_real_regressions",
+        "contracts": [
+          "docs/ADR/ADR-074-aspire-owned-test-entry.md"
+        ],
+        "backlog": [
+          "KL-080"
+        ],
+        "startCondition": "accepted_owner_implementation_contract",
+        "artifacts": [
+          "source",
+          "real_TUnit_tests",
+          "traceability"
+        ],
+        "verification": [
+          "Release solution build",
+          "formatter",
+          "governance",
+          "Aspire TUnit",
+          "process recovery",
+          "Linux exact_source RF3 SDK and official MCP"
+        ],
+        "state": "source_implemented_runtime_unqualified",
+        "joinCondition": "root_diff_review_and_original_exact_source_results"
+      },
+      {
+        "id": "TASK-EVENT-REPLAY-STORE",
+        "owner": "query_wave_gpt_6_luna_high",
+        "permissions": "new_Core_and_UnitTests_EventStreams_files_only",
+        "contracts": [
+          "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md"
+        ],
+        "backlog": [
+          "KL-085"
+        ],
+        "startCondition": "root_approved_contract_and_native_public_DTOs",
+        "dependencies": [
+          "TASK-EVENT-REPLAY-CONTRACT"
+        ],
+        "artifacts": [
+          "canonical_snapshot_CAS",
+          "same_cut_complete_replay",
+          "real_ZoneTree_regressions"
+        ],
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "Aspire_TUnit",
+          "Linux_recovery_RF3_SDK_MCP"
+        ],
+        "state": "source_authored_root_review_runtime_unqualified",
+        "joinCondition": "root_diff_review_transport_and_pure_worker_then_original_qualification"
+      },
+      {
+        "id": "TASK-SITE-CURRENT-TOOLS",
+        "owner": "cluster_wave_gpt_6_luna_high",
+        "permissions": "retired_collector_and_dedicated_site_test_family_plus_explicit_coverage_joins",
+        "dependencies": [
+          "TASK-SITE-CURRENT-CONTRACT"
+        ],
+        "artifacts": [
+          "obsolete_live_collector_retirement",
+          "current_original_archive_gate",
+          "unchanged_coverage_thresholds"
+        ],
+        "state": "source_authored_root_join_pending",
+        "contracts": [
+          "docs/ADR/ADR-076-current-cohort-publication.md"
+        ],
+        "backlog": [
+          "KL-080"
+        ],
+        "startCondition": "root_approved_frozen_contract_and_exact_scope",
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "Aspire_TUnit",
+          "genuine_exact_source_Linux_qualification"
+        ],
+        "joinCondition": "root_diff_review_and_original_complete_gates"
+      },
+      {
+        "id": "TASK-SITE-CURRENT-ASSETS",
+        "owner": "cluster_wave_gpt_6_luna_high",
+        "permissions": "ADR076_frozen_asset_and_test_scope",
+        "dependencies": [
+          "TASK-SITE-CURRENT-CONTRACT",
+          "TASK-SITE-CURRENT-TOOLS"
+        ],
+        "artifacts": [
+          "standalone_current_cohort_builder",
+          "visible_primary_current_controls",
+          "preserved_vendor_scene_browser_metadata_safety_tests"
+        ],
+        "state": "source_in_progress",
+        "contracts": [
+          "docs/ADR/ADR-076-current-cohort-publication.md"
+        ],
+        "backlog": [
+          "KL-080"
+        ],
+        "startCondition": "root_approved_frozen_contract_and_exact_scope",
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "Aspire_TUnit",
+          "genuine_exact_source_Linux_qualification"
+        ],
+        "joinCondition": "root_diff_review_and_original_complete_gates"
+      },
+      {
+        "id": "TASK-SITE-CURRENT-JOIN",
+        "owner": "root_high_capability",
+        "permissions": "shared_workflows_contracts_source_closure_policies_docs_evidence_Git",
+        "dependencies": [
+          "TASK-SITE-CURRENT-TOOLS",
+          "TASK-SITE-CURRENT-ASSETS"
+        ],
+        "artifacts": [
+          "current_qualify_build_freshness_joins",
+          "schema2_original_publication_receipts"
+        ],
+        "state": "source_in_progress",
+        "contracts": [
+          "docs/ADR/ADR-076-current-cohort-publication.md"
+        ],
+        "backlog": [
+          "KL-080"
+        ],
+        "startCondition": "root_approved_frozen_contract_and_exact_scope",
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "Aspire_TUnit",
+          "genuine_exact_source_Linux_qualification"
+        ],
+        "joinCondition": "root_diff_review_and_original_complete_gates"
+      },
+      {
+        "id": "TASK-EVENT-REPLAY-CLIENT",
+        "owner": "lifecycle_wave_gpt_6_luna_high",
+        "permissions": "new_Client_and_UnitTests_AggregateReplayWorker_files",
+        "dependencies": [
+          "TASK-EVENT-REPLAY-CONTRACT"
+        ],
+        "artifacts": [
+          "bounded_pure_versioned_reducer",
+          "typed_read_adapter",
+          "independent_pure_worker_oracles"
+        ],
+        "state": "source_authored_root_review_runtime_unqualified",
+        "contracts": [
+          "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md"
+        ],
+        "backlog": [
+          "KL-085"
+        ],
+        "startCondition": "root_approved_frozen_contract_and_exact_scope",
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "Aspire_TUnit",
+          "genuine_exact_source_Linux_qualification"
+        ],
+        "joinCondition": "root_diff_review_and_original_complete_gates"
+      },
+      {
+        "id": "TASK-EVENT-REPLAY-RECOVERY",
+        "owner": "query_wave_gpt_6_luna_high",
+        "permissions": "new_AggregateReplay_files_under_CrashHost_RecoveryTests_IntegrationTests_EventStreams_only",
+        "contracts": [
+          "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md"
+        ],
+        "requirements": [
+          "REQ-EVENT-007",
+          "REQ-EVENT-008",
+          "REQ-EVENT-009",
+          "REQ-EVENT-010"
+        ],
+        "acceptanceIds": [
+          "AC-EVENT-007",
+          "AC-EVENT-008",
+          "AC-EVENT-009",
+          "AC-EVENT-010"
+        ],
+        "backlog": [
+          "KL-085"
+        ],
+        "dependencies": [
+          "TASK-EVENT-REPLAY-STORE",
+          "TASK-EVENT-REPLAY-CLIENT"
+        ],
+        "startCondition": "accepted_frozen_recovery_contract_and_root_shared_dispatch",
+        "artifacts": [
+          "native_real_process_snapshot_atomicity_and_retry",
+          "actual_RF3_SDK_official_MCP_parity_authority_leader_restart"
+        ],
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "Aspire_TUnit_recovery",
+          "Aspire_Docker_RF3_SDK_MCP",
+          "genuine_exact_source_Linux_qualification"
+        ],
+        "state": "source_authored_root_review_compilation_pending_runtime_unqualified",
+        "joinCondition": "root_diff_review_and_original_complete_gates"
+      },
+      {
+        "id": "TASK-SERIES-RETENTION-RECOVERY",
+        "owner": "lifecycle_wave_gpt_6_luna_high",
+        "permissions": "new_SampleRetention_files_under_CrashHost_RecoveryTests_IntegrationTests_TimeSeries_only",
+        "contracts": [
+          "docs/ADR/ADR-073-logged-series-retention.md"
+        ],
+        "requirements": [
+          "REQ-SERIES-013",
+          "REQ-SERIES-014",
+          "REQ-SERIES-015",
+          "REQ-SERIES-016"
+        ],
+        "acceptanceIds": [
+          "AC-SERIES-013",
+          "AC-SERIES-014",
+          "AC-SERIES-015",
+          "AC-SERIES-016"
+        ],
+        "backlog": [
+          "KL-026"
+        ],
+        "dependencies": [
+          "TASK-SERIES-RETENTION-SOURCE"
+        ],
+        "startCondition": "accepted_frozen_recovery_contract_and_root_shared_dispatch",
+        "artifacts": [
+          "native_real_process_retention_atomicity_and_retry",
+          "actual_RF3_SDK_official_MCP_follower_restart_and_raw_oracles"
+        ],
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "Aspire_TUnit_recovery",
+          "Aspire_Docker_RF3_SDK_MCP",
+          "genuine_exact_source_Linux_qualification"
+        ],
+        "state": "source_authored_root_review_compilation_pending_runtime_unqualified",
+        "joinCondition": "root_diff_review_and_original_complete_gates"
+      },
+      {
+        "id": "TASK-EPOCH-STORE",
+        "owner": "cluster_wave_gpt_6_luna_high",
+        "permissions": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery_and_BackupRestore_only",
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "requirements": [
+          "REQ-STORAGE-007",
+          "REQ-STORAGE-021",
+          "REQ-STORAGE-022",
+          "REQ-STORAGE-023",
+          "REQ-STORAGE-024"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-001",
+          "AC-EPOCH-002",
+          "AC-EPOCH-003",
+          "AC-EPOCH-004",
+          "AC-EPOCH-005",
+          "AC-EPOCH-006"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "dependencies": [
+          "TASK-EPOCH-CONTRACT"
+        ],
+        "startCondition": "accepted_frozen_contract_and_disjoint_exact_ownership",
+        "artifacts": [
+          "strict_epoch6_checkpoint4",
+          "explicit_preserving_offline_upgrade_and_cohesive_native_receipt_helpers"
+        ],
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "governance",
+          "Aspire_TUnit_normal_scalar",
+          "Aspire_real_process_recovery",
+          "Docker_Aspire_RF3_SDK_official_MCP",
+          "exact_source_Linux_CI_original_artifacts"
+        ],
+        "state": "contract_frozen_source_pending",
+        "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification"
+      },
+      {
+        "id": "TASK-EPOCH-UNIT",
+        "owner": "query_wave_gpt_6_luna_high",
+        "permissions": "new_Epoch_prefixed_UnitTests_StorageRecovery_ClusterRouting_ClusterReplication_files_only",
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "requirements": [
+          "REQ-STORAGE-007",
+          "REQ-STORAGE-021",
+          "REQ-STORAGE-022",
+          "REQ-STORAGE-023",
+          "REQ-STORAGE-024"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-001",
+          "AC-EPOCH-002",
+          "AC-EPOCH-003",
+          "AC-EPOCH-004",
+          "AC-EPOCH-005",
+          "AC-EPOCH-006"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "dependencies": [
+          "TASK-EPOCH-CONTRACT"
+        ],
+        "startCondition": "accepted_frozen_contract_and_disjoint_exact_ownership",
+        "artifacts": [
+          "real_ZoneTree_format_and_upgrade_regressions",
+          "stale_signed_peer_request_reply_discovery_and_grain_tests"
+        ],
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "governance",
+          "Aspire_TUnit_normal_scalar",
+          "Aspire_real_process_recovery",
+          "Docker_Aspire_RF3_SDK_official_MCP",
+          "exact_source_Linux_CI_original_artifacts"
+        ],
+        "state": "contract_frozen_source_pending",
+        "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification"
+      },
+      {
+        "id": "TASK-EPOCH-RECOVERY",
+        "owner": "lifecycle_wave_gpt_6_luna_high",
+        "permissions": "new_Epoch_prefixed_CrashHost_and_RecoveryTests_StorageRecovery_files_only",
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "requirements": [
+          "REQ-STORAGE-007",
+          "REQ-STORAGE-021",
+          "REQ-STORAGE-022",
+          "REQ-STORAGE-023",
+          "REQ-STORAGE-024"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-001",
+          "AC-EPOCH-002",
+          "AC-EPOCH-003",
+          "AC-EPOCH-004",
+          "AC-EPOCH-005",
+          "AC-EPOCH-006"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "dependencies": [
+          "TASK-EPOCH-CONTRACT"
+        ],
+        "startCondition": "accepted_frozen_contract_and_disjoint_exact_ownership",
+        "artifacts": [
+          "five_real_process_upgrade_fault_cuts",
+          "source_preservation_complete_target_retry_and_new_epoch_reopen"
+        ],
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "governance",
+          "Aspire_TUnit_normal_scalar",
+          "Aspire_real_process_recovery",
+          "Docker_Aspire_RF3_SDK_official_MCP",
+          "exact_source_Linux_CI_original_artifacts"
+        ],
+        "state": "contract_frozen_source_pending",
+        "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification"
+      },
+      {
+        "id": "TASK-EPOCH-JOIN",
+        "owner": "root_high_capability",
+        "permissions": "root_shared_offline_Server_command_existing_goldens_signature_purposes_old_binary_probe_CI_and_docs",
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "requirements": [
+          "REQ-STORAGE-007",
+          "REQ-STORAGE-021",
+          "REQ-STORAGE-022",
+          "REQ-STORAGE-023",
+          "REQ-STORAGE-024"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-001",
+          "AC-EPOCH-002",
+          "AC-EPOCH-003",
+          "AC-EPOCH-004",
+          "AC-EPOCH-005",
+          "AC-EPOCH-006"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "dependencies": [
+          "TASK-EPOCH-CONTRACT"
+        ],
+        "startCondition": "accepted_frozen_contract_and_disjoint_exact_ownership",
+        "artifacts": [
+          "reviewed_integrated_source",
+          "actual_prior_executable_refusal_oracle",
+          "Aspire_normal_scalar_process_RF3_Linux_exact_source_gates"
+        ],
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "governance",
+          "Aspire_TUnit_normal_scalar",
+          "Aspire_real_process_recovery",
+          "Docker_Aspire_RF3_SDK_official_MCP",
+          "exact_source_Linux_CI_original_artifacts"
+        ],
+        "state": "contract_frozen_source_pending",
+        "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification"
+      }
+    ],
+    "qualificationRule": "Neither presence of source nor a local development result closes a full task. Preserve exact-source Linux fault/endurance and publication gates.",
+    "historicalBaselinePreserved": true,
+    "localDevelopmentEvidence": [
+      "docs/implementation/owner-wave-001-development-2026-10-03.json"
+    ]
   }
 }

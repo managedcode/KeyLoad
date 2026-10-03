@@ -80,9 +80,7 @@ internal static class SiteCoverageSourceManifestWriter
         var expectedFeature = expected.Where(path => path.StartsWith(SiteCoverageTokens.FeatureSourcePrefix, StringComparison.Ordinal))
             .ToArray();
         var actualTools = SiteCoverageSourcePaths.EnumerateModules(repository,
-            SitePublicationTokens.EvidenceToolsPrefix, SitePublicationTokens.EvidenceModulePrefix)
-            .Concat(SiteCoverageSourcePaths.EnumerateModules(repository,
-                SitePublicationTokens.EvidenceToolsPrefix, SitePublicationTokens.IsolatedEvidenceModulePrefix))
+                SitePublicationTokens.EvidenceToolsPrefix, SitePublicationTokens.IsolatedEvidenceModulePrefix)
             .Order(StringComparer.Ordinal).ToArray();
         var expectedTools = expected.Where(path => path.StartsWith(SitePublicationTokens.EvidenceToolsPrefix,
             StringComparison.Ordinal)).ToArray();

@@ -13,7 +13,6 @@ internal sealed class RawStorageBenchmarkTests
 {
     private const string EngineEnvironmentVariable = "KEYLOAD_RAW_STORAGE_ENGINE";
     private const string ZoneTreeLabel = "zonetree";
-    private const string TsavoriteLabel = "tsavorite";
     private const int BenchmarkRecordCount = 4096;
     private const int TestRecordCount = 3;
     private const int WriteBudget = 32;
@@ -21,6 +20,7 @@ internal sealed class RawStorageBenchmarkTests
     private const int DefaultInvocationCount = 1024;
     private const int DefaultUnrollFactor = 1;
     private const string WrongCaseEngineLabel = "ZoneTree";
+    private const string RemovedEngineLabel = "tsavorite";
     private const string UnsupportedEngineMessage = "The test process has an unsupported raw-storage engine label.";
     private static readonly int[] PayloadSizes = [32, 1024];
     private static readonly string[] ExpectedMethodNames =
@@ -65,19 +65,16 @@ internal sealed class RawStorageBenchmarkTests
     }
 
     [Test]
-    [Arguments(RawStorageEngineKind.ZoneTree, 32)]
-    [Arguments(RawStorageEngineKind.ZoneTree, 1024)]
-    [Arguments(RawStorageEngineKind.Tsavorite, 32)]
-    [Arguments(RawStorageEngineKind.Tsavorite, 1024)]
-    public async Task AcGe004AllMethodsUseRealFixtureAndReturnTheirActualOperationResult(
-        RawStorageEngineKind engine, int payloadBytes)
+    [Arguments(32)]
+    [Arguments(1024)]
+    public async Task AcGe004AllMethodsUseRealZoneTreeFixtureAndReturnTheirActualOperationResult(int payloadBytes)
     {
-        using var oracle = new RawStorageFixture(engine, TestRecordCount, payloadBytes, WriteBudget);
+        using var oracle = new RawStorageFixture(TestRecordCount, payloadBytes, WriteBudget);
         var original = oracle.Corpus.Value(0, alternate: false).ToArray();
         var alternate = oracle.Corpus.Value(0, alternate: true).ToArray();
         var benchmark = new RawStorageBenchmarks
         {
-            Engine = EngineLabel(engine),
+            Engine = ZoneTreeLabel,
             PayloadBytes = payloadBytes,
             RecordCount = TestRecordCount
         };
@@ -102,15 +99,13 @@ internal sealed class RawStorageBenchmarkTests
     }
 
     [Test]
-    [Arguments(RawStorageEngineKind.ZoneTree, 32)]
-    [Arguments(RawStorageEngineKind.ZoneTree, 1024)]
-    [Arguments(RawStorageEngineKind.Tsavorite, 32)]
-    [Arguments(RawStorageEngineKind.Tsavorite, 1024)]
-    public async Task AcGe004AllTimedMethodsRejectCallsAfterRealCleanup(RawStorageEngineKind engine, int payloadBytes)
+    [Arguments(32)]
+    [Arguments(1024)]
+    public async Task AcGe004AllTimedMethodsRejectCallsAfterRealCleanup(int payloadBytes)
     {
         using var benchmark = new RawStorageBenchmarks
         {
-            Engine = EngineLabel(engine),
+            Engine = ZoneTreeLabel,
             PayloadBytes = payloadBytes,
             RecordCount = TestRecordCount
         };
@@ -131,6 +126,19 @@ internal sealed class RawStorageBenchmarkTests
         using var benchmark = new RawStorageBenchmarks
         {
             Engine = WrongCaseEngineLabel,
+            PayloadBytes = PayloadSizes[0],
+            RecordCount = TestRecordCount
+        };
+
+        await Assert.That(benchmark.Setup).Throws<ArgumentException>();
+    }
+
+    [Test]
+    public async Task AcGe004RemovedTsavoriteLabelFailsBeforeBenchmarkSetup()
+    {
+        using var benchmark = new RawStorageBenchmarks
+        {
+            Engine = RemovedEngineLabel,
             PayloadBytes = PayloadSizes[0],
             RecordCount = TestRecordCount
         };
@@ -162,7 +170,7 @@ internal sealed class RawStorageBenchmarkTests
     {
         var configured = Environment.GetEnvironmentVariable(EngineEnvironmentVariable);
         var expected = configured ?? ZoneTreeLabel;
-        if (expected is not (ZoneTreeLabel or TsavoriteLabel))
+        if (expected != ZoneTreeLabel)
         {
             throw new InvalidOperationException(UnsupportedEngineMessage);
         }
@@ -170,11 +178,4 @@ internal sealed class RawStorageBenchmarkTests
         return expected;
     }
 
-    private static string EngineLabel(RawStorageEngineKind engine)
-        => engine switch
-        {
-            RawStorageEngineKind.ZoneTree => ZoneTreeLabel,
-            RawStorageEngineKind.Tsavorite => TsavoriteLabel,
-            _ => throw new ArgumentOutOfRangeException(nameof(engine))
-        };
 }

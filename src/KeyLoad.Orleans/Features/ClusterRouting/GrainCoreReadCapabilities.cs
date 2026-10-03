@@ -20,6 +20,10 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
             GrainReadKind.AggregateSamples => database.AggregateSamples(principal, GrainNativePayload.Read<AggregateSamplesRequest>(payload), cancellationToken),
             GrainReadKind.AggregateSampleWindows => database.AggregateSampleWindows(principal,
                 GrainNativePayload.Read<AggregateSampleWindowsRequest>(payload), cancellationToken),
+            GrainReadKind.SampleRetention => database.ReadSampleRetention(principal,
+                GrainNativePayload.Read<ReadSampleRetentionRequest>(payload), cancellationToken),
+            GrainReadKind.AggregateReplay => database.ReadAggregateReplay(principal,
+                GrainNativePayload.Read<ReadAggregateReplayRequest>(payload), cancellationToken),
             GrainReadKind.ChangeFeed => database.ReadChangeFeed(principal, GrainNativePayload.Read<ReadChangeFeedRequest>(payload)),
             GrainReadKind.OutboxStatus => database.GetOutboxStatus(principal, GrainNativePayload.Read<GetOutboxStatusRequest>(payload).Partition),
             GrainReadKind.ProjectionBatch => database.ReadProjectionBatch(principal, GrainNativePayload.Read<ReadProjectionBatchRequest>(payload)),
@@ -29,7 +33,8 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
 
     internal static bool Handles(GrainReadKind kind) => kind is >= GrainReadKind.Document and <= GrainReadKind.Samples
         or GrainReadKind.ChangeFeed or GrainReadKind.OutboxStatus or GrainReadKind.ProjectionBatch
-        or GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows;
+        or GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows
+        or GrainReadKind.SampleRetention or GrainReadKind.AggregateReplay;
 
     private StreamPage Stream(string principal, ReadStreamRequest request, CancellationToken cancellationToken)
         => database.ReadStream(principal, request.Stream, request.AfterRevision, request.Limit, cancellationToken);

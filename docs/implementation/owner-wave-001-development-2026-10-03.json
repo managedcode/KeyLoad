@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "purpose": "local_development_only_Aspire_test_entry",
+  "date": "2026-10-03",
+  "source": {
+    "head": "2532f781fec8f2546a033c396a7dbce0e9b4b781",
+    "workingTree": "dirty_owner_wave_and_preserved_parallel_work",
+    "scope": "previous_integrated_Release_build7_test_entry_only;later_snapshot_and_site_changes_not_qualified"
+  },
+  "configuration": {
+    "AppHostDefault": "Release",
+    "AspireCli": "13.5.4",
+    "AspireHosting": "13.6.0",
+    "actualAppHostPath": "src/KeyLoad.AppHost/bin/Release/net10.0/KeyLoad.AppHost",
+    "suite": "comparison",
+    "filter": "/*/*/AspireTestEntry*/*",
+    "nativeChildConfiguration": "Release",
+    "outerModel": "single_Aspire_owned_TUnit_runner",
+    "idleDefaultRf3": "none"
+  },
+  "outcome": {
+    "exitCode": 0,
+    "originalTrx": "TestResults/owner-wave-001/aspire-entry/KeyLoad.ComparisonTests_net10.0_arm64.trx",
+    "sha256": "821228dafd0eaed02aa736bc88119ecb3a7987c0aacfbf317e37861637f6d6ab",
+    "counters": {
+      "total": 5,
+      "executed": 5,
+      "passed": 5,
+      "failed": 0,
+      "error": 0,
+      "timeout": 0,
+      "aborted": 0,
+      "inconclusive": 0,
+      "passedButRunAborted": 0,
+      "notRunnable": 0,
+      "notExecuted": 0,
+      "disconnected": 0,
+      "warning": 0,
+      "completed": 0,
+      "inProgress": 0,
+      "pending": 0
+    }
+  },
+  "completedKlTasks": 0,
+  "githubQualified": false,
+  "remaining": [
+    "integrated_source_build_format_and_governance",
+    "complete_Aspire_owned_suites",
+    "process_recovery_RF3_SDK_official_MCP_fault_endurance_and_exact_source_Linux_gates"
+  ]
+}

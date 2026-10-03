@@ -18,6 +18,8 @@ internal static class MutationDiscriminatorNames
     internal const string UpsertEdge = "upsertEdge";
     internal const string DeleteEdge = "deleteEdge";
     internal const string AppendSamples = "appendSamples";
+    internal const string ExpireSamples = "expireSamples";
+    internal const string StoreAggregateSnapshot = "storeAggregateSnapshot";
     internal const string PutVector = "putVector";
     internal const string QueueToGraph = "queueToGraph";
     internal const string GraphToQueue = "graphToQueue";
@@ -250,6 +252,8 @@ public sealed record CommandOutcome([property: Orleans.Id(0)] string Fingerprint
 [JsonDerivedType(typeof(UpsertEdge), MutationDiscriminatorNames.UpsertEdge)]
 [JsonDerivedType(typeof(DeleteEdge), MutationDiscriminatorNames.DeleteEdge)]
 [JsonDerivedType(typeof(AppendSamples), MutationDiscriminatorNames.AppendSamples)]
+[JsonDerivedType(typeof(ExpireSamples), MutationDiscriminatorNames.ExpireSamples)]
+[JsonDerivedType(typeof(StoreAggregateSnapshot), MutationDiscriminatorNames.StoreAggregateSnapshot)]
 [JsonDerivedType(typeof(PutVector), MutationDiscriminatorNames.PutVector)]
 [JsonDerivedType(typeof(QueueToGraph), MutationDiscriminatorNames.QueueToGraph)]
 [JsonDerivedType(typeof(GraphToQueueMutation), MutationDiscriminatorNames.GraphToQueue)]

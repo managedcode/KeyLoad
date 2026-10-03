@@ -27,47 +27,6 @@ internal sealed class SiteBrowserSession : IAsyncDisposable
     public string BaseUrl => host.BaseUrl;
     public string Output => temporary.Output;
 
-    public static async Task<SiteBrowserSession> StartAsync(SiteTestInputs inputs, CancellationToken cancellationToken)
-    {
-        var browserPath = Environment.GetEnvironmentVariable(SiteBrowserTokens.BrowserEnvironment);
-        var coverageRoot = Environment.GetEnvironmentVariable(SiteBrowserTokens.CoverageEnvironment);
-        if (string.IsNullOrWhiteSpace(browserPath) || string.IsNullOrWhiteSpace(coverageRoot) ||
-            !Path.IsPathFullyQualified(coverageRoot))
-        {
-            throw new InvalidOperationException(SiteBrowserTokens.BrowserMissing);
-        }
-
-        var manifest = await ReadManifest(inputs, coverageRoot, cancellationToken);
-        return await StartOwnedResources(inputs, browserPath, coverageRoot, manifest, cancellationToken);
-    }
-
-    private static async Task<SiteBrowserSession> StartOwnedResources(SiteTestInputs inputs, string browserPath,
-        string coverageRoot, SiteCoverageSourceManifest manifest, CancellationToken cancellationToken)
-    {
-        await using var startup = SiteBrowserStartupResources.Create();
-        startup.CreateTemporary();
-        var build = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, startup.Output, cancellationToken);
-        if (build.ExitCode != SiteTokens.ProcessSuccessExitCode || build.StandardError.Length != SiteTokens.Zero)
-        {
-            throw new InvalidOperationException(SiteBuilderDiagnostics.PreChromeFailure(build));
-        }
-
-        startup.StartHost();
-        var sessionDirectory = Path.Combine(Path.GetFullPath(coverageRoot), SiteBrowserTokens.BrowserDirectory,
-            SiteBrowserTokens.SessionsDirectory, SiteBrowserTokens.BrowserSessionPrefix + Guid.NewGuid().ToString("N"));
-        var profilePath = Path.Combine(startup.Path, SiteBrowserTokens.ChromeProfileDirectory);
-        var downloadPath = Path.Combine(startup.Path, SiteBrowserTokens.DownloadDirectory);
-        Directory.CreateDirectory(profilePath);
-        Directory.CreateDirectory(downloadPath);
-        var chrome = await startup.StartChromeAsync(browserPath, profilePath, cancellationToken);
-        var metadata = SiteBrowserCoverageMetadata.Create(inputs.SiteRevision, chrome.Version,
-            startup.Host.BaseUrl, manifest);
-        await chrome.SetDownloadDirectoryAsync(downloadPath, cancellationToken);
-        await chrome.NavigateAsync(startup.Host.BaseUrl + SiteAssetTokens.IndexHtml +
-            SiteBrowserTokens.PageHideFragment, cancellationToken);
-        return startup.Transfer(sessionDirectory, metadata);
-    }
-
     internal static async Task CleanupStartupFailure(SiteBrowserChrome? chrome, SiteStaticFileHost? host,
         SiteTempDirectory temporary)
     {

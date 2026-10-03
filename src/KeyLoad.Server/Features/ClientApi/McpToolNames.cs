@@ -5,6 +5,7 @@ internal static class McpToolNames
 {
     internal const string DocumentsGet = "keyload_documents_get";
     internal const string StreamsRead = "keyload_streams_read";
+    internal const string StreamsReplay = AggregateReplayProtocol.Tool;
     internal const string EventsRead = "keyload_events_read";
     internal const string SubscriptionsStatus = "keyload_subscriptions_status";
     internal const string MessagesInspect = "keyload_messages_inspect";
@@ -13,6 +14,7 @@ internal static class McpToolNames
     internal const string SeriesLatest = TimeSeriesReadProtocol.LatestTool;
     internal const string SeriesAggregate = TimeSeriesReadProtocol.AggregateTool;
     internal const string SeriesWindows = TimeSeriesReadProtocol.WindowsTool;
+    internal const string SeriesRetention = TimeSeriesReadProtocol.RetentionTool;
     internal const string QueryExecute = "keyload_query_execute";
     internal const string QueryAst = "keyload_query_ast";
     internal const string QueryCapabilities = "keyload_query_capabilities";

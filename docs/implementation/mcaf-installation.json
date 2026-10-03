@@ -7,8 +7,8 @@
   "templateSha256": "421160c442f9c2fba52b12787995f18f524dfe09165b15b26a2c19d272b3e18c",
   "preservedRoot": {
     "path": "AGENTS.md",
-    "prefixBytes": 2326,
-    "sha256": "b78077c3d700f0b816471e32df0c839dee64e90ff10be022961917b9be7c3993"
+    "prefixBytes": 3456,
+    "sha256": "244195aa2f3fb8d372709ddaf161d9af467ec29c188cb1410fdf10cf1f6aee5f"
   },
   "preservedLocal": [],
   "projects": [
@@ -192,6 +192,23 @@
       "addedProject": "src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj",
       "localPolicy": "src/KeyLoad.Diagnostics/AGENTS.md",
       "reason": "Accepted ADR-063 BCL-only bounded callback-free ResourceExecution diagnostics. Prior policies and preserved prefix remain mandatory; source integration only, genuine native profiling pending."
+    }
+  ],
+  "ownerDirectedPolicyCorrections": [
+    {
+      "date": "2026-10-03",
+      "authorization": "Explicit owner correction: all tests and KeyLoad Docker deployments use unified Aspire AppHost; immediate obsolete/legacy cleanup; ZoneTree and ZoneTree.FullTextSearch selected, Garnet removed.",
+      "scope": "Preserved introductory policy keeps every previous rule and inserts the mandatory Aspire ownership paragraph. Other rule-specific corrections are recorded in AGENTS.md and ADR-071/074.",
+      "previousPreservedRoot": {
+        "path": "AGENTS.md",
+        "prefixBytes": 2326,
+        "sha256": "b78077c3d700f0b816471e32df0c839dee64e90ff10be022961917b9be7c3993"
+      },
+      "currentPreservedRoot": {
+        "path": "AGENTS.md",
+        "prefixBytes": 3456,
+        "sha256": "244195aa2f3fb8d372709ddaf161d9af467ec29c188cb1410fdf10cf1f6aee5f"
+      }
     }
   ]
 }

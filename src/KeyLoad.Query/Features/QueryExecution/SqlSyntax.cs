@@ -6,6 +6,8 @@ internal static class SqlSyntax
     internal const string Explain = "EXPLAIN";
     internal const string Select = "SELECT";
     internal const string From = "FROM";
+    internal const string Events = "EVENTS";
+    internal const string QueueMessages = "QUEUE_MESSAGES";
     internal const string As = "AS";
     internal const string Where = "WHERE";
     internal const string Order = "ORDER";

@@ -22,10 +22,11 @@ internal sealed class SiteMetadataTests
     [Test]
     public async Task AC_SEO_001_IconsAreValidSharedBytesAndEmittedFromTheRealBuild()
     {
-        var inputs = SiteTestInputs.Read();
+        var fixture = await SiteIsolatedFixture.ReadAsync();
+        var inputs = fixture.Inputs.Site;
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var temporary = SiteTempDirectory.Create();
-        var result = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, temporary.Output, token);
+        var result = await SiteIsolatedBuilderProcess.RunAsync(fixture, temporary.Output, token);
         await Assert.That(result.ExitCode).IsEqualTo(SiteTokens.ProcessSuccessExitCode);
 
         var consoleRoot = Path.Combine(inputs.Repository, SiteMetadataTokens.ConsoleAssetsPath);
@@ -70,10 +71,10 @@ internal sealed class SiteMetadataTests
     [Test]
     public async Task AC_SEO_002_003_RealBuilderOutputHasOneAccurateDiscoverableStaticHead()
     {
-        var inputs = SiteTestInputs.Read();
+        var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var temporary = SiteTempDirectory.Create();
-        var result = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, temporary.Output, token);
+        var result = await SiteIsolatedBuilderProcess.RunAsync(fixture, temporary.Output, token);
         await Assert.That(result.ExitCode).IsEqualTo(SiteTokens.ProcessSuccessExitCode);
         var html = await File.ReadAllTextAsync(Path.Combine(temporary.Output, SiteMetadataTokens.HtmlFile), token);
         await SiteMetadataDocumentAssertions.VerifyAsync(html, temporary.Output, token);
@@ -82,10 +83,11 @@ internal sealed class SiteMetadataTests
     [Test]
     public async Task AC_SEO_004_SourceCardAndManifestAreEmittedAsDeclared()
     {
-        var inputs = SiteTestInputs.Read();
+        var fixture = await SiteIsolatedFixture.ReadAsync();
+        var inputs = fixture.Inputs.Site;
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var temporary = SiteTempDirectory.Create();
-        var result = await SiteBuilderProcess.RunAsync(inputs, inputs.Reports, temporary.Output, token);
+        var result = await SiteIsolatedBuilderProcess.RunAsync(fixture, temporary.Output, token);
         await Assert.That(result.ExitCode).IsEqualTo(SiteTokens.ProcessSuccessExitCode);
         var feature = Path.Combine(inputs.Repository, SiteMetadataTokens.FeaturePath);
         var cardSvg = await File.ReadAllBytesAsync(Path.Combine(feature, SiteMetadataTokens.SourceCardSvg), token);

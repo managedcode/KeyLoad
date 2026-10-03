@@ -163,6 +163,48 @@ cancelled existing owned deadline/stopping token, otherwise Faulted.
 
 ## Rollout, rollback and interpretation
 
+### Frozen public/request producer packet: TASK-DBPROF-PUBLIC-A
+
+Root approves REQ-RESOURCE-003/004 and AC-DBPROF-001/002/003 for this source
+packet. A bounded Luna prepares private proposed copies of exactly Server's
+Features/Authorization/DatabaseCredentialResolver.cs and
+Features/ClientApi/CanonicalOperationGateway.cs, phase00/01. Root reads every
+candidate, checks current/original hashes and performs the serialized join.
+Root alone owns Orleans/Features/ClusterRouting/DatabaseReadGrain.cs,02..04,
+and any acyclic Diagnostics reference. No other producer, phase ID, startup,
+exporter, framework/package, endpoint or public/wire/stored contract changes.
+
+00/01 bracket their original GetRequiredService/ExecuteAsync invocation
+expression and await terminal. Keep credential parsing/signing/request header
+publication before the scope and reply decode/framing after it. Begin a scalar
+with Faulted, mark Completed only at normal await terminal, classify only an
+observed original OCE with the existing input token, rethrow it unchanged, and
+record once in finally. No delegate or added async wrapper/task is permitted.
+
+In the verified read actor02 applies only to Authenticate;03 to every other
+verified read. The command executor is outside this table's read scope.04
+brackets the original generic ReadAsync invocation including persisted principal
+reload, ending before reply encoding. A normal null/result is Completed; no
+domain-result inspection or error-code inference. Use inline phase/start/active
+scalars rather than extra async wrappers. End successful phases immediately at
+their await terminal; end handled failures before original safe failure reply
+creation; unexpected failures end in the existing finally. Never record a phase
+before verification, duplicate an end, or extend it through encoding/deactivation.
+Existing checks, both quorum cuts, ConfigureAwait values, stage diagnostics,
+safe reply and DeactivateOnIdle preserve their original ordering and meaning.
+
+Ordered verification: full exact candidate/current review, compiler/formatter/
+static checks, existing genuine grain request/authority/reply cancellation units,
+and RF3 official SDK/MCP persisted identity/expiry/revocation/minority regressions.
+These establish preservation only. New enabled physical-process tests must
+assert actual00..04 counters across success/failure/cancellation, no authorized
+scope before verification, and no encoding duration. Those tests depend on the
+separately frozen private capture/native stages and remain open. Independent
+strong review joins source before all-eligible main checkpoint; authentic CI,
+coverage, on/off overhead and profile observations remain qualification gates.
+Rollback removes these optional scopes together after draining; no data/wire
+migration is required and the process bank remains disabled by default.
+
 ### Frozen provider producer packet: TASK-DBPROF-PROVIDER
 
 AC-DBPROF-001/002/003 assigns one bounded worker exactly ZoneTreeStore.cs,

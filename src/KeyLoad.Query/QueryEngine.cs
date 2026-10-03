@@ -13,12 +13,13 @@ namespace KeyLoad.Query;
 public sealed partial class QueryEngine
 {
     private const string CursorPurpose = "query-page";
-    private const string ExplainId = "explain";
-    private const string ResultLimitExceeded = "The query result byte budget is exceeded.";
+    internal const string ExplainId = "explain";
+    internal const string ResultLimitExceeded = "The query result byte budget is exceeded.";
     private static readonly TimeSpan CursorLifetime = TimeSpan.FromMinutes(5);
     private readonly record struct CursorState(int Offset, long Cut, long SourceEpoch);
     private readonly DatabaseEngine database;
     private readonly LiveQueryExecutor liveQueries;
+    private readonly ModelQueryExecutor modelQueries;
 
     /// <summary>Creates a query engine over one node-local database.</summary>
     /// <param name="database">Database owning query reads and admission.</param>
@@ -27,6 +28,7 @@ public sealed partial class QueryEngine
         ArgumentNullException.ThrowIfNull(database);
         this.database = database;
         liveQueries = new(database, this);
+        modelQueries = new(database, this);
     }
 
     /// <summary>Executes a bounded SQL query against one authorized read cut.</summary>
@@ -51,7 +53,7 @@ public sealed partial class QueryEngine
     public QueryCapabilityManifest Capabilities => new(1, 1, "Q1", "atomicPartition", "decimal", "distinctFromNull",
         ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS MISSING"],
         database.Limits.MaxResults, database.Limits.MaxScanRecords, database.Limits.MaxQueryBytes, database.Limits.MaxQueryDepth, true, true,
-        database.Limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery"]);
+        database.Limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery", "modelViewsV1"]);
     private QueryPage Execute(string principalId, Func<ReadExecutionBudget, AstQueryRequest> adapt, TimeProvider? timeProvider,
         CancellationToken cancellationToken)
     {
@@ -61,12 +63,17 @@ public sealed partial class QueryEngine
         budget.Check();
         var request = QueryValidation.Normalize(adapt(budget), database.Limits);
         var query = request.Query;
+        if (query.ModelSource is not null)
+        {
+            return modelQueries.Execute(principalId, request, budget);
+        }
         var hash = QueryHash(request);
         budget.Check();
         return database.WithQueryView(principalId, request.Partition, query.Collection,
             (view, principal, resource) => ExecuteView(view, principal, resource, request, hash, budget,
                 timeProvider ?? TimeProvider.System));
     }
+
     internal static string QueryHash(AstQueryRequest request) => JsonData.Fingerprint(new
     { request.Partition, Query = request.Query with { Explain = false }, request.Parameters, request.AllowFullScan, request.AstVersion });
     internal void Bind(PrincipalRecord principal, ResourceDefinition resource, AstQueryRequest request)

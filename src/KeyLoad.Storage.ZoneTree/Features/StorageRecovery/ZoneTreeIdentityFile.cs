@@ -16,7 +16,7 @@ internal static class ZoneTreeIdentityFile
         }
 
         RequireEmptyOwnedDirectory(options.Directory, ownership);
-        var identity = new StoreIdentity(BinaryJournalIdentityVersion, KeyCodec.Version,
+        var identity = new StoreIdentity(CurrentDataEpoch, KeyCodec.Version,
             Guid.NewGuid(), options.Incarnation ?? Guid.NewGuid(),
             options.SigningKey is { } configuredKey ? configuredKey.ToArray() : RandomNumberGenerator.GetBytes(SigningKeyBytes),
             DurabilityProfile.ProcessDurable);
@@ -51,7 +51,7 @@ internal static class ZoneTreeIdentityFile
     {
         var identity = Read(Path.Combine(options.Directory, IdentityFileName));
         Validate(identity, options);
-        if (identity.FormatVersion != BinaryJournalIdentityVersion)
+        if (identity.FormatVersion != CurrentDataEpoch)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
         }
@@ -64,7 +64,7 @@ internal static class ZoneTreeIdentityFile
 
     private static void Validate(StoreIdentity identity, ZoneTreeStoreOptions options)
     {
-        if (identity.FormatVersion != BinaryJournalIdentityVersion
+        if (identity.FormatVersion != CurrentDataEpoch
             || identity.KeyCodecVersion != KeyCodec.Version)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
@@ -93,7 +93,7 @@ internal static class ZoneTreeIdentityFile
         }
 
         var identity = NativeSerialization.Deserialize<StoreIdentity>(envelope.Payload);
-        if (identity.FormatVersion != BinaryJournalIdentityVersion || identity.KeyCodecVersion != KeyCodec.Version)
+        if (identity.FormatVersion != CurrentDataEpoch || identity.KeyCodecVersion != KeyCodec.Version)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
         }
@@ -119,6 +119,33 @@ internal static class ZoneTreeIdentityFile
         }
 
         File.Move(temporary, path, true);
+    }
+
+    internal static StoreIdentity ReadNative5ForUpgrade(ReadOnlySpan<byte> bytes)
+    {
+        var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeIdentityEnvelope>(bytes,
+            ZoneTreeMetadataBinary.IdentityMagic, IdentityFormatUnsupported);
+        if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Checksum))
+        {
+            throw Errors.Fail(ErrorCode.Corruption, IdentityChecksumInvalid);
+        }
+
+        var identity = NativeSerialization.Deserialize<StoreIdentity>(envelope.Payload);
+        if (identity.FormatVersion != SourceDataEpoch || identity.KeyCodecVersion != KeyCodec.Version)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
+        }
+
+        ValidateIdentityFields(identity);
+        return identity;
+    }
+
+    private static void ValidateIdentityFields(StoreIdentity identity)
+    {
+        if (identity.SigningKey.Length != SigningKeyBytes || identity.NodeId == Guid.Empty || identity.Incarnation == Guid.Empty)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, IdentityChecksumInvalid);
+        }
     }
 
 }

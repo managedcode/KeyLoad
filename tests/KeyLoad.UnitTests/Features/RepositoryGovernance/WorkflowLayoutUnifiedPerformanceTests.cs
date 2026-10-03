@@ -31,7 +31,12 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
         await Assert.That(Count(workflow, PinnedImageTest)).IsEqualTo(1);
         await Assert.That(test.Contains("KEYLOAD_TIMESERIES_IMAGE_FACTS_DIRECTORY: ${{ runner.temp }}/keyload-timeseries-image-facts",
             StringComparison.Ordinal)).IsTrue();
-        await Assert.That(test.Contains("dotnet test --project tests/KeyLoad.ComparisonTests", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(test.Contains("dotnet run --project src/KeyLoad.AppHost", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(test.Contains("--KeyLoadTests:Suite=comparison", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(test.Contains("--KeyLoadTests:Filter=/*/*/TimeSeriesIntensivePinnedImageTests/*",
+            StringComparison.Ordinal)).IsTrue();
+        await Assert.That(test.Contains("--KeyLoadTests:ResultsDirectory=TestResults/timeseries-image",
+            StringComparison.Ordinal)).IsTrue();
         await Assert.That(test.Contains("continue-on-error:", StringComparison.Ordinal)).IsFalse();
         await Assert.That(test.Contains("if:", StringComparison.Ordinal)).IsFalse();
         var artifact = steps.Single(step => step.Contains(FactsArtifact, StringComparison.Ordinal));

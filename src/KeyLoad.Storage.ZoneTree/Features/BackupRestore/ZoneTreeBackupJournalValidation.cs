@@ -54,7 +54,12 @@ internal static class ZoneTreeBackupJournalValidation
         // Recovery bounds each frame; a compacted checkpoint can have later WAL frames.
         // The observer validates every record without materializing a tree or imposing
         // the standalone-snapshot whole-file size limit on the combined journal.
-        return BinaryPrimitives.ReadUInt64LittleEndian(header) == CheckpointMagic
+        var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
+        if (magic == SourceCheckpointMagic)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, JournalFormatUpgradeRequired);
+        }
+        return magic == CheckpointMagic
             ? ZoneTreeCheckpointReader.Read(journal, options, ObserveValidatedMutation).Position
             : 0;
     }

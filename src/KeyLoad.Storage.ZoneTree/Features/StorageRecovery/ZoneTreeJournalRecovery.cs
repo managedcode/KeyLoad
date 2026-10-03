@@ -31,7 +31,12 @@ internal static class ZoneTreeJournalRecovery
 
         runtime.Journal.ReadExactly(header);
         runtime.Journal.Position = 0;
-        if (BinaryPrimitives.ReadUInt64LittleEndian(header) != CheckpointMagic)
+        var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
+        if (magic == SourceCheckpointMagic)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, JournalFormatUpgradeRequired);
+        }
+        if (magic != CheckpointMagic)
         {
             return 0;
         }
@@ -79,7 +84,7 @@ internal static class ZoneTreeJournalRecovery
     {
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
         if (magic is LegacyJournalMagic or LegacyBinaryJournalMagic or LegacyNativeMutationJournalMagic
-            || magic == JournalMagic && identityVersion != BinaryJournalIdentityVersion)
+            || magic == JournalMagic && identityVersion != CurrentDataEpoch)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, JournalFormatUpgradeRequired);
         }

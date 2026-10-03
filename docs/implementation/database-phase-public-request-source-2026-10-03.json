@@ -1,0 +1,54 @@
+{
+  "schema": "keyload.database-phase.source-review.v1",
+  "dateUtc": "2026-10-03",
+  "stage": "public-request-source-join",
+  "requirements": [
+    "REQ-RESOURCE-003",
+    "REQ-RESOURCE-004"
+  ],
+  "acceptance": [
+    "AC-DBPROF-001",
+    "AC-DBPROF-002",
+    "AC-DBPROF-003"
+  ],
+  "sourcePhasesAdded": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "totalSourcePhases": 17,
+  "remainingSourcePhases": 15,
+  "originalReplicationProviderReceipt": "docs/implementation/database-phase-producer-source-r134.json",
+  "files": [
+    {
+      "path": "src/KeyLoad.Server/Features/Authorization/DatabaseCredentialResolver.cs",
+      "sha256": "b1fae7e2cb5a18a4bd1d9512ca866570442e21a7cb1a8d5d3d63e1113e73feab"
+    },
+    {
+      "path": "src/KeyLoad.Server/Features/ClientApi/CanonicalOperationGateway.cs",
+      "sha256": "3113e95d6d71d51c305b3503cd1fb6709c83df7e1a09b68edb52ed283b8d6fd9"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ClusterRouting/DatabaseReadGrain.cs",
+      "sha256": "72f1b27228b44c6bc770513b7626d9ee359428cef7bf862bd612498059f74bee"
+    }
+  ],
+  "independentStoppedReviewSha256": "7c8aee8f8fbb2df45b838e3a4c2a1dff2a5bf0af99ccc84444b5ee4bd6cf57fd",
+  "review": "Root fully read exact stopped independent review and complete private Server candidates. Reverse patch reconstruction verifies original bytes; signed authority, original await/token/stage/encoding/error/deactivation order retained.",
+  "developmentBuild": {
+    "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+    "result": "passed_zero_warnings_zero_errors",
+    "logSha256": "c45559cc70d0c3e6a294b10b5eb13460e3ff3d6963ffd7e9901772890d87e2fc",
+    "elapsed": "00:02:00.18",
+    "sourceSnapshot": "Shared moving checkout; exact producer hashes above. No full immutable GitHub qualification claim."
+  },
+  "limitations": [
+    "Mode is disabled by default; source joins are not observed enabled counter samples.",
+    "No production Initialize/Capture/export call, on/off overhead, phase throughput, allocation/RSS or actual enabled RF3 proof yet.",
+    "Remaining15 producers, private capture/startup, direct success/failure/cancellation and authorization/encoding exclusion counter tests remain required.",
+    "Exact-source normal/scalar/recovery/RF3 official SDK/MCP/coverage and native fault/endurance gates remain open.",
+    "Phase intervals overlap and are not summed/subtracted into exclusive request latency."
+  ]
+}

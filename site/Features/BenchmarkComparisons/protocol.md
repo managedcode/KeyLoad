@@ -1,44 +1,33 @@
-# Static evidence protocol — TASK-SITE-004/005/006
+# Current native comparison website protocol
 
-This frozen implementation contract supplements [ADR-040](../../../docs/ADR/ADR-040-static-site-threejs-evidence.md). It does not qualify the run: the authenticated GitHub workflow parent verifies successful main-branch KeyLoad CI evidence before downloading reports.
+This implementation contract supplements [ADR-040](../../../docs/ADR/ADR-040-static-site-threejs-evidence.md), [ADR-056](../../../docs/ADR/ADR-056-isolated-linux-comparison-cells.md) and [ADR-076](../../../docs/ADR/ADR-076-current-cohort-publication.md). The complete Benchmarks comparison-aggregate job is the sole live producer. Retired profile/catalog collectors and renderers have no active compatibility path. Immutable authentic historical results remain history.
 
-## Production exports
+## Original authority and production exports
 
-- `measurements.mjs`: `scenarios`, `colors`, `metrics`, `median(values)`, `selectedRows(report, scenario, repetition, metric)` preserve the existing flat module's output and arithmetic.
-- `measurement-loader.mjs`: `validateCatalog(value)` returns the validated object or throws; `validateReport(value, expectedRevision)` returns the validated report or throws; `sha256(bytes)` returns lower-case hex; `loadCatalog({ catalogUrl, signal })` returns the validated catalog; `loadReport({ entry, baseUrl, signal })` verifies exact raw hash, parses/validates and returns the report. Real `fetch` only, no test substitute dependency. `baseUrl` identifies the catalog's data directory.
-- `benchmark-lab.mjs`: `mountBenchmarkLab({ root, catalogUrl })` synchronously returns `{ dispose }`, starts loading with owned error handling, clears every dependent surface atomically and rejects aborted/late generations.
-- Scene mount is independent, as recorded in the plan. Workers may not change these interfaces without root review.
+The authenticated workflow captures the exact source/run/attempt/job/artifact tuple and original provider archives. Confined BCL extraction validates both immutable ZIPs, the original bounded receipt and all 277 original inputs for the complete 270-cell native cohort. Failed, missing, skipped, expired, mixed or unauthenticated cells fail closed. Website, measured and trusted-control source revisions remain distinct and accurate. A supplied local directory cannot authenticate GitHub.
 
-## Catalog schema 1
+- `isolated-projection.mjs` consumes the complete real aggregate and validates every source record before emitting the browser projection.
+- `isolated-loader.mjs` validates the catalog and complete projection, verifies raw SHA256 before parsing and uses real bounded HTTP reads with cancellation. Foreign URLs, unsafe paths, invalid metadata and incomplete bodies fail explicitly.
+- `isolated-measurements.mjs`, `measurements.mjs` and `isolated-controls.mjs` retain native dimension selection, metric arithmetic, median, percentile/resource units and honest unsupported values. An unavailable value is never converted to zero.
+- `measurement-loader.mjs` retains only the shared cross-runtime SHA256 primitive. The browser path uses its native crypto API; Node-only imports cannot occur on the browser path.
+- `isolated-lab.mjs` owns the sole visible `#benchmarks` surface, bounded request generations, dependent controls, accessible rows and disposal. Abort and late results cannot replace the selected generation.
+- `bootstrap.mjs` mounts the current comparison surface and preserves copy behavior, independent lazy scene lifecycle, reduced motion, page lifecycle, fallback and teardown. Official Three.js bytes, license and manifest stay unchanged.
 
-`schemaVersion: 1`, ISO `generatedAt`, `siteSourceRevision` (40 lower-case hex or null), `siteSourceKind` (`committed_source` or `local_preview`), `measuredSourceRevision` (40 hex), and `evidenceUrl` (exact `https://github.com/managedcode/KeyLoad/actions/runs/<positive integer>`).
+## Real probes and client behavior
 
-`runs` is a nonempty array with unique lower-case `[a-z0-9-]+` IDs. Each has `id`, nonempty `label`, `report: runs/<id>/results.json`, the same allowlisted `evidenceUrl`, ISO `startedAt`, matching `sourceRevision`, and raw-file `sha256` (64 hex). Every entry revision and evidence URL must equal the catalog values. `local_preview` requires a null website revision; `committed_source` requires a valid website revision. URLs/paths are validated before any link is assigned or report requested. No absolute/parent/query/fragment/encoded paths, foreign origins or partial entries.
+TUnit owns all site qualification. Real Node child probes import the actual production arithmetic and validators; C# derives an independent expectation from authenticated original current records. Controlled malformed copies may prove rejection but cannot be published or labeled genuine measurements. Probe responses are one bounded JSON `{ ok: true, result }` or `{ ok: false, error }`; child failure, nonzero exit, stderr, timeout or incomplete drains fail the test. Every child joins or kills/joins its owned process in finally.
 
-## Historical report boundary
+Real Chrome/CDP sessions exercise builder-emitted assets through an actual confined ephemeral HTTP listener. Preserve raw-hash rejection, all current engine/node/scenario/repetition/metric selection, independent arithmetic, keyboard/accessibility, cancellation and stale generation behavior. Scene tests retain pointer following, pause/resume, reduced motion, retina resizing, lazy rendering, visibility/page lifecycle and safe fallback. No substituted fetch, fake browser, invented samples or fabricated coverage.
 
-Only complete schema-2 reports with the exact six named engines and six named scenarios are accepted. Each engine/scenario/repetition tuple occurs exactly once. Repetitions/options are positive bounded integers (warmup may be zero), source and dataset hashes are valid, dates and nonempty platform/target contract strings are present, and each repetition has exactly 20 supported measured cases and 16 explicitly unsupported cases. Failed reports are rejected for publication/display.
+## Root builder CLI and final publication receipt
 
-Every measured case has attempts/successes equal to configured operations, zero failures, finite nonnegative metrics and resource measurements, positive elapsed time, consistent percentiles, and exactly one valid successful sample per operation with valid worker/operation IDs. Queue measurements require enqueue/receive/ACK percentile fields and unique-completion count equal to successes. Unsupported cases have null measurements and no samples. Invalid values are rejected, never rendered partly or converted to zero.
+`node site/scripts/build.mjs --isolated=<original aggregate directory> --output=<isolated nonexistent output> --revision=<measured SHA> --evidence-url=<exact producer run URL> --site-revision=<qualified website SHA>`.
 
-## Real Node probe owned by SiteTests
+All arguments are mandatory; duplicate/unknown options and retired `--reports` input fail. Validate the complete source identity, aggregate/projection, vendor manifest/bytes and authored gzip budgets before creating output. Refuse existing output, source/input ancestors or descendants, filesystem root and symlinked input/output escapes. Preserve exact `aggregate.json` bytes; emit only the validated current catalog/projection and source-bound static assets, metadata/icons/SEO, never raw benchmark samples. On failure remove only newly owned output.
 
-The child process reads one JSON object from stdin and emits exactly one JSON response. `operation` selects:
+The workflow snapshots a regular original archive receipt of at most 4 MiB into a read-only owned file and verifies its hash, original archives and all 277 input hashes before and after the bounded builder. Emitted aggregate bytes must match exactly. `data/publication.json` schema 2 records website/measured/control revisions, original test/coverage/job receipts and complete isolated archive authority. Every current authored JS source remains in native coverage: aggregate lines 80%, branches 70%, critical validators 90%. Trusted-control source closure covers both current producer tools and their actual builder/browser consumers. No threshold is waived by retiring a dead source.
 
-- `rows`: `reportPath`, `scenario`, `metric`, `repetition`; import production `selectedRows` and return its rows.
-- `median`: `values`; invoke production `median` (boundary-value input is legitimate primitive test data).
-- `validateCatalog`: `value`; invoke the actual production catalog validator.
-- `validateReport`: `value`, `expectedRevision`; invoke the actual production report validator.
-- `hash`: `filePath`; hash actual file bytes through production `sha256`.
-- `loadReport`: `entry`, `baseUrl`; invoke the actual production `loadReport` with real HTTP against an ephemeral static-file listener serving builder-emitted authentic files. A copied report whose raw bytes change while its catalog hash stays fixed must be rejected. The listener owns a real bound socket and confined file root, bounded requests/cancellation/teardown; it supplies no substitute fetch, validator, arithmetic or invented result.
-
-Response is `{ ok: true, result }` or `{ ok: false, error }`. Validation rejection is a normal captured response; probe/process failure uses nonzero exit and stderr, which the C# process wrapper must treat as a failure. Pass repository root as `KEYLOAD_SITE_REPOSITORY`; resolve actual production module paths from it. The configured absolute `KEYLOAD_SITE_REPORTS` directory contains authenticated downloaded profiles; the run/revision environment inputs identify that receipt, rather than a permanently hard-coded run or download directory. The committed-site builder case uses `KEYLOAD_SITE_SOURCE_REVISION`, verified against the actual website checkout HEAD, proving that website and measured revisions occupy separate catalog fields and documentation links address the website source. No arithmetic or validator implementation in the probe. SiteBuildTests invoke the real `site/scripts/build.mjs` CLI directly against isolated temporary output, checking exit/error behavior and complete raw-byte-preserving assets. C# independently computes numeric expectations over authentic downloaded GitHub reports. Controlled malformed copies are never published.
-
-## Root builder CLI
-
-`node site/scripts/build.mjs --reports=<downloaded directory> --output=<isolated nonexistent output> --revision=<measured SHA> --evidence-url=<comparison-evidence run URL> [--site-revision=<committed website SHA>]`.
-
-All evidence arguments are mandatory. Omitting `--site-revision` produces an explicitly uncommitted local preview. Existing output must be refused (clean-output contract); callers use disposable distinct paths. Refuse output equal to/inside source or reports or their ancestors, filesystem root, and symlinked input/output escapes. Copy exact report/CSV/Markdown bytes. Validate the complete input and vendor manifest before creating output; on failure remove only newly owned output. Root may add helper modules only with an explicit ownership/plan update.
+Deploy only after complete Aspire-owned TUnit/analyzer/native-browser qualification and exact main/producer freshness, through the needs-gated least-privilege Pages job. Preserve the real provider outcome receipt. Configuration and source checks alone are not publication or database qualification.
 
 ## Native coverage receipt — TASK-SITE-008/009
 
@@ -48,7 +37,7 @@ Each browser invocation owns a fresh `<root>/browser/sessions/<lowercase unique 
 
 `{schemaVersion:1,sourceRevision:<GITHUB_SHA>,browserVersion:<actual Chrome version>,origins:[<actual http://127.0.0.1:port origins>],sources:[{path:<repository-relative site/... path>,sha256:<source-manifest hash>}],coverageFiles:[<native JSON basenames>]}`.
 
-The sources list contains the exact 13 authored production paths from the source manifest, including Node-only build sources; this proves identity and is never proof of execution. Unique origins/source paths/file names, valid raw hashes and confined names are required. Metadata is written only after all owned browser commands/process outputs settle. Session directories prevent parallel test overwrites. Missing/malformed metadata or a requested native coverage file fails the gate.
+The sources list contains every current authored production path from the immutable source manifest, including Node-only build sources; this proves identity and is never proof of execution. Unique origins/source paths/file names, valid raw hashes and confined names are required. Metadata is written only after all owned browser commands/process outputs settle. Session directories prevent parallel test overwrites. Missing/malformed metadata or a requested native coverage file fails the gate.
 
 Each listed native JSON file is the unchanged command-result object from `Profiler.takePreciseCoverage`, including its optional official timestamp: `result` contains script records with `scriptId`, `url`, `functions`, and each function's `functionName`, `isBlockCoverage` and `ranges`. `isBlockCoverage` belongs to the function, not its ranges. Keep supported API fields; do not invent ranges or transform the raw receipt. Before page script execution enable Profiler and start precise coverage with callCount/detailed true. Browser scripts at an allowlisted origin's `/Features/BenchmarkComparisons/...mjs` map to `site/Features/BenchmarkComparisons/...mjs`; official unchanged vendor and nonproduction eval scripts do not enter the denominator. Node file URLs map only to exact required repository source files. Every required authored file missing actual execution ranges is uncovered and fails; source identity metadata cannot make it covered.
 
@@ -58,7 +47,7 @@ Preserve each native receipt and script as a separate execution snapshot: raw re
 
 Physical function identity is the exact source path and outer function span; functionName remains metadata and must not create duplicate denominators. The outcome denominator is the union of observed native child intervals keyed by source, physical function span and child span. A matching positive explicit outcome proves coverage. When the interval is omitted in another snapshot of the same physical function, infer coverage only when that snapshot proves positive effective execution throughout the canonical interval. An enclosing module is insufficient proof. A positive explicit outer outcome is not invalidated by an unexecuted descendant. Preserve native receipts unchanged and record derived decisions separately.
 
-Regression proof uses actual Node-generated receipts from both sides of a real branch. Assert exact executable/covered totals, the true and false return lines covered, an uncalled function uncovered, and identical results after receipt-order reversal. Separate/nested function identity proof also uses real Node output. Malformed/crossing-range cases mutate only the fixture's exact file-URL script, never an unrelated built-in script. Every child process starts bounded concurrent stdout/stderr drains, has a deadline, and joins or kills/joins the owned process in finally. No local tests or fabricated native coverage qualification.
+Regression proof uses actual Node-generated receipts from both sides of a real branch. Assert exact executable/covered totals, the true and false return lines covered, an uncalled function uncovered, and identical results after receipt-order reversal. Separate/nested function identity proof also uses real Node output. Malformed/crossing-range cases mutate only the fixture's exact file-URL script, never an unrelated built-in script. Every child process starts bounded concurrent stdout/stderr drains, has a deadline, and joins or kills/joins the owned process in finally. Local development runs remain development evidence; fabricated native coverage never qualifies publication.
 
 ### Native equal-span function contract
 

@@ -18,11 +18,9 @@ internal sealed class SiteBenchmarkProducerSelectionTests
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var site = SiteTestInputs.Read();
-        var siteRevision = SiteGitHubEvidenceInputs.RequiredRevisionEnvironment(
-            SiteGitHubEvidenceTokens.SiteRevisionEnvironment);
-        var workflowRevision = SiteGitHubEvidenceInputs.RequiredRevisionEnvironment(
-            SiteGitHubEvidenceTokens.WorkflowRevisionEnvironment);
-        var sourceRevision = SiteGitHubEvidenceInputs.RequiredRevisionEnvironment(SourceRevisionEnvironment);
+        var siteRevision = RequiredRevisionEnvironment(SitePublicationTokens.SourceRevisionEnvironment);
+        var workflowRevision = RequiredRevisionEnvironment(SitePublicationTokens.ControlRevisionEnvironment);
+        var sourceRevision = RequiredRevisionEnvironment(SourceRevisionEnvironment);
         var runId = long.Parse(Environment.GetEnvironmentVariable(RunIdEnvironment)!, NumberStyles.None,
             CultureInfo.InvariantCulture);
         var attempt = int.Parse(Environment.GetEnvironmentVariable(RunAttemptEnvironment)!, NumberStyles.None,
@@ -125,6 +123,14 @@ internal sealed class SiteBenchmarkProducerSelectionTests
             },
         };
         return SiteIsolatedGitHubScope.RunAsync(SiteIsolatedGitHubFields.ProofOperation, arguments, token);
+    }
+
+    private static string RequiredRevisionEnvironment(string name)
+    {
+        var value = Environment.GetEnvironmentVariable(name);
+        return SiteCoverageSourceManifestWriter.IsRevision(value)
+            ? value!
+            : throw new InvalidOperationException(SiteTokens.SiteTestsMissingEnvironment);
     }
 
     private static Task<JsonElement> SelectAsync(SiteIsolatedGitHubScope scope, string mode,

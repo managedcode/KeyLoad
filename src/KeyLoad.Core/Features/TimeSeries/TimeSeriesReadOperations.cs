@@ -45,6 +45,19 @@ public static class TimeSeriesReadOperations
         return Read(database, (view, budget) => SampleAggregateWindowReader.Read(database, view, principalId, request, budget), cancellationToken);
     }
 
+    /// <summary>Reads persisted retention progress for one authorized time series.</summary>
+    /// <param name="database">Engine borrowing its node-local store.</param>
+    /// <param name="principalId">Persisted caller identity.</param>
+    /// <param name="request">Partition and canonical series identity.</param>
+    /// <param name="cancellationToken">Operation cancellation.</param>
+    /// <returns>The exclusive UTC floor and bounded physical purge progress.</returns>
+    public static SampleRetentionStatus ReadSampleRetention(this DatabaseEngine database, string principalId,
+        ReadSampleRetentionRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Read(database, (view, budget) => SampleRetentionStatusReader.Read(database, view, principalId, request, budget), cancellationToken);
+    }
+
     private static T Read<T>(DatabaseEngine database, Func<IKeyValueView, ReadExecutionBudget, T> read,
         CancellationToken cancellationToken)
     {

@@ -16,9 +16,6 @@ runs:
       run: |
         revision=$(timeout 120s gh api "repos/$GH_REPO/git/ref/heads/main" --jq .object.sha)
         [[ "$revision" == "$QUALIFIED_REVISION" ]]
-        capture="$GITHUB_WORKSPACE/predeploy-capture"
-        bash control/scripts/Features/BenchmarkComparisons/collect-github-evidence.sh --input="$capture" --mode=publish --site-revision="$revision" --workflow-revision="$CONTROL_REVISION"
-        node control/scripts/Features/BenchmarkComparisons/github-evidence.mjs fresh --before="$GITHUB_WORKSPACE/qualification/artifacts/site-evidence/archive-receipt.json" --after="$capture/metadata-proof.json" > predeploy-proof.json
         isolated_capture="$GITHUB_WORKSPACE/predeploy-isolated-capture"
         node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs capture-metadata --input="$isolated_capture" --mode=publish --site-revision="$revision" --workflow-revision="$CONTROL_REVISION" > predeploy-isolated-capture-envelope.json
         jq -e '.ok == true' predeploy-isolated-capture-envelope.json > /dev/null
@@ -45,8 +42,6 @@ runs:
       with:
         name: site-publication-${{ github.run_id }}-${{ github.run_attempt }}
         path: |
-          predeploy-capture
-          predeploy-proof.json
           predeploy-isolated-capture
           predeploy-isolated-capture-envelope.json
           predeploy-isolated-proof.json

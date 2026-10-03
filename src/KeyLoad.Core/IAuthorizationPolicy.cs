@@ -19,4 +19,6 @@ public interface IAuthorizationPolicy
     string Project(PrincipalRecord principal, IReadOnlyList<SensitiveFieldPolicy> policies, string json, out string[] omitted);
     /// <summary>Requires access to every protected field needed for worker processing.</summary>
     void RequireWorkerInput(PrincipalRecord principal, ResourceDefinition resource);
+    /// <summary>Requires raw read and use of every configured replay payload and header field.</summary>
+    void RequireReplayInput(PrincipalRecord principal, ResourceDefinition resource);
 }

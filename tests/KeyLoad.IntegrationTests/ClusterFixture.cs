@@ -1,3 +1,4 @@
+using KeyLoad.IntegrationTests.Features.TestInfrastructure;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
@@ -52,33 +53,32 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     /// <returns>A task that completes when each of the three resources is healthy.</returns>
     public async Task InitializeAsync()
     {
-        using var timeout = new CancellationTokenSource(StartupTimeout);
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
-            [$"{ClusterFixtureProtocol.DataRootArgument}{Root}", ClusterFixtureProtocol.EphemeralArgument,
-                ClusterFixtureProtocol.SnapshotThresholdArgument], timeout.Token);
-        ConfigureCommandAdmission(builder, commandBytes);
-        ConfigureHttpAdmission(builder);
-        var containerNames = GetContainerNames(builder);
-        var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
-        ConfigureLogging(builder);
-
-        App = await builder.BuildAsync(timeout.Token);
-        containerRuntime = new(App, containerNames, repository.FullName);
-        diagnostics = new(App);
-        diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
-        await ClusterFixtureImageIdentity.VerifyAsync(App, timeout.Token);
-        await App.StartAsync(timeout.Token);
-        ReadPrivateProfile();
-
         try
         {
+            using var timeout = new CancellationTokenSource(StartupTimeout);
+            var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
+                [$"{ClusterFixtureProtocol.DataRootArgument}{Root}", ClusterFixtureProtocol.EphemeralArgument,
+                    ClusterFixtureProtocol.SnapshotThresholdArgument], timeout.Token);
+            ConfigureCommandAdmission(builder, commandBytes);
+            ConfigureHttpAdmission(builder);
+            var containerNames = GetContainerNames(builder);
+            var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
+            ConfigureLogging(builder);
+
+            App = await builder.BuildAsync(timeout.Token);
+            containerRuntime = new(App, containerNames, repository.FullName);
+            diagnostics = new(App);
+            diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
+            await ClusterFixtureImageIdentity.VerifyAsync(App, timeout.Token);
+            await App.StartAsync(timeout.Token);
+            ReadPrivateProfile();
+
             await Task.WhenAll(Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
                 .Select(number => App.ResourceNotifications.WaitForResourceHealthyAsync(ClusterFixtureProtocol.NodeName(number), timeout.Token)));
         }
-        catch (Exception)
+        catch (Exception startupFailure)
         {
-            var diagnosticToken = timeout.IsCancellationRequested ? CancellationToken.None : timeout.Token;
-            await SaveFailureDiagnosticsAsync(diagnosticToken);
+            await ClusterFixtureStartupFailure.DisposeAndThrowAsync(this, startupFailure).ConfigureAwait(false);
             throw;
         }
     }

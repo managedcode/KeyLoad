@@ -2,7 +2,6 @@ namespace KeyLoad.Orleans;
 
 internal static class GrainRoutingProtocol
 {
-    internal const string RequestPurpose = "keyload-grain-request-v1";
     internal const string RequestAlias = "keyload.request.v1";
     internal const string CommandAlias = "keyload.partition.command.v1";
     internal const string ReadAlias = "keyload.database.read.v1";

@@ -3,30 +3,14 @@ using System.Text.Json;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-internal sealed record ProbeRequest(string Operation, string? ReportPath = null, string? Scenario = null,
-    string? Metric = null, string? Repetition = null, double[]? Values = null, JsonElement? Value = null,
-    string? ExpectedRevision = null, string? FilePath = null, JsonElement? Entry = null, string? BaseUrl = null);
+internal sealed record ProbeRequest(string Operation, double[]? Values = null);
 
-internal sealed record ProbeResult(JsonElement Value, bool Accepted = true)
-{
-    public JsonElement Property(string name) => Value.GetProperty(name);
-}
+internal sealed record ProbeResult(JsonElement Value);
 
 internal static class SiteNodeProbe
 {
-    public static Task<ProbeResult> RunAsync(SiteTestInputs inputs, ProbeRequest request, CancellationToken cancellationToken)
-        => RunRawAsync(inputs, JsonSerializer.Serialize(request, SiteTokens.JsonOptions), cancellationToken);
-
-    public static async Task<ProbeResult> RunRawAsync(SiteTestInputs inputs, string input, CancellationToken cancellationToken)
-    {
-        using var process = StartProcess(inputs);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(SiteTokens.NodeTimeoutMilliseconds);
-        var result = await CaptureProcess(process, input, timeout.Token);
-        return ParseResponse(result, process.ExitCode);
-    }
-
-    private static Process StartProcess(SiteTestInputs inputs)
+    public static async Task<ProbeResult> RunAsync(SiteTestInputs inputs, ProbeRequest request,
+        CancellationToken cancellationToken)
     {
         var start = new ProcessStartInfo(SiteTokens.NodeExecutable)
         {
@@ -39,67 +23,63 @@ internal static class SiteNodeProbe
         };
         start.ArgumentList.Add(Path.Combine(inputs.Repository, SiteAssetTokens.ProbeRelativePath));
         start.Environment[SiteTokens.NodeRepositoryEnvironment] = inputs.Repository;
-        start.Environment[SiteTokens.ReportsEnvironment] = inputs.Reports;
-        var process = new Process { StartInfo = start, EnableRaisingEvents = true };
-        try
+        return await SiteNodeProbeExecution.RunAsync(new Process { StartInfo = start, EnableRaisingEvents = true },
+            request, cancellationToken);
+    }
+}
+
+internal static class SiteNodeProbeExecution
+{
+    internal static async Task<ProbeResult> RunAsync(Process process, ProbeRequest request,
+        CancellationToken cancellationToken)
+    {
+        using (process)
         {
-            if (process.Start())
+            if (!process.Start())
             {
-                return process;
+                throw new InvalidOperationException(SiteTokens.NodeProbeDidNotStart);
             }
 
-            throw new InvalidOperationException(SiteTokens.NodeProbeDidNotStart);
-        }
-        catch (Exception)
-        {
-            process.Dispose();
-            throw;
-        }
-    }
-
-    private static async Task<(string StandardOutput, string StandardError)> CaptureProcess(
-        Process process, string input, CancellationToken cancellationToken)
-    {
-        var stdoutTask = SiteProcessOutput.ReadAsync(process.StandardOutput, SiteTokens.NodeOutputExceeded, cancellationToken);
-        var stderrTask = SiteProcessOutput.ReadAsync(process.StandardError, SiteTokens.NodeOutputExceeded, cancellationToken);
-        try
-        {
-            await process.StandardInput.WriteLineAsync(input.AsMemory(), cancellationToken);
-            process.StandardInput.Close();
-            var exitTask = process.WaitForExitAsync(cancellationToken);
-            var firstCompleted = await Task.WhenAny(exitTask, stdoutTask, stderrTask);
-            await firstCompleted;
-            await exitTask;
-            return (await stdoutTask, await stderrTask);
-        }
-        catch (Exception)
-        {
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(SiteTokens.NodeTimeoutMilliseconds);
+            var stdout = SiteProcessOutput.ReadAsync(process.StandardOutput, SiteTokens.NodeOutputExceeded, timeout.Token);
+            var stderr = SiteProcessOutput.ReadAsync(process.StandardError, SiteTokens.NodeOutputExceeded, timeout.Token);
             try
             {
-                await SiteProcessCleanup.StopAsync(process);
+                await process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(request).AsMemory(), timeout.Token);
+                process.StandardInput.Close();
+                var exit = process.WaitForExitAsync(timeout.Token);
+                await Task.WhenAny(exit, stdout, stderr);
+                await exit;
+                var output = await stdout;
+                var error = await stderr;
+                if (process.ExitCode != SiteTokens.ProcessSuccessExitCode || error.Length != SiteTokens.Zero)
+                {
+                    throw new InvalidOperationException(SiteTokens.NodeProbeFailure + " " + error);
+                }
+                using var document = JsonDocument.Parse(output);
+                return new(document.RootElement.GetProperty(SiteTokens.Result).Clone());
             }
-            finally
+            catch (Exception)
             {
-                await SiteProcessCleanup.ObserveCapturesAsync(process, stdoutTask, stderrTask);
+                await SiteNodeProbeCleanup.StopAndObserveAsync(process, stdout, stderr);
+                throw;
             }
-
-            throw;
         }
     }
+}
 
-    private static ProbeResult ParseResponse((string StandardOutput, string StandardError) result, int exitCode)
+internal static class SiteNodeProbeCleanup
+{
+    internal static async Task StopAndObserveAsync(Process process, Task<string> stdout, Task<string> stderr)
     {
-        if (exitCode != SiteTokens.ProcessSuccessExitCode || result.StandardError.Length != SiteTokens.Zero)
+        try
         {
-            throw new InvalidOperationException($"{SiteTokens.NodeProbeFailure} {exitCode}; {SiteTokens.StandardErrorLabel} {result.StandardError}");
+            await SiteProcessCleanup.StopAsync(process);
         }
-
-        using var document = JsonDocument.Parse(result.StandardOutput);
-        var response = document.RootElement;
-        if (!response.GetProperty(SiteTokens.Ok).GetBoolean())
+        finally
         {
-            return new(response.Clone(), Accepted: false);
+            await SiteProcessCleanup.ObserveCapturesAsync(process, stdout, stderr);
         }
-        return new(response.GetProperty(SiteTokens.Result).Clone());
     }
 }

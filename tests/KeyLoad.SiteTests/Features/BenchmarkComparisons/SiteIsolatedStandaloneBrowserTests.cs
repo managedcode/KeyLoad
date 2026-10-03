@@ -17,7 +17,7 @@ internal sealed class SiteIsolatedStandaloneBrowserTests
             new("PointRead", 3, "all", "throughput", "all"), token);
         await SiteIsolatedBrowserLayoutAssertions.AssertAsync(browser.Chrome.Cdp, projection.RootElement, token);
         var hidden = await browser.Chrome.Cdp.EvaluateAsync("document.querySelector('#benchmarks').hidden", false, token);
-        await Assert.That(hidden.GetBoolean()).IsTrue();
+        await Assert.That(hidden.GetBoolean()).IsFalse();
         const string resources = "performance.getEntriesByType('resource').map(entry=>entry.name)";
         var requests = (await browser.Chrome.Cdp.EvaluateAsync(resources, false, token)).EnumerateArray()
             .Select(item => item.GetString()!).ToArray();
@@ -26,7 +26,11 @@ internal sealed class SiteIsolatedStandaloneBrowserTests
         await Assert.That(requests.Any(url => url.EndsWith("/data/catalog.json", StringComparison.Ordinal))).IsFalse();
         await Assert.That(requests.Any(url => url.Contains("/workers/", StringComparison.Ordinal) ||
             url.EndsWith("/samples.csv", StringComparison.Ordinal))).IsFalse();
+        await Assert.That(requests.Any(url => url.Contains("benchmark-lab.mjs", StringComparison.Ordinal) ||
+            url.Contains("benchmark-chart.mjs", StringComparison.Ordinal) ||
+            url.Contains("benchmark-profiles.mjs", StringComparison.Ordinal))).IsFalse();
         await SiteIsolatedBrowserFailureAssertions.AssertRetryAndClearingAsync(browser, token);
+        await SiteBrowserNoScriptAssertions.AssertNoScript(browser.Chrome, browser.BaseUrl, fixture.Inputs.Site, token);
         await browser.CompleteAsync(token);
     }
 }

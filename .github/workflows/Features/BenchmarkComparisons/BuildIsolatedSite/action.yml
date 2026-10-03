@@ -1,5 +1,5 @@
-name: Build the qualified historical and isolated comparison website
-description: Preserve genuine qualified inputs and independent provenance through the bounded final Pages build.
+name: Build the qualified current comparison website
+description: Preserve original complete-cohort authority through the bounded final Pages build.
 runs:
   using: composite
   steps:
@@ -10,12 +10,8 @@ runs:
         set -euo pipefail
         jq -e '.passed == true' "$EVIDENCE_DIR/analyzer-coverage/report.json"
         jq -e '.passed == true' "$KEYLOAD_SITE_COVERAGE/report.json"
-        receipt="$EVIDENCE_DIR/archive-inputs/extraction.json"
         readonly isolated_receipt_limit=4194304
-        readonly legacy_receipt_limit=16777216
         readonly isolated_snapshot="$EVIDENCE_DIR/final-isolated-archive-receipt.json"
-        readonly legacy_snapshot="$EVIDENCE_DIR/final-legacy-archive-receipt.json"
-        readonly extraction_snapshot="$EVIDENCE_DIR/final-legacy-extraction-receipt.json"
         [[ "$KEYLOAD_SITE_ISOLATED_AGGREGATE" == "$KEYLOAD_SITE_ISOLATED_CAPTURE/input/aggregate" ]]
         snapshot_receipt() {
           local source="$1" target="$2" maximum="$3"
@@ -29,19 +25,11 @@ runs:
           cmp "$source" "$target"
         }
         snapshot_receipt "$KEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT" "$isolated_snapshot" "$isolated_receipt_limit"
-        snapshot_receipt "$KEYLOAD_SITE_ARCHIVE_RECEIPT" "$legacy_snapshot" "$legacy_receipt_limit"
-        snapshot_receipt "$receipt" "$extraction_snapshot" "$legacy_receipt_limit"
         isolated_hash=$(sha256sum "$isolated_snapshot" | cut -d' ' -f1)
-        legacy_hash=$(sha256sum "$legacy_snapshot" | cut -d' ' -f1)
-        extraction_hash=$(sha256sum "$extraction_snapshot" | cut -d' ' -f1)
-        readonly isolated_hash legacy_hash extraction_hash
+        readonly isolated_hash
         verify_authority() {
           cmp "$KEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT" "$isolated_snapshot"
-          cmp "$KEYLOAD_SITE_ARCHIVE_RECEIPT" "$legacy_snapshot"
-          cmp "$receipt" "$extraction_snapshot"
           [[ "$(sha256sum "$isolated_snapshot" | cut -d' ' -f1)" == "$isolated_hash" ]]
-          [[ "$(sha256sum "$legacy_snapshot" | cut -d' ' -f1)" == "$legacy_hash" ]]
-          [[ "$(sha256sum "$extraction_snapshot" | cut -d' ' -f1)" == "$extraction_hash" ]]
         }
         verify_isolated_inputs() {
           local phase="$1"
@@ -50,43 +38,15 @@ runs:
           jq -e '.ok == true and .result.workers == 270 and .result.files == 277' "$EVIDENCE_DIR/isolated-final-$phase.json" > /dev/null
           verify_authority
         }
-        verify_inputs() {
-          jq -e --arg root "$KEYLOAD_SITE_REPORTS" --slurpfile verified "$KEYLOAD_SITE_ARCHIVE_RECEIPT" '
-            .schemaVersion == 1 and .reportsRoot == $root and .archive == $verified[0].archive and
-            (.files | type == "array" and length == 12) and
-            ([.files[].path] | sort) == (["smoke", "json-1k-c8", "json-16k-c4"] as $profiles |
-              ["results.json", "samples.csv", "results.md", "runner.log"] as $names |
-              [$profiles[] as $profile | $names[] | $profile + "/" + .] | sort) and
-            all(.files[]; (.sha256 | type == "string" and test("^[a-f0-9]{64}$")) and
-              (.bytes | type == "number" and . >= 0 and . <= 8388608 and floor == .)) and
-            ([.files[].bytes] | add) <= 67108864
-          ' "$receipt" > /dev/null
-          jq -er '.files[] | [.path,.sha256,.bytes] | @tsv' "$receipt" > "$EVIDENCE_DIR/input-recheck.tsv"
-          [[ "$(sha256sum "$KEYLOAD_SITE_ARCHIVE" | cut -d' ' -f1)" == "$(jq -r '.archive.sha256' "$KEYLOAD_SITE_ARCHIVE_RECEIPT")" ]]
-          [[ "$(stat -c %s "$KEYLOAD_SITE_ARCHIVE")" == "$(jq -r '.archive.bytes' "$KEYLOAD_SITE_ARCHIVE_RECEIPT")" ]]
-          local checked=0
-          while IFS=$'\t' read -r path digest bytes; do
-            [[ "$(sha256sum "$KEYLOAD_SITE_REPORTS/$path" | cut -d' ' -f1)" == "$digest" ]]
-            [[ "$(stat -c %s "$KEYLOAD_SITE_REPORTS/$path")" == "$bytes" ]]
-            checked=$((checked + 1))
-          done < "$EVIDENCE_DIR/input-recheck.tsv"
-          [[ "$checked" == 12 ]]
-        }
-        verify_inputs
         verify_isolated_inputs before
-        timeout 300s node site/scripts/build.mjs --reports="$KEYLOAD_SITE_REPORTS" --isolated="$KEYLOAD_SITE_ISOLATED_AGGREGATE" --output="$GITHUB_WORKSPACE/_site" --revision="$KEYLOAD_SITE_MEASURED_REVISION" --evidence-url="https://github.com/$GH_REPO/actions/runs/$KEYLOAD_SITE_EVIDENCE_RUN" --site-revision="$KEYLOAD_SITE_SOURCE_REVISION" > "$EVIDENCE_DIR/final-builder.json"
-        for profile in smoke json-1k-c8 json-16k-c4; do
-          for file in results.json samples.csv results.md; do
-            cmp "$KEYLOAD_SITE_REPORTS/$profile/$file" "$GITHUB_WORKSPACE/_site/data/runs/$profile/$file"
-          done
-        done
+        evidence_url=$(jq -er '.run.url' "$isolated_snapshot")
+        timeout 300s node site/scripts/build.mjs --isolated="$KEYLOAD_SITE_ISOLATED_AGGREGATE" --output="$GITHUB_WORKSPACE/_site" --revision="$KEYLOAD_SITE_ISOLATED_MEASURED_REVISION" --evidence-url="$evidence_url" --site-revision="$KEYLOAD_SITE_SOURCE_REVISION" > "$EVIDENCE_DIR/final-builder.json"
         [[ -f "$GITHUB_WORKSPACE/_site/data/isolated/aggregate.json" && ! -L "$GITHUB_WORKSPACE/_site/data/isolated/aggregate.json" ]]
         cmp "$KEYLOAD_SITE_ISOLATED_AGGREGATE/aggregate.json" "$GITHUB_WORKSPACE/_site/data/isolated/aggregate.json"
-        verify_inputs
         verify_isolated_inputs after
         timeout 120s gh api --paginate --slurp "repos/$GH_REPO/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100" > "$EVIDENCE_DIR/qualification-jobs-pages.json"
         job_url=$(jq -er '[.[].jobs[] | select(.name == "Check website")] | select(length == 1) | .[0].html_url' "$EVIDENCE_DIR/qualification-jobs-pages.json")
         native_hash=$(sha256sum "$EVIDENCE_DIR/analyzer-coverage/report.json" | cut -d' ' -f1)
         site_hash=$(sha256sum "$KEYLOAD_SITE_COVERAGE/report.json" | cut -d' ' -f1)
-        jq -n --slurpfile proof "$KEYLOAD_SITE_ARCHIVE_RECEIPT" --slurpfile inputs "$receipt" --slurpfile tests "$EVIDENCE_DIR/test-receipts.json" --slurpfile isolated "$isolated_snapshot" --arg run_url "https://github.com/$GH_REPO/actions/runs/$GITHUB_RUN_ID" --arg job_url "$job_url" --arg native_hash "$native_hash" --arg site_hash "$site_hash" '{schemaVersion:1,source:{website:$proof[0].siteSourceRevision,measured:$proof[0].measuredSourceRevision,control:$proof[0].controlWorkflowRevision},evidence:{run:$proof[0].run,comparisonJob:$proof[0].comparisonJob,artifact:$proof[0].artifact,archive:$proof[0].archive},reports:[$inputs[0].files[]|select(.path|endswith("/runner.log")|not)],qualification:{runUrl:$run_url,jobUrl:$job_url,nativeReportSha256:$native_hash,siteReportSha256:$site_hash,tests:$tests[0]},isolated:$isolated[0]}' > "$GITHUB_WORKSPACE/_site/data/publication.json"
+        jq -n --slurpfile tests "$EVIDENCE_DIR/test-receipts.json" --slurpfile isolated "$isolated_snapshot" --arg run_url "https://github.com/$GH_REPO/actions/runs/$GITHUB_RUN_ID" --arg job_url "$job_url" --arg native_hash "$native_hash" --arg site_hash "$site_hash" '{schemaVersion:2,source:$isolated[0].source,qualification:{runUrl:$run_url,jobUrl:$job_url,nativeReportSha256:$native_hash,siteReportSha256:$site_hash,tests:$tests[0]},isolated:$isolated[0]}' > "$GITHUB_WORKSPACE/_site/data/publication.json"
         verify_authority

@@ -141,8 +141,8 @@ classDiagram
 
 The optional bounded diagnostic workstream is accepted in
 [ADR-063](ADR/ADR-063-bounded-database-phase-profiling.md). The fixed bank and
-12 actual replication/provider phase joins are implemented in source. Process
-mode remains disabled by default; the remaining20 joins, private capture and
+17 actual public/request/replication/provider phase joins are implemented in source. Process
+mode remains disabled by default; the remaining15 joins, private capture and
 native phase/resource measurements remain open.
 
 ```mermaid
@@ -221,13 +221,18 @@ The embedded microbenchmark boundary follows Accepted ADR-047; it is peripheral
 runner qualification and does not replace the first product server's RF3 topology.
 The real generated child requires an externally visible unsealed library fixture:
 
-The additive [GarnetStorageEvaluation](Features/BenchmarkComparisons/GarnetStorageEvaluation.md)
-under [ADR-066](ADR/ADR-066-garnet-storage-evaluation.md) compares public raw
-Tsavorite2.2.0 and raw ZoneTree1.9.8 in a non-durable resident cache diagnostic.
-It preserves the existing product/node-local ZoneTree WAL and RF3 boundaries.
-Each engine uses its own Linux job and actual generated microbenchmark consumer;
-the following existing embedded fixture remains unchanged. Service/AOF/recovery,
-concurrency and multi-host qualification precede any later product decision.
+[ADR-071](ADR/ADR-071-canonical-zonetree-providers.md) fixes ZoneTree storage
+and ZoneTree.FullTextSearch derived text indexes. Candidate engine code and
+discarded evaluation plans are removed; native WAL, node-local ownership, RF3
+and all correctness/resource/qualification contracts remain mandatory.
+The independent [ScaledWorkloads](Features/BenchmarkComparisons/ScaledWorkloads.md)
+under [ADR-069](ADR/ADR-069-representative-scaled-workloads.md) adds actual
+100K/1M/5M full-keyspace read datasets,5M calls per measurement and explicit
+resource/value/provider gates. Mandatory public index/complex/RF3 stages remain
+open; existing4096/270 control and site schemas remain separate.
+Local ZoneTree microbenchmarks use the actual generated consumer for development.
+Full native database comparisons retain isolated Linux runners and the required
+resource, correctness, recovery and multi-node qualification gates.
 
 ```mermaid
 classDiagram
