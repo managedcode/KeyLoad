@@ -5,9 +5,12 @@ import { collectFacts, hashObject } from './native-serialization-files.mjs';
 
 const execute = promisify(execFile);
 
-export async function command(file, args, maxBuffer = 4 * 1024 * 1024) {
-  const result = await execute(file, args, { encoding: 'utf8', timeout: 60000, maxBuffer, windowsHide: true });
-  return result.stdout;
+export async function command(file, args, maxBuffer = 4 * 1024 * 1024, signal) {
+  signal?.throwIfAborted();
+  const execution = execute(file, args, { encoding: 'utf8', timeout: 60000, maxBuffer, windowsHide: true, signal });
+  const closed = new Promise(resolve => execution.child.once('close', resolve));
+  try { return (await execution).stdout; }
+  finally { await closed; }
 }
 
 export async function sourceFacts(environment) {
@@ -19,7 +22,7 @@ export async function sourceFacts(environment) {
   return { sha256: hashObject(files), files };
 }
 
-export async function githubJson(route) {
+export async function githubJson(route, signal) {
   return JSON.parse(await command('gh', ['api', route, '--method', 'GET', '-H', 'Accept: application/vnd.github+json',
-    '-H', 'X-GitHub-Api-Version: 2022-11-28']));
+    '-H', 'X-GitHub-Api-Version: 2022-11-28'], undefined, signal));
 }

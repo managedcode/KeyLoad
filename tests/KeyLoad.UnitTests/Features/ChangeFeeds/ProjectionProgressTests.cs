@@ -130,19 +130,51 @@ internal sealed class ProjectionProgressTests
     [Test]
     public async Task ReservedBytesAreAlsoBoundedAndAFailedEffectDoesNotConsumeThem()
     {
-        using var db = new TestDatabase(new() { MaxOutboxBytes = 1_500, ReservedOutboxBytes = 1_500 });
+        var small = new PutDocument("derived", "small", "{}");
+        var large = new PutDocument("derived", "large", JsonSerializer.Serialize(new { data = new string('x', 2_000) }));
+        var bytes = ProjectionNativeByteFixture.Calibrate(small, large);
+        await Assert.That(bytes.Large).IsGreaterThan(bytes.Small);
+        using var db = new TestDatabase(new() { MaxOutboxBytes = bytes.Input, ReservedOutboxBytes = bytes.Small });
+        db.Configure("orders", ResourceKind.Collection);
+        db.Configure("derived", ResourceKind.Collection);
+        db.Commit(new PutDocument("orders", "input", "{}"));
+        await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Head.StoredBytes).IsEqualTo(bytes.Input);
+        var consumer = Configure(db);
+        var batch = db.Database.ReadProjectionBatch("root", new(consumer));
+        await Assert.That(Write(db, new PutDocument("orders", "blocked", "{}")).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "blocked"))).IsNull();
+        await Assert.That(Complete(db, consumer, batch, large).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        var failed = db.Database.GetOutboxStatus("root", db.Partition);
+        await Assert.That(failed.Head.StoredBytes).IsEqualTo(bytes.Input);
+        await Assert.That(failed.Head.Tail).IsEqualTo(1);
+        await Assert.That(failed.Consumers.Single().Checkpoint).IsEqualTo(0);
+        await Assert.That(failed.Consumers.Single().LastProgressReservationCut).IsEqualTo(-1);
+        await Assert.That(db.Database.GetDocument("root", new(db.Partition, "derived", "large"))).IsNull();
+        Complete(db, consumer, batch, small).Get<ProjectionBatchResult>();
+        var status = db.Database.GetOutboxStatus("root", db.Partition);
+        await Assert.That(status.Head.StoredBytes).IsEqualTo(checked(bytes.Input + bytes.Small));
+        await Assert.That(status.Head.StoredBytes).IsGreaterThan(bytes.Input).And.IsLessThanOrEqualTo(checked(bytes.Input + bytes.Small));
+        await Assert.That(status.Consumers.Single().LastProgressReservationCut).IsEqualTo(1);
+    }
+    [Test]
+    public async Task OneByteShortProjectionReserveRollsBackEffectsCheckpointAndReservation()
+    {
+        var small = new PutDocument("derived", "small", "{}");
+        var large = new PutDocument("derived", "large", JsonSerializer.Serialize(new { data = new string('x', 2_000) }));
+        var bytes = ProjectionNativeByteFixture.Calibrate(small, large);
+        using var db = new TestDatabase(new() { MaxOutboxBytes = bytes.Input, ReservedOutboxBytes = bytes.Small - 1 });
         db.Configure("orders", ResourceKind.Collection);
         db.Configure("derived", ResourceKind.Collection);
         db.Commit(new PutDocument("orders", "input", "{}"));
         var consumer = Configure(db);
         var batch = db.Database.ReadProjectionBatch("root", new(consumer));
-        var large = new PutDocument("derived", "large", JsonSerializer.Serialize(new { data = new string('x', 2_000) }));
-        await Assert.That(Complete(db, consumer, batch, large).Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Consumers.Single().LastProgressReservationCut).IsEqualTo(-1);
-        Complete(db, consumer, batch, new PutDocument("derived", "small", "{}")).Get<ProjectionBatchResult>();
+        await Assert.That(Complete(db, consumer, batch, small).Error).IsEqualTo(ErrorCode.ResourceExhausted);
         var status = db.Database.GetOutboxStatus("root", db.Partition);
-        await Assert.That(status.Head.StoredBytes).IsGreaterThanOrEqualTo(1_501).And.IsLessThanOrEqualTo(3_000);
-        await Assert.That(status.Consumers.Single().LastProgressReservationCut).IsEqualTo(1);
+        await Assert.That(status.Head.StoredBytes).IsEqualTo(bytes.Input);
+        await Assert.That(status.Head.Tail).IsEqualTo(1);
+        await Assert.That(status.Consumers.Single().Checkpoint).IsEqualTo(0);
+        await Assert.That(status.Consumers.Single().LastProgressReservationCut).IsEqualTo(-1);
+        await Assert.That(db.Database.GetDocument("root", new(db.Partition, "derived", "small"))).IsNull();
     }
     [Test]
     public async Task TheProgressFenceAndOriginalReceiptSurviveCheckpointCompactionAndReopen()

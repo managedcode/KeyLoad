@@ -41,18 +41,19 @@ internal sealed class McpPolymorphicSchemaTests
             .GetProperty(McpSchemaInspector.Items);
         await Assert.That(McpSchemaInspector.Discriminators(mutationSchema)).IsEquivalentTo(McpMutationTestData.Discriminators);
         var request = new CommandRequest(McpCanonicalTestData.StableId, McpCanonicalTestData.Partition, McpMutationTestData.Create());
+        var publicRequest = JsonSerializer.SerializeToElement(request, JsonDefaults.Options);
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {
-            [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
+            [McpCanonicalTestData.RequestKey] = publicRequest
         };
-        var decoded = NativeSerialization.Deserialize<CommandRequest>(descriptor.Decode(arguments).Payload.Span);
+        var decoded = await McpNativePayloadAssertions.AssertTypedPublicPayload<CommandRequest>(publicRequest,
+            descriptor.Decode(arguments).Payload);
         await Assert.That(decoded.Mutations.Length).IsEqualTo(MutationCount);
         await Assert.That(decoded.Mutations.Select(item => item.GetType()))
             .IsEquivalentTo(request.Mutations.Select(item => item.GetType()));
-        await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(request))).IsTrue();
     }
 
-    /// <summary>A real recursive AST retains all predicate and operand unions and canonical bytes.</summary>
+    /// <summary>A real recursive AST retains all predicate and operand unions and every public field.</summary>
     [Test]
     public async Task AcMcp003RecursivePredicateAndOperandSchemasKeepEveryDiscriminator()
     {
@@ -74,8 +75,9 @@ internal sealed class McpPolymorphicSchemaTests
             [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement(typed, JsonDefaults.Options)
         };
         var payload = Find(McpCatalogExpectations.QueryAst).Decode(arguments).Payload;
-        await Assert.That(payload.Span.SequenceEqual(NativeSerialization.Serialize(typed))).IsTrue();
-        await Assert.That(NativeSerialization.Deserialize<AstQueryRequest>(payload.Span).Query.Filter is Logical
+        var decoded = await McpNativePayloadAssertions.AssertTypedPublicPayload<AstQueryRequest>(arguments[
+            McpCanonicalTestData.RequestKey], payload);
+        await Assert.That(decoded.Query.Filter is Logical
         { Right: Negation { Inner: NullTest } }).IsTrue();
     }
 

@@ -1,5 +1,15 @@
 # ClientApi
 
+REQ-SQLC-003 / AC-SQLC-003P preserves AC-MCP-002/003 in the Accepted
+[ADR-065 public/native oracle stage](../ADR/ADR-065-full-sql-client-compatibility.md).
+UnitTests ClientApi canonical command/read/polymorphic corpus and NEW
+McpNativePayload files compare every native-decoded typed value with the original
+public JSON, retain exact native bytes across source disposal and require real
+same-instance array/stream parity. Native int-zero is the no-body contract.
+No production/public/data/dependency changes are authorized; actual new GitHub
+normal/scalar/recovery/RF3 evidence remains required. A real writer divergence
+must be repaired in its owner rather than hidden by the oracle correction.
+
 REQ-SQLC-005/007/008 and AC-SQLC-005/007/008 extend SQL clients under
 [ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md). Existing transport is
 HTTP/JSON plus official MCP; no PostgreSQL native listener/session is implemented.

@@ -86,6 +86,7 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
         var source = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(scenario.Inspect(Message), cancellationToken));
         await Assert.That(source!.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(source.Metadata.Attempts).IsEqualTo(RelationalSqlRf3Tokens.NoResults);
+        await Assert.That(source.PayloadJson).IsEqualTo(DatabaseCompositionRf3Payload.OrdinalGolden(link));
         await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(source.PayloadJson!, JsonDefaults.Options)).IsEqualTo(link);
     }
 

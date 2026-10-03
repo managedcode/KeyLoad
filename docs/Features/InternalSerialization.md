@@ -44,3 +44,19 @@ REQ-IS-010 / AC-IS-010 requires actual diagnostic measurement before selecting
 shared hot-path optimizations. It maps to the full [native serialization diagnostic
 contract](BenchmarkComparisons/NativeSerialization.md), with source-bound
 BenchmarkDotNet results separate from mandatory RF3/full competitor qualification.
+
+## Current strict qualification repairs
+
+R13/R14 in ADR060 retain AC-IS002/003/005/006/007: owning nullable pair metadata,
+genuine malformed auth/probe native writers with valid twins, actual persisted
+quota lengths, full replay contents including private composition references,
+real membership provider and the existing integer-zero no-body sentinel.
+NativePairMetadataTests, McpNativeAuthenticationMalformed/ReaderTests,
+ReplicaReadProbeHeader/SecurityTests, NativeReplayResultAssertions, the blob/search
+readers and ChangeFeeds/Messaging/ClusterRouting quota/provider cases own the
+positive/negative assertions. All current formats and trust/error boundaries stay
+unchanged. R15 under AC-IS010 retains strict authentic step success while saving
+bounded API-visibility inspections. [Source/evidence stage](../implementation/native-serialization-repair-stage-002.json)
+records actual preceding failed jobs and separate current-source qualification.
+Source repair, a complete compiler build and raw measurements from a failed
+diagnostic job do not qualify runtime, acceleration, RF3 or durability.

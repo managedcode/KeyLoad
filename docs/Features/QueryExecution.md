@@ -1,5 +1,16 @@
 # QueryExecution
 
+REQ-SQLC-003 / AC-SQLC-003P adds independent full public/native value and
+same-instance native writer tests under the Accepted
+[ADR-065 oracle stage](../ADR/ADR-065-full-sql-client-compatibility.md).
+Existing SQL-to-canonical byte parity, original IDs/kinds/input and disposal
+ownership remain mandatory. Actual366 normal CI has47passed/1error among48
+selected SQL/backup cases; the invalid trailing byte oracle requires correction
+without hiding a serializer defect. Full source/scalar/RF3 remain unqualified.
+Canonical test paths are UnitTests QueryExecution SQL compiler/comment tests and
+ClientApi typed corpus/new McpNativePayload cases; production/frontend/data
+changes are N/A because this stage corrects evidence only.
+
 SQL exists because KeyLoad is one composable database for AI agents: documents,
 typed tables, graphs, blobs, queues, events, vectors/search and time series can
 reference and use one another. [DatabaseComposition](DatabaseComposition.md) /

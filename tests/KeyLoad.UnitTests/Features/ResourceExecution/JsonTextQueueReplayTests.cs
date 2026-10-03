@@ -1,4 +1,5 @@
 using System.Text.Json;
+using TUnit.Assertions.Exceptions;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -35,7 +36,7 @@ internal sealed class JsonTextQueueReplayTests
         await Assert.That(deliveries.Length).IsEqualTo(MultiDeliveryCount);
         await Assert.That(deliveries[0].Id).IsEqualTo(FirstMessageId);
         await Assert.That(deliveries[1].Id).IsEqualTo(SecondMessageId);
-        await Assert.That(replay).IsEqualTo(original);
+        await NativeReplayResultAssertions.Same<ReceiveResult>(replay, original);
         await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
 
         var ack = Guid.NewGuid();
@@ -60,12 +61,41 @@ internal sealed class JsonTextQueueReplayTests
         var replay = db.Submit(OperationKind.Receive, request, principal: WorkerPrincipal, id: id, time: now);
 
         await Assert.That(original.Get<ReceiveResult>().Deliveries).IsEmpty();
-        await Assert.That(replay).IsEqualTo(original);
+        await NativeReplayResultAssertions.Same<ReceiveResult>(replay, original);
 
         db.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(worker with { Revoked = true, PolicyEpoch = 2 }), time: now.AddSeconds(1))
             .Get<PrincipalRecord>();
         await Assert.That(db.Submit(OperationKind.Receive, request, principal: WorkerPrincipal,
             id: id, time: now.AddSeconds(1)).Error).IsEqualTo(ErrorCode.Unauthenticated);
+    }
+
+    [Test]
+    [Arguments(nameof(ReceiveResult.Token))]
+    [Arguments(nameof(ReceiveResult.Deliveries))]
+    [Arguments(nameof(Delivery.PayloadJson))]
+    public async Task AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody(string field)
+    {
+        using var db = new TestDatabase();
+        db.Configure(QueueName, ResourceKind.WorkQueue);
+        db.Commit(new EnqueueMessage(QueueName, FirstMessageId, MessageBody),
+            new EnqueueMessage(QueueName, SecondMessageId, MessageBody));
+        var id = Guid.NewGuid();
+        var original = db.Submit(OperationKind.Receive,
+            new ReceiveRequest(id, new(db.Partition, QueueName), MaxMessages: MultiDeliveryCount), id: id);
+        var result = original.Get<ReceiveResult>();
+        var changed = field switch
+        {
+            nameof(ReceiveResult.Token) => result with { Token = result.Token with { Position = result.Token.Position + 1 } },
+            nameof(ReceiveResult.Deliveries) => result with { Deliveries = [result.Deliveries[1], result.Deliveries[0]] },
+            nameof(Delivery.PayloadJson) => result with
+            {
+                Deliveries = [result.Deliveries[0] with { PayloadJson = result.Deliveries[0].PayloadJson + RawSpellingSuffix },
+                    result.Deliveries[1]]
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(field))
+        };
+        await Assert.ThrowsExactlyAsync<AssertionException>(() => NativeReplayResultAssertions.Same<ReceiveResult>(
+            original with { NativeValue = changed }, original));
     }
 }

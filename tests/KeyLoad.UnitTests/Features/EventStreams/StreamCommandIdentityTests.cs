@@ -1,4 +1,6 @@
 using System.Text.Json;
+using KeyLoad.UnitTests.Features.ResourceExecution;
+using TUnit.Assertions.Exceptions;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 
@@ -39,9 +41,26 @@ internal sealed class StreamCommandIdentityTests
         var replay = fixture.Apply(operation);
 
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
-        await Assert.That(replay).IsEqualTo(committed);
+        await NativeReplayResultAssertions.Same<CommitReceipt>(replay, committed);
         await Assert.That(fixture.EventSourceHead.TailPosition).IsEqualTo(1L);
         await Assert.That(fixture.Read().Events.Select(record => record.Revision).SequenceEqual([1L])).IsTrue();
+    }
+
+    [Test]
+    public async Task AcR14ReplayComparisonRejectsChangedInternalCompositionReferences()
+    {
+        using var fixture = new StreamReadResourceFixture();
+        var commandId = Guid.NewGuid();
+        var committed = fixture.Apply(Operation(commandId, Append(fixture.Partition, commandId)));
+        var receipt = committed.Get<CommitReceipt>();
+        var original = receipt.Mutations.Single();
+        var mutation = original with
+        {
+            CompositionReferences = original.CompositionReferences.Add(new(fixture.Partition, StreamSetName, StreamId))
+        };
+        var changed = receipt with { Mutations = [mutation] };
+        await Assert.ThrowsExactlyAsync<AssertionException>(() => NativeReplayResultAssertions.Same<CommitReceipt>(
+            committed with { NativeValue = changed }, committed));
     }
 
     private static ReplicatedOperation Operation(Guid envelopeId, CommandRequest command)

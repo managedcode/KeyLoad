@@ -37,8 +37,10 @@ These typed mutations run in one atomic `CommandRequest` through SDK
 This is the initial bounded procedural composition stage, with exact-source
 qualification pending. All source and target resources share the same atomic
 partition and transaction domain. Projection does not lease or ACK queue
-messages; the blob lifecycle remains separate. Full declarative SQL, the native
-SQL-client protocol and cross-partition composition remain required and pending.
+messages. Blobs remain part of the same database; staged upload and publication
+use their existing operations outside this initial graph/queue batch.
+Full declarative SQL, the native SQL-client protocol and cross-partition
+composition remain required and pending.
 The [DatabaseComposition contract](docs/Features/DatabaseComposition.md) and
 [ADR-067](docs/ADR/ADR-067-composable-agent-database.md) define authorization,
 cumulative limits, retries and all-or-nothing effects.
@@ -256,7 +258,7 @@ System projection APIs require cluster administration. A consumer defines its in
 
 The canonical backup includes the checksummed redo journal, database identity and a SHA-256 manifest. Domain data, schemas, credentials, outcomes and inbox receipts are journaled together. The journal can begin with a verified checkpoint followed by newer transaction frames. ZoneTree files can be rebuilt from that canonical history. Restore validates every manifest file, creates a new incarnation, resets consensus routing metadata and leaves queue dispatch paused.
 
-The owner-directed native serialization source uses generated Orleans binary codecs for internal typed records, claims, metadata, grain replies and replica payloads, with journal4/identity5/checkpoint3/backup2, KLT2 and replica2 fences. Public HTTP/MCP JSON, exact user document content, canonical command digests, sortable keys and ZoneTree raw-byte Sync WAL retain their existing contracts. Missing/legacy store identities fail before data recreation; Compact does not convert opaque record values. A qualified offline converter is not delivered, so preserve existing stores and matching old binaries. Replica upgrades require stopped writers and homogeneous versions. [ADR-060](docs/ADR/ADR-060-native-internal-serialization.md) defines these contracts; exact-source native CI and performance qualification remain pending.
+The owner-directed native serialization source uses generated Orleans binary codecs for internal typed records, claims, metadata, grain replies and replica payloads, with journal4/identity5/checkpoint3/backup2, KLT2 and replica2 fences. Public HTTP/MCP JSON, exact user document content, canonical command digests, sortable keys and ZoneTree raw-byte Sync WAL retain their existing contracts. Missing/legacy store identities fail before data recreation; Compact does not convert opaque record values. A qualified offline converter is not delivered, so preserve existing stores and matching old binaries. Replica upgrades require stopped writers and homogeneous versions. [ADR-060](docs/ADR/ADR-060-native-internal-serialization.md) defines these contracts; exact-source native CI and performance qualification remain pending. The [current repair receipt](docs/implementation/native-serialization-repair-stage-002.json) separates failed earlier unit/recovery runs and 24 original measurements from the still-pending complete qualification.
 
 The [historical WAL receipt](docs/implementation/atomic-wal-qualification-37084177131.json) qualifies only cf630751e's frame3/identity4/checkpoint2 source: normal/scalar unit, WAL, process recovery, RF3 and analyzer gates passed without skips. It does not qualify the broader new formats. No measured acceleration, power-loss durability, endurance or production readiness is claimed.
 

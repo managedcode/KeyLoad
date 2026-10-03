@@ -31,7 +31,9 @@ internal static class SiteDatabaseCompositionTokens
     internal const string QualificationPending = "exact-source qualification pending";
     internal const string AtomicScope = "same atomic partition and transaction domain";
     internal const string LeaseBoundary = "does not lease or ACK";
-    internal const string BlobBoundary = "blob lifecycle remains separate";
+    internal const string BlobsSameDatabase = "blobs remain part of the same database";
+    internal const string BlobOperationsBoundary =
+        "staged upload and publication use their existing operations outside this initial graph/queue batch";
     internal const string FullSqlPending = "Full declarative SQL";
     internal const string NativeClientPending = "native SQL-client protocol";
     internal const string CrossPartitionPending = "cross-partition composition";
@@ -51,5 +53,6 @@ internal static class SiteDatabaseCompositionTokens
 
     internal static readonly string[] StageContracts =
         [CanonicalCall, SdkCommit, OfficialMcp, ProceduralStage, QualificationPending, AtomicScope,
-            LeaseBoundary, BlobBoundary, FullSqlPending, NativeClientPending, CrossPartitionPending, RequiredPending];
+            LeaseBoundary, BlobsSameDatabase, BlobOperationsBoundary, FullSqlPending, NativeClientPending,
+            CrossPartitionPending, RequiredPending];
 }

@@ -24,27 +24,37 @@ internal sealed class McpReadDecodeTests
         await Assert.That(cases.Length).IsEqualTo(BodyReadCount);
         foreach (var item in cases)
         {
-            var decoded = Find(item.Name).Decode(item.Arguments());
+            var arguments = item.Arguments();
+            var count = arguments.Count;
+            var requestJson = arguments[McpCanonicalTestData.RequestKey].GetRawText();
+            var decoded = Find(item.Name).Decode(arguments);
             await Assert.That(decoded.CommandId).IsEqualTo(Guid.Empty);
             await Assert.That(decoded.CommandKind).IsNull();
             await Assert.That(decoded.ReadKind).IsEqualTo(Find(item.Name).ReadKind);
-            await Assert.That(decoded.Payload.Span.SequenceEqual(item.ExpectedPayload.Span)).IsTrue();
+            _ = await McpNativePayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
+            await Assert.That(arguments.Count).IsEqualTo(count);
+            await Assert.That(arguments[McpCanonicalTestData.RequestKey].GetRawText()).IsEqualTo(requestJson);
         }
     }
 
-    /// <summary>The four no-body operations accept empty arguments and produce the exact null sentinel.</summary>
+    /// <summary>The four no-body operations accept empty arguments and produce the native integer-zero sentinel.</summary>
     [Test]
-    public async Task AcMcp003OnlyNoBodyReadsAcceptEmptyArgumentsAndProduceNativeNullSentinel()
+    public async Task AcMcp003OnlyNoBodyReadsAcceptEmptyArgumentsAndProduceNativeIntegerZeroSentinel()
     {
         foreach (var name in NoBodyNames)
         {
             var descriptor = Find(name);
             var absent = descriptor.Decode(null);
             var empty = descriptor.Decode(new Dictionary<string, JsonElement>(StringComparer.Ordinal));
-            await Assert.That(NativeSerialization.Deserialize<JsonElement>(absent.Payload.Span).ValueKind).IsEqualTo(JsonValueKind.Null);
-            await Assert.That(absent.Payload.Span.SequenceEqual(NativeSerialization.Serialize(
-                JsonSerializer.Deserialize<JsonElement>(McpCanonicalTestData.NullJson)))).IsTrue();
+            await Assert.That(NativeSerialization.Deserialize<int>(absent.Payload.Span)).IsEqualTo(0);
             await Assert.That(empty.Payload.Span.SequenceEqual(absent.Payload.Span)).IsTrue();
+            await Assert.That(absent.CommandId).IsEqualTo(Guid.Empty);
+            await Assert.That(absent.CommandKind).IsNull();
+            await Assert.That(absent.ReadKind).IsEqualTo(descriptor.ReadKind);
+            await Assert.That(absent.Payload.Span.SequenceEqual(NativeSerialization.Serialize(0))).IsTrue();
+            await Assert.That(empty.CommandId).IsEqualTo(Guid.Empty);
+            await Assert.That(empty.CommandKind).IsNull();
+            await Assert.That(empty.ReadKind).IsEqualTo(descriptor.ReadKind);
             var invalid = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             {
                 [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement<object?>(null)

@@ -127,7 +127,7 @@
         <ol class="anatomy-steps">
           <li><span class="step-no" aria-hidden="true">01</span><div><h3>Queue to knowledge graph</h3><p>Read ready messages, resolve their linked entities and write knowledge-graph relationships inside the database.</p></div></li>
           <li><span class="step-no" aria-hidden="true">02</span><div><h3>Graph to queued actions</h3><p>Follow visible relationships to enqueue actions carrying canonical entity references.</p></div></li>
-          <li><span class="step-no" aria-hidden="true">03</span><div><h3>One authorized atomic command</h3><p>Source and target resources share the same atomic partition and transaction domain. A failed effect rolls back the whole command. Projection does not lease or ACK messages; the blob lifecycle remains separate.</p></div></li>
+          <li><span class="step-no" aria-hidden="true">03</span><div><h3>One authorized atomic command</h3><p>Source and target resources share the same atomic partition and transaction domain. A failed effect rolls back the whole command. Projection does not lease or ACK messages. Blobs remain part of the same database; staged upload and publication use their existing operations outside this initial graph/queue batch.</p></div></li>
         </ol>
         <div class="terminal kl-graphite">
           <article class="code-card"><header><span class="code-tag">SQL</span>One bound command envelope</header><pre><code><span class="tok-key">CALL</span> keyload_documents_commit(@arguments);</code></pre></article>

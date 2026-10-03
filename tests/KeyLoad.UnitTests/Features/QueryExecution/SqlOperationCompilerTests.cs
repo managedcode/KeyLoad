@@ -38,7 +38,9 @@ internal sealed class SqlOperationCompilerTests
             var before = JsonSerializer.Serialize(arguments, JsonDefaults.Options);
             var request = SqlOperationTestData.Call(item.Name, arguments);
             var expected = SqlOperationTestData.Find(item.Name).Decode(arguments);
-            await SqlOperationTestData.Same(SqlOperationTestData.Compile(request), expected);
+            var compiled = SqlOperationTestData.Compile(request);
+            await SqlOperationTestData.Same(compiled, expected);
+            _ = await McpNativePayloadAssertions.AssertFullPublicPayload(item, compiled.Payload);
             await Assert.That(JsonSerializer.Serialize(arguments, JsonDefaults.Options)).IsEqualTo(before);
         }
     }
@@ -64,12 +66,15 @@ internal sealed class SqlOperationCompilerTests
     {
         var item = McpCanonicalTestData.Commands()[0];
         McpDecodedOperation compiled;
+        byte[] copiedWhileDocumentWasAlive;
         using (var document = JsonDocument.Parse(JsonSerializer.Serialize(item.Arguments(), JsonDefaults.Options)))
         {
             compiled = SqlOperationTestData.Compile(SqlOperationTestData.Request(
                 SqlOperationTestData.CallPrefix + item.Name + SqlOperationTestData.CallSuffix, document.RootElement));
+            copiedWhileDocumentWasAlive = compiled.Payload.ToArray();
         }
         await Assert.That(compiled.CommandId).IsEqualTo(item.CommandId);
-        await Assert.That(compiled.Payload.Span.SequenceEqual(item.ExpectedPayload.Span)).IsTrue();
+        await Assert.That(compiled.Payload.Span.SequenceEqual(copiedWhileDocumentWasAlive)).IsTrue();
+        _ = await McpNativePayloadAssertions.AssertFullPublicPayload(item, compiled.Payload);
     }
 }

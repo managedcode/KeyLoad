@@ -28,7 +28,11 @@
       "latestIntegratedRecoveryCompositionPassed": 7,
       "latestIntegratedRf3CompositionPassed": 1,
       "latestIntegratedRf3CompositionTotal": 2,
-      "latestIntegratedScalar": "skipped_after_normal_failure"
+      "latestIntegratedScalar": "skipped_after_normal_failure",
+      "fixtureSourceRevision": "b8ee2a3f67da345fbe809d6f40270e36d901c58d",
+      "fixtureCiRunId": 37125791272,
+      "fixtureCiUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37125791272",
+      "fixtureCiStatus": "pending_zero_jobs_original_artifacts_not_yet_available"
     },
     "fullDeclarativeCompositionComplete": false,
     "crossPartitionCompositionImplemented": false,
@@ -40,7 +44,8 @@
       "All-model and distributed composition correctness fault and comparable performance",
       "Complete Benchmarks and site qualification before publication"
     ],
-    "fixtureReceipt": "docs/implementation/database-composition-fixture-stage-002.json"
+    "fixtureReceipt": "docs/implementation/database-composition-fixture-stage-002.json",
+    "copyReceipt": "docs/implementation/database-composition-copy-stage-003.json"
   },
   "SQL-CLIENT-001": {
     "title": "Повний SQL, клієнтський протокол та перевірка текстового індексу",
@@ -196,12 +201,12 @@
       "qualificationReceipt": "docs/implementation/runtime-qualification-37065200835.json"
     },
     "nativeInternalSerialization": {
-      "status": "native-source-installed-owner-directed-resumption-validation-repairs-in-progress",
+      "status": "native_generated_source_repair_join_GitHub_qualification_pending",
       "decision": "docs/ADR/ADR-060-native-internal-serialization.md",
       "feature": "docs/Features/InternalSerialization.md",
       "staticPreview": "docs/implementation/native-internal-static-preview.json",
       "qualified": false,
-      "runtimeTestsExecuted": false,
+      "runtimeTestsExecuted": true,
       "approvalRequired": "Owner explicitly directed continued implementation and GitHub testing on 2026-10-03; prior denied attempts are historical. No running-store conversion or product release is authorized by source installation.",
       "open": [
         "Qualified offline old-store conversion and reverse/rollback tooling",
@@ -209,7 +214,7 @@
         "Complete exact-source native mandatory GitHub gates",
         "Measured performance and fault evidence"
       ],
-      "activeRuntime": "Generated native candidate rebased into current checkout; preserved term observation, SQL friendship and phase telemetry. Structural collection/reference/depth/graph/DOM and missing-identity/backup-cut repairs precede exact-SHA CI. Runtime tests for this source not yet executed.",
+      "activeRuntime": "Generated native source installed. Historical exact-source unit/recovery runs exposed validation/profile and legacy fixture failures; R13/R14 repair source joins required nullable pair semantics, genuine malformed native producers, byte quotas, complete replay contents, real membership provider and correct no-body sentinel. R15 repairs strict API visibility evidence. Current repair source is not yet runtime-qualified.",
       "candidateStaticValidation": {
         "scope": "Exact captured TMP source closure only; not latest owner source",
         "projectsCompiled": 25,
@@ -227,7 +232,9 @@
         "url": "https://github.com/managedcode/KeyLoad/actions/runs/37117886564",
         "conclusion": "success",
         "scope": "Baseline only; does not qualify expanded native candidate"
-      }
+      },
+      "currentRepairSourceTestsExecuted": false,
+      "repairEvidence": "docs/implementation/native-serialization-repair-stage-002.json"
     }
   },
   "KL-004": {
@@ -749,7 +756,7 @@
       "storageEngineEvaluation": {
         "decision": "docs/ADR/ADR-066-garnet-storage-evaluation.md",
         "feature": "docs/Features/BenchmarkComparisons/GarnetStorageEvaluation.md",
-        "status": "GE001_real_local_BDN8cells_each_plus4long_read_cells_each_and_TUnit32_normal32_scalar_pass_delivered_Actions_pending",
+        "status": "GE001_local_BDN8cells_each_plus4long_reads_each_pass_GitHub_f403_build_format_governance_and32_normal32_scalar_pass_measurement_jobs_queued",
         "localDevelopmentEvidence": "docs/implementation/garnet-zonetree-local-2026-10-03.md",
         "localEvidenceIsSiteData": false,
         "garnetVersion": "2.2.0",
@@ -757,7 +764,7 @@
         "nugetPackageSha256": "cc11bd69f27417f09c42e2927598efd834b4d03919ba0eb29ce6e1d3251b7230",
         "zoneTreeVersion": "1.9.8",
         "firstLane": "public_raw_Tsavorite_and_raw_ZoneTree_resident_cache_single_worker_isolated_Linux",
-        "qualification": "Local normal32/scalar32 pass with no skips; local long reads favor Tsavorite hot hits and ZoneTree misses. Delivered-source GitHub artifacts remain required; no overall winner, production storage replacement, service/AOF, concurrency, RF3 or multi-host claim."
+        "qualification": "Local normal32/scalar32 and process-recovery194 pass with no skips; full local unit baseline failed69/2494. Local long reads favor Tsavorite hot hits and ZoneTree misses. Exact f403 GitHub run37124585233 passed build/format/governance and raw normal32/scalar32 with original authenticated artifact; engine measurements were queued at13:20UTC. No GitHub speed numbers, overall winner, production storage replacement, service/AOF, concurrency, RF3 or multi-host claim."
       },
       "phaseProfiling": {
         "decision": "docs/ADR/ADR-063-bounded-database-phase-profiling.md",

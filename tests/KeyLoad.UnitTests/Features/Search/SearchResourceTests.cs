@@ -1,3 +1,4 @@
+using System.Text;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Query;
@@ -34,6 +35,7 @@ internal sealed class SearchResourceTests
         await AssertStoredTimesAsync(db, SmallCollection, evaluatedAt);
         await AssertStoredTimesAsync(db, LargeCollection, evaluatedAt);
         var addedStoredBytes = StoredBytes(LargeCollection) - StoredBytes(SmallCollection);
+        var addedJsonBytes = StoredJsonBytes(db, LargeCollection) - StoredJsonBytes(db, SmallCollection);
         var search = new SearchEngine(db.Database);
         var small = new SearchRequest(db.Partition, SmallCollection, TextPath, SearchTerm, Limit: 1);
         var large = new SearchRequest(db.Partition, LargeCollection, TextPath, SearchTerm, Limit: 1);
@@ -55,7 +57,8 @@ internal sealed class SearchResourceTests
         // UTF-16 decoded JSON costs about twice the added stored ASCII bytes. The half-corpus
         // margin covers parser/provider metadata; an owned raw scan page adds another full copy.
         var allowance = 2 * addedStoredBytes + addedStoredBytes / 2 + FixedAllocationAllowance;
-        await Assert.That(addedStoredBytes).IsEqualTo((long)CorpusDocuments * PaddingCharacters);
+        await Assert.That(addedJsonBytes).IsEqualTo((long)CorpusDocuments * PaddingCharacters);
+        await Assert.That(addedStoredBytes).IsGreaterThan(addedJsonBytes);
         await Assert.That(extraAllocation).IsGreaterThan(0L);
         await Assert.That(extraAllocation).IsLessThan(allowance);
         var result = await Assert.That(largeResult).HasSingleItem();
@@ -74,6 +77,11 @@ internal sealed class SearchResourceTests
         }
     }
 
+    private static long StoredJsonBytes(TestDatabase database, string collection)
+        => database.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(database.Partition, collection),
+            CorpusDocuments + 1).Records.Sum(record => (long)Encoding.UTF8.GetByteCount(
+                NativeSerialization.Deserialize<DocumentRecord>(record.Value.Span).Json)));
+
     private static Mutation[] Rows(string collection, string extra) => Enumerable.Range(0, CorpusDocuments)
         .Select(index => (Mutation)new PutDocument(collection, $"row-{index:D2}",
             "{\"text\":\"other\",\"padding\":\"" + extra + "\"}"))
@@ -91,7 +99,7 @@ internal sealed class SearchResourceTests
     {
         var updatedAt = db.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(db.Partition, collection),
             CorpusDocuments + 1).Records
-            .Select(record => JsonDefaults.Deserialize<DocumentRecord>(record.Value.Span).UpdatedAt).ToArray());
+            .Select(record => NativeSerialization.Deserialize<DocumentRecord>(record.Value.Span).UpdatedAt).ToArray());
         await Assert.That(updatedAt.Length).IsEqualTo(CorpusDocuments + 1);
         await Assert.That(updatedAt.All(time => time == evaluatedAt)).IsTrue();
     }

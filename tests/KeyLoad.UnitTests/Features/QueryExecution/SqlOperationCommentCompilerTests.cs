@@ -20,7 +20,7 @@ internal sealed class SqlOperationCommentCompilerTests
             var actual = SqlOperationTestData.Compile(commented);
             await SqlOperationTestData.Same(actual, expected);
             await Assert.That(actual.CommandId).IsEqualTo(item.CommandId);
-            await Assert.That(actual.Payload.Span.SequenceEqual(item.ExpectedPayload.Span)).IsTrue();
+            _ = await McpNativePayloadAssertions.AssertFullPublicPayload(item, actual.Payload);
             await Assert.That(JsonSerializer.Serialize(arguments, JsonDefaults.Options)).IsEqualTo(before);
         }
     }

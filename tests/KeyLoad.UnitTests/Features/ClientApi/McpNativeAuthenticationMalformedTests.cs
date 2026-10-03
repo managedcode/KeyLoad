@@ -26,7 +26,13 @@ internal sealed class McpNativeAuthenticationMalformedTests
     {
         using var database = new TestDatabase();
         var principal = McpNativeAuthenticationTests.Principal(database);
+        var twin = McpAuthenticationMalformedFixture.Valid(principal);
+        var expectedShape = McpFrameBounds.InspectValue(JsonDefaults.Serialize(principal), McpFramingProtocol.MaximumDataReplyBytes);
+        await Assert.That(McpNativeAuthentication.Inspect(twin, CancellationToken.None)).IsEqualTo(expectedShape);
+        var decoded = McpNativeAuthentication.ReadPrincipal(twin, CancellationToken.None);
+        await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
         var payload = McpAuthenticationMalformedFixture.Array(principal, fault);
+        await Assert.That(payload.AsSpan().SequenceEqual(twin)).IsFalse();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.Inspect(payload, CancellationToken.None)).Code)
             .IsEqualTo(expected);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.ReadPrincipal(payload, CancellationToken.None)).Code)

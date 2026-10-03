@@ -9,9 +9,9 @@ internal sealed class McpCommandDecodeTests
 {
     private const int CommandCount = 18;
 
-    /// <summary>Exercises all eighteen actual command DTOs with their original stable identities and exact canonical bytes.</summary>
+    /// <summary>Exercises all eighteen actual command DTOs with their original identities and complete public fields.</summary>
     [Test]
-    public async Task AcMcp002EveryCommandPreservesItsCallerIdAndExactCanonicalPayload()
+    public async Task AcMcp002EveryCommandPreservesItsCallerIdAndFullTypedPayload()
     {
         var cases = McpCanonicalTestData.Commands();
         await Assert.That(cases.Length).IsEqualTo(CommandCount);
@@ -23,7 +23,7 @@ internal sealed class McpCommandDecodeTests
             await Assert.That(decoded.CommandId).IsEqualTo(item.CommandId);
             await Assert.That(decoded.ReadKind).IsNull();
             await Assert.That(decoded.CommandKind).IsEqualTo(Find(item.Name).CommandKind);
-            await Assert.That(decoded.Payload.Span.SequenceEqual(item.ExpectedPayload.Span)).IsTrue();
+            _ = await McpNativePayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
             await Assert.That(arguments.Count).IsEqualTo(count);
             await Assert.That(arguments[McpCanonicalTestData.RequestKey].GetRawText()).IsEqualTo(item.Request.GetRawText());
         }
@@ -90,15 +90,18 @@ internal sealed class McpCommandDecodeTests
     {
         var item = McpCanonicalTestData.Commands()[0];
         McpDecodedOperation decoded;
+        byte[] copiedWhileDocumentWasAlive;
         using (var document = JsonDocument.Parse(item.Request.GetRawText()))
         {
             decoded = Find(item.Name).Decode(new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             {
                 [McpCanonicalTestData.RequestKey] = document.RootElement
             });
+            copiedWhileDocumentWasAlive = decoded.Payload.ToArray();
         }
-        await Assert.That(decoded.Payload.Span.SequenceEqual(item.ExpectedPayload.Span)).IsTrue();
-        await Assert.That(NativeSerialization.Deserialize<CommandRequest>(decoded.Payload.Span).CommandId).IsEqualTo(item.CommandId);
+        await Assert.That(decoded.Payload.Span.SequenceEqual(copiedWhileDocumentWasAlive)).IsTrue();
+        var actual = await McpNativePayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
+        await Assert.That(((CommandRequest)actual).CommandId).IsEqualTo(item.CommandId);
     }
 
     private static McpOperationDescriptor Find(string name)

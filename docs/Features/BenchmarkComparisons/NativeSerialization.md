@@ -55,3 +55,17 @@ acceptance and all final joins; no optimized runtime code before measurements.
 | NSP004 |004 | root | benchmarks.yml joins and new workflow test | NSP002/003 agreed CLI/files; preserve concurrent diagnostic lanes in worktree and deliver only the native-owned snapshot | isolated diagnostic job/input and unchanged full aggregate reviewed in scoped delivery image; exact-source GitHub qualification pending |
 | NSP005 |all | root | scoped commit/push/GitHub test+measure/artifact read | all workers complete, diff/static checks | exact-source CI then actual diagnostic measurements and full comparison tracking; pending |
 | NSP006 | future | root+bounded workers | no runtime writes yet | measured baseline and numeric accepted improvement/regression budgets | typed scalar/type descriptor/provider optimizations selected from evidence; blocked on baseline intentionally |
+
+## Actual baseline attempt and visibility join
+
+[Run37124532025](https://github.com/managedcode/KeyLoad/actions/runs/37124532025)
+at sourcef403bf61e completed24 original external measurements and both normal/
+scalar diagnostic contract suites. The strict preceding-step API check failed,
+so this job is not qualified performance evidence. R15 in ADR060 retains
+completed-success requirements, saves each actual snapshot before checking,
+and only retries uniquely identified pending/null-conclusion preceding steps
+within120 seconds at10-second intervals. Terminal failure, missing/duplicate
+steps or changed run/source/job identity reject immediately. One cancellation
+reaches actual API subprocesses and waits. Pure step/deadline regression data
+never authenticates GitHub or qualifies results. A new exact-source job must
+complete all original report/corpus/generated/provenance/artifact checks.

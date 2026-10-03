@@ -1,6 +1,6 @@
 using System.Text;
-using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.BlobStorage;
@@ -17,10 +17,6 @@ internal sealed class BlobRowAccessValidationTests
     private const string StateSpace = "blob-state-v1";
     private const string QuotaSpace = "blob-quota-v1";
     private const string GlobalSpace = "blob-global-v1";
-    private const string AccessProperty = "access";
-    private const string OwnerIdProperty = "ownerId";
-    private const string ProjectIdProperty = "projectId";
-    private const string MetadataProperty = "metadata";
     private const string GuidFormat = "N";
     private const int MaximumIdentifierBytes = 256;
     private const int MaximumAccessRecordBytes = 16_384;
@@ -52,7 +48,7 @@ internal sealed class BlobRowAccessValidationTests
         var maxIdentifier = new string('é', MaximumIdentifierBytes / 2);
         await Assert.That(Encoding.UTF8.GetByteCount(maxIdentifier)).IsEqualTo(MaximumIdentifierBytes);
         var validAccess = new RowAccess(maxIdentifier, maxIdentifier);
-        await Assert.That(JsonDefaults.Serialize(validAccess).Length <= MaximumAccessRecordBytes).IsTrue();
+        await Assert.That(NativeSerialization.Serialize(validAccess).Length <= MaximumAccessRecordBytes).IsTrue();
         var validBlob = new BlobRef(partition, ResourceName, MaximumBlobId);
         var validId = Guid.NewGuid();
         var validRequest = new BeginBlobUploadRequest(validId, validBlob, Guid.NewGuid(), Length, 0, validAccess);
@@ -64,18 +60,16 @@ internal sealed class BlobRowAccessValidationTests
         var serializedState = Read(database, validStateKey)
             ?? throw new InvalidOperationException("The valid upload state must be persisted.");
         await Assert.That(serializedState.Length <= MaximumAccessRecordBytes).IsTrue();
-        using var persistedState = JsonDocument.Parse(serializedState);
-        var persistedAccess = persistedState.RootElement.GetProperty(AccessProperty);
-        await Assert.That(persistedAccess.GetProperty(OwnerIdProperty).GetString()).IsEqualTo(maxIdentifier);
-        await Assert.That(persistedAccess.GetProperty(ProjectIdProperty).GetString()).IsEqualTo(maxIdentifier);
+        var persistedState = NativeSerialization.Deserialize<BlobState>(serializedState);
+        await Assert.That(persistedState.Access.OwnerId).IsEqualTo(maxIdentifier);
+        await Assert.That(persistedState.Access.ProjectId).IsEqualTo(maxIdentifier);
         var validHeadKey = KeySpace.Partition(HeadSpace, validBlob.Partition, validBlob.Resource, validBlob.Id);
         var serializedHead = Read(database, validHeadKey)
             ?? throw new InvalidOperationException("The valid head metadata must be persisted.");
         await Assert.That(serializedHead.Length <= MaximumAccessRecordBytes).IsTrue();
-        using var persistedHead = JsonDocument.Parse(serializedHead);
-        var headAccess = persistedHead.RootElement.GetProperty(MetadataProperty).GetProperty(AccessProperty);
-        await Assert.That(headAccess.GetProperty(OwnerIdProperty).GetString()).IsEqualTo(maxIdentifier);
-        await Assert.That(headAccess.GetProperty(ProjectIdProperty).GetString()).IsEqualTo(maxIdentifier);
+        var persistedHead = NativeSerialization.Deserialize<BlobHead>(serializedHead);
+        await Assert.That(persistedHead.Metadata.Access.OwnerId).IsEqualTo(maxIdentifier);
+        await Assert.That(persistedHead.Metadata.Access.ProjectId).IsEqualTo(maxIdentifier);
     }
 
     private static async Task RejectMetadata(TestDatabase database, (string Id, RowAccess Access) testCase)

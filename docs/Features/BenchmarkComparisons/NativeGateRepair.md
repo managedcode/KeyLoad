@@ -50,3 +50,12 @@ The [source-stage receipt](../../implementation/native-benchmark-gates-source-st
 binds the integrated d500 prerequisite and reviewed files to the full Release,
 formatter and static governance checks. All nineteen policy cases and native
 metadata/readback/current-job transport behavior remain GitHub-unqualified.
+
+REQ-NGR-003 / AC-NGR-003D is the accepted bounded setup diagnostic stage in
+ADR068. Only a target-owned closed phase and at most4096-byte failure-only
+type/method stderr line are added before rethrowing the same caught exception.
+Pure genuine-thrown formatter tests map privacy/depth/chain/cancellation/bounds;
+the existing real1/2/3 preflight remains the native proof. No native errors are
+fabricated and no routing/retry/public result changes occur. Original setup
+callsite and full leader-routing qualification remain pending; an earlier
+verifier cleanup may still mask the original primary exception.

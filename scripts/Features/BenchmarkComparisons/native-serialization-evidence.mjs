@@ -2,12 +2,13 @@ import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { pathToFileURL } from 'node:url';
-import { NATIVE, PROFILE, requireNative } from './native-serialization-contract.mjs';
+import { NATIVE, PROFILE, positiveInteger, requireNative } from './native-serialization-contract.mjs';
 import { captureExecution, requireSameExecution } from './native-serialization-capture.mjs';
 import { captureCorpus } from './native-serialization-corpus.mjs';
 import { captureGenerated, generatedDirectories } from './native-serialization-generated.mjs';
-import { captureGitHub, executor, hostFacts, requireCompletedSteps } from './native-serialization-github.mjs';
+import { executor, hostFacts } from './native-serialization-github.mjs';
 import { collectFacts, hashObject, ownedOutput, readBounded, walkFiles, writeJson } from './native-serialization-files.mjs';
+import { captureReadyGitHub } from './native-serialization-readiness.mjs';
 import { validateNativeSerializationReports } from './native-serialization-report.mjs';
 
 async function prepare(directory, identity, environment) {
@@ -15,10 +16,8 @@ async function prepare(directory, identity, environment) {
   requireNative((await readdir(directory)).length === 0, 'output.fresh');
   await mkdir(join(directory, 'corpus'));
   const execution = await captureExecution(environment);
-  const github = await captureGitHub(identity);
-  requireCompletedSteps(github.job);
+  const github = await captureReadyGitHub(directory, identity);
   await writeFile(join(directory, 'dotnet-info.txt'), execution.environment.dotnetInfo, { flag: 'wx' });
-  await writeJson(join(directory, 'github-prepare.json'), github);
   await writeJson(join(directory, 'execution.json'), { schema: NATIVE.schema, executor: { ...identity, jobId: github.job.id },
     profile: PROFILE, execution, host: hostFacts(), previousGenerated: await generatedDirectories(),
     capturedAt: new Date().toISOString() });
@@ -39,8 +38,10 @@ async function reports(directory) {
 
 async function verify(directory, identity, environment) {
   const metadata = JSON.parse((await readBounded(join(directory, 'execution.json'), NATIVE.fileBytes)).toString('utf8'));
-  const github = await captureGitHub(identity);
-  requireCompletedSteps(github.job, true);
+  requireNative(positiveInteger(metadata.executor?.jobId) && metadata.schema === NATIVE.schema
+    && JSON.stringify(metadata.profile) === JSON.stringify(PROFILE)
+    && JSON.stringify(metadata.executor) === JSON.stringify({ ...identity, jobId: metadata.executor.jobId }), 'execution.identity');
+  const github = await captureReadyGitHub(directory, identity, true, metadata.executor?.jobId);
   requireNative(metadata.schema === NATIVE.schema && JSON.stringify(metadata.profile) === JSON.stringify(PROFILE)
     && JSON.stringify(metadata.executor) === JSON.stringify({ ...identity, jobId: github.job.id }), 'execution.identity');
   requireSameExecution(metadata.execution, await captureExecution(environment));
@@ -50,7 +51,6 @@ async function verify(directory, identity, environment) {
   const corpus = await captureCorpus(directory);
   const generated = await captureGenerated(directory, metadata.previousGenerated);
   requireNative(generated.length > 0, 'generated.files');
-  await writeJson(join(directory, 'github-verify.json'), github);
   const paths = await walkFiles(directory);
   requireNative(paths.includes('stdout.txt') && paths.includes('stderr.txt') && paths.includes('dotnet-info.txt')
     && paths.some(path => !path.includes('/') && path.endsWith('.log')), 'outputs.logs');

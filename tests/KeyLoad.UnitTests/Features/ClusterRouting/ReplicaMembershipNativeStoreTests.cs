@@ -75,18 +75,23 @@ internal sealed class ReplicaMembershipNativeStoreTests
         using var replica = new ZoneTreeStore(new(configuration.Directory)
         { Incarnation = configuration.Incarnation, SigningKey = fixture.Store.Identity.SigningKey });
         using var log = new DurableReplicaLog(replica, configuration, canonicalDatabase: fixture.Database);
-        using var host = new HostBuilder().UseOrleans(silo => silo.Services.Configure<EndpointOptions>(endpoint =>
-        { endpoint.AdvertisedIPAddress = IPAddress.Loopback; endpoint.SiloPort = SiloPort; endpoint.GatewayPort = 0; })).Build();
-        var options = new ReplicaPeerOptions(new() { [Voter] = new(Voter) }, fixture.Store.Identity.SigningKey, ClusterId);
-        var local = new ReplicaSiloDiscoveryState(configuration, options, host.Services.GetRequiredService<ILocalSiloDetails>());
-        using var authentication = new ReplicaEnvelopeAuthenticator(configuration, options, local, TimeProvider.System,
-            canonicalDatabase: fixture.Database);
-        using var discovery = new ReplicaSiloDiscoveryClient(configuration, options, local, authentication, TimeProvider.System);
         await using var materializer = new ReplicaMaterializer(fixture.Database, log, new ReplicaSnapshotStore(fixture.Store, log, configuration));
         await using var consensus = new ReplicaConsensus(materializer, configuration, TimeProvider.System);
         await using var coordinator = new ClusterCoordinator(consensus, fixture.Database, new CommandAdmissionGovernor(), TimeProvider.System);
         using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);
+        using var host = new HostBuilder().UseOrleans(silo =>
+        {
+            silo.Services.Configure<EndpointOptions>(endpoint =>
+            { endpoint.AdvertisedIPAddress = IPAddress.Loopback; endpoint.SiloPort = SiloPort; endpoint.GatewayPort = 0; });
+            silo.Services.AddSingleton<IMembershipTable>(new ReplicaMembershipTable(fixture.Database, coordinator,
+                consensus, ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, TimeProvider.System, linked.Token));
+        }).Build();
+        var options = new ReplicaPeerOptions(new() { [Voter] = new(Voter) }, fixture.Store.Identity.SigningKey, ClusterId);
+        var local = new ReplicaSiloDiscoveryState(configuration, options, host.Services.GetRequiredService<ILocalSiloDetails>());
+        using var authentication = new ReplicaEnvelopeAuthenticator(configuration, options, local, TimeProvider.System,
+            canonicalDatabase: fixture.Database);
+        using var discovery = new ReplicaSiloDiscoveryClient(configuration, options, local, authentication, TimeProvider.System);
         await coordinator.StartAsync(linked.Token);
         consensus.AttachTransport(new ReplicaGrainServiceClient(host.Services, configuration, discovery, authentication));
         local.MarkTransportReady();

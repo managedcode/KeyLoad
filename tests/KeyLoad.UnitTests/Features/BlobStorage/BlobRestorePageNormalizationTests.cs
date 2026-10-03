@@ -1,4 +1,3 @@
-using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Security;
@@ -22,10 +21,6 @@ internal sealed class BlobRestorePageNormalizationTests
     private const string BlobIdPrefix = "page-upload-";
     private const string QuotaSpace = "blob-quota-v1";
     private const string GlobalSpace = "blob-global-v1";
-    private const string ReservedBytesProperty = "reservedBytes";
-    private const string ObjectKeysProperty = "objectKeys";
-    private const string VersionsProperty = "versions";
-    private const string UploadsProperty = "uploads";
     private const string GuidFormat = "N";
     private const int RecordCount = BlobLimits.MaxReclaimParts + 1;
     private const int TtlSeconds = 3_600;
@@ -116,26 +111,22 @@ internal sealed class BlobRestorePageNormalizationTests
     {
         var resourceQuotaKey = KeyCodec.Encode(QuotaSpace, TenantId, DatabaseId, DomainId, ResourceName);
         var globalQuotaKey = KeyCodec.Encode(GlobalSpace);
-        var resourceQuota = ParseObject(store.Read(view => view.ReadOwnedValue(resourceQuotaKey)));
-        var globalQuota = ParseObject(store.Read(view => view.ReadOwnedValue(globalQuotaKey)));
+        var resourceQuota = ParseQuota(store.Read(view => view.ReadOwnedValue(resourceQuotaKey)));
+        var globalQuota = ParseQuota(store.Read(view => view.ReadOwnedValue(globalQuotaKey)));
 
         await AssertQuota(resourceQuota);
         await AssertQuota(globalQuota);
     }
 
-    private static async Task AssertQuota(JsonDocument quota)
+    private static async Task AssertQuota(BlobQuota quota)
     {
-        using (quota)
-        {
-            var root = quota.RootElement;
-            await Assert.That(root.GetProperty(ReservedBytesProperty).GetInt64()).IsEqualTo(0L);
-            await Assert.That(root.GetProperty(ObjectKeysProperty).GetInt32()).IsEqualTo(RecordCount);
-            await Assert.That(root.GetProperty(VersionsProperty).GetInt32()).IsEqualTo(RecordCount);
-            await Assert.That(root.GetProperty(UploadsProperty).GetInt32()).IsEqualTo(0);
-        }
+        await Assert.That(quota.ReservedBytes).IsEqualTo(0L);
+        await Assert.That(quota.ObjectKeys).IsEqualTo(RecordCount);
+        await Assert.That(quota.Versions).IsEqualTo(RecordCount);
+        await Assert.That(quota.Uploads).IsEqualTo(0);
     }
 
-    private static JsonDocument ParseObject(byte[]? bytes) => JsonDocument.Parse(bytes
+    private static BlobQuota ParseQuota(byte[]? bytes) => NativeSerialization.Deserialize<BlobQuota>(bytes
         ?? throw new InvalidOperationException("Expected a persisted blob quota record."));
 
     private static BlobRef Blob(int index) =>

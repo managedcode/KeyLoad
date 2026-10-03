@@ -2,6 +2,68 @@
 
 Status: Accepted bounded implementation contract; qualification pending.
 Date: 2026-10-03. Root integration owns BenchmarkComparisons and all shared joins.
+
+## Accepted stage D: bounded native setup diagnostics
+
+TASK-NGR-R5 retained a second actual Kurrent n2 initialization NotLeaderException
+at source366, run37123589283/job111205160819, after current-job verification
+passed. No measurement or callsite is retained. Its sealed original packet
+SHA256 `1971c6884d2d58989808e6084668b75d4709da2eec455dc8c19f500cf7b8df5b`
+does not prove a routing or startup-election defect.
+
+REQ-NGR-003 / AC-NGR-003D is approved for observability only. Ordered contract:
+first-author genuine-thrown pure formatter tests; then bounded gpt-6-luna/high
+worker changes only Comparisons Features/BenchmarkComparisons/KurrentTarget.cs
+and NEW KurrentSetupDiagnostics.cs/KurrentSetupStage.cs plus NEW UnitTests
+Features/BenchmarkComparisons/KurrentSetupDiagnostic-prefixed files; root reviews
+every diff and owns frozen integrated build/format/static checks, receipts/Git
+and exact-source GitHub qualification. The internal target-owned closed enum
+tracks writer construction, membership, NoStream semantics, seeding, copy and
+complete. Existing operations/order, cancellation, ownership, copies, ACKs and
+timing remain. Extract a private setup core if needed to obey function/type limits.
+NEW KurrentTargetProfile.cs may receive only the unchanged existing CreateProfile
+method body as internal static Create, with the constructor join adjusted and
+original method removed, to preserve the200-line type limit. Exact literal
+profile/settings/branch/parameter parity is required; no additional behavior.
+
+One failure-only best-effort ASCII stderr line emits phase, actual caught type
+and type/method stack metadata; at most3 causes,8 frames/cause,64 characters per
+identifier and4096 bytes. No Message/Data/ToString/raw stack/file path/line,
+credentials, endpoints or user payload; only existing stderr output, no other
+I/O, client, task, gossip, retry,
+poll or wait. Diagnostic errors cannot replace the same caught exception,
+rethrow preserves its stack. The existing captured runner stderr is the join,
+with no public report/schema/interface/package change or successful setup log.
+
+Tests prove safe formatting/bounds with real filesystem/arithmetic/cancellation
+exceptions and bounded deep/inner chains, not mocked native failure. Existing
+actual1/2/3 preflight proves success; any genuine initialization failure must
+retain its original failed/null-measurement case plus the diagnostic. If no such
+failure occurs, native failure-path proof stays pending. Earlier verifier
+disposal can mask a primary exception; this stage observes the caught boundary
+and does not close that separate lifetime defect or global stderr blocking.
+Frame limits apply to emitted/accessed metadata and the linear InnerException
+chain only. System.Diagnostics.StackTrace construction can materialize the full
+runtime stack before those accesses; bounded total capture work/allocation is
+unqualified. Owner: root BenchmarkComparisons integration. Before closing the
+resource gate, measure the real failed setup capture or replace it with a bounded
+metadata fallback; do not claim allocation/latency acceleration from this stage.
+Aggregate branch enumeration/Flatten is intentionally absent, not claimed complete.
+The development build rejected the initial broad diagnostic catch with CA1031.
+Use the existing cleanup diagnostic's recoverable IOException,
+InvalidOperationException (including ObjectDisposed), ArgumentException and
+NotSupportedException, plus TypeLoadException/MemberAccessException metadata
+failures. No warning suppression. Fatal runtime/allocation failures remain
+outside this stage's qualified preservation/resource contract.
+Rollback formatter/enum/target join together; full routing/cohort gates stay open.
+
+```mermaid
+flowchart LR
+    Setup[Unchanged native setup stages] --> Result{Setup outcome}
+    Result -->|success| Measure[Original benchmark workload]
+    Result -->|failure| Safe[Bounded phase type method line]
+    Safe --> Rethrow[Same caught exception and failed case]
+```
 Related REQ-NGR-001..004 / AC-NGR-001..004 in
 benchmark-native-gates-repair.acceptance.md; existing REQ-BC-006/009/050..058,
 ADR-056/062/064 and native ownership/ACK contracts remain mandatory.

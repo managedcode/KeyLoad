@@ -145,7 +145,13 @@
   },
   "review": "Separate read-only review found no fixture blocker; root inspected every owned diff",
   "delivery": {
-    "status": "scoped_commit_and_original_Actions_rerun_pending",
+    "sourceRevision": "b8ee2a3f67da345fbe809d6f40270e36d901c58d",
+    "pushedTo": "main",
+    "ciRunId": 37125791272,
+    "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37125791272",
+    "ciStatus": "pending_zero_jobs_original_artifacts_not_yet_available",
+    "supersededPushRunId": 37125776668,
+    "supersededPushStatus": "automatically_cancelled_zero_jobs_by_explicit_canonical_dispatch",
     "runtimeQualified": false
   },
   "remainingGates": [

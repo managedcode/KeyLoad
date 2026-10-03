@@ -155,7 +155,7 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
         await Assert.That(System.Linq.Enumerable.Single(result.Receipt.Mutations).Kind).IsEqualTo("Ack");
     }
     [Test]
-    public async Task RetainedEventIdRejectsDifferentContentAndPreservesDedupForTheInitialStoreFormat()
+    public async Task RetainedNativeEventIdAtInitialLogicalKeyPreservesDedupAndRejectsDifferentContent()
     {
         using var db = new TestDatabase();
         db.Configure("streams", ResourceKind.StreamSet);
@@ -164,7 +164,7 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
         db.Store.Commit((tx, _) =>
         {
             tx.Delete(KeySpace.Partition("event-id", db.Partition, "streams", "a", 1L, "same"));
-            tx.PutRecord(KeySpace.Partition("event-id", db.Partition, "streams", "same"), new { StreamId = "a", Generation = 1L, Revision = 1L });
+            tx.PutRecord(KeySpace.Partition("event-id", db.Partition, "streams", "same"), new EventIdentity("a", 1L, 1L));
             return true;
         });
         var duplicate = Guid.NewGuid();

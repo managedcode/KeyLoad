@@ -1,5 +1,18 @@
 # ADR-065: Full SQL syntax and client protocol
 
+TASK-SQLC-COMP-ORACLE / REQ-SQLC-003 / AC-SQLC-003C preserves AC-COMP-007 after
+actualca22 RF3 report0a29cc8c3c5d29db4f1135277856af42c23a584a83a232b0358c8636b74f1ad1
+retains66pass/1error. Messaging.Enqueue already canonicalizes queue JSON in
+ordinal key order. Root first uses that original failing RF3 regression, then
+owns only IntegrationTests DatabaseCompositionRf3Tests.cs and NEW
+DatabaseCompositionRf3Payload.cs: preserve incoming noncanonical DTO JSON, compare
+persisted exact bytes to an independent named-field ordinal JSON golden and
+reparse full link equality. No product canonicalizer may generate the golden.
+All forward/reverse/replay/rollback/error flows and genuine SDK/MCP RF3 remain.
+Root source review/build/format/static precede stable delivery and real RF3;
+reverse-flow and fullgate remain pending. No production/schema/migration change;
+rollback both fixture files together. Independent ADR067/outbox work is preserved.
+
 Owner clarification 2026-10-03 requires full SQL for one composable database,
 not merely independent per-model calls. [DatabaseComposition](../Features/DatabaseComposition.md)
 and [ADR-067](ADR-067-composable-agent-database.md) define the first bounded atomic
@@ -13,6 +26,46 @@ root planning agent. Related QueryExecution/ClientApi/RelationalStorage/Search;
 REQ-SQLC-001–011 and AC-SQLC-001–011 in the root sql-client-compatibility acceptance.
 This extends ADR-012/054; their initial Q1/CALL stage is historical, not the full
 product. Existing SQL envelope1 and generated DTO IDs remain unchanged.
+
+## Accepted public/native test-oracle stage
+
+TASK-SQLC-P1 / REQ-SQLC-003 / AC-SQLC-003P follows the root-reviewed R17 original
+report (source366, CI37123589277/job111204377864/artifact11273574119; report SHA256
+3471e334e4348ff727cf928ffdc845ec7b73a9e0de63b920262450217dc69635).
+SQL-compiled versus canonical descriptor bytes pass before the invalid trailing
+pre-JSON DTO comparison fails. Array/stream divergence or graph normalization
+is not yet established; no product serialization change is authorized here.
+
+Ordered contract: first-author actual same-instance native array/MemoryStream
+writer parity plus received-command/recursive DTO semantic regressions; then
+bounded gpt-6-luna/high worker updates only UnitTests ClientApi canonical corpus,
+command/read/polymorphic tests, QueryExecution SQL compiler/comment tests and
+NEW ClientApi/McpNativePayload-prefixed files. Root reviews every diff and joins
+frozen integrated build/format/static gates, scoped main delivery and real
+GitHub normal/scalar/recovery/RF3 originals. No mocks/packages/local execution.
+
+The full original public JsonElement is an independent value oracle; generic
+test-only native-decode delegates retain the actual DTO type, validate/deserialize
+native bytes and compare every resulting JSON field/union/value. Preserve kinds,
+stable IDs, dictionaries, original JSON, safe invalid/null/unknown rejections and
+exact SQL-native parity against the same real canonical descriptor. Post-disposal
+tests compare an actual-byte copy taken while the source document lived and then
+decode the complete DTO. No-body uses actual native int-zero/correct read identity,
+not JSON/null text. All existing recursive/raw JSON value assertions remain.
+
+A same decoded instance must produce exact equal native array/stream bytes and
+valid typed round trips. Any genuine failure remains failing and escalates to
+its serializer owner; no fixture avoidance, dropped assertion or consumer
+workaround. No public/format/storage/auth/transport migration; rollback corpus
+and oracle changes together. FullSQL/native/coverage gates stay open.
+
+```mermaid
+flowchart LR
+    Input[Original public typed JSON] --> Native[Actual canonical native payload]
+    Native --> Typed[Validate and decode actual DTO type]
+    Typed --> Value[Full independent public value equality]
+    Typed --> Writers[Same instance array and stream parity]
+```
 
 ## Decision and conformance target
 

@@ -165,7 +165,9 @@ internal sealed class ChangeFeedTests
         var consumer = Consumer(db);
         Configure(db, consumer);
         var all = db.Database.ReadProjectionBatch("root", new(consumer));
-        var entrySize = JsonDefaults.Serialize(all.Entries[0]).Length;
+        var entrySize = ProjectionNativeByteFixture.StoredEntryBytes(db, all.Entries[0].Sequence);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadProjectionBatch("root", new(consumer, MaxBytes: entrySize - 1))).Code)
+            .IsEqualTo(ErrorCode.BudgetExceeded);
         var batch = db.Database.ReadProjectionBatch("root", new(consumer, MaxBytes: entrySize));
         await Assert.That(batch.Entries).HasSingleItem();
         await Assert.That(batch.ThroughSequence).IsEqualTo(1);

@@ -1,5 +1,3 @@
-using System.Text;
-using System.Text.Json.Nodes;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 namespace KeyLoad.UnitTests.Features.BlobStorage;
@@ -11,7 +9,6 @@ internal sealed class BlobFormatFailureTests
     private const string StateSpace = "blob-state-v1";
     private const string PartSpace = "blob-part-v1";
     private const string PartMetadataSpace = "blob-partmeta-v1";
-    private const string FormatVersionProperty = "formatVersion";
     private const string GuidFormat = "N";
     private const int UnknownFormatVersion = 99;
     private const int PartOrdinal = 0;
@@ -27,7 +24,8 @@ internal sealed class BlobFormatFailureTests
         var blob = BlobStorageTestSupport.Blob(database, BlobId);
         var uploadId = Guid.NewGuid();
         BlobStorageTestSupport.Begin(database, blob, uploadId, Payload.Length, InitialRevision);
-        ReplaceFormatVersion(database, StateKey(blob, uploadId));
+        ReplaceFormatVersion<BlobState>(database, StateKey(blob, uploadId),
+            state => state with { FormatVersion = UnknownFormatVersion });
 
         var operations = new BlobStorageOperations(database.Database);
         var commandId = Guid.NewGuid();
@@ -67,7 +65,8 @@ internal sealed class BlobFormatFailureTests
         var deleteId = Guid.NewGuid();
         database.Submit(OperationKind.DeleteBlob,
             new DeleteBlobRequest(deleteId, blob, metadata.Revision), id: deleteId).Get<BlobCommitResult<BlobMetadata>>();
-        ReplaceFormatVersion(database, PartMetadataKey(blob, uploadId, PartOrdinal));
+        ReplaceFormatVersion<BlobPartMetadata>(database, PartMetadataKey(blob, uploadId, PartOrdinal),
+            metadata => metadata with { FormatVersion = UnknownFormatVersion });
 
         var commandId = Guid.NewGuid();
         var clockBefore = Read(database, KeySpace.Clock.ToArray());
@@ -103,13 +102,11 @@ internal sealed class BlobFormatFailureTests
     private static byte[]? Read(TestDatabase database, byte[] key) =>
         database.Store.Read(view => view.ReadOwnedValue(key));
 
-    private static void ReplaceFormatVersion(TestDatabase database, byte[] key)
+    private static void ReplaceFormatVersion<T>(TestDatabase database, byte[] key, Func<T, T> change)
     {
         var serialized = Read(database, key) ?? throw new InvalidOperationException("Expected persisted blob record.");
-        var record = JsonNode.Parse(serialized)?.AsObject()
-            ?? throw new InvalidOperationException("Expected persisted JSON object.");
-        record[FormatVersionProperty] = UnknownFormatVersion;
-        var changed = Encoding.UTF8.GetBytes(record.ToJsonString(JsonDefaults.Options));
+        var record = NativeSerialization.Deserialize<T>(serialized);
+        var changed = NativeSerialization.Serialize(change(record));
         database.Store.Commit((transaction, _) =>
         {
             transaction.Put(key, changed);

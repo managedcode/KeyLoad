@@ -6,13 +6,6 @@ namespace KeyLoad.UnitTests;
 /// <summary>AC-REP-006: genuine signed read probes cannot spend consensus reserve.</summary>
 internal sealed class ReplicaReadProbeSecurityTests
 {
-    private const string Entries = "\"entries\":[]";
-    private const string NullEntries = "\"entries\":null";
-    private const string DuplicateEntries = "\"entries\":[],\"entries\":[]";
-    private const string UnknownEntries = "\"unexpected\":[],\"entries\":[]";
-    private const string MissingEntries = "\"unexpected\":[]";
-    private const string TrailingObject = "{}";
-
     /// <summary>Both application methods share a bounded pool; native control remains independent.</summary>
     [Test]
     [Arguments(ReplicaRpc.ReadProbe)]
@@ -48,18 +41,17 @@ internal sealed class ReplicaReadProbeSecurityTests
 
     /// <summary>Null, missing, duplicate, unknown and trailing fields cannot claim either pool.</summary>
     [Test]
-    [Arguments(NullEntries)]
-    [Arguments(DuplicateEntries)]
-    [Arguments(UnknownEntries)]
-    [Arguments(MissingEntries)]
-    [Arguments(TrailingObject)]
-    public async Task MalformedSignedProbePreservesCapacity(string mutation)
+    [Arguments(NativeReadProbeFault.NullEntries)]
+    [Arguments(NativeReadProbeFault.DuplicateEntries)]
+    [Arguments(NativeReadProbeFault.UnknownEntries)]
+    [Arguments(NativeReadProbeFault.MissingEntries)]
+    [Arguments(NativeReadProbeFault.TrailingObject)]
+    public async Task MalformedSignedProbePreservesCapacity(NativeReadProbeFault fault)
     {
         using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1, ReadBarrierPerVoter = 1 });
-        var request = Request(fixture, ReplicaRpc.ReadProbe);
-        var original = ReplicaTransportProtocol.Utf8.GetString(request.Payload.Span);
-        var changed = mutation == TrailingObject ? original + mutation : original.Replace(Entries, mutation, StringComparison.Ordinal);
-        request = fixture.Resign(request with { Payload = ReplicaTransportProtocol.Utf8.GetBytes(changed) });
+        var value = new AppendRequest(ReplicaSecurityFixture.VoterA, 1, 0, 0, 0, []);
+        var request = fixture.Request(ReplicaRpc.ReadProbe, value);
+        request = fixture.Resign(request with { Payload = NativeReadProbeProducer.Encode(value, fault) });
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(request)).Code)
             .IsEqualTo(ErrorCode.Validation);
         fixture.Receiver.VerifyRequest(Request(fixture, ReplicaRpc.ReadProbe));

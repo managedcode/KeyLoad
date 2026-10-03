@@ -36,7 +36,7 @@ internal sealed class JsonTextSubscriptionReplayTests
         await Assert.That(deliveries.Length).IsEqualTo(MultiDeliveryCount);
         await Assert.That(deliveries.Select(delivery => delivery.Event.Data.EventId))
             .IsEquivalentTo(new[] { FirstEventId, SecondEventId, ThirdEventId }, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(replay).IsEqualTo(original);
+        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(replay, original);
         await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
 
         var ack = Guid.NewGuid();
@@ -60,7 +60,7 @@ internal sealed class JsonTextSubscriptionReplayTests
         var replay = db.Submit(OperationKind.ReceiveSubscription, request, id: id, time: now);
 
         await Assert.That(original.Get<ReceiveSubscriptionResult>().Deliveries).IsEmpty();
-        await Assert.That(replay).IsEqualTo(original);
+        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(replay, original);
 
         var seek = Guid.NewGuid();
         db.Submit(OperationKind.SeekSubscription,

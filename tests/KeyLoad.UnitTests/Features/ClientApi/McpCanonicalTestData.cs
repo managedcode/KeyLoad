@@ -11,7 +11,6 @@ internal static class McpCanonicalTestData
     internal const string CommandKey = "commandId";
     internal const string ReceiveKey = "requestId";
     internal const string UnknownKey = "principalId";
-    internal const string NullJson = "null";
     internal const string EmptyJson = "{}";
     internal const string StableIdText = "ee5cf37e-0e81-4a94-8725-021e30f7b721";
     internal const string Tenant = "mcp-tenant";
@@ -92,15 +91,25 @@ internal static class McpCanonicalTestData
     private static ImmutableArray<Mutation> Effects() => [new PutDocument(Resource, Entity, EmptyJson)];
 
     private static McpDecodeCase Case<T>(string name, T request, string? idMember) =>
-        new(name, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), NativeSerialization.Serialize(request), StableId, idMember);
+        CreateCase(name, request, StableId, idMember);
 
     private static McpDecodeCase Read<T>(string name, T request) =>
-        new(name, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), NativeSerialization.Serialize(request), Guid.Empty, null);
+        CreateCase(name, request, Guid.Empty, null);
+
+    private static McpDecodeCase CreateCase<T>(string name, T request, Guid commandId, string? idMember) =>
+        new(name, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), commandId, idMember,
+            element => element.Deserialize<T>(JsonDefaults.Options)!,
+            payload => NativeSerialization.Deserialize<T>(payload.Span)!,
+            value => NativeSerialization.Serialize((T)value),
+            (value, destination) => NativeSerialization.Serialize((T)value, destination),
+            value => JsonSerializer.SerializeToElement((T)value, JsonDefaults.Options));
 }
 
-/// <summary>Owned canonical input and its exact expected bytes; no service or protocol substitute.</summary>
-internal sealed record McpDecodeCase(string Name, JsonElement Request, ReadOnlyMemory<byte> ExpectedPayload,
-    Guid CommandId, string? IdMember)
+/// <summary>Owned public JSON and its independent actual-type decoding operations.</summary>
+internal sealed record McpDecodeCase(string Name, JsonElement Request, Guid CommandId, string? IdMember,
+    Func<JsonElement, object> DeserializePublic, Func<ReadOnlyMemory<byte>, object> DeserializeNative,
+    Func<object, byte[]> SerializeNative, Action<object, Stream> SerializeNativeToStream,
+    Func<object, JsonElement> SerializePublic)
 {
     internal IDictionary<string, JsonElement> Arguments()
     {

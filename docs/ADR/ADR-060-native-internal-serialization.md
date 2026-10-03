@@ -161,3 +161,110 @@ The borrowed storage span is copied for inspection only on a cold miss because
 the profile inspector requires owned ReadOnlyMemory for its borrowed proxies;
 no proxy or storage buffer escapes the read gate. Warm cut observations still
 perform no point lookup. Retain this ownership cost in performance accounting.
+
+## Accepted pair-nullability repair contract
+
+R13 preserves REQ-IS002 / AC-IS002 and the current binary formats. The supported
+KeyValuePair shape must propagate an owning attributed member's key/value
+nullability, including nullable pairs and collections of pairs, through the same
+metadata slots already consumed by semantic validation. Dynamic/root pairs with
+no owning nullable annotations retain their existing policy. No production DTO
+currently owns pair fields; this repairs the declared native closure before it
+is used by a future model.
+
+Ordered stages: root accepts R13-AC001 required-null rejection in serialize,
+measure and unchecked decode; R13-AC002 valid/absent/nullable-child roundtrips and
+metadata-free root compatibility; one worker owns only NativeValueValidation's
+pair metadata mapping and new InternalSerialization TUnit fixtures. Root owns
+integration, scoped commit/push and exact-source normal/scalar/recovery/RF3 CI.
+Do not change wire preflight, graph charge/depth/reference rules, profiles, error
+classification, formats, policy or performance claims. Rollback restores the
+prior binary without rewriting data; malformed required-null pairs remain an
+unqualified input until corrected binaries are selected. Native measurement
+artifacts remain bound to their actual source and do not qualify this repair.
+
+## Accepted exposed-fixture and auth-reader repair contract
+
+R14 addresses the actual normal-unit failures from completed job111204377864 of
+GitHub run37123589277, source366d3a8a. Preserve REQ/AC-IS002/004/007, current
+formats and every admission, authorization, size, cut and fault assertion.
+R14-AC001 requires MCP native auth's custom inspector to classify only the same
+narrow official Reader exhaustion as malformed, preserving public Validation; owned/session/programming
+exceptions must still escape. R14-AC002 requires malformed auth array fixtures
+and read-probe fixtures to author actual native defects, with a valid twin from
+the same writer. Concrete generated array codecs cannot be assumed to honor a
+generic provider override. Invalid count/type/null/reference/identity cases keep
+their original expected errors and before-materialization fences.
+
+Ordered ownership: root owns this contract and all shared integration;
+native_wire_fix owns only server MCP auth malformed classification and its
+UnitTests auth malformed fixtures; native_codec_review owns only UnitTests
+read-probe fixture writers and affected header/security tests. Root owns the
+remaining sentinel, public-input expectation and quota/replay fixture joins.
+Use the actual int0 no-body sentinel; construct expected native request graphs
+from the same public JSON input instead of promising canonical reference bytes.
+Quota boundaries must use actual native persisted/normalized byte costs and
+retain exact/one-byte-short rejection; public changefeed JSON remains JSON.
+Compare decoded record fields and contents, including immutable arrays, without
+assuming allocation identity. Native membership test hosts must register their
+real dependencies without altering production RF3, directory or migration.
+
+No runtime fallback, new role trust, wire version, storage ownership, size limit
+or recovery-policy change. Root reviews every diff, development build/format,
+then commits/pushes only scoped repairs and qualifies normal/scalar, recovery and
+RF3 through GitHub. Earlier diagnostic results retain their actual source and
+cannot qualify later repair source. Rollback restores matching-format binaries;
+fixtures do not mutate production format or make a performance/durability claim.
+
+
+## Accepted diagnostic API-visibility repair contract
+
+R15 follows actual native run37124532025/job111208251984, sourcef403bf61e:
+24 external measurements and both diagnostic test modes completed successfully,
+but the in-job required-step check failed. The completed authenticated job now
+reports those exact preceding steps successful. API visibility lag is an
+inference until new raw inspection snapshots are retained; never substitute a
+controlled receipt or relaxed success rule for authentic preceding-step proof.
+
+R15-AC001: preserve every run/attempt/source/job/executor and completed-success
+check. Only a uniquely matching required step whose status is pending/queued/in_progress
+and conclusion null may trigger bounded visibility retries. A missing/duplicate,
+failed/skipped/cancelled step or changed identity fails closed. Save every actual
+inspection receipt before checking steps, including failed attempts. Retry at
+10-second intervals for no more than a120-second monotonic deadline; propagate
+one deadline cancellation through API subprocesses and timer waits so final
+joins settle. R15-AC002: use the same strict report/corpus/generated validation
+for all24 original cells; inspect and fix pinned exporter incompatibilities only
+when actual artifacts prove them, retaining raw warmup/actual/result accounting.
+
+Ordered scope: root accepts contract, owns cross-cutting integration and docs;
+codec reviewer diagnoses original artifacts read-only; one bounded writer owns
+native evidence/GitHub helpers and new pure contract TUnit tests. Root reviews,
+builds/formats, scoped commits/pushes and reruns authentic Linux diagnostics.
+No failed prior job becomes qualified by a script repair or replay. New source
+must pass its own normal/scalar tests, external measurements, verification and
+immutable artifact authentication. Full RF3 and database comparison gates stay
+independent. Rollback removes this retry while retaining strict failure and raw
+artifacts. No production codec/wire/format/limits or speed claims change.
+
+R14 integration additionally repairs only compiler-reported analyzer/style hunks
+in concurrent Kurrent diagnostics: Console error output catches IOException or
+ObjectDisposedException only, actual fixture Capture accepts only its four thrown
+exception families, cancellation is awaited, and two unused imports/lambdas are
+removed. Preserve all target behavior, redaction, source assertions and ownership;
+these unowned addition files are not silently included in the native commit.
+The complete development build must succeed on the joined checkout; source-only
+analyzer repair is not comparison or runtime qualification.
+
+R14 SearchResourceTests retains the exact64×16384 added user JSON UTF8 corpus
+assertion and unchanged allocation allowance computed from actual persisted
+native byte growth. Native string length prefixes grow when padded JSON crosses
+the pinned codec varint width, so content-only bytes cannot be asserted as total
+record-byte growth. Decode owning DocumentRecord outside allocation measurement
+to prove the exact user-content delta; keep raw native scans for the existing
+allocation guard and all result/time/score checks. No allocation tolerance rises.
+
+The retained original github-prepare.json proves GitHub's actual preceding-step
+API also uses pending/null. Root includes that state among bounded retry-only
+states; it never satisfies completed-success. The same strict invalid-state
+and terminal-failure rules apply.

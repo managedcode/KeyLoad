@@ -16,6 +16,7 @@ public sealed class KurrentTarget : IComparisonTarget
     private KurrentDBClient? writer;
     private KurrentDBClient[] nodeClients = [];
     private bool initialized;
+    private KurrentSetupStage setupStage = KurrentSetupStage.WriterConstruction;
 
     /// <summary>Gets the observed KurrentDB version, topology, acknowledgement, read, transport, and authorization profile.</summary>
     public TargetProfile Profile { get; private set; }
@@ -34,7 +35,7 @@ public sealed class KurrentTarget : IComparisonTarget
         nodeHttpClients = nodeClients;
         this.runId = Guid.Parse(runId).ToString(KurrentConstants.GuidFormat);
         this.topology = topology;
-        Profile = CreateProfile(connectionString, image, topology);
+        Profile = KurrentTargetProfile.Create(connectionString, image, topology);
     }
 
     /// <summary>Reports support only for stream append and stream read operations.</summary>
@@ -53,26 +54,40 @@ public sealed class KurrentTarget : IComparisonTarget
         {
             throw new ComparisonFailureException(KurrentConstants.OwnershipAlreadyInitialized);
         }
-        ownership = new KurrentStreamOwnership(dataset.Options);
-        writer = new KurrentDBClient(KurrentNativeSettings.CreateWriter(connectionString));
-        ownedClients.Add(writer);
-        var timeout = TimeSpan.FromSeconds(dataset.Options.TimeoutSeconds);
-        var proof = await KurrentClusterVerifier.VerifyAsync(connectionString, nodeHttpClients, topology, timeout, cancellationToken);
-        nodeClients = proof.NodeClients;
-        ownedClients.AddRange(nodeClients);
-        await VerifyNoStreamConflictAsync(cancellationToken);
-
-        foreach (var document in dataset.Documents)
+        try
         {
-            var stream = StreamName(document);
-            await KurrentOwnedStreamAppend.AppendAsync(RequireWriter(), ownership, stream, CreateEvent(document), cancellationToken);
+            ownership = new KurrentStreamOwnership(dataset.Options);
+            setupStage = KurrentSetupStage.WriterConstruction;
+            writer = new KurrentDBClient(KurrentNativeSettings.CreateWriter(connectionString));
+            ownedClients.Add(writer);
+            setupStage = KurrentSetupStage.MemberVerification;
+            var timeout = TimeSpan.FromSeconds(dataset.Options.TimeoutSeconds);
+            var proof = await KurrentClusterVerifier.VerifyAsync(connectionString, nodeHttpClients, topology, timeout, cancellationToken);
+            nodeClients = proof.NodeClients;
+            ownedClients.AddRange(nodeClients);
+            setupStage = KurrentSetupStage.NoStreamSemantics;
+            await VerifyNoStreamConflictAsync(cancellationToken);
+
+            setupStage = KurrentSetupStage.CorpusSeeding;
+            foreach (var document in dataset.Documents)
+            {
+                var stream = StreamName(document);
+                await KurrentOwnedStreamAppend.AppendAsync(RequireWriter(), ownership, stream, CreateEvent(document), cancellationToken);
+            }
+            setupStage = KurrentSetupStage.ReplicaCopy;
+            var probe = StreamName(KurrentConstants.ProbeStreamSuffix);
+            var eventData = CreateProbeEvent();
+            var evidence = await KurrentClusterVerifier.VerifyCopyAsync(RequireWriter(), nodeClients, nodeHttpClients,
+                topology, probe, eventData, ownership, timeout, cancellationToken);
+            Profile = Profile with { Cluster = evidence };
+            initialized = true;
+            setupStage = KurrentSetupStage.Complete;
         }
-        var probe = StreamName(KurrentConstants.ProbeStreamSuffix);
-        var eventData = CreateProbeEvent();
-        var evidence = await KurrentClusterVerifier.VerifyCopyAsync(RequireWriter(), nodeClients, nodeHttpClients,
-            topology, probe, eventData, ownership, timeout, cancellationToken);
-        Profile = Profile with { Cluster = evidence };
-        initialized = true;
+        catch (Exception failure)
+        {
+            KurrentSetupDiagnostics.TryWrite(setupStage, failure);
+            throw;
+        }
     }
 
     /// <summary>Opens a stream comparison session after successful target initialization.</summary>
@@ -152,36 +167,6 @@ public sealed class KurrentTarget : IComparisonTarget
             // A different event ID cannot create a second event under the NoStream precondition.
         }
         await KurrentReplicaProbe.RequireOriginalEventAsync(RequireWriter(), stream, firstEvent, cancellationToken);
-    }
-
-    private static TargetProfile CreateProfile(string connectionString, string image, ComparisonTopology topology)
-    {
-        var imageName = image.Split(KurrentConstants.ImageDigestSeparator, KurrentConstants.ImageReferenceParts)[0];
-        var imageTag = imageName.Split(KurrentConstants.ImagePathSeparator).Last().Split(KurrentConstants.ImageTagSeparator).Last();
-        if (imageTag != KurrentConstants.ExpectedServerVersion)
-        {
-            throw new ComparisonFailureException(KurrentConstants.VersionMismatch);
-        }
-
-        var settings = KurrentNativeSettings.CreateWriter(connectionString);
-        var connectivity = settings.ConnectivitySettings;
-        var insecure = connectivity.Insecure;
-        var transport = insecure ? KurrentConstants.Insecure : KurrentConstants.TlsVerified;
-        var credentialsConfigured = settings.DefaultCredentials is not null;
-        var clientCertificateConfigured = connectivity.ClientCertificate is not null;
-        var authorization = insecure
-            ? credentialsConfigured ? KurrentConstants.InsecureCredentialsIgnored : KurrentConstants.Unauthenticated
-            : credentialsConfigured ? KurrentConstants.Authenticated : KurrentConstants.Unauthenticated;
-        var certificateMetadata = clientCertificateConfigured
-            ? insecure ? KurrentConstants.TlsClientCertificateIgnored : KurrentConstants.TlsClientCertificateConfigured
-            : KurrentConstants.TlsClientCertificateAbsent;
-        var profile = new TargetProfile(KurrentConstants.Name, KurrentConstants.ExpectedServerVersion,
-            ComparisonTopologies.NodeCount(topology) == 1 ? KurrentConstants.SingleTopology :
-                topology == ComparisonTopology.TwoNode ? KurrentConstants.TwoNodeTopology : KurrentConstants.ReplicatedTopology,
-            ComparisonTopologies.NodeCount(topology) > 1 ? KurrentConstants.ReplicatedAcknowledgement : KurrentConstants.SingleAcknowledgement,
-            KurrentConstants.ReadContract + KurrentConstants.WriterPreferenceLabel,
-            transport, authorization + KurrentConstants.AuthorizationSeparator + certificateMetadata + KurrentConstants.AuthorizationSeparator + KurrentConstants.CommunityAuthorization, image);
-        return profile;
     }
 
     private KurrentDBClient RequireWriter() => writer ?? throw new ComparisonFailureException(KurrentConstants.NotInitialized);

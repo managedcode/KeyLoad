@@ -166,7 +166,7 @@ internal sealed record NativeValueValidation(bool Required, NativeValueValidatio
         // NullabilityInfo keeps Nullable<T> as Type, but its generic metadata already describes T.
         var arguments = info.GenericTypeArguments;
         var type = Nullable.GetUnderlyingType(info.Type) ?? info.Type;
-        if (arguments.Length == 2 && (IsDictionary(type) || type.GetInterfaces().Any(IsDictionary)))
+        if (arguments.Length == 2 && (IsKeyValuePair(type) || IsDictionary(type) || type.GetInterfaces().Any(IsDictionary)))
         {
             return new(required, null, Create(arguments[0]), Create(arguments[1]));
         }
@@ -176,4 +176,7 @@ internal sealed record NativeValueValidation(bool Required, NativeValueValidatio
     private static bool IsDictionary(Type type)
         => type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>)
             || type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>));
+
+    private static bool IsKeyValuePair(Type type)
+        => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>);
 }

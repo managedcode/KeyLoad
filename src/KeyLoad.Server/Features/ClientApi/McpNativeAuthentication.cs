@@ -59,5 +59,5 @@ internal static class McpNativeAuthentication
 
     private static bool Malformed(Exception error) => error is SerializerException or ArgumentException
         or IndexOutOfRangeException or OverflowException or InvalidCastException or FormatException
-        or EndOfStreamException or TypeLoadException;
+        or EndOfStreamException or TypeLoadException || NativePayloadSyntax.IsReaderBufferFailure(error);
 }

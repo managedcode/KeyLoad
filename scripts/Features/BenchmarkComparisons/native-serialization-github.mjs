@@ -28,15 +28,18 @@ function validateRun(run, identity) {
     && identity.event === 'workflow_dispatch' && run.status === 'in_progress', 'github.run');
 }
 
-export async function captureGitHub(identity) {
+export async function captureGitHub(identity, signal, saveResponse) {
   const route = `repos/${NATIVE.repository}/actions/runs/${identity.runId}/attempts/${identity.attempt}`;
-  const run = await githubJson(route);
+  const run = await githubJson(route, signal);
+  await saveResponse?.('run', run, route);
   validateRun(run, identity);
   const pages = [];
   const jobs = [];
   let total;
   for (let page = 1; page <= 20; page++) {
-    const value = await githubJson(`${route}/jobs?per_page=100&page=${page}`);
+    const pageRoute = `${route}/jobs?per_page=100&page=${page}`;
+    const value = await githubJson(pageRoute, signal);
+    await saveResponse?.(`jobs-${String(page).padStart(2, '0')}`, value, pageRoute);
     requireNative(positiveInteger(value.total_count) && value.total_count <= 2000
       && Array.isArray(value.jobs) && value.jobs.length <= 100, 'github.jobs');
     total ??= value.total_count;
@@ -65,15 +68,24 @@ export function hostFacts() {
     processorModels: [...new Set(cpus().map(cpu => cpu.model))], totalMemoryBytes: totalmem() };
 }
 
-export function requireCompletedSteps(job, measured = false) {
+export function requiredStepsReady(job, measured = false) {
   const names = ['Build diagnostic tests and generated benchmark host',
     'Test native diagnostic contracts and generated consumers', 'Test diagnostic contracts without hardware intrinsics'];
   if (measured) names.push('Record source packages runtime and execution identity',
     'Measure all native and historical JSON diagnostic cases');
-  requireNative(Array.isArray(job.steps), 'github.steps');
+  requireNative(Array.isArray(job?.steps), 'github.steps');
+  let ready = true;
   for (const name of names) {
-    const steps = job.steps.filter(step => step.name === name);
-    requireNative(steps.length === 1 && steps[0].status === 'completed'
-      && steps[0].conclusion === 'success', 'github.requiredStep');
+    const steps = job.steps.filter(step => step?.name === name);
+    requireNative(steps.length === 1, 'github.requiredStep');
+    const completed = steps[0].status === 'completed' && steps[0].conclusion === 'success';
+    const pending = ['queued', 'in_progress', 'pending'].includes(steps[0].status) && steps[0].conclusion === null;
+    requireNative(completed || pending, 'github.requiredStep');
+    ready &&= completed;
   }
+  return ready;
+}
+
+export function requireCompletedSteps(job, measured = false) {
+  requireNative(requiredStepsReady(job, measured), 'github.requiredStep');
 }

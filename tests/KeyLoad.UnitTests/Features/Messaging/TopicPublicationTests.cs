@@ -132,10 +132,14 @@ internal sealed class TopicPublicationTests
 
     private static long ExpectedRawEventBytes(TestDatabase database, EventData[] events, DateTimeOffset publicationTime)
     {
-        var source = new EventSourceRef(database.Partition, TopicName, EventSourceKind.Topic);
-        var first = NativeSerialization.Serialize(new SourceEventRecord(source, 1, 1, events[0], publicationTime)).LongLength;
-        var second = NativeSerialization.Serialize(new SourceEventRecord(source, 2, 2, events[1], publicationTime)).LongLength;
-        return first + second;
+        using var calibration = new TestDatabase();
+        if (calibration.Partition != database.Partition)
+        {
+            throw new InvalidOperationException("The calibration must publish in the same logical partition.");
+        }
+        ConfigureTopic(calibration, long.MaxValue, time: publicationTime);
+        Publish(calibration, events, Guid.NewGuid(), publicationTime);
+        return calibration.Store.Read(view => RawEvent(view, calibration, 1).LongLength + RawEvent(view, calibration, 2).LongLength);
     }
 
     private static byte[] RawEvent(KeyLoad.Storage.IKeyValueView view, TestDatabase database, long position)
