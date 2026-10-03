@@ -7,8 +7,8 @@ durable delivery contract and evidence are retained here.
 
 # Acceptance
 
-Goal: Benchmarks shows TimeSeries within common image preparation and the complete
-performance cohort, with no separate TimeSeries branch. Existing owner direction
+Goal: Benchmarks shows TimeSeries checks within common image preparation and runs
+the existing performance cohort in parallel, with no separate TimeSeries branch. Existing owner direction
 authorizes this repair and scoped main delivery. Actors: trusted own-main push or
 manual workflow, read-only native preparation/measurement and Pages-only deployment.
 
@@ -62,12 +62,13 @@ Task graph:
 
 | Task | AC | Owner / tier | Permission | Dependency/start | Artifact / verification | State/join |
 |---|---|---|---|---|---|---|
-| TASK-UB-01 | 001-004 | lead / planning | workflow/policy/ADR/docs writes | acceptance exists | scoped source diff, static governance | active |
-| TASK-UB-02 | 002 | workload review / inherited high capability | read only | plan exists | exact inventory, no omitted suite | pending; lead review |
-| TASK-UB-03 | 001/003 | regression review / inherited high capability | read only initially | plan exists | proposed TUnit ownership/gates | pending; lead review |
-| TASK-UB-04 | all | lead / integration | scoped commit/push, GitHub dispatch | joined source review | exact-SHA CI/Benchmarks jobs/artifacts | pending |
+| TASK-UB-01 | 001-004 | lead / planning | workflow/policy/ADR/docs writes | acceptance exists | scoped source diff, static governance | complete; integrated |
+| TASK-UB-02 | 002 | workload review / inherited high capability | read only | plan exists | exact inventory, no omitted suite | complete; reviewed |
+| TASK-UB-03 | 001/003/005/006 | regression review / inherited high capability | three owned regression files | plan exists | TUnit graph/name/completeness assertions | complete; reviewed; GitHub ordinary unit suite passed |
+| TASK-UB-04 | all | lead / integration | scoped commit/push, GitHub dispatch | joined source review | exact-SHA commits/jobs/artifacts and honest outcomes | complete; source delivered |
 | TASK-UB-05 | 005 | bounded Luna worker / high | exact11 contract/oracle files | approved frozen display map | scoped diff,6 JS syntax checks | complete; lead reviewed |
 | TASK-UB-06 | all | independent high-capability review | read only | joined source | graph/name/provenance/regression review | complete; no source defect found |
+| TASK-UB-07 | 002/003 | lead and independent native review | read only | real GitHub execution | complete cohort/CI qualification | failed; native failures and superseded run, no publication proof |
 
 Ordered steps:
 - [x] Record owner correction and scope/acceptance before source edits.
@@ -78,7 +79,7 @@ Ordered steps:
   remove standalone branch and route qualify solely through the complete aggregate.
 - [x] Update ADR implementation/evidence traceability; inspect complete scoped diff.
 - [x] Static governance and YAML/JS source checks. No local test qualification.
-- [ ] Commit/push only task changes on existing main, dispatch/inspect exact-SHA
+- [x] Commit/push only task changes on existing main, dispatch/inspect exact-SHA
   CI and Benchmarks; retain real jobs/artifacts and update failures without skips.
 
 Baseline: CI37117886564/ec3399ef279fda1f4cf510e5ce2a0650684776f9 passed.
@@ -93,13 +94,13 @@ and native preflight starts. Keep these actual states, not overall success claim
 - [x] Static shellcheck SC2016 informational finding exists identically in original
   and edited Release literal Markdown printf body. Preserve literal backticks;
   YAML/action validation passes, no new finding and no source suppression.
-- [ ] Exact delivered-source CI and complete Benchmarks outcome remain pending.
-- [ ] CI37119418418/45e4992d86fcb16d1568327e1d38e9a8e76140ec: new
+- [ ] Complete delivered-source CI and Benchmarks qualification remain unproven.
+- [x] CI37119418418/45e4992d86fcb16d1568327e1d38e9a8e76140ec: new
   WorkflowStepNameTests async test synchronously reads its composite file (CA1849).
   Repair with awaited cancellation-aware file IO; preserve every assertion.
-- [ ] Same exact-source CI: WorkflowLayoutUnifiedPerformanceTests synchronously
+- [x] Same exact-source CI: WorkflowLayoutUnifiedPerformanceTests synchronously
   reads its JSON contract (CA1849). Repair with awaited cancellation-aware IO.
-- [ ] Same exact-source CI: nodeCounts JSON machine key violates KLD0001. Extract
+- [x] Same exact-source CI: nodeCounts JSON machine key violates KLD0001. Extract
   the named property constant; do not suppress the repository analyzer.
 
 Source milestone45e4992d8 was committed/pushed to main with only task-owned files
@@ -121,3 +122,48 @@ Validation order: source/schema review, static governance, GitHub build/format/
 ordinary TUnit suite, real Docker/image/native-cell qualification, authenticated
 aggregate and unchanged website qualification/deployment gates. Accepted ADR
 status remains until required provider evidence exists. Release stays manual.
+
+# Delivered-source GitHub evidence
+
+Repair commit `995721374fe3afa9af8b25e69fc438909f768870` fixes the three
+authored-regression diagnostics above with cancellation-aware awaited IO and named
+JSON property constants. No assertion or analyzer rule was weakened.
+
+[CI37119641948](https://github.com/managedcode/KeyLoad/actions/runs/37119641948)
+on that exact SHA passed repository governance, the compiler analyzer fixture,
+Release build, formatting, ordinary TUnit unit tests and the genuine RF3 .NET/MCP
+client job. Its scalar unit step was cancelled and process recovery never ran when
+concurrent main delivery superseded this run. Overall conclusion is cancelled;
+this is not full CI qualification.
+
+[Benchmarks37119641910](https://github.com/managedcode/KeyLoad/actions/runs/37119641910)
+on the same SHA passed build/checks, plan and common image qualification. The actual
+plan artifact records270 cells (108 CRUD,162 specialized),9 targets and node
+counts1/2/3. Common image qualification passed the relocated TimeSeries pinned-image
+probe and retained its facts. Real benchmark CRUD jobs ran while native preflight
+jobs were still running, confirming the matrices are independent. Runner capacity
+can queue admitted jobs; workflow dependencies and caps no longer serialize them.
+
+This run retained native failures before being superseded/cancelled:
+
+- [KeyLoad one-node preflight](https://github.com/managedcode/KeyLoad/actions/runs/37119641910/job/111194069823)
+  failed registry readiness during native image import. Both images loaded and
+  identity checks passed; the owned registry listened within one second and was
+  still running when the importer failed after its30-second readiness bound.
+  No push began. Retained native commands, registry log/state and cleanup receipts
+  do not expose the original HTTP failure because readiness discards exceptions.
+  The readiness source is unchanged by this repair; transport cause is unproven.
+- [KurrentDB two-node preflight](https://github.com/managedcode/KeyLoad/actions/runs/37119641910/job/111194069852)
+  retained five measured StreamAppend repetitions, each10000 successes with no
+  operation failures. Its subsequent volume regression expected empty original
+  event metadata but observed76 bytes. Event identity/revision/data/type checks
+  passed immediately before that assertion. Native reader/fixture/event creation
+  source is identical before and after this repair; absent metadata bytes prevent
+  attributing the server/SDK/oracle cause. The three-node preflight also failed its
+  workload step and does not count as qualified.
+
+No failed, skipped, cancelled or missing cell refreshes website metrics. Aggregation,
+website qualification/publication, scalar portability, process recovery and the
+unfinished intensive TimeSeries measurement delivery remain unqualified here.
+Concurrent main advanced to `864aa37809088a86d841b08cda9e98dc0639a567`; its
+separate CI/Benchmarks outcomes cannot be attributed to these two repair commits.
