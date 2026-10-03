@@ -17,12 +17,14 @@ internal sealed record TimeSeriesIntensivePinnedImageContext(string SourceRevisi
         var reference = Required(TimeSeriesIntensivePinnedImageProtocol.RefEnvironment);
         var eventName = Required(TimeSeriesIntensivePinnedImageProtocol.EventEnvironment);
         var workflow = Required(TimeSeriesIntensivePinnedImageProtocol.WorkflowEnvironment);
+        var workflowRef = Required(TimeSeriesIntensivePinnedImageProtocol.WorkflowRefEnvironment);
         var job = Required(TimeSeriesIntensivePinnedImageProtocol.JobEnvironment);
         var runner = Required(TimeSeriesIntensivePinnedImageProtocol.RunnerOsEnvironment);
         Require(OperatingSystem.IsLinux() && Required(TimeSeriesIntensivePinnedImageProtocol.ActionsEnvironment)
             == TimeSeriesIntensivePinnedImageProtocol.True && repository == TimeSeriesIntensivePinnedImageProtocol.Repository
             && reference == TimeSeriesIntensivePinnedImageProtocol.MainRef && runner == TimeSeriesIntensivePinnedImageProtocol.LinuxRunner
             && workflow == TimeSeriesIntensivePinnedImageProtocol.Workflow && job == TimeSeriesIntensivePinnedImageProtocol.Job
+            && workflowRef == TimeSeriesIntensivePinnedImageProtocol.WorkflowRef
             && (eventName == TimeSeriesIntensivePinnedImageProtocol.Push || eventName == TimeSeriesIntensivePinnedImageProtocol.Dispatch)
             && Matches(source, TimeSeriesIntensivePinnedImageProtocol.ShaPattern));
         var run = Required(TimeSeriesIntensivePinnedImageProtocol.RunEnvironment);

@@ -3,6 +3,7 @@
 ## Purpose and entry points
 - Owns repository CI qualification and GitHub Pages publication workflows.
 - Canonical workflows: `ci.yml` (restore, Release build, TUnit unit/integration/recovery suites and comparison artifact production) and `pages.yml` (verified artifact download, site checks/build and Pages deployment).
+- Owner clarification 2026-10-03 supersedes the historical placement above: `ci.yml` (`CI`) always includes repository rules and PR checks; `tests.yml` (`Tests`) owns project qualification; `benchmarks.yml` (`Benchmarks`) owns all performance comparisons and TimeSeries image checks; `release.yml` (`Release`) builds NuGet package artifacts; `pages.yml` (`Website`) publishes the qualified site. Do not create standalone governance or per-feature comparison workflows. Preserve exact historical KeyLoad CI main-push identity separately from its current CI metadata name under ADR-062.
 
 ## Ownership and boundaries
 - Workflow changes belong to the feature or infrastructure contract they implement and must preserve the repository's single-repository, canonical-slice architecture. Workflow YAML is delivery infrastructure, not a place to hide missing product behavior.

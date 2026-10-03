@@ -30,7 +30,7 @@ export async function readRunInventory(root) {
 
 export function validateWorkflow(workflow) {
   if (!object(workflow) || !positiveInteger(workflow[F.id]) || workflow[F.path] !== C.workflowPath ||
-      workflow[F.name] !== C.workflowName || workflow[F.state] !== C.active) {
+      workflow[F.name] !== C.workflowDisplayName || workflow[F.state] !== C.active) {
     fail(C.errorWorkflow, C.messages.workflowInvalid);
   }
   return workflow;

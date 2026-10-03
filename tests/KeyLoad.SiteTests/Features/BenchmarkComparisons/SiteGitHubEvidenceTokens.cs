@@ -20,6 +20,7 @@ internal static class SiteGitHubEvidenceTokens
     public const string ComparisonSuiteArtifact = "comparison-suite";
     public const string RepositoryFullName = "managedcode/KeyLoad";
     public const string WorkflowPath = ".github/workflows/ci.yml";
+    public const string WorkflowDisplayName = "CI";
     public const string WorkflowName = "KeyLoad CI";
     public const string ComparisonJobName = "comparison-smoke";
     public const string ControlledOtherName = "controlled-unrelated-entry";

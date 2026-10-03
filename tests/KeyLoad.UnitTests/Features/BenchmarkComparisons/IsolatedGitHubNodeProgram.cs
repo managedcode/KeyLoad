@@ -11,10 +11,10 @@ internal static class IsolatedGitHubNodeProgram
         const parser = await import(pathToFileURL(path.join(path.dirname(modulePath), 'aggregate-json.mjs')));
         const plan = planner.createIsolatedPlan();
         const cohort = { sourceRevision: 'a'.repeat(40), runId: 123, attempt: 1, repository: 'managedcode/KeyLoad',
-          ref: 'refs/heads/main', workflow: 'KeyLoad CI', profile: plan.profile };
-        const workflow = { id: 1, name: 'KeyLoad CI', path: '.github/workflows/ci.yml', state: 'active' };
-        const run = { id: 123, run_attempt: 1, workflow_id: 1, name: 'KeyLoad CI', head_sha: cohort.sourceRevision,
-          head_branch: 'main', path: '.github/workflows/ci.yml', status: 'in_progress', conclusion: null,
+          ref: 'refs/heads/main', workflow: 'Benchmarks', profile: plan.profile };
+        const workflow = { id: 1, name: 'Benchmarks', path: '.github/workflows/benchmarks.yml', state: 'active' };
+        const run = { id: 123, run_attempt: 1, workflow_id: 1, name: 'Benchmarks', head_sha: cohort.sourceRevision,
+          head_branch: 'main', path: '.github/workflows/benchmarks.yml', status: 'in_progress', conclusion: null,
           run_started_at: '2026-10-03T10:00:00Z', repository: { id: 7, full_name: cohort.repository },
           head_repository: { id: 7, full_name: cohort.repository } };
         const cell = plan.cells[0];

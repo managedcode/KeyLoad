@@ -15,12 +15,14 @@ internal static class TimeSeriesIntensivePinnedImageProtocol
     internal const string RefEnvironment = "GITHUB_REF";
     internal const string EventEnvironment = "GITHUB_EVENT_NAME";
     internal const string WorkflowEnvironment = "GITHUB_WORKFLOW";
+    internal const string WorkflowRefEnvironment = "GITHUB_WORKFLOW_REF";
     internal const string JobEnvironment = "GITHUB_JOB";
     internal const string RunnerOsEnvironment = "RUNNER_OS";
     internal const string Repository = "managedcode/KeyLoad";
     internal const string MainRef = "refs/heads/main";
     internal const string RunUrlPrefix = "https://github.com/managedcode/KeyLoad/actions/runs/";
-    internal const string Workflow = "TimeSeries native pinned image feasibility";
+    internal const string Workflow = "Benchmarks";
+    internal const string WorkflowRef = "managedcode/KeyLoad/.github/workflows/benchmarks.yml@refs/heads/main";
     internal const string Job = "timeseries-image-facts";
     internal const string LinuxRunner = "Linux";
     internal const string Linux = "linux";

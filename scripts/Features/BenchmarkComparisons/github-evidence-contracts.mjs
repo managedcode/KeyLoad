@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile, stat } from 'node:fs/promises';
 
 export const C = Object.freeze({
-  repo: 'managedcode/KeyLoad', repoWebBase: 'https://github.com/managedcode/KeyLoad', workflowPath: '.github/workflows/ci.yml', workflowName: 'KeyLoad CI',
+  repo: 'managedcode/KeyLoad', repoWebBase: 'https://github.com/managedcode/KeyLoad', workflowPath: '.github/workflows/ci.yml', workflowName: 'KeyLoad CI', workflowDisplayName: 'CI',
   main: 'main', push: 'push', active: 'active', completed: 'completed', success: 'success',
   files: ['workflow.json', 'runs-pages.json', 'run.json', 'jobs-pages.json', 'artifacts-pages.json'],
   attempts: 'attempts', run: 'run.json', jobs: 'jobs-pages.json', maxRuns: 1000, maxPairs: 10000,

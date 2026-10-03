@@ -1,0 +1,74 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: keyload-release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  packages:
+    name: Build packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Check repository rules
+        run: node scripts/Features/RepositoryGovernance/verify.mjs
+      - name: Resolve the source or tag package version
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, re, xml.etree.ElementTree as xml
+          version = xml.parse('Directory.Build.props').findtext('./PropertyGroup/Version')
+          if os.environ['GITHUB_REF_TYPE'] == 'tag':
+              tag = os.environ['GITHUB_REF_NAME']
+              if not tag.startswith('v'):
+                  raise SystemExit('A version tag must start with v.')
+              version = tag[1:]
+          if not version or not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?', version):
+              raise SystemExit('A valid source or tag package version is required.')
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              output.write('PACKAGE_VERSION=' + version + '\n')
+          PY
+      - run: dotnet restore KeyLoad.slnx
+      - name: Build Release assemblies with the package version
+        run: dotnet build KeyLoad.slnx --no-restore --configuration Release -p:Version="$PACKAGE_VERSION"
+      - name: Verify EditorConfig and analyzer fixes
+        run: dotnet format KeyLoad.slnx --verify-no-changes --no-restore
+      - name: Build NuGet packages
+        run: dotnet pack KeyLoad.slnx --no-build --no-restore --configuration Release -p:Version="$PACKAGE_VERSION" --output artifacts/packages
+      - name: Record actual package hashes and source
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          directory = pathlib.Path('artifacts/packages')
+          packages = sorted(directory.glob('*.nupkg'))
+          if not packages or any(package.stat().st_size == 0 for package in packages):
+              raise SystemExit('Non-empty NuGet packages are required.')
+          record = {'sourceRevision': os.environ['GITHUB_SHA'], 'runId': os.environ['GITHUB_RUN_ID'],
+                    'runAttempt': os.environ['GITHUB_RUN_ATTEMPT'], 'version': os.environ['PACKAGE_VERSION'],
+                    'packages': [{'file': package.name, 'bytes': package.stat().st_size,
+                                  'sha256': hashlib.sha256(package.read_bytes()).hexdigest()} for package in packages]}
+          (directory / 'packages.json').write_text(json.dumps(record, indent=2) + '\n')
+          PY
+      - name: Retain NuGet packages
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: packages-${{ env.PACKAGE_VERSION }}
+          path: artifacts/packages/*
+          if-no-files-found: error
+          retention-days: 90
+      - name: Retain compiler diagnostic reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: code-quality-release
+          path: artifacts/code-quality/**
+          if-no-files-found: error

@@ -1,5 +1,5 @@
 export const GH = Object.freeze({
-  repository: 'managedcode/KeyLoad', workflow: 'KeyLoad CI', workflowPath: '.github/workflows/ci.yml',
+  repository: 'managedcode/KeyLoad', workflow: 'Benchmarks', workflowPath: '.github/workflows/benchmarks.yml',
   api: 'repos/managedcode/KeyLoad/actions', host: 'github.com', apiVersion: '2022-11-28',
   imageJob: 'comparison-images', imageArtifact: 'comparison-image-bundle', casePrefix: 'case / ',
   preflightPrefix: 'preflight / ', artifactPrefix: 'comparison-worker-', captureDirectory: 'keyload-cell-github',

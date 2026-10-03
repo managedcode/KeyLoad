@@ -36,3 +36,6 @@
 ## Owner-directed site-only boundary, 2026-10-02
 - The latest owner instruction supersedes this task's earlier equal-source restriction above: current trusted-main website source is qualified independently; measured source remains in a separate inspected checkout. Accurately retain website/measured/control SHA and actual successful comparison-job provenance. All site/browser/native/format/governance gates remain mandatory.
 - Whole database-workflow success is not this website task's dependency. Use actual successful comparison evidence and accurate link labels even when unrelated jobs fail. Read the revised AC-BC-028 contract before implementation; do not present historical reports as qualification of current database code.
+
+## Owner-directed shared comparison pipeline, 2026-10-03
+- ADR-062 places all comparative tests in benchmarks.yml (`Benchmarks`); Pages follows that producer. New isolated cohorts bind to its exact identity. Historical legacy CI reports keep their original name/path and remain independently authenticated. Preserve every existing site/source/provenance/qualification gate.

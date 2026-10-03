@@ -15,3 +15,6 @@
 ## Skills and risks
 - No local skills installed and no installation permitted. Root applies available Orleans/Aspire guidance when relevant.
 - Shared workflow contracts and image/provider boundaries have one root integration owner.
+
+## Owner-directed comparison pipeline, 2026-10-03
+- ADR-062 moves the exact-SHA native comparison cells from the historical ci.yml placement above to benchmarks.yml (`Benchmarks`). All existing isolated source/topology/image/rules/TUnit/native270 requirements remain mandatory.

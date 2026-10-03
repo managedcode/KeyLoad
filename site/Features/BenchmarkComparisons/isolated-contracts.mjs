@@ -1,7 +1,7 @@
 // Browser wire is checked against the canonical native contract by every projection build.
 export const ISOLATED = Object.freeze({
   projectionVersion: 1, catalogVersion: 1, aggregateVersion: 4, reportVersion: 3,
-  profile: 'intensive-1k-c16', repository: 'managedcode/KeyLoad', ref: 'refs/heads/main', workflow: 'KeyLoad CI',
+  profile: 'intensive-1k-c16', repository: 'managedcode/KeyLoad', ref: 'refs/heads/main', workflow: 'Benchmarks',
   targets: Object.freeze(['KeyLoad', 'PostgreSQL + pgvector', 'Qdrant', 'RabbitMQ', 'Redis', 'Neo4j', 'MongoDB', 'OpenSearch', 'KurrentDB']),
   nodes: Object.freeze([1, 2, 3]),
   crud: Object.freeze(['PointRead', 'DocumentWrite', 'DocumentUpdate', 'DocumentDelete']),

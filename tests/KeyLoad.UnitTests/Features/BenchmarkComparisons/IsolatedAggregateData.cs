@@ -16,7 +16,7 @@ internal static class IsolatedAggregateData
     internal const string Image = "example.invalid/contract@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd";
     internal const string Repository = "managedcode/KeyLoad";
     internal const string Reference = "refs/heads/main";
-    internal const string Workflow = "KeyLoad CI";
+    internal const string Workflow = "Benchmarks";
     internal const string Profile = "intensive-1k-c16";
     internal const string Target = "KeyLoad";
     internal const string ScenarioName = "PointRead";

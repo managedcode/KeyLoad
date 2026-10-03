@@ -780,3 +780,25 @@ classDiagram
     TimeSeriesIntensiveHostSettings --> TimeSeriesIntensiveHostNativeSettings
     TimeSeriesIntensiveHostSettings --> ComparisonExecutionIdentity
 ```
+
+## Delivery workflows
+
+[ADR-062](ADR/ADR-062-workflow-separation.md) separates PR CI, project Tests, all Benchmarks, Release
+package builds and Website publication. `ci.yml` (`CI`) always checks repository rules on PR/manual runs.
+`tests.yml` (`Tests`) retains main/manual full build/format/unit/scalar/recovery/
+Docker RF3 gates. `release.yml` (`Release`) builds actual NuGet package artifacts.
+`benchmarks.yml` (`Benchmarks`) owns every native comparison and TimeSeries image
+check, with its own full build/format/rules prerequisite and isolated Linux cells.
+`pages.yml` (`Website`) follows Benchmarks and site changes. Historical
+legacy CI archives retain their original verified identity. Source integration
+does not establish successful comparison or website qualification.
+
+```mermaid
+flowchart LR
+    Source[Exact source] --> CI[CI PR rules and build]
+    Source --> Tests[Tests ordinary qualification]
+    Source --> Release[Release NuGet package builds]
+    Source --> Benchmarks[Benchmarks native isolated jobs]
+    Benchmarks --> Website[Website qualification and publication]
+    Site[Website source changes] --> Website
+```

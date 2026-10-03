@@ -1,0 +1,144 @@
+name: Tests
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: keyload-tests-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  repository-checks:
+    name: Repository checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check repository rules
+        run: node scripts/Features/RepositoryGovernance/verify.mjs
+  analyzer-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet restore tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj
+      - run: dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release
+      - run: dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release
+      - name: Retain rule regression and diagnostic evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: analyzer-rule-evidence
+          path: |
+            TestResults/**
+            tests/KeyLoad.Analyzers.Tests/**/TestResults/**
+            artifacts/code-quality/**
+          if-no-files-found: error
+  verify:
+    needs: repository-checks
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet restore KeyLoad.slnx
+      - id: build
+        run: dotnet build KeyLoad.slnx --no-restore --configuration Release
+      - name: Verify EditorConfig and analyzer fixes
+        run: dotnet format KeyLoad.slnx --verify-no-changes --no-restore
+      - name: Check repository rules
+        run: node scripts/Features/RepositoryGovernance/verify.mjs
+      - name: Verify source-owned Roslyn rules
+        run: dotnet test --project tests/KeyLoad.Analyzers.Tests --no-build --no-restore --configuration Release
+      - run: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release
+      - name: Qualify the full unit suite with hardware intrinsics disabled
+        run: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release --results-directory TestResults/unit-scalar
+        env:
+          DOTNET_EnableHWIntrinsic: 0
+      - name: Qualify real process recovery after a successful build
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: dotnet test --project tests/KeyLoad.RecoveryTests --no-build --no-restore --configuration Release
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}
+          path: |
+            **/TestResults/**
+            artifacts/qualification/**
+          if-no-files-found: ignore
+      - name: Retain compiler diagnostic reports
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: code-quality-${{ matrix.os }}
+          path: artifacts/code-quality/**
+          if-no-files-found: error
+  docker-rf3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Require the actual Docker runtime
+        run: docker version
+      - name: Prepare immutable source-bound runtime images
+        id: images
+        run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs
+      - name: Bind the verified runtime image receipt
+        shell: bash
+        env:
+          KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
+          KEYLOAD_RUNNER_IMAGE: ${{ steps.images.outputs.load-generator-image }}
+        run: |
+          test -n "$KEYLOAD_SERVER_IMAGE" && test -n "$KEYLOAD_RUNNER_IMAGE"
+          printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
+      - name: Require the actual administration browser
+        shell: bash
+        run: |
+          admin_chrome=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          test -n "$admin_chrome" && test -x "$admin_chrome"
+          "$admin_chrome" --version
+          printf 'KEYLOAD_ADMIN_CHROME_PATH=%s\n' "$admin_chrome" >> "$GITHUB_ENV"
+      - run: dotnet restore KeyLoad.slnx
+      - run: dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release
+      - name: Qualify RF3 through the real SDK clients
+        run: dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore --configuration Release
+      - name: Capture and remove only the job-owned registry
+        if: ${{ always() && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
+        run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
+      - name: Retain actual RF3 image manifest and lifecycle evidence
+        if: ${{ always() && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: docker-rf3-image-evidence
+          path: ${{ runner.temp }}/keyload-images/**
+          if-no-files-found: error
+      - name: Retain real topology and fault receipts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: docker-rf3-qualification
+          path: |
+            TestResults/**
+            tests/KeyLoad.IntegrationTests/**/TestResults/**
+            artifacts/qualification/**
+          if-no-files-found: error
+      - name: Retain RF3 compiler diagnostic reports
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: code-quality-docker-rf3
+          path: artifacts/code-quality/**
+          if-no-files-found: error

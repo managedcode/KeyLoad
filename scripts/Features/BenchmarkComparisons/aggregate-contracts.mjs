@@ -1,7 +1,7 @@
 // Supplied proof is a contract input. Only the owning workflow authenticates GitHub transport.
 export const AGGREGATE = Object.freeze({
   version: 4, proofVersion: 1, reportVersion: 3, repository: 'managedcode/KeyLoad', ref: 'refs/heads/main',
-  workflow: 'KeyLoad CI', measured: 'measured', unsupported: 'unsupported', unsupportedTopology: 'unsupportedTopology',
+  workflow: 'Benchmarks', measured: 'measured', unsupported: 'unsupported', unsupportedTopology: 'unsupportedTopology',
   success: 'success', manifest: 'aggregate.json', workers: 'workers', raw: 'worker.json', encoding: 'utf8', hash: 'sha256',
   sha: /^[a-f0-9]{40}$/, digest: /^[a-f0-9]{64}$/, image: /@sha256:[a-f0-9]{64}$/,
   zipDigest: /^sha256:[a-f0-9]{64}$/, guid: /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i,

@@ -541,3 +541,14 @@ exact-source GitHub model/normal/scalar and later real6/30 checks are required.
 No new product public CLR, persistence, credential authority or defaultRF3 change.
 Frontend publication is N/A for these input stages because no new measured family
 is qualified; the complete native family site stage remains mandatory.
+
+## Shared comparison pipeline
+
+Owner clarification2026-10-03 places all comparative tests, including native
+TimeSeries image checks, in `benchmarks.yml` (`Benchmarks`). `ci.yml` retains PR checks and repository rules; `tests.yml` retains ordinary
+project qualification; `pages.yml` follows the
+comparison producer. [ADR-062](../ADR/ADR-062-workflow-separation.md) and
+[workflow acceptance](../implementation/workflow-layout-acceptance.md) define
+REQ-WF-001..006 / AC-WF-001..006 and the exact producer handoff. Native isolated
+job/step/artifact identities, complete workloads and topology remain required;
+authentic historical legacy CI archives are not relabelled.

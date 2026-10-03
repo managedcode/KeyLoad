@@ -78,3 +78,15 @@ Owning executable-artifact convention для цієї документаційн
 TASK-DOC-AUTHOR-004/005 мають тільки нові, різні файли; лід володіє існуючими документами/індексами й join, TASK-DOC-REVIEW-007 — strongest read-only review. Повний task graph, моделі, start/join/terminal/escalation contracts — у плані. Product tests лишаються real TUnit/Recovery/Docker-Aspire RF3 через SDK/MCP у GitHub Actions; документаційні criteria мають статичну перевірку та explicit full-source-review exception.
 
 Актори та entry points: власник задає scope, contributor/agent читає root/local AGENTS та Architecture перед task, strongest planner фіксує contracts, bounded worker повертає evidence, integrator/reviewer joins всі результати; CI запускає static validator. Required/planned policy або source migration не оголошується виконаною від створення spec чи локального validator pass. Installed-by-bootstrap status і delivered-source qualification залишаються в owning audit records.
+
+## Owner-directed workflow separation, 2026-10-03
+
+[ADR-062](../ADR/ADR-062-workflow-separation.md),
+[acceptance](../implementation/workflow-layout-acceptance.md) and
+[plan](../implementation/workflow-layout-execution.md) specify REQ-WF-001..006 and AC-WF-001..006:
+CI always owns PR repository-rule/build checks; Tests owns ordinary project
+qualification; Benchmarks owns every performance comparison, including TimeSeries;
+Release builds NuGet package artifacts; Website retains separate publication. Historical legacy CI report
+identity remains authentic while new isolated cohorts bind to benchmarks.yml.
+Each same-numbered REQ/AC maps to the plan's task graph and TUnit/GitHub proof;
+no database, workload, native topology or unrelated website design changes apply.

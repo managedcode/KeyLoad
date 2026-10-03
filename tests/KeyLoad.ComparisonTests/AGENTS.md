@@ -11,6 +11,7 @@
 
 ## Commands and evidence
 - Canonical invoking GitHub Actions commands: `dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release` and `dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release` in `.github/workflows/ci.yml`.
+- Owner clarification 2026-10-03 moves those comparative commands to the separate `.github/workflows/benchmarks.yml` (`Benchmarks`) pipeline, including native TimeSeries image checks. The historical ci.yml evidence remains authentic; new isolated producer guards must bind to the new exact name/path (ADR-062).
 - Workflow runs comparison cases with controlled environment settings and uploads `comparison-suite`; do not run these tests or benchmarks locally. Preserve run URL, SHA and artifact links for any published result.
 
 ## Skills and protected risks

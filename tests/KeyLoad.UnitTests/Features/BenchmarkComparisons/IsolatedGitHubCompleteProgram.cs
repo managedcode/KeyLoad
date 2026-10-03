@@ -11,7 +11,7 @@ internal static class IsolatedGitHubCompleteProgram
         const validation = await import(pathToFileURL(path.join(path.dirname(modulePath), 'isolated-github-validation.mjs')));
         const plan = planner.createIsolatedPlan();
         const cohort = { sourceRevision: 'a'.repeat(40), runId: 123, attempt: 1, repository: 'managedcode/KeyLoad',
-          ref: 'refs/heads/main', workflow: 'KeyLoad CI', profile: plan.profile };
+          ref: 'refs/heads/main', workflow: 'Benchmarks', profile: plan.profile };
         const run = { id: 123, head_sha: cohort.sourceRevision, head_branch: 'main', run_started_at: '2026-10-03T10:00:00Z',
           repository: { id: 7 }, head_repository: { id: 7 } };
         const makeJob = (id, name, steps) => ({ id, run_id: 123, run_attempt: 1, head_sha: cohort.sourceRevision, name,

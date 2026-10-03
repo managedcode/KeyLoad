@@ -19,7 +19,7 @@ internal sealed class IsolatedAggregateCliFixture : IDisposable
         const planner = await import(pathToFileURL(process.argv[3]).href);
         const plan = planner.createIsolatedPlan(planner.readIsolatedContract());
         const cohort = {sourceRevision:'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',runId:37070000000,attempt:1,
-          repository:'managedcode/KeyLoad',ref:'refs/heads/main',workflow:'KeyLoad CI',profile:plan.profile};
+          repository:'managedcode/KeyLoad',ref:'refs/heads/main',workflow:'Benchmarks',profile:plan.profile};
         const cells = plan.cells.map((cell,index)=>({id:cell.id,
           job:{id:1000+index,name:'case / '+cell.id,url:'https://github.com/managedcode/KeyLoad/actions/runs/'+cohort.runId+'/job/'+(1000+index),
             conclusion:'success',steps:[{name:'Run isolated native case',conclusion:'success'},{name:'Retain isolated worker evidence',conclusion:'success'}]},

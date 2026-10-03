@@ -266,7 +266,7 @@ Memory and read-work repairs remain in progress across storage, SQL/search, even
 
 All test qualification and load measurements run in GitHub Actions. The comparison harness uses deterministic JSON, float32 vectors and cyclic graphs, verifies the complete returned payload, and retains every measured attempt, including failures. Reports include useful throughput, p50/p95/p99, separate enqueue/receive/ACK timings and load-generator CPU/allocation/RSS. These resource metrics describe the client process. See the [comparison methodology](docs/implementation/comparative-benchmarks.md).
 
-The [public benchmark lab](https://www.keyload.cloud/) displays verified CI reports with workload, scenario, measure and repetition controls. CI runs a correctness smoke and two measured profiles with 1 KiB/16 KiB documents, eight/four clients and three/five graph hops. GitHub Pages publishes their reports only after the complete CI workflow succeeds; [website operations](docs/implementation/website.md) describes provenance and the custom domain. Current external baselines are single-node and contracts differ; matched-durability, database resource budgets, Marten/Wolverine and scaling qualification remain planned. These development observations do not establish an equal-durability winner or production readiness.
+The [public benchmark lab](https://www.keyload.cloud/) presents authenticated GitHub reports with workload, scenario, measure and repetition controls. Historical CI reports retain their original source and run identities. The separate Benchmarks workflow now owns native isolated performance comparisons; Website publishes only after its authenticated complete comparison and site qualification gates. [Website operations](docs/implementation/website.md) describes provenance and the custom domain. Incomplete measurements cannot refresh published metrics, and these observations do not establish an equal-durability winner or production readiness.
 
 The separate [TimeSeries profile](docs/ADR/ADR-050-timeseries-timescale-comparison.md) ran a digest-pinned ephemeral TimescaleDB2.30.2-pg18 container, RF3 KeyLoad and published ManagedCode.TimeSeries10.0.0 in-memory aggregation. Its retained report atfa80c701 records20 successful attempts and20 matching correctness checks across48 identical samples, including range/boundary/offset/empty/invalid handling, buckets and cleanup. The complete Aspire test failed its native runner-completion gate and did not reach the foreign-schema assertion; it remains unqualified. The library has no persistence guarantee and the Timescale container has no cross-run data volume. [Exact receipts](docs/implementation/runtime-qualification-20261002.md) keep those guarantees and partial evidence explicit.
 
@@ -342,3 +342,18 @@ The later `2ecbeee4d` [run37093992229](https://github.com/managedcode/KeyLoad/ac
 The fixture-only `d45d7f253` [Linux source qualification](docs/implementation/isolated-source-qualification-37098964980.json) passes normal1583/scalar1583, recovery164, analyzer118 and RF363 without skips; all17 prior fixture failures pass in both modes. The [terminal comparison receipt](docs/implementation/isolated-comparison-terminal-37098964980.json) records24successful native preflight jobs and3failures (Mongo2 image import, Mongo3 priority takeover, Kurrent2 cleanup). Two successful jobs explicitly report unavailable Neo4j Community topologies. Full270 was not allocated; aggregation and refreshed site metrics remain unqualified. New ACK ownership, SDK TimeSeries adapter, SQL and transactional lifecycle source require their own delivered-SHA qualification; TimeSeries6/30 remains incomplete.
 
 The later `5bbf30f70` [Linux source run37104211481](docs/implementation/isolated-source-qualification-37104211481.json) fails the full Release build on20 Node-helper diagnostics. Analyzer118 and Docker/Aspire RF363 pass; normal/scalar units, recovery and all native comparison jobs are skipped. No intensive cells execute and no performance metrics are refreshed. Current repairs and the new TimeSeries1/2/3 resource models require a new delivered-source GitHub run; models do not establish native ACKs or copied data.
+
+### GitHub Actions
+
+- **CI** (`ci.yml`): PR build, formatting, analyzers and repository rules.
+- **Tests** (`tests.yml`): project unit/scalar tests, process recovery and
+  Docker/Aspire RF3 SDK/MCP checks on main or manual runs.
+- **Benchmarks** (`benchmarks.yml`): all performance comparisons and TimeSeries
+  image checks, with isolated Linux runners and authenticated result artifacts.
+- **Release** (`release.yml`): builds NuGet packages from a version tag or the
+  current source version and retains the packages and their hashes as artifacts.
+- **Website** (`pages.yml`): website qualification and publication after
+  benchmark completion or website changes.
+
+See [workflow separation](docs/ADR/ADR-062-workflow-separation.md) for source and
+historical-result provenance. Pipeline configuration is not a passing result.

@@ -14,6 +14,7 @@ internal sealed class TimeSeriesIntensivePinnedImageTests
             Environment.GetEnvironmentVariable(TimeSeriesIntensivePinnedImageProtocol.ShaEnvironment));
         await Assert.That(facts.Context.Repository).IsEqualTo(TimeSeriesIntensivePinnedImageProtocol.Repository);
         await Assert.That(facts.Context.Ref).IsEqualTo(TimeSeriesIntensivePinnedImageProtocol.MainRef);
+        await Assert.That(facts.Context.Workflow).IsEqualTo(TimeSeriesIntensivePinnedImageProtocol.Workflow);
         await Assert.That(facts.Image.Reference).IsEqualTo(TimeSeriesIntensivePinnedImageProtocol.Image);
         await Assert.That(Regex.IsMatch(facts.Image.ConfigId, TimeSeriesIntensivePinnedImageProtocol.ConfigPattern,
             RegexOptions.CultureInvariant, TimeSpan.FromSeconds(TimeSeriesIntensivePinnedImageProtocol.RegexSeconds))).IsTrue();

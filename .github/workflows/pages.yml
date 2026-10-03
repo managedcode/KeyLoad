@@ -1,10 +1,10 @@
-name: KeyLoad website
+name: Website
 on:
   push:
     branches: [main]
     paths: ['site/**']
   workflow_run:
-    workflows: [KeyLoad CI]
+    workflows: [Benchmarks]
     branches: [main]
     types: [completed]
   workflow_dispatch:
@@ -121,6 +121,7 @@ jobs:
           [[ "$(git -C measured rev-parse HEAD)" == "$KEYLOAD_SITE_MEASURED_REVISION" ]]
           [[ "$(git -C measured-isolated rev-parse HEAD)" == "$KEYLOAD_SITE_ISOLATED_MEASURED_REVISION" ]]
           test -f measured/.github/workflows/ci.yml
+          test -f measured-isolated/.github/workflows/benchmarks.yml
           git -C website rev-parse HEAD > "$EVIDENCE_DIR/website-revision.txt"
           git -C measured rev-parse HEAD > "$EVIDENCE_DIR/measured-revision.txt"
           git -C control rev-parse HEAD > "$EVIDENCE_DIR/control-revision.txt"
@@ -152,7 +153,7 @@ jobs:
             sha256sum "website/$relative" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
           done
           cp measured/.github/workflows/ci.yml "$EVIDENCE_DIR/measured-producer.yml"
-          cp measured-isolated/.github/workflows/ci.yml "$EVIDENCE_DIR/isolated-measured-producer.yml"
+          cp measured-isolated/.github/workflows/benchmarks.yml "$EVIDENCE_DIR/isolated-measured-producer.yml"
           node --version > "$EVIDENCE_DIR/node-version.txt"
           chrome=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
           test -n "$chrome" && test -x "$chrome"

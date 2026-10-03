@@ -63,6 +63,7 @@
 | [ADR-056 isolated Linux comparison cells](ADR-056-isolated-linux-comparison-cells.md) | Accepted, implementation and qualification pending | BenchmarkComparisons, ClusterReplication |
 | [ADR-059 intensive native TimeSeries family](ADR-059-isolated-intensive-timeseries.md) | Accepted staged contract; implementation and native qualification pending | BenchmarkComparisons |
 | [ADR-060 native internal serialization](ADR-060-native-internal-serialization.md) | Accepted; format installation/rollout approval and native qualification pending | InternalSerialization |
+| [ADR-062 workflow separation](ADR-062-workflow-separation.md) | Accepted; exact-SHA workflow qualification pending | RepositoryGovernance, BenchmarkComparisons |
 
 ## Ідентичність і пріоритет
 

@@ -15,8 +15,8 @@ import { siteMetadataFiles } from './site-isolated-github-files.mjs';
 
 async function captureSelection(input, context) {
   const directory = path.join(input, SITE_GH.metadata);
-  await captureApi(`${GH.api}/workflows/ci.yml`, path.join(directory, 'workflow.json'), false, context);
-  await captureSitePages(`${GH.api}/workflows/ci.yml/runs?branch=main&event=push`, directory, 'workflow_runs', context);
+  await captureApi(`${GH.api}/workflows/benchmarks.yml`, path.join(directory, 'workflow.json'), false, context);
+  await captureSitePages(`${GH.api}/workflows/benchmarks.yml/runs?branch=main&event=push`, directory, 'workflow_runs', context);
   const attempts = await createDirectory(path.join(directory, 'attempts'));
   for (let pair = 0; pair <= SITE_GH.pairs; pair += 1) {
     const selected = await selectSiteIsolatedEvidence({ input, mode: context.mode, requestedRun: context.requestedRun });

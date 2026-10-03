@@ -171,6 +171,7 @@ The explicit owner instruction to enable Orleans distributed directory and activ
 - Use the Prostir root `.editorconfig` as the owner-selected baseline. Enable .NET static analyzers and build-time code-style checks for every solution project, with warnings treated as errors.
 - Keep repository-owned Roslyn rules in the KeyLoad analyzer project, attach them centrally to consuming projects, and retain compiler diagnostic reports so rules can be authored and verified in code.
 - Canonical CI: `.github/workflows/ci.yml`; Pages publication: `.github/workflows/pages.yml`. Skills installed by this bootstrap: none.
+- Owner clarification 2026-10-03 supersedes the historical combined test dispatch above: use `gh workflow run tests.yml --repo managedcode/KeyLoad --ref main` for project tests, `benchmarks.yml` for performance qualification and `release.yml` for package builds; `ci.yml` handles PR checks and `pages.yml` handles Website. All test qualification remains GitHub-only.
 
 ### Project AGENTS Policy
 - Multi-project solutions MUST keep one root `AGENTS.md` plus one local `AGENTS.md` in each project or module root.
@@ -411,6 +412,9 @@ For changes outside existing owner authorization, obtain direction before changi
 - The central KeyLoad K MUST use the canonical true SVG outside the bounded 3D raster buffer so it stays sharp on Retina displays. An SVG wrapper around a bitmap or a CanvasTexture logo does not satisfy this requirement (repeated owner correction 2026-10-03).
 ### Dislikes
 - Repeated permission questions for already authorized work.
+- GitHub Actions workflows MUST use the plain names CI, Tests, Benchmarks, Release and Website. CI owns PR checks, Tests owns project tests, Benchmarks owns performance tests, and Release builds packages (owner clarification 2026-10-03).
+- Repository-rule checks MUST always run inside the standard CI pipeline, never as a separate governance workflow (owner correction 2026-10-03).
+- All comparative performance tests, including TimeSeries image checks, MUST run in one separate Benchmarks pipeline; do not name it Comparisons or create feature-specific comparison workflows. Preserve isolated Linux runners, real native topology, complete workloads and authenticated artifacts (owner clarification 2026-10-03).
 - Fake production readiness, power-loss claims from process-kill tests, or unsupported performance supremacy.
 - Installing skills when the owner explicitly prohibited it.
 - For bug-fix and optimization requests, do not spend turns on plans/status documentation without promptly making concrete source-level repairs once the scope is clear.

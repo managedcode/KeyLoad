@@ -28,7 +28,7 @@ async function capturePages(route, directory, key, context) {
 
 export async function captureRun(directory, context, includeArtifacts) {
   const { runId, attempt } = context.cohort;
-  const workflow = await captureApi(`${GH.api}/workflows/ci.yml`, path.join(directory, 'workflow.json'), false, context);
+  const workflow = await captureApi(`${GH.api}/workflows/benchmarks.yml`, path.join(directory, 'workflow.json'), false, context);
   const route = `${GH.api}/runs/${runId}/attempts/${attempt}`;
   const run = await captureApi(route, path.join(directory, 'run-attempt.json'), false, context);
   validateWorkflowRun(workflow, run, context.cohort);

@@ -12,8 +12,8 @@ internal static class IsolatedKeyLoadFaultRegressionProvider
     private const string WorkflowRefEnvironment = "GITHUB_WORKFLOW_REF";
     private const string Repository = "managedcode/KeyLoad";
     private const string Main = "refs/heads/main";
-    private const string Workflow = "KeyLoad CI";
-    private const string WorkflowRef = "managedcode/KeyLoad/.github/workflows/ci.yml@refs/heads/main";
+    private const string Workflow = "Benchmarks";
+    private const string WorkflowRef = "managedcode/KeyLoad/.github/workflows/benchmarks.yml@refs/heads/main";
 
     internal static IsolatedKeyLoadFaultRegressionEvidence Read(int nodes)
     {
