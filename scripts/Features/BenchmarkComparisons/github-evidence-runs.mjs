@@ -37,11 +37,15 @@ export function validateWorkflow(workflow) {
 }
 
 export function validateRun(run, workflow) {
+  validateRunIdentity(run, workflow, C.workflowName);
+}
+
+function validateRunIdentity(run, workflow, name) {
   const ownRepository = run?.[F.repository];
   const headRepository = run?.[F.headRepository];
   if (!object(run) || !positiveInteger(run[F.id]) || !positiveInteger(run[F.runNumber]) ||
       !positiveInteger(run[F.runAttempt]) || run[F.workflowId] !== workflow[F.id] || run[F.path] !== C.workflowPath ||
-      run[F.name] !== C.workflowName || run[F.event] !== C.push || run[F.headBranch] !== C.main || !validSha(run[F.headSha]) ||
+      run[F.name] !== name || run[F.event] !== C.push || run[F.headBranch] !== C.main || !validSha(run[F.headSha]) ||
       ownRepository?.[F.fullName] !== C.repo || headRepository?.[F.fullName] !== C.repo ||
       ownRepository?.[F.id] !== C.repoId || headRepository?.[F.id] !== C.repoId) {
     fail(C.errorRun, C.messages.runInvalid);
@@ -59,6 +63,11 @@ export async function selectEvidence(root, mode, requestedRun) {
   let pairCount = 0;
   const trail = [];
   for (const summary of selectedRuns) {
+    if (summary?.[F.name] === C.workflowDisplayName) {
+      validateRunIdentity(summary, workflow, C.workflowDisplayName);
+      if (requestedRun) fail(C.errorRun, C.messages.requestedRunInvalid);
+      continue;
+    }
     validateRun(summary, workflow);
     for (let attempt = summary[F.runAttempt]; attempt >= 1; attempt--) {
       pairCount++;

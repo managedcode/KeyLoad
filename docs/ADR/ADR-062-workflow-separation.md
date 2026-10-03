@@ -1,6 +1,6 @@
 # ADR-062: CI, Tests, Benchmarks, Release and Website
 
-Status: Accepted. Date: 2026-10-03. Owner: KeyLoad lead/integrator.
+Status: Superseded in workflow placement by [ADR-064](ADR-064-three-pipeline-release-delivery.md) after the owner’s latest correction. Historical evidence/provenance requirements remain. Date: 2026-10-03. Owner: KeyLoad lead/integrator.
 Requirements: REQ-WF-001..006. Acceptance: AC-WF-001..006.
 
 ## Decision

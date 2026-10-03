@@ -1,74 +1,264 @@
 name: Release
 on:
-  push:
-    tags: ['v*']
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
-  group: keyload-release-${{ github.ref }}
+  group: keyload-release
   cancel-in-progress: false
+env:
+  GH_TOKEN: ${{ github.token }}
+  GH_REPO: managedcode/KeyLoad
 jobs:
-  packages:
-    name: Build packages
+  version:
+    name: Reserve release version
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.reserve.outputs.version }}
+      tag: ${{ steps.reserve.outputs.tag }}
+      assembly_version: ${{ steps.reserve.outputs.assembly_version }}
+      file_version: ${{ steps.reserve.outputs.file_version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Recover this run's immutable version reservation
+        shell: bash
+        run: |
+          mkdir -p artifacts/reservation
+          gh api --paginate "repos/$GH_REPO/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" --jq '.artifacts[]' | jq -s > artifacts/reservation-inventory.json
+          name="release-version-$GITHUB_RUN_ID"
+          count=$(jq --arg name "$name" '[.[] | select(.name == $name)] | length' artifacts/reservation-inventory.json)
+          [[ "$count" == 0 || "$count" == 1 ]]
+          if [[ "$count" == 1 ]]; then
+            jq -e --arg name "$name" '.[] | select(.name == $name) | .expired == false' artifacts/reservation-inventory.json
+            gh run download "$GITHUB_RUN_ID" --repo "$GH_REPO" --name "$name" --dir artifacts/reservation
+          elif [[ "$GITHUB_RUN_ATTEMPT" != 1 ]]; then
+            printf '%s\n' 'Missing original version reservation; start a new release run.' >&2
+            exit 1
+          fi
+          printf 'RELEASE_RESERVATION_EXISTS=%s\n' "$count" >> "$GITHUB_ENV"
+      - name: Authenticate release identity and reserve the UTC daily version
+        id: reserve
+        shell: bash
+        run: |
+          args=(version --output=artifacts/version-input.json)
+          if [[ "$RELEASE_RESERVATION_EXISTS" == 1 ]]; then args+=(--reservation=artifacts/reservation/release-version.json); fi
+          python3 scripts/Features/ReleaseDelivery/release-github-context.py "${args[@]}"
+          node scripts/Features/ReleaseDelivery/release-version-cli.mjs --input=artifacts/version-input.json --output=artifacts/reservation/release-version.json
+      - name: Retain the immutable version reservation
+        if: env.RELEASE_RESERVATION_EXISTS == '0'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-version-${{ github.run_id }}
+          path: artifacts/reservation/release-version.json
+          if-no-files-found: error
+          retention-days: 90
+  build:
+    name: Build release assets
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      RELEASE_VERSION: ${{ needs.version.outputs.version }}
+      RELEASE_ASSEMBLY_VERSION: ${{ needs.version.outputs.assembly_version }}
+      RELEASE_FILE_VERSION: ${{ needs.version.outputs.file_version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
-      - name: Check repository rules
-        run: node scripts/Features/RepositoryGovernance/verify.mjs
-      - name: Resolve the source or tag package version
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: release-version-${{ github.run_id }}
+          path: artifacts/reservation
+      - name: Recover completed assets without rebuilding an existing release
         shell: bash
         run: |
-          python3 - <<'PY'
-          import os, re, xml.etree.ElementTree as xml
-          version = xml.parse('Directory.Build.props').findtext('./PropertyGroup/Version')
-          if os.environ['GITHUB_REF_TYPE'] == 'tag':
-              tag = os.environ['GITHUB_REF_NAME']
-              if not tag.startswith('v'):
-                  raise SystemExit('A version tag must start with v.')
-              version = tag[1:]
-          if not version or not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?', version):
-              raise SystemExit('A valid source or tag package version is required.')
-          with open(os.environ['GITHUB_ENV'], 'a') as output:
-              output.write('PACKAGE_VERSION=' + version + '\n')
-          PY
-      - run: dotnet restore KeyLoad.slnx
-      - name: Build Release assemblies with the package version
-        run: dotnet build KeyLoad.slnx --no-restore --configuration Release -p:Version="$PACKAGE_VERSION"
-      - name: Verify EditorConfig and analyzer fixes
-        run: dotnet format KeyLoad.slnx --verify-no-changes --no-restore
-      - name: Build NuGet packages
-        run: dotnet pack KeyLoad.slnx --no-build --no-restore --configuration Release -p:Version="$PACKAGE_VERSION" --output artifacts/packages
-      - name: Record actual package hashes and source
+          mkdir -p artifacts/assets
+          gh api --paginate "repos/$GH_REPO/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" --jq '.artifacts[]' | jq -s > artifacts/asset-inventory.json
+          name="release-assets-$GITHUB_RUN_ID"
+          count=$(jq --arg name "$name" '[.[] | select(.name == $name)] | length' artifacts/asset-inventory.json)
+          [[ "$count" == 0 || "$count" == 1 ]]
+          if [[ "$count" == 1 ]]; then
+            jq -e --arg name "$name" '.[] | select(.name == $name) | .expired == false' artifacts/asset-inventory.json
+            gh run download "$GITHUB_RUN_ID" --repo "$GH_REPO" --name "$name" --dir artifacts/assets
+          fi
+          printf 'RELEASE_ASSETS_EXISTS=%s\n' "$count" >> "$GITHUB_ENV"
+      - name: Restore, build, format and verify the complete source
+        if: env.RELEASE_ASSETS_EXISTS == '0'
         shell: bash
         run: |
-          python3 - <<'PY'
-          import hashlib, json, os, pathlib
-          directory = pathlib.Path('artifacts/packages')
-          packages = sorted(directory.glob('*.nupkg'))
-          if not packages or any(package.stat().st_size == 0 for package in packages):
-              raise SystemExit('Non-empty NuGet packages are required.')
-          record = {'sourceRevision': os.environ['GITHUB_SHA'], 'runId': os.environ['GITHUB_RUN_ID'],
-                    'runAttempt': os.environ['GITHUB_RUN_ATTEMPT'], 'version': os.environ['PACKAGE_VERSION'],
-                    'packages': [{'file': package.name, 'bytes': package.stat().st_size,
-                                  'sha256': hashlib.sha256(package.read_bytes()).hexdigest()} for package in packages]}
-          (directory / 'packages.json').write_text(json.dumps(record, indent=2) + '\n')
-          PY
-      - name: Retain NuGet packages
+          node scripts/Features/RepositoryGovernance/verify.mjs
+          dotnet restore KeyLoad.slnx
+          dotnet build KeyLoad.slnx --no-restore --configuration Release -p:Version="$RELEASE_VERSION" -p:AssemblyVersion="$RELEASE_ASSEMBLY_VERSION" -p:FileVersion="$RELEASE_FILE_VERSION"
+          dotnet format KeyLoad.slnx --verify-no-changes --no-restore
+      - name: Build all NuGet packages and the Linux x64 RF3 database distribution
+        if: env.RELEASE_ASSETS_EXISTS == '0'
+        shell: bash
+        run: |
+          args=(-p:Version="$RELEASE_VERSION" -p:AssemblyVersion="$RELEASE_ASSEMBLY_VERSION" -p:FileVersion="$RELEASE_FILE_VERSION")
+          dotnet pack KeyLoad.slnx --no-build --no-restore --configuration Release "${args[@]}" --output artifacts/assets
+          dotnet publish src/KeyLoad.Server/KeyLoad.Server.csproj --configuration Release --runtime linux-x64 --self-contained true "${args[@]}" --output artifacts/distribution/server
+          dotnet publish src/KeyLoad.Cli/KeyLoad.Cli.csproj --configuration Release --runtime linux-x64 --self-contained true "${args[@]}" --output artifacts/distribution/cli
+          cp scripts/Features/ReleaseDelivery/distribution/{compose.yml,initialize.sh,README.md,.env.example} artifacts/distribution/
+          cp artifacts/reservation/release-version.json artifacts/distribution/
+          chmod 755 artifacts/distribution/initialize.sh
+          tar --owner=0 --group=0 -C artifacts/distribution -czf "artifacts/assets/keyload-database-$RELEASE_VERSION-linux-x64.tar.gz" server cli compose.yml initialize.sh README.md .env.example release-version.json
+      - name: Build and export versioned database and benchmark Docker images
+        if: env.RELEASE_ASSETS_EXISTS == '0'
+        shell: bash
+        run: |
+          docker version
+          for role in server benchmarks; do
+            dockerfile=Dockerfile
+            if [[ "$role" == benchmarks ]]; then dockerfile=benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Dockerfile; fi
+            reference="ghcr.io/managedcode/keyload-$role:$RELEASE_VERSION"
+            archive="keyload-$role-$RELEASE_VERSION-linux-amd64.docker.tar.gz"
+            docker build --platform linux/amd64 --file "$dockerfile" --tag "$reference" --build-arg "KEYLOAD_RELEASE_VERSION=$RELEASE_VERSION" --build-arg "KEYLOAD_ASSEMBLY_VERSION=$RELEASE_ASSEMBLY_VERSION" --build-arg "KEYLOAD_FILE_VERSION=$RELEASE_FILE_VERSION" --label "org.opencontainers.image.version=$RELEASE_VERSION" --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/$GH_REPO" .
+            docker save "$reference" | gzip -n > "artifacts/assets/$archive"
+            docker image inspect "$reference" | jq --arg role "$role" --arg ref "$reference" --arg archive "$archive" '.[0] | {role:$role,reference:$ref,id:.Id,labels:.Config.Labels,archive:$archive}' >> artifacts/images.jsonl
+          done
+          jq -s . artifacts/images.jsonl > artifacts/images.json
+      - name: Verify embedded package versions, real image IDs and every asset hash
+        shell: bash
+        run: |
+          if [[ "$RELEASE_ASSETS_EXISTS" == 1 ]]; then
+            jq '[.images[] | {role,reference,id,labels,archive:.file}]' artifacts/assets/release-manifest.json > artifacts/images.json
+            (cd artifacts/assets && sha256sum --check SHA256SUMS)
+          fi
+          python3 scripts/Features/ReleaseDelivery/release-assets.py --reservation=artifacts/reservation/release-version.json --assets=artifacts/assets --images=artifacts/images.json
+      - name: Retain immutable release packages, distribution and image exports
+        if: env.RELEASE_ASSETS_EXISTS == '0'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: packages-${{ env.PACKAGE_VERSION }}
-          path: artifacts/packages/*
+          name: release-assets-${{ github.run_id }}
+          path: artifacts/assets/*
           if-no-files-found: error
           retention-days: 90
       - name: Retain compiler diagnostic reports
+        if: always() && env.RELEASE_ASSETS_EXISTS == '0'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: code-quality-release-${{ github.run_attempt }}
+          path: artifacts/code-quality/**
+          if-no-files-found: error
+  publish:
+    name: Publish tagged database release
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      packages: write
+      actions: read
+    env:
+      RELEASE_VERSION: ${{ needs.version.outputs.version }}
+      RELEASE_TAG: ${{ needs.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: release-version-${{ github.run_id }}
+          path: artifacts/reservation
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: release-assets-${{ github.run_id }}
+          path: artifacts/assets
+      - name: Require successful CI for this exact source before publication
+        shell: bash
+        run: |
+          mkdir -p artifacts/publication
+          python3 scripts/Features/ReleaseDelivery/release-github-context.py ci --output=artifacts/publication/ci-proof.json
+          (cd artifacts/assets && sha256sum --check SHA256SUMS)
+          jq '[.images[] | {role,reference,id,labels,archive:.file}]' artifacts/assets/release-manifest.json > artifacts/images.json
+          python3 scripts/Features/ReleaseDelivery/release-assets.py --reservation=artifacts/reservation/release-version.json --assets=artifacts/assets --images=artifacts/images.json
+      - name: Create or verify the immutable annotated source tag
+        shell: bash
+        run: |
+          manifest_hash=$(sha256sum artifacts/assets/release-manifest.json | cut -d ' ' -f 1)
+          printf 'KeyLoad release %s\n\nSource: %s\nRelease-Run: %s\nManifest-SHA256: %s\n' "$RELEASE_VERSION" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$manifest_hash" > artifacts/publication/tag-message.txt
+          if git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"; then
+            [[ "$(git cat-file -t "refs/tags/$RELEASE_TAG")" == tag ]]
+            [[ "$(git rev-parse "$RELEASE_TAG^{commit}")" == "$GITHUB_SHA" ]]
+            [[ "$(git for-each-ref --format='%(contents)' "refs/tags/$RELEASE_TAG")" == "$(cat artifacts/publication/tag-message.txt)" ]]
+          else
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git tag --annotate "$RELEASE_TAG" "$GITHUB_SHA" --file artifacts/publication/tag-message.txt
+            git -c credential.helper='!gh auth git-credential' push origin "refs/tags/$RELEASE_TAG"
+          fi
+          [[ "$(git ls-remote origin "refs/tags/$RELEASE_TAG^{}" | cut -f 1)" == "$GITHUB_SHA" ]]
+      - name: Publish immutable versioned GHCR images and verify their native digests
+        shell: bash
+        run: |
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          jq -c '.images[]' artifacts/assets/release-manifest.json > artifacts/publication/image-inputs.jsonl
+          while IFS= read -r record; do
+            reference=$(jq -r .reference <<< "$record")
+            expected=$(jq -r .id <<< "$record")
+            archive=$(jq -r .file <<< "$record")
+            docker load --input "artifacts/assets/$archive"
+            [[ "$(docker image inspect "$reference" --format '{{.Id}}')" == "$expected" ]]
+            if docker pull "$reference" > artifacts/publication/pull.log 2>&1; then
+              [[ "$(docker image inspect "$reference" --format '{{.Id}}')" == "$expected" ]]
+            elif rg -q 'manifest unknown|manifest not found' artifacts/publication/pull.log; then
+              docker push "$reference"
+              docker pull "$reference"
+              [[ "$(docker image inspect "$reference" --format '{{.Id}}')" == "$expected" ]]
+            else
+              cat artifacts/publication/pull.log >&2
+              exit 1
+            fi
+            docker image inspect "$reference" | jq --arg ref "$reference" '.[0] | {reference:$ref,id:.Id,digests:.RepoDigests,labels:.Config.Labels} | select(.digests | length > 0)' >> artifacts/publication/image-results.jsonl
+          done < artifacts/publication/image-inputs.jsonl
+          jq -se 'length == 2 and all(.[]; .digests | length > 0)' artifacts/publication/image-results.jsonl
+          jq -s . artifacts/publication/image-results.jsonl > artifacts/publication/images.json
+      - name: Create the owned GitHub Release and verify all immutable assets
+        shell: bash
+        run: |
+          marker="<!-- KeyLoad release run=$GITHUB_RUN_ID source=$GITHUB_SHA manifest=$(sha256sum artifacts/assets/release-manifest.json | cut -d ' ' -f 1) -->"
+          if ! gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" > artifacts/publication/release.json 2> artifacts/publication/release-error.txt; then
+            rg -q 'HTTP 404' artifacts/publication/release-error.txt
+            printf '%s\n\nVersion `%s`; source `%s`.\n\nIncludes NuGet packages, the Linux x64 RF3 distribution and exported server/benchmark images. Packaging does not establish production readiness.\n\nCI: %s\n' "$marker" "$RELEASE_VERSION" "$GITHUB_SHA" "$(jq -er .runUrl artifacts/publication/ci-proof.json)" > artifacts/publication/release-notes.md
+            gh release create "$RELEASE_TAG" --repo "$GH_REPO" --verify-tag --target "$GITHUB_SHA" --title "KeyLoad $RELEASE_VERSION" --notes-file artifacts/publication/release-notes.md --draft --prerelease
+            gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" > artifacts/publication/release.json
+          fi
+          jq -e --arg marker "$marker" --arg tag "$RELEASE_TAG" '.tag_name == $tag and (.body | contains($marker))' artifacts/publication/release.json
+          for file in artifacts/assets/*; do
+            name=$(basename "$file")
+            count=$(jq --arg name "$name" '[.assets[] | select(.name == $name)] | length' artifacts/publication/release.json)
+            [[ "$count" == 0 || "$count" == 1 ]]
+            if [[ "$count" == 0 ]]; then
+              jq -e '.draft == true' artifacts/publication/release.json
+              gh release upload "$RELEASE_TAG" "$file" --repo "$GH_REPO"
+              gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" > artifacts/publication/release.json
+            fi
+            id=$(jq -er --arg name "$name" '.assets[] | select(.name == $name) | .id' artifacts/publication/release.json)
+            gh api "repos/$GH_REPO/releases/assets/$id" -H 'Accept: application/octet-stream' > artifacts/publication/asset-verification.bin
+            [[ "$(sha256sum "$file" | cut -d ' ' -f 1)" == "$(sha256sum artifacts/publication/asset-verification.bin | cut -d ' ' -f 1)" ]]
+          done
+          [[ "$(jq '.assets | length' artifacts/publication/release.json)" == "$(find artifacts/assets -maxdepth 1 -type f | wc -l)" ]]
+          rm -f artifacts/publication/asset-verification.bin
+          gh release edit "$RELEASE_TAG" --repo "$GH_REPO" --draft=false
+          gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" > artifacts/publication/release.json
+          jq -e --arg tag "$RELEASE_TAG" '.tag_name == $tag and .draft == false and (.html_url | startswith("https://github.com/managedcode/KeyLoad/releases/tag/"))' artifacts/publication/release.json
+      - name: Retain actual CI, tag, image and GitHub Release receipts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: code-quality-release
-          path: artifacts/code-quality/**
+          name: release-publication-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/publication/**
           if-no-files-found: error

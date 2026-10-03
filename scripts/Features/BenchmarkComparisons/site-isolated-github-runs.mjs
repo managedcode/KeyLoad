@@ -1,10 +1,10 @@
 import { access } from 'node:fs/promises';
 import path from 'node:path';
-import { GH, positive } from './isolated-github-contract.mjs';
+import { GH, positive, shaPattern } from './isolated-github-contract.mjs';
 import { readJson } from './isolated-github-files.mjs';
 import { flattenPages, uniqueNamed, validateJobIdentity, validateSuccessfulJob } from './isolated-github-validation.mjs';
 import { createIsolatedPlan } from './isolated-plan.mjs';
-import { SITE_GH, requireSite } from './site-isolated-github-contract.mjs';
+import { SITE_GH, exact, requireSite } from './site-isolated-github-contract.mjs';
 
 export function validateSiteWorkflow(workflow) {
   requireSite(workflow?.path === GH.workflowPath && workflow.name === GH.workflow && workflow.state === 'active' && positive(workflow.id));
@@ -13,7 +13,7 @@ export function validateSiteWorkflow(workflow) {
 
 export function validateSiteRun(run, workflow) {
   requireSite(positive(run?.id) && positive(run.run_number) && positive(run.run_attempt) && run.workflow_id === workflow.id
-    && run.path === GH.workflowPath && run.name === GH.workflow && run.event === 'push' && run.head_branch === 'main'
+    && run.path === GH.workflowPath && run.name === GH.workflow && SITE_GH.producerEvents.includes(run.event) && run.head_branch === 'main'
     && /^[a-f0-9]{40}$/.test(run.head_sha ?? '') && run.repository?.id === SITE_GH.repositoryId
     && run.head_repository?.id === SITE_GH.repositoryId && run.repository.full_name === SITE_GH.repository
     && run.head_repository.full_name === SITE_GH.repository && run.html_url === `https://github.com/${SITE_GH.repository}/actions/runs/${run.id}`);
@@ -62,11 +62,26 @@ async function readPair(input, summary, attempt, workflow) {
     job: validateSuccessfulJob(uniqueNamed(jobs, SITE_GH.aggregateJob), siteCohort(run), SITE_GH.aggregateJob, SITE_GH.steps) };
 }
 
-export async function selectSiteIsolatedEvidence({ input, mode, requestedRun = null }) {
+async function selectCurrentSiteEvidence(input, workflow, runs, producer) {
+  requireSite(exact(producer, SITE_GH.producerKeys) && positive(producer.runId) && positive(producer.attempt)
+    && shaPattern.test(producer.sourceRevision ?? ''));
+  const matches = runs.filter(run => run.id === producer.runId);
+  requireSite(matches.length === 1);
+  const summary = validateSiteRun(matches[0], workflow);
+  requireSite(summary.run_attempt === producer.attempt && summary.head_sha === producer.sourceRevision);
+  const pair = await readPair(input, summary, producer.attempt, workflow);
+  if (pair === null) return { state: 'needs_attempt', runId: summary.id, attempt: producer.attempt };
+  requireSite(pair.successful);
+  return { state: 'selected', workflow, ...pair };
+}
+
+export async function selectSiteIsolatedEvidence({ input, mode, requestedRun = null, producer = null }) {
   requireSite([SITE_GH.publish, SITE_GH.validate].includes(mode) && (requestedRun === null || (mode === SITE_GH.validate && /^[1-9][0-9]*$/.test(String(requestedRun)))));
+  requireSite(mode === SITE_GH.publish ? producer !== null : producer === null);
   const metadata = path.join(input, SITE_GH.metadata);
   const workflow = validateSiteWorkflow(await readJson(path.join(metadata, 'workflow.json')));
   const all = flattenSiteRuns(await readJson(path.join(metadata, 'workflow_runs-pages.json')));
+  if (mode === SITE_GH.publish) return selectCurrentSiteEvidence(input, workflow, all, producer);
   const runs = requestedRun === null ? all : all.filter(run => String(run.id) === String(requestedRun));
   requireSite(requestedRun === null || runs.length === 1);
   runs.sort((left, right) => right.run_number - left.run_number);

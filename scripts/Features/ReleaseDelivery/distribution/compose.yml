@@ -1,0 +1,47 @@
+name: keyload
+x-node: &node
+  image: ${KEYLOAD_IMAGE:?Run initialize.sh before starting the cluster}
+  restart: unless-stopped
+  environment: &settings
+    ASPNETCORE_HTTP_PORTS: '8080'
+    KeyLoad__DataDirectory: /data
+    KeyLoad__ClusterId: ${KEYLOAD_CLUSTER_ID:?Missing cluster identity}
+    KeyLoad__Incarnation: ${KEYLOAD_INCARNATION:?Missing incarnation}
+    KeyLoad__SigningKey: ${KEYLOAD_SIGNING_KEY:?Missing signing key}
+    KeyLoad__PeerSecret: ${KEYLOAD_PEER_SECRET:?Missing peer secret}
+    KeyLoad__AdminKey: ${KEYLOAD_ADMIN_KEY:?Missing admin key}
+    KeyLoad__AllowPrivateNetworkHttp: 'true'
+    KeyLoad__SiloPort: '11111'
+    KeyLoad__SnapshotThreshold: '1024'
+    KeyLoad__Peers__0: http://node1:8080
+    KeyLoad__Peers__1: http://node2:8080
+    KeyLoad__Peers__2: http://node3:8080
+services:
+  node1:
+    <<: *node
+    environment:
+      <<: *settings
+      KeyLoad__PublicEndpoint: http://node1:8080
+      KeyLoad__SiloAddress: node1
+    ports: ['127.0.0.1:5101:8080']
+    volumes: [node1-data:/data]
+  node2:
+    <<: *node
+    environment:
+      <<: *settings
+      KeyLoad__PublicEndpoint: http://node2:8080
+      KeyLoad__SiloAddress: node2
+    ports: ['127.0.0.1:5102:8080']
+    volumes: [node2-data:/data]
+  node3:
+    <<: *node
+    environment:
+      <<: *settings
+      KeyLoad__PublicEndpoint: http://node3:8080
+      KeyLoad__SiloAddress: node3
+    ports: ['127.0.0.1:5103:8080']
+    volumes: [node3-data:/data]
+volumes:
+  node1-data:
+  node2-data:
+  node3-data:

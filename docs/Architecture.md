@@ -111,7 +111,7 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | benchmarks/KeyLoad.ComparisonHost | Program.cs and Features/BenchmarkComparisons/ | BenchmarkComparisons; sole CLI composition/lifetime under ADR-043, source-joined with actual build and GitHub qualification pending. |
 | site | Features/BenchmarkComparisons/index.html, bootstrap.mjs, measurement-loader.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction, conceptual Three.js RF3 view and public views of qualified GitHub JSON; ADR-040 migration in progress. |
 | tests/KeyLoad.SiteTests | KeyLoad.SiteTests.csproj, Features/BenchmarkComparisons/ | BenchmarkComparisons; independently buildable TUnit suite invokes actual Node modules and authentic GitHub report files. |
-| .github/workflows | ci.yml, pages.yml | RepositoryGovernance, BenchmarkComparisons; verification and publication boundary. |
+| .github/workflows | ci.yml, benchmarks.yml, release.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; build/tests, same-run metrics/site and immutable database release. |
 | scripts/Features/BenchmarkComparisons | github-evidence-contracts/runs/proof.mjs, github-evidence.mjs | BenchmarkComparisons; ADR-040/BC028 authenticated-metadata and same-ZIP proof tooling, implementation pending. |
 | docs | design/, implementation/, Features/, ADR/ | Product specification, evidence and canonical slice/decision records. |
 
@@ -789,22 +789,31 @@ classDiagram
 
 ## Delivery workflows
 
-[ADR-062](ADR/ADR-062-workflow-separation.md) separates PR CI, project Tests, all Benchmarks, Release
-package builds and Website publication. `ci.yml` (`CI`) always checks repository rules on PR/manual runs.
-`tests.yml` (`Tests`) retains main/PR/manual full build/format/unit/scalar/recovery/
-Docker RF3 gates. `release.yml` (`Release`) builds actual NuGet package artifacts.
-`benchmarks.yml` (`Benchmarks`) owns every native comparison and TimeSeries image
-check, with its own full build/format/rules prerequisite and isolated Linux cells.
-`pages.yml` (`Website`) follows Benchmarks and site changes. Historical
-legacy CI archives retain their original verified identity. Source integration
-does not establish successful comparison or website qualification.
+[ADR-064](ADR/ADR-064-three-pipeline-release-delivery.md) replaces the historical
+[ADR-062](ADR/ADR-062-workflow-separation.md) placement with exactly three workflows.
+`ci.yml` (`CI`) combines PR/main/manual build, format, rules, analyzers, normal/scalar
+units, recovery and genuine Docker/Aspire RF3 SDK/MCP qualification. `benchmarks.yml`
+(`Benchmarks`) preserves every isolated Linux native comparison and TimeSeries image
+check, then runs the complete site qualification/deployment stages after successful
+aggregate/image gates. Website metrics authenticate this exact run/attempt/source;
+historical legacy archives keep their genuine original identity.
+
+[ReleaseDelivery](Features/ReleaseDelivery.md) owns `release.yml` (`Release`): an
+immutable UTC version reservation `vM.m.yyMMdd.N`, full build/packages, self-contained
+Linux server/CLI RF3 distribution and actual versioned Docker exports. Publication
+requires successful exact-source CI, verifies asset hashes, and creates immutable
+tag, GHCR images and GitHub Release. Packaging does not establish runtime/endurance
+qualification. Provider and exact-SHA proof remain separate from source integration.
 
 ```mermaid
 flowchart LR
-    Source[Exact source] --> CI[CI PR rules and build]
-    Source --> Tests[Tests ordinary qualification]
-    Source --> Release[Release NuGet package builds]
-    Source --> Benchmarks[Benchmarks native isolated jobs]
-    Benchmarks --> Website[Website qualification and publication]
-    Site[Website source changes] --> Website
+    Source[PR or main source] --> CI[CI build and ordinary tests]
+    Main[Main source] --> Benchmarks[All isolated native benchmarks]
+    Benchmarks --> Aggregate[Complete authenticated JSON]
+    Aggregate --> Site[Full website tests and publication]
+    Manual[Manual main release] --> Reserve[UTC date and daily number]
+    Reserve --> Build[Packages database distribution images]
+    CI --> Gate[Successful exact source proof]
+    Build --> Publish[Immutable tag GHCR and GitHub Release]
+    Gate --> Publish
 ```

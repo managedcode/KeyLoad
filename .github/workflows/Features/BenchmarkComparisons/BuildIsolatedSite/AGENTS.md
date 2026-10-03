@@ -19,3 +19,6 @@
 - No applicable workflow skill is installed; installing skills or tools is prohibited.
 - Preserve least privilege and the actual inherited GitHub context. Never log secrets, forge a CI environment, add a provider fallback, weaken gates or rewrite measured inputs.
 - Require the isolated receipt to be a regular non-link file of at most4MiB before parsing; preserve original receipt bytes and hashes across the builder. Do not use generic archive extraction or replace original authority with a rewritten receipt.
+
+## Owner-directed three-pipeline join, 2026-10-03
+- The latest explicit owner layout moves this full qualification into Benchmarks/benchmarks.yml behind its own successful aggregate and TimeSeries image jobs, superseding pages.yml placement above. Retain the exact qualify job name, actual inherited executor, every archive/hash/TUnit/browser/coverage check, and downstream least-privilege deployment. Only the exact current benchmark run/attempt/source may refresh native metrics; historical archive validation remains separately authentic.

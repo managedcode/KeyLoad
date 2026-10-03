@@ -548,11 +548,14 @@ is qualified; the complete native family site stage remains mandatory.
 
 ## Shared comparison pipeline
 
-Owner clarification2026-10-03 places all comparative tests, including native
-TimeSeries image checks, in `benchmarks.yml` (`Benchmarks`). `ci.yml` retains PR checks and repository rules; `tests.yml` retains ordinary
-project qualification; `pages.yml` follows the
-comparison producer. [ADR-062](../ADR/ADR-062-workflow-separation.md) and
-[workflow acceptance](../implementation/workflow-layout-acceptance.md) define
-REQ-WF-001..006 / AC-WF-001..006 and the exact producer handoff. Native isolated
+The latest owner correction2026-10-03 uses exactly three workflows under
+[ADR-064](../ADR/ADR-064-three-pipeline-release-delivery.md): `ci.yml` combines
+ordinary build/test/rule gates; `benchmarks.yml` (`Benchmarks`) owns every load/
+comparison/TimeSeries check, complete JSON aggregation and the full website
+qualification/publication chain; `release.yml` builds and publishes real dated
+database delivery. REQ/AC-PIPE-001..004 and REL-001..003 are defined by
+[ReleaseDelivery](ReleaseDelivery.md) and its acceptance matrix. Website publication
+must authenticate the exact current benchmark run/attempt/source without historical
+fallback; recheck that tuple and current website source before deployment. Native isolated
 job/step/artifact identities, complete workloads and topology remain required;
 authentic historical legacy CI archives are not relabelled.

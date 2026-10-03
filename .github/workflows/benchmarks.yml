@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: keyload-benchmarks-${{ github.ref }}
   cancel-in-progress: false
@@ -349,3 +350,45 @@ jobs:
             artifacts/code-quality/**
           if-no-files-found: error
           retention-days: 90
+
+  qualify:
+    needs: [comparison-aggregate, timeseries-image-facts]
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions: {contents: read, actions: read}
+    outputs:
+      mode: ${{ steps.qualification.outputs.mode }}
+      site_revision: ${{ steps.qualification.outputs.site_revision }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: control
+          persist-credentials: false
+      - name: Qualify complete same-run metrics and website
+        id: qualification
+        uses: ./control/.github/workflows/Features/BenchmarkComparisons/QualifySite
+  deploy:
+    needs: qualify
+    if: needs.qualify.result == 'success' && needs.qualify.outputs.mode == 'publish'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions: {contents: read, actions: read, pages: write, id-token: write}
+    environment: {name: github-pages, url: '${{ steps.publication.outputs.page_url }}'}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      QUALIFIED_REVISION: ${{ needs.qualify.outputs.site_revision }}
+      CONTROL_REVISION: ${{ github.workflow_sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: control
+          persist-credentials: false
+      - name: Publish qualified same-run metrics
+        id: publication
+        uses: ./control/.github/workflows/Features/BenchmarkComparisons/DeploySite

@@ -266,13 +266,32 @@ Memory and read-work repairs remain in progress across storage, SQL/search, even
 
 All test qualification and load measurements run in GitHub Actions. The comparison harness uses deterministic JSON, float32 vectors and cyclic graphs, verifies the complete returned payload, and retains every measured attempt, including failures. Reports include useful throughput, p50/p95/p99, separate enqueue/receive/ACK timings and load-generator CPU/allocation/RSS. These resource metrics describe the client process. See the [comparison methodology](docs/implementation/comparative-benchmarks.md).
 
-The [public benchmark lab](https://www.keyload.cloud/) presents authenticated GitHub reports with workload, scenario, measure and repetition controls. Historical CI reports retain their original source and run identities. The separate Benchmarks workflow now owns native isolated performance comparisons; Website publishes only after its authenticated complete comparison and site qualification gates. [Website operations](docs/implementation/website.md) describes provenance and the custom domain. Incomplete measurements cannot refresh published metrics, and these observations do not establish an equal-durability winner or production readiness.
+The [public benchmark lab](https://www.keyload.cloud/) presents authenticated GitHub reports with workload, scenario, measure and repetition controls. Historical CI reports retain their original source and run identities. The Benchmarks workflow runs native isolated performance comparisons, then qualifies and publishes the website from that same run’s complete authenticated metrics. [Website operations](docs/implementation/website.md) describes provenance and the custom domain. Incomplete measurements cannot refresh published metrics, and these observations do not establish an equal-durability winner or production readiness.
 
 The separate [TimeSeries profile](docs/ADR/ADR-050-timeseries-timescale-comparison.md) ran a digest-pinned ephemeral TimescaleDB2.30.2-pg18 container, RF3 KeyLoad and published ManagedCode.TimeSeries10.0.0 in-memory aggregation. Its retained report atfa80c701 records20 successful attempts and20 matching correctness checks across48 identical samples, including range/boundary/offset/empty/invalid handling, buckets and cleanup. The complete Aspire test failed its native runner-completion gate and did not reach the foreign-schema assertion; it remains unqualified. The library has no persistence guarantee and the Timescale container has no cross-run data volume. [Exact receipts](docs/implementation/runtime-qualification-20261002.md) keep those guarantees and partial evidence explicit.
 
 The product website redesign is in progress under [ADR-040](docs/ADR/ADR-040-static-site-threejs-evidence.md): a product introduction, a conceptual Three.js RF3 illustration and the complete evidence workspace. Its independent TUnit site suite runs in GitHub Actions against authentic historical reports. Website source, measured source and raw hashes stay distinct; the preview does not qualify current database changes or publish the pending nine-engine comparison profiles.
 
 The next comparison contract adds MongoDB, OpenSearch and KurrentDB, expected-no-stream append/read, and real native replicated groups. [BenchmarkComparisons](docs/Features/BenchmarkComparisons.md) records requirements and acceptance; [ADR-034](docs/ADR/ADR-034-cluster-comparisons.md) records the exact support, topology, acknowledgement and publication contracts. It is not yet a qualified nine-engine result. KurrentDB is pinned to 26.1.2 to retain free clustering; Neo4j Community clustering is unavailable without Enterprise.
+
+## Delivery workflows
+
+Exactly three workflows are available:
+
+- **CI** builds and checks repository rules, analyzers, normal/scalar unit tests,
+  process recovery and genuine Docker/Aspire RF3 SDK/MCP tests on PR/main/manual runs.
+- **Benchmarks** runs all native load/comparison suites, aggregates their JSON,
+  then qualifies and publishes the website using the same run’s new metrics.
+- **Release** manually builds the solution, NuGet packages, a self-contained Linux
+  server/CLI distribution with RF3 configuration and versioned Docker images. It
+  verifies successful CI for that exact source before creating the tag and GitHub Release.
+
+Release tags are `v<major>.<minor>.<yyMMdd>.<daily-build>`, for example
+`v0.1.261003.1`. Major/minor are configured in Directory.Build.props; UTC defines
+the date and the daily counter starts at 1. A retry reuses its original version
+and assets. See [ReleaseDelivery](docs/Features/ReleaseDelivery.md) and
+[ADR-064](docs/ADR/ADR-064-three-pipeline-release-delivery.md). Source configuration
+alone does not establish successful release or website publication.
 
 ## Repository workflow
 

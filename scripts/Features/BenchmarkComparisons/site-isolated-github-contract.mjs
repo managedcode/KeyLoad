@@ -2,7 +2,9 @@ import { exactKeys } from './aggregate-contracts.mjs';
 
 export const SITE_GH = Object.freeze({
   repository: 'managedcode/KeyLoad', repositoryId: 477801965,
-  executor: 'Website', executorPath: '.github/workflows/pages.yml',
+  executor: 'Benchmarks', executorPath: '.github/workflows/benchmarks.yml',
+  executorJobs: Object.freeze(['qualify', 'deploy']), producerEvents: Object.freeze(['push', 'workflow_dispatch']),
+  producerKeys: Object.freeze(['runId', 'attempt', 'sourceRevision']), pinnedRunCapture: 'requested-run.json',
   aggregateJob: 'comparison-aggregate', suite: 'comparison-isolated-suite', provider: 'comparison-isolated-provider-evidence',
   metadata: 'metadata', archives: 'archives', input: 'input', metadataProof: 'metadata-proof.json', receipt: 'archive-receipt.json',
   metadataState: 'metadata_verified', archiveState: 'archive_verified', publish: 'publish', validate: 'validate',

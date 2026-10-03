@@ -16,7 +16,9 @@
     <Deterministic>true</Deterministic>
     <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
-    <Version>0.1.0-dev</Version>
+    <KeyLoadReleaseMajor>0</KeyLoadReleaseMajor>
+    <KeyLoadReleaseMinor>1</KeyLoadReleaseMinor>
+    <Version>$(KeyLoadReleaseMajor).$(KeyLoadReleaseMinor).0-dev</Version>
     <Authors>ManagedCode</Authors>
     <RepositoryUrl>https://github.com/managedcode/KeyLoad</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

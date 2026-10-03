@@ -9,17 +9,30 @@ import { writeJson } from './isolated-github-files.mjs';
 import { SITE_GH, requireSite } from './site-isolated-github-contract.mjs';
 import { createSiteIsolatedContext, parseSiteCaptureArguments } from './site-isolated-github-context.mjs';
 import { captureSitePages } from './site-isolated-github-api.mjs';
-import { selectSiteIsolatedEvidence } from './site-isolated-github-runs.mjs';
+import { selectSiteIsolatedEvidence, validateSiteRun } from './site-isolated-github-runs.mjs';
 import { proveSiteIsolatedEvidence } from './site-isolated-github-proof.mjs';
 import { siteMetadataFiles } from './site-isolated-github-files.mjs';
 
+async function captureSelectionRuns(directory, context, workflow) {
+  let event = context.mode === SITE_GH.publish ? context.executor.event : SITE_GH.producerEvents[0];
+  if (context.requestedRun !== null) {
+    const pinned = await captureApi(`${GH.api}/runs/${context.requestedRun}`,
+      path.join(directory, SITE_GH.pinnedRunCapture), false, context);
+    validateSiteRun(pinned, workflow);
+    requireSite(String(pinned.id) === context.requestedRun);
+    event = pinned.event;
+  }
+  await captureSitePages(`${GH.api}/workflows/benchmarks.yml/runs?branch=main&event=${event}`, directory, 'workflow_runs', context);
+}
+
 async function captureSelection(input, context) {
   const directory = path.join(input, SITE_GH.metadata);
-  await captureApi(`${GH.api}/workflows/benchmarks.yml`, path.join(directory, 'workflow.json'), false, context);
-  await captureSitePages(`${GH.api}/workflows/benchmarks.yml/runs?branch=main&event=push`, directory, 'workflow_runs', context);
+  const workflow = await captureApi(`${GH.api}/workflows/benchmarks.yml`, path.join(directory, 'workflow.json'), false, context);
+  await captureSelectionRuns(directory, context, workflow);
   const attempts = await createDirectory(path.join(directory, 'attempts'));
   for (let pair = 0; pair <= SITE_GH.pairs; pair += 1) {
-    const selected = await selectSiteIsolatedEvidence({ input, mode: context.mode, requestedRun: context.requestedRun });
+    const selected = await selectSiteIsolatedEvidence({ input, mode: context.mode, requestedRun: context.requestedRun,
+      producer: context.producer });
     if (selected.state === 'selected') {
       await captureSitePages(`${GH.api}/runs/${selected.run.id}/artifacts`, directory, 'artifacts', context);
       return selected;

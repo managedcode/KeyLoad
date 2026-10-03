@@ -79,7 +79,7 @@ TASK-DOC-AUTHOR-004/005 мають тільки нові, різні файли;
 
 Актори та entry points: власник задає scope, contributor/agent читає root/local AGENTS та Architecture перед task, strongest planner фіксує contracts, bounded worker повертає evidence, integrator/reviewer joins всі результати; CI запускає static validator. Required/planned policy або source migration не оголошується виконаною від створення spec чи локального validator pass. Installed-by-bootstrap status і delivered-source qualification залишаються в owning audit records.
 
-## Owner-directed workflow separation, 2026-10-03
+## Historical workflow separation, superseded by ADR-064
 
 [ADR-062](../ADR/ADR-062-workflow-separation.md),
 [acceptance](../implementation/workflow-layout-acceptance.md) and
@@ -90,3 +90,15 @@ Release builds NuGet package artifacts; Website retains separate publication. Hi
 identity remains authentic while new isolated cohorts bind to benchmarks.yml.
 Each same-numbered REQ/AC maps to the plan's task graph and TUnit/GitHub proof;
 no database, workload, native topology or unrelated website design changes apply.
+
+## Three-pipeline integration, 2026-10-03
+
+The owner's latest explicit correction supersedes the five-workflow placement above.
+[ADR-064](../ADR/ADR-064-three-pipeline-release-delivery.md) and
+[ReleaseDelivery](ReleaseDelivery.md) define REQ/AC-PIPE-001..004 and REL-001..003:
+CI combines ordinary build/test/rule gates; Benchmarks runs every load/comparison
+suite and qualifies/publishes the same run's metrics; Release builds real database
+packages/distribution/images and creates an immutable dated tag/GitHub Release after
+successful exact-source CI. TUnit source/version/current-producer regressions and
+actual GitHub run/job/artifact/provider records own verification. Static checks do
+not establish successful qualification, site publication or database release.

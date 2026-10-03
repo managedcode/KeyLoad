@@ -27,13 +27,18 @@ export function parseSiteCaptureArguments(argv) {
 
 export function createSiteIsolatedContext(environment, args, platform = process.platform) {
   requireSite(platform === 'linux' && environment.GITHUB_REPOSITORY === SITE_GH.repository && environment.GH_REPO === SITE_GH.repository
+    && environment.GITHUB_ACTIONS === 'true' && environment.RUNNER_OS === 'Linux'
     && environment.GITHUB_WORKFLOW === SITE_GH.executor && environment.GITHUB_WORKFLOW_SHA === args['workflow-revision']
     && environment.GITHUB_WORKFLOW_REF === `${SITE_GH.repository}/${SITE_GH.executorPath}@${environment.GITHUB_REF}`
+    && SITE_GH.executorJobs.includes(environment.GITHUB_JOB) && SITE_GH.producerEvents.includes(environment.GITHUB_EVENT_NAME)
     && shaPattern.test(environment.GITHUB_SHA ?? '') && typeof environment.GH_TOKEN === 'string' && environment.GH_TOKEN.length > 0);
   requireSite(positive(Number(environment.GITHUB_RUN_ID)) && positive(Number(environment.GITHUB_RUN_ATTEMPT))
     && typeof environment.GITHUB_WORKSPACE === 'string' && isAbsolute(environment.GITHUB_WORKSPACE));
-  if (args.mode === SITE_GH.publish) requireSite(environment.GITHUB_REF === 'refs/heads/main');
+  if (args.mode === SITE_GH.publish) requireSite(environment.GITHUB_REF === 'refs/heads/main' && args['requested-run'] === undefined);
   return { native: { workspace: repositoryRoot }, executor: { sourceRevision: environment.GITHUB_SHA,
-    runId: environment.GITHUB_RUN_ID, attempt: environment.GITHUB_RUN_ATTEMPT, workflow: environment.GITHUB_WORKFLOW },
-    source: { website: args['site-revision'], control: args['workflow-revision'] }, mode: args.mode, requestedRun: args['requested-run'] ?? null };
+    runId: environment.GITHUB_RUN_ID, attempt: environment.GITHUB_RUN_ATTEMPT, workflow: environment.GITHUB_WORKFLOW,
+    event: environment.GITHUB_EVENT_NAME },
+    source: { website: args['site-revision'], control: args['workflow-revision'] }, mode: args.mode, requestedRun: args['requested-run'] ?? null,
+    producer: args.mode === SITE_GH.publish ? { runId: Number(environment.GITHUB_RUN_ID),
+      attempt: Number(environment.GITHUB_RUN_ATTEMPT), sourceRevision: environment.GITHUB_SHA } : null };
 }

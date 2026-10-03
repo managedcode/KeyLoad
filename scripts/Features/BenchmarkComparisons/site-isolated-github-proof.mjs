@@ -79,7 +79,9 @@ export async function validateSiteIsolatedInputs({ input, receipt: receiptPath }
   const original = validateSiteIsolatedReceipt(await readJson(path.join(input, SITE_GH.metadataProof), SITE_GH.jsonBytes));
   requireSite(isDeepStrictEqual({ ...receipt, state: SITE_GH.metadataState, archives: null, inputFiles: null }, original));
   const selection = await selectSiteIsolatedEvidence({ input, mode: receipt.mode,
-    requestedRun: receipt.mode === SITE_GH.validate ? String(receipt.run.id) : null });
+    requestedRun: receipt.mode === SITE_GH.validate ? String(receipt.run.id) : null,
+    producer: receipt.mode === SITE_GH.publish ? { runId: receipt.run.id, attempt: receipt.run.attempt,
+      sourceRevision: receipt.source.measured } : null });
   const authenticated = await proveSiteIsolatedEvidence({ input, selection, source: { website: receipt.source.website,
     control: receipt.source.control }, mode: receipt.mode });
   requireSite(isDeepStrictEqual(authenticated, original));
