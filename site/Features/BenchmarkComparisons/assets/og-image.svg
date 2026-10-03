@@ -1,35 +1,103 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
   <title id="title">KeyLoad — The database for AI agents.</title>
-  <desc id="description">KeyLoad brings documents, data and tools together for AI agents, with MCP, .NET and Orleans.</desc>
+  <desc id="description">A bold light KeyLoad cover, with the canonical K among glass document, table and graph cards. One transactional engine for documents, SQL, graphs and vectors.</desc>
   <defs>
-    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#292a2e"/><stop offset="1" stop-color="#111214"/></linearGradient>
-    <linearGradient id="keyload-mark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a3d"/><stop offset="1" stop-color="#0d0e10"/></linearGradient>
-    <linearGradient id="keyload-sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
-    <linearGradient id="keyload-iris" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffb08a"/><stop offset=".5" stop-color="#e3a6ff"/><stop offset="1" stop-color="#9fb4ff"/></linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffb08a"/><stop offset=".52" stop-color="#e3a6ff"/><stop offset="1" stop-color="#9fb4ff"/></linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fdfcf9"/>
+      <stop offset="1" stop-color="#f0efeb"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".96"/>
+      <stop offset="1" stop-color="#eeede9" stop-opacity=".72"/>
+    </linearGradient>
+    <linearGradient id="glass-edge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".48" stop-color="#fff" stop-opacity=".92"/>
+      <stop offset="1" stop-color="#d7d6d3"/>
+    </linearGradient>
+    <linearGradient id="keyload-mark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3a3d"/>
+      <stop offset="1" stop-color="#0d0e10"/>
+    </linearGradient>
+    <linearGradient id="keyload-sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".28"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="keyload-iris" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffb08a"/>
+      <stop offset=".5" stop-color="#e3a6ff"/>
+      <stop offset="1" stop-color="#9fb4ff"/>
+    </linearGradient>
+    <filter id="card-shadow" x="-.4" y="-.4" width="1.8" height="2">
+      <feDropShadow dx="0" dy="17" stdDeviation="17" flood-color="#202126" flood-opacity=".09"/>
+    </filter>
+    <filter id="mark-shadow" x="-.4" y="-.4" width="1.8" height="2">
+      <feDropShadow dx="0" dy="25" stdDeviation="22" flood-color="#202126" flood-opacity=".22"/>
+    </filter>
+    <symbol id="keyload" viewBox="0 0 40 40">
+      <rect width="40" height="40" rx="10" fill="url(#keyload-mark)"/>
+      <rect x=".5" y=".5" width="39" height="39" rx="9.5" fill="url(#keyload-sheen)" stroke="#fff" stroke-opacity=".14"/>
+      <rect x="10" y="9" width="5" height="6" rx="2" fill="#fff"/>
+      <rect x="10" y="17" width="5" height="6" rx="2" fill="#fff"/>
+      <rect x="10" y="25" width="5" height="6" rx="2" fill="url(#keyload-iris)"/>
+      <path d="M29 9.5 19.5 20 29 30.5" fill="none" stroke="#fff" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
   </defs>
-  <rect width="1200" height="630" fill="#f4f3ef"/>
-  <rect x="44" y="42" width="1112" height="546" rx="34" fill="url(#panel)" stroke="#fff" stroke-opacity=".12"/>
-  <rect x="88" y="91" width="8" height="448" rx="4" fill="url(#accent)"/>
-  <svg x="132" y="104" width="94" height="94" viewBox="0 0 40 40" role="img" aria-label="KeyLoad mark">
-    <rect width="40" height="40" rx="10" fill="url(#keyload-mark)"/>
-    <rect x=".5" y=".5" width="39" height="39" rx="9.5" fill="url(#keyload-sheen)" stroke="#fff" stroke-opacity=".14"/>
-    <rect x="10" y="9" width="5" height="6" rx="2" fill="#fff"/>
-    <rect x="10" y="17" width="5" height="6" rx="2" fill="#fff"/>
-    <rect x="10" y="25" width="5" height="6" rx="2" fill="url(#keyload-iris)"/>
-    <path d="M29 9.5 19.5 20 29 30.5" fill="none" stroke="#fff" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-  <text x="250" y="171" fill="#f5f3ef" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700" letter-spacing="-1.6">KeyLoad</text>
-  <rect x="132" y="238" width="77" height="5" rx="2.5" fill="url(#accent)"/>
-  <text x="132" y="326" fill="#f5f3ef" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700" letter-spacing="-1.5">The database</text>
-  <text x="132" y="397" fill="#f5f3ef" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700" letter-spacing="-1.5">for AI agents.</text>
-  <text x="134" y="473" fill="#c9c7c3" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400">One place for the data and tools your agents use.</text>
-  <g font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="1.1">
-    <rect x="132" y="510" width="72" height="34" rx="17" fill="#fff" fill-opacity=".08" stroke="#fff" stroke-opacity=".16"/>
-    <text x="168" y="533" text-anchor="middle" fill="#f5f3ef">MCP</text>
-    <rect x="217" y="510" width="78" height="34" rx="17" fill="#fff" fill-opacity=".08" stroke="#fff" stroke-opacity=".16"/>
-    <text x="256" y="533" text-anchor="middle" fill="#f5f3ef">.NET</text>
-    <rect x="308" y="510" width="112" height="34" rx="17" fill="#fff" fill-opacity=".08" stroke="#fff" stroke-opacity=".16"/>
-    <text x="364" y="533" text-anchor="middle" fill="#f5f3ef">ORLEANS</text>
+
+  <rect width="1200" height="630" fill="url(#paper)"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <use href="#keyload" x="64" y="64" width="44" height="44"/>
+    <text x="123" y="97" fill="#111214" font-size="34" font-weight="700" letter-spacing="-1.1">KeyLoad</text>
+    <text x="1136" y="93" text-anchor="end" fill="#646469" font-size="18" font-weight="500">.NET · MCP · Orleans</text>
+
+    <rect x="209" y="382" width="441" height="14" fill="url(#keyload-iris)"/>
+    <g fill="#111214" font-size="104" font-weight="700" letter-spacing="-5.3">
+      <text x="61" y="265">The database</text>
+      <text x="61" y="368">for AI agents.</text>
+    </g>
+    <text x="65" y="453" fill="#38393d" font-size="27" letter-spacing="-.5">One engine. Every model.</text>
+    <text x="65" y="489" fill="#727277" font-size="21" letter-spacing="-.2">Documents · SQL · Graphs · Vectors</text>
+  </g>
+
+  <g transform="rotate(-11 896 264)" filter="url(#card-shadow)">
+    <rect x="804" y="157" width="184" height="214" rx="24" fill="url(#glass)" stroke="url(#glass-edge)" stroke-width="2"/>
+    <g fill="none" stroke="#535458" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M834 190h26l12 12v33h-38z"/>
+      <path d="M860 190v12h12M843 215h19M843 224h14"/>
+    </g>
+    <g stroke="#c6c5c2" stroke-width="5" stroke-linecap="round">
+      <path d="M835 267h100M835 285h83M835 303h100M835 321h59"/>
+    </g>
+  </g>
+
+  <g transform="rotate(9 1090 383)" filter="url(#card-shadow)">
+    <rect x="1025" y="282" width="151" height="209" rx="24" fill="url(#glass)" stroke="url(#glass-edge)" stroke-width="2"/>
+    <g fill="none" stroke="#818186" stroke-width="3">
+      <path d="M1054 382 1087 337 1136 364 1109 431 1054 382M1054 382l82-18M1087 337l22 94"/>
+    </g>
+    <g fill="#fdfcf9" stroke="#44454a" stroke-width="3">
+      <circle cx="1087" cy="337" r="9"/>
+      <circle cx="1136" cy="364" r="9"/>
+      <circle cx="1109" cy="431" r="9"/>
+      <circle cx="1054" cy="382" r="9"/>
+    </g>
+  </g>
+
+  <g transform="rotate(-7 866 451)" filter="url(#card-shadow)">
+    <rect x="753" y="378" width="232" height="155" rx="24" fill="url(#glass)" stroke="url(#glass-edge)" stroke-width="2"/>
+    <g fill="none" stroke="#64656a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="781" y="406" width="105" height="97" rx="7"/>
+      <path d="M781 435h105M781 469h105M816 406v97M851 406v97"/>
+    </g>
+    <path d="M908 426h47M908 448h37M908 470h47M908 492h25" fill="none" stroke="#c4c3bf" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <rect x="857" y="232" width="244" height="244" rx="61" fill="#0d0e10" filter="url(#mark-shadow)"/>
+  <use href="#keyload" x="857" y="232" width="244" height="244"/>
+
+  <path d="M64 548h1072" stroke="#deddd8"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="19" letter-spacing="-.2">
+    <text x="65" y="586" fill="#343539" font-weight="700">keyload.cloud</text>
+    <text x="1136" y="586" text-anchor="end" fill="#747479">Developed by Managed Code</text>
   </g>
 </svg>
