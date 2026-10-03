@@ -2,6 +2,12 @@
 
 Status: implementation in progress. Owner: KeyLoad lead. The owner's Orleans-only correction supersedes the DotNext candidate in architecture v0.3. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 
+REQ-REP-052 / AC-DBHP-001..008 adds the accepted preserving
+[bounded replica term metadata](ClusterReplication/ReplicaTermMetadata.md) work
+under [ADR-061](../ADR/ADR-061-bounded-replica-term-metadata.md). This private
+node-log scalar observation retains actual provider read checks and both public
+authorized quorum barriers. Implementation/native performance proof remains open.
+
 | Requirement | Acceptance and observable evidence |
 |---|---|
 | REQ-REP-001: Orleans carries votes, ordered appends, read barriers, forwarding and snapshot transfer. No DotNext runtime/package remains. | AC-REP-001: dependency/source inventory contains no DotNext reference; three Docker silos accept .NET SDK operations through request grains. |

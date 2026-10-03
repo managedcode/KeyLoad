@@ -1,5 +1,40 @@
 # Isolated intensive TimeSeries acceptance
 
+## TS009J settled-run raw payload
+
+TJ009003 pre-output refinement: reject undefined run stage/failure origin/nullable
+ErrorCode enums and any nonfinite value among the six original measurement
+doubles. These values cannot satisfy declared enum-name/JSON-number contracts;
+reject before output rather than substituting names or values. Cover each with
+unchanged-output assertions; preserve representable original facts unchanged.
+An uninitialized repetition array or null repetition record also rejects before
+output; initialized empty/partial arrays remain valid original failure evidence.
+Do not require5 repetitions or infer ACK positivity/phase/native success here.
+
+- AC-TJ009-001: explicit writer emits schemaVersion1, exact scenario/frequency,
+  seed verification, original run/repetition/phase/measurement/failure facts and
+  all50000 slots. Preserve original integer ticks and nullable facts without
+  sampling, retries or rounding.
+- AC-TJ009-002: NotStarted emits only planned slot/repetition/index/worker and
+  observed=false. Observed slots retain outcome/ticks/nullable count/digest/
+  receipt sequence/actual nullable ACK UUID and sequence/independent structured
+  primary and cleanup origin/code/status/packed SQLSTATE. Failed/cancelled calls
+  may retain an actual ACK/count and stay failed. No invented unstarted timings.
+- AC-TJ009-003: reject invalid scenario/frequency, wrong50000 length, wrong
+  planned ordinal/index/worker, undefined outcome and negative observed ticks
+  before output. Do not serialize exception messages, tags, secrets or response
+  bodies. Caller owns the Utf8JsonWriter/stream; helper neither flushes nor disposes.
+- AC-TJ009-004: workloadSucceeded is exactly the original run predicate, never
+  a native/publication verdict. Generate no source/run/job/image/copy facts here.
+  Genuine ledger/DTO/writer/parser TUnit data covers default slots, observed
+  success, cancelled ACK with independent cleanup, every repetition/measurement
+  field, nulls, integer boundaries and every rejection with unchanged output.
+
+REQ-BC-059/060/064 and AC-TSI-002/004/007/008 map to TJ009 under ADR059. NEW
+TimeSeriesIntensiveRunJsonTests executes normal/scalar only in exact-source
+GitHub. Independent expected JSON keys/numerics/UUIDs must not import writer
+constants. Pure DTO/writer data is not a provider double or native6/30 proof.
+
 Goal: meaningful native Linux1/2/3-node append/read/latest/statistics/windows
 comparisons over identical data, one engine and scenario per independent runner,
 raw JSON and complete authenticated30-cell site data. Canonical slice is
@@ -315,3 +350,14 @@ followup tests prove these separate contracts. Seed requires every exact origina
 ordinal sequence1..4096 before commit and advances state only after joined success.
 The future TS30 JSON must encode these compact independent facts; source changes
 alone never certify performance or cleanup bounds.
+TS009S refines AC-TSI-001: exactly six valid preflight selections have no scenario; exactly thirty valid intensive selections carry one named scenario. Strict route/engine/node/phase/evidence profile and rejection of simultaneous old selection are checked using real configuration input data before resource allocation. Pure invalid cases include null/empty/case/whitespace/numeric/undeclared node/engine/phase/scenario/profile and preflight scenario presence. Configuration inputs are acceptance data, never native proof.
+
+AC-TP009-001 refines TSI001/007: one additive embedded timeseries-contract.json has schema1, exact family/profile, ordered targets KeyLoad/TimescaleDB, nodes1/2/3, five existing named scenarios and the frozen runtime/timing/ACK/copy values in ADR059 TS009P. Its actual UTF8 bytes have a retained SHA256. Strict managed parsing rejects unknown, duplicate, missing, null, wrong-type, oversized/deep and changed values before any native allocation. This is an executable plan contract, not a native result or source/run/job receipt.
+
+AC-TP009-002: typed plan creation returns exactly six unique Preflight cells with null Scenario and thirty unique Intensive cells, each target/node/scenario combination exactly once. IDs are ts-keyload-n1-preflight or ts-timescaledb-n3-Append with invariant node decimals and existing exact scenario names. Every selection passes the existing strict validator. Read/create/plan calls allocate no database/container/client and preserve the old270 contract and production default.
+
+AC-TP009-003: acceptance-derived TUnit uses the actual embedded contract and real JSON input data. Independent literal expected targets/counts/scenarios/values/IDs prove the positive matrix; changes to each field, target/node/scenario array order/duplicates/unknown members, unknown/duplicate/missing/null/wrong-type/malformed/deep/oversized JSON fail. Tests execute only in GitHub normal/scalar suites. Pure plan data cannot satisfy native6/30, numerical coverage or publication.
+
+AC-TP009-004: root owns the exact JSON, csproj embedding and all shared integration. A bounded worker may prepare only the five approved NEW C# source/test candidates under a temporary review directory; no repository/Git/build/test/native/workflow change. Root reviews every candidate, integrates only complete frozen files, then full source/format/governance/delivered-SHA checks. Compatibility is additive; rollback removes only new family plan files/embedding, preserving existing routes, data, APIs and all tests. Genuine native/fault/raw/provider/site gates remain open.
+
+TS007R resource model AC-TSI-001/003/008: actual Aspire models for each1/2/3 selection contain precisely one primary and0/1/2 physical standby nodes, all exact Timescale image/digest, fresh explicit names/data mounts, canonical aliases, single shared secret, all physical endpoints and an explicit Timescale primary bootstrap host. Reject unsupported counts before adding any resources. Test models without starting containers; actual GitHub native readiness/extension/role/quorum/cut/copied-data/public flows remain separately required. Test assertions retain exact literals independent of production constants.

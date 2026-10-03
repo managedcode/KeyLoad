@@ -2,6 +2,8 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal readonly record struct TimeSeriesIntensiveAcknowledgement(Guid CommandId, long Sequence)
 {
+    private const long MinimumSequence = 1L;
+    private const string MissingCommand = "An acknowledgement requires an actual nonempty command UUID.";
     internal static TimeSeriesIntensiveAcknowledgement FromReceipt(TimeSeriesIntensiveAppendReceipt receipt)
     {
         ArgumentNullException.ThrowIfNull(receipt);
@@ -13,8 +15,8 @@ internal readonly record struct TimeSeriesIntensiveAcknowledgement(Guid CommandI
     {
         if (acknowledgement.CommandId == Guid.Empty)
         {
-            throw new ArgumentException("An acknowledgement requires an actual nonempty command UUID.", nameof(acknowledgement));
+            throw new ArgumentException(MissingCommand, nameof(acknowledgement));
         }
-        ArgumentOutOfRangeException.ThrowIfLessThan(acknowledgement.Sequence, 1L, nameof(acknowledgement));
+        ArgumentOutOfRangeException.ThrowIfLessThan(acknowledgement.Sequence, MinimumSequence, nameof(acknowledgement));
     }
 }

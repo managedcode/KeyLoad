@@ -1,0 +1,335 @@
+{
+  "record": "database-hotpath-baseline-d45-r115",
+  "observedUtc": "2026-10-03T07:51:50.389967+00:00",
+  "qualification": "authentic_historical_preflight_only_not_current_candidate_or_complete_cohort",
+  "requirements": [
+    "REQ-REP-052",
+    "REQ-MP-005",
+    "REQ-RESOURCE-002"
+  ],
+  "acceptance": [
+    "AC-DBHP-001",
+    "AC-DBHP-008"
+  ],
+  "decision": "docs/ADR/ADR-061-bounded-replica-term-metadata.md",
+  "run": {
+    "repository": "managedcode/KeyLoad",
+    "workflow": "KeyLoad CI",
+    "runId": 37098964980,
+    "attempt": 1,
+    "sourceSha": "d45d7f253d309610d7cce66684f155170277252a",
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37098964980",
+    "workflowConclusion": "failure",
+    "terminalState": "failed_incomplete_cohort",
+    "preflightSucceededJobs": 24,
+    "preflightFailedJobs": 3,
+    "full270Executed": false,
+    "aggregationOrSitePublicationExecuted": false
+  },
+  "profile": {
+    "name": "intensive-1k-c16",
+    "seed": 1729,
+    "documents": 4096,
+    "operationsPerRepetition": 10000,
+    "warmup": 256,
+    "repetitions": 5,
+    "sessionsPerRepetition": 16,
+    "closedLoop": true,
+    "payloadBytes": 1024,
+    "vectorDimensions": 128,
+    "topK": 10,
+    "timeoutSeconds": 30,
+    "hostOs": "Ubuntu 24.04.5 LTS",
+    "architecture": "X64",
+    "logicalProcessors": 4,
+    "runtime": ".NET 10.0.12",
+    "transport": "HTTP JSON",
+    "authorization": "authenticated root, all grants",
+    "loadModel": "closed-loop; setup, oracle, validation and warmup excluded",
+    "datasetSha256": "ced1a5cd31e37e333712c49aad341125fa1a6fc9a6768891d5d50d69cc7c1add"
+  },
+  "measurementScope": {
+    "operation": "Authenticated real SDK GetAsync PointRead; each of16 closed loops keeps at most one operation outstanding.",
+    "timedRegion": "Measured10000-operation repetition; setup/warmup/oracle excluded.",
+    "topology": "Each1/2/3 voter group uses one Docker host; groups are separate runner jobs. This is not multi-host scaling evidence.",
+    "latency": "Per-operation elapsed milliseconds; median of five separate repetition percentiles is not a pooled percentile.",
+    "resources": "Client load-generator process counters per10000-operation repetition; not server counters or request-attributed allocations.",
+    "acknowledgement": "Declared target write profile QuorumProcessDurable; these samples are PointRead, not write measurements.",
+    "read": "Both public persisted-authentication and operation strong quorum cuts remain in actual source.",
+    "serverCpuAllocationsGcPhases": "unavailable",
+    "complete270": "not executed; original workflow failed incomplete cohort"
+  },
+  "sourceProfileBinding": [
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedKeyLoadReplayProfile.cs",
+      "sourceRevision": "d45d7f253d309610d7cce66684f155170277252a",
+      "sha256": "81dcd13d327b705d21d96cb4cdf25be36ced3f13323bfaad0e7b817016e45989",
+      "scope": "exact local Git blob at authenticated artifact source; configuration source, not effective container env/occupancy"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedKeyLoadAdmission.cs",
+      "sourceRevision": "d45d7f253d309610d7cce66684f155170277252a",
+      "sha256": "07035d36e317f2ba16b8e973449cd751e3edecdffcb20d41d6f7f6c3d56a39f7",
+      "scope": "exact local Git blob at authenticated artifact source; configuration source, not effective container env/occupancy"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ClusterReplication/ReplicaReplayLimits.cs",
+      "sourceRevision": "d45d7f253d309610d7cce66684f155170277252a",
+      "sha256": "95ae727ad746f56389b893c0ad9781665a5bb8e540b756b04b6a8e4e7e569b83",
+      "scope": "exact local Git blob at authenticated artifact source; configuration source, not effective container env/occupancy"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ClusterReplication/ReplicaTransportProtocol.cs",
+      "sourceRevision": "d45d7f253d309610d7cce66684f155170277252a",
+      "sha256": "5b2cad67eceb6b0f38558265a5337f2e2a3028c42075a2620bbf51f077a79bf6",
+      "scope": "exact local Git blob at authenticated artifact source; configuration source, not effective container env/occupancy"
+    }
+  ],
+  "cells": [
+    {
+      "nodeCount": 1,
+      "topology": "One ready benchmark RF1 voter; quorum 1 of 1; no replica fault tolerance; one node-local store on one Docker host",
+      "jobId": 111137427690,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37098964980/job/111137427690",
+      "jobConclusion": "success",
+      "artifactId": 11266185209,
+      "artifactName": "comparison-preflight-keyload-n1-point-read",
+      "archiveSizeBytes": 1238653,
+      "zipSha256": "0c601debaefe1df9e5363a4f9fd17adb476c68977b08a34e6bbd6493018c7565",
+      "workerSha256": "aa45af40a04421ecf1ca203fec1f24fe1c83943036ad713060458dac6ba5462d",
+      "nestedRunId": "ef8209c6-feeb-48f4-9dac-e4b20b1b09b0",
+      "attempts": 50000,
+      "successes": 50000,
+      "failures": 0,
+      "repetitionOrder": "0,1,2,3,4;10000 operations each",
+      "medians": {
+        "usefulOperationsPerSecond": 2187.0925583257126,
+        "p50Ms": 6.900499999999965,
+        "p95Ms": 12.468499999999949,
+        "p99Ms": 16.257700000000114,
+        "clientAllocatedBytes": 97173168,
+        "clientCpuSeconds": 3.250787,
+        "clientPeakObservedWorkingSetBytes": 183836672
+      },
+      "originalRepetitionValues": {
+        "usefulOperationsPerSecond": [
+          2103.2537756560155,
+          2185.644060346157,
+          2187.0925583257126,
+          2221.7719431084192,
+          2192.480829989051
+        ],
+        "p50Ms": [
+          7.080099999999902,
+          6.900499999999965,
+          6.8559999999999945,
+          6.864800000000287,
+          6.941100000000006
+        ],
+        "p95Ms": [
+          13.32400000000007,
+          12.468499999999949,
+          12.725300000000004,
+          11.981699999999819,
+          12.165500000000065
+        ],
+        "p99Ms": [
+          18.23630000000003,
+          16.257700000000114,
+          16.48070000000007,
+          15.376099999999951,
+          15.927100000000337
+        ],
+        "clientAllocatedBytes": [
+          97586256,
+          97169952,
+          97207688,
+          97170128,
+          97173168
+        ],
+        "clientCpuSeconds": [
+          3.755228,
+          3.250787,
+          3.163172,
+          3.141142,
+          3.253058
+        ],
+        "clientPeakObservedWorkingSetBytes": [
+          137007104,
+          159019008,
+          183836672,
+          205139968,
+          230481920
+        ]
+      }
+    },
+    {
+      "nodeCount": 2,
+      "topology": "Two ready benchmark RF2 voters; quorum 2 of 2; no single-voter-loss availability; independent node-local stores on one Docker host",
+      "jobId": 111137427724,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37098964980/job/111137427724",
+      "jobConclusion": "success",
+      "artifactId": 11266195428,
+      "artifactName": "comparison-preflight-keyload-n2-point-read",
+      "archiveSizeBytes": 1285543,
+      "zipSha256": "6da10de6d4745ed3697eefb4b3b93334ee554b6ddd070f23ec52fb01cf9a8fde",
+      "workerSha256": "2a2cf0eb826b3737e1d44823975688ffb65b9a8648d5bb9a988249d8e212fcb1",
+      "nestedRunId": "28531ca8-6516-48d3-b983-804cac483f08",
+      "attempts": 50000,
+      "successes": 50000,
+      "failures": 0,
+      "repetitionOrder": "0,1,2,3,4;10000 operations each",
+      "medians": {
+        "usefulOperationsPerSecond": 805.2347084439183,
+        "p50Ms": 19.091299999998228,
+        "p95Ms": 24.067199999999957,
+        "p99Ms": 29.48739999999998,
+        "clientAllocatedBytes": 100467328,
+        "clientCpuSeconds": 2.570625,
+        "clientPeakObservedWorkingSetBytes": 205873152
+      },
+      "originalRepetitionValues": {
+        "usefulOperationsPerSecond": [
+          798.9698466303075,
+          797.0541643258514,
+          826.6584794410862,
+          818.7067282792602,
+          805.2347084439183
+        ],
+        "p50Ms": [
+          19.312099999999987,
+          19.091299999998228,
+          19.002599999999802,
+          19.055500000000393,
+          19.539499999998952
+        ],
+        "p95Ms": [
+          26.237500000000068,
+          25.0945999999999,
+          23.384900000000926,
+          23.87379999999999,
+          24.067199999999957
+        ],
+        "p99Ms": [
+          33.05679999999984,
+          32.5642,
+          25.860999999999876,
+          29.48739999999998,
+          27.01430000000073
+        ],
+        "clientAllocatedBytes": [
+          100705744,
+          100803680,
+          100395120,
+          100465768,
+          100467328
+        ],
+        "clientCpuSeconds": [
+          2.83213,
+          2.570625,
+          2.531125,
+          2.543865,
+          2.579797
+        ],
+        "clientPeakObservedWorkingSetBytes": [
+          191324160,
+          205873152,
+          202584064,
+          212930560,
+          212938752
+        ]
+      }
+    },
+    {
+      "nodeCount": 3,
+      "topology": "Three ready RF3 voters; one physical shard; independent node-local stores on one Docker host",
+      "jobId": 111137427771,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37098964980/job/111137427771",
+      "jobConclusion": "success",
+      "artifactId": 11265444267,
+      "artifactName": "comparison-preflight-keyload-n3-point-read",
+      "archiveSizeBytes": 1274647,
+      "zipSha256": "9a6af5c61d85706386f8d5e291bfcf3f3937faedfae323d80a18597336825cd0",
+      "workerSha256": "2f22275f8e02a7ad4bb3ff38ab98eb877f9ae494aea4bf821b77c8dad59e39e1",
+      "nestedRunId": "389c395e-d77a-4b80-ab66-0459c676cf5a",
+      "attempts": 50000,
+      "successes": 50000,
+      "failures": 0,
+      "repetitionOrder": "0,1,2,3,4;10000 operations each",
+      "medians": {
+        "usefulOperationsPerSecond": 890.8239485475766,
+        "p50Ms": 17.531199999999444,
+        "p95Ms": 24.4437999999991,
+        "p99Ms": 28.5706,
+        "clientAllocatedBytes": 100327376,
+        "clientCpuSeconds": 3.66045,
+        "clientPeakObservedWorkingSetBytes": 189673472
+      },
+      "originalRepetitionValues": {
+        "usefulOperationsPerSecond": [
+          872.848554875273,
+          892.1434758698475,
+          890.8239485475766,
+          908.2201076516926,
+          881.928839754791
+        ],
+        "p50Ms": [
+          17.608900000000176,
+          17.531199999999444,
+          17.373900000000503,
+          17.27560000000085,
+          17.664099999999962
+        ],
+        "p95Ms": [
+          25.67099999999982,
+          24.519000000000233,
+          24.01409999999987,
+          23.775700000000143,
+          24.4437999999991
+        ],
+        "p99Ms": [
+          32.55849999999998,
+          28.407800000000407,
+          28.5706,
+          27.894599999999855,
+          29.114800000000287
+        ],
+        "clientAllocatedBytes": [
+          100774880,
+          100432456,
+          100275304,
+          100004600,
+          100327376
+        ],
+        "clientCpuSeconds": [
+          3.980563,
+          3.66045,
+          3.647635,
+          3.620023,
+          3.693644
+        ],
+        "clientPeakObservedWorkingSetBytes": [
+          142036992,
+          168402944,
+          189673472,
+          211226624,
+          236560384
+        ]
+      }
+    }
+  ],
+  "rootVerification": {
+    "allThreeOriginalZipDigestsMatchGitHubApi": true,
+    "allThreeOriginalWorkerDigestsRecomputed": true,
+    "allThreeSuccessfulJobsBindRunAndSource": true,
+    "allFifteenRepetitionsVerified10000SuccessesZeroFailures": true,
+    "throughputEqualsSuccessfulOperationsDividedByElapsed": true,
+    "mediansIndependentlyRecomputed": true,
+    "nativeContainerEnvironmentAndReplayOccupancy": "not retained by worker JSON; source configuration only"
+  },
+  "limits": [
+    "No candidate speedup, server-resource attribution, database winner, maximum scalability or production-readiness claim.",
+    "The benchmark read pool196608 differs from default16384; default long-run arithmetic does not explain these isolated samples.",
+    "No local benchmark/test/recovery execution. Original artifacts are preserved unchanged."
+  ]
+}

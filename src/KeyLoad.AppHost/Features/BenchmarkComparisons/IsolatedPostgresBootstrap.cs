@@ -24,9 +24,11 @@ internal static class IsolatedPostgresBootstrap
     private const string SlotRetention = "max_slot_wal_keep_size=512MB";
     private const string MissingBootstrap = "IsolatedPostgresBootstrapMissing";
 
-    internal static (string Entry, string Init) FindScripts(IsolatedResourceContext context)
+    internal static (string Entry, string Init) FindScripts(IsolatedResourceContext context) => FindScripts(context.Builder);
+
+    internal static (string Entry, string Init) FindScripts(IDistributedApplicationBuilder builder)
     {
-        var source = Path.Combine(context.Builder.AppHostDirectory, SourceDirectory);
+        var source = Path.Combine(builder.AppHostDirectory, SourceDirectory);
         var entry = Path.Combine(source, EntryName);
         var init = Path.Combine(source, InitName);
         if (!File.Exists(entry) || !File.Exists(init))
@@ -37,7 +39,7 @@ internal static class IsolatedPostgresBootstrap
     }
 
     internal static void Configure<T>(IResourceBuilder<T> node, string directory, (string Entry, string Init) scripts,
-        IResourceBuilder<ParameterResource> password, string? standby, int standbyCount) where T : ContainerResource
+        IResourceBuilder<ParameterResource> password, string? standby, int standbyCount, string primaryName = Primary) where T : ContainerResource
     {
         node.WithBindMount(directory, Data).WithBindMount(scripts.Entry, EntryTarget, isReadOnly: true)
             .WithEnvironment(PgDataEnvironment, PgData).WithEnvironment(Password, password).WithEntrypoint(Shell)
@@ -57,7 +59,7 @@ internal static class IsolatedPostgresBootstrap
         }
         else
         {
-            node.WithEnvironment(PrimaryEnvironment, Primary).WithEnvironment(ApplicationName, StandbyPrefix + standby);
+            node.WithEnvironment(PrimaryEnvironment, primaryName).WithEnvironment(ApplicationName, StandbyPrefix + standby);
         }
     }
 }

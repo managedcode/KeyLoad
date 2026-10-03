@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
@@ -26,7 +27,6 @@ internal static class IsolatedAggregateNodeTestProcessReaper
             return;
         }
         var owned = false;
-        var deferred = false;
         Task? exit = null;
         try
         {
@@ -36,12 +36,16 @@ internal static class IsolatedAggregateNodeTestProcessReaper
             }
             owned = true;
             exit = RegisterExit(process, failures);
-            await KillAndWaitAsync(process, exit, timer, identity, failures,
-                processOwner: process, transfer => deferred = transfer);
+            var deferred = await KillAndWaitAsync(process, exit, timer, failures);
+            await FinishProcessOwnershipAsync(process, owned, deferred, exit, failures);
+            process = null;
         }
         finally
         {
-            FinishProcessOwnership(process, owned, deferred, exit, identity, failures);
+            if (process is not null)
+            {
+                await FinishProcessOwnershipAsync(process, owned, false, exit, failures);
+            }
         }
     }
 
@@ -95,35 +99,37 @@ internal static class IsolatedAggregateNodeTestProcessReaper
         }
     }
 
-    private static async Task KillAndWaitAsync(Process process, Task exit, Stopwatch timer,
-        IsolatedAggregateNodeIdentity identity, List<Exception> failures, Process processOwner,
-        Action<bool> deferOwnership)
+    private static async Task<bool> KillAndWaitAsync(Process process, Task exit, Stopwatch timer,
+        List<Exception> failures)
     {
-        IsolatedAggregateNodeGuardedInvocation.Capture(
-            () => process.Kill(entireProcessTree: false),
-            failure => IsolatedAggregateNodeTestCleanup.AddDistinct(failures, failure));
+        KillOwnedProcess(process, failures);
         var remaining = TimeSpan.FromSeconds(CleanupSeconds) - timer.Elapsed;
         if (remaining <= TimeSpan.Zero)
         {
-            deferOwnership(!IsExited(processOwner, failures));
-            if (!exit.IsCompleted)
+            if (exit.IsCompleted && IsExited(process, failures))
+            {
+                await ObserveExitAsync(exit, failures);
+                return false;
+            }
+            if (!exit.IsCompleted || !IsExited(process, failures))
             {
                 IsolatedAggregateNodeTestCleanup.AddDistinct(failures,
                     new TimeoutException(IsolatedAggregateNodeLifetimeProgram.OriginalDidNotSettle));
-                return;
+                return true;
             }
             await ObserveExitAsync(exit, failures);
-            return;
+            return !exit.IsCompletedSuccessfully || !IsExited(process, failures);
         }
         try
         {
             await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(() => exit.WaitAsync(remaining));
+            return !exit.IsCompleted || !IsExited(process, failures);
         }
         catch (AggregateException envelope)
         {
             IsolatedAggregateNodeTestCleanup.AddDistinct(failures,
                 IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope));
-            deferOwnership(!IsExited(processOwner, failures));
+            return !exit.IsCompletedSuccessfully || !IsExited(process, failures);
         }
     }
 
@@ -131,19 +137,36 @@ internal static class IsolatedAggregateNodeTestProcessReaper
         => await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(() => exit,
             failure => IsolatedAggregateNodeTestCleanup.AddDistinct(failures, failure));
 
-    private static void FinishProcessOwnership(Process process, bool owned, bool deferred,
-        Task? exit, IsolatedAggregateNodeIdentity identity, List<Exception> failures)
+    private static void KillOwnedProcess(Process process, List<Exception> failures)
+    {
+        try
+        {
+            IsolatedAggregateNodeGuardedInvocation.Invoke(() => process.Kill(entireProcessTree: false));
+        }
+        catch (AggregateException envelope)
+        {
+            var failure = IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope);
+            if (failure is not (InvalidOperationException or Win32Exception) || !IsExited(process, failures))
+            {
+                IsolatedAggregateNodeTestCleanup.AddDistinct(failures, failure);
+            }
+        }
+    }
+
+    private static async Task FinishProcessOwnershipAsync(Process process, bool owned, bool deferred,
+        Task? exit, List<Exception> failures)
     {
         if (!owned)
         {
             DisposeProcess(process, failures);
             return;
         }
-        if (deferred || !IsExited(process, failures))
+        if (deferred || exit is not { IsCompletedSuccessfully: true } || !IsExited(process, failures))
         {
             DeferProcessRelease(process, exit ?? PollForActualExitAsync(process));
             return;
         }
+        await ObserveExitAsync(exit, failures);
         DisposeProcess(process, failures);
     }
 
@@ -163,7 +186,7 @@ internal static class IsolatedAggregateNodeTestProcessReaper
 
     private static async Task PollForActualExitAsync(Process process)
     {
-        while (!IsolatedAggregateNodeGuardedInvocation.Invoke(() => process.HasExited))
+        while (!process.HasExited)
         {
             await Task.Delay(TimeSpan.FromMilliseconds(100));
         }

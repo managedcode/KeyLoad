@@ -1,5 +1,115 @@
 # ADR-059: separate native intensive TimeSeries family
 
+## TS009J explicit settled-run raw payload contract
+
+TJ009003 source refinement: full pre-output validation also rejects undefined
+run stage/failure origin/nullable ErrorCode enums and nonfinite values among the
+six measurement doubles. Preserve all representable original values; no native
+origin, outcome, count, ACK, receipt or phase predicate reclassification.
+Reject uninitialized repetition arrays/null repetition records before output;
+initialized empty/partial arrays remain valid original evidence, without requiring
+all5 repetitions, positive ACKs or phase/native consistency here.
+
+Accepted REQ-BC-059/060/064, TSI002/004/007/008 and TJ009001..004. Internal
+TimeSeriesIntensiveRunJson.Write(Utf8JsonWriter writer,
+TimeSeriesIntensiveRunResult result) borrows both objects. Validate full slot
+shape before output. Root object: schemaVersion1/scenario/timestampFrequency/
+seedVerified/workloadSucceeded/plannedSlotCount/observedAttemptCount/
+unstartedSlotCount/nullable failure/repetitions/attempts. Run failure:
+stage/repetition/outcome/failure. Repetition: repetition/warmup/measured/
+finalVerified/failure. Phase: complete/succeeded/wallTicks/workersStarted/
+peakClientCalls/peakDecodedResponses/nullable measurement. Measurement retains
+all eight existing fields with their camelCase names and original values.
+Attempt: slot/repetition/index/worker/observed; NotStarted ends there. Observed
+attempt adds outcome/latencyTicks/validationTicks/resultCount/digest/
+receiptSequence/acknowledgement/failure/cleanupFailure. ACK: nullable original
+commandId/sequence. Structured failure: origin/keyLoadCode/httpStatus/sqlState;
+exact declared enum names, original nullable packed UInt64 SQLSTATE. Digest uses
+original ToHex. No native messages, invented defaults or reclassified failure.
+
+Reject invalid scenario/nonpositive frequency/wrong50000 length/wrong planned
+slot repetition-index-worker/undefined outcome/negative observed ticks before
+WriteStartObject. No predicates, native adapters or ledger data change. A failed
+attempt's observed count and ACK are independent facts. Outer source/job/image/
+telemetry/native-copy/cleanup/publication envelope and atomic file lifetime belong
+to later root integration; this inner writer cannot certify them.
+
+Stages: root criteria/signature/schema; bounded worker tests-first prepares at
+most four NEW source and two NEW test candidates in
+/private/tmp/keyload-ts009j-candidate only; root every diff/canonical integration/
+development build/formatter/governance; delivered-source normal/scalar GitHub
+TUnit. Root owns all existing files, APIs, embedding and native/workflow/site/
+coverage joins. Worker performs no repository/Git/build/tests/native/runtime/
+package action and stops on unspecified contracts. Every file/type/function must
+meet policy limits, with named implementation keys/diagnostics/shared values.
+No product/API/persistence migration; rollback removes only the additive writer
+and eventual caller. Keep ADR Accepted until native/coverage/site qualification.
+
+```mermaid
+flowchart LR
+    Settled[Original settled run] --> Guard[Validate complete slot shape]
+    Guard --> Planned[Unstarted planned slots]
+    Guard --> Observed[Original observed facts]
+    Observed --> JSON[Borrowed JSON writer]
+    Planned --> JSON
+    JSON --> Envelope[Later actual host evidence envelope]
+```
+
+## TS009P additive executable family plan contract
+
+Accepted REQ-BC-059/064, TSI001/004/007/008 and TP009001..004. Root first freezes
+NEW Features/BenchmarkComparisons/TimeSeries/Intensive/timeseries-contract.json
+in KeyLoad.Comparisons and later embeds it with LogicalName
+KeyLoad.Comparisons.TimeSeriesIntensiveContract. A small strict internal reader
+retains the actual UTF8-byte SHA256 and immutable typed values. Do not modify
+the old isolated-contract.json, old270 types/routes or existing profile values.
+
+The exact JSON fields are schemaVersion1; family timeseries-intensive;
+evidenceProfile intensive-timeseries-4096-c16; targets ordered KeyLoad,
+TimescaleDB; nodeCounts1/2/3; scenarios Append/RawRangeRead/Latest/Aggregate/Windows;
+sampleCount4096; operationCount10000; warmupCount256; repetitions5; concurrency16;
+operationTimeoutSeconds30; cellTimeoutMinutes90; preflightTimeoutMinutes30;
+teardownTimeoutSeconds30; clientDecodedResponseLimit16; rawAttemptCount50000;
+expectedPreflightCells6; expectedIntensiveCells30; timestampUnit stopwatch-ticks;
+throughputDenominator validation-inclusive-wall; percentileMethod
+nearest-rank-per-repetition; measuredRetries0; quorumAcknowledgements1/2/2;
+dataCopies1/2/3. These are guarded plan/configuration facts; observed native
+facts and workload digest are produced only by their actual owners later.
+Contract parsing is bounded at16384 bytes/max-depth4 and rejects duplicate,
+unknown, missing, null, wrong-type or drifted fields/ordered arrays. Current
+loads the actual embedded stream; Read consumes real UTF8 input data. Preserve
+original parsing failures or a named validation failure; no native abstraction.
+
+Approved internal signatures: TimeSeriesIntensiveFamilyContract.Current,
+TimeSeriesIntensiveFamilyContract.Read(ReadOnlyMemory<byte>), immutable public
+JSON properties with required presence and ContractSha256 derived from original
+bytes; TimeSeriesIntensiveFamilyContractValidation.Validate(contract);
+TimeSeriesIntensiveFamilyPlan.Create(contract) returning
+TimeSeriesIntensiveFamilyCells(immutable Preflight, immutable Intensive arrays);
+TimeSeriesIntensiveFamilyCell(string Id, TimeSeriesIntensiveSelection Selection).
+Use existing target/phase/scenario enums and validated selections. IDs use
+ts-, lowercase closed target, -n plus invariant decimal, then -preflight or
+the exact scenario name. No run identity, timestamp or measurement is invented.
+
+Ordered stages: root freezes JSON/spec; bounded worker tests-first prepares
+complete NEW C# candidates under /private/tmp/keyload-ts009p-candidate only;
+root every diff/source review, exact canonical integration and csproj embedding;
+root development build/format/governance; delivered-SHA normal/scalar TUnit;
+separate later native/raw/workflow/provider/site joins. The worker owns only
+TimeSeriesIntensiveFamilyContract.cs, TimeSeriesIntensiveFamilyContractValidation.cs,
+TimeSeriesIntensiveFamilyCell.cs, TimeSeriesIntensiveFamilyPlan.cs in the existing
+Intensive namespace and NEW matching TimeSeriesIntensiveFamilyContractTests.cs
+under UnitTests. No repository/package/shared-contract/host/workflow/Git/build/
+test/native change by worker. Root owns JSON, embedding, all integration and
+every shared boundary. Stop on a missing exact contract rather than inventing it.
+
+No product persistence/API migration. Rollback removes only additive plan files
+and embedding; old profiles/routes/test/qualification contracts stay intact.
+Tests are actual embedded JSON and independent acceptance data/negative parsing,
+not provider simulations. The temporary candidate and source review are not
+delivery or qualification. This ADR stays Accepted until genuine full gates,
+native6/30/270, coverage and publication finish.
+
 Status: Accepted staged implementation contract; native evidence pending.
 Owner: KeyLoad integration lead. Canonical feature: BenchmarkComparisons.
 Related: ADR050/052/056, ADR007/034/035/039/054 and CodeQuality ADR033.
@@ -992,3 +1102,16 @@ Each fixture's original primary survives nonfatal disposal through one explicit
 async owner; remaining native fixtures and all6/30 qualification are still pending.
 
 TS008N final allocation-owner refinement: owned projection r6 proves six CA2000 diagnostics on caller-side command construction passed into a generic resource registry. Root serially owns the integration repair in Operation/Reads/Writes/Setup plus missing Parameters namespace and DataReader formatting. Allocate the same closed six-enum command inside the existing operation owner, register it immediately in the bounded original resource array and return the already owned command. Validate registry capacity before allocation; retain the exact reverse disposal/reader-before-commit/actual postcommit ACK/fatal-primary-cleanup contract. This removes neither analyzer nor resource operation and adds no provider abstraction, retry or public SQL. Worker continues read-only TS009R; original frozen packet remains historical and root records new exact hashes after full build/format. Native proof remains pending.
+## TS009S closed selection and TS007R physical resource packet
+
+This accepted packet maps REQ-BC-059/060/062/063 and AC-TSI-001/002/003/006/008. The delivered5bbf30f checkpoint resolves the previous source-composition coordination dependency; original d45 failures and new push37104211481 remain separate qualification records.
+
+Root owns NEW internal TimeSeriesIntensiveSelection, TimeSeriesIntensiveTargetKind and TimeSeriesIntensiveCellPhase under Comparisons TimeSeries/Intensive, plus corresponding selection UnitTests. Entry route is exactly Benchmarks:Profile=timeseries-intensive. Keys are Benchmarks:TimeSeries:Target, NodeCount, Phase, Scenario, EvidenceProfile. Target is exactly KeyLoad|TimescaleDB, Phase exactly Preflight|Intensive, NodeCount string exactly1|2|3, EvidenceProfile exactly intensive-timeseries-4096-c16. Scenario is absent only for Preflight, and exactly one declared existing TimeSeriesIntensiveScenario name for Intensive. Empty/whitespace/numeric/case drift, scenario supplied for preflight, missing intensive scenario, incompatible old Benchmarks:Target/Scenario/NodeCount selection or invalid route reject before any allocation. No old public enum, selection, report or wire change.
+
+Root NEW IsolatedTimeSeriesResourceContext under AppHost BenchmarkComparisons owns Builder, validated NodeCount, Runner and fresh Root. It exposes DataDirectory(name), BindEndpoint(index,node,endpointName), BindSetting(name,string|ParameterResource builder|ReferenceExpression), BindImage(reference), using the existing Benchmarks__Native__ environment prefix solely inside this new selected route. No old general selector is fabricated to represent a time-series workload. Root separately owns KeyLoad resource composition and all shared host/workflow/JSON/collector/site/coverage integration.
+
+Disjoint TS007R-S worker owns ONLY NEW IsolatedTimeSeriesTimescaleResources.cs and NEW IsolatedTimeSeriesTimescaleResourceTests.cs. Signature Add(IsolatedTimeSeriesResourceContext context) validates before resource creation. Primary resource isolated-timescale-1 is AddPostgres; n-1 genuine physical standbys are isolated-timescale-2/3. All use timescale/timescaledb:2.30.2-pg18 and exact sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e. Each node has a GUID-private explicit container name, canonical DNS alias and distinct fresh0700 node directory. Exactly one secret parameter isolated-timescale-password, native TCP endpoints0..n-1, primary ConnectionString and exact docker.io image reference bind to runner; no credentials or connection strings become reports or logs. Primary plus standbys use fsync=on/synchronous_commit=on, original mounted scripts, physical slots and application names benchmark_standby1/2. Node data mounts, image and shared secret are genuine model assertions; models do not prove native startup/copies/ACK.
+
+Root serially adds FindScripts(IDistributedApplicationBuilder builder) and an optional final primaryName argument to existing IsolatedPostgresBootstrap.Configure; existing signatures delegate/default to isolated-postgres-1 so old general270 topology is preserved. Configure called by new resources uses isolated-timescale-1 explicitly; no shell rewrite, image fallback or replica relabelling. Quorum configuration occurs only after actual native roles/standbys are ready and before schema install/operations: closed native ANY1 config for2/3, empty for1, then readback. Initial bootstrap avoids synchronous-write deadlock before standbys exist; this phase is untimed and does not claim qualified ACKs. Root native verifier must separately inspect PostgreSQL18, actual Timescale extension, member/slot/app/sync state, actual flush/replay cuts and ordered data copies1/2/3 versus ACK1/2/2. Measured operations stay primary.
+
+Ordered verification: selection acceptance input tests first, then closed selection/context and physical resource model assertions; root reviews every diff and source limits, builds/formats/governs source, delivers exact SHA, then runs real six Linux native preflights with actual SDK/official MCP/Npgsql. Native30/protocol/provider/coverage/site joins remain blocked until six genuine outputs pass. Rollback removes only additive new route/resources/context and restores optional common overload; default RF3, old selectors and all immutable evidence remain. No local tests/build/container/native execution by worker, no source/Git/shared docs edits beyond its two files. Stop and escalate unspecified APIs, overlap or native contract drift.

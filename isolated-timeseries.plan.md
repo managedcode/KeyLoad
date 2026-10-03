@@ -1,5 +1,12 @@
 # Isolated intensive TimeSeries plan
 
+|Task|REQ/AC and owner/permissions|Dependencies, artifacts, verification and join|
+|---|---|---|
+|TASK-ISO-TS009J-S|BC059/060/064,TSI002/004/007/008,TJ009001..004; publisher_archive_review existing capable worker; temporary-only NEW writer/helpers/tests|Accepted ADR059 exact inner schema/original DTOs. Tests first actual ledger/DTO/writer data; at most4 new source/2 new tests. No repository/existing files/Git/build/test/native/provider/package edits. Frozen hash/AC packet; root every diff/integration/development gates; exact-source normal/scalar GitHub. Outer native/source-job/telemetry/copy/publication joins remain root-owned.|
+
+- [ ] TS009J complete source packet reviewed and integrated, with no invented native metadata.
+- [ ] TS009J development build/formatter/static and delivered-source normal/scalar TUnit.
+
 Chosen direction: isolated-timeseries.brainstorm.md. Acceptance and test strategy:
 isolated-timeseries.acceptance.md, AC-TSI-001..008. ADR059 remains Accepted until
 every implementation, migration, test and native evidence gate is complete.
@@ -272,3 +279,41 @@ Root-owned74-file projection full Release development build r9 passes0warnings/0
 TS008N-IR complete read-only review found no blocking adapter-source defect. Root integrates two acceptance-derived pure oracle refinements before delivery: compare all16 production SeedCommandId values with independent SHA256 inputs, and exercise Cancelled alongside DeadlineExceeded with actual ACK plus native cleanup facts. These strengthen existing TSI002/004/008 contracts; no native proof follows. Historical eight/six declared-case packets remain historical, with current exact-source execution still pending.
 
 Root74-file development projection after both pure oracle refinements builds Release with0warnings/0errors (r12,28.17s) and formatter passes. The earlier sandbox build was terminated after no output and is not passing evidence. Independent source review is complete; new native Mongo/Kurrent and ongoing concurrent HTTP/cache source are excluded from this narrow check. Full integrated delivered-SHA source/native/coverage gates remain pending.
+|Task|REQ/AC / owner / permission|Dependencies, artifacts, verification and join|
+|---|---|---|
+|TASK-ISO-TS009S-J|BC059/060/062/063,TSI001/002/003/006/008; root sole integration owner; NEW selector/enums/context/selection UnitTests, common bootstrap overloads and KeyLoad composition|AcceptedADR059 exact packet and delivered5bbf30f scoped source checkpoint; root owns all shared contracts, no old wire change. Tests-first pure closed input, source build/format/governance; full native6/30 remains separate.|
+|TASK-ISO-TS007R-S|BC059/062,TSI001/003/008; gpt-6-luna/high bounded resource worker; exactly NEW IsolatedTimeSeriesTimescaleResources.cs and IsolatedTimeSeriesTimescaleResourceTests.cs|Actual image-feasibility receipt and acceptedADR059 contract. Tests first model only, consumes root exact context/bootstrap signatures. No local tests/build/container/native/Git/docs/shared edits. Source packet/hashes/AC mapping; root every diff/source gates/delivery/native role/extension/copy/ACK proof.|
+
+Current98 scoped source is delivered5bbf30f; development Release0/0 and format/static governance pass, actual CI37104211481 remains in progress. Root now releases disjoint new resource/selection implementation from the scoped source checkpoint; native6/protocol/coverage/30/provider/site remain unqualified.
+|TASK-ISO-TS009H-R|BC059/060/061/062/063,TSI001..008; bounded capable read-only host/native discovery|Parallel to new physical resource model source; inspect exact existing SDK/Npgsql adapter constructors, native topology/readback helpers, real SDK/MCP TimeSeries tests and host lifecycle/serialization APIs. Temporary ≤8KiB exact owning-file/signature/helper reuse/remaining native gate packet, no code/docs/build/tests/runtime/Git. Root freezes finite native6 raw/host/evidence contract before write delegation; configuration/copy counts are never proof.|
+TS009H-R follow-up to the completed bounded worker was rejected by the platform agent thread limit; no researcher writes or runtime starts. Root therefore owns this shared host/API integration discovery while the active source-CI audit and disjoint physical-resource worker continue. This is the concrete routing constraint for this stage, not permission to bypass acceptance/native gates.
+
+After the source audit completed, TASK-ISO-TS009H-R was reassigned to current_ci_audit for bounded read-only discovery. Root retains sole native host/raw contract approval and shared integration ownership.
+|TASK-ISO-TS007R-C1|TSI001/003/008; same bounded resource worker; only own NEW resource-model test file|Root reviewed both full files; scoped109 build reports7 KLD0001 machine-key literals. Replace each with an independently named literal test constant, preserving expected values, every assertion and real unstarted model. No native/production/helper/signature changes or suppressed diagnostics; source/hash packet then root source gates.|
+
+- [x] TS009S closed selection/context and TS007R physical Timescale/KeyLoad composition plus43 authored selection/model cases are root reviewed. Scoped110 development Release r4 passes0warnings/0errors and formatter passes. Foreign Node/cache source is excluded; this is not a full delivered-source or native check.
+- [ ] Exact-source GitHub execution of all43 cases, native six role/extension/ACK/copy/public-operation gates, distinct raw/host/workflow/30 and authenticated site publication.
+
+TS009H-R is complete read-only. The console owner is the existing nested ComparisonCancellationLifetime, not a separate ComparisonConsoleOwner file. Both host and AppHost require new exact-profile dispatch before old target selection. Existing adapter/scenario outputs need an explicit separate raw writer because ACK/cleanup attempt properties are internal. Preflight must not invoke the measured runner. Root has not approved host implementation: actual per-endpoint SDK reads can route through Orleans and do not independently prove each physical persisted copy; the native copy proof boundary must be resolved first. Original worker/reader settlement, independently owned clients, lease drain and positively owned schema cleanup remain mandatory.
+
+|TASK-ISO-TS009C-R|BC060/062/064,TSI002/003/004/008; current_ci_audit inherited capable read-only native-copy boundary discovery|Completed TS009H-R and accepted ADR059. Inspect actual node-local replica/apply, dashboard, persisted ZoneTree status, stopped-store recovery/backup inspection and existing RF3 restart proof APIs. Temporary bounded owning-file/API packet only; no source/docs/Git/build/tests/containers/native execution. Identify the smallest genuine existing proof, distinguish applied cut versus persisted oracle data, and escalate absence rather than invent an SDK or unsafe open-store reader. Root approves any changed public/fault boundary before writes.|
+
+TS009C-R is complete source discovery: physical copies require stopped native owners and original persisted LastApplied plus full ordered local oracle data. Backup Restore changes identity and removes the applied watermark and cannot substitute for original-copy proof. Ordinary ZoneTree open recovers its canonical redo journal and can promote identity; any inspector must explicitly guard existing original metadata and source format before opening, hold real ownership and close before restart. Native stop/start serialization, inspector placement and seed/final host handshake remain root contract decisions; discovery alone authorizes no implementation or copy claim.
+
+|TASK-ISO-TS011C-R|BC064,TSI008/004; current_ci_audit inherited capable read-only coverage boundary research|Current pinned TUnit/native MTP collector plus existing site coverage source. Inspect exact package/project/workflow/config and primary official docs only if needed. Temporary bounded feasible changed-source/critical coverage plan with original child/container ownership, separate instrumented images, branch availability and exact commands; no installs, repository edits, Git, builds, tests, benchmark/native execution. Source/config is not coverage evidence. Root approves any package/workflow/image boundary before writes.|
+
+|TASK-ISO-TS009P-S|BC059/064,TSI001/004/007/008,TP009001..004; bounded capable worker; exactly five NEW C# candidate files in temporary review directory|Accepted ADR059 exact JSON/type/plan/parser packet before writes. Root owns JSON/embedding/shared checkout integration. Tests-first actual JSON data, independent6/30 assertions and strict malformed/drifted inputs. No repository/Git/build/test/native/workflow/package changes. Complete frozen candidate hashes and AC/test map; root reviews/integrates every file after coherent shared-source checkpoint, then source gates and genuine GitHub qualification.|
+
+- [x] TS009P canonical JSON and complete C2 five-file source reviewed and integrated with exact embedding; source only. Root removes unused checksum key and distinguishes generic unknown-field/checksum test inputs; original frozen packet remains historical.
+- [x] TS009P development r1 finds IDE0007 on inferred intensive-ID array; root fixes only var declaration. No test execution or suppressed diagnostic.
+
+TS009P-C2 full five-file root review complete. Every implementation key/diagnostic/
+ID segment and frozen shared value is named; all25 property omissions, unknown
+derived checksum, malformed primitives/enum arrays and ordered ACK/copy arrays
+have independent actual-input cases. Root may integrate these disjoint NEW files
+and its sole-owned unchanged csproj from delivered5bb source checkpoint; actual
+integrated UnitTests development build037 is0warnings/0errors. Foreign Node/site/
+hot-path source remains untouched. Full current delivered-source gates stay open.
+- [ ] TS009P-C1 root review constants/malformed-input refinement, same five temporary files; all25 missing fields, unknown checksum, primitive/enum/array drift tests. Source-only; original packet historical.
+- [ ] TS009P development source/format/governance and delivered-SHA normal/scalar actual TUnit.
+- [ ] Distinct raw/native host/physical-copy/coverage/native6/30/provider/site joins; plan counts never count as executed performance.

@@ -70,6 +70,32 @@ flowchart LR
     Snapshot --> Console
 ```
 
+## Vector asset repair continuation, 2026-10-03
+
+The owner's screenshot reports a pixelated K. REQ-VEC-001..003 and
+AC-VEC-001..005 refine the existing public-site identity without changing its
+canonical logo, layout, data or runtime contracts. See the exact
+[feature continuation](../Features/BenchmarkComparisons/VectorAssets.md),
+[acceptance](../../vector-assets.acceptance.md) and
+[ordered task graph](../../vector-assets.plan.md).
+
+Use a real vector poster, and the existing canonical favicon as one decorative
+DOM SVG image projected by the existing Three camera/root. Remove the separately
+painted CanvasTexture K. The SVG stays outside the deliberately bounded GPU
+buffer, uses its projected CSS size and follows ready/resize/pointer/reduced-motion,
+pause/error/zero-size/disposal/restoration transitions. GPU budgets remain unchanged.
+The symbol is foreground illustration; it does not express live cluster state.
+
+Root owns shared projection/lifecycle/HTML/CSS, requirements and integration;
+disjoint workers own only the poster and new acceptance-driven source/CDP helpers.
+Join tests first, then source, root diff/development/static/manual review, then the
+complete exact-SHA GitHub website/analyzer/coverage gate and normal Pages receipt.
+No local test execution, new dependencies or evidence-policy exemption. Same
+favicon/poster paths provide asset compatibility; rollback reverts only the
+coherent presentation change. Missing independent comparison evidence remains
+an explicit publication blocker. This continuation remains Accepted until all
+required verification exists.
+
 ## Alternatives
 
 - Restyle each surface separately. Rejected because drift returns.

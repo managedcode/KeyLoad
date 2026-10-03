@@ -9,25 +9,21 @@ internal static class IsolatedAggregateNodeProcessTeardown
 
     internal static void TryKill(Process process, IsolatedAggregateNodeFailureSet failures)
     {
+        if (HasExited(process, failures))
+        {
+            return;
+        }
         try
         {
-            IsolatedAggregateNodeGuardedInvocation.Invoke(() =>
-            {
-                if (!process.HasExited)
-                {
-                    process.Kill(entireProcessTree: true);
-                }
-            });
-        }
-        catch (InvalidOperationException) when (HasExited(process))
-        {
-        }
-        catch (Win32Exception) when (HasExited(process))
-        {
+            IsolatedAggregateNodeGuardedInvocation.Invoke(() => process.Kill(entireProcessTree: true));
         }
         catch (AggregateException envelope)
         {
-            failures.Add(IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope));
+            var failure = IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope);
+            if (failure is not (InvalidOperationException or Win32Exception) || !HasExited(process, failures))
+            {
+                failures.Add(failure);
+            }
         }
     }
 
@@ -52,9 +48,10 @@ internal static class IsolatedAggregateNodeProcessTeardown
         {
             return null;
         }
+        var activeDeadline = deadline;
         try
         {
-            return IsolatedAggregateNodeGuardedInvocation.Invoke(() => deadline.CancelAsync());
+            return IsolatedAggregateNodeGuardedInvocation.Invoke(() => activeDeadline.CancelAsync());
         }
         catch (AggregateException envelope)
         {
@@ -77,8 +74,7 @@ internal static class IsolatedAggregateNodeProcessTeardown
             var observed = IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope);
             if (originalJoin.IsCompleted)
             {
-                await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(
-                    () => originalJoin, failures.Add);
+                await ObserveJoinAsync(originalJoin);
                 return true;
             }
             if (observed is OperationCanceledException && cleanup.IsCancellationRequested)
@@ -88,6 +84,18 @@ internal static class IsolatedAggregateNodeProcessTeardown
             }
             failures.Add(observed);
             return false;
+        }
+    }
+
+    private static async Task ObserveJoinAsync(Task originalJoin)
+    {
+        try
+        {
+            await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(() => originalJoin);
+        }
+        catch (AggregateException)
+        {
+            // The original members are collected separately; this observes the same join without mirroring one cause.
         }
     }
 
@@ -112,7 +120,10 @@ internal static class IsolatedAggregateNodeProcessTeardown
         {
             return false;
         }
-        try { return IsolatedAggregateNodeGuardedInvocation.Invoke(() => process.HasExited); }
+        try
+        {
+            return IsolatedAggregateNodeGuardedInvocation.Invoke(() => process.HasExited);
+        }
         catch (AggregateException envelope)
         {
             failures.Add(IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope));
@@ -128,14 +139,15 @@ internal static class IsolatedAggregateNodeProcessTeardown
         }
     }
 
-    private static bool HasExited(Process process)
+    private static bool HasExited(Process process, IsolatedAggregateNodeFailureSet failures)
     {
         try
         {
-            return process.HasExited;
+            return IsolatedAggregateNodeGuardedInvocation.Invoke(() => process.HasExited);
         }
-        catch (InvalidOperationException)
+        catch (AggregateException envelope)
         {
+            failures.Add(IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope));
             return false;
         }
     }

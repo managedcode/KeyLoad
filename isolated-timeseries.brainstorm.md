@@ -1,5 +1,12 @@
 # Isolated intensive TimeSeries comparisons
 
+TS009J raw-data boundary: default serialization omits internal ACK and cleanup
+facts. Use an explicit bounded JSON writer over the original settled run result.
+Encode all50000 planned slots; distinguish NotStarted from observed attempts and
+retain actual ACK/native primary/cleanup independently of outcome. A failed slot
+may retain an observed count/ACK and stays failed. Native host, source/job receipts,
+telemetry, copy proof and publication remain separate root-owned joins.
+
 The owner requires meaningful Linux1/2/3-node comparisons with one database and
 scenario per independent runner. ADR-056 freezes270 document/specialized cells;
 TimeSeries remains an explicitly open part of the same BenchmarkComparisons
@@ -46,3 +53,21 @@ coverage is a separate CodeQuality stage and cannot instrument measured cells.
 Next: freeze typed operation/workload/report/provider and task ownership in
 acceptance and ADR-059 before delegated implementation. All runtime tests and
 qualification occur in GitHub; no local containers, load or test runs.
+
+TS009 plan continuation: freeze an additive small executable JSON family contract
+and strict internal C# reader/typed6/30 plan before raw/native host integration.
+This can be prepared independently of the shared Node repair. Keep the existing
+profile constants as guarded runtime parameters; the external family contract
+must match every frozen value, never provide an alternate configurable workload.
+Reject unknown/duplicate/missing/null/drifted fields and array order/content.
+Plan cells carry no measurement or native-qualified status. Temporary complete
+source candidates allow root review without placing partial code in the shared
+checkout while its other owner prepares a full checkpoint. Root owns JSON,
+embedding, integration and all workflow/raw/physical-copy decisions.
+
+Physical-copy alternatives were reviewed separately: routed SDK reads cannot
+prove every node's local data, and Restore invalidates original identity/cut.
+Stopped original stores can provide genuine ordered oracle reads, but safe
+metadata guards, stop/start ownership and seed/final host handshakes must be
+approved before that native inspector is implemented. The plan-only continuation
+does not claim to resolve or qualify those boundaries.

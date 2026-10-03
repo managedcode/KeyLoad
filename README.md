@@ -302,6 +302,21 @@ The earlier isolated Linux baseline ([run37087909605](https://github.com/managed
 
 The bounded RAM pool, embedded point cache and local binding passed the development checks in the [R83 source receipt](docs/implementation/cache-memory-source-r83.json). The newer [d45 native source gates](docs/implementation/cache-native-source-r93.json) pass1583/1583 normal and scalar unit cases with identical IDs and no skips,164/164 recovery plus1000 seeded process-cut rows,118 analyzer cases and63/63 SDK/MCP RF3 cases. All17 earlier identity failures and the byte77 oracle now pass. The comparison workflow concluded with24/27 successful preflight jobs and3 failures; the270-cell matrix did not execute. These source gates provide no performance result. The [R100 wire source receipt](docs/implementation/cache-wire-source-r100.json) binds the complete independent review of34 unused internal signed-metadata files and26 corrected test files. Fresh integrated source gates and delivered-SHA native qualification remain pending. Orleans RF3 controls, product coverage, measured benefit, endurance and power-loss gates remain open; server RF3 caches are disabled.
 
+The later ALL186-file `5bbf30f70` checkpoint has [terminal CI evidence](docs/implementation/cache-checkpoint-native-r104.json): real RF3 passes63/63 and analyzer regressions118/118. Its full solution build fails20 Node test-helper diagnostics; normal/scalar unit tests, recovery and comparisons are skipped. The new cache-wire tests therefore remain unqualified. Current helper corrections require a fresh complete source gate and delivered-SHA CI run.
+
+The actual database hot-path investigation has an independently authenticated
+[PointRead baseline](docs/implementation/database-hotpath-baseline-d45-r115.json)
+from that earlier d45 native preflight: median2187ops/s for1 voter,805ops/s for2
+and891ops/s forRF3, at16 closed-loop clients and five10000-operation repetitions.
+Each group runs on one Docker host; this is not multi-host scaling or a complete
+competitor comparison. Server CPU/allocations and phase timings are unavailable.
+The [first preserving repair](docs/Features/ClusterReplication/ReplicaTermMetadata.md)
+targets repeated full-entry decoding during term checks, retaining both public
+authorized quorum barriers. New regressions, implementation and measured benefit
+remain pending. [Current source ownership evidence](docs/implementation/image-http-owner-source-r115.json)
+closes the Node-helper source review; the full R113 development build still fails
+21 other SiteTests diagnostics, and delivered-SHA native tests remain required.
+
 
 The delivered `2f374fc34` [Linux run37093197474](https://github.com/managedcode/KeyLoad/actions/runs/37093197474) now passes the complete source gates,118 analyzer cases,1483 normal and1483 scalar unit cases,164 process-recovery cases and63 Docker RF3 cases without skips. The [original-source receipt](docs/implementation/isolated-source-qualification-37093197474.json) retains exact report/artifact hashes. Comparative image and diagnostic gates pass;27 native preflights finish16 job successes and11 failures, including two explicit unavailable Neo4j topologies among the successes. Complete270 performance and site publication remain unqualified. The separate TimeSeries pure30 cases pass in both modes, while its bounded runner has36 new declared TUnit cases prepared in source and native adapters/all30 cells remain pending.
 
@@ -309,3 +324,5 @@ The later `2ecbeee4d` [run37093992229](https://github.com/managedcode/KeyLoad/ac
 
 
 The fixture-only `d45d7f253` [Linux source qualification](docs/implementation/isolated-source-qualification-37098964980.json) passes normal1583/scalar1583, recovery164, analyzer118 and RF363 without skips; all17 prior fixture failures pass in both modes. The [terminal comparison receipt](docs/implementation/isolated-comparison-terminal-37098964980.json) records24successful native preflight jobs and3failures (Mongo2 image import, Mongo3 priority takeover, Kurrent2 cleanup). Two successful jobs explicitly report unavailable Neo4j Community topologies. Full270 was not allocated; aggregation and refreshed site metrics remain unqualified. New ACK ownership, SDK TimeSeries adapter, SQL and transactional lifecycle source require their own delivered-SHA qualification; TimeSeries6/30 remains incomplete.
+
+The later `5bbf30f70` [Linux source run37104211481](docs/implementation/isolated-source-qualification-37104211481.json) fails the full Release build on20 Node-helper diagnostics. Analyzer118 and Docker/Aspire RF363 pass; normal/scalar units, recovery and all native comparison jobs are skipped. No intensive cells execute and no performance metrics are refreshed. Current repairs and the new TimeSeries1/2/3 resource models require a new delivered-source GitHub run; models do not establish native ACKs or copied data.

@@ -18,6 +18,7 @@ function createState(host, motionButton, poster, statusElement) {
   const coarsePointer = globalThis.matchMedia?.(SCENE.media.coarsePointer) ?? null;
   return {
     host, motionButton, poster, statusElement, reducedMotion, coarsePointer,
+    coreImage: host.querySelector(SCENE.core.selector),
     renderer: null, graph: null, resizeObserver: null, intersectionObserver: null, animationFrame: SCENE.math.zero,
     initializationPending: false, rendererDisposalQueued: false, initialized: false, terminal: false,
     disposed: false, failed: false, visible: false, pageActive: true, rendererReady: false,

@@ -7,129 +7,135 @@ internal static class IsolatedAggregateNodeTestCleanup
 {
     private const int CleanupSeconds = 5;
 
-    internal static async Task CleanupAsync(CancellationTokenSource prompt,
+    internal static async Task<(Task? Cancellation, bool Settled)> CleanupAsync(CancellationTokenSource prompt, Task? originalCancellation,
         Task<IsolatedAggregateNodeResult>? original, OperationCanceledException? expectedCancellation,
         string directory, List<IsolatedAggregateNodeIdentity> identities, Stopwatch timer,
         List<Exception> failures)
     {
-        await RunCleanupAsync(() => CancelPromptAsync(prompt, timer, failures), failures);
-        await RunCleanupAsync(() => ObserveOriginalAsync(original, expectedCancellation, timer, failures), failures);
-        await RunCleanupAsync(() => IsolatedAggregateNodeTestProcessReaper.ReapOwnedProcessesAsync(identities, timer, failures), failures);
-        await RunCleanupAsync(() => DeleteOwnedDirectoryAsync(directory, failures), failures);
-    }
-
-    private static async Task RunCleanupAsync(Func<Task> operation, List<Exception> failures)
-    {
+        Task? cancellation = null;
+        var cancellationSettled = false;
         try
         {
-            await operation();
+            (cancellation, cancellationSettled) = await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(
+                () => CancelPromptAsync(prompt, originalCancellation, timer, failures));
         }
-        catch (Exception failure)
+        catch (AggregateException envelope)
         {
-            AddDistinct(failures, failure);
+            AddDistinct(failures, IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope));
         }
-    }
-
-    private static async Task CancelPromptAsync(CancellationTokenSource prompt, Stopwatch timer,
-        List<Exception> failures)
-    {
+        var originalSettled = false;
         try
         {
-            var cancellation = prompt.CancelAsync();
-            var remaining = Remaining(timer);
-            if (remaining <= TimeSpan.Zero)
+            originalSettled = await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(
+                () => ObserveOriginalAsync(original, expectedCancellation, timer, failures));
+        }
+        catch (AggregateException envelope)
+        {
+            AddDistinct(failures, IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope));
+        }
+        await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(
+            () => IsolatedAggregateNodeTestProcessReaper.ReapOwnedProcessesAsync(identities, timer, failures),
+            failure => AddDistinct(failures, failure));
+        IsolatedAggregateNodeGuardedInvocation.Capture(
+            () => DeleteOwnedDirectory(directory), failure => AddDistinct(failures, failure));
+        return (cancellation, cancellationSettled && originalSettled);
+    }
+
+    private static async Task<(Task? Cancellation, bool Settled)> CancelPromptAsync(
+        CancellationTokenSource prompt, Task? originalCancellation, Stopwatch timer, List<Exception> failures)
+    {
+        Task? cancellation;
+        if (originalCancellation is not null)
+        {
+            cancellation = originalCancellation;
+        }
+        else
+        {
+            try
             {
-                if (cancellation.IsCompleted)
-                {
-                    await cancellation;
-                }
-                else
-                {
-                    ObserveLateOriginal(cancellation);
-                    AddDistinct(failures, new TimeoutException(IsolatedAggregateNodeLifetimeProgram.OriginalDidNotSettle));
-                }
-                return;
+                cancellation = IsolatedAggregateNodeGuardedInvocation.Invoke(() => prompt.CancelAsync());
             }
-            await cancellation.WaitAsync(remaining);
+            catch (AggregateException envelope)
+            {
+                AddDistinct(failures, IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope));
+                return (null, true);
+            }
         }
-        catch (Exception failure)
+        var bound = Remaining(timer);
+        if (bound <= TimeSpan.Zero && !cancellation.IsCompleted)
         {
-            AddDistinct(failures, failure);
+            AddDistinct(failures, new TimeoutException(IsolatedAggregateNodeLifetimeProgram.OriginalDidNotSettle));
+            return (cancellation, false);
         }
+        try
+        {
+            await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(
+                () => cancellation.WaitAsync(bound > TimeSpan.Zero ? bound : TimeSpan.Zero));
+        }
+        catch (AggregateException envelope)
+        {
+            if (!cancellation.IsCompleted)
+            {
+                AddDistinct(failures, IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope));
+                return (cancellation, false);
+            }
+        }
+        await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(() => cancellation,
+            failure => AddDistinct(failures, failure));
+        return (cancellation, true);
     }
 
-    private static async Task ObserveOriginalAsync(Task<IsolatedAggregateNodeResult>? original,
+    private static async Task<bool> ObserveOriginalAsync(Task<IsolatedAggregateNodeResult>? original,
         OperationCanceledException? expectedCancellation, Stopwatch timer, List<Exception> failures)
     {
         if (original is null)
         {
-            return;
+            return true;
         }
-        var timedOut = false;
         var bound = Remaining(timer);
-        if (bound <= TimeSpan.Zero)
-        {
-            if (original.IsCompleted)
-            {
-                bound = TimeSpan.Zero;
-            }
-            else
-            {
-                ObserveLateOriginal(original);
-                AddDistinct(failures, new TimeoutException(IsolatedAggregateNodeLifetimeProgram.OriginalDidNotSettle));
-                return;
-            }
-        }
         try
         {
-            await original.WaitAsync(bound);
+            await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(
+                () => original.WaitAsync(bound > TimeSpan.Zero ? bound : TimeSpan.Zero));
         }
-        catch (OperationCanceledException failure) when (SameCancellation(failure, expectedCancellation, original))
+        catch (AggregateException envelope)
         {
-        }
-        catch (TimeoutException failure) when (!original.IsCompleted)
-        {
-            timedOut = true;
-            AddDistinct(failures, failure);
-        }
-        catch (Exception failure)
-        {
-            AddDistinct(failures, failure);
-        }
-        if (timedOut || !original.IsCompleted)
-        {
-            ObserveLateOriginal(original);
-            if (!timedOut)
+            if (!original.IsCompleted)
             {
-                AddDistinct(failures, new TimeoutException(IsolatedAggregateNodeLifetimeProgram.OriginalDidNotSettle));
+                AddDistinct(failures, IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope));
+                return false;
+            }
+        }
+        await CaptureOriginalOutcomeAsync(original, expectedCancellation, failures);
+        return true;
+    }
+
+    private static async Task CaptureOriginalOutcomeAsync(Task original,
+        OperationCanceledException? expectedCancellation, List<Exception> failures)
+    {
+        try
+        {
+            await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(() => original);
+        }
+        catch (AggregateException envelope)
+        {
+            var failure = IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope);
+            if (failure is not OperationCanceledException cancellation
+                || expectedCancellation is null
+                || cancellation.CancellationToken != expectedCancellation.CancellationToken
+                || !cancellation.CancellationToken.IsCancellationRequested)
+            {
+                AddDistinct(failures, failure);
             }
         }
     }
 
-    private static bool SameCancellation(OperationCanceledException observed,
-        OperationCanceledException? expected, Task original)
-        => original.IsCanceled && expected is not null
-            && observed.CancellationToken == expected.CancellationToken
-            && observed.CancellationToken.IsCancellationRequested;
-
-    private static void ObserveLateOriginal(Task original)
-        => _ = original.ContinueWith(static completed => _ = completed.Exception, CancellationToken.None,
-            TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
-
-    private static Task DeleteOwnedDirectoryAsync(string directory, List<Exception> failures)
+    private static void DeleteOwnedDirectory(string directory)
     {
-        try
+        if (Directory.Exists(directory))
         {
             Directory.Delete(directory, recursive: true);
         }
-        catch (DirectoryNotFoundException)
-        {
-        }
-        catch (Exception failure) when (failure is IOException or UnauthorizedAccessException)
-        {
-            AddDistinct(failures, failure);
-        }
-        return Task.CompletedTask;
     }
 
     private static TimeSpan Remaining(Stopwatch timer)

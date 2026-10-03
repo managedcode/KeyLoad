@@ -187,30 +187,30 @@ jobs:
       - run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Qualify native image export and import
         id: roundtrip
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ImageBundleRealTests/*'
+        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ImageBundleRealTests/*' --results-directory TestResults/comparison-images/image-roundtrip
       - name: Qualify authenticated current-job identity
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedGitHubCurrentJobTests/*'
+        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedGitHubCurrentJobTests/*' --results-directory TestResults/comparison-images/job-identity
       - name: Qualify exact native topology composition models
         run: |
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/Isolated*Resource*/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessResourceTests/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessIdentityTests/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessTaskFailureTests/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKurrentVolumeRegressionFailureTests/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKeyLoadAdmissionTests/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonResourceLogBufferTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/Isolated*Resource*/*' --results-directory TestResults/comparison-images/resource-models
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessResourceTests/*' --results-directory TestResults/comparison-images/mongo-resource
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessIdentityTests/*' --results-directory TestResults/comparison-images/mongo-identity
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessTaskFailureTests/*' --results-directory TestResults/comparison-images/mongo-task-failure
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKurrentVolumeRegressionFailureTests/*' --results-directory TestResults/comparison-images/kurrent-volume-failure
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKeyLoadAdmissionTests/*' --results-directory TestResults/comparison-images/keyload-admission
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonResourceLogBufferTests/*' --results-directory TestResults/comparison-images/log-buffer
       - name: Qualify isolated replay admission and native diagnostics
         run: |
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKeyLoadReplayAdmissionTests/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/RedisReplicaDiagnosticTests/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoBootstrapDiagnosticTests/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/KurrentCleanupDiagnosticTests/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonReplayDiagnosticLogTests/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonReplayDiagnosticRetentionTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKeyLoadReplayAdmissionTests/*' --results-directory TestResults/comparison-images/replay-admission
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/RedisReplicaDiagnosticTests/*' --results-directory TestResults/comparison-images/redis-diagnostics
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoBootstrapDiagnosticTests/*' --results-directory TestResults/comparison-images/mongo-diagnostics
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/KurrentCleanupDiagnosticTests/*' --results-directory TestResults/comparison-images/kurrent-diagnostics
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonReplayDiagnosticLogTests/*' --results-directory TestResults/comparison-images/replay-log
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonReplayDiagnosticRetentionTests/*' --results-directory TestResults/comparison-images/replay-retention
       - name: Qualify time-series workload and aggregation contracts
         run: |
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesWorkloadTests/*'
-          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesPackageVersionTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesWorkloadTests/*' --results-directory TestResults/comparison-images/timeseries-workload
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesPackageVersionTests/*' --results-directory TestResults/comparison-images/timeseries-package
       - name: Retain common image bundle
         id: bundle
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

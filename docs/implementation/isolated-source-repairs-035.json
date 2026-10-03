@@ -1,0 +1,191 @@
+{
+  "record": "isolated-source-repairs-035",
+  "qualification": false,
+  "status": "root_and_independent_source_review_complete_development_only_GitHub_pending",
+  "slice": "BenchmarkComparisons",
+  "tasks": [
+    "TASK-ISO-032H-S",
+    "TASK-ISO-034F-S",
+    "TASK-ISO-035IR",
+    "TASK-ISO-035C-S",
+    "TASK-ISO-036-J",
+    "TASK-ISO-TS009S-J",
+    "TASK-ISO-TS007R-S",
+    "TASK-ISO-TS007R-C1"
+  ],
+  "sourceBaseline": {
+    "headSha": "5bbf30f70e500f2031f3687fbfd98829da8d218f",
+    "runId": 37104211481,
+    "attempt": 1,
+    "conclusion": "failure",
+    "receipt": "docs/implementation/isolated-source-qualification-37104211481.json",
+    "limits": "Full Release20 errors, normal/scalar/recovery/native comparison skipped; independent analyzer118 and RF363 pass. Later source remains unqualified."
+  },
+  "review": {
+    "rootEverySourceDiffRead": true,
+    "independentPacketSha256": "0402277833fec66445fa157972476c049fb025c46619aaccb9f991639e2ecc33",
+    "independentManifestSha256": "e41b67ad143882d036a6f79e2c6a8f7a40e9d48b2771b7855c2af7d328e785b0",
+    "reviewedFiles": 17,
+    "currentHashMismatches": 0,
+    "openSourceFindings": 0,
+    "files": [
+      {
+        "path": "scripts/Features/BenchmarkComparisons/image-manifest.mjs",
+        "sha256": "7d592d58d845e22da43c751671ec4a75f27be630516c6d6441c19a4ccd2455d2",
+        "lines": 233
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageHttpDeadlineNodeProgram.cs",
+        "sha256": "4b3ebb08ef84066515d0640583ba904371140d5b2a3e11b3a7d71033c1ee1794",
+        "lines": 68
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveSelection.cs",
+        "sha256": "f969772e65dbaa385daf3e59a6011202b46f99581e816c29601025173e1acb2e",
+        "lines": 61
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveCellPhase.cs",
+        "sha256": "248098b83e0c97b93290dd974c81fe8bc6e930fefbd4be1602ece901e00959e9",
+        "lines": 7
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveTargetKind.cs",
+        "sha256": "f3f63d4a9adfe505784cefe8a262be077e83abea623c13be26f454f9da32f6c8",
+        "lines": 7
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveSelectionTests.cs",
+        "sha256": "e82b59cd0c1160112bc3371e496d55095b2c9bc7860438769d03103005ecba8c",
+        "lines": 106
+      },
+      {
+        "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedTimeSeriesResourceContext.cs",
+        "sha256": "29da4c32eb6b968dabfab0dfdc89459b5879c38856731982a627ab4d4488d796",
+        "lines": 66
+      },
+      {
+        "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedTimeSeriesKeyLoadResources.cs",
+        "sha256": "854ff42db9e65e658b06ad596dc08a65ca4d5232875a86560f14d65c683b03c9",
+        "lines": 31
+      },
+      {
+        "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedTimeSeriesTimescaleResources.cs",
+        "sha256": "633bc6a271720c5a9170fb252d76d2268d9d21655a403c74587df3bf0bbcc4e5",
+        "lines": 82
+      },
+      {
+        "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedPostgresBootstrap.cs",
+        "sha256": "8cba63b5bb8d0eb438c80a93c0d396b82021e0b5a67c0f88cd739669e6716f9e",
+        "lines": 65
+      },
+      {
+        "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesKeyLoadResourceTests.cs",
+        "sha256": "59ae01bcd5fd229b787eb6614b21b83564d86b1d9826391f178b57f6ca37c46c",
+        "lines": 88
+      },
+      {
+        "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesTimescaleResourceTests.cs",
+        "sha256": "b5e66b9b2fb1267ac34ee347dafc33e8f72168d0efe28377cad61dbcd0f0c32d",
+        "lines": 268
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentCleanupState.cs",
+        "sha256": "b19f54711c3b3c4d16db67d0d0470e66600300a4627f6f9103f8d0a2943ad0e4",
+        "lines": 157
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentCleanupFatalCause.cs",
+        "sha256": "cac96013168cc8c589082312f344838de8fe1a3c401c80cddddd933ca9ffa1ce",
+        "lines": 45
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/KurrentCleanupStateTests.cs",
+        "sha256": "443e7331df9aef0acf914e285ca45655ff23c25c74b0b768776166496ac655b8",
+        "lines": 132
+      },
+      {
+        "path": ".github/workflows/ci.yml",
+        "sha256": "5a7602c15af8ae1bafc0371b14226dc26c4d9ae7225c57185e61dd6daea3c7b9",
+        "lines": 414
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAcknowledgement.cs",
+        "sha256": "eb91cb9155555c69228a705acc023385fc5675d9deb3cb2c2b309669901f3fba",
+        "lines": 22
+      }
+    ],
+    "historical16FileReview": {
+      "packetSha256": "f4de535c0e555530ca37e44874fc4ce26cda1221bd855fb3e387c30fd7f763bb",
+      "manifestSha256": "cbdbb13f4fbc3311558a71245de8ccf3d8c8547751ca6ce73ddd85b6e58a0bd3",
+      "rootR6ReceiptSha256": "b137f5fe10a19cee6dce48350aaa13eae612d5a97ecf0e0dc2b30a62f8ecd0c2",
+      "limits": "Original sealed16 review remains valid for that source subset; current ACK constants addendum expands scope to17."
+    },
+    "acknowledgementConstantsAddendum": "unchanged_original_UUID_and_positive_sequence_validation"
+  },
+  "development": {
+    "qualification": false,
+    "projectionFiles": 113,
+    "projectionManifestSha256": "f85b9b7f31da4fa4f396cd4615292cf385f9ddc67570c60d61fc6df0ddd42789",
+    "description": "Historical98 scoped documentation retained; foreign Node/cache source excluded. This is not a full delivered-SHA tree check.",
+    "build": {
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 27.53,
+      "logSha256": "1c0bb9fd091257b4d9996b7610ac4f3b5b44d4b5d8b6c0f93643b6ad1484c361"
+    },
+    "formatter": {
+      "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "staticGovernance": "passed_working_checkout_policy_inventory_only",
+    "scriptSyntax": "node --check image-manifest.mjs passed",
+    "gitDiffCheck": "passed"
+  },
+  "authoredSourceCases": {
+    "timeSeriesSelection": 35,
+    "timeSeriesTimescaleModels": 5,
+    "timeSeriesKeyLoadModels": 3,
+    "kurrentObservedFatalPrecedence": 5,
+    "newCasesExecutedInGitHub": false,
+    "nativeProof": false
+  },
+  "originalReportRetention": {
+    "invocations": 17,
+    "uniqueResultsDirectories": [
+      "TestResults/comparison-images/image-roundtrip",
+      "TestResults/comparison-images/job-identity",
+      "TestResults/comparison-images/resource-models",
+      "TestResults/comparison-images/mongo-resource",
+      "TestResults/comparison-images/mongo-identity",
+      "TestResults/comparison-images/mongo-task-failure",
+      "TestResults/comparison-images/kurrent-volume-failure",
+      "TestResults/comparison-images/keyload-admission",
+      "TestResults/comparison-images/log-buffer",
+      "TestResults/comparison-images/replay-admission",
+      "TestResults/comparison-images/redis-diagnostics",
+      "TestResults/comparison-images/mongo-diagnostics",
+      "TestResults/comparison-images/kurrent-diagnostics",
+      "TestResults/comparison-images/replay-log",
+      "TestResults/comparison-images/replay-retention",
+      "TestResults/comparison-images/timeseries-workload",
+      "TestResults/comparison-images/timeseries-package"
+    ],
+    "filtersAndOrderingPreserved": true,
+    "actual17OriginalReportsQualified": false
+  },
+  "openGates": [
+    "Full current delivered-source build/normal/scalar/recovery/RF3 and all model/observed-failure TUnit",
+    "Actual HTTP registry export/import and native Mongo1/2/3 stability/domain/owned process",
+    "Actual Kurrent1/2/3 complete volume, cancellation/quorum-loss, original child kill/reap/readers and restored healthy followup",
+    "All27 native preflights and complete270 intensive/source/job/artifact cohort",
+    "Distinct TimeSeries host/raw protocol, native6 ACK/copy/public negatives and all30 intensive cells",
+    "Genuine matched coverage and full site/browser/provider/publication gates"
+  ],
+  "completeMeasuredCohort": false,
+  "performanceMetricsRefreshed": false,
+  "performanceWinnerClaim": false,
+  "productionReadinessClaim": false
+}

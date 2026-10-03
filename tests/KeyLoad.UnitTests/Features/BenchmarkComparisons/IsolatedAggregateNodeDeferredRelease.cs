@@ -31,12 +31,24 @@ internal sealed class IsolatedAggregateNodeDeferredRelease
 
     private async Task ReleaseAsync()
     {
-        await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(() => originalJoin, Add);
+        await ObserveOriginalJoinAsync();
         await CaptureOriginalFailuresAsync();
         await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(() => actualExit, Add);
         await WaitForNativeExitAsync();
         DisposeDeadline();
         DisposeProcess();
+    }
+
+    private async Task ObserveOriginalJoinAsync()
+    {
+        try
+        {
+            await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(() => originalJoin);
+        }
+        catch (AggregateException)
+        {
+            // Individual original task causes are retained separately; the join is observed without mirroring one.
+        }
     }
 
     private async Task WaitForNativeExitAsync()

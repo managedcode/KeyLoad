@@ -6,14 +6,14 @@ export const SCENE = Object.freeze({
     cameraFov: 24, cameraNear: 0.1, cameraFar: 40, cameraX: 0, cameraY: 2.5, cameraZ: 11.2, cameraLookY: -0.32,
     cameraAspect: 1, pointerYaw: 0.12, pointerPitch: 0.05, smoothingDivisor: 115, fogNear: 10.5, fogFar: 16.5,
     fullTurn: Math.PI * 2, halfTurn: Math.PI / 2, millisecondsPerSecond: 1000 }),
-  canvas: Object.freeze({ element: 'canvas', context: '2d', cardWidth: 512, cardHeight: 682, coreSize: 512,
+  canvas: Object.freeze({ element: 'canvas', context: '2d', cardWidth: 512, cardHeight: 682,
     shadowSize: 256, radius: 56, inset: 3, border: 3, glyphX: 56, glyphY: 72, glyphSize: 132, stroke: 9,
     labelX: 56, labelY: 600, labelSize: 52, captionY: 640, captionSize: 22, sheenStop: 0.45,
     fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Inter, sans-serif',
     monoFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace', bold: '700 ', medium: '600 ', px: 'px ',
-    round: 'round', ink: '#111214', soft: 'rgba(17, 18, 20, 0.55)', white: '#ffffff', sheen: 'rgba(255, 255, 255, 0.55)',
+    round: 'round', ink: '#111214', soft: 'rgba(17, 18, 20, 0.55)', sheen: 'rgba(255, 255, 255, 0.55)',
     clear: 'rgba(255, 255, 255, 0)', borderColor: 'rgba(255, 255, 255, 0.85)', shadow: 'rgba(17, 18, 20, 0.16)',
-    graphite: '#16171a', graphiteLight: '#3a3b40', caption: 'KeyLoad' }),
+    caption: 'KeyLoad' }),
   cards: Object.freeze([
     Object.freeze({ label: 'SQL', from: '#ffd2bd', to: '#f6c6ff', glyph: 'sql' }),
     Object.freeze({ label: 'Documents', from: '#f6c6ff', to: '#d8ccff', glyph: 'documents' }),
@@ -40,9 +40,8 @@ export const SCENE = Object.freeze({
     blobs: Object.freeze({ lines: [], circles: [], boxes: [[0, 0, 0.44, 0.44], [0.56, 0, 0.44, 0.44], [0, 0.56, 0.44, 0.44],
       [0.56, 0.56, 0.44, 0.44]] }),
   }),
-  core: Object.freeze({ blocks: Object.freeze([[10, 9], [10, 17], [10, 25]]), blockWidth: 5, blockHeight: 6, blockRadius: 2,
-    chevron: Object.freeze([29, 9.5, 19.5, 20, 29, 30.5]), chevronWidth: 4.4, viewBox: 40, tileRadius: 10,
-    iris: Object.freeze(['#ffb08a', '#e3a6ff', '#9fb4ff']) }),
+  core: Object.freeze({ selector: '.cluster-core', matrixPrefix: 'matrix3d(', matrixSuffix: ')',
+    separator: ',', pixels: 'px' }),
   colors: Object.freeze({ sky: 0xf2f1f2 }),
   math: Object.freeze({ zero: 0, half: 0.5, one: 1, two: 2, negativeOne: -1, epsilon: 0.001 }),
   state: Object.freeze({ poster: 'poster', loading: 'loading', ready: 'ready', paused: 'paused', zeroSize: 'zero-size',
@@ -57,7 +56,7 @@ export const SCENE = Object.freeze({
   events: Object.freeze({ pointerMove: 'pointermove', click: 'click', resize: 'resize', pageHide: 'pagehide',
     pageShow: 'pageshow', visibility: 'visibilitychange', mediaChange: 'change' }),
   classes: Object.freeze({ host: 'cluster-scene-host', canvas: 'cluster-scene-canvas' }),
-  attributes: Object.freeze({ ariaHidden: 'aria-hidden', ariaPressed: 'aria-pressed' }),
+  attributes: Object.freeze({ ariaHidden: 'aria-hidden', ariaPressed: 'aria-pressed', style: 'style' }),
   observers: Object.freeze({ rootMargin: '80px', eventOptions: Object.freeze({ passive: true }) }),
   media: Object.freeze({ reducedMotion: '(prefers-reduced-motion: reduce)', coarsePointer: '(pointer: coarse)' }),
 });
@@ -94,11 +93,11 @@ export function createSceneGraph(THREE) {
   root.add(ring);
   const geometry = cardShape(THREE, own);
   SCENE.cards.forEach((card, index) => ring.add(cardMesh(THREE, own, geometry, card, index)));
-  root.add(coreMesh(THREE, own));
+  const projectCore = createCoreProjection(THREE, root, camera);
   camera.position.set(SCENE.world.cameraX, SCENE.world.cameraY, SCENE.world.cameraZ);
   camera.lookAt(SCENE.math.zero, SCENE.world.cameraLookY, SCENE.math.zero);
   return {
-    scene, camera, root,
+    scene, camera, root, projectCore,
     animate: seconds => { ring.rotation.y = seconds * SCENE.world.spinSpeed; },
     dispose: () => disposeGraph(resources),
   };
@@ -206,41 +205,28 @@ function cardMesh(THREE, own, geometry, card, index) {
   return group;
 }
 
-function paintCore() {
-  const { canvas, context } = surface(SCENE.canvas.coreSize, SCENE.canvas.coreSize);
-  const scale = canvas.width / SCENE.core.viewBox;
-  roundedPath(context, SCENE.math.zero, SCENE.math.zero, canvas.width, canvas.height, SCENE.core.tileRadius * scale);
-  const fill = context.createLinearGradient(SCENE.math.zero, SCENE.math.zero, SCENE.math.zero, canvas.height);
-  fill.addColorStop(SCENE.math.zero, SCENE.canvas.graphiteLight);
-  fill.addColorStop(SCENE.math.one, SCENE.canvas.graphite);
-  context.fillStyle = fill;
-  context.fill();
-  const iris = context.createLinearGradient(SCENE.math.zero, SCENE.math.zero, canvas.width, SCENE.math.zero);
-  SCENE.core.iris.forEach((color, index) => iris.addColorStop(index / (SCENE.core.iris.length - SCENE.math.one), color));
-  SCENE.core.blocks.forEach(([x, y], index) => {
-    context.fillStyle = index === SCENE.core.blocks.length - SCENE.math.one ? iris : SCENE.canvas.white;
-    roundedPath(context, x * scale, y * scale, SCENE.core.blockWidth * scale, SCENE.core.blockHeight * scale,
-      SCENE.core.blockRadius * scale);
-    context.fill();
-  });
-  const [x1, y1, x2, y2, x3, y3] = SCENE.core.chevron;
-  context.strokeStyle = SCENE.canvas.white;
-  context.lineWidth = SCENE.core.chevronWidth * scale;
-  context.lineCap = SCENE.canvas.round;
-  context.lineJoin = SCENE.canvas.round;
-  context.beginPath();
-  context.moveTo(x1 * scale, y1 * scale);
-  context.lineTo(x2 * scale, y2 * scale);
-  context.lineTo(x3 * scale, y3 * scale);
-  context.stroke();
-  return canvas;
-}
-
-function coreMesh(THREE, own) {
-  const mesh = new THREE.Mesh(own(new THREE.PlaneGeometry(SCENE.world.coreSize, SCENE.world.coreSize)),
-    own(new THREE.MeshBasicNodeMaterial({ map: texture(THREE, own, paintCore()), transparent: true, fog: false })));
-  mesh.position.y = SCENE.world.coreY;
-  return mesh;
+function createCoreProjection(THREE, root, camera) {
+  const anchor = new THREE.Object3D();
+  anchor.position.y = SCENE.world.coreY;
+  root.add(anchor);
+  const center = new THREE.Vector3();
+  const placement = new THREE.Matrix4();
+  const projection = new THREE.Matrix4();
+  const screen = new THREE.Matrix4();
+  return (width, height) => {
+    anchor.getWorldPosition(center).applyMatrix4(camera.matrixWorldInverse);
+    const size = height * camera.projectionMatrix.elements[5] * SCENE.world.coreSize / (-center.z * SCENE.math.two);
+    const scale = SCENE.world.coreSize / size;
+    placement.makeScale(scale, -scale, SCENE.math.one);
+    placement.setPosition(-SCENE.world.coreSize * SCENE.math.half, SCENE.world.coreSize * SCENE.math.half, SCENE.math.zero);
+    projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse).multiply(anchor.matrixWorld).multiply(placement);
+    screen.set(width * SCENE.math.half, SCENE.math.zero, SCENE.math.zero, width * SCENE.math.half,
+      SCENE.math.zero, -height * SCENE.math.half, SCENE.math.zero, height * SCENE.math.half,
+      SCENE.math.zero, SCENE.math.zero, SCENE.math.one, SCENE.math.zero,
+      SCENE.math.zero, SCENE.math.zero, SCENE.math.zero, SCENE.math.one);
+    screen.multiply(projection);
+    return { size, transform: SCENE.core.matrixPrefix + screen.elements.join(SCENE.core.separator) + SCENE.core.matrixSuffix };
+  };
 }
 
 function shadowMesh(THREE, own) {

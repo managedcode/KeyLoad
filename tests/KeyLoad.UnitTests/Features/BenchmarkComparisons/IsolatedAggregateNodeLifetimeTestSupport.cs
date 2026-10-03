@@ -8,6 +8,8 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
     private const string TemporaryDirectoryPrefix = "keyload-node-owner-";
     private const string ReceiptFileName = "process-identities.json";
     private const string GuidFormat = "N";
+    private const string ParentProperty = nameof(IsolatedAggregateNodeProcessReceipt.Parent);
+    private const string ChildProperty = nameof(IsolatedAggregateNodeProcessReceipt.Child);
     private const int ReceiptPollMilliseconds = 10;
     private const int CancellationWaitMilliseconds = 500;
 
@@ -15,40 +17,24 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
     {
         var directory = Path.Combine(Path.GetTempPath(), TemporaryDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         var receipt = Path.Combine(directory, ReceiptFileName);
-        using var prompt = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        prompt.CancelAfter(testDeadline);
-        Task<IsolatedAggregateNodeResult>? original = null;
-        OperationCanceledException? expectedCancellation = null;
         var identities = new List<IsolatedAggregateNodeIdentity>();
         Exception? primary = null;
         var cleanupFailures = new List<Exception>();
         var timer = Stopwatch.StartNew();
-        try
+        await using (var owner = new IsolatedAggregateNodePromptOwner(directory, identities, timer, cleanupFailures,
+            TestContext.Current!.Execution.CancellationToken))
         {
-            Directory.CreateDirectory(directory);
-            var started = IsolatedAggregateNodeProcess.RunAsync(
-                ["-e", IsolatedAggregateNodeLifetimeProgram.Source,
-                    IsolatedAggregateNodeLifetimeProgram.CancellationTree, receipt], prompt.Token);
-            original = started;
-            var receiptData = await ReadReceiptAsync(receipt, prompt.Token);
-            CaptureIdentities(receiptData, identities);
-            await Task.Delay(CancellationWaitMilliseconds, prompt.Token);
-            prompt.Cancel();
-            expectedCancellation = await Assert.ThrowsAsync<OperationCanceledException>(() => started)
-                ?? throw new InvalidOperationException(IsolatedAggregateNodeLifetimeProgram.OriginalDidNotCancel);
-            await Assert.That(prompt.IsCancellationRequested).IsTrue();
-            await Assert.That(expectedCancellation.CancellationToken.IsCancellationRequested).IsTrue();
-            await Assert.That(timer.Elapsed < testDeadline).IsTrue();
-            await AssertExitedAsync(identities, timer, testDeadline);
-        }
-        catch (Exception failure)
-        {
-            primary = failure;
-        }
-        finally
-        {
-            await IsolatedAggregateNodeTestCleanup.CleanupAsync(prompt, original, expectedCancellation,
-                directory, identities, timer, cleanupFailures);
+            try
+            {
+                IsolatedAggregateNodeGuardedInvocation.Invoke(() => owner.Prompt.CancelAfter(testDeadline));
+                owner.ExpectedCancellation = await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(
+                    () => RunCancellationScenarioAsync(directory, receipt, owner.Prompt, identities, timer,
+                        testDeadline, owner.RegisterOriginal, owner.RegisterCancellation, cleanupFailures));
+            }
+            catch (AggregateException envelope)
+            {
+                primary = IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope);
+            }
         }
         IsolatedAggregateNodeTestCleanup.ThrowFailures(primary, cleanupFailures);
     }
@@ -62,8 +48,63 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
             await Task.Delay(ReceiptPollMilliseconds, cancellationToken);
         }
         var json = await File.ReadAllTextAsync(path, cancellationToken);
-        return JsonSerializer.Deserialize<IsolatedAggregateNodeProcessReceipt>(json)
-            ?? throw new InvalidDataException(IsolatedAggregateNodeLifetimeProgram.IdentityReceiptInvalid);
+        using var document = JsonDocument.Parse(json);
+        var root = document.RootElement;
+        return new(root.GetProperty(ParentProperty).GetInt32(), root.GetProperty(ChildProperty).GetInt32());
+    }
+
+    private static async Task<OperationCanceledException> RunCancellationScenarioAsync(string directory,
+        string receipt, CancellationTokenSource prompt, List<IsolatedAggregateNodeIdentity> identities,
+        Stopwatch timer, TimeSpan testDeadline, Action<Task<IsolatedAggregateNodeResult>> registerOriginal,
+        Action<Task> registerCancellation, List<Exception> cancellationFailures)
+    {
+        Directory.CreateDirectory(directory);
+        var started = IsolatedAggregateNodeProcess.RunAsync(
+            ["-e", IsolatedAggregateNodeLifetimeProgram.Source,
+                IsolatedAggregateNodeLifetimeProgram.CancellationTree, receipt], prompt.Token);
+        registerOriginal(started);
+        var receiptData = await ReadReceiptAsync(receipt, prompt.Token);
+        CaptureIdentities(receiptData, identities);
+        await Task.Delay(CancellationWaitMilliseconds, prompt.Token);
+        var cancellationTask = prompt.CancelAsync();
+        registerCancellation(cancellationTask);
+        await ObserveCancellationWithinBoundAsync(cancellationTask, timer, testDeadline, cancellationFailures);
+        var remaining = testDeadline - timer.Elapsed;
+        var boundedObservation = started.WaitAsync(remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero);
+        var cancellation = await Assert.ThrowsAsync<OperationCanceledException>(() => boundedObservation)
+            ?? throw new InvalidOperationException(IsolatedAggregateNodeLifetimeProgram.OriginalDidNotCancel);
+        await Assert.That(prompt.IsCancellationRequested).IsTrue();
+        await Assert.That(cancellation.CancellationToken.IsCancellationRequested).IsTrue();
+        await Assert.That(timer.Elapsed < testDeadline).IsTrue();
+        await AssertExitedAsync(identities, timer, testDeadline);
+        return cancellation;
+    }
+
+    private static async Task ObserveCancellationWithinBoundAsync(Task cancellation, Stopwatch timer,
+        TimeSpan testDeadline, List<Exception> failures)
+    {
+        var remaining = testDeadline - timer.Elapsed;
+        try
+        {
+            await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(
+                () => cancellation.WaitAsync(remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero));
+        }
+        catch (AggregateException envelope)
+        {
+            var failure = IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope);
+            if (failure is TimeoutException)
+            {
+                throw failure;
+            }
+            if (cancellation.IsCompleted)
+            {
+                IsolatedAggregateNodeTestCleanup.AddDistinct(failures, failure);
+            }
+            else
+            {
+                throw new TimeoutException(IsolatedAggregateNodeLifetimeProgram.OriginalDidNotSettle);
+            }
+        }
     }
 
     private static void CaptureIdentities(IsolatedAggregateNodeProcessReceipt receipt,

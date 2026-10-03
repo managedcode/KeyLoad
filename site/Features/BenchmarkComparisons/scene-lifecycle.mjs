@@ -150,6 +150,7 @@ function renderFrame(state, time) {
     updateSceneMotion(state, time);
     state.renderer.render(state.graph.scene, state.graph.camera);
     if (state.terminal) return;
+    projectCoreImage(state);
     recordFrame(state);
     state.rendererReady = true;
     configureMotionControl(state);
@@ -160,6 +161,14 @@ function renderFrame(state, time) {
   } catch {
     failScene(state, SCENE.state.error, SCENE_TEXT.error);
   }
+}
+
+function projectCoreImage(state) {
+  if (!state.coreImage) return;
+  const projection = state.graph.projectCore(state.width, state.height);
+  state.coreImage.style.width = projection.size + SCENE.core.pixels;
+  state.coreImage.style.height = projection.size + SCENE.core.pixels;
+  state.coreImage.style.transform = projection.transform;
 }
 
 function updateSceneMotion(state, time) {
@@ -279,6 +288,7 @@ function writeStatus(state, status, message) {
 
 function showPoster(state, visible) {
   if (state.poster) state.poster.hidden = visible ? state.originalPosterHidden : true;
+  if (state.coreImage) state.coreImage.hidden = visible;
 }
 
 function cancelFrame(state) {
@@ -317,6 +327,7 @@ function disposeScene(state, observers) {
 function releaseResources(state) {
   if (state.graph) state.graph.dispose();
   state.graph = null;
+  state.coreImage?.removeAttribute(SCENE.attributes.style);
   if (state.canvasAttached) state.renderer?.domElement?.remove();
   state.canvasAttached = false;
   queueRendererDisposal(state);

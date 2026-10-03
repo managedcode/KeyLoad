@@ -16,11 +16,13 @@ export async function withHttpDeadline(timeoutMs, operation) {
     throw new RangeError(invalidDeadline);
   }
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(new DOMException(timeoutMessage, 'TimeoutError')), timeoutMs);
+  const timer = setInterval(() => {
+    if (!controller.signal.aborted) controller.abort(new DOMException(timeoutMessage, 'TimeoutError'));
+  }, timeoutMs);
   try {
     return await operation(controller.signal);
   } finally {
-    clearTimeout(timer);
+    clearInterval(timer);
   }
 }
 

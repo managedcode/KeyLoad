@@ -151,6 +151,15 @@ This source is absent from d45 and requires fresh integrated gates and its own
 delivered native codec/crypto/lifetime qualification. Full-ready control, coverage, matched
 cache profiles, endurance and power-loss gates remain open; RF3 caches stay off.
 
+The later ALL186-file5bb checkpoint/run37104211481 passes actual RF363/63 and
+analyzer118/118, with exact native reports, six original ZIP digests and four
+new-container restart receipts in the [R104 terminal receipt](../implementation/cache-checkpoint-native-r104.json).
+Full solution verify fails20 Node test-helper diagnostics; normal/scalar units,
+recovery and comparison lanes are skipped. AC-CACHE-014 wire tests were not
+executed. Current preserving helper corrections, complete development gates and
+a new delivered-SHA native run remain required; this checkpoint is not full
+AC-CACHE-010 qualification.
+
 TASK-CACHE-BINDING-INTEGRATION-R69 is root-only: shared contracts, permit join,
 public control/facade/runtime/lifecycle/read admission and durable docs.
 TASK-CACHE-BINDING-STATE-R69 owns only new private ResourceExecution binding/state

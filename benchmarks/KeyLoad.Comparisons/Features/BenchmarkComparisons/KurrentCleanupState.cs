@@ -9,6 +9,7 @@ internal sealed class KurrentCleanupState(int tracked)
     private readonly Stopwatch clock = Stopwatch.StartNew();
     private int next, submitted, acknowledged, faulted, pending, peak, laterDisposals;
     private ExceptionDispatchInfo? primary;
+    private ExceptionDispatchInfo? firstFatal;
     private KurrentCleanupStage failedStage;
     private KurrentCleanupFailureReason reason;
     private int? grpcStatus;
@@ -123,7 +124,7 @@ internal sealed class KurrentCleanupState(int tracked)
         ExceptionDispatchInfo? failure;
         lock (gate)
         {
-            failure = primary;
+            failure = firstFatal ?? primary;
         }
         failure?.Throw();
     }
@@ -132,6 +133,10 @@ internal sealed class KurrentCleanupState(int tracked)
 
     private void Capture(Exception error, KurrentCleanupStage stage)
     {
+        if (firstFatal is null)
+        {
+            firstFatal = KurrentCleanupFatalCause.Find(error);
+        }
         var classified = KurrentCleanupDiagnostics.Classify(error);
         if (primary is not null)
         {

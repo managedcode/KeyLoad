@@ -781,3 +781,57 @@ Brainstorm and acceptance remain the root isolated-comparisons documents. Origin
 |TASK-ISO-031M-IR|MR031001..005/ISO006/007; current_ci_audit inherited capable, read-only intended leader/module/actual child ownership source|Start from031M frozen worker packet; verify exact native BSON, same-source two rounds, genuine stepdown/domain oracles, pinned explicit name/alias identity and original process/readers/cleanup contract. Temporary bounded review/hash manifest only, no source/Git/build/tests/provider/native writes. Root sole shared selector/model/workflow/delivery owner; incomplete native fault paths stay pending.|
 
 |TASK-ISO-031M-C1|MR031003/004/ISO006/007; cost-efficient capable compiler-refinement worker; NEW ResourceTests/IdentityTests/TaskFailureTests/Topology only|Root98-file development build finds12 exact source/style/nullability gates. Frozen worker implementation remains historical; replace literal machine keys with independent named test constants, collection/null-coalescing style, awaited actual CTS CancelAsync and nonnull actual exception guard; remove unnecessary using. No assertion weakening, native algorithm/process/helper/schema change, local build/tests/runtime/Git/docs. Root reviews superseding hashes, full development source gates and exact-SHA CI.|
+|Task|REQ/AC, owner and permission|Dependencies, artifacts, verification and join|
+|---|---|---|
+|TASK-ISO-032H-S|ISO006/007/008,HT032001..003; bounded cost-efficient capable worker; exactly image-manifest.mjs withHttpDeadline and ImageHttpDeadlineNodeProgram.cs abort branch|Delivered clean5bbf30f, acceptedADR056 and tests-first unreferenced real Node completion. Keep original deadline/await/finally/identity, no other HTTP/Node source or shared docs/Git/build/tests/native edits. Frozen two-file hashes and diff; root full review/source gates/delivery/GitHub real Node and registry joins.|
+
+031M root and independent16-file source review complete; all98 scoped blobs independently equal delivered main5bbf30f70e500f2031f3687fbfd98829da8d218f. Full development Release r17 passes0warnings/0errors; final formatting-only corrections are reviewed. Push run37104211481 is in progress, no qualification claimed. The original d45 terminal failure remains preserved. Current cleanup and native fault gates remain pending.
+
+- [x]032H unreferenced original settlement regression and reviewed source timer lifetime repair; GitHub execution remains pending.
+- [ ]032H exact-SHA GitHub real Node/importer and complete27/270 evidence.
+|TASK-ISO-033R|ISO005/006/007/008,TSI002/004/008; current_ci_audit capable read-only source CI audit|Delivered5bbf30f and push37104211481 attempt1; preserve original exact run/job/source/provider reports and new pure subgroups without overwriting historical397/d45. Temporary sealed packet/logs/artifact hashes only, no repository/Git/runtime/test/source mutation. Full source/native27/270 are separate joins.|
+032H frozen two-file source diff independently read by root: only the abort test's actual original native completion timer becomes unreferenced; only withHttpDeadline's single owned timer becomes a referenced interval, guarded once and cleared in original finally. Current107-file development projection builds Release0warnings/0errors (32.21s), excluding foreign Node source and new ongoing resource worker. This does not repair or qualify failed full-source GitHub run37104211481.
+## Exact5bbf source-gate failure baseline
+
+TASK-ISO-037 integrated source check: root builds the actual UnitTests project,
+including currently authored Node lifetime fixes and root035 repairs, without
+running tests. Foreign site/performance edits remain separately owned and are
+not overwritten. This project-level development check cannot replace a full
+delivered-source solution/normal/scalar/recovery/RF3/native qualification.
+
+|Task|REQ/AC and owner/permissions|Dependencies, artifacts, verification and join|
+|---|---|---|
+|TASK-ISO-038N-IR|ISO006/007/008,HT032 and existing LIFE003; current_ci_audit capable read-only reviewer; current changed IsolatedAggregateNode*.cs only|Actual integrated UnitTests development037 passes0/0, while delivered5bb full CI20 Node errors remains historical. Inspect every changed/new Node owner against old5bb source and mandatory original Process/CTS/task/reader/fatal/cleanup ownership, exact reader/error identity and400/200/50/3 limits. Temporary bounded frozen hashes/findings only, no repo/Git/build/tests/runtime edits. Root every diff/prospective source review before any scoped delivery; foreign site/hot-path edits are excluded and preserved.|
+
+[Original receipt](docs/implementation/isolated-source-qualification-37104211481.json) records terminal push37104211481 attempt1 failure. Root independently verifies all five original ZIPs/provider digests/exact job-upload IDs, all62 entries, two real reports and181 passing case identities. Independent analyzer118/RF363 pass; full Release has20 errors before normal/scalar/recovery. No TUnit test is failed because those suites never execute; do not invent a failing-case list. New Node/TS adapters/Mongo/Kurrent groups and all native27/270 are unexecuted. Foreign Node owner is already repairing the owning sources without suppression.
+
+- [ ] CA2000 Process/linked-CTS ownership: Process37, PipeFixture15/35, Lifetime21.
+- [ ] KLD0032 PipeFixture CaptureBothAsync62 exceeds50: split actual ownership stages without dropping joins.
+- [ ] CA1031 Cleanup27/55/95, Pipe49/109/121, Lifetime29, Support44: preserve actual failure propagation and original task settlement.
+- [ ] CA1849 Support36: await original CancelAsync.
+- [ ] CA1068 Lifetime RunAsync: token is the final argument, update real callers.
+- [ ] IDE0059 Pipe57/59: remove genuinely unused assignments without dropping ownership.
+- [ ] IDE0060 Reaper99/135: remove unused identity parameters without weakening exact-process checks.
+- [ ] CA1812 Support118 receipt: retain actually used receipt contract or remove unused type.
+- [ ] New delivered-SHA complete source/normal/scalar/recovery/RF3 and native27/270; missing/skipped gates never pass.
+|TASK-ISO-034F-S|KC030003/ISO006,KF034001..003; bounded capable worker; exact cleanup state/NEW fatal scanner/NEW UnitTests only|026KF read-only finding plus acceptedADR056 before writes. Tests-first genuine CLR fatal identity/aggregate branches/first-primary diagnostics and counters. No lifecycle/deadline/SDK/helper/workflow/docs/Git/build/test/runtime changes. Source/hash/case packet, root every diff/source gates; new exact-SHA pure execution and separate native026KF required.|
+
+|TASK-ISO-035IR|ISO006/007/008,HT032001..003,KF034001..003,TSI001/002/003/006/008; inherited capable independent read-only reviewer; exact032H/034F and TS009S/TS007R source/test packet|Approved ADR056/059 and root reviewed source. Temporary bounded exact-current hash/finding packet only; no repository edits, Git, build, tests or native execution. Root owns all shared integration and resolves every finding before delivery. Model and pure source are not native proof.|
+
+- [x]034F first observed fatal original identity and preserved first-primary diagnostics/counters source reviewed by root, including sixteen-link acceptance edge; source gates and genuine TUnit execution remain pending.
+- [x]035IR final-byte independent review joined and findings resolved. Root reconciles16 exact current hashes; source-only receipt is docs/implementation/isolated-source-repairs-035.json.
+
+035IR source review identifies unnamed format/separator/node/index implementation literals under the mandatory root constants rule. Root accepts a constants-only refinement, with original values and behavior preserved. TASK-ISO-035C-S gives the bounded worker exactly TimescaleResources and KurrentCleanupFatalCause; root serially owns ResourceContext. No test, boundary, algorithm, native contract or public shape changes. Root reviews superseding hashes and reruns scoped development source/formatter/static governance; genuine GitHub gates remain pending.
+
+|TASK-ISO-035C-S|ISO006/007,KF034001/002,TSI001/003/008; bounded capable worker; two previously frozen implementation files only|035IR precise constants finding and accepted root refinement. Name current format/separator/node/index values; preserve every operation/order/value/test oracle. No other files, docs, Git, build, tests or native execution. Frozen diff/hash packet joins root source review and independent superseding-byte review.|
+
+|TASK-ISO-036-J|ISO005/007,PQ036001/002; root sole shared workflow/evidence owner; ci.yml17 comparison-images results-directory arguments only|Accepted ADR056 source-retention contract. Static unique path/count/filter-preservation check, full development source/format/governance, scoped delivery, genuine unchanged TUnit suites in GitHub and provider17-original-report reconciliation. No dependency/product/native/permission/topology change or synthesized reports.|
+
+- [x]036 distinct17 original-report destinations and unchanged invocation filters/order reviewed; actual next-run report qualification remains pending.
+- [ ]036 next delivered-SHA comparison-images original17 JSON/provider archive gate.
+
+Root scoped113 development projection r6 passes Release0warnings/0errors(13.21s), formatter, working-tree static governance, script syntax and diff checks. This excludes foreign Node/cache source and retains historical98 scoped docs. It is not full delivered-source qualification. Final16 independently reviewed source hashes match current files. Required source/native/fault/cohort/coverage/site gates remain open in the source-only035 receipt; no performance metric is refreshed.
+
+035 root-only constants addendum: direct TS009 host contract inspection finds the previously delivered TimeSeriesIntensiveAcknowledgement still has an inline diagnostic string and minimum1L. Name these two unchanged values in that root-owned internal type under TSI004/008; no receipt validation, byte/API/value change. This obvious two-value edit is kept serial with root shared-contract ownership; delegation overhead would exceed the edit. Extend independent review/source inventory before delivery and supersede the historical16-file/r6 receipt rather than relabel it current.
+
+035IR-A and root source integration complete:17 current file hashes match the new independent addendum manifest; original sealed16 review remains historical. The unchanged ACK constants addendum builds in scoped113 r7 Release0warnings/0errors(27.53s), and formatter passes. Current uncommitted035 receipt preserves r6 historical digest and current17 inventory. Source gates exclude foreign Node/cache code; delivered-SHA/full source/native/cohort gates remain open.

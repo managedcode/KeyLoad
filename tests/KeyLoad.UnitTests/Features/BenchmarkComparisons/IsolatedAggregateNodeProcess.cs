@@ -34,30 +34,10 @@ internal static class IsolatedAggregateNodeProcess
         CancellationToken cancellationToken)
     {
         var startInfo = StartInfo(arguments);
-        var process = new Process { StartInfo = startInfo };
-        try
-        {
-            if (!process.Start())
-            {
-                throw new InvalidOperationException(StartFailure);
-            }
-        }
-        catch (Exception startFailure)
-        {
-            try
-            {
-                process.Dispose();
-            }
-            catch (Exception disposeFailure)
-            {
-                throw new AggregateException("Native Node start and process-owner cleanup failed.",
-                    startFailure, disposeFailure);
-            }
-            throw;
-        }
-
-        return await IsolatedAggregateNodeLifetime.RunAsync(
-            process, cancellationToken, TimeSpan.FromSeconds(TimeoutSeconds), TimeSpan.FromSeconds(CleanupSeconds));
+        using var startOwner = IsolatedAggregateNodeStartOwner.Create(startInfo);
+        var process = startOwner.StartAndTransfer();
+        return await IsolatedAggregateNodeLifetime.RunAsync(process,
+            TimeSpan.FromSeconds(TimeoutSeconds), TimeSpan.FromSeconds(CleanupSeconds), cancellationToken);
     }
 
     internal static ProcessStartInfo StartInfo(IEnumerable<string> arguments)

@@ -13,7 +13,8 @@ internal static class ImageHttpDeadlineNodeProgram
           const result = await api.withHttpDeadline(100, signal => new Promise(resolve => {
             signal.addEventListener('abort', () => {
               reason = signal.reason;
-              setTimeout(() => { operationTerminal = true; resolve(signal.reason); }, 50);
+              const settlement = setTimeout(() => { operationTerminal = true; resolve(signal.reason); }, 50);
+              settlement.unref();
             }, { once: true });
           }));
           assert.equal(operationTerminal, true);

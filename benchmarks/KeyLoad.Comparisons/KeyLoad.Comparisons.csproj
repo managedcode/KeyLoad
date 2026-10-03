@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Features/BenchmarkComparisons/isolated-contract.json" LogicalName="KeyLoad.Comparisons.IsolatedContract" />
+    <EmbeddedResource Include="Features/BenchmarkComparisons/TimeSeries/Intensive/timeseries-contract.json" LogicalName="KeyLoad.Comparisons.TimeSeriesIntensiveContract" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <PackageReference Include="ManagedCode.TimeSeries" />
     <PackageReference Include="Npgsql" />

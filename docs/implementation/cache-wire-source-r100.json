@@ -48,6 +48,27 @@
   },
   "developmentGates": {
     "fullReleaseBuild": {
+      "state": "failed_full_enabled_R113_Node_ownership_diagnostics_closed_other_owner_SiteTests21",
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+      "warnings": 0,
+      "errors": 21,
+      "ownedNodeHelperDiagnostics": 0,
+      "otherOwnerSiteDiagnostics": 21,
+      "cacheWireDiagnostics": 0,
+      "logSha256": "1200aabcf19f34f15192e233e4d6dd23ac59adfc4a9e3dba46e42feadf21ec5d",
+      "history": "docs/implementation/image-http-owner-source-r115.json",
+      "limit": "Full solution gate failed. Source owner is repairing SiteTests; current native wire/Node tests still unexecuted. No scoped/old result qualifies new source."
+    },
+    "formatter": {
+      "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+      "state": "failed_R115_other_owner_SiteTests_CA1865",
+      "logSha256": "d3ba4e269867e63f2a61cf94e52138389106368809a3ca88bf2f8cec6c5be1ae",
+      "limit": "Full formatter gate not green; source currently being repaired by its owner."
+    },
+    "staticGovernance": {
+      "state": "passed_current25projects4modules_static_only"
+    },
+    "priorFullReleaseBuildR101": {
       "state": "failed_full_enabled_R101_work_in_progress",
       "observedUtc": "2026-10-03T06:46:56.978709+00:00",
       "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
@@ -59,20 +80,28 @@
       "cacheWireDiagnostics": 0,
       "limit": "The complete solution gate failed. No scoped or native pass is inferred from absence of cache-wire diagnostics; R103 corrections need a fresh full gate."
     },
-    "formatter": {
-      "state": "pending_required_full_verify"
-    },
-    "staticGovernance": {
-      "state": "pending_final_current_source_check"
+    "priorFullReleaseBuildR105": {
+      "state": "failed_full_enabled_R105_frozen_R103_helper_packet",
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+      "warnings": 0,
+      "errors": 14,
+      "ownedNodeHelperDiagnostics": 14,
+      "cacheWireDiagnostics": 0,
+      "logSha256": "a2d1e36fdee4c1a1b9d6d4016235b82688d65fee0475b9073c3521d9e8ef792c",
+      "limit": "Full solution gate failed; coherent disjoint R106 correction and fresh enabled full build/formatter required. Absence of cache-wire errors is not a full or native pass."
     }
   },
   "delivery": {
-    "state": "all_eligible_current_main_checkpoint_pending_remote_verification_then_R103_corrections",
-    "headSha": null,
-    "runUrl": null
+    "state": "all_186_eligible_files_checkpoint_delivered_R103_corrections_and_qualification_open",
+    "headSha": "5bbf30f70e500f2031f3687fbfd98829da8d218f",
+    "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37104211481",
+    "checkpointCommitUrl": "https://github.com/managedcode/KeyLoad/commit/5bbf30f70e500f2031f3687fbfd98829da8d218f",
+    "eligibleFiles": 186,
+    "verification": "git fetch origin; ordinary git push origin main; local HEAD and origin/main equal; fresh GitHub commits/main API returned the same exact SHA. No stash, force push, protection bypass or ignored output staging.",
+    "qualification": "Known WIP checkpoint; full build, final source join, formatter, native codec/crypto/lifetime and complete comparisons remain open."
   },
   "nativeQualification": {
-    "state": "pending_exact_delivered_sha",
+    "state": "exact_checkpoint_terminal_failed_full_build_RF3_only_pass_wire_units_and_recovery_skipped",
     "required": [
       "TUnit/MTP normal and scalar complete same ID sets and zero skips",
       "Actual typed Orleans serialization for all13 records",
@@ -81,7 +110,18 @@
       "Full recovery and Docker Aspire RF3 through real .NET and official MCP clients"
     ],
     "priorBaseline": "docs/implementation/cache-native-source-r93.json",
-    "priorBaselineQualifiesTheseNewFiles": false
+    "priorBaselineQualifiesTheseNewFiles": false,
+    "runId": 37104211481,
+    "headSha": "5bbf30f70e500f2031f3687fbfd98829da8d218f",
+    "checkpointReceipt": "docs/implementation/cache-checkpoint-native-r104.json",
+    "wireUnitTestsExecuted": false,
+    "rf3CasesPassed": 63,
+    "requiredSkippedLanes": [
+      "Normal units",
+      "Scalar units",
+      "Recovery",
+      "Comparisons"
+    ]
   },
   "openGates": [
     "Controller and receiver contracts, replay/clock/nonce ownership, native migration and authenticated physical-store full-ready probes",

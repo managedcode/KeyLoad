@@ -441,6 +441,22 @@ classDiagram
 Source stages remain unqualified until exact-SHA real native correctness/fault,
 intensive cohort, aggregate, site and publication gates pass.
 
+The additive TimeSeries selection and physical-resource model below preserves
+the separate270 route and productionRF3. These classes are source-present;
+native dispatch, membership/ACK/copy verification and the6/30 evidence join
+remain open under ADR059.
+
+```mermaid
+classDiagram
+    TimeSeriesIntensiveSelection --> IsolatedTimeSeriesResourceContext
+    TimeSeriesIntensiveFamilyContract --> TimeSeriesIntensiveFamilyPlan
+    TimeSeriesIntensiveFamilyPlan --> TimeSeriesIntensiveSelection
+    IsolatedTimeSeriesResourceContext --> IsolatedTimeSeriesKeyLoadResources
+    IsolatedTimeSeriesResourceContext --> IsolatedTimeSeriesTimescaleResources
+    IsolatedTimeSeriesKeyLoadResources --> ClusterResources
+    IsolatedTimeSeriesTimescaleResources --> IsolatedPostgresBootstrap
+```
+
 [ADR-059](ADR/ADR-059-isolated-intensive-timeseries.md) specifies a separate
 30-cell intensive TimeSeries family using the same canonical BenchmarkComparisons
 slice. KeyLoad and TimescaleDB each have native1/2/3-node preflights and five
@@ -687,3 +703,43 @@ classDiagram
     TimeSeriesIntensivePhaseExecutor --> TimeSeriesIntensiveAttemptLedger : sixteen loops
     TimeSeriesIntensiveAttemptLedger --> TimeSeriesIntensiveRunResult : compact attempts
 ```
+
+## Database term-read hot path
+
+The accepted [ClusterReplication term metadata contract](Features/ClusterReplication/ReplicaTermMetadata.md)
+and [ADR-061](ADR/ADR-061-bounded-replica-term-metadata.md) retain both public
+authorized quorum cuts, the fixed RF3/node-local storage boundary and every ACK,
+WAL, snapshot and strict error rule. Only one physical-log scalar term observation
+is reused at the same gated provider position/authority. Source discovery does
+not establish the contribution of any stage to native latency.
+
+```mermaid
+flowchart LR
+    SDK[Public SDK or MCP] --> Auth[Fresh authentication request grain]
+    Auth --> AuthCut[Authorized RF3 quorum cut]
+    AuthCut --> Credentials[Persisted credential and principal]
+    Credentials --> Request[Fresh operation request grain]
+    Request --> OperationCut[Authorized RF3 operation cut]
+    OperationCut --> Host[Node local PartitionHost]
+    Host --> Log[Physical replica log]
+    Log --> Store[Actual ZoneTree read gate and health]
+    Store --> Term[One scalar term observation at exact authority and cut]
+```
+
+```mermaid
+classDiagram
+    class PartitionHost
+    class DurableReplicaLog
+    class ReplicaTermObservation
+    class IAtomicStore
+    class ZoneTreeStore
+    PartitionHost --> DurableReplicaLog : physical owner
+    DurableReplicaLog --> ReplicaTermObservation : one scalar cell under monitor
+    DurableReplicaLog --> IAtomicStore : gated read and durable commit
+    ZoneTreeStore ..|> IAtomicStore
+```
+
+Implementation/new real-store term regressions, delivered-SHA native full gates
+and matched performance/server profiles remain pending. Per-request Orleans
+actors never own the cell or files. No distributed data-cache enablement is
+inferred from this separate private log optimization.
