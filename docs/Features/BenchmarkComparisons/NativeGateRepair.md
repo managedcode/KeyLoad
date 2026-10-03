@@ -48,8 +48,8 @@ native qualification; all1/2/3 originals must join before this stage is proven.
 
 The [source-stage receipt](../../implementation/native-benchmark-gates-source-stage-001.json)
 binds the integrated d500 prerequisite and reviewed files to the full Release,
-formatter and static governance checks. All nineteen policy cases and native
-metadata/readback/current-job transport behavior remain GitHub-unqualified.
+formatter and static governance checks. At source-stage delivery all nineteen policy cases and native
+metadata/readback/current-job transport behavior were GitHub-unqualified.
 
 REQ-NGR-003 / AC-NGR-003D is the accepted bounded setup diagnostic stage in
 ADR068. Only a target-owned closed phase and at most4096-byte failure-only
@@ -59,3 +59,13 @@ the existing real1/2/3 preflight remains the native proof. No native errors are
 fabricated and no routing/retry/public result changes occur. Original setup
 callsite and full leader-routing qualification remain pending; an earlier
 verifier cleanup may still mask the original primary exception.
+
+Original ca22 CI now proves nineteen policy-record cases passed, while its full
+CI gate failed; [the exact receipt](../../implementation/sql-client-qualification-ca22.json)
+keeps normal/recovery/RF3 failures and skipped scalar explicit. Original f403
+Kurrent1/2/3 native preflights each passed one selected TUnit flow, with full
+metadata volume assertions on the existing path and observed native copies;
+[the preflight receipt](../../implementation/native-kurrent-preflight-f403.json)
+binds provider uploads, original ZIP/report/worker/teardown hashes. This does not
+qualify the new setup diagnostic, refresh exhaustion, routing cause, full270
+cohort, website publication or all fault/resource gates.

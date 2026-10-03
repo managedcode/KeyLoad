@@ -79,18 +79,34 @@
       "nativeGateRepair": "docs/ADR/ADR-068-native-benchmark-gate-repair.md",
       "nativeGateSourceReceipt": "docs/implementation/native-benchmark-gates-source-stage-001.json",
       "latestCandidate": {
-        "sourceRevision": "ca22b1baa919198c81749d86ffab56df24ec9317",
-        "ciRunId": 37124217640,
-        "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640",
-        "ciStatus": "pending_verified_zero_jobs_and_artifacts_20261003T125215Z",
-        "benchmarkRunId": 37124217649,
-        "benchmarkUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217649",
-        "benchmarkStatus": "pending_verified_zero_jobs_and_artifacts_20261003T125215Z",
+        "sourceRevision": "bfb04d64bf9c0ca8a1ab6e0c703194e1813250f0",
+        "ciRunId": 37126290194,
+        "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126290194",
+        "ciStatus": "pending_original_discovery_20261003T133000Z",
+        "benchmarkRunId": 37126290225,
+        "benchmarkUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126290225",
+        "benchmarkStatus": "pending_original_discovery_20261003T133000Z",
+        "ownedSourceFilesUnchangedFromFrozenReview": 15,
+        "ownedSourceEquivalenceSha256": "200b1c6e942abde186915b639305f90833b2893d1af924fd3d78f5cb552ca0d8",
+        "newStage": "independent_full_public_JSON_native_payload_oracles_and_RF3_ordinal_golden_plus_failure_only_Kurrent_setup_diagnostics",
         "runtimeQualified": false
       },
       "previousCiRunId": 37121027931,
       "previousCiConclusion": "cancelled_zero_executed_steps_and_artifacts_release_queue_for_delivered_native_fix",
-      "runtimeQualified": false
+      "runtimeQualified": false,
+      "previousCandidate": {
+        "sourceRevision": "ca22b1baa919198c81749d86ffab56df24ec9317",
+        "ciRunId": 37124217640,
+        "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640",
+        "ciStatus": "failure_original_normal2357_of2402_recovery189_of190_RF366_of67_scalar_skipped",
+        "benchmarkRunId": 37124217649,
+        "benchmarkUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217649",
+        "benchmarkStatus": "cancelled_zero_jobs_zero_artifacts_no_complete_cohort",
+        "runtimeQualified": false,
+        "qualificationReceipt": "docs/implementation/sql-client-qualification-ca22.json",
+        "selectedCurrentJobPolicyPassed": 19,
+        "selectedSqlRf3CommentPassed": 2
+      }
     },
     "backupPrerequisite": "staged_restore_independently_delivered_dbd01269_further_four_actual_file_cases_source_only",
     "fullSqlComplete": false,
@@ -134,7 +150,28 @@
       "docs/Features/Search.md",
       "docs/implementation/sql-parser-candidate-review.md",
       "docs/implementation/zonetree-fulltextsearch-review.md"
-    ]
+    ],
+    "selectedPriorRuntimeQualification": {
+      "sourceRevision": "ca22b1baa919198c81749d86ffab56df24ec9317",
+      "commentRf3CasesPassed": 2,
+      "currentJobPolicyCasesPassed": 19,
+      "receipt": "docs/implementation/sql-client-qualification-ca22.json",
+      "wholeCiPassed": false
+    },
+    "nativeKurrentPreflight": {
+      "sourceRevision": "f403bf61e730919a7b6e4b811539b870b8c8433d",
+      "runId": 37124527333,
+      "nativeNodeCounts": [
+        1,
+        2,
+        3
+      ],
+      "selectedCasesPassed": 3,
+      "receipt": "docs/implementation/native-kurrent-preflight-f403.json",
+      "fullCohortQualified": false,
+      "newD1DiagnosticQualified": false,
+      "routingDefectRootCauseEstablished": false
+    }
   },
   "KL-001": {
     "title": "Версії, ліцензії та platform matrix",

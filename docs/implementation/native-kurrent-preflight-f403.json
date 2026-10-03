@@ -1,0 +1,375 @@
+{
+  "receiptType": "original_bound_Kurrent_native_preflight_qualification",
+  "qualificationScope": "Genuine native KurrentDB StreamAppend preflight for one, two, and three nodes; one passing TUnit selected case in each separately isolated job.",
+  "provider": {
+    "repository": "managedcode/KeyLoad",
+    "workflow": "Benchmarks",
+    "runId": 37124527333,
+    "attempt": 1,
+    "sourceSha": "f403bf61e730919a7b6e4b811539b870b8c8433d",
+    "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/attempts/1"
+  },
+  "cells": [
+    {
+      "workerIdentity": {
+        "target": "KurrentDB",
+        "nodeCount": 1,
+        "scenario": "StreamAppend",
+        "profile": "intensive-1k-c16",
+        "sourceRevision": "f403bf61e730919a7b6e4b811539b870b8c8433d",
+        "runId": 37124527333,
+        "attempt": 1,
+        "repository": "managedcode/KeyLoad",
+        "ref": "refs/heads/main",
+        "workflow": "Benchmarks",
+        "jobId": 111208386643
+      },
+      "disposition": "measured",
+      "engine": "KurrentDB",
+      "engineVersion": "26.1.2",
+      "engineImage": "docker.io/kurrentplatform/kurrentdb:26.1.2@sha256:ef49a58bab8bc4d7b08cd218f1bb85cf230b03edf5d136e98d6e86a3e5100b6a",
+      "profile": "intensive-1k-c16",
+      "options": {
+        "topology": "Single",
+        "seed": 1729,
+        "documents": 4096,
+        "operations": 10000,
+        "warmup": 256,
+        "repetitions": 5,
+        "concurrency": 16,
+        "payloadBytes": 1024
+      },
+      "topology": "one KurrentDB node; no replica copies",
+      "actualCluster": {
+        "nodes": 1,
+        "dataCopies": 1,
+        "state": "single",
+        "members": [
+          {
+            "id": "cdff642d-31ac-4d61-8de8-71650aa1c38b",
+            "role": "Leader"
+          }
+        ]
+      },
+      "acknowledgement": "native append acknowledgement; single node, no replicated acknowledgement",
+      "readContract": "measured reads use the leader-preferred writer; untimed copy proofs use random-preference clients bound to each member and validate full events; measured writer NodePreference=Leader",
+      "teardown": {
+        "schemaVersion": 1,
+        "primaryFailure": false,
+        "failedStages": []
+      },
+      "qualificationCase": {
+        "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedNativeComparisonTests.1.1.SelectedNativeCaseRunsCommonIntensiveWorkload.1.1.0",
+        "status": "passed",
+        "durationMs": 114703.0084
+      },
+      "rawArtifact": {
+        "artifactId": 11274605948,
+        "name": "comparison-preflight-kurrentdb-n1-stream-append",
+        "jobId": 111208386643,
+        "jobName": "Check database / kurrentdb-n1-stream-append",
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/job/111208386643",
+        "jobConclusion": "success",
+        "providerDigest": "sha256:1c9d29f24ac8b4566f09ebf655be91e51e02480c480fa42410cd1c9105f83588",
+        "providerExpired": false,
+        "localZipSha256": "1c9d29f24ac8b4566f09ebf655be91e51e02480c480fa42410cd1c9105f83588",
+        "zipBytes": 1171342,
+        "bindingFileSha256": "05640047e709f7e388ed318030ef12f66e7a0fcd4fa4032225fe57ba60545945",
+        "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/artifacts/11274605948"
+      },
+      "qualificationArtifact": {
+        "artifactId": 11274800730,
+        "name": "comparison-preflight-qualification-kurrentdb-n1-stream-append",
+        "jobId": 111208386643,
+        "jobName": "Check database / kurrentdb-n1-stream-append",
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/job/111208386643",
+        "jobConclusion": "success",
+        "providerDigest": "sha256:8b4ac50f8c29ecb97a79222eaec4f3f8fc4712bdf55d5260c1ffabe035ee171d",
+        "providerExpired": false,
+        "localZipSha256": "8b4ac50f8c29ecb97a79222eaec4f3f8fc4712bdf55d5260c1ffabe035ee171d",
+        "zipBytes": 957128,
+        "bindingFileSha256": "5dd471faf0acd2482ddd65c6d1fbeeae3cb45513c2d807eeaf08139ca415c8ff",
+        "report": {
+          "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+          "sha256": "b500e9538b7b1a8762fa493b2688c7b2f49f2794b24556a78ff2857ba30b49fd",
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/artifacts/11274800730"
+      },
+      "rawLocalEntries": {
+        "runner.log": "1f3324c71498cd7b45bd81f0b8eb16e7279fce108d8448490ad41beaaa435375",
+        "teardown.json": "87d8f7048e759d1c7730c36e30da44a7a4a1bfbd5fdff612b8ce86782ca56457",
+        "worker.json": "488ef6d8025c571cb77d55a04394888295f5eba294a0e4d6664568f85e7b4455"
+      },
+      "measurementSummary": {
+        "repetitions": 5,
+        "samplesPerRepetition": 10000,
+        "successfulAttemptsPerRepetition": 10000,
+        "failedAttemptsPerRepetition": 0,
+        "timings": "Retained only in original worker.json; this receipt is not site measurement input."
+      }
+    },
+    {
+      "workerIdentity": {
+        "target": "KurrentDB",
+        "nodeCount": 2,
+        "scenario": "StreamAppend",
+        "profile": "intensive-1k-c16",
+        "sourceRevision": "f403bf61e730919a7b6e4b811539b870b8c8433d",
+        "runId": 37124527333,
+        "attempt": 1,
+        "repository": "managedcode/KeyLoad",
+        "ref": "refs/heads/main",
+        "workflow": "Benchmarks",
+        "jobId": 111208386609
+      },
+      "disposition": "measured",
+      "engine": "KurrentDB",
+      "engineVersion": "26.1.2",
+      "engineImage": "docker.io/kurrentplatform/kurrentdb:26.1.2@sha256:ef49a58bab8bc4d7b08cd218f1bb85cf230b03edf5d136e98d6e86a3e5100b6a",
+      "profile": "intensive-1k-c16",
+      "options": {
+        "topology": "TwoNode",
+        "seed": 1729,
+        "documents": 4096,
+        "operations": 10000,
+        "warmup": 256,
+        "repetitions": 5,
+        "concurrency": 16,
+        "payloadBytes": 1024
+      },
+      "topology": "two native gossip members; one leader and one follower; both required for quorum",
+      "actualCluster": {
+        "nodes": 2,
+        "dataCopies": 2,
+        "state": "healthy",
+        "members": [
+          {
+            "id": "1f7e9683-fbdc-4dc7-8e44-eef14a832db5",
+            "role": "Follower"
+          },
+          {
+            "id": "943023e6-4774-403f-ba72-21aa8fa7389a",
+            "role": "Leader"
+          }
+        ]
+      },
+      "acknowledgement": "native leader commit; untimed post-append copy/checkpoint cut observed on all nodes; no fsync or all-follower-at-ack claim",
+      "readContract": "measured reads use the leader-preferred writer; untimed copy proofs use random-preference clients bound to each member and validate full events; measured writer NodePreference=Leader",
+      "teardown": {
+        "schemaVersion": 1,
+        "primaryFailure": false,
+        "failedStages": []
+      },
+      "qualificationCase": {
+        "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedNativeComparisonTests.1.1.SelectedNativeCaseRunsCommonIntensiveWorkload.1.1.0",
+        "status": "passed",
+        "durationMs": 159456.0223
+      },
+      "rawArtifact": {
+        "artifactId": 11274544552,
+        "name": "comparison-preflight-kurrentdb-n2-stream-append",
+        "jobId": 111208386609,
+        "jobName": "Check database / kurrentdb-n2-stream-append",
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/job/111208386609",
+        "jobConclusion": "success",
+        "providerDigest": "sha256:a27c269d3a0ec7cc411a38acbcdc96a8cdea5af09f64b1179424e9cf4548a86c",
+        "providerExpired": false,
+        "localZipSha256": "a27c269d3a0ec7cc411a38acbcdc96a8cdea5af09f64b1179424e9cf4548a86c",
+        "zipBytes": 1200842,
+        "bindingFileSha256": "032f5ed0dcb71de23e321c6dc38ba3f1246a4f3b75d733d2dcd8ace9af76d950",
+        "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/artifacts/11274544552"
+      },
+      "qualificationArtifact": {
+        "artifactId": 11275020900,
+        "name": "comparison-preflight-qualification-kurrentdb-n2-stream-append",
+        "jobId": 111208386609,
+        "jobName": "Check database / kurrentdb-n2-stream-append",
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/job/111208386609",
+        "jobConclusion": "success",
+        "providerDigest": "sha256:167cedde594185d216cf5c53343608c31d96bc3ef4f830baaec25c2eafa1ed70",
+        "providerExpired": false,
+        "localZipSha256": "167cedde594185d216cf5c53343608c31d96bc3ef4f830baaec25c2eafa1ed70",
+        "zipBytes": 954137,
+        "bindingFileSha256": "186ac6c5da6e096fc4542975c85a06a9c1b4326432bb8d49f3883a7a661dcf36",
+        "report": {
+          "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+          "sha256": "96e714bbfdb212b77e81fa898b0947491a5f165b0eac81139829484d36d00f6c",
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/artifacts/11275020900"
+      },
+      "rawLocalEntries": {
+        "runner.log": "3bddafe0479f32532d5f7b7fcdd4d77e6f3e4901da3fdf6814abd259b81bb1ba",
+        "teardown.json": "87d8f7048e759d1c7730c36e30da44a7a4a1bfbd5fdff612b8ce86782ca56457",
+        "worker.json": "35146400e7543e9785da97ef9eaa43bc8c8ade813ce71e8d722c82bd87e79569"
+      },
+      "measurementSummary": {
+        "repetitions": 5,
+        "samplesPerRepetition": 10000,
+        "successfulAttemptsPerRepetition": 10000,
+        "failedAttemptsPerRepetition": 0,
+        "timings": "Retained only in original worker.json; this receipt is not site measurement input."
+      }
+    },
+    {
+      "workerIdentity": {
+        "target": "KurrentDB",
+        "nodeCount": 3,
+        "scenario": "StreamAppend",
+        "profile": "intensive-1k-c16",
+        "sourceRevision": "f403bf61e730919a7b6e4b811539b870b8c8433d",
+        "runId": 37124527333,
+        "attempt": 1,
+        "repository": "managedcode/KeyLoad",
+        "ref": "refs/heads/main",
+        "workflow": "Benchmarks",
+        "jobId": 111208386608
+      },
+      "disposition": "measured",
+      "engine": "KurrentDB",
+      "engineVersion": "26.1.2",
+      "engineImage": "docker.io/kurrentplatform/kurrentdb:26.1.2@sha256:ef49a58bab8bc4d7b08cd218f1bb85cf230b03edf5d136e98d6e86a3e5100b6a",
+      "profile": "intensive-1k-c16",
+      "options": {
+        "topology": "Replicated",
+        "seed": 1729,
+        "documents": 4096,
+        "operations": 10000,
+        "warmup": 256,
+        "repetitions": 5,
+        "concurrency": 16,
+        "payloadBytes": 1024
+      },
+      "topology": "three native gossip members; one leader and two followers",
+      "actualCluster": {
+        "nodes": 3,
+        "dataCopies": 3,
+        "state": "healthy",
+        "members": [
+          {
+            "id": "17f8b4e8-b9ca-425c-a144-3a34603d2399",
+            "role": "Follower"
+          },
+          {
+            "id": "35c67956-27f9-48fc-a85c-6c29d2efa07f",
+            "role": "Leader"
+          },
+          {
+            "id": "a45122dc-3a74-4168-94ce-f727903893e9",
+            "role": "Follower"
+          }
+        ]
+      },
+      "acknowledgement": "native leader commit; untimed post-append copy/checkpoint cut observed on all nodes; no fsync or all-follower-at-ack claim",
+      "readContract": "measured reads use the leader-preferred writer; untimed copy proofs use random-preference clients bound to each member and validate full events; measured writer NodePreference=Leader",
+      "teardown": {
+        "schemaVersion": 1,
+        "primaryFailure": false,
+        "failedStages": []
+      },
+      "qualificationCase": {
+        "id": "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedNativeComparisonTests.1.1.SelectedNativeCaseRunsCommonIntensiveWorkload.1.1.0",
+        "status": "passed",
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "rawArtifact": {
+        "artifactId": 11275015784,
+        "name": "comparison-preflight-kurrentdb-n3-stream-append",
+        "jobId": 111208386608,
+        "jobName": "Check database / kurrentdb-n3-stream-append",
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/job/111208386608",
+        "jobConclusion": "success",
+        "providerDigest": "sha256:af825738cc3abbbea6e897fbe79d5634951e2e1e50e14bfc55bb998e0d50215a",
+        "providerExpired": false,
+        "localZipSha256": "af825738cc3abbbea6e897fbe79d5634951e2e1e50e14bfc55bb998e0d50215a",
+        "zipBytes": 1198695,
+        "bindingFileSha256": "6bd4f294ece81d7448bcec386c237cf8e0f4bd4ff74dca0b6be5847b2a490a89",
+        "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/artifacts/11275015784"
+      },
+      "qualificationArtifact": {
+        "artifactId": 11274509734,
+        "name": "comparison-preflight-qualification-kurrentdb-n3-stream-append",
+        "jobId": 111208386608,
+        "jobName": "Check database / kurrentdb-n3-stream-append",
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/job/111208386608",
+        "jobConclusion": "success",
+        "providerDigest": "sha256:d64b05fcf80a68e80c3527decb8908363e06abd976305eae285abf23eadb6566",
+        "providerExpired": false,
+        "localZipSha256": "d64b05fcf80a68e80c3527decb8908363e06abd976305eae285abf23eadb6566",
+        "zipBytes": 951648,
+        "bindingFileSha256": "a3a955b377d4d27f00e841f8dcde064881ae0f7b3802e997d15803a53923f126",
+        "report": {
+          "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+          "sha256": "19a3e9877da689d8bcc45a5c79536c7ea64b4a83b2bc0cfbee898f0e65051af6",
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/artifacts/11274509734"
+      },
+      "rawLocalEntries": {
+        "worker.json": "0d69eebdee6f1d83bdc4e84a3f7779aa6a592f121e93116cb60128c2377cbeae",
+        "teardown.json": "87d8f7048e759d1c7730c36e30da44a7a4a1bfbd5fdff612b8ce86782ca56457",
+        "runner.log": "1cb4051a55758debef68870226417c0c31ae6cc11420c90704d095de0eb6708d"
+      },
+      "measurementSummary": {
+        "repetitions": 5,
+        "samplesPerRepetition": 10000,
+        "successfulAttemptsPerRepetition": 10000,
+        "failedAttemptsPerRepetition": 0,
+        "timings": "Retained only in original worker.json; this receipt is not site measurement input."
+      }
+    }
+  ],
+  "stageA": {
+    "fullVolumeRegressionRunsWithinPreflight": true,
+    "separateVolumeCountersExported": false,
+    "interpretation": "The volume regression is covered by the passing preflight workload path; no standalone volume/fatal/cancellation counts are asserted."
+  },
+  "sourceDistinction": {
+    "D1PresentInF403": false,
+    "routingDefectRootCause": "not established by these receipts; no routing or prior NotLeader causality is inferred."
+  },
+  "limits": {
+    "scope": "These are only three StreamAppend preflight cells; they do not qualify the complete 27/270 comparison cohort or website publication.",
+    "performance": "Raw repetition observations are retained; no engine winner, speed claim, or website metric is asserted.",
+    "durability": "Checkpoint and copy observations establish applied progress/cut behavior only; they do not establish fsync or power-loss durability.",
+    "topology": "The node counts are observed native Kurrent membership and data copies, not client counts or standalone databases.",
+    "qualification": "Passing one TUnit case per cell and teardown with primaryFailure=false/failedStages=[] are preflight evidence only."
+  },
+  "localPacketSha256": {
+    "n1n2": {
+      "qualification.json": "c23243ba4470759483d1a89599b8c496e0ec19c1fd6fbdc37e2e3f5dcbff02b4",
+      "qualification.md": "75a913a01fd119c50aaa05f25262c781354da8fa823f10f1ed20292da6f99f35",
+      "original-bindings-summary.json": "230bee49f19e6a76180fb8b2a6d20096ca8e722fcd5ad4cdddc0bdf06c4c3b1a",
+      "sealed-manifest.json": "dd123909367a2e7c38d6558d1e0fb56bd7f37ec84972abe037c540089b7ace81"
+    },
+    "n3": {
+      "qualification.json": "4ab94656c7f4327d9c5d30f3215fcee508c3d781dd5499603e54eec513696a11",
+      "qualification.md": "afff26001ecbc905d67e2c92dd0a50c80616bf21cbc716e6aabe2b8556a805d6",
+      "original-bindings-summary.json": "e4fa16f8938166f62a25e0b1a1e40462981ac1fbba08001fff0e6213c8bca6d6",
+      "sealed-manifest.json": "f330c8fa81a51f06b76bbdf7f46444aa103a64896fee056ceacb55beb80b91ce"
+    }
+  },
+  "volumeSourceBinding": {
+    "regressionJoin": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedNativeRegressions.cs",
+    "metadataFixtureSha256": "63a8ec6467b0b36cd02d9dbd9aa22fa3f9a91251bf0ad028da5209911356e2af",
+    "metadataOracleSha256": "46958b54e376c7fd0d995821f5bf512765e42c76c2b3478c18b7243eb49ca771",
+    "deliveredStage": "ca22b1baa919198c81749d86ffab56df24ec9317",
+    "sourceEquivalenceSha256": "3635a065a9bfba30a4b4684e6cd1eb83f74e859f04bf0ba809f23b1a21b8fbaa"
+  }
+}

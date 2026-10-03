@@ -268,3 +268,7 @@ The retained original github-prepare.json proves GitHub's actual preceding-step
 API also uses pending/null. Root includes that state among bounded retry-only
 states; it never satisfies completed-success. The same strict invalid-state
 and terminal-failure rules apply.
+
+## Accepted stored-body fixture repair contract
+
+R17-AC001 follows original ca22 run37124217640. Persisted native queue-body corruption is a storage fault and must retain Corruption, escaping the atomic-command domain-error catch as currently designed. Root owns only QueueBodyAccountingTests: replace its old malformed-body Validation expectation with exact Corruption and no-effects assertions, retain missing-body controls, and restore the original native bytes to demonstrate the same failed operation ID can subsequently receive once. Check exact stored bytes, ready marker, counters, committed/applied position and absent outcome before repair. Native format, public invalid-JSON policy, durability/admission/authorization, quotas and FIFO remain unchanged. Unit/scalar qualification is GitHub-only and all recovery/RF3 gates still apply. Rollback restores the fixture only; no data migration or performance claim follows. Unknown well-known header metadata requires a separately accepted narrow Reader design before runtime implementation.
