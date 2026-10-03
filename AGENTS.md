@@ -393,6 +393,9 @@ For changes outside existing owner authorization, obtain direction before changi
 ## Preferences
 
 ### Likes
+- Each agent MUST follow the execution plan for its own user-assigned task and complete only that task; change its scope only when the owner explicitly redirects it (owner correction 2026-10-03).
+- Other chats' plans, progress, requests and concurrent changes MUST NOT expand an agent's task or redirect its implementation. Preserve their work and leave their tasks to their owners (owner correction 2026-10-03).
+- Repairs and verification MUST stay within the assigned task. Report an unrelated failure to the owner without taking over its implementation; direct user instructions remain authoritative (owner correction 2026-10-03).
 - Frequent concise Ukrainian progress stating completed work, remaining work and real blockers.
 - The root README MUST introduce KeyLoad as a product: its purpose, connected data models, agent use cases, getting started, and direct credits to the projects it actually uses. Keep dependency versions in their canonical manifests and link to detailed technical documentation (owner correction 2026-10-03).
 - Shared-checkout work that preserves unrelated changes and completes authorized delivery.

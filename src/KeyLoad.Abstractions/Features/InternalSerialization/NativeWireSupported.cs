@@ -15,6 +15,13 @@ internal static class NativeWireSupported
         {
             return;
         }
+        var normalizedRoot = NativeWireSchema.Normalize(type)!;
+        if (!normalizedRoot.ContainsGenericParameters && !normalizedRoot.IsGenericType
+            && (normalizedRoot.IsPrimitive || normalizedRoot.IsEnum || IsScalar(normalizedRoot)))
+        {
+            NativeWireCheck.Require(1 <= NativeSerializationLimits.WireDepth);
+            return;
+        }
         var pending = new Stack<(Type Type, int Depth)>();
         var visited = new HashSet<Type>();
         pending.Push((type, 1));

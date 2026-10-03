@@ -70,4 +70,38 @@ reaches actual API subprocesses and waits. Pure step/deadline regression data
 never authenticates GitHub or qualifies results. A new exact-source job must
 complete all original report/corpus/generated/provenance/artifact checks.
 
-REQ/AC-IS-PERF005..007 now have the accepted exact terminal-allocation/admission and prospective quantitative/variance contract in ADR060 (NSP006). Test matrix: new NativeWireSupportedScalarTests/Fixtures prove frozen allowed terminals and generic-owner/open closures; ScalarAllocationTests prove measured0B auxiliary delta, nullable Normalize equality; ScalarDepthTests prove264/265 boundaries. Retain all existing native roundtrip/fault/resource tests. AC007 manual evidence exception: actual authenticated before/after originals, corpus/cohort checks, exact interval/ratio/launch arithmetic and independent review. Protected baseline gate remains pending R18 fresh artifact.
+REQ/AC-IS-PERF005..007 now have the accepted exact terminal-allocation/admission and prospective quantitative/variance contract in ADR060 (NSP006). Test matrix: new NativeWireSupportedScalarTests/Fixtures prove frozen allowed terminals and generic-owner/open closures; ScalarAllocationTests prove measured0B auxiliary delta, nullable Normalize equality; ScalarDepthTests prove264/265 boundaries. Retain all existing native roundtrip/fault/resource tests. AC007 manual evidence exception: actual authenticated before/after originals, corpus/cohort checks, exact interval/ratio/launch arithmetic and independent review. The protected R18 baseline gate is admitted by the complete original artifact from run37129441460 at3ae408fe; see the current delivery record below.
+
+## Current delivery and workflow contract, 2026-10-03
+
+The later explicit owner workflow correction supersedes the historical
+AC-IS-PERF-003/004 placement and dispatch requirements above: benchmarks.yml is
+reserved for end-to-end database comparisons. Internal native/raw/codec
+microbenchmarks cannot be its jobs, modes or dependencies. Do not repeat the old
+native-only dispatch. The former job and its unchanged original artifacts remain
+historical evidence; removing its pipeline surface must preserve the actual
+fixture, correctness tests and database comparison gates. Local complete paired
+BDN runs use these same fixtures, six corpora,24 cells and2/3/6/200ms profile,
+with actual source/host/children/exporters and explicit development-only status.
+They do not refresh website performance evidence.
+
+NSP005 baseline admission is complete: exact3ae408fe CI run37129421675 passed
+normal/scalar2637 each, recovery194, RF3 SDK/MCP67 and analyzers118 with no
+skips. Protected run37129441460 retained24 cells, six corpora,48 distinct real
+children and matching127-case normal/scalar diagnostic suites. Artifact11276836758
+has verified SHA256 b3353fa730b664cb70c84dfb49ad9d4f0827849b9e15684998c37f7ce783ec83;
+independent source joins and credential review passed. These results qualify
+only the authentic3ae baseline, never a later candidate.
+
+NSP006 writes are accepted under ADR060 AC-IS-PERF005/006/007. The sole runtime
+change fast-returns existing closed nongeneric terminal types after one unchanged
+Normalize call; the complete fallback and persisted/native corpus bytes remain
+unchanged. Root integrates only the production change and four scalar regressions;
+the owner cancelled the unrelated process-helper branch. The complete local24cell
+pair passed all12native allocation budgets, with Command NativeDecode64.62%/79.11%
+lower allocations at1024/16384. Only3of12JSONmean controls passed; AC007 latency
+qualification remains open. These per-operation allocations do not establish total
+RAM usage or global maximum speed. Final five-source normal/scalar/recovery and
+delivered-source Linux RF3 CI remain distinct from historical image evidence.
+Current original receipts, failures and scope limitations live in
+[stage004](../../implementation/native-serialization-repair-stage-004.json).

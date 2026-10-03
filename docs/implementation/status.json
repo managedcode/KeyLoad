@@ -1,6 +1,6 @@
 {
   "DATABASE-COMPOSITION-001": {
-    "title": "Одна база для агентів: пов'язані моделі та SQL composition",
+    "title": "\u041e\u0434\u043d\u0430 \u0431\u0430\u0437\u0430 \u0434\u043b\u044f \u0430\u0433\u0435\u043d\u0442\u0456\u0432: \u043f\u043e\u0432'\u044f\u0437\u0430\u043d\u0456 \u043c\u043e\u0434\u0435\u043b\u0456 \u0442\u0430 SQL composition",
     "status": "in_progress",
     "decision": "docs/ADR/ADR-067-composable-agent-database.md",
     "feature": "docs/Features/DatabaseComposition.md",
@@ -65,7 +65,7 @@
     "fullScalarQualificationPassed": true
   },
   "SQL-CLIENT-001": {
-    "title": "Повний SQL, клієнтський протокол та перевірка текстового індексу",
+    "title": "\u041f\u043e\u0432\u043d\u0438\u0439 SQL, \u043a\u043b\u0456\u0454\u043d\u0442\u0441\u044c\u043a\u0438\u0439 \u043f\u0440\u043e\u0442\u043e\u043a\u043e\u043b \u0442\u0430 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0430 \u0442\u0435\u043a\u0441\u0442\u043e\u0432\u043e\u0433\u043e \u0456\u043d\u0434\u0435\u043a\u0441\u0443",
     "status": "in_progress",
     "decision": "docs/ADR/ADR-065-full-sql-client-compatibility.md",
     "conformance": "docs/implementation/sql-client-conformance.json",
@@ -326,7 +326,7 @@
     }
   },
   "KL-001": {
-    "title": "Версії, ліцензії та platform matrix",
+    "title": "\u0412\u0435\u0440\u0441\u0456\u0457, \u043b\u0456\u0446\u0435\u043d\u0437\u0456\u0457 \u0442\u0430 platform matrix",
     "status": "in_progress",
     "evidence": [
       "Directory.Packages.props",
@@ -336,7 +336,7 @@
     ]
   },
   "KL-002": {
-    "title": "Формальні API та consistency contracts",
+    "title": "\u0424\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0456 API \u0442\u0430 consistency contracts",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Contracts.cs",
@@ -344,7 +344,7 @@
     ]
   },
   "KL-003": {
-    "title": "ZoneTree durability audit і crash harness",
+    "title": "ZoneTree durability audit \u0456 crash harness",
     "status": "in_progress",
     "atomicWalSerialization": {
       "status": "mandatory_gates_qualified_remaining_resource_migration_performance_evidence_open",
@@ -390,7 +390,7 @@
       "qualificationReceipt": "docs/implementation/runtime-qualification-37065200835.json"
     },
     "nativeInternalSerialization": {
-      "status": "native_generated_R17_R18_local_regressions_pass_GitHub_qualification_pending",
+      "status": "native_generated_3ae_complete_CI_pass_NSP006_local_development_pass_exact_source_CI_pending",
       "decision": "docs/ADR/ADR-060-native-internal-serialization.md",
       "feature": "docs/Features/InternalSerialization.md",
       "staticPreview": "docs/implementation/native-internal-static-preview.json",
@@ -400,10 +400,10 @@
       "open": [
         "Qualified offline old-store conversion and reverse/rollback tooling",
         "General nested native type/reference/default/count/decoded-memory/work bounds",
-        "Complete exact-source native mandatory GitHub gates",
-        "Measured performance and fault evidence"
+        "Complete exact-source NSP006 five-source candidate mandatory gates",
+        "Full comparable native performance, memory, endurance and fault evidence"
       ],
-      "activeRuntime": "Generated native source installed. Historical exact-source unit/recovery runs exposed validation/profile and legacy fixture failures; R13/R14 repair source joins required nullable pair semantics, genuine malformed native producers, byte quotas, complete replay contents, real membership provider and correct no-body sentinel. R15 repairs strict API visibility evidence. Current repair source is not yet runtime-qualified.",
+      "activeRuntime": "Generated native source is installed. Delivered3ae408fe passes complete normal/scalar unit, recovery, analyzer and genuine RF3 SDK/MCP CI. Historical failed runs remain preserved. Pending NSP006 removes auxiliary terminal-type traversal allocations. Only NativeWireSupported and four scalar regressions are in scope; unrelated process-helper changes were undone by owner direction. The complete local24cell pair passes all12native allocation budgets, but only3of12JSONmean controls pass, so latency qualification remains open. Final five-source local image passes full build, normal/scalar2673each with identical test identities, recovery194, formatter and governance; exact delivered-source CI remains pending; local evidence cannot qualify website or maximum performance.",
       "candidateStaticValidation": {
         "scope": "Exact captured TMP source closure only; not latest owner source",
         "projectsCompiled": 25,
@@ -423,7 +423,58 @@
         "scope": "Baseline only; does not qualify expanded native candidate"
       },
       "currentRepairSourceTestsExecuted": true,
-      "repairEvidence": "docs/implementation/native-serialization-repair-stage-003.json"
+      "repairEvidence": "docs/implementation/native-serialization-repair-stage-004.json",
+      "deliveredCorrectness": {
+        "sourceCommit": "3ae408fe173bf0dd69dd335e688c17fe99457ad3",
+        "runId": 37129421675,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37129421675",
+        "conclusion": "success",
+        "normalUnit": 2637,
+        "scalarUnit": 2637,
+        "sameUnitIdentities": true,
+        "recovery": 194,
+        "rf3": 67,
+        "analyzers": 118,
+        "scope": "Exact delivered source only; pending NSP006 five-source candidate and offline migration remain unqualified"
+      },
+      "localAllocationExperiment": {
+        "scope": "Local macOS27.0.1 Arm64 M2Pro, BDN0.15.8/.NET10.0.12; frozen v8 production image; not final five-source or GitHub performance qualification",
+        "fullCells": 24,
+        "realChildLaunchesPerSide": 48,
+        "all12NativeAllocationBudgetsPass": true,
+        "jsonControlMeansPass": 3,
+        "jsonControlMeansTotal": 12,
+        "latencyQualified": false,
+        "commandNativeDecode": {
+          "payload1024": {
+            "referenceBytesPerOp": 128270,
+            "candidateBytesPerOp": 45386,
+            "reductionPercent": 64.61682388711311
+          },
+          "payload16384": {
+            "referenceBytesPerOp": 1541554,
+            "candidateBytesPerOp": 321975,
+            "reductionPercent": 79.11360873508161
+          }
+        }
+      },
+      "candidateDevelopment": {
+        "scope": "Exact five-source local image; not shared-checkout/GitHub qualification",
+        "baseCommit": "2db94bde97165b94adf172da7fc8203e1ec3490f",
+        "sourceManifestSha256": "79274dcfcaed2c5a7f539bb2f2d7504702afbad010676819646b9bf55b89e85c",
+        "ownedSourceFiles": 5,
+        "buildWarnings": 0,
+        "buildErrors": 0,
+        "normalUnit": 2673,
+        "scalarUnit": 2673,
+        "sameTestIdentities": true,
+        "failedSkippedCancelledTimedOut": 0,
+        "recovery": 194,
+        "formatter": "passed",
+        "governance": "passed",
+        "sourceReview": "accepted",
+        "deliveredSourceCI": "pending"
+      }
     }
   },
   "KL-004": {
@@ -444,7 +495,7 @@
     ]
   },
   "KL-006": {
-    "title": "Порівняльні бенчмарки та кластерна методологія",
+    "title": "\u041f\u043e\u0440\u0456\u0432\u043d\u044f\u043b\u044c\u043d\u0456 \u0431\u0435\u043d\u0447\u043c\u0430\u0440\u043a\u0438 \u0442\u0430 \u043a\u043b\u0430\u0441\u0442\u0435\u0440\u043d\u0430 \u043c\u0435\u0442\u043e\u0434\u043e\u043b\u043e\u0433\u0456\u044f",
     "status": "in_progress",
     "evidence": [
       "benchmarks/KeyLoad.Benchmarks/Program.cs",
@@ -557,7 +608,7 @@
     }
   },
   "KL-007": {
-    "title": "KeyCodec і storage envelopes",
+    "title": "KeyCodec \u0456 storage envelopes",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Storage/KeyCodec.cs",
@@ -565,7 +616,7 @@
     ]
   },
   "KL-008": {
-    "title": "Storage adapter і lifetime",
+    "title": "Storage adapter \u0456 lifetime",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
@@ -574,7 +625,7 @@
     ]
   },
   "KL-009": {
-    "title": "Partition writer і command envelope",
+    "title": "Partition writer \u0456 command envelope",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/ClusterCoordinator.cs",
@@ -582,7 +633,7 @@
     ]
   },
   "KL-010": {
-    "title": "Document CRUD та CAS",
+    "title": "Document CRUD \u0442\u0430 CAS",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Documents.cs",
@@ -591,7 +642,7 @@
     ]
   },
   "KL-011": {
-    "title": "Strict indexes і unique scope",
+    "title": "Strict indexes \u0456 unique scope",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Documents.cs",
@@ -600,7 +651,7 @@
     ]
   },
   "KL-012": {
-    "title": "Batch і persisted idempotency",
+    "title": "Batch \u0456 persisted idempotency",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Documents.cs",
@@ -609,7 +660,7 @@
     ]
   },
   "KL-013": {
-    "title": "Query AST, planner і cursors",
+    "title": "Query AST, planner \u0456 cursors",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/QueryAst.cs",
@@ -619,7 +670,7 @@
     ]
   },
   "KL-014": {
-    "title": "Standalone server і C# SDK",
+    "title": "Standalone server \u0456 C# SDK",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Server/ApiEndpoints.cs",
@@ -627,7 +678,7 @@
     ]
   },
   "KL-015": {
-    "title": "Security і telemetry baseline",
+    "title": "Security \u0456 telemetry baseline",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/AuthorizationPolicy.cs",
@@ -662,7 +713,7 @@
     ]
   },
   "KL-019": {
-    "title": "Orleans membership і ownership adapter",
+    "title": "Orleans membership \u0456 ownership adapter",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Orleans/ConsensusMembershipTable.cs",
@@ -670,7 +721,7 @@
     ]
   },
   "KL-020": {
-    "title": "Три-вузловий replicated apply",
+    "title": "\u0422\u0440\u0438-\u0432\u0443\u0437\u043b\u043e\u0432\u0438\u0439 replicated apply",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
@@ -679,7 +730,7 @@
     ]
   },
   "KL-021": {
-    "title": "Strong read і session tokens",
+    "title": "Strong read \u0456 session tokens",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/ClusterCoordinator.cs",
@@ -713,7 +764,7 @@
     ]
   },
   "KL-025": {
-    "title": "Time-series range і aggregates",
+    "title": "Time-series range \u0456 aggregates",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/GraphAndSeries.cs",
@@ -797,12 +848,12 @@
     }
   },
   "KL-026": {
-    "title": "Retention, expiry і rollups",
+    "title": "Retention, expiry \u0456 rollups",
     "status": "pending",
     "evidence": []
   },
   "KL-027": {
-    "title": "Canonical vectors і exact search",
+    "title": "Canonical vectors \u0456 exact search",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/GraphAndSeries.cs",
@@ -815,7 +866,7 @@
     "evidence": []
   },
   "KL-029": {
-    "title": "Text projection і rebuild",
+    "title": "Text projection \u0456 rebuild",
     "status": "pending",
     "evidence": []
   },
@@ -835,7 +886,7 @@
     "evidence": []
   },
   "KL-033": {
-    "title": "Hybrid rank і Explain",
+    "title": "Hybrid rank \u0456 Explain",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/SearchEngine.cs",
@@ -851,7 +902,7 @@
     ]
   },
   "KL-035": {
-    "title": "Replica snapshot і installation",
+    "title": "Replica snapshot \u0456 installation",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/Checkpoints.cs",
@@ -994,7 +1045,7 @@
     }
   },
   "KL-041": {
-    "title": "Chaos і corruption suite",
+    "title": "Chaos \u0456 corruption suite",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
@@ -1003,7 +1054,7 @@
     ]
   },
   "KL-042": {
-    "title": "Cluster backup і restore drills",
+    "title": "Cluster backup \u0456 restore drills",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
@@ -1012,12 +1063,12 @@
     ]
   },
   "KL-043": {
-    "title": "Upgrade і format compatibility",
+    "title": "Upgrade \u0456 format compatibility",
     "status": "pending",
     "evidence": []
   },
   "KL-044": {
-    "title": "Release gate і operational handbook",
+    "title": "Release gate \u0456 operational handbook",
     "status": "in_progress",
     "evidence": [
       "README.md",
@@ -1026,7 +1077,7 @@
     ]
   },
   "KL-045": {
-    "title": "Query capability manifest і AST version",
+    "title": "Query capability manifest \u0456 AST version",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/QueryAst.cs",
@@ -1048,7 +1099,7 @@
     ]
   },
   "KL-047": {
-    "title": "SQL parser adapter і diagnostics",
+    "title": "SQL parser adapter \u0456 diagnostics",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/QueryAst.cs",
@@ -1058,7 +1109,7 @@
     ]
   },
   "KL-048": {
-    "title": "Binder і field lineage",
+    "title": "Binder \u0456 field lineage",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/QueryAst.cs",
@@ -1080,7 +1131,7 @@
     ]
   },
   "KL-050": {
-    "title": "Batch executor і secure operator boundaries",
+    "title": "Batch executor \u0456 secure operator boundaries",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/QueryAst.cs",
@@ -1101,7 +1152,7 @@
     ]
   },
   "KL-052": {
-    "title": "Ранній admission control",
+    "title": "\u0420\u0430\u043d\u043d\u0456\u0439 admission control",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/QueryAst.cs",
@@ -1116,7 +1167,7 @@
     ]
   },
   "KL-053": {
-    "title": "Session facade та independent query contexts",
+    "title": "Session facade \u0442\u0430 independent query contexts",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Client/KeyLoadQuery.cs",
@@ -1125,7 +1176,7 @@
     ]
   },
   "KL-054": {
-    "title": "SQL differential і metamorphic suite",
+    "title": "SQL differential \u0456 metamorphic suite",
     "status": "in_progress",
     "evidence": [
       "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
@@ -1149,7 +1200,7 @@
     "evidence": []
   },
   "KL-058": {
-    "title": "BM25 corpus і statistics epochs",
+    "title": "BM25 corpus \u0456 statistics epochs",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/SearchEngine.cs",
@@ -1167,7 +1218,7 @@
     "evidence": []
   },
   "KL-061": {
-    "title": "Principals, API keys і RBAC",
+    "title": "Principals, API keys \u0456 RBAC",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/AuthorizationPolicy.cs",
@@ -1194,7 +1245,7 @@
     ]
   },
   "KL-064": {
-    "title": "Єдиний safe projector",
+    "title": "\u0404\u0434\u0438\u043d\u0438\u0439 safe projector",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/AuthorizationPolicy.cs",
@@ -1203,7 +1254,7 @@
     ]
   },
   "KL-065": {
-    "title": "Row ACL planner і graph enforcement",
+    "title": "Row ACL planner \u0456 graph enforcement",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/AuthorizationPolicy.cs",
@@ -1212,7 +1263,7 @@
     ]
   },
   "KL-066": {
-    "title": "Revocation epochs і cursor reauthorization",
+    "title": "Revocation epochs \u0456 cursor reauthorization",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/AuthorizationPolicy.cs",
@@ -1221,7 +1272,7 @@
     ]
   },
   "KL-067": {
-    "title": "Classification lineage у search projections",
+    "title": "Classification lineage \u0443 search projections",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/GraphAndSeries.cs",
@@ -1246,7 +1297,7 @@
     ]
   },
   "KL-070": {
-    "title": "Placement і tenant packing",
+    "title": "Placement \u0456 tenant packing",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Orleans/ConsensusMembershipTable.cs",
@@ -1277,7 +1328,7 @@
     "evidence": []
   },
   "KL-075": {
-    "title": "Scaling benchmark і fair deployment arms",
+    "title": "Scaling benchmark \u0456 fair deployment arms",
     "status": "pending",
     "evidence": []
   },
@@ -1290,7 +1341,7 @@
     ]
   },
   "KL-077": {
-    "title": "Hot-path allocation і SIMD оптимізація",
+    "title": "Hot-path allocation \u0456 SIMD \u043e\u043f\u0442\u0438\u043c\u0456\u0437\u0430\u0446\u0456\u044f",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/SearchEngine.cs",
@@ -1317,7 +1368,7 @@
     "evidence": []
   },
   "KL-079": {
-    "title": "Resumable change feed і обмежені live queries",
+    "title": "Resumable change feed \u0456 \u043e\u0431\u043c\u0435\u0436\u0435\u043d\u0456 live queries",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/ChangeFeeds.cs",
@@ -1328,12 +1379,12 @@
     ]
   },
   "KL-080": {
-    "title": "Integrated feature і performance release gate",
+    "title": "Integrated feature \u0456 performance release gate",
     "status": "pending",
     "evidence": []
   },
   "KL-081": {
-    "title": "Eventing contracts і shared TransactionDomain",
+    "title": "Eventing contracts \u0456 shared TransactionDomain",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Contracts.cs",
@@ -1342,7 +1393,7 @@
     ]
   },
   "KL-082": {
-    "title": "Event/queue keyspace і state envelopes",
+    "title": "Event/queue keyspace \u0456 state envelopes",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Events.cs",
@@ -1352,7 +1403,7 @@
     ]
   },
   "KL-083": {
-    "title": "AppendEvents, expected revision та dedup",
+    "title": "AppendEvents, expected revision \u0442\u0430 dedup",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Events.cs",
@@ -1361,7 +1412,7 @@
     ]
   },
   "KL-084": {
-    "title": "ReadStream, feed cursors і catch-up",
+    "title": "ReadStream, feed cursors \u0456 catch-up",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Events.cs",
@@ -1371,12 +1422,12 @@
     ]
   },
   "KL-085": {
-    "title": "Aggregate snapshots, schemas та replay",
+    "title": "Aggregate snapshots, schemas \u0442\u0430 replay",
     "status": "pending",
     "evidence": []
   },
   "KL-086": {
-    "title": "Durable enqueue і queue-lane state",
+    "title": "Durable enqueue \u0456 queue-lane state",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Messaging.cs",
@@ -1385,7 +1436,7 @@
     ]
   },
   "KL-087": {
-    "title": "Claim, ACK, renew і delivery fencing",
+    "title": "Claim, ACK, renew \u0456 delivery fencing",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Messaging.cs",
@@ -1394,7 +1445,7 @@
     ]
   },
   "KL-088": {
-    "title": "Retry, DLQ, cancellation та expiry",
+    "title": "Retry, DLQ, cancellation \u0442\u0430 expiry",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Messaging.cs",
@@ -1403,7 +1454,7 @@
     ]
   },
   "KL-089": {
-    "title": "Durable groups і contiguous checkpoints",
+    "title": "Durable groups \u0456 contiguous checkpoints",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/SubscriptionGroups.cs",
@@ -1413,7 +1464,7 @@
     ]
   },
   "KL-090": {
-    "title": "Inbox і CommitProcessing",
+    "title": "Inbox \u0456 CommitProcessing",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Messaging.cs",
@@ -1433,7 +1484,7 @@
     ]
   },
   "KL-092": {
-    "title": "Persisted scheduler і clock contract",
+    "title": "Persisted scheduler \u0456 clock contract",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Messaging.cs",
@@ -1442,7 +1493,7 @@
     ]
   },
   "KL-093": {
-    "title": "Orleans coordinators і worker SDK",
+    "title": "Orleans coordinators \u0456 worker SDK",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Orleans/ConsensusMembershipTable.cs",
@@ -1455,12 +1506,12 @@
     "evidence": []
   },
   "KL-095": {
-    "title": "Event SQL, queue views та protocol",
+    "title": "Event SQL, queue views \u0442\u0430 protocol",
     "status": "pending",
     "evidence": []
   },
   "KL-096": {
-    "title": "Event/message RBAC і sensitive schemas",
+    "title": "Event/message RBAC \u0456 sensitive schemas",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/AuthorizationPolicy.cs",
@@ -1471,12 +1522,12 @@
     ]
   },
   "KL-097": {
-    "title": "Event-driven projections і search lineage",
+    "title": "Event-driven projections \u0456 search lineage",
     "status": "pending",
     "evidence": []
   },
   "KL-098": {
-    "title": "Eventing retention, purge і backup state",
+    "title": "Eventing retention, purge \u0456 backup state",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
@@ -1486,7 +1537,7 @@
     ]
   },
   "KL-099": {
-    "title": "Eventing replication і migration",
+    "title": "Eventing replication \u0456 migration",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
@@ -1496,12 +1547,12 @@
     ]
   },
   "KL-100": {
-    "title": "Delayed jobs, recurring occurrences і saga state",
+    "title": "Delayed jobs, recurring occurrences \u0456 saga state",
     "status": "pending",
     "evidence": []
   },
   "KL-101": {
-    "title": "Eventing benchmark kit і .NET baselines",
+    "title": "Eventing benchmark kit \u0456 .NET baselines",
     "status": "in_progress",
     "evidence": [
       "benchmarks/KeyLoad.Comparisons/Targets/KeyLoadTarget.cs",
@@ -1512,7 +1563,7 @@
     ]
   },
   "KL-102": {
-    "title": "Eventing failure і state-machine suite",
+    "title": "Eventing failure \u0456 state-machine suite",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Messaging.cs",
@@ -1530,7 +1581,7 @@
     ]
   },
   "KL-104": {
-    "title": "All-in-one release manifest і runbooks",
+    "title": "All-in-one release manifest \u0456 runbooks",
     "status": "in_progress",
     "evidence": [
       "README.md",
@@ -2482,7 +2533,7 @@
     }
   },
   "AdminDashboard": {
-    "title": "Read-only адміністративна панель бази даних",
+    "title": "Read-only \u0430\u0434\u043c\u0456\u043d\u0456\u0441\u0442\u0440\u0430\u0442\u0438\u0432\u043d\u0430 \u043f\u0430\u043d\u0435\u043b\u044c \u0431\u0430\u0437\u0438 \u0434\u0430\u043d\u0438\u0445",
     "status": "in_progress",
     "source": "implemented",
     "route": "/admin",
@@ -2534,7 +2585,7 @@
     }
   },
   "AI-SQL-001": {
-    "title": "Єдиний SQL-вхід для пов’язаної AI database",
+    "title": "\u0404\u0434\u0438\u043d\u0438\u0439 SQL-\u0432\u0445\u0456\u0434 \u0434\u043b\u044f \u043f\u043e\u0432\u2019\u044f\u0437\u0430\u043d\u043e\u0457 AI database",
     "status": "in_progress",
     "sourceStage": "version1_SELECT_CALL_canonical_operation_adapter_typed_rows_native_equality_planning",
     "qualification": "pending_exact_delivered_SHA_GitHub_full_gates",

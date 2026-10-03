@@ -63,3 +63,36 @@ diagnostic job do not qualify runtime, acceleration, RF3 or durability.
 
 
 R17 under REQ-IS002/AC-IS002 and AC-IS004/007 distinguishes persisted native queue-body corruption from caller validation, preserving bytes, ready state, counters, positions and absent outcome before successful restore with the same request identity. QueueBodyAccountingTests/QueueBodyFailureAssertions own this real-ZoneTree fixture. Unknown well-known header metadata is classified only at the official single-header/span boundary in NativeFieldHeaderReader, using the saved official Reader and registered type table; arbitrary owned/generated/session key failures remain visible. NativeUnknownWellKnownHeader* tests use genuine writer twins, extended field deltas and public/MCP controls. ADR060 owns the accepted implementation and rollback. Normal/scalar/recovery/RF3 qualification remains exact-source GitHub-only; source review and a development build cannot satisfy it.
+
+## Terminal admission allocation reduction
+
+REQ-IS-PERF005 / AC-IS-PERF005 requires zero auxiliary allocation for warmed,
+normalized terminal types and nullable admission allocation equal to the existing
+Normalize loop. REQ-IS-PERF006 / AC-IS-PERF006 preserves the supported domain,
+closed generic-owner enum fallback and exact type-depth264/265 boundary. Only
+NativeWireSupported's existing primitive/enum/scalar predicate receives a root
+shortcut; the complete iterative fallback, generated codecs, persisted bytes,
+resource limits and validation remain unchanged. NativeWireSupportedScalar
+AllocationTests, Tests, Fixtures and DepthTests own the positive, unsupported,
+nullable, byte-ownership and depth controls. ADR060 records rollout and rollback.
+
+REQ-IS-PERF007 / AC-IS-PERF007 uses the prospective allocation/latency budgets,
+complete24-cell profile, six exact corpora, twelve JSON cohort controls and
+conservative interval decision in ADR060. Pair arithmetic requires retained
+originals and independent review; two local command-decode cells cannot satisfy
+this full criterion. Internal microbenchmarks follow the latest root policy and
+must not be dispatched through the end-to-end database comparison workflow.
+
+The [stage004 evidence](../implementation/native-serialization-repair-stage-004.json)
+binds the complete successful normal/scalar/recovery/analyzer/RF3 CI and protected
+24-cell diagnostic baseline to delivered commit3ae408fe. The pending shortcut's
+full local24cell experiment preserves all six corpora and native/JSON bytes.
+Command NativeDecode allocation falls from128270 to45386B/op for1KiB and from
+1541554 to321975B/op for16KiB (64.62%/79.11%). All12native allocation budgets
+pass. Only3of12JSONmean controls pass, so the pair does not qualify latency or
+AC-IS-PERF007. These are per-operation allocations, not total server RAM.
+Final five-source build, normal/scalar, recovery and exact-source RF3 gates
+remain separate from the historical image that produced this pair.
+The owner cancelled the unrelated process-helper repair branch. This delivery
+contains only the admission shortcut and its four scalar regression files;
+source-image results containing cancelled helpers remain historical evidence.

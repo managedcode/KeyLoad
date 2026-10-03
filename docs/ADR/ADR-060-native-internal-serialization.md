@@ -437,3 +437,36 @@ original report inputs, exact ratios/intervals/launch summaries, source diff and
 independent reviewer signature. Controlled arithmetic cannot authenticate GitHub.
 Local BDN experiments are owner-authorized development evidence with actual
 source/machine/settings, and cannot qualify website/cluster results.
+
+
+## NSP006 development verification and assigned scope
+
+AC-IS-PERF005 measurement scheduling is explicitly isolated after the actual full
+v7 report measured Normalize262480B and Require262144B while the focused exact
+comparison passed. This demonstrates a context-dependent measurement difference;
+it does not prove a specific CLR cache/GC cause or extra production allocation.
+The two scalar allocation tests use the pinned TUnit1.72.10 no-key NotInParallel
+class constraint, whose actual package XML specifies exclusion from every other
+test. Preserve the same32 warmups,4096 iterations, synchronous current-thread
+windows, outside-window data/assertions, exact0B and exact equality. No tolerated
+bytes, min-of-retries, extra cache, GC manipulation, removed case or changed
+production code. This follows the existing JsonTextAllocationTests scheduling
+boundary; all other tests remain parallel. The scalar worker owns only the one
+class scheduling attribute after root acceptance; root verifies the full normal/
+scalar suite and retains the original failed report.
+
+The latest owner instruction confines this delivery to native Orleans serialization
+latency and allocations: NativeWireSupported and its four scalar regression files.
+The R19 process-observation repair branch was cancelled; all eight exact task-owned
+source edits were undone, with original sources and reports retained outside the
+checkout. The existing process-lifetime failure remains reported as unrelated
+verification evidence. No weakened assertion or process-helper change is delivered.
+
+The historical native diagnostic run37129441460 at3ae408fe remains authenticated.
+Do not dispatch its former internal mode through benchmarks.yml; that workflow
+owns end-to-end database comparisons. Local full24-cell BDN pairs retain exact
+corpora, profile, actual host, controls and original samples. A source image must
+retain every tracked base file and only its declared overlays. Its results prove
+only that image, not a green shared checkout or delivered GitHub qualification.
+Images containing cancelled R19 overlays remain historical evidence and cannot
+qualify the final five-source delivery. Required exact-source CI/RF3 gates remain.

@@ -42,3 +42,11 @@ System/derived-collection native codec shapes must fail before allocation.
 Bounded unknown fields, known-schema references and the actual owned generated
 closure retain positive coverage. Full arbitrary native codec compatibility is
 out of scope and requires a separately accepted bounded shape contract.
+
+## NSP006 criteria
+
+| ID | Pass/fail contract | Automated evidence |
+|---|---|---|
+| AC-IS-PERF005 | Warm normalized terminal admission allocates0 auxiliary bytes; nullable admission equals independent unchanged Normalize allocation. No caches or changed limits. | NativeWireSupportedScalarAllocationTests use the no-key TUnit NotInParallel constraint; exact byte assertions,32 warmups/4096 iterations and outside-window data remain unchanged. |
+| AC-IS-PERF006 | Supported closed terminal roots pass; open/unsupported roots and unsupported generic-owner arguments fail with the original corruption error. Fixed263 array wrappers pass;264 fail. Generated nullable values/nulls, ordered collections and independent bytes survive round trips. | NativeWireSupportedScalarTests/Fixtures/DepthTests plus the complete existing native normal/scalar suite. |
+| AC-IS-PERF007 | All prospective budgets, six exact corpus receipts, full24-cell profile, twelve JSON controls and confidence/cohort conditions in ADR060 hold. Missing/drifted/indeterminate pairs fail qualification. | Actual complete BDN originals and strict report validation; explicit manual arithmetic exception requires source/host/profile-bound originals and independent review. Local two-cell data is insufficient. |
