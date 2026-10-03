@@ -84,3 +84,10 @@ The dedicated exact-main Linux workflow is independent from failing270 baseline;
 actual pinned image/PG18/privilege/permission facts remain required before native
 Timescale resource/bootstrap writes. Source readiness is not a successful image
 probe, cluster proof or measured TimeSeries cohort.
+
+Actual source38b57cb image run37086823368 failed workflow validation before any
+job: runner.temp was used in job-level env, where GitHub does not provide runner
+context. Root moves the same bounded evidence path to the actual test step env;
+no provider environment/identity is fabricated. Repaired-source native job remains
+the proof. Combined ComparisonTests development compilation passes0warnings/
+0errors30.19s; this is source verification only.

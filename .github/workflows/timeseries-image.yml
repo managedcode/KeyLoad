@@ -19,8 +19,6 @@ jobs:
     if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    env:
-      KEYLOAD_TIMESERIES_IMAGE_FACTS_DIRECTORY: ${{ runner.temp }}/keyload-timeseries-image-facts
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
@@ -36,6 +34,8 @@ jobs:
       - run: dotnet restore KeyLoad.slnx
       - run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Observe the actual pinned Timescale image and native bootstrap primitives
+        env:
+          KEYLOAD_TIMESERIES_IMAGE_FACTS_DIRECTORY: ${{ runner.temp }}/keyload-timeseries-image-facts
         run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesIntensivePinnedImageTests/*' --results-directory TestResults/timeseries-image
       - name: Retain actual native image facts and feasibility qualification
         if: always()
