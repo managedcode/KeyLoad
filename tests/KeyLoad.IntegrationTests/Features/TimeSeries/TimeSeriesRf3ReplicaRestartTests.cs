@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
@@ -13,10 +15,16 @@ internal sealed class TimeSeriesRf3ReplicaRestartTests(ClusterFixture fixture)
     private const string RestartFailureKey = "KeyLoad.TimeSeriesFollowerRestartFailure";
     private const string InitialSampleId = "initial";
     private const string LateSampleId = "late";
+    private const string LatestFailureMessage = "Latest-sample read failed: {0}; {1}.";
+    private const string WindowsFailureMessage = "Window aggregate read failed: {0}; {1}.";
+    private const string MissingProblemCode = "MissingProblem";
+    private const string MissingSafeDetail = "No safe detail returned.";
     private const string MissingLeaderUri = "The initialized RF3 node status omitted its current leader URI.";
     private const int NodeCount = TimeSeriesRf3Scenario.NodeCount;
     private const int FirstNode = TimeSeriesRf3Scenario.FirstNode;
     private const int ReadinessSeconds = 45;
+    private static readonly CompositeFormat LatestFailureFormat = CompositeFormat.Parse(LatestFailureMessage);
+    private static readonly CompositeFormat WindowsFailureFormat = CompositeFormat.Parse(WindowsFailureMessage);
     private static readonly TimeSpan OriginalTestLifetime = TimeSpan.FromMinutes(2);
     private static readonly TimeSpan ReadinessLifetime = TimeSpan.FromSeconds(ReadinessSeconds);
 
@@ -102,13 +110,15 @@ internal sealed class TimeSeriesRf3ReplicaRestartTests(ClusterFixture fixture)
         CancellationToken cancellationToken)
     {
         var latest = await client.ReadLatestSampleAsync(scenario.Latest(), cancellationToken);
-        await Assert.That(latest.IsSuccess).IsTrue();
+        await Assert.That(latest.IsSuccess).IsTrue().Because(string.Format(CultureInfo.InvariantCulture,
+            LatestFailureFormat, latest.Problem?.ErrorCode ?? MissingProblemCode, latest.Problem?.Detail ?? MissingSafeDetail));
         await Assert.That(latest.Value!.Sample?.Sample.EventId).IsEqualTo(LateSampleId);
         await Assert.That(latest.Value.Sample?.Sample.Value).IsEqualTo(-7d);
         var request = scenario.Windows(TimeSeriesRf3Scenario.Start,
             TimeSeriesRf3Scenario.Start.AddMinutes(2), TimeSeriesRf3Scenario.Minute);
         var windows = await client.AggregateSampleWindowsAsync(request, cancellationToken);
-        await Assert.That(windows.IsSuccess).IsTrue();
+        await Assert.That(windows.IsSuccess).IsTrue().Because(string.Format(CultureInfo.InvariantCulture,
+            WindowsFailureFormat, windows.Problem?.ErrorCode ?? MissingProblemCode, windows.Problem?.Detail ?? MissingSafeDetail));
         await Assert.That(windows.Value!.Windows.Length).IsEqualTo(2);
         await Assert.That(windows.Value.Windows[0].Aggregate.Count).IsEqualTo(1L);
         await Assert.That(windows.Value.Windows[0].Aggregate.Sum).IsEqualTo(3d);

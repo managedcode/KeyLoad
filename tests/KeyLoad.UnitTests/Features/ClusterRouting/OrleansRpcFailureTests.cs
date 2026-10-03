@@ -14,6 +14,7 @@ internal sealed class OrleansRpcFailureTests
     private const string CommandDetail = "The write outcome is unknown. Retry the same command ID.";
     private const string OrleansCategory = "Orleans";
     private const string TimeoutCategory = "Timeout";
+    private const string CancellationCategory = "Cancellation";
 
     [Test]
     [Arguments(false)]
@@ -40,13 +41,13 @@ internal sealed class OrleansRpcFailureTests
     }
 
     [Test]
-    public async Task AcRoute009CancellationDomainRecoveryAndOtherFailuresRemainOutsideTheNativeCatch()
+    public async Task AcRoute009DomainRecoveryAndOtherFailuresRemainOutsideTheNativeCatch()
     {
         Exception[] excluded =
         [
             Errors.Fail(ErrorCode.RecoveryRequired, PrivateCanary),
             Errors.Fail(ErrorCode.PermissionDenied, PrivateCanary),
-            new OperationCanceledException(PrivateCanary), new JsonException(PrivateCanary),
+            new JsonException(PrivateCanary),
             new ArgumentException(PrivateCanary), new InvalidOperationException(PrivateCanary),
             new IOException(PrivateCanary)
         ];
@@ -78,6 +79,30 @@ internal sealed class OrleansRpcFailureTests
     }
 
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task AcRoute009ForeignCancellationKeepsReadOrCommandOutcomeWithAnActiveCaller(bool command)
+    {
+        using var foreignCancellation = new CancellationTokenSource();
+        await foreignCancellation.CancelAsync();
+        var original = new OperationCanceledException(PrivateCanary, foreignCancellation.Token);
+        var requestId = Guid.NewGuid();
+        var (failure, output) = TranslateAndCapture(original, command, requestId);
+        var expectedCode = command ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost;
+
+        await Assert.That(OrleansRpcFailure.IsNative(original)).IsTrue();
+        await Assert.That(original.CancellationToken).IsEqualTo(foreignCancellation.Token);
+        await Assert.That(failure.Code).IsEqualTo(expectedCode);
+        await Assert.That(failure.Message).IsEqualTo(command ? CommandDetail : ReadDetail);
+        await Assert.That(failure.InnerException).IsNull();
+        await Assert.That(output).Contains(requestId.ToString());
+        await Assert.That(output).Contains(CancellationCategory);
+        await Assert.That(output).Contains(expectedCode.ToString());
+        await Assert.That(output).DoesNotContain(PrivateCanary);
+        await Assert.That(output).DoesNotContain(original.GetType().FullName!);
+    }
+
+    [Test]
     public async Task AcRoute009TranslatorCannotAccidentallyConvertAStorageRecoveryError()
     {
         var original = Errors.Fail(ErrorCode.RecoveryRequired, PrivateCanary);
@@ -96,6 +121,8 @@ internal sealed class OrleansRpcFailureTests
         yield return (new OrleansException(PrivateCanary), OrleansCategory);
         yield return (new global::Orleans.Runtime.Messaging.ConnectionFailedException(PrivateCanary, new IOException(PrivateCanary)), OrleansCategory);
         yield return (new TimeoutException(PrivateCanary, new IOException(PrivateCanary)), TimeoutCategory);
+        yield return (new OperationCanceledException(PrivateCanary), CancellationCategory);
+        yield return (new TaskCanceledException(PrivateCanary), CancellationCategory);
     }
 
     private static (KeyLoadException Failure, string Output) TranslateAndCapture(Exception error, bool command, Guid requestId)

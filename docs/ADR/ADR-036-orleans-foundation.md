@@ -574,3 +574,29 @@ ambiguous cancellation classification and requires requalification. Keep the exi
 must receive the same computed code as the returned reply. Internal execution
 phase of run37070004864 failure was not retained reliably, so this refinement is
 source-justified without claiming that its RF3 root cause is established.
+
+
+## Preserving initial-RPC cancellation refinement
+
+TASK-WAL-CI-RPC-CANCEL extends REQ/AC-ROUTE-009/010 after exact07ca0e807
+run37081539615 native RF3 evidence: CredentialDispatch/OperationCanceled during
+stopped-node snapshot catch-up reached generic RecoveryRequired with an inactive
+incoming caller token. At the sole existing initial-RPC await, classify native
+OperationCanceledException (including TaskCanceledException) with the closed
+Cancellation category. An active caller token still throws its own cancellation
+before classification/logging. Reads retain OwnershipLost; possibly dispatched
+commands retain UnknownWriteOutcome and their exact stable-ID resolution.
+Typed domain RecoveryRequired and every other nonnative exception stay outside
+the catch. No retry, ACK, WAL/wire format, topology, arbitrary text or exception
+object logging changes.
+
+Lead owns the boundary helper, accepted doc/feature joins and final delivery; a
+read-only regression worker prepares the existing actual-exception tests before
+implementation. Those tests require every new category's read/write/privacy and
+caller-token precedence, including cancellation with an independent token; domain
+recovery must never be translated. Root reviews exact diffs, builds/formats, then
+complete exact-SHA GitHub unit/scalar/process recovery and real RF3 SDK/MCP gate.
+The TimeSeries follower test separately retains safe Problem code/detail on its
+unchanged success assertions; no unobserved response code authorizes a retry.
+Rollback removes only this classification case/tests while preserving native
+Orleans/timeout handling; there is no persisted migration. Qualification pending.

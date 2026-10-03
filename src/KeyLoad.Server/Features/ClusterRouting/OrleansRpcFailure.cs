@@ -6,7 +6,9 @@ internal enum OrleansRpcFailureCategory
     /// <summary>The native Orleans runtime could not complete the call.</summary>
     Orleans,
     /// <summary>The initial call exceeded its native response deadline.</summary>
-    Timeout
+    Timeout,
+    /// <summary>The initial native call was cancelled independently of caller cancellation.</summary>
+    Cancellation
 }
 
 /// <summary>Classifies initial native RPC failures without claiming storage damage or retrying a command.</summary>
@@ -21,7 +23,7 @@ internal static class OrleansRpcFailure
         LoggerMessage.Define<Guid, OrleansRpcFailureCategory, ErrorCode>(LogLevel.Warning,
             new EventId(FailureEventId), FailureMessage);
 
-    internal static bool IsNative(Exception error) => error is OrleansException or TimeoutException;
+    internal static bool IsNative(Exception error) => error is OrleansException or TimeoutException or OperationCanceledException;
 
     internal static KeyLoadException Translate(Exception error, bool command, Guid requestId, ILogger logger,
         CancellationToken cancellationToken)
@@ -32,6 +34,7 @@ internal static class OrleansRpcFailure
         {
             OrleansException => OrleansRpcFailureCategory.Orleans,
             TimeoutException => OrleansRpcFailureCategory.Timeout,
+            OperationCanceledException => OrleansRpcFailureCategory.Cancellation,
             _ => throw new ArgumentException(InvalidFailure, nameof(error))
         };
         var code = command ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost;

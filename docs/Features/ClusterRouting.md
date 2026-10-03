@@ -18,7 +18,7 @@ Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../
 | REQ-ROUTE-003: silo membership starts without a second cluster stack or a single primary-node dependency. | AC-ROUTE-003: all three Docker silos become ready; the remaining two continue when any configured voter is killed. |
 | REQ-ROUTE-006: enforced grain-call policy permits only the declared application transitions and does not route native replica system targets through application telemetry grains. | AC-ROUTE-006: real RF3 authentication/write/read succeeds with enforcement enabled; direct capability calls remain denied; upstream Graph regression proves the default native-system-target exclusion and preserves explicit tracking. |
 | REQ-ROUTE-008: rejected requests provide bounded internal diagnostics without private data or changed public errors. | AC-ROUTE-008: actual logging provider records request GUID, closed stage/category and typed error code; malformed payload/typed decode/general JSON or argument failures omit payload, identity, credentials and raw exception text; successful calls allocate no diagnostic context; existing SDK/MCP RF3 outcomes remain unchanged. |
-| REQ-ROUTE-009: initial native Orleans RPC failures retain transport/outcome semantics without claiming storage damage. | AC-ROUTE-009 / AC-AISQL-011: server-derived reads report OwnershipLost, possibly dispatched commands report UnknownWriteOutcome; native exception/timeout tests and stopped-replica RF3 replay preserve domain RecoveryRequired, caller cancellation, secret-free details and exactly one dispatch. |
+| REQ-ROUTE-009: initial native Orleans RPC failures retain transport/outcome semantics without claiming storage damage. | AC-ROUTE-009 / AC-AISQL-011: server-derived reads report OwnershipLost, possibly dispatched commands report UnknownWriteOutcome; native exception/timeout/noncaller cancellation tests and stopped-replica RF3 replay preserve domain RecoveryRequired, caller cancellation, secret-free details and exactly one dispatch. |
 
 ```mermaid
 flowchart LR
@@ -119,3 +119,12 @@ classifier and all three actual token joins. Automated evidence: new genuine
 GrainReplyCancellationTests plus unchanged retained-replica SDK RF3 catch-up;
 exact-SHA qualification is pending. This corrects a concrete source defect without
 inferring the prior run's exact internal phase from overwritten fixture logs.
+
+
+TASK-WAL-CI-RPC-CANCEL refines the same initial-RPC failure boundary under
+ADR-036: native cancellation with an inactive incoming caller token maps to the
+existing trusted read/write transport outcomes, while active caller cancellation
+wins before classification or logging. The existing real framework-exception
+tests preserve domain errors, safe fixed detail, stable command identity and
+privacy; exact-source stopped-node RF3 remains mandatory. No internal retry or
+change to storage/replication outcomes is permitted.

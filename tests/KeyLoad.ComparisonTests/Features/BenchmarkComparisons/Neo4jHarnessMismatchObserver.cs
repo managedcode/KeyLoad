@@ -13,6 +13,7 @@ internal sealed class Neo4jHarnessMismatchObserver(
 {
     private const int MutationTimeoutSeconds = 15;
     private const string RestoreFailureMessage = "Neo4jHarnessSeedRestoreMismatch";
+    private const string HttpStatusPrefix = ":HTTP";
     private readonly HttpClient client = Neo4jHarnessQueryClient.CreateClient(endpoint, password);
     private readonly BenchmarkDocument[] seedDocuments = dataset.Documents.ToArray();
     private readonly string label = Neo4jHarnessConstants.DocumentLabelPrefix + Guid.Parse(runId).ToString("N");
@@ -67,7 +68,7 @@ internal sealed class Neo4jHarnessMismatchObserver(
         using var bounded = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var documents = seedDocuments.Select(document => new { document.Id, json = restoreAll ? document.Json : value }).ToArray();
         var statement = Neo4jHarnessStatements.UpdateDocuments(label);
-        SendStatement(statement, new { documents }, bounded.Token);
+        using var response = SendStatement(statement, new { documents }, bounded.Token);
     }
 
     private void VerifyStoredSeeds(CancellationToken cancellationToken)
@@ -94,15 +95,15 @@ internal sealed class Neo4jHarnessMismatchObserver(
         using var response = client.Send(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         using var stream = response.Content.ReadAsStream(cancellationToken);
         var document = JsonDocument.Parse(stream);
-        if (response.StatusCode != System.Net.HttpStatusCode.Accepted)
-        {
-            document.Dispose();
-            throw new ComparisonFailureException(Neo4jHarnessConstants.InvalidQueryResponse);
-        }
-
         try
         {
             Neo4jQueryResponse.ValidateErrors(document.RootElement);
+            if (response.StatusCode != System.Net.HttpStatusCode.Accepted)
+            {
+                throw new ComparisonFailureException(Neo4jHarnessConstants.InvalidQueryResponse + HttpStatusPrefix
+                    + ((int)response.StatusCode).ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
+
             return document;
         }
         catch (ComparisonFailureException)

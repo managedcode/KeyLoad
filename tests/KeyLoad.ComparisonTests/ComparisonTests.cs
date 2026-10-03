@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
@@ -19,6 +18,8 @@ internal sealed class RealComparisonSuite
     private const string ConcurrencyKey = "Concurrency";
     private const string DimensionsKey = "Dimensions";
     private const string TopKKey = "TopK";
+    private const string Neo4jPasswordParameter = "benchmark-neo4j-password";
+    private const string Neo4jCredentialUnavailable = "Comparison Neo4j credential is unavailable.";
 
     [Test]
     public async Task AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines()
@@ -27,10 +28,9 @@ internal sealed class RealComparisonSuite
         var output = Path.Combine(root, "reports");
         var evidence = ComparisonTestEvidenceFiles.GetDirectory();
         var options = ReadOptions();
-        var neo4jPassword = Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(24));
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
         timeout.CancelAfter(TimeSpan.FromMinutes(8));
-        var builder = await CreateBuilderAsync(root, output, options, neo4jPassword, timeout.Token);
+        var builder = await CreateBuilderAsync(root, output, options, timeout.Token);
         ConfigureLogging(builder);
         await using var app = await builder.BuildAsync(timeout.Token);
         await using var logCapture = new ComparisonTestLogCapture(app);
@@ -41,7 +41,7 @@ internal sealed class RealComparisonSuite
             await ComparisonImageResourceAssertions.VerifyAsync(app, timeout.Token);
             await VerifyPinnedContainerImagesAsync(app);
             await app.StartAsync(timeout.Token);
-            await VerifyCompletedRunAsync(app, output, evidence, options, neo4jPassword, timeout.Token);
+            await VerifyCompletedRunAsync(app, output, evidence, options, timeout.Token);
         }
         catch (OperationCanceledException) when (timeout.IsCancellationRequested)
         {
@@ -93,14 +93,13 @@ internal sealed class RealComparisonSuite
     }
 
     private static Task<IDistributedApplicationTestingBuilder> CreateBuilderAsync(string root, string output,
-        ComparisonOptions options, string neo4jPassword, CancellationToken cancellationToken)
+        ComparisonOptions options, CancellationToken cancellationToken)
     {
         var arguments = new[]
         {
             $"--KeyLoad:DataRoot={Path.Combine(root, "cluster")}",
             "--KeyLoad:Ephemeral=true",
             "--Benchmarks:Enabled=true",
-            $"--Parameters:benchmark-neo4j-password={neo4jPassword}",
             $"--Benchmarks:DataRoot={root}",
             $"--Benchmarks:Output={output}",
             $"--Benchmarks:{DocumentsKey}={options.Documents}",
@@ -148,7 +147,7 @@ internal sealed class RealComparisonSuite
     }
 
     private static async Task VerifyCompletedRunAsync(DistributedApplication app, string output, string evidence,
-        ComparisonOptions options, string neo4jPassword, CancellationToken cancellationToken)
+        ComparisonOptions options, CancellationToken cancellationToken)
     {
         await app.ResourceNotifications.WaitForResourceAsync("comparisons",
             resource => resource.Snapshot.ExitCode is not null || resource.Snapshot.State?.Text == KnownResourceStates.FailedToStart,
@@ -168,6 +167,10 @@ internal sealed class RealComparisonSuite
         var report = await ComparisonTestReportAssertions.VerifyAsync(output, options, cancellationToken);
         var neo4jImage = report.Targets.Single(target => target.Name == "Neo4j").Image
             ?? throw new InvalidOperationException("Neo4j image is missing from the comparison report.");
+        var neo4jParameter = model.Resources.OfType<ParameterResource>()
+            .Single(resource => resource.Name == Neo4jPasswordParameter);
+        var neo4jPassword = await neo4jParameter.GetValueAsync(cancellationToken)
+            ?? throw new InvalidOperationException(Neo4jCredentialUnavailable);
         var neo4jEndpoint = app.GetEndpoint("benchmark-neo4j", "http");
         await Neo4jHarnessMismatchRegression.VerifyAsync(neo4jEndpoint, neo4jPassword, neo4jImage, cancellationToken);
     }
