@@ -14,6 +14,7 @@ internal static class KeyLoadStreamPublicRegression
     private const ulong ExpectedRevision = 1;
     private const string ConflictingJson = "{\"payload\":\"conflict\"}";
     private const string ConflictCode = "KeyLoad:RevisionConflict";
+    private const string CancelledCode = "KeyLoad:Cancelled";
 
     internal static async Task VerifyAsync(DistributedApplication app, string adminKey,
         CancellationToken cancellationToken)
@@ -97,8 +98,8 @@ internal static class KeyLoadStreamPublicRegression
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         var cancellationFailure = await CaptureCancellationAsync(() => session.ReadEventAsync(
-            dataset.Documents[SeededDocumentIndex], cancelled.Token));
-        await Assert.That(cancellationFailure is OperationCanceledException).IsTrue();
+            dataset.Documents[SeededDocumentIndex], cancelled.Token), cancelled.Token);
+        await Assert.That(cancellationFailure?.Message).IsEqualTo(CancelledCode);
         var following = dataset.CreateDocument(dataset.Options.Documents + FollowingStreamOffset);
         await session.ExecuteAsync(Scenario.StreamAppend, following, cancellationToken);
         await AssertEventAsync(await session.ReadEventAsync(following, cancellationToken), following);
@@ -127,14 +128,16 @@ internal static class KeyLoadStreamPublicRegression
         }
     }
 
-    private static async Task<OperationCanceledException?> CaptureCancellationAsync(Func<Task> operation)
+    private static async Task<ComparisonFailureException?> CaptureCancellationAsync(
+        Func<Task> operation, CancellationToken cancellationToken)
     {
         try
         {
             await operation();
             return null;
         }
-        catch (OperationCanceledException exception)
+        catch (ComparisonFailureException exception) when (
+            cancellationToken.IsCancellationRequested && exception.Message == CancelledCode)
         {
             return exception;
         }

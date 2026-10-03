@@ -25,7 +25,7 @@
       "decision": "docs/ADR/ADR-057-orleans-atomic-wal.md",
       "source": "generated_Orleans10.3.1_binary_mutations_closed_native_ReadOnlyMemoryOfByteCodec_explicit_kind_full_consumption_frame3_identity4_native_ZoneTree_unchanged",
       "upgrade": "offline_old_binary_compact_verified_backup_homogeneous_RF3_no_JSON_fallback",
-      "verification": "native_storage_Release_build_and_scoped_final_formatter_pass_dirty_combined_solution_blocked_by59_unrelated_comparison_diagnostics_final_exact_source_GitHub_unit_process_RF3_comparison_qualification_pending_prior6ad_failures_preserved",
+      "verification": "c10_Release_build_full_formatter_governance_analyzers118_normal1088_scalar1088_recovery136_RF3_63_pass_zero_skips_comparison3_of4_failed_exact_SDK_cancel_contract_locally_corrected_scoped_format_and_independent_review_pass_final_GitHub_full_gate_pending",
       "performance": "encoded_size_regression_authored_no_acceleration_power_loss_or_endurance_claim",
       "successorSequenceRepair": "source_guard_rejects_terminal_MaxValue_successor_before_decode_apply_or_truncation_real_checkpoint_legal_limit_wrapped_negative_unchanged_authority_and_ownership_regressions_GitHub_pending",
       "sourceReviewGaps": [
@@ -39,6 +39,39 @@
         "runId": 37077856823,
         "url": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823",
         "conclusion": "failure"
+      },
+      "secondRun": {
+        "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
+        "runId": 37079707413,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413",
+        "conclusion": "failure",
+        "normalUnit": {
+          "passed": 1088,
+          "total": 1088,
+          "skipped": 0
+        },
+        "scalarUnit": {
+          "passed": 1088,
+          "total": 1088,
+          "skipped": 0
+        },
+        "processRecovery": {
+          "passed": 136,
+          "total": 136,
+          "skipped": 0
+        },
+        "rf3": {
+          "passed": 63,
+          "total": 63,
+          "skipped": 0
+        },
+        "comparison": {
+          "passed": 3,
+          "total": 4,
+          "skipped": 0,
+          "failure": "KeyLoadStreamPublicRegression expected exception instead of exact SDK Cancelled result"
+        },
+        "measuredProfiles": "skipped_after_comparison_failure"
       }
     },
     "evidence": [
