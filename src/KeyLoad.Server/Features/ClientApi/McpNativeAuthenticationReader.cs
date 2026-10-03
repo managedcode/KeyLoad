@@ -18,7 +18,7 @@ internal sealed class McpNativeAuthenticationReader(bool enforceMcpBounds, Cance
     internal McpFrameShape Read<TInput>(ref Reader<TInput> reader)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        NativePayloadHeader.Validate(reader.ReadFieldHeader());
+        NativePayloadHeader.Validate(NativeFieldHeaderReader.Read(ref reader));
         var reference = ReferenceCodec.CreateRecordPlaceholder(reader.Session);
         var version = McpAuthenticationNativeFields.Scalar<uint, TInput>(ref reader, FirstField);
         if (version != NativePayloadVersion.Current)

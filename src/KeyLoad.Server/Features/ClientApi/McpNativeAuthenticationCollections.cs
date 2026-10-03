@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
+using KeyLoad.Features.InternalSerialization;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 using Orleans.Serialization.WireProtocol;
@@ -35,7 +36,7 @@ internal sealed class McpNativeAuthenticationCollections(bool enforceMcpBounds, 
         }
         var reference = McpAuthenticationNativeFields.Begin(ref reader, field, typeof(T[]));
         var shape = McpAuthenticationProjection.Array;
-        var countField = reader.ReadFieldHeader();
+        var countField = NativeFieldHeaderReader.Read(ref reader);
         if (countField.IsEndObject)
         {
             McpAuthenticationNativeFields.Record(ref reader, reference, typeof(T[]), shape);

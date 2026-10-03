@@ -1,0 +1,423 @@
+{
+  "stage": "R17_R18_strict_native_repairs_local_development_evidence_pending_exact_source_GitHub",
+  "qualified": false,
+  "formatsChanged": false,
+  "decision": "docs/ADR/ADR-060-native-internal-serialization.md",
+  "baseRevision": "0f303071f6c1d141941fed2dd17dca08bf9a9b39",
+  "source": [
+    {
+      "path": ".github/workflows/benchmarks.yml",
+      "sha256": "05c897514e7a9411f2a837fede7c2a80900196bc2053edd09e281060dadd4678"
+    },
+    {
+      "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/NativeFieldHeaderReader.cs",
+      "sha256": "0e01aa80e9a741283426cbe91b498d5e50c3ef9767875d8e551f0b6fd529d36b"
+    },
+    {
+      "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/NativePayloadSyntax.cs",
+      "sha256": "61a26768b6e807b7768c139eca96f326f1ffa957f12a2e151c7df0151ea5e24e"
+    },
+    {
+      "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/NativeWireWalk.cs",
+      "sha256": "416445410f402d6ebe7382edcb8229700983b6fe31ab0ec24b3d28416e3b9f89"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ClusterRouting/ReplicaMembershipStore.cs",
+      "sha256": "2eb54141e77a6d281da2d295668b6c92b9f5141a074e79549bebf91c32fea544"
+    },
+    {
+      "path": "src/KeyLoad.Server/Features/ClientApi/McpAuthenticationNativeFields.cs",
+      "sha256": "42bfa24c8c2f8611adab3f57182cf9759cb437d5f314b4bc4178dc96a27787e9"
+    },
+    {
+      "path": "src/KeyLoad.Server/Features/ClientApi/McpNativeAuthenticationCollections.cs",
+      "sha256": "71f80f7e22d91ed5df83d668b371a1e4d14967b9f4c9ec9439c58da93f90d7ed"
+    },
+    {
+      "path": "src/KeyLoad.Server/Features/ClientApi/McpNativeAuthenticationReader.cs",
+      "sha256": "cb170ef5928d08cc44adf7e34f24cd5946a1820faa8d08facc4914a5742ce32d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/NativeSerializationWorkflowCredentialSource.cs",
+      "sha256": "e626e7532e4cd7c2c537a05f058f35310eaa5ba30fac82575dfd60fd48ade025"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/NativeSerializationWorkflowCredentialTests.cs",
+      "sha256": "a7cc23b8305036ba402332f0ef5e4d1ed7a2b7cab9ccde7aaaf9c7d4e8bd4204"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/ReplicaMembershipNativeStoreTests.cs",
+      "sha256": "d1a2c4444de8bad4ed4f7bde0c900ddc4a3ee50baa3dc73204f10935604f267f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeUnknownWellKnownHeaderAuthenticationFixture.cs",
+      "sha256": "dc58484d2c41d8fd6ae643c043d237220c8270da1a78efb31af7c7d4a087bb07"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeUnknownWellKnownHeaderAuthenticationTests.cs",
+      "sha256": "273fe52851c2c474f1d2c41805cef4dd6217e930b4cc9335252648bf19c9f867"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeUnknownWellKnownHeaderFixture.cs",
+      "sha256": "03ec084fdcccb7b989d70142c5d6acd5f8d75ee9eb27976be4771c064167f8e5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeUnknownWellKnownHeaderOwnedCodec.cs",
+      "sha256": "32bde118f520a1d7eeb0ff93df2f891df341422706c69a168aa027425cfd848d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeUnknownWellKnownHeaderOwnedTests.cs",
+      "sha256": "93ee504c0768e647d589f598e341746659c0b40bfb11e97ef178056abfd2b13a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeUnknownWellKnownHeaderReaderFixture.cs",
+      "sha256": "28cb99d733f897d3f1b1662dbe300bf039a8a64aa7bc533da4e35f81eddddcf0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeUnknownWellKnownHeaderReaderTests.cs",
+      "sha256": "bcec14b82afc861f2ddc2363bbe9558f463abe973eddf55e26d1420f19050de3"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeUnknownWellKnownHeaderTests.cs",
+      "sha256": "eadb1bb2da6d48647d0e961c6b1d51fd0d75f6fc85e6190ef0970b1c8bf4993b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/Messaging/QueueBodyAccountingTests.cs",
+      "sha256": "7fab3e2403306259504502b1c9acc9d193ea7488bb835075dbd9db8b9ce538e8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/Messaging/QueueBodyFailureAssertions.cs",
+      "sha256": "df8ba8fbdca9bf967e6589bbf8ee67124d76447e385192f6146d87d955bd9fdb"
+    }
+  ],
+  "localDevelopment": {
+    "machine": "macOS-27.0.1-arm64-arm-64bit",
+    "runtime": "net10.0 arm64; actual report metadata retained",
+    "tempDirectory": "/private/tmp/keyload-local-native/",
+    "rootPermission": "explicit owner correction on2026-10-03 permits local tests",
+    "focused": [
+      {
+        "scope": "header",
+        "originalReport": "artifacts/local-r17/header/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "sha256": "f6e9ff7e7105be6b66f251fe6125886e729f55383aad9b196fbe7d7b16694361",
+        "summary": {
+          "total": 22,
+          "passed": 22,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        }
+      },
+      {
+        "scope": "queue",
+        "originalReport": "artifacts/local-r17/queue/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "sha256": "1a23b82d783f2a84d520dc98b7346c184ad050d8361c364d5f2be546de23e9a1",
+        "summary": {
+          "total": 4,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        }
+      },
+      {
+        "scope": "membership",
+        "originalReport": "artifacts/local-r17/membership/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "sha256": "950b310bb79317910cb8b9fdfa6d90182414e4e9eb33e53e909e583b2f057128",
+        "summary": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        }
+      },
+      {
+        "scope": "guard",
+        "originalReport": "artifacts/local-r17/guard/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "sha256": "282d62b76ca9612c2fa4dc8631ce2b38a49de4f78caa06db769ca83bf07790b1",
+        "summary": {
+          "total": 8,
+          "passed": 8,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        }
+      }
+    ],
+    "recovery": {
+      "originalReport": "artifacts/local-native-recovery/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+      "sha256": "d60c6036da6b3d45bf06714eedeb4f7af5a03fe60814db8ebb318c26cba34d46",
+      "summary": {
+        "total": 194,
+        "passed": 194,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "scope": "local real-process recovery, not power-loss/endurance/RF3 or GitHub qualification"
+    },
+    "fullUnit": "pending final frozen source build",
+    "scalar": "pending final frozen source build",
+    "wrongSelector": "Original broad2612 run2599pass13fail retained. Full-path OR was not a focused selector; corrected single filters prove36cases. Default macOS temp aliases caused three explicit link guard failures; ten CLI errors require source-supported inference until canonical-temp full rerun.",
+    "credentialScopes": {
+      "originalReport": "artifacts/local-r18/credential/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "sha256": "e21bf3a720b0d95330927d4c9f8add8639eb2eba532c931a9ad432bc79a90e2a",
+      "summary": {
+        "total": 25,
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    "combinedDevelopmentBuild": {
+      "log": "combined-build-r18-02.log",
+      "result": "success_26_projects_zero_warnings_errors",
+      "limitation": "Two exact original test files restored after this snapshot; final fresh UnitTests/full normal+scalar join pending. Runtime production hashes unchanged."
+    },
+    "formatter": {
+      "log": "format-r18-02.log",
+      "exitCode": 0,
+      "scope": "full joined checkout at that snapshot; restored files retain prior byte-identical formatter-reviewed source"
+    },
+    "restoration": {
+      "scope": "two original arbitrary owned-codec regression files restored byte-identically after unrelated deletion; no changed assertions",
+      "receiptSha256": "65bb3e7c78a9b1f8ae2e42c775be734b0bad09eb81e264353012b4597a4539a6"
+    }
+  },
+  "actualDiagnosticBaseline": {
+    "run": {
+      "id": 37126408168,
+      "run_attempt": 1,
+      "head_sha": "bfb04d64bf9c0ca8a1ab6e0c703194e1813250f0",
+      "head_branch": "main",
+      "event": "workflow_dispatch",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37126408168",
+      "path": ".github/workflows/benchmarks.yml"
+    },
+    "job": {
+      "id": 111215262941,
+      "name": "Measure native serialization",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37126408168/job/111215262941",
+      "started_at": "2026-10-03T13:47:06Z",
+      "completed_at": "2026-10-03T13:56:08Z",
+      "runner_name": "GitHub Actions 1000014913",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    "artifact": {
+      "id": 11276035081,
+      "name": "native-serialization-measurements",
+      "size_in_bytes": 4035399,
+      "digest": "sha256:ad7449b16e0ffb03b589f75d42bc30dbbac5bd4f3a98dafffbbd0a296e7dada7",
+      "expired": false,
+      "created_at": "2026-10-03T13:56:05Z",
+      "expires_at": "2027-01-01T13:30:23Z",
+      "workflow_run": {
+        "id": 37126408168,
+        "repository_id": 477801965,
+        "head_repository_id": 477801965,
+        "head_branch": "main",
+        "head_sha": "bfb04d64bf9c0ca8a1ab6e0c703194e1813250f0"
+      }
+    },
+    "caseCount": 24,
+    "corpusCount": 6,
+    "normalScalar": {
+      "normal": {
+        "total": 102,
+        "passed": 102,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "scalar": {
+        "total": 102,
+        "passed": 102,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    "profile": {
+      "fixtures": [
+        "NativeDocumentSerializationBenchmarks",
+        "NativeCommandSerializationBenchmarks",
+        "NativeStorageSerializationBenchmarks"
+      ],
+      "payloadBytes": [
+        1024,
+        16384
+      ],
+      "methods": [
+        "NativeEncode",
+        "NativeDecode",
+        "JsonEncode",
+        "JsonDecode"
+      ],
+      "launchCount": 2,
+      "warmupCount": 3,
+      "iterationCount": 6,
+      "iterationTimeMs": 200,
+      "memoryDiagnoser": true,
+      "generatedExternalProcess": true,
+      "scope": "Warm typed codec diagnostics; distinct native and historical JSON validation/format contracts.",
+      "limits": "No RF3, database throughput, security equivalence, cold-start or website comparison claim."
+    },
+    "comparisons": [
+      {
+        "fixture": "NativeDocumentSerializationBenchmarks",
+        "payloadBytes": 1024,
+        "action": "Encode",
+        "nativeMeanNs": 3631.4131290737423,
+        "jsonMeanNs": 3914.221805369905,
+        "nativeOverJsonTimeRatio": 0.9277484285872154,
+        "nativeAllocatedBytes": 2368,
+        "jsonAllocatedBytes": 2656
+      },
+      {
+        "fixture": "NativeDocumentSerializationBenchmarks",
+        "payloadBytes": 1024,
+        "action": "Decode",
+        "nativeMeanNs": 18151.15174365071,
+        "jsonMeanNs": 4089.576229548758,
+        "nativeOverJsonTimeRatio": 4.438394279705968,
+        "nativeAllocatedBytes": 13048,
+        "jsonAllocatedBytes": 3672
+      },
+      {
+        "fixture": "NativeDocumentSerializationBenchmarks",
+        "payloadBytes": 16384,
+        "action": "Encode",
+        "nativeMeanNs": 8241.537962985125,
+        "jsonMeanNs": 27429.14790959916,
+        "nativeOverJsonTimeRatio": 0.30046642316952543,
+        "nativeAllocatedBytes": 17888,
+        "jsonAllocatedBytes": 18016
+      },
+      {
+        "fixture": "NativeDocumentSerializationBenchmarks",
+        "payloadBytes": 16384,
+        "action": "Decode",
+        "nativeMeanNs": 27541.806187068938,
+        "jsonMeanNs": 23722.81480532787,
+        "nativeOverJsonTimeRatio": 1.1609839057076552,
+        "nativeAllocatedBytes": 43689,
+        "jsonAllocatedBytes": 34392
+      },
+      {
+        "fixture": "NativeCommandSerializationBenchmarks",
+        "payloadBytes": 1024,
+        "action": "Encode",
+        "nativeMeanNs": 13358.26327610871,
+        "jsonMeanNs": 26693.09064892815,
+        "nativeOverJsonTimeRatio": 0.5004389881935648,
+        "nativeAllocatedBytes": 11696,
+        "jsonAllocatedBytes": 5224
+      },
+      {
+        "fixture": "NativeCommandSerializationBenchmarks",
+        "payloadBytes": 1024,
+        "action": "Decode",
+        "nativeMeanNs": 217950.4513578869,
+        "jsonMeanNs": 54617.70543708409,
+        "nativeOverJsonTimeRatio": 3.9904724963034393,
+        "nativeAllocatedBytes": 127867,
+        "jsonAllocatedBytes": 8904
+      },
+      {
+        "fixture": "NativeCommandSerializationBenchmarks",
+        "payloadBytes": 16384,
+        "action": "Encode",
+        "nativeMeanNs": 107116.06025307158,
+        "jsonMeanNs": 362165.5158928571,
+        "nativeOverJsonTimeRatio": 0.2957654871944262,
+        "nativeAllocatedBytes": 153936,
+        "jsonAllocatedBytes": 45976
+      },
+      {
+        "fixture": "NativeCommandSerializationBenchmarks",
+        "payloadBytes": 16384,
+        "action": "Decode",
+        "nativeMeanNs": 1339768.0651041667,
+        "jsonMeanNs": 717972.1399739584,
+        "nativeOverJsonTimeRatio": 1.8660446422792416,
+        "nativeAllocatedBytes": 1541117,
+        "jsonAllocatedBytes": 85800
+      },
+      {
+        "fixture": "NativeStorageSerializationBenchmarks",
+        "payloadBytes": 1024,
+        "action": "Encode",
+        "nativeMeanNs": 2473.521181142641,
+        "jsonMeanNs": 738.3571410689101,
+        "nativeOverJsonTimeRatio": 3.350033531959556,
+        "nativeAllocatedBytes": 3024,
+        "jsonAllocatedBytes": 1832
+      },
+      {
+        "fixture": "NativeStorageSerializationBenchmarks",
+        "payloadBytes": 1024,
+        "action": "Decode",
+        "nativeMeanNs": 21372.224828378774,
+        "jsonMeanNs": 1819.4413294718604,
+        "nativeOverJsonTimeRatio": 11.746586428583884,
+        "nativeAllocatedBytes": 12897,
+        "jsonAllocatedBytes": 2824
+      },
+      {
+        "fixture": "NativeStorageSerializationBenchmarks",
+        "payloadBytes": 16384,
+        "action": "Encode",
+        "nativeMeanNs": 3953.786136666284,
+        "jsonMeanNs": 3168.5824305365804,
+        "nativeOverJsonTimeRatio": 1.2478091459961589,
+        "nativeAllocatedBytes": 18384,
+        "jsonAllocatedBytes": 22312
+      },
+      {
+        "fixture": "NativeStorageSerializationBenchmarks",
+        "payloadBytes": 16384,
+        "action": "Decode",
+        "nativeMeanNs": 26826.703953644555,
+        "jsonMeanNs": 5142.025146553424,
+        "nativeOverJsonTimeRatio": 5.217147561331132,
+        "nativeAllocatedBytes": 28257,
+        "jsonAllocatedBytes": 18184
+      }
+    ],
+    "acceptedForRuntimeOptimization": false,
+    "artifactConfidentiality": "Original BDN build stdout contains ephemeral read-only workflow token; value-free presence receipt retained. R18 isolates API-step env; fresh genuine admitted artifact required. No token value is copied here.",
+    "speedImprovementClaimed": false
+  },
+  "remaining": [
+    "Fresh full development build/formatter, complete local normal/scalar",
+    "Exact delivered-source Linux CI including full unit/scalar/analyzers/recovery and real RF3 SDK/officialMCP",
+    "Authentic R18 external24case protected baseline original artifacts",
+    "NSP006 implementation then strict comparable candidate evidence",
+    "Legacy offline converter and reverse migration remain undelivered; homogeneous supported formats only",
+    "Full native competitor workload/memory/endurance evidence; no maximum speed or production-readiness claim"
+  ]
+}

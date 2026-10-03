@@ -1,3 +1,4 @@
+using KeyLoad.Features.InternalSerialization;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 using Orleans.Serialization.WireProtocol;
@@ -8,7 +9,7 @@ internal static class McpAuthenticationNativeFields
 {
     internal static Field Field<TInput>(ref Reader<TInput> reader, uint delta, Type expected)
     {
-        var field = reader.ReadFieldHeader();
+        var field = NativeFieldHeaderReader.Read(ref reader);
         Require(field.HasFieldId && field.FieldIdDelta == delta
             && (field.FieldType is null || field.FieldType == expected));
         return field;
@@ -45,8 +46,8 @@ internal static class McpAuthenticationNativeFields
     internal static void Record<TInput>(ref Reader<TInput> reader, uint reference, Type type, McpFrameShape shape)
         => ReferenceCodec.RecordObject(reader.Session, new McpAuthenticationReference(type, shape), reference);
 
-    internal static void End<TInput>(ref Reader<TInput> reader) => Require(reader.ReadFieldHeader().IsEndObject);
-    internal static void EndBase<TInput>(ref Reader<TInput> reader) => Require(reader.ReadFieldHeader().IsEndBaseFields);
+    internal static void End<TInput>(ref Reader<TInput> reader) => Require(NativeFieldHeaderReader.Read(ref reader).IsEndObject);
+    internal static void EndBase<TInput>(ref Reader<TInput> reader) => Require(NativeFieldHeaderReader.Read(ref reader).IsEndBaseFields);
     internal static void Require(bool condition)
     {
         if (!condition)

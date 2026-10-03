@@ -13,6 +13,8 @@ internal sealed class QueueBodyAccountingTests
     private const string LargePayloadSuffix = "\"}";
     private const int UnicodeCharacters = 1_000;
     private const int SingleReadyRecord = 1;
+    private const string MalformedStoredJson = "{";
+    private const string EmptyPayloadJson = "{}";
 
     [Test]
     public async Task AcMp006_StoredBytesDriveExactStoredAndInFlightQuotas()
@@ -109,36 +111,31 @@ internal sealed class QueueBodyAccountingTests
     }
 
     [Test]
-    public async Task AcMp006_MissingAndMalformedStoredBodiesStillRejectThenRecover()
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task AcMp006_MissingAndMalformedStoredBodiesStillRejectThenRecover(bool nativeTruncation)
     {
         using var db = new TestDatabase();
         db.Configure(QueueName, ResourceKind.WorkQueue);
-        db.Commit(new EnqueueMessage(QueueName, MessageId, "{}"));
+        db.Commit(new EnqueueMessage(QueueName, MessageId, EmptyPayloadJson));
         var key = BodyKey(db, MessageId);
         var original = db.Store.Read(view => view.ReadOwnedValue(key)!);
         var lane = new QueueLaneRef(db.Partition, QueueName);
-        db.Store.Commit((tx, _) => { tx.Delete(key); return true; });
         var readyKey = db.Store.Read(view => view.Scan(ReadyPrefix(db), SingleReadyRecord).Records.Single().Key.ToArray());
-        var countersBefore = Counters(db);
-        var positionBefore = db.Store.Position;
-        var appliedBefore = db.Database.LastApplied;
-        var missingId = Guid.NewGuid();
-        var missing = Assert.ThrowsExactly<KeyLoadException>(() => db.Submit(OperationKind.Receive,
-            new ReceiveRequest(missingId, lane), id: missingId));
-        await Assert.That(missing.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(db.Store.Position).IsEqualTo(positionBefore);
-        await Assert.That(db.Database.LastApplied).IsEqualTo(appliedBefore);
-        await Assert.That(db.Store.Read(view => view.ReadOwnedValue(key))).IsNull();
-        await Assert.That(db.Store.Read(view => view.ReadOwnedValue(readyKey))).IsNotNull();
-        await Assert.That(Counters(db)).IsEqualTo(countersBefore);
-        db.Store.Commit((tx, _) => { tx.Put(key, Encoding.UTF8.GetBytes("{")); return true; });
+        db.Store.Commit((tx, _) => { tx.Delete(key); return true; });
+        await QueueBodyFailureAssertions.RejectWithoutEffects(db, lane, Guid.NewGuid(), key, readyKey, null);
+        var malformed = nativeTruncation ? original[..^1] : Encoding.UTF8.GetBytes(MalformedStoredJson);
+        db.Store.Commit((tx, _) => { tx.Put(key, malformed); return true; });
         var malformedId = Guid.NewGuid();
-        await Assert.That(db.Submit(OperationKind.Receive,
-            new ReceiveRequest(malformedId, lane), id: malformedId).Error).IsEqualTo(ErrorCode.Validation);
+        await QueueBodyFailureAssertions.RejectWithoutEffects(db, lane, malformedId, key, readyKey, malformed);
         db.Store.Commit((tx, _) => { tx.Put(key, original); return true; });
-        var healthyId = Guid.NewGuid();
+        var delivery = await Assert.That(db.Submit(OperationKind.Receive,
+            new ReceiveRequest(malformedId, lane), id: malformedId).Get<ReceiveResult>().Deliveries).HasSingleItem();
+        await Assert.That(delivery.Id).IsEqualTo(MessageId);
+        await Assert.That(delivery.PayloadJson).IsEqualTo(EmptyPayloadJson);
+        var nextId = Guid.NewGuid();
         await Assert.That(db.Submit(OperationKind.Receive,
-            new ReceiveRequest(healthyId, lane), id: healthyId).Get<ReceiveResult>().Deliveries).HasSingleItem();
+            new ReceiveRequest(nextId, lane), id: nextId).Get<ReceiveResult>().Deliveries).IsEmpty();
     }
 
     private static byte[] BodyKey(TestDatabase db, string id)

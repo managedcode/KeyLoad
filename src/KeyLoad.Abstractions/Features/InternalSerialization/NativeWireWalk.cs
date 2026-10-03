@@ -17,7 +17,7 @@ internal static class NativeWireWalk
         Consume(ref reader, root, root.FieldType, frames, references);
         while (frames.Count > 0)
         {
-            var field = reader.ReadFieldHeader();
+            var field = NativeFieldHeaderReader.Read(ref reader);
             var frame = frames.Peek();
             if (field.IsEndObject)
             {

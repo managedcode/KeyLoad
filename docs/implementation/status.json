@@ -277,7 +277,7 @@
       "qualificationReceipt": "docs/implementation/runtime-qualification-37065200835.json"
     },
     "nativeInternalSerialization": {
-      "status": "native_generated_source_repair_join_GitHub_qualification_pending",
+      "status": "native_generated_R17_R18_local_regressions_pass_GitHub_qualification_pending",
       "decision": "docs/ADR/ADR-060-native-internal-serialization.md",
       "feature": "docs/Features/InternalSerialization.md",
       "staticPreview": "docs/implementation/native-internal-static-preview.json",
@@ -309,8 +309,8 @@
         "conclusion": "success",
         "scope": "Baseline only; does not qualify expanded native candidate"
       },
-      "currentRepairSourceTestsExecuted": false,
-      "repairEvidence": "docs/implementation/native-serialization-repair-stage-002.json"
+      "currentRepairSourceTestsExecuted": true,
+      "repairEvidence": "docs/implementation/native-serialization-repair-stage-003.json"
     }
   },
   "KL-004": {

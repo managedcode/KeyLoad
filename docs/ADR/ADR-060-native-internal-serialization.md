@@ -272,3 +272,168 @@ and terminal-failure rules apply.
 ## Accepted stored-body fixture repair contract
 
 R17-AC001 follows original ca22 run37124217640. Persisted native queue-body corruption is a storage fault and must retain Corruption, escaping the atomic-command domain-error catch as currently designed. Root owns only QueueBodyAccountingTests: replace its old malformed-body Validation expectation with exact Corruption and no-effects assertions, retain missing-body controls, and restore the original native bytes to demonstrate the same failed operation ID can subsequently receive once. Check exact stored bytes, ready marker, counters, committed/applied position and absent outcome before repair. Native format, public invalid-JSON policy, durability/admission/authorization, quotas and FIFO remain unchanged. Unit/scalar qualification is GitHub-only and all recovery/RF3 gates still apply. Rollback restores the fixture only; no data migration or performance claim follows. Unknown well-known header metadata requires a separately accepted narrow Reader design before runtime implementation.
+
+
+## Accepted unknown well-known header metadata repair contract
+
+R17-AC002 implements REQ-IS002/AC-IS002 at the actual official-header boundary,
+following original ca22 BenchmarkTopologyMembershipCorruptionTests failure.
+Unknown well-known type IDs in current native bytes raise Corruption without
+leaking private bytes. Do not catch arbitrary KeyNotFound from generated, owned
+or session code. No numeric decoder, global exception filter, fallback, wire
+version or admission/profile change is permitted.
+
+One worker owns new NativeFieldHeaderReader in Abstractions/InternalSerialization,
+NativePayloadSyntax/NativeWireWalk header calls, the existing three MCP native
+inspection files' header calls, and new NativeUnknownWellKnownHeader TUnit files.
+Root owns contracts/integration/docs/GitHub. The helper saves the official Reader
+before invoking its official ReadFieldHeader; only after that invocation throws
+KeyNotFound may it inspect a saved SpanReaderInput copy using official Tag,
+ReadByte/ReadVarUInt32 and WellKnownTypes.TryGetWellKnownType. Normalize only if
+the same header proves an unregistered SchemaType.WellKnown ID; otherwise bare
+throw. Check exact SpanReaderInput before any probe since copied I/O inputs may
+share mutable state. No session type/reference changes or speculative typed decode.
+Generated-phase/private replica header calls stay unchanged behind complete
+shared preflight so their programming exceptions remain visible.
+
+Tests require genuine native same-writer valid controls and invalid registered
+metadata at envelope/root/value/nested scopes, both short and extended field IDs;
+all supported span public Validate/Deserialize and MCP boundaries retain their
+Corruption versus public Validation distinction. Known/null/encoded schemas,
+owned same-family exceptions and other ReaderInput backends must not enter this
+normalization. Retain exact stored authority/no-effects/private-canary fixture
+checks. Strong review is selected because malformed-input classification crosses
+storage and public trust boundaries; bounded coding does not justify relaxing it.
+
+Stages: accepted design -> worker implementation/regressions -> independent
+source/API/provenance review -> full development build/format/governance -> scoped
+commit/push -> exact-source GitHub normal/scalar/recovery/RF3 SDK/MCP qualification.
+No local runtime execution. Rollback restores prior same-format code; malformed
+unknown metadata remains failclosed but error classification is unqualified.
+Earlier runs never qualify this source or prove performance/power-loss durability.
+
+
+## R17-AC002 supplemental genuine regression contract
+
+AC-NHT-001..005 maps R17-AC002 / REQ-IS002 / AC-IS002 to new disjoint genuine
+ClientApi NativeAuthenticationUnknownMetadata tests and BenchmarkComparisons
+BenchmarkMembershipUnknownMetadataNoEffects tests. Root freezes acceptance and
+task graph before a private cheaper-worker packet; root reviews/joins complete
+bytes and owns full normal/scalar/static/main delivery gates. Four genuine auth
+header scopes require exact fixed safe errors, complete same-writer positive
+authority, actual request/pool/governor release and successful owner reuse.
+Actual persisted malformed membership must survive owner close/reopen and both
+denials byte-exactly, preserving hardstate and Position without initialization.
+Existing moving helper/tests remain under their current ownership.
+
+Automated-test exception: unrelated owned programming KeyNotFound propagation
+is retained as source review of the exact official-header catch, span guard,
+bare rethrow and unchanged global filter, using pinned upstream sources and the
+independent stopped review. An injected throwing test codec is prohibited by
+the repository's no-stubs rule and is removed after private archival. This
+exception does not claim an executed genuine owned fault, change product error
+semantics or weaken no-fakes policy. Genuine nonspan/known/null/encoded and all
+new caller/storage tests remain required. Runtime/GitHub/coverage evidence stays
+open until actual source-matched results; local checks follow the owner's later
+development authorization and cannot produce website data. No migration/API or
+runtime change; rollback removes supplemental tests/docs only.
+
+## Accepted pre-cancelled native membership read contract
+
+R17-AC003 follows authenticated ca7 run37126562970: the compare-exchange cancellation assertion passed, while the subsequent read-barrier cancellation surfaced TaskCanceledException before ReadAsync reached its own cancellation guard. Root owns ReplicaMembershipStore.ReadAsync and its existing genuine membership test. Check the caller token before invoking the quorum barrier and retain the existing post-barrier cancellation check, so an already cancelled read performs no quorum work and raises the caller's original OperationCanceledException. Keep both existing exact cancellation assertions and all absent-row/log-state/committed-applied checks; assert original token identity and cancelled task state for the read. This is an owning entry-boundary repair, with unchanged successful read cut, authorization, placement, native bytes and public API. Normal/scalar/full recovery/RF3 run at delivered source; no speed claim follows from the guard. Rollback removes the new pre-check only and requires matching cancellation-contract requalification, without data migration.
+
+
+## Accepted native diagnostic credential isolation contract (R18)
+
+R18-REQ001/AC001: the native diagnostic run37126408168 at bfb04d64 actually
+succeeded and retains all24 original cells, six corpora and102/102 normal/scalar
+results. Its original uploaded BDN build logs also exposed the ephemeral read-only
+GitHub workflow token. Preserve original authenticated evidence and report this
+defect; never print, copy, use or sanitize the credential into a rewritten
+qualified original. No performance improvement is established by that baseline.
+
+R18-AC002: remove native job-level GH_TOKEN and grant `${{ github.token }}` only
+to the two actual API evidence prepare/verify steps. The measurement shell,
+benchmark host, generated restore/build and external consumers must inherit no
+GH_TOKEN/GITHUB_TOKEN from workflow/job/step env. Keep read-only job permissions,
+pinned actions, exact24-case profile, source/corpus capture, generated originals,
+strict verification, timeout/joins and upload-on-failure. This changes execution
+environment scope, not storage/codec formats or benchmark configuration.
+
+R18-AC003: real-workflow TUnit regression checks workflow/job env boundaries,
+exactly two API token-bearing steps and no token bindings on every other native
+step; preserve all existing original/source/runtime/performance gates. A new
+authentic diagnostic run must complete successfully and its downloaded original
+logs must pass a value-free credential-presence audit before admitting its
+artifact. Original previous measurements remain their actual source facts,
+while final artifact confidentiality qualification is pending.
+
+Ordered graph: root accepts this contract and owns shared policy/docs; one bounded
+worker owns only native job env hunks in benchmarks.yml plus a NEW native
+workflow credential TUnit file; root reviews combined diff, runs newly owner-
+authorized local normal/scalar tests, commits/pushes scoped repairs, captures
+exact-source full CI and genuine external diagnostic artifacts. Other jobs and
+concurrent raw-storage workflow edits stay with their owners. Rollback of this
+change must not restore token inheritance; disable the native diagnostic until
+an equivalent isolated API boundary is delivered if rollback is needed.
+No package, public API, admission rule, durability or competitor claim changes.
+
+
+## Accepted NSP006 terminal type admission optimization
+
+Actual baseline37126408168/bfb04d64 contains24 authentic cells and six unchanged
+corpora; all six NativeDecode means exceed their JSON diagnostic controls with
+higher allocations. R18 credential isolation plus a fresh admitted artifact is
+the start condition for runtime writes. This evidence selects avoidable scalar
+type traversal collections; no sampled profiler attribution or speed claim is
+made. REQ/AC-IS-PERF005 requires zero auxiliary allocation for normalized terminal
+types using the existing scalar predicate; nullable Require must allocate exactly
+the independently measured existing Normalize loop's bytes, without caches.
+
+REQ/AC-IS-PERF006 preserves the exact admission domain: normalize the root once,
+fast-return only when both !ContainsGenericParameters and !IsGenericType hold
+and the current primitive/enum/IsScalar predicate holds. Enforce existing depth1
+fence. Keep the complete iterative fallback structurally unchanged, including
+depth264/265, generic-owner nested enum closures, visited tracking, generated
+shape checks, field/value validation, session and reference guards. No scalar
+registry, new supported shape, enum restriction, schema/profile/resource limit,
+provider, persisted bytes, package or API changes. Rollback reverts only this
+source shortcut; matching bytes remain readable.
+
+REQ/AC-IS-PERF007 prospective budgets: command16384/1024 NativeDecode allocation
+ratios <=0.40/0.60 and mean latency ratios <=0.75/0.85. Other ten native cells
+allocation increase <=max(1%,256B) and mean ratio <=1.05. Same six corpus/hash/
+byte receipts and original24-case BDN2launch/3warmup/6actual/200ms profile; same
+SDK/runtime/JIT/architecture/CPU model/core count/config/package cohort. All12
+JSON controls require mean within5%, allocations within max(1%,256B) and no
+clear disjoint confidence drift. Cohort drift is an incomparable pair, not a win.
+
+Retain all actual per-launch samples and exporter intervals (BDN0.15.8 Level12
+is99.9%, not95%). For baseline interval[LB,UB], candidate[LC,UC] and latency
+budget t, missing/nonfinite statistics or LB<=0 is invalid/indeterminate. A
+passing mean plus UC/LB<=t supports the conservative target; LC/UB>t demonstrates
+a violation; otherwise the latency result remains indeterminate. These marginal
+interval bounds are not an exact-confidence ratio. At most two further complete
+reference+candidate pairs may resolve uncertainty; keep every pair, never choose
+best runs, discard samples, pool runs or alter profile to obtain a favorable
+result. Persist unresolved uncertainty and accept a separate precision contract
+before changing measurement settings. Allocation success does not prove latency.
+
+Ordered ownership: root accepts this REQ/AC contract, owns docs/shared integration
+and authentic pair arithmetic/evidence; bounded production worker owns only
+NativeWireSupported.cs; separate test worker owns NEW NativeWireSupportedScalar
+Tests/Fixtures/AllocationTests/DepthTests files. Read-only reviewer checks exact
+admission and unchanged fallback. Tasks start after protected baseline admission;
+combined fresh build/formatter/governance, local focused+full normal/scalar and
+recovery, exact-source Linux CI including real RF3 SDK/MCP, candidate original
+24-cell artifact and strict comparable before/after review complete the join.
+Every allocation loop warms and constructs data before synchronous measured
+windows. Existing malformed/header/null/type/depth/owned graph/DOM/count/UTF8/
+reference/cancellation/recovery assertions remain unchanged. Real generated
+scalar, collection and polymorphic positives preserve values and byte ownership.
+
+Pair arithmetic is an explicit manual-review AC007 exception: retain authenticated
+original report inputs, exact ratios/intervals/launch summaries, source diff and
+independent reviewer signature. Controlled arithmetic cannot authenticate GitHub.
+Local BDN experiments are owner-authorized development evidence with actual
+source/machine/settings, and cannot qualify website/cluster results.

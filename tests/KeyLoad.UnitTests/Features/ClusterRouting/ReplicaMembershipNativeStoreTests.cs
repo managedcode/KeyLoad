@@ -58,7 +58,11 @@ internal sealed class ReplicaMembershipNativeStoreTests
             await cancellation.CancelAsync();
             await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => store.CompareExchangeAsync(inserted, cancellation.Token));
             await Assert.That(fixture.Store.Read(view => view.GetRecord<MembershipRecord>(Key))).IsNull();
-            await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => store.ReadAsync(cancellation.Token));
+            var read = store.ReadAsync(cancellation.Token);
+            await Assert.That(read.IsCanceled).IsTrue();
+            var cancelled = await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => read);
+            await Assert.That(cancelled).IsNotNull();
+            await Assert.That(cancelled!.CancellationToken).IsEqualTo(cancellation.Token);
             await Assert.That(log.State).IsEqualTo(before);
             await Assert.That((await store.ReadAsync(token)).Data().Members.Count).IsEqualTo(0);
             await Assert.That(fixture.Database.LastApplied).IsEqualTo(log.State.CommittedIndex);

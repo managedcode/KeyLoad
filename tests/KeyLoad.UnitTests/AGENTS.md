@@ -35,3 +35,6 @@
   settle; no fake parent exception, detached cleanup or direct parent guard open.
 - Normal/scalar Actions reports and full recovery qualify this private test stage;
   they do not qualify actual benchmark node stop/restart, physical copies or ACKs.
+
+## Owner-authorized local development verification, 2026-10-03
+- The explicit owner correction in root AGENTS.md supersedes the historical GitHub-only execution restrictions above for development verification. Run the actual TUnit command locally against a freshly built source snapshot; retain actual machine, source, command and original results. Local results are development evidence. Exact-source GitHub recovery/RF3/endurance and publication gates remain required, with every necessary suite executed.

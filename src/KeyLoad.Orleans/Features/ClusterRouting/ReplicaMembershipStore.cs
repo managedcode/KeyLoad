@@ -26,6 +26,7 @@ internal sealed class ReplicaMembershipStore
 
     internal async Task<ReplicaMembershipSnapshot> ReadAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         await consensus.ReadControlBarrierAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         var record = database.Store.Read(view => view.GetRecord<MembershipRecord>(Key));

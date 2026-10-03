@@ -364,8 +364,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions: {contents: read, actions: read}
-    env:
-      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -385,6 +383,7 @@ jobs:
         run: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/NativeSerialization*/*' --results-directory artifacts/native-diagnostic-tests/scalar
       - name: Record source packages runtime and execution identity
         env:
+          GH_TOKEN: ${{ github.token }}
           KEYLOAD_NATIVE_SERIALIZATION_CORPUS_DIRECTORY: ${{ github.workspace }}/artifacts/native-serialization/corpus
         run: node scripts/Features/BenchmarkComparisons/native-serialization-evidence.mjs --mode=prepare --directory=artifacts/native-serialization
       - name: Measure all native and historical JSON diagnostic cases
@@ -398,6 +397,7 @@ jobs:
           exit "$status"
       - name: Require all original measurements and their provenance
         env:
+          GH_TOKEN: ${{ github.token }}
           KEYLOAD_NATIVE_SERIALIZATION_CORPUS_DIRECTORY: ${{ github.workspace }}/artifacts/native-serialization/corpus
         run: node scripts/Features/BenchmarkComparisons/native-serialization-evidence.mjs --mode=verify --directory=artifacts/native-serialization
       - name: Save original measurements diagnostics and failures
