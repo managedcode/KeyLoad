@@ -1,5 +1,11 @@
 # BenchmarkComparisons
 
+[Native gate repair](BenchmarkComparisons/NativeGateRepair.md) / [ADR-068](../ADR/ADR-068-native-benchmark-gate-repair.md)
+preserves full isolated scope while repairing actual stale startup job proof and
+investigating Kurrent metadata/leader failures from dbd01269 original artifacts.
+The bounded same-ID current-job refresh and exact canonical fixture metadata
+contracts are frozen; native leader routing and complete cohort qualification remain open.
+
 ## Shared parallel performance pipeline
 
 REQ-PIPE-005/006 and AC-UB-001..006 in

@@ -1,0 +1,27 @@
+{
+  "id": 111196796054,
+  "run_id": 37120639751,
+  "workflow_name": "Benchmarks",
+  "head_branch": "main",
+  "run_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/runs/37120639751",
+  "run_attempt": 1,
+  "node_id": "CR_kwDOHHqt7c8AAAAZ49h0lg",
+  "head_sha": "dbd01269e5a1e526c3773b213b201950300f1df6",
+  "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/jobs/111196796054",
+  "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37120639751/job/111196796054",
+  "status": "queued",
+  "conclusion": null,
+  "created_at": "2026-10-03T11:50:54Z",
+  "started_at": "2026-10-03T11:50:54Z",
+  "completed_at": null,
+  "name": "Benchmark / rabbitmq-n2-document-delete",
+  "steps": [],
+  "check_run_url": "https://api.github.com/repos/managedcode/KeyLoad/check-runs/111196796054",
+  "labels": [
+    "ubuntu-latest"
+  ],
+  "runner_id": 0,
+  "runner_name": "",
+  "runner_group_id": 0,
+  "runner_group_name": ""
+}

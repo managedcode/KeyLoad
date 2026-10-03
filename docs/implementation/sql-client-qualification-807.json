@@ -1,0 +1,267 @@
+{
+  "sourceRevision": "8071148cd83bfecd67332c2a794248bf66c6b4ec",
+  "originalSqlSourceRevision": "a693f7c9acd4a2c7130e5e63650d2802c379ead1",
+  "run": {
+    "id": 37121245202,
+    "run_attempt": 1,
+    "head_sha": "8071148cd83bfecd67332c2a794248bf66c6b4ec",
+    "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37121245202",
+    "event": "push",
+    "status": "completed",
+    "conclusion": "failure",
+    "created_at": "2026-10-03T11:56:23Z",
+    "updated_at": "2026-10-03T12:28:59Z"
+  },
+  "counts": {
+    "normal": {
+      "state": "provider step skipped; no original report",
+      "executedCaseCount": null
+    },
+    "scalar": {
+      "state": "provider step skipped; no original report",
+      "executedCaseCount": null
+    },
+    "analyzer": {
+      "total": 118,
+      "passed": 118,
+      "failed": 0,
+      "sourceJobDuplicateFixture": "skipped, so no second118case run"
+    },
+    "recovery": {
+      "total": 183,
+      "passed": 128,
+      "failed": 55,
+      "actualErrorStatuses": 55
+    },
+    "RF3": {
+      "total": 65,
+      "passed": 11,
+      "failed": 54,
+      "actualErrorStatuses": 54
+    }
+  },
+  "sourceGates": {
+    "solutionBuild": {
+      "jobId": 111200696195,
+      "state": "success",
+      "actualOriginalLog": "/private/tmp/keyload-sqlc-r11-a693f7c9-20261003/807-original-reports/job-111200696195.log",
+      "logSha256": "fc1418f5ee15d74daf4c884504fbbea5853be00c068c53cb2f84c2a4ecccdf31",
+      "counts": [
+        {
+          "line": 196,
+          "text": "2026-10-03T12:18:00.7520787Z     0 Warning(s)"
+        },
+        {
+          "line": 197,
+          "text": "2026-10-03T12:18:00.7521166Z     0 Error(s)"
+        }
+      ]
+    },
+    "formatter": {
+      "state": "failure",
+      "actualOriginalDiagnostics": [
+        {
+          "line": 206,
+          "text": "2026-10-03T12:18:15.0629365Z ##[error]/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeNullableMetadataTests.cs(39,61): error WHITESPACE: Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'. [/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]"
+        }
+      ],
+      "ownership": "New native nullable metadata test; not root27SQL/staging paths."
+    },
+    "repositoryRules": {
+      "jobId": 111199030751,
+      "state": "success"
+    },
+    "sourceJobUnitAndAnalyzerSteps": {
+      "Test code analyzers": {
+        "name": "Test code analyzers",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 8,
+        "started_at": "2026-10-03T12:19:39Z",
+        "completed_at": "2026-10-03T12:19:39Z"
+      },
+      "Run unit tests": {
+        "name": "Run unit tests",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 9,
+        "started_at": "2026-10-03T12:19:39Z",
+        "completed_at": "2026-10-03T12:19:39Z"
+      },
+      "Run unit tests without CPU intrinsics": {
+        "name": "Run unit tests without CPU intrinsics",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 10,
+        "started_at": "2026-10-03T12:19:39Z",
+        "completed_at": "2026-10-03T12:19:39Z"
+      }
+    }
+  },
+  "originalReports": [
+    {
+      "artifactId": 11274151120,
+      "jobId": 111199030625,
+      "runId": 37121245202,
+      "attempt": 1,
+      "sourceSha": "8071148cd83bfecd67332c2a794248bf66c6b4ec",
+      "entry": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "sha256": "83c5dc98fe1c715cb75fc4ba0bccd126b0d7e48a04229c60976129b68febf45c",
+      "label": "analyzer",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualStatusCounts": {
+        "passed": 118
+      }
+    },
+    {
+      "artifactId": 11274256057,
+      "jobId": 111200696195,
+      "runId": 37121245202,
+      "attempt": 1,
+      "sourceSha": "8071148cd83bfecd67332c2a794248bf66c6b4ec",
+      "entry": "TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "sha256": "29abfa8d079f9979049b661ebff62ee5ba20739899702fd3c6ecefaace49b70f",
+      "label": "recovery",
+      "summary": {
+        "total": 183,
+        "passed": 128,
+        "failed": 55,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualStatusCounts": {
+        "error": 55,
+        "passed": 128
+      }
+    },
+    {
+      "artifactId": 11274286830,
+      "jobId": 111199030731,
+      "runId": 37121245202,
+      "attempt": 1,
+      "sourceSha": "8071148cd83bfecd67332c2a794248bf66c6b4ec",
+      "entry": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "sha256": "fc8c6ebe885168f01ea465e6f4a0d2dfbdd06c3b7802e9a213e949df9380ffc2",
+      "label": "RF3",
+      "summary": {
+        "total": 65,
+        "passed": 11,
+        "failed": 54,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualStatusCounts": {
+        "error": 54,
+        "passed": 11
+      }
+    }
+  ],
+  "zipBindings": [
+    {
+      "artifactId": 11274151120,
+      "providerDigest": "sha256:1e1878b6cf4f557c7623d7f60ad738f2cb2efce22539095c834866ab1809299c",
+      "zipSha256": "1e1878b6cf4f557c7623d7f60ad738f2cb2efce22539095c834866ab1809299c",
+      "uploadJobId": 111199030625,
+      "uploadBinding": [
+        {
+          "line": 196,
+          "text": "2026-10-03T12:18:03.2822116Z Artifact analyzer-rule-evidence successfully finalized. Artifact ID 11274151120"
+        },
+        {
+          "line": 197,
+          "text": "2026-10-03T12:18:03.2823423Z Artifact analyzer-rule-evidence has been successfully uploaded! Final size is 207347 bytes. Artifact ID is 11274151120"
+        },
+        {
+          "line": 198,
+          "text": "2026-10-03T12:18:03.2828069Z Artifact download URL: https://github.com/managedcode/KeyLoad/actions/runs/37121245202/artifacts/11274151120"
+        },
+        {
+          "line": 194,
+          "text": "2026-10-03T12:18:02.8630750Z SHA256 digest of uploaded artifact is 1e1878b6cf4f557c7623d7f60ad738f2cb2efce22539095c834866ab1809299c"
+        }
+      ]
+    },
+    {
+      "artifactId": 11274256057,
+      "providerDigest": "sha256:a30b134ef65e16d624bf4c683d91ed2eeb28314a8690fcf672e78f1436b81dc0",
+      "zipSha256": "a30b134ef65e16d624bf4c683d91ed2eeb28314a8690fcf672e78f1436b81dc0",
+      "uploadJobId": 111200696195,
+      "uploadBinding": [
+        {
+          "line": 1940,
+          "text": "2026-10-03T12:20:13.4367088Z Artifact test-results-ubuntu-latest successfully finalized. Artifact ID 11274256057"
+        },
+        {
+          "line": 1941,
+          "text": "2026-10-03T12:20:13.4367710Z Artifact test-results-ubuntu-latest has been successfully uploaded! Final size is 187346 bytes. Artifact ID is 11274256057"
+        },
+        {
+          "line": 1942,
+          "text": "2026-10-03T12:20:13.4370281Z Artifact download URL: https://github.com/managedcode/KeyLoad/actions/runs/37121245202/artifacts/11274256057"
+        },
+        {
+          "line": 1938,
+          "text": "2026-10-03T12:20:13.1375994Z SHA256 digest of uploaded artifact is a30b134ef65e16d624bf4c683d91ed2eeb28314a8690fcf672e78f1436b81dc0"
+        }
+      ]
+    },
+    {
+      "artifactId": 11274286830,
+      "providerDigest": "sha256:4d1be0f0ad4b1835e01d11587b0671cab5fba0cba3743247f8b39a5128691c07",
+      "zipSha256": "4d1be0f0ad4b1835e01d11587b0671cab5fba0cba3743247f8b39a5128691c07",
+      "uploadJobId": 111199030731,
+      "uploadBinding": [
+        {
+          "line": 3713,
+          "text": "2026-10-03T12:28:55.8738926Z Artifact docker-rf3-qualification successfully finalized. Artifact ID 11274286830"
+        },
+        {
+          "line": 3714,
+          "text": "2026-10-03T12:28:55.8739968Z Artifact docker-rf3-qualification has been successfully uploaded! Final size is 130584 bytes. Artifact ID is 11274286830"
+        },
+        {
+          "line": 3715,
+          "text": "2026-10-03T12:28:55.8743383Z Artifact download URL: https://github.com/managedcode/KeyLoad/actions/runs/37121245202/artifacts/11274286830"
+        },
+        {
+          "line": 3711,
+          "text": "2026-10-03T12:28:55.6207312Z SHA256 digest of uploaded artifact is 4d1be0f0ad4b1835e01d11587b0671cab5fba0cba3743247f8b39a5128691c07"
+        }
+      ]
+    }
+  ],
+  "sealedOriginalPacketSha256": "1528fbe71b2267e09e3ad572326991854f9879576e59d14d478c90943c5d6600",
+  "ownedSourceEquivalence": {
+    "path": "/private/tmp/keyload-sqlc-r11-a693f7c9-20261003/owned-source-equivalence-input.json",
+    "sha256": "af0a985600ec9f7cb5d12d3758ffedb20147b6c20c3d1c52d40ec3b473b21f10",
+    "sameOwnedSourceFiles": 27,
+    "scope": "Root-authenticated same bytes at a693 and descendant807; not whole revision equivalence or native proof."
+  },
+  "normalAndScalarExecuted": false,
+  "newSqlRf3CasesPassed": false,
+  "newSqlRf3Cases": "two original errors in ClusterFixture.InitializeAsync before body",
+  "newStagedBackupCasesQualified": false,
+  "fullSqlComplete": false,
+  "nativeProtocolImplemented": false,
+  "ftsIntegrated": false,
+  "completeNativeBenchmarkCohortQualified": false,
+  "limitations": [
+    "Only genuine original provider evidence, no local test/build/runtime/dispatch/source/Git mutation.",
+    "No inferred complete PostgreSQL compatibility, whole native serialization audit, power-loss durability or performance verdict.",
+    "RF3 newSQL cases failed fixture setup and did not execute SQL/MCP business assertions.",
+    "Code-quality and Dockerimage artifacts retained as metadata only, not downloaded; original source-job log binds build and formatter facts.",
+    "Audit complete; required qualification failed and repair/requalification remains root-owned."
+  ]
+}

@@ -141,7 +141,7 @@ internal sealed class IsolatedKurrentVolumeRegressionFixture(Uri endpoint, Compa
         await Assert.That(actual.Data.AsSpan().SequenceEqual(expected.Data.ToArray())).IsTrue();
         await Assert.That(actual.Type).IsEqualTo(KurrentConstants.EventType);
         await Assert.That(actual.ContentType).IsEqualTo(KurrentConstants.EventJson);
-        await Assert.That(actual.Metadata.Length).IsEqualTo(0);
+        await Assert.That(actual.Metadata.AsSpan().SequenceEqual(expected.Metadata.ToArray())).IsTrue();
     }
 
     private async Task RequireForeignUnchangedAsync(KurrentDBClient reader, CancellationToken token)

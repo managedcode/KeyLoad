@@ -34,6 +34,15 @@ the ADMIN catch-all. All command semantic contracts and qualification remain
 pending. This layer does not replace separate expression/type/function/operator/
 clause/catalog/protocol inventories or authorize provider/session choices.
 
+TASK-SQLC-R12 [pinned parser research](../implementation/sql-parser-candidate-review.md)
+compares managed SqlParserCS and native PostgreSQL parser bindings. Tagged
+libpg_query18.0.0 is the strongest inspected PG18 syntax reference, a planning
+inference; existing wrapper/package PG18 provenance remains unverified. No parser
+is selected or installed. Syntax structures do not provide catalog/type binding,
+authorized execution or client sessions. Freeze native ABI/RIDs, ownership,
+resource/cancellation/drain and typed-plan contracts before implementation; every
+advertised family still requires real differential execution and RF3 proof.
+
 Official targets: [PostgreSQL18 SQL](https://www.postgresql.org/docs/18/sql.html),
 [syntax](https://www.postgresql.org/docs/18/sql-syntax.html),
 [protocol](https://www.postgresql.org/docs/18/protocol.html),
@@ -121,6 +130,21 @@ Each scope's exact artifacts/start/dependencies/review gates are in the working
 plan. Inherited capable workers have disjoint write scopes; root alone owns
 contracts/config/docs/Git. No suitable cheaper route is established for the
 shared lexical/outcome boundary; workers must escalate contract drift.
+
+TASK-SQLC-R13 / AC006/007/008 source planning confirms that
+[IAtomicStore](../../src/KeyLoad.Abstractions/Storage/StorageContracts.cs) exposes
+callback-scoped reads/commits and
+[the gateway](../../src/KeyLoad.Server/Features/ClientApi/CanonicalOperationGateway.cs)
+dispatches one signed operation through an HTTP principal. A native session must
+not retain a storage view, impersonate that HTTP context or treat separate CALL
+commits as one SQL transaction. Freeze typed binding and same-cut model operators,
+atomic set-DML/DDL, transport-neutral verified dispatch/original settlement, then
+canonical session transaction read-cut/write-set/commit authority before wire
+implementation. Simple-query implicit batches, explicit BEGIN and modifying CTEs
+require their actual semantics and fault tests. Proposed API shapes remain
+planning only. The70-input audit binds inspected working bytes at HEAD8071148c,
+including undelivered composition work; it is not committed equality or runtime
+proof. Packet SHA256 `10b154a3a3786152c8e821026c4919b4efea70a1e609fac8b0f33dff2ef9fb7a`.
 
 ## Native transport and search freezes
 

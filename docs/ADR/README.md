@@ -75,6 +75,8 @@
 | [ADR-065 full SQL and client protocol](ADR-065-full-sql-client-compatibility.md) | Accepted staged lexical contract; full execution/native qualification pending | QueryExecution, ClientApi, RelationalStorage, Search |
 | [ADR-067 composable agent database](ADR-067-composable-agent-database.md) | Accepted; bounded atomic composition source, full SQL and exact-SHA qualification pending | DatabaseComposition, QueryExecution, ClientApi |
 
+| [ADR-068 native benchmark gate repair](ADR-068-native-benchmark-gate-repair.md) | Accepted bounded current-job capture; native and complete cohort qualification pending | BenchmarkComparisons |
+
 ## Ідентичність і пріоритет
 
 Owner-directed unified AI database continuation:

@@ -11,6 +11,9 @@ internal static class IsolatedKurrentVolumeRegressionNative
 {
     private const int Workers = 16;
     private const string Payload = "{\"fixture\":\"canonical-volume\"}";
+    private const string TraceId = "0123456789abcdef0123456789abcdef";
+    private const string SpanId = "0123456789abcdef";
+    private const string Metadata = $"{{\"owner\":\"canonical-volume\",\"$traceId\":\"{TraceId}\",\"$spanId\":\"{SpanId}\"}}";
 
     internal static async Task RequireCanonicalProfileAsync(ComparisonOptions options)
     {
@@ -34,7 +37,7 @@ internal static class IsolatedKurrentVolumeRegressionNative
 
     internal static KurrentEventData CreateEvent()
         => new(Uuid.FromGuid(Guid.NewGuid()), KurrentConstants.EventType, Encoding.UTF8.GetBytes(Payload),
-            contentType: KurrentConstants.EventJson);
+            Encoding.UTF8.GetBytes(Metadata), KurrentConstants.EventJson);
 
     internal static KurrentEventData CreateForeignEvent()
         => new(Uuid.FromGuid(Guid.NewGuid()), KurrentConstants.EventType,

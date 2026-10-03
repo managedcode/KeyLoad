@@ -8,6 +8,7 @@ import { createDirectory, requireOutputFile } from './image-bundle-files.mjs';
 import { createGitHubContext, requireCurrentJobName } from './isolated-github-context.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { captureCurrentJobPages } from './isolated-github-api.mjs';
+import { captureFreshCurrentJob } from './isolated-current-job.mjs';
 import { validateJobIdentity } from './isolated-github-validation.mjs';
 import { writeJson } from './isolated-github-files.mjs';
 import { initializeTransport } from './isolated-github-transport.mjs';
@@ -31,9 +32,8 @@ export async function captureCurrentJob(environment = process.env, argv = proces
   await verifySourceCheckout(context.native);
   const directory = await createDirectory(path.join(context.native.runnerTemp, GH.captureDirectory));
   await initializeTransport(context, directory, directory);
-  const job = validateJobIdentity(await captureCurrentJobPages(directory, context, name), context.cohort, name);
-  requireGitHub(job.status === 'in_progress' && job.conclusion === null
-    && job.workflow_name === GH.workflow && job.head_branch === 'main');
+  const discovered = validateJobIdentity(await captureCurrentJobPages(directory, context, name), context.cohort, name);
+  const job = await captureFreshCurrentJob(discovered, directory, context, name);
   await writeJson(path.join(directory, 'job.json'), job);
   await writeJson(path.join(directory, 'cohort.json'), context.cohort);
   await appendJobEnvironment(environment.GITHUB_ENV, job.id);

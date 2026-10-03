@@ -51,6 +51,12 @@ Full PostgreSQL-compatible execution and native transport are pending. The
 adds search integration/correctness/recovery/resource/performance gates without
 selecting a provider or promising acceleration.
 
+[ADR-068](ADR/ADR-068-native-benchmark-gate-repair.md) preserves isolated benchmark
+startup authority: original bounded job discovery joins authenticated metadata for
+the same job ID before native allocation. Still-queued metadata has three bounded
+captures; identity/state failures remain failures. Kurrent metadata/leader gates
+and complete native cohort/site qualification remain open.
+
 ```mermaid
 classDiagram
     SqlParser --> SqlTriviaReader : bounded token trivia
