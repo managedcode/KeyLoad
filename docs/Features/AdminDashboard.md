@@ -1,5 +1,10 @@
 # AdminDashboard
 
+The owner-requested shared favicon export and noindex continuation is specified
+by [SiteMetadata](BenchmarkComparisons/SiteMetadata.md), REQ-SEO-001/005 and
+AC-SEO-001/006 under ADR053. It adds only finite public icon GET/HEAD assets;
+all operational authorization and existing console contracts remain required.
+
 Status: source delivered; exact-SHA dashboard unit, RF3 API and native Chrome cases pass, and retained desktop/mobile screenshots are visually reviewed. Complete recovery/comparison and numeric coverage gates remain open; ADR-051 remains Accepted. Owner: KeyLoad lead. User request: attractive runtime administration with sizes, throughput, tables/collections, queues and files.
 
 This is the durable requirements and acceptance contract. Architecture and the ordered agent implementation contract are in [ADR-051](../ADR/ADR-051-admin-dashboard.md). Root-level brainstorm, acceptance and plan files are local task scaffolding under the repository ignore policy; delivery evidence belongs here and in `docs/implementation/status.json`.

@@ -32,6 +32,12 @@ classDiagram
 
 The additive [AdminDashboard](Features/AdminDashboard.md) slice under [ADR-051](ADR/ADR-051-admin-dashboard.md) hosts the runtime read-only console in `src/KeyLoad.Server/Features/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core catalog/queue readers, matching Client SDK and UnitTests/IntegrationTests slices. It borrows the existing unique Orleans request/read actors and node-local administration; physical observations are explicitly per node. The public benchmark `site/` remains its own surface. Both surfaces share one light visual identity under [ADR-053](ADR/ADR-053-unified-visual-identity.md): the console owns the canonical `brand.css`/`logo.svg`, and the site keeps byte-identical mirrors checked by SiteTests. Exact-SHA dashboard unit/RF3/native browser cases pass and retained desktop/mobile images are visually reviewed; complete recovery/comparison and numeric coverage qualification remains open.
 
+[SiteMetadata](Features/BenchmarkComparisons/SiteMetadata.md) extends that identity
+with mirrored PNG/ICO exports, static landing SEO/OG/Twitter/JSON-LD and an authored
+share card. The existing static builder owns root delivery and crawl files; the
+console's finite embedded shell owns only its exact icon routes and noindex.
+Source assets and local rendering do not establish indexing or publication.
+
 ```mermaid
 flowchart LR
     Admin[Same origin admin console] --> API[AdminDashboard API and MCP]

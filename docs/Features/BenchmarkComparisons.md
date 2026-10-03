@@ -414,6 +414,10 @@ flowchart LR
 
 ## Owner-directed isolated Linux performance matrix, 2026-10-03
 
+The additive owner-requested favicon/search/social-preview presentation contract
+is [SiteMetadata](BenchmarkComparisons/SiteMetadata.md), REQ-SEO-001..006 /
+AC-SEO-001..007 under ADR053. It preserves every benchmark/evidence gate.
+
 [ADR-056](../ADR/ADR-056-isolated-linux-comparison-cells.md) and the canonical
 [acceptance](../../isolated-comparisons.acceptance.md)/[plan](../../isolated-comparisons.plan.md)
 replace the three-OS and all-engine-on-one-runner producer for new qualification.

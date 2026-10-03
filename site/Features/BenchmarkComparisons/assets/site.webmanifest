@@ -1,0 +1,13 @@
+{
+  "name": "KeyLoad",
+  "short_name": "KeyLoad",
+  "start_url": "./",
+  "scope": "./",
+  "display": "browser",
+  "theme_color": "#f7f6f2",
+  "background_color": "#f4f3ef",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

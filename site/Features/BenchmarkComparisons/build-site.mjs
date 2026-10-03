@@ -9,6 +9,10 @@ import { produceIsolatedProjection } from './isolated-projection.mjs';
 import { validateIsolatedCatalog, validateIsolatedProjection } from './isolated-loader.mjs';
 import { readBytes } from '../../../scripts/Features/BenchmarkComparisons/aggregate-files.mjs';
 
+const META_ASSET = Object.freeze({
+  manifest: 'assets/site.webmanifest', manifestOutput: 'site.webmanifest',
+  ogImage: 'assets/og-image.png', ogImageOutput: 'og-image.png', ogSource: 'assets/og-image.svg',
+});
 const BUILD = Object.freeze({
   encoding: 'utf8', hash: 'sha256', hex: 'hex', feature: 'Features/BenchmarkComparisons', sourceParent: '../..',
   vendor: 'vendor/three/0.186.1', manifest: 'manifest.json', three: 'three', version: '0.186.1',
@@ -20,6 +24,9 @@ const BUILD = Object.freeze({
     'benchmark-lab.mjs', 'benchmark-chart.mjs', 'benchmark-profiles.mjs', 'cluster-scene.mjs',
     'scene-geometry.mjs', 'scene-lifecycle.mjs', 'scene-observers.mjs', 'styles.css', 'brand.css', 'tokens.css', 'scene.css',
     'assets/cluster-poster.svg', 'assets/cluster-poster-mobile.svg'],
+  rootAssets: ['favicon.ico', 'favicon-32x32.png', 'favicon-96x96.png', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
+  metadataAssets: [META_ASSET.manifest, META_ASSET.ogImage, META_ASSET.ogSource],
+  metadataCopies: [[META_ASSET.manifest, META_ASSET.manifestOutput], [META_ASSET.ogImage, META_ASSET.ogImageOutput]],
   vendorFiles: ['three.webgpu.js', 'three.core.js', 'LICENSE'],
   vendorHashes: ['15cfce5c653541704fd9a3463c39d3e8b854bb6265ccd854d7cfe74090625cc6',
     '9edde002b066a9a05676a6127f67735b62baf399bdea529f2f7e31657da769e6',
@@ -36,7 +43,7 @@ const BUILD = Object.freeze({
   path: 'path', bytes: 'bytes',
   parent: '..', staticEvidence: '<!-- KEYLOAD_STATIC_EVIDENCE -->',
   documentationBlob: '/blob/main/docs', documentationTree: '/tree/main/docs',
-  robots: 'User-agent: *\nAllow: /\nSitemap: https://www.keyload.cloud/sitemap.xml\n',
+  robots: 'User-agent: *\nAllow: /\nDisallow: /admin/\nSitemap: https://www.keyload.cloud/sitemap.xml\n',
   sitemap: '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://www.keyload.cloud/</loc></url></urlset>\n',
 });
 const ERRORS = Object.freeze({
@@ -127,6 +134,8 @@ async function verifyAssets() {
     if (name.endsWith(BUILD.cssExtension)) css += gzipSync(bytes).length;
   }
   await assertRegular(join(source, BUILD.favicon));
+  for (const name of BUILD.rootAssets) await assertRegular(join(source, name));
+  for (const name of BUILD.metadataAssets) await assertRegular(join(feature, name));
   if (javascript > BUILD.authoredJsLimit || css > BUILD.cssLimit) throw new Error(ERRORS.budget);
   return { javascriptGzipBytes: javascript, cssGzipBytes: css };
 }
@@ -168,6 +177,8 @@ async function copyAsset(output, path, target = path) {
 async function emit(output, reports, catalog, isolated) {
   await emitHtml(output, catalog, isolated);
   await copyAsset(output, BUILD.favicon);
+  for (const asset of BUILD.rootAssets) await copyAsset(output, asset);
+  for (const [asset, target] of BUILD.metadataCopies) await copyAsset(output, `${BUILD.feature}/${asset}`, target);
   for (const asset of BUILD.assets) await copyAsset(output, `${BUILD.feature}/${asset}`);
   for (const file of [...BUILD.vendorFiles, BUILD.manifest]) await copyAsset(output, `${BUILD.feature}/${BUILD.vendor}/${file}`);
   for (const run of catalog.runs) {

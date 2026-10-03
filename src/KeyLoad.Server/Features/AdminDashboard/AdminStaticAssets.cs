@@ -12,6 +12,8 @@ internal static class AdminStaticAssets
     private const string Css = "text/css; charset=utf-8";
     private const string JavaScript = "text/javascript; charset=utf-8";
     private const string Svg = "image/svg+xml";
+    private const string Png = "image/png";
+    private const string Ico = "image/x-icon";
     private const string Logo = "logo.svg";
     private const string Index = "index.html";
     private const string NoStore = "no-store";
@@ -26,6 +28,11 @@ internal static class AdminStaticAssets
     private static readonly string[] Scripts = ["constants.js", "text.js", "format.js", "dom.js", "tooltip.js", "charts.js",
         "metrics.js", "navigation.js", "browsing.js", "catalog.js", "errors.js", "overview.js", "performance.js",
         "nodes.js", "storage.js", "app.js"];
+    private static readonly (string File, string Type)[] Icons =
+    [
+        ("favicon.ico", Ico), ("favicon-32x32.png", Png), ("favicon-96x96.png", Png),
+        ("apple-touch-icon.png", Png), ("icon-192.png", Png), ("icon-512.png", Png)
+    ];
     private static readonly FrozenDictionary<string, (string File, string Type)> Assets = Catalog()
         .ToFrozenDictionary(StringComparer.Ordinal);
 
@@ -37,6 +44,8 @@ internal static class AdminStaticAssets
             [RootPath + Index] = (Index, Html),
             [RootPath + Logo] = (Logo, Svg)
         };
+        foreach (var icon in Icons)
+        { assets[RootPath + icon.File] = (icon.File, icon.Type); }
         foreach (var file in Stylesheets)
         { assets[RootPath + file] = (file, Css); }
         foreach (var file in Scripts)

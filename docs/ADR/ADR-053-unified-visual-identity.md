@@ -96,6 +96,28 @@ coherent presentation change. Missing independent comparison evidence remains
 an explicit publication blocker. This continuation remains Accepted until all
 required verification exists.
 
+## Icon and site metadata continuation, 2026-10-03
+
+The owner's favicon/SEO/social-preview request adds REQ-SEO-001..006 and
+AC-SEO-001..007 in [SiteMetadata](../Features/BenchmarkComparisons/SiteMetadata.md).
+Preserve the canonical SVG and existing identity; derive six PNG/ICO files under
+console Assets with byte-identical site mirrors. Static landing metadata and an
+authored SVG/1200×630 PNG share card use the existing www canonical. JSON-LD
+describes the real MIT project without invented ratings/offers or measurements.
+The console receives only those finite public GET/HEAD icon routes and noindex;
+its authentication, CSP and data routes remain unchanged. Existing robots/sitemap
+generation is extended within BenchmarkComparisons, not a second crawl source.
+
+Implementation stages, disjoint worker/lead ownership and acceptance are retained
+in [SiteMetadata](../Features/BenchmarkComparisons/SiteMetadata.md#implementation-and-delivery-contract).
+Join the exported bytes, emitted/static-host behavior and acceptance-driven real
+builder/RF3 tests before lead review/development/static/manual checks and normal
+exact-SHA GitHub qualification/publication. No new dependency or persisted-data
+migration. Rollback coherently reverts the added head/assets/copy/whitelist changes.
+Provider indexing/share-cache refresh is a manual external outcome; source push
+or local rendering cannot establish it. Missing isolated evidence is reported,
+never bypassed. This additive contract remains Accepted until required gates pass.
+
 ## Alternatives
 
 - Restyle each surface separately. Rejected because drift returns.

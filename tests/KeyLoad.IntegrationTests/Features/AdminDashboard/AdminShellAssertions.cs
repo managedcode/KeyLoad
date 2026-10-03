@@ -32,6 +32,7 @@ internal static class AdminShellAssertions
         using var head = await client.SendAsync(request, cancellationToken);
         await VerifyHeadersAsync(head);
         await Assert.That((await head.Content.ReadAsByteArrayAsync(cancellationToken)).Length).IsEqualTo(0);
+        await AdminFaviconAssertions.VerifyAsync(fixture, cancellationToken);
         using var forbidden = await client.PostAsync(new Uri(RootPath, UriKind.Relative), content: null, cancellationToken);
         await Assert.That(forbidden.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
     }

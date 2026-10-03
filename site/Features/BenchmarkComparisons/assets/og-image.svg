@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">KeyLoad — The database for AI agents.</title>
+  <desc id="description">KeyLoad brings documents, data and tools together for AI agents, with MCP, .NET and Orleans.</desc>
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#292a2e"/><stop offset="1" stop-color="#111214"/></linearGradient>
+    <linearGradient id="keyload-mark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a3d"/><stop offset="1" stop-color="#0d0e10"/></linearGradient>
+    <linearGradient id="keyload-sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="keyload-iris" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffb08a"/><stop offset=".5" stop-color="#e3a6ff"/><stop offset="1" stop-color="#9fb4ff"/></linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffb08a"/><stop offset=".52" stop-color="#e3a6ff"/><stop offset="1" stop-color="#9fb4ff"/></linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#f4f3ef"/>
+  <rect x="44" y="42" width="1112" height="546" rx="34" fill="url(#panel)" stroke="#fff" stroke-opacity=".12"/>
+  <rect x="88" y="91" width="8" height="448" rx="4" fill="url(#accent)"/>
+  <svg x="132" y="104" width="94" height="94" viewBox="0 0 40 40" role="img" aria-label="KeyLoad mark">
+    <rect width="40" height="40" rx="10" fill="url(#keyload-mark)"/>
+    <rect x=".5" y=".5" width="39" height="39" rx="9.5" fill="url(#keyload-sheen)" stroke="#fff" stroke-opacity=".14"/>
+    <rect x="10" y="9" width="5" height="6" rx="2" fill="#fff"/>
+    <rect x="10" y="17" width="5" height="6" rx="2" fill="#fff"/>
+    <rect x="10" y="25" width="5" height="6" rx="2" fill="url(#keyload-iris)"/>
+    <path d="M29 9.5 19.5 20 29 30.5" fill="none" stroke="#fff" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <text x="250" y="171" fill="#f5f3ef" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700" letter-spacing="-1.6">KeyLoad</text>
+  <rect x="132" y="238" width="77" height="5" rx="2.5" fill="url(#accent)"/>
+  <text x="132" y="326" fill="#f5f3ef" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700" letter-spacing="-1.5">The database</text>
+  <text x="132" y="397" fill="#f5f3ef" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700" letter-spacing="-1.5">for AI agents.</text>
+  <text x="134" y="473" fill="#c9c7c3" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400">One place for the data and tools your agents use.</text>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="1.1">
+    <rect x="132" y="510" width="72" height="34" rx="17" fill="#fff" fill-opacity=".08" stroke="#fff" stroke-opacity=".16"/>
+    <text x="168" y="533" text-anchor="middle" fill="#f5f3ef">MCP</text>
+    <rect x="217" y="510" width="78" height="34" rx="17" fill="#fff" fill-opacity=".08" stroke="#fff" stroke-opacity=".16"/>
+    <text x="256" y="533" text-anchor="middle" fill="#f5f3ef">.NET</text>
+    <rect x="308" y="510" width="112" height="34" rx="17" fill="#fff" fill-opacity=".08" stroke="#fff" stroke-opacity=".16"/>
+    <text x="364" y="533" text-anchor="middle" fill="#f5f3ef">ORLEANS</text>
+  </g>
+</svg>
