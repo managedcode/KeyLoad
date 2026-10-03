@@ -159,16 +159,14 @@ internal sealed record NativeValueValidation(bool Required, NativeValueValidatio
     internal static NativeValueValidation Create(NullabilityInfo info)
     {
         var required = !info.Type.IsValueType && info.ReadState == NullabilityState.NotNull;
-        if (Nullable.GetUnderlyingType(info.Type) is not null)
-        {
-            return Create(info.GenericTypeArguments[0]);
-        }
         if (info.ElementType is { } element)
         {
             return new(required, Create(element));
         }
+        // NullabilityInfo keeps Nullable<T> as Type, but its generic metadata already describes T.
         var arguments = info.GenericTypeArguments;
-        if (arguments.Length == 2 && (IsDictionary(info.Type) || info.Type.GetInterfaces().Any(IsDictionary)))
+        var type = Nullable.GetUnderlyingType(info.Type) ?? info.Type;
+        if (arguments.Length == 2 && (IsDictionary(type) || type.GetInterfaces().Any(IsDictionary)))
         {
             return new(required, null, Create(arguments[0]), Create(arguments[1]));
         }
