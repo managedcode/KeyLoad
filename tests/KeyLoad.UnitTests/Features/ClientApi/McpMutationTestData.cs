@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>All twelve real public mutation DTOs, independent of catalog discovery.</summary>
+/// <summary>All fourteen real public mutation DTOs, independent of catalog discovery.</summary>
 internal static class McpMutationTestData
 {
     private const string EventId = "mcp-event";
@@ -28,10 +28,12 @@ internal static class McpMutationTestData
     private const string VectorKind = "putVector";
     private const string QueueToGraphKind = "queueToGraph";
     private const string GraphToQueueKind = "graphToQueue";
+    private const string ExpireSamplesKind = "expireSamples";
+    private const string StoreAggregateSnapshotKind = "storeAggregateSnapshot";
     internal static readonly ImmutableArray<string> Discriminators =
         [PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind,
          EnqueueKind, UpsertEdgeKind, DeleteEdgeKind, SamplesKind, VectorKind,
-         QueueToGraphKind, GraphToQueueKind];
+         QueueToGraphKind, GraphToQueueKind, ExpireSamplesKind, StoreAggregateSnapshotKind];
 
     internal static ImmutableArray<Mutation> Create() =>
     [
@@ -51,7 +53,11 @@ internal static class McpMutationTestData
             [Vector], new VectorSpace(SpaceId, Dimension, DistanceMetric.Cosine, Model, Version), Revision),
         new QueueToGraph(McpCanonicalTestData.Resource, McpCanonicalTestData.Resource, EdgeId),
         new GraphToQueueMutation(McpCanonicalTestData.Resource, McpCanonicalTestData.Resource,
-            McpCanonicalTestData.Reference, EdgeId)
+            McpCanonicalTestData.Reference, EdgeId),
+        new ExpireSamples(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
+            DateTimeOffset.UnixEpoch, SampleRetentionDefaults.DefaultDeletes),
+        new StoreAggregateSnapshot(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
+            Revision, Model, Dimension, McpCanonicalTestData.EmptyJson, 0, Revision)
     ];
 
     private static EventData Event() => new(EventId, EventType, McpCanonicalTestData.EmptyJson);

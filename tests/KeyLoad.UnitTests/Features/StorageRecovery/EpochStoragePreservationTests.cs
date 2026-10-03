@@ -25,14 +25,7 @@ internal sealed class EpochStoragePreservationTests
             store.SetDispatchPaused(true);
             snapshot = store.CreateSnapshot(fixture.Snapshot);
             await AssertEpoch6Async(store.Identity);
-            var oldSnapshotPath = fixture.Snapshot + ".checkpoint3";
-            await File.WriteAllBytesAsync(oldSnapshotPath,
-                EpochStorageFixture.CreateCurrentCheckpointAsLegacy(await File.ReadAllBytesAsync(fixture.Snapshot)));
-            var beforeOldInstall = await EpochStorageFixture.CaptureAsync(fixture.Source);
-            var oldInstall = Assert.ThrowsExactly<KeyLoadException>(() =>
-                store.InstallSnapshot(oldSnapshotPath, snapshot.AppliedPosition));
-            await Assert.That(oldInstall.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-            await EpochStorageFixture.AssertUnchangedAsync(fixture.Source, beforeOldInstall);
+            await AssertRejectedLegacyInstallPreservesSnapshotAsync(store, fixture, snapshot);
 
             store.Compact();
             await AssertEpoch6Async(store.Identity);
@@ -52,6 +45,38 @@ internal sealed class EpochStoragePreservationTests
 
     private static async Task AssertEpoch6Async(StoreIdentity identity)
         => await Assert.That(identity.FormatVersion).IsEqualTo(EpochStorageFixture.CurrentEpoch);
+
+    private static async Task AssertRejectedLegacyInstallPreservesSnapshotAsync(ZoneTreeStore store,
+        EpochStorageFixture fixture, StorageSnapshot snapshot)
+    {
+        var snapshotBytes = await File.ReadAllBytesAsync(fixture.Snapshot);
+        var identityPath = Path.Combine(fixture.Source, ZoneTreePersistenceFormat.IdentityFileName);
+        var identityBytes = await File.ReadAllBytesAsync(identityPath);
+        var sourceInventory = CaptureSourceInventory(fixture.Source);
+        var position = store.Position;
+        var oldSnapshotPath = fixture.Snapshot + ".checkpoint3";
+        await File.WriteAllBytesAsync(oldSnapshotPath,
+            EpochStorageFixture.CreateCurrentCheckpointAsLegacy(snapshotBytes));
+
+        var oldInstall = Assert.ThrowsExactly<KeyLoadException>(() =>
+            store.InstallSnapshot(oldSnapshotPath, snapshot.AppliedPosition));
+        await Assert.That(oldInstall.Code).IsEqualTo(ErrorCode.FormatUnsupported);
+
+        var afterSnapshot = store.CreateSnapshot(fixture.Snapshot + ".after-refusal", snapshot.AppliedPosition);
+        var afterSnapshotBytes = await File.ReadAllBytesAsync(fixture.Snapshot + ".after-refusal");
+        var afterIdentityBytes = await File.ReadAllBytesAsync(identityPath);
+        await Assert.That(afterSnapshot).IsEqualTo(snapshot);
+        await Assert.That(afterSnapshotBytes.SequenceEqual(snapshotBytes)).IsTrue();
+        await Assert.That(afterIdentityBytes.SequenceEqual(identityBytes)).IsTrue();
+        await Assert.That(store.Position).IsEqualTo(position);
+        await Assert.That(CaptureSourceInventory(fixture.Source).SequenceEqual(sourceInventory)).IsTrue();
+    }
+
+    private static string[] CaptureSourceInventory(string directory)
+        => Directory.EnumerateFileSystemEntries(directory, "*", SearchOption.AllDirectories)
+            .Select(path => Path.GetRelativePath(directory, path))
+            .Order(StringComparer.Ordinal)
+            .ToArray();
 
     private static async Task AssertValuesAsync(ZoneTreeStore store, EpochStorageFixture fixture)
     {

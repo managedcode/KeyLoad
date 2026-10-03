@@ -11,7 +11,10 @@ internal sealed class BlobStorageCompatibilityTests
     private const long BlobWriteCapability = 1L << 31;
     private const long BlobDeleteCapability = 1L << 32;
     private const long BlobManageCapability = 1L << 33;
-    private const long AllCurrentCapabilities = (1L << 34) - 1;
+    private const long SeriesManageCapability = 1L << 34;
+    private const long EventsReplayCapability = 1L << 35;
+    private const long EventsSnapshotsManageCapability = 1L << 36;
+    private const long AllCurrentCapabilities = (1L << 37) - 1;
     private const long DefaultMaxBlobBytes = 67_108_864;
     private const long DefaultMaxReservedBytes = 268_435_456;
     private const int DefaultMaxObjectKeys = 4_096;
@@ -38,6 +41,9 @@ internal sealed class BlobStorageCompatibilityTests
         await Assert.That(Numeric(Capability.BlobWrite)).IsEqualTo(BlobWriteCapability);
         await Assert.That(Numeric(Capability.BlobDelete)).IsEqualTo(BlobDeleteCapability);
         await Assert.That(Numeric(Capability.BlobManage)).IsEqualTo(BlobManageCapability);
+        await Assert.That(Numeric(Capability.SeriesManage)).IsEqualTo(SeriesManageCapability);
+        await Assert.That(Numeric(Capability.EventsReplay)).IsEqualTo(EventsReplayCapability);
+        await Assert.That(Numeric(Capability.EventsSnapshotsManage)).IsEqualTo(EventsSnapshotsManageCapability);
         await Assert.That(Numeric(Capability.All)).IsEqualTo(AllCurrentCapabilities);
         await Assert.That(Numeric(BlobUploadStatus.Active)).IsEqualTo(0);
         await Assert.That(Numeric(BlobUploadStatus.Complete)).IsEqualTo(1);

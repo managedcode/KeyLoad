@@ -74,9 +74,12 @@ internal sealed class SampleRetentionReadTests
         SampleAggregateTestData.Append(db,
             SampleAggregateTestData.Data(1, DateTimeOffset.MinValue, 1),
             SampleAggregateTestData.Data(2, DateTimeOffset.MaxValue, 2));
-        var offsetFloor = DateTimeOffset.MaxValue.ToOffset(TimeSpan.Zero);
-        db.Commit(new ExpireSamples(SampleAggregateTestData.Set, SampleAggregateTestData.Series,
-            offsetFloor, 1));
+        var evaluatedAt = TimeProvider.System.GetUtcNow();
+        var offsetFloor = evaluatedAt.ToOffset(TimeSpan.FromHours(2));
+        var commandId = Guid.NewGuid();
+        db.Submit(OperationKind.Batch, new CommandRequest(commandId, db.Partition,
+                [new ExpireSamples(SampleAggregateTestData.Set, SampleAggregateTestData.Series, offsetFloor, 1)]),
+            id: commandId, time: evaluatedAt).Get<CommitReceipt>();
 
         var range = db.Database.ReadSamples(SampleAggregateTestData.RootPrincipal, db.Partition,
             SampleAggregateTestData.Set, SampleAggregateTestData.Series, DateTimeOffset.MinValue,
@@ -93,7 +96,7 @@ internal sealed class SampleRetentionReadTests
         await Assert.That(latest.Sample?.Sample.Timestamp).IsEqualTo(DateTimeOffset.MaxValue);
         await Assert.That(aggregate.Count).IsEqualTo(1L);
         await Assert.That(aggregate.Sum).IsEqualTo(2d);
-        await Assert.That(status.Before).IsEqualTo(DateTimeOffset.MaxValue);
+        await Assert.That(status.Before).IsEqualTo(evaluatedAt);
         await Assert.That(status.Before?.Offset).IsEqualTo(TimeSpan.Zero);
     }
 }

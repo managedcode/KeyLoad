@@ -644,3 +644,18 @@ The additive [native serialization diagnostics](BenchmarkComparisons/NativeSeria
 map REQ-IS-PERF-001..004 to AC-IS-PERF-001..004 under ADR060/ADR047. They are
 local development profiling; internal codec jobs and dispatch modes are removed
 from Benchmarks. Public figures require the complete native database cohort.
+
+
+## Lossless series-codec development controls
+
+REQ-BC-CHUNK-001 maps to AC-CHUNK-006 in [TimeSeries](TimeSeries.md),
+[ADR-079](../ADR/ADR-079-lossless-series-chunk-codecs.md), TASK-CHUNK-MEASURE and
+TASK-CHUNK-JOIN. The shared microbenchmark feature owns public generated-consumer
+SampleChunk codec fixtures in `KeyLoad.BenchmarkScenarios/Features/BenchmarkComparisons/`;
+the existing typed KeyLoad.Benchmarks switcher remains their CLI. The compared
+code paths are current per-record native SampleRecord encoding/decoding and the
+bounded candidate chunk codec. Retain exact actual bytes/sample, source, corpus,
+settings, machine, cost and allocations. Fixed small batches are explicitly
+microbenchmark controls, never the required100k/1m/5m database datasets,
+RF3/durability evidence, public website comparisons or an acceleration claim.
+Actual canonical rewrite cost and correction recovery remain pending KL-078.

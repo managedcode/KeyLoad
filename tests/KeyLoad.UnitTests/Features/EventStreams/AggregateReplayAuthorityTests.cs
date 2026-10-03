@@ -104,7 +104,7 @@ internal sealed class AggregateReplayAuthorityTests
     [Test]
     public async Task AcEvent009RevocationReauthorizesReplayAndDurableSnapshotRetry()
     {
-        using var fixture = ProtectedFixture();
+        using var fixture = new AggregateReplayFixture(protectedFields: true);
         fixture.Append(new EventData(PrivateEventId, AggregateReplayFixture.EventType,
             Payload(SecretPayload), Headers(SecretHeader)));
         _ = fixture.Read(maximumEvents: 1);
@@ -119,8 +119,8 @@ internal sealed class AggregateReplayAuthorityTests
         var retry = Assert.ThrowsExactly<KeyLoadException>(() => fixture.StoreSnapshot(1,
             expectedVersion: 0, commandId: Guid.Parse(RetryCommandId)));
 
-        await Assert.That(read.Code).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(retry.Code).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(read.Code).IsEqualTo(ErrorCode.Unauthenticated);
+        await Assert.That(retry.Code).IsEqualTo(ErrorCode.Unauthenticated);
     }
 
     [Test]

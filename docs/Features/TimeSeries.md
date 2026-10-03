@@ -60,7 +60,7 @@ distinct from GitHub unit/recovery/RF3 SDK qualification and measured performanc
 |---|---|---|
 | REQ-SERIES-004: append зберігає stable sample identity і finite numeric values | AC-SERIES-004: out-of-order input читається за UTC/sequence; same EventId/fingerprint не дублюється; changed content дає Conflict; nonfinite value відхиляється без partial batch | Existing `OutOfOrderSamplesStayOrderedAndSampleIdIsIdempotent`, `LargeFiniteVectorsAndSampleValuesRemainValidAndSimilarityDoesNotOverflow` у [GraphAndSearchTests](../../tests/KeyLoad.UnitTests/GraphAndSearchTests.cs); explicit mismatch/error expansion PLANNED |
 | REQ-SERIES-005: ordered inclusive ranges зберігають authorisation і повну response межу | AC-SERIES-005: equal/min/max timestamps, empty range, limit і exact byte boundary дають визначений результат; unauthorized tags omit/deny за policy; exhausted/cancelled read не змінює data та не псує наступний read | Existing [TimeSeriesReadResourceTests](../../tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs); REQ-SERIES-001–003 та AC-MP-005/012 не замінюються |
-| REQ-SERIES-006: retention, aggregates, rollups та compressed chunks мають окремі qualified contracts | AC-SERIES-006: PLANNED real-store tests доводять declared aggregation windows/late data/dedup, expiry/rebuild/recovery і bounds; raw oracle збігається з chunked representation; incompatible encoding відхиляється | PLANNED unit/recovery/resource suites для KL-025/026/078; реалізація цих extended capabilities не доведена |
+| REQ-SERIES-006: retention, aggregates, rollups та compressed chunks мають окремі qualified contracts | AC-SERIES-006: PLANNED real-store tests доводять declared aggregation windows/late data/dedup, expiry/rebuild/recovery і bounds; raw oracle збігається з chunked representation; incompatible encoding відхиляється | PLANNED unit/recovery/resource suites для KL-025/026/078; ADR-079 adds the bounded codec stage below without closing canonical chunk/recovery acceptance |
 
 Source-present baseline: sample append/order/dedup і inclusive bounded read. Planned: автоматична retention, rollups, chunk compression qualification та distributed series execution. Existing inclusive read repair keeps its wire shape; the additive aggregate/latest contract below is governed by ADR-052 and has separate pending source/qualification evidence.
 
@@ -166,3 +166,45 @@ problem; native official MCP cancellation keeps its existing exception semantics
 These are source-oracle corrections, not altered production dedup/transport rules.
 REQ-SERIES009/011/012 and AC-QUAL004 trace to those existing/new real tests;
 the exact corrected-source full GitHub suites and coverage remain mandatory.
+
+
+## Lossless chunk codec qualification — ADR-079
+
+[ADR-079](../ADR/ADR-079-lossless-series-chunk-codecs.md) freezes a private,
+bounded generated-Orleans codec candidate before canonical storage integration.
+Current per-sample ZoneTree rows, ID receipts, sequences, retention floors and
+identity6 remain unchanged. Codec qualification does not close KL-078:
+correction generations, storage migration, rewrite cost and process/RF3 recovery
+still need their separate layout contract and original evidence.
+
+| Requirement | Acceptance criterion | Planned automated evidence |
+|---|---|---|
+| REQ-SERIES-017: codec preserves exact ordered sample identity/content | AC-CHUNK-001: fixed and seeded 1..256-record roundtrips preserve SeriesId, EventId, exact TagsJson, local/UTC ticks, offset, sequence and IEEE bits; equal UTC ties and late sequence decreases preserve strict UTC/sequence order | SampleChunkCodec* TUnit, independent input/raw oracle including -0, subnormal, finite extremes, date edges and original offsets |
+| REQ-SERIES-017: lossless text and aggregates preserve raw meaning | AC-CHUNK-002: valid Unicode and unpaired UTF16 code units survive without replacement; raw fold count/sum/min/max and all four real series-reader results remain unchanged by encoding/decoding; duplicate ID/content remains one canonical sample and changed content conflicts | SampleChunkCodec* and SampleChunkStore* real ZoneTree cases; no reassociated sums or tolerance |
+| REQ-SERIES-018: counts, memory, work and failure are bounded | AC-CHUNK-003: 256 succeeds,257/empty reject as frozen; exact envelope admission/oversize and shared byte/deadline/cancellation cases fail whole before unsafe allocation; following real read succeeds and source bytes/cut/ID/sequence/floor remain unchanged | SampleChunkWire* and SampleChunkStore* real cuts, small/exact budgets, cancellation and actual reopen |
+| REQ-SERIES-019: generated native format has explicit integrity and compatibility | AC-CHUNK-004: permanent chunk alias/Ids/native golden remain stable; checksum, truncated/trailing native/columns, nonminimal varints, invalid offset/timestamp/sequence/order/value/text dictionary/shape reject as Corruption; unknown versions are FormatUnsupported | SampleChunkWire* structural and independent malformed fixtures |
+| REQ-SERIES-019: candidate cannot become a competing authority | AC-CHUNK-005: encoding at one actual authorized source cut writes no keys/files/journals, preserves old SampleRecord contracts and exact data after failure/reopen; private buffers release to the caller and no borrowed view escapes | SampleChunkStore* plus source review; storage/replica/public operation format changes forbidden in this stage |
+| REQ-SERIES-020: qualification and performance claims have actual provenance | AC-CHUNK-006: full build/formatter/governance and Aspire TUnit normal/scalar results are source-bound; labelled BenchmarkDotNet controls retain corpus/machine/source/bytes/sample/encode/decode allocations and cost; canonical rewrite/recovery and acceleration remain explicitly pending | TASK-CHUNK-MEASURE/JOIN; genuine Linux CI and original artifacts required for global qualification |
+
+Canonical slice map: Core `Features/TimeSeries/SampleChunk*`; TUnit
+UnitTests `Features/TimeSeries/SampleChunk*`. Benchmark measurement is owned by
+the shared [BenchmarkComparisons](BenchmarkComparisons.md) feature in
+`benchmarks/KeyLoad.BenchmarkScenarios/Features/BenchmarkComparisons/` and uses
+the existing KeyLoad.Benchmarks executable. Frontend, SDK/MCP/HTTP and
+Orleans request surfaces are N/A for this transient private codec: their public
+contracts are unchanged. StorageRecovery, CrashHost, RecoveryTests and RF3 chunk
+integration are N/A for this first stage because no canonical chunk is written;
+they remain mandatory subsequent KL-078 work, not waived acceptance criteria.
+
+```mermaid
+flowchart TD
+  S[Actual committed raw sample cut] --> E[Owned bounded candidate payload]
+  E --> D[Exact lossless decode]
+  D --> O[Independent content and aggregate oracle]
+  S --> I[Unchanged canonical source after failures and reopen]
+  E --> M[Labelled native codec measurements]
+  O --> Q[Source-bound Aspire and Linux gates]
+  I --> Q
+  M --> Q
+  Q --> F[Future canonical layout, epoch and recovery contract]
+```

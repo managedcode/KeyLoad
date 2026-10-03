@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClientApi;
 
@@ -8,7 +9,20 @@ namespace KeyLoad.UnitTests.Features.BlobStorage;
 internal sealed class BlobAgentCatalogTests
 {
     private const int BlobCount = 10;
-    private const int PublicCount = 54;
+    private const int PublicCount = 56;
+    private const string AggregateReplayTool = "keyload_streams_replay";
+    private const string AggregateReplayRoute = "/v1/streams/replay";
+    private const string SampleRetentionTool = "keyload_series_retention";
+    private const string SampleRetentionRoute = "/v1/series/retention";
+    private const string Request = "request";
+    private const string Stream = "stream";
+    private const string ReducerVersion = "reducerVersion";
+    private const string StateSchemaVersion = "stateSchemaVersion";
+    private const string FromBeginning = "fromBeginning";
+    private const string MaximumEvents = "maximumEvents";
+    private const string Partition = "partition";
+    private const string Set = "set";
+    private const string SeriesId = "seriesId";
     private const string AdditionalProperties = "additionalProperties";
     private const string Receipt = "receipt";
     private const string Value = "value";
@@ -55,6 +69,37 @@ internal sealed class BlobAgentCatalogTests
             await Assert.That(McpOperationCatalog.TryGet(item.Name.ToUpperInvariant(), out _)).IsFalse();
             await Assert.That(descriptor.Description.Contains(McpToolDescriptions.StableRetry, StringComparison.Ordinal))
                 .IsEqualTo(item.CommandKind.HasValue);
+        }
+    }
+
+    /// <summary>The aggregate replay and retention read tools have explicit independent route and DTO inventories.</summary>
+    [Test]
+    public async Task AcMcp001AggregateReplayAndSampleRetentionRemainExactPublicReadTools()
+    {
+        var cases = new[]
+        {
+            (AggregateReplayTool, AggregateReplayRoute, GrainReadKind.AggregateReplay,
+                new[] { Stream, ReducerVersion, StateSchemaVersion, FromBeginning, MaximumEvents }),
+            (SampleRetentionTool, SampleRetentionRoute, GrainReadKind.SampleRetention,
+                new[] { Partition, Set, SeriesId })
+        };
+        foreach (var item in cases)
+        {
+            var descriptor = Find(item.Item1);
+            await Assert.That(McpOperationCatalog.Entries.Count(entry => entry.Name == item.Item1)).IsEqualTo(1);
+            await Assert.That(descriptor.Route).IsEqualTo(item.Item2);
+            await Assert.That(descriptor.ReadKind).IsEqualTo(item.Item3);
+            await Assert.That(descriptor.CommandKind).IsNull();
+            await Assert.That(descriptor.ReadOnly).IsTrue();
+            await Assert.That(descriptor.Idempotent).IsTrue();
+            await Assert.That(descriptor.Destructive).IsFalse();
+            var schema = descriptor.InputSchema;
+            await Assert.That(schema.GetProperty(AdditionalProperties).ValueKind).IsEqualTo(JsonValueKind.False);
+            await Assert.That(Names(schema.GetProperty(McpSchemaInspector.Properties))).IsEquivalentTo(new[] { Request });
+            var requestSchema = McpSchemaInspector.DefinedRequest(schema);
+            await Assert.That(Names(requestSchema.GetProperty(McpSchemaInspector.Properties)))
+                .IsEquivalentTo(item.Item4);
+            await Assert.That(requestSchema.GetProperty(AdditionalProperties).ValueKind).IsEqualTo(JsonValueKind.False);
         }
     }
 

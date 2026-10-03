@@ -1,5 +1,7 @@
+using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Query;
+using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
@@ -13,6 +15,7 @@ internal sealed class SqlModelViewReadTests
         var engine = new QueryEngine(database.Database);
         var eventBefore = database.Database.ReadStream("root",
             new(database.Partition, SqlModelViewTestSupport.StreamSet, SqlModelViewTestSupport.StreamId, 1));
+        var eventBeforeBytes = NativeSerialization.Serialize(eventBefore);
         var queueLane = new QueueLaneRef(database.Partition, SqlModelViewTestSupport.Queue);
         var queueBefore = database.Database.InspectMessage("root", queueLane, SqlModelViewTestSupport.MessageId);
 
@@ -43,16 +46,35 @@ internal sealed class SqlModelViewReadTests
         await Assert.That(queueRow.Json).DoesNotContain("lease");
         await Assert.That(queueRow.Json).DoesNotContain("deliveryGeneration");
         await Assert.That(queueRow.Json).DoesNotContain("fingerprint");
-        await Assert.That(eventAst.Rows).IsEqualTo(eventSql.Rows);
-        await Assert.That(queueAst.Rows).IsEqualTo(queueSql.Rows);
+        await AssertRowsMatch(eventSql.Rows, eventAst.Rows);
+        await AssertRowsMatch(queueSql.Rows, queueAst.Rows);
         await Assert.That(eventSql.Cursor).IsNull();
         await Assert.That(queueSql.Cursor).IsNull();
 
         var eventAfter = database.Database.ReadStream("root",
             new(database.Partition, SqlModelViewTestSupport.StreamSet, SqlModelViewTestSupport.StreamId, 1));
         var queueAfter = database.Database.InspectMessage("root", queueLane, SqlModelViewTestSupport.MessageId);
-        await Assert.That(eventAfter).IsEqualTo(eventBefore);
+        await Assert.That(NativeSerialization.Serialize(eventAfter).SequenceEqual(eventBeforeBytes)).IsTrue();
         await Assert.That(queueAfter).IsEqualTo(queueBefore);
+    }
+
+    private static async Task AssertRowsMatch(ImmutableArray<QueryRow> expected, ImmutableArray<QueryRow> actual)
+    {
+        await Assert.That(actual.IsDefault).IsEqualTo(expected.IsDefault);
+        await Assert.That(actual.Length).IsEqualTo(expected.Length);
+        for (var index = 0; index < expected.Length; index++)
+        {
+            var expectedRow = expected[index];
+            var actualRow = actual[index];
+            await Assert.That(actualRow.EntityId).IsEqualTo(expectedRow.EntityId);
+            await Assert.That(actualRow.Revision).IsEqualTo(expectedRow.Revision);
+            await Assert.That(actualRow.Json).IsEqualTo(expectedRow.Json);
+            await Assert.That(actualRow.Redacted).IsEqualTo(expectedRow.Redacted);
+            await Assert.That(actualRow.RedactedFields.HasValue).IsEqualTo(expectedRow.RedactedFields.HasValue);
+            await Assert.That(actualRow.RedactedFields?.IsDefault).IsEqualTo(expectedRow.RedactedFields?.IsDefault);
+            await Assert.That(actualRow.RedactedFields?.ToArray() ?? [])
+                .IsEquivalentTo(expectedRow.RedactedFields?.ToArray() ?? [], CollectionOrdering.Matching);
+        }
     }
 
     [Test]

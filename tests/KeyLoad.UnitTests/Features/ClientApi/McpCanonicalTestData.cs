@@ -87,7 +87,8 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.QueryLiveRead, new ReadLiveQueryRequest(Ast(), Cursor)),
         Read(McpCatalogExpectations.OutboxStatus, new GetOutboxStatusRequest(Partition)),
         Read(McpCatalogExpectations.ProjectionsRead, new ReadProjectionBatchRequest(Consumer)),
-        Read(McpCatalogExpectations.SearchExecute, new SearchRequest(Partition, Resource))
+        Read(McpCatalogExpectations.SearchExecute, new SearchRequest(Partition, Resource)),
+        Read(McpCatalogExpectations.SeriesRetention, new ReadSampleRetentionRequest(Partition, Resource, Entity))
     ];
 
     private static ImmutableArray<Mutation> Effects() => [new PutDocument(Resource, Entity, EmptyJson)];

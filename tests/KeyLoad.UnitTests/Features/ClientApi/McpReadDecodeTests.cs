@@ -5,10 +5,10 @@ using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCP-003: genuine canonical read DTOs and exact no-body contracts.</summary>
+/// <summary>AC-MCP-003: every body-bearing read DTO and exact no-body contracts.</summary>
 internal sealed class McpReadDecodeTests
 {
-    private const int BodyReadCount = 15;
+    private const int BodyReadCount = 17;
     private const string WrongCaseRequestKey = "Request";
     private const string ReferenceKey = "reference";
     private const string PrivateMarker = "private-value-that-must-not-appear-in-an-error";
@@ -16,7 +16,7 @@ internal sealed class McpReadDecodeTests
         [McpCatalogExpectations.QueryCapabilities, McpCatalogExpectations.AdminBackup,
          McpCatalogExpectations.AdminAdmission, McpCatalogExpectations.AdminStatus];
 
-    /// <summary>Exercises all fifteen actual body-bearing read DTOs without creating write identities.</summary>
+    /// <summary>Exercises all seventeen actual body-bearing read DTOs without creating write identities.</summary>
     [Test]
     public async Task AcMcp003EveryBodyReadPreservesTheCanonicalDto()
     {
@@ -117,4 +117,5 @@ internal sealed class McpReadDecodeTests
         }
         return descriptor!;
     }
+
 }

@@ -33,7 +33,7 @@ internal sealed class SampleRetentionMutationTests
         var third = Expire(db, offsetFloor, 1);
         var completeStatus = Status(db);
 
-        await Assert.That(replay).IsEqualTo(first);
+        await AssertReplayReceiptAsync(first, replay);
         await Assert.That(positionAfterReplay).IsEqualTo(positionAfterFirst);
         await Assert.That(firstStatus.Before).IsEqualTo(floor);
         await Assert.That(firstStatus.PurgedCount).IsEqualTo(1L);
@@ -79,8 +79,8 @@ internal sealed class SampleRetentionMutationTests
     {
         using var db = new TestDatabase();
         SampleAggregateTestData.Configure(db);
-        var now = SampleAggregateTestData.Start.AddHours(3);
-        var firstCut = SampleAggregateTestData.Start.AddHours(1);
+        var now = TimeProvider.System.GetUtcNow();
+        var firstCut = now.AddHours(-1);
         Expire(db, firstCut, SampleRetentionDefaults.MaximumDeletes, now);
         var statusBefore = Status(db);
 
@@ -102,14 +102,39 @@ internal sealed class SampleRetentionMutationTests
 
         using var limited = new TestDatabase(new DatabaseLimits { MaxScanRecords = 1 });
         SampleAggregateTestData.Configure(limited);
+        var limitedNow = TimeProvider.System.GetUtcNow();
         var constrained = Failure(limited, new(SampleAggregateTestData.Set, SampleAggregateTestData.Series,
-            SampleAggregateTestData.Start, 2), SampleAggregateTestData.Start.AddHours(1), ErrorCode.BudgetExceeded);
+            SampleAggregateTestData.Start, 2), limitedNow, ErrorCode.BudgetExceeded);
         await Assert.That(constrained.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     private static SampleRetentionStatus Status(TestDatabase db)
         => db.Database.ReadSampleRetention(SampleAggregateTestData.RootPrincipal,
             new(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series));
+
+    private static async Task AssertReplayReceiptAsync(CommitReceipt expected, CommitReceipt actual)
+    {
+        await Assert.That(actual.CommandId).IsEqualTo(expected.CommandId);
+        await Assert.That(actual.Token.Incarnation).IsEqualTo(expected.Token.Incarnation);
+        await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(expected.Token.AtomicPartitionId);
+        await Assert.That(actual.Token.Position).IsEqualTo(expected.Token.Position);
+        await Assert.That(actual.Token.OwnershipEpoch).IsEqualTo(expected.Token.OwnershipEpoch);
+        await Assert.That(actual.Durability).IsEqualTo(expected.Durability);
+        await Assert.That(actual.Mutations.Length).IsEqualTo(expected.Mutations.Length);
+        for (var index = 0; index < expected.Mutations.Length; index++)
+        {
+            var expectedMutation = expected.Mutations[index];
+            var actualMutation = actual.Mutations[index];
+            await Assert.That(actualMutation.Kind).IsEqualTo(expectedMutation.Kind);
+            await Assert.That(actualMutation.Resource).IsEqualTo(expectedMutation.Resource);
+            await Assert.That(actualMutation.Id).IsEqualTo(expectedMutation.Id);
+            await Assert.That(actualMutation.Revision).IsEqualTo(expectedMutation.Revision);
+            await Assert.That(actualMutation.CompositionReferences.ToArray()).IsEquivalentTo(
+                expectedMutation.CompositionReferences.ToArray(), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        }
+        await Assert.That(NativeSerialization.Serialize(actual)).IsEquivalentTo(
+            NativeSerialization.Serialize(expected), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+    }
 
     private static CommitReceipt Expire(TestDatabase db, DateTimeOffset before, int maximumDeletes,
         DateTimeOffset? now = null)

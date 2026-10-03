@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "purpose": "local_development_only_Aspire_complete_unit_oracle_repair",
+  "date": "2026-10-03",
+  "capturedAt": "2026-10-03T21:54:46.135385+00:00",
+  "source": {
+    "baseHead": "7136d6e1d9ae3bb91a092d35a62ddcef7131843c",
+    "workingTree": "dirty_frozen_unit_oracle_repair_after_full_Release_build13_later_candidate_source_excluded",
+    "sourceInventory": {
+      "path": "artifacts/qualification/unit-repair-build13-development-source.json",
+      "bytes": 418082,
+      "sha256": "1a008e2f9d21fb5c07202c270c9b5230716ffd44eb349ba856a1504daadd88bf"
+    },
+    "sourceFiles": 1937,
+    "testCopyBinaries": 29,
+    "capturedSourcesAndBinariesUnchanged": true
+  },
+  "environment": {
+    "machineName": "konstantins-macbook-pro",
+    "operatingSystem": "macOS 27.0.1",
+    "runtimeVersion": ".NET 10.0.12",
+    "tunitVersion": "1.72.10.0"
+  },
+  "checks": {
+    "fullReleaseBuild": {
+      "exitCode": 0,
+      "evidence": {
+        "path": "/private/tmp/keyload-104-unit-repair-build13.log",
+        "bytes": 3418,
+        "sha256": "5c8e66411dc408b07e2d42a20b152d2a6208a9a8db0f9b4306cc8876969ec430"
+      },
+      "warnings": 0,
+      "errors": 0
+    },
+    "fullFormatter": {
+      "exitCode": 0,
+      "evidence": {
+        "path": "/private/tmp/keyload-104-unit-repair-format6.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "governance": "passed_26_projects_4_modules_static_only"
+  },
+  "unit": {
+    "entry": "dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -p:AspireCliPath=/opt/homebrew/bin/aspire -- --KeyLoadTests:Suite=unit --KeyLoadTests:ReportTrx=true --KeyLoadTests:ResultsDirectory=TestResults/owner-wave-001/unit-full4",
+    "actualSuite": "unit",
+    "filter": null,
+    "exitCode": 0,
+    "reportSummary": {
+      "total": 2800,
+      "passed": 2800,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "durationMs": 116490.87,
+    "originals": [
+      {
+        "path": "TestResults/owner-wave-001/unit-full4/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 8313127,
+        "sha256": "f1ff0804e1d17f9f74b808d7362f0185e8652575e715d44e4b2439ffc8e4189d"
+      },
+      {
+        "path": "TestResults/owner-wave-001/unit-full4/KeyLoad.UnitTests-macos-net10.0-report.html",
+        "bytes": 871927,
+        "sha256": "a6591c46ef7965dbc364bf962d4a963b7e447f6337f0cc9e5e788e964be30976"
+      }
+    ],
+    "launcher": {
+      "path": "/private/tmp/keyload-104-aspire-unit-full4.log",
+      "bytes": 798,
+      "sha256": "bf4e308de10877db74a4a6f4aae4fbef5526a00892cb8c977ebb1ec2a06a8a58"
+    }
+  },
+  "repairs": [
+    "independent_epoch6_format_pin",
+    "complete_MCP_mutation_read_tool_and_capability_inventories",
+    "exact_ordered_SQL_rows_and_before_after_event_native_content",
+    "fresh_revocation_fixture_and_persisted_Unauthenticated_error",
+    "current_time_retention_cutoff_negative_and_boundary_fixtures",
+    "complete_native_idempotent_receipt_content",
+    "unsupported_live_install_complete_canonical_snapshot_identity_position_layout_oracle_with_closed_file_preservation_retained"
+  ],
+  "priorAttempts": [
+    {
+      "original": {
+        "path": "TestResults/owner-wave-001/unit-full1/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 8399359,
+        "sha256": "f488dab3ea50fdcc14ce8a2ee9ab6c9714b70192e838ee47bbcb4841ff7c18ae"
+      },
+      "summary": {
+        "total": 2799,
+        "passed": 2786,
+        "failed": 13,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "scope": "actual_prior_attempt_preserved_not_pass_evidence",
+      "note": "earlier_oracle_snapshot_attempt"
+    },
+    {
+      "original": {
+        "path": "TestResults/owner-wave-001/unit-full2/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 8349375,
+        "sha256": "8e491c34103e587dd661ee2f94852f23c909f7717855da644c7f7efbb1f5ac9a"
+      },
+      "summary": {
+        "total": 2800,
+        "passed": 2796,
+        "failed": 4,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "scope": "actual_prior_attempt_preserved_not_pass_evidence",
+      "note": "unit2_overlapped_formatter4_two_timing_cases_passed_in_isolated_unit3_without_fixture_or_deadline_changes"
+    },
+    {
+      "original": {
+        "path": "TestResults/owner-wave-001/unit-full3/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 8322662,
+        "sha256": "26adf12fa56bbeaee03869ee98e9b47ba7f76af75ad6861542c4f4c24dd56b7b"
+      },
+      "summary": {
+        "total": 2800,
+        "passed": 2799,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "scope": "actual_prior_attempt_preserved_not_pass_evidence",
+      "note": "earlier_oracle_snapshot_attempt"
+    }
+  ],
+  "githubQualified": false,
+  "scalarSuiteQualified": false,
+  "fullRecoveryQualified": false,
+  "dockerRf3Qualified": false,
+  "coverageQualified": false,
+  "powerLossQualified": false,
+  "enduranceQualified": false,
+  "completedKlTasks": 0,
+  "remaining": [
+    "exact_delivered_source_Linux_normal_scalar_full_recovery_Docker_Aspire_RF3_original_artifacts",
+    "all104_full_acceptance_and_fault_endurance_performance_gates",
+    "ADR079_codec_and_subsequent_canonical_chunk_layout_migration_correction_gates"
+  ]
+}
