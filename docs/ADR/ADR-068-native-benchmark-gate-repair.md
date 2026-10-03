@@ -95,6 +95,40 @@ flowchart LR
     Validate -->|invalid or exhausted| Fail[Retained failed evidence]
 ```
 
+## Accepted failure-only resource observation stage E
+
+REQ-NGR-005 / AC-NGR-005 / TASK-NGR-E1 is approved as private observability.
+Original f403 update/delete fail before their final timed sample collection;
+source arithmetic suggests retained outbox capacity, but actual counters/detail
+were not exported. Preserve the unproven-cause distinction and all failures.
+
+Ordered: first-author pure original-code classifier and typed OutboxStatus
+privacy/bounds tests; then a gpt-6-luna/high worker owns only NEW Comparisons
+Features/BenchmarkComparisons/IComparisonFailureDiagnostics.cs,
+ComparisonFailureDiagnostics.cs, KeyLoadFailureDiagnostics.cs,
+KeyLoadOutboxDiagnosticLine.cs and UnitTests matching OutboxFailureDiagnostic
+prefix. Root alone joins ComparisonRunner.RunCaseAsync and owns docs, source
+checks, delivery and exact native1/2/3 evidence. No public DTO/transport/schema,
+packages, resource budgets, measured operations, retries or history purge.
+
+An exact failed KeyLoad:ResourceExhausted case (optionally setup: prefix) permits
+one existing authenticated SDK outbox-status read only after the original case
+and session cleanup settle, outside the measured clock. Link the parent token
+with a two-second observation deadline and await original SDK settlement. One
+ASCII stderr line at most512bytes contains only closed scenario/repetition and
+numeric head/count/minimum active checkpoint; no active consumers uses -1.
+Exclude names/definitions/token/payload/endpoints/credentials/exception detail.
+Nonmatching cases perform no call. Unavailable/cancelled or recoverable diagnostic
+failures preserve the exact original ComparisonCase and emit only unavailable.
+Fatal allocation/runtime/output behavior remains unqualified, not silently
+claimed closed. The helper never changes case status/detail/samples/timings.
+
+The existing actual intensive1/2/3 SDK workload and authentic runner/worker
+originals qualify this stage; pure tests do not authenticate counters or prove
+the old cause. Numeric coverage/fault/complete-cohort/site gates remain open.
+Roll back interface/helper/adapter/single runner join/tests together; no product
+data migration. This ADR remains Accepted.
+
 ## Implementation contract
 
 1. TASK-NGR-R1/R2 root reviews immutable original RabbitMQ and Kurrent failed
@@ -178,3 +212,48 @@ at that nuspec commit. SHA256
 binds the inspected file; the both-properties preserving branch agrees with the
 exact distributed binary. This confirms the stageA expectation, not the original
 76-byte cause or any native test pass.
+
+StageE review refinement before corrective implementation: the interface remains
+internal and KeyLoad implements its method explicitly, with no new public callable
+API. Eligible failed details equal only KeyLoad:ResourceExhausted or its exact
+setup: prefix; arbitrary suffixes are forbidden. Exact failed sample codes also
+qualify an already-failed measured case without discarding any samples/timing.
+Validate closed scenario/nonnegative repetition before observation; malformed
+case metadata is skipped rather than replacing the original failure.
+Typed status aggregation checks at most64consumer heads (current canonical
+server bound); default/oversized/invalid status is unavailable, never partial
+counts. Count/minimum uses one bounded pass with no filtered-array allocation.
+Every numeric field formats with InvariantCulture; tests include a nondefault
+culture and default/oversized collections. One static unavailable line is the
+private fallback for recoverable formatter failure. No original case mutation.
+
+StageE corrective contract before implementation: observation implementation
+belongs to the internal helper; KeyLoadTarget has only an explicit delegating
+method so its combined partial type remains below the mandatory200-code-line
+limit. Cache parsed CompositeFormat and preserve all analyzer severities.
+Malformed null sample elements are skipped safely; typed consumer checkpoints
+must be nonnegative and no greater than the observed tail. The -1 output sentinel
+is reserved for no active consumers. Tests first cover null sample/head/consumer,
+negative/future checkpoint and canonical empty/populated status shapes.
+There is exactly one stderr WriteLine attempt. Select the static unavailable
+line for recoverable SDK/formatter failure; a recoverable output failure is
+swallowed without retry and preserves the original case. Broken output may emit
+nothing or partial text; global stderr closure is not qualified. This avoids a
+second line or partial-write-plus-fallback exceeding the observation budget.
+
+Typed head validation follows the existing contiguous canonical outbox contract:
+initial head is(0,1,0,0); FirstAvailable>=1; FirstAvailable-1<=Tail;
+StoredRecords==Tail-(FirstAvailable-1), with nonnegative Tail/StoredBytes.
+The subtraction avoids Tail+1 overflow. Pure golden fixture heads must be
+possible canonical initial/populated/purged heads; counter maxima use
+Tail=long.MaxValue, FirstAvailable=1, StoredRecords=long.MaxValue. This validates
+only observed diagnostics, changes no canonical storage contract or limit.
+
+StageE lifecycle review refinement before implementation: any original case whose
+detail is ComparisonSessionCleanup.Failure is ineligible even when retained
+samples contain ResourceExhausted. Existing CloseAsync can return false after a
+DisposeAsync timeout while that original operation is still running. Skip the
+observation rather than join/retry/replace the original cleanup or case. A pure
+classifier regression retains the failed resource sample, measurement and exact
+cleanup detail. Current KeyLoad session disposal is synchronously completed;
+this guard keeps the optional diagnostic contract safe for future adapters.

@@ -1,0 +1,153 @@
+{
+  "stage": "E_private_failure_only_outbox_observation",
+  "requirements": [
+    "REQ-NGR-005",
+    "AC-NGR-005",
+    "TASK-NGR-E1"
+  ],
+  "decision": "docs/ADR/ADR-068-native-benchmark-gate-repair.md",
+  "frozenBaseRevision": "ca7e22d9c201304f0b81f59f3a0ae18e4125be37",
+  "joinedCommittedBaseRevision": "a6afcbcbff42e8c90b1990d672f0873a6be23588",
+  "joinedBaseChanges": [
+    "docs/Features/DatabaseComposition.md",
+    "docs/implementation/database-composition-copy-stage-003.json",
+    "docs/implementation/database-composition-fixture-stage-002.json",
+    "docs/implementation/database-composition-integrated-stage-004.json",
+    "docs/implementation/database-composition-source-stage-001.json",
+    "docs/implementation/status.json"
+  ],
+  "baseArchiveSha256": "dad3e826370143a0192b64a70ece9ce3965dde97df946aafc0c290a13733d646",
+  "files": [
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/IComparisonFailureDiagnostics.cs",
+      "bytes": 629,
+      "sha256": "e0040b7a8dea10faf3b2a703a9f4b98c79bf24cff525a8b039b097821ba53fae"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/ComparisonFailureDiagnostics.cs",
+      "bytes": 499,
+      "sha256": "cd73a3fd738f4e23828c02641cb12209ab7fa0e9caf111dc2c61d7682b0efa82"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KeyLoadFailureDiagnostics.cs",
+      "bytes": 3662,
+      "sha256": "2def7b4a94b392a6198aba3b15e4ff22f0b45cd821c2ef442dc3fdfae69e1f58"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KeyLoadOutboxDiagnosticLine.cs",
+      "bytes": 3072,
+      "sha256": "c9ac11dde01f009f9d849d5a09c14041e35553c2eb94b90bf468391e2d53c20a"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/ComparisonRunner.cs",
+      "bytes": 8135,
+      "sha256": "5c9a7891981c7b8e869c50ba01c9188553041090a140f9f05ec7d286d5d09ef2"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/OutboxFailureDiagnosticClassifierTests.cs",
+      "bytes": 3979,
+      "sha256": "e8ec49259cea871e0f486306df260b236ac38d4ca3e49ead158214966c71d5e4"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/OutboxFailureDiagnosticFormatterTests.cs",
+      "bytes": 7625,
+      "sha256": "94b7ce20f244db6ac64be82fedb1abe43ffd1eada1d7b8ac45b7cf5ce57a8504"
+    }
+  ],
+  "sourceManifestSha256": "dcd7df79921f7d2a9475d043c2e26bf6856fec86290f808fefbc1078fb48c6fc",
+  "developmentChecks": {
+    "restore": {
+      "command": "dotnet restore KeyLoad.slnx --verbosity quiet",
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "logBytes": 0
+    },
+    "build": {
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+      "exitCode": 0,
+      "logSha256": "5e47fb7e8a8b1f0180b93910232cdd0d73b0e0477e7aa6717c57b4f3f1765ea0",
+      "logBytes": 3912
+    },
+    "format": {
+      "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "logBytes": 0
+    },
+    "governance": {
+      "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+      "exitCode": 0,
+      "logSha256": "76cb9ab8d9569308e691c3b773158a6447ff5fb4be35c6528a3497948ddd31ae",
+      "logBytes": 126
+    }
+  },
+  "projects": 26,
+  "warnings": 0,
+  "errors": 0,
+  "buildElapsed": "00:00:39.59",
+  "authoredClassifierCases": 7,
+  "authoredFormatterCases": 6,
+  "observedBounds": {
+    "statusReadAttemptsPerEligibleCase": 1,
+    "linkedDeadlineMilliseconds": 2000,
+    "consumerHeads": 64,
+    "formattedAsciiBytes": 512,
+    "stderrWriteAttempts": 1,
+    "outputRetry": false
+  },
+  "independentSourceReview": {
+    "path": "/private/tmp/keyload-ngr-stage-e-final-source-review.md",
+    "sha256": "90dedfb7053bd1b0f398169066b4447ea1fae5512066036f4f21b15de3417b80"
+  },
+  "reviewedCausalLimits": {
+    "replicaReviewPath": "/private/tmp/keyload-ngr-r10-replica-causal-review.md",
+    "replicaReviewSha256": "bfbb7a1aeafc659823891fcd369bac3431b2c2a6bbc992717a2aebb3d5a6204a",
+    "initiatingReplicaFailureCauseProven": false,
+    "outboxQuotaHypothesisAuthenticatedByObservedCounters": false
+  },
+  "historicalBuildCorrections": [
+    {
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+      "errors": 4,
+      "warnings": 0,
+      "elapsed": "00:00:28.64",
+      "codes": [
+        "CA1863",
+        "IDE0005",
+        "IDE0005",
+        "KLD0031"
+      ],
+      "repairs": "Cached parsed CompositeFormat, removed unused using directives, internal-helper observation with tiny explicit partial-class delegator; no diagnostic suppression."
+    },
+    {
+      "errors": 4,
+      "warnings": 0,
+      "elapsed": "00:00:38.48",
+      "codes": [
+        "CS0121",
+        "CS0121",
+        "KLD0001",
+        "IDE0005"
+      ],
+      "repairs": "Genuine null elements use Empty.Add(null!), named partition key, unnecessary test using removed; no assertions or diagnostics weakened."
+    }
+  ],
+  "runtimeQualified": false,
+  "wholeCiQualified": false,
+  "nativeFailurePathQualified": false,
+  "performanceAccelerationMeasured": false,
+  "coverageQualified": false,
+  "fullSqlComplete": false,
+  "nativeClientProtocolImplemented": false,
+  "ftsIntegrated": false,
+  "fullScaleDatasetQualification": false,
+  "scope": "Canonical development Release/format/static checks of committed ca7 plus only seven owned source/test files. Intermediate joined a6 changes are documentation only. No local tests, recovery/load benchmarks or Release dispatch. Does not change operation counts, quorum, quotas, purge, retries, public protocol or original case outcomes/timings.",
+  "remaining": [
+    "Exact delivered-source normal/scalar/recovery/RF3 GitHub qualification",
+    "Authentic failure-only outbox numeric observation on native1/2/3 with original runner/worker provenance",
+    "Actual initiating replica failure diagnosis",
+    "100000/1000000/5000000 dataset and at least100000 measured-operation scale qualification",
+    "Full authenticated comparison cohort and website publication",
+    "Full SQL/protocol and FullTextSearch integration/fault/performance decision"
+  ]
+}

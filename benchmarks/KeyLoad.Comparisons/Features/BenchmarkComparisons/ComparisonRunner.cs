@@ -113,7 +113,10 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
     {
         if (setupFailure is not null)
         {
-            return new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Failed, SetupPrefix + setupFailure, null, []);
+            var failed = new ComparisonCase(target.Profile.Name, scenario, repetition,
+                ComparisonStatuses.Failed, SetupPrefix + setupFailure, null, []);
+            await ComparisonFailureDiagnostics.ObserveAsync(target, failed, cancellationToken);
+            return failed;
         }
 
         if (!target.Supports(scenario))
@@ -122,10 +125,13 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
         }
 
         progress?.Invoke($"{target.Profile.Name}: {scenario}, repetition {repetition + 1}/{options.Repetitions}");
+        ComparisonCase result;
         try
-        { return await new ComparisonMeasurer(options).MeasureAsync(target, dataset, scenario, repetition, cancellationToken); }
+        { result = await new ComparisonMeasurer(options).MeasureAsync(target, dataset, scenario, repetition, cancellationToken); }
         catch (Exception error) when (!cancellationToken.IsCancellationRequested)
-        { return new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Failed, ComparisonErrors.Safe(error), null, []); }
+        { result = new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Failed, ComparisonErrors.Safe(error), null, []); }
+        await ComparisonFailureDiagnostics.ObserveAsync(target, result, cancellationToken);
+        return result;
     }
 
     /// <summary>Summarizes all attempts, retaining failed latencies while counting only successful useful operations.</summary>

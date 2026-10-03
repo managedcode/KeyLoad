@@ -1,0 +1,97 @@
+{
+  "sourceRevision": "ca7e22d9c201304f0b81f59f3a0ae18e4125be37",
+  "runId": 37126562961,
+  "attempt": 1,
+  "jobId": 111215394485,
+  "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562961/job/111215394485",
+  "engine": "KeyLoad",
+  "physicalNodes": 1,
+  "scenario": "DocumentDelete",
+  "artifacts": [
+    {
+      "artifactId": 11275763647,
+      "name": "comparison-case-qualification-keyload-n1-document-delete",
+      "providerAndZipSha256": "d6fc66b71dfb8ffe70b30cd0b5bdeb3f8378ddee70876795259355d4ed2fb4de",
+      "reports": [
+        {
+          "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+          "sha256": "276e0112b528f087d31a15e9e2c31941641e3ec6b77a6992e85068194d6e773e",
+          "counts": {
+            "error": 1
+          }
+        }
+      ],
+      "uploadLines": [
+        992,
+        993,
+        994,
+        990
+      ],
+      "jobLogSha256": "16c0f43d13a09c7cb6d412ec895c14f5b8aee95dbce9c8b03ce2316a7d9ea934"
+    },
+    {
+      "artifactId": 11275916516,
+      "name": "comparison-worker-keyload-n1-document-delete",
+      "providerAndZipSha256": "aba0d7d95c8c4ff96fc7f515f54a3798bdea619f25f306d297e1a8d92474bdb6",
+      "reports": [],
+      "uploadLines": [
+        910,
+        911,
+        912,
+        908
+      ],
+      "jobLogSha256": "16c0f43d13a09c7cb6d412ec895c14f5b8aee95dbce9c8b03ce2316a7d9ea934"
+    }
+  ],
+  "originalWorkerSha256": "9575cd11b7e8535eff7df4fa198f29972f15a8e84291b36b40562b8eeeb3b998",
+  "originalTeardownSha256": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4",
+  "actualRepetitions": [
+    {
+      "repetition": 0,
+      "status": "measured",
+      "attempts": 10000,
+      "successes": 10000,
+      "failures": 0,
+      "samples": 10000
+    },
+    {
+      "repetition": 1,
+      "status": "measured",
+      "attempts": 10000,
+      "successes": 10000,
+      "failures": 0,
+      "samples": 10000
+    },
+    {
+      "repetition": 2,
+      "status": "measured",
+      "attempts": 10000,
+      "successes": 10000,
+      "failures": 0,
+      "samples": 10000
+    },
+    {
+      "repetition": 3,
+      "status": "measured",
+      "attempts": 10000,
+      "successes": 10000,
+      "failures": 0,
+      "samples": 10000
+    },
+    {
+      "repetition": 4,
+      "status": "failed",
+      "detail": "KeyLoad:ResourceExhausted",
+      "measurement": null,
+      "samples": 0
+    }
+  ],
+  "observedNodeResourceExhaustedRejections": 16,
+  "teardownPrimaryFailure": true,
+  "teardownFailedStages": [],
+  "underlyingQuotaCountersAvailable": false,
+  "initiatingCauseProven": false,
+  "stageEOutboxObservationIncluded": false,
+  "fullCohortQualified": false,
+  "scope": "Actual failed original current-source cell. Original timed samples retained; failed final preparation has no fabricated timing. No older f403 cause is inferred and no successful cohort/site claim follows."
+}

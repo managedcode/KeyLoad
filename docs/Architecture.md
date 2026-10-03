@@ -523,10 +523,21 @@ classDiagram
     ComparisonWorkerSelection --> ComparisonOptions
     ComparisonRunner --> BenchmarkDataset
     ComparisonRunner --> IComparisonTarget
+    ComparisonRunner --> ComparisonFailureDiagnostics
+    ComparisonFailureDiagnostics --> IComparisonFailureDiagnostics
+    KeyLoadTarget ..|> IComparisonFailureDiagnostics
+    KeyLoadTarget --> KeyLoadOutboxDiagnosticLine
     IComparisonTarget --> IComparisonSession
     IsolatedComparisonReport --> IsolatedComparisonWorker
     IsolatedComparisonReport --> ComparisonReport
 ```
+
+[ADR-068 stageE](ADR/ADR-068-native-benchmark-gate-repair.md) adds a private
+failure-only diagnostic boundary after case/session settlement and outside the
+measurement clock. The KeyLoad adapter performs one bounded authorized outbox
+status read; only numeric context is logged and the original case is preserved.
+It changes no limits, retention, operations or public transport, and remains
+runtime-unqualified until authentic failed native originals join.
 
 Source stages remain unqualified until exact-SHA real native correctness/fault,
 intensive cohort, aggregate, site and publication gates pass.

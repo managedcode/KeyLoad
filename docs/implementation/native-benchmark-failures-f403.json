@@ -1,0 +1,245 @@
+{
+  "sourceRevision": "f403bf61e730919a7b6e4b811539b870b8c8433d",
+  "runId": 37124527333,
+  "attempt": 1,
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333",
+  "conclusion": "cancelled",
+  "actualJobCount": 306,
+  "actualJobStates": {
+    "completed/success": 101,
+    "completed/failure": 7,
+    "completed/cancelled": 195,
+    "completed/skipped": 3
+  },
+  "groups": {
+    "nativePreflight": {
+      "jobs": 27,
+      "conclusions": {
+        "success": 27
+      }
+    },
+    "scenario": {
+      "jobs": 270,
+      "conclusions": {
+        "failure": 7,
+        "success": 71,
+        "cancelled": 192
+      }
+    }
+  },
+  "artifactMetadataCount": 235,
+  "terminalPacketSha256": "710548cb3edcd15348ad534898632ad9acba00fec04f9f7f4a09bbd901745bbb",
+  "providerSnapshotSha256": "cf025f9a9a2e292de7b35a85d0fe7c5e3cfe4a38c5cd5bf709fcfcbca72c8106",
+  "providerSealSha256": "c58cd70bfb0afa4b175a66fe63d26ad8fe392376726051661ed19631280f3a88",
+  "originalFailureArtifactBindings": [
+    {
+      "id": 11275631797,
+      "name": "comparison-case-qualification-keyload-n1-document-update",
+      "jobId": 111208387461,
+      "providerDigest": "sha256:e4ba0469733c5db4c6cc9be3409f2f7dff01645c968a784166a0c15e445af3c6",
+      "uploadBindingSha256": "fbbcd58dc182c8ac127d08c1b78b473a69ec49fcd6b98d6d9caf65ac8bad0289",
+      "reports": [
+        {
+          "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+          "sha256": "0a591aa45cda8457eedb1bda00e93da05cc44fad45f7665afa62f4a7d1bc3874",
+          "counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": 11275341405,
+      "name": "comparison-worker-keyload-n1-document-update",
+      "jobId": 111208387461,
+      "providerDigest": "sha256:acb130dae5f7c31c1968939d8ca6f7f9254628bd0f5554ecc4a649800aecc383",
+      "uploadBindingSha256": "4e3af81710f6389ad85d95b9b4ae1b53a16ca69db1042113f8ebcd3ccff5d261",
+      "reports": []
+    },
+    {
+      "id": 11275097454,
+      "name": "comparison-case-qualification-rabbitmq-n3-document-write",
+      "jobId": 111208387783,
+      "providerDigest": "sha256:91985124fae4923262ebb42daee0597eac69243c7841d76398ac4a79288c0d61",
+      "uploadBindingSha256": "be4f7ca3626eb8b85d046f5988484ef2429504b8144a5776a863e9695eb472b1",
+      "reports": []
+    },
+    {
+      "id": 11275006625,
+      "name": "comparison-case-qualification-keyload-n1-document-delete",
+      "jobId": 111208387449,
+      "providerDigest": "sha256:504fc59854817617cf53a26ec5d4eccde30e2509c5d1272fc7d96715cca53000",
+      "uploadBindingSha256": "9f28990cf7786735301cabf9b6a8db36c9fc239d808bdf49b8224be165b9c00f",
+      "reports": [
+        {
+          "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+          "sha256": "1c730bdba91c94cbb02decde771e280aec4f6f1381fb1182a539affa6c3749e2",
+          "counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": 11274801808,
+      "name": "comparison-worker-keyload-n1-document-delete",
+      "jobId": 111208387449,
+      "providerDigest": "sha256:0fad9b5b1afc6cdf663a6bd40015900f839b39d3bd88abdfd054c4f0599eb34d",
+      "uploadBindingSha256": "6f7acc912127fe1767e8cb4a82799d99fe92db9abe3c7ccfa069bc1faba396ba",
+      "reports": []
+    },
+    {
+      "id": 11275672145,
+      "name": "comparison-worker-keyload-n2-document-update",
+      "jobId": 111208387497,
+      "providerDigest": "sha256:c8c5d55d07259f3a2e479e3b998172f752070e3b140f8bd91dc852354a343196",
+      "uploadBindingSha256": "2495ce4d8d08af9799d656d4aa6f4bfc226172c5dfdd5f59ebf11fac285bc4da",
+      "reports": []
+    },
+    {
+      "id": 11275492590,
+      "name": "comparison-case-qualification-keyload-n2-document-write",
+      "jobId": 111208387491,
+      "providerDigest": "sha256:96ed0daa12c2895c968b8562bf0c0a31cbba65e56f1231856fac3eb9c264157d",
+      "uploadBindingSha256": "936458a8747cb34b44335e847fd16804e3e5d0facecfe09c5474e01880844211",
+      "reports": [
+        {
+          "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+          "sha256": "2d68d40b8e0b9fce54b5ce47fbdeddcd5458cb632b8dc0fee6bb46dd808bffd8",
+          "counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": 11275202775,
+      "name": "comparison-case-qualification-keyload-n2-document-update",
+      "jobId": 111208387497,
+      "providerDigest": "sha256:9476340141ebd7d74ec4cd0e29185be8bcf5a27814f96aa1639d937d301368d1",
+      "uploadBindingSha256": "359b807412c265a8a015d0179f00dd030a7014b70b9ddd47d044a615f7809302",
+      "reports": [
+        {
+          "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+          "sha256": "6d7cebce3790ff6c1db7e8c156cd8e32d903d0527c1207573f8ac7a57710ca81",
+          "counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": 11275147936,
+      "name": "comparison-worker-keyload-n2-document-write",
+      "jobId": 111208387491,
+      "providerDigest": "sha256:60c67a657403e98593525e36010f32ad6bbe3c4b9453c2464a927f18f9e7e5bf",
+      "uploadBindingSha256": "7ed585aec3bc305166dca99ce93c90b8a66f96cf3389b9ab458fa210fd4b4c94",
+      "reports": []
+    },
+    {
+      "id": 11275047135,
+      "name": "comparison-case-qualification-keyload-n3-document-write",
+      "jobId": 111208387465,
+      "providerDigest": "sha256:64b335fffdfba5234e9c7536f6708862469f55d809586b45eee7448739611a9c",
+      "uploadBindingSha256": "b9bc04f10efaf19bf195743efa44459a6f321162973e9d2ecf25fec3fd51c6cc",
+      "reports": [
+        {
+          "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+          "sha256": "d8d5874764c10dbe99a3a7f42019835b8bf607d66ff2565c4c61de8fb922b53d",
+          "counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": 11274837213,
+      "name": "comparison-worker-keyload-n3-document-write",
+      "jobId": 111208387465,
+      "providerDigest": "sha256:a7277537613d84629ed3892facd8770321497591a57ed2e404b0a1493643e288",
+      "uploadBindingSha256": "c660845c98e54beaeb75aa716bd7b289ddac0f0c7effdd8524ecabda96eee602",
+      "reports": []
+    },
+    {
+      "id": 11275218238,
+      "name": "comparison-worker-keyload-n2-document-delete",
+      "jobId": 111208387508,
+      "providerDigest": "sha256:77cc1a87c590ce3add6700e80734dd568caa5f2fa037363e1a7419eb10158450",
+      "uploadBindingSha256": "57f644edc834cc8db1f414a0618018859e4f2fd61980e7bd6066ab971f0a4626",
+      "reports": []
+    },
+    {
+      "id": 11274728863,
+      "name": "comparison-case-qualification-keyload-n2-document-delete",
+      "jobId": 111208387508,
+      "providerDigest": "sha256:a8167f789517144dddb34f089631ba5c574debd22f5191afd8e13b2e470ed025",
+      "uploadBindingSha256": "74dbeccdd6a7dbc6c6a5de00383fef1e999cdf10bf4dd9413ae1baa4704c431d",
+      "reports": [
+        {
+          "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+          "sha256": "b4d496cd49eb94ad7548ffca85f111d08a8ba3761c15c3422149ad10423fef4d",
+          "counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          }
+        }
+      ]
+    }
+  ],
+  "failureSummary": {
+    "resourceExhausted": "KeyLoad n1 update/delete and n2 delete: first4 repetitions10000/10000success; repetition4 fails before samples/timing; original zero samples/null measurement preserved",
+    "replication": "KeyLoad n2 write/update and n3 write retain original OwnershipLost and UnknownWriteOutcome failed samples; no complete successful cell",
+    "rabbitImageImport": "Rabbit n3 write fails before TUnit/worker;17 retained Docker command exits0 do not establish underlying failurecause"
+  },
+  "rootCancellation": {
+    "afterPreservingSixOriginalFailures": true,
+    "seventhConcurrentFailurePreservedBeforeTerminal": true,
+    "commandExitCode": 0,
+    "originalCommandLogSha256": "7e39deb22b3a824299d2fa435d39a7553a9db9710e27582c5a91f96681715619"
+  },
+  "qualificationLimits": {
+    "preflightProviderSuccessIsCaseProof": false,
+    "authenticKurrentSelectedOriginals": "docs/implementation/native-kurrent-preflight-f403.json",
+    "all270Qualified": false,
+    "siteUpdated": false,
+    "sourceResourceHypothesisProven": false,
+    "replicationCauseProven": false,
+    "originalCasesUnavailableAreZero": false
+  },
+  "nextStage": "ADR068 AC-NGR-005 failure-only canonical outbox counter observation; preserve quotas/history/workload/measurements"
+}

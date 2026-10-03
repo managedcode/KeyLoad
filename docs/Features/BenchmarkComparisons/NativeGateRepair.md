@@ -1,7 +1,8 @@
 # BenchmarkComparisons native gate repair
 
-Status: Accepted AC001 and AC002 stage A contracts; reviewed source implemented,
-exact-source GitHub qualification pending.
+Status: Accepted staged contracts; reviewed source is delivered through bfb.
+Selected ca22 policy and f403 native preflight originals are qualified below;
+complete comparison and failure-path qualification remain pending.
 [ADR-068](../../ADR/ADR-068-native-benchmark-gate-repair.md) owns stages, exact paths,
 root/worker permissions, bounds, rollback and join conditions. All parent
 BenchmarkComparisons guarantees,1/2/3node cells and270scenario scope remain.
@@ -9,9 +10,10 @@ BenchmarkComparisons guarantees,1/2/3node cells and270scenario scope remain.
 |Requirement|Acceptance and test trace|
 |---|---|
 |REQ-NGR-001 fresh executing-job authority|AC-NGR-001 / TASK-NGR-G1: exact same-ID authenticated metadata, up to3captures/1000ms, all identity/running checks preserved. First-author real-provider-data policy regressions plus actual GitHub startup. Stale queued/exhausted/mismatched/terminal/error authority rejects before any database/timing.|
-|REQ-NGR-002 exact Kurrent event preservation|AC-NGR-002 / TASK-NGR-R2/K1: source-contract freeze then genuine SDK original/custom/system metadata equality and unchanged55,378owned-stream/foreign/cleanup proof on1/2/3. Implementation pending; hard-coded empty assumption is not a valid completeness oracle.|
-|REQ-NGR-003 actual native leader routing|AC-NGR-003 / TASK-NGR-R2/K1: pinned SDK/advertised-endpoint source freeze, actual leader/follower/native setup proof and observed members/copies/ACK. Implementation pending; no guessed leader, independent nodes or measured write retry.|
+|REQ-NGR-002 exact Kurrent event preservation|AC-NGR-002 / TASK-NGR-R2/K1: source-contract freeze then genuine SDK original/custom/system metadata equality and unchanged55,378owned-stream/foreign/cleanup proof on1/2/3. StageA source delivered; selected f403 native1/2/3 originals pass. Empty tracing characterization remains open; a hard-coded empty assumption is not a valid completeness oracle.|
+|REQ-NGR-003 actual native leader routing|AC-NGR-003 / TASK-NGR-R2/K1: pinned SDK/advertised-endpoint source freeze, actual leader/follower/native setup proof and observed members/copies/ACK. Selected f403 native1/2/3 preflight proof exists; D1 diagnostic source is delivered. Original routing cause and diagnostic failure-path qualification remain open; no guessed leader, independent nodes or measured write retry.|
 |REQ-NGR-004 genuine complete publication|AC-NGR-004 / TASK-NGR-Q1: full source/normal/scalar/recovery/RF3/native preflight270/cohort/site original source/run/attempt/upload/digest/report evidence. Failed/cancelled/skipped/unavailable data remains honest.|
+|REQ-NGR-005 settled resource-failure observation|AC-NGR-005 / TASK-NGR-E1: Authored OutboxFailureDiagnosticClassifierTests and OutboxFailureDiagnosticFormatterTests map exact eligibility and typed privacy/bounds; execution is pending. Existing real isolated1/2/3 failed-case runner/worker originals must prove the one authenticated SDK read outside timing, cancellation/settlement and original-result preservation. No quotas, purge or retry changes.|
 
 ```mermaid
 flowchart LR
@@ -69,3 +71,37 @@ metadata volume assertions on the existing path and observed native copies;
 binds provider uploads, original ZIP/report/worker/teardown hashes. This does not
 qualify the new setup diagnostic, refresh exhaustion, routing cause, full270
 cohort, website publication or all fault/resource gates.
+
+REQ-NGR-005 / AC-NGR-005 / TASK-NGR-E1 is the approved stageE private failure
+observation in ADR068: one bounded authenticated outbox-status read after an
+exact resource-failed case settles, only numeric redacted context, original
+case/timing/sample preservation. Pure classifier/typed formatter tests and
+actual native1/2/3 original runner/worker JSON form its trace. Source accounting
+is a hypothesis until real counters exist; no quota or retention policy change.
+
+The [f403 failure receipt](../../implementation/native-benchmark-failures-f403.json)
+retains seven genuine failed jobs and the terminal cancellation after originals
+were preserved. The cohort never aggregated or published. OwnershipLost,
+UnknownWriteOutcome and ResourceExhausted remain failures with all original
+samples; outbox accounting and membership diagnostics are hypotheses until
+actual cause evidence joins.
+
+The [ca7 CI receipt](../../implementation/sql-client-qualification-ca7.json)
+proves the two genuine same-instance native writer cases, five D1 formatter
+cases, and all67 RF3 cases, with194/194 recovery and118/118 unique analyzer
+cases. Normal is2573/2576 and scalar is skipped, so the whole CI fails. These
+selected successes do not qualify stageE observation or its native failure
+path, full SQL/protocol, FullTextSearch, complete comparison or publication.
+
+StageE [source-stage receipt](../../implementation/native-benchmark-gates-source-stage-003.json)
+binds all seven source/test files to complete26-project Release/format/static
+checks and final independent review. Thirteen new pure cases await GitHub
+execution; no native failure counters or acceleration are qualified. Initial
+270cell reports do not satisfy the additional mandatory100k/1m/5m dataset and
+at least100k measured-operation scale gates; those remain open.
+
+The [ca7 failed cell](../../implementation/native-benchmark-failures-ca7.json)
+independently retains the original n1 DocumentDelete ResourceExhausted failure:
+four measured10000-success repetitions, then failed preparation with no samples
+or timing. Cause and actual quota counters remain unproven; publication stays
+unqualified. This source predates stageE observation.

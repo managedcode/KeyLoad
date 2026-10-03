@@ -94,17 +94,25 @@
       "nativeGateRepair": "docs/ADR/ADR-068-native-benchmark-gate-repair.md",
       "nativeGateSourceReceipt": "docs/implementation/native-benchmark-gates-source-stage-001.json",
       "latestCandidate": {
-        "sourceRevision": "bfb04d64bf9c0ca8a1ab6e0c703194e1813250f0",
-        "ciRunId": 37126290194,
-        "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126290194",
-        "ciStatus": "pending_original_discovery_20261003T133000Z",
-        "benchmarkRunId": 37126290225,
-        "benchmarkUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126290225",
-        "benchmarkStatus": "pending_original_discovery_20261003T133000Z",
+        "sourceRevision": "ca7e22d9c201304f0b81f59f3a0ae18e4125be37",
+        "ciRunId": 37126562970,
+        "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562970",
+        "ciStatus": "failure_original_normal2573_of2576_recovery194_of194_RF367_of67_scalar_skipped",
+        "benchmarkRunId": 37126562961,
+        "benchmarkUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126562961",
+        "benchmarkStatus": "in_progress_with_original_KeyLoad_n1_DocumentDelete_failure_no_complete_cohort",
+        "benchmarkInspectedAtUtc": "2026-10-03T14:11:06Z",
+        "benchmarkFailureReceipt": "docs/implementation/native-benchmark-failures-ca7.json",
         "ownedSourceFilesUnchangedFromFrozenReview": 15,
         "ownedSourceEquivalenceSha256": "200b1c6e942abde186915b639305f90833b2893d1af924fd3d78f5cb552ca0d8",
         "newStage": "independent_full_public_JSON_native_payload_oracles_and_RF3_ordinal_golden_plus_failure_only_Kurrent_setup_diagnostics",
-        "runtimeQualified": false
+        "runtimeQualified": false,
+        "qualificationReceipt": "docs/implementation/sql-client-qualification-ca7.json",
+        "sourceStageReceipt": "docs/implementation/native-benchmark-gates-source-stage-002.json",
+        "selectedSameInstanceWriterPassed": 2,
+        "selectedKurrentDiagnosticFormatterPassed": 5,
+        "selectedSqlRf3CommentPassed": 2,
+        "selectedRf3CompositionPassed": 2
       },
       "previousCiRunId": 37121027931,
       "previousCiConclusion": "cancelled_zero_executed_steps_and_artifacts_release_queue_for_delivered_native_fix",
@@ -121,7 +129,22 @@
         "qualificationReceipt": "docs/implementation/sql-client-qualification-ca22.json",
         "selectedCurrentJobPolicyPassed": 19,
         "selectedSqlRf3CommentPassed": 2
-      }
+      },
+      "intermediateCancelledCandidate": {
+        "sourceRevision": "bfb04d64bf9c0ca8a1ab6e0c703194e1813250f0",
+        "ciRunId": 37126290194,
+        "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126290194",
+        "ciStatus": "cancelled_zero_jobs_zero_artifacts",
+        "benchmarkRunId": 37126290225,
+        "benchmarkUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37126290225",
+        "benchmarkStatus": "cancelled_zero_jobs_zero_artifacts",
+        "ownedSourceFilesUnchangedFromFrozenReview": 15,
+        "ownedSourceEquivalenceSha256": "200b1c6e942abde186915b639305f90833b2893d1af924fd3d78f5cb552ca0d8",
+        "newStage": "independent_full_public_JSON_native_payload_oracles_and_RF3_ordinal_golden_plus_failure_only_Kurrent_setup_diagnostics",
+        "runtimeQualified": false
+      },
+      "nativeGateFailureObservation": "accepted_source_stageE_private_outbox_observation_pending_exact_source_GitHub",
+      "nativeGateFailureObservationReceipt": "docs/implementation/native-benchmark-gates-source-stage-003.json"
     },
     "backupPrerequisite": "staged_restore_independently_delivered_dbd01269_further_four_actual_file_cases_source_only",
     "fullSqlComplete": false,
@@ -186,7 +209,8 @@
       "fullCohortQualified": false,
       "newD1DiagnosticQualified": false,
       "routingDefectRootCauseEstablished": false
-    }
+    },
+    "nativeBenchmarkFailureReceipt": "docs/implementation/native-benchmark-failures-f403.json"
   },
   "KL-001": {
     "title": "Версії, ліцензії та platform matrix",

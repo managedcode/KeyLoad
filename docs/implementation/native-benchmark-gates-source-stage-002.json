@@ -1,0 +1,203 @@
+{
+  "sourceStage": "D1_P1_and_independent_RF3_ordinal_golden",
+  "sourceRevision": "bfb04d64bf9c0ca8a1ab6e0c703194e1813250f0",
+  "frozenBaseRevision": "b8ee2a3f67da345fbe809d6f40270e36d901c58d",
+  "files": [
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentTarget.cs",
+      "sha256": "766b5b739922afd60b3dc021e66aebbdf00ec43fce85d7d13d375aadbc8a273a",
+      "bytes": 8952
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentSetupDiagnostics.cs",
+      "sha256": "ce863f22cde353aa3c7a8b04ef49e6159eda4ded51e84cc70a3d2dc8c62e78aa",
+      "bytes": 3175
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentSetupStage.cs",
+      "sha256": "601ea9570e36ab2177a619fad9c28bb23a239b71fe66855e1e2b4ba69a202c6a",
+      "bytes": 196
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentTargetProfile.cs",
+      "sha256": "5da1129d4ee030e4ae0601f2b087e44a527d195971c9d8f5ca8a033e5e30decc",
+      "bytes": 2336
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/KurrentSetupDiagnosticFormatterTests.cs",
+      "sha256": "6ea4e3850e134789575f2b8640c4e5272b5b68962fdbe512d6bd008c0b6424eb",
+      "bytes": 4239
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClientApi/McpCanonicalTestData.cs",
+      "sha256": "23ef61126ed3f53c16736693ca39c7e9317b73c0856827e033cdc29b93fc8a59",
+      "bytes": 8299
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClientApi/McpCommandDecodeTests.cs",
+      "sha256": "92e76332be8ba28e7ca74e30cb3bb85c5cac17fae9be152ded425dfe980539e0",
+      "bytes": 5453
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClientApi/McpReadDecodeTests.cs",
+      "sha256": "4974b432def3cb560b744dbb6080a92bf5a9bb005ed3cb5f44dabbf30d2e9989",
+      "bytes": 6505
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClientApi/McpPolymorphicSchemaTests.cs",
+      "sha256": "47e468cc693658d880ed4bbb34cb8a44bc8d75405b1edb24eb007eaac5a7f12d",
+      "bytes": 11083
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClientApi/McpNativePayloadAssertions.cs",
+      "sha256": "40ec2c39c88d2f2c42f520159b2a48cecce6824aa8216c79559bdef0ce7cee33",
+      "bytes": 2783
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClientApi/McpNativePayloadOracleTests.cs",
+      "sha256": "556d9704290ea8f5596f9c7c256e27502c700b2dba64925af0fe361ecb5e9f78",
+      "bytes": 961
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/SqlOperationCommentCompilerTests.cs",
+      "sha256": "d38dc0860a2488639a2801c3a21316ef87d9f6276c0b47022f1c8328a7a97846",
+      "bytes": 5019
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/SqlOperationCompilerTests.cs",
+      "sha256": "e41084126e347241ceb68dced7e995b195d6c4e478444e092fb5dd52b26fe2da",
+      "bytes": 4257
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/DatabaseComposition/DatabaseCompositionRf3Payload.cs",
+      "sha256": "5f6a184a7ddda3d6e29dbf833735a6dc7cc690580dcef607760159499b5b971d",
+      "bytes": 1030
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/DatabaseComposition/DatabaseCompositionRf3Tests.cs",
+      "sha256": "0f55b60b851843c96523e4221cfa059c404bd214a25cd60b199cca636a1719c7",
+      "bytes": 7814
+    }
+  ],
+  "sourceManifestSha256": "a2ca76b39c9352f838532ad1e1af588671e804fe2f50a8a93ff71fb5f902703b",
+  "committedSourceEquivalenceSha256": "200b1c6e942abde186915b639305f90833b2893d1af924fd3d78f5cb552ca0d8",
+  "developmentChecks": {
+    "restore": {
+      "path": "/private/tmp/keyload-native-oracles-development-restore-r2-enabled.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "exitCode": 0
+    },
+    "build": {
+      "path": "/private/tmp/keyload-native-oracles-development-build-r3.log",
+      "sha256": "b76b7e06e6144f21e14f4a0361c1467d5f853a3c55201b12d45cf5093fb14b26",
+      "bytes": 3990,
+      "exitCode": 0
+    },
+    "format": {
+      "path": "/private/tmp/keyload-native-oracles-development-format-r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "exitCode": 0
+    },
+    "governance": {
+      "path": "/private/tmp/keyload-native-oracles-development-governance-r2.log",
+      "sha256": "76cb9ab8d9569308e691c3b773158a6447ff5fb4be35c6528a3497948ddd31ae",
+      "bytes": 126,
+      "exitCode": 0
+    }
+  },
+  "buildProjects": 26,
+  "buildWarnings": 0,
+  "buildErrors": 0,
+  "buildElapsed": "00:01:42.00",
+  "independentSourceReviews": [
+    {
+      "path": "/private/tmp/keyload-sqlc-r18-review.md",
+      "sha256": "c9cc87e1cf8a7c1334c00c81e4617c653bfbf5728bac641670d5427c2d550d27"
+    },
+    {
+      "path": "/private/tmp/keyload-sqlc-r19-ngr-r6-addendum.md",
+      "sha256": "aabf534b92e56d0bcffebf8e5872908edcc358ba91263b40f9d1d53dc4137f88"
+    },
+    {
+      "path": "/private/tmp/keyload-ngr-r6-review.md",
+      "sha256": "47e60762e6677aff32c67628da9d4f1f8ec78e6e6647b5a549fdbe8631f0cb24"
+    }
+  ],
+  "historicalFailures": [
+    {
+      "stage": "earlier frozen D1/P1 source",
+      "symptom": "CA1031 broad diagnostic catch",
+      "repair": "accepted recoverable exception filter; no diagnostic severity change"
+    },
+    {
+      "stage": "first current-source enabled build",
+      "symptom": "MSB4166 premature MSBuild child node exit",
+      "repair": "unchanged canonical command repeated; full build passed"
+    }
+  ],
+  "runtimeQualified": false,
+  "wholeCiQualified": false,
+  "fullSqlComplete": false,
+  "nativeClientProtocolImplemented": false,
+  "ftsIntegrated": false,
+  "coverageQualified": false,
+  "scope": "Development source build/format/static checks and full exact committed bfb integration checks. Selected authentic ca7 writer/formatter/RF3 cases now pass; its whole CI failed and scalar was skipped. No local tests, recovery, load benchmarks or Release dispatch.",
+  "remaining": [
+    "Exact latest-source full normal/scalar/recovery/RF3 GitHub qualification",
+    "D1 actual failure-path and stack capture allocation qualification",
+    "Full270 scenario cohort authenticated aggregation/site",
+    "Full SQL execution/native transport and FTS integration/fault/performance decision"
+  ],
+  "integratedCommittedDevelopmentChecks": {
+    "sourceRevision": "bfb04d64bf9c0ca8a1ab6e0c703194e1813250f0",
+    "archiveSha256": "a5200a08371539ad79df032bd6fd76ad9b519560106ec3e70af6162bda6dd45b",
+    "checks": {
+      "restore": {
+        "command": "dotnet restore KeyLoad.slnx --verbosity quiet",
+        "exitCode": 0,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "logBytes": 0
+      },
+      "build": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+        "exitCode": 0,
+        "logSha256": "7f2b1f21618ccc05387a4e3cccaa2df70cd718401f2ef73728de3bf0a677f34e",
+        "logBytes": 4042
+      },
+      "format": {
+        "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+        "exitCode": 0,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "logBytes": 0
+      },
+      "governance": {
+        "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+        "exitCode": 0,
+        "logSha256": "76cb9ab8d9569308e691c3b773158a6447ff5fb4be35c6528a3497948ddd31ae",
+        "logBytes": 126
+      }
+    },
+    "projects": 26,
+    "warnings": 0,
+    "errors": 0,
+    "elapsed": "00:05:07.84",
+    "scope": "Full exact committed snapshot; no uncommitted patches or local tests."
+  },
+  "authoredCasesAtSourceDeliveryAwaitingGitHub": {
+    "diagnosticFormatter": 5,
+    "sameInstanceNativeWriters": 2,
+    "existingRf3CompositionOracleStrengthened": 1
+  },
+  "selectedSuccessorRuntimeReceipt": "docs/implementation/sql-client-qualification-ca7.json",
+  "selectedSuccessorRuntime": {
+    "sourceRevision": "ca7e22d9c201304f0b81f59f3a0ae18e4125be37",
+    "sameInstanceNativeWritersPassed": 2,
+    "diagnosticFormatterPassed": 5,
+    "rf3CompositionPassed": 2,
+    "wholeCiQualified": false,
+    "scalarExecuted": false,
+    "diagnosticNativeFailurePathQualified": false
+  }
+}
