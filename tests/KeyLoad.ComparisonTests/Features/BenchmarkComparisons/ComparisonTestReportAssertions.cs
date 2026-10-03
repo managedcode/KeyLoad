@@ -9,6 +9,13 @@ internal static class ComparisonTestReportAssertions
     private const string MeasuredStatus = "measured";
     private const string KeyLoadTargetName = "KeyLoad";
     private const string Neo4jTargetName = "Neo4j";
+    private const string PostgresTargetName = "PostgreSQL + pgvector";
+    private const string QdrantTargetName = "Qdrant";
+    private const string RabbitTargetName = "RabbitMQ";
+    private const string RedisTargetName = "Redis";
+    private const int ExpectedTargetCount = 6;
+    private const int ScenariosPerTarget = 8;
+    private const int MeasuredCasesPerRepetition = 24;
 
     internal static async Task<ComparisonReport> VerifyAsync(string output, ComparisonOptions options,
         CancellationToken cancellationToken)
@@ -25,10 +32,11 @@ internal static class ComparisonTestReportAssertions
     private static async Task VerifyReportAsync(ComparisonReport report, ComparisonOptions options)
     {
         await Assert.That(report.SchemaVersion).IsEqualTo(3);
-        await Assert.That(report.Targets.Length).IsEqualTo(6);
-        await Assert.That(report.Cases.Length).IsEqualTo(36 * options.Repetitions);
+        await Assert.That(report.Targets.Length).IsEqualTo(ExpectedTargetCount);
+        await Assert.That(report.Cases.Length).IsEqualTo(ExpectedTargetCount * ScenariosPerTarget * options.Repetitions);
+        await VerifyCaseMatrixAsync(report, options);
         await Assert.That(report.Cases).DoesNotContain(item => item.Status == FailedStatus);
-        await Assert.That(report.Cases.Count(item => item.Status == MeasuredStatus)).IsEqualTo(20 * options.Repetitions);
+        await Assert.That(report.Cases.Count(item => item.Status == MeasuredStatus)).IsEqualTo(MeasuredCasesPerRepetition * options.Repetitions);
         await VerifyMeasuredCasesAsync(report, options);
         await Assert.That(report.Targets).Contains(target => target.Name == KeyLoadTargetName
             && target.Topology.Contains("RF3", StringComparison.Ordinal));
@@ -36,6 +44,22 @@ internal static class ComparisonTestReportAssertions
         await Assert.That(report.Cases.Count(item => item.Scenario == Scenario.GraphTraverse && item.Status == MeasuredStatus))
             .IsEqualTo(3 * options.Repetitions);
         await VerifyExternalImagesAsync(report);
+    }
+
+    private static async Task VerifyCaseMatrixAsync(ComparisonReport report, ComparisonOptions options)
+    {
+        string[] targets = [KeyLoadTargetName, PostgresTargetName, QdrantTargetName,
+            RabbitTargetName, RedisTargetName, Neo4jTargetName];
+        Scenario[] scenarios = [Scenario.PointRead, Scenario.DocumentWrite, Scenario.VectorExact,
+            Scenario.QueueCycle, Scenario.GraphNeighbors, Scenario.GraphTraverse, Scenario.StreamAppend, Scenario.StreamRead];
+        await Assert.That(report.Targets.Select(target => target.Name).ToHashSet().SetEquals(targets)).IsTrue();
+        var expected = from target in targets
+                       from scenario in scenarios
+                       from repetition in Enumerable.Range(0, options.Repetitions)
+                       select (target, scenario, repetition);
+        var actual = report.Cases.Select(item => (item.Target, item.Scenario, item.Repetition)).ToHashSet();
+        await Assert.That(actual.Count).IsEqualTo(report.Cases.Length);
+        await Assert.That(actual.SetEquals(expected)).IsTrue();
     }
 
     private static async Task VerifyMeasuredCasesAsync(ComparisonReport report, ComparisonOptions options)
@@ -65,6 +89,6 @@ internal static class ComparisonTestReportAssertions
     private static async Task VerifyCsvAsync(string output, ComparisonOptions options, CancellationToken cancellationToken)
     {
         var lines = await File.ReadAllLinesAsync(Path.Combine(output, "samples.csv"), cancellationToken);
-        await Assert.That(lines.Length).IsEqualTo(1 + 20 * options.Repetitions * options.Operations);
+        await Assert.That(lines.Length).IsEqualTo(1 + MeasuredCasesPerRepetition * options.Repetitions * options.Operations);
     }
 }
