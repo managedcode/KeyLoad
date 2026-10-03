@@ -1,5 +1,13 @@
 # BenchmarkComparisons
 
+The additive TimeSeries family has a strict embedded6/30-cell contract and a
+settled-run JSON writer under ADR059. The writer retains every planned slot and
+original observed ACK/count/failure; unstarted attempts carry no invented timing.
+Its workloadSucceeded field preserves the original DTO predicate and cannot
+certify native copies or publication. Source review/development evidence is in
+[repair039](../implementation/isolated-source-repairs-039.json); exact-source
+TUnit/native host/envelope/copy/coverage/30-cell/site joins remain required.
+
 The [035 source-only repair receipt](../implementation/isolated-source-repairs-035.json)
 records reviewed HTTP deadline ownership, observed Kurrent fatal precedence,
 closed TimeSeries selection/physical-resource models and17 separate original

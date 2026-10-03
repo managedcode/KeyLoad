@@ -7,27 +7,27 @@ internal static class SiteBrowserVectorAssetAssertions
     public static async Task AssertReadyMarkAsync(SiteBrowserCdpClient cdp, CancellationToken cancellationToken)
     {
         var state = await ReadMarkAsync(cdp, cancellationToken);
-        await Assert.That(state.GetProperty("count").GetInt32()).IsEqualTo(SiteTokens.One);
-        await Assert.That(state.GetProperty("loaded").GetBoolean()).IsTrue();
-        await Assert.That(state.GetProperty("source").GetString()).IsEqualTo("/favicon.svg");
-        await Assert.That(state.GetProperty("display").GetString()).IsNotEqualTo(SiteVectorAssetTokens.CssNone);
-        await Assert.That(state.GetProperty("visibility").GetString()).IsNotEqualTo(SiteVectorAssetTokens.HiddenVisibility);
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.CountField).GetInt32()).IsEqualTo(SiteTokens.One);
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.LoadedField).GetBoolean()).IsTrue();
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.SourceField).GetString()).IsEqualTo(SiteVectorAssetTokens.ExpectedFaviconPath);
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.DisplayField).GetString()).IsNotEqualTo(SiteVectorAssetTokens.CssNone);
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.VisibilityField).GetString()).IsNotEqualTo(SiteVectorAssetTokens.HiddenVisibility);
         await Assert.That(CssNumber(state.GetProperty(SiteVectorAssetTokens.OpacityField).GetString()))
             .IsGreaterThan(SiteVectorAssetTokens.PositiveSize);
-        await Assert.That(state.GetProperty("posterVisibility").GetString()).IsEqualTo(SiteVectorAssetTokens.HiddenVisibility);
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.PosterVisibilityField).GetString()).IsEqualTo(SiteVectorAssetTokens.HiddenVisibility);
         await AssertProjectedDimensions(state);
-        var transform = state.GetProperty("transform").GetString() ?? string.Empty;
+        var transform = state.GetProperty(SiteVectorAssetTokens.TransformField).GetString() ?? string.Empty;
         await Assert.That(transform.StartsWith(SiteVectorAssetTokens.Matrix3dPrefix, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(transform.EndsWith(")", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(transform.EndsWith(SiteVectorAssetTokens.MatrixClosingCharacter)).IsTrue();
     }
 
     public static async Task AssertPosterFallbackAsync(SiteBrowserCdpClient cdp,
         CancellationToken cancellationToken)
     {
         var state = await cdp.EvaluateAsync(SiteVectorAssetTokens.PosterStateScript, false, cancellationToken);
-        await Assert.That(state.GetProperty("posterVisible").GetBoolean()).IsTrue();
-        await Assert.That(state.GetProperty("markVisible").GetBoolean()).IsFalse();
-        await Assert.That(state.GetProperty("markCount").GetInt32()).IsEqualTo(SiteTokens.One);
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.PosterVisibleField).GetBoolean()).IsTrue();
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.MarkVisibleField).GetBoolean()).IsFalse();
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.MarkCountField).GetInt32()).IsEqualTo(SiteTokens.One);
     }
 
     public static async Task<JsonElement> ReadMarkAsync(SiteBrowserCdpClient cdp,
@@ -39,19 +39,19 @@ internal static class SiteBrowserVectorAssetAssertions
     {
         await AssertReadyMarkAsync(cdp, cancellationToken);
         var current = await ReadMarkAsync(cdp, cancellationToken);
-        await Assert.That(current.GetProperty("transform").GetString())
-            .IsNotEqualTo(previous.GetProperty("transform").GetString());
+        await Assert.That(current.GetProperty(SiteVectorAssetTokens.TransformField).GetString())
+            .IsNotEqualTo(previous.GetProperty(SiteVectorAssetTokens.TransformField).GetString());
     }
 
     private static async Task AssertProjectedDimensions(JsonElement state)
     {
-        var width = CssPixels(state.GetProperty("width").GetString());
-        var height = CssPixels(state.GetProperty("height").GetString());
+        var width = CssPixels(state.GetProperty(SiteVectorAssetTokens.WidthField).GetString());
+        var height = CssPixels(state.GetProperty(SiteVectorAssetTokens.HeightField).GetString());
         await Assert.That(width > SiteVectorAssetTokens.PositiveSize && height > SiteVectorAssetTokens.PositiveSize).IsTrue();
-        await Assert.That(state.GetProperty("offsetWidth").GetDouble()).IsEqualTo(width).Within(SiteVectorAssetTokens.CssDimensionTolerance);
-        await Assert.That(state.GetProperty("offsetHeight").GetDouble()).IsEqualTo(height).Within(SiteVectorAssetTokens.CssDimensionTolerance);
-        await Assert.That(state.GetProperty("rectWidth").GetDouble() > SiteVectorAssetTokens.PositiveSize).IsTrue();
-        await Assert.That(state.GetProperty("rectHeight").GetDouble() > SiteVectorAssetTokens.PositiveSize).IsTrue();
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.OffsetWidthField).GetDouble()).IsEqualTo(width).Within(SiteVectorAssetTokens.CssDimensionTolerance);
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.OffsetHeightField).GetDouble()).IsEqualTo(height).Within(SiteVectorAssetTokens.CssDimensionTolerance);
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.RectWidthField).GetDouble() > SiteVectorAssetTokens.PositiveSize).IsTrue();
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.RectHeightField).GetDouble() > SiteVectorAssetTokens.PositiveSize).IsTrue();
     }
 
     private static double CssPixels(string? value) => value is not null &&

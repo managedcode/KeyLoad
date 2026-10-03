@@ -23,6 +23,30 @@ High-capability inheritance is retained for replication/JSON evidence/topology/t
 
 ## Baseline and known failures
 
+TASK-ISO-039 source integration: eeef54b full development build plus six new
+TS009J files reports30 errors,0warnings. These are compiler/analyzer failures,
+not failing executed TUnit cases. Twenty-one belong to committed vector SiteTests
+(unnamed machine keys and string EndsWith); eight belong to concurrent committed
+ReplicaTermMetadata tests (missing fixture members/catch/style); one is CA1849 in
+the new asynchronous raw-writer test. Fix the raw flush with actual FlushAsync
+and repair the three SiteTests files by using identical named keys/group names
+and the equivalent character overload. Preserve every numerical/DOM/assertion
+oracle and existing ADR053/AC-VEC tests. Root owns this bounded source-only repair;
+the other checkout owner retains Recovery/hot-path edits. No new boundary or ADR
+is required. Verify scoped build/format first, then genuine exact-SHA full CI;
+never report the failing projection as a passing complete gate.
+
+TASK-ISO-039-CI terminal join: original eeef54b run37107911987 fails Release29
+errors, while analyzer118/118 and genuine RF363/63 pass with no skips. Root
+independently verifies seven provider ZIP digests/sizes/job uploads, all613 entry
+hashes,41 sealed input hashes,181 original case identities and45 delivered source
+blobs. Pages37107911998 rejects the missing qualified isolated aggregate; its
+secondary coverage step never starts because the website checkout is absent.
+Normal/scalar/recovery/images/native27/270 remain unexecuted. Durable evidence:
+docs/implementation/isolated-source-qualification-37107911987.json. Scope039
+development UnitTests/SiteTests and nine-file formatter pass; full new-source
+GitHub qualification is still required.
+
 - [x] Inspect full relevant real baseline after planning input: GitHub37072003906 SHA722e7fe7872288d99869b6e25950e67a547b7d86, completedfailure. Linux/macOS/Windows full verification and analyzer job success; comparison and RF3 failed. Historical threeOS success is retained; new required execution isLinux.
 - [ ] RF3 `ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites`: intentional restart health wait fails while fresh Docker container running. Stale terminal snapshot strongly supported, selected event generation unproven. TASK-AISQL-024 has exact source/receipt audit; native bounded recovery wait refinement remains required and cannot weaken health/SDK/data assertions.
 - [ ] Comparison `AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines`: old host-resource lifecycleWaiting/no exit, unsupported stream read in older source; current06a9b631 committed digest-image/public-read repairs need actual qualification.

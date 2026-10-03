@@ -12,6 +12,14 @@ The product is one database server for AI agents with linked documents, typed re
 
 ## Development status
 
+The latest [eeef54b source qualification](docs/implementation/isolated-source-qualification-37107911987.json)
+passes118 analyzer and63 RF3 cases, but its full solution build fails29 Site and
+Recovery diagnostics. Normal/scalar/recovery and native27/270 did not execute;
+Pages rejected the incomplete cohort. The [reviewed039 source repair](docs/implementation/isolated-source-repairs-039.json)
+adds the explicit50,000-slot TimeSeries raw writer and fixes Site test keys;
+scoped project builds/formatting pass, while exact-source GitHub and native family
+host/copy/coverage/publication qualification remain open.
+
 This is an early implementation of the clustered kernel. The default server topology has three persistent voting nodes and requires a majority for writes and strong reads. It needs no external database, Redis or message broker.
 
 Implemented surfaces include document CRUD and field patches, partition-scoped unique/composite equality indexes, command deduplication, stream expected-revision append/read, retained topics, per-source durable subscriptions with bounded delivery windows and contiguous checkpoints, scheduled work queues with fenced leases and retry/DLQ, atomic inbox completion, a committed projection outbox with generation pins, protected resumable document changes and scalar live queries, bounded property-graph traversal, ordered samples, exact vector search, BM25 and weighted reciprocal-rank fusion, a bounded read-only Q1 SQL dialect, API keys, field omission and field-use policies, verified backups, native Raft snapshots and empty-replica catch-up, offline journal compaction, a .NET SDK and CLI.

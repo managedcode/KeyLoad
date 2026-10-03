@@ -2266,13 +2266,13 @@
       "limits": "Historical all-OS verification passed; RF3 59/60 and comparison failed. This is not an isolated intensive cohort."
     },
     "latestBaseline": {
-      "sourceRevision": "5bbf30f70e500f2031f3687fbfd98829da8d218f",
-      "runId": 37104211481,
+      "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "runId": 37107911987,
       "runAttempt": 1,
-      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37104211481",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37107911987",
       "conclusion": "failure",
-      "receipt": "docs/implementation/isolated-source-qualification-37104211481.json",
-      "limits": "Full solution Release fails20 Node-helper diagnostics before normal/scalar/recovery; independent analyzer118 and RF363 pass all/no skips. Native27/full270/TimeSeries6/30 unallocated; images and aggregate skipped. New dirty source is not qualified."
+      "receipt": "docs/implementation/isolated-source-qualification-37107911987.json",
+      "limits": "Full source Release29errors; actual analyzer118/RF363 pass all. No normal/scalar/recovery/native27/270/image suite/TimeSeries6/30/coverage/site publication qualification. Later working-tree039 source is not in this original SHA."
     },
     "sourceEvidence": "docs/implementation/isolated-comparison-source-qualification.json",
     "intensiveTimeSeries": {
@@ -2319,10 +2319,25 @@
           "TASK-ISO-TS007R-C1"
         ],
         "limits": "Models describe actual primary/standby or KeyLoad resource composition; runtime membership, ACKs, persisted copies, extension installation and full6/30 remain pending."
+      },
+      "executableFamilyPlan": {
+        "state": "reviewed_source_delivered_eeef54b_original_TUnit_unexecuted",
+        "preflightCells": 6,
+        "intensiveCells": 30,
+        "authoredTUnitCases": 7,
+        "nativeHostDispatchImplemented": false,
+        "measuredFamilyQualified": false
+      },
+      "settledRunJson": {
+        "state": "source_integrated_development_only_GitHub_unqualified",
+        "authoredTUnitCases": 8,
+        "plannedSlotCount": 50000,
+        "nativeOrPublicationVerdict": false,
+        "receipt": "docs/implementation/isolated-source-repairs-039.json"
       }
     },
     "sourceRepairs": {
-      "state": "delivered_5bbf_source_gate_failed20_Node_helper_diagnostics_repairs_and_new_family_pending",
+      "state": "reviewed035_TS009P_038N_delivered_eeef54b_full_source_gate_failed29_Site_Recovery_errors_039_source_repair_development_only",
       "tasks": [
         "TASK-ISO-019J",
         "TASK-ISO-020RM",
@@ -2340,20 +2355,26 @@
         "TASK-ISO-034F-S",
         "TASK-ISO-035IR",
         "TASK-ISO-035C-S",
-        "TASK-ISO-036-J"
+        "TASK-ISO-036-J",
+        "TASK-ISO-TS009P-S",
+        "TASK-ISO-TS009J-S",
+        "TASK-ISO-TS009J-IR",
+        "TASK-ISO-038N-IR",
+        "TASK-ISO-039-Site"
       ],
       "contracts": "isolated-comparisons.acceptance.md",
-      "limits": "Full solution Release fails20 Node-helper diagnostics before normal/scalar/recovery; independent analyzer118 and RF363 pass all/no skips. Native27/full270/TimeSeries6/30 unallocated; images and aggregate skipped. New dirty source is not qualified. Root reviews new032H referenced post-abort HTTP timer and TS009 closed selector/resource models; scoped development builds are source-only. New034F actual fatal-precedence source and036 distinct17 original TUnit report destinations are reviewed/prepared; original GitHub execution and independent native fault gates remain pending."
+      "limits": "All45 frozen035/TS009P/038N source blobs match delivered eeef54b. Its real CI Release fails29 Site/Recovery diagnostics before normal/scalar/recovery/native27/270; analyzer118 and RF363 genuinely pass without skips. New039 raw writer and source-only Site repair build scoped UnitTests/SiteTests with0 warnings/errors and scoped formatter; no exact-source GitHub/new native/coverage/publication qualification.",
+      "sourceRepairReceipt039": "docs/implementation/isolated-source-repairs-039.json"
     },
     "latestSourceQualification": {
-      "sourceRevision": "5bbf30f70e500f2031f3687fbfd98829da8d218f",
-      "runId": 37104211481,
+      "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "runId": 37107911987,
       "runAttempt": 1,
-      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37104211481",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37107911987",
       "conclusion": "failure",
-      "receipt": "docs/implementation/isolated-source-qualification-37104211481.json",
-      "limits": "Full solution Release fails20 Node-helper diagnostics before normal/scalar/recovery; independent analyzer118 and RF363 pass all/no skips. Native27/full270/TimeSeries6/30 unallocated; images and aggregate skipped. New dirty source is not qualified.",
-      "sourceGates": "failed_Release20_errors_normal_scalar_recovery_unexecuted_analyzer118_RF3_63_passed"
+      "receipt": "docs/implementation/isolated-source-qualification-37107911987.json",
+      "limits": "Full source Release29errors; actual analyzer118/RF363 pass all. No normal/scalar/recovery/native27/270/image suite/TimeSeries6/30/coverage/site publication qualification. Later working-tree039 source is not in this original SHA.",
+      "sourceGates": "failed_Release29errors_normal_scalar_recovery_unexecuted_analyzer118_RF3_63_passed"
     },
     "latestObservedCurrentMainBaseline": {
       "sourceRevision": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
@@ -2365,13 +2386,13 @@
       "limits": "Original normal1583:1566pass17fail0skip; scalar and native comparisons skipped. RF363/recovery164/analyzer118 pass; actual new36 runner and earlier pure30 pass within failed normal suite. Null-memory fixture fix belongs to later d45 checkpoint."
     },
     "currentSourceQualificationRun": {
-      "sourceRevision": "5bbf30f70e500f2031f3687fbfd98829da8d218f",
-      "runId": 37104211481,
+      "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "runId": 37107911987,
       "runAttempt": 1,
-      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37104211481",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37107911987",
       "conclusion": "failure",
-      "receipt": "docs/implementation/isolated-source-qualification-37104211481.json",
-      "limits": "Full solution Release fails20 Node-helper diagnostics before normal/scalar/recovery; independent analyzer118 and RF363 pass all/no skips. Native27/full270/TimeSeries6/30 unallocated; images and aggregate skipped. New dirty source is not qualified.",
+      "receipt": "docs/implementation/isolated-source-qualification-37107911987.json",
+      "limits": "Full source Release29errors; actual analyzer118/RF363 pass all. No normal/scalar/recovery/native27/270/image suite/TimeSeries6/30/coverage/site publication qualification. Later working-tree039 source is not in this original SHA.",
       "state": "terminal_failed_full_source_gate_native_unallocated"
     },
     "latestComparisonNativeBaseline": {
@@ -2392,6 +2413,16 @@
       "sourceGates": "passed_full_Release_format_governance_analyzers118_normal1583_scalar1583_recovery164_RF3_63_all_no_skips",
       "wholeWorkflowAtCapture": "historical_source_receipt_in_progress_snapshot_terminal_comparison_receipt_now_available",
       "terminalComparisonReceipt": "docs/implementation/isolated-comparison-terminal-37098964980.json"
+    },
+    "priorSourceQualification": {
+      "sourceRevision": "5bbf30f70e500f2031f3687fbfd98829da8d218f",
+      "runId": 37104211481,
+      "runAttempt": 1,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37104211481",
+      "conclusion": "failure",
+      "receipt": "docs/implementation/isolated-source-qualification-37104211481.json",
+      "limits": "Full solution Release fails20 Node-helper diagnostics before normal/scalar/recovery; independent analyzer118 and RF363 pass all/no skips. Native27/full270/TimeSeries6/30 unallocated; images and aggregate skipped. New dirty source is not qualified.",
+      "sourceGates": "failed_Release20_errors_normal_scalar_recovery_unexecuted_analyzer118_RF3_63_passed"
     }
   }
 }

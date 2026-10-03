@@ -1,0 +1,1509 @@
+{
+  "schemaVersion": 1,
+  "task": "TASK-ISO-039-CI",
+  "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+  "runId": 37107911987,
+  "runAttempt": 1,
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37107911987",
+  "conclusion": "failure",
+  "qualification": false,
+  "providerPacketSha256": "67c595071684cb719c0846f9dbac9a7a42d852fd426c4ef20d2ea1962fd639a0",
+  "providerManifestSha256": "d4ec8faa147146067fccab9334d3439271229c582a951913a9702cf27896c740",
+  "rootIndependentVerification": {
+    "qualification": false,
+    "originalArtifactsVerified": 7,
+    "sealedFilesVerified": 41,
+    "originalArchiveEntriesVerified": 613,
+    "deliveredSourceBlobsVerified": 45,
+    "genuineTUnitCases": 181,
+    "primarySourceGate": "failed_29_errors",
+    "native270Executed": false
+  },
+  "originalArtifacts": [
+    {
+      "id": 11268881436,
+      "name": "comparison-plan",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11268881436/zip",
+      "runId": 37107911987,
+      "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "bytes": 5140,
+      "sha256": "6d6c73485ffecd376da27625e2a55e556d26eb4d8bdd3fabdbdef9eeb430bb00",
+      "entryInventorySha256": "6d92d0dba9f73348581e5b8575037f31305fcbf6827997c6940287316a8f087a",
+      "entryCount": 1,
+      "producerJobId": 111159948539,
+      "producerLogSha256": "246e4849f8c304711e4e98ff1c71b45c4250cb86378da36c3b7ce711abba890e"
+    },
+    {
+      "id": 11268786940,
+      "name": "code-quality-ubuntu-latest",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11268786940/zip",
+      "runId": 37107911987,
+      "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "bytes": 1570200,
+      "sha256": "2b72c78b72e8f923aafadab9d64963171eb9aadfd98ea4392c40c62975d20fb8",
+      "entryInventorySha256": "eaaa262e127da589b20edc2dae44547e98f7a1fc790834cce6e62e7255da7a4e",
+      "entryCount": 25,
+      "producerJobId": 111159948713,
+      "producerLogSha256": "b09808a6b906ad7ed1ca3a01574a9b30e3e5364228c5883dca258001d86b9d07"
+    },
+    {
+      "id": 11268786851,
+      "name": "analyzer-rule-evidence",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11268786851/zip",
+      "runId": 37107911987,
+      "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "bytes": 207059,
+      "sha256": "36d0bde15dffa36d21955cec1266c0e4ea26a2251ba7334b6643ced104fe1681",
+      "entryInventorySha256": "4dbdd43a922e07c7a2e22afc73ee713362b2733b3728537cc49a281690d5b0b0",
+      "entryCount": 4,
+      "producerJobId": 111159948780,
+      "producerLogSha256": "60265b02730c66539bb976bb7f1fb7f178edcd0b88e897d7a4977d68bc82298d"
+    },
+    {
+      "id": 11268512990,
+      "name": "docker-rf3-qualification",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11268512990/zip",
+      "runId": 37107911987,
+      "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "bytes": 484558,
+      "sha256": "c7b9d03e7464a34e7213c329f0db2e1016bcb9ed353907363234eb800410de45",
+      "entryInventorySha256": "e7fca746996489fa2d9b4a70c4a39dfa49786addbfb10106f1d609b26e541f27",
+      "entryCount": 10,
+      "producerJobId": 111159948685,
+      "producerLogSha256": "34053caf37d5b1c46518e88a923163f53dea318c426035f900a3f12e3276e473"
+    },
+    {
+      "id": 11268483066,
+      "name": "code-quality-docker-rf3",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11268483066/zip",
+      "runId": 37107911987,
+      "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "bytes": 779148,
+      "sha256": "4ed63e35168cb7026ecdc4a5196c046081bc7d1b582d11b4a5894f3c1ece3751",
+      "entryInventorySha256": "510fd581d584fe9a2414a87e01b97082a9d5619df376a6a9aca0a87c4756169c",
+      "entryCount": 15,
+      "producerJobId": 111159948685,
+      "producerLogSha256": "34053caf37d5b1c46518e88a923163f53dea318c426035f900a3f12e3276e473"
+    },
+    {
+      "id": 11268403250,
+      "name": "docker-rf3-image-evidence",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11268403250/zip",
+      "runId": 37107911987,
+      "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "bytes": 33285,
+      "sha256": "b17ccc1e17e373b5bbbe878a3272c5ea3eaaf6352c2ef710b1031e0be5099809",
+      "entryInventorySha256": "c89c120a74f06c5dcf72058d4ea460f75beb86bdfef5350b3a20bfb485f4148d",
+      "entryCount": 8,
+      "producerJobId": 111159948685,
+      "producerLogSha256": "34053caf37d5b1c46518e88a923163f53dea318c426035f900a3f12e3276e473"
+    },
+    {
+      "id": 11268906534,
+      "name": "site-qualification-eeef54b3262b603bb94cad1dadb64e26ef3cb657-1",
+      "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/artifacts/11268906534/zip",
+      "runId": 37107911998,
+      "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "bytes": 1292728,
+      "sha256": "ea10d1f02f940a28d0d71cbffc951ab9d1ab8f40a6c54af6b6b7bb11595e310b",
+      "entryInventorySha256": "038100844f03442e1dc82d5293f86d143dc24c87568b23046bd00f2c74d83852",
+      "entryCount": 550,
+      "producerJobId": 111159948353,
+      "producerLogSha256": "0899069361fe19c02c6c1467996b6395729f57408441728bd642ec07cf011850"
+    }
+  ],
+  "reports": [
+    {
+      "artifactId": 11268786851,
+      "entry": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "entrySha256": "92191bf1cba636705f792abb328b77381f6ed5f36019fbc45da280f8e50626e9",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "source": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "tunitVersion": "1.72.10.0",
+      "runtimeVersion": ".NET 10.0.12",
+      "operatingSystem": "Ubuntu 24.04.5 LTS",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.DiagnosticContractTests.1.1.AllTwelveRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync.1.1.0",
+          "status": "passed",
+          "methodName": "AllTwelveRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageInputSemanticsTests.1.1.CoberturaLineNumbersMustMatchHashVerifiedPhysicalFileBoundsAsync.1.1.0",
+          "status": "passed",
+          "methodName": "CoberturaLineNumbersMustMatchHashVerifiedPhysicalFileBoundsAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageInputSemanticsTests.1.1.NativeBranchBooleanCasingNormalizesBeforeDuplicateChecksAsync.1.1.0",
+          "status": "passed",
+          "methodName": "NativeBranchBooleanCasingNormalizesBeforeDuplicateChecksAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ProgramCompositionRootTests.1.1.GeneratedProgramIsIgnoredAsync.1.1.0",
+          "status": "passed",
+          "methodName": "GeneratedProgramIsIgnoredAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ProgramCompositionRootTests.1.1.NonProgramFileIsIgnoredAsync.1.1.0",
+          "status": "passed",
+          "methodName": "NonProgramFileIsIgnoredAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ProgramCompositionRootTests.1.1.AggregateCompositionIsAllowedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "AggregateCompositionIsAllowedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ProgramCompositionRootTests.1.1.ConcreteRegistrationReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ConcreteRegistrationReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ProgramCompositionRootTests.1.1.HelperDeclarationReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "HelperDeclarationReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageProcessTests.1.1.PrepareAndVerifyRetainIntegerEvidenceAsync.1.1.0",
+          "status": "passed",
+          "methodName": "PrepareAndVerifyRetainIntegerEvidenceAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageProcessTests.1.1.UniqueCoberturaSourceRootResolvesWithinCheckoutAsync.1.1.0",
+          "status": "passed",
+          "methodName": "UniqueCoberturaSourceRootResolvesWithinCheckoutAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageProcessTests.1.1.SourceLinesUnionDistinctClassesAndTreatAnyPositiveHitsAsCoveredAsync.1.1.0",
+          "status": "passed",
+          "methodName": "SourceLinesUnionDistinctClassesAndTreatAnyPositiveHitsAsCoveredAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageProcessTests.1.1.MethodRecordsDoNotContributeDuplicateCoverageAsync.1.1.0",
+          "status": "passed",
+          "methodName": "MethodRecordsDoNotContributeDuplicateCoverageAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageProcessTests.1.1.MissingCoverageReportFailsClosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "MissingCoverageReportFailsClosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageProcessTests.1.1.MissingManifestRetainsFailureAndNativeReportHashAsync.1.1.0",
+          "status": "passed",
+          "methodName": "MissingManifestRetainsFailureAndNativeReportHashAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageProcessTests.1.1.UnsafeAndConflictingPathsFailClosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "UnsafeAndConflictingPathsFailClosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageProcessTests.1.1.ThresholdFailureStillWritesDerivedReportAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ThresholdFailureStillWritesDerivedReportAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageProcessTests.1.1.EmptyBranchDenominatorFailsClosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "EmptyBranchDenominatorFailsClosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageProcessTests.1.1.DtdAndMalformedIntegerInputsFailClosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DtdAndMalformedIntegerInputsFailClosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerSourceRevisionTests.1.1.MissingOrInvalidRevisionSourcesFailPrepareAsync.1.1.0",
+          "status": "passed",
+          "methodName": "MissingOrInvalidRevisionSourcesFailPrepareAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerSourceRevisionTests.1.1.AbsentDedicatedRevisionKeepsLegacyGitHubShaCallerAsync.1.1.0",
+          "status": "passed",
+          "methodName": "AbsentDedicatedRevisionKeepsLegacyGitHubShaCallerAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerSourceRevisionTests.1.1.PresentInvalidDedicatedRevisionFailsWithoutTriggerFallbackAsync.1.1.0",
+          "status": "passed",
+          "methodName": "PresentInvalidDedicatedRevisionFailsWithoutTriggerFallbackAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerSourceRevisionTests.1.1.WhitespaceUppercaseAndMalformedDedicatedRevisionsFailPrepareAsync.1.1.0",
+          "status": "passed",
+          "methodName": "WhitespaceUppercaseAndMalformedDedicatedRevisionsFailPrepareAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerSourceRevisionTests.1.1.ChangedDedicatedRevisionBetweenPrepareAndVerifyFailsAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ChangedDedicatedRevisionBetweenPrepareAndVerifyFailsAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerSourceRevisionTests.1.1.DedicatedRevisionWinsOverTriggerForManifestAndReportAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DedicatedRevisionWinsOverTriggerForManifestAndReportAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ExecutableUnitCodeLineCountAnalyzerTests.1.1.OversizedAccessorLocalFunctionAndLambdaEachReportAsync.1.1.0",
+          "status": "passed",
+          "methodName": "OversizedAccessorLocalFunctionAndLambdaEachReportAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ExecutableUnitCodeLineCountAnalyzerTests.1.1.GeneratedExecutableUnitIsIgnoredByRoslynPolicyAsync.1.1.0",
+          "status": "passed",
+          "methodName": "GeneratedExecutableUnitIsIgnoredByRoslynPolicyAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ExecutableUnitCodeLineCountAnalyzerTests.1.1.AnonymousMethodAndEnclosingMethodBothIncludeItsSourceAsync.1.1.0",
+          "status": "passed",
+          "methodName": "AnonymousMethodAndEnclosingMethodBothIncludeItsSourceAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ExecutableUnitCodeLineCountAnalyzerTests.1.1.ExecutableUnitLinesAtLimitPassAndOneOverReportsAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ExecutableUnitLinesAtLimitPassAndOneOverReportsAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ExecutableUnitCodeLineCountAnalyzerTests.1.1.AccessorLocalFunctionAndLambdaAreMeasuredSeparatelyAsync.1.1.0",
+          "status": "passed",
+          "methodName": "AccessorLocalFunctionAndLambdaAreMeasuredSeparatelyAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ExecutableUnitCodeLineCountAnalyzerTests.1.1.ConstructorsDestructorAndOperatorUnitsReportAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ConstructorsDestructorAndOperatorUnitsReportAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyTests.1.1.ConstantAndHumanTextAreAllowedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ConstantAndHumanTextAreAllowedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyTests.1.1.GeneratedCodeIsIgnoredAsync.1.1.0",
+          "status": "passed",
+          "methodName": "GeneratedCodeIsIgnoredAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyTests.1.1.InlineDictionaryKeyReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "InlineDictionaryKeyReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyTests.1.1.JsonAttributeKeyReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "JsonAttributeKeyReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageInventoryTests.1.1.MissingModuleAndMissingExecutableSourceFailClosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "MissingModuleAndMissingExecutableSourceFailClosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageInventoryTests.1.1.SourceChangeAfterPrepareFailsClosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "SourceChangeAfterPrepareFailsClosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageInventoryTests.1.1.ConfigurationInventoryChangeFailsClosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ConfigurationInventoryChangeFailsClosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageInventoryTests.1.1.SourceDirectoryMustExactlyMatchFrozenInventoryAsync.1.1.0",
+          "status": "passed",
+          "methodName": "SourceDirectoryMustExactlyMatchFrozenInventoryAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageInventoryTests.1.1.CollectorSettingsCopyChangeAfterPrepareFailsClosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "CollectorSettingsCopyChangeAfterPrepareFailsClosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageInventoryTests.1.1.StaleManifestOrReportPreventsPrepareAsync.1.1.0",
+          "status": "passed",
+          "methodName": "StaleManifestOrReportPreventsPrepareAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageInventoryTests.1.1.GateHelperChangeAfterPrepareFailsClosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "GateHelperChangeAfterPrepareFailsClosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.GrainInterfaceVersionTests.1.1.MissingVersionReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "MissingVersionReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.GrainInterfaceVersionTests.1.1.ZeroVersionReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ZeroVersionReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.GrainInterfaceVersionTests.1.1.PositiveVersionAndPlainInterfaceAreAllowedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "PositiveVersionAndPlainInterfaceAreAllowedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.GrainInterfaceVersionTests.1.1.ExternalAssemblyIsIgnoredAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ExternalAssemblyIsIgnoredAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ProgramEndpointMappingTests.1.1.AggregateMappingIsAllowedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "AggregateMappingIsAllowedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ProgramEndpointMappingTests.1.1.GeneratedServerProgramIsIgnoredAsync.1.1.0",
+          "status": "passed",
+          "methodName": "GeneratedServerProgramIsIgnoredAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ProgramEndpointMappingTests.1.1.DirectMappingInServerProgramReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DirectMappingInServerProgramReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ProgramEndpointMappingTests.1.1.DirectMappingOutsideServerProgramIsIgnoredAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DirectMappingOutsideServerProgramIsIgnoredAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyInvocationTests.1.1.ConstantEmptyListAndHumanValueLiteralsAreAllowedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ConstantEmptyListAndHumanValueLiteralsAreAllowedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyInvocationTests.1.1.DictionaryAndHeaderInvocationsDiagnoseKeysNotValuesAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DictionaryAndHeaderInvocationsDiagnoseKeysNotValuesAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyInvocationTests.1.1.Utf8JsonWriterValueArgumentIsNotAMachineKeyAsync.1.1.0",
+          "status": "passed",
+          "methodName": "Utf8JsonWriterValueArgumentIsNotAMachineKeyAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyInvocationTests.1.1.JsonPropertyLookupsDiagnoseDirectAndNestedKeysAsync.1.1.0",
+          "status": "passed",
+          "methodName": "JsonPropertyLookupsDiagnoseDirectAndNestedKeysAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyCreationBindingTests.1.1.KeyValuePairAndDictionaryEntryPositionalKeysAreDiagnosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "KeyValuePairAndDictionaryEntryPositionalKeysAreDiagnosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyCreationBindingTests.1.1.OrdinaryListAndTupleTextIsNotAKeyAsync.1.1.0",
+          "status": "passed",
+          "methodName": "OrdinaryListAndTupleTextIsNotAKeyAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyCreationBindingTests.1.1.DictionaryComplexInitializerKeyIsDiagnosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DictionaryComplexInitializerKeyIsDiagnosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyCreationBindingTests.1.1.ReorderedNamedConstructorsBindKeysNotFirstSourceValuesAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ReorderedNamedConstructorsBindKeysNotFirstSourceValuesAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ExecutableUnitSpanAndTriviaAnalyzerTests.1.1.MultilineCommentInsideExecutableUnitAddsNoCodeLinesAsync.1.1.0",
+          "status": "passed",
+          "methodName": "MultilineCommentInsideExecutableUnitAddsNoCodeLinesAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ExecutableUnitSpanAndTriviaAnalyzerTests.1.1.DisabledTextInsideExecutableUnitContributesToItsTotalAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DisabledTextInsideExecutableUnitContributesToItsTotalAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ExecutableUnitSpanAndTriviaAnalyzerTests.1.1.ExpressionBodiedPropertyAndIndexerAreMeasuredAsUnitsAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ExpressionBodiedPropertyAndIndexerAreMeasuredAsUnitsAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ExecutableUnitSpanAndTriviaAnalyzerTests.1.1.MultilineLiteralLinesCountWithinTheExecutableUnitAsync.1.1.0",
+          "status": "passed",
+          "methodName": "MultilineLiteralLinesCountWithinTheExecutableUnitAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.OrleansGenerateSerializerTests.1.1.IdMemberWithoutSerializerReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "IdMemberWithoutSerializerReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.OrleansGenerateSerializerTests.1.1.NestedGrainPayloadWithoutSerializerReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "NestedGrainPayloadWithoutSerializerReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.OrleansGenerateSerializerTests.1.1.PersistentStateWithoutSerializerReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "PersistentStateWithoutSerializerReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.OrleansGenerateSerializerTests.1.1.ExternalTestAndGeneratedAssembliesAreIgnoredAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ExternalTestAndGeneratedAssembliesAreIgnoredAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.OrleansGenerateSerializerTests.1.1.SerializedPayloadAndOrdinaryDtoAreAllowedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "SerializedPayloadAndOrdinaryDtoAreAllowedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.AggregateTypeCodeLineCountAnalyzerTests.1.1.OversizedNestedTypeReportsForOuterAndInnerDeclarationsAsync.1.1.0",
+          "status": "passed",
+          "methodName": "OversizedNestedTypeReportsForOuterAndInnerDeclarationsAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.AggregateTypeCodeLineCountAnalyzerTests.1.1.AggregateTypeLinesAtLimitPassAndOneOverReportsAsync.1.1.0",
+          "status": "passed",
+          "methodName": "AggregateTypeLinesAtLimitPassAndOneOverReportsAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.AggregateTypeCodeLineCountAnalyzerTests.1.1.GeneratedPartialDeclarationDoesNotContributeToTypeTotalAsync.1.1.0",
+          "status": "passed",
+          "methodName": "GeneratedPartialDeclarationDoesNotContributeToTypeTotalAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.AggregateTypeCodeLineCountAnalyzerTests.1.1.GeneratedTypeSourceIsIgnoredByRoslynPolicyAsync.1.1.0",
+          "status": "passed",
+          "methodName": "GeneratedTypeSourceIsIgnoredByRoslynPolicyAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.AggregateTypeCodeLineCountAnalyzerTests.1.1.NestedTypeLinesCountInOuterAndInnerTypesAsync.1.1.0",
+          "status": "passed",
+          "methodName": "NestedTypeLinesCountInOuterAndInnerTypesAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.AggregateTypeCodeLineCountAnalyzerTests.1.1.DisabledTextAndMultilineRawTokenInsideTypeCountAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DisabledTextAndMultilineRawTokenInsideTypeCountAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.AggregateTypeCodeLineCountAnalyzerTests.1.1.MultilineCommentInsideTypeAddsNoCodeLinesAsync.1.1.0",
+          "status": "passed",
+          "methodName": "MultilineCommentInsideTypeAddsNoCodeLinesAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.AggregateTypeCodeLineCountAnalyzerTests.1.1.OnlyExactCoreDatabaseEngineTypeGetsExpiringExceptionAsync.1.1.0",
+          "status": "passed",
+          "methodName": "OnlyExactCoreDatabaseEngineTypeGetsExpiringExceptionAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.UntypedCatchTests.1.1.ExplicitExceptionTypeIsAllowedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ExplicitExceptionTypeIsAllowedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.UntypedCatchTests.1.1.GeneratedCatchIsIgnoredAsync.1.1.0",
+          "status": "passed",
+          "methodName": "GeneratedCatchIsIgnoredAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.UntypedCatchTests.1.1.UntypedCatchReportsLocatedWarningAsync.1.1.0",
+          "status": "passed",
+          "methodName": "UntypedCatchReportsLocatedWarningAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageBranchDisplayTests.1.1.ObservedNativeDisplaysKeepIntegerBranchCountsAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ObservedNativeDisplaysKeepIntegerBranchCountsAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageBranchDisplayTests.1.1.RoundedDisplayCannotChangeIntegerThresholdDecisionAsync.1.1.0",
+          "status": "passed",
+          "methodName": "RoundedDisplayCannotChangeIntegerThresholdDecisionAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageBranchDisplayTests.1.1.MalformedDisplayAndUnsignedPairTokensFailClosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "MalformedDisplayAndUnsignedPairTokensFailClosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageThresholdTests.1.1.CriticalPipelineThresholdUsesExactIntegerBoundaryAsync.1.1.0",
+          "status": "passed",
+          "methodName": "CriticalPipelineThresholdUsesExactIntegerBoundaryAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageThresholdTests.1.1.HugeBranchThresholdUsesExactIntegerProductsAsync.1.1.0",
+          "status": "passed",
+          "methodName": "HugeBranchThresholdUsesExactIntegerProductsAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageThresholdTests.1.1.AggregateCounterOverflowFailsBeforeNumericEvidenceAsync.1.1.0",
+          "status": "passed",
+          "methodName": "AggregateCounterOverflowFailsBeforeNumericEvidenceAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageThresholdTests.1.1.ModuleBranchThresholdUsesExactIntegerBoundaryAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ModuleBranchThresholdUsesExactIntegerBoundaryAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SiteAnalyzerCoverageThresholdTests.1.1.ModuleLineThresholdUsesExactIntegerBoundaryAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ModuleLineThresholdUsesExactIntegerBoundaryAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.OrleansContractConstructorTests.1.1.StaticFactoryAndHelperOutsideContractsAreAllowedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "StaticFactoryAndHelperOutsideContractsAreAllowedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.OrleansContractConstructorTests.1.1.SharedContractFolderConstructorReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "SharedContractFolderConstructorReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.OrleansContractConstructorTests.1.1.SerializedDtoConstructorReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "SerializedDtoConstructorReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.OrleansContractConstructorTests.1.1.ExternalTestAndGeneratedSourcesAreIgnoredAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ExternalTestAndGeneratedSourcesAreIgnoredAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ControlFlowNestingExtendedConstructTests.1.1.ElseIfEveryLoopUsingStatementAndFixedAddNestingAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ElseIfEveryLoopUsingStatementAndFixedAddNestingAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ControlFlowNestingExtendedConstructTests.1.1.NestedLocalFunctionStartsAtItsOwnDepthAsync.1.1.0",
+          "status": "passed",
+          "methodName": "NestedLocalFunctionStartsAtItsOwnDepthAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ControlFlowNestingExtendedConstructTests.1.1.NestedLambdaStartsAtItsOwnDepthAsync.1.1.0",
+          "status": "passed",
+          "methodName": "NestedLambdaStartsAtItsOwnDepthAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ControlFlowNestingExtendedConstructTests.1.1.LoopsSwitchesAndConditionalExpressionsContributeToDepthAsync.1.1.0",
+          "status": "passed",
+          "methodName": "LoopsSwitchesAndConditionalExpressionsContributeToDepthAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyArgumentBindingTests.1.1.Utf8JsonWriterReorderedNamedArgumentsBindPropertyAndValueAsync.1.1.0",
+          "status": "passed",
+          "methodName": "Utf8JsonWriterReorderedNamedArgumentsBindPropertyAndValueAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyArgumentBindingTests.1.1.ConstantDictionaryKeyDoesNotMakeValueLiteralAMachineKeyAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ConstantDictionaryKeyDoesNotMakeValueLiteralAMachineKeyAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyArgumentBindingTests.1.1.Utf8JsonWriterPositionalArgumentsBindPropertyAndValueAsync.1.1.0",
+          "status": "passed",
+          "methodName": "Utf8JsonWriterPositionalArgumentsBindPropertyAndValueAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyArgumentBindingTests.1.1.NestedKeyConcatIsPositiveAndNestedValueConcatIsNegativeAsync.1.1.0",
+          "status": "passed",
+          "methodName": "NestedKeyConcatIsPositiveAndNestedValueConcatIsNegativeAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyArgumentBindingTests.1.1.ReducedAndStaticEndpointExtensionsBindNamesAndExpandedTagsAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ReducedAndStaticEndpointExtensionsBindNamesAndExpandedTagsAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyArgumentBindingTests.1.1.DictionaryAddBindsPositionalAndReorderedNamedKeysAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DictionaryAddBindsPositionalAndReorderedNamedKeysAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyArgumentBindingTests.1.1.DynamicPropertyLookupUsesNamedAndPositionalKeyFallbackAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DynamicPropertyLookupUsesNamedAndPositionalKeyFallbackAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ControlFlowNestingAnalyzerTests.1.1.GeneratedNestedControlFlowIsIgnoredByRoslynPolicyAsync.1.1.0",
+          "status": "passed",
+          "methodName": "GeneratedNestedControlFlowIsIgnoredByRoslynPolicyAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ControlFlowNestingAnalyzerTests.1.1.TryCatchFinallyAreSiblingBranchesAndUsingDeclarationAddsNoDepthAsync.1.1.0",
+          "status": "passed",
+          "methodName": "TryCatchFinallyAreSiblingBranchesAndUsingDeclarationAddsNoDepthAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.ControlFlowNestingAnalyzerTests.1.1.ControlFlowDepthTwoAndThreePassWhileFourReportsAsync.1.1.0",
+          "status": "passed",
+          "methodName": "ControlFlowDepthTwoAndThreePassWhileFourReportsAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SystemClockSemanticTests.1.1.DateTimeAndDateTimeOffsetClockPropertiesAreDiagnosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DateTimeAndDateTimeOffsetClockPropertiesAreDiagnosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SystemClockSemanticTests.1.1.TimeProviderAndNonClockDatePropertiesAreAllowedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "TimeProviderAndNonClockDatePropertiesAreAllowedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SystemClockAccessTests.1.1.GeneratedClockCodeIsIgnoredAsync.1.1.0",
+          "status": "passed",
+          "methodName": "GeneratedClockCodeIsIgnoredAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SystemClockAccessTests.1.1.DirectUtcNowReportsLocatedErrorAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DirectUtcNowReportsLocatedErrorAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.SystemClockAccessTests.1.1.TimeProviderAndNonClockPropertyAreAllowedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "TimeProviderAndNonClockPropertyAreAllowedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.FileCodeLineCountAnalyzerTests.1.1.GeneratedSourceIsIgnoredByRoslynPolicyAsync.1.1.0",
+          "status": "passed",
+          "methodName": "GeneratedSourceIsIgnoredByRoslynPolicyAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.FileCodeLineCountAnalyzerTests.1.1.NonblankDirectiveAndDisabledTextLinesCountAsync.1.1.0",
+          "status": "passed",
+          "methodName": "NonblankDirectiveAndDisabledTextLinesCountAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.FileCodeLineCountAnalyzerTests.1.1.OrdinaryAndRawMultilineLiteralTokensCountEachPhysicalLineAsync.1.1.0",
+          "status": "passed",
+          "methodName": "OrdinaryAndRawMultilineLiteralTokensCountEachPhysicalLineAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.FileCodeLineCountAnalyzerTests.1.1.CommentsAndBlankLinesDoNotAddCodeLinesAsync.1.1.0",
+          "status": "passed",
+          "methodName": "CommentsAndBlankLinesDoNotAddCodeLinesAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.FileCodeLineCountAnalyzerTests.1.1.FileCodeLinesAtLimitPassAndOneOverReportsAsync.1.1.0",
+          "status": "passed",
+          "methodName": "FileCodeLinesAtLimitPassAndOneOverReportsAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyConstructionTests.1.1.KeyValuePairAndDictionaryEntryKeysAreDiagnosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "KeyValuePairAndDictionaryEntryKeysAreDiagnosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyConstructionTests.1.1.DictionaryInitializerIsDiagnosedButTupleValuesAreNotAsync.1.1.0",
+          "status": "passed",
+          "methodName": "DictionaryInitializerIsDiagnosedButTupleValuesAreNotAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyAttributeContractTests.1.1.HumanDescriptionAndConstantAttributeMetadataAreAllowedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "HumanDescriptionAndConstantAttributeMetadataAreAllowedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.LiteralMachineKeyAttributeContractTests.1.1.QualifiedSerializationAttributeKeysAreDiagnosedAsync.1.1.0",
+          "status": "passed",
+          "methodName": "QualifiedSerializationAttributeKeysAreDiagnosedAsync"
+        },
+        {
+          "id": "KeyLoad.Analyzers.Tests.Features.CodeQuality.NumericAnalyzerSelfInventoryTests.1.1.AnalyzerAndAnalyzerTestsSourcesSatisfyNumericPolicyAsync.1.1.0",
+          "status": "passed",
+          "methodName": "AnalyzerAndAnalyzerTestsSourcesSatisfyNumericPolicyAsync"
+        }
+      ]
+    },
+    {
+      "artifactId": 11268512990,
+      "entry": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "entrySha256": "0b902e0394ac420a70db365caff232a78efffa3c56414559843c6567a2e5f204",
+      "assembly": "KeyLoad.IntegrationTests",
+      "source": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "tunitVersion": "1.72.10.0",
+      "runtimeVersion": ".NET 10.0.12",
+      "operatingSystem": "Ubuntu 24.04.5 LTS",
+      "summary": {
+        "total": 63,
+        "passed": 63,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "id": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3AdmissionTests.1.1.AcAisql007InsufficientDataBytesRejectSdkAndOfficialSqlBeforeIdClaimWhileDirectControlKeepsRf3Healthy.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql007InsufficientDataBytesRejectSdkAndOfficialSqlBeforeIdClaimWhileDirectControlKeepsRf3Healthy"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpDiscoveryTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpDiscoveryTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpDiscoveryTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp007OfficialClientReceivesCanonicalCapabilitiesAndFreshExecutionIds.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp007OfficialClientReceivesCanonicalCapabilitiesAndFreshExecutionIds"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterReplication.ContainerRestartNativeDiagnosticsTests.1.1.AcTest007BoundedActualStreamReaderDrainsAfterRetainingPrefix.1.1.0",
+          "status": "passed",
+          "methodName": "AcTest007BoundedActualStreamReaderDrainsAfterRetainingPrefix"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterReplication.ContainerRestartNativeDiagnosticsTests.1.1.AcTest007MalformedNativeDockerFieldsReturnFixedPrivateMarker.1.1.0",
+          "status": "passed",
+          "methodName": "AcTest007MalformedNativeDockerFieldsReturnFixedPrivateMarker"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterReplication.ContainerRestartNativeDiagnosticsTests.1.1.AcTest007ValidNativeDockerRecordProjectsOnlyClosedFields.1.1.0",
+          "status": "passed",
+          "methodName": "AcTest007ValidNativeDockerRecordProjectsOnlyClosedFields"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterReplication.ContainerRestartFailureCaptureTests.1.1.AcTest007RestartReceiptsKeepFirstAndLatestWithinWholeUtf8Bounds.1.1.0",
+          "status": "passed",
+          "methodName": "AcTest007RestartReceiptsKeepFirstAndLatestWithinWholeUtf8Bounds"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterReplication.ContainerRestartFailureCaptureTests.1.1.AcTest007ProjectionKeepsOnlyValidatedPublicSnapshotFields.1.1.0",
+          "status": "passed",
+          "methodName": "AcTest007ProjectionKeepsOnlyValidatedPublicSnapshotFields"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3BlobParityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql006AbsentBlobMetadataAndEmptyListAreCanonicalAcrossSqlSdkAndMcp.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql006AbsentBlobMetadataAndEmptyListAreCanonicalAcrossSqlSdkAndMcp"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3BlobParityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql006SqlPublishesTwoRealPartsAndAllClientsReadTheExactCrossPartRange.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql006SqlPublishesTwoRealPartsAndAllClientsReadTheExactCrossPartRange"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3ReadTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries008LatestUsesTimestampThenSequenceAndReturnsTypedAbsence.1.1.0",
+          "status": "passed",
+          "methodName": "AcSeries008LatestUsesTimestampThenSequenceAndReturnsTypedAbsence"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3ReadTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries009AggregateMatchesIndependentRawOracleForOffsetsLateSamplesAndDeduplication.1.1.0",
+          "status": "passed",
+          "methodName": "AcSeries009AggregateMatchesIndependentRawOracleForOffsetsLateSamplesAndDeduplication"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3DeliveryTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql006SqlReceiveAndAckPreserveStableIdsAndRejectForgedTokensWithoutEffects.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql006SqlReceiveAndAckPreserveStableIdsAndRejectForgedTokensWithoutEffects"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3AuthorizationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries011EmptyResultsProjectedTagsRevocationAndBudgetFailuresAreConsistent.1.1.0",
+          "status": "passed",
+          "methodName": "AcSeries011EmptyResultsProjectedTagsRevocationAndBudgetFailuresAreConsistent"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd003RealDocumentSuccessAndFailureAdvanceProcessHttpObservations.1.1.0",
+          "status": "passed",
+          "methodName": "AcAd003RealDocumentSuccessAndFailureAdvanceProcessHttpObservations"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd007RealSdkAndOfficialMcpAgreeOnCatalogAndNonconsumingQueue.1.1.0",
+          "status": "passed",
+          "methodName": "AcAd007RealSdkAndOfficialMcpAgreeOnCatalogAndNonconsumingQueue"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd001CredentialFreeShellNeverExemptsDataOrUnknownAssets.1.1.0",
+          "status": "passed",
+          "methodName": "AcAd001CredentialFreeShellNeverExemptsDataOrUnknownAssets"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd001CurrentPersistedAdministratorRevocationOrExpiryRejectsLaterReads(System.Boolean).2.1.0",
+          "status": "passed",
+          "methodName": "AcAd001CurrentPersistedAdministratorRevocationOrExpiryRejectsLaterReads"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd001CurrentPersistedAdministratorRevocationOrExpiryRejectsLaterReads(System.Boolean).1.1.0",
+          "status": "passed",
+          "methodName": "AcAd001CurrentPersistedAdministratorRevocationOrExpiryRejectsLaterReads"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd002ActualPhysicalNodesAndExcludedPollingHaveHonestSnapshots.1.1.0",
+          "status": "passed",
+          "methodName": "AcAd002ActualPhysicalNodesAndExcludedPollingHaveHonestSnapshots"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.EventStreams.McpEventStreamTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp005SdkAppendAndMcpRetryReturnOneCommittedEventBatch.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp005SdkAppendAndMcpRetryReturnOneCommittedEventBatch"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.EventStreams.McpEventStreamTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp007SdkAndOfficialClientReturnIdenticalBoundedReplayPages.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp007SdkAndOfficialClientReturnIdenticalBoundedReplayPages"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.EventStreams.McpEventStreamTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002ScopedEventReadDeniesForeignTenantAndStaleGenerationWithoutLeakingData.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp002ScopedEventReadDeniesForeignTenantAndStaleGenerationWithoutLeakingData"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3ModelParityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql004SqlAndNativeClientsShareTypedTableGraphVectorsAndSamples.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql004SqlAndNativeClientsShareTypedTableGraphVectorsAndSamples"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3ModelParityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql006SqlAtomicCommandAndNativeRetryExposeTheSameEventsAndNonconsumingQueue.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql006SqlAtomicCommandAndNativeRetryExposeTheSameEventsAndNonconsumingQueue"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3ModelParityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql005NoBodySqlCallUsesTheEmptyCanonicalEnvelope.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql005NoBodySqlCallUsesTheEmptyCanonicalEnvelope"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpFieldAuthorizationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002FieldProjectionAndDeniedPatchHaveTheSameCanonicalAuthorityAcrossClients.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp002FieldProjectionAndDeniedPatchHaveTheSameCanonicalAuthorityAcrossClients"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterReplication.BoundedDiagnosticLogTests.1.1.AcDiag003UnicodeClippingPreservesScalarsAndNodeShares.1.1.0",
+          "status": "passed",
+          "methodName": "AcDiag003UnicodeClippingPreservesScalarsAndNodeShares"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterReplication.BoundedDiagnosticLogTests.1.1.AcDiag003ExistingSingleArtifactBoundsRemainExact.1.1.0",
+          "status": "passed",
+          "methodName": "AcDiag003ExistingSingleArtifactBoundsRemainExact"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterReplication.BoundedDiagnosticLogTests.1.1.AcDiag003EveryNodeRetainsItsFailureBeforeOversizedNoise.1.1.0",
+          "status": "passed",
+          "methodName": "AcDiag003EveryNodeRetainsItsFailureBeforeOversizedNoise"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterFailureReceiptsTests.1.1.AcTest007ConcurrentFailureWritesStayWholeAndBounded.1.1.0",
+          "status": "passed",
+          "methodName": "AcTest007ConcurrentFailureWritesStayWholeAndBounded"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterFailureReceiptsTests.1.1.AcTest007IndividualReceiptsKeepFirst32WhileLatestViewContinues.1.1.0",
+          "status": "passed",
+          "methodName": "AcTest007IndividualReceiptsKeepFirst32WhileLatestViewContinues"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterFailureReceiptsTests.1.1.AcTest007FirstReceiptAndLatestFailureAreBothPreserved.1.1.0",
+          "status": "passed",
+          "methodName": "AcTest007FirstReceiptAndLatestFailureAreBothPreserved"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpPersistedAuthorizationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002CurrentPersistedPrincipalControlsEachCallAfterDiscovery.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp002CurrentPersistedPrincipalControlsEachCallAfterDiscovery"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpPersistedAuthorizationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002CrossTenantAndForgedAuthorityAreDeniedWithoutChangingTheDocument.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp002CrossTenantAndForgedAuthorityAreDeniedWithoutChangingTheDocument"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3AuthorizationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql006ReadOnlyPersistedIdentityCannotWriteThroughSqlOrOfficialMcp.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql006ReadOnlyPersistedIdentityCannotWriteThroughSqlOrOfficialMcp"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.AdmissionClusterTests.1.1.FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable.1.1.0",
+          "status": "passed",
+          "methodName": "FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.AdmissionClusterTests.1.1.OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds.1.1.0",
+          "status": "passed",
+          "methodName": "OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpCredentialLifecycleTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002PersistedCredentialChangesRejectTheClientAfterDiscovery(System.Boolean).1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp002PersistedCredentialChangesRejectTheClientAfterDiscovery"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpCredentialLifecycleTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002PersistedCredentialChangesRejectTheClientAfterDiscovery(System.Boolean).2.1.0",
+          "status": "passed",
+          "methodName": "AcMcp002PersistedCredentialChangesRejectTheClientAfterDiscovery"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpCredentialLifecycleTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002NativeDiscoveryRejectsMissingAndUnconfiguredCredentials(System.Boolean).1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp002NativeDiscoveryRejectsMissingAndUnconfiguredCredentials"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpCredentialLifecycleTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002NativeDiscoveryRejectsMissingAndUnconfiguredCredentials(System.Boolean).2.1.0",
+          "status": "passed",
+          "methodName": "AcMcp002NativeDiscoveryRejectsMissingAndUnconfiguredCredentials"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentParityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp005StableDocumentCommandHasTheSameOutcomeAcrossBothRealClients.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp005StableDocumentCommandHasTheSameOutcomeAcrossBothRealClients"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentParityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp005ConflictingCommandIsRejectedByBothClientsWithoutChangingTheDocument.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp005ConflictingCommandIsRejectedByBothClientsWithoutChangingTheDocument"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentParityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp007MissingDocumentIsCanonicalNullWithFreshNativeExecutionIds.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp007MissingDocumentIsCanonicalNullWithFreshNativeExecutionIds"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3AtomicityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql004FailedSqlTableDocumentEventQueueBatchHasNoPartialEffects(System.Boolean).1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql004FailedSqlTableDocumentEventQueueBatchHasNoPartialEffects"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3AtomicityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql004FailedSqlTableDocumentEventQueueBatchHasNoPartialEffects(System.Boolean).2.1.0",
+          "status": "passed",
+          "methodName": "AcAisql004FailedSqlTableDocumentEventQueueBatchHasNoPartialEffects"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3CancellationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql007CancelledOfficialMcpSelectThrowsAndTheNextSqlReadReturnsThePersistedRow.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql007CancelledOfficialMcpSelectThrowsAndTheNextSqlReadReturnsThePersistedRow"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3CancellationTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql007CancelledSdkSelectReturnsCancelledAndTheNextSqlReadReturnsThePersistedRow.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql007CancelledSdkSelectReturnsCancelledAndTheNextSqlReadReturnsThePersistedRow"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3WindowTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries010WindowsAreDenseAnchoredUtcAndClampThePartialFinalWindow.1.1.0",
+          "status": "passed",
+          "methodName": "AcSeries010WindowsAreDenseAnchoredUtcAndClampThePartialFinalWindow"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3RowsTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql003SqlInvalidTypedPatchLeavesTheFinalRowAndRevisionUnchanged.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql003SqlInvalidTypedPatchLeavesTheFinalRowAndRevisionUnchanged"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3RowsTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAisql004SqlTypedPutRetriesAndPatchShareNativeReceiptsAndIndexedSelect.1.1.0",
+          "status": "passed",
+          "methodName": "AcAisql004SqlTypedPutRetriesAndPatchShareNativeReceiptsAndIndexedSelect"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestIdReceiptTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.SdkResponsesCarryUniqueActorRequestIdsAcrossStableWriteRetryAndParallelReads.1.1.0",
+          "status": "passed",
+          "methodName": "SdkResponsesCarryUniqueActorRequestIdsAcrossStableWriteRetryAndParallelReads"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpConcurrentIdentityTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp002DistinctOfficialClientsKeepTheirOwnTenantsDuringConcurrentCalls.1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp002DistinctOfficialClientsKeepTheirOwnTenantsDuringConcurrentCalls"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.ClusterTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.UnsignedPeerRequestsAndClientSuppliedPrincipalAreRejected.1.1.0",
+          "status": "passed",
+          "methodName": "UnsignedPeerRequestsAndClientSuppliedPrincipalAreRejected"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.ClusterTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes.1.1.0",
+          "status": "passed",
+          "methodName": "RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.ClusterTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.SqlJsonAndCSharpUseTheSameAuthorizedHttpQueryContract.1.1.0",
+          "status": "passed",
+          "methodName": "SqlJsonAndCSharpUseTheSameAuthorizedHttpQueryContract"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.ClusterTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites.1.1.0",
+          "status": "passed",
+          "methodName": "ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3ReplicaRestartTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica.1.1.0",
+          "status": "passed",
+          "methodName": "AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpCanonicalInputRejectionTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp003InvalidCanonicalBodyHasNoExecutionIdentity(System.Boolean).1.1.0",
+          "status": "passed",
+          "methodName": "AcMcp003InvalidCanonicalBodyHasNoExecutionIdentity"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.ClientApi.McpCanonicalInputRejectionTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcMcp003InvalidCanonicalBodyHasNoExecutionIdentity(System.Boolean).2.1.0",
+          "status": "passed",
+          "methodName": "AcMcp003InvalidCanonicalBodyHasNoExecutionIdentity"
+        },
+        {
+          "id": "KeyLoad.IntegrationTests.Features.AdminDashboard.AdminDashboardBrowserTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcAd006RealChromeBrowsesSeededRf3DataAndDisconnectClearsSession.1.1.0",
+          "status": "passed",
+          "methodName": "AcAd006RealChromeBrowsesSeededRf3DataAndDisconnectClearsSession"
+        }
+      ]
+    }
+  ],
+  "fullReleaseBuild": {
+    "jobId": 111159948713,
+    "warnings": 0,
+    "errors": 29,
+    "uniqueOriginalDiagnostics": [
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(10,45): error KLD0001: Machine key 'count' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(11,45): error KLD0001: Machine key 'loaded' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(12,45): error KLD0001: Machine key 'source' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(13,45): error KLD0001: Machine key 'display' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(14,45): error KLD0001: Machine key 'visibility' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(17,45): error KLD0001: Machine key 'posterVisibility' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(19,43): error KLD0001: Machine key 'transform' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(21,45): error CA1865: Use 'string.EndsWith(char)' instead of 'string.EndsWith(string)' when you have a string with a single char (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1865)",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(28,45): error KLD0001: Machine key 'posterVisible' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(29,45): error KLD0001: Machine key 'markVisible' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(30,45): error KLD0001: Machine key 'markCount' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(42,47): error KLD0001: Machine key 'transform' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(43,48): error KLD0001: Machine key 'transform' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(48,49): error KLD0001: Machine key 'width' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(49,50): error KLD0001: Machine key 'height' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(51,45): error KLD0001: Machine key 'offsetWidth' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(52,45): error KLD0001: Machine key 'offsetHeight' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(53,45): error KLD0001: Machine key 'rectWidth' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs(54,45): error KLD0001: Machine key 'rectHeight' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteVectorAssetTests.cs(112,57): error KLD0001: Machine key 'name' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteVectorAssetTests.cs(113,47): error KLD0001: Machine key 'value' must be referenced through a named const string",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaTermMetadataSnapshotTests.cs(58,78): error CS0117: 'ReplicaTermMetadataFixture' does not contain a definition for 'SystemNamespace'",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaTermMetadataSnapshotTests.cs(59,44): error CS0117: 'ReplicaTermMetadataFixture' does not contain a definition for 'AppliedPositionKey'",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaTermMetadataFixture.cs(32,9): error KLD0024: Declare an exception type, such as catch (Exception), instead of an untyped catch",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaTermMetadataFixture.cs(14,5): error IDE0032: Use auto property (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0032)",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaTermMetadataFixture.cs(16,5): error IDE0032: Use auto property (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0032)",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaTermMetadataFixture.cs(15,5): error IDE0032: Use auto property (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0032)",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaTermMetadataBoundsTests.cs(2,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005)",
+      "/home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaTermMetadataReadTests.cs(2,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005)"
+    ],
+    "kind": "compiler/analyzer errors; no failed TUnit cases"
+  },
+  "unexecuted": [
+    "verify normal unit tests",
+    "verify scalar portability unit tests",
+    "verify real-process recovery tests",
+    "verify formatter",
+    "verify governance/source-inventory fixture",
+    "comparison-images pure classes including SDK/Npgsql/031M/030K/Node/TS009P",
+    "native 27 preflight cohort",
+    "native 270 measured cells",
+    "comparison aggregation/publication"
+  ],
+  "nativeComparison": {
+    "plannedCells": 270,
+    "plannedMatrices": {
+      "crud": 108,
+      "specialized": 162
+    },
+    "allocatedPreflightCases": 0,
+    "allocatedMeasuredCases": 0,
+    "status": "unexecuted; jobs skipped after source gate failure"
+  },
+  "sourceDelivery": {
+    "manifestSha256": "13764ba37b3fbb9e0f92a20e5f710e78d9e82e1006392ae3b78c451ff8943929",
+    "files": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "frozenSha256": "5a7602c15af8ae1bafc0371b14226dc26c4d9ae7225c57185e61dd6daea3c7b9",
+        "deliveredSha256": "5a7602c15af8ae1bafc0371b14226dc26c4d9ae7225c57185e61dd6daea3c7b9",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentCleanupFatalCause.cs",
+        "frozenSha256": "cac96013168cc8c589082312f344838de8fe1a3c401c80cddddd933ca9ffa1ce",
+        "deliveredSha256": "cac96013168cc8c589082312f344838de8fe1a3c401c80cddddd933ca9ffa1ce",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/KurrentCleanupState.cs",
+        "frozenSha256": "b19f54711c3b3c4d16db67d0d0470e66600300a4627f6f9103f8d0a2943ad0e4",
+        "deliveredSha256": "b19f54711c3b3c4d16db67d0d0470e66600300a4627f6f9103f8d0a2943ad0e4",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAcknowledgement.cs",
+        "frozenSha256": "eb91cb9155555c69228a705acc023385fc5675d9deb3cb2c2b309669901f3fba",
+        "deliveredSha256": "eb91cb9155555c69228a705acc023385fc5675d9deb3cb2c2b309669901f3fba",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveCellPhase.cs",
+        "frozenSha256": "248098b83e0c97b93290dd974c81fe8bc6e930fefbd4be1602ece901e00959e9",
+        "deliveredSha256": "248098b83e0c97b93290dd974c81fe8bc6e930fefbd4be1602ece901e00959e9",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveFamilyCell.cs",
+        "frozenSha256": "10e63a0b9ea396ab5d37f12c064b7a60de8165387becdb279fd7965adcaebceb",
+        "deliveredSha256": "10e63a0b9ea396ab5d37f12c064b7a60de8165387becdb279fd7965adcaebceb",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveFamilyContract.cs",
+        "frozenSha256": "942929e27a79bfc1d12eaded776b5d03976c551085de1567d004031a81f6cc0b",
+        "deliveredSha256": "942929e27a79bfc1d12eaded776b5d03976c551085de1567d004031a81f6cc0b",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveFamilyContractValidation.cs",
+        "frozenSha256": "ae4408cf9b953e2df59b716737bc17a520fa55fbd3d41717a1866a94b35d282c",
+        "deliveredSha256": "ae4408cf9b953e2df59b716737bc17a520fa55fbd3d41717a1866a94b35d282c",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveFamilyPlan.cs",
+        "frozenSha256": "c4b90cb2e47f9c558ceec1444917cf85a2e33ac5fdd02056f7686cab72b81eaa",
+        "deliveredSha256": "c4b90cb2e47f9c558ceec1444917cf85a2e33ac5fdd02056f7686cab72b81eaa",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveSelection.cs",
+        "frozenSha256": "f969772e65dbaa385daf3e59a6011202b46f99581e816c29601025173e1acb2e",
+        "deliveredSha256": "f969772e65dbaa385daf3e59a6011202b46f99581e816c29601025173e1acb2e",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveTargetKind.cs",
+        "frozenSha256": "f3f63d4a9adfe505784cefe8a262be077e83abea623c13be26f454f9da32f6c8",
+        "deliveredSha256": "f3f63d4a9adfe505784cefe8a262be077e83abea623c13be26f454f9da32f6c8",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/timeseries-contract.json",
+        "frozenSha256": "5d5fca799172272e1495b62c6f7b104785b394a64926082eef1030b0011e1831",
+        "deliveredSha256": "5d5fca799172272e1495b62c6f7b104785b394a64926082eef1030b0011e1831",
+        "equal": true
+      },
+      {
+        "path": "benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj",
+        "frozenSha256": "c06868002a966fc522e0e262bb60a5d66145a3f2c0bbd758b5955687af8876b9",
+        "deliveredSha256": "c06868002a966fc522e0e262bb60a5d66145a3f2c0bbd758b5955687af8876b9",
+        "equal": true
+      },
+      {
+        "path": "scripts/Features/BenchmarkComparisons/image-manifest.mjs",
+        "frozenSha256": "7d592d58d845e22da43c751671ec4a75f27be630516c6d6441c19a4ccd2455d2",
+        "deliveredSha256": "7d592d58d845e22da43c751671ec4a75f27be630516c6d6441c19a4ccd2455d2",
+        "equal": true
+      },
+      {
+        "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedPostgresBootstrap.cs",
+        "frozenSha256": "8cba63b5bb8d0eb438c80a93c0d396b82021e0b5a67c0f88cd739669e6716f9e",
+        "deliveredSha256": "8cba63b5bb8d0eb438c80a93c0d396b82021e0b5a67c0f88cd739669e6716f9e",
+        "equal": true
+      },
+      {
+        "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedTimeSeriesKeyLoadResources.cs",
+        "frozenSha256": "854ff42db9e65e658b06ad596dc08a65ca4d5232875a86560f14d65c683b03c9",
+        "deliveredSha256": "854ff42db9e65e658b06ad596dc08a65ca4d5232875a86560f14d65c683b03c9",
+        "equal": true
+      },
+      {
+        "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedTimeSeriesResourceContext.cs",
+        "frozenSha256": "29da4c32eb6b968dabfab0dfdc89459b5879c38856731982a627ab4d4488d796",
+        "deliveredSha256": "29da4c32eb6b968dabfab0dfdc89459b5879c38856731982a627ab4d4488d796",
+        "equal": true
+      },
+      {
+        "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedTimeSeriesTimescaleResources.cs",
+        "frozenSha256": "633bc6a271720c5a9170fb252d76d2268d9d21655a403c74587df3bf0bbcc4e5",
+        "deliveredSha256": "633bc6a271720c5a9170fb252d76d2268d9d21655a403c74587df3bf0bbcc4e5",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesKeyLoadResourceTests.cs",
+        "frozenSha256": "59ae01bcd5fd229b787eb6614b21b83564d86b1d9826391f178b57f6ca37c46c",
+        "deliveredSha256": "59ae01bcd5fd229b787eb6614b21b83564d86b1d9826391f178b57f6ca37c46c",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesTimescaleResourceTests.cs",
+        "frozenSha256": "b5e66b9b2fb1267ac34ee347dafc33e8f72168d0efe28377cad61dbcd0f0c32d",
+        "deliveredSha256": "b5e66b9b2fb1267ac34ee347dafc33e8f72168d0efe28377cad61dbcd0f0c32d",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageHttpDeadlineNodeProgram.cs",
+        "frozenSha256": "4b3ebb08ef84066515d0640583ba904371140d5b2a3e11b3a7d71033c1ee1794",
+        "deliveredSha256": "4b3ebb08ef84066515d0640583ba904371140d5b2a3e11b3a7d71033c1ee1794",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeDeadlineOwner.cs",
+        "frozenSha256": "92def83b7a25dc32914c8735b24f152c2a3aa7f32c72858443fdf097c5f53f75",
+        "deliveredSha256": "92def83b7a25dc32914c8735b24f152c2a3aa7f32c72858443fdf097c5f53f75",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeDeferredProcessRelease.cs",
+        "frozenSha256": "5d1e76bbe4cd75a39a32214eca2c6c6b2f87395aaba7e4d529a2af7bd9b67f0f",
+        "deliveredSha256": "5d1e76bbe4cd75a39a32214eca2c6c6b2f87395aaba7e4d529a2af7bd9b67f0f",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeDeferredPromptRelease.cs",
+        "frozenSha256": "e304c56c1c890c78b3a381a6a3dd690be1b0cd2b78a3cce8bfb4d906cca9b2ab",
+        "deliveredSha256": "e304c56c1c890c78b3a381a6a3dd690be1b0cd2b78a3cce8bfb4d906cca9b2ab",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeDeferredRelease.cs",
+        "frozenSha256": "e641f307d8a1a0b32730813ef8762b59c1679a34c2af1598d7fb743d9c1c260a",
+        "deliveredSha256": "e641f307d8a1a0b32730813ef8762b59c1679a34c2af1598d7fb743d9c1c260a",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeFailureSet.cs",
+        "frozenSha256": "6996938c6c99c90abe76a5803f1e58d0e5b748280971def50c587344273c9dd5",
+        "deliveredSha256": "6996938c6c99c90abe76a5803f1e58d0e5b748280971def50c587344273c9dd5",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeGuardedInvocation.cs",
+        "frozenSha256": "10024f0f5b9d063f67db7a6044a1c3c91807475d6d85a9fe2291131a7974c9b8",
+        "deliveredSha256": "10024f0f5b9d063f67db7a6044a1c3c91807475d6d85a9fe2291131a7974c9b8",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeLifetime.cs",
+        "frozenSha256": "9cb7310d3a5cb9414ca634c4d75b875cfea52ec772a3e6bd343ee67466bc245e",
+        "deliveredSha256": "9cb7310d3a5cb9414ca634c4d75b875cfea52ec772a3e6bd343ee67466bc245e",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeLifetimeCleanup.cs",
+        "frozenSha256": "69eb7fa409554da4635b95543508b1ff6c7accc39da4734c7e63e0d3ada442f5",
+        "deliveredSha256": "69eb7fa409554da4635b95543508b1ff6c7accc39da4734c7e63e0d3ada442f5",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeLifetimeProgram.cs",
+        "frozenSha256": "378187778e6cc78b7600a5720da0bb6992ccb7df8273fc6f7904e707beb94a8f",
+        "deliveredSha256": "378187778e6cc78b7600a5720da0bb6992ccb7df8273fc6f7904e707beb94a8f",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeLifetimeTestSupport.cs",
+        "frozenSha256": "c530527337a3c0d380b72609f926d2a7393c5d6632ebeb371480db37545cecc9",
+        "deliveredSha256": "c530527337a3c0d380b72609f926d2a7393c5d6632ebeb371480db37545cecc9",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeLifetimeTests.cs",
+        "frozenSha256": "3f33752858ac365295bc444bd66b45e4a5a784a44b2f65c376673529761799a8",
+        "deliveredSha256": "3f33752858ac365295bc444bd66b45e4a5a784a44b2f65c376673529761799a8",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeOutput.cs",
+        "frozenSha256": "b4ec5801f7d5296c12d32de6baf1ec031847bae988834cbb8771a035329378b9",
+        "deliveredSha256": "b4ec5801f7d5296c12d32de6baf1ec031847bae988834cbb8771a035329378b9",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodePipeFailureFixture.cs",
+        "frozenSha256": "f332b612db1903e8cc2d720a409d9bb9ad5e8994a5a8d1875b9dec4dabde8ad2",
+        "deliveredSha256": "f332b612db1903e8cc2d720a409d9bb9ad5e8994a5a8d1875b9dec4dabde8ad2",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodePipeFailureOwner.cs",
+        "frozenSha256": "277a79900d21aa8b341a8bc1172e51f390a49ff8723ab4caaa5f895bc22f0154",
+        "deliveredSha256": "277a79900d21aa8b341a8bc1172e51f390a49ff8723ab4caaa5f895bc22f0154",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodePipeFailureOwnerEvidence.cs",
+        "frozenSha256": "f6798858177db5b1fe6149ed3fb85e2f6f66aea0eafa39c049c61ef3ab4eea3e",
+        "deliveredSha256": "f6798858177db5b1fe6149ed3fb85e2f6f66aea0eafa39c049c61ef3ab4eea3e",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeProcess.cs",
+        "frozenSha256": "807bc927db6e1279a911cf2fd0cc6edd082d8d37053c0e1e8508f8499931b5e3",
+        "deliveredSha256": "807bc927db6e1279a911cf2fd0cc6edd082d8d37053c0e1e8508f8499931b5e3",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeProcessTeardown.cs",
+        "frozenSha256": "879453d8607863e8d845b4cab75b672b95b4d03a06b2ccd6afeb48c24c016834",
+        "deliveredSha256": "879453d8607863e8d845b4cab75b672b95b4d03a06b2ccd6afeb48c24c016834",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodePromptOwner.cs",
+        "frozenSha256": "8e274b96f9af715baffda2d226cc3340d2eb3f718213db61f03120d3b8bd31e6",
+        "deliveredSha256": "8e274b96f9af715baffda2d226cc3340d2eb3f718213db61f03120d3b8bd31e6",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeStartOwner.cs",
+        "frozenSha256": "da26e5f94058db04398d6f4430bce47a54bbe249c794069a37dfd1ae8f4771b7",
+        "deliveredSha256": "da26e5f94058db04398d6f4430bce47a54bbe249c794069a37dfd1ae8f4771b7",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeTestCleanup.cs",
+        "frozenSha256": "54638b49f634fd655d4fbb0333bd2c992c8251f9a29de586317df96242125492",
+        "deliveredSha256": "54638b49f634fd655d4fbb0333bd2c992c8251f9a29de586317df96242125492",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregateNodeTestProcessReaper.cs",
+        "frozenSha256": "50e1b8b35c9eab8e90f990e876f8d19ce418a89a1d82de20bca43593402be393",
+        "deliveredSha256": "50e1b8b35c9eab8e90f990e876f8d19ce418a89a1d82de20bca43593402be393",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/KurrentCleanupStateTests.cs",
+        "frozenSha256": "443e7331df9aef0acf914e285ca45655ff23c25c74b0b768776166496ac655b8",
+        "deliveredSha256": "443e7331df9aef0acf914e285ca45655ff23c25c74b0b768776166496ac655b8",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveFamilyContractTests.cs",
+        "frozenSha256": "98b683de3e421754d3d165748dca8f87756aed3634390075c1385ab886138be0",
+        "deliveredSha256": "98b683de3e421754d3d165748dca8f87756aed3634390075c1385ab886138be0",
+        "equal": true
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveSelectionTests.cs",
+        "frozenSha256": "e82b59cd0c1160112bc3371e496d55095b2c9bc7860438769d03103005ecba8c",
+        "deliveredSha256": "e82b59cd0c1160112bc3371e496d55095b2c9bc7860438769d03103005ecba8c",
+        "equal": true
+      }
+    ]
+  },
+  "pages": {
+    "runId": 37107911998,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37107911998",
+    "sourceRevision": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+    "conclusion": "failure",
+    "facts": {
+      "isolatedEnvelope": {
+        "ok": false,
+        "error": "Isolated Pages GitHub evidence rejected."
+      },
+      "capturedAttemptCount": 62,
+      "aggregateJobs": [
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37082268730/1/jobs-pages.json",
+          "jobId": 111087495110,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37082449440/1/jobs-pages.json",
+          "jobId": 111087855382,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37083535329/1/jobs-pages.json",
+          "jobId": 111089571201,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37084105070/1/jobs-pages.json",
+          "jobId": 111092413449,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37084177131/1/jobs-pages.json",
+          "jobId": 111097809329,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37086824118/1/jobs-pages.json",
+          "jobId": 111100325671,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37086903499/1/jobs-pages.json",
+          "jobId": 111101250035,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37087767502/1/jobs-pages.json",
+          "jobId": 111103221805,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37087909605/1/jobs-pages.json",
+          "jobId": 111108153342,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37093197474/1/jobs-pages.json",
+          "jobId": 111123331211,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37093992229/1/jobs-pages.json",
+          "jobId": 111125331222,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37097831105/1/jobs-pages.json",
+          "jobId": 111132575396,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37098964980/1/jobs-pages.json",
+          "jobId": 111140294195,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "entry": "artifacts/site-evidence/isolated-capture/metadata/attempts/37104211481/1/jobs-pages.json",
+          "jobId": 111149936523,
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ],
+      "successfulAggregateJobs": 0,
+      "legacyReceiptSource": "9c570f8c33a7a9667507a8e1c0ca68860de3be45",
+      "legacyReceiptRun": 36926803549,
+      "secondaryFailure": "Coverage command did not start: /website working directory missing after source selection failed; no coverage percentage or Site tests executed.",
+      "primaryDetailLimit": "Original isolated envelope gives generic rejection only; absence of any successful aggregate established from the complete retained candidate job metadata."
+    },
+    "deploymentQualified": false
+  },
+  "governance": {
+    "runId": 37107911991,
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37107911991",
+    "conclusion": "success",
+    "limits": "Static policy result only."
+  },
+  "limits": "Full source Release29errors; actual analyzer118/RF363 pass all. No normal/scalar/recovery/native27/270/image suite/TimeSeries6/30/coverage/site publication qualification. Later working-tree039 source is not in this original SHA."
+}

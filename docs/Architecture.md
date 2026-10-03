@@ -451,6 +451,9 @@ classDiagram
     TimeSeriesIntensiveSelection --> IsolatedTimeSeriesResourceContext
     TimeSeriesIntensiveFamilyContract --> TimeSeriesIntensiveFamilyPlan
     TimeSeriesIntensiveFamilyPlan --> TimeSeriesIntensiveSelection
+    TimeSeriesIntensiveRunResult --> TimeSeriesIntensiveRunJson
+    TimeSeriesIntensiveRunJson --> TimeSeriesIntensiveRunJsonValidation
+    TimeSeriesIntensiveRunJson --> Utf8JsonWriter : borrows caller writer
     IsolatedTimeSeriesResourceContext --> IsolatedTimeSeriesKeyLoadResources
     IsolatedTimeSeriesResourceContext --> IsolatedTimeSeriesTimescaleResources
     IsolatedTimeSeriesKeyLoadResources --> ClusterResources

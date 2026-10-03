@@ -109,8 +109,8 @@ internal static class SiteVectorAssetHtml
     public static IReadOnlyList<SiteVectorImage> Images(string html)
     {
         return ImageTag.Matches(html).Select(match => Attribute.Matches(match.Value)
-            .ToDictionary(attribute => attribute.Groups["name"].Value,
-                attribute => attribute.Groups["value"].Value, StringComparer.OrdinalIgnoreCase))
+            .ToDictionary(attribute => attribute.Groups[SiteVectorAssetTokens.RegexNameGroup].Value,
+                attribute => attribute.Groups[SiteVectorAssetTokens.RegexValueGroup].Value, StringComparer.OrdinalIgnoreCase))
             .Select(attributes => new SiteVectorImage(
                 attributes.GetValueOrDefault(SiteVectorAssetTokens.ClassAttributeName, string.Empty),
                 attributes.GetValueOrDefault(SiteVectorAssetTokens.SourceAttributeName, string.Empty)))

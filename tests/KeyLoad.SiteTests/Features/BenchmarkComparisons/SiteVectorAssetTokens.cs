@@ -69,6 +69,10 @@ internal static class SiteVectorAssetTokens
     public const string TagEnd = ">";
     public const string Whitespace = " ";
     public const string CssPixelSuffix = "px";
+    public const string ExpectedFaviconPath = "/favicon.svg";
+    public const string RegexNameGroup = "name";
+    public const string RegexValueGroup = "value";
+    public const char MatrixClosingCharacter = ')';
     public const double PositiveSize = 0;
     public const double CssDimensionTolerance = 1;
 

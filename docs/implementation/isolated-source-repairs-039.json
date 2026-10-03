@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "tasks": [
+    "TASK-ISO-TS009J-S",
+    "TASK-ISO-TS009J-IR",
+    "TASK-ISO-039-Site"
+  ],
+  "state": "source_integrated_development_checks_only_exact_source_GitHub_pending",
+  "baseline": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+  "qualification": false,
+  "localTestsRun": false,
+  "nativeFamilyHostImplemented": false,
+  "nativePreflightsExecuted": 0,
+  "nativeIntensiveCellsExecuted": 0,
+  "authoredJsonTUnitCases": 8,
+  "scope": [
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunJson.cs",
+      "sha256": "98e9098d4665643da6d97936bbb18cbb20921520e003c3d6c953290138df76a7"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunJsonAttempts.cs",
+      "sha256": "bf16ea9da1482aaaacd532dbcf854fbb6bd5b640a71291a4e9db76dd22b0cb73"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunJsonFields.cs",
+      "sha256": "49626a0bc64595f83e57eef5cc412b28e267e7e8cd925eb8ae76e70c827922eb"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunJsonValidation.cs",
+      "sha256": "b8c2cf8a1c1fd691146a73ed9afac182b975047d097ae3b64338a26bdffda9be"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunJsonTests.cs",
+      "sha256": "f76a7a7a8eaeb73a382aa88881f3e9a7cb0b8d2c05a779d5544867b428980f7a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunJsonValidationTests.cs",
+      "sha256": "0d25726681a647b65349c5ea0e782f384db60e27a487128d141746d7b079f885"
+    },
+    {
+      "path": "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteBrowserVectorAssetAssertions.cs",
+      "sha256": "863f3363935ad8a806a99787442250c9313c232f8fab1093171e901651ef464c"
+    },
+    {
+      "path": "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteVectorAssetTests.cs",
+      "sha256": "e4c07188be10f42b6eb037fa8daefcf298c09ab76d0eedd63841f649459b0c84"
+    },
+    {
+      "path": "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteVectorAssetTokens.cs",
+      "sha256": "17e91196d212ded932795299d7011c6cc916a0a3441599f6b897791a5f470fed"
+    }
+  ],
+  "candidate": {
+    "revision": "C1",
+    "manifestSha256": "52a5ef1bab54996909cac7e8e8d656bbd46d513f21349f7eb42d9ea2e39acf19",
+    "independentAuditSha256": "d7c93130df3eb83f41c4bdcdb3dd254a564095b0255768bda2ed642986cae7ac",
+    "sourceRefinement": "CA1849: asynchronous test flush awaits actual FlushAsync; writer ownership, output and independent assertions unchanged."
+  },
+  "development": {
+    "fullProspectiveSolution": {
+      "baseline": "eeef54b3262b603bb94cad1dadb64e26ef3cb657",
+      "exitCode": 1,
+      "warnings": 0,
+      "errors": 30,
+      "logSha256": "ee3bb63f30341b2efffe0eefdd7b91d34c7020c7807653d78c5e72f26e4841aa",
+      "limits": "Snapshot of committed eeef54b plus six new raw writer files; failures21 Site,8 Recovery and1 new async-test flush. No full green gate."
+    },
+    "unitProject": {
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 24.67,
+      "logSha256": "dd0b328f9adea1aa7250d270b7c1f2b9af7ec9ccddeb8b888553bc0622bfcc55"
+    },
+    "siteProject": {
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 10.36,
+      "logSha256": "76e71248da8d7ed5198e8c8c0fac974e4fbf6ed07d627a79f6ed993b34a1d074"
+    },
+    "scopedFormatter": {
+      "state": "PASS",
+      "files": 9,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "limits": "Only nine reviewed source files; not the full exact-source GitHub formatter qualification."
+    },
+    "governance": "PASS25projects4modules",
+    "diffWhitespace": "PASS"
+  },
+  "limits": [
+    "The writer emits all50000 planned slots and original observed facts; original workloadSucceeded is not native or publication qualification.",
+    "Caller must retain settled immutable memory throughout write; original mutable underlying memory is not copied.",
+    "Writer borrows stream and neither flushes nor disposes; owning host envelope/atomic-file lifetime remains pending.",
+    "ProductionRF3 and old270/legacy families unchanged. Genuine SDK/MCP/native-copy/ACK/coverage/current-source provider/site gates remain open.",
+    "Foreign active Recovery/Storage/hot-path work is excluded from this scoped repair. No local tests/native/load execution."
+  ]
+}

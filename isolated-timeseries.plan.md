@@ -4,8 +4,31 @@
 |---|---|---|
 |TASK-ISO-TS009J-S|BC059/060/064,TSI002/004/007/008,TJ009001..004; publisher_archive_review existing capable worker; temporary-only NEW writer/helpers/tests|Accepted ADR059 exact inner schema/original DTOs. Tests first actual ledger/DTO/writer data; at most4 new source/2 new tests. No repository/existing files/Git/build/test/native/provider/package edits. Frozen hash/AC packet; root every diff/integration/development gates; exact-source normal/scalar GitHub. Outer native/source-job/telemetry/copy/publication joins remain root-owned.|
 
-- [ ] TS009J complete source packet reviewed and integrated, with no invented native metadata.
+- [x] TS009J C1 complete source packet reviewed and integrated: four source files,
+  two test files and eight authored, unexecuted TUnit cases. Root checked every
+  original DTO/ledger/writer diff and independent schema key. No native metadata
+  or publication verdict is manufactured; exact-source qualification remains open.
 - [ ] TS009J development build/formatter/static and delivered-source normal/scalar TUnit.
+
+TS009J development integration passes UnitTests project compilation0warnings/
+0errors24.67s; the source-only Site key repair passes its project0/0 in10.36s.
+Scoped formatter for all nine reviewed files, governance25projects4modules and
+diff whitespace pass. The full eeef54b-plus-C1 projection fails30errors before
+repair:21Site/8Recovery/1CA1849. Original eeef CI fails29 without the new raw
+files. Root repairs the raw async flush with awaited FlushAsync; no assertion
+changes. Evidence: docs/implementation/isolated-source-repairs-039.json. These
+development checks do not pass full-source TUnit/native/coverage/publication.
+Independent TS009J-IR finds no candidate blocker; owning outer gate must require
+actual complete successful attempts independently of the original run predicate.
+
+TASK-ISO-TS009J-IR: timeseries_resources_worker independently reviews every C1
+source/test blob and original DTO/ledger contracts, read-only with temporary
+hash-bound audit output. Root owns integration and source/GitHub/native joins.
+
+TASK-ISO-039-CI: current_ci_audit inspects actual eeef54b GitHub run37107911987,
+source jobs/logs/artifacts and frozen source delivery, read-only. Root preserves
+foreign Recovery/hot-path changes and joins every actual result before reporting
+qualification. A queued or skipped native matrix is not a passing cohort.
 
 Chosen direction: isolated-timeseries.brainstorm.md. Acceptance and test strategy:
 isolated-timeseries.acceptance.md, AC-TSI-001..008. ADR059 remains Accepted until
