@@ -8289,7 +8289,10 @@
         "backlog": [
           "KL-078"
         ],
-        "evidenceState": "contract_frozen_workers_not_started"
+        "evidenceState": "local_codec_development_acceptance_passed_full_task_and_Linux_pending",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
       },
       {
         "id": "REQ-SERIES-018",
@@ -8309,7 +8312,10 @@
         "backlog": [
           "KL-078"
         ],
-        "evidenceState": "contract_frozen_workers_not_started"
+        "evidenceState": "local_codec_development_acceptance_passed_full_task_and_Linux_pending",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
       },
       {
         "id": "REQ-SERIES-019",
@@ -8330,7 +8336,10 @@
         "backlog": [
           "KL-078"
         ],
-        "evidenceState": "contract_frozen_workers_not_started"
+        "evidenceState": "local_codec_development_acceptance_passed_full_task_and_Linux_pending",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
       },
       {
         "id": "REQ-SERIES-020",
@@ -8350,7 +8359,10 @@
         "backlog": [
           "KL-078"
         ],
-        "evidenceState": "contract_frozen_workers_not_started"
+        "evidenceState": "local_codec_development_acceptance_passed_full_task_and_Linux_pending",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
       }
     ],
     "decisions": [
@@ -9708,8 +9720,11 @@
           "Aspire_TUnit_actual_sources",
           "exact_source_Linux_and_labelled_microbench_originals"
         ],
-        "state": "contract_frozen_root_reviewed",
-        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes"
+        "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
+        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-CHUNK-CODEC",
@@ -9749,8 +9764,11 @@
           "Aspire_TUnit_actual_sources",
           "exact_source_Linux_and_labelled_microbench_originals"
         ],
-        "state": "contract_frozen_workers_not_started",
-        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes"
+        "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
+        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-CHUNK-ORACLE",
@@ -9790,8 +9808,11 @@
           "Aspire_TUnit_actual_sources",
           "exact_source_Linux_and_labelled_microbench_originals"
         ],
-        "state": "contract_frozen_workers_not_started",
-        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes"
+        "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
+        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-CHUNK-STORE-ORACLE",
@@ -9830,14 +9851,17 @@
           "Aspire_TUnit_actual_sources",
           "exact_source_Linux_and_labelled_microbench_originals"
         ],
-        "state": "contract_frozen_workers_not_started",
-        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes"
+        "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
+        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-CHUNK-MEASURE",
         "owner": "root",
         "modelTier": "strong_planning_integration_review",
-        "permissions": "new_BenchmarkScenarios_BenchmarkComparisons_controls_and_exact_Core_BenchmarkScenarios_friend_visibility",
+        "permissions": "new_BenchmarkScenarios_BenchmarkComparisons_controls_exact_Core_BenchmarkScenarios_friend_visibility_and_new_UnitTests_SampleChunkBenchmark_consumer_oracles_and_new_bounded_development_provenance_runner",
         "contracts": [
           "docs/ADR/ADR-079-lossless-series-chunk-codecs.md"
         ],
@@ -9869,8 +9893,50 @@
           "Aspire_TUnit_actual_sources",
           "exact_source_Linux_and_labelled_microbench_originals"
         ],
-        "state": "contract_frozen_workers_not_started",
-        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes"
+        "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
+        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
+      },
+      {
+        "id": "TASK-CHUNK-PROVENANCE",
+        "owner": "cluster_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "new_scripts_BenchmarkComparisons_sample_chunk_development_modules_only",
+        "contracts": [
+          "docs/ADR/ADR-079-lossless-series-chunk-codecs.md"
+        ],
+        "requirements": [
+          "REQ-BC-CHUNK-001",
+          "REQ-SERIES-020"
+        ],
+        "acceptanceIds": [
+          "AC-CHUNK-006"
+        ],
+        "backlog": [
+          "KL-078"
+        ],
+        "dependencies": [
+          "TASK-CHUNK-CONTRACT",
+          "TASK-CHUNK-CODEC",
+          "TASK-CHUNK-MEASURE"
+        ],
+        "startCondition": "root_frozen_source_binary_report_and_corpus_binding_contract",
+        "artifacts": [
+          "bounded_local_development_runner_and_original_source_binary_BDN_manifest_receipt"
+        ],
+        "verification": [
+          "root_diff_review",
+          "Node_syntax",
+          "Aspire_generated_consumer_oracles",
+          "real_BDN36_case_development_capture"
+        ],
+        "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
+        "joinCondition": "all36_original_cells_and9_actual_corpora_match_unchanged_source_and_DLL_inventories_no_public_qualification",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-CHUNK-JOIN",
@@ -9902,7 +9968,9 @@
           "TASK-CHUNK-CODEC",
           "TASK-CHUNK-ORACLE",
           "TASK-CHUNK-STORE-ORACLE",
-          "TASK-CHUNK-MEASURE"
+          "TASK-CHUNK-MEASURE",
+          "TASK-CHUNK-PROVENANCE",
+          "TASK-CHUNK-PROVENANCE-ORACLE"
         ],
         "startCondition": "root_frozen_contract_and_explicit_start_after_unit_repair_stage",
         "artifacts": [
@@ -9915,8 +9983,232 @@
           "Aspire_TUnit_actual_sources",
           "exact_source_Linux_and_labelled_microbench_originals"
         ],
-        "state": "contract_frozen_workers_not_started",
-        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes"
+        "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
+        "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
+      },
+      {
+        "id": "TASK-FTS-ASYNC-CONTRACT",
+        "owner": "root",
+        "modelTier": "strong_planning_integration_review",
+        "permissions": "docs_ADR081_and_acceptance_graph",
+        "contracts": [
+          "docs/ADR/ADR-081-awaited-native-search-execution.md"
+        ],
+        "requirements": [
+          "REQ-FTS-007"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-007"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [],
+        "startCondition": "root_frozen_contract_and_explicit_source_freeze_release",
+        "artifacts": [
+          "exact_source_native_execution_and_independent_public_oracles"
+        ],
+        "verification": [
+          "root_diff_review",
+          "strict_full_Release_build",
+          "formatter_governance",
+          "actual_Aspire_unit_scalar_and_Docker_RF3_SDK_official_MCP",
+          "exact_source_Linux_original_reports"
+        ],
+        "state": "contract_frozen_waiting_explicit_write_release",
+        "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening"
+      },
+      {
+        "id": "TASK-FTS-ASYNC-INTEGRATE",
+        "owner": "root",
+        "modelTier": "strong_planning_integration_review",
+        "permissions": "Query_SearchEngine_and_Orleans_read_dispatch_only",
+        "contracts": [
+          "docs/ADR/ADR-081-awaited-native-search-execution.md"
+        ],
+        "requirements": [
+          "REQ-FTS-003",
+          "REQ-FTS-005",
+          "REQ-FTS-007"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-003",
+          "AC-FTS-005",
+          "AC-FTS-007"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-ASYNC-CONTRACT"
+        ],
+        "startCondition": "root_frozen_contract_and_explicit_source_freeze_release",
+        "artifacts": [
+          "exact_source_native_execution_and_independent_public_oracles"
+        ],
+        "verification": [
+          "root_diff_review",
+          "strict_full_Release_build",
+          "formatter_governance",
+          "actual_Aspire_unit_scalar_and_Docker_RF3_SDK_official_MCP",
+          "exact_source_Linux_original_reports"
+        ],
+        "state": "contract_frozen_waiting_explicit_write_release",
+        "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening"
+      },
+      {
+        "id": "TASK-FTS-ASYNC-ORACLE",
+        "owner": "lifecycle_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "new_Unit_Search_NativeTextAsync_and_Integration_Search_NativeTextAsyncRf3_only",
+        "contracts": [
+          "docs/ADR/ADR-081-awaited-native-search-execution.md"
+        ],
+        "requirements": [
+          "REQ-FTS-003",
+          "REQ-FTS-005",
+          "REQ-FTS-007"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-003",
+          "AC-FTS-005",
+          "AC-FTS-007"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-ASYNC-CONTRACT"
+        ],
+        "startCondition": "root_frozen_contract_and_explicit_source_freeze_release",
+        "artifacts": [
+          "exact_source_native_execution_and_independent_public_oracles"
+        ],
+        "verification": [
+          "root_diff_review",
+          "strict_full_Release_build",
+          "formatter_governance",
+          "actual_Aspire_unit_scalar_and_Docker_RF3_SDK_official_MCP",
+          "exact_source_Linux_original_reports"
+        ],
+        "state": "contract_frozen_waiting_explicit_write_release",
+        "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening"
+      },
+      {
+        "id": "TASK-RF3-ORACLE-REPAIR",
+        "owner": "query_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "existing_RF3_catalog_AggregateReplay_and_SqlModelView_oracles_only",
+        "contracts": [
+          "docs/ADR/ADR-081-awaited-native-search-execution.md"
+        ],
+        "requirements": [
+          "REQ-FTS-005"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-005",
+          "AC-MCP-001",
+          "AC-SQLVIEW-003"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-ASYNC-CONTRACT"
+        ],
+        "startCondition": "root_frozen_contract_and_explicit_source_freeze_release",
+        "artifacts": [
+          "exact_source_native_execution_and_independent_public_oracles"
+        ],
+        "verification": [
+          "root_diff_review",
+          "strict_full_Release_build",
+          "formatter_governance",
+          "actual_Aspire_unit_scalar_and_Docker_RF3_SDK_official_MCP",
+          "exact_source_Linux_original_reports"
+        ],
+        "state": "independent_contract_oracles_source_reviewed_full_build_passed_actual_RF3_pending",
+        "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening"
+      },
+      {
+        "id": "TASK-FTS-ASYNC-JOIN",
+        "owner": "root",
+        "modelTier": "strong_planning_integration_review",
+        "permissions": "integration_docs_original_evidence_git",
+        "contracts": [
+          "docs/ADR/ADR-081-awaited-native-search-execution.md"
+        ],
+        "requirements": [
+          "REQ-FTS-003",
+          "REQ-FTS-005",
+          "REQ-FTS-007"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-003",
+          "AC-FTS-005",
+          "AC-FTS-007"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-ASYNC-INTEGRATE",
+          "TASK-FTS-ASYNC-ORACLE",
+          "TASK-RF3-ORACLE-REPAIR"
+        ],
+        "startCondition": "root_frozen_contract_and_explicit_source_freeze_release",
+        "artifacts": [
+          "exact_source_native_execution_and_independent_public_oracles"
+        ],
+        "verification": [
+          "root_diff_review",
+          "strict_full_Release_build",
+          "formatter_governance",
+          "actual_Aspire_unit_scalar_and_Docker_RF3_SDK_official_MCP",
+          "exact_source_Linux_original_reports"
+        ],
+        "state": "contract_frozen_waiting_explicit_write_release",
+        "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening"
+      },
+      {
+        "id": "TASK-CHUNK-PROVENANCE-ORACLE",
+        "owner": "lifecycle_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "new_Unit_BenchmarkComparisons_SampleChunkBenchmarkRejection_helpers_only",
+        "contracts": [
+          "docs/ADR/ADR-079-lossless-series-chunk-codecs.md"
+        ],
+        "requirements": [
+          "REQ-BC-CHUNK-001",
+          "REQ-SERIES-020"
+        ],
+        "acceptanceIds": [
+          "AC-CHUNK-006"
+        ],
+        "backlog": [
+          "KL-078"
+        ],
+        "dependencies": [
+          "TASK-CHUNK-CONTRACT",
+          "TASK-CHUNK-PROVENANCE"
+        ],
+        "startCondition": "real_Dry_consumer_originals_and_frozen_rejection_contract",
+        "artifacts": [
+          "unchanged_original_BDN_artifacts_and_independent_corruption_rejection_oracles"
+        ],
+        "verification": [
+          "root_diff_review",
+          "strict_build_formatter",
+          "actual_Aspire_generated_consumer_and_original_validator_negative_cases"
+        ],
+        "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
+        "joinCondition": "every_corrupted_copy_rejected_and_original_complete_evidence_still_valid_no_fabricated_measurements",
+        "developmentEvidence": [
+          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+        ]
       }
     ],
     "qualificationRule": "Neither presence of source nor a local development result closes a full task. Preserve exact-source Linux fault/endurance and publication gates.",
@@ -9925,7 +10217,8 @@
       "docs/implementation/owner-wave-001-development-2026-10-03.json",
       "docs/implementation/epoch-upgrade-development-2026-10-03.json",
       "docs/implementation/native-full-text-development-2026-10-03.json",
-      "docs/implementation/full-unit-repair-development-2026-10-03.json"
+      "docs/implementation/full-unit-repair-development-2026-10-03.json",
+      "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
     ]
   }
 }

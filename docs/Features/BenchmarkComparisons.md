@@ -659,6 +659,17 @@ settings, machine, cost and allocations. Fixed small batches are explicitly
 microbenchmark controls, never the required100k/1m/5m database datasets,
 RF3/durability evidence, public website comparisons or an acceleration claim.
 Actual canonical rewrite cost and correction recovery remain pending KL-078.
+`UnitTests/Features/BenchmarkComparisons/SampleChunkBenchmarkConsumerTests.cs`
+verifies all36 matched cases through the real external generated consumer;
+its Dry execution proves interoperability rather than performance.
+`scripts/Features/BenchmarkComparisons/sample-chunk-development*.mjs` binds the
+actual child execution, all36 original BDN cases and9 corpus manifests to unchanged
+source and Release dependency inventories. Its development receipt retains the
+original settings and explicitly rejects public or database-scale qualification.
+The [codec development receipt](../implementation/sample-chunk-codec-development-2026-10-03.json)
+retains the actual normal/scalar Aspire reports, two Dry consumers with copied
+negative cases and the ordinary36-cell matched codec control. Canonical storage,
+rewrite/recovery, representative database scale and Linux/RF3 gates remain open.
 
 ## Failed-cell publication repair, 2026-10-04
 

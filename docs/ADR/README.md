@@ -157,3 +157,9 @@ benchmark failure handling: bounded transient GitHub GET retries, authenticated
 null-report failed cells and successful competitor publication. Full planned-cell
 accounting and complete site qualification remain required; delivered-source proof
 is pending.
+
+[ADR-079](ADR-079-lossless-series-chunk-codecs.md) freezes a private lossless
+series-codec qualification stage; canonical layout, rewrite/migration and fault
+qualification remain separate. [ADR-081](ADR-081-awaited-native-search-execution.md)
+freezes awaited admitted native search execution and independent RF3 oracle
+repairs. Both retain source/runtime and exact-source Linux qualification gates.

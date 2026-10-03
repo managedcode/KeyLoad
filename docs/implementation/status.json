@@ -1420,8 +1420,14 @@
   },
   "KL-078": {
     "title": "Time-series chunk qualification",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      {
+        "kind": "local_development_codec_stage",
+        "receipt": "docs/implementation/sample-chunk-codec-development-2026-10-03.json",
+        "qualification": "actual_normal_scalar_and_BDN36_codec_controls_canonical_layout_rewrite_recovery_RF3_and_Linux_pending"
+      }
+    ]
   },
   "KL-079": {
     "title": "Resumable change feed і обмежені live queries",

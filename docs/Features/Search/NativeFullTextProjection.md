@@ -13,6 +13,7 @@ index-management API and KL-097's event-driven projection lineage.
 |REQ-FTS-004: staged generations and restart cannot supply partial truth|AC-FTS-004: actual native write/publication interruption, malformed/unknown/link generation and reopen/rebuild tests preserve canonical bytes, recognize only owned cleanup and serve only a fully verified source cut|
 |REQ-FTS-005: physical owner and public RF3 joins are real|AC-FTS-005: node-local handles survive activation routing changes; Docker/Aspire RF3 SDK/official MCP text/hybrid results remain exact after restart/leader loss and current source rebuild|
 |REQ-FTS-006: measured qualification is honest|AC-FTS-006: exact-SHA Linux build/TUnit/process/RF3, native package signature and original provider artifacts pass; actual matched scale/resource measurements precede any acceleration claim|
+|REQ-FTS-007: native settlement yields the request grain safely|AC-FTS-007: one analytical reservation acquired before scheduling spans the complete awaited default-scheduler search/cleanup; actual native first publish/reuse/replacement, bounds/cancellation and healthy following calls pass; real Docker/Aspire RF3 SDK/official MCP results and node health remain correct through the Orleans request boundary|
 
 Maps: Query/Features/Search cross-assembly contracts + SearchEngine/TextRanker;
 Server/Features/Search native owner, Server/StorageRecovery PartitionHost and DI;
@@ -24,6 +25,11 @@ N/A: the disposable index is reconstructed from unchanged committed epoch6 data.
 
 TASK-FTS-QUERY / NATIVE / TEST depend on root frozen contracts and the completed
 epoch source build. Root owns integration, validation, receipts and commits.
+TASK-FTS-ASYNC-CONTRACT/INTEGRATE/ORACLE/JOIN map REQ-FTS-007 to AC-FTS-007
+under [ADR-081](../../ADR/ADR-081-awaited-native-search-execution.md).
+TASK-RF3-ORACLE-REPAIR corrects independently diagnosed catalog, persisted write
+grant, metadata-pointer and policy-epoch fixtures; it cannot weaken authorization
+or qualify the scheduler repair without genuine RF3 execution.
 TASK-FTS-LIFETIME-REPAIR / SETTLEMENT-TEST / CANONICAL-ORACLE map to AC-FTS-003/004:
 retain failed-release handles, retain both cancellation and cleanup failures, and
 compare all canonical logical key/value state across the real process cuts.

@@ -948,6 +948,14 @@ flowchart LR
     Gate --> Publish
 ```
 
+## Awaited native search execution
+
+Native Search scheduling follows [ADR-081](ADR/ADR-081-awaited-native-search-execution.md):
+one analytical reservation spans the complete awaited default-scheduler read and
+native settlement while the Orleans request grain yields. Physical handles,
+committed state and authorization remain node-local/canonical. Genuine RF3
+liveness qualification is required before claiming the scheduler repair delivered.
+
 ## Independent benchmark failure publication
 
 [ADR-080](ADR/ADR-080-benchmark-failure-isolation.md) and

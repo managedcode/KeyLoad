@@ -28,8 +28,10 @@ internal static class AggregateReplayRf3Tokens
     internal const string HeaderClassification = "aggregate-header";
     internal const string PayloadReadGrant = "aggregate.payload.read";
     internal const string PayloadUseGrant = "aggregate.payload.use";
+    internal const string PayloadWriteGrant = "aggregate.payload.write";
     internal const string HeaderReadGrant = "aggregate.header.read";
     internal const string HeaderUseGrant = "aggregate.header.use";
+    internal const string HeaderWriteGrant = "aggregate.header.write";
     internal const string Secret = "aggregate-replay-private-payload";
     internal const string PrivateHeader = "aggregate-replay-private-header";
     internal const string InitialState = "{\"" + CountProperty + "\":1}";

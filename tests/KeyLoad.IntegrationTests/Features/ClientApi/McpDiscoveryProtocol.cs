@@ -13,6 +13,7 @@ internal static class McpDiscoveryProtocol
     internal const string OneOf = "oneOf";
     internal const string Reference = "reference";
     internal const string Stream = "stream";
+    internal const string ReducerVersion = "reducerVersion";
     internal const string Source = "source";
     internal const string Subscription = "subscription";
     internal const string Lane = "lane";

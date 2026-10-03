@@ -1,6 +1,7 @@
 # ADR-079 — Bounded lossless time-series chunk codec qualification
 
-Status: Accepted for the codec qualification stage; source and runtime evidence pending.
+Status: Accepted; codec source and local development verification delivered.
+Exact-source Linux and subsequent canonical layout qualification remain pending.
 Related: KL-078, REQ-SERIES-006/017–020 and AC-CHUNK-001–006 in
 [TimeSeries](../Features/TimeSeries.md), architecture §27.6, ADR-035, ADR-073 and
 ADR-077. The owner authorized completing the implementation plan; root owns this
@@ -150,6 +151,31 @@ exhaustion remains BudgetExceeded. Failure cannot mutate canonical source data.
    Add only the exact benchmark friend visibility needed. Each result records
    source, machine, corpus and actual serialized bytes; these small controls are
    not database scale/comparison evidence or a public acceleration claim.
+   New UnitTests `Features/BenchmarkComparisons/SampleChunkBenchmark*` own
+   the fixture metadata and real external generated-consumer execution oracle;
+   the existing bounded child/capture owner is reused without changing it.
+   TASK-CHUNK-PROVENANCE, cluster_wave Luna/high, owns only new
+   `scripts/Features/BenchmarkComparisons/sample-chunk-development*.mjs`.
+   A bounded development CLI captures the complete tracked/untracked nonignored
+   source inventory and actual Release benchmark dependency DLLs, including Core,
+   before execution. It sets the frozen manifest environment, awaits the real
+   BenchmarkDotNet child and validates all36 original cases and9 corpus manifests.
+   It refuses changed source/binaries, missing/duplicate cases, failed execution,
+   mismatched source or corpus and substituted artifacts. A new owned output
+   directory holds original reports, bounded logs, inventories and a derived
+   receipt explicitly marked local development only. Default settings match the
+   fixture's1 launch,3 warmups,8 measurements and100ms iteration time, with
+   explicit DontRemove outlier mode retaining every actual measurement; optional
+   Dry mode remains an execution oracle with no performance qualification.
+   No existing public/GitHub evidence module, workflow or website is modified.
+   TASK-CHUNK-PROVENANCE-ORACLE, lifecycle_wave Luna/high, owns only new UnitTests
+   BenchmarkComparisons `SampleChunkBenchmarkRejection*` helpers. After the real
+   Dry consumer completes, validate its receipt and reject independently corrupted
+   copies of its original reports/manifests: missing or duplicated cases, wrong
+   launch/settings/parameters, nonpositive measurements, source-hash mismatch and
+   forbidden qualification flags. Leave all originals byte-exact. Execute the
+   actual checked-in validators in a bounded awaited child inside TUnit/Aspire;
+   supplied parser fixtures never become measured or authenticated evidence.
 6. TASK-CHUNK-JOIN, root: inspect every diff and acceptance mapping, enforce
    numeric complexity, strict full build/formatter/governance, run actual TUnit
    through Aspire, retain original reports and commit/push the completed stage.
@@ -161,3 +187,15 @@ Coding workers stop and escalate on contract ambiguity, bound/compatibility
 conflict, shared-file changes or any proposed canonical storage integration.
 Unit/store suites prove codec behavior only. Process-kill, power-loss, endurance,
 database performance and complete KL-078 acceptance are not inferred from them.
+
+## Development evidence
+
+The [2026-10-03 receipt](../implementation/sample-chunk-codec-development-2026-10-03.json)
+retains the complete frozen source/runtime inventories, full Release and formatter
+results, Aspire normal/scalar2852/2852 reports, two real36-case Dry consumers and
+12 copied-report rejection cases per consumer. The ordinary36-case BenchmarkDotNet
+control retains all8 measurements,3 warmups,9 actual corpora and original
+encode/decode cost, allocations and native-envelope bytes for1/32/256 samples.
+Both the initial failed validator/settings integration and its originals remain
+recorded. Canonical storage, rewrite/correction recovery, RF3 and delivered-source
+Linux qualification are still open.

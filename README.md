@@ -45,6 +45,8 @@ The default server is a three-node replicated cluster (RF3), built on Orleans wi
 
 The server uses ZoneTree.FullTextSearch for bounded derived text candidates while preserving exact authorized ranking. Its [development receipt](docs/implementation/native-full-text-development-2026-10-03.json) records 26 native unit and 10 process-recovery checks through Aspire. Full Linux/RF3 qualification and incremental projection replay remain pending; these checks establish no speed improvement.
 
+A bounded lossless time-series chunk codec has [development evidence](docs/implementation/sample-chunk-codec-development-2026-10-03.json) from full Aspire unit/scalar suites and matched native-codec controls. Canonical chunk storage, rewrite/recovery and RF3 qualification remain in progress under KL-078.
+
 ## Get started
 
 Install the .NET SDK selected in [global.json](global.json) and Docker, then build from the repository root:

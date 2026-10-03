@@ -24,10 +24,12 @@ internal sealed record AggregateReplayRf3Scenario(PartitionRef Partition, Princi
         {
             FieldPolicies = [new(AggregateReplayRf3Tokens.PayloadSecretPath,
                 AggregateReplayRf3Tokens.PayloadClassification, AggregateReplayRf3Tokens.PayloadReadGrant,
-                AggregateReplayRf3Tokens.PayloadUseGrant, RequiredForProcessing: false)],
+                AggregateReplayRf3Tokens.PayloadUseGrant, AggregateReplayRf3Tokens.PayloadWriteGrant,
+                RequiredForProcessing: false)],
             HeaderPolicies = [new(AggregateReplayRf3Tokens.HeaderSecretPath,
                 AggregateReplayRf3Tokens.HeaderClassification, AggregateReplayRf3Tokens.HeaderReadGrant,
-                AggregateReplayRf3Tokens.HeaderUseGrant, RequiredForProcessing: false)]
+                AggregateReplayRf3Tokens.HeaderUseGrant, AggregateReplayRf3Tokens.HeaderWriteGrant,
+                RequiredForProcessing: false)]
         };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource), cancellationToken));
@@ -38,7 +40,8 @@ internal sealed record AggregateReplayRf3Scenario(PartitionRef Partition, Princi
         var worker = new PrincipalRecord(principalId, partition.TenantId,
             [new(partition.DatabaseId, AggregateReplayRf3Tokens.StreamSet, capabilities)],
             [AggregateReplayRf3Tokens.PayloadReadGrant, AggregateReplayRf3Tokens.PayloadUseGrant,
-                AggregateReplayRf3Tokens.HeaderReadGrant, AggregateReplayRf3Tokens.HeaderUseGrant]);
+                AggregateReplayRf3Tokens.PayloadWriteGrant, AggregateReplayRf3Tokens.HeaderReadGrant,
+                AggregateReplayRf3Tokens.HeaderUseGrant, AggregateReplayRf3Tokens.HeaderWriteGrant]);
         var secret = await ConfigureWorkerAsync(administrator, worker, cancellationToken);
         return new(partition, worker, secret);
     }

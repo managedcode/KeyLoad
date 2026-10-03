@@ -1,3 +1,4 @@
+using System.Net;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 
@@ -21,13 +22,18 @@ internal static class SqlModelViewRf3AuthorizationAssertions
                 + $"WHERE id = '{SqlModelViewRf3Scenario.FirstMessageId}' LIMIT 1"
         };
 
-    internal static async Task GrantSensitiveReadAsync(KeyLoadClient administrator,
+    internal static async Task<McpPersistedIdentity> GrantSensitiveReadAsync(KeyLoadClient administrator,
         McpPersistedIdentity identity, CancellationToken cancellationToken)
     {
         var updated = identity.Principal with
-        { FieldGrants = [SqlModelViewRf3Scenario.SecretGrant, SqlModelViewRf3Scenario.SecretUseGrant] };
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
-            updated, cancellationToken));
+        {
+            FieldGrants = [SqlModelViewRf3Scenario.SecretGrant, SqlModelViewRf3Scenario.SecretUseGrant],
+            PolicyEpoch = identity.Principal.PolicyEpoch + EpochIncrement
+        };
+        var persisted = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(
+            Guid.NewGuid(), updated, cancellationToken));
+        await Assert.That(persisted.PolicyEpoch).IsEqualTo(updated.PolicyEpoch);
+        return identity with { Principal = persisted };
     }
 
     internal static async Task RevokeAsync(KeyLoadClient administrator, McpPersistedIdentity identity,
@@ -43,13 +49,15 @@ internal static class SqlModelViewRf3AuthorizationAssertions
             revoked, cancellationToken));
     }
 
-    internal static async Task AssertDeniedAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        QueryRequest request, CancellationToken cancellationToken)
+    internal static async Task AssertDeniedAsync(ClusterFixture fixture, KeyLoadClient sdk,
+        McpOfficialClient mcp, QueryRequest request, string secret, CancellationToken cancellationToken)
     {
         var sdkResult = await sdk.QueryAsync(request, cancellationToken);
-        await Assert.That(sdkResult.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.QueryExecute, request,
-            cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
+        await Assert.That(sdkResult.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Unauthenticated));
+        var error = await Assert.ThrowsAsync<HttpRequestException>(() => mcp.CallAsync(
+            McpCallerTools.QueryExecute, request, cancellationToken));
+        await Assert.That(error!.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+        await McpUnauthorizedProbe.VerifyAsync(fixture, McpCallerProtocol.Node3, secret, cancellationToken);
     }
 
     internal static async Task AssertMissingGrantDeniedAsync(ClusterFixture fixture,

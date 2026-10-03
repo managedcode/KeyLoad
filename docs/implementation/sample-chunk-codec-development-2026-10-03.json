@@ -1,0 +1,818 @@
+{
+  "schemaVersion": 1,
+  "scope": "local_lossless_sample_chunk_codec_development_stage_only",
+  "dateUtc": "2026-10-03",
+  "contracts": [
+    "docs/ADR/ADR-079-lossless-series-chunk-codecs.md",
+    "docs/Features/TimeSeries.md"
+  ],
+  "backlog": [
+    "KL-078"
+  ],
+  "acceptanceIds": [
+    "AC-CHUNK-001",
+    "AC-CHUNK-002",
+    "AC-CHUNK-003",
+    "AC-CHUNK-004",
+    "AC-CHUNK-005",
+    "AC-CHUNK-006"
+  ],
+  "source": {
+    "head": "65e8bf59fbac150d7d1d13211abc73f6ad7ea66b",
+    "workingTree": "reviewed_dirty_precommit_source",
+    "inventory": {
+      "path": "artifacts/qualification/chunk-stage-development-20261003-225011/source-before-unit2.json",
+      "bytes": 582419,
+      "sha256": "20aa8c1f34c076cb6f270562cc57d90e7762e00a2e94c089e4af2c4fca449871"
+    },
+    "fileCount": 2774,
+    "sha256": "e1c4c24bccb6297a9276148cbca63394a627ea7fb8fe86e4933fd04b37c8a46d",
+    "unchangedAcrossNormalScalarAndDefault": true,
+    "documentationAndThisReceiptAddedAfterExecution": true
+  },
+  "binaries": {
+    "benchmarkDependencyInventory": {
+      "path": "artifacts/qualification/chunk-stage-development-20261003-225011/release-before-unit2.json",
+      "bytes": 21952,
+      "sha256": "d40a53c506b5363cd70a514ab6160af457c07da852decdeea9ebddcb72ea3f78"
+    },
+    "benchmarkDependencySha256": "f6315f6c34f1fce9cccd50cd730badbd62daf3b4ebbd990ef54f3ed897c24408",
+    "benchmarkRuntimeFileCount": 126,
+    "unitRuntimeInventory": {
+      "path": "artifacts/qualification/chunk-stage-development-20261003-225011/unit-before-unit2.json",
+      "bytes": 55561,
+      "sha256": "944d23a5ef027565278f3205cab2f013208878b2817c96f0aa2ed200f5dca7a6"
+    },
+    "unitRuntimeSha256": "f60c3efe131e938435008bb4c76b8e7803b2b7e24796fad2d6e65daffdda4872",
+    "unitRuntimeFileCount": 320,
+    "unchangedAcrossNormalScalarAndDefault": true
+  },
+  "checks": {
+    "fullReleaseBuild": {
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "log": {
+        "path": "/private/tmp/keyload-104-chunk-build9.log",
+        "bytes": 3418,
+        "sha256": "ff0e4bd3eac3679197ed0185f551cda4e0e82a94fa60a91334d2a3b5c6ead77f"
+      }
+    },
+    "fullFormatter": {
+      "exitCode": 0,
+      "log": {
+        "path": "/private/tmp/keyload-104-chunk-format3.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "governance": {
+      "exitCode": 0,
+      "projects": 26,
+      "modules": 4
+    },
+    "aspireUnit": {
+      "path": "TestResults/owner-wave-001/unit-chunk2/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "bytes": 8463248,
+      "sha256": "f339e4121825031b7aee8575f8648c856f510806b6c5e46aeaa48c857c4e1921",
+      "summary": {
+        "total": 2852,
+        "passed": 2852,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 143537.737,
+      "chunkCases": 26
+    },
+    "aspireScalar": {
+      "path": "TestResults/owner-wave-001/unit-scalar-chunk1/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "bytes": 8465215,
+      "sha256": "c94456d137bff9d1b9ae1b50d3de77c3d3b803707042ab65949c722c07c8d203",
+      "summary": {
+        "total": 2852,
+        "passed": 2852,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 186058.051,
+      "chunkCases": 26
+    }
+  },
+  "priorFailedConsumer": {
+    "report": {
+      "path": "TestResults/owner-wave-001/unit-chunk1/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "bytes": 8468616,
+      "sha256": "95df24902d5c7c43daf03138ed01fc0523e5df607ac6eef393968e6043db14c0",
+      "summary": {
+        "total": 2852,
+        "passed": 2851,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 177184.374,
+      "chunkCases": 26
+    },
+    "originalDirectory": "artifacts/qualification/sample-chunk-dry-c3aa86c5c73d424c8c9f97dde6539d12",
+    "actualBenchmarksExecuted": 36,
+    "failures": [
+      "validator_assumed_comma_instead_of_actual_BDN0_15_8_ampersand_parameters",
+      "IterationTime_attribute_overrode_requested_Dry_settings"
+    ],
+    "fix": "actual_parameter_format_and_runner_owned_iteration_time",
+    "originalsRetained": true,
+    "sourceAndRuntimeUnchangedDuringFailedRun": true
+  },
+  "dryExecutionOracles": [
+    {
+      "receipt": {
+        "path": "artifacts/qualification/sample-chunk-dry-e5d59ec5d0534383957f1380d72e3a15/receipt.json",
+        "bytes": 21955,
+        "sha256": "3cd01f226830923f6d51f4eb8455836200de019a1881f153b30267eb95327872"
+      },
+      "originalDirectory": "artifacts/qualification/sample-chunk-dry-e5d59ec5d0534383957f1380d72e3a15",
+      "caseCount": 36,
+      "corpusCount": 9,
+      "copiedNegativeCases": 12,
+      "originalMetadataReportsCorporaUnchanged": true,
+      "performanceEvidence": false
+    },
+    {
+      "receipt": {
+        "path": "artifacts/qualification/sample-chunk-dry-7fc059a3190d4be6affa0586499869fa/receipt.json",
+        "bytes": 21950,
+        "sha256": "e20a16df7120cb00e52dbe70056ed750c8d9800190b8e10eed71f0d29b11461d"
+      },
+      "originalDirectory": "artifacts/qualification/sample-chunk-dry-7fc059a3190d4be6affa0586499869fa",
+      "caseCount": 36,
+      "corpusCount": 9,
+      "copiedNegativeCases": 12,
+      "originalMetadataReportsCorporaUnchanged": true,
+      "performanceEvidence": false
+    }
+  ],
+  "defaultCodecControl": {
+    "receipt": {
+      "path": "artifacts/qualification/sample-chunk-development-20261003-230915/receipt.json",
+      "bytes": 21838,
+      "sha256": "9a2e5e3b458a0689cbfb8733df1daeed3ae61d0e952ea9ded581c9c74b6364ac"
+    },
+    "originalDirectory": "artifacts/qualification/sample-chunk-development-20261003-230915",
+    "caseCount": 36,
+    "corpusCount": 9,
+    "recordCounts": [
+      1,
+      32,
+      256
+    ],
+    "datasetSizeMeaning": "samples_per_encoded_batch_not_database_scale",
+    "settings": {
+      "launchCount": 1,
+      "warmupCount": 3,
+      "iterationCount": 8,
+      "iterationTimeMilliseconds": 100,
+      "outliers": "DontRemove"
+    },
+    "hostEnvironment": {
+      "BenchmarkDotNetCaption": "BenchmarkDotNet",
+      "BenchmarkDotNetVersion": "0.15.8",
+      "OsVersion": "macOS 27.0.1 (26A434) [Darwin 27.0.0]",
+      "ProcessorName": "Apple M2 Pro",
+      "PhysicalProcessorCount": 1,
+      "PhysicalCoreCount": 12,
+      "LogicalCoreCount": 12,
+      "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+      "Architecture": "Arm64",
+      "HasAttachedDebugger": false,
+      "HasRyuJit": true,
+      "Configuration": "RELEASE",
+      "DotNetCliVersion": "10.0.401",
+      "ChronometerFrequency": {
+        "Hertz": 1000000000
+      },
+      "HardwareTimerKind": "Unknown"
+    },
+    "cases": [
+      {
+        "method": "ChunkDecode",
+        "recordCount": 1,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=deterministic-random]",
+        "meanNanoseconds": 12478.678397362384,
+        "bytesAllocatedPerOperation": 8457,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkEncode",
+        "recordCount": 1,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=deterministic-random]",
+        "meanNanoseconds": 3841.884443629663,
+        "bytesAllocatedPerOperation": 5024,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsDecode",
+        "recordCount": 1,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=deterministic-random]",
+        "meanNanoseconds": 6268.445151601832,
+        "bytesAllocatedPerOperation": 5568,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsEncode",
+        "recordCount": 1,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=deterministic-random]",
+        "meanNanoseconds": 973.7083414315858,
+        "bytesAllocatedPerOperation": 1504,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkDecode",
+        "recordCount": 1,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=late-equal]",
+        "meanNanoseconds": 7140.184338872832,
+        "bytesAllocatedPerOperation": 8457,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkEncode",
+        "recordCount": 1,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=late-equal]",
+        "meanNanoseconds": 6123.586410984849,
+        "bytesAllocatedPerOperation": 5024,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsDecode",
+        "recordCount": 1,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=late-equal]",
+        "meanNanoseconds": 4497.470450565733,
+        "bytesAllocatedPerOperation": 5568,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsEncode",
+        "recordCount": 1,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=late-equal]",
+        "meanNanoseconds": 969.9392608111566,
+        "bytesAllocatedPerOperation": 1504,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkDecode",
+        "recordCount": 1,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=regular]",
+        "meanNanoseconds": 15659.401508084577,
+        "bytesAllocatedPerOperation": 8457,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkEncode",
+        "recordCount": 1,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=regular]",
+        "meanNanoseconds": 7012.521153255528,
+        "bytesAllocatedPerOperation": 5024,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsDecode",
+        "recordCount": 1,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=regular]",
+        "meanNanoseconds": 4522.844551571532,
+        "bytesAllocatedPerOperation": 5568,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsEncode",
+        "recordCount": 1,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=1, Corpus=regular]",
+        "meanNanoseconds": 989.8970276717558,
+        "bytesAllocatedPerOperation": 1504,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkDecode",
+        "recordCount": 32,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=deterministic-random]",
+        "meanNanoseconds": 31817.886346726187,
+        "bytesAllocatedPerOperation": 16081,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkEncode",
+        "recordCount": 32,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=deterministic-random]",
+        "meanNanoseconds": 30596.502435064933,
+        "bytesAllocatedPerOperation": 9368,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsDecode",
+        "recordCount": 32,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=deterministic-random]",
+        "meanNanoseconds": 205409.40384615387,
+        "bytesAllocatedPerOperation": 171733,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsEncode",
+        "recordCount": 32,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=deterministic-random]",
+        "meanNanoseconds": 121662.74590773809,
+        "bytesAllocatedPerOperation": 41680,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkDecode",
+        "recordCount": 32,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=late-equal]",
+        "meanNanoseconds": 16069.53745814732,
+        "bytesAllocatedPerOperation": 15953,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkEncode",
+        "recordCount": 32,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=late-equal]",
+        "meanNanoseconds": 22159.351454988533,
+        "bytesAllocatedPerOperation": 9056,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsDecode",
+        "recordCount": 32,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=late-equal]",
+        "meanNanoseconds": 285531.658203125,
+        "bytesAllocatedPerOperation": 171733,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsEncode",
+        "recordCount": 32,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=late-equal]",
+        "meanNanoseconds": 85765.8773148148,
+        "bytesAllocatedPerOperation": 41680,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkDecode",
+        "recordCount": 32,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=regular]",
+        "meanNanoseconds": 14784.5421875,
+        "bytesAllocatedPerOperation": 14745,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkEncode",
+        "recordCount": 32,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=regular]",
+        "meanNanoseconds": 24496.74189814815,
+        "bytesAllocatedPerOperation": 8480,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsDecode",
+        "recordCount": 32,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=regular]",
+        "meanNanoseconds": 261967.5924479167,
+        "bytesAllocatedPerOperation": 171733,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsEncode",
+        "recordCount": 32,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=32, Corpus=regular]",
+        "meanNanoseconds": 49582.678006329115,
+        "bytesAllocatedPerOperation": 41680,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkDecode",
+        "recordCount": 256,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=deterministic-random]",
+        "meanNanoseconds": 76047.00791529604,
+        "bytesAllocatedPerOperation": 63949,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkEncode",
+        "recordCount": 256,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=deterministic-random]",
+        "meanNanoseconds": 145114.1296875,
+        "bytesAllocatedPerOperation": 36707,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsDecode",
+        "recordCount": 256,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=deterministic-random]",
+        "meanNanoseconds": 1454841.0260416667,
+        "bytesAllocatedPerOperation": 1373653,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsEncode",
+        "recordCount": 256,
+        "corpus": "deterministic-random",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=deterministic-random]",
+        "meanNanoseconds": 874614.90625,
+        "bytesAllocatedPerOperation": 333528,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkDecode",
+        "recordCount": 256,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=late-equal]",
+        "meanNanoseconds": 116220.37872023809,
+        "bytesAllocatedPerOperation": 62926,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkEncode",
+        "recordCount": 256,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=late-equal]",
+        "meanNanoseconds": 190041.75603693182,
+        "bytesAllocatedPerOperation": 34457,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsDecode",
+        "recordCount": 256,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=late-equal]",
+        "meanNanoseconds": 1509872.830729167,
+        "bytesAllocatedPerOperation": 1373653,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsEncode",
+        "recordCount": 256,
+        "corpus": "late-equal",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=late-equal]",
+        "meanNanoseconds": 608564.7343749999,
+        "bytesAllocatedPerOperation": 333528,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkDecode",
+        "recordCount": 256,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=regular]",
+        "meanNanoseconds": 80808.86008522726,
+        "bytesAllocatedPerOperation": 62045,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "ChunkEncode",
+        "recordCount": 256,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.ChunkEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=regular]",
+        "meanNanoseconds": 129170.43258928572,
+        "bytesAllocatedPerOperation": 34537,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsDecode",
+        "recordCount": 256,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsDecode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=regular]",
+        "meanNanoseconds": 1682835.3984374998,
+        "bytesAllocatedPerOperation": 1373653,
+        "workloadResultCount": 8
+      },
+      {
+        "method": "NativeRecordsEncode",
+        "recordCount": 256,
+        "corpus": "regular",
+        "displayInfo": "SampleChunkSerializationBenchmarks.NativeRecordsEncode: SampleChunkCodecDevelopment(OutlierMode=DontRemove, Runtime=.NET 10.0, IterationCount=8, IterationTime=100ms, LaunchCount=1, WarmupCount=3) [RecordCount=256, Corpus=regular]",
+        "meanNanoseconds": 475807.8109374999,
+        "bytesAllocatedPerOperation": 333528,
+        "workloadResultCount": 8
+      }
+    ],
+    "corpora": [
+      {
+        "schemaVersion": 1,
+        "scope": "development_codec_microbenchmark_control_only",
+        "fixture": "SampleChunkSerializationBenchmarks",
+        "sourceHead": "65e8bf59fbac150d7d1d13211abc73f6ad7ea66b",
+        "sourceInventorySha256": "e1c4c24bccb6297a9276148cbca63394a627ea7fb8fe86e4933fd04b37c8a46d",
+        "corpus": "deterministic-random",
+        "seed": 78031,
+        "corpusGenerator": "SHA256_seed_sample_lane_Int32LE",
+        "actualRecordCount": 1,
+        "nativeValueBytes": 159,
+        "chunkValueBytes": 199,
+        "nativeValueBytesPerSample": 159,
+        "chunkValueBytesPerSample": 199,
+        "orderedNativeValuesSha256": "dcc443fbab02314e64f3e132ef0b8d889ff6807e1d3ecd121e2b998d8629e454",
+        "chunkValueSha256": "4c212c3d6bc3efb6bfb722f0cd794913950c2fdcd6675d9cd295d4fb4a87fed1",
+        "correctness": "every_field_original_offset_and_IEEE_bits_verified_before_timing",
+        "accounting": "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead",
+        "machineName": "konstantins-macbook-pro",
+        "processorCount": 12,
+        "architecture": "Arm64",
+        "operatingSystem": "macOS 27.0.1",
+        "runtime": ".NET 10.0.12",
+        "databaseScaleEvidence": false,
+        "githubQualified": false,
+        "canonicalChunkStorage": false,
+        "rewriteCostQualified": false,
+        "correctionRecoveryQualified": false
+      },
+      {
+        "schemaVersion": 1,
+        "scope": "development_codec_microbenchmark_control_only",
+        "fixture": "SampleChunkSerializationBenchmarks",
+        "sourceHead": "65e8bf59fbac150d7d1d13211abc73f6ad7ea66b",
+        "sourceInventorySha256": "e1c4c24bccb6297a9276148cbca63394a627ea7fb8fe86e4933fd04b37c8a46d",
+        "corpus": "late-equal",
+        "seed": 78031,
+        "corpusGenerator": "SHA256_seed_sample_lane_Int32LE",
+        "actualRecordCount": 1,
+        "nativeValueBytes": 159,
+        "chunkValueBytes": 198,
+        "nativeValueBytesPerSample": 159,
+        "chunkValueBytesPerSample": 198,
+        "orderedNativeValuesSha256": "0456ebdceac521dac19c9bfdbc484f9ca9d11d44b25952582555d931f5817b27",
+        "chunkValueSha256": "7c1395e70a6eeb84d573de9132d46d0af8013eadd09d9193461e4b89066ec18a",
+        "correctness": "every_field_original_offset_and_IEEE_bits_verified_before_timing",
+        "accounting": "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead",
+        "machineName": "konstantins-macbook-pro",
+        "processorCount": 12,
+        "architecture": "Arm64",
+        "operatingSystem": "macOS 27.0.1",
+        "runtime": ".NET 10.0.12",
+        "databaseScaleEvidence": false,
+        "githubQualified": false,
+        "canonicalChunkStorage": false,
+        "rewriteCostQualified": false,
+        "correctionRecoveryQualified": false
+      },
+      {
+        "schemaVersion": 1,
+        "scope": "development_codec_microbenchmark_control_only",
+        "fixture": "SampleChunkSerializationBenchmarks",
+        "sourceHead": "65e8bf59fbac150d7d1d13211abc73f6ad7ea66b",
+        "sourceInventorySha256": "e1c4c24bccb6297a9276148cbca63394a627ea7fb8fe86e4933fd04b37c8a46d",
+        "corpus": "regular",
+        "seed": 78031,
+        "corpusGenerator": "SHA256_seed_sample_lane_Int32LE",
+        "actualRecordCount": 1,
+        "nativeValueBytes": 159,
+        "chunkValueBytes": 198,
+        "nativeValueBytesPerSample": 159,
+        "chunkValueBytesPerSample": 198,
+        "orderedNativeValuesSha256": "0456ebdceac521dac19c9bfdbc484f9ca9d11d44b25952582555d931f5817b27",
+        "chunkValueSha256": "7c1395e70a6eeb84d573de9132d46d0af8013eadd09d9193461e4b89066ec18a",
+        "correctness": "every_field_original_offset_and_IEEE_bits_verified_before_timing",
+        "accounting": "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead",
+        "machineName": "konstantins-macbook-pro",
+        "processorCount": 12,
+        "architecture": "Arm64",
+        "operatingSystem": "macOS 27.0.1",
+        "runtime": ".NET 10.0.12",
+        "databaseScaleEvidence": false,
+        "githubQualified": false,
+        "canonicalChunkStorage": false,
+        "rewriteCostQualified": false,
+        "correctionRecoveryQualified": false
+      },
+      {
+        "schemaVersion": 1,
+        "scope": "development_codec_microbenchmark_control_only",
+        "fixture": "SampleChunkSerializationBenchmarks",
+        "sourceHead": "65e8bf59fbac150d7d1d13211abc73f6ad7ea66b",
+        "sourceInventorySha256": "e1c4c24bccb6297a9276148cbca63394a627ea7fb8fe86e4933fd04b37c8a46d",
+        "corpus": "deterministic-random",
+        "seed": 78031,
+        "corpusGenerator": "SHA256_seed_sample_lane_Int32LE",
+        "actualRecordCount": 256,
+        "nativeValueBytes": 41299,
+        "chunkValueBytes": 7934,
+        "nativeValueBytesPerSample": 161.32421875,
+        "chunkValueBytesPerSample": 30.9921875,
+        "orderedNativeValuesSha256": "81939158eb8b8fd0e5fbdb5f0e2caec47226791523e5267677c06e9ee11a6e15",
+        "chunkValueSha256": "e0c0595203e1f389c21bd3e2f665e631acec98a3b2a7fa1cbb9e211fa661c7c7",
+        "correctness": "every_field_original_offset_and_IEEE_bits_verified_before_timing",
+        "accounting": "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead",
+        "machineName": "konstantins-macbook-pro",
+        "processorCount": 12,
+        "architecture": "Arm64",
+        "operatingSystem": "macOS 27.0.1",
+        "runtime": ".NET 10.0.12",
+        "databaseScaleEvidence": false,
+        "githubQualified": false,
+        "canonicalChunkStorage": false,
+        "rewriteCostQualified": false,
+        "correctionRecoveryQualified": false
+      },
+      {
+        "schemaVersion": 1,
+        "scope": "development_codec_microbenchmark_control_only",
+        "fixture": "SampleChunkSerializationBenchmarks",
+        "sourceHead": "65e8bf59fbac150d7d1d13211abc73f6ad7ea66b",
+        "sourceInventorySha256": "e1c4c24bccb6297a9276148cbca63394a627ea7fb8fe86e4933fd04b37c8a46d",
+        "corpus": "late-equal",
+        "seed": 78031,
+        "corpusGenerator": "SHA256_seed_sample_lane_Int32LE",
+        "actualRecordCount": 256,
+        "nativeValueBytes": 41299,
+        "chunkValueBytes": 6915,
+        "nativeValueBytesPerSample": 161.32421875,
+        "chunkValueBytesPerSample": 27.01171875,
+        "orderedNativeValuesSha256": "d0d5e532be34aa8302125745e59008408f86c43b49cbfd3b4ad55b9990643825",
+        "chunkValueSha256": "dfcf859811a4f46df6f65f7329b58df0f1c5f1fe05d8dd01e6232791443e7729",
+        "correctness": "every_field_original_offset_and_IEEE_bits_verified_before_timing",
+        "accounting": "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead",
+        "machineName": "konstantins-macbook-pro",
+        "processorCount": 12,
+        "architecture": "Arm64",
+        "operatingSystem": "macOS 27.0.1",
+        "runtime": ".NET 10.0.12",
+        "databaseScaleEvidence": false,
+        "githubQualified": false,
+        "canonicalChunkStorage": false,
+        "rewriteCostQualified": false,
+        "correctionRecoveryQualified": false
+      },
+      {
+        "schemaVersion": 1,
+        "scope": "development_codec_microbenchmark_control_only",
+        "fixture": "SampleChunkSerializationBenchmarks",
+        "sourceHead": "65e8bf59fbac150d7d1d13211abc73f6ad7ea66b",
+        "sourceInventorySha256": "e1c4c24bccb6297a9276148cbca63394a627ea7fb8fe86e4933fd04b37c8a46d",
+        "corpus": "regular",
+        "seed": 78031,
+        "corpusGenerator": "SHA256_seed_sample_lane_Int32LE",
+        "actualRecordCount": 256,
+        "nativeValueBytes": 41299,
+        "chunkValueBytes": 6985,
+        "nativeValueBytesPerSample": 161.32421875,
+        "chunkValueBytesPerSample": 27.28515625,
+        "orderedNativeValuesSha256": "1e996dc0d5d28eec9ff6361fe0c11c78e3f70dbb5bb5695b6671e40766cbf150",
+        "chunkValueSha256": "9f31e18cbd41f57cae71841a7dbe7924c50b50554949c43905241b25571cbadc",
+        "correctness": "every_field_original_offset_and_IEEE_bits_verified_before_timing",
+        "accounting": "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead",
+        "machineName": "konstantins-macbook-pro",
+        "processorCount": 12,
+        "architecture": "Arm64",
+        "operatingSystem": "macOS 27.0.1",
+        "runtime": ".NET 10.0.12",
+        "databaseScaleEvidence": false,
+        "githubQualified": false,
+        "canonicalChunkStorage": false,
+        "rewriteCostQualified": false,
+        "correctionRecoveryQualified": false
+      },
+      {
+        "schemaVersion": 1,
+        "scope": "development_codec_microbenchmark_control_only",
+        "fixture": "SampleChunkSerializationBenchmarks",
+        "sourceHead": "65e8bf59fbac150d7d1d13211abc73f6ad7ea66b",
+        "sourceInventorySha256": "e1c4c24bccb6297a9276148cbca63394a627ea7fb8fe86e4933fd04b37c8a46d",
+        "corpus": "deterministic-random",
+        "seed": 78031,
+        "corpusGenerator": "SHA256_seed_sample_lane_Int32LE",
+        "actualRecordCount": 32,
+        "nativeValueBytes": 5110,
+        "chunkValueBytes": 1391,
+        "nativeValueBytesPerSample": 159.6875,
+        "chunkValueBytesPerSample": 43.46875,
+        "orderedNativeValuesSha256": "b4aeaa75707e4d4d8a9252e9d1b5507083273f757125264fbd404143c8ddd158",
+        "chunkValueSha256": "f7ef2c82dfbb128181c0d0df9b8d0f69263cbc55ceb2ad55b1bb05ddf86447a7",
+        "correctness": "every_field_original_offset_and_IEEE_bits_verified_before_timing",
+        "accounting": "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead",
+        "machineName": "konstantins-macbook-pro",
+        "processorCount": 12,
+        "architecture": "Arm64",
+        "operatingSystem": "macOS 27.0.1",
+        "runtime": ".NET 10.0.12",
+        "databaseScaleEvidence": false,
+        "githubQualified": false,
+        "canonicalChunkStorage": false,
+        "rewriteCostQualified": false,
+        "correctionRecoveryQualified": false
+      },
+      {
+        "schemaVersion": 1,
+        "scope": "development_codec_microbenchmark_control_only",
+        "fixture": "SampleChunkSerializationBenchmarks",
+        "sourceHead": "65e8bf59fbac150d7d1d13211abc73f6ad7ea66b",
+        "sourceInventorySha256": "e1c4c24bccb6297a9276148cbca63394a627ea7fb8fe86e4933fd04b37c8a46d",
+        "corpus": "late-equal",
+        "seed": 78031,
+        "corpusGenerator": "SHA256_seed_sample_lane_Int32LE",
+        "actualRecordCount": 32,
+        "nativeValueBytes": 5110,
+        "chunkValueBytes": 1256,
+        "nativeValueBytesPerSample": 159.6875,
+        "chunkValueBytesPerSample": 39.25,
+        "orderedNativeValuesSha256": "bb6e8f20eaba3ea7fb99be7d044bc36e0a3125b866bdeb54b72aedf4c613b23e",
+        "chunkValueSha256": "c30c058c319643a312f675d25994e6f3f050438f341803f6be359179f487b388",
+        "correctness": "every_field_original_offset_and_IEEE_bits_verified_before_timing",
+        "accounting": "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead",
+        "machineName": "konstantins-macbook-pro",
+        "processorCount": 12,
+        "architecture": "Arm64",
+        "operatingSystem": "macOS 27.0.1",
+        "runtime": ".NET 10.0.12",
+        "databaseScaleEvidence": false,
+        "githubQualified": false,
+        "canonicalChunkStorage": false,
+        "rewriteCostQualified": false,
+        "correctionRecoveryQualified": false
+      },
+      {
+        "schemaVersion": 1,
+        "scope": "development_codec_microbenchmark_control_only",
+        "fixture": "SampleChunkSerializationBenchmarks",
+        "sourceHead": "65e8bf59fbac150d7d1d13211abc73f6ad7ea66b",
+        "sourceInventorySha256": "e1c4c24bccb6297a9276148cbca63394a627ea7fb8fe86e4933fd04b37c8a46d",
+        "corpus": "regular",
+        "seed": 78031,
+        "corpusGenerator": "SHA256_seed_sample_lane_Int32LE",
+        "actualRecordCount": 32,
+        "nativeValueBytes": 5110,
+        "chunkValueBytes": 998,
+        "nativeValueBytesPerSample": 159.6875,
+        "chunkValueBytesPerSample": 31.1875,
+        "orderedNativeValuesSha256": "25b54d9aa453e6b94aea9c666449edc2433d7904161544d372cf96afb7307ba1",
+        "chunkValueSha256": "366b6adc91bb872fd0559dac098bde88859d87c469ff83426833755f7a5c1890",
+        "correctness": "every_field_original_offset_and_IEEE_bits_verified_before_timing",
+        "accounting": "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead",
+        "machineName": "konstantins-macbook-pro",
+        "processorCount": 12,
+        "architecture": "Arm64",
+        "operatingSystem": "macOS 27.0.1",
+        "runtime": ".NET 10.0.12",
+        "databaseScaleEvidence": false,
+        "githubQualified": false,
+        "canonicalChunkStorage": false,
+        "rewriteCostQualified": false,
+        "correctionRecoveryQualified": false
+      }
+    ]
+  },
+  "qualification": {
+    "localDevelopmentOnly": true,
+    "codecSourceImplemented": true,
+    "canonicalChunkStorage": false,
+    "publicContractsChanged": false,
+    "currentDataEpoch": 6,
+    "fullTaskClosed": false,
+    "exactSourceLinuxQualified": false,
+    "rf3ChunkQualified": false,
+    "rewriteCostQualified": false,
+    "correctionRecoveryQualified": false,
+    "databaseScaleEvidence": false,
+    "competitorPerformanceQualified": false,
+    "enduranceQualified": false,
+    "powerLossQualified": false,
+    "coverageQualified": false
+  },
+  "remaining": [
+    "separate_measured_canonical_layout_and_offline_epoch_upgrade_contract",
+    "bounded_late_append_and_partial_retention_rewrite",
+    "correction_generation_and_prior_executable_recovery",
+    "genuine_Docker_Aspire_RF3_SDK_official_MCP_and_exact_source_Linux",
+    "representative_100k_1m_5m_database_cells_and_at_least_100k_operations",
+    "fault_endurance_coverage_and_power_loss_gates"
+  ]
+}

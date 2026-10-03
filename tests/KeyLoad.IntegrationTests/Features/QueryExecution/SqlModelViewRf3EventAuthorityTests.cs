@@ -43,7 +43,7 @@ internal sealed class SqlModelViewRf3EventAuthorityTests(ClusterFixture fixture)
         await McpCallerAssertions.DoesNotDiscloseAsync(deniedMcp, identity.Secret,
             SqlModelViewRf3Scenario.EventCanary);
 
-        await SqlModelViewRf3AuthorizationAssertions.GrantSensitiveReadAsync(
+        identity = await SqlModelViewRf3AuthorizationAssertions.GrantSensitiveReadAsync(
             administrator, identity, deadline.Token);
         var visible = await McpCallerAssertions.SdkSuccessAsync(await reader.QueryAsync(
             SqlModelViewRf3AuthorizationAssertions.EventPrivateProjection(scenario), deadline.Token));
@@ -53,6 +53,7 @@ internal sealed class SqlModelViewRf3EventAuthorityTests(ClusterFixture fixture)
             .IsEqualTo(SqlModelViewRf3Scenario.EventCanary);
 
         await SqlModelViewRf3AuthorizationAssertions.RevokeAsync(administrator, identity, deadline.Token);
-        await SqlModelViewRf3AuthorizationAssertions.AssertDeniedAsync(reader, mcp, request, deadline.Token);
+        await SqlModelViewRf3AuthorizationAssertions.AssertDeniedAsync(fixture, reader, mcp, request,
+            identity.Secret, deadline.Token);
     }
 }

@@ -159,8 +159,9 @@ reports; those partial failures are not complete qualification. The valid raw-fo
 fixture must use distinct IDs when content changes, while the new
 SampleAggregateIdempotencyTests separately proves Conflict leaves canonical
 samples unchanged and a following legitimate append/aggregate succeeds. The
-complete catalog remains exactly53 tools with all prior50 and three additive
-TimeSeries schemas/routes/hints, including the same ten blob operations. All three
+earlier TimeSeries stage exercised53 tools. The current catalog has56 tools,
+including aggregate replay and retention, with independently checked schemas,
+routes/hints and the same ten blob operations. All three
 SDK pre-cancelled reads use the existing shared transport's failed Result/Cancelled
 problem; native official MCP cancellation keeps its existing exception semantics.
 These are source-oracle corrections, not altered production dedup/transport rules.
@@ -176,6 +177,13 @@ Current per-sample ZoneTree rows, ID receipts, sequences, retention floors and
 identity6 remain unchanged. Codec qualification does not close KL-078:
 correction generations, storage migration, rewrite cost and process/RF3 recovery
 still need their separate layout contract and original evidence.
+
+The [codec development receipt](../implementation/sample-chunk-codec-development-2026-10-03.json)
+records full Aspire normal/scalar2852/2852 verification and36 matched ordinary
+BenchmarkDotNet cases with exact source/runtime/corpus binding. Canonical samples
+still use their existing per-record ZoneTree representation. The measured controls
+cover1/32/256 samples per batch; full database scale, rewrite/correction recovery,
+RF3 and exact-source Linux qualification remain required for KL-078.
 
 | Requirement | Acceptance criterion | Planned automated evidence |
 |---|---|---|

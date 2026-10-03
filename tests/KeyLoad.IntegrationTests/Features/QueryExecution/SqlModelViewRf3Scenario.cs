@@ -104,7 +104,7 @@ internal sealed record SqlModelViewRf3Scenario(PartitionRef Partition)
         string? cursor)
         => new(Partition,
             new SelectQuery(collection, null, [new("*", "*")], null,
-                [new(kind == ModelQuerySourceKind.Events ? "revision" : "id", false)],
+                [new(kind == ModelQuerySourceKind.Events ? "/@revision" : "/@id", false)],
                 RowLimit, false, new(kind, item, generation)),
             AllowFullScan: true, Cursor: cursor);
 }
