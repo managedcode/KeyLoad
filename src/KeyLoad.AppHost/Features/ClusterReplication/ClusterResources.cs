@@ -32,18 +32,21 @@ internal static class ClusterResources
     private const string SiloPortEnvironment = "KeyLoad__SiloPort";
     private const string HttpPortEnvironment = "ASPNETCORE_HTTP_PORTS";
     private const string PeerEnvironmentPrefix = "KeyLoad__Peers__";
+    private const string BenchmarkTopologyEnvironment = "KeyLoad__BenchmarkTopology";
     private const string TrueValue = "true";
     private const int HttpPort = 8080;
     private const int SiloPort = 11111;
     private const int FirstPublicPort = 5101;
+    private const int MinimumBenchmarkNodes = 1;
     private static readonly string[] NodeNames = ["node1", "node2", "node3"];
 
-    /// <summary>Adds simultaneous RF3 Docker nodes with stable internal origins and independently mounted storage.</summary>
+    /// <summary>Adds RF3 Docker nodes, or an explicitly selected benchmark fixed group, with independent storage.</summary>
     internal static IResourceBuilder<ContainerResource>[] Add(IDistributedApplicationBuilder builder,
-        LocalProfile profile, string dataRoot, bool ephemeral)
+        LocalProfile profile, string dataRoot, bool ephemeral, int? benchmarkNodeCount = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentException.ThrowIfNullOrWhiteSpace(dataRoot);
+        var nodeNames = ReadNodeNames(benchmarkNodeCount);
         ClusterProfileStore.Validate(profile);
         var root = Path.GetFullPath(dataRoot);
         ClusterProfileStore.PrepareDirectory(root);
@@ -53,10 +56,10 @@ internal static class ClusterResources
         var admin = builder.AddParameter(AdminParameter, profile.AdminKey, secret: true);
         var incarnation = builder.AddParameter(IncarnationParameter, profile.Incarnation.ToString(GuidFormat), secret: true);
         var containerUser = ClusterContainerUser.Resolve(builder);
-        var nodes = new IResourceBuilder<ContainerResource>[NodeNames.Length];
+        var nodes = new IResourceBuilder<ContainerResource>[nodeNames.Length];
         for (var index = 0; index < nodes.Length; index++)
         {
-            var name = NodeNames[index];
+            var name = nodeNames[index];
             var directory = Path.Combine(root, name);
             ClusterProfileStore.PrepareDirectory(directory);
             var resource = image.Add(builder, name)
@@ -78,11 +81,33 @@ internal static class ClusterResources
                 .WithEnvironment(HttpPortEnvironment, HttpPort.ToString(CultureInfo.InvariantCulture))
                 .WithHttpHealthCheck(ReadyPath, endpointName: HttpEndpoint);
             ClusterResourceSettings.Apply(builder, resource, containerUser);
-            for (var peerIndex = 0; peerIndex < NodeNames.Length; peerIndex++)
-            { resource.WithEnvironment(PeerEnvironmentPrefix + peerIndex.ToString(CultureInfo.InvariantCulture), Origin(NodeNames[peerIndex])); }
+            ApplyPeers(resource, nodeNames, benchmarkNodeCount.HasValue);
             nodes[index] = resource;
         }
         return nodes;
+    }
+
+    private static string[] ReadNodeNames(int? benchmarkNodeCount)
+    {
+        if (benchmarkNodeCount is null)
+        {
+            return NodeNames;
+        }
+        ArgumentOutOfRangeException.ThrowIfLessThan(benchmarkNodeCount.Value, MinimumBenchmarkNodes, nameof(benchmarkNodeCount));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(benchmarkNodeCount.Value, NodeNames.Length, nameof(benchmarkNodeCount));
+        return [.. NodeNames.Take(benchmarkNodeCount.Value)];
+    }
+
+    private static void ApplyPeers(IResourceBuilder<ContainerResource> resource, string[] nodeNames, bool benchmark)
+    {
+        if (benchmark)
+        {
+            resource.WithEnvironment(BenchmarkTopologyEnvironment, TrueValue);
+        }
+        for (var index = 0; index < nodeNames.Length; index++)
+        {
+            resource.WithEnvironment(PeerEnvironmentPrefix + index.ToString(CultureInfo.InvariantCulture), Origin(nodeNames[index]));
+        }
     }
 
     private static string Origin(string node) => string.Format(CultureInfo.InvariantCulture, OriginCompositeFormat,

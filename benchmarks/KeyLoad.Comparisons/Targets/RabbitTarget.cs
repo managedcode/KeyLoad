@@ -9,18 +9,17 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="connectionString">AMQP connection URI used to create the broker connection.</param>
 /// <param name="runId">Guid-formatted run identifier used to isolate the queue name.</param>
 /// <param name="image">Broker image reference recorded in the verified profile.</param>
-/// <param name="topology">The expected single-member or three-member quorum queue topology.</param>
+/// <param name="topology">The expected one-, two- or three-member quorum queue topology.</param>
 /// <param name="management">Optional management API client for broker membership verification; initialization requires it, and the target disposes it.</param>
 public sealed class RabbitTarget(string connectionString, string runId, string image,
     ComparisonTopology topology = ComparisonTopology.Standalone, HttpClient? management = null) : IComparisonTarget
 {
     private const string QueuePrefix = "keyload_benchmark_";
-    private const string QueueTypeArgument = "x-queue-type";
-    private const string InitialGroupSizeArgument = "x-quorum-initial-group-size";
     private readonly string brokerConnectionString = connectionString;
     private readonly string queue = QueuePrefix + Guid.Parse(runId).ToString("N");
     private readonly string imageName = image;
     private readonly ComparisonTopology configuredTopology = topology;
+    private readonly Dictionary<string, object?> queueArguments = RabbitNativePolicy.QueueArguments(topology);
     private readonly HttpClient? managementClient = management;
     private IConnection? connection;
 
@@ -44,13 +43,8 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
         connection = await factory.CreateConnectionAsync(cancellationToken);
         await using (var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken))
         {
-            var expectedMembers = configuredTopology == ComparisonTopology.Replicated ? 3 : 1;
             await channel.QueueDeclareAsync(queue, durable: true, exclusive: false, autoDelete: false,
-                arguments: new Dictionary<string, object?>
-                {
-                    [QueueTypeArgument] = "quorum",
-                    [InitialGroupSizeArgument] = expectedMembers
-                }, cancellationToken: cancellationToken);
+                arguments: queueArguments, cancellationToken: cancellationToken);
         }
         if (managementClient is null)
         {
@@ -62,10 +56,8 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
         Profile = Profile with
         {
             Version = proof.Version,
-            Topology = configuredTopology == ComparisonTopology.Replicated
-                ? "three connected native broker nodes; three-member quorum queue"
-                : "one connected native broker node; one-member quorum queue",
-            WriteAcknowledgement = "persistent messages + tracked publisher confirms; quorum member online verification; manual ACK + ordered channel RPC barrier",
+            Topology = RabbitNativePolicy.TopologyLabel(configuredTopology),
+            WriteAcknowledgement = $"persistent messages + tracked publisher confirms; quorum {ComparisonTopologies.NodeCount(configuredTopology) / 2 + 1} of {ComparisonTopologies.NodeCount(configuredTopology)}; quorum member online verification; manual ACK + ordered channel RPC barrier",
             Transport = endpoint.Scheme == "amqps" ? "AMQP 0-9-1/TLS; one channel per worker" : "AMQP 0-9-1/TCP; one channel per worker",
             Image = imageName,
             Cluster = proof.Evidence

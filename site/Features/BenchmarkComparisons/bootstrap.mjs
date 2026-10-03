@@ -1,5 +1,6 @@
 import { IDS, SELECTORS, CONFIG, TEXT } from './contracts.mjs';
 import { mountBenchmarkLab } from './benchmark-lab.mjs';
+import { mountIsolatedLab } from './isolated-lab.mjs';
 
 const EVENTS = Object.freeze({ hide: 'pagehide', show: 'pageshow', click: 'click' });
 const SCENE = Object.freeze({ module: './cluster-scene.mjs', unavailable: 'Static architectural illustration', delay: 100,
@@ -7,6 +8,7 @@ const SCENE = Object.freeze({ module: './cluster-scene.mjs', unavailable: 'Stati
 let mounted = false;
 let generation = SCENE.initialGeneration;
 let lab;
+let isolatedLab;
 let scene;
 let deferred;
 let copyReset;
@@ -17,8 +19,10 @@ function stop() {
   clearTimeout(deferred);
   clearTimeout(copyReset);
   lab?.dispose();
+  isolatedLab?.dispose();
   scene?.dispose();
   lab = undefined;
+  isolatedLab = undefined;
   scene = undefined;
 }
 
@@ -45,7 +49,13 @@ function start() {
   if (mounted) return;
   mounted = true;
   const token = ++generation;
-  lab = mountBenchmarkLab({ root: document, catalogUrl: CONFIG.catalogUrl });
+  if (!document.body.dataset.historicalUnavailable) {
+    lab = mountBenchmarkLab({ root: document, catalogUrl: CONFIG.catalogUrl });
+  }
+  const isolatedRoot = document.getElementById('isolated-lab');
+  if (isolatedRoot?.dataset.isolatedCatalog) {
+    isolatedLab = mountIsolatedLab({ root: isolatedRoot, catalogUrl: isolatedRoot.dataset.isolatedCatalog });
+  }
   deferred = setTimeout(() => startScene(token), SCENE.delay);
 }
 

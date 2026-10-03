@@ -34,7 +34,15 @@ internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocu
             case Scenario.PointRead:
                 return new(Document: await ReadAsync(document, cancellationToken));
             case Scenario.DocumentWrite:
-                await documents.InsertOneAsync(MongoSchema.Document(document), cancellationToken: cancellationToken);
+                await CreateAsync(document, cancellationToken);
+                return new();
+            case Scenario.DocumentUpdate:
+                ValidateUpdateResult(await documents.UpdateOneAsync(IdFilter(document.Id),
+                    Builders<BsonDocument>.Update.Set(MongoSchema.BodyField, document.Json),
+                    new UpdateOptions { IsUpsert = false }, cancellationToken));
+                return new();
+            case Scenario.DocumentDelete:
+                ValidateDeleteResult(await documents.DeleteOneAsync(IdFilter(document.Id), cancellationToken));
                 return new();
             case Scenario.GraphNeighbors:
             case Scenario.GraphTraverse:
@@ -52,6 +60,46 @@ internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocu
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+    private async Task CreateAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await documents.InsertOneAsync(MongoSchema.Document(document), cancellationToken: cancellationToken);
+        }
+        catch (MongoWriteException error) when (error.WriteError.Code == MongoSchema.DuplicateKeyCode)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict, error);
+        }
+    }
+
+    internal static void ValidateUpdateResult(UpdateResult result)
+    {
+        if (!result.IsAcknowledged || !result.IsModifiedCountAvailable || result.UpsertedId is not null)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
+        }
+        if (result.MatchedCount == 0 && result.ModifiedCount == 0)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.UpdateMissing);
+        }
+        if (result.MatchedCount != 1 || result.ModifiedCount != 1)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
+        }
+    }
+
+    internal static void ValidateDeleteResult(DeleteResult result)
+    {
+        if (!result.IsAcknowledged || result.DeletedCount > 1 || result.DeletedCount < 0)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
+        }
+        if (result.DeletedCount == 0)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.DeleteMissing);
+        }
+    }
 
     private static FilterDefinition<BsonDocument> IdFilter(string id)
         => Builders<BsonDocument>.Filter.Eq(MongoSchema.IdField, id);

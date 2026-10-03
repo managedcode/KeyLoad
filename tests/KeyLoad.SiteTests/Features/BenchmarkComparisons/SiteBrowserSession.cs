@@ -154,7 +154,7 @@ internal sealed class SiteBrowserSession : IAsyncDisposable
         { /* Preserve the test failure. */ }
     }
 
-    private static async Task<SiteCoverageSourceManifest> ReadManifest(SiteTestInputs inputs, string coverageRoot,
+    internal static async Task<SiteCoverageSourceManifest> ReadManifest(SiteTestInputs inputs, string coverageRoot,
         CancellationToken cancellationToken)
     {
         var manifestPath = Path.Combine(Path.GetFullPath(coverageRoot), SiteBrowserTokens.SourceManifestFile);

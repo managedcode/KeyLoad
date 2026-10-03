@@ -26,7 +26,7 @@ public sealed class KurrentTarget : IComparisonTarget
     /// <param name="nodeClients">HTTP clients for the configured KurrentDB nodes; the target disposes these clients.</param>
     /// <param name="runId">Guid-formatted run identifier used to isolate benchmark stream names.</param>
     /// <param name="image">Pinned server image reference recorded in the target profile.</param>
-    /// <param name="topology">The single-node or replicated topology that cluster verification must establish.</param>
+    /// <param name="topology">The one, two or three native members that cluster verification must establish.</param>
     public KurrentTarget(string connectionString, HttpClient[] nodeClients, string runId, string image,
         ComparisonTopology topology)
     {
@@ -181,8 +181,9 @@ public sealed class KurrentTarget : IComparisonTarget
             ? insecure ? KurrentConstants.TlsClientCertificateIgnored : KurrentConstants.TlsClientCertificateConfigured
             : KurrentConstants.TlsClientCertificateAbsent;
         var profile = new TargetProfile(KurrentConstants.Name, KurrentConstants.ExpectedServerVersion,
-            topology == ComparisonTopology.Replicated ? KurrentConstants.ReplicatedTopology : KurrentConstants.SingleTopology,
-            topology == ComparisonTopology.Replicated ? KurrentConstants.ReplicatedAcknowledgement : KurrentConstants.SingleAcknowledgement,
+            ComparisonTopologies.NodeCount(topology) == 1 ? KurrentConstants.SingleTopology :
+                topology == ComparisonTopology.TwoNode ? KurrentConstants.TwoNodeTopology : KurrentConstants.ReplicatedTopology,
+            ComparisonTopologies.NodeCount(topology) > 1 ? KurrentConstants.ReplicatedAcknowledgement : KurrentConstants.SingleAcknowledgement,
             KurrentConstants.ReadContract + KurrentConstants.WriterPreferenceLabel,
             transport, authorization + KurrentConstants.AuthorizationSeparator + certificateMetadata + KurrentConstants.AuthorizationSeparator + KurrentConstants.CommunityAuthorization, image);
         return profile;

@@ -6,6 +6,17 @@ internal static class SiteCoverageGate
 {
     private static readonly string[] CriticalSources =
     [
+        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-contracts.mjs",
+        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-metadata.mjs",
+        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-metrics-validation.mjs",
+        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-report-validation.mjs",
+        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-projection.mjs",
+        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-http.mjs",
+        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-loader.mjs",
+        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-measurements.mjs",
+        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-view.mjs",
+        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-controls.mjs",
+        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-lab.mjs",
         $"{SiteCoverageTokens.FeatureSourcePrefix}measurements.mjs",
         $"{SiteCoverageTokens.FeatureSourcePrefix}measurement-loader.mjs",
         $"{SiteCoverageTokens.FeatureSourcePrefix}build-site.mjs",

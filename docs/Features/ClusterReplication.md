@@ -113,3 +113,19 @@ or forged requests. The clock is injected TimeProvider.System in production.
 Real request-object security cases cover tamper/replay/expiry/body/path/method and
 capacity, while RF3 CI exercises the genuine sockets and signed discovery reply.
 No HTTP handler fake or legacy body fallback remains.
+
+## Bounded intentional restart health wait refinement
+
+REQ-REP-050 maps to AC-REP-050 and AC-ISO-004: after a deliberate native Docker kill
+and one Aspire Start command, health waiting uses the native recovery wait behavior
+with the original cancellation/deadline. Old unavailable logical-resource snapshots
+must not immediately abort a requested restart. Actual healthy result, fresh Docker
+Running/changed-start/source identity, public SDK readiness, persisted command/data/
+subscription/outbox recovery and minority rejection remain required. Initial startup
+keeps its existing fail-fast behavior; no retries, longer deadlines or swallowed
+failures. Existing `ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites`
+is the real acceptance regression, executed in exact-SHA Linux RF3 CI. TASK-AISQL-024
+retained run37072003906 evidence supports stale-terminal handling; exact selected
+Aspire event generation remains unproven. TASK-AISQL-025/root owns only the two
+post-restart health waits; ADR036 existing lifecycle contract is sufficient, new
+architecture ADR:N/A. Qualification remains pending.

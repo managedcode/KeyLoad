@@ -35,8 +35,7 @@ internal static class OpenSearchClusterEvidence
         var health = healthResponse.RootElement;
         var state = stateResponse.RootElement;
         var nodesInfo = nodesInfoResponse.RootElement;
-        var expectedNodes = topology == ComparisonTopology.Replicated
-            ? OpenSearchNames.ReplicatedNodeCount : OpenSearchNames.SingleNodeCount;
+        var expectedNodes = ComparisonTopologies.NodeCount(topology);
         VerifyHealth(health, expectedNodes, expectedCopies);
         var observation = OpenSearchReplicaProof.VerifyMembershipAndPlacement(state, nodesInfo, index,
             expectedNodes, expectedCopies);

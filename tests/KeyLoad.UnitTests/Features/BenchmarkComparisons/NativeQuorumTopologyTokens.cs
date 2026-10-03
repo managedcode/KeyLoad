@@ -1,0 +1,52 @@
+namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+
+internal static class NativeQuorumTopologyTokens
+{
+    internal const string Result = "result";
+    internal const string Version = "version";
+    internal const string NativeVersion = "1.15.4";
+    internal const string BrokerVersion = "4.1.0";
+    internal const string RabbitVersion = "rabbitmq_version";
+    internal const string Status = "status";
+    internal const string Enabled = "enabled";
+    internal const string Disabled = "disabled";
+    internal const string PeerId = "peer_id";
+    internal const string Peers = "peers";
+    internal const string Uri = "uri";
+    internal const string ShardCount = "shard_count";
+    internal const string LocalShards = "local_shards";
+    internal const string ShardId = "shard_id";
+    internal const string Points = "points_count";
+    internal const string State = "state";
+    internal const string Active = "Active";
+    internal const string Partial = "Partial";
+    internal const string Config = "config";
+    internal const string Params = "params";
+    internal const string Replication = "replication_factor";
+    internal const string Consistency = "write_consistency_factor";
+    internal const string ShardNumber = "shard_number";
+    internal const string QueueType = "x-queue-type";
+    internal const string GroupSize = "x-quorum-initial-group-size";
+    internal const string Type = "type";
+    internal const string Quorum = "quorum";
+    internal const string Disc = "disc";
+    internal const string Ram = "ram";
+    internal const string Name = "name";
+    internal const string Running = "running";
+    internal const string Members = "members";
+    internal const string Online = "online";
+    internal const string Durable = "durable";
+    internal const string Queue = "keyload_benchmark_0123456789abcdef0123456789abcdef";
+    internal const string SeedSuffix = "&ordering=strong";
+    internal const string QuerySuffix = "?consistency=majority";
+    internal const string PolicyFailure = "QdrantCollectionPolicyMismatch";
+    internal const string RunId = "01234567-89ab-cdef-0123-456789abcdef";
+    internal const string Image = "native-contract-input";
+    internal const string EndpointOne = "http://localhost:10001";
+    internal const string EndpointTwo = "http://localhost:10002";
+    internal const string EndpointThree = "http://localhost:10003";
+    internal const string BrokerConnection = "amqp://guest:guest@localhost";
+    internal const string InvalidClients = "QdrantInvalidNodeClients";
+    internal const string NativeTopologyMismatch = "QdrantNativeTopologyMismatch";
+    internal const int PointsCount = 4096;
+}

@@ -68,28 +68,19 @@ internal static class Neo4jHarnessRegression
     {
         using var client = Neo4jHarnessQueryClient.CreateClient(endpoint, password);
         var target = new Neo4jTarget(client, fixture.RunId, image);
-        var supportedScenarios = Enum.GetValues<Scenario>().Where(target.Supports).ToHashSet();
         await using (target)
         {
             var report = await new ComparisonRunner(SmallOptions()).RunAsync([target], "test", cancellationToken);
 
-            await Assert.That(report.Cases.Length == 8).IsTrue();
+            await Assert.That(report.Cases.Length == Enum.GetValues<Scenario>().Length).IsTrue();
             foreach (var item in report.Cases)
             {
-                await Assert.That(item.Status is "failed" or "unsupported").IsTrue();
+                var expectedDetail = SetupPrefix + SafeNativePrefix + nativeCode;
+                await Assert.That(item.Status == "failed" && item.Detail == expectedDetail).IsTrue();
                 await Assert.That(item.Measurement is null && item.Samples.IsEmpty).IsTrue();
-                if (supportedScenarios.Contains(item.Scenario))
-                {
-                    var expectedDetail = SetupPrefix + SafeNativePrefix + nativeCode;
-                    await Assert.That(item.Status == "failed" && item.Detail == expectedDetail).IsTrue();
-                    await Assert.That(!item.Detail!.Contains(nativeMessage, StringComparison.Ordinal)).IsTrue();
-                    await Assert.That(!item.Detail.Contains(password, StringComparison.Ordinal)).IsTrue();
-                    await Assert.That(!item.Detail.Contains(fixture.RunId, StringComparison.Ordinal)).IsTrue();
-                }
-                else
-                {
-                    await Assert.That(item.Status == "unsupported").IsTrue();
-                }
+                await Assert.That(!item.Detail!.Contains(nativeMessage, StringComparison.Ordinal)).IsTrue();
+                await Assert.That(!item.Detail.Contains(password, StringComparison.Ordinal)).IsTrue();
+                await Assert.That(!item.Detail.Contains(fixture.RunId, StringComparison.Ordinal)).IsTrue();
             }
         }
 

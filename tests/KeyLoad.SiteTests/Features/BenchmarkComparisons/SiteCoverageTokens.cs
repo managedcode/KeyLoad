@@ -148,6 +148,17 @@ internal static class SiteCoverageTokens
 
     public static readonly string[] ProductionSources =
     [
+        $"{SiteAssetTokens.FeatureRelativePath}/isolated-contracts.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/isolated-metadata.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/isolated-metrics-validation.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/isolated-report-validation.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/isolated-projection.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/isolated-http.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/isolated-loader.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/isolated-measurements.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/isolated-view.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/isolated-controls.mjs",
+        $"{SiteAssetTokens.FeatureRelativePath}/isolated-lab.mjs",
         $"{SiteAssetTokens.FeatureRelativePath}/measurements.mjs",
         $"{SiteAssetTokens.FeatureRelativePath}/measurement-loader.mjs",
         $"{SiteAssetTokens.FeatureRelativePath}/benchmark-lab.mjs",

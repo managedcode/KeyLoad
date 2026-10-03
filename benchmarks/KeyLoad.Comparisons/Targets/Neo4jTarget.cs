@@ -14,6 +14,9 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
     private const string ValuesProperty = "values";
     private const string ErrorsProperty = "errors";
     private const string CodeProperty = "code";
+    private const string CommunityEdition = "community";
+    private const string CommunityRequired = "Neo4jCommunityEditionRequired";
+    private const string SingleCommunityState = "single native Community node";
     private readonly string label = "Benchmark_" + Guid.Parse(runId).ToString("N");
     private bool constraintCreationAttempted;
     private int depth;
@@ -24,7 +27,8 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
     /// <summary>Reports support for point reads, document writes, and directed graph neighbor or traversal queries.</summary>
     /// <param name="scenario">The comparison scenario to check.</param>
     /// <returns><see langword="true"/> for a supported scenario; otherwise <see langword="false"/>.</returns>
-    public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.GraphNeighbors or Scenario.GraphTraverse;
+    public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate
+        or Scenario.DocumentDelete or Scenario.GraphNeighbors or Scenario.GraphTraverse;
 
     /// <summary>Reads the server version, creates an isolated uniqueness constraint, seeds documents and edges, and waits for indexes.</summary>
     /// <param name="dataset">The deterministic documents and directed graph edges to seed.</param>
@@ -36,7 +40,16 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
         depth = dataset.Options.GraphDepth;
         using var version = await QueryAsync("CALL dbms.components() YIELD name,versions,edition WHERE name='Neo4j Kernel' RETURN versions[0],edition", null, cancellationToken);
         var row = Rows(version).EnumerateArray().Single();
-        Profile = Profile with { Version = row[0].GetString() + "; " + row[1].GetString() };
+        var edition = row[1].GetString();
+        if (!string.Equals(edition, CommunityEdition, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ComparisonFailureException(CommunityRequired);
+        }
+        Profile = Profile with
+        {
+            Version = row[0].GetString() + "; " + edition,
+            Cluster = new(1, 1, SingleCommunityState, [CommunityEdition])
+        };
         constraintCreationAttempted = true;
         await ExecuteAsync($"CREATE CONSTRAINT {label}_id FOR (n:{label}) REQUIRE n.id IS UNIQUE", null, cancellationToken);
         foreach (var batch in dataset.Documents.Chunk(256))
@@ -107,8 +120,9 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
                 case Scenario.PointRead:
                     return new(Document: await ReadAsync(document, cancellationToken));
                 case Scenario.DocumentWrite:
-                    await target.ExecuteAsync($"CREATE (n:{target.label} {{id:$id,json:$json}})", new { id = document.Id, json = document.Json }, cancellationToken);
-                    return new();
+                case Scenario.DocumentUpdate:
+                case Scenario.DocumentDelete:
+                    return await Neo4jMutationOperations.ExecuteAsync(target.QueryAsync, target.label, scenario, document, cancellationToken);
                 case Scenario.GraphNeighbors:
                 case Scenario.GraphTraverse:
                     var hops = scenario == Scenario.GraphNeighbors ? 1 : target.depth;

@@ -1,0 +1,28 @@
+name: Isolated native comparison teardown
+description: Clean only the cell-owned image registry and retain real native qualification evidence.
+inputs:
+  setup-outcome:
+    description: Actual setup step outcome
+    required: true
+  artifact-name:
+    description: Exact unique qualification artifact name
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Capture and remove only the job-owned image registry
+      if: ${{ always() && (inputs.setup-outcome == 'success' || inputs.setup-outcome == 'failure') }}
+      shell: bash
+      run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
+    - name: Retain native worker qualification evidence
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ runner.temp }}/keyload-images/**
+          ${{ runner.temp }}/keyload-cell-github/**
+          **/TestResults/**
+          artifacts/code-quality/**
+        if-no-files-found: error
+        retention-days: 90

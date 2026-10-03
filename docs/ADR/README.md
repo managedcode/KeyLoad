@@ -58,6 +58,9 @@
 | [ADR-050 TimeSeries and Timescale comparison](ADR-050-timeseries-timescale-comparison.md) | Accepted, implementation and qualification pending | TimeSeries, BenchmarkComparisons |
 | [ADR-051 read-only administration console](ADR-051-admin-dashboard.md) | Accepted, source implemented; GitHub qualification pending | AdminDashboard |
 | [ADR-052 bounded TimeSeries latest and aggregates](ADR-052-timeseries-bounded-aggregates.md) | Accepted, implementation and qualification pending | TimeSeries, StorageRecovery, ResourceExecution |
+| [ADR-054 central SQL](ADR-054-central-sql.md) | Accepted, source implemented; complete qualification pending | QueryExecution |
+| [ADR-055 typed relational rows](ADR-055-typed-relational-rows.md) | Accepted, source implemented; complete qualification pending | RelationalStorage |
+| [ADR-056 isolated Linux comparison cells](ADR-056-isolated-linux-comparison-cells.md) | Accepted, implementation and qualification pending | BenchmarkComparisons, ClusterReplication |
 
 ## Ідентичність і пріоритет
 

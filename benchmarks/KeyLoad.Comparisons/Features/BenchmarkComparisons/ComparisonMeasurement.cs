@@ -12,44 +12,60 @@ internal sealed class ComparisonMeasurer(ComparisonOptions options)
         int repetition, CancellationToken cancellationToken)
     {
         var sessions = new List<IComparisonSession>();
+        ComparisonCase result;
+        bool closed;
         try
         {
-            var inputs = Enumerable.Range(0, options.Operations).Select(operation => dataset.Input(scenario, repetition, operation, false)).ToArray();
-            for (var worker = 0; worker < options.Concurrency; worker++)
-            {
-                sessions.Add(await target.OpenSessionAsync(cancellationToken));
-            }
-
-            await WarmupAsync(sessions, dataset, scenario, repetition, cancellationToken);
-            var samples = new OperationSample[options.Operations];
-            var outputs = new OperationResult?[options.Operations];
-            await using var resources = new ClientResourceSampler();
-            var clock = Stopwatch.StartNew();
-            await ExecuteBatchAsync(sessions, inputs, scenario, samples, outputs, clock, cancellationToken);
-            clock.Stop();
-            var clientResources = await resources.StopAsync();
-            await ComparisonValidation.ValidateBatchAsync(sessions[0], dataset, scenario, inputs, samples, outputs, cancellationToken);
-            var measurement = ComparisonStatistics.Summarize(samples, clock.Elapsed.TotalSeconds) with { ClientResources = clientResources };
-            return new(target.Profile.Name, scenario, repetition, measurement.Failures == 0 ? ComparisonStatuses.Measured : ComparisonStatuses.Failed,
-                measurement.Failures == 0 ? null : FailedAttemptDetail, measurement,
-                ImmutableCollectionsMarshal.AsImmutableArray(samples));
+            result = await MeasureOwnedAsync(target, dataset, scenario, repetition, sessions, cancellationToken);
         }
         finally
         {
-            foreach (var session in sessions)
-            {
-                await session.DisposeAsync();
-            }
+            closed = await ComparisonSessionCleanup.CloseAsync(sessions, options.TimeoutSeconds);
         }
+        return closed ? result : result with { Status = ComparisonStatuses.Failed, Detail = ComparisonSessionCleanup.Failure };
+    }
+
+    private async Task<ComparisonCase> MeasureOwnedAsync(IComparisonTarget target, BenchmarkDataset dataset,
+        Scenario scenario, int repetition, List<IComparisonSession> sessions, CancellationToken cancellationToken)
+    {
+        var inputs = Enumerable.Range(0, options.Operations).Select(operation => dataset.Input(scenario, repetition, operation, false)).ToArray();
+        for (var worker = 0; worker < options.Concurrency; worker++)
+        {
+            sessions.Add(await target.OpenSessionAsync(cancellationToken));
+        }
+
+        await WarmupAsync(sessions, dataset, scenario, repetition, cancellationToken);
+        await ComparisonMutationPreparation.PrepareAsync(sessions, inputs, scenario, options.TimeoutSeconds, cancellationToken);
+        var samples = new OperationSample[options.Operations];
+        var outputs = new OperationResult?[options.Operations];
+        await using var resources = new ClientResourceSampler();
+        var clock = Stopwatch.StartNew();
+        await ExecuteBatchAsync(sessions, inputs, scenario, samples, outputs, clock, cancellationToken);
+        clock.Stop();
+        var clientResources = await resources.StopAsync();
+        if (ComparisonMutationPreparation.Required(scenario))
+        {
+            await ComparisonMutationValidation.ValidateAsync(sessions, dataset, scenario, inputs, samples, outputs, cancellationToken);
+        }
+        else
+        {
+            await ComparisonValidation.ValidateBatchAsync(sessions[0], dataset, scenario, inputs, samples, outputs, cancellationToken);
+        }
+        var measurement = ComparisonStatistics.Summarize(samples, clock.Elapsed.TotalSeconds) with { ClientResources = clientResources };
+        return new(target.Profile.Name, scenario, repetition, measurement.Failures == 0 ? ComparisonStatuses.Measured : ComparisonStatuses.Failed,
+            measurement.Failures == 0 ? null : FailedAttemptDetail, measurement,
+            ImmutableCollectionsMarshal.AsImmutableArray(samples));
     }
 
     private async Task WarmupAsync(List<IComparisonSession> sessions, BenchmarkDataset dataset, Scenario scenario,
         int repetition, CancellationToken cancellationToken)
     {
+        var warmup = Enumerable.Range(0, options.Warmup).Select(operation => dataset.Input(scenario, repetition, operation, true)).ToArray();
+        await ComparisonMutationPreparation.PrepareAsync(sessions, warmup, scenario, options.TimeoutSeconds, cancellationToken);
         for (var operation = 0; operation < options.Warmup; operation++)
         {
             using var deadline = ComparisonDeadline.Create(options.TimeoutSeconds, cancellationToken);
-            var input = dataset.Input(scenario, repetition, operation, true);
+            var input = warmup[operation];
             var session = sessions[operation % sessions.Count];
             var output = await session.ExecuteAsync(scenario, input, deadline.Token);
             await ComparisonValidation.ValidateOperationAsync(session, dataset, scenario, input, output, deadline.Token);

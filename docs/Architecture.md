@@ -43,7 +43,7 @@ flowchart LR
 
 Read the root and nearest project-local AGENTS.md before changing this solution. The product specification is [architecture v0.3](design/architecture-v0.3.uk.md). This document is a navigation map, not a replacement specification or a readiness claim.
 
-The [documentation index](README.md) is the complete entry point for 22 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 56 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
+The [documentation index](README.md) is the complete entry point for 22 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) contains all 57 decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
 
 Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
 
@@ -405,6 +405,42 @@ flowchart LR
     MCTS --> Oracle
 ```
 
+## Isolated Linux comparison execution
+
+[ADR-056](ADR/ADR-056-isolated-linux-comparison-cells.md) and the canonical
+[BenchmarkComparisons](Features/BenchmarkComparisons.md) contract add one native
+engine/node-count/scenario per independent GitHub Linux runner. The closed plan,
+common corpus/options, strict worker envelope and complete aggregate are owned
+by the same slice across library, host, AppHost, scripts, tests and site.
+Production starts RF3; explicit benchmark startup alone enables fixed RF1/RF2.
+The first intensive cohort has270 planned cells; this is a plan count, not evidence
+that any measurement passed. TimeSeries keeps a distinct workload and needs the
+same isolation before it joins publication.
+
+```mermaid
+flowchart LR
+    Contract[Canonical isolated contract] --> Selection[ComparisonWorkerSelection]
+    Selection --> Aspire[Selected native resources only]
+    Aspire --> Target[One native adapter]
+    Target --> Runner[One selected scenario and common oracle]
+    Runner --> Envelope[Raw worker schema4]
+    Envelope --> Aggregate[Complete authenticated cohort]
+    Aggregate --> Site[Independent site generation]
+```
+
+```mermaid
+classDiagram
+    ComparisonWorkerSelection --> ComparisonOptions
+    ComparisonRunner --> BenchmarkDataset
+    ComparisonRunner --> IComparisonTarget
+    IComparisonTarget --> IComparisonSession
+    IsolatedComparisonReport --> IsolatedComparisonWorker
+    IsolatedComparisonReport --> ComparisonReport
+```
+
+Source stages remain unqualified until exact-SHA real native correctness/fault,
+intensive cohort, aggregate, site and publication gates pass.
+
 ## Atomic WAL binary serialization
 
 [ADR-057](ADR/ADR-057-orleans-atomic-wal.md) scopes native generated Orleans serialization to StorageRecovery commands.wal payloads. Private stable mutation DTOs and a cached typed serializer join the existing ordered atomic journal; native ZoneTree bytes/Sync WAL, replication journal, checkpoint2 and Orleans routing stay under their existing owners. Identity4 fences old writers; only offline verified checkpoint-only/empty legacy identities1/2/3 may promote. The closed native byte-memory codec writes nullable values as raw byte blocks; complete legacy frame1/2 headers refuse before truncation. Source/GitHub qualification pending.
@@ -416,4 +452,21 @@ classDiagram
     ZoneTreeJournalRecovery --> ZoneTreeJournalCodec : complete checked decode
     ZoneTreeJournalCodec --> ZoneTreeJournalMutation : stable generated fields
     ZoneTreeStoreInitializer --> ZoneTreeIdentityFile : format4 writer fence
+```
+
+The isolated CI cell setup/teardown are colocated executable infrastructure under
+`.github/workflows/Features/BenchmarkComparisons/`, each with local policy.
+They import the common native image and retain authenticated job/image evidence;
+only the caller's real TUnit cell runs database operations. Complete raw workers
+stay in immutable GitHub artifacts; Pages receives a bounded derived projection
+and exact original manifest after all270 raw reports validate.
+
+```mermaid
+flowchart LR
+    Build[Source-bound native image roundtrip] --> Preflight[27 separate Linux jobs]
+    Preflight --> CRUD[108 separate CRUD jobs]
+    CRUD --> Specialized[162 separate specialized jobs]
+    Specialized --> Capture[Authenticated jobs and artifacts]
+    Capture --> Raw[Complete raw aggregate]
+    Raw --> Compact[Bounded derived website projection]
 ```

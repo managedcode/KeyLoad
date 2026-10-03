@@ -9,6 +9,11 @@ namespace KeyLoad.Replication;
 /// <param name="Incarnation">Shared authority incarnation fencing unrelated replica groups.</param>
 public sealed record ReplicaConfiguration(string LocalId, ImmutableArray<string> VoterIds, string Directory, Guid Incarnation)
 {
+    private const int MinimumBenchmarkVoters = 1;
+    private const int MaximumBenchmarkVoters = 3;
+    private const int MinimumProductionVoters = 3;
+    /// <summary>Permits only explicit trusted benchmark fixed groups of one, two or three voters.</summary>
+    public bool BenchmarkTopology { get; init; }
     /// <summary>Gets the number of voters required for durable acknowledgement.</summary>
     public int Majority => VoterIds.Length / 2 + 1;
     /// <summary>Gets the committed-entry interval triggering canonical checkpoints.</summary>
@@ -34,7 +39,9 @@ public sealed record ReplicaConfiguration(string LocalId, ImmutableArray<string>
     /// <exception cref="InvalidOperationException">The topology or configured limits are invalid.</exception>
     public void Validate()
     {
-        if (Incarnation == Guid.Empty || VoterIds.IsDefault || VoterIds.Length < 3 || VoterIds.Length % 2 == 0
+        if (Incarnation == Guid.Empty || VoterIds.IsDefault
+            || (BenchmarkTopology ? VoterIds.Length is < MinimumBenchmarkVoters or > MaximumBenchmarkVoters
+                : VoterIds.Length < MinimumProductionVoters || VoterIds.Length % 2 == 0)
             || VoterIds.Distinct(StringComparer.Ordinal).Count() != VoterIds.Length
             || VoterIds.Any(string.IsNullOrWhiteSpace) || !VoterIds.Contains(LocalId, StringComparer.Ordinal))
         {

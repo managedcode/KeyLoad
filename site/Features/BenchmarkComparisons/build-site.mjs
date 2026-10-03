@@ -5,13 +5,18 @@ import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 import { CONFIG } from './contracts.mjs';
 import { validateCatalog, validateReport } from './measurement-loader.mjs';
+import { produceIsolatedProjection } from './isolated-projection.mjs';
+import { validateIsolatedCatalog, validateIsolatedProjection } from './isolated-loader.mjs';
+import { readBytes } from '../../../scripts/Features/BenchmarkComparisons/aggregate-files.mjs';
 
 const BUILD = Object.freeze({
   encoding: 'utf8', hash: 'sha256', hex: 'hex', feature: 'Features/BenchmarkComparisons', sourceParent: '../..',
   vendor: 'vendor/three/0.186.1', manifest: 'manifest.json', three: 'three', version: '0.186.1',
   license: 'MIT', sourceCommit: '9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8',
   integrity: 'sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==',
-  assets: ['contracts.mjs', 'bootstrap.mjs', 'measurements.mjs', 'measurement-loader.mjs',
+  assets: ['isolated-contracts.mjs', 'isolated-metadata.mjs', 'isolated-metrics-validation.mjs',
+    'isolated-report-validation.mjs', 'isolated-http.mjs', 'isolated-loader.mjs',
+    'isolated-measurements.mjs', 'isolated-view.mjs', 'isolated-controls.mjs', 'isolated-lab.mjs', 'contracts.mjs', 'bootstrap.mjs', 'measurements.mjs', 'measurement-loader.mjs',
     'benchmark-lab.mjs', 'benchmark-chart.mjs', 'benchmark-profiles.mjs', 'cluster-scene.mjs',
     'scene-geometry.mjs', 'scene-lifecycle.mjs', 'scene-observers.mjs', 'styles.css', 'brand.css', 'tokens.css', 'scene.css', 'assets/cluster-poster.svg'],
   vendorFiles: ['three.webgpu.js', 'three.core.js', 'LICENSE'],
@@ -19,7 +24,7 @@ const BUILD = Object.freeze({
     '9edde002b066a9a05676a6127f67735b62baf399bdea529f2f7e31657da769e6',
     '8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc'],
   html: 'index.html', favicon: 'favicon.svg', data: 'data', runs: 'runs', catalog: 'catalog.json',
-  reports: '--reports', output: '--output', revision: '--revision', evidence: '--evidence-url', site: '--site-revision',
+  reports: '--reports', isolated: '--isolated', output: '--output', revision: '--revision', evidence: '--evidence-url', site: '--site-revision',
   preview: 'local_preview', committed: 'committed_source', smoke: 'smoke',
   empty: '', equals: '=', newline: '\n', missing: 'ENOENT', javascriptExtension: '.mjs', cssExtension: '.css',
   noJekyll: '.nojekyll', cname: 'CNAME', domain: 'www.keyload.cloud\n', robotsFile: 'robots.txt', sitemapFile: 'sitemap.xml',
@@ -42,7 +47,7 @@ const ERRORS = Object.freeze({
 const source = resolve(dirname(fileURLToPath(import.meta.url)), BUILD.sourceParent);
 const feature = join(source, BUILD.feature);
 const hash = bytes => createHash(BUILD.hash).update(bytes).digest(BUILD.hex);
-const knownArguments = new Set([BUILD.reports, BUILD.output, BUILD.revision, BUILD.evidence, BUILD.site]);
+const knownArguments = new Set([BUILD.reports, BUILD.isolated, BUILD.output, BUILD.revision, BUILD.evidence, BUILD.site]);
 
 function parseArguments(argv) {
   const args = {};
@@ -52,7 +57,7 @@ function parseArguments(argv) {
     if (separator < BUILD.zero || !knownArguments.has(name) || name in args) throw new Error(ERRORS.argument);
     args[name] = item.slice(separator + BUILD.one);
   }
-  if (!args[BUILD.reports] || !args[BUILD.output] || !CONFIG.revisionPattern.test(args[BUILD.revision]) ||
+  if ((!args[BUILD.reports] && !args[BUILD.isolated]) || !args[BUILD.output] || !CONFIG.revisionPattern.test(args[BUILD.revision]) ||
       !CONFIG.evidencePattern.test(args[BUILD.evidence]) ||
       (BUILD.site in args && !CONFIG.revisionPattern.test(args[BUILD.site]))) throw new Error(ERRORS.required);
   return args;
@@ -69,10 +74,11 @@ async function assertRegular(path) {
 }
 
 async function preparePaths(args) {
-  const reports = resolve(args[BUILD.reports]);
+  const reports = resolve(args[BUILD.reports] ?? args[BUILD.isolated]);
   const output = resolve(args[BUILD.output]);
   if (await realpath(reports) !== reports || !(await lstat(reports)).isDirectory()) throw new Error(ERRORS.symlink);
-  if ([source, reports].some(path => contains(path, output) || contains(output, path))) throw new Error(ERRORS.output);
+  const inputs = [source, reports, ...(args[BUILD.isolated] ? [resolve(args[BUILD.isolated])] : [])];
+  if (inputs.some(path => contains(path, output) || contains(output, path))) throw new Error(ERRORS.output);
   try {
     await lstat(output);
     throw new Error(ERRORS.output);
@@ -158,8 +164,8 @@ async function copyAsset(output, path, target = path) {
   await copyFile(join(source, path), destination);
 }
 
-async function emit(output, reports, catalog) {
-  await emitHtml(output, catalog);
+async function emit(output, reports, catalog, isolated) {
+  await emitHtml(output, catalog, isolated);
   await copyAsset(output, BUILD.favicon);
   for (const asset of BUILD.assets) await copyAsset(output, `${BUILD.feature}/${asset}`);
   for (const file of [...BUILD.vendorFiles, BUILD.manifest]) await copyAsset(output, `${BUILD.feature}/${BUILD.vendor}/${file}`);
@@ -169,22 +175,72 @@ async function emit(output, reports, catalog) {
     for (const file of Object.values(CONFIG.files)) await copyFile(join(reports, run.id, file), join(destination, file));
     if (hash(await readFile(join(destination, CONFIG.files.json))) !== run.sha256) throw new Error(ERRORS.profiles);
   }
-  await writeFile(join(output, BUILD.data, BUILD.catalog), JSON.stringify(catalog, null, BUILD.jsonIndent) + BUILD.newline);
+  if (catalog.runs.length > 0) {
+    await writeFile(join(output, BUILD.data, BUILD.catalog), JSON.stringify(catalog, null, BUILD.jsonIndent) + BUILD.newline);
+  }
+  if (isolated) await emitIsolated(output, isolated);
   await writeFile(join(output, BUILD.noJekyll), BUILD.empty);
   await writeFile(join(output, BUILD.cname), BUILD.domain);
   await writeFile(join(output, BUILD.robotsFile), BUILD.robots);
   await writeFile(join(output, BUILD.sitemapFile), BUILD.sitemap);
 }
 
-async function emitHtml(output, catalog) {
+async function emitHtml(output, catalog, isolated) {
   let html = await readFile(join(feature, BUILD.html), BUILD.encoding);
   if (catalog.siteSourceRevision) {
     html = html.replaceAll(BUILD.documentationBlob, `/blob/${catalog.siteSourceRevision}/docs`)
       .replaceAll(BUILD.documentationTree, `/tree/${catalog.siteSourceRevision}/docs`);
   }
+  if (isolated) {
+    html = html.replace('id="isolated-lab" class="benchmark-section" aria-labelledby="isolated-title" hidden',
+      'id="isolated-lab" class="benchmark-section" aria-labelledby="isolated-title" data-isolated-catalog="./data/isolated-catalog.json"');
+    html = html.replace('<!-- KEYLOAD_ISOLATED_EVIDENCE -->',
+      '<p><a href="./data/isolated/aggregate.json" download>Native evidence manifest</a> · <a href="'
+      + isolated.catalog.evidenceUrl + '">GitHub native comparison evidence</a></p>');
+  }
+  if (catalog.runs.length === 0) {
+    html = html.replace('<body', '<body data-historical-unavailable="true"');
+    html = html.replace('id="benchmarks"', 'id="benchmarks" hidden');
+  }
   const links = catalog.runs.map(run => `<li>${run.label} · <a href="./${BUILD.data}/${run.report}" download>Raw JSON</a> · <a href="${run.evidenceUrl}">GitHub comparison evidence</a></li>`).join(BUILD.empty);
   if (!html.includes(BUILD.staticEvidence)) throw new Error(ERRORS.profiles);
   await writeFile(join(output, BUILD.html), html.replace(BUILD.staticEvidence, `<ul>${links}</ul>`));
+}
+
+async function prepareIsolated(args) {
+  if (!CONFIG.revisionPattern.test(args[BUILD.site] ?? BUILD.empty)) throw new Error(ERRORS.required);
+  const input = resolve(args[BUILD.isolated]);
+  if (await realpath(input) !== input || !(await lstat(input)).isDirectory()) throw new Error(ERRORS.symlink);
+  const manifestPath = join(input, 'aggregate.json');
+  const manifest = await readIsolatedManifest(manifestPath);
+  const projection = await produceIsolatedProjection({ input });
+  if (!manifest.equals(await readIsolatedManifest(manifestPath))) throw new Error(ERRORS.profiles);
+  const bytes = Buffer.from(JSON.stringify(projection) + BUILD.newline);
+  if (bytes.length > 4_194_304) throw new Error(ERRORS.budget);
+  const catalog = validateIsolatedCatalog({ schemaVersion: 1, generatedAt: new Date().toISOString(),
+    siteSourceRevision: args[BUILD.site], measuredSourceRevision: projection.cohort.sourceRevision,
+    evidenceUrl: 'https://github.com/managedcode/KeyLoad/actions/runs/' + projection.cohort.runId,
+    cohort: projection.cohort, aggregate: { path: 'isolated/aggregate.json', sha256: hash(manifest) },
+    projection: { path: 'isolated/projection.json', sha256: hash(bytes) }, rawLocation: 'githubActionsArtifacts' });
+  validateIsolatedProjection(projection, catalog);
+  if (!args[BUILD.reports] && (args[BUILD.revision] !== catalog.measuredSourceRevision || args[BUILD.evidence] !== catalog.evidenceUrl)) {
+    throw new Error(ERRORS.profiles);
+  }
+  return { catalog, bytes, manifest };
+}
+
+async function readIsolatedManifest(path) {
+  return readBytes(path, 4_194_304);
+}
+
+async function emitIsolated(output, isolated) {
+  const directory = join(output, BUILD.data, 'isolated');
+  await mkdir(directory, { recursive: true });
+  await writeFile(join(directory, 'aggregate.json'), isolated.manifest, { flag: 'wx' });
+  await writeFile(join(directory, 'projection.json'), isolated.bytes, { flag: 'wx' });
+  const catalog = JSON.stringify(isolated.catalog) + BUILD.newline;
+  if (Buffer.byteLength(catalog) > 65_536) throw new Error(ERRORS.budget);
+  await writeFile(join(output, BUILD.data, 'isolated-catalog.json'), catalog, { flag: 'wx' });
 }
 
 export async function buildSite(argv) {
@@ -192,10 +248,13 @@ export async function buildSite(argv) {
   const { reports, output } = await preparePaths(args);
   const compression = await verifyVendor();
   const sizes = await verifyAssets();
-  const catalog = await readCatalog(reports, args);
+  const isolated = args[BUILD.isolated] ? await prepareIsolated(args) : null;
+  const catalog = args[BUILD.reports] ? await readCatalog(reports, args)
+    : { runs: [], siteSourceRevision: args[BUILD.site] };
+  if (catalog.runs.length === 0 && isolated === null) throw new Error(ERRORS.profiles);
   await mkdir(output);
   try {
-    await emit(output, reports, catalog);
+    await emit(output, reports, catalog, isolated);
     return { output, profiles: catalog.runs.length, ...sizes, [BUILD.compression]: compression };
   } catch (error) {
     await rm(output, { recursive: true, force: true });

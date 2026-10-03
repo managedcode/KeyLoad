@@ -67,5 +67,5 @@ internal static class Neo4jHarnessReportAssertions
     }
 
     private static bool IsSupported(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite
-        or Scenario.GraphNeighbors or Scenario.GraphTraverse;
+        or Scenario.GraphNeighbors or Scenario.GraphTraverse or Scenario.DocumentUpdate or Scenario.DocumentDelete;
 }

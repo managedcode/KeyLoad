@@ -1,0 +1,231 @@
+# Isolated Linux comparisons plan
+
+Derived from [brainstorm](isolated-comparisons.brainstorm.md) and [acceptance](isolated-comparisons.acceptance.md). Root approves this implementation contract under explicit owner2026-10-03 direction. Canonical slice BenchmarkComparisons; replication refinement remains ClusterReplication. Required ADR-056 and ADR-007/034/040 amendments precede relevant source edits.
+
+## Ordered graph / ownership
+
+| Task | AC | Owner / model / permissions | Dependency / start | Artifacts / verification / join state |
+|---|---|---|---|---|
+| TASK-ISO-001 | 002..006 | sql_audit, inherited capable planner, read-only | independent discovery | source report complete; no local execution |
+| TASK-ISO-002 | 006..009 | models_audit, inherited capable planner, read-only | independent discovery | ingestion/provenance report complete |
+| TASK-ISO-003 | 001..009 | gates_audit, inherited capable planner, read-only | independent discovery | workflows/source report complete |
+| TASK-ISO-004 | all | root architecture/integration, shared write owner | join001..003 | approved contract/ADR/task graph; static governance |
+| TASK-ISO-005 | 003/004 | sql_audit, inherited capable tier, disjoint specified topology files/tests | approved004+shared enum | benchmark-only fixed-voter validation/KeyLoad proof; source review then exact-SHA Linux |
+| TASK-ISO-006 | 006/007 | models_audit, inherited capable tier, only new aggregate modules/tests | approved004+frozen envelope | strict raw-envelope/plan merge validator and TUnit actual Node process tests; root join |
+| TASK-ISO-007 | 001/002/007 | gates_audit, inherited capable tier, new matrix/control modules/tests only | approved004 | closed270-cell plan split108CRUD/162special, workflow dependency proposal; root join |
+| TASK-ISO-008 | 005/006 | root shared contracts/runner/dataset/host/test integration |004, serialized shared ownership | selected engine/scenario, serious CRUD and worker report envelope |
+| TASK-ISO-009 | 002/003 | next disjoint native adapter/resource workers |005+008 frozen constructors | genuine native1/2/3 engine resources/membership/ACK; no foreign engines |
+| TASK-ISO-010 | 006/007 | root workflow/fixture/auth join |005..009 complete | one cell perLinux VM, raw+image+native receipts, actual GitHub cohort |
+| TASK-ISO-011 | 008/009 | disjoint site/evidence workers, root shared tokens/workflows/inventory |006+010 qualified cohort | schema4 site/provenance/browser/coverage integration and separate Pages |
+| TASK-ISO-012 | all | root strongest final integration | all required workers complete | exact-SHA required checks, complete full cohort, aggregation/site/publication evidence |
+
+High-capability inheritance is retained for replication/JSON evidence/topology/trust implementation because these are cross-boundary correctness-critical scopes and no concrete cheaper model capability evidence is available. Workers must stop on contract drift, public/schema invention, dependency defects, ownership overlap or unexpected baseline failure; no local tests/builds/benchmarks, commits, suppression, fake dependencies, skipped required gates or expanded write scope. Root reviews all diffs, source identity and combined gates.
+
+## Baseline and known failures
+
+- [x] Inspect full relevant real baseline after planning input: GitHub37072003906 SHA722e7fe7872288d99869b6e25950e67a547b7d86, completedfailure. Linux/macOS/Windows full verification and analyzer job success; comparison and RF3 failed. Historical threeOS success is retained; new required execution isLinux.
+- [ ] RF3 `ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites`: intentional restart health wait fails while fresh Docker container running. Stale terminal snapshot strongly supported, selected event generation unproven. TASK-AISQL-024 has exact source/receipt audit; native bounded recovery wait refinement remains required and cannot weaken health/SDK/data assertions.
+- [ ] Comparison `AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines`: old host-resource lifecycleWaiting/no exit, unsupported stream read in older source; current06a9b631 committed digest-image/public-read repairs need actual qualification.
+- [ ] TimeSeries Aspire real profile lifecycleWaiting/no exit: same committed native image route awaits exact-SHA qualification; isolate target/cell rather than skip.
+- [ ] Current site schema2/producer schema3 and full-nine target mismatch: update coupled schema4 producer/aggregate/site; do not weaken historical tests.
+
+## Checklist and methodology
+
+- [x] Record latest permanent owner rules without dropping existing policy.
+- [x] Create brainstorm, detailed acceptance, task graph and frozen first-stage contract before code.
+- [x] Add ADR056 and requirement/ADR007/034/040 amendments; freeze planner/proof/aggregate and native persisted membership safety before delegated edits.
+- [ ] Add meaningful failing TUnit regressions derived from acceptance before production edits; exact-SHA GitHub only.
+- [ ] Implement and review005/006/007 then shared008; validate static source/JSON/governance only locally.
+- [ ] Integrate genuine native resource/adapters and isolated real-client case fixture; no current all-engine workflow remains as new performance proof.
+- [ ] Run full solutionLinux restore/build, tests, recovery and RF3; fix each actual owning failure and preserve raw evidence.
+- [ ] Run changed/related/full comparison case cohorts in GitHub. Native member/copy/ACK and CRUD oracle pass before each timing claim.
+- [ ] Aggregate authenticated all-cell results; real-files negative tests and complete same-source cohort pass.
+- [ ] Extend and run full siteTUnit/native/browser/coverage, format and provenance tests; regenerate site only from raw JSON.
+- [ ] Deliver coherent scoped checkpoints/pushes; successful new producer/aggregation/site provider receipt before completion.
+- [ ] Final strongest combined review: every AC/REQ/test/task/evidence linked, no pending mandatory gate, honest README/status.
+
+Final validation order: approved Orleans skill for storage/routing/failure review; static governance/diff preservation; GitHub Release solution/analyzer build; fullTUnit/scalar; process recovery; real Docker/AspireRF3 and native1/2/3 correctness; complete intensive isolated cohort; formatter and required coverage/source inventory; authenticated aggregation; siteTUnit/browser/native thresholds; freshness/provider/live Pages proof. No configuration, worker claim or partial artifact counts as complete.
+
+## Active source joins
+
+- TASK-ISO-005 source reviewed: benchmark opt-in and atomic membership guard plus
+  32 expanded authored cases; actual snapshot/restart/SDK/MCP qualification open.
+- TASK-ISO-007 planner source reviewed:270 canonical cells,108/162 matrices;
+  41 authored cases, none executed locally. Final CI/compiler review pending.
+- TASK-ISO-008H sql_audit owns selected host/new IsolatedHost tests and serialized
+  routing join; settings/envelope are frozen. Native adapters remain dependants.
+- TASK-ISO-008M root owns fresh mutation corpus/preparation/readback, bounded
+  sessions and sentinel. New corpus/oracle tests precede the source path.
+- TASK-ISO-009QR gates_audit owns only Qdrant/Rabbit count/proof files and new
+  NativeQuorumTopology tests. Explicit disabled Qdrant1 refinement is recorded.
+- TASK-ISO-009PMOK next models_audit scope is approved in acceptance/ADR056:
+  four native adapter prefixes and new NativeDocumentTopology tests; root alone
+  owns native composition and authentic runtime qualification.
+- Current06a9b631 baseline37073331174 completedfailure: image preflight failed
+  before RF3/comparison execution, Linux unit failed, recovery/analyzer passed.
+  Other checkout owner has a scoped image-format/schema regression repair; do
+  not duplicate it or count skipped runtime stages as passing.
+
+TASK010 image join discovered before cohort execution: existing prepare-images
+builds independently in every job. Same source alone does not ensure identical
+image bytes/config timestamps. The aggregate correctly requires a common immutable
+generator image. Build server/generator once in a separate trusted source job,
+retain native manifests/config/source receipt plus portable images, then import
+and verify identical bytes into each job-owned registry/runner. No database or
+live process is shared. Root must freeze import/proof wire and add real Docker
+round-trip/digest/source negative tests in GitHub before enabling the cohort.
+
+TASK-ISO-009PMOK source complete, root review pending. TASK-ISO-009PMOKR approved
+composition contract above: models_audit owns four NEW native helper prefixes and
+new model tests. Root retains all shared joins and genuine runtime qualification.
+
+TASK-ISO-010I approved immutable v1 image bundle. gates_audit owns NEW bundle
+modules and TUnit Node/files + actual Docker round-trip tests. Root owns transport,
+workflow and canonical image exports. Same manifest bytes are a mandatory join.
+
+## R14 compiler join
+
+The full development build log /private/tmp/keyload-r14-integrated-build.log
+contains142 distinct diagnostics, some already stale after active owning edits.
+Read-only current-source triage is retained in
+/private/tmp/keyload-build-join-triage-r14.txt. No compilation snapshot is runtime
+qualification. Root approves only preserving compiler/style corrections under
+the existing AC-ISO-002/006/007 contracts; spellings, validation inputs, scenario
+count, assertions and subprocess/cancellation cleanup must remain identical.
+
+| Task | AC / owner / model | Permissions / start | Artifact / verification / join |
+|---|---|---|---|
+| TASK-ISO-JOIN-PLANNER-R15 | ISO002/007; bounded Luna/high worker | Read current four IsolatedPlan test/process files; write ONLY a /private/tmp patch proposal and hash inventory, since another owner has active shared source | Named protocol/environment constants and exact-preserving analyzer/style fixes; no tests/build/source/Git mutations; root verifies fresh bytes before applying |
+| TASK-ISO-JOIN-INTEGRATE-R15 | ISO002..007; root high capability | Serialized shared-file compiler/API/formatter joins, preserve fresh owning changes | Full combined development build/formatter/governance followed by actual final-SHA Linux gates; pending |
+| TASK-ISO-SITE-COMPILER-R17 | ISO008/009; bounded Luna/high worker | Read current SiteIsolated*.cs and compiler log; write ONLY a private-tmp exact-byte-guarded patch proposal since another owner is active | Preserve every genuine browser/HTTP/arithmetic oracle,270 workers, all scenario/node/repetition/metric selectors and corruption cases; named fields/braces/var corrections only; root alone applies fresh reviewed bytes |
+
+The final checkpoint follows the owner's all-current-KeyLoad-scope main request;
+no active producer/resource/test file may be silently omitted, moved or stashed.
+
+R19 source join: the new SiteIsolatedGitHub proof/receipt tests reference a
+missing real Node-process bridge. Root alone joins the authored Node program to
+the existing bounded SiteIsolatedNodeProcess.RunProcessAsync implementation;
+temporary request/script files, exit/stderr checks, cloned JSON and cancellation
+remain mandatory. This is the existing ISO007/009 native proof flow, not a new
+protocol or provider substitute. Shared site ownership prevents safe delegated
+source writes; root performs the bounded integration and reviews its whole diff.
+
+TASK-ISO-010C native27 preflight approved before allocating full270 matrices.
+Separate VMs/artifacts, fixed supported representatives, no replacement of final
+qualification; root owns derived matrix and needs graph.
+
+TASK-ISO-010G approved: gates_audit owns new native authenticated GH transport
+modules/tests. Root owns CLI bindings/workflows and frozen proof join. Full270
+collection plus native current-job capture are mandatory; parser inputs are not
+authenticated proof.
+
+TASK-ISO-011W approved compact projection/isolated loader/arithmetic/UI worker; root owns shared joins. Raw270 workers stay byte-preserved in authenticated GitHub artifacts; Pages gets bounded derived metrics plus original manifest. TASK010G budget refinement sequences independent VM phases to preserve authenticated provider capacity. Runtime and coverage qualification remain pending.
+
+TASK010G rate budget: exact provider403/429 reset/Retry-After may boundedly wait outside timings, with retained headers, same route/source and no DB retries; frozen accumulated3700s/3repeats/maxparallel6.
+
+TASK-ISO-010F approved genuine1/2/3 fault implementation; sql_audit newprefix ownership, root call/evidence join. TASK011 clarified browser/producer joins recorded. Every runtime gate remains pending.
+
+## Fresh real baseline6ad, run37077856823
+
+Exact SHA6ad4741a713ac3376868aef146ed60a199e97b93,
+https://github.com/managedcode/KeyLoad/actions/runs/37077856823. Full build,
+formatter, governance,118 analyzer cases and recovery passed; unit/scalar/native
+RF3/comparison qualification is not complete. Local copied log is diagnostic
+input only at /private/tmp/keyload-baseline-37077856823.log.
+
+- [ ] OversizedCompiledFramePersistsItsFailureAndAdvancesTheRaftApplyPosition: compiled journal frame limit failure at TransactionProtocolTests.cs70; concurrent owning WAL framing repair must preserve exact limit/receipt/apply contracts.
+- [ ] AcWal001RealBinaryPayloadUsesFewerEncodedBytesThanEquivalentRepresentativeJson: binary payload not smaller than real JSON; concurrent WAL owner has source repairs, awaiting exact-SHA actual unit gate.
+- [ ] AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica: committed.IsSuccess false at TimeSeriesRf3ReplicaRestartTests.cs43; actual source package/recovery owner repair pending genuine RF3, no weakened assertion.
+- [ ] AspireTimeseriesProfileEmitsOracleReportAndProtectsForeignSchema: native Timescale persistenceGuarantee omitted required single-node; exact wording/source owner repair pending. Native TimeSeries must move to separate isolated target jobs, not silently disappear from qualification.
+- [ ] AspireRunsIdenticalScenariosAgainstRealRf3AndExternalEngines: stream duplicate returns actual KeyLoad:RevisionConflict, old assertion KeyLoad:Conflict; current source already has exact raw RevisionConflict expectation. Whole multi-engine performance invocation is superseded by270 isolated native cells; its relevant SDK/PG/Neo semantic regressions are explicitly joined after selected PointRead timing.
+
+TASK010 infrastructure source now joins immutable image-native roundtrip, actual
+current-job capture, exact model/workload gates,27preflight,108CRUD,162specialized,
+authenticated raw collector and complete bounded aggregator. Common setup/teardown
+are colocated native composite artifacts under workflows/Features/BenchmarkComparisons
+with policy before implementation. ci.yml remains under400lines; no unrelated gate
+is waived. Source-only governance passes25projects/4modules. Required GitHub remains
+pending; source compilation is a development check only.
+
+| Task | AC / owner / tier | Permission / dependencies | Ordered artifacts / verification / join |
+|---|---|---|---|
+| TASK-ISO-012P | ISO007/008/009; gates_audit capable trust-boundary worker | ONLY NEW site-isolated-github-* and SiteIsolatedGitHub* prefixes; approved written contract after010G/011 source; root shared integration | Tests-first genuine archive/metadata, bounded capture/selection, exact BCL277-file preparation, immutable receipts/freshness; source review then actual native full site/browser80/70/90. Pending |
+| TASK-ISO-012PJ | ISO007/008/009; root strongest integration | Shared before/after hooks, source/coverage/workflow/env joins, publication receipt | Preserve legacy12-file gates independently; capture2 isolated ZIPs, verified277 inputs, complete site suite, both final source/identity freshness checks, actual Pages/live evidence. Pending |
+
+TASK011 manual exception: deterministic source mutation precisely during the
+sequential producer has no legitimate native observable synchronization point.
+Review both bounded no-follow manifest reads and equality check; real corruption,
+positive270 raw data and post-suite/final unchanged-file gates stay automated.
+Do not add a test-only production hook, fabricated positive or timing race.
+
+Native development compilation at /private/tmp/keyload-isolated-source-build-native.log
+completed with88 source diagnostics; these are not qualification/test results.
+010F owns TimeProvider/catch/disposal corrections;011W owns named-key/style fixes.
+Some exact diagnostics were already corrected by concurrent source owner; fresh
+reads precede all joins. Required GitHub tests/coverage/runtime remain pending.
+
+Fresh historical source c10c48e40d8a9b452c9d131da549cab1e336692d,
+https://github.com/managedcode/KeyLoad/actions/runs/37079707413: Linux full build,
+formatter/governance/analyzer, unit, scalar unit, process recovery and native RF3
+jobs are successful. Historical comparison job still failed; source407619362
+repairs its stream cancellation expectation and awaits its actual run37080578096.
+Neither source contains this new isolated cohort. Earlier WAL/TimeSeries unit/RF3
+failure entries retain chronology and are superseded only for that exact c10 SHA;
+new270/image/Pages native qualification remains pending.
+
+TASK010 native teardown join now preserves an already failing public assertion
+while attempting every independent raw/log/stop/data/receipt stage. An owned
+teardown.json records only fixed failure stages and a primaryFailure flag; cleanup
+failure on an otherwise successful case still fails. The real fault/current-job
+flows exercise ordinary cleanup; unforced simultaneous filesystem/log shutdown
+faults have explicit source-control-flow review evidence rather than test doubles.
+
+TASK-ISO-TS001 package identity repair (AC-ISO-006): authored a real loaded-assembly
+versus central NuGet pin report regression before replacing stale10.0.0 metadata
+with the actual library informational version. No dependency implementation or
+release is modified; package10.0.3 delivery belongs to the existing owning repair.
+New comparison source/test requires exact-SHA GitHub execution. Missing assembly
+version fails rather than inventing a value.
+
+TASK-ISO-011R (AC-ISO-008/009) is a bounded native responsive follow-up: worker
+owns only isolated-view and new SiteIsolated layout assertions plus standalone
+test call. Root owns scoped CSS using existing tokens. Actual270 Chrome evidence
+must retain9 rows at1440/768/390/320 widths, confine620px-minimum table overflow
+inside a labelled keyboard-focusable scroll region and wrap long provenance.
+Tests precede the container/CSS changes; no new visual or measurement contract.
+
+## Foundation checkpoint review
+
+TASK-ISO-011V reviews the stopped compact producer, loader, view and genuine
+site tests read-only; TASK-ISO-013V reviews selected native topology, teardown,
+image import and workflow bindings read-only. Root integrates concrete findings
+before the first source checkpoint. The active TASK-ISO-012P publication prefix
+is excluded until its own contract implementation is complete; unrelated owning
+WAL and TimeSeries changes remain visible and separate.
+
+Exact historical407619362db859e14d7a678d4441b8d4a77862e4,
+https://github.com/managedcode/KeyLoad/actions/runs/37080578096 completed with
+successful Linux verify, analyzer and actual Docker RF3 jobs. Legacy comparison
+failed its stale case-cardinality assertion (72 expected,96 actual); the owning
+source07ca0e8074a0c29cd5b1a38c558b366834f203a0 corrects the explicit eight-scenario
+matrix. No isolated270 measurements are qualified by these historical runs.
+
+TASK-ISO-011V found a rejection-fixture path outside the protected site source
+tree. Root corrected sourceChild to the actual canonical site root, preserving
+the production boundary and expected rejection. Native GitHub execution remains
+mandatory; source correction alone is not a passing test.
+
+Both read-only reviews are complete with the fixture correction joined. Root
+closed the remaining unbounded implicit-disposal risk under AC-ISO-006: explicit
+capture/application disposal now runs as independently attempted30s teardown
+stages and observes late faults. No primary assertion is overwritten afterward.
+Fresh native development compilation and then exact-source GitHub remain the
+join gates; the new intensive/runtime/publication receipts remain absent.
+
+The final foundation ComparisonTests development compilation passed with zero
+warnings/errors (36.78s), retained at
+/private/tmp/keyload-isolated-checkpoint-native-build-r3.log. Static governance
+and syntax checks of51 staged JavaScript modules passed. These are source checks,
+not native test/runtime qualification. The stopped foundation contains328 scoped
+paths; the active publisher and foreign owning work remain excluded from this
+coherent checkpoint. Next required gate is actual GitHub source qualification.

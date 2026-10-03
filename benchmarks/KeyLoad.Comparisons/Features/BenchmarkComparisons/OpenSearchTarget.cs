@@ -1,30 +1,29 @@
 namespace KeyLoad.Comparisons.Targets;
 
-/// <summary>Runs point-read, document-write, and exact-vector comparisons against an isolated OpenSearch index.</summary>
+/// <summary>Runs document CRUD and exact-vector comparisons against an isolated OpenSearch index.</summary>
 /// <param name="client">HTTP client configured for the OpenSearch endpoint and Aspire credentials; the target disposes it.</param>
 /// <param name="runId">Guid-formatted run identifier used to isolate the index name.</param>
 /// <param name="image">Pinned OpenSearch image reference checked during initialization and recorded in the profile.</param>
-/// <param name="topology">The expected single-node or replicated topology verified against the created index.</param>
+/// <param name="topology">The expected one, two or three native nodes verified against the created index.</param>
 public sealed class OpenSearchTarget(HttpClient client, string runId, string image, ComparisonTopology topology) : IComparisonTarget
 {
     private readonly string index = OpenSearchNames.IndexNamePrefix + Guid.Parse(runId).ToString(OpenSearchNames.GuidFormat);
-    private readonly int expectedCopies = topology == ComparisonTopology.Replicated
-        ? OpenSearchNames.ReplicatedCopiesCount : OpenSearchNames.SingleNodeCount;
+    private readonly int expectedCopies = ComparisonTopologies.NodeCount(topology);
     private bool indexCreated;
     private int topK;
 
     /// <summary>Gets the observed server, transport, index-copy, and acknowledgement evidence collected during initialization.</summary>
     public TargetProfile Profile { get; private set; } = new(OpenSearchNames.TargetName, OpenSearchNames.Unverified,
-        topology == ComparisonTopology.Replicated ? OpenSearchNames.ReplicatedTopology : OpenSearchNames.SingleTopology,
-        topology == ComparisonTopology.Replicated ? OpenSearchNames.ReplicatedAcknowledgement : OpenSearchNames.SingleAcknowledgement,
+        topology == ComparisonTopology.Standalone ? OpenSearchNames.SingleTopology : topology == ComparisonTopology.TwoNode ? OpenSearchNames.TwoNodeTopology : OpenSearchNames.ReplicatedTopology,
+        topology == ComparisonTopology.Standalone ? OpenSearchNames.SingleAcknowledgement : topology == ComparisonTopology.TwoNode ? OpenSearchNames.TwoNodeAcknowledgement : OpenSearchNames.ReplicatedAcknowledgement,
         OpenSearchNames.RealtimeReadContract, OpenSearchNames.HttpJson, OpenSearchNames.AspireAuthorization, image);
 
     /// <summary>Gets the limitation text for scenarios that this target does not implement.</summary>
     public string UnsupportedReason => OpenSearchNames.Unsupported;
-    /// <summary>Reports support for point reads, document writes, and exact vector search.</summary>
+    /// <summary>Reports support for document CRUD and exact vector search.</summary>
     /// <param name="scenario">The comparison scenario to check.</param>
     /// <returns><see langword="true"/> for a supported scenario; otherwise <see langword="false"/>.</returns>
-    public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.VectorExact;
+    public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete or Scenario.VectorExact;
 
     /// <summary>Checks the pinned server version, creates and seeds the index, verifies replica copies and settings, then records evidence.</summary>
     /// <param name="dataset">The deterministic document and vector corpus and query options.</param>

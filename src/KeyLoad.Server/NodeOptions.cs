@@ -11,8 +11,10 @@ internal sealed record NodeOptions
     public string DataDirectory { get; init; } = NodeDefaults.DataDirectory;
     /// <summary>Stable configured voter identity and authenticated discovery HTTP origin.</summary>
     public string PublicEndpoint { get; init; } = NodeDefaults.PublicEndpoint;
-    /// <summary>Odd fixed set of voter origins, including the local origin.</summary>
+    /// <summary>Fixed voter origins including the local origin; production requires an odd group of at least three.</summary>
     public IReadOnlyList<string> Peers { get; init; } = [];
+    /// <summary>Trusted startup opt-in for isolated benchmark fixed groups of one, two or three voters.</summary>
+    public bool BenchmarkTopology { get; init; }
     /// <summary>Orleans cluster identity, shared by every voter.</summary>
     public string ClusterId { get; init; } = NodeDefaults.ClusterId;
     /// <summary>Database incarnation, stable across process restarts and snapshot catch-up.</summary>
@@ -76,7 +78,9 @@ internal sealed record NodeOptions
 
     private void ValidatePeers()
     {
-        if (Peers is null || Peers.Count < NodeDefaults.MinimumVoters || Peers.Count % 2 == 0
+        if (Peers is null || (BenchmarkTopology
+                ? Peers.Count is < NodeDefaults.MinimumBenchmarkVoters or > NodeDefaults.MaximumBenchmarkVoters
+                : Peers.Count < NodeDefaults.MinimumVoters || Peers.Count % 2 == 0)
             || Peers.Distinct(StringComparer.Ordinal).Count() != Peers.Count
             || !Peers.Contains(PublicEndpoint, StringComparer.Ordinal)
             || string.IsNullOrWhiteSpace(DataDirectory) || string.IsNullOrWhiteSpace(SiloAddress))
@@ -115,6 +119,7 @@ internal sealed record NodeOptions
     /// <param name="directory">The full physical node directory.</param>
     public ReplicaConfiguration CreateReplicaConfiguration(string directory) => new(PublicEndpoint, [.. Peers], directory, Incarnation)
     {
+        BenchmarkTopology = BenchmarkTopology,
         SnapshotThreshold = SnapshotThreshold,
         LowerElectionTimeout = TimeSpan.FromMilliseconds(LowerElectionTimeoutMilliseconds),
         UpperElectionTimeout = TimeSpan.FromMilliseconds(UpperElectionTimeoutMilliseconds),
@@ -143,6 +148,8 @@ internal static class NodeDefaults
     internal const string InvalidPeers = "Cluster origins require distinct fixed voters, private development HTTP or HTTPS, and a local member.";
     internal const string InvalidAddress = "A remote voter requires a routable advertised silo address.";
     internal const int MinimumVoters = 3;
+    internal const int MinimumBenchmarkVoters = 1;
+    internal const int MaximumBenchmarkVoters = 3;
     internal const int SiloPort = 11_111;
     internal const int SnapshotThreshold = 1_024;
     internal const int LowerElectionMilliseconds = 4_000;

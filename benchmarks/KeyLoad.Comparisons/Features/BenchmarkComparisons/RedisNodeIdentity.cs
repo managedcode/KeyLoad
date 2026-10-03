@@ -15,11 +15,12 @@ internal sealed record RedisNodeIdentity(string RunId, string Version)
     private const string PrimaryRoleObservation = "primary";
     private const string ReplicaRolePrefix = "replica-";
     private const string SingleStateObservation = "observed ROLE=master and connected_slaves=0";
-    private const string ReplicatedStateObservation = "primary ROLE=master with two connected replicas";
+    private const string TwoReplicaObservation = "primary ROLE=master with two connected replicas";
+    private const string OneReplicaObservation = "primary ROLE=master with one connected replica";
     private const string ReplicaProtocolObservation = "direct endpoints report ROLE=slave and matching INFO master_host/master_port";
     private const string ReplicaPayloadObservation = "payload read from each endpoint with DemandReplica";
     private const string SingleAofObservation = "AOF appendonly=yes and appendfsync=always";
-    private const string ReplicatedAofObservation = "AOF appendonly=yes and appendfsync=always on all three nodes";
+    private const string ReplicatedAofObservation = "AOF appendonly=yes and appendfsync=always on every observed node";
 
     public static async Task<RedisNodeIdentity> ReadAsync(IServer server, CommandFlags flags, CancellationToken token)
     {
@@ -65,7 +66,7 @@ internal sealed record RedisNodeIdentity(string RunId, string Version)
     {
         var observations = new List<string>
         {
-            ReplicatedStateObservation,
+            replicas.Length == 2 ? TwoReplicaObservation : OneReplicaObservation,
             primary.Observation(PrimaryRoleObservation),
             ReplicaProtocolObservation,
             ReplicaPayloadObservation,

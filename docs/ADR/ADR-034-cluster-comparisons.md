@@ -220,3 +220,13 @@ and real GitHub qualification remains mandatory before the decision is Implement
 New code uses named feature paths; move existing flat benchmark assets only as a verified whole-slice migration. Isolated benchmark engine datasets are disposable; no product schema or persisted format changes are introduced. Keep immutable published results after rollback; stop new publication while repairing a failing profile and preserve the complete required CI matrix. Do not overwrite old evidence or invent replacement numbers. A rollback cannot weaken a mandatory product/test/security rule.
 
 The current baseline is six-engine GitHub CI36926803549 at9c570f8c33a7a9667507a8e1c0ca68860de3be45. Nine-engine/multi-node/full-Docker evidence is pending. The TUnit source migration is present locally and awaits delivered-source GitHub proof. Existing Node-runner/DotNext/host-process and coverage/complexity gaps remain explicit until their owning implementations and GitHub proofs complete.
+
+## Owner-directed isolated producer refinement, 2026-10-03
+
+[ADR-056](ADR-056-isolated-linux-comparison-cells.md), REQ-BC-050..058/AC-ISO-001..009
+and its ordered implementation contract supersede the new producer's old combined
+Single/Replicated six-profile execution. Actual native1/2/3 × engine × scenario
+is one isolated Linux agent, intensive CRUD added, raw per-worker reports retained
+and complete authenticated cohort required before site metrics refresh. Earlier
+schema2/3 results retain original contracts; no fictional merged host or equivalent
+availability acrossRF1/RF2/RF3. Existing native image/ACK/community boundaries remain.

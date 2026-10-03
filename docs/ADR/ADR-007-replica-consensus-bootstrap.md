@@ -35,3 +35,14 @@ flowchart LR
     Barrier --> Response[Authorized committed response]
     Bootstrap[Verified voter metadata bootstrap] --> Replica
 ```
+
+## Owner-directed benchmark fixed membership, 2026-10-03
+
+The production odd-voterRF3-first contract remains mandatory. Explicit trusted
+benchmark startup may use fixed native1/2/3 voters under [ADR-056](ADR-056-isolated-linux-comparison-cells.md),
+REQ-BC-053/AC-ISO-004 and TASK-ISO-005/010/012. Majority remainsfloor(n/2)+1;
+RF1 tolerates no voter loss,RF2 needs both voters for quorum read/write. No HTTP
+caller opt-in, alternate storage, membership migration, lowered quorum or production
+readiness claim. Exact files/stages/migration/rollback/SDK+MCP fault tests and
+root-owned integration are the ADR056 implementation contract. Status staysAccepted
+until real benchmark topology and unchangedRF3 fault/recovery qualification exist.

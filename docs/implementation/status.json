@@ -2055,5 +2055,55 @@
       "dedicated_RF3_SQL_table_CALL_performance_and_per_node_resources",
       "numeric_coverage_endurance_power_loss"
     ]
+  },
+  "ISO-COMP-001": {
+    "status": "in_progress",
+    "scope": "Linux-only isolated native engine x1/2/3 nodes x one scenario, common intensive workload, raw worker schema4, authenticated complete aggregation and site regeneration",
+    "specification": "docs/Features/BenchmarkComparisons.md#owner2026-10-03-isolated-linux-intensive-comparisons",
+    "adr": "docs/ADR/ADR-056-isolated-linux-comparison-cells.md",
+    "plan": "isolated-comparisons.plan.md",
+    "sourceReady": [
+      "closed270cellPlanner",
+      "rawEnvelopeValidatorAndBoundedAggregator",
+      "benchmarkFixedMembershipAndAtomicZoneTreeGuard",
+      "selectedHostAndAtomicWorkerOutput",
+      "commonMutationCorpusPreparationReadback",
+      "qdrantRabbitNative1to3Proofs",
+      "nativeDocumentAdaptersAndSelectedTopologyResources",
+      "portableImmutableImageBundleRoundtripSource",
+      "realSDKMCPPublicAssertions",
+      "Linux27Preflight108Crud162SpecializedWorkflowGraph",
+      "authenticatedGitHubTransportSource",
+      "fixedMembershipNativeFaultAssertions",
+      "compactProjectionAndNativeBrowserSource"
+    ],
+    "pending": [
+      "nativeImageImportAndProviderQualification",
+      "realSDKMCPFixedMembershipFaultProofs",
+      "exactSHAFullLinuxRequiredGates",
+      "actualComplete270CellIntensiveCohort",
+      "schema4SiteCoverageBrowserAndPublication",
+      "separateNativeTimeSeriesIsolation"
+    ],
+    "qualification": {
+      "newIntensiveResults": null,
+      "localTestsRun": false,
+      "runtimeReady": false,
+      "productionReady": false
+    },
+    "baseline": {
+      "runId": 37072003906,
+      "sourceRevision": "722e7fe7872288d99869b6e25950e67a547b7d86",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37072003906",
+      "conclusion": "failure",
+      "limits": "Historical all-OS verification passed; RF3 59/60 and comparison failed. This is not an isolated intensive cohort."
+    },
+    "latestBaseline": {
+      "runId": 37079707413,
+      "sourceRevision": "c10c48e40d8a9b452c9d131da549cab1e336692d",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413",
+      "conclusion": "failure",
+      "limits": "Exact historical Linux build/format/governance/analyzers/unit/scalar/recovery and RF3 passed; legacy comparison cancellation failed. New isolated intensive cohort not run."
+    }
   }
 }

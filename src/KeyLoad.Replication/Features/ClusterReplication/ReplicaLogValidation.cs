@@ -13,8 +13,10 @@ internal static class ReplicaLogValidation
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ReplicaProtocol.CorruptLog);
         }
-        var state = store.Read(view => view.ReadOwnedValue(ReplicaProtocol.StateStorageKey) is { } bytes
-            ? ReplicaPersistence.Decode<ReplicaHardState>(bytes) : null);
+        var metadata = store.Read(view => (State: view.ReadOwnedValue(ReplicaProtocol.StateStorageKey),
+            Membership: view.ReadOwnedValue(ReplicaBenchmarkMembership.StorageKey)));
+        ReplicaBenchmarkMembership.Validate(metadata.Membership, metadata.State is not null, configuration);
+        var state = metadata.State is { } bytes ? ReplicaPersistence.Decode<ReplicaHardState>(bytes) : null;
         if (state is null)
         {
             if (store.Read(view => view.Scan(KeyCodec.Encode(ReplicaProtocol.EntryKey), 1).Records.Length) != 0)
@@ -22,7 +24,12 @@ internal static class ReplicaLogValidation
                 throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
             }
             state = new(ReplicaProtocol.FormatVersion, configuration.Incarnation, 0, null, 0, 0, null);
-            store.Commit((tx, _) => { tx.PutRecord(ReplicaProtocol.StateStorageKey, state); return true; });
+            store.Commit((tx, _) =>
+            {
+                tx.PutRecord(ReplicaProtocol.StateStorageKey, state);
+                ReplicaBenchmarkMembership.Initialize(tx, configuration);
+                return true;
+            });
         }
         Validate(state, configuration);
         ValidateEntries(store, state, configuration);

@@ -60,7 +60,7 @@ export async function prepareImages(environment = process.env, argv = process.ar
   await appendImageOutputs(context, serverManifest.finalReference, loadGeneratorManifest.finalReference);
 }
 
-function makeImageRecord(manifest, manifestFile, builtImage) {
+export function makeImageRecord(manifest, manifestFile, builtImage) {
   return Object.freeze({
     [receiptField.reference]: manifest.finalReference,
     [receiptField.manifestDigest]: manifest.manifest.manifestSha256,
@@ -71,7 +71,7 @@ function makeImageRecord(manifest, manifestFile, builtImage) {
   });
 }
 
-async function verifySourceCheckout(context) {
+export async function verifySourceCheckout(context) {
   const revisionResult = await runBounded(gitCommand, gitRevisionArguments, {
     cwd: context.workspace,
     timeoutMs: processLimit.inspectTimeoutMs,

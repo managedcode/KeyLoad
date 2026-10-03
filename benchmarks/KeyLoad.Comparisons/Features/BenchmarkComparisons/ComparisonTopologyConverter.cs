@@ -6,6 +6,7 @@ namespace KeyLoad.Comparisons;
 internal static class ComparisonTopologyNames
 {
     internal const string Single = "Single";
+    internal const string TwoNode = "TwoNode";
 }
 
 /// <summary>Preserves the comparison topology's established configuration names for external type-descriptor callers.</summary>

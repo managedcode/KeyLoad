@@ -14,7 +14,7 @@ internal static class KurrentClusterMembers
     }
 
     private static int ExpectedCount(ComparisonTopology topology)
-        => topology == ComparisonTopology.Replicated ? KurrentConstants.ExpectedReplicatedNodes : KurrentConstants.ExpectedSingleNode;
+        => ComparisonTopologies.NodeCount(topology);
 
     private static KurrentGossipMember[] CanonicalMembers(KurrentGossipMember[] members)
         => members.OrderBy(member => member.Id, StringComparer.Ordinal).ToArray();
@@ -26,7 +26,10 @@ internal static class KurrentClusterMembers
         var localIds = views.Select(view => view.LocalMember.Id).ToArray();
         return members.Length == expectedCount && members.All(IsHealthyMember) &&
             members.Select(member => member.Id).Distinct(StringComparer.Ordinal).Count() == expectedCount &&
-            localIds.Distinct(StringComparer.Ordinal).Count() == expectedCount && RolesMatch(members, views, topology);
+            localIds.Distinct(StringComparer.Ordinal).Count() == expectedCount &&
+            members.Select(member => member.Id).ToHashSet(StringComparer.Ordinal).SetEquals(localIds) &&
+            members.Select(member => (member.HttpEndpointIp, member.HttpEndpointPort)).Distinct().Count() == expectedCount &&
+            RolesMatch(members, views, topology);
     }
 
     private static bool IsHealthyMember(KurrentGossipMember member)
@@ -36,7 +39,7 @@ internal static class KurrentClusterMembers
 
     private static bool RolesMatch(KurrentGossipMember[] members, KurrentGossipView[] views, ComparisonTopology topology)
     {
-        if (topology != ComparisonTopology.Replicated)
+        if (ExpectedCount(topology) == 1)
         {
             return members.Length == KurrentConstants.ExpectedSingleNode &&
                 members.Count(member => member.State == KurrentConstants.LeaderState) == KurrentConstants.ExpectedLeader;
@@ -44,14 +47,19 @@ internal static class KurrentClusterMembers
 
         var leaders = members.Where(member => member.State == KurrentConstants.LeaderState).ToArray();
         return leaders.Length == KurrentConstants.ExpectedLeader &&
-            members.Count(member => member.State == KurrentConstants.FollowerState) == KurrentConstants.ExpectedFollowers &&
+            members.Count(member => member.State == KurrentConstants.FollowerState) == ExpectedCount(topology) - 1 &&
             views.All(view => view.Members.Count(member => member.State == KurrentConstants.LeaderState) == KurrentConstants.ExpectedLeader &&
                               view.Members.Single(member => member.State == KurrentConstants.LeaderState).Id == leaders[0].Id &&
-                              view.Members.Count(member => member.State == KurrentConstants.FollowerState) == KurrentConstants.ExpectedFollowers);
+                              view.Members.Count(member => member.State == KurrentConstants.FollowerState) == ExpectedCount(topology) - 1);
     }
 
     private static bool ViewsAgree(KurrentGossipMember[] expected, KurrentGossipView[] views)
-        => views.All(view => CanonicalMembers(view.Members).All(IsHealthyMember) &&
-            expected.Select(member => member.Id).SequenceEqual(
-                CanonicalMembers(view.Members).Select(member => member.Id), StringComparer.Ordinal));
+        => views.All(view => view.Members.Length == expected.Length && CanonicalMembers(view.Members).All(IsHealthyMember) &&
+            CanonicalMembers(view.Members).Select(Identity).SequenceEqual(expected.Select(Identity)) &&
+            expected.Any(member => Identity(member) == Identity(view.LocalMember)));
+
+    private static (string Id, string State, string Version, string Host, int Port, string InternalHost, int InternalPort)
+        Identity(KurrentGossipMember member)
+        => (member.Id, member.State, member.Version, member.HttpEndpointIp, member.HttpEndpointPort,
+            member.InternalHttpEndpointIp, member.InternalHttpEndpointPort);
 }

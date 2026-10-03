@@ -1,0 +1,31 @@
+export const GH = Object.freeze({
+  repository: 'managedcode/KeyLoad', workflow: 'KeyLoad CI', workflowPath: '.github/workflows/ci.yml',
+  api: 'repos/managedcode/KeyLoad/actions', host: 'github.com', apiVersion: '2022-11-28',
+  imageJob: 'comparison-images', imageArtifact: 'comparison-image-bundle', casePrefix: 'case / ',
+  preflightPrefix: 'preflight / ', artifactPrefix: 'comparison-worker-', captureDirectory: 'keyload-cell-github',
+  imageSteps: Object.freeze(['Qualify native image export and import', 'Retain common image bundle']),
+  workerSteps: Object.freeze(['Run isolated native case', 'Retain isolated worker evidence']),
+  pageSize: 100, pages: 20, items: 2000, metadataBytes: 16777216, workerZipBytes: 134217728,
+  workerRawBytes: 67108864, imageZipBytes: 9663676416, totalWorkerZipBytes: 17179869184,
+  metadataTimeoutMs: 120000, downloadTimeoutMs: 600000, unzipTimeoutMs: 120000,
+  headerBytes: 65536, rateWaitMs: 3700000, rateRepeats: 3,
+  stderrBytes: 262144, inventoryBytes: 1048576, inventoryEntries: 4096,
+  failure: 'Isolated GitHub evidence rejected.',
+});
+
+export function requireGitHub(condition) {
+  if (!condition) throw new Error(GH.failure);
+}
+
+export const positive = value => Number.isSafeInteger(value) && value > 0;
+export const canonicalJobUrl = (cohort, id) => `https://github.com/${cohort.repository}/actions/runs/${cohort.runId}/job/${id}`;
+export const hashPattern = /^[a-f0-9]{64}$/;
+export const shaPattern = /^[a-f0-9]{40}$/;
+export const digestPattern = /^sha256:[a-f0-9]{64}$/;
+
+export function timestamp(value) {
+  requireGitHub(typeof value === 'string' && /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/.test(value));
+  const parsed = Date.parse(value);
+  requireGitHub(Number.isFinite(parsed));
+  return parsed;
+}

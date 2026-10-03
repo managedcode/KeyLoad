@@ -59,7 +59,7 @@ internal sealed class ComparisonTopologyTests
     public void AcBct003MalformedAndUndefinedConfigurationRemainsRejectedByBinderOrValidation()
     {
         using var configuration = new ConfigurationManager();
-        configuration[TopologySetting] = "Single, 2";
+        configuration[TopologySetting] = "Single, 3";
         var combined = configuration.GetSection(BenchmarkSection).Get<ComparisonOptions>()!;
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(combined.Validate);
 
@@ -69,7 +69,7 @@ internal sealed class ComparisonTopologyTests
             Assert.ThrowsExactly<InvalidOperationException>(() => ComparisonOptions.Read(configuration));
         }
 
-        foreach (var configured in new[] { "2", "3" })
+        foreach (var configured in new[] { "3", "4" })
         {
             configuration[TopologySetting] = configured;
             Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ComparisonOptions.Read(configuration));

@@ -20,7 +20,9 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
                 await KeyLoadEventOperations.AppendAsync(client, partition, document, cancellationToken);
                 return new();
             case Scenario.DocumentWrite:
-                return await WriteDocumentAsync(document, cancellationToken);
+            case Scenario.DocumentUpdate:
+            case Scenario.DocumentDelete:
+                return await KeyLoadDocumentOperations.ExecuteAsync(client, partition, scenario, document, cancellationToken);
             case Scenario.VectorExact:
                 return await SearchVectorAsync(document, cancellationToken);
             case Scenario.GraphNeighbors:
@@ -44,19 +46,6 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
 
     public Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         => KeyLoadEventOperations.ReadAsync(client, partition, document, cancellationToken);
-
-    private async Task<OperationResult> WriteDocumentAsync(BenchmarkDocument document,
-        CancellationToken cancellationToken)
-    {
-        var receipt = KeyLoadClientResults.Success(await client.CommitAsync(new(Guid.NewGuid(), partition,
-            [new PutDocument("documents", document.Id, document.Json, 0)]), cancellationToken));
-        if (receipt.Durability != DurabilityProfile.QuorumProcessDurable)
-        {
-            throw new ComparisonFailureException(KeyLoadEventOperations.WrongWriteProfile);
-        }
-
-        return new();
-    }
 
     private async Task<OperationResult> SearchVectorAsync(BenchmarkDocument document,
         CancellationToken cancellationToken)

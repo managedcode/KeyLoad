@@ -10,27 +10,24 @@ internal static class MongoReplicaVerifier
 {
     public static async Task<MongoReplicaProof> VerifyAsync(string connectionString,
         IMongoDatabase adminDatabase, IMongoDatabase database,
-        IMongoCollection<BsonDocument> documents, int timeoutSeconds, CancellationToken cancellationToken)
+        IMongoCollection<BsonDocument> documents, ComparisonTopology topology, BenchmarkDataset dataset, CancellationToken cancellationToken)
     {
         var status = await adminDatabase.RunCommandAsync<BsonDocument>(
             new BsonDocument(MongoSchema.ReplicaSetStatusCommand, MongoSchema.CommandEnabledValue),
             ReadPreference.Primary, cancellationToken);
-        var members = ReadMembers(status);
-        var primaries = members.Where(IsPrimary).ToArray();
-        var secondaries = members.Where(IsSecondary).ToArray();
-        if (members.Length != MongoSchema.ReplicaNodeCount || primaries.Length != MongoSchema.PrimaryNodeCount
-            || secondaries.Length != MongoSchema.SecondaryNodeCount)
-        {
-            throw new ComparisonFailureException(MongoSchema.FailureReplicaSetShape);
-        }
+        var settings = MongoTarget.CreateSettings(connectionString, 1);
+        var members = ValidateMembers(status, topology, settings.ReplicaSetName);
+        var secondaries = members.Where(MongoReplicaMembers.IsSecondary).ToArray();
 
         var clients = new List<IMongoClient>(secondaries.Length);
         try
         {
             clients.AddRange(secondaries.Select(member => CreateSecondaryClient(connectionString, member)));
             var versions = new List<string>(members.Length);
-            foreach (var client in clients)
+            for (var index = 0; index < clients.Count; index++)
             {
+                var client = clients[index];
+                await VerifySameSetAsync(client, topology, status, secondaries[index], cancellationToken);
                 versions.Add(await ReadVersionAsync(client.GetDatabase(database.DatabaseNamespace.DatabaseName), ReadPreference.Secondary, cancellationToken));
             }
             versions.Insert(0, await ReadVersionAsync(database, ReadPreference.Primary, cancellationToken));
@@ -39,13 +36,10 @@ internal static class MongoReplicaVerifier
                 throw new ComparisonFailureException(MongoSchema.FailureReplicaMemberVersion);
             }
 
-            var settings = MongoClientSettings.FromConnectionString(connectionString);
-            settings.WriteConcern = MongoSchema.MajorityJournalWriteConcern;
-            settings.ReadConcern = ReadConcern.Majority;
-            settings.ReadPreference = ReadPreference.Primary;
             ValidateConcerns(settings);
-            await VerifyCopiedProbeAsync(documents, clients.ToArray(), database.DatabaseNamespace.DatabaseName, timeoutSeconds, cancellationToken);
-            var observations = BuildObservations(members, versions[0], settings);
+            await VerifyCopiedProbeAsync(documents, clients.ToArray(), database.DatabaseNamespace.DatabaseName, dataset.Options.TimeoutSeconds, cancellationToken);
+            await MongoSeededCopies.VerifyAsync(clients, database.DatabaseNamespace.DatabaseName, dataset, cancellationToken);
+            var observations = BuildObservations(status, members, versions[0], settings);
             return new(new ClusterEvidence(members.Length, members.Length, MongoSchema.HealthyState, observations), versions[0], clients.ToArray());
         }
         catch (Exception)
@@ -58,18 +52,23 @@ internal static class MongoReplicaVerifier
         }
     }
 
-    private static BsonDocument[] ReadMembers(BsonDocument status)
-        => status.GetValue(MongoSchema.MembersField).AsBsonArray.Select(value => value.AsBsonDocument).ToArray();
+    internal static BsonDocument[] ValidateMembers(BsonDocument status, ComparisonTopology topology, string? expectedSet)
+        => MongoReplicaMembers.Validate(status, topology, expectedSet);
 
-    private static bool IsPrimary(BsonDocument member)
-        => IsHealthyDataBearing(member) && member.GetValue(MongoSchema.MemberStateField).AsString == MongoSchema.PrimaryState;
-
-    private static bool IsSecondary(BsonDocument member)
-        => IsHealthyDataBearing(member) && member.GetValue(MongoSchema.MemberStateField).AsString == MongoSchema.SecondaryState;
-
-    private static bool IsHealthyDataBearing(BsonDocument member)
-        => member.GetValue(MongoSchema.MemberHealthField).ToInt32() == MongoSchema.HealthyMemberValue
-           && !member.GetValue(MongoSchema.MemberArbiterField, false).ToBoolean();
+    private static async Task VerifySameSetAsync(IMongoClient client, ComparisonTopology topology, BsonDocument expected, BsonDocument expectedMember,
+        CancellationToken cancellationToken)
+    {
+        var status = await client.GetDatabase(MongoSchema.AdminDatabase).RunCommandAsync<BsonDocument>(
+            new BsonDocument(MongoSchema.ReplicaSetStatusCommand, MongoSchema.CommandEnabledValue), ReadPreference.Secondary, cancellationToken);
+        var members = ValidateMembers(status, topology, expected[MongoSchema.ReplicaStatusSetField].AsString);
+        MongoReplicaMembers.ValidateDirectMember(status, expectedMember);
+        var original = MongoReplicaMembers.Read(expected);
+        if (members.Any(member => !original.Any(previous => previous[MongoSchema.MemberIdField] == member[MongoSchema.MemberIdField]
+            && previous[MongoSchema.MemberHostField] == member[MongoSchema.MemberHostField] && previous[MongoSchema.MemberStateField] == member[MongoSchema.MemberStateField])))
+        {
+            throw new ComparisonFailureException(MongoSchema.FailureReplicaSetShape);
+        }
+    }
 
     private static MongoClient CreateSecondaryClient(string connectionString, BsonDocument member)
     {
@@ -84,6 +83,8 @@ internal static class MongoReplicaVerifier
         settings.ReadPreference = ReadPreference.Secondary;
         settings.ReadConcern = ReadConcern.Majority;
         settings.WriteConcern = MongoSchema.MajorityJournalWriteConcern;
+        settings.RetryWrites = false;
+        settings.RetryReads = false;
         return new MongoClient(settings);
     }
 
@@ -150,7 +151,7 @@ internal static class MongoReplicaVerifier
         }
     }
 
-    private static ImmutableArray<string> BuildObservations(BsonDocument[] members, string version, MongoClientSettings settings)
+    private static ImmutableArray<string> BuildObservations(BsonDocument status, BsonDocument[] members, string version, MongoClientSettings settings)
     {
         var roles = members.Select(member => member.GetValue(MongoSchema.MemberStateField).AsString)
             .Order(StringComparer.Ordinal).ToArray();
@@ -158,6 +159,10 @@ internal static class MongoReplicaVerifier
         return [MongoSchema.ObservationMembers + members.Length, MongoSchema.ObservationRoles + string.Join(',', roles),
             MongoSchema.ObservationVersions + version, MongoSchema.ObservationWriteConcern + serverConcern,
             MongoSchema.ObservationReadConcern + settings.ReadConcern!.Level,
-            MongoSchema.ObservationReadPreference + settings.ReadPreference!.ReadPreferenceMode];
+            MongoSchema.ObservationReadPreference + settings.ReadPreference!.ReadPreferenceMode,
+            MongoSchema.ObservationSet + status[MongoSchema.ReplicaStatusSetField].AsString,
+            MongoSchema.ObservationMajority + status[MongoSchema.WriteMajorityField].ToInt32(),
+            MongoSchema.ObservationIdentities + string.Join(',', members.Select(member => member[MongoSchema.MemberIdField].ToInt32() + MongoSchema.MemberIdentitySeparator + member[MongoSchema.MemberHostField].AsString)),
+            MongoSchema.ObservationSeededCopies];
     }
 }

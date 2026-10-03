@@ -22,6 +22,7 @@ internal static class MongoSchema
     public const string ProfileVersion = "unverified";
     public const string SingleTopology = "one server; no replica copies";
     public const string ReplicatedTopology = "one primary plus two data-bearing secondaries";
+    public const string TwoNodeTopology = "one primary plus one data-bearing secondary; both members required for majority";
     public const string WriteAcknowledgement = "one-event-per-stream unique-document emulation; w=majority, journal=true; not full event-store equivalence";
     public const string ReadContract = "primary reads with majority read concern; event identity, revision and payload returned for outer untimed oracle validation";
     public const string NetworkTls = "MongoDB transport settings from connection string";
@@ -33,6 +34,14 @@ internal static class MongoSchema
     public const string HelloCommand = "hello";
     public const string WritablePrimaryField = "isWritablePrimary";
     public const string ReplicaSetNameField = "setName";
+    public const string ReplicaStatusSetField = "set";
+    public const string VotingMembersField = "votingMembersCount";
+    public const string WritableVotingMembersField = "writableVotingMembersCount";
+    public const string VoteMajorityField = "majorityVoteCount";
+    public const string WriteMajorityField = "writeMajorityCount";
+    public const string MemberIdField = "_id";
+    public const string MemberSelfField = "self";
+    public const int DuplicateKeyCode = 11000;
     public const string RouterMessageField = "msg";
     public const string RouterMessage = "isdbgrid";
     public const string BuildInfoCommand = "buildInfo";
@@ -48,8 +57,8 @@ internal static class MongoSchema
     public const string DefaultWriteConcernField = "defaultWriteConcern";
     public const string DefaultWriteConcernModeField = "w";
     public const string MajorityMode = "majority";
-    public const string FailureUnsupportedTopology = "MongoTopologyMustBeSingleOrThreeNodeReplicaSet";
-    public const string FailureReplicaSetShape = "MongoReplicaSetMustHaveOnePrimaryAndTwoDataSecondaries";
+    public const string FailureUnsupportedTopology = "MongoStandaloneTopologyMismatch";
+    public const string FailureReplicaSetShape = "MongoReplicaSetNodeRoleOrIdentityMismatch";
     public const string FailureReplicaMemberVersion = "MongoReplicaMemberVersionMismatch";
     public const string FailureDataCopyMissing = "MongoSecondaryDataCopyProbeFailed";
     public const string FailureDuplicateStreamAccepted = "MongoStreamUniqueInsertAcceptedDuplicate";
@@ -77,6 +86,11 @@ internal static class MongoSchema
     public const string ObservationWriteConcern = "clientWriteConcern=";
     public const string ObservationReadConcern = "clientReadConcern=";
     public const string ObservationReadPreference = "clientReadPreference=";
+    public const string ObservationSet = "replicaSet=";
+    public const string ObservationMajority = "native voting and writable voting members equal requested count; native write/election majority=";
+    public const string ObservationIdentities = "memberIdentities=";
+    public const string MemberIdentitySeparator = "@";
+    public const string ObservationSeededCopies = "direct secondary native corpus count and exact seeded body verified after copy probe";
     public const string ProbeJsonPrefix = "{\"probe\":\"";
     public const string ProbeJsonSuffix = "\"}";
     public const string CredentialConfigured = "connection-string credentials configured";

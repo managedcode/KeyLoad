@@ -9,6 +9,7 @@ internal static class KurrentConstants
     public const string ImageTagSeparator = ":";
     public const string SingleTopology = "one KurrentDB node; no replica copies";
     public const string ReplicatedTopology = "three native gossip members; one leader and two followers";
+    public const string TwoNodeTopology = "two native gossip members; one leader and one follower; both required for quorum";
     public const string HealthyState = "healthy";
     public const string SingleState = "single";
     public const string SingleAcknowledgement = "native append acknowledgement; single node, no replicated acknowledgement";

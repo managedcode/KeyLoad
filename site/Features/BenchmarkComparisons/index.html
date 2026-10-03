@@ -202,6 +202,25 @@
       </section>
     </section>
 
+    <section id="isolated-lab" class="benchmark-section" aria-labelledby="isolated-title" hidden>
+      <header class="section-head">
+        <div><p class="eyebrow">Native topology comparisons</p><h2 id="isolated-title">Performance with 1, 2 and 3 nodes.</h2></div>
+        <p class="section-intro">Each engine, node count and scenario has its own Linux runner. Results show five repetitions of the same intensive workload.</p>
+      </header>
+      <div class="instrument-controls">
+        <label class="control" for="isolated-scenario">Scenario<select id="isolated-scenario"></select></label>
+        <label class="control" for="isolated-node-count">Nodes<select id="isolated-node-count"></select></label>
+        <label class="control" for="isolated-target">Engine<select id="isolated-target"></select></label>
+        <label class="control" for="isolated-metric">Metric<select id="isolated-metric"></select></label>
+        <label class="control" for="isolated-repetition">Repetition<select id="isolated-repetition"></select></label>
+      </div>
+      <div id="isolated-results" aria-live="polite"><p class="empty-state">Loading qualified native measurements…</p></div>
+      <p id="isolated-error" class="load-error" role="alert" hidden></p>
+      <button id="isolated-retry" class="retry-button" type="button" hidden>Retry native measurements</button>
+      <p id="isolated-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+      <noscript><!-- KEYLOAD_ISOLATED_EVIDENCE --></noscript>
+    </section>
+
     <section class="ledger" aria-labelledby="ledger-title">
       <header class="section-head">
         <div><p class="eyebrow">Qualification status</p><h2 id="ledger-title">What we show. What we don't claim yet.</h2></div>

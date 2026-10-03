@@ -11,7 +11,7 @@ internal sealed class TimeSeriesComparisonRecorder(TimeSeriesComparisonWorkload 
     private const string LibraryStorage = "in-memory bucket aggregation";
     private const string LibraryPersistence = "none; no persistence, recovery, or replication";
     private const string LibraryAcknowledgement = "AddNewData returns after an in-process bucket update";
-    private const string LibraryVersion = "10.0.0";
+    private static readonly string LibraryVersion = TimeSeriesComparisonPackageVersion.Read();
     private const int ReportSchemaVersion = 1;
     private readonly List<TimeSeriesTargetMetadata> targets = [];
     private readonly List<TimeSeriesComparisonAttempt> attempts = [];

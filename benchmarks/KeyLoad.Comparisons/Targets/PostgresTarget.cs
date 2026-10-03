@@ -25,7 +25,7 @@ public sealed class PostgresTarget(string connectionString, string runId, string
     /// <summary>Reports support for the target's document, vector, queue, graph, and stream scenarios.</summary>
     /// <param name="scenario">The comparison scenario to check.</param>
     /// <returns>Whether this target implements the scenario.</returns>
-    public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.VectorExact
+    public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete or Scenario.VectorExact
         or Scenario.QueueCycle or Scenario.GraphNeighbors or Scenario.GraphTraverse or Scenario.StreamAppend or Scenario.StreamRead;
 
     /// <summary>Creates the owned schema, verifies settings, seeds data, and observes replication copies.</summary>

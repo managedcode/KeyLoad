@@ -16,34 +16,40 @@ internal static class RabbitQuorumProbe
     private const string TypeField = "type";
     private const string QuorumType = "quorum";
     private const string VersionField = "rabbitmq_version";
-    private const int SingleNodeCount = 1;
-    private const int ReplicatedNodeCount = 3;
+    private const string DurableField = "durable";
 
     internal static async Task<(string Version, ClusterEvidence Evidence)?> TryReadReadyAsync(HttpClient management,
         string queue, ComparisonTopology topology, CancellationToken cancellationToken)
     {
-        var expected = topology == ComparisonTopology.Replicated ? ReplicatedNodeCount : SingleNodeCount;
         using var nodesJson = await ReadAsync(management, NodesPath, cancellationToken);
-        var runningNodes = nodesJson.RootElement.EnumerateArray()
-            .Where(node => node.GetProperty(RunningField).GetBoolean()).ToArray();
-        var nodes = runningNodes.Select(node => node.GetProperty(NameField).GetString() ?? string.Empty)
-            .Order(StringComparer.Ordinal).ToArray();
         using var overview = await ReadAsync(management, OverviewPath, cancellationToken);
-        var version = overview.RootElement.GetProperty(VersionField).GetString() ?? string.Empty;
         using var queueJson = await ReadAsync(management, QueuesPath + Uri.EscapeDataString(queue), cancellationToken);
-        var detail = queueJson.RootElement;
+        return ReadReady(nodesJson.RootElement, overview.RootElement, queueJson.RootElement, queue, topology);
+    }
+
+    internal static (string Version, ClusterEvidence Evidence)? ReadReady(JsonElement nodesJson, JsonElement overview,
+        JsonElement detail, string queue, ComparisonTopology topology)
+    {
+        var expected = ComparisonTopologies.NodeCount(topology);
+        var nativeNodes = nodesJson.EnumerateArray().ToArray();
+        var nodes = nativeNodes.Select(node => node.GetProperty(NameField).GetString() ?? string.Empty)
+            .Order(StringComparer.Ordinal).ToArray();
+        var version = overview.GetProperty(VersionField).GetString() ?? string.Empty;
         var members = ReadNames(detail, MembersField);
         var online = ReadNames(detail, OnlineField);
-        if (!IsReady(runningNodes, nodes, members, online, detail, version, expected))
+        if (!IsReady(nativeNodes, nodes, members, online, detail, version, expected) ||
+            detail.GetProperty(NameField).GetString() != queue)
         {
             return null;
         }
 
-        var state = topology == ComparisonTopology.Replicated
+        var state = expected > 1
             ? "healthy native quorum cluster"
             : "single native quorum node";
         var evidence = new ClusterEvidence(expected, expected, state,
-            [$"connected running disc nodes={nodes.Length}", $"quorum members online={online.Length}", $"queue type={QuorumType}"]);
+            [$"connected running disc nodes={nodes.Length}", $"quorum members online={online.Length}", $"queue type={QuorumType}",
+                $"running nodes={string.Join(',', nodes)}", $"queue members={string.Join(',', members)}",
+                $"online members={string.Join(',', online)}", $"quorum={expected / 2 + 1} of {expected}"]);
         return (version, evidence);
     }
 
@@ -54,12 +60,15 @@ internal static class RabbitQuorumProbe
         return await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(token), cancellationToken: token);
     }
 
-    private static bool IsReady(JsonElement[] runningNodes, string[] nodes, string[] members, string[] online,
+    private static bool IsReady(JsonElement[] nativeNodes, string[] nodes, string[] members, string[] online,
         JsonElement detail, string version, int expected)
-        => nodes.Length == expected && nodes.Distinct(StringComparer.Ordinal).Count() == expected &&
+        => nodes.Length == expected && nodes.All(node => node.Length != 0) &&
+           nodes.Distinct(StringComparer.Ordinal).Count() == expected &&
            members.Length == expected && members.SequenceEqual(nodes, StringComparer.Ordinal) &&
            online.SequenceEqual(members, StringComparer.Ordinal) && detail.GetProperty(TypeField).GetString() == QuorumType &&
-           runningNodes.All(node => node.GetProperty(NodeTypeField).GetString() == DiskNodeType) && version.Length != 0;
+           detail.GetProperty(DurableField).GetBoolean() &&
+           nativeNodes.All(node => node.GetProperty(RunningField).GetBoolean() &&
+               node.GetProperty(NodeTypeField).GetString() == DiskNodeType) && version.Length != 0;
 
     private static string[] ReadNames(JsonElement detail, string field)
         => detail.GetProperty(field).EnumerateArray().Select(item => item.GetString() ?? string.Empty)

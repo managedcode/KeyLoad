@@ -13,12 +13,6 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null) : IComparisonTarget
 {
     private const string Prefix = "keyload-benchmark:";
-    private const string ClientCommand = "CLIENT";
-    private const string ClientIdSubcommand = "ID";
-    private const string WaitAofCommand = "WAITAOF";
-    private const string CreateConflictError = "RedisCreateConflict";
-    private const string WriteConnectionReplacedError = "RedisWriteConnectionReplaced";
-    private const string ReceiptConnectionReplacedError = "RedisReceiptConnectionReplaced";
     private const string TargetName = "Redis";
     private const string InitialVersion = "unverified";
     private const string InitialTopology = "unverified native topology";
@@ -27,13 +21,10 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     private const string TlsTransport = "RESP/TLS multiplexed";
     private const string Authorization = "Aspire password; no row/field policy";
     private const string ReplicatedTopology = "single primary plus two native direct replicas; no cluster sharding or automatic failover claim";
+    private const string TwoNodeTopology = "single primary plus one native direct replica; no sharding or automatic failover claim";
     private const string SingleTopology = "single primary, no replicas";
     private const string AofAcknowledgement = "AOF appendfsync=always; single-node ACK";
     private const string ReplicatedAcknowledgement = "AOF appendfsync=always; WAITAOF 1 local + 1 replica fsync on the same primary connection (receipt RPC included)";
-    private const string TimeoutSettingError = "RedisWaitAofFailed";
-    private const int RequiredLocalFsync = 1;
-    private const int RequiredReplicaFsync = 1;
-    private const int ReceiptTimeoutMilliseconds = 3000;
     private readonly string connectionSettings = connectionString;
     private readonly string prefix = Prefix + Guid.Parse(runId).ToString("N") + ":";
     private readonly string imageName = image;
@@ -47,7 +38,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     /// <summary>Reports support for primary point reads and document writes.</summary>
     /// <param name="scenario">The comparison scenario to check.</param>
     /// <returns><see langword="true"/> for point read or document write; otherwise <see langword="false"/>.</returns>
-    public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite;
+    public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete;
 
     /// <summary>Connects to the configured primary, seeds run-specific keys, and verifies native topology and fsync receipts.</summary>
     /// <param name="dataset">The deterministic document corpus used to seed and probe the target.</param>
@@ -78,10 +69,13 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         Profile = Profile with
         {
             Version = primaryIdentity.Version,
-            Topology = configuredTopology == ComparisonTopology.Replicated
-                ? ReplicatedTopology
-                : SingleTopology,
-            WriteAcknowledgement = configuredTopology == ComparisonTopology.Replicated ? ReplicatedAcknowledgement : AofAcknowledgement,
+            Topology = configuredTopology switch
+            {
+                ComparisonTopology.Replicated => ReplicatedTopology,
+                ComparisonTopology.TwoNode => TwoNodeTopology,
+                _ => SingleTopology
+            },
+            WriteAcknowledgement = ComparisonTopologies.NodeCount(configuredTopology) > 1 ? ReplicatedAcknowledgement : AofAcknowledgement,
             Image = imageName,
             Cluster = evidence
         };
@@ -102,7 +96,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         try
         { await RedisReplicaProof.VerifyWorkerPrimaryAsync(workerConnection, configuredTopology, cancellationToken); }
         catch (Exception) { await workerConnection.DisposeAsync(); throw; }
-        return new Session(workerConnection, prefix, configuredTopology);
+        return new RedisComparisonSession(workerConnection, prefix, configuredTopology);
     }
 
     /// <summary>Closes and disposes the target-owned Redis connection.</summary>
@@ -113,82 +107,4 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         { await connection.CloseAsync(); connection.Dispose(); }
     }
 
-    /// <summary>Executes Redis key reads and writes on a session-owned connection.</summary>
-    private sealed class Session(ConnectionMultiplexer connection, string prefix, ComparisonTopology topology) : IComparisonSession
-    {
-        private readonly IDatabase database = connection.GetDatabase();
-
-        public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
-        {
-            var json = await database.StringGetAsync(prefix + document.Id, CommandFlags.DemandMaster).WaitAsync(cancellationToken);
-            return json.IsNull ? null : new(document.Id, json.ToString());
-        }
-
-        public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
-        {
-            if (scenario == Scenario.PointRead)
-            {
-                return new(Document: await ReadAsync(document, cancellationToken));
-            }
-
-            if (scenario != Scenario.DocumentWrite)
-            {
-                throw new NotSupportedException();
-            }
-
-            if (topology == ComparisonTopology.Replicated)
-            {
-                await WriteWithReplicaReceiptAsync(document, cancellationToken);
-            }
-            else
-            {
-                await WriteAsync(document, CommandFlags.DemandMaster, cancellationToken);
-            }
-
-            return new();
-        }
-
-        private async Task WriteAsync(BenchmarkDocument document, CommandFlags flags, CancellationToken token)
-        {
-            if (!await database.StringSetAsync(prefix + document.Id, document.Json, when: When.NotExists, flags: flags).WaitAsync(token))
-            {
-                throw new ComparisonFailureException(CreateConflictError);
-            }
-        }
-
-        private async Task WriteWithReplicaReceiptAsync(BenchmarkDocument document, CancellationToken token)
-        {
-            var before = await ReadClientIdAsync(token);
-            await WriteAsync(document, CommandFlags.DemandMaster, token);
-            var writeId = await ReadClientIdAsync(token);
-            if (writeId != before)
-            {
-                throw new ComparisonFailureException(WriteConnectionReplacedError);
-            }
-
-            var receiptArgs = new object[] { RequiredLocalFsync, RequiredReplicaFsync, ReceiptTimeoutMilliseconds };
-            var reply = (RedisResult[])(await database.ExecuteAsync(WaitAofCommand, receiptArgs, CommandFlags.DemandMaster).WaitAsync(token))!;
-            if (reply.Length != 2 || (long)reply[0] < RequiredLocalFsync || (long)reply[1] < RequiredReplicaFsync)
-            {
-                throw new ComparisonFailureException(TimeoutSettingError);
-            }
-
-            if (await ReadClientIdAsync(token) != before)
-            {
-                throw new ComparisonFailureException(ReceiptConnectionReplacedError);
-            }
-        }
-
-        private async Task<long> ReadClientIdAsync(CancellationToken token)
-        {
-            var args = new object[] { ClientIdSubcommand };
-            return (long)await database.ExecuteAsync(ClientCommand, args, CommandFlags.DemandMaster).WaitAsync(token);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await connection.CloseAsync();
-            connection.Dispose();
-        }
-    }
 }

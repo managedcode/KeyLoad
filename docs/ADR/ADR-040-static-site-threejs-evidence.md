@@ -445,3 +445,14 @@ REQ/AC-BC-011–018/024/025/027/028 are implemented and qualified at exact H `6a
 Both automatic publications succeeded at https://www.keyload.cloud/; current provider evidence confirms the authorized www/HTTPS update and live apex301 redirect. Live HTML/publication/catalog/raw-report bytes match qualified output. Manual desktop/mobile/WebGPU observations supplement the real GitHub Chrome qualification and preserve the narrower physical-device-loss exception. Schema3/advanced benchmarks, database/RF3/endurance/power-loss qualification and production readiness are separate; their status is not changed by this ADR closure. DNS was not modified.
 
 Implementation ownership and ordered stages above remain the executed contract. Rollback retains the coherent prior verified website and immutable evidence; it never restores a publisher bypass or suppresses tests/freshness. This immutable H as-of record may be delivered in one docs-only descendant without attributing H tests to that descendant; subsequent automatic qualification remains source-accurate in Actions.
+
+## Owner-directed isolated aggregate evidence stage, 2026-10-03
+
+REQ-BC-055..058/AC-ISO-006..009 and [ADR-056](ADR-056-isolated-linux-comparison-cells.md)
+define the next producer/consumer contract. Successful authenticated complete
+aggregate plus every actual worker/job/artifact replaces the old singular
+comparison-smoke producer for schema4. Site source still qualifies independently;
+retain all raw/archive/freshness/native/browser/coverage gates and historical
+formats exactly. New aggregate formats cannot be published until coupled tooling,
+closed inventories, test evidence and actual provider/live receipt exist. Required
+TASK-ISO-006/010/011/012 ownership/stages/rollback and tests are inADR056; statusAccepted.

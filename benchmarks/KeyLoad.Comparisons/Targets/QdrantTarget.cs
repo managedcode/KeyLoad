@@ -19,6 +19,8 @@ public sealed class QdrantTarget : IComparisonTarget
     private readonly string collection;
     private readonly string image;
     private readonly ComparisonTopology topology;
+    private readonly string seedSuffix;
+    private readonly string querySuffix;
     private bool collectionCreationAttempted;
     private int topK;
 
@@ -26,7 +28,7 @@ public sealed class QdrantTarget : IComparisonTarget
     /// <param name="http">The collection and query client; the target disposes it.</param>
     /// <param name="runId">Guid-formatted run identifier used to isolate the collection.</param>
     /// <param name="image">Qdrant image reference recorded after replica verification.</param>
-    /// <param name="topology">The single-node or replicated native topology to configure and verify.</param>
+    /// <param name="topology">The one-, two- or three-node native topology to configure and verify.</param>
     /// <param name="nodeClients">Optional clients for each Qdrant node used by replica verification; the target disposes distinct clients.</param>
     public QdrantTarget(HttpClient http, string runId, string image,
         ComparisonTopology topology = ComparisonTopology.Standalone, HttpClient[]? nodeClients = null)
@@ -34,6 +36,8 @@ public sealed class QdrantTarget : IComparisonTarget
         client = http;
         this.image = image;
         this.topology = topology;
+        seedSuffix = QdrantNativePolicy.SeedSuffix(topology);
+        querySuffix = QdrantNativePolicy.QuerySuffix(topology);
         collection = CollectionPrefix + Guid.Parse(runId).ToString("N");
         this.nodeClients = nodeClients ?? [http];
         ownedClients = this.nodeClients.Prepend(http).Distinct<HttpClient>(ReferenceEqualityComparer.Instance).ToArray();
@@ -59,17 +63,10 @@ public sealed class QdrantTarget : IComparisonTarget
     {
         ArgumentNullException.ThrowIfNull(dataset);
         topK = dataset.Options.TopK;
-        var replication = topology == ComparisonTopology.Replicated ? 3 : 1;
-        var writeFactor = topology == ComparisonTopology.Replicated ? 2 : 1;
+        QdrantReplicaProof.ValidateClients(nodeClients, topology);
         collectionCreationAttempted = true;
-        using (var create = await client.PutAsJsonAsync($"/collections/{collection}", new
-        {
-            vectors = new { size = dataset.Options.Dimensions, distance = "Cosine" },
-            shard_number = 1,
-            replication_factor = replication,
-            write_consistency_factor = writeFactor,
-            hnsw_config = new { m = 0 }
-        }, cancellationToken))
+        using (var create = await client.PutAsJsonAsync($"/collections/{collection}",
+            QdrantNativePolicy.CreateCollection(dataset.Options.Dimensions, topology), cancellationToken))
         {
             create.EnsureSuccessStatusCode();
         }
@@ -79,13 +76,9 @@ public sealed class QdrantTarget : IComparisonTarget
         Profile = Profile with
         {
             Version = proof.Version,
-            Topology = topology == ComparisonTopology.Replicated ? "three native peers; RF3, WCF2" : "one native node; RF1, WCF1",
-            WriteAcknowledgement = topology == ComparisonTopology.Replicated
-                ? "wait=true; write_consistency_factor=2 of RF3; seed ordering=strong"
-                : "wait=true; write_consistency_factor=1 of RF1",
-            ReadContract = topology == ComparisonTopology.Replicated
-                ? "exact=true; consistency=majority; seeded collection static during queries"
-                : "exact=true; seeded collection static during queries",
+            Topology = QdrantNativePolicy.TopologyLabel(topology),
+            WriteAcknowledgement = QdrantNativePolicy.WriteContract(topology),
+            ReadContract = QdrantNativePolicy.ReadContract(topology),
             Image = image,
             Cluster = proof.Evidence
         };
@@ -101,8 +94,7 @@ public sealed class QdrantTarget : IComparisonTarget
                 vector = document.Vector,
                 payload = new { id = document.Id, document = JsonSerializer.Deserialize<JsonElement>(document.Json) }
             });
-            var ordering = topology == ComparisonTopology.Replicated ? "&ordering=strong" : string.Empty;
-            using var response = await client.PutAsJsonAsync($"/collections/{collection}/points?wait=true{ordering}",
+            using var response = await client.PutAsJsonAsync($"/collections/{collection}/points?wait=true{seedSuffix}",
                 new { points }, cancellationToken);
             response.EnsureSuccessStatusCode();
         }
@@ -147,8 +139,7 @@ public sealed class QdrantTarget : IComparisonTarget
                 throw new NotSupportedException();
             }
 
-            var consistency = target.topology == ComparisonTopology.Replicated ? "?consistency=majority" : string.Empty;
-            using var response = await target.client.PostAsJsonAsync($"/collections/{target.collection}/points/query{consistency}",
+            using var response = await target.client.PostAsJsonAsync($"/collections/{target.collection}/points/query{target.querySuffix}",
                 new { query = document.Vector, limit = target.topK, @params = new { exact = true }, with_payload = true, with_vector = false }, cancellationToken);
             response.EnsureSuccessStatusCode();
             using var result = await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken);

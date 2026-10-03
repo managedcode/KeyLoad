@@ -15,14 +15,14 @@ internal static class Neo4jHarnessConstants
     public const int AcceptedStatusCode = 202;
     public const int RequestTimeoutSeconds = 30;
     public const int CleanupTimeoutSeconds = 15;
-    public const int SupportedScenarioCount = 4;
+    public const int SupportedScenarioCount = 6;
     public const int UnsupportedScenarioCount = 4;
-    public const int SuccessfulCaseCount = 8;
-    public const int TotalCaseCount = 16;
+    public const int SuccessfulCaseCount = 12;
+    public const int TotalCaseCount = 20;
     public const int WriteDocumentCount = 28;
-    public const int TotalNeo4jDocumentCount = 44;
-    public const int CsvLineCount = 97;
-    public const int MismatchCsvLineCount = 49;
+    public const int TotalNeo4jDocumentCount = 72;
+    public const int CsvLineCount = 145;
+    public const int MismatchCsvLineCount = 73;
     public const string MeasuredStatus = "measured";
     public const string FailedStatus = "failed";
     public const string UnsupportedStatus = "unsupported";
@@ -94,11 +94,13 @@ internal static class Neo4jHarnessConstants
         Scenario.GraphNeighbors,
         Scenario.GraphTraverse,
         Scenario.StreamAppend,
-        Scenario.StreamRead
+        Scenario.StreamRead,
+        Scenario.DocumentUpdate,
+        Scenario.DocumentDelete
     ];
 
     public static bool IsSupported(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite
-        or Scenario.GraphNeighbors or Scenario.GraphTraverse;
+        or Scenario.GraphNeighbors or Scenario.GraphTraverse or Scenario.DocumentUpdate or Scenario.DocumentDelete;
 
     private static ComparisonOptions CreateOptions(int warmup, int repetitions) => new()
     {

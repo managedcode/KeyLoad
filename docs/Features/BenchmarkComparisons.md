@@ -362,3 +362,38 @@ flowchart LR
     SiteBrand --> Pages[Pages build BUILD.assets]
     Parity[SiteBrandParityTests] --> SiteBrand
 ```
+
+## Owner-directed isolated Linux performance matrix, 2026-10-03
+
+[ADR-056](../ADR/ADR-056-isolated-linux-comparison-cells.md) and the canonical
+[acceptance](../../isolated-comparisons.acceptance.md)/[plan](../../isolated-comparisons.plan.md)
+replace the three-OS and all-engine-on-one-runner producer for new qualification.
+Historical evidence retains its original topology/source/format; it is not
+qualification of the new matrix. Source and full GitHub/publication gates are pending.
+
+| Stable requirement | Acceptance | Owner and automated evidence |
+|---|---|---|
+| REQ-BC-050 Linux-only complete qualification | AC-ISO-001 | TASK-ISO-007/010/012; workflow inventory + actual fullLinux CI |
+| REQ-BC-051 one isolated agent per engine/node/scenario | AC-ISO-002 | TASK-ISO-007/009/010; closed270-cell plan and native resource inventory |
+| REQ-BC-052 actual native1/2/3 and honest unsupported topology | AC-ISO-003 | TASK-ISO-005/009/010; independent membership/copies/ACK proof |
+| REQ-BC-053 explicit benchmark fixed-voter safety | AC-ISO-004 | TASK-ISO-005/010; negative configuration, SDK/MCP restart/quorum loss andRF3 |
+| REQ-BC-054 intensive shared CRUD correctness and raw failures | AC-ISO-005 | TASK-ISO-008/009/010; deterministic plan/oracle + real native full body/cardinality/absence |
+| REQ-BC-055 exact per-worker versioned JSON/provenance | AC-ISO-006 | TASK-ISO-008/010; strict single-target/scenario report and actual job identity |
+| REQ-BC-056 complete authenticated aggregation | AC-ISO-007 | TASK-ISO-006/010; real Node/files/TUnit corruption checks + GitHub job/artifact manifest |
+| REQ-BC-057 site metrics derived from isolated raw JSON | AC-ISO-008 | TASK-ISO-011; full site validators/oracles/browser/native coverage |
+| REQ-BC-058 publish only fresh complete successful cohort | AC-ISO-009 | TASK-ISO-011/012; authenticated aggregate/worker/archive freshness + provider/live proof |
+
+Canonical slice map: BenchmarkComparisons in Comparisons library, ComparisonHost,
+AppHost/Features, UnitTests/ComparisonTests/SiteTests/Features, scripts/Features,
+site/Features and this durable feature doc; shared workflow/architecture remain
+root-owned infrastructure. Benchmark voter validation remains ClusterReplication
+with ADR-007. Other public SQL/MCP contracts areN/A changed because existing native
+operations/authorization remain. No duplicate feature behavior belongs in a layer.
+
+```mermaid
+flowchart LR
+    Matrix[Engine node count scenario] --> Worker[One isolated Linux worker]
+    Worker --> Proof[Native correctness and timing JSON]
+    Proof --> Aggregate[All cells authenticated and complete]
+    Aggregate --> Website[Generate metrics and qualify site]
+```

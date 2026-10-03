@@ -1,3 +1,4 @@
+using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
@@ -19,6 +20,11 @@ internal static class ComparisonApplication
         try
         {
             cancellationLifetime = new ComparisonCancellationLifetime();
+            if (configuration[ComparisonWorkerSelection.TargetSetting] is not null)
+            {
+                return await IsolatedHostApplication.RunAsync(configuration, cancellationLifetime.Token);
+            }
+
             if (string.Equals(configuration[ComparisonHostConstants.Profile],
                     ComparisonHostConstants.TimeSeriesProfile, StringComparison.OrdinalIgnoreCase))
             {

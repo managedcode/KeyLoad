@@ -1,9 +1,9 @@
-using System.Buffers.Binary;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace KeyLoad.Comparisons;
 
@@ -11,6 +11,8 @@ namespace KeyLoad.Comparisons;
 /// <remarks>Inference and exhaustive oracle work are outside measured requests.</remarks>
 public sealed class BenchmarkDataset
 {
+    private const string MutationTextProperty = "text";
+    private const string InitialMutationText = "KeyLoad initial value";
     private readonly ComparisonOptions options;
     private readonly Dictionary<int, ImmutableArray<FoundDocument>> neighbors = [];
     private readonly Dictionary<(int Number, int Depth), ImmutableArray<string>> reachable = [];
@@ -47,24 +49,7 @@ public sealed class BenchmarkDataset
             });
         }).ToArray();
         Edges = ImmutableCollectionsMarshal.AsImmutableArray(edges);
-        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        Span<byte> bytes = stackalloc byte[4];
-        foreach (var document in Documents)
-        {
-            hash.AppendData(Encoding.UTF8.GetBytes(document.Json));
-            hash.AppendData(EventId(document).ToByteArray());
-            foreach (var value in document.Vector)
-            {
-                BinaryPrimitives.WriteSingleLittleEndian(bytes, value);
-                hash.AppendData(bytes);
-            }
-        }
-        foreach (var edge in Edges)
-        {
-            hash.AppendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(edge)));
-        }
-
-        Sha256 = Convert.ToHexStringLower(hash.GetHashAndReset());
+        Sha256 = BenchmarkCorpusHash.Compute(Documents, Edges);
     }
 
     /// <summary>Creates the deterministic document and vector for the specified number.</summary>
@@ -106,15 +91,40 @@ public sealed class BenchmarkDataset
     /// <returns>The deterministic document selected or generated for the operation.</returns>
     public BenchmarkDocument Input(Scenario scenario, int repetition, int operation, bool warmup)
     {
-        if (scenario is Scenario.DocumentWrite or Scenario.QueueCycle or Scenario.StreamAppend)
+        if (scenario is Scenario.DocumentWrite or Scenario.QueueCycle or Scenario.StreamAppend
+            or Scenario.DocumentUpdate or Scenario.DocumentDelete)
         {
-            return CreateDocument(options.Documents + repetition * (options.Operations + options.Warmup)
+            var range = scenario switch { Scenario.DocumentUpdate => 1, Scenario.DocumentDelete => 2, _ => 0 };
+            return CreateDocument(options.Documents + range * options.Repetitions * (options.Operations + options.Warmup)
+                + repetition * (options.Operations + options.Warmup)
                 + (warmup ? operation : options.Warmup + operation));
         }
 
         var count = scenario is Scenario.GraphNeighbors or Scenario.GraphTraverse ? GraphVertexCount : Documents.Length;
         var index = (int)((unchecked((uint)options.Seed) + (uint)operation * 2654435761u) % (uint)count);
         return Documents[index];
+    }
+
+    /// <summary>Creates the owned existing state required before timing an update or delete.</summary>
+    /// <param name="scenario">The update or delete operation to prepare.</param>
+    /// <param name="input">The exact measured operation input.</param>
+    /// <returns>The initial document with the same identifier and payload length.</returns>
+    public static BenchmarkDocument InitialMutationState(Scenario scenario, BenchmarkDocument input)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+        if (scenario == Scenario.DocumentDelete)
+        {
+            return input;
+        }
+
+        if (scenario != Scenario.DocumentUpdate)
+        {
+            throw new ArgumentOutOfRangeException(nameof(scenario));
+        }
+
+        var payload = JsonNode.Parse(input.Json)!.AsObject();
+        payload[MutationTextProperty] = InitialMutationText;
+        return input with { Json = payload.ToJsonString() };
     }
 
     /// <summary>Returns the identifiers reachable from a starting document within the specified edge depth.</summary>

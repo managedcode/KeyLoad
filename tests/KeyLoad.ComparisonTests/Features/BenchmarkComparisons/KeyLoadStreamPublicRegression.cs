@@ -17,20 +17,19 @@ internal static class KeyLoadStreamPublicRegression
     private const string CancelledCode = "KeyLoad:Cancelled";
 
     internal static async Task VerifyAsync(DistributedApplication app, string adminKey,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, int nodeCount = 3)
     {
-        var clients = new HttpClient?[3];
+        var clients = new HttpClient?[nodeCount];
         var ownershipTransferred = false;
         try
         {
-            clients[0] = app.CreateHttpClient("node1", "http");
-            clients[1] = app.CreateHttpClient("node2", "http");
-            clients[2] = app.CreateHttpClient("node3", "http");
-            var primary = clients[0]!;
-            var secondary = clients[1]!;
-            var tertiary = clients[2]!;
-            await using var target = new KeyLoadTarget(primary, adminKey, Guid.NewGuid().ToString("N"),
-                peers: [primary, secondary, tertiary]);
+            for (var index = 0; index < nodeCount; index++)
+            {
+                clients[index] = app.CreateHttpClient("node" + (index + 1).ToString(System.Globalization.CultureInfo.InvariantCulture), "http");
+            }
+            var peers = clients.Select(client => client!).ToArray();
+            await using var target = new KeyLoadTarget(peers[0], adminKey, Guid.NewGuid().ToString("N"),
+                peers: peers, expectedNodes: nodeCount);
             ownershipTransferred = true;
             await VerifyTargetAsync(target, cancellationToken);
         }

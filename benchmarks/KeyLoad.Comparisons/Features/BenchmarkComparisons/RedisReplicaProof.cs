@@ -13,8 +13,7 @@ internal static class RedisReplicaProof
     private const string ErrorReplicaDistinct = "RedisReplicaEndpointsNotDistinct";
     private const string ErrorAof = "RedisAofAlwaysRequired";
     private const string SingleState = "single primary";
-    private const string ReplicatedState = "single primary with two native direct replicas";
-    private const int RequiredReplicas = 2;
+    private const string ReplicatedState = "single primary with verified native direct replicas";
     private const int ProbeExpiryMinutes = 2;
 
     public static ConfigurationOptions CreateOptions(string connectionString)
@@ -30,8 +29,9 @@ internal static class RedisReplicaProof
     public static async Task<ClusterEvidence> VerifyAsync(ConnectionMultiplexer primary, string[] replicaStrings,
         ComparisonTopology topology, RedisNodeIdentity primaryIdentity, string probeKey, string payload, CancellationToken token)
     {
-        var replicated = topology == ComparisonTopology.Replicated;
-        if (replicated && replicaStrings.Length != RequiredReplicas || !replicated && replicaStrings.Length != 0)
+        var requiredReplicas = ComparisonTopologies.NodeCount(topology) - 1;
+        var replicated = requiredReplicas > 0;
+        if (replicaStrings.Length != requiredReplicas)
         {
             throw new ComparisonFailureException(ErrorEndpoints);
         }
@@ -39,7 +39,7 @@ internal static class RedisReplicaProof
         var primaryEndpoint = RedisNativeProtocol.RequirePrimaryEndpoint(primary);
         var primaryServer = primary.GetServer(primaryEndpoint);
         await VerifyAofAsync(primaryServer, CommandFlags.DemandMaster, token);
-        await VerifyPrimaryAsync(primaryServer, replicated ? RequiredReplicas : 0, token);
+        await VerifyPrimaryAsync(primaryServer, requiredReplicas, token);
         RedisNodeIdentity.RequireUnchanged(await RedisNodeIdentity.ReadAsync(primaryServer, CommandFlags.DemandMaster, token), primaryIdentity);
         if (!replicated)
         {
@@ -53,7 +53,7 @@ internal static class RedisReplicaProof
             var endpoints = VerifyReplicaEndpoints(primaryEndpoint, replicas);
             var identities = await ReadReplicaIdentitiesAsync(replicas, endpoints, primaryEndpoint, token);
             var allIdentities = new[] { primaryIdentity }.Concat(identities).ToArray();
-            RedisNodeIdentity.RequireUniqueVersionedSet(allIdentities, primaryIdentity, RequiredReplicas + 1);
+            RedisNodeIdentity.RequireUniqueVersionedSet(allIdentities, primaryIdentity, requiredReplicas + 1);
             for (var index = 0; index < replicas.Length; index++)
             {
                 await VerifyReplicaAsync(replicas[index].GetServer(endpoints[index]), endpoints[index], primaryEndpoint, token);
@@ -76,7 +76,7 @@ internal static class RedisReplicaProof
     public static async Task VerifyWorkerPrimaryAsync(ConnectionMultiplexer connection, ComparisonTopology topology, CancellationToken token)
     {
         var endpoint = RedisNativeProtocol.RequirePrimaryEndpoint(connection);
-        await VerifyPrimaryAsync(connection.GetServer(endpoint), topology == ComparisonTopology.Replicated ? RequiredReplicas : 0, token);
+        await VerifyPrimaryAsync(connection.GetServer(endpoint), ComparisonTopologies.NodeCount(topology) - 1, token);
     }
 
     private static async Task VerifyAofAsync(IServer server, CommandFlags flags, CancellationToken token)
@@ -133,7 +133,7 @@ internal static class RedisReplicaProof
     private static EndPoint[] VerifyReplicaEndpoints(EndPoint primary, ConnectionMultiplexer[] replicas)
     {
         var endpoints = replicas.Select(connection => RedisNativeProtocol.ConfiguredEndpoint(connection, ErrorReplicaEndpoint)).ToArray();
-        if (endpoints.Select(RedisNativeProtocol.EndpointIdentity).Distinct(StringComparer.OrdinalIgnoreCase).Count() != RequiredReplicas ||
+        if (endpoints.Select(RedisNativeProtocol.EndpointIdentity).Distinct(StringComparer.OrdinalIgnoreCase).Count() != replicas.Length ||
             endpoints.Any(endpoint => RedisNativeProtocol.SameEndpoint(endpoint, primary)))
         {
             throw new ComparisonFailureException(ErrorReplicaDistinct);
@@ -171,7 +171,7 @@ internal static class RedisReplicaProof
             RedisNodeIdentity.RequireUnchanged(current, replicaIdentities[index]);
         }
         RedisNodeIdentity.RequireUniqueVersionedSet(new[] { primaryIdentity }.Concat(replicaIdentities).ToArray(),
-            primaryIdentity, RequiredReplicas + 1);
+            primaryIdentity, replicas.Length + 1);
     }
 
     private static async Task VerifyReplicaAsync(IServer server, EndPoint endpoint, EndPoint primary, CancellationToken token)

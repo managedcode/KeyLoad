@@ -20,8 +20,13 @@ internal static class OpenSearchHttp
         => SendAsync(client, HttpMethod.Post, path, body, NdjsonMediaType, allowNotFound: false,
             cancellationToken: cancellationToken);
 
+    internal static Task<JsonDocument> SendMutationAsync(HttpClient client, HttpMethod method, string path, object? body,
+        Scenario scenario, int expectedCopies, CancellationToken cancellationToken)
+        => SendAsync(client, method, path, body is null ? null : JsonSerializer.Serialize(body, JsonOptions), JsonMediaType,
+            allowNotFound: false, cancellationToken, scenario, expectedCopies);
+
     private static async Task<JsonDocument> SendAsync(HttpClient client, HttpMethod method, string path, string? body,
-        string contentType, bool allowNotFound, CancellationToken cancellationToken)
+        string contentType, bool allowNotFound, CancellationToken cancellationToken, Scenario? mutation = null, int expectedCopies = 0)
     {
         using var request = new HttpRequestMessage(method, path);
         if (body is not null)
@@ -35,8 +40,24 @@ internal static class OpenSearchHttp
             return JsonDocument.Parse(OpenSearchNames.EmptyObjectJson);
         }
 
-        response.EnsureSuccessStatusCode();
+        if (mutation is null)
+        {
+            response.EnsureSuccessStatusCode();
+        }
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        return await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+        var json = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+        try
+        {
+            if (mutation is { } scenario)
+            {
+                OpenSearchWriteAcknowledgement.VerifyMutation(response.StatusCode, json.RootElement, scenario, expectedCopies);
+            }
+            return json;
+        }
+        catch (Exception)
+        {
+            json.Dispose();
+            throw;
+        }
     }
 }

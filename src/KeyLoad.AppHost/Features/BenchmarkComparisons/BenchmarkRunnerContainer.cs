@@ -15,7 +15,7 @@ internal static class BenchmarkRunnerContainer
     private const string SourceName = "GITHUB_SHA";
     private const string MissingSource = "The actual GitHub source revision is required for the container runner.";
     private static readonly string[] ProvenanceNames =
-        [SourceName, "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "GITHUB_REPOSITORY", "GITHUB_REF", "GITHUB_WORKFLOW"];
+        [SourceName, "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "GITHUB_REPOSITORY", "GITHUB_REF", "GITHUB_WORKFLOW", "KEYLOAD_COMPARISON_JOB_ID"];
 
     internal static IResourceBuilder<ContainerResource> Create(IDistributedApplicationBuilder builder, string hostOutput)
     {

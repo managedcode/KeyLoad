@@ -1,0 +1,663 @@
+# ADR-056: Isolated Linux comparison cells and complete evidence aggregation
+
+Status: Accepted. Owner: lead integration. Date:2026-10-03. Related: REQ-BC-050..058 / AC-ISO-001..009, [acceptance](../../isolated-comparisons.acceptance.md), [ordered task graph](../../isolated-comparisons.plan.md), [BenchmarkComparisons](../Features/BenchmarkComparisons.md). Refines ADR-007/034/040; no source or qualification claim follows from this decision.
+
+## Decision
+
+Every measured engine × actual node count1/2/3 × scenario × intensive profile is one ordinary isolated Linux GitHub runner job. The closed nine-engine catalog and ten scenarios produce270 cells for the initial intensive profile:108 CRUD and162 specialized, separate matrices below the256-job limit. One common deterministic workload/oracle/measurer serves all engines; each worker creates only its selected native engine topology and load generator. No resource/credential/database leakage across workers. Native Community topology unavailable (Neo4j2/3) produces a structured reason with no measurement, never independent standalone nodes posing as a cluster.
+
+```mermaid
+flowchart LR
+    Plan[Closed cell plan] --> Linux[Separate Linux VM per cell]
+    Linux --> Native[Selected native engine group]
+    Native --> Oracle[Shared corpus and correctness]
+    Oracle --> Raw[Per worker schema4 raw JSON]
+    Raw --> Join[Authenticated complete aggregation]
+    Join --> Site[Independent site qualification and generation]
+    Site --> Pages[Freshness recheck and Pages deployment]
+```
+
+Worker selection/envelope/paths/intensity are frozen in acceptance. Preserve every raw nested report and real per-host runtime facts. The aggregate owns only complete plan/provenance/raw hash references, never synthesized one-host measurements or summed independent throughput/percentiles. All actual worker jobs/artifacts must succeed and correspond to the same run/attempt/source/plan/corpus/options. Unsupported capability is explicit and null; failed proof/timeout is failed evidence. Missing data never becomes a zero or invented winner.
+
+## Fixed-membership benchmark topology contract
+
+The owner explicitly requested actual1/2/3-node benchmark sets. Existing production validation continues to require odd groups≥3; default AppHost remainsRF3. Only explicit trusted server startup `BenchmarkTopology` enables benchmark groups1/2/3. ReplicaConfiguration receives the same explicit opt-in; no HTTP/SQL/client request can set it. The same consensus, Orleans distributed directory/migration/request actors, persisted membership/auth and node-local ZoneTree+journals apply. Majority stays floor(n/2)+1. RF1 has no replica fault tolerance; RF2 requires both voters for read/commit and offers no single-node-loss availability. RF3 retains its current majority/fault contracts. Never callRF1 orRF2 production-qualified from timing tests.
+
+Every group has a fresh fixed incarnation and its own storage directories. Changed voter membership must not silently reopen an existing authority; existing persistent identity checks remain. Restart retains exactly the same set and ordered atomic apply. Real SDK/MCP topology, acknowledged-data restart,RF2 quorum-loss and unchangedRF3 gates are required. Compiler opt-ins remain scoped to the existing two Orleans calls; no analyzer suppression or alternate engine.
+
+```mermaid
+flowchart TB
+    Default[Production startup] --> RF3[Existing odd voters at least3]
+    Benchmark[Explicit benchmark startup] --> Fixed[Fresh fixed voters1 to3]
+    RF3 --> Majority[Same floor n over2 plus1]
+    Fixed --> Majority
+    Majority --> Host[Same node local storage and Orleans routes]
+```
+
+## Workload contract
+
+DocumentWrite remains unique absent-ID creation. New DocumentUpdate and DocumentDelete get fresh owned initial state outside timing; measured operation IDs and warmup IDs are disjoint. Update asserts existence/affected cardinality and exact changed body; delete asserts prior existence/cardinality and post-delete absence; sentinel/unaffected records remain. Preparation, readback and oracle are outside timed requests. No retries hide faults. Every attempt and failed latency remains raw; useful throughput counts verified success. Existing vector/queue/graph/event oracles remain identical.
+
+## Implementation and join contract
+
+1. TASK-ISO-004 root owns architecture/spec/ADR, shared selection/envelope/scenario/contracts, central workflow/configuration/inventory and final integration. Existing historical evidence remains immutable. Static baseline identifies unresolved RF3 restart, comparison lifecycle and schema mismatch; they remain tracked.
+2. TASK-ISO-005 topology worker owns only ReplicaConfiguration.cs, Server NodeOptions.cs, AppHost ClusterResources.cs, KeyLoadTarget.cs, KeyLoadTopology.cs and new BenchmarkTopology-prefixed UnitTests. Root serializes composition/endpoint joins. Extend only benchmark fixed membership; preserve production negative checks/majority and existing storage/fault contracts. Real tests in010/012 prove runtime.
+3. TASK-ISO-006 aggregation worker owns only new `scripts/Features/BenchmarkComparisons/aggregate-*.mjs` modules and `tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedAggregate*` TUnit real Node/files regressions. Strict closed-cell identity/options/provenance/hash/sample validation, no authenticated-provider claim from supplied JSON. Root owns GitHub API transport and site join.
+4. TASK-ISO-007 matrix worker owns only new `scripts/Features/BenchmarkComparisons/isolated-plan*.mjs` and `tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedPlan*` regressions. Emit exact270 cells split108/162, Linux-only closed target/node/scenario/intensity fields. Root owns ci/comparison/Pages YAML joins.
+5. TASK-ISO-008 root and subsequent disjoint adapter workers integrate selected-scenario common runner, fresh CRUD oracle/target methods, strict selected host and raw envelope. No new dependency or obsolete all-engine path qualifies isolation.
+6. TASK-ISO-009 root approves exact native adapter constructors/count/ACK contract before assigning disjoint engine resources/proof/CRUD workers. Requested count must be independently observed, including seeded data copies. Pin Community images from primary sources; no paid/native topology substitute.
+7. TASK-ISO-010 joins all producers and creates one real TUnit/Aspire cell flow, bounded lifecycle/cleanup and required real SDK/MCP fault proofs. Workflow consumes closed plan, retains raw/image/native/test artifacts and authenticates every actual job/artifact/digest before aggregation.
+8. TASK-ISO-011 evolves schema4 site/provenance consumers and closed source/coverage/archive inventory together. Preserve validated historicalschema2/3 and all existing site/browser/coverage/freshness intentions. Site/main and measured/source remain accurately separate. Only the successful complete aggregate replaces comparison-smoke as the new evidence producer.
+9. TASK-ISO-012 root reviews every diff, resolves ownership conflicts and completes exact-SHA Linux full checks, native/intensive cohort, aggregate, site qualification and actual publication receipt. Every required task must be complete with artifacts, never inferred from idle/partial worker output.
+
+Worker model/permissions/escalations are in the plan. Root approves each disjoint source contract before work; shared file writes are serialized. Test methodology is acceptance-derived positive/negative/edge/fault flows through actual native dependencies/TUnit/Node/browser, GitHub execution only. No local benchmark, mock target, test skip, fabricated metric or weakening of analyzers/coverage.
+
+## Rollout and rollback
+
+No database format/API migration. Benchmark opt-in is additive and defaults off. New complete evidence producer/aggregate/site protocol deploys atomically as a versioned route, with latest publication blocked until the first full qualified cohort. Source rollback removes the new route together and retains prior immutable historical evidence, sourceSHA and contract labels; no mixed format/latest pointer or hidden fallback. Temporary source stages remain Accepted and visibly unqualified until every criterion and delivery gate passes.
+
+### TASK005 persisted membership refinement before opt-in implementation
+
+Source audit found legacy hardstate carries incarnation but no exact voter list.
+AC-ISO-004 cannot be met by validation alone. TASK005 additionally owns only
+`ReplicaLogValidation.cs` and new `ReplicaBenchmarkMembership*` feature files/tests.
+Use the existing node-owned replica ZoneTree IAtomicStore commit/WAL for a versioned
+private guard containing incarnation and exact ordered voters. Fresh benchmark
+stores commit it atomically with initial hardstate; no extra flat-file authority.
+Existing hardstate without guard rejects benchmark opt-in; no guessed legacy
+migration. Any existing guard is validated on every open, including opt-out, and
+voter/incarnation drift or malformed metadata fails closed. Existing production
+stores without guard keep their existing production contract. Canonical snapshot
+installation does not replace the independent local replica metadata; reopen and
+restore revalidate it. Source rollback cannot safely reopen benchmark1/2 with an old
+runtime and is explicitly unsupported. No data/ACK/quorum/protocol substitution.
+Real-ZoneTree persistence/corruption/reopen/atomic-commit tests plus native1/2/3
+restart/quorum qualification are required before statusImplemented. This extends
+the ordered005→010→012 join; root owns restore review and final evidence.
+### TASK009QR native adapter join
+
+The Qdrant/RabbitMQ implementation contract is frozen in acceptance before
+delegation. Existing constructor and transport ownership remain; exact native
+count/peer/copy policy and quorum acknowledgement apply equally to2/3 nodes.
+TASK009QR owns only the six named adapters/proofs and new native response
+regressions. Root joins selected host, Aspire startup and GitHub actual container
+evidence. No response-only test establishes native runtime qualification.
+### TASK008M common mutation join
+
+Acceptance freezes the additive corpus initial-state API, disjoint input ranges
+and bounded preparation/readback flow before implementation. Root owns this
+shared path; adapter workers own native mutation cardinality. Existing session
+contracts and failed raw attempt timings remain. Real native CRUD qualification
+is required after all joins.
+Native disabled Qdrant1 is verified as a standalone endpoint with RF1/WCF1 and
+exact seeded count. Its unavailable distributed peer/shard endpoint is not
+fabricated; enabled/distributed engines require the exact native peer/copy proof.
+### TASK009PMOK native document and event adapters
+
+Acceptance freezes count-derived native PostgreSQL/Mongo/OpenSearch/Kurrent
+proofs and strict document mutation cardinality before delegation. The named
+library/test ownership is disjoint from host, shared measurer and Aspire wiring.
+Real native members/copies/quorum plus CRUD faults must be exercised by the
+Linux integration/cell workflow before any measurement is publishable.
+### Selected Aspire composition contract
+
+Acceptance freezes the internal resource context/API before helper delegation.
+The early route validates selection before any existing default RF3 creation;
+only KeyLoad selects trusted benchmark RF1/RF2/RF3, while external cells allocate
+no KeyLoad nodes. Root owns context/dispatcher and native helper join. Source-owned
+bootstrap runs outside timing; observed member/copy/ACK proof remains mandatory.
+
+## TASK-ISO-009PMOKR native composition join
+
+REQ-BC-052/055, AC-ISO-002/003/006: only selected PostgreSQL, MongoDB,
+OpenSearch or KurrentDB native nodes plus an explicitly labelled one-shot native
+bootstrap client may be added. Root owns dispatcher and shared image/settings.
+The worker owns NEW `IsolatedPostgres*`, `IsolatedMongo*`, `IsolatedOpenSearch*`,
+`IsolatedKurrent*` AppHost slice files and NEW `IsolatedDocumentResource*` comparison
+tests. Existing adapter constructors and all frozen settings remain unchanged.
+
+PostgreSQL uses the pinned pgvector18 image, one primary, zero/one/two physical
+streaming standbys, exact application names `benchmark_standby1/2`, PG18 native
+data mount, fsync/on and synchronous_commit/on. The primary's official init path
+adds a secret-free physical replication pg_hba rule. The superuser password is a
+random secret Aspire parameter. Standby pg_basebackup uses PGPASSWORD, an owned
+fresh directory and native -R/streaming WAL configuration. Quorum is established
+by the existing untimed native adapter before seeding. No setup DDL waits for
+standbys before they can bootstrap. Native bootstrap waits are bounded.
+
+MongoDB uses official 8.3.9 digest
+`81a1c8842a09589fc8d5f285266f3340bf4abdf66700ba22988f14cc9b2b3118`, verified
+against official Registry OCI index on2026-10-03. One node is genuine authenticated
+standalone; two/three use exactly one authenticated replica set. Random shared
+root password and replication key are secret parameters/environment, never
+command arguments or retained logs. A source-owned wrapper may write/chmod/chown
+its private in-container key file before exec of official docker-entrypoint.
+A same-image one-shot mongosh client establishes the native replica-set members
+and bounded readiness before the runner. It is a bootstrap client, not a fourth
+database node. No fake replicas, force reconfig or hidden operation retries.
+
+OpenSearch uses pinned3.6 native discovery seed and cluster-manager lists, one
+primary shard and n-1 copies qualified by the adapter. Heap512MiB per native
+node, official entrypoint, private data volumes. Benchmark-only security-disabled
+HTTP is explicit in report transport/auth metadata; no admin credentials are
+claimed. Kurrent uses pinned free26.1.2 native cluster_size n, replication1112,
+HTTP2113, all-interface binds and exact native advertised aliases/gossip seeds;
+benchmark-only insecure transport is accurately reported. Two-node majorities
+require both nodes and do not claim single-failure availability.
+
+Tests precede implementation: actual Aspire CreateBuilder/Build resource models,
+ExecutionConfigurationBuilder native callbacks, exact selected resource counts,
+private paths, images, aliases, secret/env/argument boundaries, bootstrap wait
+edges, single-node exclusions and rejection before allocation. They run in
+GitHub only. Model assertions do not qualify a running cluster; root's genuine
+isolated270-cell tests and raw native proof remain required. Worker may not edit
+shared context, dispatch, projects, central pins, contracts, workflows, docs,
+existing tests or other resource prefixes. Escalate any missing native setting
+or image-specific UID requirement rather than weakening security/native proof.
+
+PMOKR image-specific permission refinement: official PostgreSQL18 entrypoint
+chowns PGDATA but does not chown its mounted parent. A source-owned wrapper may
+chown only this cell's `/var/lib/postgresql` mount to image postgres user/group,
+keep0700, then exec the official entrypoint with native args. The standby wrapper
+owns the same narrowly scoped permission initialization before pg_basebackup.
+Do not relax directory modes or impose a host UID on the PostgreSQL process.
+Root approves this native startup refinement under AC-ISO-002/003/006; actual
+GitHub container permission/copy proof remains mandatory.
+
+PMOKR volume refinement: OpenSearch and Kurrent retain their official image user
+and entrypoint. They may use new uniquely named Docker volumes scoped to this
+one cell rather than unreadable host0700 binds. Volume names include an owned
+random cell token; no volume is reused or shared. Root's runtime fixture records
+actual mount names and removes only these owned volumes after stopping this app.
+Model tests assert volume type, distinct per-node/per-cell names and official
+user/entrypoint; actual native GitHub storage/copy proof remains mandatory.
+
+## TASK-ISO-010I immutable image bundle
+
+REQ-BC-050/056, AC-ISO-001/006/007: one trusted Linux job builds the server and
+load generator once. All native cells import those exact image bytes into their
+own local registry; no database or live process is shared. Frozen portable v1:
+`{schemaVersion:1,sourceRevision,runId,attempt,repository,ref,images:{server:{archive:"server.tar",bytes,sha256},comparisons:{archive:"comparisons.tar",bytes,sha256}}}`.
+A bundle contains original image-receipt.json, server/comparisons-manifest.json,
+these two native Docker save archives and image-bundle.json; native command/
+registry/cleanup evidence may also be retained. JSON must be strict, duplicate
+keys rejected, SHA/IDs/source/cohort/constant base pins bound to the existing
+receipt; no symlinks or existing output overwrite. Hash archives with bounded
+streaming reads (4GiB maximum each); never parse a Docker archive in custom code.
+
+`export-images.mjs` accepts no CLI options, uses the existing Linux GitHub run
+context and prepared verified receipt, invokes native Docker image save with
+bounded owned output paths, hashes regular files and exclusively writes the v1
+bundle. `import-images.mjs --bundle=<absolute-existing-directory>` verifies the
+input regular files/hashes/receipt/cohort and current clean source before native
+Docker load. It starts only the existing owned local registry, verifies native
+loaded config IDs/source labels, pushes the original tags, retrieves native
+registry manifests and requires exact byte/digest equivalence to the original
+manifests. Then it writes the existing local image receipt and original immutable
+outputs. Any mismatch fails before Aspire/native database allocation. Original
+build and import receipts are retained separately; supplied JSON never claims to
+authenticate GitHub transport.
+
+Root owns actual trusted GitHub job/artifact binding, workflows, image-contracts
+and shared source exports. gates_audit owns only NEW `image-bundle-*`,
+`export-images.mjs`, `import-images.mjs`, NEW UnitTests `ImageBundle*` and NEW
+ComparisonTests `ImageBundle*` files. Root exposed verifySourceCheckout and
+makeImageRecord from prepare-images for reuse; preserve all native checks.
+TUnit tests precede implementation: real Node/file validation and negative
+hash/source/manifest/unsafe-path/duplicate/output-preservation inputs, no HTTP
+or Docker doubles. A real Docker export/registry-stop/remove-own-tags/import
+round-trip in the trusted build job verifies archive consumption, native config,
+source, manifest identity and outputs. Test filtering uses TUnit tree-node paths.
+No local tests/build/start. Root review and exact-SHA GitHub proof are required.
+
+TASK-ISO-010I retention filename: import exclusively retains original receipt bytes as `build-image-receipt.json` in its fresh owned local evidence directory; existing `image-receipt.json` remains the native verified import receipt. Existing strict aggregate-json parser may be reused as a generic duplicate-key reader; it does not authenticate transport.
+
+TASK-ISO-010I directory join: export exclusively creates sibling `RUNNER_TEMP/keyload-image-bundle` for original receipt/manifests, tar archives and v1 bundle. `keyload-images` retains registry evidence. The real round-trip retains the original evidence as a distinct owned sibling, cleans only its registry/verified tags, then import recreates `keyload-images` and final native receipts/outputs. No supplied paths may overwrite either directory.
+
+TASK-ISO-010I archive sha256 is raw lowercase64-hex; bytes is a positive safe integer at most4294967296. Existing native manifest/config digest IDs retain sha256: prefix. Export/import require no success stdout; workflow uses the fixed bundle/evidence paths and existing GITHUB_OUTPUT image outputs.
+
+## TASK-ISO-010C native preflight before full cohort
+
+Before allocating270 intense cells, qualify27 isolated Linux native cells, one
+supported representative scenario per engine at each native node count. Each
+preflight gets its own VM, the same frozen intensive options/image and all native
+membership/copy and untimed CRUD negative probes where supported. Representatives:
+KeyLoad/PostgreSQL/Redis/Neo4j/MongoDB/OpenSearch PointRead; Qdrant VectorExact;
+RabbitMQ QueueCycle; KurrentDB StreamAppend. Neo4j2/3 remain runner-only explicit
+unsupported topology. Preflight artifacts are `comparison-preflight-<id>` and
+jobs `preflight / <id>`; they are retained but excluded from final aggregation.
+The108CRUD/162specialized full matrices depend on successful complete preflight.
+Every full cell is still measured on its own new VM and must pass; preflight never
+substitutes for the270-cell cohort, RF3/public clients or remaining quality gates.
+The closed270-cell plan schema remains unchanged. A derived preflight matrix has
+exactly these27 existing canonical cells and is validated against that plan.
+
+## TASK-ISO-010K public client qualification
+
+AC-ISO-003/004/005: NEW ComparisonTests `IsolatedKeyLoadPublicRegression*` files
+are owned by sql_audit. Entry `VerifyAsync(DistributedApplication app,int nodeCount,
+CancellationToken token)` runs untimed after KeyLoad PointRead measurements for
+actual RF1/2/3. Read only native model endpoints and persisted admin authority;
+own native HTTP + official C# MCP SDK clients. Use a unique persisted partition.
+Verify SDK create/MCP read/revision-fenced MCP update/SDK exact read/SQL CALL delete
+and SDK/MCP absence, duplicate create/missing update+delete, persisted read-only
+credential denial across SDK/MCP/SQL with exact canonical errors, stable CommandId
+retry/receipt, atomic stream/queue plus SQL logical parity/nonconsuming inspect/
+fenced ACK, genuine two-part blob hash and crossing range via SDK+official MCP,
+and invalid hash rejected without publication. No transport/fixture copying or
+mocks. Root adds explicit SDK project and centrally pinned official MCP package
+references; worker may not edit contracts/projects/workflows/old fixtures/docs.
+
+Root owns subsequent real native fault phase: RF1 native SIGKILL/restart restores
+prior ACK, RF2 loses quorum with either voter stopped and rejects new quorum work,
+restart preserves exact membership/authority and prior ACK; normal RF3 retained
+snapshot/catch-up public-client gate remains mandatory. No snapshot-threshold
+change or claimed process proof from activation restarts. The public helper alone
+does not qualify process recovery, power loss or snapshot installation. Worker
+writes meaningful actual caller assertions first; source inspection and exact-SHA
+GitHub cases/fault receipts are required before the task joins as qualified.
+
+## TASK-ISO-010G authenticated GitHub transport
+
+AC-ISO-001/006/007: gates_audit owns only NEW `isolated-github-*` scripts and NEW
+UnitTests/ComparisonTests `IsolatedGitHub*`. Root owns workflows and fixed shared
+schemas. Use actual authenticated GitHub CLI REST (GH_TOKEN only in environment,
+never argv/logs), fixed managedcode/KeyLoad canonical ci.yml/run/current attempt,
+actual clean source/GITHUB_SHA and Linux. Retain exact raw run-attempt/jobs-pages/
+artifacts-pages JSON. Complete bounded pagination, unique IDs and exact native
+source/run/attempt/job/artifact associations are mandatory. Supplied metadata
+never claims to authenticate transport. Reuse genuine existing hash/strict JSON/
+process primitives where suitable; do not invent a ZIP parser or HTTP doubles.
+
+`isolated-github-job.mjs` accepts no args, reads exact trusted
+KEYLOAD_COMPARISON_JOB_NAME (`case / <canonical-id>`, `preflight / <canonical-id>`
+or comparison-images for a native API test), captures current in-progress own
+job, and appends only actual KEYLOAD_COMPARISON_JOB_ID to existing GITHUB_ENV.
+Closed source/run/repo/ref/workflow context is checked against actual provider
+response. Metadata capture lives under fresh RUNNER_TEMP/keyload-cell-github.
+The derived canonical cell is checked against a strict plan when applicable.
+
+`isolated-github-collect.mjs --plan=<absolute> --input=<NEW-absolute>` collects
+all270 successful exact `case / <id>` jobs and all270 unique immutable unexpired
+`comparison-worker-<id>` artifacts for this same current source/run/attempt,
+plus successful `comparison-images` job and exact `comparison-image-bundle`.
+Worker jobs must each contain exactly one successful Run isolated native case and
+Retain isolated worker evidence step. Image job must contain successful Qualify
+native image export and import and Retain common image bundle steps. Keep full
+provider metadata; frozen schema1 proof projects only the two required worker
+steps. Validate artifact workflow_run source/run and timestamps within own job.
+Download native artifact ZIP bytes via bounded authenticated gh api; verify exact
+API size and SHA256 digest before extraction. For workers use native `unzip -p`
+for exactly worker.json into `input/workers/<id>/worker.json` (no archive paths
+extracted); stream raw bytes with64MiB bound/hash and reject absent/duplicate raw
+entry through native filename inventory. Retain verified ZIP archives separately
+under input/archives and full API capture under input/github. Root aggregate
+validator consumes strict input/workers and input/github/proof.json.
+
+The image ZIP is separately bounded by both4GiB archives plus metadata, streamed
+and retained with actual provider digest. Native unzip reads only its fixed JSON
+receipt/bundle/manifests to establish source/config/manifest/cohort and common
+report image identity; write input/github/image-proof.json with authenticated
+actual image job/artifact/ZIP and raw-file hashes. Raw workers must name exactly
+the verified image-receipt generator and KeyLoad server image where applicable.
+Do not extend frozen aggregate proof/envelope shape. Fail closed before returning
+success or before aggregate invocation if any cell/image evidence is missing,
+foreign, partial, duplicate, expired, failed, changed or corrupt. Existing input
+must remain unchanged; newly created partial capture is retained as failed
+read-only evidence and cannot publish. Do not redownload/fallback to another run.
+
+Tests first: actual Node/files strict projection and corrupt/foreign/duplicate/
+missing/hash/step/source/cohort failures with controlled metadata clearly labelled
+as parser inputs, no fake network. One real read-only GitHub current-job capture
+TUnit case in trusted image job exercises authenticated provider CLI and exact
+job identity; complete actual270 collection is final native positive proof. No
+local tests/build/network qualification, commits, shared edits or secrets output.
+Escalate ambiguous provider fields/ZIP entries rather than weaken proof. Root
+retains least-privilege actions:read and trusted same-run artifact-ID download.
+
+TASK-ISO-010G owning join refinements (before implementation): keep aggregate
+inventory strict. Collector's --input is the NEW capture root; workers live at
+`input/data/workers/<id>/worker.json`, full API proof at input/github/proof.json,
+ZIPs at input/archives. Aggregate is invoked with --input=input/data and proof
+outside it; no extra directory is admitted into aggregate source inventory.
+
+Image-proof exact schema1:
+`{schemaVersion:1,cohort,job,artifact,archive:{path:"archives/comparison-image-bundle.zip",bytes,sha256},files:[{path,bytes,sha256}],images:{server,loadGenerator}}`.
+Cohort and job/artifact projections use the frozen worker-proof field shapes;
+image job name comparison-images, exact two successful image steps. files are
+exactly the four strict fixed JSONs under github/images: image-bundle.json,
+image-receipt.json, server-manifest.json, comparisons-manifest.json. Paths are
+relative to capture root; hashes lowercase64hex. images are actual native
+verified receipt references. Capture all raw metadata and actual provider URLs.
+
+Bounds:100 items/page, max20 pages and2000 unique jobs/artifacts each; metadata
+16MiB per capture, worker ZIP128MiB, worker raw64MiB, image ZIP9GiB (two archives
+individually at most4GiB plus fixed metadata/ZIP overhead), all worker ZIPs total
+16GiB; gh metadata120s, downloads/native image ZIP600s, worker unzip120s. Stream
+binary outputs/hashes, never unbounded buffering or native secret output.
+
+An authenticated exact `/runs/{run}/attempts/{attempt}/jobs` route plus verified
+native run-attempt response binds attempt when native jobs omit run_attempt;
+if returned it must equal current. Artifact workflow_run has no attempt field:
+exact own source/run/repository IDs, unique name/ID, immutable digest and created
+within the exact current successful job interval bind it; another attempt's
+artifact cannot qualify. Provider job html_url may be native actions/runs/run/job/id
+or documented legacy runs/run/jobs/id; verify actual own IDs/repository and retain
+raw URL, project the same actual IDs to frozen canonical actions URL. No alternate
+run/attempt lookup or fallback. A changed pagination snapshot fails closed; setup
+may make explicitly recorded bounded same-route fresh captures before allocation,
+at most30s, never change source/cohort or retry measured database operations.
+
+TASK-ISO-010 cleanup/privacy refinement: native constructor/configuration failures
+must produce fixed safe host stderr, never a driver's connection text. Real
+malformed Mongo/Kurrent parser TUnit cases cover the boundary. Session teardown
+attempts every owned native session under the ordinary timeout outside timing;
+cleanup failure marks a completed case failed while preserving its original
+measurement/raw samples. It cannot erase earlier attempts or authorize metrics.
+Caller/app teardown independently attempts raw retention, log closure, bounded
+native Stop and owned cleanup; a stop failure preserves live mounted data and
+fails the job. Native success paths are qualified by every genuine cell. Rare
+unforced native-driver close failure has source control-flow review as explicit
+manual exception until an actual reproducible native driver fault exists; do not
+invent an IComparisonSession service double to produce that branch.
+
+## TASK-ISO-011 approved compact publication contract, 2026-10-03
+
+AC-ISO-008/009: the complete schema4 aggregate and its270 byte-preserved workers
+remain GitHub Actions evidence. Pages publishes the exact original aggregate
+manifest plus an explicitly derived schema1 projection, each hash-bound in a
+separate isolated catalog. Raw samples are never copied to Pages or preloaded by
+the browser. Each row links its actual successful job and the exact authenticated
+artifact ID/digest/name; the UI labels raw evidence as a GitHub artifact requiring
+GitHub download/access and subject to provider retention. It must not pretend
+that an artifact page is a direct raw JSON download. Expired/missing artifacts
+cannot qualify a new publication. This satisfies the native16GiB raw ceiling and
+the official published Pages1GB ceiling without losing raw evidence.
+
+Projection schema1 exact top-level fields: schemaVersion, cohort, profile,
+options, datasetSha256, workers. It retains each original aggregate worker
+verbatim plus one report field. report is the fully validated original schema3
+report except each case omits samples; no other reported value is changed.
+UnsupportedTopology has report:null. Projection output is at most4MiB. Producer
+revalidates all270 raw envelopes/hashes/native proof sequentially using the
+existing aggregate validators before stripping samples; never pool nodes or
+engines. Browser validates closed270 IDs, cohort, options, target/node/scenario,
+all5cases, native nodes/copies/ack metadata, exact measured/unsupported contracts,
+finite consistent metrics and original job/artifact identity. Negative parser
+inputs are explicitly validation inputs, never synthetic performance evidence.
+
+Separate catalog schema1 fields: schemaVersion, generatedAt, siteSourceRevision,
+measuredSourceRevision, evidenceUrl, cohort, aggregate, projection, rawLocation.
+Website SHA is trusted main website source; measured SHA/cohort remain exact.
+evidenceUrl is the exact managedcode/KeyLoad run URL. aggregate/projection each
+have path and sha256 only, with paths isolated/aggregate.json and
+isolated/projection.json; rawLocation is githubActionsArtifacts. Every fetched
+projection is byte-hash verified before JSON validation. Catalog at most64KiB.
+
+Approved exports: isolated-projection.mjs produceIsolatedProjection({input})
+returns the validated derived projection from the aggregate directory;
+isolated-loader.mjs validateIsolatedCatalog(value),
+validateIsolatedProjection(value, catalog), loadIsolatedCatalog({catalogUrl,signal}),
+loadIsolatedProjection({entry,baseUrl,signal}); isolated-measurements.mjs
+selectedIsolatedRows(projection,scenario,nodeCount,repetition,metric,target)
+returns selected engine rows, where target is exact engine or all, repetitions
+are all or exact0..4, and metric keys preserve existing metrics. Every median
+uses only that worker's five cases. isolated-lab.mjs
+mountIsolatedLab({root,catalogUrl}) returns synchronously {dispose}; async native
+fetch has owned errors, abort/generation control, atomic dependent-surface clearing.
+
+Task graph: TASK-ISO-011W models_audit high-capability integration worker owns
+ONLY NEW site Features/BenchmarkComparisons/isolated-*.mjs and NEW SiteIsolated*
+TUnit test files; may split private helpers under the same prefixes. Root owns
+HTML/bootstrap/build assets/shared inventories/Pages/source catalog joins. Start
+condition: this contract, existing ADR056, acceptance and plan are approved under
+the owner's requested work. Tests precede implementation. Preserve legacy schema2
+contracts and all real-browser/TUnit gates; add no third-party packages, fake
+fetch/server/measurement, framework, local tests or qualification. New sources
+enter exact coverage inventory,80/70 aggregate and90 critical validation/UI gates.
+Worker delivers exact source list, integration patch proposal, test mapping and
+static evidence; root reviews and qualifies actual complete cohort in GitHub.
+
+TASK-ISO-010G provider-budget refinement: current-job capture relies on genuine
+fixed GitHub runner source/run/attempt/repository/main/workflow environment and
+queries only its exact-attempt native jobs route, retaining visited pages and
+stopping after the unique expected in-progress job. Final collector verifies
+workflow and run-attempt provider source afresh and complete jobs/artifacts.
+Preflight, CRUD and specialized phases are ordered for the repository-wide
+1000/hour REST budget; every cell still has its own VM and independent native
+resources. No alternate token, unauthenticated fallback, or measured retry.
+
+Primary constraints: https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits
+and https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api.
+
+TASK-ISO-010G native rate-limit handling refinement: authenticated metadata and
+artifact requests retain provider headers as well as exact bodies. Only an
+actual403/429 with native x-ratelimit-remaining:0 and valid x-ratelimit-reset, or
+a valid native Retry-After, may wait then repeat the identical route. This is
+provider setup/collection outside every measured database interval; never retry
+database operations or choose another source/token/run. Record every rejected
+provider attempt and exact wait. Bound accumulated rate waits per CLI to3700s,
+at most3 repeats per identical request and existing request/download bounds.
+Other authorization/errors fail immediately. Respect reset/Retry-After and
+prevent concurrent retry flooding; workflow matrix max-parallel6. Actual rate
+headers are evidence, not an inferred fixed remaining budget. Cancellation kills
+owned native process/wait; exhausted bounds retain failure and cannot publish.
+Static/parser tests cover invalid headers, absent429 retry permission and bound
+calculation; actual current-job and complete270 collector remain native proof.
+
+Current-job context additionally requires the native GITHUB_WORKFLOW_REF value managedcode/KeyLoad/.github/workflows/ci.yml@refs/heads/main. Planner retains its exact schema1 wire while appending derived preflight_matrix to GitHub output; native TUnit validates all27 original cells/options and rejects drift.
+
+## TASK-ISO-010F approved genuine fixed-membership fault qualification
+
+AC-ISO-003/004/005: after KeyLoad PointRead timing and010K public regression,
+call IsolatedKeyLoadFaultRegression.VerifyAsync(app,nodeCount,evidenceDirectory,
+token). sql_audit owns ONLY NEW ComparisonTests IsolatedKeyLoadFaultRegression*
+files. Reuse010K public SDK/MCP/identity assertions read-only; no old integration
+fixture/transport copy or mock. Tests are caller-visible assertions in the real
+isolated native test. Root owns call and evidence join; no shared edits/commits.
+
+Create unique persisted collection/queue, ACK a sentinel and queue delivery,
+retain full command receipts and scoped read-only credential in memory. Capture
+every native Dashboard ordered Voters/LocalVoter/NodeId/incarnation/process ID.
+Select actual leader/follower through native Dashboard, never assume node1 leader.
+Close owned official MCP before faults and reconnect genuine client after recovery.
+Resolve closed node1..n ContainerNameAnnotation to bounded native Docker inspect
+full ID/configured image/image ID/start time/mount identity; inspect only selected
+safe fields, never environment/whole inspect/secrets. SIGKILL the exact inspected
+full ID and prove exited. Restart only a verified killed resource using native
+Aspire StartCommand and WaitOnResourceUnavailable health wait, then native running
+and new process start time with unchanged image and retained bind-mount authority.
+
+RF1: sole native process exited before failed SDK attempts; read OwnershipLost
+and write UnknownWriteOutcome cannot ACK. After restore, prior ACK data persists
+and command not sent to any live process is absent before explicit same-ID retry.
+RF2: separate stop/restore phases for EACH actual voter prove either stop loses
+majority. Survivor public quorum reads/commands fail only the existing closed
+OwnershipLost/UnknownWriteOutcome contracts; official MCP may fail genuine503
+at its persisted auth/read barrier. Never demand canonical apply statistics from
+quorum-blocked public status. While minority exists no successful public cut/ACK
+is allowed. An unknown write may remain durable/uncommitted and later commit:
+restore resolves that SAME retained command ID to one exact receipt/revision,
+never asserts permanent absence or retries with a fresh ID. RF3: follower kill
+preserves actual live majority ACK/read; restart/catch-up proves ordered membership
+and Applied>=ACK plus exact data. No snapshot-threshold/storage modification.
+Existing RF3 retained snapshot/cursor/outbox gate remains separate required proof;
+process restore and append catch-up are not snapshot-install or power-loss proof.
+
+After every restore, exact completed ACK same-ID/token returns stored receipt;
+fresh-ID reuse of the old ACK token yields StaleLease, never TokenInvalidated.
+Same persisted scoped credential succeeds through SDK/reconnected official MCP
+and still rejects writes. Compare actual ordered voters/local authority and
+incarnation with baseline. SDK unknown outcomes follow existing public contract.
+
+Bounds: overall10min, native CLI30s with bounded readers/kill+exit/drain, native
+exited20s, restart120s, public attempt30s, readiness reads90s/250ms. Recovery polling
+and same-command resolution are untimed fault qualification, not benchmark retries.
+Finally attempt every killed resource restoration with independent bounded cleanup
+even if an earlier restoration fails; preserve the primary safe failure. Atomic
+owned no-overwrite JSON retains actual cell/SHA/run/attempt/job, safe native IDs/
+image/start/mount hashes, ordered membership and fixed failure categories, not
+credentials/tokens/raw exception strings. Root reviews every prefix diff and
+qualifies all1/2/3 actual native jobs at final SHA before completion.
+
+TASK-ISO-011W clarified joins: projection loader entry is the whole validated
+catalog. Rows preserve legacy row fields plus nodeCount and verbatim worker
+metadata/report. isolated-contracts.mjs browser constants must match canonical
+isolated-contract.json structurally in every producer invocation. Defaults are
+PointRead/node3/target all/repetition all/throughput. DOM IDs: isolated-lab,
+isolated-scenario, isolated-node-count, isolated-target, isolated-metric,
+isolated-repetition, isolated-results, isolated-error, isolated-retry,
+isolated-announcement; native labelled selects, role alert/error and polite
+status announcement. Root joins HTML/bootstrap and --isolated aggregate option.
+Genuine input env KEYLOAD_SITE_ISOLATED_AGGREGATE; native producer deadline300s,
+max4MiB output, V8 coverage env retained. Reuse one immutable validated projection
+within suite; real270 raw positive is mandatory, never skip/fabricate fallback.
+New site modules join exact80/70 aggregate/90 critical source inventory. Imported
+authoritative aggregate/planner modules retain their own TUnit tooling/native
+cohort gates; site coverage is scoped to site-authored modules and existing
+evidence tools without claiming unmeasured tooling coverage.
+
+## TASK-ISO-012P approved isolated Pages evidence join
+
+REQ-BC-056/057/058, AC-ISO-007/008/009. Root approves this additive contract
+before implementation. Retain the independent genuine legacy comparison job,
+12-file archive, three historical profiles and their complete tests. Their
+actual earlier SHA is independent of the new isolated cohort; unavailable or
+expired historical evidence fails rather than fabricating profiles.
+
+Pages keeps its actual trusted native executor environment. A separate explicit
+Pages context captures authenticated main-push CI metadata; never forge the
+CI-only current-job environment. Selection is highest run number, then descending
+attempt, with an actual completed/successful comparison-aggregate job. Missing or
+failed aggregate permits bounded earlier search. Once success is selected,
+missing/expired/ambiguous/invalid evidence fails without older fallback. Native
+repository IDs, workflow path/ID, source, exact attempt route, jobs, artifacts,
+creation intervals and closed successful steps are mandatory. Search is bounded
+to2000 run records,2000 exact-attempt jobs/artifacts and2000 run-attempt pairs.
+Retain every requested history page/pair. No alternate token/source/retry route.
+
+Exact successful aggregate steps are Recreate the canonical complete intensive
+plan; Collect exact authenticated native jobs and immutable raw artifacts;
+Validate and retain all270 byte-preserved workers; Generate bounded native
+performance metrics; Retain the generated native metrics candidate; Retain the
+complete qualified comparison cohort; Retain authenticated provider and archive
+integrity evidence. Provider artifact existence from always() alone proves nothing.
+
+Download only authenticated comparison-isolated-suite and
+comparison-isolated-provider-evidence ZIPs. Freshly verify all270 canonical worker
+job/artifact identities and common image job/artifact against retained proof.json
+and image-proof.json. Reuse strict image contracts to verify the four original
+image JSONs, their hashes, source/cohort/config/manifests/references and every
+worker image. Do not redownload270 worker ZIPs or the common9GiB image ZIP:
+successful exact-step collector and immutable aggregate artifacts bind that chain.
+
+Closed receipt schema1 fields: schemaVersion,state,mode,publishEligible,source
+{website,measured,control},repository{id,fullName},workflow{id,path},run
+{id,number,attempt,url},cohort,aggregateJob{id,name,url,startedAt,completedAt,steps},
+artifacts{suite,provider},workers[{id,job,artifact}] exactly270,image{job,artifact},
+metadataFiles[{path,bytes,sha256}],archives,inputFiles. Native artifacts retain
+id,name,sizeInBytes,digest,expired,createdAt. Archives retain confined path,bytes,
+sha256. metadata_verified has null archives/inputFiles; archive_verified has both
+ZIP receipts and exactly277 extracted-file receipts. Website/measured/control
+revisions remain independent. Fail on extra/duplicate fields or changed source.
+
+Capture layout: metadata/; archives/comparison-isolated-suite.zip and
+comparison-isolated-provider-evidence.zip; input/aggregate/aggregate.json plus
+workers/<canonical ID>/worker.json; input/provider/proof.json,image-proof.json,
+images/<four fixed original JSON files>; metadata-proof.json; archive-receipt.json.
+Root supplies KEYLOAD_SITE_ISOLATED_CAPTURE and
+KEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT; the mandatory before-session BCL preparation
+sets KEYLOAD_SITE_ISOLATED_AGGREGATE to its verified input/aggregate directory.
+
+BCL ZipArchive inspects the complete native archive before creating output.
+Suite file set is EXACT aggregate.json plus270 canonical worker paths, with only
+their parent directory entries allowed. Provider must include the exact six
+selected original proof/image files; other retained native capture entries are
+bounded metadata only under the collector's closed capture naming convention.
+Reject traversal, case-insensitive collisions, links/special files, unexpected
+directories/types, duplicated entries, declared/streamed length drift and excess
+bounds. Suite ZIP18GiB, provider ZIP128MiB, each raw64MiB, JSON4MiB, total raw16GiB;
+metadata captures16MiB/page with finite inventories. Check required available disk
+from actual declared extraction lengths plus1GiB reserve before extracting.
+Exclusive fixed-path extraction retains all277 byte/hash receipts. No generic
+unzip-to-directory or pre-extracted fallback. Verify archives/files unchanged
+after the full suite and immediately before/after the final builder.
+
+Public new CLI:
+capture --input=<NEW absolute root> --mode=validate|publish
+ --site-revision=<website SHA> --workflow-revision=<control SHA>
+ [--requested-run=<validation-only run ID>]
+verify-inputs --input=<capture root> --receipt=<archive receipt>
+fresh --before=<qualified archive receipt> --after=<fresh metadata receipt>.
+Fresh capture reselects latest eligibility and compares source/cohort, aggregate,
+all270 workers, common image and both aggregate artifacts. Deletion/expiry,
+changed identity or newer successful evidence blocks deployment. No ZIP download
+for freshness. Native metadata120s/download600s/producer300s remain bounded.
+Rate wait is the approved identical-route actual403/429 protocol,3700s accumulated,
+3 repeats. Pages qualification timeout180min and deploy freshness90min accommodate
+this wait without changing operation clocks.
+
+gates_audit owns ONLY NEW scripts site-isolated-github-*.mjs (contract,context,
+runs,proof,capture,fresh,CLI, plus narrowly split private helpers if400/200/50
+requires) and NEW SiteIsolatedGitHub*.cs (archive setup/reader/receipt/file operations,
+selection/proof/archive/freshness/native capture tests and bounded Node helper).
+Root alone owns shared hooks/workflows/coverage inventories/source joins/docs.
+Disjoint from models_audit SiteIsolated* UI/producer prefixes: NEW delegated names
+must begin SiteIsolatedGitHub. No shared transport mutation, commits, local builds,
+tests, providers, suppressions, doubles or skipped inputs. Escalate contract drift.
+
+Tests-first methodology: genuine complete native metadata+two ZIPs and same
+277 raw files are the positive input; independent C# assertions verify exact
+identities/hash/source/fields, actual BCL extraction and native Node capture.
+Controlled corrupt copies cover missing/extra/duplicate/path/type/hash/length/
+cohort/image/job/artifact/source/expiry/newer-success/freshness failures, never
+positive measurements or provider doubles. Root joins every new production module
+to actual site80/70 aggregate and individual critical90 coverage and hashes the
+executed dependency closure between control and website checkout. Existing tests
+and denominators remain. Final builder takes both real archives, publication
+receipt gains a separate isolated field, both native freshness checks precede the
+same needs-gated Pages artifact deployment. Actual successful workflow/provider/
+live metrics proof is required before AC completion.
+
+TASK012P freshness entry refinement: add closed capture-metadata CLI verb with
+the same capture arguments and actual provider environment. Export
+captureSiteIsolatedMetadata({environment,args}); it performs the identical bounded
+selection/native proof capture, emits metadata_verified and downloads no ZIPs.
+capture uses that selection before downloading the two immutable ZIPs. Deploy
+calls capture-metadata in publish mode, then fresh with the two receipt paths.
+
+TASK012P provider archive refinement: bound the total declared AND streamed
+decompressed provider metadata to128MiB,4096 entries, and16MiB per metadata entry
+before any extraction. Selected original JSONs retain4MiB limits. Safe names and
+actual lengths are checked for the entire archive, including metadata not emitted
+to the fixed six-file output. Reject excess totals rather than ignoring them.
+
+TASK-ISO-011R approved responsive refinement under AC-ISO-008/009: tests first
+use genuine standalone native Chrome/270 projection at1440/768/390/320 widths.
+Keep document scrollWidth<=clientWidth, all9 independent-oracle rows/statuses and
+opened long provenance details. Table overflow belongs only to a labelled,
+keyboard-focusable role=region wrapper (table-scroll isolated-table-scroll,
+tabIndex0). Chart class isolated-chart and details isolated-worker use existing
+brand tokens. models_audit owns only isolated-view.mjs, a NEW SiteIsolated layout
+assertion helper and standalone test call; root owns scoped shared CSS. No value,
+validation/provenance/source/schema/public contract changes or test omissions.
+Root reviews complete prefix diff; actual GitHub Chrome/coverage remains required.
+
+TASK012P original archive authority: BCL unchanged verification compares its
+private in-memory original receipts and files, never a rewritten disk baseline.
+CLI verify-inputs also revalidates retained authenticated metadata/proof identity
+and hashes both original ZIPs against the selected native artifact digests.
+Three bounded native unzip -p reads select ONLY original aggregate.json,
+proof.json and image-proof.json into exclusively owned temporary files,4MiB each.
+Their SHA256 must equal extraction receipts; original proof binds all270 actual
+worker hashes and original image-proof binds all four actual image JSON hashes.
+Reject rewritten receipts/raw/proofs rather than trusting their mutually changed
+values. No new download, custom ZIP parser, general extraction or270 repeats.
+Fresh predeploy authenticated metadata remains the final remote identity anchor.
+
+TASK-ISO-013V joins AC-ISO-006 cleanup explicitly: capture and application
+disposal each has a30s bound, independent failure-stage retention and late-fault
+observation. No implicit disposer may override the primary assertion afterward.
+Root owns IsolatedNativeCase/Teardown; every genuine cell exercises success.
+Unforced simultaneous disposal failure has the existing native fault/control-flow
+review exception, with no service double or fabricated runtime evidence.

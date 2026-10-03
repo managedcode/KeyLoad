@@ -134,21 +134,49 @@ jobs:
           name: code-quality-docker-rf3
           path: artifacts/code-quality/**
           if-no-files-found: error
-  comparison-smoke:
+  comparison-plan:
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      Benchmarks__EvidenceProfile: smoke-single
+    timeout-minutes: 10
+    outputs:
+      crud: ${{ steps.plan.outputs.crud_matrix }}
+      specialized: ${{ steps.plan.outputs.specialized_matrix }}
+      preflight: ${{ steps.plan.outputs.preflight_matrix }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Freeze the complete intensive Linux cohort
+        id: plan
+        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --github-output="$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-plan
+          path: ${{ runner.temp }}/isolated-plan.json
+          if-no-files-found: error
+          retention-days: 90
+  comparison-images:
+    name: comparison-images
+    needs: [verify, comparison-plan]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      bundle-artifact-id: ${{ steps.bundle.outputs.artifact-id }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      KEYLOAD_COMPARISON_JOB_NAME: comparison-images
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
         with:
           global-json-file: global.json
-      - name: Prepare immutable source-bound runtime images
+      - name: Require the actual Docker runtime
+        run: docker version
+      - name: Prepare immutable source-bound runtime images once
         id: images
         run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs
       - name: Bind the verified runtime image receipt
-        shell: bash
         env:
           KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
           KEYLOAD_RUNNER_IMAGE: ${{ steps.images.outputs.load-generator-image }}
@@ -157,65 +185,215 @@ jobs:
           printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
       - run: dotnet restore KeyLoad.slnx
       - run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
-      - run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release
-      - name: Measure 1 KiB documents, eight clients and three graph hops
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release
-        env:
-          KEYLOAD_COMPARISON_DOCUMENTS: 128
-          KEYLOAD_COMPARISON_OPERATIONS: 60
-          KEYLOAD_COMPARISON_WARMUP: 5
-          KEYLOAD_COMPARISON_REPETITIONS: 3
-          KEYLOAD_COMPARISON_CONCURRENCY: 8
-          KEYLOAD_COMPARISON_DIMENSIONS: 32
-          KEYLOAD_COMPARISON_TOPK: 10
-          KEYLOAD_COMPARISON_GRAPHVERTICES: 128
-          KEYLOAD_COMPARISON_GRAPHDEPTH: 3
-          KEYLOAD_COMPARISON_REPORT_NAME: json-1k-c8
-          Benchmarks__EvidenceProfile: json-1k-c8-single
-      - name: Measure 16 KiB documents, four clients and five graph hops
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release
-        env:
-          KEYLOAD_COMPARISON_DOCUMENTS: 128
-          KEYLOAD_COMPARISON_OPERATIONS: 60
-          KEYLOAD_COMPARISON_WARMUP: 5
-          KEYLOAD_COMPARISON_REPETITIONS: 3
-          KEYLOAD_COMPARISON_CONCURRENCY: 4
-          KEYLOAD_COMPARISON_PAYLOADBYTES: 16384
-          KEYLOAD_COMPARISON_DIMENSIONS: 32
-          KEYLOAD_COMPARISON_TOPK: 10
-          KEYLOAD_COMPARISON_GRAPHVERTICES: 128
-          KEYLOAD_COMPARISON_GRAPHDEPTH: 5
-          KEYLOAD_COMPARISON_REPORT_NAME: json-16k-c4
-          Benchmarks__EvidenceProfile: json-16k-c4-single
-      - name: Capture and remove only the job-owned registry
-        if: ${{ always() && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
+      - name: Qualify native image export and import
+        id: roundtrip
+        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ImageBundleRealTests/*'
+      - name: Qualify authenticated current-job identity
+        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedGitHubCurrentJobTests/*'
+      - name: Qualify exact native topology composition models
+        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/Isolated*Resource*/*'
+      - name: Qualify time-series workload and aggregation contracts
+        run: |
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesWorkloadTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesPackageVersionTests/*'
+      - name: Retain common image bundle
+        id: bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-image-bundle
+          path: ${{ runner.temp }}/keyload-image-bundle/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 90
+      - name: Capture job-owned registry after an incomplete round-trip
+        if: ${{ always() && steps.roundtrip.outcome != 'success' && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
         run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
-      - name: Retain actual comparison image manifest and lifecycle evidence
-        if: ${{ always() && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: comparison-image-evidence
-          path: ${{ runner.temp }}/keyload-images/**
-          if-no-files-found: error
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - name: Retain native image and source qualification evidence
         if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: comparison-suite
-          path: artifacts/comparisons/**
-          if-no-files-found: warn
-      - name: Retain comparison test result reports
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
-        with:
-          name: comparison-test-results
+          name: comparison-images-qualification
           path: |
-            TestResults/**
-            tests/KeyLoad.ComparisonTests/**/TestResults/**
-          if-no-files-found: warn
-      - name: Retain comparison compiler diagnostic reports
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
-        with:
-          name: code-quality-comparisons
-          path: artifacts/code-quality/**
+            ${{ runner.temp }}/keyload-images/**
+            ${{ runner.temp }}/keyload-images-build/**
+            ${{ runner.temp }}/keyload-cell-github/**
+            **/TestResults/**
+            artifacts/code-quality/**
           if-no-files-found: error
+          retention-days: 90
+  comparison-preflight:
+    name: preflight / ${{ matrix.id }}
+    needs: [comparison-plan, comparison-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.preflight) }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      KEYLOAD_COMPARISON_CELL_ID: ${{ matrix.id }}
+      KEYLOAD_COMPARISON_JOB_NAME: preflight / ${{ matrix.id }}
+      Benchmarks__Target: ${{ matrix.target }}
+      Benchmarks__NodeCount: ${{ matrix.nodeCount }}
+      Benchmarks__Scenario: ${{ matrix.scenario }}
+      Benchmarks__EvidenceProfile: ${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Prepare isolated native case
+        id: images
+        uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellSetup
+        with:
+          bundle-artifact-id: ${{ needs.comparison-images.outputs.bundle-artifact-id }}
+      - run: dotnet restore KeyLoad.slnx
+      - run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
+      - name: Run isolated native case
+        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedNativeComparisonTests/*'
+      - name: Retain isolated worker evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-preflight-${{ matrix.id }}
+          path: artifacts/comparisons/isolated/workers/${{ matrix.id }}/*
+          if-no-files-found: error
+          retention-days: 90
+      - name: Retain native worker lifecycle evidence
+        if: always()
+        uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellTeardown
+        with:
+          setup-outcome: ${{ steps.images.outcome }}
+          artifact-name: comparison-preflight-qualification-${{ matrix.id }}
+  comparison-crud:
+    name: case / ${{ matrix.id }}
+    needs: [comparison-plan, comparison-images, comparison-preflight]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.crud) }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      KEYLOAD_COMPARISON_CELL_ID: ${{ matrix.id }}
+      KEYLOAD_COMPARISON_JOB_NAME: case / ${{ matrix.id }}
+      Benchmarks__Target: ${{ matrix.target }}
+      Benchmarks__NodeCount: ${{ matrix.nodeCount }}
+      Benchmarks__Scenario: ${{ matrix.scenario }}
+      Benchmarks__EvidenceProfile: ${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Prepare isolated native case
+        id: images
+        uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellSetup
+        with:
+          bundle-artifact-id: ${{ needs.comparison-images.outputs.bundle-artifact-id }}
+      - run: dotnet restore KeyLoad.slnx
+      - run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
+      - name: Run isolated native case
+        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedNativeComparisonTests/*'
+      - name: Retain isolated worker evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-worker-${{ matrix.id }}
+          path: artifacts/comparisons/isolated/workers/${{ matrix.id }}/*
+          if-no-files-found: error
+          retention-days: 90
+      - name: Retain native worker lifecycle evidence
+        if: always()
+        uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellTeardown
+        with:
+          setup-outcome: ${{ steps.images.outcome }}
+          artifact-name: comparison-case-qualification-${{ matrix.id }}
+  comparison-specialized:
+    name: case / ${{ matrix.id }}
+    needs: [comparison-plan, comparison-images, comparison-preflight, comparison-crud]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.specialized) }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      KEYLOAD_COMPARISON_CELL_ID: ${{ matrix.id }}
+      KEYLOAD_COMPARISON_JOB_NAME: case / ${{ matrix.id }}
+      Benchmarks__Target: ${{ matrix.target }}
+      Benchmarks__NodeCount: ${{ matrix.nodeCount }}
+      Benchmarks__Scenario: ${{ matrix.scenario }}
+      Benchmarks__EvidenceProfile: ${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Prepare isolated native case
+        id: images
+        uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellSetup
+        with:
+          bundle-artifact-id: ${{ needs.comparison-images.outputs.bundle-artifact-id }}
+      - run: dotnet restore KeyLoad.slnx
+      - run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
+      - name: Run isolated native case
+        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedNativeComparisonTests/*'
+      - name: Retain isolated worker evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-worker-${{ matrix.id }}
+          path: artifacts/comparisons/isolated/workers/${{ matrix.id }}/*
+          if-no-files-found: error
+          retention-days: 90
+      - name: Retain native worker lifecycle evidence
+        if: always()
+        uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellTeardown
+        with:
+          setup-outcome: ${{ steps.images.outcome }}
+          artifact-name: comparison-case-qualification-${{ matrix.id }}
+  comparison-aggregate:
+    needs: [comparison-plan, comparison-images, comparison-crud, comparison-specialized]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Recreate the canonical complete intensive plan
+        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json"
+      - name: Collect exact authenticated native jobs and immutable raw artifacts
+        run: node scripts/Features/BenchmarkComparisons/isolated-github-collect.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --input="$RUNNER_TEMP/isolated-capture"
+      - name: Validate and retain all270 byte-preserved workers
+        run: node scripts/Features/BenchmarkComparisons/aggregate-cli.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --input="$RUNNER_TEMP/isolated-capture/data" --proof="$RUNNER_TEMP/isolated-capture/github/proof.json" --output="$RUNNER_TEMP/isolated-aggregate"
+      - name: Generate bounded native performance metrics
+        run: node site/scripts/build.mjs --isolated="$RUNNER_TEMP/isolated-aggregate" --output="$RUNNER_TEMP/isolated-site" --revision="$GITHUB_SHA" --site-revision="$GITHUB_SHA" --evidence-url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+      - name: Retain the generated native metrics candidate
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-isolated-site-candidate
+          path: ${{ runner.temp }}/isolated-site/**
+          if-no-files-found: error
+          retention-days: 90
+      - name: Retain the complete qualified comparison cohort
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-isolated-suite
+          path: ${{ runner.temp }}/isolated-aggregate/**
+          if-no-files-found: error
+          retention-days: 90
+      - name: Retain authenticated provider and archive integrity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-isolated-provider-evidence
+          path: ${{ runner.temp }}/isolated-capture/github/**
+          if-no-files-found: error
+          retention-days: 90

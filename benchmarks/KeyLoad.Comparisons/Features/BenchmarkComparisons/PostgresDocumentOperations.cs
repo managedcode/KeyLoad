@@ -7,6 +7,8 @@ internal static class PostgresDocumentOperations
 {
     private const string ReadSql = "SELECT body::text FROM documents WHERE id=$1";
     private const string WriteSql = "INSERT INTO documents(id,body) VALUES ($1,$2)";
+    private const string UpdateSql = "UPDATE documents SET body=$2 WHERE id=$1";
+    private const string DeleteSql = "DELETE FROM documents WHERE id=$1";
     private const string SeedSql = "INSERT INTO documents(id,body,embedding) VALUES ($1,$2,$3::vector)";
 
     internal static async Task<FoundDocument?> ReadAsync(NpgsqlConnection connection, BenchmarkDocument document,
@@ -23,14 +25,60 @@ internal static class PostgresDocumentOperations
         return new(document.Id, json);
     }
 
-    internal static async Task WriteAsync(NpgsqlConnection connection, BenchmarkDocument document,
-        CancellationToken cancellationToken)
+    internal static Task WriteAsync(NpgsqlConnection connection, BenchmarkDocument document, CancellationToken cancellationToken)
+        => ExecuteMutationAsync(connection, Scenario.DocumentWrite, document, cancellationToken);
+
+    internal static Task UpdateAsync(NpgsqlConnection connection, BenchmarkDocument document, CancellationToken cancellationToken)
+        => ExecuteMutationAsync(connection, Scenario.DocumentUpdate, document, cancellationToken);
+
+    internal static Task DeleteAsync(NpgsqlConnection connection, BenchmarkDocument document, CancellationToken cancellationToken)
+        => ExecuteMutationAsync(connection, Scenario.DocumentDelete, document, cancellationToken);
+
+    internal static NpgsqlCommand CreateCommand(NpgsqlConnection connection, Scenario scenario, BenchmarkDocument document)
     {
-        await using var command = connection.CreateCommand();
-        command.CommandText = WriteSql;
-        command.Parameters.AddWithValue(document.Id);
-        command.Parameters.AddWithValue(NpgsqlDbType.Jsonb, document.Json);
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        var sql = scenario switch
+        {
+            Scenario.DocumentWrite => WriteSql,
+            Scenario.DocumentUpdate => UpdateSql,
+            Scenario.DocumentDelete => DeleteSql,
+            _ => throw new ArgumentOutOfRangeException(nameof(scenario)),
+        };
+        var command = new NpgsqlCommand(sql, connection);
+        command.Parameters.AddWithValue(NpgsqlDbType.Text, document.Id);
+        if (scenario != Scenario.DocumentDelete)
+        {
+            command.Parameters.AddWithValue(NpgsqlDbType.Jsonb, document.Json);
+        }
+        return command;
+    }
+
+    internal static void RequireAffected(Scenario scenario, int affected)
+    {
+        if (affected == 1)
+        {
+            return;
+        }
+        var code = affected == 0 ? scenario switch
+        {
+            Scenario.DocumentUpdate => ComparisonMutationFailures.UpdateMissing,
+            Scenario.DocumentDelete => ComparisonMutationFailures.DeleteMissing,
+            _ => ComparisonMutationFailures.CardinalityMismatch,
+        } : ComparisonMutationFailures.CardinalityMismatch;
+        throw new ComparisonFailureException(code);
+    }
+
+    private static async Task ExecuteMutationAsync(NpgsqlConnection connection, Scenario scenario,
+        BenchmarkDocument document, CancellationToken cancellationToken)
+    {
+        await using var command = CreateCommand(connection, scenario, document);
+        try
+        {
+            RequireAffected(scenario, await command.ExecuteNonQueryAsync(cancellationToken));
+        }
+        catch (PostgresException error) when (scenario == Scenario.DocumentWrite && error.SqlState == PostgresErrorCodes.UniqueViolation)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict, error);
+        }
     }
 
     internal static async Task SeedAsync(NpgsqlConnection connection, BenchmarkDataset dataset,
@@ -43,7 +91,7 @@ internal static class PostgresDocumentOperations
             command.Parameters.AddWithValue(document.Id);
             command.Parameters.AddWithValue(NpgsqlDbType.Jsonb, document.Json);
             command.Parameters.AddWithValue(PostgresVectorOperations.VectorLiteral(document.Vector));
-            await command.ExecuteNonQueryAsync(cancellationToken);
+            RequireAffected(Scenario.DocumentWrite, await command.ExecuteNonQueryAsync(cancellationToken));
         }
     }
 }

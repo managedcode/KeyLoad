@@ -83,8 +83,8 @@ internal static class KurrentClusterVerifier
             observations.Add(KurrentConstants.ObservationAppendPrepare + cut.PreparePosition);
             observations.Add(KurrentConstants.ObservationCheckpointEvidence);
         }
-        return new ClusterEvidence(nodes.Length, topology == ComparisonTopology.Replicated ? nodes.Length : KurrentConstants.ExpectedSingleDataCopies,
-            topology == ComparisonTopology.Replicated ? KurrentConstants.HealthyState : KurrentConstants.SingleState,
+        return new ClusterEvidence(nodes.Length, nodes.Length,
+            ComparisonTopologies.NodeCount(topology) > 1 ? KurrentConstants.HealthyState : KurrentConstants.SingleState,
             ImmutableCollectionsMarshal.AsImmutableArray(observations.ToArray()));
     }
 
@@ -122,7 +122,7 @@ internal static class KurrentClusterVerifier
 
     private static void ValidateHttpClientSet(HttpClient[] clients, ComparisonTopology topology)
     {
-        var expectedCount = topology == ComparisonTopology.Replicated ? KurrentConstants.ExpectedReplicatedNodes : KurrentConstants.ExpectedSingleNode;
+        var expectedCount = ComparisonTopologies.NodeCount(topology);
         if (clients.Length != expectedCount || clients.Any(client => client.BaseAddress is null) ||
             clients.Select(client => client.BaseAddress!.Authority).Distinct(StringComparer.OrdinalIgnoreCase).Count() != expectedCount)
         {

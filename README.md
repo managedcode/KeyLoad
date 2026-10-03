@@ -272,3 +272,12 @@ This repository follows the [MCAF tutorial](https://mcaf.managed-code.com/tutori
 The baseline uses .NET 10, Orleans 10.3.1, Aspire 13.6.0, ZoneTree 1.9.8, .NEXT 6.8.1 and appropriate ManagedCode libraries. See [Directory.Packages.props](Directory.Packages.props) and the [dependency survey](docs/implementation/dependency-survey.json). `ManagedCode.Orleans.Graph` restricts grain call relationships; the property graph lives in KeyLoad's canonical data model.
 
 KeyLoad is released under the [MIT license](LICENSE). Dependency licenses remain with their respective owners. Contribution checks and dependency ownership rules are described in [AGENTS.md](AGENTS.md).
+
+The owner-directed comparison workflow now targets Linux and plans a separate
+runner for every native engine ×1/2/3 nodes ×scenario. [ADR-056](docs/ADR/ADR-056-isolated-linux-comparison-cells.md)
+freezes the common intensive workload, exact mutation correctness, per-worker
+JSON and complete authenticated aggregation before site generation. The initial
+270-cell plan includes read/create/update/delete and specialized scenarios;
+unsupported Community topology has an explicit reason and no measurement.
+Source integration is in progress. No new intensive cohort or performance claim
+is qualified yet; production default remains RF3.

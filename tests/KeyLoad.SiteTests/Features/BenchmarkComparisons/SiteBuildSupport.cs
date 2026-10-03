@@ -6,6 +6,10 @@ internal sealed record SiteProcessResult(int ExitCode, string StandardOutput, st
 
 internal static class SiteBuilderProcess
 {
+    private const string IsolatedEnvironment = "KEYLOAD_SITE_ISOLATED_AGGREGATE";
+    private const string IsolatedArgument = "--isolated=";
+    private const int IsolatedTimeoutMilliseconds = 300_000;
+
     public static async Task<SiteProcessResult> RunAsync(SiteTestInputs inputs, string reports,
         string output, CancellationToken cancellationToken, string? additionalArgument = null,
         bool committedSource = true)
@@ -23,7 +27,8 @@ internal static class SiteBuilderProcess
         }
 
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(SiteTokens.NodeTimeoutMilliseconds);
+        timeout.CancelAfter(Environment.GetEnvironmentVariable(IsolatedEnvironment) is null
+            ? SiteTokens.NodeTimeoutMilliseconds : IsolatedTimeoutMilliseconds);
         var stdoutTask = SiteProcessOutput.ReadAsync(process.StandardOutput, SiteTokens.BuilderOutputExceeded, timeout.Token);
         var stderrTask = SiteProcessOutput.ReadAsync(process.StandardError, SiteTokens.BuilderOutputExceeded, timeout.Token);
         try
@@ -67,6 +72,11 @@ internal static class SiteBuilderProcess
         if (committedSource)
         {
             arguments.Add($"{SiteTokens.SiteRevisionArgument}={inputs.SiteRevision}");
+        }
+
+        if (committedSource && Environment.GetEnvironmentVariable(IsolatedEnvironment) is { } isolated)
+        {
+            arguments.Add(IsolatedArgument + isolated);
         }
 
         if (additionalArgument is not null)

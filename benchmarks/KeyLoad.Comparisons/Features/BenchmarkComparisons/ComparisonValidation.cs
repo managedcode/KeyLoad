@@ -59,18 +59,22 @@ internal static class ComparisonValidation
             {
                 throw new ComparisonFailureException(WriteMismatch);
             }
+            return;
         }
-        else if (scenario == Scenario.StreamAppend)
+        if (ComparisonMutationPreparation.Required(scenario))
+        {
+            ComparisonMutationOracle.RequireFinalState(scenario, await reader.ReadAsync(input, cancellationToken), input);
+            return;
+        }
+        if (scenario == Scenario.StreamAppend)
         {
             if (!BenchmarkDataset.SameEvent(await reader.ReadEventAsync(input, cancellationToken), input))
             {
                 throw new ComparisonFailureException(EventMismatch);
             }
+            return;
         }
-        else
-        {
-            ValidateResult(scenario, input, output, dataset);
-        }
+        ValidateResult(scenario, input, output, dataset);
     }
 
     private static void ValidateResult(Scenario scenario, BenchmarkDocument input, OperationResult output, BenchmarkDataset dataset)

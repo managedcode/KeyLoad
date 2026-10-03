@@ -2,16 +2,18 @@ using KeyLoad.Client;
 
 namespace KeyLoad.Comparisons.Targets;
 
-/// <summary>Compares the database through its authenticated HTTP client while requiring the configured three-voter RF3 cluster.</summary>
+/// <summary>Compares the database through its authenticated HTTP client and verifies the expected fixed voter group.</summary>
 /// <param name="http">The primary HTTP client used by the KeyLoad SDK client; target disposal disposes it.</param>
 /// <param name="apiKey">The credential passed to the KeyLoad SDK client for authenticated operations.</param>
 /// <param name="runId">Run identifier used to derive the isolated benchmark partition.</param>
 /// <param name="image">Optional database image reference included in the initial target profile.</param>
 /// <param name="peers">Optional peer HTTP clients used to observe replica copies; the target disposes distinct clients.</param>
+/// <param name="expectedNodes">Actual fixed benchmark voter count; the default retains the required RF3 contract.</param>
 public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string runId, string? image = null,
-    HttpClient[]? peers = null) : IComparisonTarget
+    HttpClient[]? peers = null, int expectedNodes = 3) : IComparisonTarget
 {
     private const string TransactionDomainId = "shared";
+    private readonly int expectedNodeCount = ValidateExpectedNodes(expectedNodes);
     private readonly KeyLoadClient client = new(http, apiKey);
     private readonly HttpClient[] peerClients = peers is null
         ? [http]
@@ -21,15 +23,15 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     private VectorSpace space = null!;
     private int topK;
     private int graphDepth, graphVertices, graphEdges;
-    /// <summary>Gets the declared RF3, process-durable, API, and authorization profile for this target.</summary>
-    public TargetProfile Profile { get; private set; } = new("KeyLoad", "0.1.0-dev", "3 voters, RF3, one physical shard; all processes on one host",
-        "QuorumProcessDurable; process-kill qualified, power-loss unqualified", "strong quorum barrier; graph returns vertices and edges, projected to IDs", "HTTP JSON", "authenticated root, all grants", image);
+    /// <summary>Gets the declared quorum, durability, API and authorization contract before actual cluster observation.</summary>
+    public TargetProfile Profile { get; private set; } = CreateProfile(expectedNodes, image);
     /// <summary>Reports support for document, vector, queue, graph, and event-stream comparison scenarios.</summary>
     /// <param name="scenario">The comparison scenario to check.</param>
     /// <returns><see langword="true"/> for a scenario implemented by this target; otherwise <see langword="false"/>.</returns>
     public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.VectorExact
-        or Scenario.QueueCycle or Scenario.GraphNeighbors or Scenario.GraphTraverse or Scenario.StreamAppend or Scenario.StreamRead;
-    /// <summary>Requires three voters and process-durable quorum writes, provisions the benchmark resources, seeds the corpus, and observes replica copies.</summary>
+        or Scenario.QueueCycle or Scenario.GraphNeighbors or Scenario.GraphTraverse or Scenario.StreamAppend or Scenario.StreamRead
+        or Scenario.DocumentUpdate or Scenario.DocumentDelete;
+    /// <summary>Requires the expected voters and process-durable quorum writes, seeds the corpus and observes every copy.</summary>
     /// <param name="dataset">The deterministic documents, vectors, graph edges, and workload options to provision.</param>
     /// <param name="cancellationToken">A token that cancels status checks and database operations.</param>
     /// <returns>A task that completes after seeding and replica observation.</returns>
@@ -37,9 +39,9 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     {
         ArgumentNullException.ThrowIfNull(dataset);
         var status = KeyLoadClientResults.Success(await client.StatusAsync(cancellationToken), "Status");
-        if (status.Voters != 3 || status.Durability != DurabilityProfile.QuorumProcessDurable)
+        if (status.Voters != expectedNodeCount || status.Durability != DurabilityProfile.QuorumProcessDurable)
         {
-            throw new ComparisonFailureException("KeyLoadRf3Required");
+            throw new ComparisonFailureException(expectedNodeCount == 3 ? Rf3Required : BenchmarkTopologyMismatch);
         }
 
         space = new("comparison", dataset.Options.Dimensions, DistanceMetric.Cosine, "seeded-float32", "1");

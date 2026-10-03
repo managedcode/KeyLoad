@@ -7,7 +7,7 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="connectionString">MongoDB connection string for the selected topology.</param>
 /// <param name="runId">Stable run identifier used to isolate the benchmark database.</param>
 /// <param name="image">Server image recorded in comparison provenance.</param>
-/// <param name="topology">Requested single-node or replicated topology.</param>
+/// <param name="topology">Requested one, two or three native members.</param>
 public sealed class MongoTarget(string connectionString, string runId, string image, ComparisonTopology topology) : IComparisonTarget
 {
     private readonly string databaseName = MongoSchema.DatabasePrefix + Guid.Parse(runId).ToString(MongoSchema.InvariantFormat);
@@ -26,7 +26,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
     /// <param name="scenario">The comparison scenario.</param>
     /// <returns>Whether this target supports that scenario.</returns>
     public bool Supports(Scenario scenario)
-        => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.GraphNeighbors or Scenario.GraphTraverse
+        => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete or Scenario.GraphNeighbors or Scenario.GraphTraverse
             or Scenario.StreamAppend or Scenario.StreamRead;
 
     /// <summary>Creates collections, seeds the corpus, and verifies the selected topology.</summary>
@@ -50,13 +50,13 @@ public sealed class MongoTarget(string connectionString, string runId, string im
         await VerifyUniqueStreamInsertionAsync(cancellationToken);
         var version = await ReadPrimaryVersionAsync(cancellationToken);
         var profile = Profile with { Version = version };
-        if (topology == ComparisonTopology.Replicated)
+        if (ComparisonTopologies.NodeCount(topology) > 1)
         {
             var proof = await MongoReplicaVerifier.VerifyAsync(connectionString,
                 primaryClient.GetDatabase(MongoSchema.AdminDatabase), database, documents,
-                dataset.Options.TimeoutSeconds, cancellationToken);
+                topology, dataset, cancellationToken);
             ownedClients.AddRange(proof.SecondaryClients);
-            profile = profile with { Cluster = proof.Evidence };
+            profile = profile with { Cluster = proof.Evidence, Version = proof.Version };
         }
         else
         {
@@ -121,6 +121,8 @@ public sealed class MongoTarget(string connectionString, string runId, string im
         settings.WriteConcern = MongoSchema.MajorityJournalWriteConcern;
         settings.ReadConcern = ReadConcern.Majority;
         settings.ReadPreference = ReadPreference.Primary;
+        settings.RetryWrites = false;
+        settings.RetryReads = false;
         settings.MaxConnectionPoolSize = Math.Max(concurrency + MongoPool.SessionMargin, MongoPool.MinimumSize);
         return settings;
     }

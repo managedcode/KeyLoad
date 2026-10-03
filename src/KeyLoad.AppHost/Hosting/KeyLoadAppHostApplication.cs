@@ -9,6 +9,11 @@ internal static class KeyLoadAppHostApplication
     internal static void AddKeyLoad(IDistributedApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
+        if (builder.Configuration[KeyLoad.Comparisons.ComparisonWorkerSelection.TargetSetting] is not null)
+        {
+            IsolatedBenchmarkResources.Add(builder);
+            return;
+        }
         var configuration = global::AppHostConfiguration.Read(builder);
         var profile = global::ClusterProfileStore.Open(configuration.DataRoot);
         var nodes = global::ClusterResources.Add(builder, profile, configuration.DataRoot, configuration.Ephemeral);

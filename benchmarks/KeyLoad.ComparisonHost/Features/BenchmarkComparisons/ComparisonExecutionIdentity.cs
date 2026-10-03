@@ -56,8 +56,17 @@ internal sealed record ComparisonExecutionIdentity(
     internal static ComparisonExecutionIdentity? ReadTimeSeries(IConfiguration configuration, string sourceRevision)
         => ReadIdentity(configuration, sourceRevision, topology: null, isTimeSeries: true);
 
+    /// <summary>Validates the same native image/source provenance for an isolated intensive worker.</summary>
+    /// <param name="configuration">The native container execution settings.</param>
+    /// <param name="sourceRevision">The measured source revision.</param>
+    /// <param name="topology">The selected native topology.</param>
+    /// <returns>The validated native image and GitHub provenance.</returns>
+    internal static ComparisonExecutionIdentity? ReadIsolated(IConfiguration configuration, string sourceRevision,
+        ComparisonTopology topology)
+        => ReadIdentity(configuration, sourceRevision, topology, isTimeSeries: false, isIsolated: true);
+
     private static ComparisonExecutionIdentity? ReadIdentity(IConfiguration configuration, string? sourceRevision,
-        ComparisonTopology? topology, bool isTimeSeries)
+        ComparisonTopology? topology, bool isTimeSeries, bool isIsolated = false)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         var loadGeneratorImage = configuration[LoadGeneratorImageSetting];
@@ -82,7 +91,9 @@ internal sealed record ComparisonExecutionIdentity(
             || !string.Equals(sourceRevision, configuredRevision, StringComparison.Ordinal)
             || !IsRevision(gitHubSha)
             || !string.Equals(sourceRevision, gitHubSha, StringComparison.Ordinal)
-            || !IsAcceptedProfile(profile, topology, isTimeSeries))
+            || !(isIsolated ? topology is { } selected && Enum.IsDefined(selected)
+                && profile == IsolatedComparisonContract.Current.Profile
+                : IsAcceptedProfile(profile, topology, isTimeSeries)))
         {
             throw InvalidIdentity();
         }

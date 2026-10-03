@@ -23,7 +23,11 @@ public enum Scenario
     /// <summary>Appends a generated event to a document stream.</summary>
     StreamAppend,
     /// <summary>Reads an event from a document stream.</summary>
-    StreamRead
+    StreamRead,
+    /// <summary>Replaces an existing document and verifies its exact changed body.</summary>
+    DocumentUpdate,
+    /// <summary>Deletes an existing document and verifies its absence.</summary>
+    DocumentDelete
 }
 
 /// <summary>Describes the deployment topology requested for a comparison target.</summary>
@@ -34,7 +38,10 @@ public enum ComparisonTopology
     [JsonStringEnumMemberName(ComparisonTopologyNames.Single)]
     Standalone,
     /// <summary>Uses a replicated target topology and records its cluster evidence.</summary>
-    Replicated
+    Replicated,
+    /// <summary>Uses two native nodes; quorum based engines require both nodes.</summary>
+    [JsonStringEnumMemberName(ComparisonTopologyNames.TwoNode)]
+    TwoNode
 }
 
 /// <summary>Configures the generated workload and its measurement budgets.</summary>

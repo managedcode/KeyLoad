@@ -12,32 +12,30 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
     private const string PreviousSetupFailure = "PreviousSetupFailure";
     private const string LoadModel = "closed-loop; setup, oracle, validation and warmup excluded";
     private const string UnrecordedStorage = "unrecorded";
+    private const string IsolatedTargetRequired = "An isolated scenario requires exactly one database target.";
 
     /// <summary>Prepares the oracle, initializes targets and runs their supported scenarios in rotated repetition order.</summary>
     /// <param name="targets">The targets to measure; the collection must contain at least one target.</param>
     /// <param name="sourceRevision">The measured source revision recorded as provenance, when available.</param>
     /// <param name="cancellationToken">The token cancelling setup and workload operations.</param>
     /// <param name="storage">The supplied storage-profile description recorded in the report.</param>
+    /// <param name="scenario">One workload for an isolated worker, or null for the existing complete suite.</param>
     /// <returns>The report with target profiles, all case outcomes and all measured attempts.</returns>
     public async Task<ComparisonReport> RunAsync(IComparisonTarget[] targets, string? sourceRevision, CancellationToken cancellationToken,
-        string storage = UnrecordedStorage)
+        string storage = UnrecordedStorage, Scenario? scenario = null)
     {
-        ArgumentNullException.ThrowIfNull(targets);
-        if (targets.Length == 0)
-        {
-            throw new ArgumentException("At least one target is required.", nameof(targets));
-        }
+        ValidateTargets(targets, scenario);
 
         var started = TimeProvider.System.GetUtcNow();
         var dataset = new BenchmarkDataset(options);
         var cases = new List<ComparisonCase>();
-        PrepareOracle(dataset);
+        PrepareOracle(dataset, scenario);
         for (var repetition = 0; repetition < options.Repetitions; repetition++)
         {
             var offset = repetition % targets.Length;
             foreach (var target in targets.Skip(offset).Concat(targets.Take(offset)))
             {
-                await RunTargetAsync(target, dataset, repetition, cases, cancellationToken);
+                await RunTargetAsync(target, dataset, repetition, cases, scenario, cancellationToken);
             }
         }
         return new(3, Guid.NewGuid(), started, options, dataset.Sha256, LoadModel,
@@ -46,27 +44,57 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
             targets.Select(target => target.Profile).ToImmutableArray(), cases.ToImmutableArray());
     }
 
-    private void PrepareOracle(BenchmarkDataset dataset)
+    private static void ValidateTargets(IComparisonTarget[] targets, Scenario? scenario)
+    {
+        ArgumentNullException.ThrowIfNull(targets);
+        if (scenario is { } selected && !Enum.IsDefined(selected))
+        {
+            throw new ArgumentOutOfRangeException(nameof(scenario));
+        }
+        if (scenario is not null && targets.Length != 1)
+        {
+            throw new ArgumentException(IsolatedTargetRequired, nameof(targets));
+        }
+        if (targets.Length == 0)
+        {
+            throw new ArgumentException("At least one target is required.", nameof(targets));
+        }
+    }
+
+    private void PrepareOracle(BenchmarkDataset dataset, Scenario? selectedScenario)
     {
         for (var operation = 0; operation < Math.Max(options.Operations, options.Warmup); operation++)
         {
-            dataset.ExactNeighbors(dataset.Input(Scenario.VectorExact, 0, operation, false));
-            var root = dataset.Input(Scenario.GraphTraverse, 0, operation, false);
-            dataset.Reachable(root, 1);
-            dataset.Reachable(root, options.GraphDepth);
+            if (selectedScenario is null or Scenario.VectorExact)
+            {
+                dataset.ExactNeighbors(dataset.Input(Scenario.VectorExact, 0, operation, false));
+            }
+            if (selectedScenario is null or Scenario.GraphNeighbors or Scenario.GraphTraverse)
+            {
+                var root = dataset.Input(Scenario.GraphTraverse, 0, operation, false);
+                dataset.Reachable(root, 1);
+                dataset.Reachable(root, options.GraphDepth);
+            }
         }
     }
 
     private async Task RunTargetAsync(IComparisonTarget target, BenchmarkDataset dataset, int repetition,
-        List<ComparisonCase> cases, CancellationToken cancellationToken)
+        List<ComparisonCase> cases, Scenario? selectedScenario, CancellationToken cancellationToken)
     {
-        var scenarios = Enum.GetValues<Scenario>();
+        var scenarios = selectedScenario is { } selected ? [selected] : Enum.GetValues<Scenario>();
         string? failure = null;
         if (repetition == 0)
         {
             progress?.Invoke($"Preparing {target.Profile.Name}");
             try
-            { await target.InitializeAsync(dataset, cancellationToken); }
+            {
+                await target.InitializeAsync(dataset, cancellationToken);
+                if (selectedScenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete
+                    && target.Supports(Scenario.DocumentUpdate) && target.Supports(Scenario.DocumentDelete))
+                {
+                    await ComparisonMutationProbe.VerifyAsync(target, dataset, cancellationToken);
+                }
+            }
             catch (Exception error) when (!cancellationToken.IsCancellationRequested) { failure = ComparisonErrors.Safe(error); }
         }
         else if (cases.Any(item => item.Target == target.Profile.Name && item.Detail?.StartsWith(SetupPrefix, StringComparison.Ordinal) == true))
@@ -83,14 +111,14 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
     private async Task<ComparisonCase> RunCaseAsync(IComparisonTarget target, BenchmarkDataset dataset,
         Scenario scenario, int repetition, string? setupFailure, CancellationToken cancellationToken)
     {
-        if (!target.Supports(scenario))
-        {
-            return new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Unsupported, target.UnsupportedReason, null, []);
-        }
-
         if (setupFailure is not null)
         {
             return new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Failed, SetupPrefix + setupFailure, null, []);
+        }
+
+        if (!target.Supports(scenario))
+        {
+            return new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Unsupported, target.UnsupportedReason, null, []);
         }
 
         progress?.Invoke($"{target.Profile.Name}: {scenario}, repetition {repetition + 1}/{options.Repetitions}");

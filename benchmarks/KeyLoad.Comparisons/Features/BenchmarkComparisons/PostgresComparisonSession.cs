@@ -21,6 +21,12 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
             case Scenario.DocumentWrite:
                 await PostgresDocumentOperations.WriteAsync(connection, document, cancellationToken);
                 return new();
+            case Scenario.DocumentUpdate:
+                await PostgresDocumentOperations.UpdateAsync(connection, document, cancellationToken);
+                return new();
+            case Scenario.DocumentDelete:
+                await PostgresDocumentOperations.DeleteAsync(connection, document, cancellationToken);
+                return new();
             case Scenario.VectorExact:
                 return new(Neighbors: await PostgresVectorOperations.SearchAsync(connection, document, topK, cancellationToken));
             case Scenario.QueueCycle:
