@@ -1,8 +1,8 @@
 # QueryExecution bounded SQL BETWEEN
 
 Status: Accepted contract under [ADR-065](../../ADR/ADR-065-full-sql-client-compatibility.md);
-source implementation and development checks complete; exact-SHA runtime proof
-pending. Existing Q1 semantics
+source implementation, development checks and original GitHub runtime proof
+complete at7d1196. Coverage and performance gates remain open. Existing Q1 semantics
 remain the target. Full PostgreSQL syntax/semantics and native client sessions
 are separate mandatory unfinished stages.
 
@@ -121,12 +121,25 @@ joined all eleven owned source files without a source blocker. Initial frozen
 7d9852b source build failed with five IDE0005 unnecessary using directives in
 new unit fixtures,0warnings,elapsed00:01:39.70. The owning worker removes only
 those imports; no assertion, diagnostic severity or execution contract changes.
-Repeat full Release, formatter and static checks before delivery. Runtime still
-requires the new delivered-source GitHub originals.
+Full Release, formatter and static checks passed before delivery. Original
+runtime proof is retained below separately from those development checks.
 
 The [source-stage receipt](../../implementation/sql-client-source-stage-003.json)
 binds all eleven owned files to frozen7d985 base, full26project Release with
 0warnings/0errors, canonical formatter and static26project/4module governance.
 The final import/whitespace corrections preserve all assertions and non-whitespace
-bytes. The21unit and2RF3 cases still require authentic delivered-source CI proof.
-No runtime, coverage or measured gain is inferred from development checks.
+bytes. No runtime, coverage or measured gain is inferred from development checks.
+
+[Original CI proof](../../implementation/sql-client-qualification-7d1196.json)
+now closes the runtime gate at source7d1196/run37132491153/attempt1: all21 new
+unit cases pass in each normal/scalar mode, and both RF3 SDK/official MCP cases
+pass. Root independently verifies original ZIP/report/source/job/upload hashes,
+all44 execution rows and the same21 unit IDs in both modes; all11 owned source
+files match the frozen development source. Full CI passes2667/2667 normal and
+scalar,194/194 recovery,69/69 RF3 and118/118 unique analyzer cases, with no
+nonpass, Release warnings/errors, formatter or governance failure. This source
+includes9 additional governance tests and is a descendant of deliveredbe2e;
+its cancelled predecessor supplied no executed cases.
+Coverage collector/thresholds, complete native comparisons, full SQL and native
+sessions remain open. The benchmark run has a genuine Kurrentn2 setup failure;
+it cannot qualify scale or website performance. ADR065 remains Accepted.

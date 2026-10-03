@@ -13,7 +13,7 @@ BenchmarkComparisons guarantees,1/2/3node cells and270scenario scope remain.
 |REQ-NGR-002 exact Kurrent event preservation|AC-NGR-002 / TASK-NGR-R2/K1: source-contract freeze then genuine SDK original/custom/system metadata equality and unchanged55,378owned-stream/foreign/cleanup proof on1/2/3. StageA source delivered; selected f403 native1/2/3 originals pass. Empty tracing characterization remains open; a hard-coded empty assumption is not a valid completeness oracle.|
 |REQ-NGR-003 actual native leader routing|AC-NGR-003 / TASK-NGR-R2/K1: pinned SDK/advertised-endpoint source freeze, actual leader/follower/native setup proof and observed members/copies/ACK. Selected f403 native1/2/3 preflight proof exists; D1 diagnostic source is delivered. Original routing cause and diagnostic failure-path qualification remain open; no guessed leader, independent nodes or measured write retry.|
 |REQ-NGR-004 genuine complete publication|AC-NGR-004 / TASK-NGR-Q1: full source/normal/scalar/recovery/RF3/native preflight270/cohort/site original source/run/attempt/upload/digest/report evidence. Failed/cancelled/skipped/unavailable data remains honest.|
-|REQ-NGR-005 settled resource-failure observation|AC-NGR-005 / TASK-NGR-E1: Authored OutboxFailureDiagnosticClassifierTests and OutboxFailureDiagnosticFormatterTests map exact eligibility and typed privacy/bounds; execution is pending. Existing real isolated1/2/3 failed-case runner/worker originals must prove the one authenticated SDK read outside timing, cancellation/settlement and original-result preservation. No quotas, purge or retry changes.|
+|REQ-NGR-005 settled resource-failure observation|AC-NGR-005 / TASK-NGR-E1: thirteen genuine classifier/formatter cases pass in each3ae unit mode; the7d1196 n1 delete original proves a numeric native failure observation. Complete1/2/3 failure-path and cancellation/settlement gates remain open. Preserve the authenticated SDK read outside timing and original result. No quotas, purge or retry changes.|
 
 ```mermaid
 flowchart LR
@@ -120,3 +120,68 @@ numeric budget cause and the complete isolated cohort remain open. Automatic
 Benchmarks37129421599 cancelled all27 preflight and270 scenario jobs without
 steps, so it supplies no native measurement or website refresh. Later source
 changes and working-tree SQL BETWEEN are outside this exact3ae qualification.
+
+TASK-NGR-K2R / REQ-NGR-003 is read-only source diagnosis of the genuine7d9852
+KurrentDB3node preflight failure in Benchmarks37130907091/attempt1/job111227060126.
+Root independently verifies two original ZIPs and0/1 TUnit error; all five worker
+repetitions have null measurements and zero samples. First setup reports
+NoStreamSemantics/NotLeaderException; remaining repetitions record
+PreviousSetupFailure. Teardown retains primaryFailure=true and no failed stages.
+The source/run/upload/report/worker evidence is retained under seal
+c50787a2279f9a8525df8794aaafa786e5a2cb2f7dd37bac623e36f524dd0a54;
+root verification receiptf12f7c4f4e4fd068e6b78fb4c6d13aa77d0f12976f7c6fedc525a157a2d6f1cb.
+Bounded analysis worker reads the Kurrent client/setup/verifier/endpoint and
+Aspire topology paths, compares actual7d to current owned bytes, and returns
+precise causal evidence or an explicit uncertainty with candidate file ownership
+and real fault/test requirements. No implementation, retry/quorum/timeout change,
+package, runtime, Git mutation or provider control is authorized by this diagnostic task.
+Root owns the contract/review/qualification join before any repair. This failed
+native gate cannot qualify the complete cohort or website metrics.
+
+K2R source review is complete: eight inspected consumer/topology files match the
+failed revision; server logs show convergence near setup, but the sanitized
+original omits RPC status, selected destination and redirect details. Cause
+remains unknown, with no proven consumer or pinned-SDK defect. No implementation
+is justified by that packet. Root reviewed analysis SHA-256
+`da2be25c51d66e5b242554ced508c58715732a94fc7ae74888b4439c8ed741de`.
+[The original7d985 receipt](../../implementation/sql-client-qualification-7d985.json)
+retains the green CI baseline and cancelled native cohort:26/27 preflight jobs
+have provider success, one genuine Kurrent setup failure;19/270 scenario jobs
+have provider success and251 are cancelled. These metadata counts do not prove
+complete case or measurement success. Nineteen cancelled jobs have failed result
+upload steps; no workload failure is inferred from upload failure. Full cohort,
+scale and website qualification remain open.
+
+The successor [7d1196 n2 preflight original](../../implementation/native-kurrent-preflight-failure-7d1196.json)
+also fails NoStreamSemantics with NotLeaderException and no measurements. Root
+independently verifies both original ZIPs; the repeated stage/type does not
+establish a shared cause. [Pinned SDK source review](../../implementation/kurrent-sdk-routing-source-review.md)
+confirms supported multi-seed settings and future-call route updates while the
+original failed append is surfaced. Selected destination/status/leader snapshot
+remain absent; no repair or replay is approved from this source review.
+
+The [7d1196 KeyLoad failure originals](../../implementation/native-keyload-failures-7d1196.json)
+retain three later genuine failures from the same live run. The n1 delete's first
+four repetitions each complete10k operations; final preparation rejects with
+ResourceExhausted and the stageE SDK observation records100000 retained outbox
+entries and192581709 bytes. This reaches the exact default100000-record cap,
+below the1GiB byte cap. It qualifies that native numeric failure observation;
+fixture accounting, reclamation and a repair remain separate unresolved work.
+The n2 update completes its first10k operations, then four repetitions fail
+OwnershipLost before timed sample collection; warmup versus preparation and the
+underlying cause are absent. The n2 PointRead completes all50k
+samples, then its separate native fault check fails quorumAssertions. The harness
+erases the original exception and assigns receipt fields only after all SDK/MCP
+probes return: null/false defaults do not prove which probe failed or that MCP ran.
+Container restoration is observed, while logical fault recovery remains failed.
+Root independently verifies all six original ZIPs, provider/upload/source bindings,
+reports and raw case hashes. The live snapshot is bounded by its recorded time;
+later failures need fresh review. No new passing cohort, quota/retry change,
+required-scale result or website refresh is established.
+
+[Exact delete source accounting](../../implementation/keyload-outbox-benchmark-source-review.md)
+predicts95620 entries before fifth measured-input preparation and115620 for the
+unchanged complete fixture. The observed100000 count matches the guard; hidden
+ordinal and inner cause remain unexported. Server defaults have no current
+benchmark limit-injection seam. Any new setting requires a separate replicated
+resource/provenance/restart contract, not a change to stageE observation.

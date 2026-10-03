@@ -1,0 +1,346 @@
+{
+  "schemaVersion": 1,
+  "requirement": [
+    "REQ-NGR-004",
+    "REQ-NGR-005"
+  ],
+  "acceptance": [
+    "AC-NGR-004",
+    "AC-NGR-005"
+  ],
+  "qualification": "original_genuine_native_failures_preserved_not_passing_results",
+  "sourceRevision": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+  "runId": 37132491118,
+  "attempt": 1,
+  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37132491118",
+  "runTerminal": false,
+  "observedAtUtc": "2026-10-03T15:55:26Z",
+  "providerJobCountsAtObservation": {
+    "total": 303,
+    "success": 94,
+    "failure": 4,
+    "active": 20,
+    "queued": 182,
+    "skipped": 3
+  },
+  "kurrentSetupFailureReceipt": "docs/implementation/native-kurrent-preflight-failure-7d1196.json",
+  "declaredOptions": {
+    "topology": "TwoNode",
+    "seed": 1729,
+    "documents": 4096,
+    "operations": 10000,
+    "warmup": 256,
+    "repetitions": 5,
+    "concurrency": 16,
+    "payloadBytes": 1024,
+    "dimensions": 128,
+    "topK": 10,
+    "timeoutSeconds": 30,
+    "graphVertices": 256,
+    "graphFanOut": 3,
+    "graphDepth": 3
+  },
+  "jobs": [
+    {
+      "jobId": 111232263528,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37132491118/job/111232263528",
+      "workerIdentity": {
+        "target": "KeyLoad",
+        "nodeCount": 1,
+        "scenario": "DocumentDelete",
+        "profile": "intensive-1k-c16",
+        "sourceRevision": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+        "runId": 37132491118,
+        "attempt": 1,
+        "repository": "managedcode/KeyLoad",
+        "ref": "refs/heads/main",
+        "workflow": "Benchmarks",
+        "jobId": 111232263528
+      },
+      "originalPacketSeal": "566c840f1477296b9fa00ed73b48bfd842f204adc9104dc166d4abbaf8f3d429",
+      "sealedFilesVerified": 19,
+      "rootVerificationReceiptSha256": "13187ce065ffc594ec7f1f20afcb5727b090db85be243c66442b58b7122de794",
+      "originalEvidenceSha256": "4f72aabcdd16c516e6dba5116b71849c592e7042160d309c79dce9d90f150e81",
+      "originalArtifacts": [
+        {
+          "id": 11278640617,
+          "jobId": 111232263528,
+          "runId": 37132491118,
+          "attempt": 1,
+          "sourceSha": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+          "zipSha256": "13cbbeb12f66ff0b8e0b7670d1f81bfac50afb64e5426c5d77feb8f49a2c8a59",
+          "reports": [
+            {
+              "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+              "sha256": "6b6b1966890a7b553411f74ab786a536f037458e0fb2a82811a612de2c5c575d",
+              "summary": {
+                "total": 1,
+                "passed": 0,
+                "failed": 1,
+                "skipped": 0,
+                "cancelled": 0,
+                "timedOut": 0,
+                "flaky": 0
+              },
+              "actualCounts": {
+                "error": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": 11278705477,
+          "jobId": 111232263528,
+          "runId": 37132491118,
+          "attempt": 1,
+          "sourceSha": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+          "zipSha256": "c0b8d20dad677ac578efecd6ca74b5db4a3b2d7526bde1d4d0bff80e266add5a",
+          "reports": []
+        }
+      ],
+      "originalCases": [
+        {"repetition":0,"status":"measured","detail":null,"attempts":10000,"successes":10000,"failures":0,"sampleCount":10000,"measurementAvailable":true},
+        {"repetition":1,"status":"measured","detail":null,"attempts":10000,"successes":10000,"failures":0,"sampleCount":10000,"measurementAvailable":true},
+        {"repetition":2,"status":"measured","detail":null,"attempts":10000,"successes":10000,"failures":0,"sampleCount":10000,"measurementAvailable":true},
+        {"repetition":3,"status":"measured","detail":null,"attempts":10000,"successes":10000,"failures":0,"sampleCount":10000,"measurementAvailable":true},
+        {"repetition":4,"status":"failed","detail":"KeyLoad:ResourceExhausted","attempts":null,"successes":null,"failures":null,"sampleCount":0,"measurementAvailable":false}
+      ],
+      "originalRawSha256": {
+        "worker.json": "ef0142efaf7afc98f7adcc7744d89021136b373eb61cebb6553f45acccf207c7",
+        "runner.log": "b59d9f3d80d229310486a51d5a3bfd15a08674267fd7d5b73558b49f1a2f2b85",
+        "teardown.json": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4"
+      },
+      "teardown": {
+        "schemaVersion": 1,
+        "primaryFailure": true,
+        "failedStages": []
+      },
+      "observedCounters": {
+        "scenario": "DocumentDelete",
+        "repetition": 4,
+        "tail": 100000,
+        "firstAvailable": 1,
+        "storedRecords": 100000,
+        "storedBytes": 192581709,
+        "activeConsumerCount": 0,
+        "minimumActiveCheckpoint": -1
+      },
+      "diagnosticLine": "2026-10-03T15:48:01.2144499Z KeyLoadOutboxDiagnostic scenario=DocumentDelete repetition=4 tail=100000 firstAvailable=1 storedRecords=100000 storedBytes=192581709 activeConsumerCount=0 minimumActiveCheckpoint=-1",
+      "diagnosticLineNumber": 16,
+      "sourceLimits": {
+        "MaxOutboxRecords": 100000,
+        "MaxOutboxBytes": 1073741824,
+        "recordCapReached": true,
+        "byteCapReached": false,
+        "sourcePath": "src/KeyLoad.Abstractions/Features/ResourceExecution/DatabaseLimits.cs",
+        "sourceSha256": "3d62f29922adc48ae1882a5777dff59e328c9af1a0b268923f8c067ff4fbaa5a"
+      },
+      "diagnosis": {
+        "observedFailure": "ResourceExhausted_after_four_successful_repetitions",
+        "nodeDomainResourceExhaustedRejections": 16,
+        "outboxRecordQuotaObservationProven": true,
+        "underlyingExceptionExported": false,
+        "fixtureAccountingAndRepair": "docs/implementation/keyload-outbox-benchmark-source-review.md",
+        "productionQuotaChanged": false
+      }
+    },
+    {
+      "jobId": 111232263573,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37132491118/job/111232263573",
+      "workerIdentity": {
+        "target": "KeyLoad",
+        "nodeCount": 2,
+        "scenario": "PointRead",
+        "profile": "intensive-1k-c16",
+        "sourceRevision": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+        "runId": 37132491118,
+        "attempt": 1,
+        "repository": "managedcode/KeyLoad",
+        "ref": "refs/heads/main",
+        "workflow": "Benchmarks",
+        "jobId": 111232263573
+      },
+      "originalPacketSeal": "3c2afe60c26621ad73d909288731fb90a155d2a8ea5b0479b89ec08991cfb81b",
+      "sealedFilesVerified": 21,
+      "rootVerificationReceiptSha256": "29bfa561c75c043c3425b70abe07e8926111950a126e106315d4b929610cea3d",
+      "originalEvidenceSha256": "9a62defc70ce30fd9f17c63f2023c38c07f6e8dce6446e58f7d8a667ddb1d924",
+      "originalArtifacts": [
+        {
+          "id": 11277811327,
+          "jobId": 111232263573,
+          "runId": 37132491118,
+          "attempt": 1,
+          "sourceSha": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+          "zipSha256": "e0a69f187dea0ea3b5d99741ef64d596ea01f6a1e68ba52e64d0f057541b7832",
+          "reports": []
+        },
+        {
+          "id": 11277906161,
+          "jobId": 111232263573,
+          "runId": 37132491118,
+          "attempt": 1,
+          "sourceSha": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+          "zipSha256": "f06fd99314a43e4993cc74b24c3a471bd8fab2cdded5763f9008347971a72f8c",
+          "reports": [
+            {
+              "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+              "sha256": "c713032558f9dd6052a33d767a862e9a3207f874079fcc275c395b0f76db375f",
+              "summary": {
+                "total": 1,
+                "passed": 0,
+                "failed": 1,
+                "skipped": 0,
+                "cancelled": 0,
+                "timedOut": 0,
+                "flaky": 0
+              },
+              "actualCounts": {
+                "error": 1
+              }
+            }
+          ]
+        }
+      ],
+      "originalCases": [
+        {"repetition":0,"status":"measured","detail":null,"attempts":10000,"successes":10000,"failures":0,"sampleCount":10000,"measurementAvailable":true},
+        {"repetition":1,"status":"measured","detail":null,"attempts":10000,"successes":10000,"failures":0,"sampleCount":10000,"measurementAvailable":true},
+        {"repetition":2,"status":"measured","detail":null,"attempts":10000,"successes":10000,"failures":0,"sampleCount":10000,"measurementAvailable":true},
+        {"repetition":3,"status":"measured","detail":null,"attempts":10000,"successes":10000,"failures":0,"sampleCount":10000,"measurementAvailable":true},
+        {"repetition":4,"status":"measured","detail":null,"attempts":10000,"successes":10000,"failures":0,"sampleCount":10000,"measurementAvailable":true}
+      ],
+      "originalRawSha256": {
+        "worker.json": "c03256c290d51bfe2ccad4667e64f0a9aad9f3730ad132c4c9760c6f645ed8ec",
+        "runner.log": "71abaff2defdc24adcb0fad85f1383aac359aa0d64b0729596ccc95fa08a6475",
+        "teardown.json": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4",
+        "keyload-fault.json": "ea94318c7c18cc91b8fb89441af3c6942321200da416c3b5d306a66d571cf6a0"
+      },
+      "teardown": {
+        "schemaVersion": 1,
+        "primaryFailure": true,
+        "failedStages": []
+      },
+      "faultSummary": {
+        "status": "failed",
+        "failureCategory": "quorumAssertions",
+        "stage": "quorumAssertions",
+        "originalPhase": {
+          "phase": 1,
+          "killedNode": 1,
+          "commandId": "92d3fe60-7103-4328-8fe8-1c8d1f791414",
+          "kind": "majorityLost",
+          "nativeMcpAuthentication503": false,
+          "writeRejection": null,
+          "resolvedPosition": null,
+          "restored": [],
+          "complete": false
+        }
+      },
+      "diagnosis": {
+        "observedFailure": "separate_native_quorumAssertions_after_50000_successful_read_samples",
+        "phaseFieldsAreDefaultsWhenRejectSequenceThrows": true,
+        "mcpCallReached": null,
+        "actualFailingSdkOrMcpCall": null,
+        "underlyingCause": null,
+        "containerRestored": true,
+        "cleanupFailed": false,
+        "faultRecoveryQualified": false,
+        "sourceReviewSha256": "96a4f914b615a0ea389a6dbd60c8a03ee264d11cc0b7664993aec2b5e3580041"
+      }
+    },
+    {
+      "jobId": 111232263484,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37132491118/job/111232263484",
+      "workerIdentity": {
+        "target": "KeyLoad",
+        "nodeCount": 2,
+        "scenario": "DocumentUpdate",
+        "profile": "intensive-1k-c16",
+        "sourceRevision": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+        "runId": 37132491118,
+        "attempt": 1,
+        "repository": "managedcode/KeyLoad",
+        "ref": "refs/heads/main",
+        "workflow": "Benchmarks",
+        "jobId": 111232263484
+      },
+      "originalPacketSeal": "5926fd9184e726996c4ce551c65a83289a77e821216fc9482818c15b1e7e2d67",
+      "sealedFilesVerified": 20,
+      "rootVerificationReceiptSha256": "7353ff9e56e0fb099652c1698c390fd4483d15038834f526d02651106c7b3a3d",
+      "originalEvidenceSha256": "442fa1945513f0e065b15bb90d7f4e714a7a758b5b3c1774483857b4552638e2",
+      "originalArtifacts": [
+        {
+          "id": 11278561053,
+          "jobId": 111232263484,
+          "runId": 37132491118,
+          "attempt": 1,
+          "sourceSha": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+          "zipSha256": "112b33b329ad9d7ba766616ff832d77dc64df668749e06a9e1ade68b07217e9a",
+          "reports": []
+        },
+        {
+          "id": 11278650893,
+          "jobId": 111232263484,
+          "runId": 37132491118,
+          "attempt": 1,
+          "sourceSha": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+          "zipSha256": "701c5f3285bc35a4b3295a2c6415bd42c96ae2e0fa7b9a459d8acda681143d50",
+          "reports": [
+            {
+              "entry": "KeyLoad/KeyLoad/TestResults/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+              "sha256": "92ae7c36bcb301a711eae82d589f63ca0032b2e812d8b35c96592da8987b3d0a",
+              "summary": {
+                "total": 1,
+                "passed": 0,
+                "failed": 1,
+                "skipped": 0,
+                "cancelled": 0,
+                "timedOut": 0,
+                "flaky": 0
+              },
+              "actualCounts": {
+                "error": 1
+              }
+            }
+          ]
+        }
+      ],
+      "originalCases": [
+        {"repetition":0,"status":"measured","detail":null,"attempts":10000,"successes":10000,"failures":0,"sampleCount":10000,"measurementAvailable":true},
+        {"repetition":1,"status":"failed","detail":"KeyLoad:OwnershipLost","attempts":null,"successes":null,"failures":null,"sampleCount":0,"measurementAvailable":false},
+        {"repetition":2,"status":"failed","detail":"KeyLoad:OwnershipLost","attempts":null,"successes":null,"failures":null,"sampleCount":0,"measurementAvailable":false},
+        {"repetition":3,"status":"failed","detail":"KeyLoad:OwnershipLost","attempts":null,"successes":null,"failures":null,"sampleCount":0,"measurementAvailable":false},
+        {"repetition":4,"status":"failed","detail":"KeyLoad:OwnershipLost","attempts":null,"successes":null,"failures":null,"sampleCount":0,"measurementAvailable":false}
+      ],
+      "originalRawSha256": {
+        "worker.json": "82e88721a0608aa485993d1404ac95f83a884b672e31ba75fe0e2c9c198cea81",
+        "runner.log": "bb2d6bc9e0f3aeb31d7e75ceb5cdacb78a18a76614dddc2b14b0184bcc522e28",
+        "teardown.json": "6c489c3c53e535e6f146b2d23721e4ba799ae56b2a034b1196772c243114f0b4"
+      },
+      "teardown": {
+        "schemaVersion": 1,
+        "primaryFailure": true,
+        "failedStages": []
+      },
+      "diagnosis": {
+        "observedFailure": "OwnershipLost_repetitions_1_to_4_after_10000_successful_update_samples",
+        "nodeDomainOwnershipLostRejections": 50,
+        "observedStages": [
+          "QuorumRead",
+          "CapabilityExecution"
+        ],
+        "underlyingExceptionExported": false,
+        "cause": "unknown",
+        "sourceReviewSha256": "a29e5dbd9deb6e882c6e877b881228a8175135f52af5597243cabd06e4123d5a"
+      }
+    }
+  ],
+  "limitations": [
+    "Original raw ZIPs retain exact measurements and every actual sample; these derived case counts never replace them.",
+    "Null measurements and zero samples on failed preparation are unavailable, never zero performance.",
+    "The n2 PointRead workload succeeded; its later fault assertion failed. Default receipt fields do not prove a failed MCP response or that MCP ran.",
+    "Record-cap observation is genuine; no history reclamation, production quota increase, weakened quorum, measured write replay, or repair is qualified.",
+    "The run is live at this observation; later failures and final provider state require fresh original review.",
+    "Declared4096documents and10000operations per repetition do not qualify actual100k/1m/5mcorpora or100koperations per required cell.",
+    "Complete cohort, website, coverage, full SQL/client protocol, power-loss durability and production readiness remain unqualified."
+  ]
+}

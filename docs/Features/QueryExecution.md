@@ -4,8 +4,10 @@ REQ-SQLC-006 / AC-SQLC-006A / TASK-SQLC-BETWEEN adds the bounded typed
 [SqlBetween stage](QueryExecution/SqlBetween.md) under Accepted ADR065. Existing
 scalar/null/eager-error semantics, expanded AST budgets, field authority and
 cursors remain canonical. First-authored real ZoneTree and genuine RF3 SDK/MCP
-tests must qualify the new syntax; full SQL/native protocol and measured
-performance remain unfinished.
+tests qualify the new syntax at source7d1196 with44 original execution rows;
+[the receipt](../implementation/sql-client-qualification-7d1196.json) retains
+full exact-source CI. Coverage, full SQL/native protocol and measured performance
+remain unfinished.
 
 REQ-SQLC-003 / AC-SQLC-003P adds independent full public/native value and
 same-instance native writer tests under the Accepted

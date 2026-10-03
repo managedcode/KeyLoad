@@ -3,6 +3,8 @@
 Owner suggestion2026-10-03 is included in the active Search/SQL workstream.
 Decision remains evaluation under ADR-009/065, REQ-SQLC-010 / AC-SQLC-010.
 No package is installed and no production provider integration is implemented.
+The independent [Garnet evaluation](../Features/BenchmarkComparisons/GarnetStorageEvaluation.md)
+remains a separate storage comparison; neither candidate is selected by this review.
 
 Official source inspected at commit `6d7710a4845608a5ab266342c3e93808f53a8695`:
 [engine](https://github.com/ZoneTree/ZoneTree.FullTextSearch/blob/6d7710a4845608a5ab266342c3e93808f53a8695/src/ZoneTree.FullTextSearch/SearchEngines/HashedSearchEngine.cs),
@@ -40,7 +42,7 @@ cleanup, rollback and every authoritative/freshness join before implementation.
 |Privacy/cuts|Persisted row/field policies, tenant/partition boundaries, stale/deleted/hidden rows and concurrent writes preserve the same authorized source cut.|
 |Resources/cancellation|Bounded tokens/candidates/bytes/cache/build concurrency and temporary disk; cancellation fails rather than returns partial success, and following requests recover. Track foreground write amplification and index lag.|
 |Native public flow|Docker/Aspire RF3 using actual .NET SDK and official MCP, restart/failover/migration and missing/current/rebuilding index states. Tests only in GitHub.|
-|Performance|One isolated Linux agent per actual1/2/3node/scenario, matched read/create/update/delete oracle/ACK/corpus/concurrency. Retain source/run/attempt JSON plus p50/p95/p99, throughput, CPU/allocations/RSS/disk, rebuild cost and error/lag; complete authenticated cohort alone may refresh site metrics.|
+|Performance|One isolated Linux agent per actual1/2/3node/scenario, matched read/create/update/delete oracle/ACK/corpus/concurrency. Validate actual100k/1m/5m persisted records and at least100k measured operations per applicable cell; include deterministic random/sequential, ordered/range/index and complex-query flows. Retain source/run/attempt JSON plus p50/p95/p99, throughput, CPU/allocations/RSS/disk, rebuild cost and error/lag; complete authenticated cohort alone may refresh site metrics.|
 
 Research task TASK-SQLC-R4 completed source review; raw packet SHA256
 `094be38e3e22063f95bddef591ae150721285975129cff51463580975e2ea55b`.

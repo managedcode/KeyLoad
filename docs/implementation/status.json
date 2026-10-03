@@ -148,6 +148,30 @@
       "nativeGateFailureObservation": "stageE_thirteen_classifier_formatter_cases_pass_both_modes_exact3ae_native_failed_case_observation_and_numeric_cause_pending",
       "nativeGateFailureObservationReceipt": "docs/implementation/native-benchmark-gates-source-stage-003.json",
       "latestQualifiedCi": {
+        "sourceRevision": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+        "runId": 37132491153,
+        "attempt": 1,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37132491153",
+        "conclusion": "success_original_reports_independently_verified",
+        "normalPassed": 2667,
+        "scalarPassed": 2667,
+        "recoveryPassed": 194,
+        "rf3Passed": 69,
+        "analyzerUniquePassed": 118,
+        "allNonpass": 0,
+        "betweenNormalPassed": 21,
+        "betweenScalarPassed": 21,
+        "betweenRf3Passed": 2,
+        "receipt": "docs/implementation/sql-client-qualification-7d1196.json",
+        "nativeBenchmarkRunId": 37132491118,
+        "nativeBenchmarkConclusion": "unqualified_four_genuine_native_failures_originals_preserved_run_live_at_observation",
+        "nativeFailureReceipt": "docs/implementation/native-kurrent-preflight-failure-7d1196.json",
+        "completeNativeCohortQualified": false,
+        "websiteQualified": false,
+        "foreignLaterWorkingTreeExcluded": true,
+        "nativeKeyLoadFailureReceipt": "docs/implementation/native-keyload-failures-7d1196.json"
+      },
+      "previousQualifiedCi": {
         "sourceRevision": "3ae408fe173bf0dd69dd335e688c17fe99457ad3",
         "runId": 37129421675,
         "attempt": 1,
@@ -171,7 +195,7 @@
     "backupPrerequisite": "staged_restore_independently_delivered_dbd01269_further_four_actual_file_cases_source_only",
     "fullSqlComplete": false,
     "nativeProtocolImplemented": false,
-    "newCasesQualified": false,
+    "newCasesQualified": true,
     "currentBetweenStage": {
       "requirement": "REQ-SQLC-006",
       "acceptance": "AC-SQLC-006A",
@@ -180,8 +204,19 @@
       "review": "R27_complete_no_source_blocker",
       "buildFormatStatic": "passed_frozen7d985_base_plus11_owned_files_26projects0warnings0errors_full_formatter_static_governance",
       "sourceReceipt": "docs/implementation/sql-client-source-stage-003.json",
-      "runtimeQualified": false,
-      "performanceQualified": false
+      "runtimeQualified": true,
+      "performanceQualified": false,
+      "sourceDeliveryRevision": "be2e8918d9636c2507af26588279035e7183c918",
+      "qualificationSourceRevision": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+      "qualificationReceipt": "docs/implementation/sql-client-qualification-7d1196.json",
+      "ciRunId": 37132491153,
+      "ciConclusion": "success",
+      "normalPassed": 21,
+      "scalarPassed": 21,
+      "rf3Passed": 2,
+      "ownedSourceFilesByteEquivalent": 11,
+      "coverageQualified": false,
+      "fullSqlAndNativeProtocolComplete": false
     },
     "lastQualifiedBase": {
       "sourceRevision": "86e58128a3c6e9b246c19425d1e7093b9657a5ba",
@@ -243,7 +278,52 @@
       "newD1DiagnosticQualified": false,
       "routingDefectRootCauseEstablished": false
     },
-    "nativeBenchmarkFailureReceipt": "docs/implementation/native-benchmark-failures-f403.json"
+    "nativeBenchmarkFailureReceipt": "docs/implementation/native-benchmark-failures-f403.json",
+    "nativeKurrentLatestFailure": {
+      "sourceRevision": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+      "runId": 37132491118,
+      "attempt": 1,
+      "jobId": 111232262706,
+      "nativeNodeCount": 2,
+      "stage": "NoStreamSemantics",
+      "exception": "NotLeaderException",
+      "measurements": 0,
+      "samples": 0,
+      "cause": "unknown",
+      "receipt": "docs/implementation/native-kurrent-preflight-failure-7d1196.json",
+      "routingSourceReview": "docs/implementation/kurrent-sdk-routing-source-review.md",
+      "completeCohortQualified": false
+    },
+    "nativeKeyLoadLatestFailures": {
+      "sourceRevision": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
+      "runId": 37132491118,
+      "attempt": 1,
+      "observedAtUtc": "2026-10-03T15:55:26Z",
+      "runTerminal": false,
+      "receipt": "docs/implementation/native-keyload-failures-7d1196.json",
+      "jobs": [
+        {
+          "jobId": 111232263528,
+          "nodeCount": 1,
+          "scenario": "DocumentDelete",
+          "observedFailure": "ResourceExhausted_after_four_successful_repetitions"
+        },
+        {
+          "jobId": 111232263573,
+          "nodeCount": 2,
+          "scenario": "PointRead",
+          "observedFailure": "separate_native_quorumAssertions_after_50000_successful_read_samples"
+        },
+        {
+          "jobId": 111232263484,
+          "nodeCount": 2,
+          "scenario": "DocumentUpdate",
+          "observedFailure": "OwnershipLost_repetitions_1_to_4_after_10000_successful_update_samples"
+        }
+      ],
+      "completeCohortQualified": false,
+      "websiteQualified": false
+    }
   },
   "KL-001": {
     "title": "Версії, ліцензії та platform matrix",
