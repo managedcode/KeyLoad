@@ -12,7 +12,7 @@ internal sealed class ReplicaMaterializerShutdownTests
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(15);
     private static CancellationToken TestToken => TestContext.Current!.Execution.CancellationToken;
 
-    /// <summary>The pure helper drains actual file work, preserves its original exception and closes its real synchronization resources.</summary>
+    /// <summary>The helper drains actual file work, preserves its original error and closes only its owned synchronization resources.</summary>
     [Test]
     public async Task FilesystemFailurePreservesOriginalErrorAfterPendingWorkAndTerminalCleanup()
     {
@@ -40,7 +40,6 @@ internal sealed class ReplicaMaterializerShutdownTests
             await Assert.That(terminal.IsFaulted).IsTrue();
             await Assert.That(await fixture.TerminalPublished.WaitAsync(linked.Token)).IsTrue();
             await Assert.That(Assert.ThrowsExactly<ObjectDisposedException>(() => fixture.ApplyGate.Wait(ImmediateWaitMilliseconds))).IsNotNull();
-            await Assert.That(Assert.ThrowsExactly<ObjectDisposedException>(() => fixture.ProtocolGate.Wait(ImmediateWaitMilliseconds))).IsNotNull();
             await Assert.That(Assert.ThrowsExactly<ObjectDisposedException>(() => _ = fixture.Lifetime.Token)).IsNotNull();
         });
     }
@@ -72,7 +71,6 @@ internal sealed class ReplicaMaterializerShutdownFixture : IAsyncDisposable
 
     internal CancellationTokenSource Lifetime { get; } = new();
     internal SemaphoreSlim ApplyGate { get; } = new(SingleOwner, SingleOwner);
-    internal SemaphoreSlim ProtocolGate { get; } = new(SingleOwner, SingleOwner);
     internal string MissingFilePath { get; }
     internal Task Worker { get; }
     internal Task Entered => entered.Task;
@@ -81,7 +79,7 @@ internal sealed class ReplicaMaterializerShutdownFixture : IAsyncDisposable
     internal FileNotFoundException? FilesystemFailure => Volatile.Read(ref filesystemFailure);
 
     internal Task BeginShutdown() => terminal ??= ReplicaMaterializerShutdown.DisposeAsync(Lifetime, Writer, Worker,
-        ApplyGate, ProtocolGate, () => published.TrySetResult(Worker.IsCompleted));
+        ApplyGate, () => published.TrySetResult(Worker.IsCompleted));
 
     internal void Release() => released.TrySetResult();
 
@@ -142,7 +140,6 @@ internal sealed class ReplicaMaterializerShutdownFixture : IAsyncDisposable
             await ObserveAsync(terminal);
         }
         Attempt(ApplyGate.Dispose);
-        Attempt(ProtocolGate.Dispose);
         Attempt(Lifetime.Dispose);
         Attempt(() => directory.Delete(true));
     }

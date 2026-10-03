@@ -40,7 +40,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     public IDurableReplicaLog Log { get; }
     /// <summary>The node's verified checkpoint transfer store.</summary>
     public IReplicaSnapshotStore Snapshots { get; }
-    internal SemaphoreSlim ProtocolGate { get; } = new(1, 1);
+    internal SemaphoreSlim ProtocolGate => Log.ProtocolGate;
 
     /// <summary>Rejects unsupported canonical cuts and completes verified interrupted snapshot installs.</summary>
     public void Recover()
@@ -189,13 +189,12 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     }
 
     /// <summary>Stops the node-owned apply loop before its independently owned stores are disposed.</summary>
-    /// <returns>Completion after the apply worker and its gates have drained.</returns>
+    /// <returns>Completion after the apply worker and its owned gate drain; the borrowed protocol gate remains with the log owner.</returns>
     public ValueTask DisposeAsync()
     {
         lock (signals)
         {
-            shutdown ??= ReplicaMaterializerShutdown.DisposeAsync(lifetime, work.Writer, worker, applyGate,
-                ProtocolGate, PublishChange);
+            shutdown ??= ReplicaMaterializerShutdown.DisposeAsync(lifetime, work.Writer, worker, applyGate, PublishChange);
             return new(shutdown);
         }
     }

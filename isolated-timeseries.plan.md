@@ -91,3 +91,11 @@ context. Root moves the same bounded evidence path to the actual test step env;
 no provider environment/identity is fabricated. Repaired-source native job remains
 the proof. Combined ComparisonTests development compilation passes0warnings/
 0errors30.19s; this is source verification only.
+
+TS007F native stage passes1/1 TUnit,0failed/0skipped at890047996, run37086903497,
+job111098989273. Original artifact11260697185 and actual facts/command output
+hashes are retained in docs/implementation/timeseries-image-qualification-37086903497.json.
+The exact pinned image is Linux/amd64 Alpine3.23.6, native PG18.6, real gosu at
+/usr/local/bin/gosu, postgres UID70 and verified PGDATA18/docker write permission.
+Owned probe container removal is verified. This satisfies only image feasibility;
+extension/schema/database/replication/runtime/30-cell/performance remain pending.

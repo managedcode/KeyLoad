@@ -61,6 +61,7 @@
 | [ADR-054 central SQL](ADR-054-central-sql.md) | Accepted, source implemented; complete qualification pending | QueryExecution |
 | [ADR-055 typed relational rows](ADR-055-typed-relational-rows.md) | Accepted, source implemented; complete qualification pending | RelationalStorage |
 | [ADR-056 isolated Linux comparison cells](ADR-056-isolated-linux-comparison-cells.md) | Accepted, implementation and qualification pending | BenchmarkComparisons, ClusterReplication |
+| [ADR-059 intensive native TimeSeries family](ADR-059-isolated-intensive-timeseries.md) | Accepted staged contract; implementation and native qualification pending | BenchmarkComparisons |
 
 ## Ідентичність і пріоритет
 

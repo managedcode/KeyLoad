@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "scope": "actual_native_pinned_image_feasibility_only",
+  "sourceRevision": "890047996b651e76b3fbc6bb87dc941f91c9bd2e",
+  "runId": 37086903497,
+  "attempt": 1,
+  "jobId": 111098989273,
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37086903497",
+  "conclusion": "success",
+  "tests": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0
+  },
+  "artifact": {
+    "id": 11260697185,
+    "name": "timeseries-native-pinned-image-facts",
+    "sizeBytes": 759606,
+    "digest": "sha256:e15c6774156338f44eba237ea3b36070276e756a74c9556613da39501b69a694"
+  },
+  "originalFactsSha256": "1e791a9f05c91fa44904e074bfad0ad59acd582fb5154a311c7df36559d3c82f",
+  "image": {
+    "reference": "docker.io/timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e",
+    "configId": "sha256:68813a947696228afb058a7e8684aafdcbf1349ea11f96ec61417ced299375d6",
+    "repoDigests": [
+      "timescale/timescaledb@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e"
+    ],
+    "os": "linux",
+    "architecture": "amd64",
+    "entrypoint": [
+      "docker-entrypoint.sh"
+    ],
+    "command": [
+      "postgres"
+    ],
+    "defaultUser": "",
+    "defaultEnvironment": [
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "GOSU_VERSION=1.19",
+      "LANG=en_US.utf8",
+      "PG_MAJOR=18",
+      "PG_VERSION=18.6",
+      "PG_SHA256=555610c24d53e4316da5b7d3fc25c279d96856d5e0e23ee308c328c5fa881d9f",
+      "DOCKER_PG_LLVM_DEPS=llvm21-dev \t\tclang21",
+      "PGDATA=/var/lib/postgresql/18/docker"
+    ]
+  },
+  "observations": {
+    "entrypointPath": "/usr/local/bin/docker-entrypoint.sh",
+    "rootUid": "0",
+    "kernel": "Linux",
+    "distribution": "alpine",
+    "distributionVersion": "3.23.6",
+    "tool.postgres": "/usr/local/bin/postgres",
+    "tool.pg_basebackup": "/usr/local/bin/pg_basebackup",
+    "tool.pg_isready": "/usr/local/bin/pg_isready",
+    "tool.timeout": "/usr/bin/timeout",
+    "postgresVersion": "postgres (PostgreSQL) 18.6",
+    "postgresMajor": "18",
+    "userSwitchName": "gosu",
+    "userSwitchPath": "/usr/local/bin/gosu",
+    "postgresUid": "70",
+    "pgData": "/var/lib/postgresql/18/docker",
+    "writeVerified": "true"
+  },
+  "ownedContainerRemoved": true,
+  "retainedCommandOutputHashesVerified": true,
+  "limits": "This genuine image probe does not run a database service, qualify replication or extension/schema contracts, measure performance, or establish the complete30 intensive family."
+}

@@ -29,7 +29,7 @@ internal static class IsolatedNativeCase
         builder.Services.AddLogging(logging => logging.ClearProviders().AddConsole().SetMinimumLevel(LogLevel.Warning));
         var app = await builder.BuildAsync(timeout.Token);
         var containers = app.Services.GetRequiredService<DistributedApplicationModel>().Resources.OfType<ContainerResource>().ToArray();
-        await using var capture = new ComparisonTestLogCapture(app);
+        await using var capture = new ComparisonTestLogCapture(app, containers.Select(container => container.Name));
         var primaryFailure = false;
         try
         {

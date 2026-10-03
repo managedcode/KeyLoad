@@ -46,3 +46,42 @@ caller opt-in, alternate storage, membership migration, lowered quorum or produc
 readiness claim. Exact files/stages/migration/rollback/SDK+MCP fault tests and
 root-owned integration are the ADR056 implementation contract. Status staysAccepted
 until real benchmark topology and unchangedRF3 fault/recovery qualification exist.
+
+## TASK-ISO-016K-F: one node-owned publication and planning gate
+
+Root accepts REQ-REP-051/AC-REP-051 before implementation. IDurableReplicaLog
+exposes a borrowed ProtocolGate SemaphoreSlim, owned by DurableReplicaLog.
+ReplicaMaterializer borrows that exact gate; its shutdown drains apply work and
+never disposes it. DurableReplicaLog.Dispose closes the gate only after existing
+node-host consensus/materializer drain. PublishSnapshot acquires ProtocolGate
+before its existing durable-log monitor and releases it in finally. Both real
+SnapshotStore.Create and Complete, including recovery/reset incoming publication,
+use this single publication path. Canonical image IO remains outside ProtocolGate.
+ProtocolGate to durable-log monitor is the sole permitted order; no caller may
+publish recursively while already holding the semaphore. Current production
+call-site review found no such caller. Persisted format, voters, quorum and public
+database wire do not change; rollback is a coordinated source rollback after host
+drain and retains every valid durable cut.
+
+Ordered stages: author real ZoneTree regression first; add the log contract/gate and
+metadata-only serialization; update borrowed materializer lifecycle assertions;
+run GitHub recovery and RF3/full intensive gates and retain exact source/job/raw
+logs. Existing publisher_archive_review owns only ReplicaLogContracts.cs,
+DurableReplicaLog.cs, ReplicaMaterializer.cs, ReplicaMaterializerShutdown.cs,
+the two existing MaterializerLifecycle/ShutdownTests files and NEW
+ReplicaCheckpointProtocolGate* tests/helpers under Recovery ClusterReplication.
+Root owns docs/shared integration and reviews the entire diff. Stop on lock-order,
+ownership/API or scope uncertainty; no replica retries, admission or election
+threshold changes, suppressed diagnostics, mocks, local tests/runtime or Git
+writes are delegated. The separate heartbeat/apply liveness exposure remains
+unqualified and is not silently changed in this repair.
+
+```mermaid
+flowchart LR
+    Plan[Protocol term and suffix planning] --> Gate[Node log-owned protocol gate]
+    IO[Canonical snapshot IO under apply ownership] --> Publish[Metadata publication]
+    Publish --> Gate
+    Gate --> Log[Durable metadata monitor and commit]
+    Materializer[Materializer borrows gate] --> Drain[Apply drain without gate disposal]
+    Drain --> Owner[Physical log owner disposes after consensus drain]
+```

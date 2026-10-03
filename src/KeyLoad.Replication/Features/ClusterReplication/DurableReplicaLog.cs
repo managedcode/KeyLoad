@@ -14,6 +14,8 @@ public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration c
     private ReplicaHardState state = ReplicaLogValidation.Open(store, configuration);
     private bool disposed;
     /// <inheritdoc />
+    public SemaphoreSlim ProtocolGate { get; } = new(1, 1);
+    /// <inheritdoc />
     public ReplicaHardState State
     {
         get { lock (gate) { Check(); return state; } }
@@ -135,28 +137,33 @@ public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration c
     public void PublishSnapshot(ReplicaSnapshot snapshot)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
-        lock (gate)
+        ProtocolGate.Wait();
+        try
         {
-            Check();
-            ReplicaPersistence.ValidateSnapshot(snapshot, configuration);
-            if (snapshot.Index < (state.Snapshot?.Index ?? 0))
+            lock (gate)
             {
-                throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
+                Check();
+                ReplicaPersistence.ValidateSnapshot(snapshot, configuration);
+                if (snapshot.Index < (state.Snapshot?.Index ?? 0))
+                {
+                    throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
+                }
+                var retain = snapshot.Index <= state.LastIndex && Term(snapshot.Index) == snapshot.Term;
+                if (!retain && snapshot.Index <= state.CommittedIndex)
+                {
+                    throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
+                }
+                Save(state with
+                {
+                    Snapshot = snapshot,
+                    LastIndex = retain ? state.LastIndex : snapshot.Index,
+                    CommittedIndex = Math.Max(state.CommittedIndex, snapshot.Index),
+                    Term = Math.Max(state.Term, snapshot.Term),
+                    VotedFor = snapshot.Term > state.Term ? null : state.VotedFor
+                });
             }
-            var retain = snapshot.Index <= state.LastIndex && Term(snapshot.Index) == snapshot.Term;
-            if (!retain && snapshot.Index <= state.CommittedIndex)
-            {
-                throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
-            }
-            Save(state with
-            {
-                Snapshot = snapshot,
-                LastIndex = retain ? state.LastIndex : snapshot.Index,
-                CommittedIndex = Math.Max(state.CommittedIndex, snapshot.Index),
-                Term = Math.Max(state.Term, snapshot.Term),
-                VotedFor = snapshot.Term > state.Term ? null : state.VotedFor
-            });
         }
+        finally { ProtocolGate.Release(); }
     }
 
     private void Save(ReplicaHardState next)
@@ -170,6 +177,13 @@ public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration c
     public void Dispose()
     {
         lock (gate)
-        { disposed = true; }
+        {
+            if (disposed)
+            {
+                return;
+            }
+            disposed = true;
+            ProtocolGate.Dispose();
+        }
     }
 }

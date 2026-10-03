@@ -129,3 +129,26 @@ retained run37072003906 evidence supports stale-terminal handling; exact selecte
 Aspire event generation remains unproven. TASK-AISQL-025/root owns only the two
 post-restart health waits; ADR036 existing lifecycle contract is sufficient, new
 architecture ADR:N/A. Qualification remains pending.
+
+## Atomic checkpoint metadata publication
+
+REQ-REP-051 maps to AC-REP-051: every node shares one log-owned protocol gate for
+term/append/follower planning and checkpoint metadata publication. Real canonical
+snapshot capture/verification/install IO remains outside that gate. A checkpoint
+cannot advance the compacted cut between an authenticated protocol operation's
+metadata, term and suffix reads; ordinary concurrent publication cannot poison a
+healthy replica. The materializer borrows the gate, drains its apply work and does
+not dispose the log owner's gate; physical log disposal closes it after consensus
+and materializer drain. Existing snapshot cut, tail, quorum, incarnation, transfer
+and process-durable acknowledgement rules remain strict.
+
+AC-REP-051 requires tests on genuine ZoneTree log/canonical stores proving the same
+gate instance, blocked metadata publication while a real planning scope is held,
+then exact verified snapshot publication/tail read and preserved metadata after
+release. Cover direct Create and completed incoming transfer publication,
+successful and faulted materializer disposal, and actual log-owner closure. Existing
+process-crash/snapshot tests and 1/2/3 native intensive seeding/read plus RF3 SDK/MCP
+fault gates must pass at the repaired SHA. TASK-ISO-016K-F and ADR007 own the ordered
+contract; no injected storage substitute, silent retry, lost cut or changed quorum
+is acceptable. Source races are established independently from the unresolved
+cf630 OwnershipLost runtime attribution; exact native node logs remain necessary.

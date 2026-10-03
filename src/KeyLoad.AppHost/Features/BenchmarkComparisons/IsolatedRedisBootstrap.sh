@@ -13,8 +13,8 @@ config=/data/isolated-redis.conf
     printf '%s\n' 'dir /data' 'bind 0.0.0.0' 'protected-mode yes' 'appendonly yes' 'appendfsync always' 'save ""'
     printf 'requirepass %s\nmasterauth %s\n' "$KEYLOAD_REDIS_PASSWORD" "$KEYLOAD_REDIS_PASSWORD"
     if [ -n "${KEYLOAD_REDIS_PRIMARY:-}" ]; then
-        [ "$KEYLOAD_REDIS_PRIMARY" = primary ] || exit 1
-        printf '%s\n' 'replicaof primary 6379'
+        [ "$KEYLOAD_REDIS_PRIMARY" = primary.dev.internal ] || exit 1
+        printf '%s\n' 'replicaof primary.dev.internal 6379'
     fi
 } > "$config"
 

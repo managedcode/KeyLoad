@@ -22,18 +22,22 @@ internal static class IsolatedKurrentSettings
     private const string Enabled = "true";
     private const string Disabled = "false";
     private const string PortSeparator = ":";
+    private const string NativeHostSuffix = ".dev.internal";
+
+    internal static string NativeHost(string name) => name + NativeHostSuffix;
 
     internal static void Configure(IResourceBuilder<ContainerResource> node, string name, string[] names)
     {
         node.WithEnvironment(ClusterSize, names.Length.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment(NodeIp, BindAll).WithEnvironment(NodePort, HttpPort)
             .WithEnvironment(ReplicationIp, BindAll).WithEnvironment(ReplicationPort, TcpPort)
-            .WithEnvironment(NodeAdvertise, name).WithEnvironment(ReplicationAdvertise, name)
+            .WithEnvironment(NodeAdvertise, NativeHost(name)).WithEnvironment(ReplicationAdvertise, NativeHost(name))
             .WithEnvironment(Insecure, Enabled).WithEnvironment(DiscoverDns, Disabled)
             .WithEnvironment(Database, Data);
         if (names.Length > 1)
         {
-            node.WithEnvironment(GossipSeeds, string.Join(',', names.Where(peer => peer != name).Select(peer => peer + PortSeparator + HttpPort)));
+            node.WithEnvironment(GossipSeeds, string.Join(',', names.Where(peer => peer != name)
+                .Select(peer => NativeHost(peer) + PortSeparator + HttpPort)));
         }
     }
 }

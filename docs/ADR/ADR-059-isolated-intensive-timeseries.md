@@ -247,3 +247,12 @@ Session/Target and matching native tests. Root alone edits the common initialize
 and native topology/bootstrap/profile/host composition. Actual1/2/3 SQL negative,
 transactional rollback/dedup/concurrency/ordering/marker/copy tests are required;
 DDL and source compilation alone cannot authorize native performance claims.
+
+TS007F actual pinned-image feasibility passes at890047996, run37086903497/
+job111098989273,1/1 with no skips. The exact native evidence is
+[image receipt](../implementation/timeseries-image-qualification-37086903497.json).
+Observed image: Linux/amd64 Alpine3.23.6, PostgreSQL18.6, gosu at
+/usr/local/bin/gosu, postgres UID70 and actual writable PGDATA18/docker. Owned
+container removal and retained command hashes pass. This resolves the native
+gosu/path assumption only; Timescale extension installation, real1/2/3 database
+bootstrap/ACK/copies and complete intensive family remain unqualified.

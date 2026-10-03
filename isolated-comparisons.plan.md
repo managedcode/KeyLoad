@@ -274,3 +274,87 @@ part of this checkpoint. Actual exact-source GitHub remains the qualification.
 - [ ] Complete270 measured cells and authenticated aggregation.
 - [ ] Qualify full site/native80/70/90/Chrome/no-skip and actual Pages/live metrics.
 - [ ] Isolated TimeSeries native cohort and matched backend coverage.
+
+
+## Corrected native baseline cf630
+
+Run37084177131, sourcecf630751e0f24e4d8183e55510add9c7207e377f, passes
+verify111092414086: complete Release/format/governance,118 analyzer tests,1407
+normal units,1407 scalar units and136 recovery tests, zero skips. RF3 job
+111092414223 passes63/63, zero skips. Common image job111093924880 passes native
+image export/import1, actual authenticated job1, composition models77, historical
+TimeSeries workload3 and package-version1, all without skips. The27 native
+preflights now execute on distinct selected-engine runners. No complete intensive
+raw cohort, numeric backend coverage, site/provider/live result is yet qualified.
+
+## Genuine cf630 preflight failures and corrective graph
+
+- [ ] SelectedNativeCaseRunsCommonIntensiveWorkload / keyload-n1-point-read,
+  job111094622972: five10000-attempt repetitions hit ResourceExhausted. The actual
+  default HTTP principal admission is8 while this profile creates16 clients;
+  native bounded admission receipt and per-node diagnostic logs are needed.
+- [ ] SelectedNativeCaseRunsCommonIntensiveWorkload / keyload-n2-point-read,
+  job111094622918: first repetition has5336 ResourceExhausted and73 OwnershipLost;
+  later warmups fail ResourceExhausted. Diagnose ownership separately from limits.
+- [ ] SelectedNativeCaseRunsCommonIntensiveWorkload / keyload-n3-point-read,
+  job111094622936: native setup OwnershipLost, zero measured samples. Per-node logs
+  were not retained by the runner-only logger; no invented root cause.
+- [ ] SelectedNativeCaseRunsCommonIntensiveWorkload / redis-n2-point-read,
+  job111094622945: native setup RedisReplicaPrimaryIdentityMismatch, zero samples.
+- [ ] SelectedNativeCaseRunsCommonIntensiveWorkload / redis-n3-point-read,
+  job111094623016: same strict native replication identity assertion, zero samples.
+
+| Task | AC / owner / permissions | Dependencies / artifacts / join |
+|---|---|---|
+|TASK-ISO-016R|ISO003/005; gates_audit read-only Redis analysis|Authentic logs/artifacts and exact source; terminal diagnosis then root-approved fix packet; no guessed host identity relaxation.|
+|TASK-ISO-016K|ISO003/004/005; existing publisher_archive_review capable read-only replica analysis|Authentic KeyLoad raw/QA; root separately owns admission/diagnostics; identify missing facts/source defects; no hidden retry/quorum weakening.|
+|TASK-ISO-016H|ISO003/005/006; root owns bounded benchmark HTTP configuration and native logs/admission receipts|Actual c16/default8 contradiction; approved ADR056 refinement and source/native regressions before writes; retain failures and every real job.|
+|TASK-ISO-016R-F|ISO003/005; gates_audit owns only RedisResources/Bootstrap/TopologyRedisTests, bounded source writes|016R terminal diagnosis and root-approved ADR056 exact native hostname contract; tests first, root full diff review, actual GitHub 1/2/3 preflight and complete CRUD proof.|
+|TASK-ISO-016K-F|REP051/ISO004/005; publisher_archive_review owns exact replication gate files and real recovery tests in ADR007|K2 lock/call-site analysis terminal; log-owned metadata gate, tests first; root full diff review, no local qualification, same-SHA recovery/RF3/intensive join.|
+|TASK-ISO-016M-F|ISO003/005; gates_audit owns five Mongo/Kurrent source/model paths in ADR056|016M actual parser failure/source DNS contradiction; approved final-promise and canonical native-host contract; root diff and authentic1/2/3/full-cohort proof.|
+|TASK-ISO-016N-F|ISO003/005; build_action_review owns exact Neo4j target/protocol/native test packet in ADR056|016N exact pinned upstream status mapper and foreign constraint ownership review terminal; root-approved strict202/400/nativecode + actual CREATE-success ownership; genuine regression/fullcohort join.|
+
+These failures block the complete270 intensive cohort, site refresh and dependent
+TimeSeries native implementation. The separately approved pinned-image feasibility
+stage is independent. PostgreSQL preflight1/2/3 and Redis1 pass at this source;
+partial native results never count as a completed cohort.
+
+Final cf630 native baseline:27 preflight jobs complete with15 successes and12
+failures. Neo4j Community2/3 are explicit unsupported proof jobs. Add individually
+tracked failed cases to the same corrective graph; aggregate111097809329 is skipped
+and no full270 cohort exists:
+
+- [ ] MongoDB n1 job111094622975: actual bootstrap classic script SyntaxError at
+  top-level await; no runner/JSON. Fix retained final native evaluator promise.
+- [ ] MongoDB n2 job111094622970: same actual parser failure, no measurements.
+- [ ] MongoDB n3 job111094622962: same actual parser failure, no measurements.
+- [ ] KurrentDB n1 job111094624150: setup:GossipEndpointIdentityMismatch; native
+  advertised hostname differs from actual Aspire endpoint. Keep strict identity.
+- [ ] KurrentDB n2 job111094624217: same source address contradiction; zero samples.
+- [ ] KurrentDB n3 job111094624589: same source address contradiction; zero samples.
+- [ ] Neo4j n1 job111094623024:50000 successful measured reads, but required
+  duplicate-constraint regression rejects HTTP!=202. Actual status/body not retained;
+  source error-response and foreign constraint cleanup ownership need repair/proof.
+
+TASK016H/016R-F source is authored; combined ComparisonTests development build
+passes0warnings/0errors30.19s. Runtime remains unqualified until every failed case
+and original required suites pass at repaired source. TASK016K-F fixes the proved
+metadata race independently from unresolved historical OwnershipLost attribution.
+
+TASK016H/016R-F/016M-F/016N-F/016K-F source review is complete. The full solution
+development build passed0warnings/0errors29.41s before the final Neo4j success-envelope
+refinement. That final scoped build reports zero owned diagnostics and five errors
+in a concurrently introduced, unowned IsolatedResourceLogCaptureStopTests.cs.
+That file and its shared logger/teardown/doc refinements remain outside this
+scoped source checkpoint. Static governance and whitespace validation pass.
+The scoped commit retains the earlier owned logger/teardown version and every
+foreign working-tree change; only genuine exact-source GitHub can qualify it.
+No local tests or runtime qualifications ran. All12 original failures remain
+tracked until native repaired-source results exist.
+
+- [x] Root-reviewed strict Neo4j native errors and malformed202 success envelopes.
+- [x] Root-reviewed Redis native host, Mongo final promise and Kurrent native hosts.
+- [x] Root-reviewed physical log-owned checkpoint publication and recovery cases.
+- [x] Bounded isolated admission and native per-member/log receipts source joined.
+- [ ] Repaired exact-source Release/format/governance/normal/scalar/recovery/RF3.
+- [ ] Repaired native27 preflights and complete270 original intensive cell cohort.

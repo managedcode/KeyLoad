@@ -12,13 +12,11 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
 {
     private const string DataProperty = "data";
     private const string ValuesProperty = "values";
-    private const string ErrorsProperty = "errors";
-    private const string CodeProperty = "code";
     private const string CommunityEdition = "community";
     private const string CommunityRequired = "Neo4jCommunityEditionRequired";
     private const string SingleCommunityState = "single native Community node";
     private readonly string label = "Benchmark_" + Guid.Parse(runId).ToString("N");
-    private bool constraintCreationAttempted;
+    private bool ownsConstraint;
     private int depth;
     /// <summary>Gets the observed Neo4j version and declared single-node, local-transaction, and query profile.</summary>
     public TargetProfile Profile { get; private set; } = new("Neo4j", "unverified", "Community; single node; heap 512 MiB, page cache 256 MiB",
@@ -50,8 +48,12 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
             Version = row[0].GetString() + "; " + edition,
             Cluster = new(1, 1, SingleCommunityState, [CommunityEdition])
         };
-        constraintCreationAttempted = true;
-        await ExecuteAsync($"CREATE CONSTRAINT {label}_id FOR (n:{label}) REQUIRE n.id IS UNIQUE", null, cancellationToken);
+        using (var constraint = await QueryAsync($"CREATE CONSTRAINT {label}_id FOR (n:{label}) REQUIRE n.id IS UNIQUE", null, cancellationToken))
+        {
+            Neo4jQueryProtocol.ValidateConstraintCreation(constraint.RootElement);
+            ownsConstraint = true;
+        }
+
         foreach (var batch in dataset.Documents.Chunk(256))
         {
             await ExecuteAsync($"UNWIND $documents AS d CREATE (n:{label} {{id:d.id,json:d.json}})",
@@ -71,16 +73,24 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
     private async Task<JsonDocument> QueryAsync(string statement, object? parameters, CancellationToken cancellationToken)
     {
         using var response = await http.PostAsJsonAsync("db/neo4j/query/v2", new { statement, parameters = parameters ?? new { }, maxExecutionTime = 30 }, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        var json = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(cancellationToken), cancellationToken: cancellationToken);
-        if (json.RootElement.TryGetProperty(ErrorsProperty, out var errors) && errors.ValueKind == JsonValueKind.Array && errors.GetArrayLength() != 0)
+        Neo4jQueryProtocol.RequireQueryStatus((int)response.StatusCode);
+        JsonDocument? json = null;
+        try
         {
-            // Query API returns HTTP 202 for query failures too. Never log server messages or credentials.
-            var code = errors[0].GetProperty(CodeProperty).GetString();
-            json.Dispose();
-            throw new ComparisonFailureException("Neo4j:" + code);
+            json = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(cancellationToken), cancellationToken: cancellationToken);
+            Neo4jQueryProtocol.ValidateResponse((int)response.StatusCode, json.RootElement);
+            return json;
         }
-        return json;
+        catch (JsonException)
+        {
+            json?.Dispose();
+            throw Neo4jQueryProtocol.Invalid();
+        }
+        catch (Exception)
+        {
+            json?.Dispose();
+            throw;
+        }
     }
     private async Task ExecuteAsync(string statement, object? parameters, CancellationToken cancellationToken)
     { using var response = await QueryAsync(statement, parameters, cancellationToken); }
@@ -95,7 +105,7 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         try
         {
-            if (constraintCreationAttempted)
+            if (ownsConstraint)
             {
                 await ExecuteAsync($"MATCH (n:{label}) DETACH DELETE n", null, timeout.Token);
                 await ExecuteAsync($"DROP CONSTRAINT {label}_id IF EXISTS", null, timeout.Token);

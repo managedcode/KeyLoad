@@ -76,7 +76,8 @@ public sealed partial class KeyLoadTarget
         {
             Topology = description,
             Cluster = new(expectedNodeCount, expectedNodeCount, description, ImmutableCollectionsMarshal.AsImmutableArray(receipts.Select(status =>
-                $"{status.NodeId}: ready; incarnation {status.Incarnation}; applied {status.Applied}; leader {status.Leader}").ToArray()))
+                $"{status.NodeId}: ready; incarnation {status.Incarnation}; applied {status.Applied}; leader {status.Leader}")
+                .Concat(admissionObservations).ToArray()))
         };
     }
 

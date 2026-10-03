@@ -8,17 +8,31 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 internal sealed class ComparisonTestLogCapture : IAsyncDisposable
 {
     private const int MaximumRetainedLines = 150;
+    private const int MaximumNodeLines = 2_000;
+    private const int MaximumResourceBytes = 1_048_576;
+    private const int MaximumLineBytes = 16_384;
+    private const string ResourceLogSuffix = ".log";
     private const string ComparisonResourceName = "comparisons";
     private readonly DistributedApplication application;
     private readonly CancellationTokenSource lifetime = new();
-    private readonly ConcurrentQueue<string> lines = new();
+    private readonly Dictionary<string, ComparisonResourceLogBuffer> logs;
     private readonly ConcurrentDictionary<string, Task> logCaptures = new(StringComparer.Ordinal);
     private readonly Task capture;
     private int stopped;
+    private int disposed;
 
-    public ComparisonTestLogCapture(DistributedApplication application)
+    public ComparisonTestLogCapture(DistributedApplication application, IEnumerable<string>? selectedResources = null)
     {
         this.application = application;
+        var names = (selectedResources ?? []).Append(ComparisonResourceName).Distinct(StringComparer.Ordinal).ToArray();
+        if (names.Any(name => name.Length is < 1 or > 100 || name.Any(character =>
+            !char.IsAsciiLetterOrDigit(character) && character != '-')))
+        {
+            throw new ArgumentException("Resource log names must be confined native identifiers.", nameof(selectedResources));
+        }
+        logs = names.ToDictionary(name => name, name => new ComparisonResourceLogBuffer(
+            name == ComparisonResourceName ? MaximumRetainedLines : MaximumNodeLines,
+            MaximumResourceBytes, MaximumLineBytes), StringComparer.Ordinal);
         var logger = application.Services.GetRequiredService<ResourceLoggerService>();
         capture = Task.Run(() => CaptureResourcesAsync(logger), CancellationToken.None);
     }
@@ -38,13 +52,32 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     public async Task WriteToAsync(string path)
     {
         await StopAsync();
-        await File.WriteAllLinesAsync(path, lines, CancellationToken.None);
+        await File.WriteAllLinesAsync(path, logs[ComparisonResourceName].Snapshot(), CancellationToken.None);
+    }
+
+    public async Task WriteResourcesToAsync(string directory)
+    {
+        await StopAsync();
+        foreach (var (name, buffer) in logs.Where(item => item.Key != ComparisonResourceName))
+        {
+            await File.WriteAllLinesAsync(Path.Combine(directory, name + ResourceLogSuffix), buffer.Snapshot(), CancellationToken.None);
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
-        await StopAsync();
-        lifetime.Dispose();
+        if (Interlocked.Exchange(ref disposed, 1) != 0)
+        {
+            return;
+        }
+        try
+        {
+            await StopAsync();
+        }
+        finally
+        {
+            lifetime.Dispose();
+        }
     }
 
     private async Task CaptureResourcesAsync(ResourceLoggerService logger)
@@ -53,9 +86,10 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
         {
             await foreach (var change in application.ResourceNotifications.WatchAsync(lifetime.Token))
             {
-                if (change.Resource.Name == ComparisonResourceName)
+                if (logs.ContainsKey(change.Resource.Name))
                 {
-                    _ = logCaptures.GetOrAdd(change.ResourceId, _ => CaptureLogsAsync(logger, change.ResourceId));
+                    _ = logCaptures.GetOrAdd(change.ResourceId,
+                        _ => CaptureLogsAsync(logger, change.ResourceId, change.Resource.Name));
                 }
             }
         }
@@ -64,7 +98,7 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
         }
     }
 
-    private async Task CaptureLogsAsync(ResourceLoggerService logger, string resourceId)
+    private async Task CaptureLogsAsync(ResourceLoggerService logger, string resourceId, string name)
     {
         try
         {
@@ -72,21 +106,12 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
             {
                 foreach (var line in batch)
                 {
-                    RetainLine(line.Content);
+                    logs[name].Add(line.Content);
                 }
             }
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
         {
-        }
-    }
-
-    private void RetainLine(string line)
-    {
-        lines.Enqueue(line);
-        while (lines.Count > MaximumRetainedLines)
-        {
-            _ = lines.TryDequeue(out _);
         }
     }
 }

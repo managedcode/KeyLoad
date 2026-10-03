@@ -38,6 +38,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dataset);
+        await ObserveAdmissionAsync(cancellationToken);
         var status = KeyLoadClientResults.Success(await client.StatusAsync(cancellationToken), "Status");
         if (status.Voters != expectedNodeCount || status.Durability != DurabilityProfile.QuorumProcessDurable)
         {

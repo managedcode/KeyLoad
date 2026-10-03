@@ -286,5 +286,10 @@ The isolated publication path now requires the complete270-worker cohort and
 277 original files, keeps its measured SHA separate from website/control and
 historical measurements, and rechecks both evidence identities before Pages.
 The [native source qualification record](docs/implementation/isolated-comparison-source-qualification.json)
-records RF3 passing63/63 on63ac while full qualification remains incomplete.
+records cf630 full Release/format/governance,1407 normal and1407 scalar unit
+checks,136 recovery and63 RF3 checks passing without skips. Native image
+roundtrip passed. The27 isolated preflight jobs conclude15 successes and12
+failures; two successes are explicit unsupported Neo4j Community topologies.
+Actual admission, bootstrap, endpoint identity and native regression failures
+block the complete270 intensive cohort and authenticated aggregation.
 No new intensive performance or live publication result is claimed.

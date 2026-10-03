@@ -18,7 +18,8 @@ internal static class Neo4jHarnessProtocolTests
         await AssertInvalidErrorsAsync();
         await AssertInvalidConstraintAcknowledgementsAsync();
         await AssertDuplicateCriticalPropertiesAsync(nativeCode);
-        await Assert.That(IsNativeCode(nativeCode)).IsTrue();
+        await Assert.That(Neo4jQueryResponse.ReadNativeErrorCode(duplicateCreate) == nativeCode).IsTrue();
+        await VerifyHttpResponsesAsync(successfulCreate, duplicateCreate, nativeCode);
     }
 
     private static async Task AssertNativeErrorAsync(JsonElement response, string? expectedCode)
@@ -61,6 +62,8 @@ internal static class Neo4jHarnessProtocolTests
         await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":null}]}");
         await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"\"}]}");
         await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"Neo.ClientError.Schema.Bad-Code\"}]}");
+        await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"Neo.ClientError.Schema.Schéma\"}]}");
+        await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"Neo.ClientError.Schema." + new string('A', Neo4jHarnessConstants.MaximumNativeCodeLength) + "\"}]}");
     }
 
     private static async Task AssertEmptyErrorsAcceptedAsync()
@@ -145,14 +148,43 @@ internal static class Neo4jHarnessProtocolTests
         await Assert.That(failure?.Message == expected).IsTrue();
     }
 
-    private static bool IsNativeCode(string value)
+    private static async Task VerifyHttpResponsesAsync(JsonElement successful, JsonElement failed, string nativeCode)
     {
-        var parts = value.Split('.');
-        return parts.Length == 4 && parts[0] == "Neo" && parts.All(IsIdentifier);
+        Neo4jQueryResponse.ValidateResponse(Neo4jHarnessConstants.AcceptedStatusCode, successful);
+        foreach (var status in new[] { Neo4jHarnessConstants.AcceptedStatusCode, Neo4jHarnessConstants.QueryErrorStatusCode })
+        {
+            await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(status, failed), "Neo4j:" + nativeCode);
+        }
+
+        await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(Neo4jHarnessConstants.QueryErrorStatusCode, successful), InvalidResponse);
+        foreach (var status in Neo4jHarnessConstants.UnexpectedQueryStatuses())
+        {
+            await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(status, successful), InvalidResponse);
+            await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(status, failed), InvalidResponse);
+        }
+
+        foreach (var body in new[]
+        {
+            "{}", "{\"errors\":[]}", "{\"errors\":null}", "{\"errors\":{}}", "[]", "null",
+            "{\"data\":null}", "{\"data\":{}}", "{\"data\":{},\"data\":{}}",
+            "{\"data\":{\"fields\":[]}}", "{\"data\":{\"values\":[]}}",
+            "{\"data\":{\"fields\":[1],\"values\":[]}}", "{\"data\":{\"fields\":null,\"values\":[]}}",
+            "{\"data\":{\"fields\":[],\"values\":null}}", "{\"data\":{\"fields\":[],\"values\":{}}}",
+            "{\"data\":{\"fields\":[],\"values\":[null]}}", "{\"data\":{\"fields\":[],\"values\":[[1]]}}",
+            "{\"data\":{\"fields\":[\"n\"],\"values\":[[]]}}",
+            "{\"data\":{\"fields\":[],\"fields\":[],\"values\":[]}}",
+            "{\"data\":{\"fields\":[],\"values\":[],\"values\":[]}}"
+        })
+        {
+            using var document = JsonDocument.Parse(body);
+            await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(Neo4jHarnessConstants.AcceptedStatusCode, document.RootElement), InvalidResponse);
+            await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(Neo4jHarnessConstants.QueryErrorStatusCode, document.RootElement), InvalidResponse);
+        }
+
+        using var malformed = JsonDocument.Parse("{\"errors\":[{\"code\":\"" + nativeCode + "\"},{\"code\":null}]}");
+        foreach (var status in new[] { Neo4jHarnessConstants.AcceptedStatusCode, Neo4jHarnessConstants.QueryErrorStatusCode })
+        {
+            await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(status, malformed.RootElement), InvalidResponse);
+        }
     }
-
-    private static bool IsIdentifier(string value) => value.Length > 0 && IsAsciiLetter(value[0])
-        && value.All(character => IsAsciiLetter(character) || character is >= '0' and <= '9' or '_');
-
-    private static bool IsAsciiLetter(char value) => value is >= 'A' and <= 'Z' or >= 'a' and <= 'z';
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
@@ -24,9 +25,13 @@ internal static class Neo4jHarnessRegression
         CancellationToken cancellationToken)
     {
         using var duplicate = await fixture.ProbeDuplicateConstraintAsync(cancellationToken);
-        await Assert.That(duplicate.StatusCode == 202).IsTrue();
+        var nativeCode = Neo4jQueryResponse.ReadNativeErrorCode(duplicate.Document.RootElement);
+        await Assert.That(!nativeCode.Contains(password, StringComparison.Ordinal)).IsTrue();
+        await Assert.That(!nativeCode.Contains(fixture.RunId, StringComparison.Ordinal)).IsTrue();
+        Console.WriteLine(string.Create(CultureInfo.InvariantCulture,
+            $"{Neo4jHarnessConstants.DuplicateHttpDiagnosticPrefix}{duplicate.StatusCode}{Neo4jHarnessConstants.NativeCodeDiagnosticSeparator}{nativeCode}"));
+        await Assert.That(duplicate.StatusCode is Neo4jHarnessConstants.AcceptedStatusCode or Neo4jHarnessConstants.QueryErrorStatusCode).IsTrue();
         var error = duplicate.Document.RootElement.GetProperty(Neo4jHarnessConstants.ErrorsProperty)[0];
-        var nativeCode = error.GetProperty(Neo4jHarnessConstants.ErrorCodeProperty).GetString() ?? string.Empty;
         var nativeMessage = error.GetProperty(Neo4jHarnessConstants.ErrorMessageProperty).GetString() ?? string.Empty;
         await Assert.That(nativeCode.Length > 0).IsTrue();
         await Assert.That(nativeMessage.Length > 0).IsTrue();

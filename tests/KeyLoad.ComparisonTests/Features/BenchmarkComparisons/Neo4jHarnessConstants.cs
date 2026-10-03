@@ -1,3 +1,4 @@
+using System.Net;
 using KeyLoad.Comparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -13,6 +14,8 @@ internal static class Neo4jHarnessConstants
     public const int SmallDimensions = 8;
     public const int SmallTopK = 3;
     public const int AcceptedStatusCode = 202;
+    public const int QueryErrorStatusCode = 400;
+    public const int MaximumNativeCodeLength = 256;
     public const int RequestTimeoutSeconds = 30;
     public const int CleanupTimeoutSeconds = 15;
     public const int SupportedScenarioCount = 6;
@@ -76,6 +79,8 @@ internal static class Neo4jHarnessConstants
     public const string NumericCodeComponent = "1ClientError";
     public const string UnderscoreCodeComponent = "_ClientError";
     public const string NativeTestMessage = "controlled native message";
+    public const string DuplicateHttpDiagnosticPrefix = "Neo4jHarnessDuplicateHTTP:";
+    public const string NativeCodeDiagnosticSeparator = ";code:";
     public const string MarkerParameter = "id";
     public const string ConstraintParameter = "name";
     public const string IdsParameterName = "ids";
@@ -84,6 +89,18 @@ internal static class Neo4jHarnessConstants
     public static ComparisonOptions SmallOptions() => CreateOptions(SmallWarmup, SmallRepetitions);
 
     public static ComparisonOptions SetupFailureOptions() => CreateOptions(0, 1);
+
+    public static int[] UnexpectedQueryStatuses() =>
+    [
+        (int)HttpStatusCode.OK,
+        (int)HttpStatusCode.Created,
+        (int)HttpStatusCode.NoContent,
+        (int)HttpStatusCode.Unauthorized,
+        (int)HttpStatusCode.Forbidden,
+        (int)HttpStatusCode.NotFound,
+        (int)HttpStatusCode.InternalServerError,
+        (int)HttpStatusCode.ServiceUnavailable
+    ];
 
     public static Scenario[] ExpectedScenarios() =>
     [

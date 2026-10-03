@@ -670,3 +670,95 @@ downloads both authenticated ZIPs and checks their identities/digests, serialize
 with actual ZIP-size-plus1GiB disk preflight and exclusive cleanup. It does not
 repeat BCL277-file extraction. Parser tests copy metadata only. This reduces test
 resource duplication without replacing genuine transport or coverage evidence.
+
+TASK-ISO-016H approved AC-ISO-003/005/006 refinement after authentic cf630 failures:
+the frozen16-client profile must explicitly configure bounded benchmark HTTP
+admission, rather than run against the product's default8-per-principal limit.
+Only isolated KeyLoad benchmark resources receive32 data requests per node/tenant/
+principal,32 control requests per node/tenant/principal and2GiB modeled data-byte
+admission. Keep default body/working/control-byte limits, product defaultRF3 and
+all production limits unchanged. Admission is still finite and fail-closed;
+over-capacity tests remain required. This is declared native benchmark configuration,
+not retries or altered workload/ACK/consistency. Every configured bound must be
+verified from the real SDK AdmissionStatusAsync response on each actual member and
+retained as bounded nonsecret cluster observations before timing. Other engine
+budgets and native contracts remain explicit; no fair-resource/winner claim.
+
+Root owns new IsolatedKeyLoadAdmission helper and its resource/model/real-SDK
+regressions, and the existing composition call. Source-only model/real-governor
+tests precede the configuration change. Main270/versioned wire and generated
+corpus remain unchanged. Native counters and all zero-error/fault checks must
+still pass. OwnershipLost is a separate unresolved failure; increasing HTTP
+capacity must not be presented as its repair.
+
+Retain real per-node logs alongside the runner before teardown, bounded by exact
+selected container names, per-resource line/byte caps and a30s owned shutdown.
+Capture only native resource logs, no credentials/environment dumps or test hook.
+Preserve primary errors and independently report capture/cleanup faults. Root
+owns logger/teardown integration; native cells prove the lifecycle and retained
+actual images/topology/admission. Without those facts, no guessed replica failure
+or permissive identity comparison unblocks qualification.
+
+Admission source join is internal to the benchmark slice: one immutable
+IsolatedKeyLoadAdmissionProfile in Comparisons owns the exact finite limits and
+validates actual HTTP status. Add only the AppHost friend assembly, and mark only
+the isolated host-created KeyLoadTarget with an internal init flag. Existing public
+constructor/default/legacy RF3 calls and wire schemas remain unchanged. AppHost
+maps the profile's seven changed fields to explicit native node environment;
+target initialization validates every actual SDK member before seeding and retains
+its bounded admission observations with the actual topology after seeding.
+
+TASK-ISO-016R approved AC-ISO-003/005 repair contract: retain the Aspire resource
+name `primary`, but pass its actual native container endpoint hostname
+`primary.dev.internal` as the closed replication hostname. The bootstrap validates
+that exact value and writes the same value to `replicaof`; native INFO/ROLE identity
+comparison, real copies, AOF and WAITAOF contracts remain strict. gates_audit owns
+only IsolatedRedisResources.cs, IsolatedRedisBootstrap.sh and
+IsolatedResourceTopologyRedisTests.cs. Write the 1/2/3-node regression first, retain
+the primary-without-replica configuration and private directories, then change
+composition/bootstrap. Root reviews all three diffs and joins exact-SHA native
+Redis preflights plus the complete CRUD cohort. Static shell/model checks alone
+do not establish replication readiness or mutation ACK performance. No retries,
+synthetic provider evidence, local runtime/tests, Git writes, changes to validators,
+shared configuration or workload/profile values are delegated.
+
+TASK-ISO-016M-F approved AC-ISO-003/005 repair after actual cf630 native bootstrap
+and identity failures: Mongo classic mongosh script must end with the retained
+bootstrap promise expression; success exits0 only after bootstrap and failure logs
+the existing fixed classification then exits1. Keep the original120s setup bound,
+authentication, member-status and completion barrier. Kurrent node HTTP/replication
+advertise, native gossip seeds and writer connection hosts use one closed
+NativeHost(name)=name+`.dev.internal`, matching actual Aspire container endpoints.
+Resource names/aliases, native membership/count/ACK/all-copy/redirect validators
+and image pins remain unchanged. gates_audit owns only IsolatedMongoInitiate.js,
+IsolatedDocumentResourceMongoTests.cs, IsolatedKurrentSettings.cs,
+IsolatedKurrentResources.cs and IsolatedDocumentResourceKurrentTests.cs. Tests first
+cover the real composition1/2/3 and retained bootstrap source/barriers, then change
+those exact files; root reviews complete diff and authentic GitHub preflight1/2/3
+plus full intensive cohort. Parse/source checks are not native readiness proof.
+No local runtime/tests, provider doubles, validator relaxation, Git writes or
+shared workflow/contracts/docs edits are delegated.
+
+TASK-ISO-016N-F approved AC-ISO-003/005 native Neo4j2026.09.0 response and ownership
+repair: successful QueryAPI v2 responses require exact HTTP202 and structurally
+valid JSON/errors. HTTP202 or400 with nonempty valid native errors returns only
+Neo4j:<validated native code>. Validate every error entry and unique critical
+properties; never retain native error messages/credentials. HTTP400 without valid
+errors, malformed success and other statuses including401/403/5xx fail closed.
+Constraint creation grants cleanup authority only after HTTP202 and strict schema
+acknowledgement: unique data, empty fields/values, queryType s, string-array bookmarks.
+Unknown acknowledgement grants no authority to delete a preowned constraint.
+Measured statements, parameters, deadlines and native image remain unchanged.
+
+build_action_review owns only existing Neo4jTarget.cs; NEW canonical
+Comparisons/Features/BenchmarkComparisons/Neo4jQueryProtocol.cs; existing ComparisonTests
+Neo4jQueryResponse.cs, Neo4jHarnessRegression.cs, Neo4jHarnessProtocolTests.cs,
+Neo4jHarnessConstants.cs and narrowly necessary SchemaFixture.cs call integration.
+Tests first retain native genuine success/error/duplicate/malformed body probes,
+then implement one production validator and delegate the existing test wrapper
+to it. Controlled malformed actual bodies are negative parser inputs, never service
+doubles or invented performance. Retain actual duplicate HTTP status and bounded
+validated code only. Original native failures, foreign fixture retention and both
+zero-sample failed target/runner flows remain strict. Root reviews all diffs and
+joins genuine same-SHA native regression and complete cohort; no local runtime/
+tests, Git writes, shared workflow/doc changes or broad cleanup are delegated.

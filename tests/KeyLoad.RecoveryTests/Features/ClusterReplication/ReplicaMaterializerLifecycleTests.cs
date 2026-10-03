@@ -2,7 +2,7 @@ using KeyLoad.Replication;
 
 namespace KeyLoad.RecoveryTests;
 
-/// <summary>AC-REP-002/004: terminal materializer disposal drains real durable apply and closes synchronization once.</summary>
+/// <summary>AC-REP-002/004/051: terminal materializer disposal drains durable apply while preserving borrowed protocol ownership.</summary>
 internal sealed class ReplicaMaterializerLifecycleTests
 {
     private const int ConcurrentCallers = 8;
@@ -33,12 +33,13 @@ internal sealed class ReplicaMaterializerLifecycleTests
             finally { fixture.Release(); }
             await Task.WhenAll(terminal).WaitAsync(linked.Token);
             await Assert.That(fixture.Database.LastApplied).IsEqualTo(ReplicaMaterializerLifecycleFixture.AppliedCut);
-            await AssertClosedGateAsync(fixture.Materializer);
+            await AssertBorrowedGateAsync(fixture.Materializer, fixture.Log);
             await fixture.AssertReopenedAsync(ReplicaMaterializerLifecycleFixture.AppliedCut);
+            await AssertOwnerClosedGateAsync(fixture.Log);
         });
     }
 
-    /// <summary>Concurrent and repeated normal disposal returns the same successful terminal task and closes the real protocol gate.</summary>
+    /// <summary>Concurrent and repeated normal disposal shares one terminal task without closing the log owner's protocol gate.</summary>
     [Test]
     public async Task ConcurrentAndRepeatedDisposeShareOneSuccessfulTerminalTask()
     {
@@ -57,8 +58,9 @@ internal sealed class ReplicaMaterializerLifecycleTests
             var repeated = fixture.Materializer.DisposeAsync().AsTask();
             await Assert.That(repeated).IsSameReferenceAs(terminal[0]);
             await repeated.WaitAsync(linked.Token);
-            await AssertClosedGateAsync(fixture.Materializer);
+            await AssertBorrowedGateAsync(fixture.Materializer, fixture.Log);
             await fixture.AssertReopenedAsync(EmptyCut);
+            await AssertOwnerClosedGateAsync(fixture.Log);
         });
     }
 
@@ -90,14 +92,24 @@ internal sealed class ReplicaMaterializerLifecycleTests
             await Task.WhenAll(terminal, concurrent).WaitAsync(linked.Token);
             await Assert.That(terminal.IsCompletedSuccessfully).IsTrue();
             await Assert.That(concurrent.IsCompletedSuccessfully).IsTrue();
-            await AssertClosedGateAsync(fixture.Materializer);
+            await AssertBorrowedGateAsync(fixture.Materializer, fixture.Log);
             await fixture.AssertReopenedAsync(ReplicaMaterializerLifecycleFixture.AppliedCut);
+            await AssertOwnerClosedGateAsync(fixture.Log);
         });
     }
 
-    private static async Task AssertClosedGateAsync(ReplicaMaterializer materializer)
+    private static async Task AssertBorrowedGateAsync(ReplicaMaterializer materializer, DurableReplicaLog log)
     {
-        var error = Assert.ThrowsExactly<ObjectDisposedException>(() => materializer.ProtocolGate.Wait(0));
+        await Assert.That(materializer.ProtocolGate).IsSameReferenceAs(log.ProtocolGate);
+        var entered = log.ProtocolGate.Wait(0);
+        try
+        { await Assert.That(entered).IsTrue(); }
+        finally { if (entered) { log.ProtocolGate.Release(); } }
+    }
+
+    private static async Task AssertOwnerClosedGateAsync(DurableReplicaLog log)
+    {
+        var error = Assert.ThrowsExactly<ObjectDisposedException>(() => log.ProtocolGate.Wait(0));
         await Assert.That(error).IsNotNull();
     }
 }

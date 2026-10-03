@@ -191,7 +191,10 @@ jobs:
       - name: Qualify authenticated current-job identity
         run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedGitHubCurrentJobTests/*'
       - name: Qualify exact native topology composition models
-        run: dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/Isolated*Resource*/*'
+        run: |
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/Isolated*Resource*/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKeyLoadAdmissionTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonResourceLogBufferTests/*'
       - name: Qualify time-series workload and aggregation contracts
         run: |
           dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/TimeSeriesWorkloadTests/*'

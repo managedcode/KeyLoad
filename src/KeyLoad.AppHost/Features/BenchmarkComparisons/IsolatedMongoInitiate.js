@@ -65,10 +65,11 @@ async function bootstrap() {
     }
 }
 
-try {
-    await bootstrap();
-} catch {
-    // Native failures are retained as a fixed classification without credential-bearing details.
-    print('MongoNativeBootstrapFailed');
-    quit(1);
-}
+bootstrap().then(
+    () => quit(0),
+    () => {
+        // Native failures are retained as a fixed classification without credential-bearing details.
+        print('MongoNativeBootstrapFailed');
+        quit(1);
+    }
+);

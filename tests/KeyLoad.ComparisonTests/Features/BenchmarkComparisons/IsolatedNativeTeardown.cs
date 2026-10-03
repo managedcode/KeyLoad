@@ -24,6 +24,8 @@ internal static class IsolatedNativeTeardown
         await AttemptAsync(() => capture.StopAsync().WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds)), "logs-close", failures);
         await AttemptAsync(() => capture.WriteToAsync(Path.Combine(evidence, LogFile))
             .WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds)), "logs-retain", failures);
+        await AttemptAsync(() => capture.WriteResourcesToAsync(evidence)
+            .WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds)), "node-logs-retain", failures);
         var stopped = await StopAsync(app, failures);
         await AttemptAsync(() => DisposeAsync(capture), "capture-dispose", failures);
         await AttemptAsync(() => DisposeAsync(app), "app-dispose", failures);

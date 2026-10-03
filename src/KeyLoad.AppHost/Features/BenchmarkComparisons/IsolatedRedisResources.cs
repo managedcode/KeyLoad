@@ -9,6 +9,7 @@ internal static class IsolatedRedisResources
     private const string Version = "8.4.0";
     private const string ImagePrefix = "docker.io/library/redis:";
     private const string Primary = "primary";
+    private const string NativePrimaryHost = "primary.dev.internal";
     private const string PasswordParameter = "redis-password";
     private const string PasswordEnvironment = "KEYLOAD_REDIS_PASSWORD";
     private const string PrimaryEnvironment = "KEYLOAD_REDIS_PRIMARY";
@@ -51,7 +52,7 @@ internal static class IsolatedRedisResources
             }
             else
             {
-                node.WithEnvironment(PrimaryEnvironment, Primary).WaitFor(primary!);
+                node.WithEnvironment(PrimaryEnvironment, NativePrimaryHost).WaitFor(primary!);
                 context.BindSetting(ReplicaSettingPrefix + (index - 1).ToString(CultureInfo.InvariantCulture),
                     node.Resource.ConnectionStringExpression);
             }

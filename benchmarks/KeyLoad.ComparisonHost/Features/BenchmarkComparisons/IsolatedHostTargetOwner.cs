@@ -39,7 +39,8 @@ internal sealed class IsolatedHostTargetOwner : IAsyncDisposable
     private KeyLoadTarget CreateKeyLoad(IsolatedHostSettings settings, IsolatedHostNativeSettings native)
     {
         var clients = CreateClients(native);
-        return new(clients[0], native.AdminKey!, settings.RunId, native.Image, clients, settings.Selection.NodeCount);
+        return new(clients[0], native.AdminKey!, settings.RunId, native.Image, clients, settings.Selection.NodeCount)
+        { RequireIsolatedAdmission = true };
     }
 
     private QdrantTarget CreateQdrant(IsolatedHostSettings settings, IsolatedHostNativeSettings native)

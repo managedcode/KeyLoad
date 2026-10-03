@@ -2164,7 +2164,7 @@
       "independentEvidenceFreshnessBeforePagesDeployment"
     ],
     "pending": [
-      "nativeImageImportAndProviderQualification",
+      "repair12AuthenticPreflightFailuresAndRerunExactSource",
       "realSDKMCPFixedMembershipFaultProofs",
       "exactSHAFullLinuxRequiredGates",
       "actualComplete270CellIntensiveCohort",
@@ -2185,12 +2185,25 @@
       "limits": "Historical all-OS verification passed; RF3 59/60 and comparison failed. This is not an isolated intensive cohort."
     },
     "latestBaseline": {
-      "sourceRevision": "63ac27c37061c17b05813b5b0a3d2dbee7c9087c",
-      "runId": 37082449440,
-      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37082449440",
+      "sourceRevision": "cf630751e0f24e4d8183e55510add9c7207e377f",
+      "runId": 37084177131,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131",
       "conclusion": "failure",
-      "limits": "Actual RF3 job passed; Linux full build failed Receipt IDE0032/IDE0290. Intensive images, preflight and270 cohort did not run. Corrected source and full publication join need exact-SHA GitHub qualification."
+      "limits": "Complete source, recovery, RF3 and immutable image gates pass. Native27 preflights conclude15 job successes and12 failures; full270 intensive cohort and authenticated aggregation are absent. No new site performance publication is qualified."
     },
-    "sourceEvidence": "docs/implementation/isolated-comparison-source-qualification.json"
+    "sourceEvidence": "docs/implementation/isolated-comparison-source-qualification.json",
+    "intensiveTimeSeries": {
+      "status": "native_pinned_image_feasibility_passed_database_family_pending",
+      "adr": "docs/ADR/ADR-059-isolated-intensive-timeseries.md",
+      "plan": "isolated-timeseries.plan.md",
+      "cells": 30,
+      "preflights": 6,
+      "sourceImageProbe": "14_bounded_native_TUnit_source_helpers_and_independent_Linux_workflow",
+      "actualImageProbeRun": 37086903497,
+      "actualImageProbeSource": "890047996b651e76b3fbc6bb87dc941f91c9bd2e",
+      "qualifiedNativeFacts": true,
+      "completeMeasuredFamily": false,
+      "nativeFactsReceipt": "docs/implementation/timeseries-image-qualification-37086903497.json"
+    }
   }
 }

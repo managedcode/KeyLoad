@@ -30,6 +30,7 @@ internal static class IsolatedKeyLoadResources
         context.BindImage(image.Reference);
         for (var index = 0; index < nodes.Length; index++)
         {
+            IsolatedKeyLoadAdmission.Apply(nodes[index]);
             context.BindEndpoint(index, nodes[index], HttpEndpoint);
         }
     }

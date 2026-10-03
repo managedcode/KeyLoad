@@ -441,7 +441,45 @@ classDiagram
 Source stages remain unqualified until exact-SHA real native correctness/fault,
 intensive cohort, aggregate, site and publication gates pass.
 
+[ADR-059](ADR/ADR-059-isolated-intensive-timeseries.md) specifies a separate
+30-cell intensive TimeSeries family using the same canonical BenchmarkComparisons
+slice. KeyLoad and TimescaleDB each have native1/2/3-node preflights and five
+operation scenarios, with common4096 samples, actual persisted sequence order,
+bounded output lifetime and separate latency/validation-inclusive wall throughput.
+Exact target/SQL/provider packets and native pinned-image feasibility precede
+their staged implementation. The historical TimeSeries and270-cell protocols
+remain independent; source, measured results and publication gates stay explicit.
+
+```mermaid
+classDiagram
+    TimeSeriesIntensiveSelection --> TimeSeriesIntensiveWorkload
+    TimeSeriesIntensiveRunner --> ITimeSeriesIntensiveTarget
+    TimeSeriesIntensiveRunner --> TimeSeriesIntensiveOracle
+    ITimeSeriesIntensiveTarget <|.. KeyLoadTimeSeriesIntensiveTarget
+    ITimeSeriesIntensiveTarget <|.. TimescaleTimeSeriesIntensiveTarget
+    TimeSeriesIntensiveRunner --> TimeSeriesIntensiveReport
+```
+
 ## Atomic WAL binary serialization
+
+[ADR-007](ADR/ADR-007-replica-consensus-bootstrap.md) and REQ/AC-REP-051 refine
+ClusterReplication checkpoint publication: one physical DurableReplicaLog owns the
+protocol gate shared by term/suffix planning and metadata publication. Its
+materializer borrows that gate, owns ordered apply and canonical image IO, and
+drains before the log owner closes the gate. Canonical snapshot IO stays outside
+the protocol gate; no storage ownership moves with Orleans activations. Source
+regressions use actual ZoneTree Create/Complete and node lifecycle; repaired-SHA
+native recovery/RF3/intensive qualification remains required.
+
+```mermaid
+classDiagram
+    IDurableReplicaLog <|.. DurableReplicaLog
+    DurableReplicaLog *-- SemaphoreSlim : owns ProtocolGate
+    ReplicaMaterializer --> IDurableReplicaLog : borrows gate
+    ReplicaState --> ReplicaMaterializer : protocol planning
+    ReplicaSnapshotStore --> IDurableReplicaLog : publishes verified metadata
+    ReplicaMaterializer --> ReplicaSnapshotStore : canonical IO under apply ownership
+```
 
 [ADR-057](ADR/ADR-057-orleans-atomic-wal.md) scopes native generated Orleans serialization to StorageRecovery commands.wal payloads. Private stable mutation DTOs and a cached typed serializer join the existing ordered atomic journal; native ZoneTree bytes/Sync WAL, replication journal, checkpoint2 and Orleans routing stay under their existing owners. Identity4 fences old writers; only offline verified checkpoint-only/empty legacy identities1/2/3 may promote. The closed native byte-memory codec writes nullable values as raw byte blocks; complete legacy frame1/2 headers refuse before truncation. Source/GitHub qualification pending.
 

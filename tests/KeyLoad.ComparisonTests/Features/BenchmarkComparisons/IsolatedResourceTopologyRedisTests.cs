@@ -7,10 +7,15 @@ internal sealed class IsolatedResourceTopologyRedisTests
 {
     private const string Target = "Redis";
     private const string Primary = "primary";
+    private const string NativePrimaryHost = "primary.dev.internal";
     private const string SecretEnvironment = "KEYLOAD_REDIS_PASSWORD";
     private const string PrimaryEnvironment = "KEYLOAD_REDIS_PRIMARY";
     private const string Bootstrap = "/bootstrap/isolated-redis.sh";
     private const string ReplicaPrefix = "Benchmarks__Native__ReplicaConnections__";
+    private const string ReplicationGuard = "if [ -n \"${KEYLOAD_REDIS_PRIMARY:-}\" ]; then";
+    private const string ReplicationHostGuard = "[ \"$KEYLOAD_REDIS_PRIMARY\" = primary.dev.internal ] || exit 1";
+    private const string ReplicationConfiguration = "'replicaof primary.dev.internal 6379'";
+    private const string IncorrectReplicationConfiguration = "'replicaof primary 6379'";
 
     /// <summary>AC-ISO-003/005: one native primary and direct replicas, authenticated and persisted independently.</summary>
     [Test]
@@ -65,7 +70,8 @@ internal sealed class IsolatedResourceTopologyRedisTests
         await Assert.That(secret.All(char.IsAsciiHexDigit)).IsTrue();
         var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
         await Assert.That(environment[SecretEnvironment]).IsEqualTo("{" + primary.PasswordParameter!.Name + ".value}");
-        await Assert.That(environment.GetValueOrDefault(PrimaryEnvironment)).IsEqualTo(node == primary ? null : Primary);
+        await Assert.That(environment.ContainsKey(PrimaryEnvironment)).IsEqualTo(node != primary);
+        await Assert.That(environment.GetValueOrDefault(PrimaryEnvironment)).IsEqualTo(node == primary ? null : NativePrimaryHost);
         var waits = node.Annotations.OfType<WaitAnnotation>().Select(wait => wait.Resource.Name);
         await Assert.That(waits).IsEquivalentTo(node == primary ? Array.Empty<string>() : new[] { Primary });
         var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(node);
@@ -74,6 +80,7 @@ internal sealed class IsolatedResourceTopologyRedisTests
         var mount = node.Annotations.OfType<ContainerMountAnnotation>().Single(item => item.Target == Bootstrap);
         await Assert.That(mount.IsReadOnly).IsTrue();
         await Assert.That(File.Exists(mount.Source)).IsTrue();
+        await VerifyBootstrapReplicationAsync(mount.Source!);
         if (!OperatingSystem.IsWindows())
         {
             await Assert.That((File.GetUnixFileMode(mount.Source!) & UnixFileMode.UserExecute) != 0).IsTrue();
@@ -81,5 +88,14 @@ internal sealed class IsolatedResourceTopologyRedisTests
         await Assert.That(node.Annotations.OfType<ContainerNetworkAliasAnnotation>().Single().Alias).IsEqualTo(node.Name);
         await Assert.That(node.Annotations.OfType<ContainerImageAnnotation>().Single().SHA256)
             .IsEqualTo(BenchmarkResources.RedisDigest[7..]);
+    }
+
+    private static async Task VerifyBootstrapReplicationAsync(string path)
+    {
+        var source = await File.ReadAllTextAsync(path, TestContext.Current!.Execution.CancellationToken);
+        await Assert.That(source.Contains(ReplicationGuard, StringComparison.Ordinal)).IsTrue();
+        await Assert.That(source.Contains(ReplicationHostGuard, StringComparison.Ordinal)).IsTrue();
+        await Assert.That(source.Contains(ReplicationConfiguration, StringComparison.Ordinal)).IsTrue();
+        await Assert.That(source.Contains(IncorrectReplicationConfiguration, StringComparison.Ordinal)).IsFalse();
     }
 }

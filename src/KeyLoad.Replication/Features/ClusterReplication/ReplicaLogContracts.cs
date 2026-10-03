@@ -17,6 +17,8 @@ public interface IReplicaTransport
 /// <summary>Persists node-owned election, ordered entries, commit positions and published checkpoints.</summary>
 public interface IDurableReplicaLog : IDisposable
 {
+    /// <summary>Gets the borrowed node-owned gate shared by protocol planning and checkpoint publication; only the drained log owner disposes it.</summary>
+    SemaphoreSlim ProtocolGate { get; }
     /// <summary>Gets the current verified durable metadata.</summary>
     ReplicaHardState State { get; }
     /// <summary>Reads one retained entry without exposing the private storage buffer.</summary>
@@ -43,7 +45,7 @@ public interface IDurableReplicaLog : IDisposable
     /// <summary>Durably advances the committed prefix within the current log.</summary>
     /// <param name="index">Monotonic committed position.</param>
     void Commit(long index);
-    /// <summary>Publishes a verified checkpoint while retaining any matching ordered tail.</summary>
+    /// <summary>Acquires the protocol gate before publishing a verified checkpoint and retaining its matching tail; callers must not already hold that gate.</summary>
     /// <param name="snapshot">Verified canonical image and its exact committed cut.</param>
     void PublishSnapshot(ReplicaSnapshot snapshot);
 }

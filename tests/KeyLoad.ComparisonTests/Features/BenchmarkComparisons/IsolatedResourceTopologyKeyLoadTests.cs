@@ -12,6 +12,9 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
     private const string AdminParameter = "admin-key";
     private const string AdminSetting = "Benchmarks__AdminKey";
     private const string AdminNativeSetting = "KeyLoad__AdminKey";
+    private const string HttpPrefix = "KeyLoad__HttpAdmission__";
+    private const string RequestCount = "32";
+    private const string ReservedBytes = "2147483648";
 
     /// <summary>AC-ISO-003/004: actual fixed voters share authority and retain independent native data.</summary>
     [Test]
@@ -54,6 +57,13 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
         var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
         await Assert.That(environment[BenchmarkSetting]).IsEqualTo("true");
         await Assert.That(environment[AdminNativeSetting]).IsEqualTo("{" + AdminParameter + ".value}");
+        await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxRequests)]).IsEqualTo(RequestCount);
+        await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxTenantRequests)]).IsEqualTo(RequestCount);
+        await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxPrincipalRequests)]).IsEqualTo(RequestCount);
+        await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.ReservedControlRequests)]).IsEqualTo(RequestCount);
+        await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxTenantControlRequests)]).IsEqualTo(RequestCount);
+        await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxPrincipalControlRequests)]).IsEqualTo(RequestCount);
+        await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxReservedBytes)]).IsEqualTo(ReservedBytes);
         var peers = environment.Where(item => item.Key.StartsWith(PeerPrefix, StringComparison.Ordinal)).ToArray();
         await Assert.That(peers.Length).IsEqualTo(count);
         for (var index = 0; index < count; index++)
