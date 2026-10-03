@@ -11,6 +11,7 @@ internal sealed class SiteBenchmarkProducerSelectionTests
     private const string RunIdEnvironment = "GITHUB_RUN_ID";
     private const string RunAttemptEnvironment = "GITHUB_RUN_ATTEMPT";
     private const string BenchmarksWorkflowPath = ".github/workflows/benchmarks.yml";
+    private const string SelectionAttempt = "attempt";
 
     [Test]
     public async Task AcPipe003CapturesTheAuthenticCurrentBenchmarkRunThroughInstrumentedProductionContext()
@@ -51,7 +52,7 @@ internal sealed class SiteBenchmarkProducerSelectionTests
             .GetProperty(SiteIsolatedGitHubTokens.Attempt).GetInt32()).IsEqualTo(attempt);
         await Assert.That(proof.GetProperty(SiteIsolatedGitHubTokens.Source)
             .GetProperty(SiteIsolatedGitHubTokens.Measured).GetString()).IsEqualTo(sourceRevision);
-        await Assert.That(proof.GetProperty(SiteIsolatedGitHubTokens.Workflow)
+        await Assert.That(proof.GetProperty(SiteIsolatedGitHubFields.WorkflowKey)
             .GetProperty(SiteIsolatedGitHubTokens.Path).GetString()).IsEqualTo(BenchmarksWorkflowPath);
     }
 
@@ -66,14 +67,22 @@ internal sealed class SiteBenchmarkProducerSelectionTests
         var attempt = run[SiteIsolatedGitHubTokens.Attempt]!.GetValue<int>();
         var sourceRevision = cohort[SiteIsolatedGitHubTokens.SourceRevision]!.GetValue<string>();
 
-        var selected = await SelectAsync(scope, SiteIsolatedGitHubTokens.Publish, null,
+        var selection = await SelectAsync(scope, SiteIsolatedGitHubTokens.Publish, null,
             new { runId, attempt, sourceRevision }, token);
-        await Assert.That(selected.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsTrue();
-        var evidence = selected.GetProperty(SiteIsolatedGitHubFields.Result);
-        await Assert.That(evidence.GetProperty(SiteIsolatedGitHubTokens.State).GetString())
-            .IsEqualTo(SiteIsolatedGitHubTokens.Selected);
-        await Assert.That(evidence.GetProperty(SiteIsolatedGitHubTokens.RunId).GetInt64()).IsEqualTo(runId);
-        await Assert.That(evidence.GetProperty(SiteIsolatedGitHubTokens.Attempt).GetInt32()).IsEqualTo(attempt);
+        await Assert.That(selection.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsTrue();
+        var selected = selection.GetProperty(SiteIsolatedGitHubFields.Result);
+        await Assert.That(selected.GetProperty(SiteIsolatedGitHubFields.State).GetString())
+            .IsEqualTo(SiteIsolatedGitHubFields.Selected);
+        await Assert.That(selected.GetProperty(SiteIsolatedGitHubSelectionFields.RunId).GetInt64()).IsEqualTo(runId);
+        await Assert.That(selected.GetProperty(SelectionAttempt).GetInt32()).IsEqualTo(attempt);
+
+        var proofEnvelope = await ProveCurrentProducerAsync(scope, runId, attempt, sourceRevision, token);
+        await Assert.That(proofEnvelope.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsTrue();
+        var proof = proofEnvelope.GetProperty(SiteIsolatedGitHubFields.Result);
+        await Assert.That(proof.GetProperty(SiteIsolatedGitHubTokens.Run)
+            .GetProperty(SiteIsolatedGitHubTokens.Id).GetInt64()).IsEqualTo(runId);
+        await Assert.That(proof.GetProperty(SiteIsolatedGitHubTokens.Run)
+            .GetProperty(SiteIsolatedGitHubTokens.Attempt).GetInt32()).IsEqualTo(attempt);
     }
 
     [Test]
@@ -94,8 +103,28 @@ internal sealed class SiteBenchmarkProducerSelectionTests
             new { runId, attempt = attempt + 1, sourceRevision }, token);
         await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Publish, null,
             new { runId, attempt, sourceRevision = SiteIsolatedGitHubTokens.WrongSha }, token);
-        await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Publish, runId.ToString(), tokenTuple, token);
+        await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Publish,
+            runId.ToString(CultureInfo.InvariantCulture), tokenTuple, token);
         await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Validate, null, tokenTuple, token);
+    }
+
+    private static Task<JsonElement> ProveCurrentProducerAsync(SiteIsolatedGitHubScope scope, long runId,
+        int attempt, string sourceRevision, CancellationToken token)
+    {
+        var source = scope.Inputs.Metadata[SiteIsolatedGitHubTokens.Source]!;
+        var arguments = new
+        {
+            input = scope.Capture,
+            mode = SiteIsolatedGitHubTokens.Publish,
+            requestedRun = (string?)null,
+            producer = new { runId, attempt, sourceRevision },
+            source = new
+            {
+                website = source[SiteIsolatedGitHubTokens.Website]!.GetValue<string>(),
+                control = source[SiteIsolatedGitHubTokens.Control]!.GetValue<string>(),
+            },
+        };
+        return SiteIsolatedGitHubScope.RunAsync(SiteIsolatedGitHubFields.ProofOperation, arguments, token);
     }
 
     private static Task<JsonElement> SelectAsync(SiteIsolatedGitHubScope scope, string mode,

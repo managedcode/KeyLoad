@@ -218,6 +218,17 @@ jobs:
               docker push "$reference"
               docker pull "$reference"
               [[ "$(docker image inspect "$reference" --format '{{.Id}}')" == "$expected" ]]
+            elif rg -q 'denied|unauthorized' artifacts/publication/pull.log; then
+              package="${reference#ghcr.io/managedcode/}"
+              package="${package%%:*}"
+              if gh api "orgs/managedcode/packages/container/$package" > artifacts/publication/package.json 2> artifacts/publication/package-error.txt; then
+                printf '%s\n' 'Existing package is unreadable in the registry; refusing to overwrite.' >&2
+                exit 1
+              fi
+              rg -q 'HTTP 404' artifacts/publication/package-error.txt
+              docker push "$reference"
+              docker pull "$reference"
+              [[ "$(docker image inspect "$reference" --format '{{.Id}}')" == "$expected" ]]
             else
               cat artifacts/publication/pull.log >&2
               exit 1

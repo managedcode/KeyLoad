@@ -49,7 +49,7 @@ Reservation is source/run/date bound and retained before expensive work. Its dai
 sequence is at least the actual daily release-run ordinal and exceeds already
 published dated tag counters. A retry validates and reuses its reservation; it
 cannot silently change version/source or steal another run's tag/assets. Publication
-checks successful exact-source CI and all owned hashes, then creates/reuses only
+checks successful latest exact-source CI and all owned hashes, then creates/reuses only
 its own immutable tag/release/image identities. Failed source tests, conflicts,
 missing credentials or incomplete artifacts fail without force or overwrite.
 

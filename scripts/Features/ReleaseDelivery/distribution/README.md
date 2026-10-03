@@ -29,6 +29,6 @@ for data transfer; a volume copy alone is not a consistency-qualified backup.
 
 The `server/KeyLoad.Server` and `cli/KeyLoad.Cli` executables include their .NET
 runtime. The server needs the same RF3 membership and credential settings as the
-Compose file. The CLI exposes its actual commands through `cli/KeyLoad.Cli --help`.
+Compose file. The CLI exposes its actual commands through `cli/KeyLoad.Cli`.
 The standard CI qualifies the real Docker/Aspire RF3 topology through SDK/MCP;
 this packaged Compose deployment has no independent qualification claim.

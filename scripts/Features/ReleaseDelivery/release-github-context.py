@@ -246,7 +246,7 @@ def validate_ci_run(run, workflow_id, source_revision):
     if any(not isinstance(run.get(key), int) or isinstance(run.get(key), bool) or run[key] < 1
            for key in ("id", "run_number", "run_attempt")):
         return False
-    return run.get("status") == "completed" and run.get("conclusion") == "success"
+    return True
 
 
 def ci_jobs(run):
@@ -285,8 +285,10 @@ def ci_receipt(context):
     runs = paginated_items(runs_route, "workflow_runs")
     candidates = [run for run in runs if isinstance(run, dict) and validate_ci_run(run, workflow_id, context["sourceRevision"])]
     if not candidates:
-        fail("No successful completed main CI run exists for the exact release source SHA.")
+        fail("No authenticated main CI run exists for the exact release source SHA.")
     selected = max(candidates, key=lambda item: (item.get("run_number", 0), item.get("id", 0)))
+    if selected.get("status") != "completed" or selected.get("conclusion") != "success":
+        fail("The latest exact-source main CI run must finish successfully before release publication.")
     jobs = ci_jobs(selected)
     html_url = selected.get("html_url")
     if not isinstance(html_url, str) or html_url != f"https://github.com/{REPOSITORY}/actions/runs/{selected['id']}":
