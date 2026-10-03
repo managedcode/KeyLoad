@@ -66,7 +66,8 @@ internal static class TestSuiteApplication
         }
         if (pending.IsCanceled)
         {
-            try { await pending.ConfigureAwait(false); }
+            try
+            { await pending.ConfigureAwait(false); }
             catch (OperationCanceledException exception) { failures.Add(exception); }
         }
     }

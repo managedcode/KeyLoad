@@ -1,3 +1,4 @@
+using KeyLoad.Client;
 using static KeyLoad.UnitTests.Features.EventStreams.AggregateReplayWorkerTestSupport;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
@@ -59,7 +60,8 @@ internal sealed class AggregateReplayWorkerParityTests
         await Assert.That(reducedRecord.RecordedAt).IsEqualTo(original.RecordedAt);
         await Assert.That(reducedRecord.Data).IsEqualTo(original.Data with
         {
-            PayloadJson = "{\"increment\":7}", SchemaVersion = 3
+            PayloadJson = "{\"increment\":7}",
+            SchemaVersion = 3
         });
         await Assert.That(original.Data).IsEqualTo(new EventData("multiversion", EventType,
             "{\"oldValue\":7}", "{\"source\":\"legacy\"}", 1, default, "correlation", "causation"));

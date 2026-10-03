@@ -1,4 +1,5 @@
 using System.Globalization;
+using KeyLoad.CrashHost.Features.Search;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.CrashHost;
@@ -8,6 +9,10 @@ internal static class CrashHostApplication
     internal static async Task RunAsync(string[] args)
     {
         if (await EpochPriorSourceProbe.TryRunAsync(args) || await EpochUpgradeCrashScenario.TryRunAsync(args))
+        {
+            return;
+        }
+        if (await NativeTextCrashScenario.TryRunAsync(args))
         {
             return;
         }
@@ -30,14 +35,14 @@ internal static class CrashHostApplication
 
     private static Task RunScenarioAsync(string directory, ZoneTreeStore store,
         CanonicalCrashBoundary boundary, string mode) => mode switch
-    {
-        CrashFixtureValues.ProjectionMode => ProjectionCrashScenario.RunAsync(directory, store, boundary),
-        CrashFixtureValues.SubscriptionMode => SubscriptionCrashScenario.RunAsync(directory, store, boundary),
-        DatabaseCompositionCrashScenario.Mode => DatabaseCompositionCrashScenario.RunAsync(directory, store, boundary),
-        AggregateReplayCrashScenario.Mode => AggregateReplayCrashScenario.RunAsync(directory, store, boundary),
-        SampleRetentionCrashScenario.Mode => SampleRetentionCrashScenario.RunAsync(directory, store, boundary),
-        _ => RunCanonicalAsync(directory, store, boundary, mode)
-    };
+        {
+            CrashFixtureValues.ProjectionMode => ProjectionCrashScenario.RunAsync(directory, store, boundary),
+            CrashFixtureValues.SubscriptionMode => SubscriptionCrashScenario.RunAsync(directory, store, boundary),
+            DatabaseCompositionCrashScenario.Mode => DatabaseCompositionCrashScenario.RunAsync(directory, store, boundary),
+            AggregateReplayCrashScenario.Mode => AggregateReplayCrashScenario.RunAsync(directory, store, boundary),
+            SampleRetentionCrashScenario.Mode => SampleRetentionCrashScenario.RunAsync(directory, store, boundary),
+            _ => RunCanonicalAsync(directory, store, boundary, mode)
+        };
 
     private static async Task RunCanonicalAsync(string directory, ZoneTreeStore store,
         CanonicalCrashBoundary boundary, string mode)

@@ -28,11 +28,11 @@ internal sealed class EpochStoragePreservationTests
             var oldSnapshotPath = fixture.Snapshot + ".checkpoint3";
             await File.WriteAllBytesAsync(oldSnapshotPath,
                 EpochStorageFixture.CreateCurrentCheckpointAsLegacy(await File.ReadAllBytesAsync(fixture.Snapshot)));
-            var beforeOldInstall = await fixture.CaptureAsync(fixture.Source);
+            var beforeOldInstall = await EpochStorageFixture.CaptureAsync(fixture.Source);
             var oldInstall = Assert.ThrowsExactly<KeyLoadException>(() =>
                 store.InstallSnapshot(oldSnapshotPath, snapshot.AppliedPosition));
             await Assert.That(oldInstall.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-            await fixture.AssertUnchangedAsync(fixture.Source, beforeOldInstall);
+            await EpochStorageFixture.AssertUnchangedAsync(fixture.Source, beforeOldInstall);
 
             store.Compact();
             await AssertEpoch6Async(store.Identity);

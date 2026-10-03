@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 
@@ -26,7 +25,7 @@ internal sealed class AggregateReplayAuthorityTests
     public async Task AcEvent009RequiresPersistedEventsReplayAndEventsReadCapabilities()
     {
         using var fixture = new AggregateReplayFixture();
-        fixture.Append(new(AuthEventId, AggregateReplayFixture.EventType, "{}"));
+        fixture.Append(new EventData(AuthEventId, AggregateReplayFixture.EventType, "{}"));
         fixture.ConfigurePrincipal(NoReplayPrincipal, Capability.EventsRead, []);
         fixture.ConfigurePrincipal(NoEventsPrincipal, Capability.EventsReplay, []);
 
@@ -61,7 +60,7 @@ internal sealed class AggregateReplayAuthorityTests
     public async Task AcEvent009RequiresRawReadAndUseEvenWhenPolicyIsNotRequiredForProcessing()
     {
         using var fixture = new AggregateReplayFixture(protectedFields: true);
-        fixture.Append(new(PrivateEventId, AggregateReplayFixture.EventType,
+        fixture.Append(new EventData(PrivateEventId, AggregateReplayFixture.EventType,
             Payload(SecretPayload), Headers(SecretHeader)));
         fixture.StoreSnapshot(1);
         fixture.ConfigurePrincipal(NoRawUsePrincipal,
@@ -106,7 +105,7 @@ internal sealed class AggregateReplayAuthorityTests
     public async Task AcEvent009RevocationReauthorizesReplayAndDurableSnapshotRetry()
     {
         using var fixture = ProtectedFixture();
-        fixture.Append(new(PrivateEventId, AggregateReplayFixture.EventType,
+        fixture.Append(new EventData(PrivateEventId, AggregateReplayFixture.EventType,
             Payload(SecretPayload), Headers(SecretHeader)));
         _ = fixture.Read(maximumEvents: 1);
         fixture.StoreSnapshot(1, commandId: Guid.Parse(RetryCommandId));
@@ -128,7 +127,7 @@ internal sealed class AggregateReplayAuthorityTests
     public async Task AcEvent009AuthorizedWorkerReceivesExactRawSnapshotEventAndHeaders()
     {
         using var fixture = new AggregateReplayFixture(protectedFields: true);
-        fixture.Append(new(PrivateEventId, AggregateReplayFixture.EventType,
+        fixture.Append(new EventData(PrivateEventId, AggregateReplayFixture.EventType,
             Payload(SecretPayload), Headers(SecretHeader)));
         fixture.StoreSnapshot(0);
 
@@ -148,7 +147,7 @@ internal sealed class AggregateReplayAuthorityTests
     private static AggregateReplayFixture ProtectedFixture()
     {
         var fixture = new AggregateReplayFixture(protectedFields: true);
-        fixture.Append(new(PrivateEventId, AggregateReplayFixture.EventType,
+        fixture.Append(new EventData(PrivateEventId, AggregateReplayFixture.EventType,
             Payload(SecretPayload), Headers(SecretHeader)));
         fixture.StoreSnapshot(0);
         return fixture;

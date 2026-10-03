@@ -1,0 +1,333 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-03",
+  "recordedAt": "2026-10-03T21:18:00.829913+00:00",
+  "purpose": "local_development_only_native_full_text_projection_correctness_and_process_recovery",
+  "source": {
+    "baseHead": "0b4572d05457d5546d6e2c45f064828fd5c8fc94",
+    "workingTree": "dirty_frozen_stage_after_full_Release_build10",
+    "actualSourceSnapshot": {
+      "path": "artifacts/qualification/native-text-build10-development-source.json",
+      "bytes": 417821,
+      "sha256": "f55196953c1a62751ab7ce785b3037e3d7f58a0f1400bf551dd862a2fed9e50d"
+    },
+    "sourceFileCount": 1936,
+    "sourceDriftAtReceipt": [],
+    "testedBinaries": [
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Abstractions.dll",
+        "bytes": 989184,
+        "sha256": "fb45e036939a4e5a1d69ccebd729861673d96c25689da202f32de5eb081098e1"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Artifacts.dll",
+        "bytes": 18432,
+        "sha256": "38765cabc3c16a56e8d8e3c28d39cac2c26544ddf2da4dbf9619322cd1797642"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.BenchmarkScenarios.dll",
+        "bytes": 80384,
+        "sha256": "93e30ce7344d04aa393e2b0cdb9b225a26ea21a42dfac9140f32168d1833925f"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Client.dll",
+        "bytes": 57856,
+        "sha256": "dbeb0a5f877c31179a373c17b59df947ac346e40452160b79e8ad70e1362c98c"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.ComparisonHost.dll",
+        "bytes": 93696,
+        "sha256": "c717739732d485500e7255254a799af7740a02d0569e10b20f4950401eb3a9e4"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Comparisons.dll",
+        "bytes": 1069056,
+        "sha256": "08477eac6fa31bbfbd189057c9df6756e616037464084f1f5e7e9a628186122f"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Core.dll",
+        "bytes": 465920,
+        "sha256": "7d3cfd28971eeba055754e4a1d7baacb6ccb5e4ed533d3c4fce1a867d6370ba4"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.CrashHost.dll",
+        "bytes": 131072,
+        "sha256": "6c1f1a972e6989140f7c4e8f19c36adb89de4386c0205f2da335c59a0e7e53db"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Diagnostics.dll",
+        "bytes": 14336,
+        "sha256": "bad901ce01e51d64e2a867563c61ae670ede625f89db586197baf1a1574efad8"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Orleans.dll",
+        "bytes": 254976,
+        "sha256": "ed7eed87e7c2b194164845fc7b8fd245e53b6d4f0ca0d28c67d3a422a3acf79a"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Query.dll",
+        "bytes": 109056,
+        "sha256": "88532cd10b3318062856cbd939ce3abab09c8d2351a6b19e07650c18f5ab8876"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Replication.dll",
+        "bytes": 223232,
+        "sha256": "c46dc503cef87b40eae3ecec9a46834f213d853edaa0edfd8ecbd787c15863e9"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Security.dll",
+        "bytes": 12288,
+        "sha256": "9d15d2206fd7b805c353859938b7efd61d88471c64675e9316f32807609c6aa8"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Server.dll",
+        "bytes": 517632,
+        "sha256": "12c289cd9a7cd20645e2fb20aa0f585c3f5e00f2af35cd76a4c8782ac6f6aa3c"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.ServiceDefaults.dll",
+        "bytes": 15872,
+        "sha256": "fd7ce90f1901cb4f94db6a8c67ec981993a356b42c0c8c27f0a47b40ff098852"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Storage.ZoneTree.dll",
+        "bytes": 158208,
+        "sha256": "05f0ba1d40f43af932d6bd4479c3c1f1a09d71e345f9e3f86bf4611a867aa6b7"
+      },
+      {
+        "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+        "bytes": 8456192,
+        "sha256": "4eb092b39326cf01b6bd53fa0b2bfb1e8ff7e50044202e83bd38d90fd234bab8"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.Abstractions.dll",
+        "bytes": 989184,
+        "sha256": "fb45e036939a4e5a1d69ccebd729861673d96c25689da202f32de5eb081098e1"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.Core.dll",
+        "bytes": 465920,
+        "sha256": "7d3cfd28971eeba055754e4a1d7baacb6ccb5e4ed533d3c4fce1a867d6370ba4"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.CrashHost.dll",
+        "bytes": 131072,
+        "sha256": "6c1f1a972e6989140f7c4e8f19c36adb89de4386c0205f2da335c59a0e7e53db"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.Diagnostics.dll",
+        "bytes": 14336,
+        "sha256": "bad901ce01e51d64e2a867563c61ae670ede625f89db586197baf1a1574efad8"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.Orleans.dll",
+        "bytes": 254976,
+        "sha256": "ed7eed87e7c2b194164845fc7b8fd245e53b6d4f0ca0d28c67d3a422a3acf79a"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.Query.dll",
+        "bytes": 109056,
+        "sha256": "88532cd10b3318062856cbd939ce3abab09c8d2351a6b19e07650c18f5ab8876"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.RecoveryTests.dll",
+        "bytes": 803328,
+        "sha256": "21841996c621e73bcaeafda7d73d4aea990e40c97aeb249e3f95e2d964cfcf19"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.Replication.dll",
+        "bytes": 223232,
+        "sha256": "c46dc503cef87b40eae3ecec9a46834f213d853edaa0edfd8ecbd787c15863e9"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.Security.dll",
+        "bytes": 12288,
+        "sha256": "9d15d2206fd7b805c353859938b7efd61d88471c64675e9316f32807609c6aa8"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.Server.dll",
+        "bytes": 517632,
+        "sha256": "12c289cd9a7cd20645e2fb20aa0f585c3f5e00f2af35cd76a4c8782ac6f6aa3c"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.ServiceDefaults.dll",
+        "bytes": 15872,
+        "sha256": "fd7ce90f1901cb4f94db6a8c67ec981993a356b42c0c8c27f0a47b40ff098852"
+      },
+      {
+        "path": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.Storage.ZoneTree.dll",
+        "bytes": 158208,
+        "sha256": "05f0ba1d40f43af932d6bd4479c3c1f1a09d71e345f9e3f86bf4611a867aa6b7"
+      }
+    ],
+    "limitation": "dirty stage evidence bound to actual source and binaries, not a delivered-source GitHub qualification"
+  },
+  "configuration": {
+    "AspireCli": "13.5.4",
+    "AspireHosting": "13.6.0",
+    "machine": "konstantins-macbook-pro",
+    "operatingSystem": "macOS 27.0.1",
+    "runtime": ".NET 10.0.12",
+    "TUnit": "1.72.10.0",
+    "topology": "unit and genuine child-process recovery runners composed by Aspire; no RF3 claim for these suites"
+  },
+  "provider": {
+    "name": "ZoneTree.FullTextSearch",
+    "version": "1.0.9",
+    "releaseSource": "c0993e2c65186708f3b087741082545bf49224fd",
+    "packageSha256": "7ea1fbb7aba0ad00391d78d2f414166b500335f5b1affe43c305d861b55719ff",
+    "ZoneTreeVersion": "1.9.8",
+    "optionalMutableCompositeBloomBitsPerItem": 0,
+    "nativeRepositorySignatureDevelopmentVerification": {
+      "entry": "dotnet nuget verify /Users/ksemenenko/.nuget/packages/zonetree.fulltextsearch/1.0.9/zonetree.fulltextsearch.1.0.9.nupkg --all",
+      "exitCode": 0,
+      "originalLog": {
+        "path": "/private/tmp/keyload-104-fts-package-verification-host.log",
+        "bytes": 430,
+        "sha256": "bec8ae8f510e57fdceba380d8acd9b88a6e6502982731158aab4af025c1d3922"
+      },
+      "LinuxQualificationPending": true
+    }
+  },
+  "checks": {
+    "fullReleaseBuild": {
+      "entry": "dotnet build KeyLoad.slnx --no-restore --configuration Release --disable-build-servers -m:1 -nodeReuse:false",
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "projectCount": 26,
+      "originalLog": {
+        "path": "/private/tmp/keyload-104-fts-build10.log",
+        "bytes": 3418,
+        "sha256": "ba2abdfc36f3ff1f0191a37680984bb12221719933b48e2df09331203095bd22"
+      }
+    },
+    "fullFormatter": {
+      "entry": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+      "exitCode": 0,
+      "originalLog": {
+        "path": "/private/tmp/keyload-104-fts-format3.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "governance": {
+      "entry": "node scripts/Features/RepositoryGovernance/verify.mjs",
+      "exitCode": 0,
+      "projects": 26,
+      "modules": 4,
+      "scope": "static policy and inventory validation"
+    }
+  },
+  "nativeUnit": {
+    "entry": "dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -p:AspireCliPath=/opt/homebrew/bin/aspire -- --KeyLoadTests:Suite=unit --KeyLoadTests:Filter=/*/*/NativeText*/* --KeyLoadTests:ReportTrx=true --KeyLoadTests:ResultsDirectory=TestResults/owner-wave-001/native-text-unit2",
+    "exitCode": 0,
+    "timestamp": "03 Oct 2026, 21:15:59 UTC",
+    "summary": {
+      "total": 26,
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "originalArtifacts": [
+      {
+        "path": "TestResults/owner-wave-001/native-text-unit2/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 80113,
+        "sha256": "54298907cca307233ef920679a987a025c4ff1d97d0bdb02701ae282f0de0165"
+      },
+      {
+        "path": "TestResults/owner-wave-001/native-text-unit2/KeyLoad.UnitTests-macos-net10.0-report.html",
+        "bytes": 157931,
+        "sha256": "124ab76d3169d4307999cfdb332ea7aff269d833110e2f2afae1be4ac5d2439f"
+      }
+    ]
+  },
+  "realProcessRecovery": {
+    "entry": "dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -p:AspireCliPath=/opt/homebrew/bin/aspire -- --KeyLoadTests:Suite=recovery --KeyLoadTests:Filter=/*/*/NativeText*/* --KeyLoadTests:ReportTrx=true --KeyLoadTests:ResultsDirectory=TestResults/owner-wave-001/native-text-recovery3",
+    "exitCode": 0,
+    "timestamp": "03 Oct 2026, 21:16:36 UTC",
+    "summary": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "originalArtifacts": [
+      {
+        "path": "TestResults/owner-wave-001/native-text-recovery3/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+        "bytes": 32801,
+        "sha256": "b1bf65d9b1e659a192dab75dca82ed1ddf0b2cddc03327768b86802524d84329"
+      },
+      {
+        "path": "TestResults/owner-wave-001/native-text-recovery3/KeyLoad.RecoveryTests-macos-net10.0-report.html",
+        "bytes": 152875,
+        "sha256": "22dc00112618ae27d40b05ed39cd84ed162e059bbf867df148c770c0f605517f"
+      }
+    ]
+  },
+  "failedDevelopmentAttempts": [
+    {
+      "originalReport": {
+        "path": "TestResults/owner-wave-001/native-text-unit1/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 114812,
+        "sha256": "6d8d983d6b4669ccad200f7a0c238bf3c206e79e3e70f139bbc9ec3029c3c2df"
+      },
+      "summary": {
+        "total": 23,
+        "passed": 19,
+        "failed": 4,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "qualified": false
+    },
+    {
+      "originalReport": {
+        "path": "TestResults/owner-wave-001/native-text-recovery1/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+        "bytes": 181485,
+        "sha256": "b7ea9e1970f6a8f53f358f9cf40192a30380ab323454727fcfe6ab4b0c7d3899"
+      },
+      "summary": {
+        "total": 10,
+        "passed": 0,
+        "failed": 10,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "qualified": false
+    }
+  ],
+  "verifiedDevelopmentContracts": [
+    "real native cached reopening and nullable supplied/absent backup semantics",
+    "exact Unicode/collision/score/tie/RRF parity on canonical authorized corpus",
+    "row/field grants, redaction, policy epoch and revoked identity semantics",
+    "posting/metadata/count/disk/path/depth/admission/cancellation bounds",
+    "closed ownership ledger, unknown/malformed/link preservation and failed-settlement identities",
+    "five actual publication fault points on first and replacement builds, complete bounded logical key/value digest and authority preservation"
+  ],
+  "qualification": {
+    "githubQualified": false,
+    "DockerRf3Qualified": false,
+    "fullUnitSuiteQualified": false,
+    "powerLossQualified": false,
+    "enduranceQualified": false,
+    "accelerationClaim": false,
+    "completedKlTasks": 0,
+    "remaining": [
+      "exact delivered-source Linux build, normal/scalar/analyzer/full recovery suites and pinned package signature",
+      "actual Aspire Docker RF3 SDK and official MCP text/hybrid, authorization and inspected leader recovery",
+      "KL-029 durable incremental replay/freshness requirements and separate KL-039 online index-management and KL-097 event lineage",
+      "measured matched scale/resource/fault/endurance gates; no speed or production claim"
+    ]
+  }
+}

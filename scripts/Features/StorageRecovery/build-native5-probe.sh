@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly prior_revision=2532f781fec8f2546a033c396a7dbce0e9b4b781
+readonly prior_revision=7784b6b46b98ce994dd98070dc1f58fe4e506b91
+readonly prior_tree=b03bf1301a03b3fe00f419c3c7bf5285a34b63f9
 readonly repository=$(git rev-parse --show-toplevel)
 readonly destination="$repository/artifacts/native5-probe"
 readonly driver=tests/KeyLoad.CrashHost/Features/StorageRecovery/EpochPriorSourceProbe.cs
@@ -10,6 +11,7 @@ readonly project=tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj
 
 [[ ! -e "$destination" && ! -L "$destination" ]]
 git cat-file -e "$prior_revision^{commit}"
+[[ "$(git rev-parse "$prior_revision^{tree}")" == "$prior_tree" ]]
 readonly temporary=$(mktemp -d "${TMPDIR:-/tmp}/keyload-native5-source.XXXXXX")
 trap 'rm -rf -- "$temporary"' EXIT
 mkdir "$temporary/source"

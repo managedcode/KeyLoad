@@ -30,8 +30,12 @@ internal sealed class SampleRetentionRf3Tests(ClusterFixture fixture)
         await AssertStatusAsync(reader, mcp, scenario, new(cutoff, 1, true), deadline.Token);
         await AssertSurvivorsAsync(reader, mcp, scenario, deadline.Token);
 
-        var next = command with { CommandId = Guid.NewGuid(), Mutations =
-            [new ExpireSamples(TimeSeriesRf3Scenario.Set, TimeSeriesRf3Scenario.Series, cutoff, 2)] };
+        var next = command with
+        {
+            CommandId = Guid.NewGuid(),
+            Mutations =
+            [new ExpireSamples(TimeSeriesRf3Scenario.Set, TimeSeriesRf3Scenario.Series, cutoff, 2)]
+        };
         await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync(McpCallerTools.DocumentsCommit, next, deadline.Token));
         await AssertStatusAsync(reader, mcp, scenario, new(cutoff, 3, false), deadline.Token);

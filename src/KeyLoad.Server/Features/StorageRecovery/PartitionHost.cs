@@ -1,6 +1,8 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Query.Features.Search;
 using KeyLoad.Replication;
+using KeyLoad.Server.Features.Search;
 
 namespace KeyLoad.Server;
 
@@ -32,6 +34,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         stores = new(options, DirectoryPath);
         ReplicaMaterializer? applying = null;
         DurableReplicaLog? openedLog = null;
+        ITextProjection? openedText = null;
         try
         {
             Database = new(stores.Canonical, authorization);
@@ -40,6 +43,8 @@ internal sealed class PartitionHost : IAsyncDisposable
             snapshots.Recover();
             new BlobStorageOperations(Database).NormalizeRestoredStore();
             BootstrapFreshNode(options);
+            TextProjection = openedText = new NativeTextProjection(Path.Combine(DirectoryPath, "search-indexes"),
+                Database.Limits, Database.Store.Identity.NodeId);
             Materializer = applying = new(Database, log, snapshots);
             Consensus = new(Materializer, Configuration, clock, logger);
             Coordinator = new(Consensus, Database, admission, clock);
@@ -49,6 +54,8 @@ internal sealed class PartitionHost : IAsyncDisposable
             var failures = new List<Exception> { error };
             if (applying is not null)
             { ServerFailureObserver.Observe(() => applying.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+            if (openedText is not null)
+            { ServerFailureObserver.Observe(openedText.Dispose, failures); }
             if (openedLog is not null)
             { ServerFailureObserver.Observe(() => openedLog.Dispose(), failures); }
             ServerFailureObserver.Observe(() => stores.Dispose(), failures);
@@ -64,6 +71,8 @@ internal sealed class PartitionHost : IAsyncDisposable
     public ReplicaConfiguration Configuration { get; }
     /// <summary>Borrowed canonical engine; only this host disposes its underlying store.</summary>
     public DatabaseEngine Database { get; }
+    /// <summary>Borrowed derived text projection; physical ownership remains in this host.</summary>
+    public ITextProjection TextProjection { get; }
     /// <summary>Node-owned ordered apply and checkpoint fencing.</summary>
     public ReplicaMaterializer Materializer { get; }
     /// <summary>Node-owned protocol endpoint attached by the Orleans Grain Service.</summary>
@@ -104,6 +113,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         await ServerFailureObserver.ObserveAsync(() => applying, failures).ConfigureAwait(false);
         var closingLog = CloseLogAsync(applying);
         await ServerFailureObserver.ObserveAsync(() => closingLog, failures).ConfigureAwait(false);
+        ServerFailureObserver.Observe(TextProjection.Dispose, failures);
         var closingStores = CloseStoresAsync(closingLog);
         await ServerFailureObserver.ObserveAsync(() => closingStores, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

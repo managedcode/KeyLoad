@@ -24,6 +24,23 @@ N/A: the disposable index is reconstructed from unchanged committed epoch6 data.
 
 TASK-FTS-QUERY / NATIVE / TEST depend on root frozen contracts and the completed
 epoch source build. Root owns integration, validation, receipts and commits.
+TASK-FTS-LIFETIME-REPAIR / SETTLEMENT-TEST / CANONICAL-ORACLE map to AC-FTS-003/004:
+retain failed-release handles, retain both cancellation and cleanup failures, and
+compare all canonical logical key/value state across the real process cuts.
+
+```mermaid
+flowchart TD
+    Scope[Persisted policy and committed source cut] --> Build[Bounded native generation]
+    Build --> Check[Exact canonical candidates and ranks]
+    Check --> Publish[Closed verified manifest]
+    Publish --> Lease[Borrowed node-local lease]
+    Lease --> Settle[Close handles and refresh inventory]
+    Settle --> Reuse[Validated matching scope]
+    Build --> Crash[Real process interruption]
+    Crash --> Recover[Preserve complete canonical logical state]
+    Recover --> Build
+```
+
 Positive/negative/edge/error cases are the table and ADR; tests use genuine
 ZoneTree/native FTS, persisted policy and real client operations. Source-present
 work is not acceptance evidence; every qualification gate remains open until its

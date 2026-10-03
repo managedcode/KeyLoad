@@ -33,7 +33,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(administration);
         services.AddSingleton<QueryEngine>();
-        services.AddSingleton<SearchEngine>();
+        services.AddSingleton(_ => new SearchEngine(partition.Database, partition.TextProjection));
         services.AddSingleton<GrainRequestCodec>();
         services.AddSingleton<ReplicaSiloDiscoveryState>();
         services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(partition.Configuration, peers,

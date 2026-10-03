@@ -4,6 +4,8 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.CrashHost" />
+    <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
     <ProjectReference Include="../KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../KeyLoad.Orleans/KeyLoad.Orleans.csproj" />
     <ProjectReference Include="../KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
@@ -11,5 +13,7 @@
     <ProjectReference Include="../KeyLoad.ServiceDefaults/KeyLoad.ServiceDefaults.csproj" />
     <PackageReference Include="ManagedCode.Communication.AspNetCore" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" />
+    <PackageReference Include="Microsoft.Orleans.Sdk" PrivateAssets="all" />
+    <PackageReference Include="ZoneTree.FullTextSearch" />
   </ItemGroup>
 </Project>

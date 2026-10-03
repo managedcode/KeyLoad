@@ -894,12 +894,20 @@
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-078-native-full-text-projection.md",
-      "docs/Features/Search/NativeFullTextProjection.md"
+      "docs/Features/Search/NativeFullTextProjection.md",
+      "docs/implementation/native-full-text-development-2026-10-03.json"
     ],
     "qualification": {
-      "source": "frozen_native_candidate_generation_contract_implementation_pending",
+      "source": "native_provider_generation_join_reviewed_and_development_verified",
       "runtimeQualified": false,
-      "remaining": "native source, exact oracle, process/RF3 and Linux original artifacts; no acceleration claim"
+      "localDevelopment": {
+        "nativeUnit": "26/26",
+        "realProcessRecovery": "10/10",
+        "fullReleaseBuild": "0 warnings, 0 errors",
+        "fullFormatter": "passed",
+        "governance": "passed"
+      },
+      "remaining": "exact-source Linux full-suite, package and Docker RF3 SDK/MCP gates; incremental replay/freshness and measured resource gates; no acceleration claim"
     }
   },
   "KL-030": {

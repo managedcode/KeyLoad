@@ -1,6 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Security;
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
@@ -38,8 +39,8 @@ internal sealed class AggregateReplayFixture : IDisposable
     private const string EventSpace = "event";
     private const string EventIdentitySpace = "event-id";
     private readonly string directory;
-    private ZoneTreeStore store = null!;
-    private DatabaseEngine database = null!;
+    private ZoneTreeStore store { get; set; } = null!;
+    private DatabaseEngine database { get; set; } = null!;
 
     internal PartitionRef Partition { get; } = new(TenantId, DatabaseId, DomainId, PartitionKey);
     internal DatabaseEngine Database => database;
@@ -51,13 +52,13 @@ internal sealed class AggregateReplayFixture : IDisposable
         directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (Directory.Exists(directory))
         {
-            throw new ArgumentException(FreshDirectoryMessage, nameof(directory));
+            throw new InvalidOperationException(FreshDirectoryMessage);
         }
         try
         {
             Open(limits, timeProvider);
             database.Bootstrap(new(RootId, SystemTenant, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-                { ClusterAdministrator = true }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
+            { ClusterAdministrator = true }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
             ConfigureResource(protectedFields);
             ConfigurePrincipal(WorkerId, Capability.EventsReplay | Capability.EventsRead | Capability.EventsSnapshotsManage,
                 protectedFields ? [PayloadReadGrant, PayloadUseGrant, HeaderReadGrant, HeaderUseGrant] : []);

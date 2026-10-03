@@ -73,12 +73,12 @@ public static class ZoneTreeFormatUpgrade
 
     private static ZoneTreeStoreOptions TargetOptions(ZoneTreeStoreOptions options, string directory,
         StoreIdentity sourceIdentity) => options with
-    {
-        Directory = directory,
-        Incarnation = sourceIdentity.Incarnation,
-        SigningKey = sourceIdentity.SigningKey,
-        EmbeddedPointCache = null
-    };
+        {
+            Directory = directory,
+            Incarnation = sourceIdentity.Incarnation,
+            SigningKey = sourceIdentity.SigningKey,
+            EmbeddedPointCache = null
+        };
 
     private static void ValidateOptions(ZoneTreeStoreOptions options)
     {

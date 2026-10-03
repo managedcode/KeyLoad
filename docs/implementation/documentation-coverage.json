@@ -8862,8 +8862,11 @@
           "root_process_and_Docker_RF3_SDK_MCP",
           "exact_source_Linux_original_artifacts"
         ],
-        "state": "contract_frozen_source_pending",
-        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance"
+        "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
+        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-FTS-NATIVE",
@@ -8906,8 +8909,11 @@
           "root_process_and_Docker_RF3_SDK_MCP",
           "exact_source_Linux_original_artifacts"
         ],
-        "state": "contract_frozen_source_pending",
-        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance"
+        "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
+        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-FTS-TEST",
@@ -8950,8 +8956,11 @@
           "root_process_and_Docker_RF3_SDK_MCP",
           "exact_source_Linux_original_artifacts"
         ],
-        "state": "source_authored_frozen_root_review_build_and_Aspire_runtime_pending",
-        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance"
+        "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
+        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-FTS-JOIN",
@@ -8995,8 +9004,11 @@
           "root_process_and_Docker_RF3_SDK_MCP",
           "exact_source_Linux_original_artifacts"
         ],
-        "state": "contract_frozen_source_pending",
-        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance"
+        "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
+        "joinCondition": "root_inspects_each_diff_and_mapped_acceptance",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-FTS-RECOVERY",
@@ -9033,14 +9045,292 @@
           "Aspire_TUnit_real_process",
           "genuine_exact_source_Linux_original_artifacts"
         ],
-        "state": "frozen_source_pending",
-        "joinCondition": "root_diff_review_full_resource_ownership_and_original_process_gates"
+        "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
+        "joinCondition": "root_diff_review_full_resource_ownership_and_original_process_gates",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
+      },
+      {
+        "id": "TASK-FTS-RF3",
+        "owner": "query_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "new_IntegrationTests_Features_Search_NativeTextRf3_files_only",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-001",
+          "REQ-FTS-002",
+          "REQ-FTS-005"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-001",
+          "AC-FTS-002",
+          "AC-FTS-005"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-NATIVE",
+          "TASK-FTS-CONTRACT"
+        ],
+        "startCondition": "root_frozen_public_RF3_parity_privacy_and_leader_recovery_contract",
+        "artifacts": [
+          "genuine_RF3_SDK_official_MCP_text_hybrid_authorization_and_leader_restart_cases"
+        ],
+        "verification": [
+          "strict_Release_build",
+          "formatter",
+          "Aspire_Docker_RF3_SDK_MCP",
+          "genuine_exact_source_Linux_original_artifacts"
+        ],
+        "state": "source_reviewed_full_build_formatter_passed_actual_Linux_Docker_RF3_runtime_pending",
+        "joinCondition": "root_diff_review_and_complete_original_real_cluster_gates",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
+      },
+      {
+        "id": "TASK-FTS-OWNERSHIP-TEST",
+        "owner": "cluster_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "new_UnitTests_Features_Search_NativeTextProjectionOwnershipTests_only",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-003",
+          "REQ-FTS-004"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-003",
+          "AC-FTS-004"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-CONTRACT",
+          "TASK-FTS-NATIVE"
+        ],
+        "startCondition": "frozen_ledger_inventory_and_preserving_preflight_contract",
+        "artifacts": [
+          "real_native_untracked_layout_pending_corruption_and_root_preflight_preservation_tests"
+        ],
+        "verification": [
+          "root_strict_Release_build",
+          "root_Aspire_TUnit",
+          "exact_source_Linux_original_artifacts"
+        ],
+        "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
+        "joinCondition": "root_diff_review_exact_failures_and_preserved_owned_unknown_files",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
+      },
+      {
+        "id": "TASK-FTS-LIFETIME-REPAIR",
+        "owner": "lifecycle_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "Server_NativeTextProjection_Generation_ProjectionLease_Settlement_only",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-003",
+          "REQ-FTS-004"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-003",
+          "AC-FTS-004"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-CONTRACT",
+          "TASK-FTS-NATIVE"
+        ],
+        "startCondition": "root_frozen_contract_disjoint_source_and_test_scopes",
+        "artifacts": [
+          "retained_failed_release_handle_and_preserved_cancellation_cleanup_identities"
+        ],
+        "verification": [
+          "root_strict_Release_build",
+          "root_Aspire_TUnit_real_native_and_process",
+          "exact_source_Linux_original_artifacts"
+        ],
+        "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
+        "joinCondition": "root_diff_review_mapped_acceptance_and_actual_original_runtime_artifacts",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
+      },
+      {
+        "id": "TASK-FTS-SETTLEMENT-TEST",
+        "owner": "query_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "new_UnitTests_Search_NativeTextProjectionSettlementTests_only",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-003",
+          "REQ-FTS-004"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-003",
+          "AC-FTS-004"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-CONTRACT",
+          "TASK-FTS-NATIVE"
+        ],
+        "startCondition": "root_frozen_contract_disjoint_source_and_test_scopes",
+        "artifacts": [
+          "genuine_native_canceled_close_with_failed_inventory_regression"
+        ],
+        "verification": [
+          "root_strict_Release_build",
+          "root_Aspire_TUnit_real_native_and_process",
+          "exact_source_Linux_original_artifacts"
+        ],
+        "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
+        "joinCondition": "root_diff_review_mapped_acceptance_and_actual_original_runtime_artifacts",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
+      },
+      {
+        "id": "TASK-FTS-CANONICAL-ORACLE",
+        "owner": "cluster_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "CrashHost_and_RecoveryTests_Search_native_receipt_scenario_state_and_assertions_only",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-003",
+          "REQ-FTS-004"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-003",
+          "AC-FTS-004"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-CONTRACT",
+          "TASK-FTS-NATIVE"
+        ],
+        "startCondition": "root_frozen_contract_disjoint_source_and_test_scopes",
+        "artifacts": [
+          "bounded_all_canonical_key_value_digest_before_after_process_rebuild"
+        ],
+        "verification": [
+          "root_strict_Release_build",
+          "root_Aspire_TUnit_real_native_and_process",
+          "exact_source_Linux_original_artifacts"
+        ],
+        "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
+        "joinCondition": "root_diff_review_mapped_acceptance_and_actual_original_runtime_artifacts",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
+      },
+      {
+        "id": "TASK-FTS-OPTIONAL-BACKUP-REPAIR",
+        "owner": "lifecycle_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "NativeTextFileStreamProvider_and_new_NativeTextFileStreamProviderTests_only",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-001",
+          "REQ-FTS-003",
+          "REQ-FTS-004"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-001",
+          "AC-FTS-003",
+          "AC-FTS-004"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-NATIVE",
+          "TASK-FTS-TEST"
+        ],
+        "startCondition": "actual_Aspire_failure_and_root_frozen_narrow_repair_contract",
+        "artifacts": [
+          "native_optional_backup_semantics_with_owned_filesystem_rejections"
+        ],
+        "verification": [
+          "root_diff_review",
+          "strict_Release_build",
+          "formatter",
+          "Aspire_TUnit_real_native",
+          "exact_source_Linux_original_artifacts"
+        ],
+        "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
+        "joinCondition": "same_preserved_contract_and_original_healthy_runtime_regression",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
+      },
+      {
+        "id": "TASK-FTS-REVOKED-TEST-REPAIR",
+        "owner": "query_wave_luna_high",
+        "modelTier": "cost_efficient_coding_luna",
+        "permissions": "NativeTextProjectionAuthorityTests_final_revocation_expectation_only",
+        "contracts": [
+          "docs/ADR/ADR-078-native-full-text-projection.md"
+        ],
+        "requirements": [
+          "REQ-FTS-002"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-002"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-NATIVE",
+          "TASK-FTS-TEST"
+        ],
+        "startCondition": "actual_Aspire_failure_and_root_frozen_narrow_repair_contract",
+        "artifacts": [
+          "persisted_revoked_identity_Unauthenticated_and_live_field_denial_PermissionDenied"
+        ],
+        "verification": [
+          "root_diff_review",
+          "strict_Release_build",
+          "formatter",
+          "Aspire_TUnit_real_native",
+          "exact_source_Linux_original_artifacts"
+        ],
+        "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
+        "joinCondition": "same_preserved_contract_and_original_healthy_runtime_regression",
+        "developmentEvidence": [
+          "docs/implementation/native-full-text-development-2026-10-03.json"
+        ]
       }
     ],
     "qualificationRule": "Neither presence of source nor a local development result closes a full task. Preserve exact-source Linux fault/endurance and publication gates.",
     "historicalBaselinePreserved": true,
     "localDevelopmentEvidence": [
-      "docs/implementation/owner-wave-001-development-2026-10-03.json"
+      "docs/implementation/owner-wave-001-development-2026-10-03.json",
+      "docs/implementation/epoch-upgrade-development-2026-10-03.json",
+      "docs/implementation/native-full-text-development-2026-10-03.json"
     ]
   }
 }

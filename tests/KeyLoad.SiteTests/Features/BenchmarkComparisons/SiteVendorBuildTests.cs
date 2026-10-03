@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-    /// <summary>Proves vendor compression metadata does not replace exact raw-byte identity.</summary>
+/// <summary>Proves vendor compression metadata does not replace exact raw-byte identity.</summary>
 internal sealed class SiteVendorBuildTests
 {
     /// <summary>Accepts changed historical sizes while reporting independently measured current gzip output.</summary>

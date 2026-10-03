@@ -58,7 +58,7 @@ internal static class ServerOfflineFormatUpgrade
     private static string PathArgument(string argument, string prefix)
     {
         var value = argument[prefix.Length..];
-        if (string.IsNullOrWhiteSpace(value) || value.Length > MaximumPathCharacters || value.Contains('\0'))
+        if (string.IsNullOrWhiteSpace(value) || value.Length > MaximumPathCharacters || value.Contains('\0', StringComparison.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Validation, Usage);
         }

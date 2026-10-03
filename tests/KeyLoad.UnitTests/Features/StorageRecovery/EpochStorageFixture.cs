@@ -71,7 +71,7 @@ internal sealed class EpochStorageFixture : IDisposable
         return identity;
     }
 
-    internal async Task<Dictionary<string, byte[]?>> CaptureAsync(string directory)
+    internal static async Task<Dictionary<string, byte[]?>> CaptureAsync(string directory)
     {
         var result = new Dictionary<string, byte[]?>(StringComparer.Ordinal);
         foreach (var path in Directory.EnumerateDirectories(directory, "*", SearchOption.AllDirectories))
@@ -85,7 +85,7 @@ internal sealed class EpochStorageFixture : IDisposable
         return result;
     }
 
-    internal async Task AssertUnchangedAsync(string directory, Dictionary<string, byte[]?> expected)
+    internal static async Task AssertUnchangedAsync(string directory, Dictionary<string, byte[]?> expected)
     {
         var actual = await CaptureAsync(directory);
         await Assert.That(actual.Keys).IsEquivalentTo(expected.Keys);
@@ -102,7 +102,7 @@ internal sealed class EpochStorageFixture : IDisposable
         }
     }
 
-    internal async Task AssertIdentityPreservedAsync(StoreIdentity expected, StoreIdentity actual)
+    internal static async Task AssertIdentityPreservedAsync(StoreIdentity expected, StoreIdentity actual)
     {
         await Assert.That(actual.FormatVersion).IsEqualTo(CurrentEpoch);
         await Assert.That(actual.KeyCodecVersion).IsEqualTo(expected.KeyCodecVersion);

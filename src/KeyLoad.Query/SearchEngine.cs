@@ -6,7 +6,7 @@ using KeyLoad.Query.Features.Search;
 namespace KeyLoad.Query;
 
 /// <summary>Runs exact text, vector and hybrid ranking within one authorized read cut.</summary>
-public sealed class SearchEngine(DatabaseEngine database)
+public sealed class SearchEngine(DatabaseEngine database, ITextProjection? textProjection = null)
 {
     private const string InvalidSearch = "The search budgets or branch weights are invalid.";
     private const string InvalidText = "A bounded text query and field are required.";
@@ -46,7 +46,7 @@ public sealed class SearchEngine(DatabaseEngine database)
             var fusion = new SearchRankFusion(request.FusionConstant, request.Limit, budget);
             if (request.Text is not null)
             {
-                fusion.AddBranch(RankText(view, principal, request, budget), request.TextWeight);
+                fusion.AddBranch(RankText(view, principal, resource, request, budget), request.TextWeight);
             }
             if (similarity is not null)
             {
@@ -57,14 +57,65 @@ public sealed class SearchEngine(DatabaseEngine database)
     }
 
     private SearchScore[] RankText(KeyLoad.Storage.IKeyValueView view, PrincipalRecord principal,
-        SearchRequest request, ReadExecutionBudget budget)
+        ResourceDefinition resource, SearchRequest request, ReadExecutionBudget budget)
     {
         var ranker = new TextRanker(request.Text!, request.TextField!, budget);
-        if (ranker.HasTerms)
+        if (!ranker.HasTerms)
         {
-            database.VisitVisibleDocuments(view, principal, request.Partition, request.Collection, budget, ranker.Visit);
+            return ranker.Rank();
         }
-        return ranker.Rank();
+
+        var lease = textProjection?.Acquire(CreateTextProjectionScope(principal, resource, request), budget);
+        Exception? primaryFailure = null;
+        try
+        {
+            if (lease is not null)
+            {
+                ranker.AttachProjection(lease);
+            }
+            database.VisitVisibleDocuments(view, principal, request.Partition, request.Collection, budget, ranker.Visit);
+            var scores = ranker.Rank();
+            if (lease is not null)
+            {
+                var references = scores.Select(score => score.Reference).Distinct().ToArray();
+                lease.VerifyCandidates(ranker.Terms, references, budget);
+            }
+            return scores;
+        }
+        catch (Exception error)
+        {
+            primaryFailure = error;
+            throw;
+        }
+        finally
+        {
+            DisposeTextProjection(lease, primaryFailure);
+        }
+    }
+
+    private TextProjectionScope CreateTextProjectionScope(PrincipalRecord principal, ResourceDefinition resource,
+        SearchRequest request)
+    {
+        var identity = database.Store.Identity;
+        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+            database.Store.Position, request.Partition, request.Collection, request.TextField!, principal.Id,
+            principal.PolicyEpoch, resource.SchemaVersion);
+    }
+
+    private static void DisposeTextProjection(ITextProjectionLease? lease, Exception? primaryFailure)
+    {
+        if (lease is null)
+        {
+            return;
+        }
+        try
+        {
+            lease.Dispose();
+        }
+        catch (Exception cleanupFailure) when (primaryFailure is not null)
+        {
+            throw new AggregateException(primaryFailure, cleanupFailure);
+        }
     }
 
     private RankedDocument[] ProjectSelected(KeyLoad.Storage.IKeyValueView view, PrincipalRecord principal,

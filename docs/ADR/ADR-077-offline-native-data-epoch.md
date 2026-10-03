@@ -8,11 +8,18 @@ AC-EPOCH-001..006; EventStreams AC-EVENT-008/010, TimeSeries AC-SERIES-013/016.
 ## Problem and supported formats
 
 The exact previous executable at
-`2532f781fec8f2546a033c396a7dbce0e9b4b781` uses native identity5, WAL magic4,
+`7784b6b46b98ce994dd98070dc1f58fe4e506b91` uses native identity5, WAL magic4,
 checkpoint3 and native replica metadata/payload2. The old identity validator
 requires5. Aggregate snapshots and retention floors change interpretation of
 ordinary model keys: an unaware executable must not reopen their store, install
 their image, or accept their signed peer work.
+
+Its immutable source tree is `b03bf1301a03b3fe00f419c3c7bf5285a34b63f9`.
+The owner-authorized removal of obsolete Git history changed commit ancestry;
+this reachable commit has exactly the same complete source tree as the original
+`2532f781fec8f2546a033c396a7dbce0e9b4b781`. The probe exporter verifies that
+tree before building. Historical development receipts keep their actual original
+commit, archive and binary hashes; they are not relabeled as a new execution.
 
 ADR-057's identity4/WAL3/checkpoint2 matrix records its qualified historical
 generation; it does not describe the current identity5/WAL4/checkpoint3 source.

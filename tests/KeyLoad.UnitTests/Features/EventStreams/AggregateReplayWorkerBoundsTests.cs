@@ -1,3 +1,4 @@
+using KeyLoad.Client;
 using static KeyLoad.UnitTests.Features.EventStreams.AggregateReplayWorkerTestSupport;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;

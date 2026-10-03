@@ -164,10 +164,10 @@ internal static class ZoneTreeFormatUpgradeBuilder
 
     private static ZoneTreeStoreOptions StageOptions(ZoneTreeStoreOptions options, string directory,
         StoreIdentity identity) => options with
-    {
-        Directory = directory,
-        Incarnation = identity.Incarnation,
-        SigningKey = identity.SigningKey,
-        EmbeddedPointCache = null
-    };
+        {
+            Directory = directory,
+            Incarnation = identity.Incarnation,
+            SigningKey = identity.SigningKey,
+            EmbeddedPointCache = null
+        };
 }

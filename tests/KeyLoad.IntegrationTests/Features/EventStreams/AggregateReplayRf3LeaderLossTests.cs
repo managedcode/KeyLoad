@@ -1,4 +1,4 @@
-using Aspire.Hosting.Testing;
+using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
@@ -66,7 +66,7 @@ internal sealed class AggregateReplayRf3LeaderLossTests(ClusterFixture fixture)
             if (stoppedNode is not null && !restarted)
             {
                 using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45));
-                await RestoreLeaderAsync(stoppedNode, nodes, administrators, recovery.Token, originalFailure);
+                await RestoreLeaderAsync(stoppedNode, nodes, administrators, originalFailure, recovery.Token);
             }
         }
     }
@@ -122,7 +122,7 @@ internal sealed class AggregateReplayRf3LeaderLossTests(ClusterFixture fixture)
     }
 
     private async Task RestoreLeaderAsync(string stoppedNode, string[] nodes, KeyLoadClient[] administrators,
-        CancellationToken cancellationToken, Exception? originalFailure)
+        Exception? originalFailure, CancellationToken cancellationToken)
     {
         try
         {

@@ -16,8 +16,11 @@ internal sealed class SqlModelViewAstTests
         var cursor = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
             new(database.Partition, query, AllowFullScan: true, Cursor: "not-a-token")));
         var invalidKind = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
-            new(database.Partition, query with { ModelSource = new((ModelQuerySourceKind)99,
-                SqlModelViewTestSupport.Queue) }, AllowFullScan: true)));
+            new(database.Partition, query with
+            {
+                ModelSource = new((ModelQuerySourceKind)99,
+                SqlModelViewTestSupport.Queue)
+            }, AllowFullScan: true)));
         var mismatchedQueue = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
             new(database.Partition, query with { ModelSource = new(ModelQuerySourceKind.QueueMessages, "other") },
                 AllowFullScan: true)));

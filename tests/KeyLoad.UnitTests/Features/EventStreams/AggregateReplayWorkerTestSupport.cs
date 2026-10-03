@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.Client;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 
@@ -6,18 +7,21 @@ internal static class AggregateReplayWorkerTestSupport
 {
     internal const string ReducerVersion = "counter.reducer.v1";
     internal const string EventType = "CounterChanged";
+    private const string TotalField = "total";
+    private const string IncrementField = "increment";
+    private const string PartitionId = "key";
 
     internal static AggregateReplayReducer CounterReducer(int eventVersion = 1,
         Func<string, EventRecord, string>? apply = null)
-        => new(ReducerVersion, 1, eventVersion, "{\"total\":0}", apply ?? AddIncrement);
+        => new(ReducerVersion, 1, eventVersion, "{\"" + TotalField + "\":0}", apply ?? AddIncrement);
 
     internal static string AddIncrement(string state, EventRecord record)
     {
         using var stateDocument = JsonDocument.Parse(state);
         using var eventDocument = JsonDocument.Parse(record.Data.PayloadJson);
-        var total = stateDocument.RootElement.GetProperty("total").GetInt32();
-        var increment = eventDocument.RootElement.GetProperty("increment").GetInt32();
-        return "{\"total\":" + (total + increment) + "}";
+        var total = stateDocument.RootElement.GetProperty(TotalField).GetInt32();
+        var increment = eventDocument.RootElement.GetProperty(IncrementField).GetInt32();
+        return "{\"" + TotalField + "\":" + (total + increment) + "}";
     }
 
     internal static int ReadInteger(string json, string property)
@@ -26,7 +30,7 @@ internal static class AggregateReplayWorkerTestSupport
         return document.RootElement.GetProperty(property).GetInt32();
     }
 
-    internal static StreamRef Stream() => new(new("tenant", "database", "domain", "key"), "orders", "aggregate");
+    internal static StreamRef Stream() => new(new("tenant", "database", "domain", PartitionId), "orders", "aggregate");
 
     internal static EventRecord Event(StreamRef stream, long revision, string id, string payload, int schema = 1)
         => new(stream, revision, revision, new(id, EventType, payload, "{}", schema), DateTimeOffset.UnixEpoch.AddSeconds(revision));

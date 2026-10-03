@@ -15,7 +15,8 @@ internal static class ClusterFixtureStartupFailure
         }
         if (cleanup.IsCanceled)
         {
-            try { await cleanup.ConfigureAwait(false); }
+            try
+            { await cleanup.ConfigureAwait(false); }
             catch (OperationCanceledException cleanupFailure)
             {
                 throw new AggregateException("Cluster fixture startup and cleanup failed.", startupFailure, cleanupFailure);

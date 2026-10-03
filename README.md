@@ -43,6 +43,8 @@ KeyLoad is a **development preview**. The current SQL subset provides bounded do
 
 The default server is a three-node replicated cluster (RF3), built on Orleans with persistent ZoneTree storage on each node. Production readiness, endurance, power-loss durability and comparative performance remain under qualification. The [implementation tracker](docs/implementation/status.json), [SQL compatibility inventory](docs/implementation/sql-client-conformance.json) and [test results](docs/implementation/runtime-qualification-20261002.md) record the detailed status.
 
+The server uses ZoneTree.FullTextSearch for bounded derived text candidates while preserving exact authorized ranking. Its [development receipt](docs/implementation/native-full-text-development-2026-10-03.json) records 26 native unit and 10 process-recovery checks through Aspire. Full Linux/RF3 qualification and incremental projection replay remain pending; these checks establish no speed improvement.
+
 ## Get started
 
 Install the .NET SDK selected in [global.json](global.json) and Docker, then build from the repository root:

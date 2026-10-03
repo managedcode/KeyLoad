@@ -9,6 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 internal static class SampleRetentionRf3RestartWorkflow
 {
     private const string FailureScenario = "series-retention-follower-restart";
+    private const string FollowerRestoreFailureKey = "KeyLoad.RetentionFollowerRestoreFailure";
     private const int NodeCount = TimeSeriesRf3Scenario.NodeCount;
     private const int FirstNode = TimeSeriesRf3Scenario.FirstNode;
     private const int McpNodeIndex = 1;
@@ -159,7 +160,7 @@ internal static class SampleRetentionRf3RestartWorkflow
         {
             if (activeFailure is not null)
             {
-                activeFailure.Data["KeyLoad.RetentionFollowerRestoreFailure"] = cleanupFailure;
+                activeFailure.Data[FollowerRestoreFailureKey] = cleanupFailure;
                 return;
             }
             throw;

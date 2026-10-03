@@ -11,6 +11,8 @@ internal sealed class TextRanker
     private const double Bm25LengthWeight = 0.75;
     private const double IdfSmoothing = 0.5;
     private readonly ReadExecutionBudget budget;
+    private ITextProjectionLease? projection;
+    private readonly string[] terms;
     private readonly Dictionary<string, int> lookup;
     private readonly string[] path;
     private readonly int[] frequency;
@@ -21,7 +23,7 @@ internal sealed class TextRanker
     public TextRanker(string query, string field, ReadExecutionBudget budget)
     {
         this.budget = budget;
-        var terms = SearchTerms.Enumerate(query, budget).Distinct(StringComparer.Ordinal).ToArray();
+        terms = SearchTerms.Enumerate(query, budget).Distinct(StringComparer.Ordinal).ToArray();
         lookup = terms.Select((term, index) => (term, index))
             .ToDictionary(pair => pair.term, pair => pair.index, StringComparer.Ordinal);
         frequency = new int[terms.Length];
@@ -29,11 +31,16 @@ internal sealed class TextRanker
     }
 
     public bool HasTerms => lookup.Count != 0;
+    public IReadOnlyList<string> Terms => terms;
+
+    public void AttachProjection(ITextProjectionLease lease)
+        => projection = lease;
 
     public void Visit(DocumentRecord document)
     {
         budget.Check();
         corpusCount++;
+        projection?.BeginRecord(document.Reference, document.Revision);
         using var json = JsonDocument.Parse(document.Json);
         var value = JsonData.Scalar(json.RootElement, path);
         var counts = new Dictionary<int, int>();
@@ -42,6 +49,7 @@ internal sealed class TextRanker
         {
             foreach (var term in SearchTerms.Enumerate(content, budget))
             {
+                projection?.ObserveToken(term);
                 length++;
                 if (lookup.TryGetValue(term, out var index))
                 {

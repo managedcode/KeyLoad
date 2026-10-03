@@ -32,8 +32,9 @@ internal sealed class EpochReplicaPurposeTests
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Unauthenticated);
 
         using var currentMac = new ReplicaMessageMac(fixture.Options.Secret, fixture.Options.ClusterId);
-        fixture.Receiver.VerifyRequest(stale with { Signature = currentMac.Request(stale) });
-        await AssertCurrentReplicaContractAsync();
+        var accepted = stale with { Signature = currentMac.Request(stale) };
+        fixture.Receiver.VerifyRequest(accepted);
+        await AssertCurrentReplicaContractAsync(accepted, fixture);
     }
 
     [Test]
@@ -78,19 +79,25 @@ internal sealed class EpochReplicaPurposeTests
             ReplicaRpc.SnapshotBegin => fixture.Request(method,
                 new SnapshotBeginRequest(ReplicaSecurityFixture.VoterA, SnapshotTerm, snapshot)),
             ReplicaRpc.SnapshotChunk => fixture.Request(method,
-                new SnapshotChunkRequest(ReplicaSecurityFixture.VoterA, SnapshotTerm, transfer, 0, [SnapshotContent])),
+                new SnapshotChunkRequest(ReplicaSecurityFixture.VoterA, SnapshotTerm, transfer, 0,
+                    new byte[] { SnapshotContent })),
             _ => fixture.Request(method,
                 new SnapshotCompleteRequest(ReplicaSecurityFixture.VoterA, SnapshotTerm, transfer))
         };
     }
 
-    private static async Task AssertCurrentReplicaContractAsync()
+    private static async Task AssertCurrentReplicaContractAsync(ReplicaPeerEnvelope request,
+        ReplicaSecurityFixture fixture)
     {
+        await Assert.That(request.Version).IsEqualTo(ReplicaTransportProtocol.Version);
         await Assert.That(ReplicaTransportProtocol.RequestPurpose).IsEqualTo(CurrentRequestPurpose);
-        await Assert.That(ReplicaTransportProtocol.Version).IsEqualTo(2);
         await Assert.That(ReplicaTransportProtocol.RequestAlias).IsEqualTo("keyload.replica.request.v1");
         await Assert.That(ReplicaTransportProtocol.ReplyAlias).IsEqualTo("keyload.replica.reply.v1");
-        await Assert.That(ReplicaProtocol.FormatVersion).IsEqualTo(2);
+        var opened = ReplicaLogValidation.Open(fixture.Database.Store, fixture.Configuration, fixture.Database);
+        var stateBytes = fixture.Database.Store.Read(view => view.ReadOwnedValue(ReplicaProtocol.StateStorageKey));
+        var persisted = ReplicaProtocolCodec.DeserializeStored<ReplicaHardState>(stateBytes!,
+            fixture.Configuration.MaxAppendEntries);
+        await Assert.That(persisted.Version).IsEqualTo(opened.Version);
     }
 }
 

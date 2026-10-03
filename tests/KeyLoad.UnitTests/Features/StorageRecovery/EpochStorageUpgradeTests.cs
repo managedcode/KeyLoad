@@ -1,5 +1,6 @@
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
@@ -25,9 +26,9 @@ internal sealed class EpochStorageUpgradeTests
     {
         using var fixture = new EpochStorageFixture();
         var original = await fixture.CreateNativeSourceAsync(checkpoint);
-        var sourceFiles = await fixture.CaptureAsync(fixture.Source);
+        var sourceFiles = await EpochStorageFixture.CaptureAsync(fixture.Source);
         var upgraded = ZoneTreeFormatUpgrade.Upgrade(fixture.Source, fixture.DestinationOptions(original));
-        await fixture.AssertIdentityPreservedAsync(original, upgraded);
+        await EpochStorageFixture.AssertIdentityPreservedAsync(original, upgraded);
         await Assert.That(upgraded.FormatVersion).IsEqualTo(EpochStorageFixture.CurrentEpoch);
         using (var destination = new ZoneTreeStore(fixture.DestinationOptions(original)))
         {
@@ -42,7 +43,7 @@ internal sealed class EpochStorageUpgradeTests
             await Assert.That(records[1]!).IsEquivalentTo(fixture.SecondValue, CollectionOrdering.Matching);
             await Assert.That(NativeSerialization.Deserialize<long>(records[2]!)).IsEqualTo(SourcePosition);
         }
-        await fixture.AssertUnchangedAsync(fixture.Source, sourceFiles);
+        await EpochStorageFixture.AssertUnchangedAsync(fixture.Source, sourceFiles);
     }
 
     [Test]
@@ -57,10 +58,13 @@ internal sealed class EpochStorageUpgradeTests
             ZoneTreeIdentityFile.Write(Path.Combine(fixture.Source, "identity.json"),
                 identity with { FormatVersion = version });
         }
-        var before = await fixture.CaptureAsync(fixture.Source);
-        var rejected = Assert.ThrowsExactly<KeyLoadException>(() => new ZoneTreeStore(fixture.SourceOptions));
+        var before = await EpochStorageFixture.CaptureAsync(fixture.Source);
+        var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
+        {
+            using var store = new ZoneTreeStore(fixture.SourceOptions);
+        });
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-        await fixture.AssertUnchangedAsync(fixture.Source, before);
+        await EpochStorageFixture.AssertUnchangedAsync(fixture.Source, before);
     }
 
     [Test]
@@ -79,10 +83,10 @@ internal sealed class EpochStorageUpgradeTests
         using var fixture = new EpochStorageFixture();
         var identity = await fixture.CreateNativeSourceAsync(checkpoint: false);
         await ConfigureFailureAsync(fixture, identity, scenario);
-        var before = await fixture.CaptureAsync(fixture.Source);
+        var before = await EpochStorageFixture.CaptureAsync(fixture.Source);
         var upgradeStage = fixture.Destination + EpochStorageFixture.UpgradeStageSuffix;
-        Dictionary<string, byte[]?>? stageBefore = Directory.Exists(upgradeStage)
-            ? await fixture.CaptureAsync(upgradeStage) : null;
+        var stageBefore = Directory.Exists(upgradeStage)
+            ? await EpochStorageFixture.CaptureAsync(upgradeStage) : null;
         var options = fixture.DestinationOptions(identity);
         if (scenario == AuthorityScenario)
         {
@@ -94,7 +98,7 @@ internal sealed class EpochStorageUpgradeTests
             await File.WriteAllBytesAsync(Path.Combine(fixture.Destination, UnrelatedDestinationFile), [0x01]);
         }
         var destinationBefore = Directory.Exists(fixture.Destination)
-            ? await fixture.CaptureAsync(fixture.Destination) : null;
+            ? await EpochStorageFixture.CaptureAsync(fixture.Destination) : null;
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
             ZoneTreeFormatUpgrade.Upgrade(fixture.Source, options));
         await Assert.That(rejected.Code).IsEqualTo(expectedError);
@@ -104,12 +108,12 @@ internal sealed class EpochStorageUpgradeTests
         }
         else
         {
-            await fixture.AssertUnchangedAsync(fixture.Destination, destinationBefore);
+            await EpochStorageFixture.AssertUnchangedAsync(fixture.Destination, destinationBefore);
         }
-        await fixture.AssertUnchangedAsync(fixture.Source, before);
+        await EpochStorageFixture.AssertUnchangedAsync(fixture.Source, before);
         if (stageBefore is not null)
         {
-            await fixture.AssertUnchangedAsync(upgradeStage, stageBefore);
+            await EpochStorageFixture.AssertUnchangedAsync(upgradeStage, stageBefore);
         }
     }
 
@@ -128,7 +132,7 @@ internal sealed class EpochStorageUpgradeTests
             });
         }
         var retried = ZoneTreeFormatUpgrade.Upgrade(fixture.Source, fixture.DestinationOptions(original));
-        await fixture.AssertIdentityPreservedAsync(first, retried);
+        await EpochStorageFixture.AssertIdentityPreservedAsync(first, retried);
         using var reopened = new ZoneTreeStore(fixture.DestinationOptions(original));
         await Assert.That(reopened.Position).IsEqualTo(SourcePosition + 1);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue([0x41, 0x00]))!)
@@ -137,16 +141,16 @@ internal sealed class EpochStorageUpgradeTests
 
     private static Task ConfigureFailureAsync(EpochStorageFixture fixture, StoreIdentity identity,
         string scenario) => scenario switch
-    {
-        UnknownFormatScenario => SetUnknownIdentityAsync(fixture, identity),
-        CorruptScenario => RewriteJournalAsync(fixture, torn: false),
-        TornScenario => RewriteJournalAsync(fixture, torn: true),
-        LinkScenario => LinkJournalAsync(fixture),
-        StageScenario => CreateMismatchedStageAsync(fixture),
-        MissingIdentityScenario => DeleteArtifact(fixture, "identity.json"),
-        MissingJournalScenario => DeleteArtifact(fixture, EpochStorageFixture.JournalName),
-        _ => Task.CompletedTask
-    };
+        {
+            UnknownFormatScenario => SetUnknownIdentityAsync(fixture, identity),
+            CorruptScenario => RewriteJournalAsync(fixture, torn: false),
+            TornScenario => RewriteJournalAsync(fixture, torn: true),
+            LinkScenario => LinkJournalAsync(fixture),
+            StageScenario => CreateMismatchedStageAsync(fixture),
+            MissingIdentityScenario => DeleteArtifact(fixture, "identity.json"),
+            MissingJournalScenario => DeleteArtifact(fixture, EpochStorageFixture.JournalName),
+            _ => Task.CompletedTask
+        };
 
     private static Task SetUnknownIdentityAsync(EpochStorageFixture fixture, StoreIdentity identity)
     {

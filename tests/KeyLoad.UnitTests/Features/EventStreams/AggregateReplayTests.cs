@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 
@@ -144,7 +145,7 @@ internal sealed class AggregateReplayTests
         var rawError = Assert.ThrowsExactly<KeyLoadException>(() => rawBudget.Read(maximumEvents: 1));
 
         using var resultBudget = new AggregateReplayFixture();
-        resultBudget.Append(new(FirstEventId, AggregateReplayFixture.EventType,
+        resultBudget.Append(new EventData(FirstEventId, AggregateReplayFixture.EventType,
             "{\"" + ValueField + "\":\"" + new string('x', 512) + "\"}"));
         resultBudget.Reopen(new() { MaxBatchBytes = 256 });
         var resultError = Assert.ThrowsExactly<KeyLoadException>(() => resultBudget.Read(maximumEvents: 1));

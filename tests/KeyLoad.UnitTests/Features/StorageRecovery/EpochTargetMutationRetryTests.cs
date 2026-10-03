@@ -10,7 +10,7 @@ internal sealed class EpochTargetMutationRetryTests
     {
         using var fixture = new EpochStorageFixture();
         var original = await fixture.CreateNativeSourceAsync(checkpoint: true);
-        var sourceBefore = await fixture.CaptureAsync(fixture.Source);
+        var sourceBefore = await EpochStorageFixture.CaptureAsync(fixture.Source);
         _ = ZoneTreeFormatUpgrade.Upgrade(fixture.Source, fixture.DestinationOptions(original));
         StoreIdentity advanced;
         using (var current = new ZoneTreeStore(fixture.DestinationOptions(original)))
@@ -25,11 +25,11 @@ internal sealed class EpochTargetMutationRetryTests
             current.InstallSnapshot(fixture.Snapshot, snapshot.AppliedPosition);
             advanced = current.Identity;
         }
-        var targetBefore = await fixture.CaptureAsync(fixture.Destination);
+        var targetBefore = await EpochStorageFixture.CaptureAsync(fixture.Destination);
         var retried = ZoneTreeFormatUpgrade.Upgrade(fixture.Source, fixture.DestinationOptions(original));
-        await fixture.AssertIdentityPreservedAsync(advanced, retried);
-        await fixture.AssertUnchangedAsync(fixture.Source, sourceBefore);
-        await fixture.AssertUnchangedAsync(fixture.Destination, targetBefore);
+        await EpochStorageFixture.AssertIdentityPreservedAsync(advanced, retried);
+        await EpochStorageFixture.AssertUnchangedAsync(fixture.Source, sourceBefore);
+        await EpochStorageFixture.AssertUnchangedAsync(fixture.Destination, targetBefore);
         using var reopened = new ZoneTreeStore(fixture.DestinationOptions(original));
         await Assert.That(reopened.Position).IsEqualTo(2L);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue([0x40, 0x00]))!)

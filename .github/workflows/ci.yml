@@ -71,6 +71,26 @@ jobs:
       - name: Build KeyLoad
         id: build
         run: dotnet build KeyLoad.slnx --no-restore --configuration Release
+      - name: Verify the pinned native full-text package
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import crypto from 'node:crypto';
+          import { execFileSync, spawnSync } from 'node:child_process';
+          const cache = execFileSync('dotnet', ['nuget', 'locals', 'global-packages', '--list'], { encoding: 'utf8' }).trim();
+          const prefix = 'global-packages: ';
+          if (!cache.startsWith(prefix) || cache.includes('\n')) throw new Error('Ambiguous NuGet package cache.');
+          const packagePath = path.join(cache.slice(prefix.length), 'zonetree.fulltextsearch', '1.0.9', 'zonetree.fulltextsearch.1.0.9.nupkg');
+          const digest = crypto.createHash('sha256').update(fs.readFileSync(packagePath)).digest('hex');
+          if (digest !== '7ea1fbb7aba0ad00391d78d2f414166b500335f5b1affe43c305d861b55719ff') throw new Error('Native FTS package differs from ADR-078.');
+          const verification = spawnSync('dotnet', ['nuget', 'verify', packagePath, '--all'], { encoding: 'utf8', maxBuffer: 1048576 });
+          fs.mkdirSync('artifacts/qualification', { recursive: true });
+          fs.writeFileSync('artifacts/qualification/native-full-text-package-signature.log', `Package SHA256: ${digest}\n${verification.stdout ?? ''}${verification.stderr ?? ''}`);
+          process.stdout.write(verification.stdout ?? '');
+          process.stderr.write(verification.stderr ?? '');
+          if (verification.error || verification.status !== 0) throw verification.error ?? new Error('Native FTS package signature verification failed.');
+          JS
       - name: Check code formatting
         run: dotnet format KeyLoad.slnx --verify-no-changes --no-restore
       - name: Check repository rules
