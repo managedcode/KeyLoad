@@ -11,7 +11,8 @@ internal static class IsolatedTimeSeriesTimescaleResources
     private const string Tcp = "tcp";
     private const string Image = "timescale/timescaledb";
     private const string Tag = "2.30.2-pg18";
-    private const string Registry = "docker.io/";
+    private const string Registry = "docker.io";
+    private const string RegistrySeparator = "/";
     private const string TagSeparator = ":";
     private const string DigestSeparator = "@";
     private const string GuidFormat = "N";
@@ -47,12 +48,13 @@ internal static class IsolatedTimeSeriesTimescaleResources
         context.BindSetting(Connection, primary.Resource.ConnectionStringExpression);
         context.BindEndpoint(FirstEndpointIndex, primary, Tcp);
         AddStandbys(context, primary, password, scripts, privateGroup, primaryName);
-        context.BindImage(Registry + Image + TagSeparator + Tag + DigestSeparator + Digest);
+        context.BindImage(Registry + RegistrySeparator + Image + TagSeparator + Tag + DigestSeparator + Digest);
     }
 
     private static IResourceBuilder<PostgresServerResource> AddPrimary(IsolatedTimeSeriesResourceContext context,
         string name, IResourceBuilder<ParameterResource> password, string privateGroup)
-        => context.Builder.AddPostgres(name, password: password).WithImage(Image).WithImageTag(Tag)
+        => context.Builder.AddPostgres(name, password: password).WithImageRegistry(Registry)
+            .WithImage(Image).WithImageTag(Tag)
             .WithImageSHA256(Digest[DigestPrefixLength..]).WithContainerName(name + ContainerSeparator + privateGroup)
             .WithContainerNetworkAlias(name);
 
@@ -72,7 +74,7 @@ internal static class IsolatedTimeSeriesTimescaleResources
     {
         var ordinal = index.ToString(CultureInfo.InvariantCulture);
         var name = NodePrefix + (index + NodeOrdinalOffset).ToString(CultureInfo.InvariantCulture);
-        var standby = context.Builder.AddContainer(name, Image, Tag)
+        var standby = context.Builder.AddContainer(name, Image, Tag).WithImageRegistry(Registry)
             .WithImageSHA256(Digest[DigestPrefixLength..]).WithContainerName(name + ContainerSeparator + privateGroup)
             .WithContainerNetworkAlias(name).WithEndpoint(targetPort: Port, name: Tcp, scheme: Tcp).WaitFor(primary);
         IsolatedPostgresBootstrap.Configure(standby, context.DataDirectory(name), scripts, password, ordinal,

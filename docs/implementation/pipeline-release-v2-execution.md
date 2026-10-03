@@ -24,15 +24,15 @@ three-pipeline/public-release correction; existing required gates remain mandato
   integrate bounded version/manifest helpers and real RF3 distribution/image assets.
 - [x] Join worker TUnit/source/version regressions; inspect every diff and count all
   preserved native cells/suites. No worker commits or pushes.
-- [ ] Static syntax/governance/whitespace on exact scoped source, then commit/push main.
-- [ ] Inspect exact-SHA CI/Benchmarks and dispatch Release build when concrete;
-  download actual package/image/distribution artifacts. Final publication remains
-  gated by genuine successful exact-source CI; no duplicated full qualification.
+- [x] Static syntax/governance/whitespace on exact scoped source, then commit/push main.
+- [x] Inspect exact-SHA CI/Benchmarks and the prior Release runs; preserve real gates.
+- [ ] Actual package/image/distribution qualification is owner-deferred; dispatch
+  only after an explicit release/readiness instruction, then download actual assets.
 - [ ] Verify actual tag/GitHub Release/GHCR only when all required gates pass; retain
   exact blockers otherwise and never claim packaging or configuration is release.
-- [ ] Repair stable-package NU5104 from alpha-only Cartograph by preserving the
-  source's `dev` package stage with the same numeric identity; verify reservation,
-  actual nuspecs and checksums in GitHub without altering the exact git tag format.
+- [x] Prepare the stable-package NU5104 repair by retaining the source's `dev`
+  package stage with the same numeric identity in reservation, CLI and verifier.
+- [ ] Verify actual nuspecs and checksums in GitHub when Release is authorized.
 
 Owner correction: actual packaging/publication is now deferred because the product
 is unfinished. Do not dispatch another Release. Version/package-stage helpers,
@@ -77,3 +77,24 @@ the empty separate Tag field. All remaining cells, aggregate and site publicatio
 were correctly skipped. The separately delivered c2415755d source contains that
 assertion repair; it has not been called qualified here. e089 CI37116893088 is still
 running at this checkpoint; no full CI/release/site success is claimed.
+
+TASK-PIPE-TIMESCALE-REGISTRY / AC-PIPE-002 and existing AC-TSI-001/003: subsequent
+c241 Benchmarks37117317113 job111187647295 passes95/98 model tests but fails
+ModelContainsPinnedPhysicalTimescaleNodes(2), (3) and the complete family model.
+All three fail the retained exact `docker.io` registry assertion for standby nodes.
+Root owns the bounded existing IsolatedTimeSeriesTimescaleResources correction:
+explicitly configure the same registry on all native members, retaining the same
+image/digest/reference, physical topology, credentials, scripts and every assertion.
+Existing ADR059 already requires that exact docker.io image identity; no new
+architecture, dependency or test exception is introduced. Recheck the complete
+native model suite in GitHub Benchmarks; no local test or Release dispatch.
+
+e089 CI completed failure: all8 pipeline/version cases pass within1860/1861 units;
+the only failure is AcTsi006UnknownProblemNamesAndUnavailableStatusStayUnknown
+(expected absent status; real SDK supplied500). Analyzer118/118, recovery183/183
+and real RF3 SDK/MCP63/63 pass; scalar is skipped after unit failure and is not
+qualified. The separately committed c241 source corrects that status assertion.
+ec3399ef279fda1f4cf510e5ce2a0650684776f9 delivers schema2/package stage and the
+owner's release deferral. Exact-source CI37117886564 passes complete build/format/
+governance at the current checkpoint; remaining suites are in progress. Benchmarks
+37117886617 is running; no provider publication or completed cohort is claimed.
