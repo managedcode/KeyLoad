@@ -1,3 +1,5 @@
+using KeyLoad.Diagnostics.Features.ResourceExecution;
+
 namespace KeyLoad.Replication;
 
 internal sealed class ReplicaRpcClient(ReplicaConfiguration configuration, CancellationToken stoppingToken)
@@ -16,20 +18,77 @@ internal sealed class ReplicaRpcClient(ReplicaConfiguration configuration, Cance
         CancellationToken cancellationToken)
     {
         var active = Volatile.Read(ref transport) ?? throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
-        var payload = ReplicaProtocolCodec.Serialize(request);
-        if (payload.Length > configuration.MaxAppendBytes + ReplicaProtocol.PayloadMetadataBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidAppend);
-        }
+        var payload = EncodeRequest(request, configuration);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, stoppingToken);
         deadline.CancelAfter(configuration.RpcTimeout);
         try
         {
-            var reply = await active.InvokeAsync(voter, method, payload, deadline.Token).ConfigureAwait(false);
-            return ReplicaProtocolCodec.Deserialize<TReply>(reply.Span);
+            var transportStarted = DatabasePhaseTelemetry.Begin();
+            var transportOutcome = DatabasePhaseOutcome.Faulted;
+            ReadOnlyMemory<byte> reply;
+            try
+            {
+                reply = await active.InvokeAsync(voter, method, payload, deadline.Token)
+                    .ConfigureAwait(false);
+                transportOutcome = DatabasePhaseOutcome.Completed;
+            }
+            catch (OperationCanceledException)
+            {
+                transportOutcome = DatabasePhaseTelemetry.CancellationOutcome(cancellationToken, deadline.Token);
+                throw;
+            }
+            finally
+            {
+                DatabasePhaseTelemetry.End(DatabasePhaseKind.ReplicaTransportAwait, transportOutcome, transportStarted);
+            }
+            return DecodeReply<TReply>(reply, cancellationToken, deadline.Token);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
+        }
+    }
+
+    private static byte[] EncodeRequest<TRequest>(TRequest request, ReplicaConfiguration configuration)
+    {
+        var encodeStarted = DatabasePhaseTelemetry.Begin();
+        var encodeOutcome = DatabasePhaseOutcome.Faulted;
+        try
+        {
+            var payload = ReplicaProtocolCodec.Serialize(request);
+            if (payload.Length > configuration.MaxAppendBytes + ReplicaProtocol.PayloadMetadataBytes)
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidAppend);
+            }
+            encodeOutcome = DatabasePhaseOutcome.Completed;
+            return payload;
+        }
+        finally
+        {
+            DatabasePhaseTelemetry.End(DatabasePhaseKind.ReplicaRequestEncode, encodeOutcome, encodeStarted);
+        }
+    }
+
+    private static TReply DecodeReply<TReply>(ReadOnlyMemory<byte> reply, CancellationToken cancellationToken,
+        CancellationToken deadlineToken)
+    {
+        var decodeStarted = DatabasePhaseTelemetry.Begin();
+        var decodeOutcome = DatabasePhaseOutcome.Faulted;
+        try
+        {
+            var decoded = ReplicaProtocolCodec.Deserialize<TReply>(reply.Span);
+            decodeOutcome = DatabasePhaseOutcome.Completed;
+            return decoded;
+        }
+        catch (OperationCanceledException)
+        {
+            decodeOutcome = DatabasePhaseTelemetry.CancellationOutcome(cancellationToken, deadlineToken);
+            throw;
+        }
+        finally
+        {
+            DatabasePhaseTelemetry.End(DatabasePhaseKind.ReplicaReplyDecode, decodeOutcome, decodeStarted);
+        }
     }
 
     internal static bool Unavailable(Exception error) => error is HttpRequestException or TimeoutException or OperationCanceledException

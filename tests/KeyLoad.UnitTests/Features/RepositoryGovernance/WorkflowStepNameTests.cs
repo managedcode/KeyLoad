@@ -37,6 +37,7 @@ internal sealed class WorkflowStepNameTests
     [Arguments("BuildIsolatedSite")]
     [Arguments("QualifySite")]
     [Arguments("DeploySite")]
+    [Arguments("RawStorageEvaluation")]
     public async Task AcUb005EveryUsedCompositeStepExplainsItsAction(string actionName)
     {
         var root = IsolatedAggregateNodeProcess.RepositoryRoot();

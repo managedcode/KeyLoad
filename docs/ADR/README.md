@@ -130,3 +130,8 @@ fixed phase diagnostics, preserving actual quorum/gate/tail/WAL ownership.
 Shared schema is registered; bank, producer joins, private native capture and
 measured overhead remain open. Tests owns runtime qualification; Benchmarks
 owns matched performance comparisons under the separate ADR-062 workflow map.
+
+[ADR-066](ADR-066-garnet-storage-evaluation.md) accepts isolated public raw
+Tsavorite versus ZoneTree cache diagnostics before full Garnet service/fault
+experiments. It does not change product storage or establish a performance
+winner; source and exact-SHA native qualification are pending.

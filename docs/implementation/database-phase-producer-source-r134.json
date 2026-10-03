@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "development-source-checkpoint-not-native-qualification",
+  "observedAtUtc": "2026-10-03T10:59:27Z",
+  "baseHead": "ec3399ef279fda1f4cf510e5ce2a0650684776f9",
+  "workingTreeScope": "concurrent mutable checkout; per-file hashes below bind reviewed producer inputs",
+  "requirements": [
+    "REQ-RESOURCE-003",
+    "REQ-RESOURCE-004",
+    "REQ-RESOURCE-006"
+  ],
+  "acceptance": [
+    "AC-DBPROF-001",
+    "AC-DBPROF-002",
+    "AC-DBPROF-003"
+  ],
+  "decision": "docs/ADR/ADR-063-bounded-database-phase-profiling.md",
+  "sourcePhases": [
+    5,
+    15,
+    16,
+    17,
+    18,
+    19,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31
+  ],
+  "processMode": "default_disabled; no startup opt-in or capture joined",
+  "sources": [
+    {
+      "path": "src/KeyLoad.Replication/Features/ClusterReplication/ReplicaState.cs",
+      "original": "f1e3ab542b8a94ef1f76b7f34aba5597e7830d279e272681ed4452b572c8e99c",
+      "candidate": "16948ced93911f23a0e52e7928a173c33959b4043172ac66cad6af5efa547331"
+    },
+    {
+      "path": "src/KeyLoad.Replication/Features/ClusterReplication/ReplicaRpcClient.cs",
+      "original": "f378f0c5e9199cc0f6266cb5b9957d12bfc581e566177df7f54f3b19255e24cb",
+      "candidate": "119db45d2f5ec8f4c764eb2eee01930ecbd1731bfc519beb6a903a8bd960b0be"
+    },
+    {
+      "path": "src/KeyLoad.Replication/Features/ClusterReplication/ReplicaReadRoundExecutor.cs",
+      "original": "e3ebc6ff433cf1ab04c651ab3d2a9418811d638e516cc247b789d940e9ea281c",
+      "candidate": "5c412a0d331d9fce50e9303d7449d169d49634c40e85e07b7ef20d2376f1f264"
+    },
+    {
+      "path": "src/KeyLoad.Replication/Features/ClusterReplication/ReplicaCanonicalApply.cs",
+      "original": "20da6f8e11918caf771cbcebde1568095802ec8418a0d8c5bc7cf52572899c76",
+      "candidate": "e20ff390736ad89f1778d6f3c10b2583e113a01452da518480d3e830c4c11fe0"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
+      "original": "de270095f4fd307e8dd43527687f60d28d4f59f6953871ee34cad8523ca3a9f8",
+      "candidate": "96cad5600e6749420095bf576a38b76d5dcc74d2e7d936b442b55147e6480493"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeJournalPublication.cs",
+      "original": "714c03db5e04fe0d7032f67c8f68173826fff1539c162b429dd695e650b7d884",
+      "candidate": "fe7173687c103587a0b7ea1f1ee1cb49d5bbc3dfadebe41c7074394e36555b6f"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs",
+      "original": "d3eef80cfb0f73d9af5b1b097a81ff3670e967acb6873b33040cc90eb369c78f",
+      "candidate": "efef9f9958f1dff8323cac7cfc80b7fe9f950e2f78668ad313291178267ad638"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/ResourceExecution/ZoneTreePhaseGate.cs",
+      "original": null,
+      "candidate": "96f38fd8e9117d42c9cda352ae193a95ed04d21548508e5abbcdc9ea311433b4"
+    },
+    {
+      "path": "src/KeyLoad.Replication/KeyLoad.Replication.csproj",
+      "sha256": "b9c533e8d903d697866b06e739dbbed7d5a1bc1e36a181eeb40491e81ec15411"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj",
+      "sha256": "999e974bd7f7b9f433db3b7ca9d1d30a6d9d38d46593e9e082460fc42349f2a8"
+    }
+  ],
+  "preservation": [
+    "exact current original hashes verified before all8 serialized source joins",
+    "guarded existing-store constructor, identity, open, cleanup and disposal retained",
+    "RPC string conversion remains under original armed deadline and decoding under original filtered OCE catch",
+    "only original business gate instances; held intervals include original release attempts",
+    "atomic journal header,payload,hooks,Flush(true),poison,apply,position ordering retained",
+    "actual Runtime.Apply includes every original caller; scheduling batch is not group commit",
+    "no new gate, task, delegate, observer, timer, payload retention, wire/storage/public API change"
+  ],
+  "developmentChecks": [
+    {
+      "command": "dotnet restore KeyLoad.slnx",
+      "exitCode": 0,
+      "logSha256": "b5913fb3c84716cdea2da0681e8cafc61965463bbcd1f21b219bfe5f2fd15ddb"
+    },
+    {
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "elapsed": "00:00:29.82",
+      "logSha256": "2a8a38a73c12d74eb5cf469bb916ed2bb000f7b8bbb082cc7bc3e643a5d42876"
+    },
+    {
+      "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+      "exitCode": 0,
+      "inventory": "26 projects,4 modules"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "stoppedReviewReceipts": [
+    {
+      "kind": "combined producer review followed by preserving provider rebase",
+      "sha256": "41e62dfd66e9c9514fdddf90799bcc6ef96f97df945a6682570d37b42ad4bde0"
+    },
+    {
+      "kind": "preserving provider rebase review; only two import fixes remained",
+      "sha256": "fac04b7b82d7dbba2744fdff3566bbc5a47ad1d5e2ec58d76e2f205db3ac02cf"
+    },
+    {
+      "kind": "fresh provider packet; root verified only two import differences",
+      "sha256": "b1158490024e33325768f88d73f2d15bfd1f98f9819fc4c2496cb6f7b69c3e22"
+    }
+  ],
+  "qualificationGaps": [
+    "remaining20 source phases and trusted physical startup not joined",
+    "private exporter, source/image/node/window-bound genuine RF3 capture not implemented",
+    "exact delivered-source normal,scalar,recovery,RF3 and enabled phase observations pending",
+    "actual allocation/overhead,server resource and comparable throughput measurements unavailable",
+    "complete competitor cohort,multi-host scaling,coverage,endurance and power-loss unqualified"
+  ],
+  "claim": "No runtime counts, speedup, competitor ranking or production readiness established."
+}

@@ -688,3 +688,31 @@ Fresh main e089f3ccc77460c0fc6610581025b57651eac96a includes the concurrent
 release/Site build repairs; no successful exact-source Actions verdict is
 inferred. Root will commit only the reviewed source/docs/hunks and inspect the
 actual push-triggered CI and Benchmarks runs before any dependent native join.
+
+
+Actual integration join042: concurrent authorized main commit
+c2415755d8de27019e4add8e148320389e382ba0 includes all38 exact R3 source blobs
+and all51 root paths alongside the independently owned Diagnostics/SDK/SQL/site
+work. Root's own commit attempt stopped at fresh CAS and made no duplicate or
+revert. Remote main is independently verified equal. Source041 remains the
+original scoped candidate with its CrashHost-only Unit project; source042 binds
+the actual full I2 project with the now-tracked Diagnostics module. Independent
+actual-commit preservation/reference review7c3ee2e4f7e28a6fd4f3689a1da4053bf00826285f5782be00696f56e2ec5ff6
+verifies26 tracked projects and57 literal references; this is not whole combined
+semantic/build/runtime qualification. CI37117316968 and Benchmarks37117317113
+attempt1 are initially pending with no allocated jobs/artifacts; no duplicate
+dispatch. Keep delivered source stable while those actual runs execute. Commit
+this supplementary receipt after the qualification join, rather than triggering
+another full measurement cohort solely for initial pending metadata.
+
+- [x] Actual38 source files delivered on main and preserved in combined join042.
+- [ ] Exact c241 full source/normal/scalar/process/RF3 and model/native270 qualification.
+- [ ] Root freeze and implement prepared seed/native full-copy/ACK/wire/6+30/collector/site.
+
+Native-oracle discoveryd787771f727f57cdeb8e9cc70241beffe3d0a2dad0550cff41b184af8e36856a
+maps original per-scenario data and real SDK/Npgsql APIs. One endpoint or primary
+adapter does not prove every physical copy; Timescale receipts lack WAL LSN and
+need actual post-quiescence flush/replay observations. Node-local stopped-original
+KeyLoad inspection still needs its separately accepted authorized full-business
+oracle. No discovery recommendation authorizes an invented public node-pin API
+or native-copy/performance claim.

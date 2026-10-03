@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
+    <ProjectReference Include="../KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <InternalsVisibleTo Include="KeyLoad.CrashHost" />
     <PackageReference Include="Microsoft.Orleans.Serialization" />

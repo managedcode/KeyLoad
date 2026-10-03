@@ -20,7 +20,9 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         var expectedJobs = new[]
         {
             "comparison-build", "comparison-plan", "comparison-images", "comparison-preflight",
-            "comparison-crud", "comparison-specialized", "native-serialization", "comparison-aggregate",
+            "comparison-crud", "comparison-specialized", "comparison-aggregate",
+            "raw-storage-correctness", "raw-storage",
+            "native-serialization",
             "qualify", "deploy",
         }.Order(StringComparer.Ordinal).ToArray();
         await Assert.That(jobs.Order(StringComparer.Ordinal).SequenceEqual(expectedJobs)).IsTrue();

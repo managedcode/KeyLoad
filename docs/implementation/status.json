@@ -6,6 +6,25 @@
     "feature": "docs/Features/DatabaseComposition.md",
     "sourceStage": "bounded_same_partition_queue_to_graph_and_graph_to_queue_atomic_mutations",
     "sourceReceipt": "docs/implementation/database-composition-source-stage-001.json",
+    "sourceDelivery": {
+      "sourceRevision": "366d3a8a34af98c57d895a0317fb9da323a6d9aa",
+      "pushedTo": "main",
+      "ciRunId": 37123589277,
+      "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37123589277",
+      "ciStatus": "cancelled_after_verify_failure",
+      "integratedSourceRevision": "d50001d81856ec4d9891ccbfa6ce0aef6e2a1b01",
+      "integratedCiRunId": 37123615103,
+      "integratedCiStatus": "cancelled_zero_jobs",
+      "normalCompositionPassed": 32,
+      "recoveryCompositionPassed": 7,
+      "fullNormalFailed": 129,
+      "fullRecoveryFailed": 55,
+      "rf3": "cancelled_unqualified",
+      "latestIntegratedSourceRevision": "ca22b1baa919198c81749d86ffab56df24ec9317",
+      "latestIntegratedCiRunId": 37124217640,
+      "latestIntegratedCiStatus": "queued",
+      "runtimeQualified": false
+    },
     "fullDeclarativeCompositionComplete": false,
     "crossPartitionCompositionImplemented": false,
     "newCasesQualified": false,
@@ -48,6 +67,16 @@
       "benchmarkStatus": "cancelled_zero_jobs_no_complete_native_cohort",
       "nativeGateRepair": "docs/ADR/ADR-068-native-benchmark-gate-repair.md",
       "nativeGateSourceReceipt": "docs/implementation/native-benchmark-gates-source-stage-001.json",
+      "latestCandidate": {
+        "sourceRevision": "ca22b1baa919198c81749d86ffab56df24ec9317",
+        "ciRunId": 37124217640,
+        "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640",
+        "ciStatus": "pending_verified_zero_jobs_and_artifacts_20261003T125215Z",
+        "benchmarkRunId": 37124217649,
+        "benchmarkUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217649",
+        "benchmarkStatus": "pending_verified_zero_jobs_and_artifacts_20261003T125215Z",
+        "runtimeQualified": false
+      },
       "previousCiRunId": 37121027931,
       "previousCiConclusion": "cancelled_zero_executed_steps_and_artifacts_release_queue_for_delivered_native_fix",
       "runtimeQualified": false
@@ -711,12 +740,40 @@
       "nativeReceipt": "docs/implementation/database-native9b3-r125.json",
       "repairSourceReceipt": "docs/implementation/database-native40-repair-source-r123.json",
       "sdkOracleSourceReceipt": "docs/implementation/database-sdk-oracle-source-r125.json",
+      "storageEngineEvaluation": {
+        "decision": "docs/ADR/ADR-066-garnet-storage-evaluation.md",
+        "feature": "docs/Features/BenchmarkComparisons/GarnetStorageEvaluation.md",
+        "status": "GE001_real_local_BDN8cells_each_plus4long_read_cells_each_and_TUnit32_normal32_scalar_pass_delivered_Actions_pending",
+        "localDevelopmentEvidence": "docs/implementation/garnet-zonetree-local-2026-10-03.md",
+        "localEvidenceIsSiteData": false,
+        "garnetVersion": "2.2.0",
+        "garnetSource": "0d585906eeb5dd77e130a8de6351683336cb168a",
+        "nugetPackageSha256": "cc11bd69f27417f09c42e2927598efd834b4d03919ba0eb29ce6e1d3251b7230",
+        "zoneTreeVersion": "1.9.8",
+        "firstLane": "public_raw_Tsavorite_and_raw_ZoneTree_resident_cache_single_worker_isolated_Linux",
+        "qualification": "Local normal32/scalar32 pass with no skips; local long reads favor Tsavorite hot hits and ZoneTree misses. Delivered-source GitHub artifacts remain required; no overall winner, production storage replacement, service/AOF, concurrency, RF3 or multi-host claim."
+      },
       "phaseProfiling": {
         "decision": "docs/ADR/ADR-063-bounded-database-phase-profiling.md",
         "feature": "docs/Features/ResourceExecution/DatabasePhaseProfiling.md",
-        "status": "bank_arithmetic_immutable_facade_and19_authored_cases_complete26_development_build_format_pass_producers_capture_native_pending",
-        "qualification": "No native execution of19 new cases, server phases/resources, new throughput or measured gain yet.",
-        "sourceReceipt": "docs/implementation/database-phase-bank-source-r133.json"
+        "status": "bank_and19_authored_cases_plus12_reviewed_replication_provider_phase_joins_complete26_development_build_format_pass_default_off_remaining20_capture_native_pending",
+        "qualification": "No actual enabled phase/resource observations, allocation/overhead, new throughput or measured gain yet; exact-source CI normal/scalar/recovery/RF3 and capture remain required.",
+        "sourceReceipt": "docs/implementation/database-phase-bank-source-r133.json",
+        "sourcePhases": [
+          5,
+          15,
+          16,
+          17,
+          18,
+          19,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "producerSourceReceipt": "docs/implementation/database-phase-producer-source-r134.json"
       },
       "authoredCaseInventory": {
         "testMethods": 17,
@@ -2625,14 +2682,16 @@
       "sourceGates": "build_formatter_governance_passed_unit2_recovery1_failures_scalar_and_comparisons_skipped"
     },
     "guardedStoreProcessAndWarmupSource": {
-      "state": "reviewed38_sources_development_build_and_full_formatter_passed_delivered_Actions_pending",
+      "state": "actual38_sources_delivered_c241_combined26_GitHub_pending",
       "receipt": "docs/implementation/isolated-process-warmup-source-041.json",
       "authoredGuardProcessCases": 22,
       "authoredWarmupPureCases": 4,
       "newSourceCasesExecuted": 0,
       "nativeFamilyHostAndEvidenceImplemented": false,
       "completeNativeCohortAndSitePublished": false,
-      "developmentFormatterExitCode": 0
+      "developmentFormatterExitCode": 0,
+      "actualDeliveryReceipt": "docs/implementation/isolated-process-warmup-delivery-042.json",
+      "sourceRevision": "c2415755d8de27019e4add8e148320389e382ba0"
     }
   }
 }

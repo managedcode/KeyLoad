@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using ZoneTree;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
@@ -77,19 +78,31 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
 
     internal void Apply(StorageMutation mutation)
     {
-        PointCache?.Invalidate(mutation.Key.Span);
-        var key = MemoryMarshal.AsMemory(mutation.Key);
-        if (mutation.Value is null)
+        var started = DatabasePhaseTelemetry.Begin();
+        try
         {
-            Tree.ForceDelete(key);
-            return;
+            PointCache?.Invalidate(mutation.Key.Span);
+            var key = MemoryMarshal.AsMemory(mutation.Key);
+            if (mutation.Value is null)
+            {
+                Tree.ForceDelete(key);
+            }
+            else
+            {
+                var logicalValue = mutation.Value.Value;
+                var value = new byte[logicalValue.Length + StorageValueHeaderBytes];
+                value[0] = LiveValueMarker;
+                logicalValue.Span.CopyTo(value.AsSpan(StorageValueHeaderBytes));
+                Tree.Upsert(key, value);
+            }
+        }
+        catch (Exception)
+        {
+            DatabasePhaseTelemetry.End(DatabasePhaseKind.NativeTreeMutation, DatabasePhaseOutcome.Faulted, started);
+            throw;
         }
 
-        var logicalValue = mutation.Value.Value;
-        var value = new byte[logicalValue.Length + StorageValueHeaderBytes];
-        value[0] = LiveValueMarker;
-        logicalValue.Span.CopyTo(value.AsSpan(StorageValueHeaderBytes));
-        Tree.Upsert(key, value);
+        DatabasePhaseTelemetry.End(DatabasePhaseKind.NativeTreeMutation, DatabasePhaseOutcome.Completed, started);
     }
 
     public void Dispose()

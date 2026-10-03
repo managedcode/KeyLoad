@@ -90,9 +90,14 @@ Private capture tests reject missing/partial/wrong-node/source/image/window,
 oversize/default schema and degraded profiles instead of fabricating numbers.
 
 The primitive bank, arithmetic and immutable process-mode facade are now
-implemented in source with19 acceptance-derived TUnit cases. Their compilation,
-allocation and native qualification are independent of source review; producers,
-private capture, process-mode and actual RF3 profile qualification remain open.
+implemented in source with19 acceptance-derived TUnit cases. The reviewed
+Replication-A/provider joins add12 actual boundaries:05,15..19 and26..31.
+Their full development build and formatter pass with all analyzers enabled;
+the [source receipt](../../implementation/database-phase-producer-source-r134.json)
+binds the exact inputs and preservation review. This does not
+establish actual phase counts, allocations or performance. Default mode remains
+off. The remaining20 producers, private capture, trusted process-mode startup
+and actual RF3 profile qualification remain open.
 
 Runtime/allocations/performance qualification is GitHub TUnit/MTP only. Current
 owner workflow policy uses CI/ci.yml for build and every project test, Benchmarks

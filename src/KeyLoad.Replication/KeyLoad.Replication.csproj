@@ -6,5 +6,6 @@
     <PackageReference Include="Microsoft.Orleans.Sdk" PrivateAssets="all" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
+    <ProjectReference Include="../KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
   </ItemGroup>
 </Project>

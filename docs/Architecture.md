@@ -140,8 +140,10 @@ classDiagram
 ## Complete repository boundary
 
 The optional bounded diagnostic workstream is accepted in
-[ADR-063](ADR/ADR-063-bounded-database-phase-profiling.md). Schema is joined;
-producer instrumentation, private capture and native measurements remain open.
+[ADR-063](ADR/ADR-063-bounded-database-phase-profiling.md). The fixed bank and
+12 actual replication/provider phase joins are implemented in source. Process
+mode remains disabled by default; the remaining20 joins, private capture and
+native phase/resource measurements remain open.
 
 ```mermaid
 classDiagram
@@ -218,6 +220,14 @@ Canonical slice names use PascalCase consistently: RepositoryGovernance, Benchma
 The embedded microbenchmark boundary follows Accepted ADR-047; it is peripheral
 runner qualification and does not replace the first product server's RF3 topology.
 The real generated child requires an externally visible unsealed library fixture:
+
+The additive [GarnetStorageEvaluation](Features/BenchmarkComparisons/GarnetStorageEvaluation.md)
+under [ADR-066](ADR/ADR-066-garnet-storage-evaluation.md) compares public raw
+Tsavorite2.2.0 and raw ZoneTree1.9.8 in a non-durable resident cache diagnostic.
+It preserves the existing product/node-local ZoneTree WAL and RF3 boundaries.
+Each engine uses its own Linux job and actual generated microbenchmark consumer;
+the following existing embedded fixture remains unchanged. Service/AOF/recovery,
+concurrency and multi-host qualification precede any later product decision.
 
 ```mermaid
 classDiagram

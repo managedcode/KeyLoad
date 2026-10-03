@@ -1,0 +1,292 @@
+{
+  "task": "TASK-ISO-SG009P-I / TS009W / TSM009-O actual combined source join",
+  "state": "delivered_exact_source_full_GitHub_qualification_pending",
+  "sourceRevision": "c2415755d8de27019e4add8e148320389e382ba0",
+  "sourceTree": "8ac0f34ba962211f143145f37d92d9156d30c2b1",
+  "commitUrl": "https://github.com/managedcode/KeyLoad/commit/c2415755d8de27019e4add8e148320389e382ba0",
+  "remoteMainObservedEqual": true,
+  "sourceFiles": [
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveAttemptLedger.cs",
+      "sha256": "e4f81f375727cacae94dea9180f9a14bc139b47b8c0c06036199cae86439d80c",
+      "bytes": 4575,
+      "group": "warmup6"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRepetitionExecutor.cs",
+      "sha256": "f63e54a3e79a50c6ee25cb8c5a38944ebaaaa979704e9c2f9f108f433780e2fe",
+      "bytes": 5276,
+      "group": "warmup6"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunResult.cs",
+      "sha256": "23963517512803760db0f29e7ee147caa7b484963807ad058299b73f034e0568",
+      "bytes": 1607,
+      "group": "warmup6"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunState.cs",
+      "sha256": "3e7857cd02394c8af37cd497a855e245f4724c37a66b93fe75f657819f8d3d4c",
+      "bytes": 1546,
+      "group": "warmup6"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveRunner.cs",
+      "sha256": "9d8fb4a04cec64c071b499ccaa704a230f8f483f6d2ac200c843b8572ab834a1",
+      "bytes": 2916,
+      "group": "warmup6"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeExistingStore.cs",
+      "sha256": "1494d2349f5e31a8f635454f7e4691fc69a74cb4193fa8ce17f4bf7527d0a310",
+      "bytes": 2178,
+      "group": "child13"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeExistingStoreCleanup.cs",
+      "sha256": "930a89cbba968d66fb7e92c9c89e0b5adce467737c2615c8de40fdc571683d08",
+      "bytes": 1965,
+      "group": "child13"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs",
+      "sha256": "475afe7f5e443b87c14949117ec07bfc978e40d0cb106087c60c1b659a52b0b3",
+      "bytes": 4133,
+      "group": "child13"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreFiles.cs",
+      "sha256": "490024583f6c4e74d4d4ebbf2e4a246c7f505ba2b7439f676712047998b91e15",
+      "bytes": 745,
+      "group": "child13"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs",
+      "sha256": "b042a587c9425dcae69f7405aaec0a715f42e200028bcb67600fa0547b3434da",
+      "bytes": 2125,
+      "group": "child13"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs",
+      "sha256": "d3eef80cfb0f73d9af5b1b097a81ff3670e967acb6873b33040cc90eb369c78f",
+      "bytes": 5822,
+      "group": "child13"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeTreeFactory.cs",
+      "sha256": "dd03bbbf5edee158f5f7ad66f54549f0a10aea0123b6b6c18ecd13bb7b9a2c42",
+      "bytes": 2139,
+      "group": "child13"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj",
+      "sha256": "b1911d682486f794aecb7ffecc03293218179b513e10f046e8714ba45a0a086a",
+      "bytes": 535,
+      "group": "shared5"
+    },
+    {
+      "path": "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
+      "sha256": "de270095f4fd307e8dd43527687f60d28d4f59f6953871ee34cad8523ca3a9f8",
+      "bytes": 10076,
+      "group": "shared5"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedTimeSeriesTimescaleResourceTests.cs",
+      "sha256": "084a5bc0a4a8874bcb0bd18e5125a1b09c6228b46e0c1de7d126bf1c8728898a",
+      "bytes": 14699,
+      "group": "timescaleModelOracle1"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/CrashHostApplication.cs",
+      "sha256": "63f203832f2831b0b01aeabfcacb165c7c10b1037eae0633505292bb9418d42f",
+      "bytes": 1375,
+      "group": "shared5"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/ExistingStoreInspector.cs",
+      "sha256": "4d709c396721166f732a6197caeaabb32d1fc41bd58f1959fe9dcb4f4a525aae",
+      "bytes": 2752,
+      "group": "child13"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/ExistingStoreInspectorContracts.cs",
+      "sha256": "7a3db2c53d59109b77fc3c8cf10bf08199ded17becb275260cbcd29199fd0e0a",
+      "bytes": 915,
+      "group": "child13"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/ExistingStoreInspectorFailures.cs",
+      "sha256": "3341ecd2a7e59d5275f4cec279f57af38d69d6cce76bbd0d5e2b8b079bd30fa9",
+      "bytes": 2322,
+      "group": "child13"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/ExistingStoreInspectorInputs.cs",
+      "sha256": "4ac358c5ee03cba42c6b5ada22a902150f4c97ac89e8a08319c9fad096a4a110",
+      "bytes": 2116,
+      "group": "child13"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/ExistingStoreInspectorOperation.cs",
+      "sha256": "bbde1f8dc1eca8e0cab82faa353840ff7ac9b95e9a0e8f6b3a32079ef1118072",
+      "bytes": 2237,
+      "group": "child13"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/ExistingStoreInspectorProtocol.cs",
+      "sha256": "e9a3190ad69d8687e27c9a944704a54af6e4054b1e346aba60ad1a88dcb462c3",
+      "bytes": 2430,
+      "group": "child13"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj",
+      "sha256": "bbcae1fb62e5cfc87318a9a40dde7eeb7659aed6ca71b5959245a660686775d8",
+      "bytes": 573,
+      "group": "shared5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/TimeSeriesIntensiveWarmupStorageTests.cs",
+      "sha256": "7d0431307e9b4ddf769872243e07a3e3ad42a87b780d7a1a9b72fe25ceb00b74",
+      "bytes": 7264,
+      "group": "warmup6"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ExistingStoreInspectionAssertions.cs",
+      "sha256": "4c61c385f35232a45e1475061c2e97eabd9f80da9ac266f8ae6042675109ff6e",
+      "bytes": 3092,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ExistingStoreInspectionExpectedFailures.cs",
+      "sha256": "a9f48b46d2e66e2bb91dc612f3dbe2dffb841b017a7e828d08054cc44b219565",
+      "bytes": 905,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ExistingStoreInspectorFailureJoin.cs",
+      "sha256": "59da7c68475ea9f9d9fce9603fc9333e07430972218b1eac7ff15df661b96df7",
+      "bytes": 2051,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ExistingStoreInspectorLaunchSettings.cs",
+      "sha256": "36e0aa5bd8987da60f0405fd10576befee4e747fe2c476831b6b61aa83719674",
+      "bytes": 2470,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ExistingStoreInspectorLifetime.cs",
+      "sha256": "525de7557dd876185cbb11ef905520cc4b20cc2f4b54a16be1b000413949e37b",
+      "bytes": 5848,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ExistingStoreInspectorPipeCapture.cs",
+      "sha256": "d0ead1ac8b84dffce9099e6e1dd6da1c2745d8436f2c079fb76cb07abdab9633",
+      "bytes": 1927,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ExistingStoreInspectorProcess.cs",
+      "sha256": "aa98eac926fe0ea6fec65240c66f43ee3b0782dcb83ac05646f40093ae5efa3c",
+      "bytes": 3760,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ExistingStoreInspectorSession.cs",
+      "sha256": "29754b179bb85321d8ce9c29d1e6849e588431345c9abbfc6c8fd171b28f1d2e",
+      "bytes": 5556,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ExistingStoreInspectorSessionStartFailure.cs",
+      "sha256": "8d6a803a6c6119117398eb141602f556586b54a1c64e0bd557995aa3dd5d50b9",
+      "bytes": 2829,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ZoneTreeExistingStoreFixture.cs",
+      "sha256": "6c829c880ebe9bef4939db090a05e7ef2377957eddbb6a12eb2183cbfd230a92",
+      "bytes": 5005,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ZoneTreeExistingStoreMissingTests.cs",
+      "sha256": "ce85e68ef4a9c83d796d9b723f848178a9a70cd8f8efb95a52d4d86d5afb3645",
+      "bytes": 4225,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ZoneTreeExistingStoreTests.cs",
+      "sha256": "447810f37bf1e81d612b0afd01bd26aa35e224e3782fbcc23cdebe644827de9f",
+      "bytes": 13531,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/StorageRecovery/ZoneTreeExistingStoreValidationTests.cs",
+      "sha256": "ce8cbbc534deabbcb48581374f03a0638576b12190226f7ce894b1aa38864652",
+      "bytes": 6247,
+      "group": "parent13"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj",
+      "sha256": "81221fb25af7bef70ad2990d0eb33fd6fbc7af897a3bee413f49a01892a68ca5",
+      "bytes": 1545,
+      "group": "shared5"
+    }
+  ],
+  "sourceFileCount": 38,
+  "originalScopedCandidateReceipt": "docs/implementation/isolated-process-warmup-source-041.json",
+  "actualUnitProjectJoin": {
+    "path": "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj",
+    "scopedCandidateSha256": "c0aadc044e0152a8f4a4b04385d07f5ead2c05519e5d02b28c013ed536431656",
+    "actualCombinedSha256": "81221fb25af7bef70ad2990d0eb33fd6fbc7af897a3bee413f49a01892a68ca5",
+    "difference": "same_CrashHost_reference_plus_concurrently_delivered_tracked_Diagnostics_reference",
+    "scopedCandidateReceiptIsCombinedQualification": false
+  },
+  "preservationReview": {
+    "sha256": "7c3ee2e4f7e28a6fd4f3689a1da4053bf00826285f5782be00696f56e2ec5ff6",
+    "sourceAndReferenceMapSha256": "711ea60192022da29ff20d833bb1d830481c034ee69ba2c4c4f8dafb150e522e",
+    "all38SourcesEqualR3": true,
+    "all51RootPathsRetained": true,
+    "trackedProjects": 26,
+    "trackedLiteralProjectReferences": 57,
+    "allReferenceTargetsTracked": true,
+    "kind": "source_preservation_and_reference_closure_not_full_foreign_semantic_or_runtime_qualification"
+  },
+  "developmentEvidence": "source041_records_separate_25_project_development_build_and_formatter_not_this_combined26_source",
+  "initialActionsObservation": {
+    "kind": "one_original_provider_snapshot_no_runtime_verdict",
+    "sourceRevision": "c2415755d8de27019e4add8e148320389e382ba0",
+    "runs": [
+      {
+        "workflow": "CI",
+        "runId": 37117316968,
+        "attempt": 1,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37117316968",
+        "stateAtSnapshot": "pending",
+        "allocatedJobsAtSnapshot": 0,
+        "artifactsAtSnapshot": 0
+      },
+      {
+        "workflow": "Benchmarks",
+        "runId": 37117317113,
+        "attempt": 1,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37117317113",
+        "stateAtSnapshot": "pending",
+        "allocatedJobsAtSnapshot": 0,
+        "artifactsAtSnapshot": 0
+      }
+    ],
+    "snapshotSealSha256": "77cfff845ac6ae33eefccd8e5feed4daa62a37d44f3dbfe6dabc5b071d609196",
+    "noDuplicateDispatch": true
+  },
+  "gates": {
+    "actualNewCaseResultsRetained": false,
+    "normalScalarProcessRf3": "pending",
+    "comparisonModelsAndNative270": "pending",
+    "timeSeriesPreparedNative6And30WireCollectorSiteJoinImplemented": false,
+    "freshCompleteCohortAndSitePublished": false
+  },
+  "limits": "The source041 planned project variant remains immutable candidate history. This receipt binds actual combined source only; no new performance, coverage, endurance, power-loss durability or production qualification is claimed."
+}

@@ -8,11 +8,13 @@ on:
         description: Run only source checks and native serialization diagnostics
         type: boolean
         default: false
-permissions:
-  contents: read
-  actions: read
+      raw_storage_only:
+        description: Run only source checks and the isolated raw cache evaluation
+        type: boolean
+        default: false
+permissions: {contents: read, actions: read}
 concurrency:
-  group: keyload-benchmarks-${{ github.ref }}${{ inputs.native_serialization_only && '-native-serialization' || '' }}
+  group: keyload-benchmarks-${{ github.ref }}${{ inputs.raw_storage_only && '-raw-storage' || '' }}${{ inputs.native_serialization_only && '-native-serialization' || '' }}
   cancel-in-progress: false
 jobs:
   comparison-build:
@@ -20,6 +22,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      - name: Check diagnostic mode selection
+        env: {NATIVE_ONLY: "${{ inputs.native_serialization_only }}", RAW_ONLY: "${{ inputs.raw_storage_only }}"}
+        run: |
+          if [ "$NATIVE_ONLY" = true ] && [ "$RAW_ONLY" = true ]; then
+            echo 'Select only one diagnostic mode.' >&2
+            exit 1
+          fi
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up .NET
@@ -43,7 +52,7 @@ jobs:
           if-no-files-found: error
   comparison-plan:
     name: Plan benchmark runs
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && !inputs.native_serialization_only
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && !inputs.raw_storage_only && !inputs.native_serialization_only
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -65,7 +74,7 @@ jobs:
           retention-days: 90
   comparison-images:
     name: Build Docker images
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && !inputs.native_serialization_only
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && !inputs.raw_storage_only && !inputs.native_serialization_only
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions: {contents: read, actions: read}
@@ -315,9 +324,42 @@ jobs:
         with:
           setup-outcome: ${{ steps.images.outcome }}
           artifact-name: comparison-case-qualification-${{ matrix.id }}
+  raw-storage-correctness:
+    name: Check raw storage contracts
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && inputs.raw_storage_only && !inputs.native_serialization_only
+    needs: comparison-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Qualify real cache and report contracts
+        uses: ./.github/workflows/Features/BenchmarkComparisons/RawStorageEvaluation
+        with:
+          mode: correctness
+  raw-storage:
+    name: Raw cache benchmark / ${{ matrix.engine }}
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && inputs.raw_storage_only && !inputs.native_serialization_only
+    needs: [comparison-build, raw-storage-correctness]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [zonetree, tsavorite]
+    env:
+      KEYLOAD_RAW_STORAGE_ENGINE: ${{ matrix.engine }}
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Measure the selected resident engine
+        uses: ./.github/workflows/Features/BenchmarkComparisons/RawStorageEvaluation
+        with:
+          mode: benchmark
+          engine: ${{ matrix.engine }}
   native-serialization:
     name: Measure native serialization
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && inputs.native_serialization_only
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && inputs.native_serialization_only && !inputs.raw_storage_only
     needs: comparison-build
     runs-on: ubuntu-latest
     timeout-minutes: 45

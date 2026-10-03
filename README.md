@@ -45,6 +45,16 @@ cumulative limits, retries and all-or-nothing effects.
 
 ## Development status
 
+[Garnet/ZoneTree evaluation](docs/Features/BenchmarkComparisons/GarnetStorageEvaluation.md)
+starts with public raw Tsavorite 2.2.0 and raw ZoneTree 1.9.8 cache diagnostics,
+identical binary inputs and isolated Linux jobs. Both real engines completed
+[local BenchmarkDotNet diagnostics](docs/implementation/garnet-zonetree-local-2026-10-03.md);
+long hot-hit reads favor Tsavorite, while ZoneTree misses are faster.
+Normal/scalar TUnit and delivered-source GitHub qualification are tracked
+separately. Full Garnet service/AOF/recovery,
+concurrency and multi-host comparisons remain open. Product storage remains
+ZoneTree; an overall storage or service winner has not been established.
+
 The retained [9b3bd8ed source qualification](docs/implementation/isolated-source-qualification-37111280400.json)
 passes full build/format/governance,118 analyzer,183 recovery and63 RF3 cases.
 Its normal suite passes1852/1853; the known SDK-status assertion leaves scalar
@@ -394,8 +404,10 @@ is corrected in newer test source, which still needs native qualification.
 Scalar tests and performance jobs were skipped. The optional
 [server phase profiler](docs/Features/ResourceExecution/DatabasePhaseProfiling.md)
 has its bounded bank, arithmetic and process-mode facade implemented in source,
-with19 authored TUnit cases. Producer joins, private native capture and native
-qualification remain pending. Full native tests, actual server profiles
+with19 authored TUnit cases. Source joins now cover12 actual replication/provider
+boundaries, including protocol/RPC, apply, gate waits/holds and journal writes.
+Mode remains disabled by default; remaining producers, private capture and native
+qualification stay pending. Full native tests, actual server profiles
 and measured benefit remain required; no throughput increase or competitor
 ranking is established.
 
@@ -413,8 +425,9 @@ skips. Full CI fails50 compiler/analyzer diagnostics in release/site tests;
 ordinary unit, scalar and recovery steps were skipped. The newer test repairs,
 bounded phase bank and19 authored cases pass the complete26-project development
 build and formatter in the [source checkpoint](docs/implementation/database-phase-bank-source-r133.json).
-Their delivered-source native execution, producer joins and private RF3 profiles
-remain required; these development gates establish no measured performance gain.
+Their delivered-source native execution and private RF3 profiles remain required;
+the later12 producer joins also pass the full development build. These development
+gates establish no measured performance gain.
 
 
 The delivered `2f374fc34` [Linux run37093197474](https://github.com/managedcode/KeyLoad/actions/runs/37093197474) now passes the complete source gates,118 analyzer cases,1483 normal and1483 scalar unit cases,164 process-recovery cases and63 Docker RF3 cases without skips. The [original-source receipt](docs/implementation/isolated-source-qualification-37093197474.json) retains exact report/artifact hashes. Comparative image and diagnostic gates pass;27 native preflights finish16 job successes and11 failures, including two explicit unavailable Neo4j topologies among the successes. Complete270 performance and site publication remain unqualified. The separate TimeSeries pure30 cases pass in both modes, while its bounded runner has36 new declared TUnit cases prepared in source and native adapters/all30 cells remain pending.

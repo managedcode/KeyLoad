@@ -1,3 +1,5 @@
+using KeyLoad.Diagnostics.Features.ResourceExecution;
+
 namespace KeyLoad.Replication;
 
 internal sealed class ReplicaState(ReplicaMaterializer materializer, ReplicaConfiguration configuration, TimeProvider clock)
@@ -17,10 +19,45 @@ internal sealed class ReplicaState(ReplicaMaterializer materializer, ReplicaConf
 
     internal async Task<T> LockedAsync<T>(Func<T> action, CancellationToken cancellationToken)
     {
-        await Materializer.ProtocolGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        var waitStarted = DatabasePhaseTelemetry.Begin();
+        var waitOutcome = DatabasePhaseOutcome.Faulted;
         try
-        { Check(); return action(); }
-        finally { Materializer.ProtocolGate.Release(); }
+        {
+            await Materializer.ProtocolGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            waitOutcome = DatabasePhaseOutcome.Completed;
+        }
+        catch (OperationCanceledException)
+        {
+            waitOutcome = DatabasePhaseTelemetry.CancellationOutcome(cancellationToken);
+            throw;
+        }
+        finally
+        {
+            DatabasePhaseTelemetry.End(DatabasePhaseKind.ReplicaProtocolGateWait, waitOutcome, waitStarted);
+        }
+
+        var holdStarted = DatabasePhaseTelemetry.Begin();
+        var holdOutcome = DatabasePhaseOutcome.Faulted;
+        try
+        {
+            Check();
+            var result = action();
+            holdOutcome = DatabasePhaseOutcome.Completed;
+            return result;
+        }
+        finally
+        {
+            var releaseOutcome = DatabasePhaseOutcome.Faulted;
+            try
+            {
+                Materializer.ProtocolGate.Release();
+                releaseOutcome = holdOutcome;
+            }
+            finally
+            {
+                DatabasePhaseTelemetry.End(DatabasePhaseKind.ReplicaProtocolGateHold, releaseOutcome, holdStarted);
+            }
+        }
     }
 
     internal void Check()

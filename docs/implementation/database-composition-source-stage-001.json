@@ -5,7 +5,7 @@
   "decision": "docs/ADR/ADR-067-composable-agent-database.md",
   "feature": "docs/Features/DatabaseComposition.md",
   "sourceBaseRevision": "8071148cd83bfecd67332c2a794248bf66c6b4ec",
-  "sourceRevision": null,
+  "sourceRevision": "366d3a8a34af98c57d895a0317fb9da323a6d9aa",
   "sourceCodePacketSha256": "376bc7b78a5c5e08b28fbb27ebb79456aeff7d86a3a7ff7ba029bcceccb65c71",
   "sourceCodeFiles": [
     {
@@ -286,12 +286,54 @@
     "contract": "Current generated reader decodes missing appended receipt field4 as a safe empty collection and missing outcome field5 as null; ordinary fields unchanged. This is not universal old-store/downgrade qualification."
   },
   "githubQualification": {
-    "sourceRevision": null,
-    "ciRunId": null,
-    "ciUrl": null,
-    "status": "not_yet_dispatched_for_this_source",
+    "sourceRevision": "366d3a8a34af98c57d895a0317fb9da323a6d9aa",
+    "ciRunId": 37123589277,
+    "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37123589277",
+    "status": "cancelled_after_completed_verify_failure_to_release_repaired_source",
     "runtimeQualified": false,
-    "linuxOnly": true
+    "linuxOnly": true,
+    "dispatchedRunId": 37123597222,
+    "dispatchedStatus": "cancelled_zero_jobs",
+    "integratedSourceRevision": "d50001d81856ec4d9891ccbfa6ce0aef6e2a1b01",
+    "integratedCiRunId": 37123615103,
+    "integratedCiUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37123615103",
+    "integratedCiStatus": "cancelled_zero_jobs",
+    "verifyJobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37123589277/job/111204377864",
+    "buildFormatGovernanceAnalyzers": "passed",
+    "normal": {
+      "sha256": "3471e334e4348ff727cf928ffdc845ec7b73a9e0de63b920262450217dc69635",
+      "total": 2349,
+      "passed": 2220,
+      "failed": 129,
+      "skipped": 0,
+      "compositionPassed": 32
+    },
+    "scalar": "not_executed_after_normal_failure",
+    "recovery": {
+      "sha256": "838a9ad6efadd3c5dd27a73d4d4d1cee1990bd41f2c28986e9dc08306126d9ca",
+      "total": 190,
+      "passed": 135,
+      "failed": 55,
+      "skipped": 0,
+      "compositionPassed": 7
+    },
+    "rf3": "cancelled_during_test_step_unqualified",
+    "artifactId": 11273574119,
+    "artifactName": "test-results-ubuntu-latest",
+    "artifactZipSha256": "e1e5555c23bf046d014382db70f400085f621c6bd8959da5012fc4711ad158f8",
+    "artifactContainsTrx": false,
+    "artifactFormat": "original_TUnit_JSON",
+    "failureNameOverlapWithLocalBase": {
+      "ciOnly": 0,
+      "shared": 129,
+      "localBaseOnly": 11,
+      "sameFailureCausesProven": false,
+      "caveat": "Ubuntu CI and macOS local baseline differ; same names do not prove identical causes"
+    },
+    "latestIntegratedSourceRevision": "ca22b1baa919198c81749d86ffab56df24ec9317",
+    "latestIntegratedCiRunId": 37124217640,
+    "latestIntegratedCiUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640",
+    "latestIntegratedCiStatus": "queued"
   },
   "remainingGates": [
     "Delivered-source full build/format/governance and TUnit normal/scalar/process recovery",

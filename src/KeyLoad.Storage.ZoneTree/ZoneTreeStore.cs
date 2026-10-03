@@ -1,3 +1,4 @@
+using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
@@ -43,7 +44,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     public T Read<T>(Func<IKeyValueView, T> read)
     {
         ArgumentNullException.ThrowIfNull(read);
-        runtime.Gate.EnterReadLock();
+        ZoneTreePhaseGate.EnterRead(runtime);
         try
         {
             runtime.Check();
@@ -62,7 +63,8 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     public T Commit<T>(Func<IAtomicTransaction, long, T> compile)
     {
         ArgumentNullException.ThrowIfNull(compile);
-        runtime.Gate.EnterWriteLock();
+        var holdStarted = ZoneTreePhaseGate.EnterCommit(runtime);
+        var holdOutcome = DatabasePhaseOutcome.Faulted;
         try
         {
             runtime.Check();
@@ -72,15 +74,17 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
             var changes = tx.PrepareChanges();
             if (changes.Length == 0)
             {
+                holdOutcome = DatabasePhaseOutcome.Completed;
                 return result;
             }
 
             ZoneTreeJournalPublication.Publish(runtime, tx, changes, nextPosition);
+            holdOutcome = DatabasePhaseOutcome.Completed;
             return result;
         }
         finally
         {
-            runtime.Gate.ExitWriteLock();
+            ZoneTreePhaseGate.ExitCommit(runtime, holdStarted, holdOutcome);
         }
     }
 
