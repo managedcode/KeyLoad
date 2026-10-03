@@ -1,6 +1,6 @@
 # ADR-057: Native Orleans binary atomic WAL
 
-Status: Accepted implementation contract2026-10-03 under owner serializer direction; source implemented; exact-SHA qualification pending. Owner: KeyLoad integration lead. Related REQ-STORAGE-015..019, AC-WAL-001..005, TASK-WAL-001..005. Extends the storage format matrix of ADR-011 only for this private journal transition; no broader migration approval.
+Status: Accepted implementation contract2026-10-03 under owner serializer direction; source implemented; mandatory exact-SHA unit/process/RF3 gates qualified at cf630751e0f24e4d8183e55510add9c7207e377f. Independent migration/resource and performance evidence remains open. Owner: KeyLoad integration lead. Related REQ-STORAGE-015..019, AC-WAL-001..005, TASK-WAL-001..005. Extends the storage format matrix of ADR-011 only for this private journal transition; no broader migration approval.
 
 ## Decision
 
@@ -63,6 +63,12 @@ unit/process/RF3 and migration/resource evidence exists.
 
 ## Native codec refinement from exact-source CI
 
-Run37077856823 at6ad4741a7 disproved the authored1024-byte size assertion and overflow-rejection protocol fixture. Orleans10.3.1 NullableCodec's generic codec resolution uses ReadOnlyMemoryCodec<byte> with per-byte tagged fields. Accept the framework's closed native IFieldCodec<ReadOnlyMemory<byte>> → ReadOnlyMemoryOfByteCodec registration, with no custom wire codec. Nullable nonnull values then use native length-prefixed raw bytes. Keep the failing size/4096-byte assertions unchanged; qualification is pending.
+Run37077856823 at6ad4741a7 disproved the authored1024-byte size assertion and overflow-rejection protocol fixture. Orleans10.3.1 NullableCodec's generic codec resolution uses ReadOnlyMemoryCodec<byte> with per-byte tagged fields. Accept the framework's closed native IFieldCodec<ReadOnlyMemory<byte>> → ReadOnlyMemoryOfByteCodec registration, with no custom wire codec. Nullable nonnull values then use native length-prefixed raw bytes. The original size/4096-byte assertions remain unchanged and pass in the native qualification below.
 
 That inner wire encoding is incompatible with the first unqualified frame2/identity3 source. The final contract supersedes frame2/identity3 references above with frame3/identity4, rejects all complete legacy frame1/2 headers including torn payloads, and permits offline verified checkpoint-only/empty identities1/2/3 to promote4. Both old writer generations refuse identity4 before writes. Aliases, fields0/1/2, explicit kinds, checkpoint2, raw tree bytes, flush order and authority remain. Use the previous binary matching each legacy journal to Compact while all RF3 writers are stopped; verify its backup, then upgrade all nodes. No JSON or binary fallback decoder.
+
+## Current mandatory-gate evidence
+
+The [native receipt](../implementation/atomic-wal-qualification-37084177131.json) joins authenticated run37084177131, exact source cf630751e0f24e4d8183e55510add9c7207e377f, original ZIP digests and terminal successful jobs. Full Release restore/build, formatter/governance and118 analyzer cases pass; units1407/1407 in normal and scalar modes, recovery136/136 and genuine RF3 SDK/MCP63/63 pass with no skips. All66 WAL cases pass in each mode; their19 source methods and native expanded signatures match the earlier independently joined c10c source, with this storage/test slice unchanged. All1000 real process-kill receipts retain atomic cuts and values at every observed cut at or after journal flush.
+
+This qualifies the specified mandatory WAL gates. The overall workflow still runs the separate isolated comparative cohort at receipt capture; it is not a full green workflow or an acceleration result. ADR status stays Accepted while numeric coverage, decoded-memory/work amplification, independent matching old-executable upgrade/rollback and remaining malformed-envelope/header proof are open. Process-kill recovery does not establish power-loss durability, endurance or production readiness.

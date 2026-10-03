@@ -1,6 +1,6 @@
 # Atomic WAL implementation plan
 
-Chosen [brainstorm](zonetree-orleans-wal.brainstorm.md) and [acceptance](zonetree-orleans-wal.acceptance.md) govern scope. Integration owner accepts the bounded implementation contract in ADR-057 under the owner's requested serializer change; required fault qualification remains pending. Do not expand into replication/checkpoint value re-encoding or concurrent comparison work.
+Chosen [brainstorm](zonetree-orleans-wal.brainstorm.md) and [acceptance](zonetree-orleans-wal.acceptance.md) govern scope. Integration owner accepts the bounded implementation contract in ADR-057 under the owner's requested serializer change; mandatory unit/process/RF3 fault gates are qualified at cf630751e0f24e4d8183e55510add9c7207e377f; independent migration/resource and performance evidence remains open. Do not expand into replication/checkpoint value re-encoding or concurrent comparison work.
 
 ## Ordered work and task graph
 
@@ -48,22 +48,22 @@ final main checkpoint; preserve every eligible shared change and never stash.
 - [x] Integrate generated binary DTO/codecs and exact binary output bound; remove JSON-specific accounting.
 - [x] Integrate frame/identity version guard, full validation before apply and offline checkpoint-only upgrade.
 - [x] Review all worker diffs, cache/stage/poison/disposal/migration/error behavior.
-- [ ] Development validation: restore, Release solution build/analyzers; required format check; git diff --check; static node governance. No local tests or benchmarks.
-- [ ] Deliver only relevant stable KeyLoad changes under existing main authorization; preserve unrelated files/hunks and never stash/force-push/bypass gates.
-- [ ] Qualify exact pushed SHA in GitHub: complete unit, real-process recovery and Docker/Aspire RF3 SDK+MCP; fix actual failures and repeat owning gate. No skipped/pending jobs qualify.
-- [ ] Record actual final SHA/run/job summaries and gaps. Never mark completed with failed/pending gates or unmeasured speed/unsupported durability.
+- [x] Development/source validation: local static governance and scoped formatting/diff checks; exact cf630751e GitHub restore, full Release solution build/analyzers, required solution formatter and governance all pass. Earlier dirty-tree build failures remain historical below. No local tests or benchmarks.
+- [x] Deliver only relevant stable KeyLoad changes under existing main authorization;6ad/c10c plus scoped gate repairs are committed and pushed on main. Preserve unrelated files/hunks; no stash/force-push/protection bypass.
+- [x] Qualify exact pushed source cf630751e in GitHub run37084177131:1407/1407 units each normal/scalar mode,136/136 process recovery and63/63 genuine RF3 SDK+MCP;66/66 WAL cases each mode. Every mandatory job is terminal successful with no skips. The separate270-cell comparative cohort was still running at evidence capture.
+- [x] Record exact tested source/run/job/ZIP/native reports and gaps in docs/implementation/atomic-wal-qualification-37084177131.json. Mandatory WAL gates pass; full comparative workflow, numeric coverage, independent upgrade/resource faults, speed, power-loss and endurance are not claimed.
 
 ## Verification methodology and existing failures
 
 The codec worker follows installed Orleans serialization/versioning guidance; lead reviews actual generated codecs, stable aliases and full-consumption boundaries. Real-store tests establish write/reopen and reject-before-durable behavior. Existing CrashHost tests exercise actual process cuts; RF3 SDK/MCP suites retain multi-node authority. Coverage collector status and numeric thresholds must be reported honestly. Format/analysis/governance are separate source gates; tests stay in GitHub.
 
-- [ ] Baseline image preflight failure37073331174: existing comparison topology workflow repair is already in concurrent working tree; outside WAL ownership. Inspect updated37074392471 result before attributing it to this work.
+- [x] Track baseline image preflight failure37073331174 and actual37074392471 failures below. Historical image/build/test blockers have scoped repairs and current cf630751e mandatory gates pass; comparison topology delivery remains outside WAL ownership.
 
 Baseline test failures are recorded below. External blockers do not become permission to weaken acceptance or fabricate evidence.
 
 Full development build observed four concurrent BenchmarkComparisons blockers: MongoReplicaProof.cs19 CS1061 ReplicaSet property, ComparisonValidation.cs53 KLD0033 nesting4, OpenSearchHttp.cs57 KLD0024 untypedcatch, PostgresTopology.cs60 CA2100 commandtext. TASK-WAL-GATE-REPAIR owns only those exact edits to unblock integrated source validation; no comparison feature delivery or unrelated commits are authorized. Baseline main37074392471 terminated failure: AC_IMAGE_002_MetadataRequiresAValidConfigIdAndExactSourceRevision (KeyNotFoundException atImageToolingContractTests.cs196; 1021/1022unit passes no skips) plus image preparation/cleanup command failure beforeRF3/comparison tests. The existing minimal image-contract/test corrections and owner-selected Linux-only matrix are delivery prerequisites for the complete canonical gate; preserve every other concurrent comparison change.
 
-Final development source check: restore and static governance pass; all final WAL source/test files have no compiler/analyzer diagnostics. The full dirty-tree build fails on111 concurrent BenchmarkComparisons diagnostics, including two not-yet-added native resource types. Required full dirty-tree formatting likewise includes concurrent benchmark diagnostics. This is not a green full-solution qualification. Reviewers completed the codec contract and all44 new parameterized regression cases without running local tests; exact committed source will be built, formatted and tested by canonical GitHub CI.
+Historical first development source check: restore and static governance pass; all final WAL source/test files have no compiler/analyzer diagnostics. The full dirty-tree build fails on111 concurrent BenchmarkComparisons diagnostics, including two not-yet-added native resource types. Required full dirty-tree formatting likewise includes concurrent benchmark diagnostics. This is not a green full-solution qualification. Reviewers completed the codec contract and all44 new parameterized regression cases without running local tests; exact committed source will be built, formatted and tested by canonical GitHub CI.
 
 ## Exact-source full-gate repair37077856823
 
@@ -100,7 +100,7 @@ Exact c10c48e40 run37079707413 builds/formats successfully; comparison3/4 reache
 
 The lead independently joined the original c10c attempt1 archives against fresh authenticated GitHub run/artifact/job metadata in [the native receipt](docs/implementation/runtime-qualification-37079707413.json): 7 original TUnit publications, 2615 executions, 1409 distinct IDs, one comparison failure; normal/scalar units1088/1088 each, recovery136/136 and RF3 63/63. All19 source WAL methods and every argument expansion match66/66 native cases in each mode, including closed raw-byte codec, unchanged size/protocol assertions and successor refusal before apply. All1000 recovery rows match exact source seeds/stages and atomic cuts. Coverage, decoded-memory/work bounds, independent deployed-binary migration, remaining malformed envelopes, speed, power-loss and endurance remain open. The historical c10c consumer pin and native TimeSeries report are10.0.0; current10.0.3 and isolated270-cell changes require new source qualification.
 
-Completed c10c48e40 source gate: full solution build/formatter/governance and118 analyzer cases pass;1088/1088 normal and1088/1088 scalar units,136/136 real process recovery and63/63 RF3 SDK/MCP pass with0 skips. Comparison3/4 fails only the cancellation contract above; both measurement profiles skip after that failure. This is a failed whole workflow, not complete qualification. The exact preserving cancellation hunks pass independent source review and scoped formatting; dirty comparison build has9 unrelated isolated-feature diagnostics and0 owned cancellation diagnostics. Final revised-source full GitHub gate remains mandatory.
+Historical c10c48e40 mandatory source gates: full solution build/formatter/governance and118 analyzer cases pass;1088/1088 normal and1088/1088 scalar units,136/136 real process recovery and63/63 RF3 SDK/MCP pass with0 skips. Comparison3/4 fails only the cancellation contract above; both measurement profiles skip after that failure. This is a failed whole workflow, not complete qualification. The exact preserving cancellation hunks pass independent source review and scoped formatting; dirty comparison build has9 unrelated isolated-feature diagnostics and0 owned cancellation diagnostics. Final revised-source full GitHub gate remains mandatory.
 
 
 ## Closed comparison report matrix join
@@ -132,3 +132,11 @@ Final prerequisite source review keeps all RPC outcomes/privacy, native Neo4j mi
 ## Mechanical Site build prerequisite
 
 Exactcfe8c1608/run37083535329 enabled GitHub build fails only SiteIsolatedGitHubArchiveReceipt.cs IDE0032/IDE0290; native analyzer118 gate passes and RF3 runs independently. TASK-WAL-CI-STYLE under WAL005 changes only that committed receipt class to the required primary constructor/get-only backing properties, preserving constructor parameter order, exact DeepClone/copy-on-access and Matches behavior. Root prepares an exactHEAD index patch so the active owner's different receipt/authority/MatchesBytes work stays visible and unstaged. No behavior/API/security/test assertion changes, new runtime tests or ADR: N/A for mechanical style. Source/formatter/governance review and full next-source GitHub gate remain mandatory; skipped unit/recovery/comparison after failed build are not passing evidence.
+
+## Final mandatory WAL qualification
+
+[Native receipt](docs/implementation/atomic-wal-qualification-37084177131.json): exact cf630751e0f24e4d8183e55510add9c7207e377f/run37084177131; full solution Release/formatter/governance, analyzer118/118, unit1407/1407 normal and1407/1407 scalar, recovery136/136 andRF3 63/63, no skips. Four original ZIP digests and all six native TUnit publications are verified against authenticated API run/job/artifact provenance. All19 WAL methods/66 expanded cases pass in each mode, match the historical native signatures and unchanged source slice; all1000 seeded process receipts have atomic cuts and post-flush recovery. Terminal successor and unchanged size/protocol assertions pass.
+
+Prior bef68a27f/run37084105070 passed136 recovery and63 RF3 but unit1406/1407 failed the cleanup report assertion and scalar skipped. Source ComparisonRunner checks setup failure before scenario support, so unreachable targets correctly emit60 failed/setup/no-sample rows. The separate comparison owner corrected that exact expectation in cf630751e; all mandatory gates above are freshly qualified, not inferred from bef.
+
+Independent final source review found no new concrete WAL defect. No local runtime/tests ran. ADR057 remains Accepted: decoded-memory/work amplification, matching old-executable migration/rollback, remaining malformed envelopes, numeric coverage, comparable speed/allocations, power-loss and endurance remain explicit gaps. At evidence capture the separate isolated270-cell comparative cohort and overall workflow are still in progress; they do not establish performance leadership.

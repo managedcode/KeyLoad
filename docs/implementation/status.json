@@ -21,13 +21,13 @@
     "title": "ZoneTree durability audit і crash harness",
     "status": "in_progress",
     "atomicWalSerialization": {
-      "status": "source_implemented_qualification_pending",
+      "status": "mandatory_gates_qualified_remaining_resource_migration_performance_evidence_open",
       "decision": "docs/ADR/ADR-057-orleans-atomic-wal.md",
       "source": "generated_Orleans10.3.1_binary_mutations_closed_native_ReadOnlyMemoryOfByteCodec_explicit_kind_full_consumption_frame3_identity4_native_ZoneTree_unchanged",
       "upgrade": "offline_old_binary_compact_verified_backup_homogeneous_RF3_no_JSON_fallback",
-      "verification": "current_published_TimeSeries10_0_3_consumer_restore_and_full_combined_Release_build_formatter_pending_exact_source_GitHub_unit_process_RF3_qualification_pending_prior6ad_frame2_identity3_failures_preserved",
-      "performance": "encoded_size_regression_authored_no_acceleration_power_loss_or_endurance_claim",
-      "successorSequenceRepair": "source_guard_rejects_terminal_MaxValue_successor_before_decode_apply_or_truncation_real_checkpoint_legal_limit_wrapped_negative_unchanged_authority_and_ownership_regressions_GitHub_pending",
+      "verification": "exactcf630751e_run37084177131_full_Release_restore_build_formatter_governance_analyzers118_normal1407_scalar1407_recovery136_RF3_63_no_skips_WAL66_each_mode_1000_atomic_process_cuts",
+      "performance": "native_raw_byte_and_unchanged_size_protocol_regressions_qualified_no_measured_acceleration_allocations_power_loss_or_endurance_claim",
+      "successorSequenceRepair": "qualified_exactcf630751e_run37084177131_terminal_MaxValue_successor_rejects_before_decode_apply_or_truncation_real_checkpoint_legal_limit_wrapped_negative_unchanged_authority_and_ownership",
       "sourceReviewGaps": [
         "decoded_memory_and_work_preallocation_contract_open",
         "independent_frozen_binary_legacy_backup_and_old_executable_rollback_proof_open",
@@ -39,6 +39,14 @@
         "runId": 37077856823,
         "url": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823",
         "conclusion": "failure"
+      },
+      "qualificationReceipt": "docs/implementation/atomic-wal-qualification-37084177131.json",
+      "qualification": {
+        "sourceRevision": "cf630751e0f24e4d8183e55510add9c7207e377f",
+        "runId": 37084177131,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131",
+        "mandatoryGates": "passed",
+        "canonicalWorkflowAtCapture": "in_progress_separate_comparison_cohort_unqualified"
       }
     },
     "evidence": [
