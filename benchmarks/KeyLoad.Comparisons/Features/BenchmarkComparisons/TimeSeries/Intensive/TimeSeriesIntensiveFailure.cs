@@ -31,10 +31,14 @@ internal readonly record struct TimeSeriesIntensiveFailure(TimeSeriesIntensiveFa
     internal static TimeSeriesIntensiveFailure From(Exception error) => error switch
     {
         TimeSeriesIntensiveObservedFailureException { InnerException: { } original } => From(original),
+        TimeSeriesIntensiveTargetCompletionException { InnerException: { } original } => From(original),
+        KeyLoadTimeSeriesIntensiveProblemException native => new(TimeSeriesIntensiveFailureOrigin.KeyLoad, native.Code, native.HttpStatus, null),
+        KeyLoadTimeSeriesIntensiveReplyException => new(TimeSeriesIntensiveFailureOrigin.Oracle, null, null, null),
         KeyLoadException native => new(TimeSeriesIntensiveFailureOrigin.KeyLoad, native.Code, native.StatusCode, null),
         PostgresException native => new(TimeSeriesIntensiveFailureOrigin.PostgreSQL, null, null, PackSqlState(native.SqlState)),
         NpgsqlException => new(TimeSeriesIntensiveFailureOrigin.PostgreSQL, null, null, null),
         HttpRequestException native => new(TimeSeriesIntensiveFailureOrigin.HttpTransport, null, (int?)native.StatusCode, null),
+        OperationCanceledException { InnerException: PostgresException native } => From(native),
         ComparisonFailureException => new(TimeSeriesIntensiveFailureOrigin.Oracle, null, null, null),
         OperationCanceledException or TimeoutException => new(TimeSeriesIntensiveFailureOrigin.Client, null, null, null),
         _ => new(TimeSeriesIntensiveFailureOrigin.Unexpected, null, null, null)
@@ -43,7 +47,10 @@ internal readonly record struct TimeSeriesIntensiveFailure(TimeSeriesIntensiveFa
     internal static TimeSeriesIntensiveOutcome Outcome(Exception error) => error switch
     {
         TimeSeriesIntensiveObservedFailureException observed => observed.Completion,
+        TimeSeriesIntensiveTargetCompletionException { InnerException: { } original } => Outcome(original),
         TimeSeriesIntensiveCallDeadlineException => TimeSeriesIntensiveOutcome.DeadlineExceeded,
+        KeyLoadTimeSeriesIntensiveProblemException => TimeSeriesIntensiveOutcome.TargetFailure,
+        KeyLoadTimeSeriesIntensiveReplyException => TimeSeriesIntensiveOutcome.ValidationFailure,
         KeyLoadException or PostgresException => TimeSeriesIntensiveOutcome.TargetFailure,
         NpgsqlException or HttpRequestException or TimeoutException => TimeSeriesIntensiveOutcome.TransportFailure,
         OperationCanceledException => TimeSeriesIntensiveOutcome.Cancelled,

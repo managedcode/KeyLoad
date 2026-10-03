@@ -270,3 +270,48 @@ when measured-entry cancellation or empty-series readback fails. Return the
 actual warmup and failure, with no invented measured phase. Pure phase evidence
 tests plus source review cover the retention rule; actual SDK/Npgsql cancelled
 entry/readback/healthy followup remains a native qualification requirement.
+
+
+TS008K-S refinement of AC-TSI-002/003/004/005/006/008: actual SDK adapter
+borrows1..3 clients, preserves all five native outputs and256-sample seed order,
+validates actual command/matching Revision/token authority before success and
+keeps only one validated ACK-cut scalar. Actual returned Problem code/status
+remain nullable facts; unknown codes/status0 never acquire invented metadata.
+Malformed reply may retain only unambiguous matching Revision, with no inferred
+applied count/ACK cut/digest. Pure Receipt/Result/Seed/Topology TUnit cases cover
+positive, missing/duplicate/wrong/late/error inputs; genuine SDK/MCP/native6/30
+remain separate required proof. Direct original task/uncancellable MCP disposal
+observation cannot be replaced by a30s detaching WaitAsync. See ADR059 accepted
+TS008K-S for exact source ownership, timing, cleanup and root join contract.
+
+TS008TR source refinement: root explicitly accepts typed seed arrays/scalar
+append instead of the prior sample JSONB choice, with exact routine types and
+ordered fields in ADR059 TS008TR. AC-TSI-002/005 require real exact-row/UUID/
+ordinal/positive-sequence validation BEFORE commit, dedup/conflict/overflow full
+rollback, single-snapshot bounded aggregate/windows and actual ordered tags.
+AC-TSI-003 requires transactional CREATE SCHEMA/marker/installer, exact positive
+owner confirmation, foreign/tampered marker preservation and one private borrowed
+datasource. AC-TSI-004 requires shared overall lifetime, original held-lock cancel
+observation/rollback and healthy followup; actual postcommit cleanup failure keeps
+actual ACK facts separately but never passes the attempt. Native IDs1..256 UTF8
+bytes, object tags<=4096 native-text bytes and finite stored microsecond domain
+exclude the exact MinValue sentinel; query infinities remain native for raw/
+aggregate, finite nonnull fixed UTC windows remain explicit native scope.
+Pure actual-exception/code tests establish compact fact handling only; actual SQL
+guards, array dimensions/nulls, caps, transactional DDL/dedup/overflow, native
+blocking cancellation, scope/order/window/full-readback and1/2/3 ACK/copies require
+real GitHub native tests. No mock target, local execution, inferred durability,
+source-only qualification or performance result satisfies these criteria.
+
+
+TS008N-S AC-TSI-002/003/004/005/008: failed calls after an actual scalar commit
+retain the actual echoed UUID/positive sequence separately from outcome/native
+primary and cleanup facts, without a decoded Count or digest. Failed/unknown
+commit, pending row, input UUID or invalid authority never acquire an ACK. Preserve
+primary native facts before nonfatal cleanup; original fatal wins and remains
+unwrapped. Cooperative disposal joins all original tasks. Pure actual-input TUnit
+completion/fact tests plus native transaction/connection/cancellation and healthy
+followup tests prove these separate contracts. Seed requires every exact original
+ordinal sequence1..4096 before commit and advances state only after joined success.
+The future TS30 JSON must encode these compact independent facts; source changes
+alone never certify performance or cleanup bounds.

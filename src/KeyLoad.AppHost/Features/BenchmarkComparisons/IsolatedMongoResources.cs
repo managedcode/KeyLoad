@@ -28,6 +28,8 @@ internal static class IsolatedMongoResources
     private const int SecretBytes = 32;
     private const string ReplicaConnection = "&replicaSet=" + ReplicaSet;
     private const string InvalidSelection = "IsolatedMongoSelectionInvalid";
+    private const string GroupFormat = "N";
+    private const string GroupSeparator = "-";
 
     internal static void Add(IsolatedResourceContext context)
     {
@@ -41,11 +43,13 @@ internal static class IsolatedMongoResources
         var password = Secret(context, PasswordName);
         var key = context.Selection.NodeCount > 1 ? Secret(context, KeyName) : null;
         var nodes = new List<IResourceBuilder<ContainerResource>>(context.Selection.NodeCount);
+        var group = Guid.NewGuid().ToString(GroupFormat);
         for (var index = 0; index < context.Selection.NodeCount; index++)
         {
             var name = NodePrefix + (index + 1).ToString(CultureInfo.InvariantCulture);
             var node = context.Builder.AddContainer(name, Image, Tag).WithImageSHA256(BenchmarkResources.MongoDigest[DigestPrefixLength..])
-                .WithContainerNetworkAlias(name).WithEndpoint(targetPort: Port, name: Tcp, scheme: Tcp);
+                .WithContainerName(name + GroupSeparator + group).WithContainerNetworkAlias(name)
+                .WithEndpoint(targetPort: Port, name: Tcp, scheme: Tcp);
             IsolatedMongoBootstrap.ConfigureNode(node, context.DataDirectory(name), scripts.Entry, User, password, key);
             nodes.Add(node);
             context.BindEndpoint(index, node, Tcp);
@@ -54,7 +58,7 @@ internal static class IsolatedMongoResources
         var replica = key is null ? string.Empty : ReplicaConnection;
         context.BindSetting(Connection, ReferenceExpression.Create(
             $"{MongoScheme}{User}{PasswordSeparator}{password}{CredentialsSeparator}{hosts}{ConnectionOptions}{replica}{RetryOptions}"));
-        IsolatedMongoBootstrap.AddClient(context, nodes, scripts.Client, User, password, ReplicaSet, Image, Tag, hosts);
+        IsolatedMongoBootstrap.AddClient(context, nodes, scripts.Client, scripts.Readiness, User, password, ReplicaSet, Image, Tag, hosts);
         context.BindImage(ImageReference + DigestSeparator + BenchmarkResources.MongoDigest);
     }
 

@@ -52,7 +52,7 @@ internal sealed class TimeSeriesAspireProfileTests
                 ?? throw new InvalidOperationException("Aspire did not resolve the Timescale connection string.");
             await WaitForComparisonAsync(app, timeout.Token);
             await TimeSeriesProfileReportAssertions.VerifyAsync(output, SourceRevision, timeout.Token);
-            await TimeSeriesForeignSchemaCollision.VerifyAsync(connectionString, timeout.Token);
+            await VerifyNativeSchemaOwnershipAsync(connectionString, timeout.Token);
         }
         finally
         {
@@ -67,6 +67,12 @@ internal sealed class TimeSeriesAspireProfileTests
                 await DeleteTemporaryDataAsync(root, cleanupImage);
             }
         }
+    }
+
+    private static async Task VerifyNativeSchemaOwnershipAsync(string connectionString, CancellationToken token)
+    {
+        await TimeSeriesForeignSchemaCollision.VerifyAsync(connectionString, token);
+        await Intensive.TimescaleTimeSeriesIntensiveSchemaAtomicityRegression.VerifyAsync(connectionString, token);
     }
 
     private static string VerifyTimescaleImage(DistributedApplication app)

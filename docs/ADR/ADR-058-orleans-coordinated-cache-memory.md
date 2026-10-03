@@ -554,3 +554,42 @@ flowchart LR
     MAC --> Match[Exact original request correlation]
     Match --> Pending[Future physical receiver contract]
 ```
+
+## Accepted test ownership correction after R95
+
+REQ-CACHE-004/007 / AC-CACHE-014; TASK-CACHE-WIRE-LIFETIME-R98 and
+TASK-CACHE-WIRE-TARGET-R98 preserve the accepted unused primitive contract.
+Independent review found a concurrency result type mismatch, incomplete original
+task observation/lifetime ownership and missing target0/1 sequence and unknown
+reply matcher cases. These are test-source blockers; the34 product files remain
+unchanged and this ADR remains Accepted.
+
+Ordered implementation contract:
+1. Root owns concurrency helpers and lifetime test. The caller protects proof
+   creation then explicitly transfers its real authenticator to the helper;
+   no caller using may re-enter its private gate after a failed finite drain.
+2. Register every actual worker/disposal task immediately; retain one worker
+   aggregate and one complete-original aggregate. Always release the start TCS;
+   collect fallback dispatch failure without bypassing cleanup. Before the10s
+   drain register one retained completion cleanup tied to those same originals.
+   It observes their complete faults then idempotently disposes the signer only
+   after actual settlement; its own faults are observed. Late cleanup performs
+   no assertions and cannot mutate the caller's reported failure collection.
+3. Return actual summed Signed/Closed only after successful settlement. Collect
+   all currently terminal faults/cancellations plus primary/dispatch/timeout/
+   cleanup errors; deduplicate by exception and task identity respectively.
+   Unforced stalled/partial-dispatch branches require explicit source review.
+4. Luna owns only test AuthenticatorSupport, AuthenticatorTests, UnknownInputTests
+   and new TargetCorrelationTests. Preserve actual proof metadata while signing;
+   independently author expected target sequences12/13/14 for all3 slots with
+   Active/Cold positives and shape-valid foreign-slot sequence negatives. Add
+   valid-request/throwing-unknown-reply rejection and constructor cleanup Actions.
+5. Root reads all resulting bytes; strongest independent reviewer joins all
+   product/test files. Required full enabled build/format/governance precede
+   ordinary ALL eligible main delivery and exact-SHA GitHub TUnit/MTP normal,
+   scalar, native-codec/crypto/lifetime, recovery and RF3 qualification.
+
+No public/data/version/topology migration. Rollback reverts only this test repair;
+previous failed tests remain evidence and cannot be weakened. No local tests or
+crypto are executed. Coverage, receiver/control/migration/probe, performance and
+production-readiness gates remain separate and open.

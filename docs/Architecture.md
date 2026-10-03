@@ -498,7 +498,7 @@ The accepted [R82 v1 contract](Features/ResourceExecution/CacheControlV1.md)
 adds only unused immutable generated metadata and bounded shape/transcript/
 authentication/correlation primitives under Orleans/Features/ResourceExecution.
 Dedicated bytes and exact original-request binding preserve existing database
-and replica formats; source/native implementation qualification is pending.
+and replica formats; final integrated source and native qualification are pending.
 Positive point-value caches remain disposable provider state; logical policy grains and actual
 per-silo services must authenticate physical host IDs and leases before cluster
 admission. They never move files/handles or replace current authorization/read
@@ -542,6 +542,34 @@ classDiagram
     ZoneTreePointCacheBinding --> ZoneTreePointCache
     ZoneTreePointCache --> ICacheMemoryBudget
 ```
+
+```mermaid
+classDiagram
+    class CacheControlWire {
+        TryEncodeSigned(message)
+        TryEncodeForSigning(message)
+    }
+    class CacheControlAuthenticator {
+        TrySign(message)
+        TryAuthenticate(message)
+        Dispose()
+    }
+    class CacheControlCorrelation {
+        TryCreate(request)
+        TryMatch(request, reply)
+    }
+    CacheControlWire --> CacheControlShape : complete preflight
+    CacheControlWire --> CacheControlDigest : canonical raw bytes
+    CacheControlAuthenticator --> CacheControlWire : dedicated transcripts
+    CacheControlAuthenticator --> CacheReadyProof : nested authentication
+    CacheControlCorrelation --> CacheControlHeaderComparison : exact echo
+    CacheControlCorrelation --> CachePhysicalBinding : own physical target
+    CacheGrantRequest --> CacheReadyProof : fixed three slots
+    CacheGrantReply --> CacheReplyCorrelation : original signed request digest
+```
+
+These unused wire helpers have no receiver or server caller. The class map records
+source ownership; it does not establish a lease, RF3 cache admission or performance.
 
 ```mermaid
 classDiagram

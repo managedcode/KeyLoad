@@ -27,6 +27,8 @@ internal static class IsolatedNativeRegressions
         if (selection.Target == Kurrent && selection.Scenario == Scenario.StreamAppend)
         {
             await IsolatedKurrentCleanupRegression.VerifyAsync(app, selection.NodeCount, cancellationToken);
+            await IsolatedKurrentOwnershipRegression.VerifyAsync(app, selection.NodeCount, cancellationToken);
+            await IsolatedKurrentVolumeRegression.VerifyAsync(app, selection.NodeCount, cancellationToken);
         }
         if (selection.Scenario != Scenario.PointRead)
         {
@@ -51,6 +53,7 @@ internal static class IsolatedNativeRegressions
             case Mongo:
                 var mongoPassword = await ParameterAsync(resources, MongoPassword, cancellationToken);
                 await MongoNativeAuthenticationRegression.VerifyAsync(app, selection.NodeCount, mongoPassword, cancellationToken);
+                await MongoNativeReadinessRegression.VerifyAsync(app, selection.NodeCount, mongoPassword, cancellationToken);
                 break;
             case Neo4j when selection.NodeCount == 1:
                 var password = await ParameterAsync(resources, Neo4jPassword, cancellationToken);

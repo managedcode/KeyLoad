@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Diagnostics;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
@@ -11,9 +10,9 @@ internal static class IsolatedAggregateNodeProcess
     private const string ScriptsDirectory = "scripts";
     private const string FeaturesDirectory = "Features";
     private const string SliceDirectory = "BenchmarkComparisons";
-    private const string StartFailure = "The isolated aggregate Node child did not start.";
-    private const int TimeoutSeconds = 60;
-    private const int CleanupSeconds = 5;
+    internal const string StartFailure = "The isolated aggregate Node child did not start.";
+    internal const int TimeoutSeconds = 60;
+    internal const int CleanupSeconds = 5;
 
     internal static string RepositoryRoot()
     {
@@ -34,37 +33,34 @@ internal static class IsolatedAggregateNodeProcess
     internal static async Task<IsolatedAggregateNodeResult> RunAsync(IEnumerable<string> arguments,
         CancellationToken cancellationToken)
     {
-        using var process = new Process { StartInfo = StartInfo(arguments) };
-        if (!process.Start())
-        {
-            throw new InvalidOperationException(StartFailure);
-        }
-
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
-        var output = IsolatedAggregateNodeOutput.ReadAsync(process.StandardOutput, deadline.Token);
-        var error = IsolatedAggregateNodeOutput.ReadAsync(process.StandardError, deadline.Token);
+        var startInfo = StartInfo(arguments);
+        var process = new Process { StartInfo = startInfo };
         try
         {
-            await process.WaitForExitAsync(deadline.Token);
-            return new(process.ExitCode, await output, await error);
+            if (!process.Start())
+            {
+                throw new InvalidOperationException(StartFailure);
+            }
         }
-        finally
+        catch (Exception startFailure)
         {
             try
             {
-                await ReapAsync(process);
+                process.Dispose();
             }
-            finally
+            catch (Exception disposeFailure)
             {
-                await deadline.CancelAsync();
-                await IsolatedAggregateNodeOutput.ObserveAsync(output);
-                await IsolatedAggregateNodeOutput.ObserveAsync(error);
+                throw new AggregateException("Native Node start and process-owner cleanup failed.",
+                    startFailure, disposeFailure);
             }
+            throw;
         }
+
+        return await IsolatedAggregateNodeLifetime.RunAsync(
+            process, cancellationToken, TimeSpan.FromSeconds(TimeoutSeconds), TimeSpan.FromSeconds(CleanupSeconds));
     }
 
-    private static ProcessStartInfo StartInfo(IEnumerable<string> arguments)
+    internal static ProcessStartInfo StartInfo(IEnumerable<string> arguments)
     {
         var start = new ProcessStartInfo(Node)
         {
@@ -89,37 +85,4 @@ internal static class IsolatedAggregateNodeProcess
         return start;
     }
 
-    private static async Task ReapAsync(Process process)
-    {
-        TryKill(process);
-
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds));
-        try
-        {
-            await process.WaitForExitAsync(cleanup.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            throw new InvalidOperationException(StartFailure);
-        }
-    }
-
-    private static void TryKill(Process process)
-    {
-        try
-        {
-            if (!process.HasExited)
-            {
-                process.Kill(entireProcessTree: true);
-            }
-        }
-        catch (InvalidOperationException) when (process.HasExited)
-        {
-            // The owned child exited between the observation and kill.
-        }
-        catch (Win32Exception) when (process.HasExited)
-        {
-            // The operating system has already reaped the owned child.
-        }
-    }
 }

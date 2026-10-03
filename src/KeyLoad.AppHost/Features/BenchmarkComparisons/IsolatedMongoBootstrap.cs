@@ -5,8 +5,10 @@ internal static class IsolatedMongoBootstrap
     private const string SourceDirectory = "Features/BenchmarkComparisons";
     private const string EntryFile = "IsolatedMongoEntry.sh";
     private const string ClientFile = "IsolatedMongoInitiate.js";
+    private const string ReadinessFile = "IsolatedMongoReadiness.js";
     private const string EntryTarget = "/bootstrap/isolated-mongo.sh";
     private const string ClientTarget = "/bootstrap/isolated-mongo.js";
+    private const string ReadinessTarget = "/bootstrap/isolated-mongo-readiness.js";
     private const string ClientName = "isolated-mongo-bootstrap";
     private const string PasswordEnvironment = "MONGO_INITDB_ROOT_PASSWORD";
     private const string UserEnvironment = "MONGO_INITDB_ROOT_USERNAME";
@@ -28,16 +30,17 @@ internal static class IsolatedMongoBootstrap
     private const string MissingBootstrap = "IsolatedMongoBootstrapMissing";
     private const int DigestPrefixLength = 7;
 
-    internal static (string Entry, string Client) FindScripts(IsolatedResourceContext context)
+    internal static (string Entry, string Client, string Readiness) FindScripts(IsolatedResourceContext context)
     {
         var source = Path.Combine(context.Builder.AppHostDirectory, SourceDirectory);
         var entry = Path.Combine(source, EntryFile);
         var client = Path.Combine(source, ClientFile);
-        if (!File.Exists(entry) || !File.Exists(client))
+        var readiness = Path.Combine(source, ReadinessFile);
+        if (!File.Exists(entry) || !File.Exists(client) || !File.Exists(readiness))
         {
             throw new InvalidOperationException(MissingBootstrap);
         }
-        return (entry, client);
+        return (entry, client, readiness);
     }
 
     internal static void ConfigureNode(IResourceBuilder<ContainerResource> node, string directory, string script,
@@ -53,10 +56,11 @@ internal static class IsolatedMongoBootstrap
     }
 
     internal static void AddClient(IsolatedResourceContext context, IEnumerable<IResourceBuilder<ContainerResource>> nodes,
-        string script, string user, IResourceBuilder<ParameterResource> password, string replicaSet, string image, string tag, string hosts)
+        string script, string readinessScript, string user, IResourceBuilder<ParameterResource> password, string replicaSet, string image, string tag, string hosts)
     {
         var client = context.Builder.AddContainer(ClientName, image, tag).WithImageSHA256(BenchmarkResources.MongoDigest[DigestPrefixLength..])
-            .WithBindMount(script, ClientTarget, isReadOnly: true).WithArgs(MongoShell, Quiet, NoDatabase, ClientTarget)
+            .WithBindMount(script, ClientTarget, isReadOnly: true).WithBindMount(readinessScript, ReadinessTarget, isReadOnly: true)
+            .WithArgs(MongoShell, Quiet, NoDatabase, ClientTarget)
             .WithEnvironment(UserEnvironment, user).WithEnvironment(PasswordEnvironment, password)
             .WithEnvironment(MembersEnvironment, hosts).WithEnvironment(SetEnvironment, replicaSet);
         foreach (var node in nodes)

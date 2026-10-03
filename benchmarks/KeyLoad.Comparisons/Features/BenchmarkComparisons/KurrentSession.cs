@@ -42,9 +42,8 @@ internal sealed class KurrentSession(KurrentDBClient client, KurrentTarget targe
         {
             case Scenario.StreamAppend:
                 var appendStream = target.StreamName(document);
-                target.TrackStream(appendStream);
-                await client.AppendToStreamAsync(appendStream, StreamState.NoStream,
-                    [KurrentTarget.CreateEvent(document)], cancellationToken: cancellationToken);
+                await KurrentOwnedStreamAppend.AppendAsync(client, target.Ownership, appendStream,
+                    KurrentTarget.CreateEvent(document), cancellationToken);
                 return new();
             case Scenario.StreamRead:
                 return new(Event: await ReadEventAsync(document, cancellationToken));

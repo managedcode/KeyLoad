@@ -10,18 +10,18 @@ internal static class TimescaleSchemaLifecycle
     private const string SchemaPrefix = "keyload_tsc_";
     private const string SetSchemaSettingSql = "SELECT set_config('keyload.timeseries_schema', $1, false)";
     private const string SetSearchPathSql = "SELECT set_config('search_path', $1, false)";
-    private const string CreateSchemaSql = "DO $$ BEGIN EXECUTE format('CREATE SCHEMA %I', " +
+    internal const string CreateSchemaSql = "DO $$ BEGIN EXECUTE format('CREATE SCHEMA %I', " +
         "current_setting('keyload.timeseries_schema')); END $$";
-    private const string CreateExtensionSql = "CREATE EXTENSION IF NOT EXISTS timescaledb WITH SCHEMA public";
-    private const string CreateMarkerSql = "CREATE TABLE owner_marker (owner_id uuid PRIMARY KEY)";
-    private const string InsertMarkerSql = "INSERT INTO owner_marker (owner_id) VALUES ($1)";
+    internal const string CreateExtensionSql = "CREATE EXTENSION IF NOT EXISTS timescaledb WITH SCHEMA public";
+    internal const string CreateMarkerSql = "CREATE TABLE owner_marker (owner_id uuid PRIMARY KEY)";
+    internal const string InsertMarkerSql = "INSERT INTO owner_marker (owner_id) VALUES ($1)";
     private const string CreateSamplesSql = "CREATE TABLE samples (sample_time timestamptz NOT NULL, " +
         "event_id text NOT NULL, set_name text NOT NULL, series_id text NOT NULL, " +
         "sample_value double precision NOT NULL, sample_sequence bigint NOT NULL, tags_json jsonb NOT NULL, " +
         "PRIMARY KEY (sample_time, event_id)) WITH (tsdb.hypertable, tsdb.partition_column='sample_time')";
     private const string VerifyMarkerSql = "SELECT count(*) = 1 AND bool_and(owner_id = $1) FROM owner_marker";
-    private const string LockMarkerSql = "LOCK TABLE owner_marker IN ACCESS EXCLUSIVE MODE";
-    private const string DropSchemaSql = "DO $$ BEGIN EXECUTE format('DROP SCHEMA %I CASCADE', " +
+    internal const string LockMarkerSql = "LOCK TABLE owner_marker IN ACCESS EXCLUSIVE MODE";
+    internal const string DropSchemaSql = "DO $$ BEGIN EXECUTE format('DROP SCHEMA %I CASCADE', " +
         "current_setting('keyload.timeseries_schema')); END $$";
 
     internal static string SchemaName(string runId)
@@ -65,72 +65,53 @@ internal static class TimescaleSchemaLifecycle
         }
     }
 
-    internal static async Task<bool> InitializeAsync(string connectionString, string schemaName, Guid ownerId,
+    internal static Task<bool> InitializeAsync(string connectionString, string schemaName, Guid ownerId,
+        CancellationToken cancellationToken)
+        => InitializeOwnedAsync(connectionString, schemaName, ownerId, InstallLegacyAsync, cancellationToken);
+
+    internal static Task<bool> InitializeOwnedAsync(string connectionString, string schemaName, Guid ownerId,
+        Func<NpgsqlConnection, NpgsqlTransaction, CancellationToken, Task> installer, CancellationToken token)
+    {
+        ValidateSchemaName(schemaName);
+        ArgumentNullException.ThrowIfNull(installer);
+        return TimescaleSchemaConnection.ExecuteAsync(connectionString, null, connection =>
+            TimescaleSchemaInstallation.InitializeAsync(connection, schemaName, ownerId, installer, token));
+    }
+
+    internal static Task<bool> InitializeOwnedAsync(NpgsqlDataSource dataSource, string schemaName, Guid ownerId,
+        Func<NpgsqlConnection, NpgsqlTransaction, CancellationToken, Task> installer, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(dataSource);
+        ValidateSchemaName(schemaName);
+        ArgumentNullException.ThrowIfNull(installer);
+        return TimescaleSchemaConnection.ExecuteAsync(null, dataSource, connection =>
+            TimescaleSchemaInstallation.InitializeAsync(connection, schemaName, ownerId, installer, token));
+    }
+
+    internal static Task DropOwnedSchemaAsync(string connectionString, string schemaName, Guid ownerId,
         CancellationToken cancellationToken)
     {
         ValidateSchemaName(schemaName);
-        await using var connection = new NpgsqlConnection(connectionString);
-        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-        await ConfigureSchemaAsync(connection, schemaName, cancellationToken).ConfigureAwait(false);
-        await using (var createSchema = new NpgsqlCommand(CreateSchemaSql, connection))
+        return TimescaleSchemaConnection.ExecuteAsync(connectionString, null, async connection =>
         {
-            await createSchema.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-        }
-        await SetSearchPathAsync(connection, schemaName, cancellationToken).ConfigureAwait(false);
-        await using (var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
-        {
-            await using (var extension = new NpgsqlCommand(CreateExtensionSql, connection, transaction))
-            {
-                await extension.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            await using (var markerTable = new NpgsqlCommand(CreateMarkerSql, connection, transaction))
-            {
-                await markerTable.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-            }
-            await using (var marker = new NpgsqlCommand(InsertMarkerSql, connection, transaction))
-            {
-                marker.Parameters.AddWithValue(NpgsqlDbType.Uuid, ownerId);
-                await marker.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            await using (var samplesTable = new NpgsqlCommand(CreateSamplesSql, connection, transaction))
-            {
-                await samplesTable.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        return await MarkerMatchesAsync(connection, ownerId, cancellationToken).ConfigureAwait(false);
+            await TimescaleSchemaInstallation.DropAsync(connection, schemaName, ownerId, cancellationToken).ConfigureAwait(false);
+            return true;
+        });
     }
 
-    internal static async Task DropOwnedSchemaAsync(string connectionString, string schemaName, Guid ownerId,
-        CancellationToken cancellationToken)
+    internal static Task DropOwnedSchemaAsync(NpgsqlDataSource dataSource, string schemaName, Guid ownerId,
+        CancellationToken token)
     {
+        ArgumentNullException.ThrowIfNull(dataSource);
         ValidateSchemaName(schemaName);
-        await using var connection = new NpgsqlConnection(connectionString);
-        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-        await ConfigureSchemaAsync(connection, schemaName, cancellationToken).ConfigureAwait(false);
-        await SetSearchPathAsync(connection, schemaName, cancellationToken).ConfigureAwait(false);
-        await using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using (var lockMarker = new NpgsqlCommand(LockMarkerSql, connection, transaction))
+        return TimescaleSchemaConnection.ExecuteAsync(null, dataSource, async connection =>
         {
-            await lockMarker.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-        }
-        if (!await MarkerMatchesAsync(connection, ownerId, cancellationToken, transaction).ConfigureAwait(false))
-        {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleOwnerMarkerMismatch");
-        }
-
-        await using (var dropSchema = new NpgsqlCommand(DropSchemaSql, connection, transaction))
-        {
-            await dropSchema.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-        }
-        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            await TimescaleSchemaInstallation.DropAsync(connection, schemaName, ownerId, token).ConfigureAwait(false);
+            return true;
+        });
     }
 
-    private static async Task ConfigureSchemaAsync(NpgsqlConnection connection, string schemaName,
+    internal static async Task ConfigureSchemaAsync(NpgsqlConnection connection, string schemaName,
         CancellationToken cancellationToken)
     {
         await using var command = new NpgsqlCommand(SetSchemaSettingSql, connection);
@@ -138,15 +119,15 @@ internal static class TimescaleSchemaLifecycle
         await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    private static async Task SetSearchPathAsync(NpgsqlConnection connection, string schemaName,
-        CancellationToken cancellationToken)
+    internal static async Task SetSearchPathAsync(NpgsqlConnection connection, string schemaName,
+        CancellationToken cancellationToken, NpgsqlTransaction? transaction = null)
     {
-        await using var command = new NpgsqlCommand(SetSearchPathSql, connection);
+        await using var command = new NpgsqlCommand(SetSearchPathSql, connection, transaction);
         command.Parameters.AddWithValue(NpgsqlDbType.Text, schemaName);
         await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    private static async Task<bool> MarkerMatchesAsync(NpgsqlConnection connection, Guid ownerId,
+    internal static async Task<bool> MarkerMatchesAsync(NpgsqlConnection connection, Guid ownerId,
         CancellationToken cancellationToken, NpgsqlTransaction? transaction = null)
     {
         await using var command = new NpgsqlCommand(VerifyMarkerSql, connection, transaction);
@@ -154,7 +135,7 @@ internal static class TimescaleSchemaLifecycle
         return await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false) is true;
     }
 
-    private static void ValidateSchemaName(string schemaName)
+    internal static void ValidateSchemaName(string schemaName)
     {
         ArgumentNullException.ThrowIfNull(schemaName);
         if (schemaName.Length != SchemaPrefix.Length + 32 ||
@@ -170,6 +151,13 @@ internal static class TimescaleSchemaLifecycle
                 throw new ArgumentException("The benchmark schema name is invalid.", nameof(schemaName));
             }
         }
+    }
+
+    private static async Task InstallLegacyAsync(NpgsqlConnection connection, NpgsqlTransaction transaction,
+        CancellationToken cancellationToken)
+    {
+        await using var command = new NpgsqlCommand(CreateSamplesSql, connection, transaction);
+        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
 }

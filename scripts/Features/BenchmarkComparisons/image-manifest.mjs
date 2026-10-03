@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { imageKind, imageReference, message, outputFormat, processLimit, registry, registryProtocol, validation } from './image-contracts.mjs';
+import { imageKind, imageReference, message, outputFormat, processLimit, registry, registryProtocol, safeErrorMessage, validation } from './image-contracts.mjs';
 import { recordRegistryHeaders } from './image-evidence.mjs';
 
 const successfulHttpStatus = 200;
@@ -7,6 +7,22 @@ const manifestSchemaVersion = 2;
 const metadataSeparator = '|';
 const mediaTypeParameterSeparator = ';';
 const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+const invalidDeadline = 'The owned image HTTP deadline is invalid.';
+const timeoutMessage = 'The owned image HTTP operation exceeded its time bound.';
+const cleanupErrorGroups = new WeakMap();
+
+export async function withHttpDeadline(timeoutMs, operation) {
+  if (!Number.isInteger(timeoutMs) || timeoutMs <= 0 || timeoutMs > processLimit.inspectTimeoutMs) {
+    throw new RangeError(invalidDeadline);
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(new DOMException(timeoutMessage, 'TimeoutError')), timeoutMs);
+  try {
+    return await operation(controller.signal);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 export function parseImageMetadata(output, expectedRevision) {
   if (typeof output !== 'string' || typeof expectedRevision !== 'string' || !validation.shaPattern.test(expectedRevision)) {
@@ -75,32 +91,63 @@ export function parseManifestEvidence(bytes, digestHeader, contentTypeHeader, ex
 export async function waitForRegistry(context) {
   const deadline = Date.now() + processLimit.readinessTimeoutMs;
   while (Date.now() < deadline) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) break;
     try {
-      const response = await fetch(`${registry.url}${registryProtocol.path}`, {
-        signal: AbortSignal.timeout(processLimit.inspectTimeoutMs),
-        redirect: 'error',
+      const result = await withHttpDeadline(Math.min(processLimit.inspectTimeoutMs, remaining), async signal => {
+        const response = await fetch(`${registry.url}${registryProtocol.path}`, { signal, redirect: 'error' });
+        await response.body?.cancel();
+        return { status: response.status, aborted: signal.aborted };
       });
-      await response.body?.cancel();
-      if (response.status === successfulHttpStatus) return;
+      if (result.status === successfulHttpStatus && !result.aborted && Date.now() < deadline) return;
     } catch {
     }
-    await wait(processLimit.readinessIntervalMs);
+    const backoff = Math.min(processLimit.readinessIntervalMs, deadline - Date.now());
+    if (backoff > 0) await wait(backoff);
   }
   throw new Error(message.registryTimeout);
 }
 
 export async function fetchManifest(context, imageName, tag, image) {
   const url = `${registry.url}${registryProtocol.repositories}${imageName}${registryProtocol.manifests}${tag}`;
+  return withHttpDeadline(processLimit.inspectTimeoutMs, signal =>
+    fetchManifestWithSignal(context, imageName, image, url, signal));
+}
+
+async function fetchManifestWithSignal(context, imageName, image, url, signal) {
   let response;
   try {
     response = await fetch(url, {
       headers: { [registryProtocol.accept]: registryProtocol.acceptHeader },
-      signal: AbortSignal.timeout(processLimit.inspectTimeoutMs),
+      signal,
       redirect: 'error',
     });
   } catch {
     throw new Error(message.fetchFailed);
   }
+  return readManifestAndClose(context, imageName, image, response);
+}
+
+async function readManifestAndClose(context, imageName, image, response) {
+  let failed = false;
+  let failure;
+  try {
+    return await readManifestContents(context, imageName, image, response);
+  } catch (error) {
+    failed = true;
+    failure = error;
+    throw error;
+  } finally {
+    try {
+      await response.body?.cancel();
+    } catch (cleanup) {
+      if (failed) throw combineCleanupErrors([failure, cleanup]);
+      throw cleanup;
+    }
+  }
+}
+
+async function readManifestContents(context, imageName, image, response) {
   const digestHeader = response.headers.get(registryProtocol.digestHeader);
   const contentTypeHeader = response.headers.get(registryProtocol.contentTypeHeader) ?? '';
   const contentLengthHeader = response.headers.get(registryProtocol.contentLengthHeader);
@@ -110,12 +157,10 @@ export async function fetchManifest(context, imageName, tag, image) {
     contentLength: contentLengthHeader,
   });
   if (response.status !== successfulHttpStatus) {
-    await response.body?.cancel();
     throw new Error(message.fetchFailed);
   }
   const contentLength = Number(contentLengthHeader);
   if (Number.isFinite(contentLength) && contentLength > processLimit.maxManifestBytes) {
-    await response.body?.cancel();
     throw new Error(message.invalidManifest);
   }
   const bytes = await readBoundedBody(response);
@@ -133,23 +178,52 @@ export async function fetchManifest(context, imageName, tag, image) {
 async function readBoundedBody(response) {
   const reader = response.body?.getReader();
   if (!reader) throw new Error(message.invalidManifest);
+  const failures = [];
+  try {
+    return await readManifestBytes(reader);
+  } catch (error) {
+    failures.push(error);
+    throw error;
+  } finally {
+    await closeManifestReader(reader, failures);
+  }
+}
+
+async function readManifestBytes(reader) {
   const chunks = [];
   let byteCount = 0;
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      byteCount += value.byteLength;
-      if (byteCount > processLimit.maxManifestBytes) {
-        await reader.cancel();
-        throw new Error(message.invalidManifest);
-      }
-      chunks.push(Buffer.from(value));
-    }
-  } finally {
-    reader.releaseLock();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    byteCount += value.byteLength;
+    if (byteCount > processLimit.maxManifestBytes) throw new Error(message.invalidManifest);
+    chunks.push(Buffer.from(value));
   }
   return Buffer.concat(chunks, byteCount);
+}
+
+async function closeManifestReader(reader, failures) {
+  try {
+    await reader.cancel();
+  } catch (error) {
+    failures.push(error);
+  }
+  try {
+    reader.releaseLock();
+  } catch (error) {
+    failures.push(error);
+  }
+  if (failures.length > 0) throw combineCleanupErrors(failures);
+}
+
+function combineCleanupErrors(failures) {
+  const distinct = [...new Set(failures)];
+  if (distinct.length === 1) return distinct[0];
+  const unique = [...new Set(distinct.flatMap(error => cleanupErrorGroups.get(error) ?? [error]))];
+  if (unique.length === 1) return unique[0];
+  const combined = new AggregateError(unique, safeErrorMessage(failures[0], message.cleanupFailed));
+  cleanupErrorGroups.set(combined, Object.freeze(unique));
+  return combined;
 }
 
 export function imageOutputName(kind) {

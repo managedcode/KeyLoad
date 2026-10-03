@@ -193,6 +193,10 @@ jobs:
       - name: Qualify exact native topology composition models
         run: |
           dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/Isolated*Resource*/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessResourceTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessIdentityTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/MongoReadinessTaskFailureTests/*'
+          dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKurrentVolumeRegressionFailureTests/*'
           dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/IsolatedKeyLoadAdmissionTests/*'
           dotnet test --project tests/KeyLoad.ComparisonTests --no-build --no-restore --configuration Release --treenode-filter '/*/*/ComparisonResourceLogBufferTests/*'
       - name: Qualify isolated replay admission and native diagnostics

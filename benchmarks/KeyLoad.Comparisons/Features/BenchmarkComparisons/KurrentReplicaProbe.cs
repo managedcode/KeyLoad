@@ -8,10 +8,11 @@ internal readonly record struct KurrentAppendCut(long CommitPosition, long Prepa
 internal static class KurrentReplicaProbe
 {
     public static async Task<ClusterEvidence> VerifyCopyAsync(KurrentDBClient writer, KurrentDBClient[] nodeClients,
-        HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData, TimeSpan timeout,
+        HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData,
+        KurrentStreamOwnership ownership, TimeSpan timeout,
         CancellationToken cancellationToken)
     {
-        var cut = await AppendAndCaptureCutAsync(writer, stream, eventData, cancellationToken);
+        var cut = await AppendAndCaptureCutAsync(writer, ownership, stream, eventData, cancellationToken);
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         limit.CancelAfter(timeout);
         try
@@ -59,11 +60,10 @@ internal static class KurrentReplicaProbe
         }
     }
 
-    private static async Task<KurrentAppendCut> AppendAndCaptureCutAsync(KurrentDBClient writer, string stream,
-        KurrentEventData eventData, CancellationToken cancellationToken)
+    private static async Task<KurrentAppendCut> AppendAndCaptureCutAsync(KurrentDBClient writer,
+        KurrentStreamOwnership ownership, string stream, KurrentEventData eventData, CancellationToken cancellationToken)
     {
-        var result = await writer.AppendToStreamAsync(stream, StreamState.NoStream, [eventData],
-            cancellationToken: cancellationToken);
+        var result = await KurrentOwnedStreamAppend.AppendAsync(writer, ownership, stream, eventData, cancellationToken);
         var commit = checked((long)result.LogPosition.CommitPosition);
         var prepare = checked((long)result.LogPosition.PreparePosition);
         if (commit < prepare)

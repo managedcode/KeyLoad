@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Own the internal immutable cache-control metadata and bounded validation, canonical transcript, authentication and correlation primitives accepted by ADR-058 R82.
-- Planned entry points: CacheControlWire, CacheControlAuthenticator and CacheControlCorrelation. The exact types/aliases/Ids/APIs are in docs/Features/ResourceExecution/CacheControlV1.md.
+- Unused internal source entry points: CacheControlWire, CacheControlAuthenticator and CacheControlCorrelation; native qualification remains pending. The exact types/aliases/Ids/APIs are in docs/Features/ResourceExecution/CacheControlV1.md.
 - Read the solution and Orleans project AGENTS.md, docs/Architecture.md, ResourceExecution feature and ADR-058 before changing this slice.
 
 ## Boundaries and ownership
@@ -12,6 +12,7 @@
 - Never apply the separately held native internal-format migration as a prerequisite or workaround.
 - Validate the complete closed shape and all complete/signing/correlation lengths before transcript allocation. Authenticate nested proofs and exact request correlation; a signed tuple never creates a lease or Byzantine voter authority.
 - Private signing material never enters metadata, diagnostics or tests' output. Final disposal closes and zeroes it; original concurrent tasks must finish or remain finitely observed before owners are released.
+- A failed finite wait must retain a completion owner for unsettled originals; signing and coordination resources are released only after actual originals settle, with complete fault observation and no late mutation of reported failures.
 - Inherit file400/type200/function50/nesting3 limits and all stricter root quality policies. No analyzer suppression or weakened assertions.
 
 ## Commands and evidence

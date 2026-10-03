@@ -185,3 +185,90 @@ diagnostics, native27/270, TimeSeries6/30 and site remain separate pending gates
 The native SQL workstream can be planned independently of the Kurrent cleanup
 source join and current-main failure diagnosis. Shared schema lifecycle, resource
 topology and future family evidence joins remain solely owned by root.
+
+
+The coherent026/TS007B-D source checkpoint is delivered in main397a89c46df8caaf0cc89a51e2e1c7b9208adcc6.
+Run37097831105 attempt1 is terminal failure17 normal fixture cases; RF3/recovery/
+analyzers and runner36 pass, scalar/native comparisons are skipped.
+Root verified all85 exact owned file bytes plus three preserved shared documents;
+concurrent checkpoint delivery also includes owning cache/queue fixture repairs.
+
+| Task | REQ/AC / owner / model / permissions | Dependencies/start/artifacts/verification/join |
+|---|---|---|
+|TASK-ISO-TS008TR-IR|BC060/061/062,TSI002/003/004/005/008; publisher_archive_review inherited capable; read-only SQL packet/source review|TS008TR-R complete; exact native SQL/infinity/interval/transaction/ownership/cancellation review, temporary hash packet only. No writes/build/tests/runtime/Git. Root freezes native contract before dependencies start.|
+|TASK-ISO-TS008K-S|BC060/061/062/063,TSI002/003/004/005/006/008; sdk_adapter_worker gpt-6-luna/high; NEW closed prefixed adapter+pure UnitTests only|Start after accepted ADR059 TS008K-S and corresponding AC refinement. Tests first, actual DTOs/direct borrowed SDK calls, no transport/clock doubles. Artifacts exact source/hash/diff/case matrix, no local tests/build/Git. Root full review, existing Failure/Attempt joins, sequential source gates and exact-SHA native6/30/coverage required.|
+
+- [ ] TS008K-S acceptance-derived pure tests and real adapter source frozen.
+- [ ] Root SDKProblem/Reply/Npgsql-OCE compact-fact joins and matching regressions.
+- [ ] TS008K-S integrated source gates and delivered-SHA full Linux qualification.
+- [ ] New actual SDK/MCP/public/native helpers, all6/30 and genuine coverage.
+
+
+|TASK-ISO-TS008K-J|BC062/064,TSI004/008; root strongest integration owner; only Failure/AttemptExecutor, NEW AttemptFailures and NativeFailureFactTests|TS008K-S exception shapes frozen before writes. Acceptance-derived actual-input tests first, pure compact capture and narrow actual OCE-inner-Postgres mapping. Worker NEW adapter ownership remains disjoint; root full review and sequential combined source/GitHub/native join.|
+
+|TASK-ISO-TS008K-S-R|BC060/062,TSI002/004/008; sdk_adapter_worker gpt-6-luna/high; same Receipt and ReceiptTests only|Root source review requires the already frozen exact-one mutation/O(1) contract. Tests first reject any extra/default/null/mismatched mutation, and retain a sole positive matching revision as an observed fact when authority validation fails. No inferred count/ACK/token validity. Root full diff/build/formatter and exact-SHA genuine tests remain mandatory.|
+
+|TASK-ISO-TS008TR-S|BC060/061/062,TSI002/003/004/005/008; SQL worker capable gpt-6.1-sol/high, write six NEW approved prefixed SQL/schema files only|Start after root-approved ADR059 TS008TR and matching acceptance refinement, original397 real full baseline and independent review. Exact native routines/storage/guards/lock/rollback/snapshot bounded SQL; no shared lifecycle/adapter/test/host/Git/runtime. Static source packet with hashes/statement ownership/negative-flow map; root every-statement review/build and later real6/30 qualification.|
+|TASK-ISO-TS008TR-L|Same; root strongest integration owner, existing TimescaleSchemaLifecycle only plus separately specified actual native fixture tests|TS008TR-S installer shape frozen. Move schema creation into one transaction, legacy delegate, borrowed private datasource overloads, preserve owner lock and unknown-outcome fail-closed behavior. Native failing restricted-role installer/foreign/tamper tests precede real qualification; no local tests or global pool clearing.|
+|TASK-ISO-TS008TR-S-IR|Same; publisher_archive_review inherited capable; read-only six literal SQL/schema source files|Start after worker freezes exact six-file packet. Independently inspect every SQL statement versus approved types/guards/locking/snapshot/caps/ordering/native error/installation contract. No source/docs/build/tests/runtime/Git; temporary exact hash packet. Root final every-statement review and real native proof remain required.|
+|TASK-ISO-TS008TR-S-R|Same; timescale_sql_worker gpt-6.1-sol/high; ONLY owned Schema/WindowsSql|Start after root-approved exact div/mod and offset decomposition refinement from independent primary-source review. Correct native rounded division/interval multiplication and remove unjustified public DDL fallback; preserve complete finite accepted domain/guards/types. Source packet and independent rereview; genuine large-width native regression still required.|
+|TASK-ISO-TS008N-R|BC060/061/062,TSI002/003/004/005/008; sdk_adapter_worker gpt-6-luna/high; read-only Npgsql adapter/ownership proposal|After frozen six SQL routines and root borrowed-datasource lifecycle. Exact typed constructor/params/native row decoding/batch+scalar ACK-beforecommit validation/original task and cleanup lifetime proposal. Root approves compact primary/cleanup/actual-ACK exception join before any adapter writes; temporary source/hash packet only, no build/tests/runtime/Git.|
+
+The SQL work requires careful native snapshot/row-lock/rollback and array guards;
+gpt-6.1-sol is the least-cost available tier judged suitable for that bounded
+implementation risk. Shared lifecycle/adapter-failure contracts cannot be safely
+delegated with concurrent SQL ownership and remain with the integration owner.
+
+- [x] TS008TR-R and independent TS008TR-IR reviewed; native differences frozen.
+- [x] TS008TR-S exact six-file native SQL/schema source and full root/independent statement review; native execution pending.
+- [x] TS008TR-L transactional legacy/private datasource lifecycle source repair; native qualification pending.
+- [x] TS008TR-L restricted-role42501 rollback and real privileged healthy-followup fixture source authored before lifecycle repair, joined to existing pinned legacy flow. No local or native execution; isolated native join still required.
+- [ ] Separate Npgsql adapter ACK/cleanup compact wrapper contract and tests first.
+- [ ] Native actual role/schema/array/dedup/counter/guards/window/cancellation tests.
+- [ ] Genuine6 preflights/30 cells, instrumented coverage and publication joins.
+
+Fixture-only source checkpoint d45d7f253d309610d7cce66684f155170277252a is
+delivered; push CI37098964980 is the new real baseline. It does not include
+uncommitted SDK/native SQL/027 ownership source. TASK-ISO-028R read-only receipt
+tracking covers both terminal397 and this separate fixture checkpoint; no
+performance or passing qualification follows from starting the new run.
+
+
+Actual d45 original reports now qualify TS007B-D36 and TS00630 cases in EACH normal/scalar mode; whole source prerequisites pass. [Source receipt](docs/implementation/isolated-source-qualification-37098964980.json) is exact-source proof, not native6/30 or performance proof. New SDK/027/SQL/lifecycle source remains separately pending delivered-SHA gates.
+
+
+|TASK-ISO-TS008N-J|BC060/061/062/064,TSI002/003/004/005/008; root strongest; shared Attempt/Failure/AttemptFailures/AttemptExecutor plus NEW ACK/completion types and NEW pure completion tests|Approved ADR059 compact completion join before writes. Tests first actual exceptions/receipts; no native fabricated evidence. Full root diff and serial source build; exact-SHA normal/scalar plus real native commit/disposal/cancellation remain required.|
+|TASK-ISO-TS008N-S|Same; sdk_adapter_worker gpt-6-luna/high; ONLY NEW prefixed intensive Npgsql adapter and pure UnitTests|Start after approved TS008N-J signatures and read-only proposal; typed native rows, EOF/extra-result/reader-dispose before commit, actual postcommit ACK, bounded private DS, first primary/cleanup facts. No edits to SQL/lifecycle/shared/contracts/host/docs/workflow/Git/runtime. Escalate contract gaps. Root reviews all source and joins separate6/30/native coverage/site qualification.|
+
+- [x] TS008N-J acceptance-derived compact ACK/primary/cleanup/fatal/deadline source and six declared TUnit cases; exact-SHA execution pending.
+- [x] TS008N-S target-owned16-pool adapter source and eight declared pure TUnit cases, reviewed/root allocation integration; native Npgsql behavior and exact-SHA cases pending.
+- [ ] Combined independent source review, serial build/format/governance and delivery.
+- [ ] Exact-SHA full and native rollback/cancellation/lateACK/healthy-followup proof.
+
+TASK-ISO-028R pinned run37098964980 now has comparison-images success and real27
+native preflights allocated. Read-only continuation current_ci_audit uses the
+least available suitable high-capability audit tier for provider provenance and
+original failure diagnosis; no writes/runtime/Git. Its terminal artifact join is
+required before any performance/site claim; 270 remains unqualified.
+
+
+|TASK-ISO-TS008TR-CA|BC060/061/062,TSI002/003/004/005/008; SQL worker gpt-6.1-sol/high; ONLY owned Schema.cs|Full development build proves CA2100 remains on bound native DDL. Approved ADR059 constant-command/typed transaction-local trusted setting transport before writes; preserve all SQL literals/stages and original sameTX/token. Independent primary-source review and actual native installation/rollback gate required; no suppression, runtime/Git, or other files.|
+
+TS008TR-CA delegation was rejected by platform agent thread limit; the SQL worker
+is absent from the live tree and no worker implementation starts. Root alone
+performs this approved one-file integration while the independent ISO029 review,
+current CI audit and disjoint Npgsql implementation consume the available slots.
+This concrete routing limit prevents safe cheaper delegated execution here.
+
+
+TASK-ISO-TS009R read-only native6 resource/host proposal reviewed: image job37086903497 only qualifies PostgreSQL18.6/entrypoint/gosu/PGDATA image feasibility, not extension/bootstrap/replication/ACK/copied data. Dedicated Timescale pinned physical resources and closed separate6/30 selector/host remain missing. Proposed ACK1/2/2 is distinct from observedcopies1/2/3; measured calls remain primary, no auto-failover/read-scaling claim. Root will freeze family CLI/raw/native evidence before future writes. Coordination dependency: the current checkout has three concurrently authored native repair/test scopes and another chat's HTTP/cache changes; do not start another write-capable shared AppHost/host integration before their scoped stable-source checkpoint. This serializes shared composition ownership, not independent research; TS009R was delegated concurrently and complete.
+
+Root-owned74-file projection full Release development build r9 passes0warnings/0errors(19.27s). This excludes ongoing foreign/new Mongo/volume/HTTP implementation; formatter and later full integrated source/native6/30 qualification remain pending. Compiler errors were repaired without suppressed diagnostics: exact closed enum command ownership, namespace/nullability and spacing. Original worker packet is historical; root projection manifest records current superseding hashes.
+
+|Task|REQ/AC and owner/permission|Dependencies/artifacts/join|
+|---|---|---|
+|TASK-ISO-TS008N-IR|BC060/061/062/064,TSI002/003/004/005/008; current_ci_audit inherited capable, read-only current16 adapter/tests plus shared compact completion|Root reviewed/repaired exact superseding source;74-file development build0/0 and format pass. Temporary bounded review/hash packet only; no source/docs/Git/build/tests/runtime/provider/oldsealedpacket mutations. Root integrates every finding before delivery and actual native6/30 proof.|
+
+TS008N-IR complete read-only review found no blocking adapter-source defect. Root integrates two acceptance-derived pure oracle refinements before delivery: compare all16 production SeedCommandId values with independent SHA256 inputs, and exercise Cancelled alongside DeadlineExceeded with actual ACK plus native cleanup facts. These strengthen existing TSI002/004/008 contracts; no native proof follows. Historical eight/six declared-case packets remain historical, with current exact-source execution still pending.
+
+Root74-file development projection after both pure oracle refinements builds Release with0warnings/0errors (r12,28.17s) and formatter passes. The earlier sandbox build was terminated after no output and is not passing evidence. Independent source review is complete; new native Mongo/Kurrent and ongoing concurrent HTTP/cache source are excluded from this narrow check. Full integrated delivered-SHA source/native/coverage gates remain pending.

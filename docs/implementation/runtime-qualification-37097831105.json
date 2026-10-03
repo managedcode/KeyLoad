@@ -1,0 +1,386 @@
+{
+  "schemaVersion": 1,
+  "repository": "managedcode/KeyLoad",
+  "branch": "main",
+  "sourceSha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+  "runId": 37097831105,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105",
+  "status": "completed",
+  "conclusion": "failure",
+  "terminalApiReceiptSha256": {
+    "run": "19a1ed95703676ac21a109bb4b4c27f94ce87f84123862f137b2d203f5e90e17",
+    "jobs": "bad3ad2fd91a85d978d947e99e309310cadb8949a4e6c5adacd08992209f1249",
+    "artifacts": "54cdbe99275c12c4f60b6893d3075dd792907c0badbb7168253c16834b9e3f77"
+  },
+  "jobs": [
+    {
+      "name": "docker-rf3",
+      "id": 111131287611,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287611",
+      "conclusion": "success"
+    },
+    {
+      "name": "comparison-plan",
+      "id": 111131287683,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287683",
+      "conclusion": "success"
+    },
+    {
+      "name": "analyzer-rules",
+      "id": 111131287699,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287699",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (ubuntu-latest)",
+      "id": 111131287728,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287728",
+      "conclusion": "failure"
+    },
+    {
+      "name": "comparison-images",
+      "id": 111132574100,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111132574100",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "preflight / ${{ matrix.id }}",
+      "id": 111132574529,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111132574529",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "case / ${{ matrix.id }}",
+      "id": 111132575174,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111132575174",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "case / ${{ matrix.id }}",
+      "id": 111132575356,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111132575356",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "comparison-aggregate",
+      "id": 111132575396,
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111132575396",
+      "conclusion": "skipped"
+    }
+  ],
+  "nativeSuites": {
+    "unit": {
+      "assembly": "KeyLoad.UnitTests",
+      "summary": {
+        "total": 1583,
+        "passed": 1566,
+        "failed": 17,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "reportSha256": "bdfb8d4a48f08be22cf6b4b411cf1be940813345cdea81fb9399a2de0d87b0a8",
+      "testIdSetSha256": "8c3c34b2fe3db1a431948d9345550f964f41e4642816c9ca8cd7812c24e8b63a",
+      "failedTestIds": [
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCoherenceTests.1.1.SameCutCompactionRetainsWarmEntriesButSnapshotReplacementAndReopenAreCold.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCoherenceTests.1.1.ChangedApplyInvalidatesAWhileUnrelatedWarmBRemains.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCoherenceTests.1.1.StagedPutDeleteResetAndRejectedCompilerCannotWarmOrChangeCommittedValues.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFillLifetimeTests.1.1.PinnedLruVictimStaysChargedAndNewValueFallsBackToNative.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFillLifetimeTests.1.1.DuplicateConcurrentFillsKeepBothCandidatesChargedAndReleaseTheLoser.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheReadTests.1.1.EmptyPositiveValueWarmsWhileMissingAndTombstoneRemainNativeMisses.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheReadTests.1.1.BorrowedWarmReadPreservesLogicalObserverChargeAndCapturedKeyMutationCannotRebindFill.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheReadTests.1.1.ColdOwnedReadWarmsExactKeyAndWarmOwnedReadReturnsIndependentBytes.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCapacityTests.1.1.SeventeenPinnedVictimsBoundOneAdmissionToSixteenAttempts.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCapacityTests.1.1.ClearAndDisableKeepIndexChargeUntilActualStoreDisposal.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCapacityTests.1.1.OversizedKeyValueAndUnavailableIndexReturnNativeBytesWithoutRetention.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCapacityTests.1.1.TwoStoresShareTheExactPoolEntryCapAndResumeAdmissionAfterOwnerDisposal.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheLifetimeTests.1.1.DisableDuringPinnedBorrowRetiresEntryUntilBorrowerReleases.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheLifetimeTests.1.1.ReaderAndObserverFailuresReleasePinsAndCandidatesBeforeHealthyReads.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheDeletionTests.1.1.WarmDeleteMissesNativeTwiceThenDifferentReinsertIsColdAndWarmsCorrectly.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFixtureIdentityTests.1.1.DefaultKeyPersistsOnReopenAndExplicitKeyPresenceIsPreserved.1.1.0",
+        "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheAuthorizationTests.1.1.WarmRawPrincipalAndCredentialBytesNeverBypassExpiryOrRevocationChecks.1.1.0"
+      ]
+    },
+    "recovery": {
+      "assembly": "KeyLoad.RecoveryTests",
+      "summary": {
+        "total": 164,
+        "passed": 164,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "reportSha256": "ffbfbf0a2a05d69d22a9a5b3f85da0914454e53aad39f5eee3c6270f8f8ed182",
+      "testIdSetSha256": "523d18d8410eaa1a8e627750c98941bc55f8aadc9400e2909408ee03a6bc4ca9",
+      "failedTestIds": []
+    },
+    "rf3": {
+      "assembly": "KeyLoad.IntegrationTests",
+      "summary": {
+        "total": 63,
+        "passed": 63,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "reportSha256": "c8ed531b1237385a540cdcb9765bf1812a4de578f72c270ba6d54e88cafc3350",
+      "testIdSetSha256": "37c487f70e98a27c06bcff919dcac9310d6f9a6dc6acfa19a08326151c937178",
+      "failedTestIds": []
+    }
+  },
+  "scalar": {
+    "status": "skipped_after_normal_unit_failure",
+    "idOutcomeEqualityQualified": false
+  },
+  "analyzerRules": {
+    "assembly": "KeyLoad.Analyzers.Tests",
+    "summary": {
+      "total": 118,
+      "passed": 118,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "reportSha256": "07b3f6c901f807717561e70dd4925f04ae76fc3d6dcb7688a229be7144c51e7c",
+    "testIdSetSha256": "2500efdc068d6702107b28fbc67fe77eb20dcdb6ccb5cbe1128c8f0aa5c0d8a7",
+    "failedTestIds": []
+  },
+  "cachePrimitiveSubsets": {
+    "coordinatedCache": {
+      "total": 21,
+      "passed": 21,
+      "testIdSetSha256": "990e9920c7eaa1b0c66eb2aee8f1b56e8d3d984840bd91162b0f8697cb647596"
+    },
+    "permit": {
+      "total": 11,
+      "passed": 11,
+      "testIdSetSha256": "d4ec085c3885dd1214d7b6c2cb61b2dc40b6caabc51e664d8f41147fbad68973"
+    },
+    "ownerObservation": {
+      "total": 7,
+      "passed": 7,
+      "testIdSetSha256": "abdfc6caa186d04a4e29f5b61d93fd91a6dd5dcf9b4e535fbfbfbf570a2bd63b",
+      "normalOnly": true,
+      "fullReadyOrRemoteGrantQualified": false
+    }
+  },
+  "priorFailureJoin": {
+    "priorSourceSha": "2ecbeee4d7b969129b93346d2863d50072976a68",
+    "priorRunId": 37093992229,
+    "prior17IdsPresent": true,
+    "nowPassedTypedByteOracleIds": [
+      "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreeCoordinatedPointCacheReadTests.1.1.ReadyReceiptIsIdempotentAndWarmOwnedReadsReturnIndependentCopies.1.1.0"
+    ],
+    "newFailedIdentityIds": [
+      "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFixtureIdentityTests.1.1.DefaultKeyPersistsOnReopenAndExplicitKeyPresenceIsPreserved.1.1.0"
+    ],
+    "stillFailedIdentityCount": 16,
+    "stillFailedIdentityIdSetSha256": "f7d10c50c94310cadb40249432be3209e31f0246aa3ce48c082290bc9eb4e838"
+  },
+  "processRecovery": {
+    "seededCases": 20,
+    "verifiedCrashRows": 1000,
+    "trialFiles": [
+      {
+        "name": "artifacts/qualification/crash-trials-00.jsonl",
+        "seed": 1701,
+        "sha256": "1c27cd8abeec5903510e216be44b33db1ac5907e8c039e960e04a6e91c94a8f7"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-01.jsonl",
+        "seed": 1702,
+        "sha256": "8ea55b453d0f9dde7b0e74f21a58affcfaa4ae104cd21efec10cd3d98aeb9e59"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-02.jsonl",
+        "seed": 1703,
+        "sha256": "73e10f70ba263be9edb067fda0a1b0b454fca4ac531c689fa0c7846c1d341333"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-03.jsonl",
+        "seed": 1704,
+        "sha256": "5733713afb2c4e1decf357f09d660b580891fdf4203945ffdcb5601bd3f9f1e9"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-04.jsonl",
+        "seed": 1705,
+        "sha256": "ae742f5d8b1838fb6e317216c0fa94831c9205a7972449dd75011b3f91b6a131"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-05.jsonl",
+        "seed": 1706,
+        "sha256": "bdb5f21d60c3efc99545e14a739c99c85dee6a301419e2460911525f7d98a4ec"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-06.jsonl",
+        "seed": 1707,
+        "sha256": "65c224e48e14a9a199e4bb812d9b8f7b11321334dd0b91a41b9fd579bd2171ca"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-07.jsonl",
+        "seed": 1708,
+        "sha256": "83f319bc15091a90be7406e2b4fa6fe0c573e8fe73281fc085fcdfaed4eea182"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-08.jsonl",
+        "seed": 1709,
+        "sha256": "9c1582b3b68e18596ff91de9bc37f46a1287246d7ec498da6ef46647ae7ad4c6"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-09.jsonl",
+        "seed": 1710,
+        "sha256": "8ca89d368b07834ee8dcc278db0895ceb807d4efde051b00d76e52648429a01d"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-10.jsonl",
+        "seed": 1711,
+        "sha256": "e412147323788eff0288f29a5338224ddbbca5976e10188bf8833a82aa9741fa"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-11.jsonl",
+        "seed": 1712,
+        "sha256": "51900d675f847eda21b670bbc1c6f28e2fc15d8bbcf56e8b69f9f758a7015c90"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-12.jsonl",
+        "seed": 1713,
+        "sha256": "eb37bcb5640b02348718856af9708530c1a77087c07c599cdcf53d2f4d18f0fc"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-13.jsonl",
+        "seed": 1714,
+        "sha256": "4a6e25f54c325dfdd97c6b4801226ad6f5bfc75ac052e80329eef7664402c145"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-14.jsonl",
+        "seed": 1715,
+        "sha256": "ff41d82c1b327128f2bba429d3cbda568459b5bba43350a4898e0fb04d4eac1b"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-15.jsonl",
+        "seed": 1716,
+        "sha256": "3769afd07c7f7a8bbb2abb74af39bca4fcd205c59100a2428700ddaa11abbb88"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-16.jsonl",
+        "seed": 1717,
+        "sha256": "e12db85f19a1f2c301b4adbdaa891e67df94eb78adce104cf6c092e2fda8ad23"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-17.jsonl",
+        "seed": 1718,
+        "sha256": "634710e41e28626d5e6ae0db826af23a91444c50d3e35ebaf83e882a283bd5bf"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-18.jsonl",
+        "seed": 1719,
+        "sha256": "c76c973a05a98e203733a9bdcad8103863796b28a51f3f8eb8288ea10264f893"
+      },
+      {
+        "name": "artifacts/qualification/crash-trials-19.jsonl",
+        "seed": 1720,
+        "sha256": "cb90441f4a7937bf6345f066eb383217f79b9800710c651dc26b976e41fe7f59"
+      }
+    ],
+    "stageCounts": {
+      "MutationApplied": 206,
+      "JournalFlushed": 163,
+      "HeaderWritten": 214,
+      "ApplyCompleted": 214,
+      "PayloadWritten": 203
+    },
+    "maximumObservedStorageTrials": 4,
+    "powerLossQualified": false,
+    "seedRange": {
+      "first": 1701,
+      "last": 1720,
+      "count": 20
+    },
+    "rowsPerTrialFile": 50
+  },
+  "failureInterpretation": {
+    "primary": "17 actual identity mismatches; storage correctly rejects a present empty configured signing key",
+    "firstFrame": "ZoneTreeIdentityFile.Validate:49",
+    "fixtureFrame": "ZoneTreePointCacheFileFixture.OpenStoreAt:80",
+    "sourceCorrection": "R88 explicit ReadOnlyMemory<byte>? null conditional branch is present in the shared checkout; not executed in this run",
+    "productionValidationChanged": false,
+    "nextSourceRequired": true
+  },
+  "artifacts": [
+    {
+      "id": 11265071178,
+      "name": "analyzer-rule-evidence",
+      "bytes": 207313,
+      "sha256": "96ae8fb19c80313b081ce0710d1c5334c07da7ab65f191c88954f429ea27f14b",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265071178"
+    },
+    {
+      "id": 11265156456,
+      "name": "test-results-ubuntu-latest",
+      "bytes": 1182234,
+      "sha256": "cff98fc3509e4507581f1eda2951cf660aad7c4f58b28c8beca0d773128cdb2a",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265156456"
+    },
+    {
+      "id": 11265251141,
+      "name": "docker-rf3-qualification",
+      "bytes": 483210,
+      "sha256": "fc220009a66459d6c5fa7c23c15be9a8e6e684d27ecacc0524db1687a1b92ff7",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265251141"
+    },
+    {
+      "id": 11265305340,
+      "name": "comparison-plan",
+      "bytes": 5140,
+      "sha256": "5125fd75d345edc8cfca033e6c6559f3b9fc207cd0d785563360842765a7937a",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265305340"
+    },
+    {
+      "id": 11265321163,
+      "name": "code-quality-ubuntu-latest",
+      "bytes": 1541342,
+      "sha256": "6ef8a18fd640c09ad74d53e40f40d285bfc28428b01ca177f171ea708a1b0f4c",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265321163"
+    },
+    {
+      "id": 11265365983,
+      "name": "docker-rf3-image-evidence",
+      "bytes": 32183,
+      "sha256": "3145a4b7f9857c2aac42bf1d9abc17d517616b5d235e76fe2f0cc0c908e8741f",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265365983"
+    },
+    {
+      "id": 11265530836,
+      "name": "code-quality-docker-rf3",
+      "bytes": 778398,
+      "sha256": "2a0059aae79920ba428bbd5316b07a9efe246d772ce0a5315e7ada501940d837",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265530836"
+    }
+  ],
+  "comparisons": {
+    "planCells": 270,
+    "planOnly": true,
+    "resultJobs": "all_skipped_after_required_unit_gate_failure",
+    "qualifiedCells": 0
+  },
+  "qualification": {
+    "completeRequiredGate": false,
+    "rf3SdkAndOfficialMcp": true,
+    "processRecovery": true,
+    "serverCacheEnabled": false,
+    "signedCacheControls": false,
+    "coverage": false,
+    "performance": false,
+    "powerLoss": false,
+    "productionReady": false
+  },
+  "independentReceiptSha256": "632fe8963827564c3484636a8410df024754653a9199c18f7084cc575c78daae"
+}

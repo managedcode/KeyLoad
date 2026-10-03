@@ -89,6 +89,13 @@ function projectMongoDiagnostic(stage, host, status, error, expectedHosts, expec
 }
 
 // Native bootstrap composition.
+const MongoBootstrap = Object.freeze({
+    readinessPath: '/bootstrap/isolated-mongo-readiness.js', zero: 0, one: 1, primaryPriority: 2,
+    commandMs: 2000, pollMs: 500, scheme: 'mongodb://', database: 'admin',
+    direct: '/admin?directConnection=true&serverSelectionTimeoutMS=2000&connectTimeoutMS=2000&socketTimeoutMS=2000',
+    authenticationFailed: 'MongoNativeAuthenticationFailed', timeout: 'MongoNativeBootstrapTimeout',
+    initiationFailed: 'MongoNativeReplicaInitiationFailed'
+});
 const hosts = process.env.KEYLOAD_MONGO_MEMBERS.split(',');
 const set = process.env.KEYLOAD_MONGO_REPLICA_SET;
 const username = process.env.MONGO_INITDB_ROOT_USERNAME;
@@ -113,18 +120,26 @@ function printDiagnostic() {
     print(MongoDiagnosticPrefix + bounded);
 }
 
+function mongoBootstrapTime() {
+    const remaining = deadline - Date.now();
+    if (remaining <= MongoBootstrap.zero) throw new Error(MongoBootstrap.timeout);
+    return Math.min(MongoBootstrap.commandMs, remaining);
+}
+
 async function admin(host) {
+    mongoBootstrapTime();
     rememberDiagnostic(MongoDiagnosticStage.authentication, host, null);
     let database = clients.get(host);
     if (!database) {
-        const connection = await new Mongo('mongodb://' + host + '/admin?directConnection=true&serverSelectionTimeoutMS=2000&connectTimeoutMS=2000&socketTimeoutMS=2000');
-        database = connection.getDB('admin');
+        const connection = await new Mongo(MongoBootstrap.scheme + host + MongoBootstrap.direct);
+        database = connection.getDB(MongoBootstrap.database);
         clients.set(host, database);
     }
+    mongoBootstrapTime();
     const authenticated = await database.auth(username, password);
     rememberDiagnostic(MongoDiagnosticStage.authentication, host, authenticated);
-    if (authenticated.ok !== 1) {
-        throw new Error('MongoNativeAuthenticationFailed');
+    if (authenticated.ok !== MongoBootstrap.one) {
+        throw new Error(MongoBootstrap.authenticationFailed);
     }
     return database;
 }
@@ -137,9 +152,11 @@ async function waitReady(probe) {
             // Bootstrap readiness retries are bounded and never emit connection credentials.
             rememberException(error);
         }
-        await sleep(500);
+        const remaining = deadline - Date.now();
+        if (remaining <= MongoBootstrap.zero) break;
+        await sleep(Math.min(MongoBootstrap.pollMs, remaining));
     }
-    throw new Error('MongoNativeBootstrapTimeout');
+    throw new Error(MongoBootstrap.timeout);
 }
 
 async function pingMembers() {
@@ -147,43 +164,27 @@ async function pingMembers() {
         rememberDiagnostic(MongoDiagnosticStage.ping, host, null);
         const database = await admin(host);
         rememberDiagnostic(MongoDiagnosticStage.ping, host, null);
-        const status = await database.runCommand({ ping: 1 });
+        const status = await database.runCommand({ ping: MongoBootstrap.one, maxTimeMS: mongoBootstrapTime() });
         rememberDiagnostic(MongoDiagnosticStage.ping, host, status);
-        if (status.ok !== 1) return false;
-    }
-    return true;
-}
-
-async function replicaMembersReady() {
-    for (const host of hosts) {
-        rememberDiagnostic(MongoDiagnosticStage.replica, host, null);
-        const database = await admin(host);
-        rememberDiagnostic(MongoDiagnosticStage.replica, host, null);
-        const status = await database.runCommand({ replSetGetStatus: 1, maxTimeMS: 2000 });
-        rememberDiagnostic(MongoDiagnosticStage.replica, host, status);
-        const ready = status.ok === 1 && status.set === set && status.members.length === hosts.length &&
-            status.members.every(member => member.health === 1) &&
-            status.members.filter(member => member.stateStr === 'PRIMARY').length === 1 &&
-            status.members.filter(member => member.stateStr === 'SECONDARY').length === hosts.length - 1 &&
-            status.votingMembersCount === hosts.length && status.writableVotingMembersCount === hosts.length &&
-            status.writeMajorityCount === Math.floor(hosts.length / 2) + 1;
-        if (!ready) return false;
+        if (status.ok !== MongoBootstrap.one) return false;
     }
     return true;
 }
 
 async function bootstrap() {
+    await load(MongoBootstrap.readinessPath);
     await waitReady(pingMembers);
-    if (hosts.length > 1) {
-        const primary = await admin(hosts[0]);
-        rememberDiagnostic(MongoDiagnosticStage.initiate, hosts[0], null);
+    if (hosts.length > MongoBootstrap.one) {
+        const primary = await admin(hosts[MongoBootstrap.zero]);
+        rememberDiagnostic(MongoDiagnosticStage.initiate, hosts[MongoBootstrap.zero], null);
         const initiated = await primary.runCommand({ replSetInitiate: {
-            _id: set, members: hosts.map((host, index) => ({ _id: index, host, votes: 1, priority: index === 0 ? 2 : 1 }))
-        } });
-        rememberDiagnostic(MongoDiagnosticStage.initiate, hosts[0], initiated);
-        if (initiated.ok !== 1) throw new Error('MongoNativeReplicaInitiationFailed');
-        await waitReady(replicaMembersReady);
+            _id: set, members: hosts.map((host, index) => ({ _id: index, host, votes: MongoBootstrap.one,
+                priority: index === MongoBootstrap.zero ? MongoBootstrap.primaryPriority : MongoBootstrap.one }))
+        }, maxTimeMS: mongoBootstrapTime() });
+        rememberDiagnostic(MongoDiagnosticStage.initiate, hosts[MongoBootstrap.zero], initiated);
+        if (initiated.ok !== MongoBootstrap.one) throw new Error(MongoBootstrap.initiationFailed);
     }
+    await KeyLoadMongoReadiness.waitReady(hosts, set, deadline, admin);
 }
 
 bootstrap().then(

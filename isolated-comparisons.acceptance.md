@@ -1034,3 +1034,24 @@ owned client disposal is attempted with original failure retained. Pure closed
 diagnostic tests plus actual55378-stream teardown and small genuine SDK delete/
 foreign-preservation regression execute on each1/2/3 topology. Pre-ACK ownership
 collision and genuine quorum-loss fault drain remain separately tracked gaps.
+
+
+TASK-ISO-027KA narrow ACK stage, supplements BC054/055/ISO005/006:
+
+| Criterion | Pass/fail and test map |
+|---|---|
+|AC-KO-001|All four real creation paths reserve without authority and promote only immediately after native ACK, before later conversion/copy/error; source path review plus genuine helper/native full-target join. Pre-ACK deletion selection fails.|
+|AC-KO-002|Real different-ID same-name foreign rejection stays excluded; ordinary ACKed own stream is removed and foreign original identity/full bytes survive actual cleanup. Genuine native1/2/3 helper; disabling cleanup is failure.|
+|AC-KO-003|Rejected, failed/unknown/pending reservations never enter cleanup or become successful samples; pure closed-state tests plus separate genuine unknown outcome required. No inferred ACK from readback.|
+|AC-KO-004|An actual ACK-before-later-copy-validation failure retains the known candidate. Pure transition/source boundary review plus separate real in-container target failure proof; source alone is not native qualification.|
+|AC-KO-005|Checked finite actual-profile capacity, compact descriptors, duplicate/mismatch rejection and original tasks/errors are preserved. Pure capacity/overflow/state tests, full source gates and actual native resource/performance capture.|
+
+Identical-ID NoStream replay is a known native ambiguity outside this partial
+stage; universal foreign/new-creator and generation fencing remain unresolved.
+Never mark the whole ownership/fault workstream qualified from AC-KO subset.
+
+
+TASK-ISO-030K supplements AC-ISO-005/006 and REQ-BC-054/055 under ADR-056. AC-KC-030-001: actual native1/2/3 fixture independently derives55378 canonical ACKed identities, applies the production cleanup120s/180s with at most16 workers, requires exact complete counters and reads every tombstone plus unchanged foreign identity/bytes. Positive qualification is the original GitHub native regression and diagnostic; missing/unknown ACK, partial deletion, retry, pending/faulted task or changed foreign content fails. AC-KC-030-002: all five10000-operation actual StreamAppend repetitions and teardown pass with exact source/run/attempt artifacts for1/2/3. AC-KC-030-003: existing exceptional deferred-observation branch remains a failed result and an explicit pending026KF native fault/process-boundary criterion; source budget adjustment cannot satisfy unconditional original settlement. No local tests or performance improvement claim. See ADR exact900s fixture and disjoint ownership contract.
+
+
+TASK-ISO-031M adds AC-MR-031-001..005 under ADR056 and REQ-BC-052/055/AC-ISO-002/003/006/007: exact native member/config/hello intended writable first-primary tuple; lossless pinned signed Long domains; two fresh identical500ms rounds within existing120s; genuine20s native stepdown/lower-primary/automatic-return regression under300s parent; actual same-image malformed and >2^53 integral domain tests. No quorum/priority/durability/measured retry changes. Original d45 Mongo3 failures preserved; all1/2/3 native preflights/authentication regressions and source-qualified tests required. Genuine cancellation/kill-reap/healthy-followup remains an explicit pending fault criterion. See exact module ownership, tuple and process restrictions in ADR.

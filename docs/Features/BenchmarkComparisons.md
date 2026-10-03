@@ -25,6 +25,23 @@ No public engine API/schema/ACK change, external registry publication, local run
 tool installation, secret logging or test/bound weakening. Full nine-engine,
 native Single/Replicated and six-profile scope remains required and unqualified.
 
+TASK-ISO-030H under [ADR-056](../ADR/ADR-056-isolated-linux-comparison-cells.md)
+preserves REQ-BC-001/003/009/050/055/056 and AC-IMAGE-006 while repairing the
+native image importer's HTTP lifetime. Supplemental acceptance is explicit:
+
+| Criterion | Pass/fail and evidence |
+|---|---|
+| AC-IMAGE-LIFE-001 | One real referenced AbortController deadline owns and awaits the original operation through terminal body work, clears in finally, and rejects invalid bounds before submission; no detached race or global keepalive. |
+| AC-IMAGE-LIFE-002 | Readiness attempt and poll fit the remaining overall30s; manifest fetch/headers/bounded body/cancel share the existing30s owner. Every existing image/source/digest/status/output oracle remains. Source review plus actual native import is required. |
+| AC-IMAGE-LIFE-003 | New ImageHttpDeadlineTests real Node child/native controller tests assert abort settlement/exit0, prompt success/fault exit, original error identity, no late abort, and invalid-bound rejection. No HTTP double; lifecycle evidence stays distinct from HTTP proof. |
+| AC-IMAGE-LIFE-004 | Exact-SHA existing ImageBundleRealTests and native import/preflight retain original image bytes/config/source/manifests/outputs/owned cleanup. Failed/skipped/missing cells fail complete270/publication. |
+
+Root owns same-slice image-manifest and its internal helper, shared docs and integration; Luna
+owns only NEW ImageHttpDeadline* unit tests/program after the frozen contract.
+Public API/data/SQL/SDK/cache topology changes are N/A: this is an internal
+tooling lifetime repair. Original d45 MongoDB n2 import failed before tests;
+the exact pending inner HTTP await is unretained. New native proof is pending.
+
 ```mermaid
 flowchart LR
     GitHub[Exact source runtime job] --> Images[Verified final OCI manifests]
@@ -459,3 +476,18 @@ UnknownWriteOutcome; scalar and native comparisons are skipped. This does not
 erase the successful exact2f source gate or qualify the new repairs. Fixture
 identity/typed-assertion and queue fault work require their own causal repairs
 and final delivered-source GitHub proof.
+
+
+REQ-BC-060..064 / AC-TSI-002..008: ADR059 TS008K-S accepts the additive
+real SDK adapter and pure actual-input tests before implementation. Native
+SDK/MCP/cancellation/membership/fault proof remains a separate6/30 family gate.
+The026/TS007B-D source checkpoint is main397a89c; actual run37097831105
+fails17 normal fixture cases. Its RF363/recovery164/analyzer118 and pure runner36
+pass; scalar/native comparisons are skipped. The original receipt is
+[retained separately](../implementation/isolated-current-main-baseline-37097831105.json).
+A source checkpoint or development build does not establish measured performance.
+
+TASK-ISO-030K maps REQ-BC-054/055 and AC-ISO-005/006 to AC-KC-030-001/002/003 in the root acceptance and ADR-056 accepted canonical teardown contract. The native1/2/3 full-volume fixture independently derives55378 real acknowledged streams, retains a foreign native event, applies120s/180s untimed production cleanup at concurrency16 and reads every actual tombstone. Root owns shared selector/evidence/workflow joins. Source/budget approval does not qualify the existing failed/deferred drain branch; genuine026KF process-boundary/fault proof remains pending. Exact delivered-source GitHub tests and authenticated complete workload artifacts are required.
+
+
+TASK-ISO-031M traces REQ-BC-052/055 and AC-ISO-002/003/006/007 to AC-MR-031-001..005 in ADR056/root acceptance: exact same-image BSON integral fields, intended first writable primary and two fresh valid500ms rounds in existing120s; genuine20s lower-priority native election and observed automatic return under300s parent. Native1/2/3 plus persisted authentication regressions and immutable failed-source evidence remain mandatory. Four AppHost files plus NEW Mongo-prefixed tests have one implementation owner; root owns every selector/workflow/doc/evidence join. Source discovery or stable admission does not establish measured failover tolerance.

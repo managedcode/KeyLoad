@@ -16,9 +16,8 @@ internal static class TimeSeriesIntensiveAttemptExecutor
         }
         catch (Exception error) when (TimeSeriesIntensiveExceptionBoundary.IsNonfatal(error))
         {
-            var captured = TimeSeriesIntensiveFailure.Capture(error);
-            var outcome = call.Completion == TimeSeriesIntensiveOutcome.Succeeded ? captured.Outcome : call.Completion;
-            return new(phase.Repetition, index, worker, call.LatencyTicks, 0, outcome, null, default, 0, captured.Failure);
+            return TimeSeriesIntensiveAttemptFailures.Capture(phase.Repetition, index, worker,
+                call.LatencyTicks, call.Completion, error);
         }
 
         if (response is not { } observed)
@@ -32,7 +31,10 @@ internal static class TimeSeriesIntensiveAttemptExecutor
             if (call.Completion != TimeSeriesIntensiveOutcome.Succeeded)
             {
                 return new(phase.Repetition, index, worker, call.LatencyTicks, 0, call.Completion, observed.Count(phase.Scenario),
-                    default, observed.Receipt?.Sequence ?? 0, new(TimeSeriesIntensiveFailureOrigin.Client, null, null, null));
+                    default, observed.Receipt?.Sequence ?? 0, new(TimeSeriesIntensiveFailureOrigin.Client, null, null, null))
+                {
+                    Acknowledgement = Acknowledgement(observed)
+                };
             }
 
             return Validate(expected, phase, index, worker, call.LatencyTicks, observed);
@@ -51,13 +53,23 @@ internal static class TimeSeriesIntensiveAttemptExecutor
         {
             var hash = TimeSeriesIntensiveResponseVerifier.Validate(expected, phase, index, response);
             return new(phase.Repetition, index, worker, latency, Stopwatch.GetTimestamp() - started,
-                TimeSeriesIntensiveOutcome.Succeeded, response.Count(phase.Scenario), hash, response.Receipt?.Sequence ?? 0, default);
+                TimeSeriesIntensiveOutcome.Succeeded, response.Count(phase.Scenario), hash, response.Receipt?.Sequence ?? 0, default)
+            {
+                Acknowledgement = Acknowledgement(response)
+            };
         }
         catch (Exception error) when (TimeSeriesIntensiveExceptionBoundary.IsNonfatal(error))
         {
             var captured = TimeSeriesIntensiveFailure.Capture(error);
             return new(phase.Repetition, index, worker, latency, Stopwatch.GetTimestamp() - started,
-                captured.Outcome, response.Count(phase.Scenario), default, response.Receipt?.Sequence ?? 0, captured.Failure);
+                captured.Outcome, response.Count(phase.Scenario), default, response.Receipt?.Sequence ?? 0, captured.Failure)
+            {
+                Acknowledgement = Acknowledgement(response)
+            };
         }
     }
+
+    private static TimeSeriesIntensiveAcknowledgement? Acknowledgement(TimeSeriesIntensiveResponse response) =>
+        response.Receipt is { Sequence: > 0 } receipt && receipt.CommandId != Guid.Empty
+            ? TimeSeriesIntensiveAcknowledgement.FromReceipt(receipt) : null;
 }

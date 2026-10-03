@@ -1,0 +1,335 @@
+{
+  "record": "cache-wire-source-r100",
+  "observedUtc": "2026-10-03T06:27:05.345687+00:00",
+  "qualification": "source_review_approved_integrated_development_and_new_sha_native_gates_pending",
+  "slice": "ResourceExecution",
+  "requirements": [
+    "REQ-CACHE-004",
+    "REQ-CACHE-007"
+  ],
+  "acceptance": [
+    "AC-CACHE-014"
+  ],
+  "contract": "docs/Features/ResourceExecution/CacheControlV1.md",
+  "decision": "docs/ADR/ADR-058-orleans-coordinated-cache-memory.md",
+  "sourceIdentity": {
+    "baseHeadSha": "d45d7f253d309610d7cce66684f155170277252a",
+    "observation": "Uncommitted current checkout file hashes; per-file observation is not an atomic delivered Git SHA."
+  },
+  "sourceReview": {
+    "state": "complete_source_only",
+    "reportSha256": "f5de906bb31d9012ee8b0083a70bb4b95bd2c3f1ed5d02cb1ad6e196d624dec5",
+    "productManifest": {
+      "fileCount": 34,
+      "sha256": "bde200190fb6a2ce779be6500220c826a1a090d328da99c5b36bd6599cb476fa"
+    },
+    "testManifest": {
+      "fileCount": 26,
+      "sha256": "9d0342f0894d421c18e44a261dc7c210a9230ba196fc664db58e24b00d85472e"
+    },
+    "rootComparedAllHashes": true,
+    "remainingActionableSourceBlockers": 0,
+    "scope": "All34 unused internal product files and all26 actual CacheControlWire tests/helpers, accepted R82 contract preserved.",
+    "reviewMiss": "R95 missed the third collection closing delimiter. Its prior source closure is withdrawn; the real R98 compiler exposed it. R99 and the actual R100 method extraction preserve all cases. A fresh full enabled build proves compiler closure."
+  },
+  "implementation": {
+    "stage": "Unused internal wire primitives and regression source; no runtime caller or cache admission.",
+    "schemas": 13,
+    "rootMessageTypes": 9,
+    "authentication": "Trusted-scope private HMAC key, complete closed shape and size preflight, constant-time digest/header comparison, all nested MACs bound, all11 reply header fields and actual target slot correlated.",
+    "lifetime": "Exclusive signer gate; originals registered and retained through finite cleanup; authenticator disposal only after actual task settlement.",
+    "bounds": {
+      "completeTranscriptMaximumBytes": 5547,
+      "signingTranscriptMaximumBytes": 5550,
+      "correlationMaximumBytes": 5588,
+      "applicationCapBytes": 65536,
+      "evidence": "Independent source arithmetic; no native pre-decode allocation, transport or RSS claim."
+    }
+  },
+  "developmentGates": {
+    "fullReleaseBuild": {
+      "state": "failed_full_enabled_R101_work_in_progress",
+      "observedUtc": "2026-10-03T06:46:56.978709+00:00",
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+      "errors": 53,
+      "warnings": 0,
+      "ownedNodeHelperDiagnostics": 41,
+      "otherOwnerMongoDiagnostics": 12,
+      "logSha256": "f5246d3148f512b3b416c00fa51cb18be6f14c7a09db258294626f9b48e4df96",
+      "cacheWireDiagnostics": 0,
+      "limit": "The complete solution gate failed. No scoped or native pass is inferred from absence of cache-wire diagnostics; R103 corrections need a fresh full gate."
+    },
+    "formatter": {
+      "state": "pending_required_full_verify"
+    },
+    "staticGovernance": {
+      "state": "pending_final_current_source_check"
+    }
+  },
+  "delivery": {
+    "state": "all_eligible_current_main_checkpoint_pending_remote_verification_then_R103_corrections",
+    "headSha": null,
+    "runUrl": null
+  },
+  "nativeQualification": {
+    "state": "pending_exact_delivered_sha",
+    "required": [
+      "TUnit/MTP normal and scalar complete same ID sets and zero skips",
+      "Actual typed Orleans serialization for all13 records",
+      "Independent literal C/S/key/correlation/HMAC vectors and nested proof failures",
+      "Real concurrent signer disposal and all original-task cleanup",
+      "Full recovery and Docker Aspire RF3 through real .NET and official MCP clients"
+    ],
+    "priorBaseline": "docs/implementation/cache-native-source-r93.json",
+    "priorBaselineQualifiesTheseNewFiles": false
+  },
+  "openGates": [
+    "Controller and receiver contracts, replay/clock/nonce ownership, native migration and authenticated physical-store full-ready probes",
+    "Server RF3 cache remains disabled",
+    "Coverage collector and numeric line/branch coverage",
+    "Representative matched single/multi-node profiles and complete comparison cohort",
+    "Endurance, fault and power-loss qualification"
+  ],
+  "files": [
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlAuthenticator.cs",
+      "sha256": "acab4ecf69bafbebb17122267bdc0b1d07585bbdc54972c080d162770ee68c13"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlCoreEncoding.cs",
+      "sha256": "9d9c48af07bc76e4c253174e44af98ba9b520d63f7dd04fb005b8bfe5511c2d5"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlCorrelation.cs",
+      "sha256": "f0b027d28bcffb466702162d8004599f15f3cbd64f680de984cfb9dc1c5b09bc"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlDigest.cs",
+      "sha256": "cc4c683252d43b7b51a20b924b8643e1443fcf534500779b9d8ba5ce149c93d1"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlEnums.cs",
+      "sha256": "06e1e158d23e264b196be8978dcb74a81263e443760b72fd4f8ee53651cbad86"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlFieldEncoding.cs",
+      "sha256": "0d60873281d6500c6c23aad8d9877e31dcb817fd202f7ae7ae9a94793dd64031"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlHeader.cs",
+      "sha256": "47e78c8e3ce4368eec805dab52f431787b616c1afc59af2d74080608a29958bb"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlHeaderComparison.cs",
+      "sha256": "a6d7eebf5ae25546a5bd0bae9f8c09f91f8d0fc443895b4fcce188f6062b2ded"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlInterfaces.cs",
+      "sha256": "d708abfa544f3aea810ef020702cbd963afbbe74168cfe248689699f8d0b863a"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlKey.cs",
+      "sha256": "dd52bf635c38404836ded1d4428757eb87cdc4a5f89f1be4fd9efa1d9bb7db3b"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlMac.cs",
+      "sha256": "7b475b1d294b318b8f319d35e503fc1cd3ec148676f6e63227fecb33f34cfaaf"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlMeasurement.cs",
+      "sha256": "4f69fa862c7218be0dbe6cfe1a39abf38445b7bcf10e25bfcbc0b4d4baa54be7"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlMessageEncoding.cs",
+      "sha256": "535c124faabbb4dd60b93266b373c962e0d7e453a4b3d0e6124cfda6ccee0d66"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlNames.cs",
+      "sha256": "c58899ed354c8151c12e45dc43d19086f44077859b9f10ecd27fb8a83f29100c"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlNestedAuthentication.cs",
+      "sha256": "7d588b9165d680951ba29acca71590b6f31c7343d21f7d54f20b5b9f333464c3"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlReplyEncoding.cs",
+      "sha256": "225663147d140060d1664dc3e9756f2a92faf86be9e94e83b8db655723b7f9f5"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlReplyValidation.cs",
+      "sha256": "1d5285a59d5d3c0807285a875f8147da2096fc6ef911efe5c9ad1ef2b85206dd"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlRequestEncoding.cs",
+      "sha256": "9272c2f1841d07edd736feb960c889ede4c3c4d8e5f99e3a15a8755362acb521"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlRequestValidation.cs",
+      "sha256": "b06df42270e2c99962df254bc238ecc8ac03dc10b66c5ee676db33b3dfe82b7e"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlShape.cs",
+      "sha256": "5fe5581d289291eefe34490fb85d5a00b78c3a9ee2e69e1049df958c721ee654"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlValidation.cs",
+      "sha256": "16c5fdc16018322748e74b5dbd1657b38cd611db16cb45fdc6850f4a3e19b5d3"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlWire.cs",
+      "sha256": "e5d7d830c9e046f8b49dae834b3c4a30e2ba6eb7e6b363358c427652eb0be28b"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheControlWriter.cs",
+      "sha256": "7e7ea3acbfe2dbf1cd31eb59d0026a2fe27908a9fe9b901eacc07ecafa212c43"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheGrantReply.cs",
+      "sha256": "0c2b9ccbad2fcd4f39c7c02fb13c5fd2dce238bf763f379113e892b657fa5060"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheGrantRequest.cs",
+      "sha256": "7a7f16e5050235ffdbe855792875bb877e7c4726095fd4206d9f2f63bfda0780"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CachePhysicalBinding.cs",
+      "sha256": "8c3ee30ae295b7766d90a6b7680a9f0d5a96c76dee355ebb0ae262ba44a4921c"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CachePrepareReply.cs",
+      "sha256": "974aba9490177a2c7537da23540772e142960bcbce57710ab6d245e6fb2251cc"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CachePrepareRequest.cs",
+      "sha256": "884b9316b5fc6024dd532d21f348e76d711089f8b7b5f7058ee92673f87e43cd"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheReadyProof.cs",
+      "sha256": "4f78455a365a8267d5234c96bf0b757f4ccfe486a6572166951f7896818321b3"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheRefreshHint.cs",
+      "sha256": "57eab08ad1271b64f0f204a2c95645ba3db7f3957bcd913adcebb2186bd2901a"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheRefreshReceipt.cs",
+      "sha256": "8118f4cc989ef22341134135918b1d175f42e436fe9587fe113fcd8f57f83ccc"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheReplyCorrelation.cs",
+      "sha256": "efeba2f403ee33629295ced363a76f962d2ce19571cab61f5e7e26a8fcd90db1"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheRevokeReply.cs",
+      "sha256": "4dfab0efe24e0f600a87daf88f1f05896aae5eafff4ec8b6a11c18129c0e8dc2"
+    },
+    {
+      "path": "src/KeyLoad.Orleans/Features/ResourceExecution/CacheRevokeRequest.cs",
+      "sha256": "046d5682cc0e0aff0ddad4664adbae771430e315bcac30726fd136b002e2123f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireAuthenticatorLifetimeTests.cs",
+      "sha256": "3d003bde4565cbd8fdb24e08d0642d14191b00ccd3f03173d066537459e2bb7d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireAuthenticatorSupport.cs",
+      "sha256": "6c95d8c13c5e7ae8a2dcbbf0a9e6231e2935f71729e37af5638518c51162015f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireAuthenticatorTests.cs",
+      "sha256": "60d0fb6e40bbd025050fd245379d04e734529704bbde1459dd6288614029e635"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireConcurrencySupport.cs",
+      "sha256": "b97d93c5ebc7850043610bc3b9af37acdcae3885e454ddf749ac5a352314ae50"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireConcurrentFailures.cs",
+      "sha256": "704a5a83b28ef17387edeaadf1c46d563977bba53659ee13ef9d2c49dfb30f28"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireConcurrentTaskOwner.cs",
+      "sha256": "79de1c1407939f621d6371dd1e2563f0b5953ed19b6d72b100a7e2837bf3a444"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireConcurrentWorkers.cs",
+      "sha256": "2a0ede1e21f823b58bc595893f597cbf52ed91b9bf1849c01716da8cd2b54da5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireCorrelationMutationTests.cs",
+      "sha256": "687f5ccad8291b7b2855650b26d10bec1574857876024ba9df155af4528e55da"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireCorrelationTests.cs",
+      "sha256": "8d12734d82851f14b30ad5a409ea7b3980d3c869364c50d095d551a2e6ffdf7f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireDigestTests.cs",
+      "sha256": "12f756e5f4d8aef3f7c87b6d05a0f507e82e91ad7ddc6b268283f1c70061b9cf"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireFieldMutationTests.cs",
+      "sha256": "a722216cfc07c9a36cf8f856994d184d6c7352d445b4932fdc6a7ab521d8c0c7"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireFlatAuthenticationTests.cs",
+      "sha256": "7701edcda02c7c96462cb13ca3a853488d00398ce9913c230ac8fdb95a9f49a2"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireGoldenVectorTests.cs",
+      "sha256": "2e36f5b399e0afd0401a1e72aa822272c7db1bf5e45a7dd16904bacd9815f10c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireGrantCohortTests.cs",
+      "sha256": "2dd0f0ff5a793183f60e895a7b1a274a4aa169b7e64f11afe249c159d8ae6cfd"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireHmacTestSupport.cs",
+      "sha256": "e5ad0f447c04085e88ee97fb0128d1ad6783327c0c7b46da74e3ea3e9ff7fb5b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireNestedProofAuthenticationTests.cs",
+      "sha256": "1c1d09e1c835814fb6d38c9af826228fd20447c297882766ded6959a68243f28"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireProofValidationTests.cs",
+      "sha256": "588a16efa0cf09bed301a79106126e62ebcef51bffcfb33eac693b23267ee9d1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireRefreshShapeTests.cs",
+      "sha256": "18f35dbb235efbdfb2915b535f1e1f1975cbe192d629ed9b88bd233e57e1582c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireReplyAuthenticationTests.cs",
+      "sha256": "eb3602a83d7e5f13a21da1adec45a69ab7ebdadfc502661b7642ec7f962d8a27"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireReplyShapeTests.cs",
+      "sha256": "a83c64ed7221fcce4fdefd2ecf4ca0a62ea9c2c95556c3633e1e907ef3fa24ca"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireReplyStatusClosureTests.cs",
+      "sha256": "a7f7d68787af15e024d4fc8e1b672131cb73554c63474f84f1bf0c5545d4e338"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireSerializationTests.cs",
+      "sha256": "0758eff2eb7acfffe5791a2bbcfcec986c66eb643a6cbd5ed1f5af887a8e106a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireShapeTests.cs",
+      "sha256": "b5a375a822da1376358bb7a6fbf344cdc3814f172ce45a47bf600da2a8e7e8cb"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireTargetCorrelationTests.cs",
+      "sha256": "0ab5ecdf8f0b98169a3ad6cfc06b199925c3bf3305b3716729eaaa7847d97f11"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireTestData.cs",
+      "sha256": "f6cf2c9ad55057894c29980ff3bc51e2d183ec290912bc68c0cca040589d05b3"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheControlWireUnknownInputTests.cs",
+      "sha256": "af05d4efe7d25b2b04d2010b23b73593084359664276bb8cfb2a72e3ff44b9db"
+    }
+  ]
+}

@@ -7,7 +7,11 @@ Related REQ-CACHE-004/007 and AC-CACHE-007/010/014 in [ResourceExecution](../Res
 The R69/R75 local capability and R81 actual owner observation are prerequisites.
 Root joined the complete independent review e02ad6e40d20e09b2d38919a5b26ead48a677c40ec56d4337c195f7f2b6ba0b0
 of exact candidate8adca2e05910c6f21d5fe7e2a6f65fedc37d27b490c2c7a4096ed55db7817bf4.
-Implementation, native codecs/crypto tests and qualification remain pending.
+Unused internal implementation and acceptance-led test source are present.
+The [R100 source receipt](../../implementation/cache-wire-source-r100.json)
+binds the independent complete34-product/26-test review and root hash comparison;
+final integrated source gates and delivered-SHA native codecs/crypto/lifetime
+qualification remain pending. This source state grants no cache admission.
 No complete local StoreIdentity, signing material, data, path, authorization result
 or CacheReadPermitAcceptance enters these generated internal control types.
 

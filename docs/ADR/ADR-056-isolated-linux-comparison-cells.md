@@ -1304,3 +1304,256 @@ regression uses this same deletion/drain unit over actual SDK clients; no
 configurable disposal callback or double remains. Only the accepted two Kurrent
 files and Kurrent*Cleanup* helper glob are writable. Root reviews all structure
 and native selector joins; genuine 1/2/3 cleanup evidence remains pending.
+
+
+## TASK-ISO-027KA accepted narrow ACK ownership repair
+
+REQ-BC-054/055, AC-ISO-005/006; supplemental AC-KO-001..005 below. Root
+accepts OptionA from the read-only026KO source audit as a partial safety stage
+before writes. Exact pinned SDK1.4/server26.1 proves NoStream identical EventId
+idempotency; ACK is not universal new-creator proof. Metadata/EventId/wire/profile
+changes are excluded. Foreign identical-ID/generation fencing and real unknown
+quorum/transport qualification remain open; do not claim the entire ownership
+workstream complete from this stage. Production/library public API remains.
+
+Replace the pre-ACK byte dictionary with a finite concrete ownership ledger.
+Initialize its checked capacity from actual dataset.Options.Documents +
+Repetitions*(Warmup+Operations)+2 before IO, validate options and fail overflow/
+invalid size. Capacity is a hard admission bound, not permission to allocate all
+possible entries up front; retain only exact name/native EventId/closed state,
+no full documents/payloads or arbitrary errors. A reservation is nondeletable.
+Use one concrete real SDK append helper for all four creation paths, with original
+token, NoStream precondition and existing EventData unchanged. Reserve before
+submission; promote immediately after a real successful return, before any
+checked cut conversion/progress/copy validation or success return. A native
+WrongExpectedVersion records rejected; other original faults/unobserved/unknown
+results remain nondeletable. Catch/rethrow original failures, never retry or
+manufacture ACK from readback. Duplicate/mismatched reservations or transitions
+fail closed. Known earlier ACK survives a later unrelated/copy failure.
+
+Paths: first semantic append (second intentional negative stays direct and
+unchanged), every seed append, copy-probe AppendAndCaptureCutAsync boundary,
+each warmup/measured Session append. Thread concrete ledger through only the
+existing verifier/probe signatures, no generic configurable success callback.
+Target Dispose snapshots only acknowledged candidates. Frozen026KC delete/drain/
+diagnostics/schema stay unchanged: those counters describe selected deletions
+only, never all possible unknown-created namespace contents. Unknown workload
+effects preserve a failed job/aggregation even if selected cleanup succeeds.
+Fresh cell-owned private namespace/native instance provenance remains necessary;
+the different-ID foreign rejection test is a bounded protection claim.
+
+Owned existing library files: KurrentTarget/Session/ReplicaProbe/ClusterVerifier
+and constants identifiers only. NEW KurrentStreamOwnership, cohesive Entry/State
+if needed, KurrentOwnedStreamAppend. NEW ComparisonTests KurrentStreamOwnershipTests
+and IsolatedKurrentOwnershipRegression* only; root owns native selector and
+in-container qualification join/docs/Git/gates. No other cleanup file, public
+contract, shared corpus/EventId, deadlines, request count/ACK/native identity/TLS
+change. Limits400/200/50/depth3; escalate missing contract/overlap/SDK defect.
+
+Tests first: pure finite ledger reserved/negative/unknown exclusion, positive
+transition, duplicate/mismatched descriptor, capacity/checked overflow, independent
+ACK retained after later error. Real selected1/2/3 native helper uses actual
+mapped transports and unchanged original gossip, precreates a same-name foreign
+stream with different native event ID, observes actual native conflict through
+the production helper, includes an ordinary positive owned stream, deletes only
+selected candidates via026KC and uses fresh reader to prove foreign original
+ID/revision/full Data/type/content type/metadata unchanged and owned absence.
+Fixture deletes only its independently ACKed foreign ownership; unknown effects
+never retried. A helper test is not full Target.Initialize failure proof. Root
+must separately join a real in-container target/setup conflict and native unknown
+protocol before claiming all four path fault qualification. Identical-ID native
+characterization must retain actual idempotency and uncertainty, not force a
+false WrongExpectedVersion or delete the foreign candidate to make a test pass.
+
+Rollback restores only this coherent ownership unit after original calls drain;
+no persistence migration. Full source review/build/format/governance and exact-SHA
+Linux pure/native1/2/3/270 remain required. No unchanged-cost or maximum-performance
+claim; measured results capture actual ledger overhead. ADR remains Accepted.
+
+## TASK-ISO-030H native image HTTP lifetime
+
+REQ-BC-001/003/009/050/055/056, AC-IMAGE-006 and AC-ISO-001/002/003/006/007
+map to supplemental AC-IMAGE-LIFE-001..004 in the BenchmarkComparisons feature.
+Root accepts this narrow internal tooling repair before writes. Original d45
+run37098964980 job111137427802 exits13 with unsettled top-level await after both
+image loads/config/source checks and owned registry start, before first push or
+any restore/build/database test. Original artifact11266105715 digest
+bb71b310edc5c33e582e84b5c6b2102c9cf82668e1a2425aadc7666b0120634a
+retains a running registry and successful owned cleanup. The exact pending fetch
+versus body-cancel await and shell Node version are absent. Node's versioned
+[timeout implementation](https://raw.githubusercontent.com/nodejs/node/v22.20.0/lib/internal/abort_controller.js)
+uses an unreferenced timer. The source lifetime deficiency is supported; repair
+of the observed native failure still needs an actual new-SHA GitHub run.
+
+Ordered implementation: Luna authors only NEW UnitTests
+`Features/BenchmarkComparisons/ImageHttpDeadline*` first; root then owns the
+existing `scripts/Features/BenchmarkComparisons/image-manifest.mjs` HTTP join
+and internal helper export, all contracts/docs/config/Git. Keeping this helper
+in the already inventoried module preserves the mandatory trusted Pages49-file
+closure; no dynamic-import shortcut or source-inventory policy change is needed.
+Strong reviewer
+independently joins actual source. The internal helper exports only
+`withHttpDeadline(timeoutMs, operation)` for same-slice callers and genuine Node
+lifecycle tests, with no CLI/service/public database API. Accept only positive
+integer bounds at most30000ms before invoking the operation. Create a real
+AbortController plus ordinary referenced timer before submission; timeout aborts
+that original signal with a TimeoutError; await the original operation and clear
+the timer only in finally after terminal body work. Do not detach a race loser,
+substitute fetch, keep the process alive globally, or manufacture success.
+
+Readiness uses its existing overall30000ms budget: cap each HTTP attempt and
+250ms poll delay by the remaining time, with no submission/backoff after expiry.
+The same owner covers fetch plus required response-body cancellation before
+Ready. Manifest retrieval uses the existing30000ms bound across fetch, retained
+headers, bounded body reads and error cancellation. Preserve original fixed
+loopback/redirect/status/byte/manifest/config/source/tag/exclusive-output contracts
+and verified original-image equivalence; no image pin, timeout increase, measured
+retry, receipt schema or native registry cleanup change is authorized.
+
+Tests exercise this exact helper through a real Node child with native controller,
+events and timers: terminal abort exits0 rather than13; success/fault preserve
+results/error identity and clear the long ref timer; no later abort after cleanup;
+invalid bounds do not invoke work. Reuse the original bounded child/output owner,
+not a fake HTTP/registry server or copied primitive. These are lifecycle tests,
+not production HTTP/body proof. The existing genuine `ImageBundleRealTests`
+archive/export/stop/remove/import/manifest equality roundtrip and actual isolated
+imports supply native HTTP/image evidence in GitHub. Abort is only a cancellation
+request; the original must actually settle, with existing finite process/drain/
+kill fallback retained. Positive roundtrip does not prove every delayed-body edge.
+
+Join: enabled full build/analyzers/complexity, required format/static governance,
+ordinary full coherent main delivery, then same-SHA GitHub normal/scalar units,
+real image roundtrip, recovery/RF3, native preflights and complete270 qualification.
+Root retains original failed job/ZIP/raw measurements and all independent cleanup
+failures. Missing/skipped/failed cells cannot publish site values. No persistence
+migration; rollback is the coherent tooling/test unit after original operations
+drain. Native/coverage/endurance/performance gates remain separate and pending.
+
+```mermaid
+sequenceDiagram
+    participant Import as Image importer
+    participant Owner as Referenced deadline owner
+    participant Registry as Actual local registry
+    Import->>Owner: Submit original HTTP operation
+    Owner->>Registry: Fetch with owned AbortSignal
+    Registry-->>Owner: Headers and bounded body
+    Owner->>Owner: Complete read or cancellation
+    Owner->>Owner: Clear timer in finally
+    Owner-->>Import: Original terminal result or failure
+```
+
+
+## TASK-ISO-030K canonical Kurrent teardown budget and volume
+
+Status: Accepted, source and native qualification pending. This implements REQ-BC-054/055 and AC-ISO-005/006; it preserves the original d45 failed native2 job111137429246 and its acknowledged30125/55378 streams at20017ms. Successful timed samples cannot certify a failed teardown.
+
+The fixed untimed deletion allowance becomes120s and the whole cleanup allowance180s, both measured from the existing cleanup lifetime without per-stream resets. Concurrency stays16. Only the actual acknowledged ownership snapshot is submitted once; unknown/rejected/pending and foreign identities stay excluded. No native quorum, append ACK, driver retry, measured timing or product setting changes. A larger engineering allowance is not a throughput improvement or an extrapolated service guarantee.
+
+AC-KC-030-001 requires genuine native1/2/3 full canonical volume: independent checked capacity4096+5*(256+10000)+2=55378, exact unique stream identities and original successful native NoStream append ACKs. NEW IsolatedKurrentVolumeRegression* helpers own this fixture; existing three-stream foreign-preservation and ownership regressions remain. Use at most16 original seed/read workers, one original operation per item, bounded identity lists, no Task-per-stream fanout, retries, fake SDK or timers as correctness proof. Native stream/event names use a fresh private fixture GUID. One independently owned foreign event must retain its original ID and bytes.
+
+The fixture owns one overall900s linked setup/verification allowance, including its actual seed and readback; production cleanup retains its independent120/180s caps. Source and write ownership are KurrentConstants.cs named cleanup bounds plus NEW IsolatedKurrentVolumeRegression* files only. Root alone joins the existing StreamAppend selector for each native1/2/3 topology. Run actual production KurrentOwnedStreamCleanup once on the exact ACK set; require tracked=submitted=acknowledged=55378, faulted=pending=0, peak<=16, no cancellation/deadline/disposal failure, success only after the original production success join. Independently read every tombstoned stream and the foreign event through actual native SDK before successful fixture return. Preserve primary errors and attempt disposal of all owned clients; retain unknown deletion outcome as failed and do not retry uncertain deletions.
+
+AC-KC-030-002 requires all five10000-operation native StreamAppend repetitions plus ordinary seed/warmup/probes and complete source/run/attempt-bound worker, qualification, native log and teardown diagnostic evidence on1/2/3 nodes. Original d45 failure stays unchanged.
+
+AC-KC-030-003 explicitly retains a separate incomplete fault gate: the existing global drain-timeout branch registers original fault observations and defers CTS disposal; it does not synchronously await every original task before owner return. The bounds-only change cannot certify unconditional settlement, native quorum-loss/cancellation recovery or parent kill/reap. TASK-ISO-026KF must qualify that owned process boundary before claiming those behaviors. Source docs may describe the actual failed/deferred branch but cannot label it a complete drain. No policy or criterion is waived.
+
+Ordered implementation: freeze this contract; write native full-volume assertions first; update named bounds; root review and selector join; development build/format/governance; scoped main delivery; exact-SHA GitHub full source gates, native1/2/3 volume and complete workload; authenticated artifact review. Rollback reverts this coherent fixture/budget/selector unit and leaves original receipts. Worker is cost-efficient capable implementation owner with no Git, workflow, docs, shared selector, other Kurrent or runtime writes. Escalate contract/SDK/ownership uncertainty. Root integrates all evidence and leaves ADR Accepted until the complete required native chain exists.
+
+```mermaid
+flowchart LR
+  A[Native canonical append ACKs] --> B[Exact owned55378 set]
+  B --> C[16 original deletion workers]
+  C --> D[120s deletion and180s whole cleanup]
+  D --> E[Complete original success join]
+  E --> F[Actual tombstones and unchanged foreign event]
+  D --> G[Failure retained and fault gate pending]
+```
+
+
+## TASK-ISO-031M intended writable Mongo primary admission
+
+Status: Accepted, source/native qualification pending. REQ-BC-052/055, AC-ISO-002/003/006/007. Original d45 Mongo3 job111137427827 records three actual NotPrimary failures during priority takeover. Initiation remains native votes1 and priorities2/1[/1]; measured retries, weaker quorums, changed durability, post-hoc sample exclusions and topology relabeling are forbidden.
+
+Closed ownership: existing AppHost IsolatedMongoInitiate.js, IsolatedMongoBootstrap.cs and IsolatedMongoResources.cs plus NEW IsolatedMongoReadiness.js; NEW comparison MongoNativeReadinessRegression* and NEW pure MongoReadiness* tests only. Root owns every shared selector/workflow/doc/receipt. Helper mounted read-only at /bootstrap/isolated-mongo-readiness.js and awaited load inside actual bootstrap. FindScripts validates Entry/Client/Readiness; AddClient receives the extra closed readiness path, Resources passes it. Same-source module exposes one KeyLoadMongoReadiness namespace probeRound/waitReady/sameRound and bounded integral validator for same-shell real tests. No public production hook, fake provider or reinitiation. The existing genuine reauthenticating direct native admin function is reused; native callers cannot supply simulated responses.
+
+AC-MR-031-001: every direct real status/hello/config observation has exact configured (id=index,name=host) bijection; one self matching queried host; all health1; intended hosts[0] PRIMARY/isWritablePrimary true and all others SECONDARY; same set/me/primary; actual votes1, priorities2/1[/1], no arbiter/hidden/delay/nonvoting shortcuts; all voting/writable countsN and vote/write majorities floor(N/2)+1. Configuration membership identity, votes and priorities must match every peer, not only one view. Native member configVersion/configTerm match actual config, hello.setVersion matches version; top-level status.term is election term. There is no fabricated top-level status.configTerm. Config.term may be -1 and is not required equal to election term; it must be <= election term.
+
+AC-MR-031-002: exact integral helper validates native signed Long by instanceof global Long, exact Long.prototype, unsigned=false, signed32 primitive low/high halves; copy through Long.fromBits. Only version/configTerm fields permit validated primitive signed32 fallback Long.fromInt; election term requires native Long. Minimum election0, version1, configTerm-1. Compare validated private copies via native prototype lessThan/equals calls; bounded decimal diagnostics only from validated copies. No Number(Long), toNumber, arbitrary object/string coercion, duck marker, JSON identity or unsafe adjacent>2^53 collapse. Pinned mongosh2.10.0/driver7.5.0/BSON7.3.1 primary-source discovery is preserved in029R integration refinement; actual same-image type tests still required.
+
+AC-MR-031-003: require two complete fresh consecutive identical valid rounds separated by existing500ms, tuple includes intended writable primary/election/config/member domains and actual votes/majorities. Reset on invalid/exception. Preserve the existing single120000ms bootstrap budget, direct2s connect/selection/socket/command caps; check remaining budget before every native stage and poll, cap maxTimeMS to remaining positive budget. Reauthentication remains per cached native use. Native transient setup polling remains untimed; no measured retries. Genuine one-node standalone requires actual authenticated ping/hello writable and sole mapped endpoint, no fabricated replica term/config. Stable admission cannot promise future no-failover.
+
+AC-MR-031-004: native3 regression performs ordinary intended-primary replSetStepDown20s (force allowed only this untimed native election fixture), observes an actual lower-priority writable primary with term via authenticated native commands, and starts the SAME production readiness module in actual same-image mongosh child. It must never certify that observed lower-primary state; observe intended automatic return, complete all-peer tuple and two-round success. Entire fixture is linked300s; child readiness retains its own declared120s inside this parent, original stdout/stderr/exit all awaited. Source-bound mounted helper must be present in the child environment; use owned fresh same-image native container on verified actual Aspire network or approved exact copied read-only source inside actual node. Credentials only via protected native environment/stdin, never logs or process argument/error diagnostics. Inspect existing owned native process/Docker patterns; escalate missing concrete process ownership instead of inventing container/network APIs. Native observation establishes transitions; sleeps/failpoints/fake HTTP/modified priorities do not.
+
+AC-MR-031-005: same-image exact Long domain tests include adjacent>2^53 distinctness, copied equality, signed extrema/minimum, allowed Int32 equivalence, and rejection of missing/string/duck/unsigned/Timestamp/fractional/NaN/out-of32 values. Pure domain inputs are acceptance data and do not qualify native election. Existing Mongo authentication UUID/native full1/2/3 preflights remain; later cancellation/uncooperative-child kill/reap/healthy follow-up must remain explicitly pending until actual owned proof exists. No native failure rewritten.
+
+Ordered stages: root freeze; write domain/native regression assertions first; implement closed admission/mount joins; root independent diff+profile review and selector; full development build/format/governance; scoped main delivery; actual GitHub full source/native1/2/3 and election/domain cases; immutable authenticated artifacts. Rollback coherent helper/mount/selector/test unit, keep original receipts. Agent roles: capable high-reasoning worker owns BSON/election/process scope because native exact representation and process ownership exceed routine budget-only work; root owns integration. Escalate boundary/SDK/API uncertainty. ADR remains Accepted until full required evidence.
+
+```mermaid
+flowchart LR
+ A[Authenticated direct status hello config] --> B[Exact native tuple]
+ B --> C[Intended writable first primary]
+ C --> D[Two fresh identical rounds]
+ D --> E[Untimed admission complete]
+ B --> F[Invalid round resets within120s]
+```
+
+### TASK-ISO-029R HTTP030H integration review boundary
+
+The independent comparison reviewer captured the earlier17-line helper at SHA2564f30757ac04b07a8e9930692a94c6621d6123fb05bcf62080d6ba2f9f0282ed2; that separate helper file was absent at closing inspection. This is a candidate-byte finding, not proof of the current replacement. Before integration, the actual030H owner must retain an owned referenced handle through original post-abort body/operation settlement: a one-shot referenced timer ceases being active after its callback, so awaiting a later unresolved original Promise alone can still permit Node exit13. Test an actual Node child whose abort handler schedules original settlement through a native unref timer; require original terminal result/error and child exit0 without a leaked keeper. No HTTP substitute or global keepalive; external owned process deadline/kill/reap remains the uncooperative-transport boundary. Original healthy image roundtrip and exact-source native imports remain required. This root review adds a join condition, does not change another concurrent owner's helper or claim the regression ran.
+
+TASK-ISO-031M-N native child refinement, approved before writes: NEW prefixed regression process/inspection/JS helpers may use the actual Docker CLI alongside existing bounded ProcessStartInfo/ArgumentList patterns. Resolve only the selected real Aspire node ContainerNameAnnotation. Inspect bounded actual Docker JSON and require running exact pinned Config.Image, configured expected native alias per selected node, and exactly one common verified native network shared by all N selected nodes; reject duplicates/missing/foreign aliases or ambiguous networks. Do not attach to arbitrary inferred networks. Launch one fresh explicitly named readonly --pull never pinned same-image mongosh child with read-only mounts of the exact current production module and NEW native fixture script. Apply source/run/attempt/task/fixture-GUID ownership labels before launch; inspect exact labels/name/image/network before child removal. Credentials use child ProcessStartInfo.Environment plus Docker --env NAME with no value arguments, never global environment, logs, diagnostics or URI userinfo. The child authenticates actual direct native clients and catches native failures into fixed bounded classifications. Retain actual same-image Long globals and status/config/hello domain facts, stepdown20s/lower-writable/return/two-round transitions; no fake native results. Parent300s owns original run/stdout/stderr; on cancellation kill/reap the Docker client and inspect/stop/remove the exact owned container, then await all original reader/process work. Teardown has one separately named30s initiation allowance; if native child/process cleanup cannot settle, retain failure and no ready/fault proof. Domain-only success cannot certify election behavior. Shared selector/workflow remains root-owned. This is an internal regression owner, not a new runtime network/configuration API.
+
+TASK-ISO-031M native member-delay representation refinement: pinned mongo r8.3.9 member_config.idl uses optional safeInt64 secondaryDelaySecs and member_config.cpp emits int64 when present. Accept only absent native zero-delay default or the same strictly validated signed Long.ZERO; do not compare present Long to primitive0 or introduce an arbitrary numeric/string fallback. votes remains actual emitted Int32 promoted primitive and the approved version/config-term fallback domains remain unchanged. This preserves no-delayed-member semantics. Root serially owns updating existing IsolatedDocumentResourceMongoTests to assert the actual read-only mounted helper and its genuine readiness contract after source relocation; source-token checks must not require moved replSetGetStatus text to remain in the entry file. Full native domain/election proof stays required.
+## TASK-ISO-030H R98 final lifetime closure
+
+AC-IMAGE-LIFE-001/002/003 retain the existing30000ms readiness and HTTP bounds.
+Before marking readiness, require the actual body-cancel terminal result,
+unaborted signal and remaining overall budget. The acquired manifest response
+has one protected owner through header evidence, capped reading, validation and
+final cancellation; preserve the original failure and any independent cancel
+failure together. Root alone owns image-manifest; no49-file closure or schema
+change. Luna owns only the new abort-child test: an actual native delayed terminal
+callback after abort must complete before await returns; assert its marker and
+original reason identity. A detached race or early return must fail this oracle.
+Existing shared Node-process registration/cleanup observation defects remain an
+explicit blocker for separate bounded repair and final review. No local tests or
+native HTTP operations; exact-SHA GitHub image/preflight qualification is pending.
+## TASK-ISO-030H-O accepted shared test-child lifetime contract
+
+REQ-BC-001/003/009/050/055/056 / AC-IMAGE-LIFE-003. Root fully joined R98 F4 and
+freezes the preserving repair before worker writes. Existing Luna/high owns only
+test BenchmarkComparisons IsolatedAggregateNodeProcess/Output, cohesive new
+lifetime/failure helpers and real Node regression tests; root owns integration.
+Keep RunAsync/Module/RepositoryRoot success signatures, real Process/Node and
+controlled environment,65,536-character output,60s process and5s cleanup bounds.
+Protect every post-Start construction; register each original immediately.
+Attempt native owned-tree kill/reap, cancellation and both output observations
+independently; retain already-terminal full faults before cleanup. Report sole
+primary with its identity, otherwise aggregate all independent original/cleanup
+errors without duplicate exception/task reports or blanket output-limit/IO
+suppression. Retain actual original task joins and actual uncancelled child-exit
+ownership after failed finite waits; a retained observed late cleanup releases
+Process/reader/CTS dependencies only after actual settlement, with no late
+assertion or mutation of reported failures. Missing operation slots are absent,
+never successful evidence. No double/suppression/local execution is authorized.
+Real Node success/nonzero/one/both output-limit/cancellation cases plus all15
+existing caller regressions execute on new-SHA GitHub normal/scalar. Partial
+setup/dispatch/stall branches receive explicit source-control-flow review.
+Strongest final actual source review and full enabled development gates precede
+ordinary eligible main delivery. No public/data/topology/image/version change;
+rollback reverts the coherent test owner and tests together. Native HTTP/image,
+coverage and comparative gates remain separate, and this ADR stays Accepted.
+
+TASK-ISO-031M-N pinned mongosh writable-state refinement: v2.10.0 config-directory.ts resolves both native config/history and local logs under os.homedir()/.mongodb/mongosh on Linux; no supported MONGOSH_LOG_DIR/XDG override was found. Preserve HOME and every global environment. The exact owned child may use --user 0:0 and one disposable16MiB tmpfs at /root/.mongodb/mongosh with rw,nosuid,nodev,noexec,mode0700,uid0,gid0; root filesystem and production/fixture source mounts stay read-only. Use actual supported --quiet --nodb --norc fixture entry. No host writable mount, broad home volume, undocumented flag, credential log/archive or persistent child config. Source config/entrypoint facts are review only; same-image native GitHub execution must qualify the concrete storage/UID contract.
+
+TASK-ISO-031M-N selected-node identity refinement, approved before writes: current Mongo resources have no explicit ContainerNameAnnotation; old DCP assigned names are not annotation proof. Existing owned IsolatedMongoResources may create one fresh private group GUID and assign each selected node WithContainerName(resourceName + '-' + guidN). This creates the actual bounded native identity used by the regression inspection. Keep resource names, exact native DNS alias, replica host membership, volumes, image and votes/ACK unchanged. Native inspection must still match actual name/image/running state/common network/allowed selected alias; no inferred container suffix or arbitrary network selection. New pure resource assertions cover unique explicit names and group suffix across1/2/3, but genuine Docker inspection remains required.
+
+TASK-ISO-030K-IR fatal-path refinement: the new fixture collector must locate the original fatal exception through ordinary InnerException and aggregate branches, preserving actual EDI identity and primary-fatal precedence while attempting every independent cleanup stage. New same-prefix TUnit pure failure regressions derive from KC030001/003 and use actual CLR rejected-array failures plus actual wrapped/aggregate errors; they cannot certify the unchanged production026KF fault/drain join.
+
+TASK-ISO-031M-N pinned Aspire alias refinement: [Aspire13.6.0 ContainerCreator](https://raw.githubusercontent.com/dotnet/aspire/v13.6.0/src/Aspire.Hosting/Dcp/ContainerCreator.cs) lines107–120 prepends resourceName and resourceName+'.dev.internal' before explicit aliases. The existing explicit selected resource alias therefore has closed submitted multiplicity2. Native identity validation accepts only that selected resource alias with observed multiplicity1..2, its exact '.dev.internal' alias once, and exact selected container name/fullID/shortID once when emitted. Every other duplicate or foreign alias still fails. Require the selected resource alias and one exact common inspected network; native Docker may deduplicate the submitted pair, and source inspection cannot establish which actual form was emitted. No arbitrary alias fallback or weakened membership proof is authorized.
+
+TASK-ISO-031M-N protected startup refinement, approved before writes: within the existing NEW Process/Docker/main helpers, preconstruct the owner Process and closed StartInfo before native Start. A private asynchronous StartAsync owns one original Task.Run for actual Process.Start plus immediate registration of each original stdout/stderr reader in nullable slots; cancellation is checked before Start and after registration. Missing original slots remain absent, and Complete requires both readers. On original startup fault/cancellation, an original terminal continuation attempts independent30s kill/reap and all registered-reader drains, preserving startup and independent cleanup faults in the original task join before releasing Process. Do not add injectable startup delegates, native substitutes, races that return before original startup, or detached success. If finite cleanup cannot settle, retain explicit failed ownership and its original work; no successful native/fault proof or premature disposal claim. Pure source review covers partial registration; genuine process cancellation qualification stays mandatory. Root owns integration and the worker must escalate any need to expand this bounded owner.
+
+TASK-ISO-031M-N one cleanup owner refinement: keep the preconstructed private Process owner visible to main/Docker before starting; its constructor prepares only closed Process/StartInfo. CompleteAsync owns and awaits the one actual registered startup Task.Run and then original exit/readers. Each caller registers the terminal cleanup continuation before awaiting that original operation, so failed partial startup uses the same independently initiated30s caller cleanup scope as client stop/exact-child cleanup/registered-reader drain. Do not add a separate sequential factory cleanup allowance. Original startup/exit/reader tasks stay owned through deferred failed-path disposal until actual settlement; missing registrations stay absent. This serial source refinement preserves the single-budget contract and both actual operation/cleanup failure joins, not a new public process API.
+
+TASK-ISO-031M-N final failure/release join: ordinary protected try/await/finally replaces caller continuation allocation while preserving original operation plus cleanup faults. Within NEW MongoNativeReadinessRegressionFailures, inspect each actual original terminal task after the full join; include actual cancellation obtained from each cancelled task's own awaiter alongside independent faults, because WhenAll.Exception excludes cancelled inputs when any task faults. Preserve sole original EDI identity and aggregate independent failures. The registered task set is bounded by the closed caller stages. NEW MongoReadinessTaskFailureTests cover actual CLR async cancellation+IO failure identity/token, sole IO identity and completed actual tasks as pure algorithm inputs under MR031004/ISO006/007; they never establish native cancellation. After all independently attempted stop/remove/drain stages, always attempt actual settled release within the same30s scope, and propagate Process.Dispose failure through the joined result. Deferred release is solely a failed/unsettled retention path and cannot establish successful disposal or readiness. Pure/source/native evidence remains distinct.

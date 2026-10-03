@@ -35,9 +35,10 @@ internal static class KurrentClusterVerifier
     }
 
     public static Task<ClusterEvidence> VerifyCopyAsync(KurrentDBClient writer, KurrentDBClient[] nodeClients,
-        HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData, TimeSpan timeout,
+        HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData,
+        KurrentStreamOwnership ownership, TimeSpan timeout,
         CancellationToken cancellationToken)
-        => KurrentReplicaProbe.VerifyCopyAsync(writer, nodeClients, httpClients, topology, stream, eventData,
+        => KurrentReplicaProbe.VerifyCopyAsync(writer, nodeClients, httpClients, topology, stream, eventData, ownership,
             timeout, cancellationToken);
 
     internal static async Task<KurrentGossipView[]> ReadReadyViewsAsync(HttpClient[] clients,

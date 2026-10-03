@@ -13,6 +13,7 @@ internal sealed class IsolatedDocumentResourceMongoTests
     private const string Key = "KEYLOAD_MONGO_REPLICATION_KEY";
     private const string Script = "/bootstrap/isolated-mongo.sh";
     private const string BootstrapScript = "/bootstrap/isolated-mongo.js";
+    private const string ReadinessScript = "/bootstrap/isolated-mongo-readiness.js";
     private const string TopLevelAwait = "await bootstrap();";
     private const string SetupDeadline = "const deadline = Date.now() + 120000;";
     private const string BootstrapCompletion = """
@@ -81,7 +82,11 @@ internal sealed class IsolatedDocumentResourceMongoTests
         await Assert.That(fixture.Context.Runner.Resource.Annotations.OfType<WaitAnnotation>().Any(wait =>
             ReferenceEquals(wait.Resource, bootstrap) && wait.WaitType == WaitType.WaitForCompletion)).IsTrue();
         await IsolatedDocumentResourceAssertions.VerifyScriptAsync(bootstrap, BootstrapScript,
-            "process.env", "replSetInitiate", "replSetGetStatus", "deadline", "auth", "quit(1)", "hosts.length > 1");
+            "process.env", "replSetInitiate", "deadline", "auth", "quit(1)", "hosts.length > MongoBootstrap.one",
+            "await load(MongoBootstrap.readinessPath)", "KeyLoadMongoReadiness.waitReady(hosts, set, deadline, admin)");
+        await IsolatedDocumentResourceAssertions.VerifyScriptAsync(bootstrap, ReadinessScript,
+            "replSetGetStatus", "replSetGetConfig", "isWritablePrimary", "primary === hosts[MongoReadiness.zero]",
+            "mongoReadinessSameRound(previous, current)", "pollMs: 500");
         await VerifyCompletionAsync(bootstrap);
         var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(bootstrap);
         await Assert.That(configuration.Arguments.Select(argument => argument.Value).SequenceEqual(

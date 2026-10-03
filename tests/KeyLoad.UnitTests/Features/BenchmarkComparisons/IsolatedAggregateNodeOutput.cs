@@ -31,23 +31,4 @@ internal static class IsolatedAggregateNodeOutput
         }
     }
 
-    internal static async Task ObserveAsync(Task task)
-    {
-        try
-        {
-            await task.ConfigureAwait(false);
-        }
-        catch (OperationCanceledException)
-        {
-            // The bounded reader was cancelled while the owned Node child was reaped.
-        }
-        catch (IOException)
-        {
-            // Killing the owned child can close its redirected pipe.
-        }
-        catch (InvalidOperationException error) when (error.Message == OutputLimitMessage)
-        {
-            // The originating output-bound failure remains the caller's failure.
-        }
-    }
 }

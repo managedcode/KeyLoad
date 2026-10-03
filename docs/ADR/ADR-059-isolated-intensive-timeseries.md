@@ -575,3 +575,420 @@ codes. Pure standard-constructor and original-cause tests precede the source
 repair. No public contract, suppression, runtime filter bypass, deadline or
 native failure semantics changes. Root owns these already frozen source/test
 files during integration; exact-SHA native gates remain unchanged.
+
+
+## TS008K-S accepted SDK adapter and compact-fact contract
+
+Root accepts REQ-BC-060/061/062/063, AC-TSI-002/003/004/005/006/008
+before any writes. This stage owns the real SDK adapter and pure actual-input
+regressions only; native public/MCP/fault helpers, host/resources/evidence and
+shared Failure/Attempt joins remain root-owned later stages. Existing SDK,
+public contracts, legacy RF3 target, production defaults and dependencies remain.
+
+1. NEW internal KeyLoadTimeSeriesIntensiveContext/Peer records contain run ID,
+   PartitionRef, private SeriesSet, nonempty actual incarnation and1..3 borrowed
+   real SDK peers (index1..N, distinct voter IDs/endpoints/clients). Precompute
+   AtomicPartitionId once outside timing. Host owns HTTP credentials/transports,
+   actual endpoint pairing and30min preflight/90min cell authority; fresh HTTP
+   owners use infinite transport timeout plus original linked30s call tokens.
+   Context/DTO validation is shape proof, never native membership evidence.
+2. Target borrows clients and owns only closed state, sequential seed ordinal and
+   maximum fully validated positive ACK-cut scalar. No retry, timer, background
+   Task, response collection, transport rewrite or client disposal. Dispose closes
+   target admission after caller drain; calls afterward fail locally. Measured
+   calls are stateless apart from that bounded atomic maximum.
+3. Initialize directly awaits actual Status from all peers, validates exact count,
+   distinct NodeId, common expected incarnation/leader, expected voter count,
+   RoutingReady and QuorumProcessDurable, then real ConfigureResourceAsync for
+   the private TimeSeries set/domain. Validate returned definition identity and
+   policies required by the frozen tags. Host proves actual Dashboard local-voter
+   pairing and private freshness before runner; no measured status/freshness call.
+4. Seed receives unchanged supplied256 samples/tags,16 sequential batches from
+   common descending4095..0 insertion. Seed purpose is invariant seed:b, b0..15,
+   using Plans.CommandId. Advance ordinal only after real validated receipt;
+   require actual terminal Revision256*(b+1). No seed retry/sort/recomposition.
+5. Five methods each directly await exactly one original SDK operation using the
+   original token: one-sample Commit/AppendSamples, ReadSamples, ReadLatestSample,
+   AggregateSamples, AggregateSampleWindows. Preserve actual decoded outputs;
+   transfer exclusive raw SampleRecord[] via ImmutableCollectionsMarshal without
+   copy/sort. Null latest Sample is genuine absence; missing success wrapper or
+   default windows/raw is validation failure. Pass ranges/caps/tags through; native
+   public negative proof cannot be fabricated by adapter guards.
+6. Receipt validation is O(1) inside latency: actual CommandId matches original
+   command, exactly one nonnull matching appendSamples/set/series mutation,
+   positive actual Revision, token with expected incarnation/partition/epoch1,
+   positive commit Position and QuorumProcessDurable. Map actual CommandId and
+   matching MutationReceipt.Revision; token Position/submission ordinal are never
+   sample sequence. Only fully valid receipts advance maximum ACK cut. Common
+   oracle still validates mapped identity/sequence after the timer.
+7. NEW internal fixed-fact ProblemException and ReplyException derive from
+   InvalidOperationException with standard constructors and named messages.
+   Problem retains only nullable defined ErrorCode and actual positive returned
+   Problem.StatusCode; unknown/missing/numeric/case-variant code stays null,
+   status0 is unavailable, never recompute Errors.Status. No Title/Detail/DTO/raw
+   HTTP status/original transport error is invented or retained. Reply retains
+   only nullable observed Revision from exactly one actual matching mutation;
+   missing/multiple/wrong identity has no sequence. Malformed authority never
+   certifies applied count or advances ACK cut. Standard construction has no
+   invented facts. Root later maps Problem to TargetFailure/KeyLoad origin and
+   Reply to ValidationFailure/Oracle; original call deadline/cancellation wins.
+   Pre-response failure has ResultCount=null, digest default; no inferred samples.
+8. Root serially joins existing Failure/AttemptExecutor and pure join tests after
+   these NEW types freeze. Preserve nullable numeric fields and any actual
+   matching observed sequence through closed failure capture; no native strings.
+   Existing Npgsql cancellation can contain actual QueryCanceled57014 in OCE's
+   direct InnerException: a separate root join must retain that actual SQLSTATE
+   while preserving the observed cancellation/deadline outcome; never fabricate
+  57014 from an OCE alone. Native Npgsql proof is still required.
+9. Tests first use actual CommitReceipt/Result/Problem/NodeStatus and independent
+   common seed formulas; no target/client/clock/service doubles. Receipt positives
+   include non-ordinal Revision; negatives cover missing/multiple/wrong mutation,
+   command/authority/token/cut/durability/seed-boundary failures. Result tests cover
+   actual known409/429/400/503, deliberately different returned status, unknown
+   code forms/status0, missing wrappers versus true empty values. Topology guards
+   cover1/2/3, duplicates/drift/mixed authority/readiness and leader membership;
+   pure guards do not establish native quorum or endpoint pairing.
+10. Native SDK/MCP/replay/negative/projection/revocation/cancellation/restart/loss
+    helpers remain separately frozen before writes. SDK cancelled writes may be
+    UnknownWriteOutcome; SDK completion does not prove remote RPC drain/rollback.
+    Explicit untimed original-ID reconciliation belongs only to native fault tests.
+    Official MCP disposal has no token: await the original uncancellable operation,
+    mark completion beyond its30s cooperative cleanup budget as failure, retain
+    primary error and continue independent cleanup, with actual outer job ceiling.
+    Never detach disposal or claim guaranteed30s settlement from this API.
+11. Exact NEW source ownership: KeyLoadTimeSeriesIntensiveContext, Target, Setup,
+    Reads, Writes, Receipt, Result, ProblemException, ReplyException, Topology,
+    Protocol under Comparisons/TimeSeries/Intensive; matching NEW UnitTests
+    ReceiptTests/ResultTests/SeedTests/TopologyTests and narrowly cohesive prefixed
+    actual-input helpers. Limits400/200/50/depth3; stop on missing contract/overlap/
+    owning dependency defect. Root owns all existing files/docs/Git/workflows.
+
+Root reviews complete diffs and joins before source build/format/governance and
+exact-SHA GitHub normal/scalar/recovery/RF3; native6/30/coverage/site evidence
+remains mandatory. Additive source rollback removes only the new adapter unit
+after original calls settle; no API/persistence migration. ADR stays Accepted.
+
+
+TS008K root compact-fact join, before writes: root alone owns existing
+TimeSeriesIntensiveFailure/AttemptExecutor plus NEW TimeSeriesIntensiveAttemptFailures
+and NEW TimeSeriesIntensiveNativeFailureFactTests. The pure capture factory accepts
+only known call completion/index/latency and actual Exception, preserves actual
+matching Reply.ObservedSequence through observed-failure wrappers, and always
+sets pre-response ResultCount=null/digest default/validation duration0. It never
+infers applied cardinality. Problem maps actual nullable fields to KeyLoad origin/
+TargetFailure; Reply maps Oracle/ValidationFailure. Original observed deadline or
+caller cancellation wins over native classification while native facts remain.
+An OCE with an actual direct PostgresException InnerException keeps that actual
+packed SQLSTATE/PostgreSQL origin; bare OCE keeps Client/null SQLSTATE. Test actual
+exception-input positives/unknowns, mismatched returned HTTP status, reply sequence
+with no count/cut/digest, deadline precedence and inner57014 versus bare cancellation
+before source implementation. No provider task, clock, role, retry or wire change.
+
+## TS008TR root-approved native SQL refinement and implementation join
+
+Root reviewed TS008TR-R and its independent TS008TR-IR source review on2026-10-03.
+This paragraph explicitly replaces the earlier sample-JSONB parameter choice:
+untimed seed uses typed parallel arrays; measured append uses scalar parameters.
+No sample serializer, serializer speed claim or product contract change follows.
+Related requirements BC060/061/062/064 and AC-TSI-002/003/004/005/008 remain mandatory.
+The six source-owned routines have exactly the names, ordered types and returned
+fields in the reviewed packet, reproduced here as the implementation contract:
+
+| Routine | Ordered parameter types | Ordered returned fields |
+|---|---|---|
+|kld_tsi_append_batch|text set,text series,uuid command,text[] events,timestamptz[] times,float8[] values,jsonb tags|input_ordinal int4,command_id uuid,sample_sequence int8|
+|kld_tsi_append_one|text set,text series,uuid command,text event,timestamptz time,float8 value,jsonb tags|command_id uuid,sample_sequence int8|
+|kld_tsi_read|text set,text series,timestamptz from,timestamptz until,int4 limit|series_id text,event_id text,sample_time timestamptz,sample_value float8,sample_sequence int8,tags_text text|
+|kld_tsi_latest|text set,text series,timestamptz nullable cut|same six sample fields|
+|kld_tsi_aggregate|text set,text series,timestamptz from,timestamptz nullable until,int4 max_samples|sample_count int8,sample_sum float8,sample_min/max/avg nullable float8|
+|kld_tsi_windows|text set,text series,timestamptz from,timestamptz until,interval width,int4 max_samples,int4 max_windows|window_ordinal int4,window_from/until timestamptz,sample_count int8,sample_sum float8,sample_min/max/avg nullable float8|
+
+1. All routines are SECURITY INVOKER, CALLED ON NULL INPUT, PARALLEL UNSAFE;
+   append is VOLATILE and reads STABLE. Each declares UTC and fixed search_path
+   pg_catalog, quoted validated private schema, pg_temp; no public fallback.
+   Use p_ parameters and qualified aliases to avoid output-variable ambiguity.
+   Values are typed parameters; only validated source-owned schema identifiers
+   enter installation SQL. Server encoding is UTF8 and its actual value is checked
+   by the root native proof. Set/series/event IDs are nonnull1..256 UTF8 bytes;
+   tags must be a nonnull jsonb object with native textual size<=4096 UTF8 bytes.
+   These are declared benchmark native bounds, not universal product restrictions.
+   Malformed JSON retains actual22P02; declared null/shape/byte/range guards22023.
+2. Stored UTC times are finite, >=0001-01-01T00:00:00.000001Z and
+   <=9999-12-31T23:59:59.999999Z. Exact MinValue sentinel is excluded. Measured
+   timestamps/widths are microsecond aligned; Npgsql's actual conversion of
+   submicroseconds is not claimed tick-equivalent. Raw/aggregate query infinities
+   remain allowed for genuine MinValue/MaxValue verification. Latest null cut and
+   aggregate null end remain supported. Windows requires finite nonnull endpoints,
+   until>=from, finite positive fixed interval with no year/month components;
+   UTC makes interval days fixed here. Null/infinite window bounds raise22023.
+   Native interval/timestamp arithmetic overflows retain22015/22008 or the actual
+   native code; no client clipping, compatibility switch or substituted maximum.
+3. Private series_counter uses exact set/series PK and nonnegative int8 counter;
+   seed/warm-r0..4/measured-r0..4 are the eleven zero rows installed untimed.
+   event_identity has scoped EventId PK and scoped unique positive sequence.
+   Both identity and hypertable sample fields use finite time/value/object guards;
+   samples PK includes set/series/time/event and range index starts set/series/
+   time/sequence. No nextval/serial or unsupported hypertable FK/unique index.
+4. Validate all required fields and rank1/lower1/equal cardinality1..256/non-null
+   elements BEFORE unnest padding or mutation. Lock an existing exact counter
+   FOR UPDATE; missing row22023. Iterate original ordinals; identical native
+   timestamp/float8/jsonb EventId content reuses its sequence, changed content
+   raises23505 with fixed safe text. Fresh items increment checked int8 and
+   insert both identity/sample; update counter once at end. Native overflow22003
+   or later conflict rolls back the entire batch and counter. Native +/-0/jsonb
+   equality is explicit; UUID is echoed correlation, not durable command replay.
+5. Batch results are ordered ordinal; scalar wrapper invokes the same routine
+   with one-element typed arrays inside PostgreSQL. In the adapter, validate
+   exact echoed UUID, positive sequence, expected seed ordinals/cardinality;
+   scalar must decode EXACTLY one row, observe EOF and NextResult=false, and
+   dispose reader BEFORE original CommitAsync. Only successful commit creates
+   an ACK receipt. Decoded row count never becomes inserted cardinality; dedup
+   can return an older sequence. Whole readback and fresh-sequence bijection
+   remain required. Unknown commit is failed with no retry or guessed ACK.
+6. Raw is inclusive, native time/sequence ascending LIMIT1..1000. Latest is
+   descending time/sequence LIMIT1; absent/unknown series remains empty/null.
+   Aggregate is half-open and scans at most max_samples+1 once into bounded
+   native values, checks max1..10000/excess54000 before statistics, then returns
+   actual count/sum/min/max/avg. Empty sum/count0 and null other stats; finite
+   arithmetic overflow retains22003. Inverted raw/aggregate returns native empty.
+7. Windows computes exact numeric microsecond span/width ceiling BEFORE int cast
+   or generation; max_windows1..1000/excess54000. Equal endpoints yields0 slots.
+   Select at most max_samples+1 rows once, reject excess, group each by native
+   floor((time-from)/width), then dense LEFT JOIN generated From-anchored slots.
+   Clamp each end, preserve half-open inclusion and empty0/nulls, ORDER BY ordinal.
+   No sample-times-window cross join, time_bucket, extra terminal slot or sorting
+   in CLR. Return actual tags_json::text; later TagScope validates native spelling.
+8. Root owns TimescaleSchemaLifecycle's repair and borrowed NpgsqlDataSource
+   overloads. CREATE SCHEMA, marker, extension and closed installer run in ONE
+   transaction; legacy installer/entry point stays compatible. Positive ownsSchema
+   follows successful commit plus exact-one owner confirmation only. Existing
+   marker lock and equality check precede DROP. Unknown commit/confirmation never
+   permits guessed DROP or retry; root removes only actual owned container/files.
+   Installer is InstallAsync(connection,transaction,schemaName,setName,token).
+   Root exposes existing ValidateSchemaName internally; installer repeats that
+   validation before quoted identifier interpolation. DDL search path may put
+   the validated private schema first; every installed routine fixes pg_catalog
+   first as above. Legacy lifecycle remains separately owned, with no global pool
+   clear or dropping the public extension. Intensive lifecycle borrows the ONE
+   target-owned datasource, rather than global connection-string PoolManager.
+9. Future adapter owns datasource MaxPoolSize16/MinPoolSize0, Enlist=false,
+   Multiplexing=false, NoResetOnClose=false, IncludeErrorDetail=false,
+   LogParameters=false, CommandTimeout30s/CancellationTimeout2000ms and validated
+private startup SearchPath. No timed set_config round trip or automatic retry.
+   Original caller token flows through open/execute/read/next-result/commit;
+   original readers/commands/transactions/connections and disposal are awaited.
+   Primary exception facts survive cleanup failure by compact source-owned wrapper
+   and original EDI, never error/SQL/parameter strings. After a genuine commit,
+   cleanup failure retains only actual echoed UUID/sequence ACK facts separately,
+   while the attempt remains failed and has no guessed count/digest. This adapter
+   wrapper and root Failure/Attempt join must be frozen before adapter writes.
+10. One root-owned30min preflight/90min cell token covers all readiness/schema/
+   probes/seed/copy/readback. Call30s and independent teardown30s do not restart
+   overall time. Native held-lock test owns two separate observer connections
+   outside measured pool16: A holds actual FOR UPDATE; actual pg_blocking_pids/
+   wait_event proves original B blocked, caller-linked1s cancel then await B and
+   its disposal. Finally release A even on observer/assertion error. Same target
+   must then append/read healthily with no partial mutation. A late commit keeps
+   its actual facts and FAILS the required cancellation flow. Provider settings
+   are cooperative bounds, not completed drain or hard lifetime proof.
+11. Root native fixtures add explicitly separate counter rows for dedup scopes/
+   int8 overflow, leaving eleven measured guards intact. Genuine rollback DDL
+   test uses native restricted role denied extension creation after CREATE SCHEMA
+   in a fresh owned database; no injected delegate fault or fake Npgsql. It
+   observes schema absence from an independent privileged connection. Existing
+   foreign schema42P06 and marker tamper/multiple-owner preservation remain real
+   tests. Actual role privileges/database ownership and bootstrap are root-owned.
+
+Ordered stage TS008TR-S owns ONLY six NEW SQL/schema files under the Intensive
+slice: TimescaleTimeSeriesIntensiveSchema, AppendSql, AppendGuardSql, ReadSql,
+AggregateSql, WindowsSql. No adapter/lifecycle/host/test/provider/Git edits.
+Schema installer uses Npgsql typed set binding for counter rows and validated
+schema interpolation for routine search paths. SQL constants/factories stay
+within file400/type200/function50/nesting3; split cohesive new prefixed files if
+the bounds require it, report exact ownership additions before writing them.
+The complex native lock/rollback/snapshot SQL uses a capable implementation
+worker; root keeps all shared/lifecycle/protocol decisions. TDD/native tests are
+staged with separately owned actual native fixtures before qualification, never
+synthetic service tests or local execution. Static SQL authoring/build is source
+evidence only. Root inspects every SQL statement and full diff before integration.
+Rollback removes additive routines/new native target after original tasks settle;
+legacy48/schema1/general270 and public APIs stay intact. Exact-SHA source,
+normal/scalar/recovery/RF3, real native6/30, coverage/collector/site evidence are
+still pending; ADR remains Accepted.
+
+TS008TR-L exact root source allocation: existing TimescaleSchemaLifecycle,
+NEW TimeSeries/TimescaleSchemaInstallation for cohesive transaction execution,
+NEW ComparisonTests TimeSeries/Intensive/TimescaleTimeSeriesIntensiveSchemaFailureFixture
+and TimescaleTimeSeriesIntensiveSchemaAtomicityRegression, and the existing
+TimeSeriesAspireProfileTests adds that actual helper to its pinned-image flow.
+Native regression source precedes lifecycle repair. Its independently owned
+fresh database uses TEMPLATE template0 and a generated LOGIN role with database
+ownership/CREATE but no superuser/extension privilege. Typed settings and native
+format quote role/password; no credentials/error strings enter evidence. Require
+actual42501 from extension install, then independently observe namespace absent.
+The pre-repair code leaves it present. A privileged subsequent real legacy
+initialize/owner-checked drop must succeed. Fixture cleanup removes only its
+positively CREATE-ACKed database/role, observes original disposal, and preserves
+the first failure through subsequent cleanup. Private nonpooled fixture connections
+avoid shared/global pool clearing. Existing foreign-owner test stays mandatory.
+
+Fixture security refinement before native execution: use a generated NOLOGIN
+role instead of constructing a role password in dynamic server SQL, whose native
+error context could expose it. Authenticate with the owned native admin credential
+and startup Options role=<generated role>; independently require actual current_user
+equals that persisted restricted role before the initializer. The real database
+owner has CREATE but no superuser/extension privilege. Only the generated role
+identifier enters native format; no generated password or SQL credential value
+exists. This refinement supersedes the fixture LOGIN/password choice above;
+failure of native role activation blocks the test instead of guessing authority.
+
+TS008TR-S-R exact arithmetic correction, approved before writes: PostgreSQL
+numeric division rounds its scale before ceil/floor; native interval_mul also
+uses float8 for its time field. Use exact nonnegative integer-microsecond div/mod
+for slot ceiling (quotient plus nonzero remainder) and bucket quotient, with
+budget check before cast. For each start/end, multiply ordinal by width_us as
+numeric integer, clamp end offset to exact span_us BEFORE timestamp construction,
+decompose offset by86400000000 into whole UTC days and sub-day integer micros,
+then construct make_interval(days=>bounded int4 days) plus the exact small
+remainder times INTERVAL '1 microsecond'. Preserve native overflow codes rather
+than narrowing the accepted width domain. Native regression width_us=10^17,
+span_us=2*10^17+1 must return3 slots and place offset2*10^17-1 in slot1;
+width_us=10^17+1 in a native interval with Months0/Days0 must retain the exact
+one-microsecond boundaries. Npgsql TimeSpan itself splits days and sub-day ticks;
+that does not authorize rounding other accepted native interval representations.
+Remove the installer's unjustified public search-path fallback; use validated
+private schema, pg_catalog, pg_temp. Actual Timescale utility-hook installation
+and these large finite-window cases require genuine native GitHub tests.
+
+```mermaid
+sequenceDiagram
+    participant Host as Isolated Linux host
+    participant DS as Private datasource
+    participant Life as Owned lifecycle
+    participant SQL as Native routines
+    Host->>DS: One shared lifetime and bounded pool
+    DS->>Life: Borrowed connection
+    Life->>SQL: Transactional schema marker installer
+    SQL-->>Life: Commit and exact owner confirmation
+    Host->>SQL: Typed operation and original token
+    SQL-->>Host: Actual bounded ordered rows
+    Host->>SQL: Receipt validation before commit
+    SQL-->>Host: Actual commit completion
+```
+
+
+## Accepted TS008N compact completion and adapter implementation join
+
+Before any adapter writes, root accepts REQ-BC-060/061/062/064 and
+AC-TSI-002/003/004/005/008 with these internal contracts. Native SQL/lifecycle
+remain frozen and root-owned. No existing measured protocol or public API changes.
+
+`TimeSeriesIntensiveAcknowledgement` is a compact value `(Guid CommandId,
+long Sequence)` retaining only an actual nonempty echoed UUID and positive
+sequence AFTER original scalar CommitAsync returned success. A pending row,
+unknown/failed commit, input UUID, inferred ordinal or malformed KeyLoad authority
+cannot produce it. Successful or late returned validated target receipts retain
+the same actual fact. It is independent from Count/digest/Outcome and never
+certifies a successful call or fresh insertion by itself.
+
+`TimeSeriesIntensiveAttempt` adds nullable Acknowledgement and value CleanupFailure
+properties. On pre-response failure, Count remains null, digest/validation ticks
+remain zero; ReceiptSequence may retain the positive ACK sequence or existing
+explicitly observed malformed-reply revision. Those are distinct labels. The
+future TS30 serializer MUST encode Acknowledgement and CleanupFailure explicitly;
+no emitted TS30 protocol exists yet and none is retroactively qualified.
+
+NEW root-owned `TimeSeriesIntensiveTargetCompletionException.Join(primary,
+cleanup, acknowledgement)` chooses original primary fatal before original cleanup
+fatal, otherwise primary before cleanup. Fatal exceptions remain original and
+unwrapped; callers observe every original resource disposal even after failure.
+For two nonfatal failures, selected original remains InnerException and the first
+actual cleanup's compact native code/status/SQLSTATE is retained separately.
+Constant wrapper messages contain no provider text, SQL, parameters or credentials.
+Each operation has bounded resource owners; collect first cleanup failure, replacing
+it only if a subsequent actual fatal must escape. Neither exception graph enters
+attempt storage. Deadline/cancellation classification wrappers preserve these
+facts without turning a late ACK into success. Native code fields describe the
+selected actual exception; cleanup code fields describe actual cleanup separately.
+
+Root owns these shared types, Failure/AttemptExecutor/AttemptFailures joins and
+NEW completion/fact regression tests. Tests use actual exceptions/receipts only:
+postcommit ACK plus failed disposal retains UUID/sequence without Count/digest;
+unknown commit retains no ACK; primary native SQLSTATE survives different cleanup;
+deadline/cancellation still dominate outcome while native and ACK facts survive;
+fatal precedence returns the original; nonempty/positive ACK validation rejects
+malformed values. Actual native cleanup/commit/cancellation proof remains mandatory.
+
+TS008N-S worker owns ONLY NEW prefixed Npgsql intensive adapter/context/session/
+parameter/reader/receipt/protocol files plus NEW prefixed pure UnitTests. One owned
+private datasource freezes Timeout=30s, CommandTimeout=30s, CancellationTimeout=2s,
+pool16/min0, no enlist/multiplex/no-reset/error-detail/parameter logging; lifecycle
+borrows it. Generated schema validation precedes allocation. The initialization
+positive marker alone authorizes target DROP; unknown installation never guesses
+ownership. Independent teardown30s is cooperative and every original task joins.
+All typed operation/row contracts are the read-only TS008N-R proposal and TS008TR
+routine table. No retries or detached timeout wrappers. Seed additionally requires
+exact sequence for each original ordinal `(seed batch offset + ordinal)` before
+commit, so corpus1..4096 is a positive checked fact; replay/new insertion semantics
+remain distinct. Seed ordinal advances only after commit and successful cleanup.
+
+Stages: root criteria/ADR/tests/shared completion source; disjoint adapter tests
+and source; full root diff and independent review; serial full solution build /
+format / governance; scoped main delivery; exact-SHA normal/scalar/recovery/RF3 and
+native six preflights/30 cells/coverage/collector/site. No dependency or product
+storage migration; rollback restores source before any qualified TS30 publication.
+Root alone owns host/resources/native fixtures/workflows/collector/site/evidence.
+Workers stop and escalate any unspecified contract or required shared-file edit.
+ADR remains Accepted until all native and publication joins actually qualify.
+
+```mermaid
+flowchart LR
+    Row[Actual returned receipt] --> Validate[Exact shape and EOF]
+    Validate --> Commit[Original native commit]
+    Commit --> Ack[Compact actual ACK]
+    Commit --> Unknown[Failed or uncertain commit]
+    Ack --> Dispose[Join original cleanup]
+    Dispose --> Attempt[Failed outcome plus independent facts]
+    Unknown --> Attempt
+    Dispose --> Success[Validated successful response]
+```
+
+
+TS008TR installation/source refinement: full development build flags CA2100 on
+generated schema-bound DDL. Preserve the closed five-stage templates and every
+literal routine/guard; bind each complete bounded trusted template as a Text
+parameter to transaction-local `keyload.tsi_install_sql`, then execute it through
+constant `DO $$ BEGIN EXECUTE current_setting('keyload.tsi_install_sql'); END $$`
+in the SAME original installation transaction. Only the closed InstallStage
+switch constructs that setting; no public arbitrary-SQL API, identifier bypass,
+user template, public search path or diagnostic suppression. Native PostgreSQL18
+[SPI_execute](https://www.postgresql.org/docs/18/spi-spi-execute.html) accepts
+multiple commands in a string; exact native installation/rollback proof remains
+required. Installation is outside every timed operation. Owned connection
+allocation/disposal belongs to NEW TimescaleSchemaConnection; installation borrows
+that connection and owns its transaction. Every original disposal is awaited,
+first original failure survives nonfatal cleanup, and no positive ownership is
+returned after cleanup failure. No double-disposal ownership or global pool use.
+
+TS008N query refinement: immutable datasource SearchPath supplies validated private
+schema, pg_catalog, pg_temp. Each measured query uses constant unqualified private
+routine names and explicitly typed positional values, avoiding string-generated
+command text. The target owns its immutable private pool; clients cannot change
+its search path. Routine definitions remain schema-qualified and fix their own
+pg_catalog/private/pg_temp search path. No per-call configuration or lookup retry.
+This preserves the accepted native routine ownership and timing boundary.
+
+
+TS008TR-L fixture refinement before compiler repair: the genuine denied-DDL test
+runs only inside its already verified pinned fresh Aspire Timescale container.
+Use closed constant fixture database/NOLOGIN role names, with constant native
+CREATE/DROP commands. Independent isolated jobs/resources provide their namespace;
+creation refuses any pre-existing database/role, and only positive original
+creation acknowledgement authorizes cleanup. No IF EXISTS/adoption/unknown DROP.
+Keep random RunId/schema/owner marker identities for tested schema boundaries.
+This removes arbitrary identifier-generated command text; no SQL interpolation,
+quality suppression, password-bearing SQL or public management endpoint is added.
+Each fixture's original primary survives nonfatal disposal through one explicit
+async owner; remaining native fixtures and all6/30 qualification are still pending.
+
+TS008N final allocation-owner refinement: owned projection r6 proves six CA2000 diagnostics on caller-side command construction passed into a generic resource registry. Root serially owns the integration repair in Operation/Reads/Writes/Setup plus missing Parameters namespace and DataReader formatting. Allocate the same closed six-enum command inside the existing operation owner, register it immediately in the bounded original resource array and return the already owned command. Validate registry capacity before allocation; retain the exact reverse disposal/reader-before-commit/actual postcommit ACK/fatal-primary-cleanup contract. This removes neither analyzer nor resource operation and adds no provider abstraction, retry or public SQL. Worker continues read-only TS009R; original frozen packet remains historical and root records new exact hashes after full build/format. Native proof remains pending.

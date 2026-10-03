@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Text;
 using KurrentDB.Client;
 using KurrentEventData = KurrentDB.Client.EventData;
@@ -12,7 +11,7 @@ public sealed class KurrentTarget : IComparisonTarget
     private readonly HttpClient[] nodeHttpClients;
     private readonly string runId;
     private readonly ComparisonTopology topology;
-    private readonly ConcurrentDictionary<string, byte> ownedStreams = new(StringComparer.Ordinal);
+    private KurrentStreamOwnership? ownership;
     private readonly List<KurrentDBClient> ownedClients = [];
     private KurrentDBClient? writer;
     private KurrentDBClient[] nodeClients = [];
@@ -50,6 +49,11 @@ public sealed class KurrentTarget : IComparisonTarget
     public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dataset);
+        if (ownership is not null)
+        {
+            throw new ComparisonFailureException(KurrentConstants.OwnershipAlreadyInitialized);
+        }
+        ownership = new KurrentStreamOwnership(dataset.Options);
         writer = new KurrentDBClient(KurrentNativeSettings.CreateWriter(connectionString));
         ownedClients.Add(writer);
         var timeout = TimeSpan.FromSeconds(dataset.Options.TimeoutSeconds);
@@ -61,15 +65,12 @@ public sealed class KurrentTarget : IComparisonTarget
         foreach (var document in dataset.Documents)
         {
             var stream = StreamName(document);
-            ownedStreams.TryAdd(stream, KurrentConstants.OwnedStreamMarker);
-            await RequireWriter().AppendToStreamAsync(stream, StreamState.NoStream,
-                [CreateEvent(document)], cancellationToken: cancellationToken);
+            await KurrentOwnedStreamAppend.AppendAsync(RequireWriter(), ownership, stream, CreateEvent(document), cancellationToken);
         }
         var probe = StreamName(KurrentConstants.ProbeStreamSuffix);
-        ownedStreams.TryAdd(probe, KurrentConstants.OwnedStreamMarker);
         var eventData = CreateProbeEvent();
         var evidence = await KurrentClusterVerifier.VerifyCopyAsync(RequireWriter(), nodeClients, nodeHttpClients,
-            topology, probe, eventData, timeout, cancellationToken);
+            topology, probe, eventData, ownership, timeout, cancellationToken);
         Profile = Profile with { Cluster = evidence };
         initialized = true;
     }
@@ -91,7 +92,7 @@ public sealed class KurrentTarget : IComparisonTarget
     /// <returns>A value task that completes when cleanup and client disposal finish.</returns>
     public async ValueTask DisposeAsync()
     {
-        using var cleanup = new KurrentCleanupOperation(ownedStreams.Keys.ToArray(), CancellationToken.None);
+        using var cleanup = new KurrentCleanupOperation(ownership?.SnapshotAcknowledged() ?? [], CancellationToken.None);
         try
         {
             await cleanup.DeleteAsync(writer);
@@ -124,7 +125,7 @@ public sealed class KurrentTarget : IComparisonTarget
 
     internal string StreamName(BenchmarkDocument document) => StreamName(document.Id);
     internal string StreamName(string suffix) => KurrentConstants.StreamPrefix + runId + KurrentConstants.StreamSeparator + suffix;
-    internal void TrackStream(string stream) => ownedStreams.TryAdd(stream, KurrentConstants.OwnedStreamMarker);
+    internal KurrentStreamOwnership Ownership => ownership ?? throw new ComparisonFailureException(KurrentConstants.NotInitialized);
 
     internal static KurrentEventData CreateEvent(BenchmarkDocument document)
         => new(Uuid.FromGuid(BenchmarkDataset.EventId(document)), KurrentConstants.EventType,
@@ -137,11 +138,8 @@ public sealed class KurrentTarget : IComparisonTarget
     private async Task VerifyNoStreamConflictAsync(CancellationToken cancellationToken)
     {
         var stream = StreamName(KurrentConstants.SemanticsProbeSuffix);
-        ownedStreams.TryAdd(stream, KurrentConstants.OwnedStreamMarker);
         var firstEvent = CreateProbeEvent();
-        await RequireWriter().AppendToStreamAsync(stream, StreamState.NoStream,
-            [firstEvent],
-            cancellationToken: cancellationToken);
+        await KurrentOwnedStreamAppend.AppendAsync(RequireWriter(), Ownership, stream, firstEvent, cancellationToken);
         try
         {
             await RequireWriter().AppendToStreamAsync(stream, StreamState.NoStream,

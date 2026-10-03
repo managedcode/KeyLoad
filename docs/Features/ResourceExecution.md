@@ -121,6 +121,36 @@ must pass on the next delivered source. No product identity validation, key
 generation, provider error, cache data or dependency behavior changes.
 ADR-058/035/041 already govern these unchanged boundaries; no new migration.
 
+R86 exact source397a89c46df8caaf0cc89a51e2e1c7b9208adcc6/
+run37097831105 passes63 RF3,164 recovery/1000 seeded process-cut rows and118
+analyzer cases. Normal1583 has1566 pass/17 identity errors; scalar/comparisons
+are skipped. The historical byte77 case passes,16 prior identity errors persist
+and the new genuine default-key/reopen case fails. R88 explicitly casts the
+absent conditional branch to ReadOnlyMemory<byte>?; a bare null branch still
+permits natural present-empty memory conversion. The already shared one-line
+source correction preserves all genuine original/empty-key assertions and product
+validation. Every current identity failure and the historical byte case must pass
+on the next exact source. Seven R81 owner-observation cases pass in normal mode,
+with no full-ready, signer/controller, scalar or coverage qualification. The
+[original native receipt](../implementation/runtime-qualification-37097831105.json)
+is the canonical result and artifact join.
+
+R93 delivered sourced45d7f253d309610d7cce66684f155170277252a/run37098964980
+closes AC-CACHE-015: all1583 native unit cases pass in normal and scalar modes,
+with identical complete ID/status sets and no skips. All17 R86 identity failures
+and the historical byte77 oracle pass in both modes. Recovery164/164 plus1000
+seeded rows, analyzer118/118 and actual SDK/MCP RF363/63 pass. Root joined the
+original API/run/SHA/ZIP digests, every native ID,20 seed files and four genuine
+container restart receipts in the [R93 source-gates receipt](../implementation/cache-native-source-r93.json).
+The comparison workflow concluded failure:24/27 preflight jobs succeeded,3 failed
+(MongoDB n2 image import, MongoDB n3 NotPrimary reads, KurrentDB n2 cleanup).
+Two successful Neo4j Community jobs report unsupported topology; the270-cell
+matrix and aggregate did not execute. The [R100 wire source receipt](../implementation/cache-wire-source-r100.json)
+binds the independent34-product/26-test review and root's complete hash comparison.
+This source is absent from d45 and requires fresh integrated gates and its own
+delivered native codec/crypto/lifetime qualification. Full-ready control, coverage, matched
+cache profiles, endurance and power-loss gates remain open; RF3 caches stay off.
+
 TASK-CACHE-BINDING-INTEGRATION-R69 is root-only: shared contracts, permit join,
 public control/facade/runtime/lifecycle/read admission and durable docs.
 TASK-CACHE-BINDING-STATE-R69 owns only new private ResourceExecution binding/state

@@ -1,0 +1,671 @@
+{
+  "schemaVersion": 1,
+  "state": "completed_failure_original_baseline",
+  "sourceRevision": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+  "runId": 37097831105,
+  "runAttempt": 1,
+  "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 111131287611,
+      "name": "docker-rf3",
+      "head_sha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "run_attempt": 1,
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287611",
+      "conclusion": "success"
+    },
+    {
+      "id": 111131287683,
+      "name": "comparison-plan",
+      "head_sha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "run_attempt": 1,
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287683",
+      "conclusion": "success"
+    },
+    {
+      "id": 111131287699,
+      "name": "analyzer-rules",
+      "head_sha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "run_attempt": 1,
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287699",
+      "conclusion": "success"
+    },
+    {
+      "id": 111131287728,
+      "name": "verify (ubuntu-latest)",
+      "head_sha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "run_attempt": 1,
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287728",
+      "conclusion": "failure"
+    },
+    {
+      "id": 111132574100,
+      "name": "comparison-images",
+      "head_sha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "run_attempt": 1,
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111132574100",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 111132574529,
+      "name": "preflight / ${{ matrix.id }}",
+      "head_sha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "run_attempt": 1,
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111132574529",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 111132575174,
+      "name": "case / ${{ matrix.id }}",
+      "head_sha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "run_attempt": 1,
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111132575174",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 111132575356,
+      "name": "case / ${{ matrix.id }}",
+      "head_sha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "run_attempt": 1,
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111132575356",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 111132575396,
+      "name": "comparison-aggregate",
+      "head_sha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "run_attempt": 1,
+      "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111132575396",
+      "conclusion": "skipped"
+    }
+  ],
+  "reports": [
+    {
+      "artifactId": 11265251141,
+      "entry": "TestResults/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "bytes": 1074816,
+      "sha256": "c8ed531b1237385a540cdcb9765bf1812a4de578f72c270ba6d54e88cafc3350",
+      "jobId": 111131287611,
+      "commitSha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "assemblyName": "KeyLoad.IntegrationTests",
+      "summary": {
+        "total": 63,
+        "passed": 63,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualTestStatuses": {
+        "passed": 63
+      }
+    },
+    {
+      "artifactId": 11265156456,
+      "entry": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "bytes": 354772,
+      "sha256": "5b925299a0b43d5c2c3df1769430e8312b1131b5482753a8a7b2985bb97ebf4c",
+      "jobId": 111131287728,
+      "commitSha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "assemblyName": "KeyLoad.Analyzers.Tests",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualTestStatuses": {
+        "passed": 118
+      }
+    },
+    {
+      "artifactId": 11265156456,
+      "entry": "TestResults/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "bytes": 470370,
+      "sha256": "ffbfbf0a2a05d69d22a9a5b3f85da0914454e53aad39f5eee3c6270f8f8ed182",
+      "jobId": 111131287728,
+      "commitSha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "assemblyName": "KeyLoad.RecoveryTests",
+      "summary": {
+        "total": 164,
+        "passed": 164,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualTestStatuses": {
+        "passed": 164
+      }
+    },
+    {
+      "artifactId": 11265156456,
+      "entry": "TestResults/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "bytes": 4875797,
+      "sha256": "bdfb8d4a48f08be22cf6b4b411cf1be940813345cdea81fb9399a2de0d87b0a8",
+      "jobId": 111131287728,
+      "commitSha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "assemblyName": "KeyLoad.UnitTests",
+      "summary": {
+        "total": 1583,
+        "passed": 1566,
+        "failed": 17,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualTestStatuses": {
+        "passed": 1566,
+        "error": 17
+      }
+    },
+    {
+      "artifactId": 11265071178,
+      "entry": "TestResults/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "bytes": 354833,
+      "sha256": "07b3f6c901f807717561e70dd4925f04ae76fc3d6dcb7688a229be7144c51e7c",
+      "jobId": 111131287699,
+      "commitSha": "397a89c46df8caaf0cc89a51e2e1c7b9208adcc6",
+      "assemblyName": "KeyLoad.Analyzers.Tests",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "actualTestStatuses": {
+        "passed": 118
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11265530836,
+      "name": "code-quality-docker-rf3",
+      "bytes": 778398,
+      "sha256": "2a0059aae79920ba428bbd5316b07a9efe246d772ce0a5315e7ada501940d837",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265530836",
+      "jobId": 111131287611,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287611",
+      "jobBinding": "exact-attempt jobs API plus original completed-job upload log IDs/sizes/digests",
+      "providerSizeMatched": true,
+      "providerDigestMatched": true
+    },
+    {
+      "id": 11265365983,
+      "name": "docker-rf3-image-evidence",
+      "bytes": 32183,
+      "sha256": "3145a4b7f9857c2aac42bf1d9abc17d517616b5d235e76fe2f0cc0c908e8741f",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265365983",
+      "jobId": 111131287611,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287611",
+      "jobBinding": "exact-attempt jobs API plus original completed-job upload log IDs/sizes/digests",
+      "providerSizeMatched": true,
+      "providerDigestMatched": true
+    },
+    {
+      "id": 11265321163,
+      "name": "code-quality-ubuntu-latest",
+      "bytes": 1541342,
+      "sha256": "6ef8a18fd640c09ad74d53e40f40d285bfc28428b01ca177f171ea708a1b0f4c",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265321163",
+      "jobId": 111131287728,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287728",
+      "jobBinding": "exact-attempt jobs API plus original completed-job upload log IDs/sizes/digests",
+      "providerSizeMatched": true,
+      "providerDigestMatched": true
+    },
+    {
+      "id": 11265305340,
+      "name": "comparison-plan",
+      "bytes": 5140,
+      "sha256": "5125fd75d345edc8cfca033e6c6559f3b9fc207cd0d785563360842765a7937a",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265305340",
+      "jobId": 111131287683,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287683",
+      "jobBinding": "exact-attempt jobs API plus original completed-job upload log IDs/sizes/digests",
+      "providerSizeMatched": true,
+      "providerDigestMatched": true
+    },
+    {
+      "id": 11265251141,
+      "name": "docker-rf3-qualification",
+      "bytes": 483210,
+      "sha256": "fc220009a66459d6c5fa7c23c15be9a8e6e684d27ecacc0524db1687a1b92ff7",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265251141",
+      "jobId": 111131287611,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287611",
+      "jobBinding": "exact-attempt jobs API plus original completed-job upload log IDs/sizes/digests",
+      "providerSizeMatched": true,
+      "providerDigestMatched": true
+    },
+    {
+      "id": 11265156456,
+      "name": "test-results-ubuntu-latest",
+      "bytes": 1182234,
+      "sha256": "cff98fc3509e4507581f1eda2951cf660aad7c4f58b28c8beca0d773128cdb2a",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265156456",
+      "jobId": 111131287728,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287728",
+      "jobBinding": "exact-attempt jobs API plus original completed-job upload log IDs/sizes/digests",
+      "providerSizeMatched": true,
+      "providerDigestMatched": true
+    },
+    {
+      "id": 11265071178,
+      "name": "analyzer-rule-evidence",
+      "bytes": 207313,
+      "sha256": "96ae8fb19c80313b081ce0710d1c5334c07da7ab65f191c88954f429ea27f14b",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/artifacts/11265071178",
+      "jobId": 111131287699,
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105/job/111131287699",
+      "jobBinding": "exact-attempt jobs API plus original completed-job upload log IDs/sizes/digests",
+      "providerSizeMatched": true,
+      "providerDigestMatched": true
+    }
+  ],
+  "normalUnitFailureFacts": {
+    "total": 1583,
+    "passed": 1566,
+    "failed": 17,
+    "skipped": 0,
+    "nativeIndividualStatus": "error",
+    "allSameExceptionTypeAndMessage": true,
+    "allIncludeIdentityValidate49AndFixtureOpenStoreAt80": true,
+    "causalLimit": "Root separately diagnosed/changed the nullable-memory fixture branch. Its later unqualified source change is not evidence of a passing397 normal suite; no duplicate repair performed."
+  },
+  "normalUnitFailures": [
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheCoherenceTests",
+      "methodName": "SameCutCompactionRetainsWarmEntriesButSnapshotReplacementAndReopenAreCold",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.ReopenStore(String directory, Int32 maxEntries, Int32 maxValueBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 32\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCoherenceTests.SameCutCompactionRetainsWarmEntriesButSnapshotReplacementAndReopenAreCold() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCoherenceTests.cs:line 92\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCoherenceTests.cs",
+      "lineNumber": 63
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheCoherenceTests",
+      "methodName": "ChangedApplyInvalidatesAWhileUnrelatedWarmBRemains",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCoherenceTests.ChangedApplyInvalidatesAWhileUnrelatedWarmBRemains() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCoherenceTests.cs:line 18\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCoherenceTests.cs",
+      "lineNumber": 14
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheCoherenceTests",
+      "methodName": "StagedPutDeleteResetAndRejectedCompilerCannotWarmOrChangeCommittedValues",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCoherenceTests.StagedPutDeleteResetAndRejectedCompilerCannotWarmOrChangeCommittedValues() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCoherenceTests.cs:line 39\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCoherenceTests.cs",
+      "lineNumber": 35
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheFillLifetimeTests",
+      "methodName": "PinnedLruVictimStaysChargedAndNewValueFallsBackToNative",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFillLifetimeTests.PinnedLruVictimStaysChargedAndNewValueFallsBackToNative() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFillLifetimeTests.cs:line 69\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFillLifetimeTests.cs",
+      "lineNumber": 65
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheFillLifetimeTests",
+      "methodName": "DuplicateConcurrentFillsKeepBothCandidatesChargedAndReleaseTheLoser",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFillLifetimeTests.DuplicateConcurrentFillsKeepBothCandidatesChargedAndReleaseTheLoser() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFillLifetimeTests.cs:line 17\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFillLifetimeTests.cs",
+      "lineNumber": 13
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheReadTests",
+      "methodName": "EmptyPositiveValueWarmsWhileMissingAndTombstoneRemainNativeMisses",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheReadTests.EmptyPositiveValueWarmsWhileMissingAndTombstoneRemainNativeMisses() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheReadTests.cs:line 83\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheReadTests.cs",
+      "lineNumber": 79
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheReadTests",
+      "methodName": "BorrowedWarmReadPreservesLogicalObserverChargeAndCapturedKeyMutationCannotRebindFill",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheReadTests.BorrowedWarmReadPreservesLogicalObserverChargeAndCapturedKeyMutationCannotRebindFill() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheReadTests.cs:line 53\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheReadTests.cs",
+      "lineNumber": 49
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheReadTests",
+      "methodName": "ColdOwnedReadWarmsExactKeyAndWarmOwnedReadReturnsIndependentBytes",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheReadTests.ColdOwnedReadWarmsExactKeyAndWarmOwnedReadReturnsIndependentBytes() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheReadTests.cs:line 18\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheReadTests.cs",
+      "lineNumber": 14
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheCapacityTests",
+      "methodName": "SeventeenPinnedVictimsBoundOneAdmissionToSixteenAttempts",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCapacityTests.SeventeenPinnedVictimsBoundOneAdmissionToSixteenAttempts() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs:line 104\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs",
+      "lineNumber": 100
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheCapacityTests",
+      "methodName": "ClearAndDisableKeepIndexChargeUntilActualStoreDisposal",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCapacityTests.ClearAndDisableKeepIndexChargeUntilActualStoreDisposal() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs:line 82\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs",
+      "lineNumber": 78
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheCapacityTests",
+      "methodName": "OversizedKeyValueAndUnavailableIndexReturnNativeBytesWithoutRetention",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCapacityTests.OversizedKeyValueAndUnavailableIndexReturnNativeBytesWithoutRetention() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs:line 14\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs",
+      "lineNumber": 10
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheCapacityTests",
+      "methodName": "TwoStoresShareTheExactPoolEntryCapAndResumeAdmissionAfterOwnerDisposal",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheCapacityTests.TwoStoresShareTheExactPoolEntryCapAndResumeAdmissionAfterOwnerDisposal() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs:line 54\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheCapacityTests.cs",
+      "lineNumber": 50
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheLifetimeTests",
+      "methodName": "DisableDuringPinnedBorrowRetiresEntryUntilBorrowerReleases",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheLifetimeTests.DisableDuringPinnedBorrowRetiresEntryUntilBorrowerReleases() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheLifetimeTests.cs:line 51\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheLifetimeTests.cs",
+      "lineNumber": 47
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheLifetimeTests",
+      "methodName": "ReaderAndObserverFailuresReleasePinsAndCandidatesBeforeHealthyReads",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheLifetimeTests.ReaderAndObserverFailuresReleasePinsAndCandidatesBeforeHealthyReads() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheLifetimeTests.cs:line 15\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheLifetimeTests.cs",
+      "lineNumber": 11
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheDeletionTests",
+      "methodName": "WarmDeleteMissesNativeTwiceThenDifferentReinsertIsColdAndWarmsCorrectly",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheDeletionTests.WarmDeleteMissesNativeTwiceThenDifferentReinsertIsColdAndWarmsCorrectly() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheDeletionTests.cs:line 15\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheDeletionTests.cs",
+      "lineNumber": 11
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheFixtureIdentityTests",
+      "methodName": "DefaultKeyPersistsOnReopenAndExplicitKeyPresenceIsPreserved",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFixtureIdentityTests.<>c__DisplayClass2_0.<<DefaultKeyPersistsOnReopenAndExplicitKeyPresenceIsPreserved>b__0>d.MoveNext() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFixtureIdentityTests.cs:line 16\n--- End of stack trace from previous location ---\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreeCoordinatedPointCacheTestSupport.WrapFailureAsync(Func`1 operation) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreeCoordinatedPointCacheTestSupport.cs:line 107\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreeCoordinatedPointCacheTestSupport.ThrowFailures(List`1 failures) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreeCoordinatedPointCacheTestSupport.cs:line 95\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.RunAsync(Func`1 scenario) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 48\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFixtureIdentityTests.DefaultKeyPersistsOnReopenAndExplicitKeyPresenceIsPreserved() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFixtureIdentityTests.cs:line 14\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFixtureIdentityTests.cs",
+      "lineNumber": 10
+    },
+    {
+      "namespace": "KeyLoad.UnitTests.Features.ResourceExecution",
+      "className": "ZoneTreePointCacheAuthorizationTests",
+      "methodName": "WarmRawPrincipalAndCredentialBytesNeverBypassExpiryOrRevocationChecks",
+      "status": "error",
+      "exception": {
+        "type": "KeyLoad.KeyLoadException",
+        "message": "The configured cluster identity does not match this database.",
+        "stackTrace": "   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Validate(StoreIdentity identity, ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 49\n   at KeyLoad.Storage.ZoneTree.ZoneTreeIdentityFile.Open(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeIdentityFile.cs:line 15\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreInitializer.Open(ZoneTreeStoreRuntime runtime) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreInitializer.cs:line 14\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStoreRuntime..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeStoreRuntime.cs:line 22\n   at KeyLoad.Storage.ZoneTree.ZoneTreeStore..ctor(ZoneTreeStoreOptions options) in /_/src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStoreAt(String directory, Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 80\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheFileFixture.OpenStore(Int32 maxEntries, Int32 maxValueBytes, Int32 maxPinsPerEntry, Nullable`1 incarnation, Byte[] signingKey, Int32 maxKeyBytes) in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs:line 26\n   at KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheAuthorizationTests.WarmRawPrincipalAndCredentialBytesNeverBypassExpiryOrRevocationChecks() in /_/tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheAuthorizationTests.cs:line 24\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+      },
+      "sourceRelativePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheAuthorizationTests.cs",
+      "lineNumber": 20
+    }
+  ],
+  "runner36": {
+    "total": 36,
+    "passed": 36,
+    "failed": 0,
+    "skipped": 0,
+    "selection": "Original TUnit sourceRelativePath belongs to the47-file frozen TS007B-D test-file set, including root two additional observed-failure/phase-evidence cases; not namespace-only counting.",
+    "limits": "Actual pure/BCL runner cases passed within failed whole normal suite; no native intensive6/30 or performance qualification."
+  },
+  "olderPure30": {
+    "total": 30,
+    "passed": 30,
+    "failed": 0,
+    "skipped": 0,
+    "selection": "Same intensive namespace complement outside frozen TS007B-D test-file paths: earlier TS006 oracle/corpus/tags/digest/writer cases."
+  },
+  "rf3": {
+    "total": 63,
+    "passed": 63,
+    "failed": 0,
+    "skipped": 0,
+    "limits": "Genuine RF3 gate/container-kill assertions passed at397. rf3-failure*.log filenames do not imply failed cases; original logs retained, not warning-free. No power-loss/exhaustive fault/prior different-SHA intermittent-failure resolution claim. RF3 images are separate from skipped common comparison-images job."
+  },
+  "recovery": {
+    "total": 164,
+    "passed": 164,
+    "failed": 0,
+    "skipped": 0,
+    "actualRecordedTrialCount": 1000,
+    "actualSeeds": [
+      1701,
+      1702,
+      1703,
+      1704,
+      1705,
+      1706,
+      1707,
+      1708,
+      1709,
+      1710,
+      1711,
+      1712,
+      1713,
+      1714,
+      1715,
+      1716,
+      1717,
+      1718,
+      1719,
+      1720
+    ],
+    "actualStageCounts": {
+      "MutationApplied": 206,
+      "JournalFlushed": 163,
+      "HeaderWritten": 214,
+      "ApplyCompleted": 214,
+      "PayloadWritten": 203
+    },
+    "occupancy": {
+      "maximumObserved": 4,
+      "actualCounts": {
+        "4": 996,
+        "3": 1,
+        "2": 2,
+        "1": 1
+      }
+    },
+    "limits": "Process-kill evidence, not power-loss. Individual receipts omit sourceSHA; authority derives exact-attempt job upload/artifact hash and source-bound report."
+  },
+  "sarifInventories": [
+    {
+      "artifactId": 11265321163,
+      "files": 25,
+      "counts": [
+        {
+          "level": "error",
+          "nativeSuppressionRecorded": true,
+          "count": 3323
+        },
+        {
+          "level": "note",
+          "nativeSuppressionRecorded": false,
+          "count": 8979
+        }
+      ],
+      "unsuppressedErrors": 0,
+      "unsuppressedWarnings": 0,
+      "interpretation": "Native SARIF includes suppressed error-level records; raw level:error alone is not a failed build. Inventory is not empty."
+    },
+    {
+      "artifactId": 11265530836,
+      "files": 15,
+      "counts": [
+        {
+          "level": "error",
+          "nativeSuppressionRecorded": true,
+          "count": 1787
+        },
+        {
+          "level": "note",
+          "nativeSuppressionRecorded": false,
+          "count": 743
+        }
+      ],
+      "unsuppressedErrors": 0,
+      "unsuppressedWarnings": 0,
+      "interpretation": "Native SARIF includes suppressed error-level records; raw level:error alone is not a failed build. Inventory is not empty."
+    },
+    {
+      "artifactId": 11265071178,
+      "files": 2,
+      "counts": [
+        {
+          "level": "error",
+          "nativeSuppressionRecorded": true,
+          "count": 118
+        },
+        {
+          "level": "note",
+          "nativeSuppressionRecorded": false,
+          "count": 305
+        }
+      ],
+      "unsuppressedErrors": 0,
+      "unsuppressedWarnings": 0,
+      "interpretation": "Native SARIF includes suppressed error-level records; raw level:error alone is not a failed build. Inventory is not empty."
+    }
+  ],
+  "comparison": {
+    "planCells": 270,
+    "crudCells": 108,
+    "specializedCells": 162,
+    "planArtifactId": 11265305340,
+    "imageJob": "skipped",
+    "preflightJobs": "skipped",
+    "caseJobs": "skipped",
+    "aggregateJob": "skipped",
+    "actualQualifiedNativeCells": 0,
+    "limits": "Frozen plan is not measurement. No current27preflight/270full cohort."
+  },
+  "scalar": {
+    "status": "skipped",
+    "jobId": 111131287728,
+    "stepNumber": 10,
+    "qualification": false
+  },
+  "originalIntegrity": {
+    "all7ZipProviderSizesAndDigestsMatch": true,
+    "all7ZipInventoriesUniqueConfinedWithoutSymlinks": true,
+    "perArtifactUncompressedBoundBytes": 134217728,
+    "totalUncompressedBytes": 48845571,
+    "originalVerifyLogEqualsParentLog": true
+  },
+  "sourceOnlyCausalRepair": {
+    "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/ZoneTreePointCacheFileFixture.cs",
+    "cause": "Null branch converted through nonnullable ReadOnlyMemory; explicit nullable null preserves absence while explicit empty key stays rejected.",
+    "commit": "d45d7f253d309610d7cce66684f155170277252a",
+    "runId": 37098964980,
+    "limits": "Later source repair never makes original397 normal/scalar/comparison gates pass."
+  },
+  "privateOriginalAuditPacketSha256": "6fdd048f062462b1243bcefa45dd543456425264a8972c0f8ec807f419e377e1",
+  "limits": "Original reports and provider-verified artifact bytes establish this source/attempt only. No local tests, complete270, TimeSeries6/30, new site, power-loss or performance qualification."
+}
