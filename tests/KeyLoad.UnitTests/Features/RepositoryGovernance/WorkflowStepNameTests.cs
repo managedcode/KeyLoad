@@ -40,7 +40,8 @@ internal sealed class WorkflowStepNameTests
     public async Task AcUb005EveryUsedCompositeStepExplainsItsAction(string actionName)
     {
         var root = IsolatedAggregateNodeProcess.RepositoryRoot();
-        var action = File.ReadAllText(Path.Combine(root, CompositeDirectory, actionName, ActionFile));
+        var action = await File.ReadAllTextAsync(Path.Combine(root, CompositeDirectory, actionName, ActionFile),
+            TestContext.Current!.Execution.CancellationToken);
         await AssertStepNames(action);
     }
 

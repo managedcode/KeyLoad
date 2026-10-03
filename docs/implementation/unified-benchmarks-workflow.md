@@ -67,7 +67,7 @@ Task graph:
 | TASK-UB-03 | 001/003 | regression review / inherited high capability | read only initially | plan exists | proposed TUnit ownership/gates | pending; lead review |
 | TASK-UB-04 | all | lead / integration | scoped commit/push, GitHub dispatch | joined source review | exact-SHA CI/Benchmarks jobs/artifacts | pending |
 | TASK-UB-05 | 005 | bounded Luna worker / high | exact11 contract/oracle files | approved frozen display map | scoped diff,6 JS syntax checks | complete; lead reviewed |
-| TASK-UB-06 | all | independent high-capability review | read only | joined source | graph/name/provenance/regression review | active |
+| TASK-UB-06 | all | independent high-capability review | read only | joined source | graph/name/provenance/regression review | complete; no source defect found |
 
 Ordered steps:
 - [x] Record owner correction and scope/acceptance before source edits.
@@ -94,6 +94,23 @@ and native preflight starts. Keep these actual states, not overall success claim
   and edited Release literal Markdown printf body. Preserve literal backticks;
   YAML/action validation passes, no new finding and no source suppression.
 - [ ] Exact delivered-source CI and complete Benchmarks outcome remain pending.
+- [ ] CI37119418418/45e4992d86fcb16d1568327e1d38e9a8e76140ec: new
+  WorkflowStepNameTests async test synchronously reads its composite file (CA1849).
+  Repair with awaited cancellation-aware file IO; preserve every assertion.
+- [ ] Same exact-source CI: WorkflowLayoutUnifiedPerformanceTests synchronously
+  reads its JSON contract (CA1849). Repair with awaited cancellation-aware IO.
+- [ ] Same exact-source CI: nodeCounts JSON machine key violates KLD0001. Extract
+  the named property constant; do not suppress the repository analyzer.
+
+Source milestone45e4992d8 was committed/pushed to main with only task-owned files
+and three own root-policy lines. Unrelated SQL/storage/package working changes
+remain unstaged. [CI](https://github.com/managedcode/KeyLoad/actions/runs/37119418418)
+finds the three authored-regression build diagnostics above.
+[Benchmarks](https://github.com/managedcode/KeyLoad/actions/runs/37119418409)
+actually starts Plan benchmark runs, Build and check KeyLoad, and Build Docker
+images concurrently with the new readable names. This is observed graph execution,
+not a passing whole benchmark cohort. The old86e58128a benchmark run was cancelled
+as superseded to unblock this exact-source run; its partial results are not proof.
 
 Independent review confirms270 lacks TimeSeries, and intensive6/30 delivery is
 unfinished. Existing KurrentStreamOwnershipTests is now explicitly executed;

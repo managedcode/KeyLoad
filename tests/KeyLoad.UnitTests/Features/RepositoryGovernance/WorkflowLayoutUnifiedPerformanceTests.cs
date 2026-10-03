@@ -5,6 +5,10 @@ namespace KeyLoad.UnitTests.Features.RepositoryGovernance;
 
 internal sealed class WorkflowLayoutUnifiedPerformanceTests
 {
+    private const string NodeCounts = "nodeCounts";
+    private const string Targets = "targets";
+    private const string CrudScenarios = "crudScenarios";
+    private const string SpecializedScenarios = "specializedScenarios";
     private const string BenchmarksFile = "benchmarks.yml";
     private const string ImageJob = "comparison-images";
     private const string PinnedImageTest = "TimeSeriesIntensivePinnedImageTests";
@@ -66,12 +70,14 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
     public async Task AcUb002CanonicalNativeInventoryPreservesEveryTargetNodeCountAndScenario()
     {
         var root = IsolatedAggregateNodeProcess.RepositoryRoot();
-        using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, ContractPath)));
+        var source = await File.ReadAllTextAsync(Path.Combine(root, ContractPath),
+            TestContext.Current!.Execution.CancellationToken);
+        using var document = JsonDocument.Parse(source);
         var contract = document.RootElement;
-        var targets = Strings(contract, "targets");
-        var nodes = contract.GetProperty("nodeCounts").EnumerateArray().Select(static value => value.GetInt32()).ToArray();
-        var crud = Strings(contract, "crudScenarios");
-        var specialized = Strings(contract, "specializedScenarios");
+        var targets = Strings(contract, Targets);
+        var nodes = contract.GetProperty(NodeCounts).EnumerateArray().Select(static value => value.GetInt32()).ToArray();
+        var crud = Strings(contract, CrudScenarios);
+        var specialized = Strings(contract, SpecializedScenarios);
         await Assert.That(targets.SequenceEqual(new[] { "KeyLoad", "PostgreSQL + pgvector", "Qdrant", "RabbitMQ", "Redis",
             "Neo4j", "MongoDB", "OpenSearch", "KurrentDB" })).IsTrue();
         await Assert.That(nodes.SequenceEqual(new[] { 1, 2, 3 })).IsTrue();
