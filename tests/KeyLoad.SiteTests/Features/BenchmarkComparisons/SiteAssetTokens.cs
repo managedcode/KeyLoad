@@ -47,6 +47,7 @@ internal static class SiteAssetTokens
     public const string TokenStylesheet = "tokens.css";
     public const string SceneStylesheet = "scene.css";
     public const string PosterAsset = "assets/cluster-poster.svg";
+    public const string MobilePosterAsset = "assets/cluster-poster-mobile.svg";
     public const string WebGpuVendorModule = "three.webgpu.js";
     public const string CoreVendorModule = "three.core.js";
     public const string VendorLicense = "LICENSE";

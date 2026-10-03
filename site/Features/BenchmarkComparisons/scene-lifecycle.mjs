@@ -78,6 +78,8 @@ async function initializeRenderer(state, observers) {
     state.initializationPending = true;
     installRendererHooks(state);
     state.graph = observers.sceneFactory();
+    await state.coreImage.decode();
+    if (state.terminal) return releaseResources(state);
     await renderer.init();
     state.initializationPending = false;
     if (state.terminal) return releaseResources(state);

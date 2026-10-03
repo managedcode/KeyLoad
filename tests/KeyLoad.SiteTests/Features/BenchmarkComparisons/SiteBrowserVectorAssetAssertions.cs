@@ -43,6 +43,26 @@ internal static class SiteBrowserVectorAssetAssertions
             .IsNotEqualTo(previous.GetProperty(SiteVectorAssetTokens.TransformField).GetString());
     }
 
+    public static async Task AssertRetinaResizeAsync(SiteBrowserCdpClient cdp, CancellationToken cancellationToken)
+    {
+        var originalMark = await ReadMarkAsync(cdp, cancellationToken);
+        foreach (var width in SiteBrowserUiTokens.ViewportWidths)
+        {
+            await cdp.CommandAsync(SiteBrowserTokens.SetDeviceMetrics, new Dictionary<string, object?>
+            {
+                [SiteBrowserTokens.WidthField] = width,
+                [SiteBrowserTokens.HeightField] = SiteBrowserUiTokens.ViewportMobileHeight,
+                [SiteBrowserTokens.DeviceScaleFactorField] = SiteVectorAssetTokens.RetinaScale,
+                [SiteBrowserTokens.MobileField] = false,
+            }, cancellationToken);
+            await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollScript, false, cancellationToken);
+            await Assert.That(await cdp.WaitForExpressionAsync(SiteVectorAssetTokens.ReadyPredicate, cancellationToken)).IsTrue();
+            await Task.Delay(SiteBrowserUiTokens.SceneSettleWaitMilliseconds, cancellationToken);
+            await AssertPoseUpdatedAsync(cdp, originalMark, cancellationToken);
+            originalMark = await ReadMarkAsync(cdp, cancellationToken);
+        }
+    }
+
     private static async Task AssertProjectedDimensions(JsonElement state)
     {
         var width = CssPixels(state.GetProperty(SiteVectorAssetTokens.WidthField).GetString());
@@ -52,6 +72,18 @@ internal static class SiteBrowserVectorAssetAssertions
         await Assert.That(state.GetProperty(SiteVectorAssetTokens.OffsetHeightField).GetDouble()).IsEqualTo(height).Within(SiteVectorAssetTokens.CssDimensionTolerance);
         await Assert.That(state.GetProperty(SiteVectorAssetTokens.RectWidthField).GetDouble() > SiteVectorAssetTokens.PositiveSize).IsTrue();
         await Assert.That(state.GetProperty(SiteVectorAssetTokens.RectHeightField).GetDouble() > SiteVectorAssetTokens.PositiveSize).IsTrue();
+        await AssertContainedRasterSize(state, width, height);
+    }
+
+    private static async Task AssertContainedRasterSize(JsonElement state, double width, double height)
+    {
+        var dimensions = state.GetProperty(SiteVectorAssetTokens.BoundsField);
+        await Assert.That(dimensions.GetProperty(SiteVectorAssetTokens.ContainedField).GetBoolean()).IsTrue();
+        await Assert.That(dimensions.GetProperty(SiteVectorAssetTokens.CenteredField).GetBoolean()).IsTrue();
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.RectWidthField).GetDouble() / width)
+            .IsBetween(SiteVectorAssetTokens.MinimumProjectionRatio, SiteVectorAssetTokens.MaximumProjectionRatio);
+        await Assert.That(state.GetProperty(SiteVectorAssetTokens.RectHeightField).GetDouble() / height)
+            .IsBetween(SiteVectorAssetTokens.MinimumProjectionRatio, SiteVectorAssetTokens.MaximumProjectionRatio);
     }
 
     private static double CssPixels(string? value) => value is not null &&

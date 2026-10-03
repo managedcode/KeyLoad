@@ -21,7 +21,7 @@ internal static class SiteVectorAssetTokens
     public const string ScriptElement = "script";
     public const string FillAttribute = "fill";
     public const string StrokeAttribute = "stroke";
-    public const string SceneFallbackDescription = "Conceptual illustration, not live data.";
+    public const string SceneFallbackDescription = "time series and blobs circle one KeyLoad engine.";
     public const string MissingPosterFailure = "The committed scene poster must be a readable SVG document.";
     public const string UnsafePosterFailure = "The scene poster must contain vector artwork without scripts or external assets.";
     public const string MissingModelLabelFailure = "The scene poster must name all eight data models.";
@@ -37,9 +37,17 @@ internal static class SiteVectorAssetTokens
     public const string PosterLabelQueues = "Queues";
     public const string PosterLabelTimeSeries = "Time series";
     public const string PosterLabelBlobs = "Blobs";
-    public const string DataImageScript = "(() => { const img = document.querySelectorAll('img.cluster-core'); const node = img[0]; const style = node ? getComputedStyle(node) : null; const rect = node ? node.getBoundingClientRect() : null; const poster = document.querySelector('.cluster-poster'); const posterStyle = poster ? getComputedStyle(poster) : null; return { count: img.length, loaded: !!node && node.complete && node.naturalWidth > 0 && node.naturalHeight > 0, source: node ? new URL(node.currentSrc || node.src, document.baseURI).pathname : '', display: style?.display || '', visibility: style?.visibility || '', opacity: style?.opacity || '', width: style?.width || '', height: style?.height || '', offsetWidth: node?.offsetWidth || 0, offsetHeight: node?.offsetHeight || 0, rectWidth: rect?.width || 0, rectHeight: rect?.height || 0, transform: style?.transform || '', posterVisibility: posterStyle?.visibility || '', posterDisplay: posterStyle?.display || '' }; })()";
+    public const string DataImageScript = "(() => { const img = document.querySelectorAll('img.cluster-core'); const node = img[0]; const style = node ? getComputedStyle(node) : null; const rect = node ? node.getBoundingClientRect() : null; const host = document.querySelector('#cluster-scene')?.getBoundingClientRect(); const poster = document.querySelector('.cluster-poster'); const posterStyle = poster ? getComputedStyle(poster) : null; return { count: img.length, loaded: !!node && node.complete && node.naturalWidth > 0 && node.naturalHeight > 0, source: node ? new URL(node.currentSrc || node.src, document.baseURI).pathname : '', display: style?.display || '', visibility: style?.visibility || '', opacity: style?.opacity || '', width: style?.width || '', height: style?.height || '', offsetWidth: node?.offsetWidth || 0, offsetHeight: node?.offsetHeight || 0, rectWidth: rect?.width || 0, rectHeight: rect?.height || 0, transform: style?.transform || '', posterVisibility: posterStyle?.visibility || '', bounds:{ contained: !!rect && !!host && rect.left >= host.left && rect.right <= host.right && rect.top >= host.top && rect.bottom <= host.bottom, centered: !!rect && !!host && Math.abs(rect.left + rect.width / 2 - host.left - host.width / 2) <= host.width / 10 } }; })()";
     public const string PosterStateScript = "(() => { const poster = document.querySelector('.cluster-poster'); const mark = document.querySelector('img.cluster-core'); const p = poster ? getComputedStyle(poster) : null; const m = mark ? getComputedStyle(mark) : null; return { posterVisible: !!poster && p.display !== 'none' && p.visibility !== 'hidden' && Number(p.opacity) > 0, markVisible: !!mark && m.display !== 'none' && m.visibility !== 'hidden' && Number(m.opacity) > 0, markCount: document.querySelectorAll('img.cluster-core').length }; })()";
     public const string Matrix3dPrefix = "matrix3d(";
+    public const string BoundsField = "bounds";
+    public const string ContainedField = "contained";
+    public const string CenteredField = "centered";
+    public const string ReadyPredicate = "document.querySelector('#cluster-scene')?.getAttribute('data-scene-state')==='ready'";
+    public const string SceneErrorPredicate = "document.querySelector('#cluster-scene')?.getAttribute('data-scene-state')==='error'";
+    public const string DisableCacheMethod = "Network.setCacheDisabled";
+    public const string CacheDisabledField = "cacheDisabled";
+    public const string NotFoundStatusMarker = "404";
     public const string CountField = "count";
     public const string LoadedField = "loaded";
     public const string SourceField = "source";
@@ -75,6 +83,9 @@ internal static class SiteVectorAssetTokens
     public const char MatrixClosingCharacter = ')';
     public const double PositiveSize = 0;
     public const double CssDimensionTolerance = 1;
+    public const int RetinaScale = 2;
+    public const double MinimumProjectionRatio = 0.8;
+    public const double MaximumProjectionRatio = 1.2;
 
     public static readonly string[] RequiredLabels =
     [

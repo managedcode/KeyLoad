@@ -11,6 +11,7 @@ internal static class SiteBuildArtifacts
         SiteAssetTokens.LabModule, SiteAssetTokens.ChartModule, SiteAssetTokens.ProfilesModule, SiteAssetTokens.SceneModule,
         SiteAssetTokens.GeometryModule, SiteAssetTokens.LifecycleModule, SiteAssetTokens.ObserversModule, SiteAssetTokens.Stylesheet,
         SiteAssetTokens.BrandStylesheet, SiteAssetTokens.TokenStylesheet, SiteAssetTokens.SceneStylesheet, SiteAssetTokens.PosterAsset,
+        SiteAssetTokens.MobilePosterAsset,
     ];
     private static readonly string[] VendorFiles = [SiteAssetTokens.WebGpuVendorModule, SiteAssetTokens.CoreVendorModule,
         SiteAssetTokens.VendorLicense, SiteAssetTokens.ThreeManifestFile];

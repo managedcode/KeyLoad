@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -11,23 +10,10 @@ internal sealed class SiteVectorAssetTests
     public async Task AC_VEC_001_CommittedPosterIsAccessibleVectorArtworkWithAllModels()
     {
         var inputs = SiteTestInputs.Read();
-        var posterPath = Path.Combine(inputs.Repository, SiteVectorAssetTokens.PosterRelativePath);
-        XDocument poster;
-        try
+        foreach (var posterPath in SiteVectorAssetSourceTokens.PosterPaths)
         {
-            poster = XDocument.Load(posterPath, LoadOptions.None);
+            await VerifyPoster(Path.Combine(inputs.Repository, posterPath), inputs.Repository);
         }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or XmlException)
-        {
-            throw new InvalidDataException(SiteVectorAssetTokens.MissingPosterFailure, exception);
-        }
-
-        var root = poster.Root;
-        await Assert.That(root?.Name.LocalName).IsEqualTo("svg");
-        await Assert.That(root?.Name.NamespaceName).IsEqualTo(SiteVectorAssetTokens.SvgNamespace);
-        await Assert.That(poster.Descendants().Any(element => element.Name.LocalName is "path" or "rect" or "circle" or "polygon" or "text")).IsTrue();
-        await AssertSafeVector(poster);
-        await AssertModelLabels(poster);
     }
 
     [Test]
@@ -38,7 +24,7 @@ internal sealed class SiteVectorAssetTests
         var faviconPath = Path.Combine(inputs.Repository, SiteVectorAssetTokens.FaviconRelativePath);
         await Assert.That(File.Exists(faviconPath)).IsTrue();
         var favicon = XDocument.Load(faviconPath, LoadOptions.None);
-        await Assert.That(favicon.Root?.Name.LocalName).IsEqualTo("svg");
+        await Assert.That(favicon.Root?.Name.LocalName).IsEqualTo(SiteVectorAssetSourceTokens.SvgElement);
 
         var html = await File.ReadAllTextAsync(htmlPath, Encoding.UTF8);
         var images = SiteVectorAssetHtml.Images(html);
@@ -51,66 +37,129 @@ internal sealed class SiteVectorAssetTests
 
     private static async Task AssertSafeVector(XDocument poster)
     {
-        var elements = poster.Descendants().ToArray();
-        var hasForbiddenElement = elements.Any(element => element.Name.LocalName.Equals(
-            SiteVectorAssetTokens.ImageElement, StringComparison.OrdinalIgnoreCase) ||
-            element.Name.LocalName.Equals(SiteVectorAssetTokens.ForeignObjectElement, StringComparison.OrdinalIgnoreCase) ||
-            element.Name.LocalName.Equals(SiteVectorAssetTokens.ScriptElement, StringComparison.OrdinalIgnoreCase));
-        var hasUnsafeReference = elements.SelectMany(element => element.Attributes()).Any(attribute =>
-            IsExternalReference(attribute.Name.LocalName, attribute.Value)) ||
-            elements.SelectMany(element => element.Nodes().OfType<XText>()).Any(node =>
-                HasExternalAssetReference(node.Value));
-        var fullText = poster.ToString(SaveOptions.DisableFormatting);
-        await Assert.That(hasForbiddenElement || hasUnsafeReference || ContainsEmbeddedPayload(fullText)).IsFalse();
+        var elements = poster.Root!.DescendantsAndSelf().ToArray();
+        var identifiers = elements.SelectMany(element => element.Attributes()).Where(attribute =>
+                attribute.Name.LocalName == SiteVectorAssetSourceTokens.IdAttribute)
+            .GroupBy(attribute => attribute.Value, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal);
+        await Assert.That(HasForbiddenElement(elements) || ContainsEmbeddedPayload(poster)).IsFalse();
+        if (!HasOnlyLocalReferences(elements, identifiers))
+        {
+            throw new InvalidDataException(SiteVectorAssetSourceTokens.QueryReferenceFailure);
+        }
     }
 
-    private static bool IsExternalReference(string name, string value)
+    private static bool HasForbiddenElement(IEnumerable<XElement> elements) => elements.Any(element =>
+        element.Name.LocalName.Equals(SiteVectorAssetSourceTokens.ImageElement, StringComparison.OrdinalIgnoreCase) ||
+        element.Name.LocalName.Equals(SiteVectorAssetSourceTokens.ForeignObjectElement, StringComparison.OrdinalIgnoreCase) ||
+        element.Name.LocalName.Equals(SiteVectorAssetSourceTokens.ScriptElement, StringComparison.OrdinalIgnoreCase));
+
+    private static bool ContainsEmbeddedPayload(XDocument poster)
     {
-        if (name is not (SiteVectorAssetTokens.HrefAttribute or SiteVectorAssetTokens.XlinkHrefAttribute))
+        var source = poster.ToString(SaveOptions.DisableFormatting);
+        return source.Contains(SiteVectorAssetSourceTokens.DataScheme, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool HasOnlyLocalReferences(XElement[] elements,
+        IReadOnlyDictionary<string, int> identifiers)
+    {
+        var attributes = elements.SelectMany(element => element.Attributes()).Where(attribute => !attribute.IsNamespaceDeclaration).ToArray();
+        var values = attributes.Select(attribute => attribute.Value).Concat(elements
+            .Where(element => element.Name.LocalName == SiteVectorAssetSourceTokens.StyleElement)
+            .SelectMany(element => element.Nodes().OfType<XText>()).Select(node => node.Value));
+        foreach (var attribute in attributes.Where(attribute => attribute.Name.LocalName == SiteVectorAssetSourceTokens.HrefAttribute))
         {
-            return false;
+            if (!HasUniqueFragment(attribute.Value, identifiers))
+            {
+                return false;
+            }
         }
 
-        return value.StartsWith(SiteVectorAssetTokens.DataScheme, StringComparison.OrdinalIgnoreCase) ||
-            value.Contains(SiteVectorAssetTokens.ExternalScheme, StringComparison.OrdinalIgnoreCase) ||
-            value.StartsWith(SiteVectorAssetTokens.RasterMimeMarker, StringComparison.OrdinalIgnoreCase);
+        return values.All(value => HasOnlyLocalUrlFunctions(value, identifiers) && !HasExternalReference(value));
     }
 
-    private static bool HasExternalAssetReference(string value) =>
-        value.Contains("url(http:", StringComparison.OrdinalIgnoreCase) ||
-        value.Contains("url(https:", StringComparison.OrdinalIgnoreCase) ||
-        value.Contains("url(//", StringComparison.OrdinalIgnoreCase) ||
-        value.Contains("@import", StringComparison.OrdinalIgnoreCase);
+    private static bool HasOnlyLocalUrlFunctions(string value, IReadOnlyDictionary<string, int> identifiers)
+    {
+        var references = SiteVectorAssetSourceTokens.SvgUrlReference.Matches(value);
+        var referenceCount = SiteVectorAssetSourceTokens.UrlFunction.Count(value);
+        return references.Count == referenceCount && references.All(reference => HasUniqueFragment(
+            SiteVectorAssetSourceTokens.FragmentPrefix + reference.Groups[SiteVectorAssetSourceTokens.FragmentGroup].Value,
+            identifiers));
+    }
 
-    private static bool ContainsEmbeddedPayload(string source) =>
-        source.Contains(SiteVectorAssetTokens.DataScheme, StringComparison.OrdinalIgnoreCase) ||
-        source.Contains("url(http:", StringComparison.OrdinalIgnoreCase) ||
-        source.Contains("url(https:", StringComparison.OrdinalIgnoreCase) ||
-        source.Contains("url(//", StringComparison.OrdinalIgnoreCase) ||
-        source.Contains("@import", StringComparison.OrdinalIgnoreCase);
+    private static bool HasUniqueFragment(string value, IReadOnlyDictionary<string, int> identifiers)
+    {
+        var match = SiteVectorAssetSourceTokens.SvgHrefFragment.Match(value);
+        return match.Success && identifiers.GetValueOrDefault(
+            match.Groups[SiteVectorAssetSourceTokens.FragmentGroup].Value) == SiteTokens.One;
+    }
+
+    private static bool HasExternalReference(string value) =>
+        value.Contains(SiteVectorAssetSourceTokens.ExternalScheme, StringComparison.OrdinalIgnoreCase) ||
+        value.TrimStart().StartsWith(SiteVectorAssetSourceTokens.ProtocolRelativePrefix, StringComparison.Ordinal) ||
+        value.Contains(SiteVectorAssetSourceTokens.ImportRuleMarker, StringComparison.OrdinalIgnoreCase);
+
+    private static bool HasVectorGeometry(XDocument poster) => poster.Descendants().Any(element =>
+        element.Name.LocalName is SiteVectorAssetSourceTokens.PathElement or SiteVectorAssetSourceTokens.RectElement or
+            SiteVectorAssetSourceTokens.CircleElement or SiteVectorAssetSourceTokens.PolygonElement or
+            SiteVectorAssetSourceTokens.TextElement);
 
     private static async Task AssertModelLabels(XDocument poster)
     {
-        var text = string.Join(' ', poster.Descendants().Where(element => element.Name.LocalName == "text")
+        var text = string.Join(SiteVectorAssetSourceTokens.TextJoinSeparator,
+            poster.Descendants().Where(element => element.Name.LocalName == SiteVectorAssetSourceTokens.TextElement)
             .Select(element => element.Value));
         foreach (var label in SiteVectorAssetTokens.RequiredLabels)
         {
             await Assert.That(text.Contains(label, StringComparison.OrdinalIgnoreCase)).IsTrue();
         }
     }
+
+    private static async Task AssertCanonicalKeyPath(XDocument poster, string repository)
+    {
+        var favicon = XDocument.Load(Path.Combine(repository, SiteVectorAssetTokens.FaviconRelativePath), LoadOptions.None);
+        var canonicalPath = favicon.Descendants().Single(element =>
+            element.Name.LocalName == SiteVectorAssetSourceTokens.PathElement);
+        var matchingPaths = poster.Descendants().Where(element =>
+            element.Name.LocalName == SiteVectorAssetSourceTokens.PathElement &&
+            (string?)element.Attribute(SiteVectorAssetSourceTokens.PathDataAttribute) ==
+            (string?)canonicalPath.Attribute(SiteVectorAssetSourceTokens.PathDataAttribute)).ToArray();
+        await Assert.That(matchingPaths.Length).IsEqualTo(SiteTokens.One);
+        var path = matchingPaths.Single();
+        foreach (var attributeName in SiteVectorAssetSourceTokens.CanonicalPathAttributes)
+        {
+            await Assert.That((string?)path.Attribute(attributeName)).IsEqualTo((string?)canonicalPath.Attribute(attributeName));
+        }
+    }
+
+    private static async Task VerifyPoster(string posterPath, string repository)
+    {
+        XDocument poster;
+        try
+        {
+            poster = XDocument.Load(posterPath, LoadOptions.None);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or XmlException)
+        {
+            throw new InvalidDataException(SiteVectorAssetTokens.MissingPosterFailure, exception);
+        }
+
+        await Assert.That(poster.Root?.Name.LocalName).IsEqualTo(SiteVectorAssetSourceTokens.SvgElement);
+        await Assert.That(poster.Root?.Name.NamespaceName).IsEqualTo(SiteVectorAssetTokens.SvgNamespace);
+        await Assert.That(HasVectorGeometry(poster)).IsTrue();
+        await AssertSafeVector(poster);
+        await AssertModelLabels(poster);
+        await AssertCanonicalKeyPath(poster, repository);
+    }
 }
 
 internal static class SiteVectorAssetHtml
 {
-    private static readonly Regex ImageTag = new("<img\\b[^>]*>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    private static readonly Regex Attribute = new("(?<name>[a-z-]+)\\s*=\\s*[\\\"'](?<value>[^\\\"']*)[\\\"']",
-        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-
     public static IReadOnlyList<SiteVectorImage> Images(string html)
     {
-        return ImageTag.Matches(html).Select(match => Attribute.Matches(match.Value)
-            .ToDictionary(attribute => attribute.Groups[SiteVectorAssetTokens.RegexNameGroup].Value,
-                attribute => attribute.Groups[SiteVectorAssetTokens.RegexValueGroup].Value, StringComparer.OrdinalIgnoreCase))
+        return SiteVectorAssetSourceTokens.HtmlImageTag.Matches(html).Select(match => SiteVectorAssetSourceTokens.HtmlAttribute.Matches(match.Value)
+            .ToDictionary(attribute => attribute.Groups[SiteVectorAssetSourceTokens.RegexNameGroup].Value,
+                attribute => attribute.Groups[SiteVectorAssetSourceTokens.RegexValueGroup].Value, StringComparer.OrdinalIgnoreCase))
             .Select(attributes => new SiteVectorImage(
                 attributes.GetValueOrDefault(SiteVectorAssetTokens.ClassAttributeName, string.Empty),
                 attributes.GetValueOrDefault(SiteVectorAssetTokens.SourceAttributeName, string.Empty)))

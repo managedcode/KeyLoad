@@ -40,11 +40,14 @@ internal static class SiteBrowserVisualAssertions
                 ? SiteBrowserSceneTokens.BrowserSceneError : SiteBrowserSceneTokens.BrowserSceneUnsupported);
         }
         await AssertRendererState(cdp, cancellationToken);
+        await SiteBrowserVectorAssetAssertions.AssertReadyMarkAsync(cdp, cancellationToken);
         await AssertMotionPlaysThenSettles(chrome, cancellationToken);
         await AssertReducedMotion(cdp, rendererReady: true, cancellationToken);
+        await SiteBrowserVectorAssetAssertions.AssertRetinaResizeAsync(cdp, cancellationToken);
         await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollAwayScript, false, cancellationToken);
         var paused = await cdp.WaitForExpressionAsync(SiteBrowserUiTokens.ScenePausedScript, cancellationToken);
         await Assert.That(paused).IsTrue();
+        await SiteBrowserVectorAssetAssertions.AssertPosterFallbackAsync(cdp, cancellationToken);
 
         await chrome.NavigateAsync(SiteBrowserTokens.BlankUrl, cancellationToken);
         await chrome.NavigateAsync(baseUrl + SiteAssetTokens.IndexHtml + SiteBrowserTokens.PageHideFragment, cancellationToken);
@@ -55,6 +58,7 @@ internal static class SiteBrowserVisualAssertions
         var restored = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneReadyScript, true, cancellationToken);
         await Assert.That(restored.GetString()).IsEqualTo(SiteBrowserUiTokens.StateReady);
         await AssertRendererState(cdp, cancellationToken);
+        await SiteBrowserVectorAssetAssertions.AssertReadyMarkAsync(cdp, cancellationToken);
     }
 
     public static Task AssertSceneIsLazyBeforeHeroNavigation(SiteBrowserCdpClient cdp,
@@ -68,6 +72,7 @@ internal static class SiteBrowserVisualAssertions
         await Assert.That(state.GetProperty(SiteBrowserUiTokens.SceneStateField).GetString()).IsEqualTo(
             SiteBrowserUiTokens.ScenePoster);
         await Assert.That(state.GetProperty(SiteBrowserUiTokens.CanvasCountField).GetInt32()).IsEqualTo(SiteTokens.Zero);
+        await SiteBrowserVectorAssetAssertions.AssertPosterFallbackAsync(cdp, cancellationToken);
     }
 
     private static async Task AssertRendererState(SiteBrowserCdpClient cdp, CancellationToken cancellationToken)
@@ -99,6 +104,7 @@ internal static class SiteBrowserVisualAssertions
         var cdp = chrome.Cdp;
         var playing = await cdp.EvaluateAsync(SiteBrowserUiTokens.MotionPlayingScript, false, cancellationToken);
         await Assert.That(playing.GetBoolean()).IsTrue();
+        var originalMark = await SiteBrowserVectorAssetAssertions.ReadMarkAsync(cdp, cancellationToken);
         var point = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneCenterScript, false, cancellationToken);
         await cdp.CommandAsync(SiteBrowserTokens.InputDispatchMouseEvent, new Dictionary<string, object?>
         {
@@ -107,6 +113,7 @@ internal static class SiteBrowserVisualAssertions
             [SiteBrowserTokens.YField] = point.GetProperty(SiteBrowserTokens.YField).GetDouble(),
         }, cancellationToken);
         await Task.Delay(SiteBrowserUiTokens.SceneSettleWaitMilliseconds, cancellationToken);
+        await SiteBrowserVectorAssetAssertions.AssertPoseUpdatedAsync(cdp, originalMark, cancellationToken);
         var moving = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneGeometrySnapshotScript, false, cancellationToken);
         await Assert.That(moving.GetProperty(SiteBrowserUiTokens.FrameField).GetString())
             .IsEqualTo(SiteBrowserUiTokens.FrameRendered);

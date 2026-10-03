@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "scope": "BenchmarkComparisons vector assets",
+  "sourceBaseRevision": "9b3bd8ed64b42e7e3bd37d454face7984dfc6b5f",
+  "workingTree": true,
+  "requirements": [
+    "REQ-VEC-001",
+    "REQ-VEC-002",
+    "REQ-VEC-003"
+  ],
+  "acceptance": "vector-assets.acceptance.md",
+  "plan": "vector-assets.plan.md",
+  "sourceHashes": {
+    "site/favicon.svg": "7d93c0d681b1b2a0c29708bcf6055242b8d57d3931282ef11a203ed5988ce459",
+    "src/KeyLoad.Server/Features/AdminDashboard/Assets/logo.svg": "7d93c0d681b1b2a0c29708bcf6055242b8d57d3931282ef11a203ed5988ce459",
+    "site/Features/BenchmarkComparisons/assets/cluster-poster.svg": "ef787a7eaec235cf47aa240dc64239eccccfb3a503aefd857367867fd2af8ac0",
+    "site/Features/BenchmarkComparisons/assets/cluster-poster-mobile.svg": "68e303d0b94e0471926bfdb416f590cb053b88a8c3cbdf4f191a792e5521bfb9",
+    "site/Features/BenchmarkComparisons/scene-geometry.mjs": "5db7511e529813f466012a8edc7ebe7ac9e3f8b96371525c3fba81da36c8ebf1",
+    "site/Features/BenchmarkComparisons/scene-lifecycle.mjs": "60ecc385a394b963be18c09a9e14e9756bdbf304927463f1a133d03d012996fa"
+  },
+  "developmentChecks": {
+    "siteTestsBuild": {
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "log": "/private/tmp/keyload-vector-build-verified.log"
+    },
+    "scopedFormat": {
+      "exitCode": 0,
+      "log": "/private/tmp/keyload-vector-format-verified.log"
+    },
+    "javascriptSyntax": "passed",
+    "staticGovernance": {
+      "exitCode": 0,
+      "log": "/private/tmp/keyload-vector-governance.log"
+    },
+    "localTestsExecuted": false
+  },
+  "manualPreview": {
+    "qualification": false,
+    "mode": "local_preview",
+    "measuredSource": "9c570f8c33a7a9667507a8e1c0ca68860de3be45",
+    "measuredRun": "https://github.com/managedcode/KeyLoad/actions/runs/36926803549",
+    "javascriptGzipBytes": 40804,
+    "cssGzipBytes": 9700,
+    "devices": [
+      {
+        "width": 1440,
+        "dpr": 2,
+        "backend": "webgpu",
+        "bufferPixels": 999044,
+        "drawCalls": 18,
+        "triangles": 35,
+        "markLoaded": true,
+        "svg": "/favicon.svg",
+        "contained": true,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "dpr": 2,
+        "backend": "webgpu",
+        "bufferPixels": 226884,
+        "drawCalls": 18,
+        "triangles": 35,
+        "markLoaded": true,
+        "svg": "/favicon.svg",
+        "contained": true,
+        "overflow": false
+      }
+    ],
+    "noJavascriptMobilePoster": "cluster-poster-mobile.svg",
+    "desktopScreenshot": "/private/tmp/keyload-vector-final-preview.png",
+    "mobileNoJavascriptScreenshot": "/private/tmp/keyload-vector-mobile-no-js.png"
+  },
+  "gitHubQualification": {
+    "state": "blocked_before_site_checkout",
+    "runId": 37112008157,
+    "sourceRevision": "9b3bd8ed64b42e7e3bd37d454face7984dfc6b5f",
+    "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37112008157",
+    "artifactId": 11270013705,
+    "artifactName": "site-qualification-9b3bd8ed64b42e7e3bd37d454face7984dfc6b5f-1",
+    "reason": "Isolated Pages GitHub evidence rejected.",
+    "siteTestsExecuted": false,
+    "nativeCoverageQualified": false,
+    "published": false
+  },
+  "acceptanceState": {
+    "AC-VEC-001": "source and manual preview implemented; GitHub tests pending",
+    "AC-VEC-002": "source and DPR2 manual preview implemented; GitHub browser tests pending",
+    "AC-VEC-003": "source and manual fallback implemented; real HTTP404 regression written but unexecuted",
+    "AC-VEC-004": "development checks and manual renderer budgets pass; GitHub gates pending",
+    "AC-VEC-005": "publication blocked by rejected isolated evidence"
+  }
+}

@@ -408,6 +408,7 @@ For changes outside existing owner authorization, obtain direction before changi
 - KeyLoad's visual style is serious, adult Apple-style Liquid Glass in the Managed Code family: editorial off-white surfaces, bold black typography and Managed Code's pastel iridescent accent (peach → lilac → periwinkle), plus Prostir graphite. Do not use green or lime as the brand accent, and do not return to the rejected light-blue look. No Material Design, colour blobs, rainbow logos or playful decoration. The `/admin` console and the public site share it (owner direction 2026-10-02).
 - The public landing must be a radically better product page for KeyLoad as the database for AI agents, on .NET and Orleans. Its Three.js scene must be live and moving as soon as it loads, except under reduced-motion preferences, within the scene lifecycle, budget and honesty contracts.
 - Every public KeyLoad page ends with "Developed by Managed Code" and a normal followed (dofollow) link to https://www.managed-code.com/.
+- The central KeyLoad K MUST use the canonical true SVG outside the bounded 3D raster buffer so it stays sharp on Retina displays. An SVG wrapper around a bitmap or a CanvasTexture logo does not satisfy this requirement (repeated owner correction 2026-10-03).
 ### Dislikes
 - Repeated permission questions for already authorized work.
 - Fake production readiness, power-loss claims from process-kill tests, or unsupported performance supremacy.

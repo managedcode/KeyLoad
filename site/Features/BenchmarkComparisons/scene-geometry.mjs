@@ -40,7 +40,7 @@ export const SCENE = Object.freeze({
     blobs: Object.freeze({ lines: [], circles: [], boxes: [[0, 0, 0.44, 0.44], [0.56, 0, 0.44, 0.44], [0, 0.56, 0.44, 0.44],
       [0.56, 0.56, 0.44, 0.44]] }),
   }),
-  core: Object.freeze({ selector: '.cluster-core', matrixPrefix: 'matrix3d(', matrixSuffix: ')',
+  core: Object.freeze({ selector: '.cluster-core', perspectiveScaleIndex: 5, matrixPrefix: 'matrix3d(', matrixSuffix: ')',
     separator: ',', pixels: 'px' }),
   colors: Object.freeze({ sky: 0xf2f1f2 }),
   math: Object.freeze({ zero: 0, half: 0.5, one: 1, two: 2, negativeOne: -1, epsilon: 0.001 }),
@@ -215,7 +215,8 @@ function createCoreProjection(THREE, root, camera) {
   const screen = new THREE.Matrix4();
   return (width, height) => {
     anchor.getWorldPosition(center).applyMatrix4(camera.matrixWorldInverse);
-    const size = height * camera.projectionMatrix.elements[5] * SCENE.world.coreSize / (-center.z * SCENE.math.two);
+    const size = height * camera.projectionMatrix.elements[SCENE.core.perspectiveScaleIndex] * SCENE.world.coreSize
+      / (-center.z * SCENE.math.two);
     const scale = SCENE.world.coreSize / size;
     placement.makeScale(scale, -scale, SCENE.math.one);
     placement.setPosition(-SCENE.world.coreSize * SCENE.math.half, SCENE.world.coreSize * SCENE.math.half, SCENE.math.zero);
