@@ -16,6 +16,7 @@ function verifyBrowserContract(contract, plan) {
   }
   assertIsolated(ISOLATED.profile === contract.profile &&
     isDeepStrictEqual(Object.keys(SUPPORT).sort(), Object.keys(NATIVE_SUPPORT).sort()));
+  assertIsolated(['failed', 'failure', 'success', 'failureReason'].every(key => ISOLATED[key] === AGGREGATE[key]));
   for (const target of ISOLATED.targets) {
     assertIsolated(isDeepStrictEqual([...SUPPORT[target]].sort(), [...NATIVE_SUPPORT[target]].sort()));
   }
@@ -25,7 +26,7 @@ function verifyBrowserContract(contract, plan) {
 
 function validateManifest(value, plan) {
   assertIsolated(exact(value, WIRE.projection) && value.schemaVersion === ISOLATED.aggregateVersion &&
-    value.profile === ISOLATED.profile && matches(ISOLATED.hash, value.datasetSha256) &&
+    value.profile === ISOLATED.profile && (value.datasetSha256 === null || matches(ISOLATED.hash, value.datasetSha256)) &&
     Array.isArray(value.workers) && value.workers.length === plan.cells.length);
   validateCohort(value.cohort);
   validateOptions(value.options);
@@ -90,6 +91,7 @@ export async function produceIsolatedProjection({ input }) {
   for (const worker of manifest.workers) {
     workers.push(await projectWorker(input, worker, expected.get(worker.id), manifest, contract, common));
   }
+  assertIsolated(manifest.datasetSha256 === (common.report?.datasetSha256 ?? null));
   const projection = { ...manifest, schemaVersion: ISOLATED.projectionVersion, workers };
   assertIsolated(Buffer.byteLength(JSON.stringify(projection)) <= ISOLATED.projectionBytes);
   return projection;

@@ -22,7 +22,7 @@ async function appendJobEnvironment(target, id) {
   } finally { await handle.close(); }
 }
 
-export async function captureCurrentJob(environment = process.env, argv = process.argv.slice(2)) {
+export async function captureCurrentJob(environment = process.env, argv = process.argv.slice(2), finalizing = false) {
   validateEntryArguments(argv);
   const context = createGitHubContext(environment, process.platform);
   const name = requireCurrentJobName(environment.KEYLOAD_COMPARISON_JOB_NAME, context.plan);
@@ -30,7 +30,7 @@ export async function captureCurrentJob(environment = process.env, argv = proces
   requireGitHub(typeof environment.GITHUB_ENV === 'string' && path.isAbsolute(environment.GITHUB_ENV));
   await requireOutputFile(environment.GITHUB_ENV);
   await verifySourceCheckout(context.native);
-  const directory = await createDirectory(path.join(context.native.runnerTemp, GH.captureDirectory));
+  const directory = await createDirectory(path.join(context.native.runnerTemp, GH.captureDirectory + (finalizing ? '-finalize' : '')));
   await initializeTransport(context, directory, directory);
   const discovered = validateJobIdentity(await captureCurrentJobPages(directory, context, name), context.cohort, name);
   const job = await captureFreshCurrentJob(discovered, directory, context, name);

@@ -39,3 +39,6 @@
 
 ## Owner-directed shared comparison pipeline, 2026-10-03
 - ADR-064/076 place all comparative tests in Benchmarks; Pages follows only its complete current producer with exact original identity. Retire active legacy collection, rendering and dependencies while preserving immutable historical evidence as history and every applicable site/source/provenance/qualification gate.
+
+## Owner-directed failed-cell publication, 2026-10-04
+- ADR-080 permits authenticated same-run failed cells alongside successful competitors. Render failed cells as no data with null numeric fields and actual job links; an entirely unavailable cohort has a null corpus digest. Full TUnit/browser/coverage/source/freshness gates remain mandatory. Original retained GitHub report fixtures are parser/coverage test inputs only, never current publication measurements.

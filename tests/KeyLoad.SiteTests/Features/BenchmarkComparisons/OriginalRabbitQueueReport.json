@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Immutable original GitHub measurement for parser and arithmetic tests only; never publication input.",
+  "original": {
+    "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37154664616",
+    "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37154664616/job/111299652838",
+    "artifactId": 11285807871,
+    "artifactName": "comparison-preflight-rabbitmq-n2-queue-cycle",
+    "artifactDigest": "sha256:f2a11a052deacec9fe443f8c4d9cfc12879005abf674ae20a92a01b3806bc99c",
+    "rawWorkerSha256": "e467ad08fea00b6a49cceb96379942d545ac7a15a4dd31b7a3a3b1a3ac744551",
+    "retainedRepresentation": "Original report metadata and measurements; raw per-operation samples omitted."
+  },
+  "worker": {
+    "id": "rabbitmq-n2-queue-cycle",
+    "target": "RabbitMQ",
+    "nodeCount": 2,
+    "scenario": "QueueCycle",
+    "profile": "intensive-1k-c16",
+    "disposition": "measured"
+  },
+  "cohort": {
+    "sourceRevision": "7136d6e1d9ae3bb91a092d35a62ddcef7131843c",
+    "runId": 37154664616,
+    "attempt": 1,
+    "repository": "managedcode/KeyLoad",
+    "ref": "refs/heads/main",
+    "workflow": "Benchmarks",
+    "profile": "intensive-1k-c16"
+  },
+  "datasetSha256": "ced1a5cd31e37e333712c49aad341125fa1a6fc9a6768891d5d50d69cc7c1add",
+  "report": {
+    "schemaVersion": 3,
+    "runId": "a63c73a9-8729-46c5-864a-e5cc70bb339d",
+    "startedAt": "2026-10-03T21:48:01.8375968+00:00",
+    "options": {
+      "topology": "TwoNode",
+      "seed": 1729,
+      "documents": 4096,
+      "operations": 10000,
+      "warmup": 256,
+      "repetitions": 5,
+      "concurrency": 16,
+      "payloadBytes": 1024,
+      "dimensions": 128,
+      "topK": 10,
+      "timeoutSeconds": 30,
+      "graphVertices": 256,
+      "graphFanOut": 3,
+      "graphDepth": 3
+    },
+    "datasetSha256": "ced1a5cd31e37e333712c49aad341125fa1a6fc9a6768891d5d50d69cc7c1add",
+    "loadModel": "closed-loop; setup, oracle, validation and warmup excluded",
+    "hostOs": "Ubuntu 24.04.5 LTS",
+    "architecture": "X64",
+    "logicalProcessors": 4,
+    "runtime": ".NET 10.0.12",
+    "storage": "Fresh cell-owned native directories and volumes; no shared database",
+    "sourceRevision": "7136d6e1d9ae3bb91a092d35a62ddcef7131843c",
+    "targets": [
+      {
+        "name": "RabbitMQ",
+        "version": "4.2.4",
+        "topology": "2 connected native broker nodes; 2-member quorum queue; quorum 2 of 2; no single-node-loss availability",
+        "writeAcknowledgement": "persistent messages + tracked publisher confirms; quorum 2 of 2; quorum member online verification; manual ACK + ordered channel RPC barrier",
+        "readContract": "basic.get manual acknowledgements; at least once",
+        "transport": "AMQP 0-9-1/TCP; one channel per worker",
+        "authorization": "Aspire user; no field policy",
+        "image": "docker.io/library/rabbitmq:4.2.4-management@sha256:aeee1db0ff9fdb1347f3585242c14ed10877b56c22eeaa113b21208ef3dd3edf",
+        "cluster": {
+          "nodes": 2,
+          "dataCopies": 2,
+          "state": "healthy native quorum cluster",
+          "observations": [
+            "connected running disc nodes=2",
+            "quorum members online=2",
+            "queue type=quorum",
+            "running nodes=rabbit@isolated-rabbit-1,rabbit@isolated-rabbit-2",
+            "queue members=rabbit@isolated-rabbit-1,rabbit@isolated-rabbit-2",
+            "online members=rabbit@isolated-rabbit-1,rabbit@isolated-rabbit-2",
+            "quorum=2 of 2"
+          ]
+        }
+      }
+    ],
+    "cases": [
+      {
+        "target": "RabbitMQ",
+        "scenario": "QueueCycle",
+        "repetition": 0,
+        "status": "measured",
+        "detail": null,
+        "measurement": {
+          "attempts": 10000,
+          "successes": 10000,
+          "failures": 0,
+          "elapsedSeconds": 5.2204188,
+          "usefulOperationsPerSecond": 1915.5551274928364,
+          "latency": {
+            "p50Ms": 8.003300000000081,
+            "p95Ms": 11.70270000000005,
+            "p99Ms": 15.237100000000282
+          },
+          "uniqueCompletedMessages": 10000,
+          "enqueue": {
+            "p50Ms": 3.4404,
+            "p95Ms": 5.6744,
+            "p99Ms": 7.7889
+          },
+          "receive": {
+            "p50Ms": 3.2557,
+            "p95Ms": 5.3471,
+            "p99Ms": 7.6044
+          },
+          "ack": {
+            "p50Ms": 1.1332,
+            "p95Ms": 2.3998,
+            "p99Ms": 3.4418
+          },
+          "clientResources": {
+            "cpuSeconds": 5.977947,
+            "allocatedBytes": 93964392,
+            "peakObservedWorkingSetBytes": 154206208,
+            "samplingIntervalMs": 50
+          }
+        }
+      },
+      {
+        "target": "RabbitMQ",
+        "scenario": "QueueCycle",
+        "repetition": 1,
+        "status": "measured",
+        "detail": null,
+        "measurement": {
+          "attempts": 10000,
+          "successes": 10000,
+          "failures": 0,
+          "elapsedSeconds": 4.8390421,
+          "usefulOperationsPerSecond": 2066.524695042434,
+          "latency": {
+            "p50Ms": 7.517800000000079,
+            "p95Ms": 10.660900000000026,
+            "p99Ms": 12.853599999999915
+          },
+          "uniqueCompletedMessages": 10000,
+          "enqueue": {
+            "p50Ms": 3.238,
+            "p95Ms": 5.3669,
+            "p99Ms": 7.2734
+          },
+          "receive": {
+            "p50Ms": 3.0656,
+            "p95Ms": 4.8924,
+            "p99Ms": 6.6075
+          },
+          "ack": {
+            "p50Ms": 0.9724,
+            "p95Ms": 2.061,
+            "p99Ms": 2.8853
+          },
+          "clientResources": {
+            "cpuSeconds": 4.417982,
+            "allocatedBytes": 93975016,
+            "peakObservedWorkingSetBytes": 199593984,
+            "samplingIntervalMs": 50
+          }
+        }
+      },
+      {
+        "target": "RabbitMQ",
+        "scenario": "QueueCycle",
+        "repetition": 2,
+        "status": "measured",
+        "detail": null,
+        "measurement": {
+          "attempts": 10000,
+          "successes": 10000,
+          "failures": 0,
+          "elapsedSeconds": 4.8536724,
+          "usefulOperationsPerSecond": 2060.2956227536083,
+          "latency": {
+            "p50Ms": 7.481999999999971,
+            "p95Ms": 10.79159999999996,
+            "p99Ms": 12.959100000000035
+          },
+          "uniqueCompletedMessages": 10000,
+          "enqueue": {
+            "p50Ms": 3.2292,
+            "p95Ms": 5.3015,
+            "p99Ms": 7.3492
+          },
+          "receive": {
+            "p50Ms": 3.0858,
+            "p95Ms": 5.0611,
+            "p99Ms": 7.019
+          },
+          "ack": {
+            "p50Ms": 0.9832,
+            "p95Ms": 2.0566,
+            "p99Ms": 2.8782
+          },
+          "clientResources": {
+            "cpuSeconds": 4.371537,
+            "allocatedBytes": 93894896,
+            "peakObservedWorkingSetBytes": 241917952,
+            "samplingIntervalMs": 50
+          }
+        }
+      },
+      {
+        "target": "RabbitMQ",
+        "scenario": "QueueCycle",
+        "repetition": 3,
+        "status": "measured",
+        "detail": null,
+        "measurement": {
+          "attempts": 10000,
+          "successes": 10000,
+          "failures": 0,
+          "elapsedSeconds": 4.9175155,
+          "usefulOperationsPerSecond": 2033.5472252197271,
+          "latency": {
+            "p50Ms": 7.496200000000499,
+            "p95Ms": 10.30749999999989,
+            "p99Ms": 13.07899999999995
+          },
+          "uniqueCompletedMessages": 10000,
+          "enqueue": {
+            "p50Ms": 3.2409,
+            "p95Ms": 5.0176,
+            "p99Ms": 7.1521
+          },
+          "receive": {
+            "p50Ms": 3.0638,
+            "p95Ms": 4.6375,
+            "p99Ms": 6.3001
+          },
+          "ack": {
+            "p50Ms": 1.025,
+            "p95Ms": 2.0729,
+            "p99Ms": 2.8795
+          },
+          "clientResources": {
+            "cpuSeconds": 4.541862,
+            "allocatedBytes": 94111368,
+            "peakObservedWorkingSetBytes": 250114048,
+            "samplingIntervalMs": 50
+          }
+        }
+      },
+      {
+        "target": "RabbitMQ",
+        "scenario": "QueueCycle",
+        "repetition": 4,
+        "status": "measured",
+        "detail": null,
+        "measurement": {
+          "attempts": 10000,
+          "successes": 10000,
+          "failures": 0,
+          "elapsedSeconds": 4.761866,
+          "usefulOperationsPerSecond": 2100.017094139146,
+          "latency": {
+            "p50Ms": 7.396200000000135,
+            "p95Ms": 10.093499999999949,
+            "p99Ms": 12.402700000000095
+          },
+          "uniqueCompletedMessages": 10000,
+          "enqueue": {
+            "p50Ms": 3.2181,
+            "p95Ms": 5.0221,
+            "p99Ms": 6.4111
+          },
+          "receive": {
+            "p50Ms": 3.0295,
+            "p95Ms": 4.5771,
+            "p99Ms": 5.8989
+          },
+          "ack": {
+            "p50Ms": 0.9989,
+            "p95Ms": 2.0869,
+            "p99Ms": 2.9649
+          },
+          "clientResources": {
+            "cpuSeconds": 4.521822,
+            "allocatedBytes": 93866368,
+            "peakObservedWorkingSetBytes": 195473408,
+            "samplingIntervalMs": 50
+          }
+        }
+      }
+    ],
+    "provenance": {
+      "runId": 37154664616,
+      "attempt": 1,
+      "repository": "managedcode/KeyLoad",
+      "ref": "refs/heads/main",
+      "workflow": "Benchmarks",
+      "profile": "intensive-1k-c16"
+    },
+    "loadGeneratorImage": "127.0.0.1:5000/keyload/comparisons:7136d6e1d9ae3bb91a092d35a62ddcef7131843c-37154664616-1@sha256:e6bb637a7071b5a398d79b19e5ddba9c8573e30990915ece39923b179777f88d"
+  }
+}

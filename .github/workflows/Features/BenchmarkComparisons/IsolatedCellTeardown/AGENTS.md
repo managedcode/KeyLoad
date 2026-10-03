@@ -17,3 +17,6 @@
 
 ## Owner-directed comparison pipeline, 2026-10-03
 - ADR-062 moves the exact-SHA native comparison cells from the historical ci.yml placement above to benchmarks.yml (`Benchmarks`). Every existing cleanup, retention, isolation and publication-failure requirement remains mandatory.
+
+## Owner-directed failed-cell publication, 2026-10-04
+- Retain original failed runner reports separately from the null-report worker envelope, plus the finalization job capture. Workload failure may be published as unavailable under ADR-080; teardown failure itself remains a failed ownership/cleanup gate and cannot validate a measured cell.

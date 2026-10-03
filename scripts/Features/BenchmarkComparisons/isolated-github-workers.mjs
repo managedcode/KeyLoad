@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { readIsolatedContract } from './isolated-plan.mjs';
-import { validateWorkerEnvelope } from './aggregate-validation.mjs';
+import { requireWorkerJobAgreement, validateWorkerEnvelope } from './aggregate-validation.mjs';
 import { createDirectory } from './image-bundle-files.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { downloadArtifact } from './isolated-github-api.mjs';
@@ -21,6 +21,7 @@ export async function collectWorkerEvidence(input, selected, images, context) {
   const raw = await extractNativeEntry(archive, 'worker.json', target, GH.workerRawBytes, context);
   const envelope = validateWorkerEnvelope(await readJson(target, GH.workerRawBytes), cell, context.cohort, readIsolatedContract());
   requireGitHub(envelope.worker.jobId === job.id);
+  requireWorkerJobAgreement(envelope, job);
   requireWorkerImages(envelope, images);
   return projectWorkerProof(job, artifact, cell, context.cohort, raw.sha256);
 }

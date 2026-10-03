@@ -13,6 +13,10 @@ export function validateWorkerEnvelope(value, cell, cohort, contract) {
     exactKeys(value.worker, KEYS.worker), error);
   requireValue(['target', 'nodeCount', 'scenario', 'profile'].every(key => value.worker[key] === cell[key]) &&
     KEYS.cohort.every(key => value.worker[key] === cohort[key]) && positive(value.worker.jobId), error);
+  if (value.disposition === AGGREGATE.failed) {
+    requireValue(value.reason === AGGREGATE.failureReason && value.report === null, error);
+    return value;
+  }
   const unsupported = contract.unsupportedTopologies.find(item => item.target === cell.target && item.nodeCounts.includes(cell.nodeCount));
   if (unsupported) {
     requireValue(value.disposition === AGGREGATE.unsupportedTopology && value.reason === unsupported.reason && value.report === null, error);
@@ -21,4 +25,9 @@ export function validateWorkerEnvelope(value, cell, cohort, contract) {
   requireValue(value.disposition === AGGREGATE.measured && value.reason === null, error);
   validateReport(value.report, cell, cohort, contract);
   return value;
+}
+
+export function requireWorkerJobAgreement(envelope, job) {
+  requireValue((envelope.disposition === AGGREGATE.failed) === (job.conclusion === AGGREGATE.failure),
+    AGGREGATE.errors.proof);
 }

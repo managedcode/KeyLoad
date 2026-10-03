@@ -60,7 +60,7 @@ runs:
         git -C measured-isolated rev-parse HEAD > "$EVIDENCE_DIR/isolated-measured-revision.txt"
         closure="scripts/Features/BenchmarkComparisons/site-isolated-dependencies.txt"
         cmp "control/$closure" "website/$closure"
-        [[ "$(wc -l < "control/$closure")" == 65 ]]
+        [[ "$(wc -l < "control/$closure")" == 70 ]]
         LC_ALL=C sort -u "control/$closure" > "$EVIDENCE_DIR/isolated-dependencies.txt"
         cmp "control/$closure" "$EVIDENCE_DIR/isolated-dependencies.txt"
         sha256sum "website/$closure" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"

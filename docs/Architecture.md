@@ -947,3 +947,24 @@ flowchart LR
     Build --> Publish[Immutable tag GHCR and GitHub Release]
     Gate --> Publish
 ```
+
+## Independent benchmark failure publication
+
+[ADR-080](ADR/ADR-080-benchmark-failure-isolation.md) and
+[BenchmarkComparisons](Features/BenchmarkComparisons.md) preserve the full native
+planned-cell inventory while allowing terminal workload failures to coexist with
+successful measurements. The original GitHub job/step remains failed, its bounded
+worker envelope has a null report, and the site has no numeric result for that
+cell. The aggregate and site jobs explicitly wait for all matrices and run after
+failures; image authority, authenticated artifacts, fairness, full website
+qualification and freshness remain mandatory. KeyLoad engine repair is separate.
+
+```mermaid
+flowchart LR
+  Job[Independent native Aspire cell] --> Result[Measured or failed null report]
+  GitHub[Actual job steps and immutable artifact] --> Proof[Same source run attempt validation]
+  Result --> Proof
+  Proof --> Aggregate[Complete planned-cell aggregate]
+  Aggregate --> Qualification[Site tests browser coverage freshness]
+  Qualification --> Site[Values or no data and original job links]
+```

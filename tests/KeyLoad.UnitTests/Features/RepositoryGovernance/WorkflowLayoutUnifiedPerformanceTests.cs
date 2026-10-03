@@ -62,11 +62,14 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
         await AssertNativeMatrix(workflow, "comparison-specialized", "specialized");
         var aggregate = WorkflowLayoutSource.JobBlock(workflow, "comparison-aggregate");
         await Assert.That(aggregate.Contains(AggregateNeeds, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(aggregate.Contains("\n    if:", StringComparison.Ordinal)).IsFalse();
+        await Assert.That(aggregate.Contains("always() && !cancelled()", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(aggregate.Contains("needs.comparison-plan.result == 'success'", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(aggregate.Contains("needs.comparison-images.result == 'success'", StringComparison.Ordinal)).IsTrue();
         await Assert.That(aggregate.Contains("continue-on-error:", StringComparison.Ordinal)).IsFalse();
         var qualify = WorkflowLayoutSource.JobBlock(workflow, "qualify");
         await Assert.That(qualify.Contains("needs: comparison-aggregate", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(qualify.Contains("\n    if:", StringComparison.Ordinal)).IsFalse();
+        await Assert.That(qualify.Contains("always() && !cancelled()", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(qualify.Contains("needs.comparison-aggregate.result == 'success'", StringComparison.Ordinal)).IsTrue();
         await Assert.That(WorkflowLayoutSource.JobBlock(workflow, "deploy")
             .Contains("needs: qualify", StringComparison.Ordinal)).IsTrue();
     }

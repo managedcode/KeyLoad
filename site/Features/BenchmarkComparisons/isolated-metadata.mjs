@@ -14,15 +14,16 @@ export function validateOptions(value, nodeCount) {
     (nodeCount === undefined || value.topology === ISOLATED.topology[nodeCount]));
 }
 
-function validateJob(job, id, cohort, jobs) {
+function validateJob(job, id, cohort, jobs, disposition) {
+  const failed = disposition === ISOLATED.failed;
   assertIsolated(exact(job, WIRE.job) && positive(job.id) && !jobs.has(job.id) && job.name === 'Benchmark / ' + id &&
-    job.url === `${runUrl(cohort)}/job/${job.id}` && job.conclusion === 'success' &&
+    job.url === `${runUrl(cohort)}/job/${job.id}` && job.conclusion === (failed ? ISOLATED.failure : ISOLATED.success) &&
     Array.isArray(job.steps) && job.steps.length === ISOLATED.steps.length);
   jobs.add(job.id);
   const seen = new Set();
   for (const step of job.steps) {
     assertIsolated(exact(step, WIRE.step) && ISOLATED.steps.includes(step.name) && !seen.has(step.name) &&
-      step.conclusion === 'success');
+      step.conclusion === (failed && step.name === ISOLATED.steps[0] ? ISOLATED.failure : ISOLATED.success));
     seen.add(step.name);
   }
 }
@@ -37,11 +38,11 @@ function validateArtifact(artifact, id, artifacts) {
 export function validateWorkerMetadata(worker, cell, cohort, identities, keys = WIRE.worker) {
   assertIsolated(exact(worker, keys) && same(worker, cell, ['id', 'target', 'nodeCount', 'scenario', 'profile']) &&
     worker.rawPath === rawPath(cell.id) && matches(ISOLATED.hash, worker.rawSha256));
-  validateJob(worker.job, cell.id, cohort, identities.jobs);
+  validateJob(worker.job, cell.id, cohort, identities.jobs, worker.disposition);
   validateArtifact(worker.artifact, cell.id, identities.artifacts);
   const unsupported = ISOLATED.unsupportedTopologies.find(item => item.target === cell.target &&
     item.nodeCounts.includes(cell.nodeCount));
-  assertIsolated(unsupported
+  assertIsolated(worker.disposition === ISOLATED.failed ? worker.reason === ISOLATED.failureReason : unsupported
     ? worker.disposition === 'unsupportedTopology' && worker.reason === unsupported.reason
     : worker.disposition === 'measured' && worker.reason === null);
 }

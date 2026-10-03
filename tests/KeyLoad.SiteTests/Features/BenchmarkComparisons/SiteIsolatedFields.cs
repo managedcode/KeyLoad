@@ -69,4 +69,9 @@ internal static class SiteIsolatedFields
     internal const string DatasetSha256 = "datasetSha256";
     internal const string RawSha256 = "rawSha256";
     internal const string Files = "files";
+    internal const string Disposition = "disposition";
+    internal const string Reason = "reason";
+    internal const string Steps = "steps";
+    internal const string Detail = "detail";
+    internal const string Worker = "worker";
 }

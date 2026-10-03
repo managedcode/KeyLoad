@@ -53,11 +53,12 @@ function validateArchiveFields(receipt, plan) {
   requireSite(receipt.inputFiles.filter(file => file.path.endsWith('/worker.json')).reduce((sum, file) => sum + file.bytes, 0) <= SITE_GH.totalRawBytes);
 }
 
-function validateProjectedJob(job, cohort, name, requiredSteps) {
-  requireSite(exact(job, KEYS.job) && job.name === name && positive(job.id) && job.conclusion === 'success'
+function validateProjectedJob(job, cohort, name, requiredSteps, worker = false) {
+  const failed = worker && job?.conclusion === 'failure';
+  requireSite(exact(job, KEYS.job) && job.name === name && positive(job.id) && (job.conclusion === 'success' || failed)
     && job.url === `https://github.com/${SITE_GH.repository}/actions/runs/${cohort.runId}/job/${job.id}`
     && Array.isArray(job.steps) && job.steps.length === requiredSteps.length
-    && job.steps.every((step, index) => exact(step, KEYS.step) && step.name === requiredSteps[index] && step.conclusion === 'success'));
+    && job.steps.every((step, index) => exact(step, KEYS.step) && step.name === requiredSteps[index] && step.conclusion === (failed && index === 0 ? 'failure' : 'success')));
 }
 
 function validateWorkers(receipt, plan) {
@@ -65,7 +66,7 @@ function validateWorkers(receipt, plan) {
   requireSite(Array.isArray(receipt.workers) && receipt.workers.length === expected.size);
   for (const worker of receipt.workers) {
     requireSite(exact(worker, ['id', 'job', 'artifact']) && expected.delete(worker.id));
-    validateProjectedJob(worker.job, receipt.cohort, GH.casePrefix + worker.id, GH.workerSteps);
+    validateProjectedJob(worker.job, receipt.cohort, GH.casePrefix + worker.id, GH.workerSteps, true);
     validateArtifact(worker.artifact, GH.artifactPrefix + worker.id, GH.workerZipBytes);
   }
   requireSite(exact(receipt.image, ['job', 'artifact']));

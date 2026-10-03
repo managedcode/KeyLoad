@@ -659,3 +659,54 @@ settings, machine, cost and allocations. Fixed small batches are explicitly
 microbenchmark controls, never the required100k/1m/5m database datasets,
 RF3/durability evidence, public website comparisons or an acceleration claim.
 Actual canonical rewrite cost and correction recovery remain pending KL-078.
+
+## Failed-cell publication repair, 2026-10-04
+
+Owner direction explicitly supersedes the all-success restriction of REQ-BC-058,
+AC-ISO-007/009 and ADR-076 for benchmark publication. Every planned cell remains
+accounted for in the same authenticated run/attempt/source. Successful independent
+cells remain measured; terminal failed workloads have `disposition: failed`,
+`reason: Benchmark failed; no measurement data is available.`, `report: null`,
+and the original failed job/step conclusions. No metric, winner or zero is inferred.
+KeyLoad engine repair and concurrent series-codec work are outside this task.
+
+| Requirement | Acceptance | Verification |
+|---|---|---|
+| REQ-BC-FAIL-001 independent workloads finish | AC-BC-FAIL-001 failed matrices do not skip aggregate; no fail-fast or arbitrary parallel cap | workflow source regressions and actual GitHub jobs |
+| REQ-BC-FAIL-002 explicit unavailable cells | AC-BC-FAIL-002 workload failure produces a bounded null-report envelope before artifact upload; original job failure remains visible | real Node/files TUnit tests, actual failed-job artifact |
+| REQ-BC-FAIL-003 authenticated partial results | AC-BC-FAIL-003 failed job accepted only with failed workload, successful result upload and matching failed envelope; missing/malformed/expired/mixed evidence rejected | producer/aggregate/site negative and positive TUnit regressions |
+| REQ-BC-FAIL-004 honest site | AC-BC-FAIL-004 successful competitors retain values; failed cells have no numeric values and expose actual job link | independent numeric oracle, projection validation and real Chrome |
+| REQ-BC-FAIL-005 repair shared preparation | AC-BC-FAIL-005 diagnose exact failed logs, repair benchmark setup/build invocation, retain native isolated topology and Aspire ownership | exact failed-source log, focused regression, delivered-source GitHub rerun |
+
+[ADR-080](../ADR/ADR-080-benchmark-failure-isolation.md) owns the boundary change.
+Ordered task graph: FAIL-CONTRACT (root, complete) -> FAIL-SITE (site worker),
+FAIL-PRODUCER (tooling worker), FAIL-PREP (root/diagnostic worker) -> FAIL-JOIN
+(root review/build/format/governance/Aspire tests) -> FAIL-DELIVERY (scoped commit,
+push, genuine complete GitHub benchmark run and Pages receipt). All workers have
+disjoint write scopes; root owns contracts, workflows, receipts, inventories and
+docs. Local verification is development evidence; publication requires authentic
+GitHub artifacts and full existing site qualification. Interrupted jobs without
+authentic result artifacts remain a publication blocker rather than fabricated
+worker evidence. Baseline run37154664616 has failures in container preparation,
+missing result artifacts and KeyLoad workloads. Original Redis job111299652762
+retained an HTTP503 response in comparison-preflight-qualification-redis-n1-point-read
+artifact11286445994; the retry policy accepted only403/429 and rejected503.
+Bounded transient GET retries and null-report finalization repair this shared
+setup path. Local macOS development evidence: full Release solution build passed
+with zero warnings/errors; Aspire-owned producer/finalizer tests 2/2, GitHub
+evidence tests 84/84 and workflow tests 23/23 passed. Original successful PostgreSQL job111299653748/artifact
+11285823608 and RabbitMQ preflight job111299652838/artifact11285807871 are retained
+as compact immutable test-only fixtures with original hashes, source and provenance;
+48 original measured-report positive/negative probes passed. These fixtures never
+substitute for current publication input. Final formatting is recorded separately; unrelated concurrent SampleChunk
+formatting is outside this repair. Delivered-source workload/site publication proof remains pending.
+
+```mermaid
+flowchart LR
+  Plan[Complete native cell plan] --> Jobs[Independent Aspire workloads]
+  Jobs --> Success[Validated measurements]
+  Jobs --> Failure[Failed job and null report]
+  Success --> Aggregate[Authenticated complete cell accounting]
+  Failure --> Aggregate
+  Aggregate --> Site[Qualified website]
+```

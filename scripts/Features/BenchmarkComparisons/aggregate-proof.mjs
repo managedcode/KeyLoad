@@ -8,13 +8,13 @@ const GITHUB = 'https://github.com/';
 
 function validateJob(job, cell, cohort, identities) {
   requireValue(exactKeys(job, KEYS.job) && positive(job.id) && !identities.has(job.id) && job.name === JOB_PREFIX + cell.id &&
-    job.url === `${GITHUB}${cohort.repository}/actions/runs/${cohort.runId}/job/${job.id}` && job.conclusion === AGGREGATE.success &&
+    job.url === `${GITHUB}${cohort.repository}/actions/runs/${cohort.runId}/job/${job.id}` && [AGGREGATE.success, AGGREGATE.failure].includes(job.conclusion) &&
     Array.isArray(job.steps) && job.steps.length === AGGREGATE.steps.length, ERROR);
   identities.add(job.id);
   const steps = new Set();
   for (const step of job.steps) {
     requireValue(exactKeys(step, KEYS.step) && AGGREGATE.steps.includes(step.name) && !steps.has(step.name) &&
-      step.conclusion === AGGREGATE.success, ERROR);
+      step.conclusion === (step.name === AGGREGATE.steps[0] ? job.conclusion : AGGREGATE.success), ERROR);
     steps.add(step.name);
   }
 }

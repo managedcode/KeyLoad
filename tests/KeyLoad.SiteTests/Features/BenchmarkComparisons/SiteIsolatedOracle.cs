@@ -25,7 +25,9 @@ internal static class SiteIsolatedOracle
                 .Where(item => selection.Repetition is string || item.GetProperty(SiteIsolatedFields.Repetition).GetInt32() == (int)selection.Repetition).ToArray();
             var measured = cases.Where(item => item.GetProperty(SiteIsolatedFields.Measurement).ValueKind != JsonValueKind.Null)
                 .Select(item => item.GetProperty(SiteIsolatedFields.Measurement)).ToArray();
-            var status = report.ValueKind == JsonValueKind.Null ? "unsupportedTopology" : measured.Length == 0 ? "unsupported" : "measured";
+            var status = report.ValueKind == JsonValueKind.Null
+                ? worker.GetProperty(SiteIsolatedFields.Disposition).GetString()!
+                : measured.Length == 0 ? "unsupported" : "measured";
             var value = Median(measured.Select(item => Metric(item, selection.Metric))
                 .Where(item => item is not null).Select(item => item!.Value).ToArray());
             rows.Add(new(target, status, value, selection.NodeCount, worker.GetProperty(SiteIsolatedFields.Id).GetString()!,

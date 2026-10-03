@@ -6,6 +6,7 @@ scripts/Features/BenchmarkComparisons/aggregate-proof.mjs
 scripts/Features/BenchmarkComparisons/aggregate-report.mjs
 scripts/Features/BenchmarkComparisons/aggregate-validation.mjs
 scripts/Features/BenchmarkComparisons/contracts.mjs
+scripts/Features/BenchmarkComparisons/finalize-worker.mjs
 scripts/Features/BenchmarkComparisons/image-bundle-contract.mjs
 scripts/Features/BenchmarkComparisons/image-bundle-files.mjs
 scripts/Features/BenchmarkComparisons/image-bundle-read.mjs
@@ -15,11 +16,14 @@ scripts/Features/BenchmarkComparisons/image-evidence.mjs
 scripts/Features/BenchmarkComparisons/image-inputs.mjs
 scripts/Features/BenchmarkComparisons/image-manifest.mjs
 scripts/Features/BenchmarkComparisons/image-process.mjs
+scripts/Features/BenchmarkComparisons/isolated-current-job.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-api.mjs
+scripts/Features/BenchmarkComparisons/isolated-github-context.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-contract.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-files.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-headers.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-images.mjs
+scripts/Features/BenchmarkComparisons/isolated-github-job.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-rate.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-selection.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-stream.mjs
@@ -30,6 +34,7 @@ scripts/Features/BenchmarkComparisons/isolated-plan-cli.mjs
 scripts/Features/BenchmarkComparisons/isolated-plan-contract.mjs
 scripts/Features/BenchmarkComparisons/isolated-plan.mjs
 scripts/Features/BenchmarkComparisons/isolated-preflight.mjs
+scripts/Features/BenchmarkComparisons/prepare-images.mjs
 scripts/Features/BenchmarkComparisons/sample-metrics.mjs
 scripts/Features/BenchmarkComparisons/site-isolated-github-api.mjs
 scripts/Features/BenchmarkComparisons/site-isolated-github-capture.mjs

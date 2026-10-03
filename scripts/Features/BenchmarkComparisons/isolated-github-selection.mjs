@@ -1,6 +1,6 @@
 import { validateAggregateProof } from './aggregate-proof.mjs';
 import { GH, requireGitHub, timestamp } from './isolated-github-contract.mjs';
-import { uniqueNamed, validateArtifact, validateSuccessfulJob } from './isolated-github-validation.mjs';
+import { uniqueNamed, validateArtifact, validateSuccessfulJob, validateWorkerJob } from './isolated-github-validation.mjs';
 
 export function selectCompletedEvidence(capture, context, plan) {
   const { jobs, artifacts, run } = capture;
@@ -11,8 +11,8 @@ export function selectCompletedEvidence(capture, context, plan) {
   requireGitHub(artifacts.filter(item => item.name.startsWith(GH.artifactPrefix)).length === plan.cells.length
     && artifacts.every(item => !item.name.startsWith(GH.artifactPrefix) || expectedArtifacts.has(item.name)));
   const cells = plan.cells.map(cell => {
-    const job = validateSuccessfulJob(uniqueNamed(jobs, GH.casePrefix + cell.id), context.cohort,
-      GH.casePrefix + cell.id, GH.workerSteps);
+    const job = validateWorkerJob(uniqueNamed(jobs, GH.casePrefix + cell.id), context.cohort,
+      GH.casePrefix + cell.id);
     requireGitHub(timestamp(job.started_at) >= timestamp(run.run_started_at));
     const artifact = validateArtifact(uniqueNamed(artifacts, GH.artifactPrefix + cell.id), run, job,
       GH.artifactPrefix + cell.id, GH.workerZipBytes);

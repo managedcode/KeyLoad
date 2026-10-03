@@ -13,7 +13,7 @@ internal sealed class WorkflowLayoutCurrentSiteTests
     private const string FeatureRoot = "site/Features/BenchmarkComparisons";
     private const string ThinBuilder = "site/scripts/build.mjs";
     private const string Closure = "scripts/Features/BenchmarkComparisons/site-isolated-dependencies.txt";
-    private const int ClosureCount = 65;
+    private const int ClosureCount = 70;
 
     [Test]
     public async Task AcBcCurrent003TrustedClosureIncludesEveryActualBuilderAndBrowserConsumer()

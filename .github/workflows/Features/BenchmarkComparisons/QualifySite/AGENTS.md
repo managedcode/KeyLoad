@@ -13,3 +13,6 @@
 
 ## Applicable skills
 - No installed skill is required for this bounded workflow composition; install none.
+
+## Owner-directed failed-cell publication, 2026-10-04
+- ADR-080 allows authenticated failed workload/null-report cells; keep every existing archive, source, TUnit, coverage, browser and freshness gate. The trusted producer/builder dependency closure now includes failed-cell finalization and its actual imports; source-bound counts change together with validators.

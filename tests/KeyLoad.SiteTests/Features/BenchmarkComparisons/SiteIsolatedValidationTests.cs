@@ -89,9 +89,20 @@ internal sealed class SiteIsolatedValidationTests
     private static void CorruptProjection(JsonObject value, string corruption)
     {
         var workers = value[SiteIsolatedFields.Workers]!.AsArray();
-        var worker = workers.First(item => item![SiteIsolatedFields.Target]!.GetValue<string>() == "KeyLoad")!;
-        var report = worker[SiteIsolatedFields.Report]!;
-        var item = report[SiteIsolatedFields.Cases]![0]!;
+        var worker = SiteIsolatedFailureFixture.TryMeasuredWorker(workers) ?? workers[0]!;
+        var report = worker[SiteIsolatedFields.Report];
+        if (report is null && corruption is "copies" or "failed" or "percentiles" or "throughput" or "samples")
+        {
+            // Retain unavailable-only rejection: no failed/unsupported worker may carry any report shape.
+            worker[SiteIsolatedFields.Report] = new JsonObject();
+            return;
+        }
+        CorruptWorker(value, workers, worker, report, corruption);
+    }
+
+    private static void CorruptWorker(JsonObject value, JsonArray workers, JsonNode worker, JsonNode? report, string corruption)
+    {
+        var item = report?[SiteIsolatedFields.Cases]?[0];
         switch (corruption)
         {
             case "missing":
@@ -104,7 +115,7 @@ internal sealed class SiteIsolatedValidationTests
                 worker[SiteIsolatedFields.Target] = "foreign";
                 break;
             case "cohort":
-                report[SiteIsolatedFields.Provenance]![SiteIsolatedFields.Attempt] = 999999;
+                (report?[SiteIsolatedFields.Provenance] ?? value[SiteIsolatedFields.Cohort])![SiteIsolatedFields.Attempt] = 999999;
                 break;
             case "options":
                 value[SiteIsolatedFields.Options]![SiteIsolatedFields.Operations] = 1;
@@ -113,22 +124,24 @@ internal sealed class SiteIsolatedValidationTests
                 worker[SiteIsolatedFields.Artifact]![SiteIsolatedFields.Expired] = true;
                 break;
             case "job":
-                worker[SiteIsolatedFields.Job]![SiteIsolatedFields.Conclusion] = "failure";
+                var job = worker[SiteIsolatedFields.Job]!;
+                job[SiteIsolatedFields.Conclusion] = job[SiteIsolatedFields.Conclusion]!.GetValue<string>() == SiteIsolatedFailureFixture.Failure
+                    ? SiteIsolatedFailureFixture.Success : SiteIsolatedFailureFixture.Failure;
                 break;
             case "copies":
-                report[SiteIsolatedFields.Targets]![0]![SiteIsolatedFields.Cluster]![SiteIsolatedFields.DataCopies] = 99;
+                report![SiteIsolatedFields.Targets]![0]![SiteIsolatedFields.Cluster]![SiteIsolatedFields.DataCopies] = 99;
                 break;
             case "failed":
-                item[SiteIsolatedFields.Status] = "failed";
+                item![SiteIsolatedFields.Status] = "failed";
                 break;
             case "percentiles":
-                item[SiteIsolatedFields.Measurement]![SiteIsolatedFields.Latency]![SiteIsolatedFields.P99Ms] = -1;
+                item![SiteIsolatedFields.Measurement]![SiteIsolatedFields.Latency]![SiteIsolatedFields.P99Ms] = -1;
                 break;
             case "throughput":
-                item[SiteIsolatedFields.Measurement]![SiteIsolatedFields.UsefulOperationsPerSecond] = 0;
+                item![SiteIsolatedFields.Measurement]![SiteIsolatedFields.UsefulOperationsPerSecond] = 0;
                 break;
             case "samples":
-                item[SiteIsolatedFields.Samples] = new JsonArray();
+                item![SiteIsolatedFields.Samples] = new JsonArray();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(corruption));

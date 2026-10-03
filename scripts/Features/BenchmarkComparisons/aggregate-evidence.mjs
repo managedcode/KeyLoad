@@ -1,6 +1,6 @@
 import { AGGREGATE, requireValue } from './aggregate-contracts.mjs';
 import { readIsolatedContract, validateIsolatedPlan } from './isolated-plan.mjs';
-import { validateAggregateProof, validateWorkerEnvelope } from './aggregate-validation.mjs';
+import { requireWorkerJobAgreement, validateAggregateProof, validateWorkerEnvelope } from './aggregate-validation.mjs';
 import { createStage, hashBytes, parseBytes, publishStage, rawFile, rawPath, readBytes, removeStage,
   retainBytes, validateInventory, validatePaths } from './aggregate-files.mjs';
 
@@ -31,6 +31,7 @@ async function retainWorker(input, stage, cell, proof, cohort, contract, common)
   requireValue(hash === proof.workerSha256, AGGREGATE.errors.proof);
   const envelope = validateWorkerEnvelope(parseBytes(bytes), cell, cohort, contract);
   requireValue(envelope.worker.jobId === proof.job.id, AGGREGATE.errors.proof);
+  requireWorkerJobAgreement(envelope, proof.job);
   retainCommonFacts(common, envelope.report);
   common.bytes += bytes.length;
   requireValue(common.bytes <= AGGREGATE.totalBytes, AGGREGATE.errors.input);
@@ -53,9 +54,8 @@ export async function aggregateEvidence({ input, output, plan, proof }) {
     for (const cell of inventory.cells) {
       workers.push(await retainWorker(input, stage, cell, byId.get(cell.id), evidence.cohort, contract, common));
     }
-    requireValue(typeof common.datasetSha256 === 'string', AGGREGATE.errors.cohort);
     const manifest = { schemaVersion: AGGREGATE.version, cohort: evidence.cohort, profile: inventory.profile,
-      options: inventory.options, datasetSha256: common.datasetSha256, workers };
+      options: inventory.options, datasetSha256: common.datasetSha256 ?? null, workers };
     await publishStage(stage, output, manifest);
     return manifest;
   } catch (error) {

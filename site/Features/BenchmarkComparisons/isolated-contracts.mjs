@@ -19,6 +19,8 @@ export const ISOLATED = Object.freeze({
   linux: /(?:^|\s|\/)(?:Linux|Ubuntu)(?:\s|$)/i,
   date: /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/,
   error: 'E_ISOLATED_EVIDENCE', tolerance: 0.00000001,
+  failed: 'failed', failure: 'failure', success: 'success',
+  failureReason: 'Benchmark failed; no measurement data is available.',
 });
 
 export const WIRE = Object.freeze({

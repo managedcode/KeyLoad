@@ -41,6 +41,65 @@ internal sealed class SiteIsolatedGitHubReceiptTests
         }
     }
 
+    /// <summary>AC-BC-FAIL-003: a controlled receipt keeps the actual worker identity and permits only workload failure.</summary>
+    [Test]
+    public async Task AC_BC_FAIL_003_ReceiptAcceptsFailedWorkloadWithSuccessfulResultUpload()
+    {
+        var token = TestContext.Current!.Execution.CancellationToken;
+        var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
+        var copy = FailedWorkerReceipt(inputs.Metadata);
+        await Assert.That(await ProbeAsync(copy, token)).IsTrue();
+        await Assert.That(JsonNode.DeepEquals(copy[SiteIsolatedGitHubFields.Image],
+            inputs.Metadata[SiteIsolatedGitHubFields.Image])).IsTrue();
+        await Assert.That(copy[SiteIsolatedGitHubTokens.Workers]!.AsArray().Count)
+            .IsEqualTo(SiteIsolatedGitHubTokens.WorkerCount);
+    }
+
+    /// <summary>AC-BC-FAIL-003: failure cannot be relabelled successful and failed uploads or image checks remain rejected.</summary>
+    [Test]
+    [Arguments("successConclusion")]
+    [Arguments("successWorkload")]
+    [Arguments("failedUpload")]
+    [Arguments("failedImage")]
+    public async Task AC_BC_FAIL_003_ReceiptRejectsFailureOutcomeMismatches(string corruption)
+    {
+        var token = TestContext.Current!.Execution.CancellationToken;
+        var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
+        var copy = FailedWorkerReceipt(inputs.Metadata);
+        var job = copy[SiteIsolatedGitHubTokens.Workers]![SiteIsolatedGitHubTokens.Zero]![SiteIsolatedGitHubFields.Job]!;
+        switch (corruption)
+        {
+            case "successConclusion":
+                job[SiteIsolatedFields.Conclusion] = SiteIsolatedFailureFixture.Success;
+                break;
+            case "successWorkload":
+            case "failedUpload":
+                var name = corruption == "successWorkload" ? SiteIsolatedFailureFixture.WorkloadStep : SiteIsolatedFailureFixture.UploadStep;
+                var step = job[SiteIsolatedFields.Steps]!.AsArray().Single(item => item![SiteIsolatedFields.Name]!.GetValue<string>() == name)!;
+                step[SiteIsolatedFields.Conclusion] = corruption == "successWorkload" ? SiteIsolatedFailureFixture.Success : SiteIsolatedFailureFixture.Failure;
+                break;
+            case "failedImage":
+                copy[SiteIsolatedGitHubFields.Image]![SiteIsolatedGitHubFields.Job]![SiteIsolatedFields.Conclusion] = SiteIsolatedFailureFixture.Failure;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(corruption));
+        }
+        await Assert.That(await ProbeAsync(copy, token)).IsFalse();
+    }
+
+    private static JsonObject FailedWorkerReceipt(JsonObject original)
+    {
+        var copy = original.DeepClone().AsObject();
+        var job = copy[SiteIsolatedGitHubTokens.Workers]![SiteIsolatedGitHubTokens.Zero]![SiteIsolatedGitHubFields.Job]!;
+        job[SiteIsolatedFields.Conclusion] = SiteIsolatedFailureFixture.Failure;
+        foreach (var step in job[SiteIsolatedFields.Steps]!.AsArray())
+        {
+            step![SiteIsolatedFields.Conclusion] = step[SiteIsolatedFields.Name]!.GetValue<string>() == SiteIsolatedFailureFixture.WorkloadStep
+                ? SiteIsolatedFailureFixture.Failure : SiteIsolatedFailureFixture.Success;
+        }
+        return copy;
+    }
+
     private static async Task<bool> ProbeAsync(JsonObject receipt, CancellationToken token)
     {
         var inputs = SiteTestInputs.Read();

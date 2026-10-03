@@ -42,9 +42,9 @@ export function validateJobIdentity(job, cohort, name) {
   return job;
 }
 
-export function validateSuccessfulJob(job, cohort, name, requiredSteps) {
+function validateCompletedJob(job, cohort, name, requiredSteps, conclusions) {
   validateJobIdentity(job, cohort, name);
-  requireGitHub(job.status === 'completed' && job.conclusion === 'success'
+  requireGitHub(job.status === 'completed' && conclusions.includes(job.conclusion)
     && timestamp(job.completed_at) >= timestamp(job.started_at) && Array.isArray(job.steps));
   const numbers = new Set();
   for (const step of job.steps) {
@@ -53,9 +53,17 @@ export function validateSuccessfulJob(job, cohort, name, requiredSteps) {
   }
   for (const name of requiredSteps) {
     const matched = job.steps.filter(step => step.name === name);
-    requireGitHub(matched.length === 1 && matched[0].status === 'completed' && matched[0].conclusion === 'success');
+    requireGitHub(matched.length === 1 && matched[0].status === 'completed' && matched[0].conclusion === (name === GH.workerSteps[0] ? job.conclusion : 'success'));
   }
   return job;
+}
+
+export function validateSuccessfulJob(job, cohort, name, requiredSteps) {
+  return validateCompletedJob(job, cohort, name, requiredSteps, ['success']);
+}
+
+export function validateWorkerJob(job, cohort, name) {
+  return validateCompletedJob(job, cohort, name, GH.workerSteps, ['success', 'failure']);
 }
 
 export function validateArtifact(artifact, run, job, name, maximumBytes) {
@@ -77,7 +85,11 @@ export function uniqueNamed(items, name) {
 
 export function projectJob(job, cohort, steps) {
   return { id: job.id, name: job.name, url: canonicalJobUrl(cohort, job.id), conclusion: job.conclusion,
-    steps: steps.map(name => ({ name, conclusion: 'success' })) };
+    steps: steps.map(name => {
+      const matched = job.steps.filter(step => step.name === name);
+      requireGitHub(matched.length === 1 && matched[0].status === 'completed');
+      return { name, conclusion: matched[0].conclusion };
+    }) };
 }
 
 export function projectArtifact(artifact) {

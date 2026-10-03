@@ -2,6 +2,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed class SiteIsolatedProducerRejectionTests
 {
+    private const string EnvelopeError = "E_AGGREGATE_ENVELOPE";
     /// <summary>AC-ISO-008: native files and corruption copies prove preflight/raw rejection, never fabricated measurements.</summary>
     [Test]
     [Arguments("missing", "E_ISOLATED_EVIDENCE")]
@@ -22,7 +23,11 @@ internal sealed class SiteIsolatedProducerRejectionTests
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var temporary = SiteTempDirectory.Create();
         var input = Path.Combine(temporary.Path, "validation-input");
-        await SiteIsolatedProducerFixture.CreateAsync(fixture, input, corruption, token);
+        var measured = await SiteIsolatedProducerFixture.CreateAsync(fixture, input, corruption, token);
+        if (!measured && corruption is "failed" or "unixHost" or "mixedDataset")
+        {
+            expectedError = EnvelopeError;
+        }
         var output = Path.Combine(temporary.Path, "projection.json");
         var response = await SiteIsolatedNodeProcess.RunAsync(fixture.Inputs.Site, new
         {

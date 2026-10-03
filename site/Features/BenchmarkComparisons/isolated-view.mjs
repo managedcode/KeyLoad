@@ -1,8 +1,8 @@
 import { metrics } from './measurements.mjs';
-import { artifactUrl, runUrl } from './isolated-contracts.mjs';
+import { ISOLATED, artifactUrl, runUrl } from './isolated-contracts.mjs';
 
 const STATUS = Object.freeze({ measured: 'Measured', unsupported: 'Unsupported scenario',
-  unsupportedTopology: 'Unsupported native topology', failed: 'Failed' });
+  unsupportedTopology: 'Unsupported native topology', failed: 'Benchmark failed · no data' });
 const HEADINGS = Object.freeze(['Engine', 'Native nodes', 'Status', 'Selected metric', 'Attempts', 'Successes', 'Failures', 'GitHub run']);
 const FORMAT = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
 
@@ -42,7 +42,7 @@ function renderChart(document, rows, metric) {
 
 function renderEvidence(document, worker, cohort) {
   const cell = element(document, 'td');
-  cell.append(link(document, 'Successful worker job', worker.job.url), element(document, 'br'),
+  cell.append(link(document, worker.disposition === ISOLATED.failed ? 'Failed benchmark job' : 'Successful worker job', worker.job.url), element(document, 'br'),
     link(document, 'GitHub artifact', artifactUrl(cohort, worker.artifact)), element(document, 'br'),
     element(document, 'small', 'GitHub download/access required; subject to artifact retention.'));
   return cell;
@@ -65,7 +65,7 @@ function renderTable(document, rows, metric, cohort) {
     tr.dataset.workerId = row.worker.id;
     tr.dataset.value = row.value === null ? '' : String(row.value);
     for (const value of [row.name, row.nodeCount, STATUS[row.status], display(row.value, metric), row.attempts, row.successes, row.failures]) {
-      tr.append(element(document, 'td', String(value)));
+      tr.append(element(document, 'td', value === null ? 'Unavailable' : String(value)));
     }
     tr.append(renderEvidence(document, row.worker, cohort));
     body.append(tr);
@@ -87,7 +87,7 @@ function renderWorker(document, worker) {
   details.append(element(document, 'summary', worker.target + ' · ' + worker.nodeCount + ' native nodes · worker provenance'));
   const fields = [['Worker', worker.id], ['Raw envelope SHA256', worker.rawSha256], ['Artifact ID', worker.artifact.id],
     ['Artifact name', worker.artifact.name], ['Artifact digest', worker.artifact.digest]];
-  if (worker.report === null) fields.push(['Topology limitation', worker.reason]);
+  if (worker.report === null) fields.push([worker.disposition === ISOLATED.failed ? 'Benchmark result' : 'Topology limitation', worker.reason]);
   else {
     const report = worker.report;
     const target = report.targets[0];
@@ -113,7 +113,7 @@ export function renderIsolatedView(container, catalog, projection, rows, selecti
       'Repetition ' + selection.repetition) + ' · ' + metric.direction),
     element(document, 'p', 'Derived compact projection; raw samples remain in the linked GitHub artifacts.'),
     element(document, 'p', `Profile ${projection.profile}; operations ${projection.options.operations}; concurrency ${projection.options.concurrency}; ` +
-      `payload ${projection.options.payloadBytes} bytes; corpus SHA256 ${projection.datasetSha256}.`),
+      `payload ${projection.options.payloadBytes} bytes; ${projection.datasetSha256 === null ? 'corpus unavailable' : 'corpus SHA256 ' + projection.datasetSha256}.`),
     link(document, 'Measured source ' + catalog.measuredSourceRevision, `https://github.com/${catalog.cohort.repository}/tree/${catalog.measuredSourceRevision}`),
     element(document, 'br'), link(document, 'Website source ' + catalog.siteSourceRevision,
       `https://github.com/${catalog.cohort.repository}/tree/${catalog.siteSourceRevision}`), element(document, 'br'),

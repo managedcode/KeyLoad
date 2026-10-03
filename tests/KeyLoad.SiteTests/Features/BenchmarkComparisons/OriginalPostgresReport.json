@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Immutable original GitHub measurement for parser and arithmetic tests only; never publication input.",
+  "original": {
+    "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37154664616",
+    "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37154664616/job/111299653748",
+    "artifactId": 11285823608,
+    "artifactName": "comparison-worker-postgresql-pgvector-n1-document-write",
+    "artifactDigest": "sha256:71fcb91ba13675281210a3e99f7d215696e062d4afdacd69deeb177129084455",
+    "rawWorkerSha256": "9dcc776a1a0b405f1b3d22a427602717695669cbe884fb2681c31ac404aa08fc",
+    "retainedRepresentation": "Original report metadata and measurements; raw per-operation samples omitted."
+  },
+  "worker": {
+    "id": "postgresql-pgvector-n1-document-write",
+    "target": "PostgreSQL + pgvector",
+    "nodeCount": 1,
+    "scenario": "DocumentWrite",
+    "profile": "intensive-1k-c16",
+    "disposition": "measured"
+  },
+  "cohort": {
+    "sourceRevision": "7136d6e1d9ae3bb91a092d35a62ddcef7131843c",
+    "runId": 37154664616,
+    "attempt": 1,
+    "repository": "managedcode/KeyLoad",
+    "ref": "refs/heads/main",
+    "workflow": "Benchmarks",
+    "profile": "intensive-1k-c16"
+  },
+  "datasetSha256": "ced1a5cd31e37e333712c49aad341125fa1a6fc9a6768891d5d50d69cc7c1add",
+  "report": {
+    "schemaVersion": 3,
+    "runId": "ac3f5463-3edb-4158-a04e-8794a2b9a5c0",
+    "startedAt": "2026-10-03T21:56:52.1654355+00:00",
+    "options": {
+      "topology": "Single",
+      "seed": 1729,
+      "documents": 4096,
+      "operations": 10000,
+      "warmup": 256,
+      "repetitions": 5,
+      "concurrency": 16,
+      "payloadBytes": 1024,
+      "dimensions": 128,
+      "topK": 10,
+      "timeoutSeconds": 30,
+      "graphVertices": 256,
+      "graphFanOut": 3,
+      "graphDepth": 3
+    },
+    "datasetSha256": "ced1a5cd31e37e333712c49aad341125fa1a6fc9a6768891d5d50d69cc7c1add",
+    "loadModel": "closed-loop; setup, oracle, validation and warmup excluded",
+    "hostOs": "Ubuntu 24.04.5 LTS",
+    "architecture": "X64",
+    "logicalProcessors": 4,
+    "runtime": ".NET 10.0.12",
+    "storage": "Fresh cell-owned native directories and volumes; no shared database",
+    "sourceRevision": "7136d6e1d9ae3bb91a092d35a62ddcef7131843c",
+    "targets": [
+      {
+        "name": "PostgreSQL + pgvector",
+        "version": "18.6 (Debian 18.6-1.pgdg12+2); pgvector 0.8.6",
+        "topology": "single primary, no replicas",
+        "writeAcknowledgement": "fsync=on, synchronous_commit=on; local WAL flush",
+        "readContract": "READ COMMITTED on primary; streams emulate the narrow atomic one-event contract",
+        "transport": "pooled prepared SQL/TCP",
+        "authorization": "database owner; no RLS/masking",
+        "image": "docker.io/pgvector/pgvector:0.8.6-pg18@sha256:2ba9ca5f2e7daa0f0e7723cba1ee9167bab54efd3640516a44ac1a928dd67e7a",
+        "cluster": {
+          "nodes": 1,
+          "dataCopies": 1,
+          "state": "single primary, no replicas",
+          "observations": [
+            "fsync=on, synchronous_commit=on; local WAL flush"
+          ]
+        }
+      }
+    ],
+    "cases": [
+      {
+        "target": "PostgreSQL + pgvector",
+        "scenario": "DocumentWrite",
+        "repetition": 0,
+        "status": "measured",
+        "detail": null,
+        "measurement": {
+          "attempts": 10000,
+          "successes": 10000,
+          "failures": 0,
+          "elapsedSeconds": 0.655374,
+          "usefulOperationsPerSecond": 15258.463106562054,
+          "latency": {
+            "p50Ms": 0.9138000000000375,
+            "p95Ms": 1.7574000000000751,
+            "p99Ms": 3.681099999999997
+          },
+          "uniqueCompletedMessages": 0,
+          "enqueue": null,
+          "receive": null,
+          "ack": null,
+          "clientResources": {
+            "cpuSeconds": 1.094868,
+            "allocatedBytes": 24001768,
+            "peakObservedWorkingSetBytes": 158814208,
+            "samplingIntervalMs": 50
+          }
+        }
+      },
+      {
+        "target": "PostgreSQL + pgvector",
+        "scenario": "DocumentWrite",
+        "repetition": 1,
+        "status": "measured",
+        "detail": null,
+        "measurement": {
+          "attempts": 10000,
+          "successes": 10000,
+          "failures": 0,
+          "elapsedSeconds": 0.6952079,
+          "usefulOperationsPerSecond": 14384.1863707245,
+          "latency": {
+            "p50Ms": 0.9368000000000052,
+            "p95Ms": 2.065899999999999,
+            "p99Ms": 4.000400000000013
+          },
+          "uniqueCompletedMessages": 0,
+          "enqueue": null,
+          "receive": null,
+          "ack": null,
+          "clientResources": {
+            "cpuSeconds": 1.207935,
+            "allocatedBytes": 24008816,
+            "peakObservedWorkingSetBytes": 181510144,
+            "samplingIntervalMs": 50
+          }
+        }
+      },
+      {
+        "target": "PostgreSQL + pgvector",
+        "scenario": "DocumentWrite",
+        "repetition": 2,
+        "status": "measured",
+        "detail": null,
+        "measurement": {
+          "attempts": 10000,
+          "successes": 10000,
+          "failures": 0,
+          "elapsedSeconds": 0.6159298,
+          "usefulOperationsPerSecond": 16235.61646148636,
+          "latency": {
+            "p50Ms": 0.8599999999999568,
+            "p95Ms": 1.7031999999999812,
+            "p99Ms": 3.7698999999999927
+          },
+          "uniqueCompletedMessages": 0,
+          "enqueue": null,
+          "receive": null,
+          "ack": null,
+          "clientResources": {
+            "cpuSeconds": 0.99476,
+            "allocatedBytes": 23972888,
+            "peakObservedWorkingSetBytes": 184025088,
+            "samplingIntervalMs": 50
+          }
+        }
+      },
+      {
+        "target": "PostgreSQL + pgvector",
+        "scenario": "DocumentWrite",
+        "repetition": 3,
+        "status": "measured",
+        "detail": null,
+        "measurement": {
+          "attempts": 10000,
+          "successes": 10000,
+          "failures": 0,
+          "elapsedSeconds": 0.6182371,
+          "usefulOperationsPerSecond": 16175.024112917197,
+          "latency": {
+            "p50Ms": 0.8648000000000025,
+            "p95Ms": 1.6651999999999703,
+            "p99Ms": 3.438199999999938
+          },
+          "uniqueCompletedMessages": 0,
+          "enqueue": null,
+          "receive": null,
+          "ack": null,
+          "clientResources": {
+            "cpuSeconds": 0.965172,
+            "allocatedBytes": 23994232,
+            "peakObservedWorkingSetBytes": 198688768,
+            "samplingIntervalMs": 50
+          }
+        }
+      },
+      {
+        "target": "PostgreSQL + pgvector",
+        "scenario": "DocumentWrite",
+        "repetition": 4,
+        "status": "measured",
+        "detail": null,
+        "measurement": {
+          "attempts": 10000,
+          "successes": 10000,
+          "failures": 0,
+          "elapsedSeconds": 0.6311802,
+          "usefulOperationsPerSecond": 15843.33602353179,
+          "latency": {
+            "p50Ms": 0.8609000000000151,
+            "p95Ms": 1.7287000000000035,
+            "p99Ms": 3.9581000000000017
+          },
+          "uniqueCompletedMessages": 0,
+          "enqueue": null,
+          "receive": null,
+          "ack": null,
+          "clientResources": {
+            "cpuSeconds": 1.037145,
+            "allocatedBytes": 23991408,
+            "peakObservedWorkingSetBytes": 205127680,
+            "samplingIntervalMs": 50
+          }
+        }
+      }
+    ],
+    "provenance": {
+      "runId": 37154664616,
+      "attempt": 1,
+      "repository": "managedcode/KeyLoad",
+      "ref": "refs/heads/main",
+      "workflow": "Benchmarks",
+      "profile": "intensive-1k-c16"
+    },
+    "loadGeneratorImage": "127.0.0.1:5000/keyload/comparisons:7136d6e1d9ae3bb91a092d35a62ddcef7131843c-37154664616-1@sha256:e6bb637a7071b5a398d79b19e5ddba9c8573e30990915ece39923b179777f88d"
+  }
+}

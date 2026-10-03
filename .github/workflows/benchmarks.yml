@@ -89,6 +89,7 @@ jobs:
       - name: Restore .NET packages
         run: dotnet restore KeyLoad.slnx
       - name: Build benchmark tests
+        id: benchmark-build
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Check TimescaleDB Docker image and startup tools
         env:
@@ -201,9 +202,25 @@ jobs:
       - name: Restore .NET packages
         run: dotnet restore KeyLoad.slnx
       - name: Build benchmark tests
+        id: benchmark-build
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Run database workload
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=145
+        id: workload
+        if: always()
+        env:
+          PREPARATION_OUTCOME: ${{ steps.images.outcome }}
+          BUILD_OUTCOME: ${{ steps.benchmark-build.outcome }}
+        run: |
+          if [ "$PREPARATION_OUTCOME" != success ] || [ "$BUILD_OUTCOME" != success ]; then
+            echo '::error::Benchmark preparation failed; no measurement data is available.'
+            exit 1
+          fi
+          dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=140
+      - name: Record benchmark availability
+        if: always()
+        env:
+          KEYLOAD_WORKLOAD_OUTCOME: ${{ steps.workload.outcome }}
+        run: node scripts/Features/BenchmarkComparisons/finalize-worker.mjs
       - name: Save benchmark results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -246,9 +263,25 @@ jobs:
       - name: Restore .NET packages
         run: dotnet restore KeyLoad.slnx
       - name: Build benchmark tests
+        id: benchmark-build
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Run database workload
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=145
+        id: workload
+        if: always()
+        env:
+          PREPARATION_OUTCOME: ${{ steps.images.outcome }}
+          BUILD_OUTCOME: ${{ steps.benchmark-build.outcome }}
+        run: |
+          if [ "$PREPARATION_OUTCOME" != success ] || [ "$BUILD_OUTCOME" != success ]; then
+            echo '::error::Benchmark preparation failed; no measurement data is available.'
+            exit 1
+          fi
+          dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=140
+      - name: Record benchmark availability
+        if: always()
+        env:
+          KEYLOAD_WORKLOAD_OUTCOME: ${{ steps.workload.outcome }}
+        run: node scripts/Features/BenchmarkComparisons/finalize-worker.mjs
       - name: Save benchmark results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -291,9 +324,25 @@ jobs:
       - name: Restore .NET packages
         run: dotnet restore KeyLoad.slnx
       - name: Build benchmark tests
+        id: benchmark-build
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Run database workload
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=145
+        id: workload
+        if: always()
+        env:
+          PREPARATION_OUTCOME: ${{ steps.images.outcome }}
+          BUILD_OUTCOME: ${{ steps.benchmark-build.outcome }}
+        run: |
+          if [ "$PREPARATION_OUTCOME" != success ] || [ "$BUILD_OUTCOME" != success ]; then
+            echo '::error::Benchmark preparation failed; no measurement data is available.'
+            exit 1
+          fi
+          dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=140
+      - name: Record benchmark availability
+        if: always()
+        env:
+          KEYLOAD_WORKLOAD_OUTCOME: ${{ steps.workload.outcome }}
+        run: node scripts/Features/BenchmarkComparisons/finalize-worker.mjs
       - name: Save benchmark results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -311,6 +360,7 @@ jobs:
   comparison-aggregate:
     name: Combine benchmark results
     needs: [comparison-build, comparison-plan, comparison-images, comparison-preflight, comparison-crud, comparison-specialized]
+    if: ${{ always() && !cancelled() && needs.comparison-plan.result == 'success' && needs.comparison-images.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
     permissions: {contents: read, actions: read}
@@ -352,6 +402,7 @@ jobs:
   qualify:
     name: Check website
     needs: comparison-aggregate
+    if: ${{ always() && !cancelled() && needs.comparison-aggregate.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 180
     permissions: {contents: read, actions: read}
@@ -374,7 +425,7 @@ jobs:
   deploy:
     name: Publish website
     needs: qualify
-    if: needs.qualify.result == 'success' && needs.qualify.outputs.mode == 'publish'
+    if: ${{ always() && !cancelled() && needs.qualify.result == 'success' && needs.qualify.outputs.mode == 'publish' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions: {contents: read, actions: read, pages: write, id-token: write}

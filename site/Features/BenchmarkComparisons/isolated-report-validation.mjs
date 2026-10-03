@@ -30,7 +30,7 @@ function validateCase(item, worker, repetitions) {
 }
 
 export function validateCompactReport(report, worker, cohort, datasetSha256) {
-  if (worker.disposition === 'unsupportedTopology') {
+  if (worker.disposition === 'unsupportedTopology' || worker.disposition === ISOLATED.failed) {
     assertIsolated(report === null);
     return;
   }

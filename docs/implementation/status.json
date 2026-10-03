@@ -3112,5 +3112,20 @@
       "fullCohortQualified": false,
       "websiteEligible": false
     }
+  },
+  "BENCHMARK-FAILURE-ISOLATION-001": {
+    "title": "Незалежні бенчмарки та публікація недоступних результатів",
+    "status": "in_progress",
+    "feature": "docs/Features/BenchmarkComparisons.md",
+    "decision": "docs/ADR/ADR-080-benchmark-failure-isolation.md",
+    "sourceStage": "bounded_transient_github_get_retries_and_authenticated_failed_cell_publication",
+    "baselineRun": 37154664616,
+    "originalFailedJob": 111299652762,
+    "originalDiagnosticArtifact": 11286445994,
+    "provenFailure": "GitHub HTTP503 rejected by rate-only retry policy before database startup",
+    "localDevelopmentVerification": "Local macOS development: full Release solution build passed with zero warnings/errors; Aspire comparison producer/finalizer 2/2 and GitHub evidence 84/84 passed; original PostgreSQL/RabbitMQ report probes 48/48 passed. Aspire workflow regressions 23/23 passed; full formatting remains blocked by unrelated concurrent SampleChunk files. Linux runtime/site/Pages qualification pending.",
+    "runtimeQualified": false,
+    "publicationQualified": false,
+    "keyLoadEngineChanges": false
   }
 }

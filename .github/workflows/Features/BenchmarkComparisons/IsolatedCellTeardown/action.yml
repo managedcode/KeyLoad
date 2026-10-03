@@ -24,5 +24,7 @@ runs:
           ${{ runner.temp }}/keyload-cell-github/**
           **/TestResults/**
           artifacts/code-quality/**
+          artifacts/comparisons/isolated/failures/**
+          ${{ runner.temp }}/keyload-cell-github-finalize/**
         if-no-files-found: error
         retention-days: 90

@@ -151,3 +151,9 @@ peer fences. Homogeneous rollout, real prior-binary proof and qualification pend
 ZoneTree.FullTextSearch candidate generations under a node-local physical owner,
 exact canonical ranking, persisted-policy cuts and fail-closed publication.
 Source integration and qualification pending; acceleration is not claimed.
+
+[ADR-080](ADR-080-benchmark-failure-isolation.md) accepts owner-directed independent
+benchmark failure handling: bounded transient GitHub GET retries, authenticated
+null-report failed cells and successful competitor publication. Full planned-cell
+accounting and complete site qualification remain required; delivered-source proof
+is pending.

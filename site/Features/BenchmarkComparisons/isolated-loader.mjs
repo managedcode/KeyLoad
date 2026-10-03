@@ -17,7 +17,7 @@ export function validateIsolatedProjection(value, catalog) {
   validateIsolatedCatalog(catalog);
   validateSize(value, ISOLATED.projectionBytes);
   assertIsolated(exact(value, WIRE.projection) && value.schemaVersion === ISOLATED.projectionVersion &&
-    value.profile === ISOLATED.profile && matches(ISOLATED.hash, value.datasetSha256) &&
+    value.profile === ISOLATED.profile && (value.datasetSha256 === null || matches(ISOLATED.hash, value.datasetSha256)) &&
     Array.isArray(value.workers) && value.workers.length === ISOLATED.workers);
   validateCohort(value.cohort);
   assertIsolated(same(value.cohort, catalog.cohort, WIRE.cohort));
@@ -32,7 +32,7 @@ export function validateIsolatedProjection(value, catalog) {
     validateCompactReport(worker.report, worker, value.cohort, value.datasetSha256);
     retainCommonFacts(common, worker.report, worker.nodeCount);
   }
-  assertIsolated(expected.size === 0);
+  assertIsolated(expected.size === 0 && value.datasetSha256 === (common.report?.datasetSha256 ?? null));
   return value;
 }
 

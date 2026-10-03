@@ -2,8 +2,9 @@ import { metrics, selectedRows } from './measurements.mjs';
 import { ISOLATED, assertIsolated } from './isolated-contracts.mjs';
 
 function unavailable(worker) {
-  return { name: worker.target, status: 'unsupportedTopology', value: null, min: null, max: null, attempts: 0,
-    successes: 0, failures: 0, throughput: null, p50: null, p95: null, p99: null, detail: worker.reason,
+  const count = worker.disposition === ISOLATED.failed ? null : 0;
+  return { name: worker.target, status: worker.disposition, value: null, min: null, max: null, attempts: count,
+    successes: count, failures: count, throughput: null, p50: null, p95: null, p99: null, detail: worker.reason,
     nodeCount: worker.nodeCount, worker };
 }
 
@@ -14,7 +15,7 @@ export function selectedIsolatedRows(projection, scenario, nodeCount, repetition
   const workers = projection.workers.filter(worker => worker.scenario === scenario && worker.nodeCount === nodeCount &&
     (target === 'all' || worker.target === target));
   const rows = workers.map(worker => {
-    if (worker.disposition === 'unsupportedTopology') return unavailable(worker);
+    if (worker.disposition === 'unsupportedTopology' || worker.disposition === ISOLATED.failed) return unavailable(worker);
     const row = selectedRows(worker.report, scenario, repetition === 'all' ? 'median' : repetition, metric)[0];
     return { ...row, nodeCount, worker };
   });

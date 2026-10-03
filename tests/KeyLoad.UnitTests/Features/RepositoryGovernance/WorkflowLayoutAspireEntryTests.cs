@@ -33,7 +33,7 @@ internal sealed class WorkflowLayoutAspireEntryTests
             await Assert.That(job.Contains("--KeyLoadTests:Suite=comparison", StringComparison.Ordinal)).IsTrue();
             await Assert.That(job.Contains("--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*",
                 StringComparison.Ordinal)).IsTrue();
-            await Assert.That(job.Contains("--KeyLoadTests:TimeoutMinutes=145", StringComparison.Ordinal)).IsTrue();
+            await Assert.That(job.Contains("--KeyLoadTests:TimeoutMinutes=140", StringComparison.Ordinal)).IsTrue();
         }
     }
 
