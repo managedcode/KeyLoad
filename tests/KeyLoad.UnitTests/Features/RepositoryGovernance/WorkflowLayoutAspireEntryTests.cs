@@ -153,7 +153,8 @@ internal sealed class WorkflowLayoutAspireEntryTests
             "/*/*/TimeSeriesPackageVersionTests/*", "/*/*/IsolatedTimeSeriesKeyLoadResourceTests/*",
             "/*/*/IsolatedTimeSeriesTimescaleResourceTests/*",
             "/*/*/IsolatedTimeSeriesBenchmarkResourceTests/*",
-            "/*/*/IsolatedKurrentDiscoverySettingsTests/*"
+            "/*/*/IsolatedKurrentDiscoverySettingsTests/*",
+            "/*/*/OpenSearchVectorQueryTests/*", "/*/*/OpenSearchVectorResponseTests/*"
         };
         await Assert.That(steps.Length).IsEqualTo(expectedFilters.Length);
         foreach (var step in steps)

@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices;
-
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class OpenSearchSession(HttpClient client, string index, int topK, int expectedCopies) : IComparisonSession
@@ -61,11 +59,7 @@ internal sealed class OpenSearchSession(HttpClient client, string index, int top
         var request = OpenSearchVectorQuery.Create(document.Vector, topK);
         using var result = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Post, OpenSearchNames.PathSeparator + index + OpenSearchNames.SearchSuffix,
             request, cancellationToken);
-        var root = result.RootElement;
-        OpenSearchSearchResponse.Verify(root);
-        var hits = root.GetProperty(OpenSearchNames.Hits).GetProperty(OpenSearchNames.Hits);
-        return new(Neighbors: ImmutableCollectionsMarshal.AsImmutableArray(hits.EnumerateArray()
-            .Select(hit => OpenSearchDocument.Read(hit.GetProperty(OpenSearchNames.Source))).ToArray()));
+        return new(Neighbors: OpenSearchSearchResponse.Read(result.RootElement, topK));
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

@@ -1,9 +1,46 @@
+using System.Collections.Immutable;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal static class OpenSearchSearchResponse
 {
+    internal static ImmutableArray<FoundDocument> Read(JsonElement response, int topK)
+    {
+        Verify(response);
+        var aggregation = OpenSearchJson.RequiredPath(response, OpenSearchNames.Aggregations, OpenSearchNames.ExactNeighborsAggregation);
+        var rows = OpenSearchJson.RequiredArray(aggregation, OpenSearchNames.AggregationValue);
+        if (rows.GetArrayLength() > topK)
+        {
+            throw new ComparisonFailureException(OpenSearchNames.VectorResponseMismatch);
+        }
+
+        var documents = new FoundDocument[rows.GetArrayLength()];
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var previousScore = double.PositiveInfinity;
+        string? previousId = null;
+        var index = 0;
+        foreach (var row in rows.EnumerateArray())
+        {
+            if (row.ValueKind != JsonValueKind.Object)
+            {
+                throw new ComparisonFailureException(OpenSearchNames.VectorResponseMismatch);
+            }
+            var score = RequiredScore(row);
+            var document = OpenSearchDocument.Read(row);
+            if (!seen.Add(document.Id) || score > previousScore
+                || (score == previousScore && previousId is not null && StringComparer.Ordinal.Compare(previousId, document.Id) >= 0))
+            {
+                throw new ComparisonFailureException(OpenSearchNames.VectorResponseMismatch);
+            }
+            documents[index++] = document;
+            previousId = document.Id;
+            previousScore = score;
+        }
+        return ImmutableCollectionsMarshal.AsImmutableArray(documents);
+    }
+
     internal static void Verify(JsonElement response)
     {
         if (OpenSearchJson.RequiredBoolean(response, OpenSearchNames.SearchTimedOut))
@@ -13,19 +50,19 @@ internal static class OpenSearchSearchResponse
 
         var shardInfo = OpenSearchJson.RequiredObject(response, OpenSearchNames.ShardsObject);
         if (OpenSearchJson.RequiredInt32(shardInfo, OpenSearchNames.Failed) != 0
-            || OpenSearchJson.RequiredInt32(shardInfo, OpenSearchNames.Successful) == 0)
+            || OpenSearchJson.RequiredInt32(shardInfo, OpenSearchNames.Successful) <= 0)
         {
             throw new ComparisonFailureException(OpenSearchNames.SearchShardFailure);
         }
+    }
 
-        var hits = OpenSearchJson.RequiredObject(response, OpenSearchNames.Hits).GetProperty(OpenSearchNames.Hits);
-        foreach (var hit in hits.EnumerateArray())
+    private static double RequiredScore(JsonElement row)
+    {
+        var value = OpenSearchJson.Required(row, OpenSearchNames.VectorScore, JsonValueKind.Number);
+        if (!value.TryGetDouble(out var score) || !double.IsFinite(score))
         {
-            var score = hit.GetProperty(OpenSearchNames.Score).GetDouble();
-            if (!double.IsFinite(score))
-            {
-                throw new ComparisonFailureException(OpenSearchNames.SearchShardFailure);
-            }
+            throw new ComparisonFailureException(OpenSearchNames.VectorResponseMismatch);
         }
+        return score;
     }
 }

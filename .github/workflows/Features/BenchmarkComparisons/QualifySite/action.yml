@@ -12,6 +12,13 @@ runs:
       shell: bash
       run: |
         base="$GITHUB_WORKSPACE/artifacts/site-evidence"
+        for directory in "$GITHUB_WORKSPACE/artifacts" "$base"; do
+          if [[ -L "$directory" || ( -e "$directory" && ! -d "$directory" ) ]]; then
+            printf '%s\n' 'Website evidence path must be a real directory.' >&2
+            exit 1
+          fi
+        done
+        mkdir -p "$base"
         printf 'EVIDENCE_DIR=%s\nKEYLOAD_SITE_REPOSITORY=%s\n' "$base" "$GITHUB_WORKSPACE/website" >> "$GITHUB_ENV"
         printf 'KEYLOAD_SITE_COVERAGE=%s/js-coverage\n' "$base" >> "$GITHUB_ENV"
         printf 'KEYLOAD_SITE_ISOLATED_CAPTURE=%s/isolated-capture\nKEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT=%s/isolated-capture/archive-receipt.json\nKEYLOAD_SITE_ISOLATED_AGGREGATE=%s/isolated-capture/input/aggregate\n' "$base" "$base" "$base" >> "$GITHUB_ENV"

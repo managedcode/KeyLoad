@@ -692,6 +692,8 @@ KeyLoad engine repair and concurrent series-codec work are outside this task.
 | REQ-BC-FAIL-007 Kurrent writer starts after membership | AC-BC-FAIL-007 verify all native1/2/3-member views before constructing the SDK writer; retain native DNS seeds, TLS verification, leader preference, NoStream semantics, acknowledgements, replica-copy oracle and cleanup | `IsolatedKurrentDiscoverySettingsTests`:3 actual SDK/resource-model cases; genuine Aspire-owned StreamAppend preflights for1/2/3 nodes |
 | REQ-BC-FAIL-008 explicit cancellation stops owned work | AC-BC-FAIL-008 workload, finalization and result upload use `!cancelled()` so ordinary failure still finalizes while cancellation stops execution/publication; `always()` cleanup retains bounded diagnostics and safely removes owned registries whose setup was cancelled | `WorkflowBenchmarkFailureTests`, unchanged canceled-job/producer rejection regressions and actual GitHub lifecycle |
 | REQ-BC-FAIL-009 align native Redis transport | AC-BC-FAIL-009 each isolated Redis resource uses the documented native certificate opt-out for its existing authenticated RESP/TCP bootstrap; after actual Aspire startup, primary/replica endpoints retain scheme `redis` and native target port6379 with TLS disabled. Discovered mapped host ports remain dynamic; native client settings retain a password without `ssl=true`. Preserve health checks, wait dependencies, AOF `always`, native membership, direct-copy/cancellation checks and WAIT/WAITAOF acknowledgements | actual pinned resource-model regressions plus genuine Aspire-owned native Redis 1/2/3-node preflights; complete matrix and site qualification remain mandatory |
+| REQ-BC-FAIL-010 preserve exact OpenSearch vector ordering | AC-BC-FAIL-010 the native query preserves the unchanged shared float32-input/double-accumulated cosine oracle and ordinal ID tie order. Use native `scripted_metric` map/combine/reduce over actual vector doc values; round parsed query values back to float32 before double arithmetic, retain at most TopK candidates per shard, merge only bounded shard TopK states, validate finite native double scores and retain projected content from the existing native source only for admitted candidates. Do not sort through float `_score`, weaken recall/tolerances, rerank/fetch in the client, duplicate stored vectors, use ANN or change the corpus/native topology/ACK contracts | independent deterministic precision witness for query d000000170 (documents2289/1272), positive/negative native query/response TUnit checks, and genuine Aspire-owned OpenSearch VectorExact1/2/3 jobs with every five10000-operation repetition passing the unchanged oracle; complete same-run aggregate/site/Pages still required |
+| REQ-BC-FAIL-011 create the qualification evidence parent | AC-BC-FAIL-011 initialization creates the real workspace artifacts/site-evidence parent before any capture redirection, preserves existing directories/files, rejects file or symlink collisions at artifacts or site-evidence before output, and leaves isolated-capture absent for its exclusive producer. Never skip/rebind source/archive/270/277/test/coverage/browser/freshness gates | SiteQualificationStartupTests executes the actual initialization Bash block in fresh owned filesystems (new/existing parent, file/base-link/parent-link collisions), checks actual envelope redirection and unchanged targets, and runs as a mandatory Aspire-owned unit preparation gate; genuine new-source website qualification/Pages remains required |
 
 [ADR-080](../ADR/ADR-080-benchmark-failure-isolation.md) owns the boundary change.
 Ordered task graph: FAIL-CONTRACT (root, complete) -> FAIL-SITE (site worker),
@@ -742,6 +744,41 @@ repairs; neither changes a database engine, URI, retry/ACK contract or topology.
 Root records this contract before integration, then runs the focused Aspire
 unit/comparison cases, full build/formatter/governance and an exact-source Linux
 rerun before claiming the two repairs or publication qualified.
+
+FAIL-PREP-OPENSEARCH is a follow-up under ADR-080. Sourcefabff69193f41c784f0b36b85c1f34d82fa9903d,
+run37166698745, OpenSearch n1 VectorExact job111334162158 failed exactly two
+`ExactRecallOrProjectionMismatch` operations (2489/6585) in every repetition;
+both select corpus query d000000170. Native startup, membership, copy checks and
+cleanup succeeded. Original failed public artifact11291956733 has SHA256
+1823f7fc876ad3b3a385056a8f75ab6bcd1de2cdb53bbef977a9e2d4313f5088 and
+`report:null`; original qualification11291373059 has SHA256
+070fd453c92cf373666c3e993990f9e06bac07d111eac0795ebcdc03ed86d4d2 and retains
+the rejected raw result. Returned neighbor IDs were not captured in this original
+failure, so its precise native rank is not inferred. An independent offline
+mathematical witness shows the shared double oracle places document2289
+(0.27605485016755293) before1272 (0.2760548285997265), while both collapse to
+1.276054859161377 under float32 translated-score ordering. That witness is
+development proof, not a native query result or publication input. The follow-up
+must use the native exact bounded aggregation API and qualify actual returned IDs through
+the unchanged complete workload. The current failed-cell run continues independently;
+any repair requires its own authentic source/run/attempt qualification.
+Pinned OpenSearch3.6.0/k-NN3.6.0.0 registers vector doc-values access for
+scripted-metric contexts but not `NumberSortScript`; generic vector `get(int)`
+throws. Numeric `_script` sorting cannot use that vector accessor in this pinned
+version. The selected native map/combine/reduce path avoids that unsupported API
+and float `_score` ordering. Source/response helpers remain benchmark-owned;
+unchanged native VectorExact jobs must prove the strategy and resource bounds.
+
+FAIL-SITE-STARTUP follows the successful original270 aggregate in run37166698745.
+Actual Check website job111348160002 failed before tests at02:55:05.5179465Z:
+its first shell redirection could not open artifacts/site-evidence/isolated-capture-envelope.json.
+QualifySite initialization exported paths but never created their parent. The
+selected website source was e97bf30af7ecff5aff467385832ed89a70fe6ee7; control/measured
+source remainedfabff69193f41c784f0b36b85c1f34d82fa9903d. Pages was skipped; the successful
+aggregate is not publication evidence. Root owns the minimal action initialization
+and its mandatory startup test gate. Producer worker owns only the two dedicated
+unit fixture/test files. Filesystem-only development tests use disposable workspace
+variables and no provider, run IDs, source rebinding or measurement inputs.
 
 Native-stage local development checks: initial full Release build and formatter
 passed; Aspire registry10/10 and actual SDK/resource settings3/3 passed. The new
@@ -821,7 +858,26 @@ freshly built actual pinned resource-model regressions passed3/3 through the
 Aspire/TUnit comparison entry point, without skips/cancellation/timeouts. The
 experimental opt-in is confined to the resource API and actual annotation checks.
 These model results do not prove Docker startup or workload execution; new-source
-native1/2/3 preflights and complete aggregate/site/Pages acceptance remain pending.
+native1/2/3 preflights and complete aggregate/site/Pages acceptance were pending
+at that checkpoint.
+
+Delivered fabff691 source run37166698745 subsequently passed all Redis native
+1/2/3 preflights and12 main CRUD cells, including600000 measured successful
+operations. All240 competitor originals were verified;96 numeric cells contain
+4800000 successful samples. The full270 aggregate job111347065594 passed and
+preserved its15 failed/null-report cells (12 KeyLoad,3 OpenSearch VectorExact).
+Website job111348160002 failed before capture/tests because its evidence parent
+did not exist; Pages was skipped. This proves complete aggregation with failed
+cells, but does not establish publication or the required large-dataset gates.
+
+The exact OpenSearch and evidence-startup follow-up uses committed e97bf30 source
+plus20 scoped benchmark paths, excluding concurrent engine changes. Full Release
+build passed with0 warnings/errors; formatter and governance passed. Fresh
+Aspire-owned TUnit checks passed query10/10, response25/25, actual Bash/filesystem
+startup6/6 and workflow gates7/7, with no skips, cancellations or timeouts.
+These are local development results on macOS27.0.1/.NET10.0.12; a fresh genuine
+Linux270 cohort, native precision/edge cases and complete website/Pages acceptance
+remain mandatory before claiming this follow-up delivered.
 
 ```mermaid
 flowchart LR

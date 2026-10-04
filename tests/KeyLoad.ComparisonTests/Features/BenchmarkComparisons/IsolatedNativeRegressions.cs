@@ -16,6 +16,7 @@ internal static class IsolatedNativeRegressions
     private const string Mongo = "MongoDB";
     private const string MongoPassword = "isolated-mongo-password";
     private const string Neo4j = "Neo4j";
+    private const string OpenSearch = "OpenSearch";
     private const string Admin = "admin-key";
     private const string Neo4jPassword = "neo4j-password";
     private const string Neo4jNode = "neo4j";
@@ -49,6 +50,9 @@ internal static class IsolatedNativeRegressions
                 break;
             case Redis:
                 await RedisNativeReadinessRegression.VerifyAsync(app, selection.NodeCount, cancellationToken);
+                break;
+            case OpenSearch:
+                await OpenSearchNativeVectorRegression.VerifyAsync(app, selection.NodeCount, cancellationToken);
                 break;
             case Mongo:
                 var mongoPassword = await ParameterAsync(resources, MongoPassword, cancellationToken);

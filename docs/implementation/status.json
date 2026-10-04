@@ -3192,7 +3192,7 @@
     "status": "in_progress",
     "feature": "docs/Features/BenchmarkComparisons.md",
     "decision": "docs/ADR/ADR-080-benchmark-failure-isolation.md",
-    "sourceStage": "authenticated_failed_cell_publication_with_native_registry_kurrent_redis_transport_repairs_and_explicit_cancellation_cleanup",
+    "sourceStage": "authenticated_failed_cell_publication_with_native_startup_exact_opensearch_and_site_evidence_repairs",
     "baselineRun": 37154664616,
     "originalFailedJob": 111299652762,
     "originalDiagnosticArtifact": 11286445994,
@@ -3243,7 +3243,7 @@
         "scope": "preparation and native preflight only;4096-record development workload; no scale, full cohort, winner or power-loss qualification"
       }
     },
-    "localDevelopmentVerification": "Delivered6ec Linux clean build, formatter, workflow inventory, registry10/10 and SDK/resource settings3/3 passed. Clean88e2cec snapshot passed full Release build, formatter and governance; actual full unit2821/2867 passed with46 failures, no skips/cancellation (including a registry port conflict, macOS temp-link rejections, missing Git metadata for the chunk child and an allocation assertion). Workflow cancellation3/3 and failed producer/finalizer2/2 passed through Aspire. Benchmark-only ephemeral-port follow-up freshly built clean with0warnings/errors; formatter and governance passed; actual registry10/10 normal and10/10 scalar passed through Aspire/TUnit with canonical owned TMPDIR. Complete delivered-source native/site/Pages qualification remains pending; no KeyLoad engine repair in this stage. Redis transport follow-up: fresh benchmark-only snapshot full Release0warnings/errors, formatter and governance passed; actual pinned resource models3/3 passed through Aspire/TUnit. Genuine new-source Redis1/2/3 startup/workload and complete website publication remain pending.",
+    "localDevelopmentVerification": "Delivered6ec Linux clean build, formatter, workflow inventory, registry10/10 and SDK/resource settings3/3 passed. Clean88e2cec snapshot passed full Release build, formatter and governance; actual full unit2821/2867 passed with46 failures, no skips/cancellation (including a registry port conflict, macOS temp-link rejections, missing Git metadata for the chunk child and an allocation assertion). Workflow cancellation3/3 and failed producer/finalizer2/2 passed through Aspire. Benchmark-only ephemeral-port follow-up freshly built clean with0warnings/errors; formatter and governance passed; actual registry10/10 normal and10/10 scalar passed through Aspire/TUnit with canonical owned TMPDIR. Complete delivered-source native/site/Pages qualification remains pending; no KeyLoad engine repair in this stage. Redis transport follow-up: fresh benchmark-only snapshot full Release0warnings/errors, formatter and governance passed; actual pinned resource models3/3 passed through Aspire/TUnit. Genuine fab Linux Redis1/2/3 preflights and12mainCRUD cells passed with600000successful measured operations; complete website publication remains pending. OpenSearch/startup follow-up: clean e97 baseline plus20scoped benchmark paths; fullRelease0warnings/errors, formatter andgovernance passed; Aspire query10/10,response25/25,actualBash/filesystem startup6/6,workflow gates7/7 passed,zero skips/cancellations/timeouts; native new-source OpenSearch andfullsite/Pages pending.",
     "runtimeQualified": false,
     "publicationQualified": false,
     "keyLoadEngineChanges": false,
@@ -3405,7 +3405,190 @@
           "runtimeVersion": ".NET 10.0.12"
         }
       },
-      "nativeGitHubQualified": false
+      "nativeGitHubQualified": true,
+      "deliveredSource": {
+        "sourceRevision": "fabff69193f41c784f0b36b85c1f34d82fa9903d",
+        "runId": 37166698745,
+        "attempt": 1,
+        "nativePreflights": [
+          {
+            "nodes": 1,
+            "jobId": 111334155768,
+            "successfulMeasuredOperations": 50000,
+            "nativeMembershipCount": 1,
+            "dataCopies": 1,
+            "TUnit": {
+              "total": 1,
+              "passed": 1,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            }
+          },
+          {
+            "nodes": 2,
+            "jobId": 111334155747,
+            "successfulMeasuredOperations": 50000,
+            "nativeMembershipCount": 2,
+            "dataCopies": 2,
+            "TUnit": {
+              "total": 1,
+              "passed": 1,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            }
+          },
+          {
+            "nodes": 3,
+            "jobId": 111334155778,
+            "successfulMeasuredOperations": 50000,
+            "nativeMembershipCount": 3,
+            "dataCopies": 3,
+            "TUnit": {
+              "total": 1,
+              "passed": 1,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            }
+          }
+        ],
+        "originalArchives": [
+          {
+            "artifactId": 11290741086,
+            "name": "comparison-preflight-qualification-redis-n1-point-read",
+            "digest": "sha256:b2aca37ee2f19dcf3524556c04b8e4b6ae3576d29456a704d65604b15481958c"
+          },
+          {
+            "artifactId": 11290691237,
+            "name": "comparison-preflight-qualification-redis-n2-point-read",
+            "digest": "sha256:6a8f3b0609f112e8d37d936c69edde57764447c4cabbfdca57fb8e672e7d5a3d"
+          },
+          {
+            "artifactId": 11290646417,
+            "name": "comparison-preflight-qualification-redis-n3-point-read",
+            "digest": "sha256:695d87b591c35b12e5c3067d350eebf3e1b068a6c3a28f5245aa42fb92a4ca64"
+          },
+          {
+            "artifactId": 11290057396,
+            "name": "comparison-preflight-redis-n3-point-read",
+            "digest": "sha256:a42f0fbbf606ec6fea9e3ebdfc7de02a91b01dbfc3ace525b45f48776ddd81e7"
+          },
+          {
+            "artifactId": 11289792980,
+            "name": "comparison-preflight-redis-n1-point-read",
+            "digest": "sha256:7daacd0d3e19c69fa56f528cc756361eda080e24b8b87fb21331ee8e9862e41f"
+          },
+          {
+            "artifactId": 11289314616,
+            "name": "comparison-preflight-redis-n2-point-read",
+            "digest": "sha256:291826a7ea7240569d16d723bbcc21d999df894f78065602a939a609f901a440"
+          }
+        ],
+        "mainCrudCells": 12,
+        "successfulMainCrudOperations": 600000,
+        "publicationQualified": false
+      }
+    },
+    "openSearchPrecisionRepair": {
+      "requirement": "REQ-BC-FAIL-010",
+      "originalSourceRevision": "fabff69193f41c784f0b36b85c1f34d82fa9903d",
+      "originalRunId": 37166698745,
+      "originalJobId": 111334162158,
+      "originalWorkerArtifactId": 11291956733,
+      "originalWorkerArchiveDigest": "sha256:1823f7fc876ad3b3a385056a8f75ab6bcd1de2cdb53bbef977a9e2d4313f5088",
+      "originalQualificationArtifactId": 11291373059,
+      "originalQualificationArchiveDigest": "sha256:070fd453c92cf373666c3e993990f9e06bac07d111eac0795ebcdc03ed86d4d2",
+      "provenFailure": "Every repetition rejected ExactRecallOrProjectionMismatch at operations2489/6585 selectingd000000170;9998successful/2failed raw attempts;originalpublicreport null;native membership/copies and cleanup passed.",
+      "numericWitness": "Offline double cosine places2289(0.27605485016755293) before1272(0.2760548285997265);both translatedfloat32 scores1.276054859161377;native returnedIDs were not retained and are not inferred.",
+      "pinnedApi": "OpenSearch3.6.0/k-NN3.6.0.0 vector docvalue whitelist supports scriptedmetric contexts, not NumberSortScript;generic vectorget(int) throws.",
+      "selectedStrategy": "native bounded scripted_metric map/combine/reduce;actualvector docvalues;queryFloat32/doublearithmetic;TopKper shard;double scoredesc/IDordinal;sourcepayloadonlyadmittedcandidates;no clientrerank/fetch,storedvectorduplication ororaclechange",
+      "sourceImplemented": true,
+      "nativeGitHubQualified": false,
+      "publicationQualified": false,
+      "developmentQualified": true,
+      "developmentReports": {
+        "opensearch-query": {
+          "summary": {
+            "total": 10,
+            "passed": 10,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "sha256": "774059923dffe15b607773e0201200248b686ec8b785a3e525e71eeddde73c95",
+          "operatingSystem": "macOS 27.0.1",
+          "runtimeVersion": ".NET 10.0.12"
+        },
+        "opensearch-response": {
+          "summary": {
+            "total": 25,
+            "passed": 25,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "sha256": "9537df3694bee2f66b5a7bed5b5dcaf38367ef7aed8d5dc3c61c411c289c27bc",
+          "operatingSystem": "macOS 27.0.1",
+          "runtimeVersion": ".NET 10.0.12"
+        }
+      }
+    },
+    "fullAggregateEvidence": {
+      "sourceRevision": "fabff69193f41c784f0b36b85c1f34d82fa9903d",
+      "runId": 37166698745,
+      "attempt": 1,
+      "jobId": 111347065594,
+      "jobConclusion": "success",
+      "plannedCells": 270,
+      "completedCells": 270,
+      "jobSuccesses": 255,
+      "jobFailures": 15,
+      "failedKeyLoad": 12,
+      "failedOpenSearchVector": 3,
+      "suiteArtifactId": 11292026842,
+      "suiteArchiveDigest": "sha256:8adb5259f8be360448550164c5d42e78e5b3f00b6f338409ff5d437ab3788078",
+      "originalCompetitorCellsVerified": 240,
+      "numericCompetitorCells": 96,
+      "successfulCompetitorAttempts": 4800000,
+      "qualification": "Complete production270 acceptance and byte-identical240 competitor originals;no publication,scale,winner orenginequalification claim."
+    },
+    "siteEvidenceStartupRepair": {
+      "requirement": "REQ-BC-FAIL-011",
+      "originalJobId": 111348160002,
+      "originalSourceRevision": "fabff69193f41c784f0b36b85c1f34d82fa9903d",
+      "selectedWebsiteSource": "e97bf30af7ecff5aff467385832ed89a70fe6ee7",
+      "provenFailure": "Action exported paths but never created evidenceparent;shell redirection failed before sourcecapture/tests;Pages skipped.",
+      "repair": "Createonlyrealartifacts/site-evidence before output;rejectfile/symlink components;preserveexclusivecapturechild andallqualificationgates.",
+      "sourceImplemented": true,
+      "developmentQualified": true,
+      "githubQualified": false,
+      "publicationQualified": false,
+      "developmentReport": {
+        "summary": {
+          "total": 6,
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "sha256": "c41df501e76135178ad070ecee3ed632adccf49e86e1d36795623f6a3f27489d",
+        "operatingSystem": "macOS 27.0.1",
+        "runtimeVersion": ".NET 10.0.12"
+      }
     }
   }
 }

@@ -4,47 +4,43 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class OpenSearchVectorQuery
 {
-    private static readonly string[] SourceFields = [OpenSearchNames.Id, OpenSearchNames.Payload];
-
     internal static object Create(ImmutableArray<float> vector, int topK)
-        => new
+    {
+        if (vector.IsDefault || vector.Length is < OpenSearchNames.MinimumVectorDimensions or > OpenSearchNames.MaximumVectorDimensions
+            || vector.Any(value => !float.IsFinite(value)))
         {
-            size = topK,
-            _source = SourceFields,
-            query = new
+            throw new ArgumentOutOfRangeException(nameof(vector));
+        }
+        ArgumentOutOfRangeException.ThrowIfLessThan(topK, OpenSearchNames.MinimumTopK);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(topK, OpenSearchNames.MaximumTopK);
+
+        return new
+        {
+            size = 0,
+            query = new Dictionary<string, object>
             {
-                script_score = new
+                [OpenSearchNames.Exists] = new Dictionary<string, object> { [OpenSearchNames.Field] = OpenSearchNames.Vector }
+            },
+            aggregations = new Dictionary<string, object>
+            {
+                [OpenSearchNames.ExactNeighborsAggregation] = new Dictionary<string, object>
                 {
-                    query = new Dictionary<string, object>
+                    [OpenSearchNames.ScriptedMetric] = new Dictionary<string, object>
                     {
-                        [OpenSearchNames.Bool] = new Dictionary<string, object>
+                        [OpenSearchNames.ScriptParameters] = new Dictionary<string, object>
                         {
-                            [OpenSearchNames.Filter] = new Dictionary<string, object>
-                            {
-                                [OpenSearchNames.Exists] = new Dictionary<string, object>
-                                {
-                                    [OpenSearchNames.Field] = OpenSearchNames.Vector
-                                }
-                            }
-                        }
-                    },
-                    script = new
-                    {
-                        source = OpenSearchNames.KnnScore,
-                        lang = OpenSearchNames.KnnLanguage,
-                        @params = new Dictionary<string, object>
-                        {
-                            [OpenSearchNames.Field] = OpenSearchNames.Vector,
                             [OpenSearchNames.QueryValue] = vector,
-                            [OpenSearchNames.SpaceType] = OpenSearchNames.CosineSimilarity
-                        }
+                            [OpenSearchNames.VectorTopK] = topK
+                        },
+                        [OpenSearchNames.InitScript] = Script(OpenSearchVectorScripts.Initialize),
+                        [OpenSearchNames.MapScript] = Script(OpenSearchVectorScripts.Map),
+                        [OpenSearchNames.CombineScript] = Script(OpenSearchVectorScripts.Combine),
+                        [OpenSearchNames.ReduceScript] = Script(OpenSearchVectorScripts.Reduce)
                     }
                 }
-            },
-            sort = new object[]
-            {
-                new Dictionary<string, object> { [OpenSearchNames.Score] = new { order = OpenSearchNames.Descending } },
-                new Dictionary<string, object> { [OpenSearchNames.IdKeyword] = new { order = OpenSearchNames.Ascending } }
             }
         };
+    }
+
+    private static object Script(string source) => new { lang = OpenSearchNames.PainlessLanguage, source };
 }
