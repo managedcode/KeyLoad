@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns the .NET SDK client surface used by applications connecting to KeyLoad.
-- Main entry points: `KeyLoadClient.cs` and `Features/QueryExecution/Queries/Features/QueryExecution/Queries/Features/QueryExecution/Queries/Features/QueryExecution/Queries/Features/QueryExecution/Queries/KeyLoadQuery.cs`.
+- Main entry points: `KeyLoadClient.cs` and `Features/QueryExecution/Queries/KeyLoadQuery.cs`.
 
 ## Ownership and boundaries
 - Client capabilities belong under `Features/<SliceName>/` and the same-name `docs/Features/<SliceName>.md`; keep shared client composition separate from feature behavior.
@@ -23,7 +23,7 @@
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - `ClientApi` owns shared SDK transport and request/response infrastructure under `Features/ClientApi/`, matching `docs/Features/ClientApi.md`.
 - Business SDK operations MUST mirror their owning business slice, including `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, `TimeSeries`, `Search`, `QueryExecution`, `Authorization` and `ChangeFeeds`, under `Features/<same-business-SliceName>/` and its matching feature doc.
-- `KeyLoadClient.cs` and `Features/QueryExecution/Queries/Features/QueryExecution/Queries/Features/QueryExecution/Queries/Features/QueryExecution/Queries/Features/QueryExecution/Queries/KeyLoadQuery.cs` are current entry points; shared transport belongs to `ClientApi`, while business behavior keeps the same canonical name as core, contracts, API and tests.
+- `KeyLoadClient.cs` and `Features/QueryExecution/Queries/KeyLoadQuery.cs` are current entry points; shared transport belongs to `ClientApi`, while business behavior keeps the same canonical name as core, contracts, API and tests.
 
 ## Vertical-slice responsibility folders
 - Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

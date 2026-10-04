@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns Aspire application composition for KeyLoad services and infrastructure resources.
-- Entry point: `Program.cs`; benchmark resource composition: `Features/BenchmarkComparisons/Resources/Features/BenchmarkComparisons/Resources/Features/BenchmarkComparisons/Resources/Features/BenchmarkComparisons/Resources/BenchmarkResources.cs`.
+- Entry point: `Program.cs`; benchmark resource composition: `Features/BenchmarkComparisons/Resources/BenchmarkResources.cs`.
 
 ## Ownership and boundaries
 - Keep host wiring and genuinely shared infrastructure composition here. Feature-specific deployment behavior belongs under `Features/<SliceName>/` and the matching `docs/Features/<SliceName>.md`.

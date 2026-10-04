@@ -21,7 +21,7 @@
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned slices: `ClusterReplication` and `StorageRecovery`; target paths: `Features/ClusterReplication/` and `Features/StorageRecovery/`.
-- `Features/ClusterReplication/Execution/ClusterCoordinator.cs`, `DurableRaftLog.cs`, `ReplicatedStateMachine.cs`, `ClusterBootstrap.cs`, and `Features/ClusterReplication/Identity/PeerSecurity.cs` are current slice entry points.
+- `Features/ClusterReplication/Execution/ClusterCoordinator.cs`, `Features/ClusterReplication/Storage/DurableReplicaLog.cs`, `Features/ClusterReplication/Execution/ReplicaMaterializer.cs`, `Features/ClusterReplication/Execution/ClusterCoordinator.cs`, and `Features/ClusterReplication/Identity/PeerSecurity.cs` are current slice entry points.
 ## Feature-local responsibility folders
 
 - Every populated `Features/<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.

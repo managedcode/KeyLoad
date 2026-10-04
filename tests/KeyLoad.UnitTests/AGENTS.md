@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns focused TUnit tests for contracts and feature behavior, including queries, transactions, storage codecs, admission, change feeds, subscriptions, search, messaging and artifacts.
-- Test sources include `Features/QueryExecution/Cases/QueryAdapterTests.cs`, `Features/ResourceExecution/Cases/TransactionTests.cs`, `Features/StorageRecovery/Cases/KeyCodecTests.cs`, `CommandAdmissionTests.cs`, `GraphAndSearchTests.cs`, `TestDatabase.cs` and the other feature-named test files in this project.
+- Test sources include `Features/QueryExecution/Cases/QueryAdapterTests.cs`, `Features/ResourceExecution/Cases/TransactionTests.cs`, `Features/StorageRecovery/Cases/KeyCodecTests.cs`, `Features/ResourceExecution/Cases/CommandAdmissionGovernorTests.cs`, `Features/GraphTraversal/Cases/GraphTraversalTests.cs` and `Features/Search/Cases/SearchResourceTests.cs`, `TestDatabase.cs` and the other feature-named test files in this project.
 
 ## Ownership and boundaries
 - Organize feature-owned tests under the same canonical `Features/<SliceName>/` used by implementation and `docs/Features/<SliceName>.md`; shared test infrastructure may remain outside slices.

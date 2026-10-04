@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns recovery, durable-log, snapshot, peer-security, projection and subscription recovery tests.
-- Main suites include `Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/RecoveryTests.cs`, `SnapshotInstallFeatures/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/RecoveryTests.cs`, `RaftLogTests.cs`, `PeerSecurityTests.cs`, `Features/EventStreams/Cases/ProjectionFeatures/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/RecoveryTests.cs`, `InterruptedSnapshotTests.cs`, `RaftSnapshotTests.cs` and `Features/ChangeFeeds/Cases/SubscriptionFeatures/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/RecoveryTests.cs`.
+- Main suites include `Features/StorageRecovery/Cases/RecoveryTests.cs`, `Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs`, `Features/ClusterReplication/Cases/ReplicaSnapshotMetadataRecoveryTests.cs`, `Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs`, `Features/ClusterReplication/Cases/ReplicaTermMetadataSnapshotTests.cs`, `Features/EventStreams/Cases/ProjectionRecoveryTests.cs` and `Features/ChangeFeeds/Cases/SubscriptionRecoveryTests.cs`.
 
 ## Ownership and boundaries
 - Feature cases belong under matching canonical `Features/<SliceName>/` paths; real process-host and shared recovery fixture infrastructure may remain shared.
@@ -20,7 +20,7 @@
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned test slices: `StorageRecovery` and `ClusterReplication`; target paths: `Features/StorageRecovery/` and `Features/ClusterReplication/`.
-- `Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/RecoveryTests.cs`, `RaftLogTests.cs`, and `SnapshotInstallFeatures/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/Features/StorageRecovery/Cases/RecoveryTests.cs` are current entry points; other recovery scenarios follow the matching slice.
+- `Features/StorageRecovery/Cases/RecoveryTests.cs`, `Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs` and `Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs` are current entry points; other recovery scenarios follow the matching slice.
 
 ## Owner-authorized local development verification, 2026-10-03
 - The explicit owner correction in root AGENTS.md supersedes the historical GitHub-only execution restrictions above for development verification. Run the actual Aspire-owned TUnit entry locally against a freshly built source snapshot; retain actual machine, source, command and original results. The recovery runner uses the same AppHost caller without pretending its process fixtures require an RF3 topology. Local results are development evidence. Exact-source GitHub recovery/RF3/endurance and publication gates remain required, with every necessary suite executed.

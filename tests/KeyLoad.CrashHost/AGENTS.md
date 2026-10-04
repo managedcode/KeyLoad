@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns the helper process used by real-process recovery qualification.
-- Executable entry point: `Program.cs`; reusable pause protocol: `Features/StorageRecovery/Models/CrashFixtureValues.cs` and `Features/StorageRecovery/Helpers/CrashHostPause.cs`.
+- Executable entry point: `Program.cs`; reusable pause protocol: `Features/StorageRecovery/Fixtures/CrashFixtureValues.cs` and `Features/StorageRecovery/Helpers/CrashHostPause.cs`.
 
 ## Ownership and boundaries
 - This helper is test infrastructure invoked by `RecoveryTests`; it does not own production storage or declare a durability guarantee.
