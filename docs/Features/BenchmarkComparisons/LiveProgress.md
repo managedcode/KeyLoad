@@ -1,6 +1,6 @@
 # Live benchmark progress
 
-Status: Accepted repair contract; runtime verification pending.
+Status: Linux component regressions passed; native workload/cancellation artifact qualification pending.
 Parent: [BenchmarkComparisons](../BenchmarkComparisons.md).
 Decision: [ADR-085](../../ADR/ADR-085-live-benchmark-progress.md).
 
@@ -69,3 +69,14 @@ evaluated Node import must not trigger the script's production entry merely
 because its first argument contains the module path; the real child regressions
 also verify this boundary. Full
 unit/scalar, recovery, RF3 and complete native workload gates are not qualified.
+
+Runtime checkpoint: [Linux job 111470753546](https://github.com/managedcode/KeyLoad/actions/runs/37213603249/job/111470753546)
+at source `3d1b8bc413f3ee28a4d36b3784f1caf40eee2658` passed the four independent
+Aspire-owned gates: native progress capture; real process entry/exit/SIGTERM;
+phase/attempt/heartbeat counters; and workflow Aspire entry contracts. The first
+three cover 30 capture cases, five genuine process cases and seven runner/counter
+cases. Build, formatter, governance and analyzers also passed at that source.
+REQ/AC-BC-LIVE-001..004 and TASK-BC-LIVE-VERIFY now have component runtime proof;
+actual complete native workload and Linux cancellation artifacts remain pending.
+This documentation checkpoint changes no runtime source; it does not qualify
+the concurrent engine or the final CI/full-suite result.
