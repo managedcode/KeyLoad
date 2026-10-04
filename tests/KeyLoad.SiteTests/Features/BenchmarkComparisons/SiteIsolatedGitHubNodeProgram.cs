@@ -52,6 +52,16 @@ internal static class SiteIsolatedGitHubNodeProgram
           else if (request.operation === 'fresh') result = await (await load('cli')).runSiteIsolatedGitHub([
             'fresh','--before='+request.arguments.before,'--after='+request.arguments.after]);
           else if (request.operation === 'cli') result = await (await load('cli')).runSiteIsolatedGitHub(request.arguments);
+          else if (request.operation === 'producer-event') result = await (await load('context')).readSiteProducerEvent(request.arguments.path);
+          else if (request.operation === 'latest-selection') {
+            const runs = await load('runs');
+            const metadata = path.join(request.arguments.input,'metadata');
+            const workflow = runs.validateSiteWorkflow(JSON.parse(await readFile(path.join(metadata,'workflow.json'),'utf8')));
+            const pages = JSON.parse(await readFile(path.join(metadata,'workflow_runs-pages.json'),'utf8'));
+            const producer = runs.selectLatestSiteProducer(runs.flattenSiteRuns(pages),workflow);
+            const selection = await runs.selectSiteIsolatedEvidence({input:request.arguments.input,mode:'publish',producer});
+            result = {producer,state:selection.state,runId:selection.run?.id,attempt:selection.run?.run_attempt};
+          }
           else if (request.operation === 'clone') result = await clone(request.arguments.input,request.arguments.output);
           else if (request.operation === 'detach') result = await detach(request.arguments.path);
           else throw new Error('Unknown controlled probe operation.');

@@ -108,6 +108,8 @@ runs:
         pwsh --version > "$EVIDENCE_DIR/powershell-version.txt"
         dotnet restore KeyLoad.slnx
         dotnet build src/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-restore --configuration Release
+        dotnet build tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-restore --configuration Release
+        dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/SiteQualificationStartupTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/startup-tests"
         dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release
         mkdir -p "$EVIDENCE_DIR/analyzer-coverage"
         cp scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml "$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml"
@@ -141,7 +143,7 @@ runs:
     - name: Check every required test passed
       shell: pwsh
       run: |
-        $receipts = foreach ($suite in @('analyzer-tests', 'site-tests')) {
+        $receipts = foreach ($suite in @('startup-tests', 'analyzer-tests', 'site-tests')) {
           $files = @(Get-ChildItem -LiteralPath "$env:EVIDENCE_DIR/$suite" -Filter '*.trx' -File)
           if ($files.Count -ne 1) { throw "Expected exactly one $suite TRX receipt" }
           [xml]$document = Get-Content -LiteralPath $files[0].FullName -Raw

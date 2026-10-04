@@ -39,9 +39,10 @@ internal static class SiteMetadataBinaryAssertions
                 ? SiteMetadataTokens.IcoDimension256 : entry[SiteMetadataTokens.IcoWidthOffset];
             await Assert.That(dimension).IsEqualTo(dimensions[index]);
             await Assert.That(entry[SiteMetadataTokens.IcoHeightOffset]).IsEqualTo((byte)dimensions[index]);
-            await Assert.That(entry[SiteMetadataTokens.IcoTypeOffset]).IsEqualTo((byte)SiteMetadataTokens.IcoTypeValue);
+            await Assert.That(entry[SiteMetadataTokens.IcoColorCountOffset]).IsEqualTo((byte)SiteMetadataTokens.IcoColorCount);
+            await Assert.That(entry[SiteMetadataTokens.IcoReservedOffset]).IsEqualTo((byte)SiteMetadataTokens.IcoReserved);
             await Assert.That(BinaryPrimitives.ReadUInt16LittleEndian(entry.AsSpan(SiteMetadataTokens.IcoEntryPlanesOffset, 2)))
-                .IsEqualTo((ushort)SiteMetadataTokens.IcoPlanes);
+                .IsEqualTo((ushort)SiteMetadataTokens.IcoPngPlanes);
             await Assert.That(BinaryPrimitives.ReadUInt16LittleEndian(entry.AsSpan(SiteMetadataTokens.IcoEntryBitsOffset, 2)))
                 .IsEqualTo((ushort)SiteMetadataTokens.IcoBitsPerPixel);
             var frameLength = BinaryPrimitives.ReadUInt32LittleEndian(entry.AsSpan(SiteMetadataTokens.IcoEntryFrameSizeOffset, 4));
@@ -56,6 +57,8 @@ internal static class SiteMetadataBinaryAssertions
                 .IsEqualTo(dimensions[index]);
             await Assert.That(BinaryPrimitives.ReadInt32BigEndian(frame.AsSpan(SiteMetadataTokens.IcoPngHeightOffset, 4)))
                 .IsEqualTo(dimensions[index]);
+            await Assert.That(frame[SiteMetadataTokens.IcoPngBitDepthOffset]).IsEqualTo((byte)SiteMetadataTokens.IcoPngBitDepth);
+            await Assert.That(frame[SiteMetadataTokens.IcoPngColorTypeOffset]).IsEqualTo((byte)SiteMetadataTokens.IcoPngRgbaColorType);
         }
     }
 

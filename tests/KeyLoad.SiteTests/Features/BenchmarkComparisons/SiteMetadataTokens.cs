@@ -120,7 +120,7 @@ internal static class SiteMetadataTokens
     internal const string ManifestRel = "manifest";
     internal const string IconRel = "icon";
     internal const string AppleTouchRel = "apple-touch-icon";
-    internal const string IndexTitle = "KeyLoad — the database for AI agents";
+    internal const string IndexTitle = "KeyLoad — the AI-native database for AI agents";
     internal const string Scope = "scope";
     internal const string StartUrl = "start_url";
     internal const string Display = "display";
@@ -148,15 +148,21 @@ internal static class SiteMetadataTokens
     internal const int IcoDimension32 = 32;
     internal const int IcoDimension48 = 48;
     internal const int IcoZeroDimensionMeans256 = 0;
-    internal const int IcoPlanes = 1;
+    internal const int IcoPngPlanes = 0;
     internal const int IcoBitsPerPixel = 32;
     internal const int IcoWidthOffset = 0;
     internal const int IcoHeightOffset = 1;
-    internal const int IcoTypeOffset = 2;
-    internal const int IcoTypeValue = 1;
-    internal const int IcoPngHeaderLength = 24;
+    internal const int IcoColorCountOffset = 2;
+    internal const int IcoColorCount = 0;
+    internal const int IcoReservedOffset = 3;
+    internal const int IcoReserved = 0;
+    internal const int IcoPngHeaderLength = 26;
     internal const int IcoPngWidthOffset = 16;
     internal const int IcoPngHeightOffset = 20;
+    internal const int IcoPngBitDepthOffset = 24;
+    internal const int IcoPngBitDepth = 8;
+    internal const int IcoPngColorTypeOffset = 25;
+    internal const int IcoPngRgbaColorType = 6;
 
     internal static readonly string[] IconAssetNames =
     [FaviconIco, Favicon32, Favicon96, AppleTouch, Icon192, Icon512];

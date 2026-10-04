@@ -70,4 +70,25 @@ internal static class SiteIsolatedGitHubFields
     public const string NativeFixtureKey = "KeyLoad.SiteTests.IsolatedGitHubNativeFixture";
     public const string Repository = "repository";
     public const string WorkflowKey = "workflow";
+    public const string Action = "action";
+    public const string Event = "event";
+    public const string WorkflowRun = "workflow_run";
+    public const string NativeRepositoryName = "full_name";
+    public const string NativeHeadRepository = "head_repository";
+    public const string NativeHeadBranch = "head_branch";
+    public const string NativeHtmlUrl = "html_url";
+    public const string NativeRunNumber = "run_number";
+    public const string NativeJobs = "jobs";
+    public const string RepositoryIdCase = "repositoryId";
+    public const string RepositoryNameCase = "repositoryName";
+    public const string RunRepositoryIdCase = "runRepositoryId";
+    public const string RunRepositoryNameCase = "runRepositoryName";
+    public const string HeadRepositoryIdCase = "headRepositoryId";
+    public const string HeadRepositoryNameCase = "headRepositoryName";
+    public const string BranchCase = "branch";
+    public const string WorkflowNameCase = "workflowName";
+    public const string WorkflowPathCase = "workflowPath";
+    public const string ProducerEventCase = "producerEvent";
+    public const string MissingRunCase = "missingRun";
+    public const string Cancelled = "cancelled";
 }

@@ -61,3 +61,13 @@ flowchart LR
 ```
 
 Acceptance explicitly covers missing/symlink files, invalid dimensions, metadata conflicts, long-text preview readability and unauthorized/unknown routes. Qualification remains GitHub-only. Local development builds and visual inspection are manual/design evidence and do not prove provider cache refresh, indexing, full tests, coverage or publication. The full relevant baseline is recorded in the plan; isolated cohort absence remains a publication blocker.
+
+The canonical ICO contains three PNG-backed frames. Its file header type is1;
+entry byte2 is color count0 and byte3 is reserved0. The native generated entries
+have planes0/bits32 and8-bit RGBA PNG payloads. AC-SEO-001 checks these actual
+fields, frame boundaries, dimensions and exact bytes across all three surfaces.
+The [Microsoft directory structure](https://devblogs.microsoft.com/oldnewthing/20101018-00/?p=12513),
+[PNG icon format](https://devblogs.microsoft.com/oldnewthing/20101022-00/?p=12473)
+and [Pillow native ICO writer](https://github.com/python-pillow/Pillow/blob/main/src/PIL/IcoImagePlugin.py)
+support the format distinction. ADR-080/REQ-BC-FAIL-016 repairs the assertion;
+canonical icon assets remain byte-identical.

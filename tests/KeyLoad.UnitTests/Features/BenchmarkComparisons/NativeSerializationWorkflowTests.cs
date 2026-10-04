@@ -14,9 +14,7 @@ internal sealed class NativeSerializationWorkflowTests
         "comparison-preflight",
         "comparison-crud",
         "comparison-specialized",
-        "comparison-aggregate",
-        "qualify",
-        "deploy"
+        "comparison-aggregate"
     ];
     private static readonly string[] RemovedDiagnosticJobs = ["native-serialization", "raw-storage", "internal-codec"];
 
@@ -50,9 +48,11 @@ internal sealed class NativeSerializationWorkflowTests
         await Assert.That(aggregate.Contains("raw-storage", StringComparison.Ordinal)).IsFalse();
         await Assert.That(aggregate.Contains("internal-codec", StringComparison.Ordinal)).IsFalse();
 
-        await Assert.That(WorkflowLayoutSource.JobBlock(workflow, "qualify")
-            .Contains("needs: comparison-aggregate", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(WorkflowLayoutSource.JobBlock(workflow, "deploy")
+        await Assert.That(jobIds.Contains("qualify", StringComparer.Ordinal)).IsFalse();
+        await Assert.That(jobIds.Contains("deploy", StringComparer.Ordinal)).IsFalse();
+        var ci = WorkflowLayoutSource.Read("ci.yml");
+        await Assert.That(WorkflowLayoutSource.JobBlock(ci, "qualify").Contains("needs:", StringComparison.Ordinal)).IsFalse();
+        await Assert.That(WorkflowLayoutSource.JobBlock(ci, "deploy")
             .Contains("needs: qualify", StringComparison.Ordinal)).IsTrue();
     }
 }

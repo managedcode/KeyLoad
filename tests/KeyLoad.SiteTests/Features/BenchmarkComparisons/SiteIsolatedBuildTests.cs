@@ -34,7 +34,7 @@ internal sealed class SiteIsolatedBuildTests
         await Assert.That(File.Exists(Path.Combine(temporary.Output, "data", "catalog.json"))).IsFalse();
         var html = await File.ReadAllTextAsync(Path.Combine(temporary.Output, SiteAssetTokens.IndexHtml), token);
         await Assert.That(html.Contains("id=\"benchmarks\" class=\"benchmark-section\"", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(html.Contains("data-isolated-catalog=\"./data/isolated-catalog.json\"", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(html.Contains("data-isolated-catalog=\"data/isolated-catalog.json\"", StringComparison.Ordinal)).IsTrue();
         await Assert.That(html.Contains("id=\"isolated-lab\"", StringComparison.Ordinal)).IsFalse();
         await Assert.That(html.Contains("data-historical-unavailable", StringComparison.Ordinal)).IsFalse();
         await Assert.That(html.Contains("KEYLOAD_ISOLATED_EVIDENCE", StringComparison.Ordinal)).IsFalse();

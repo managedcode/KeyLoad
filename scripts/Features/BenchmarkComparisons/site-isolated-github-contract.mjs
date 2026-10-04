@@ -2,9 +2,11 @@ import { exactKeys } from './aggregate-contracts.mjs';
 
 export const SITE_GH = Object.freeze({
   repository: 'managedcode/KeyLoad', repositoryId: 477801965,
-  executor: 'Benchmarks', executorPath: '.github/workflows/benchmarks.yml',
+  executor: 'CI', executorPath: '.github/workflows/ci.yml',
+  executorEvents: Object.freeze(['push', 'workflow_dispatch', 'workflow_run']),
   executorJobs: Object.freeze(['qualify', 'deploy']), producerEvents: Object.freeze(['push', 'workflow_dispatch']),
-  producerKeys: Object.freeze(['runId', 'attempt', 'sourceRevision']), pinnedRunCapture: 'requested-run.json',
+  producerKeys: Object.freeze(['runId', 'attempt', 'sourceRevision', 'event', 'conclusion']),
+  producerConclusions: Object.freeze(['success', 'failure']), eventBytes: 1_048_576, pinnedRunCapture: 'requested-run.json',
   aggregateJob: 'Combine benchmark results', suite: 'comparison-isolated-suite', provider: 'comparison-isolated-provider-evidence',
   metadata: 'metadata', archives: 'archives', input: 'input', metadataProof: 'metadata-proof.json', receipt: 'archive-receipt.json',
   metadataState: 'metadata_verified', archiveState: 'archive_verified', publish: 'publish', validate: 'validate',
@@ -14,8 +16,14 @@ export const SITE_GH = Object.freeze({
   failure: 'Isolated Pages GitHub evidence rejected.',
   steps: Object.freeze(['Verify benchmark plan',
     'Download benchmark results', 'Check all 270 benchmark results',
+    'Save combined benchmark results', 'Save GitHub result verification']),
+  legacySteps: Object.freeze(['Verify benchmark plan',
+    'Download benchmark results', 'Check all 270 benchmark results',
     'Generate website benchmark data', 'Save website benchmark data',
     'Save combined benchmark results', 'Save GitHub result verification']),
+  legacySources: Object.freeze(['aa49aa93982866b85a80e771a749d9b968ffc9f2',
+    '73aebfd3f72695357834599e813aba77b9e274ad', '77167cbca9efe8942aab869dd52ad5b0b6cc72a1',
+    'ff0af70a279b6adce653bc5fe2527fef51f9de69']),
   receiptKeys: Object.freeze(['schemaVersion', 'state', 'mode', 'publishEligible', 'source', 'repository', 'workflow', 'run',
     'cohort', 'aggregateJob', 'artifacts', 'workers', 'image', 'metadataFiles', 'archives', 'inputFiles']),
   artifactKeys: Object.freeze(['id', 'name', 'sizeInBytes', 'digest', 'expired', 'createdAt']),
@@ -32,3 +40,4 @@ export const artifactLimit = name => name === SITE_GH.suite ? SITE_GH.suiteBytes
 export const projectSiteArtifact = item => ({ id: item.id, name: item.name, sizeInBytes: item.size_in_bytes,
   digest: item.digest, expired: item.expired, createdAt: item.created_at });
 export const plainArtifact = ({ createdAt, ...artifact }) => artifact;
+export const siteAggregateSteps = source => SITE_GH.legacySources.includes(source) ? SITE_GH.legacySteps : SITE_GH.steps;

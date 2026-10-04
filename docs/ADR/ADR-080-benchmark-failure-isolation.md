@@ -5,6 +5,43 @@ Date: 2026-10-04. Related: REQ/AC-BC-FAIL-001..014, ADR-056/074/076.
 
 ## Decision
 
+The owner separates database comparisons/JSON from Chrome/site qualification.
+The latest clarification permits a separate static build action after JSON,
+including at the end of Benchmarks. The selected implementation triggers the
+independent website action through CI on own-main push/manual and completed
+Benchmarks events. Exactly three workflows remain; measurements and failed/null
+semantics stay intact. Website failures cannot block benchmark JSON.
+
+REQ/AC-BC-FAIL-017..020 own this boundary. Root removes the old aggregate HTML
+steps and qualify/deploy from Benchmarks, and adds independent CI website jobs.
+Ordinary CI suites keep their existing push/PR/manual events. Website jobs have
+no dependency on ordinary CI/RF3. Preserve every archive/source/TUnit/browser/
+coverage gate and least-privilege needs-gated deployment.
+
+Every website build selects the newest completed own-main Benchmarks run by run
+number across push/workflow_dispatch producers; pending runs cannot replace ready
+JSON. Require its success/failure conclusion and successful complete aggregate.
+After selecting the newest completed run, missing/corrupt/expired/failed aggregate
+evidence rejects publication without older fallback. Authenticate an actual
+workflow_run trigger separately: it may refer to an older completed run while a
+newer one is already ready. Actual native Linux CI context and original GitHub
+REST metadata authenticate the selected source/run/attempt/event/conclusion.
+Reselect latest before deployment; a changed tuple fails freshness.
+
+Producer worker owns existing site-isolated-github context/contract/capture/runs/
+receipt/proof and native producer SiteTests. Bound actual workflow_run payloads
+and preserve frozen original seven-step legacy receipts; new producers require
+five database aggregate steps. Root owns workflows, composites/policies,
+closure/coverage inventories and docs; workflow worker owns relevant UnitTests.
+Join at exact original suite/provider archives,270/277 proof, all website gates
+and latest-tuple freshness. No engine, persistence, workload or topology changes.
+
+Stages: contract -> disjoint source/test implementation -> root review/full build/
+format/governance/focused Aspire verification -> scoped main checkpoint/push ->
+authentic JSON and independent native CI website consumer. Rollback coherently
+restores prior workflow/context together without changing immutable results or
+introducing a fourth workflow or fabricated provider.
+
 The owner requires all independent benchmarks to finish and publication to proceed
 when one database workload fails, including unfinished KeyLoad. Preserve every
 planned cell, actual native topology, bounded resources, workload contracts and
@@ -158,8 +195,11 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
    44.014s and two53.448/53.444s; full277-input verification48.428s single and
    59.707/75.799s concurrent, with peak per-child RSS below483MB on the actual
    macOS arm64 machine. These local observations do not prove GitHub saturation.
-   The original TRX has25 builder cases plus12 produce-rejection cases, allowing
-   35 pending requests with two active. Approve two active children, at most64
+   The original TRX has25 builder cases,12 produce-rejection cases and five
+   additional native inputs/verify-inputs cases matched by heavy classification.
+   These42 cases permit40 pending requests with two active; multi-invocation
+   cases invoke children sequentially. This is a source/TRX inventory bound,
+   not an observed queue. Approve two active children, at most64
    FIFO waiters and20 minutes for cancellable admission within the existing
    30-minute Aspire site-suite budget. Classify actual builder/produce/full
    inputs or CLI verify-inputs calls; light probes and native network capture
@@ -187,6 +227,31 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
    A focused development filter cannot qualify the full suite/coverage.
    Rollback reverts only these test-harness/admission changes and truthfully
    restores the observed qualification failure. No engine/data migration.
+   Under FAIL-SITE-CATALOG/ICO (REQ/AC-BC-FAIL-015/016), the complete original-input
+   local development suite reached159/168 passing after the heavy-child repair.
+   Five real Chrome cases exposed emitted `./data/isolated-catalog.json`, which
+   the existing strict URL guard rejects before fetching. Root owns only the
+   catalog attribute in site/Features/BenchmarkComparisons/index.html and its
+   actual-output assertion in SiteIsolatedBuildTests.cs; emit the confined
+   `data/isolated-catalog.json` without relaxing validators or Ready assertions.
+   The existing ICO positive test also confuses an entry color-count byte with
+   the file header type, and expects bitmap planes1 for canonical PNG-backed
+   planes0 entries. Root owns only SiteMetadataTokens.cs and
+   SiteMetadataBinaryAssertions.cs: name/check color-count0 and reserved0, retain
+   file type1/bits32/bounds/dimensions/exact bytes, and check PNG bit-depth8 and
+   RGBA color-type6. The Microsoft ICO structure and Pillow's native PNG ICO
+   writer document these fields; this changes assertions, not canonical assets.
+   Existing five Chrome, standalone output and icon cases are the regressions;
+   source-exact local development then genuine complete Linux qualification,
+   coverage and Pages remain required. Two native GitHub-context tests require
+   actual Linux Actions execution and cannot pass in the local macOS environment;
+   never fabricate that executor or skip the production gate. Root records the
+   original159/168 report, its coverage failure and actual9m14s duration, then
+   repeats relevant cases after source repair. The executed70-file dependency
+   closure is unchanged by this markup/test-only repair, allowing genuine older
+   measured/control source to qualify a freshly captured main website source.
+   Rollback reverts these four owned files and restores the known failure;
+   no data, dependency, transport, engine or storage migration is involved.
 5. Root reviews all diffs, builds solution, runs formatter/governance and focused
    Aspire-owned suites, then checkpoints scoped changes on current main and pushes.
 6. Genuine Linux Benchmarks run qualifies all cells, aggregate, site coverage/browser
@@ -194,7 +259,7 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
 
 Migration is additive to version4 dispositions; deploy producer/validators/site
 atomically. Rollback reverts this coherent change and restores the conservative
-publication gate, retaining immutable original artifacts. AC-BC-FAIL-001..014 map
+publication gate, retaining immutable original artifacts. AC-BC-FAIL-001..019 map
 to automated and actual-provider evidence in the feature specification. Root alone
 owns integration and shared contract updates; workers never commit or push.
 

@@ -20,7 +20,6 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
     private const string KurrentDiscoveryTest = "IsolatedKurrentDiscoverySettingsTests";
     private const string OpenSearchQueryTest = "OpenSearchVectorQueryTests";
     private const string OpenSearchResponseTest = "OpenSearchVectorResponseTests";
-    private const string SiteStartupTest = "SiteQualificationStartupTests";
     private const string UnitBuild = "dotnet build tests/KeyLoad.UnitTests";
     private const string UnitSuite = "unit";
     private const string ComparisonSuite = "comparison";
@@ -30,14 +29,14 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
     private const string ContinueOnError = "continue-on-error:";
 
     [Test]
-    public async Task AcBcFail006And007And010And011RegressionsAreMandatoryBeforeFanOut()
+    public async Task AcBcFail006And007And010NativeRegressionsAreMandatoryBeforeFanOut()
     {
         var workflow = WorkflowLayoutSource.Read(BenchmarksFile);
         var images = WorkflowLayoutSource.JobBlock(workflow, ImageJob);
         await Assert.That(images.Contains(UnitBuild, StringComparison.Ordinal)).IsTrue();
         var steps = WorkflowStepNameTests.StepBlocks(images);
         foreach (var (name, suite) in new[] { (RegistryReadinessTest, UnitSuite), (KurrentDiscoveryTest, ComparisonSuite),
-            (OpenSearchQueryTest, ComparisonSuite), (OpenSearchResponseTest, ComparisonSuite), (SiteStartupTest, UnitSuite) })
+            (OpenSearchQueryTest, ComparisonSuite), (OpenSearchResponseTest, ComparisonSuite) })
         {
             await Assert.That(Count(workflow, name)).IsEqualTo(1);
             var step = steps.Single(value => value.Contains(name, StringComparison.Ordinal));
@@ -79,7 +78,7 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
     }
 
     [Test]
-    public async Task AcUb003And006IndependentNativeJobsJoinEveryRequiredGateBeforePublication()
+    public async Task AcUb003And006AndBcFail017IndependentNativeJobsJoinEveryRequiredGateBeforeJsonAggregation()
     {
         var workflow = WorkflowLayoutSource.Read(BenchmarksFile);
         foreach (var jobId in new[] { "comparison-build", "comparison-plan", ImageJob })
@@ -97,12 +96,8 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
         await Assert.That(aggregate.Contains("needs.comparison-plan.result == 'success'", StringComparison.Ordinal)).IsTrue();
         await Assert.That(aggregate.Contains("needs.comparison-images.result == 'success'", StringComparison.Ordinal)).IsTrue();
         await Assert.That(aggregate.Contains("continue-on-error:", StringComparison.Ordinal)).IsFalse();
-        var qualify = WorkflowLayoutSource.JobBlock(workflow, "qualify");
-        await Assert.That(qualify.Contains("needs: comparison-aggregate", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(qualify.Contains("always() && !cancelled()", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(qualify.Contains("needs.comparison-aggregate.result == 'success'", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(WorkflowLayoutSource.JobBlock(workflow, "deploy")
-            .Contains("needs: qualify", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(WorkflowLayoutSource.JobBlock(workflow, "qualify")).IsEqualTo(string.Empty);
+        await Assert.That(WorkflowLayoutSource.JobBlock(workflow, "deploy")).IsEqualTo(string.Empty);
     }
 
     [Test]

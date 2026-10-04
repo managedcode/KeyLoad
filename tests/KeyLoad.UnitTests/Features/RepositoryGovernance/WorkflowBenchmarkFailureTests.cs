@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.RepositoryGovernance;
 
-/// <summary>AC-BC-FAIL-001/002/008: failures retain results while cancellation stops owned work.</summary>
+/// <summary>AC-BC-FAIL-001/002/008/017: failures retain database JSON while cancellation stops owned work.</summary>
 internal sealed class WorkflowBenchmarkFailureTests
 {
     private const string WorkloadName = "name: Run database workload";
@@ -58,7 +58,7 @@ internal sealed class WorkflowBenchmarkFailureTests
     }
 
     [Test]
-    public async Task AggregateWaitsForEveryMatrixAndPublishesDespiteUnrelatedBuildOrWorkloadFailure()
+    public async Task AggregateWaitsForEveryMatrixAndSavesJsonDespiteUnrelatedBuildOrWorkloadFailure()
     {
         var workflow = WorkflowLayoutSource.Read("benchmarks.yml");
         var aggregate = WorkflowLayoutSource.JobBlock(workflow, "comparison-aggregate");
@@ -70,8 +70,12 @@ internal sealed class WorkflowBenchmarkFailureTests
         await Assert.That(aggregate.Contains("comparison-preflight, comparison-crud, comparison-specialized", StringComparison.Ordinal)).IsTrue();
         foreach (var jobId in new[] { "qualify", "deploy" })
         {
-            var job = WorkflowLayoutSource.JobBlock(workflow, jobId);
-            await Assert.That(job.Contains("always() && !cancelled()", StringComparison.Ordinal)).IsTrue();
+            await Assert.That(WorkflowLayoutSource.JobBlock(workflow, jobId)).IsEqualTo(string.Empty);
         }
+
+        await Assert.That(aggregate.Contains("name: comparison-isolated-suite", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(aggregate.Contains("name: comparison-isolated-provider-evidence", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(workflow.Contains("site/scripts/build.mjs", StringComparison.Ordinal)).IsFalse();
+        await Assert.That(workflow.Contains("comparison-isolated-site-candidate", StringComparison.Ordinal)).IsFalse();
     }
 }

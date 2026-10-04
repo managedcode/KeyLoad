@@ -49,15 +49,35 @@ internal sealed class WorkflowLayoutAspireEntryTests
         var steps = WorkflowStepNameTests.StepBlocks(action);
         var analyzer = steps.Single(step => step.Contains("Build and test code analyzers", StringComparison.Ordinal));
         var site = steps.Single(step => step.Contains("Run all website tests", StringComparison.Ordinal));
+        await AssertStartupEvidenceAsync(analyzer);
         await AssertAnalyzerEvidenceAsync(analyzer);
         await AssertSiteEvidenceAsync(site);
         var receipts = steps.Single(step => step.Contains("Check every required test passed", StringComparison.Ordinal));
-        await Assert.That(receipts.Contains("@('analyzer-tests', 'site-tests')", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(receipts.Contains("@('startup-tests', 'analyzer-tests', 'site-tests')", StringComparison.Ordinal)).IsTrue();
         await Assert.That(receipts.Contains("$env:EVIDENCE_DIR/$suite", StringComparison.Ordinal)).IsTrue();
         await Assert.That(receipts.Contains("[int]$counts.executed -ne [int]$counts.total", StringComparison.Ordinal)).IsTrue();
         await Assert.That(receipts.Contains("[int]$counts.passed -ne [int]$counts.total", StringComparison.Ordinal)).IsTrue();
         await Assert.That(receipts.Contains("[int]$counts.total -le 0", StringComparison.Ordinal)).IsTrue();
         await Assert.That(receipts.Contains("$files.Count -ne 1", StringComparison.Ordinal)).IsTrue();
+    }
+
+    private static async Task AssertStartupEvidenceAsync(string analyzer)
+    {
+        foreach (var required in new[]
+        {
+            "dotnet build tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-restore --configuration Release",
+            AppHostCommand, "--KeyLoadTests:Suite=unit", "--KeyLoadTests:ReportTrx=true",
+            "--KeyLoadTests:Filter=/*/*/SiteQualificationStartupTests/*",
+            "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/startup-tests"
+        })
+        {
+            await Assert.That(analyzer.Contains(required, StringComparison.Ordinal)).IsTrue();
+        }
+
+        var startup = analyzer.IndexOf("--KeyLoadTests:Suite=unit", StringComparison.Ordinal);
+        var native = analyzer.IndexOf("--KeyLoadTests:Suite=analyzers", StringComparison.Ordinal);
+        await Assert.That(startup).IsLessThan(native);
+        await Assert.That(analyzer.Contains("continue-on-error", StringComparison.Ordinal)).IsFalse();
     }
 
     private static async Task AssertAnalyzerEvidenceAsync(string analyzer)

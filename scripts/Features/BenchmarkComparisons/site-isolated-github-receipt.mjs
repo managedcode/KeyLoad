@@ -2,7 +2,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { KEYS, validateCohort } from './aggregate-contracts.mjs';
 import { createIsolatedPlan } from './isolated-plan.mjs';
 import { GH, digestPattern, hashPattern, positive, shaPattern, timestamp } from './isolated-github-contract.mjs';
-import { SITE_GH, artifactLimit, exact, requireSite, safeRelative } from './site-isolated-github-contract.mjs';
+import { SITE_GH, artifactLimit, exact, requireSite, safeRelative, siteAggregateSteps } from './site-isolated-github-contract.mjs';
 
 function validateArtifact(value, name, limit) {
   requireSite(exact(value, SITE_GH.artifactKeys) && value.name === name && positive(value.id)
@@ -10,16 +10,17 @@ function validateArtifact(value, name, limit) {
   timestamp(value.createdAt);
 }
 
-function validateAggregateJob(job, run, artifacts) {
+function validateAggregateJob(job, run, artifacts, sourceRevision) {
+  const steps = siteAggregateSteps(sourceRevision);
   requireSite(exact(job, ['id', 'name', 'url', 'startedAt', 'completedAt', 'steps']) && positive(job.id)
     && job.name === SITE_GH.aggregateJob && job.url === `https://github.com/${SITE_GH.repository}/actions/runs/${run.id}/job/${job.id}`
-    && Array.isArray(job.steps) && job.steps.length === SITE_GH.steps.length);
+    && Array.isArray(job.steps) && job.steps.length === steps.length);
   const start = timestamp(job.startedAt);
   const end = timestamp(job.completedAt);
   const names = new Set();
   const numbers = new Set();
-  for (const step of job.steps) {
-    requireSite(exact(step, ['name', 'number', 'conclusion']) && SITE_GH.steps.includes(step.name)
+  for (const [index, step] of job.steps.entries()) {
+    requireSite(exact(step, ['name', 'number', 'conclusion']) && step.name === steps[index]
       && !names.has(step.name) && positive(step.number) && !numbers.has(step.number) && step.conclusion === 'success');
     names.add(step.name); numbers.add(step.number);
   }
@@ -91,7 +92,7 @@ export function validateSiteIsolatedReceipt(receipt) {
   requireSite(receipt.cohort.sourceRevision === receipt.source.measured && receipt.cohort.runId === receipt.run.id && receipt.cohort.attempt === receipt.run.attempt);
   requireSite(exact(receipt.artifacts, ['suite', 'provider']));
   for (const name of ['suite', 'provider']) validateArtifact(receipt.artifacts[name], SITE_GH[name], artifactLimit(SITE_GH[name]));
-  validateAggregateJob(receipt.aggregateJob, receipt.run, receipt.artifacts);
+  validateAggregateJob(receipt.aggregateJob, receipt.run, receipt.artifacts, receipt.source.measured);
   validateWorkers(receipt, plan);
   validateFiles(receipt.metadataFiles, null, 'metadata/');
   if (receipt.state === SITE_GH.archiveState) validateArchiveFields(receipt, plan);

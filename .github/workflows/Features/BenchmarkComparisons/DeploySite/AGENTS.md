@@ -13,3 +13,9 @@
 
 ## Applicable skills
 - No installed skill is required for this bounded workflow composition; install none.
+
+## Owner-directed database-only producer, 2026-10-04
+- The later owner correction moves this action to the needs-gated CI/ci.yml deploy job after its independent website qualification. This explicitly supersedes inherited Benchmarks executor placement above. Authenticate the actual completed own-main Benchmarks workflow_run producer separately from the CI executor; retain exact archives, source, tests, coverage, freshness and least-privilege Pages/OIDC requirements. Website failures cannot alter or block benchmark JSON.
+
+## Latest benchmark consumer, 2026-10-04
+- The latest owner clarification permits the separate build action after JSON production or in CI, including own-main push/manual CI events. Select the newest completed own-main Benchmarks producer across push/manual events and require its successful authenticated aggregate; reject invalid latest evidence without historical fallback. Authenticate an actual workflow_run trigger separately from the selected producer. Preserve all original archive, source, test, coverage, browser and freshness gates; website failures cannot block benchmark JSON.

@@ -451,17 +451,21 @@ Pages at https://www.keyload.cloud/ uses enforced HTTPS; live apex redirects301 
   - paper surfaces, oversized black display type and mono chapter eyebrows (`01 — …`);
   - graphite instrument panels;
   - Managed Code's iridescent marker as the only accent. There is no green or lime.
-- **Order.** The page presents KeyLoad as the database for AI agents on .NET 10 and Orleans, keeps the early-development wording, and runs in this order:
+- **Order.** The page presents KeyLoad as the AI-native database for AI agents on .NET 10 and Orleans, keeps the early-development wording, and runs in this order:
   1. a hero with the live scene;
   2. a fact strip;
-  3. the anatomy of one agent call;
-  4. a data-shape bento;
-  5. an engine cross-section;
-  6. the evidence instrument, with a perforated provenance receipt;
-  7. a ledger of claims that are not made yet;
-  8. the method;
-  9. reproduce;
-  10. the footer.
+  3. why an AI-native database: the stitched stack against one database, and why we think one database is the future (AC-COMP-009);
+  4. connected data in one request ([DatabaseComposition](DatabaseComposition.md));
+  5. the anatomy of one agent call;
+  6. a data-shape bento;
+  7. an engine cross-section;
+  8. why .NET, Orleans and ZoneTree (AC-COMP-009);
+  9. the evidence instrument, with a perforated provenance receipt;
+  10. a ledger of claims that are not made yet;
+  11. the method;
+  12. reproduce;
+  13. the footer.
+- **Search metadata.** The title is "KeyLoad — the AI-native database for AI agents". Description, Open Graph, Twitter and JSON-LD copy use the same AI-native positioning within the AC-SEO-002 contract; JSON-LD stays a two-node WebSite/SoftwareSourceCode graph without offers, ratings, reviews or actions.
 - **Agent call anatomy.** A numbered timeline beside a graphite terminal shows the real MCP tool `keyload_query_execute` and the real .NET SDK atomic command. It describes the path, not live data.
 - **3D scene motion contract (changed by owner direction).**
   - The carousel of data-shape cards around the KeyLoad mark starts moving as soon as it is ready. It spins while visible and follows a fine pointer.
@@ -673,6 +677,17 @@ rewrite/recovery, representative database scale and Linux/RF3 gates remain open.
 
 ## Failed-cell publication repair, 2026-10-04
 
+The owner separates database measurement from browser/site qualification. A
+separate static-site build action may follow the generated JSON or run through
+CI; the latest clarification permits an end-of-Benchmarks static build. The
+selected implementation uses independent CI website jobs on own-main push/manual
+and completed Benchmarks events. Every build selects the newest completed
+own-main push/manual benchmark with a successful authenticated aggregate, across
+both producer event kinds. Invalid latest evidence fails without older fallback;
+a workflow_run trigger is authenticated separately from the selected producer.
+Website failures do not block metrics. Exactly CI, Benchmarks and Release remain.
+ADR-080 owns this workflow/trust-boundary change.
+
 Owner direction explicitly supersedes the all-success restriction of REQ-BC-058,
 AC-ISO-007/009 and ADR-076 for benchmark publication. Every planned cell remains
 accounted for in the same authenticated run/attempt/source. Successful independent
@@ -697,6 +712,29 @@ KeyLoad engine repair and concurrent series-codec work are outside this task.
 | REQ-BC-FAIL-012 execute the actual native probe contract | AC-BC-FAIL-012 C# probe requests serialize the existing lowercase operation/values contract; median arithmetic and odd/even/empty assertions remain unchanged. Native error probes preserve string error codes and use the actual native error name for numeric DOMException codes; real AbortController cancellation must still assert AbortError | Existing SiteMeasurementArithmeticTests and SiteIsolatedHttpTests, original failed TRX and focused genuine-input development checks |
 | REQ-BC-FAIL-013 complete disposable builder source | AC-BC-FAIL-013 SEO/vendor scratch repositories copy the exact canonical isolated-contract.json bytes from the actual source repository before invoking the actual builder. Vendor-only mutations use the accepted fixture's unchanged full original aggregate and270-worker inventory; they must not substitute an aggregate-only directory or duplicate the2GB raw inventory for each metadata mutation. Existing missing/link/corrupt-asset negatives must reach their intended checks before output; the valid vendor compression case must succeed. No fabricated contract, provider input, replacement builder or weaker assertion | Existing four SiteMetadataRejectionTests and three SiteVendorBuildTests, with actual source-byte copying and unchanged input authority |
 | REQ-BC-FAIL-014 bound heavy qualification children | AC-BC-FAIL-014 expensive full-cohort builder/archive-verification children share bounded admission before their existing300s active execution deadline starts. Retain complete277 inputs/270 workers, stdout/stderr bounds, caller cancellation and original-byte verification. Hold ownership until actual child exit and readers settle; cancelled queued requests start no child. Select limits from original timings and bounded source-exact development measurements, then require every complete site test and native coverage gate in genuine Linux GitHub | Real-process admission/cancellation/failure regressions, original-input single-versus-parallel phase/CPU/RSS development receipts, complete unfiltered Aspire-owned GitHub site/TRX/Node+Chrome coverage and Pages |
+| REQ-BC-FAIL-015 emit a confined browser catalog URL | AC-BC-FAIL-015 the actual built HTML uses `data/isolated-catalog.json`, which the existing strict `confinedUrl` accepts. Retain rejection of dot segments, traversal, foreign origins, credentials, redirects, mismatched hashes and unavailable evidence. Real Chrome must reach the existing Ready predicate and preserve every numeric/null, provenance, responsive and lifecycle assertion | Existing SiteIsolatedBuildTests, SiteIsolatedBrowserTests, SiteIsolatedFailedCellBrowserTests, SiteIsolatedStandaloneBrowserTests and SiteBrowserBehaviorTests; genuine Linux full site and coverage |
+| REQ-BC-FAIL-016 validate the actual PNG-backed ICO structure | AC-BC-FAIL-016 distinguish the ICO file header type1 from each directory entry's color-count0 and reserved0. The canonical PNG-backed entries retain planes0, bits32, bounded16/32/48 frames and actual8-bit RGBA PNG payloads. Preserve exact console/site/output bytes, frame bounds, dimensions and missing/corrupt asset checks | Existing SiteMetadataTests.AC_SEO_001_IconsAreValidSharedBytesAndEmittedFromTheRealBuild; genuine Linux full site and coverage |
+| REQ-BC-FAIL-017 database-only benchmark graph | AC-BC-FAIL-017 Benchmarks has only native preparation, database comparisons, authenticated result validation and JSON aggregation. No browser/site qualification/coverage/Pages dependency; a separate static build may follow ready JSON; every independent cell still finishes and failure still yields null data | WorkflowBenchmarkFailureTests and WorkflowThreePipelineLayoutTests; actual completed270 cells/aggregate JSON |
+| REQ-BC-FAIL-018 independent automatic JSON consumer | AC-BC-FAIL-018 CI website jobs run on own-main push/manual and actual completed Benchmarks events, independently of ordinary CI/RF3 and producer workload failures. Consume only a successful aggregate and its exact original suite/provider archives. Chrome/site/build/deploy remain exclusively CI website work and cannot affect the producer | Updated workflow/source/producer-selection TUnit tests, genuine workflow_run CI and published JSON/browser join |
+| REQ-BC-FAIL-019 authenticate the cross-workflow producer | AC-BC-FAIL-019 native Linux CI qualify/deploy context validates the real GitHub workflow_run payload: repository477801965, own-main head repository/branch, Benchmarks path/name, completed status, allowed producer event, immutable source, positive exact run/attempt and success/failure conclusion. Reject cancellation, fork, other workflow, changed tuple, missing/malformed/nonregular/oversized event file and historical publication overrides before capture. Authenticate that trigger separately from the latest selected producer and current CI executor/control/website; reselect latest and reauthenticate before deploy | Actual native context/selection rejection tests and CI AcPipe003; original archive receipts,270/277 identity and existing freshness coverage |
+
+| REQ-BC-FAIL-020 latest metrics for every website build | AC-BC-FAIL-020 select the highest run-number completed own-main Benchmarks run across push/workflow_dispatch producers; pending runs do not replace finished JSON. Require success/failure producer conclusion, successful aggregate and all original270/277 proofs. Reject missing/corrupt/latest failed aggregation without older fallback. Own-main CI push/manual and workflow_run all use this selection; changed latest tuple before deploy prevents stale refresh | Real producer-selection positive/negative TUnit cases, native CI capture and freshness/provider join |
+
+TASK-FAIL-SEPARATE-001 (root) records policy/requirements/ADR before edits.
+TASK-FAIL-SEPARATE-002 (root) removes site generation and qualify/deploy from
+Benchmarks, adds independent CI own-main push/manual and workflow_run website jobs, and prevents ordinary CI suites
+from running again for that event. Keep native database matrices untouched.
+TASK-FAIL-SEPARATE-003 (producer worker) adapts only the site GitHub context,
+capture/aggregate-step contracts and their native SiteTests to the real CI event and strict latest completed producer selection.
+Original historical receipts retain their actual legacy aggregate-step inventory;
+new producers bind the five database-only aggregate steps. Never rewrite archives.
+TASK-FAIL-SEPARATE-004 (workflow worker) updates only workflow TUnit regressions.
+TASK-FAIL-SEPARATE-005 (root) joins exact-source build/format/governance/Aspire
+checks, scoped commit/push, genuine benchmark JSON and independent CI publication.
+Root owns action policies, dependency/source inventory and shared docs. No worker
+may alter engines, raw measurements, authorization, topology or numerical gates.
+
+The independent source-stage [development receipt](../implementation/benchmark-json-ci-development-2026-10-04.json) binds the full0-warning/0-error build, format/governance and34/34 real Aspire/TUnit workflow/startup regressions to the actual source candidate. The six native context modules pass syntax checks; delivered-source native CI, full site coverage and publication remain pending. The genuine73 cohort independently completed all270 cells and authenticated JSON aggregation despite16 failed/null KeyLoad workloads; successful-job counts include explicitly unsupported cells and are not measurement counts.
 
 [ADR-080](../ADR/ADR-080-benchmark-failure-isolation.md) owns the boundary change.
 The site follow-up is FAIL-SITE-PROBES (native worker, four test-helper files and
@@ -706,8 +744,11 @@ regressions after the root contract), then FAIL-SITE-JOIN/DELIVERY (root).
 Native worker owns SiteNodeProbe.cs, SiteIsolatedNodeProgram.cs,
 SiteMetadataRejectionTests.cs and SiteVendorTestScope.cs. The producer first
 profiles the unchanged actual source/original input before admission changes.
-The original TRX contains25 builder cases and12 produce-rejection cases; with
-two active children,35 eligible cases may wait. The approved admission policy is
+The original TRX contains25 builder cases and12 produce-rejection cases, plus
+five native inputs/verify-inputs cases matched by the heavy classification.
+These42 cases permit40 pending requests with two active children; cases with
+multiple invocations issue them sequentially. This is an inventory bound,
+not an observed concurrent queue. The approved admission policy is
 two active children, a FIFO queue of at most64 waiters and a20-minute cancellable
 admission deadline before the unchanged300-second active deadline. Local
 source6e/original AA270 profiling with native V8 coverage measured44.014s for one

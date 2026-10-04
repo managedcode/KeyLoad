@@ -4,13 +4,17 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_run:
+    workflows: [Benchmarks]
+    types: [completed]
 permissions:
   contents: read
 concurrency:
-  group: keyload-ci-${{ github.ref }}
+  group: keyload-ci-${{ github.event_name == 'workflow_run' && 'site' || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   repository-checks:
+    if: github.event_name != 'workflow_run'
     name: Check repository rules
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -20,6 +24,7 @@ jobs:
       - name: Check repository rules
         run: node scripts/Features/RepositoryGovernance/verify.mjs
   analyzer-rules:
+    if: github.event_name != 'workflow_run'
     name: Test code analyzers
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -49,6 +54,7 @@ jobs:
             artifacts/code-quality/**
           if-no-files-found: error
   verify:
+    if: github.event_name != 'workflow_run'
     name: Build and test KeyLoad
     needs: repository-checks
     strategy:
@@ -125,6 +131,7 @@ jobs:
           path: artifacts/code-quality/**
           if-no-files-found: error
   docker-rf3:
+    if: github.event_name != 'workflow_run'
     name: Test three-node database
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -196,3 +203,59 @@ jobs:
           name: code-quality-docker-rf3
           path: artifacts/code-quality/**
           if-no-files-found: error
+  qualify:
+    name: Check website
+    if: >-
+      github.repository == 'managedcode/KeyLoad' && github.event.repository.id == 477801965 &&
+      ((github.ref == 'refs/heads/main' &&
+        (github.event_name == 'push' || github.event_name == 'workflow_dispatch')) ||
+       (github.event_name == 'workflow_run' &&
+        github.event.workflow_run.head_repository.id == 477801965 &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.name == 'Benchmarks' &&
+        github.event.workflow_run.path == '.github/workflows/benchmarks.yml' &&
+        github.event.workflow_run.status == 'completed' &&
+        (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch') &&
+        (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure')))
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions: {contents: read, actions: read}
+    outputs:
+      mode: ${{ steps.qualification.outputs.mode }}
+      site_revision: ${{ steps.qualification.outputs.site_revision }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: control
+          persist-credentials: false
+      - name: Run website checks
+        id: qualification
+        uses: ./control/.github/workflows/Features/BenchmarkComparisons/QualifySite
+  deploy:
+    name: Publish website
+    needs: qualify
+    if: ${{ always() && !cancelled() && needs.qualify.result == 'success' && needs.qualify.outputs.mode == 'publish' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions: {contents: read, actions: read, pages: write, id-token: write}
+    environment: {name: github-pages, url: '${{ steps.publication.outputs.page_url }}'}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      QUALIFIED_REVISION: ${{ needs.qualify.outputs.site_revision }}
+      CONTROL_REVISION: ${{ github.workflow_sha }}
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: control
+          persist-credentials: false
+      - name: Publish website
+        id: publication
+        uses: ./control/.github/workflows/Features/BenchmarkComparisons/DeploySite

@@ -41,4 +41,9 @@
 - ADR-064/076 place all comparative tests in Benchmarks; Pages follows only its complete current producer with exact original identity. Retire active legacy collection, rendering and dependencies while preserving immutable historical evidence as history and every applicable site/source/provenance/qualification gate.
 
 ## Owner-directed failed-cell publication, 2026-10-04
+
+- Owner correction 2026-10-04 moves website work to CI: Benchmarks only compares databases and emits authenticated JSON, including unavailable cells. CI automatically consumes that producer JSON for the landing and owns website tests/build/Pages. Preserve every website gate in CI; never run Chrome, browser/site qualification or static-site generation inside Benchmarks or make them dependencies of metrics production. This explicitly supersedes the earlier Benchmarks placement while retaining exactly three workflows.
 - ADR-080 permits authenticated same-run failed cells alongside successful competitors. Render failed cells as no data with null numeric fields and actual job links; an entirely unavailable cohort has a null corpus digest. Full TUnit/browser/coverage/source/freshness gates remain mandatory. Original retained GitHub report fixtures are parser/coverage test inputs only, never current publication measurements.
+
+## Latest benchmark and separate build action, 2026-10-04
+- The latest owner clarification explicitly permits static website building after benchmark JSON or a separate CI trigger, superseding the interim static-build prohibition above. The selected independent CI action runs on own-main push/manual and completed Benchmarks events, always consumes the newest completed own-main push/manual benchmark and its successful authenticated aggregate, and retains original source/run/attempt, failed/null cells, all website gates and predeploy freshness. Never fall back to older evidence after rejecting the latest completed producer.

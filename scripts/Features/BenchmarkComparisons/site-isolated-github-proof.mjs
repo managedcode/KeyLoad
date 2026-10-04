@@ -9,7 +9,7 @@ import { validateAggregateProof } from './aggregate-proof.mjs';
 import { readPreparedImages } from './image-bundle-read.mjs';
 import { requireWorkerImages } from './isolated-github-images.mjs';
 import { produceIsolatedProjection } from '../../../site/Features/BenchmarkComparisons/isolated-projection.mjs';
-import { SITE_GH, exact, plainArtifact, projectSiteArtifact, requireSite } from './site-isolated-github-contract.mjs';
+import { SITE_GH, exact, plainArtifact, projectSiteArtifact, requireSite, siteAggregateSteps } from './site-isolated-github-contract.mjs';
 import { validateSiteIsolatedReceipt } from './site-isolated-github-receipt.mjs';
 import { selectSiteIsolatedEvidence, siteCohort } from './site-isolated-github-runs.mjs';
 import { siteMetadataFiles, verifySiteFiles } from './site-isolated-github-files.mjs';
@@ -32,7 +32,7 @@ export async function proveSiteIsolatedEvidence({ input, selection, source, mode
     run: { id: run.id, number: run.run_number, attempt: run.run_attempt, url: run.html_url }, cohort,
     aggregateJob: { id: job.id, name: job.name, url: `https://github.com/${SITE_GH.repository}/actions/runs/${run.id}/job/${job.id}`,
       startedAt: job.started_at, completedAt: job.completed_at,
-      steps: SITE_GH.steps.map(name => { const step = job.steps.find(item => item.name === name); return { name, number: step.number, conclusion: step.conclusion }; }) },
+      steps: siteAggregateSteps(run.head_sha).map(name => { const step = job.steps.find(item => item.name === name); return { name, number: step.number, conclusion: step.conclusion }; }) },
     artifacts: projectedArtifacts,
     workers: selected.cells.map(item => ({ id: item.cell.id, job: projectJob(item.job, cohort, GH.workerSteps), artifact: projectSiteArtifact(item.artifact) })),
     image: { job: projectJob(selected.image.job, cohort, GH.imageSteps), artifact: projectSiteArtifact(selected.image.artifact) },
@@ -78,10 +78,12 @@ export async function validateSiteIsolatedInputs({ input, receipt: receiptPath }
   await verifySiteFiles(input, receipt.inputFiles);
   const original = validateSiteIsolatedReceipt(await readJson(path.join(input, SITE_GH.metadataProof), SITE_GH.jsonBytes));
   requireSite(isDeepStrictEqual({ ...receipt, state: SITE_GH.metadataState, archives: null, inputFiles: null }, original));
-  const selection = await selectSiteIsolatedEvidence({ input, mode: receipt.mode,
+  const run = await readJson(path.join(input, SITE_GH.metadata, 'attempts', String(receipt.run.id),
+    String(receipt.run.attempt), 'run-attempt.json'));
+  const selection = await selectSiteIsolatedEvidence({ input, mode: receipt.mode, legacyArchive: true,
     requestedRun: receipt.mode === SITE_GH.validate ? String(receipt.run.id) : null,
     producer: receipt.mode === SITE_GH.publish ? { runId: receipt.run.id, attempt: receipt.run.attempt,
-      sourceRevision: receipt.source.measured } : null });
+      sourceRevision: receipt.source.measured, event: run.event, conclusion: run.conclusion } : null });
   const authenticated = await proveSiteIsolatedEvidence({ input, selection, source: { website: receipt.source.website,
     control: receipt.source.control }, mode: receipt.mode });
   requireSite(isDeepStrictEqual(authenticated, original));

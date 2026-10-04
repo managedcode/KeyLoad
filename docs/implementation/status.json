@@ -3267,7 +3267,7 @@
     "status": "in_progress",
     "feature": "docs/Features/BenchmarkComparisons.md",
     "decision": "docs/ADR/ADR-080-benchmark-failure-isolation.md",
-    "sourceStage": "native_competitors_full270_and_development_site_harness_qualified_full_site_publication_pending",
+    "sourceStage": "database_JSON_and_latest_independent_CI_action_source_build_format_governance_34_Aspire_regressions_passed",
     "baselineRun": 37154664616,
     "originalFailedJob": 111299652762,
     "originalDiagnosticArtifact": 11286445994,
@@ -3782,6 +3782,71 @@
         "overallExitCode": 10,
         "afterSessionCoverageGate": "failed as filtered development;full unfiltered qualification mandatory",
         "publicationQualified": false
+      }
+    },
+    "siteCatalogAndIcoFollowup": {
+      "requirements": [
+        "REQ-BC-FAIL-015",
+        "REQ-BC-FAIL-016"
+      ],
+      "sourceState": "contract_recorded_before_four_file_repair",
+      "originalDevelopmentFullSuite": {
+        "sourceBaseRevision": "6e09f03b1d3d98f5bd01479d025103982b9f87ee",
+        "harnessRevision": "77167cbca9efe8942aab869dd52ad5b0b6cc72a1",
+        "measuredControlRevision": "aa49aa93982866b85a80e771a749d9b968ffc9f2",
+        "totalIncludingAfterSession": 168,
+        "passed": 159,
+        "failed": 9,
+        "skipped": 0,
+        "exitCode": 10,
+        "duration": "9m14s",
+        "trxSha256": "a9b207deb9f72a7a543e98da673103ea65fc94548677e6eaf49d77192bae0f9e",
+        "publicationQualified": false
+      },
+      "catalogCause": "emitted leading dot segment is rejected before fetch by unchanged confinedUrl",
+      "icoCause": "entry color-count confused with file type; canonical PNG-backed planes0 not bitmap planes1",
+      "genuineLinuxSiteQualification": "pending",
+      "implementation": "four_source_files_fixed_full_solution_build_and_format_passed; genuine_Linux_browser_regressions_pending",
+      "localBrowserFollowup": "aborted_after_owner_scope_correction; no_local_browser_qualification_claim"
+    },
+    "workflowSeparation": {
+      "requirements": [
+        "REQ-BC-FAIL-017",
+        "REQ-BC-FAIL-018",
+        "REQ-BC-FAIL-019",
+        "REQ-BC-FAIL-020"
+      ],
+      "ownerCorrection": "Independent static build action may follow JSON or run through CI; no benchmark Chrome/site tests; every site build uses latest completed authenticated benchmark",
+      "implementation": "source_implemented_and_development_verified",
+      "benchmarkNativeSourceAndEngineUnchanged": true,
+      "websiteConsumer": "independent CI own-main push/manual and completed Benchmarks workflow_run",
+      "runtimeQualified": false,
+      "publicationQualified": false,
+      "selection": "newest_completed_own_main_push_or_workflow_dispatch_Benchmarks; invalid_latest_no_older_fallback; fresh_latest_tuple_before_deploy",
+      "genuineCompletedCohort": {
+        "sourceRevision": "73aebfd3f72695357834599e813aba77b9e274ad",
+        "runId": 37184989107,
+        "attempt": 1,
+        "workers": 270,
+        "competitorJobSuccesses": 240,
+        "competitorUnexpectedFailures": 0,
+        "keyLoadJobSuccesses": 14,
+        "keyLoadUnavailableFailures": 16,
+        "numericMeasurementCountNotInferredFromJobSuccesses": true,
+        "aggregateJobId": 111403286924,
+        "aggregateConclusion": "success",
+        "suiteArtifactId": 11299092773,
+        "providerArtifactId": 11298868223,
+        "newSourceVerification": false
+      },
+      "developmentReceipt": "docs/implementation/benchmark-json-ci-development-2026-10-04.json",
+      "localFocusedAspireRegressions": {
+        "total": 34,
+        "passed": 34,
+        "failed": 0,
+        "skipped": 0,
+        "trxSha256": "91e50a30de911b506dd83962b509bf720d9adfebf527b742aefff4f3dc3faa2d",
+        "qualification": "development_only"
       }
     }
   }

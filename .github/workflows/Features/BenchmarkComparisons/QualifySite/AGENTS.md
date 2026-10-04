@@ -16,3 +16,7 @@
 
 ## Owner-directed failed-cell publication, 2026-10-04
 - ADR-080 allows authenticated failed workload/null-report cells; keep every existing archive, source, TUnit, coverage, browser and freshness gate. The trusted producer/builder dependency closure now includes failed-cell finalization and its actual imports; source-bound counts change together with validators.
+- The later owner correction moves this action to CI/ci.yml, triggered by an actual completed own-main Benchmarks workflow_run. This explicitly supersedes the inherited Benchmarks executor placement above. CI executor/control/website identity and benchmark producer source/run/attempt/event remain distinct and authenticated; browser, source, archive, TUnit, coverage and freshness gates remain mandatory in CI and cannot block benchmark JSON production.
+
+## Latest benchmark consumer, 2026-10-04
+- The latest owner clarification permits the separate build action after JSON production or in CI, including own-main push/manual CI events. Select the newest completed own-main Benchmarks producer across push/manual events and require its successful authenticated aggregate; reject invalid latest evidence without historical fallback. Authenticate an actual workflow_run trigger separately from the selected producer. Preserve all original archive, source, test, coverage, browser and freshness gates; website failures cannot block benchmark JSON.

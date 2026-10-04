@@ -1,34 +1,42 @@
 import path from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import { absolutePath, existingPath } from './aggregate-files.mjs';
 import { createDirectory } from './image-bundle-files.mjs';
 import { GH } from './isolated-github-contract.mjs';
 import { captureApi, downloadArtifact } from './isolated-github-api.mjs';
 import { initializeTransport } from './isolated-github-transport.mjs';
 import { validateDownloadedArchive } from './isolated-github-stream.mjs';
-import { writeJson } from './isolated-github-files.mjs';
+import { readJson, writeJson } from './isolated-github-files.mjs';
 import { SITE_GH, requireSite } from './site-isolated-github-contract.mjs';
 import { createSiteIsolatedContext, parseSiteCaptureArguments } from './site-isolated-github-context.mjs';
 import { captureSitePages } from './site-isolated-github-api.mjs';
-import { selectSiteIsolatedEvidence, validateSiteRun } from './site-isolated-github-runs.mjs';
+import { flattenSiteRuns, selectLatestSiteProducer, selectSiteIsolatedEvidence, validateSiteRun } from './site-isolated-github-runs.mjs';
 import { proveSiteIsolatedEvidence } from './site-isolated-github-proof.mjs';
 import { siteMetadataFiles } from './site-isolated-github-files.mjs';
 
 async function captureSelectionRuns(directory, context, workflow) {
-  let event = context.mode === SITE_GH.publish ? context.executor.event : SITE_GH.producerEvents[0];
+  if (context.trigger !== null) {
+    const trigger = await captureApi(`${GH.api}/runs/${context.trigger.runId}/attempts/${context.trigger.attempt}`,
+      path.join(directory, 'trigger-run.json'), false, context);
+    requireSite(isDeepStrictEqual(selectLatestSiteProducer([trigger], workflow), context.trigger));
+  }
   if (context.requestedRun !== null) {
     const pinned = await captureApi(`${GH.api}/runs/${context.requestedRun}`,
       path.join(directory, SITE_GH.pinnedRunCapture), false, context);
     validateSiteRun(pinned, workflow);
     requireSite(String(pinned.id) === context.requestedRun);
-    event = pinned.event;
   }
-  await captureSitePages(`${GH.api}/workflows/benchmarks.yml/runs?branch=main&event=${event}`, directory, 'workflow_runs', context);
+  await captureSitePages(`${GH.api}/workflows/benchmarks.yml/runs?branch=main`, directory, 'workflow_runs', context);
 }
 
 async function captureSelection(input, context) {
   const directory = path.join(input, SITE_GH.metadata);
   const workflow = await captureApi(`${GH.api}/workflows/benchmarks.yml`, path.join(directory, 'workflow.json'), false, context);
   await captureSelectionRuns(directory, context, workflow);
+  if (context.mode === SITE_GH.publish) {
+    const runs = flattenSiteRuns(await readJson(path.join(directory, 'workflow_runs-pages.json')));
+    context.producer = selectLatestSiteProducer(runs, workflow);
+  }
   const attempts = await createDirectory(path.join(directory, 'attempts'));
   for (let pair = 0; pair <= SITE_GH.pairs; pair += 1) {
     const selected = await selectSiteIsolatedEvidence({ input, mode: context.mode, requestedRun: context.requestedRun,
@@ -53,7 +61,7 @@ async function captureSelection(input, context) {
 async function capture({ environment = process.env, args = process.argv.slice(3) }, download) {
   const parsed = parseSiteCaptureArguments(args);
   const input = absolutePath(parsed.input);
-  const context = createSiteIsolatedContext(environment, parsed);
+  const context = await createSiteIsolatedContext(environment, parsed);
   await existingPath(path.dirname(input), true);
   await createDirectory(input);
   const directory = await createDirectory(path.join(input, SITE_GH.metadata));

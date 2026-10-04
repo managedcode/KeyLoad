@@ -85,8 +85,6 @@ jobs:
         run: dotnet build tests/KeyLoad.UnitTests --no-restore --configuration Release
       - name: Check bounded Docker registry readiness
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/ImageRegistryReadinessTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/registry-readiness
-      - name: Check website evidence startup
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/SiteQualificationStartupTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/site-startup
       - name: Build KeyLoad server and benchmark Docker images
         id: images
         run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs
@@ -387,15 +385,6 @@ jobs:
         run: node scripts/Features/BenchmarkComparisons/isolated-github-collect.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --input="$RUNNER_TEMP/isolated-capture"
       - name: Check all 270 benchmark results
         run: node scripts/Features/BenchmarkComparisons/aggregate-cli.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --input="$RUNNER_TEMP/isolated-capture/data" --proof="$RUNNER_TEMP/isolated-capture/github/proof.json" --output="$RUNNER_TEMP/isolated-aggregate"
-      - name: Generate website benchmark data
-        run: node site/scripts/build.mjs --isolated="$RUNNER_TEMP/isolated-aggregate" --output="$RUNNER_TEMP/isolated-site" --revision="$GITHUB_SHA" --site-revision="$GITHUB_SHA" --evidence-url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-      - name: Save website benchmark data
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: comparison-isolated-site-candidate
-          path: ${{ runner.temp }}/isolated-site/**
-          if-no-files-found: error
-          retention-days: 90
       - name: Save combined benchmark results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
@@ -411,49 +400,3 @@ jobs:
           path: ${{ runner.temp }}/isolated-capture/github/**
           if-no-files-found: error
           retention-days: 90
-  qualify:
-    name: Check website
-    needs: comparison-aggregate
-    if: ${{ always() && !cancelled() && needs.comparison-aggregate.result == 'success' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 180
-    permissions: {contents: read, actions: read}
-    outputs:
-      mode: ${{ steps.qualification.outputs.mode }}
-      site_revision: ${{ steps.qualification.outputs.site_revision }}
-    env:
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
-    steps:
-      - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.workflow_sha }}
-          path: control
-          persist-credentials: false
-      - name: Run website checks
-        id: qualification
-        uses: ./control/.github/workflows/Features/BenchmarkComparisons/QualifySite
-  deploy:
-    name: Publish website
-    needs: qualify
-    if: ${{ always() && !cancelled() && needs.qualify.result == 'success' && needs.qualify.outputs.mode == 'publish' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    permissions: {contents: read, actions: read, pages: write, id-token: write}
-    environment: {name: github-pages, url: '${{ steps.publication.outputs.page_url }}'}
-    env:
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
-      QUALIFIED_REVISION: ${{ needs.qualify.outputs.site_revision }}
-      CONTROL_REVISION: ${{ github.workflow_sha }}
-    steps:
-      - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.workflow_sha }}
-          path: control
-          persist-credentials: false
-      - name: Publish website
-        id: publication
-        uses: ./control/.github/workflows/Features/BenchmarkComparisons/DeploySite

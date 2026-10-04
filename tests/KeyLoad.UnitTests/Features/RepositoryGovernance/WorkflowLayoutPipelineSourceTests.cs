@@ -4,11 +4,9 @@ internal sealed class WorkflowLayoutPipelineSourceTests
 {
     private const string BenchmarksFile = "benchmarks.yml";
     private const string ReleaseFile = "release.yml";
-    private const string QualifySiteAction = "./control/.github/workflows/Features/BenchmarkComparisons/QualifySite";
-    private const string DeploySiteAction = "./control/.github/workflows/Features/BenchmarkComparisons/DeploySite";
 
     [Test]
-    public async Task AcPipe002BenchmarksRetainsNativeGraphAndGatesWebsiteAfterFullQualification()
+    public async Task AcPipe002AndBcFail017BenchmarksRetainsOnlyNativeDatabaseGraphAndJsonAggregation()
     {
         var benchmarks = WorkflowLayoutSource.Read(BenchmarksFile);
         await Assert.That(benchmarks.StartsWith("name: Benchmarks\n", StringComparison.Ordinal)).IsTrue();
@@ -21,7 +19,6 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         {
             "comparison-build", "comparison-plan", "comparison-images", "comparison-preflight",
             "comparison-crud", "comparison-specialized", "comparison-aggregate",
-            "qualify", "deploy",
         }.Order(StringComparer.Ordinal).ToArray();
         await Assert.That(jobs.Order(StringComparer.Ordinal).SequenceEqual(expectedJobs)).IsTrue();
 
@@ -39,7 +36,7 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         await AssertNativeJob(benchmarks, "comparison-specialized");
         await AssertAggregate(WorkflowLayoutSource.JobBlock(benchmarks, "comparison-aggregate"));
         await AssertPinnedImage(WorkflowLayoutSource.JobBlock(benchmarks, "comparison-images"));
-        await AssertWebsiteDependency(benchmarks);
+        await AssertDatabaseOnly(benchmarks);
     }
 
     [Test]
@@ -72,7 +69,18 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         await Assert.That(job.Contains("needs: [comparison-build, comparison-plan, comparison-images, comparison-preflight, comparison-crud, comparison-specialized]",
             StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("comparison-crud, comparison-specialized", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(job.Contains("--isolated=", StringComparison.Ordinal)).IsTrue();
+        var steps = WorkflowStepNameTests.StepBlocks(job);
+        var expected = new[]
+        {
+            "name: Verify benchmark plan", "name: Download benchmark results",
+            "name: Check all 270 benchmark results", "name: Save combined benchmark results",
+            "name: Save GitHub result verification"
+        };
+        var authenticatedSteps = steps.Where(static step => !step.Contains("name: Download source code", StringComparison.Ordinal));
+        await Assert.That(authenticatedSteps.Select(static step => step.Split('\n')[0].Trim()[2..])
+            .SequenceEqual(expected)).IsTrue();
+        await Assert.That(job.Contains("name: comparison-isolated-suite", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(job.Contains("name: comparison-isolated-provider-evidence", StringComparison.Ordinal)).IsTrue();
     }
 
     private static async Task AssertPinnedImage(string job)
@@ -82,15 +90,16 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         await Assert.That(job.Contains("timeseries-native-pinned-image-facts", StringComparison.Ordinal)).IsTrue();
     }
 
-    private static async Task AssertWebsiteDependency(string workflow)
+    private static async Task AssertDatabaseOnly(string workflow)
     {
-        var qualify = WorkflowLayoutSource.JobBlock(workflow, "qualify");
-        await Assert.That(qualify.Contains("needs: comparison-aggregate",
-            StringComparison.Ordinal)).IsTrue();
-        await Assert.That(qualify.Contains(QualifySiteAction, StringComparison.Ordinal)).IsTrue();
-        var deploy = WorkflowLayoutSource.JobBlock(workflow, "deploy");
-        await Assert.That(deploy.Contains("needs: qualify", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(deploy.Contains(DeploySiteAction, StringComparison.Ordinal)).IsTrue();
+        foreach (var excluded in new[]
+        {
+            "website", "Chrome", "browser", "pages:", "id-token:", "QualifySite", "DeploySite",
+            "BuildIsolatedSite", "SiteQualificationStartupTests", "site/", "site-isolated-", "Suite=site"
+        })
+        {
+            await Assert.That(workflow.Contains(excluded, StringComparison.OrdinalIgnoreCase)).IsFalse();
+        }
     }
 
     private static async Task AssertReleaseVersion(string job)
