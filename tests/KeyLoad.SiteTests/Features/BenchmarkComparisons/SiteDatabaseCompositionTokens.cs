@@ -3,7 +3,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal static class SiteDatabaseCompositionTokens
 {
     internal const string ReadmePath = "README.md";
-    internal const string ReadmeIntroductionStart = "# KeyLoad";
+    internal const string ReadmeIntroductionStart = "<h1 align=\"center\">KeyLoad</h1>";
     internal const string ReadmeIntroductionEnd = "## What you can build";
     internal const string HtmlPath = "site/Features/BenchmarkComparisons/index.html";
     internal const string HeroStart = "<p class=\"hero-summary\">";
@@ -11,7 +11,7 @@ internal static class SiteDatabaseCompositionTokens
     internal const string HtmlCompositionStart = "<section class=\"anatomy\" id=\"composition\"";
     internal const string HtmlSectionEnd = "</section>";
     internal const string ReadmeCompositionStart = "## One database, connected models";
-    internal const string ReadmeCompositionEnd = "## Get started";
+    internal const string ReadmeCompositionEnd = "## Quick start";
     internal const string MissingRepository = "Composition content tests require the actual site repository path.";
     internal const string MissingSection = "The public database composition section is missing or incomplete.";
     internal const string OneDatabase = "one database for AI agents";
