@@ -1030,8 +1030,19 @@
   },
   "KL-031": {
     "title": "ANN projection lifecycle",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/Search/ManagedAnnSeed.md",
+      "docs/ADR/ADR-019-managed-ann.md",
+      "src/KeyLoad.Core/Features/Search/AnnSeedCollector.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/AnnSeedReadBudgetTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/AnnSeedReservationTests.cs"
+    ],
+    "sourceStage": "R2A_bounded_historical_seed_9_source_12_tests_34_cases_full_static23_and_unchanged_actual_Aspire_normal34_scalar34_local_pass_persisted_projection_replay_and_delivered_Linux_RF3_pending",
+    "runtimeQualified": false,
+    "allAcceptanceClosed": false,
+    "localDevelopmentGatePassed": true,
+    "localDevelopmentEvidence": "artifacts/qualification/managed-ann-r2a-development-20261004/focused02-originals/manifest.json"
   },
   "KL-032": {
     "title": "Filtered vector planner",

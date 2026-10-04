@@ -12766,7 +12766,7 @@
         "joinCondition": "actual_native_runtime_source_review_full_strict_gates_and_original_Aspire_reports_no_product_RF3_claim",
         "id": "TASK-NCQRS-C0-RUNTIME-ORACLES",
         "owner": "cluster_wave",
-        "state": "nine_native_test_files_compile_actual_six_failures_unchanged_oracles_wait_for_published_owner_Graph_repair",
+        "state": "unchanged_six_C0_local_Aspire_pass_published_dependencies_C1_implementation_prerequisite_satisfied_product_RF3_and_Linux_pending",
         "dependencies": [
           "TASK-NCQRS-C0-CONTRACT"
         ],
@@ -12792,7 +12792,24 @@
           "actual_TUnit_IAsyncInitializer_native_deploy_30s_token_and_failed_start_cleanup",
           "native_stop_30s_token_and_actual_dispose_await",
           "native_identity_oracle_method_split_without_assertion_loss"
-        ]
+        ],
+        "developmentGatePassed": true,
+        "focused02Development": {
+          "summary": {
+            "total": 6,
+            "passed": 6,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "durationMs": 2004.464,
+          "sourceUnchanged": true,
+          "compiledRuntimeUnchanged": true,
+          "wholeRuntimeUnchanged": false,
+          "originalManifest": "artifacts/qualification/native-cqrs-c0-development-20261004/focused02-originals/manifest.json"
+        }
       },
       {
         "requirements": [
@@ -12814,7 +12831,7 @@
         "joinCondition": "actual_native_runtime_source_review_full_strict_gates_and_original_Aspire_reports_no_product_RF3_claim",
         "id": "TASK-NCQRS-C0-JOIN",
         "owner": "root",
-        "state": "full_build14_pass_C0_actual_six_failures_native_Graph_StartEnumeration_bypass_owner_repair_required",
+        "state": "unchanged_six_C0_local_Aspire_pass_published_dependencies_C1_implementation_prerequisite_satisfied_product_RF3_and_Linux_pending",
         "dependencies": [
           "TASK-NCQRS-C0-RUNTIME-ORACLES",
           "TASK-NCQRS-GRAPH-OWNER-ENUMERATION"
@@ -12915,7 +12932,24 @@
             "originalManifest": "artifacts/qualification/native-cqrs-c0-development-20261004/focused01-originals/manifest.json",
             "allAcceptanceClosed": false
           }
-        ]
+        ],
+        "developmentGatePassed": true,
+        "focused02Development": {
+          "summary": {
+            "total": 6,
+            "passed": 6,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "durationMs": 2004.464,
+          "sourceUnchanged": true,
+          "compiledRuntimeUnchanged": true,
+          "wholeRuntimeUnchanged": false,
+          "originalManifest": "artifacts/qualification/native-cqrs-c0-development-20261004/focused02-originals/manifest.json"
+        }
       },
       {
         "id": "TASK-NCQRS-HTTP-OWNER-BOUNDS",
@@ -13150,7 +13184,7 @@
         "owner": "query_wave",
         "model": "gpt-6-luna",
         "effort": "high",
-        "state": "owning_10_0_9_full_95_pass_87_17_line_coverage_scoped_commit_pushed_canonical_publication_and_consumer_gates_pending",
+        "state": "owning_10_0_9_canonical_publication_feed_verified_full_local_consumer_build22_and_unchanged_six_C0_pass_product_Linux_RF3_pending",
         "requirements": [
           "REQ-GSE-001",
           "REQ-GSE-002",
@@ -13187,7 +13221,7 @@
           "unchanged_six_KeyLoad_C0_cases_through_Aspire"
         ],
         "runtimeQualified": false,
-        "publicationQualified": false,
+        "publicationQualified": true,
         "owningDevelopmentGates": {
           "baseHead": "fbbf9e83ac200ca746193d48f4cc13fea49f5548",
           "initialPatchSha256": "f3cb1562961d18a689a724c273a3936d39a27f534e4fc058225d314c696925fa",
@@ -13272,9 +13306,23 @@
             "sourceFiles": 123,
             "sourceUnchanged": true,
             "originalManifest": "artifacts/qualification/native-graph-enumeration-owning-development-20261004/final-versioned-originals/manifest.json",
-            "canonicalPublicationQualified": false,
+            "canonicalPublicationQualified": true,
             "consumerQualified": false
           }
+        },
+        "canonicalPublication": {
+          "version": "10.0.9",
+          "sourceSha": "6ca993425c812c337394f7f17f915ebab0ca5ade",
+          "allCanonicalRunsSucceeded": true,
+          "ciRunId": 37199276658,
+          "releaseRunId": 37199276691,
+          "codeQlRunId": 37199276699,
+          "feedSha256": "b90236a3974926c303e8a45f3d67c0aff88d91ea4108f3fc842db6c0b7b002d6",
+          "originalManifest": "artifacts/qualification/native-graph-enumeration-owning-development-20261004/publication-originals/manifest.json",
+          "consumerRestore22ExitCode": 0,
+          "consumerC0Qualified": true,
+          "consumerFullLocalBuildExitCode": 0,
+          "consumerC0OriginalManifest": "artifacts/qualification/native-cqrs-c0-development-20261004/focused02-originals/manifest.json"
         }
       },
       {
@@ -13282,7 +13330,7 @@
         "owner": "root",
         "model": "root_planning_and_integration_model",
         "effort": "inherited",
-        "state": "accepted_contract_product_writes_wait_for_C0_and_published_dependencies",
+        "state": "C0_prerequisite_satisfied_waiting_root_exact_helpers_and_private_write_release",
         "requirements": [
           "REQ-CRS-001",
           "REQ-CRS-002",
@@ -13312,14 +13360,15 @@
         ],
         "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
         "runtimeQualified": false,
-        "allAcceptanceClosed": false
+        "allAcceptanceClosed": false,
+        "c0ImplementationPrerequisiteSatisfied": true
       },
       {
         "id": "TASK-NCQRS-C1-IDENTITY-CONTEXT",
         "owner": "root",
         "model": "root_planning_and_integration_model",
         "effort": "inherited",
-        "state": "published_Core_10_0_3_provenance_verified_contract_frozen_product_join_waits_for_C0",
+        "state": "C0_prerequisite_satisfied_waiting_root_exact_helpers_and_private_write_release",
         "requirements": [
           "REQ-CRS-006"
         ],
@@ -13362,14 +13411,15 @@
           "consumerQualified": false
         },
         "runtimeQualified": false,
-        "allAcceptanceClosed": false
+        "allAcceptanceClosed": false,
+        "c0ImplementationPrerequisiteSatisfied": true
       },
       {
         "id": "TASK-NCQRS-C1-RPC-ROUTING",
         "owner": "query_wave",
         "model": "gpt-6-luna",
         "effort": "high",
-        "state": "pending_C0_join",
+        "state": "private_r2_patch_review_in_progress_root_helpers_and_owning_fatal_conversion_delivery_pending",
         "requirements": [
           "REQ-CRS-001",
           "REQ-CRS-002",
@@ -13399,14 +13449,22 @@
         ],
         "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
         "runtimeQualified": false,
-        "allAcceptanceClosed": false
+        "allAcceptanceClosed": false,
+        "c0ImplementationPrerequisiteSatisfied": true,
+        "privatePatch": {
+          "path": "/private/tmp/keyload-c1-request-stream-stage-r2.patch",
+          "sha256": "b0b911af8d0cb86a5b4fae464228b991ef796d360f9c78cd6bbc24896cb8e734",
+          "files": 4,
+          "checkoutJoined": false,
+          "gatesExecuted": false
+        }
       },
       {
         "id": "TASK-NCQRS-C1-RUNTIME-ORACLES",
         "owner": "cluster_wave",
         "model": "gpt-6-luna",
         "effort": "high",
-        "state": "pending_C0_join",
+        "state": "C0_prerequisite_satisfied_waiting_root_exact_helpers_and_private_write_release",
         "requirements": [
           "REQ-CRS-001",
           "REQ-CRS-002",
@@ -13436,14 +13494,15 @@
         ],
         "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
         "runtimeQualified": false,
-        "allAcceptanceClosed": false
+        "allAcceptanceClosed": false,
+        "c0ImplementationPrerequisiteSatisfied": true
       },
       {
         "id": "TASK-NCQRS-C1-COHORT-FAULTS",
         "owner": "lifecycle_wave",
         "model": "gpt-6-luna",
         "effort": "high",
-        "state": "pending_C0_join_and_root_exact_file_freeze",
+        "state": "C0_prerequisite_satisfied_waiting_root_exact_helpers_and_private_write_release",
         "requirements": [
           "REQ-CRS-001",
           "REQ-CRS-002",
@@ -13473,7 +13532,8 @@
         ],
         "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
         "runtimeQualified": false,
-        "allAcceptanceClosed": false
+        "allAcceptanceClosed": false,
+        "c0ImplementationPrerequisiteSatisfied": true
       },
       {
         "id": "TASK-NCQRS-C1-ROOT-JOIN",
@@ -13513,6 +13573,452 @@
         ],
         "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
         "runtimeQualified": false,
+        "allAcceptanceClosed": false,
+        "c0ImplementationPrerequisiteSatisfied": true
+      },
+      {
+        "id": "TASK-ANN-R2A-ROOT-CONTRACT",
+        "owner": "root",
+        "model": "root_planning_and_integration_model",
+        "effort": "inherited",
+        "state": "complete_contract_accepted_no_runtime_qualification",
+        "requirements": [
+          "REQ-ASD-001",
+          "REQ-ASD-002",
+          "REQ-ASD-003",
+          "REQ-ASD-004",
+          "REQ-ASD-005",
+          "REQ-ASD-006"
+        ],
+        "acceptance": [
+          "AC-ASD-001",
+          "AC-ASD-002",
+          "AC-ASD-003",
+          "AC-ASD-004",
+          "AC-ASD-005",
+          "AC-ASD-006"
+        ],
+        "planTasks": [
+          "KL-030",
+          "KL-031",
+          "KL-032",
+          "KL-059",
+          "KL-060"
+        ],
+        "contracts": [
+          "docs/Features/Search/ManagedAnnSeed.md",
+          "docs/ADR/ADR-019-managed-ann.md"
+        ],
+        "permissions": "exclusive shared feature_ADR_task_graph_docs",
+        "fileOwnership": [
+          "docs/Features/Search/ManagedAnnSeed.md",
+          "docs/ADR/ADR-019-managed-ann.md",
+          "docs/implementation/documentation-coverage.json"
+        ],
+        "dependencies": [],
+        "startCondition": "root_R2A_contract_and_ADR_accepted_before_delegated_writes",
+        "artifacts": [
+          "accepted exact local API_cut_memory_work_hash_authority and ordered ownership"
+        ],
+        "verification": [
+          "root complete diff review against frozen six ACs",
+          "strict full solution build_formatter_governance",
+          "root actual TUnit Aspire focused normal_scalar then required complete suites",
+          "exact delivered-source Linux recovery_RF3 and later lifecycle gates remain mandatory"
+        ],
+        "joinCondition": "root accepts actual implementation_tests_review_gates_no_partial_acceptance_claim",
+        "runtimeQualified": false,
+        "allAcceptanceClosed": false
+      },
+      {
+        "id": "TASK-ANN-R2A-CANONICAL-SEED",
+        "owner": "query_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "state": "local_development_stage_implemented_reviewed_full_static23_and_unchanged_Aspire_normal34_scalar34_pass_complete_Linux_RF3_lifecycle_gates_open",
+        "requirements": [
+          "REQ-ASD-001",
+          "REQ-ASD-002",
+          "REQ-ASD-003",
+          "REQ-ASD-004",
+          "REQ-ASD-005",
+          "REQ-ASD-006"
+        ],
+        "acceptance": [
+          "AC-ASD-001",
+          "AC-ASD-002",
+          "AC-ASD-003",
+          "AC-ASD-004",
+          "AC-ASD-005",
+          "AC-ASD-006"
+        ],
+        "planTasks": [
+          "KL-030",
+          "KL-031",
+          "KL-032",
+          "KL-059",
+          "KL-060"
+        ],
+        "contracts": [
+          "docs/Features/Search/ManagedAnnSeed.md",
+          "docs/ADR/ADR-019-managed-ann.md"
+        ],
+        "permissions": "new disjoint product files private staging only",
+        "fileOwnership": [
+          "src/KeyLoad.Core/Features/Search/AnnSeed*.cs"
+        ],
+        "dependencies": [
+          "TASK-ANN-R2A-ROOT-CONTRACT"
+        ],
+        "startCondition": "root_R2A_contract_and_ADR_accepted_before_delegated_writes",
+        "artifacts": [
+          "reviewable private patch",
+          "exact file inventory and self-review findings"
+        ],
+        "verification": [
+          "root complete diff review against frozen six ACs",
+          "strict full solution build_formatter_governance",
+          "root actual TUnit Aspire focused normal_scalar then required complete suites",
+          "exact delivered-source Linux recovery_RF3 and later lifecycle gates remain mandatory"
+        ],
+        "joinCondition": "root accepts actual implementation_tests_review_gates_no_partial_acceptance_claim",
+        "runtimeQualified": false,
+        "allAcceptanceClosed": false,
+        "privatePatch": {
+          "path": "/private/tmp/keyload-ann-r2a-seed-stage/AnnSeed.patch",
+          "sha256": "c34119cedb7d8ec74423959a6b652eb5cef4c060405b573dc6508bc7e37c2a81",
+          "newFiles": 9,
+          "rootReview": "one_cut_authority_owned_bytes_peak_exact_work_error_propagation_null_identity_4096_hash_blocks",
+          "gatesExecuted": false
+        },
+        "localDevelopmentGatePassed": true
+      },
+      {
+        "id": "TASK-ANN-R2A-INDEPENDENT-TESTS",
+        "owner": "cluster_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "state": "local_development_stage_implemented_reviewed_full_static23_and_unchanged_Aspire_normal34_scalar34_pass_complete_Linux_RF3_lifecycle_gates_open",
+        "requirements": [
+          "REQ-ASD-001",
+          "REQ-ASD-002",
+          "REQ-ASD-003",
+          "REQ-ASD-004",
+          "REQ-ASD-005",
+          "REQ-ASD-006"
+        ],
+        "acceptance": [
+          "AC-ASD-001",
+          "AC-ASD-002",
+          "AC-ASD-003",
+          "AC-ASD-004",
+          "AC-ASD-005",
+          "AC-ASD-006"
+        ],
+        "planTasks": [
+          "KL-030",
+          "KL-031",
+          "KL-032",
+          "KL-059",
+          "KL-060"
+        ],
+        "contracts": [
+          "docs/Features/Search/ManagedAnnSeed.md",
+          "docs/ADR/ADR-019-managed-ann.md"
+        ],
+        "permissions": "new disjoint tests private staging only",
+        "fileOwnership": [
+          "tests/KeyLoad.UnitTests/Features/Search/AnnSeed*.cs"
+        ],
+        "dependencies": [
+          "TASK-ANN-R2A-ROOT-CONTRACT"
+        ],
+        "startCondition": "root_R2A_contract_and_ADR_accepted_before_delegated_writes",
+        "artifacts": [
+          "independent real ZoneTree AC tests private patch",
+          "exact AC-to-test inventory"
+        ],
+        "verification": [
+          "root complete diff review against frozen six ACs",
+          "strict full solution build_formatter_governance",
+          "root actual TUnit Aspire focused normal_scalar then required complete suites",
+          "exact delivered-source Linux recovery_RF3 and later lifecycle gates remain mandatory"
+        ],
+        "joinCondition": "root accepts actual implementation_tests_review_gates_no_partial_acceptance_claim",
+        "runtimeQualified": false,
+        "allAcceptanceClosed": false,
+        "privatePatch": {
+          "path": "/private/tmp/keyload-ann-r2a-tests.patch",
+          "sha256": "9454ec72ca6573f2f28077c51711a08174c00a58e62a6108d2a94a209ac9b80a",
+          "newFiles": 11,
+          "nativeCasesAuthored": 30,
+          "gatesExecuted": false,
+          "supplementalScope": "new_AnnSeedBoundsTests.cs_private_single_4096_dimension_vector_multiblock_digest_and_invalid_inputs_only",
+          "supplementalPatch": {
+            "path": "/private/tmp/keyload-ann-r2a-bounds-tests.patch",
+            "sha256": "078f638005da20248e44b24399c47b63905c7df73cc00ffe1338089a54864aa4",
+            "newFiles": 1,
+            "nativeCasesAuthored": 3,
+            "rootAndIndependentReviewComplete": true
+          }
+        },
+        "rootAdditionalSemanticCorruptionCase": "StructurallyValidPersistedPartitionMismatchFailsAsCorruption",
+        "localDevelopmentGatePassed": true
+      },
+      {
+        "id": "TASK-ANN-R2A-INDEPENDENT-REVIEW",
+        "owner": "lifecycle_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "state": "local_development_stage_implemented_reviewed_full_static23_and_unchanged_Aspire_normal34_scalar34_pass_complete_Linux_RF3_lifecycle_gates_open",
+        "requirements": [
+          "REQ-ASD-001",
+          "REQ-ASD-002",
+          "REQ-ASD-003",
+          "REQ-ASD-004",
+          "REQ-ASD-005",
+          "REQ-ASD-006"
+        ],
+        "acceptance": [
+          "AC-ASD-001",
+          "AC-ASD-002",
+          "AC-ASD-003",
+          "AC-ASD-004",
+          "AC-ASD-005",
+          "AC-ASD-006"
+        ],
+        "planTasks": [
+          "KL-030",
+          "KL-031",
+          "KL-032",
+          "KL-059",
+          "KL-060"
+        ],
+        "contracts": [
+          "docs/Features/Search/ManagedAnnSeed.md",
+          "docs/ADR/ADR-019-managed-ann.md"
+        ],
+        "permissions": "read_only_no_gates_or_writes",
+        "fileOwnership": [],
+        "dependencies": [
+          "TASK-ANN-R2A-CANONICAL-SEED",
+          "TASK-ANN-R2A-INDEPENDENT-TESTS"
+        ],
+        "startCondition": "root_R2A_contract_and_ADR_accepted_before_delegated_writes",
+        "artifacts": [
+          "source accounting_cut_authority_owned_bytes_peak_heap_sort_hash and independent AC review"
+        ],
+        "verification": [
+          "root complete diff review against frozen six ACs",
+          "strict full solution build_formatter_governance",
+          "root actual TUnit Aspire focused normal_scalar then required complete suites",
+          "exact delivered-source Linux recovery_RF3 and later lifecycle gates remain mandatory"
+        ],
+        "joinCondition": "root accepts actual implementation_tests_review_gates_no_partial_acceptance_claim",
+        "runtimeQualified": false,
+        "allAcceptanceClosed": false,
+        "review": {
+          "sourcePatchSha256": "c34119cedb7d8ec74423959a6b652eb5cef4c060405b573dc6508bc7e37c2a81",
+          "testsPatchSha256": "9454ec72ca6573f2f28077c51711a08174c00a58e62a6108d2a94a209ac9b80a",
+          "blockingFindingsAfterFix": 0,
+          "gatesExecuted": false,
+          "supplementalMultiBlockAndInputBoundaryReviewPending": false
+        },
+        "localDevelopmentGatePassed": true
+      },
+      {
+        "id": "TASK-ANN-R2A-ROOT-JOIN",
+        "owner": "root",
+        "model": "root_planning_and_integration_model",
+        "effort": "inherited",
+        "state": "local_development_stage_implemented_reviewed_full_static23_and_unchanged_Aspire_normal34_scalar34_pass_complete_Linux_RF3_lifecycle_gates_open",
+        "requirements": [
+          "REQ-ASD-001",
+          "REQ-ASD-002",
+          "REQ-ASD-003",
+          "REQ-ASD-004",
+          "REQ-ASD-005",
+          "REQ-ASD-006"
+        ],
+        "acceptance": [
+          "AC-ASD-001",
+          "AC-ASD-002",
+          "AC-ASD-003",
+          "AC-ASD-004",
+          "AC-ASD-005",
+          "AC-ASD-006"
+        ],
+        "planTasks": [
+          "KL-030",
+          "KL-031",
+          "KL-032",
+          "KL-059",
+          "KL-060"
+        ],
+        "contracts": [
+          "docs/Features/Search/ManagedAnnSeed.md",
+          "docs/ADR/ADR-019-managed-ann.md"
+        ],
+        "permissions": "exclusive integration_shared_docs_all_build_tests_Git_Linux_qualification",
+        "fileOwnership": [
+          "docs/Features/Search/ManagedAnnSeed.md",
+          "docs/Features/Search.md",
+          "docs/ADR/ADR-019-managed-ann.md",
+          "docs/Architecture.md",
+          "docs/implementation/documentation-coverage.json",
+          "docs/implementation/status.json"
+        ],
+        "dependencies": [
+          "TASK-ANN-R2A-CANONICAL-SEED",
+          "TASK-ANN-R2A-INDEPENDENT-TESTS",
+          "TASK-ANN-R2A-INDEPENDENT-REVIEW"
+        ],
+        "startCondition": "root_R2A_contract_and_ADR_accepted_before_delegated_writes",
+        "artifacts": [
+          "strict full build_formatter_governance",
+          "actual Aspire normal_scalar originals and source_runtime inventories",
+          "honest stage commit and required complete exact_source Linux gates"
+        ],
+        "verification": [
+          "root complete diff review against frozen six ACs",
+          "strict full solution build_formatter_governance",
+          "root actual TUnit Aspire focused normal_scalar then required complete suites",
+          "exact delivered-source Linux recovery_RF3 and later lifecycle gates remain mandatory"
+        ],
+        "joinCondition": "root accepts actual implementation_tests_review_gates_no_partial_acceptance_claim",
+        "runtimeQualified": false,
+        "allAcceptanceClosed": false,
+        "rootSourceRepairs": [
+          "missing_StoreIdentity_namespace_and_VectorRecord_parameter",
+          "CA1825_shared_empty_zero_element_array_no_user_data",
+          "native_TUnit_CollectionOrdering_namespace_and_IsTrue_invocation",
+          "TimeProvider_clock_and_typed_exception_catch",
+          "remove_unused_usings",
+          "cancellation_owned_tasks_unconditionally_awaited_before_disposable_scope_exit",
+          "synchronous_database_capture_with_real_first_read_cancellation_observer_explicit_await_before_CT_disposal",
+          "report_maximum_admitted_owned_reservation_before_reference_array_trim",
+          "actual_official_native_serializer_authored_null_partition_bytes_put_raw_for_corruption_fixture",
+          "additional_structurally_valid_persisted_partition_mismatch_corruption_case"
+        ],
+        "fullStatic22Development": {
+          "buildExitCode": 0,
+          "warnings": 0,
+          "errors": 0,
+          "elapsedSeconds": 37.2,
+          "formatterExitCode": 0,
+          "governanceExitCode": 0,
+          "sourceUnchangedDuringBuild": true,
+          "sourceSha256": "d0ee2e9da9f853641189793fb2ba421f9e2500b3253a9cbe26803a6808c45cd5"
+        },
+        "focused01Development": {
+          "exitCode": 2,
+          "summary": {
+            "total": 33,
+            "passed": 31,
+            "failed": 2,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "nativeDurationMs": 9227.355,
+          "sourceUnchanged": true,
+          "runtimeUnchanged": true,
+          "originalManifest": "artifacts/qualification/managed-ann-r2a-development-20261004/focused01-originals/manifest.json"
+        },
+        "joinedSourceFiles": 9,
+        "joinedTestFiles": 12,
+        "authoredNativeCases": 34,
+        "localDevelopmentGatePassed": true,
+        "fullStatic23Development": {
+          "buildExitCode": 0,
+          "warnings": 0,
+          "errors": 0,
+          "elapsedSeconds": 56.72,
+          "formatterExitCode": 0,
+          "governanceExitCode": 0,
+          "sourceUnchangedDuringBuild": true,
+          "sourceSha256": "036cf2b6bed56f8e75932f5d8bd13bf9d3f1d0c03f6f87ccabb7877420cc02ba",
+          "originalManifest": "artifacts/qualification/managed-ann-r2a-development-20261004/static23-originals/manifest.json"
+        },
+        "focused02Development": {
+          "exitCode": 0,
+          "summary": {
+            "total": 34,
+            "passed": 34,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "nativeDurationMs": 7603.609,
+          "sourceUnchanged": true,
+          "runtimeUnchanged": true,
+          "sourceSha256": "036cf2b6bed56f8e75932f5d8bd13bf9d3f1d0c03f6f87ccabb7877420cc02ba",
+          "runtimeSha256": "c58bb5b2572474cb2a0dc56f95e06e3de972a3e45315acea6fad131bc9c38159",
+          "originalManifest": "artifacts/qualification/managed-ann-r2a-development-20261004/focused02-originals/manifest.json"
+        },
+        "scalar03Development": {
+          "exitCode": 0,
+          "summary": {
+            "total": 34,
+            "passed": 34,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "nativeDurationMs": 7272.075,
+          "sourceUnchanged": true,
+          "runtimeUnchanged": true,
+          "sourceSha256": "036cf2b6bed56f8e75932f5d8bd13bf9d3f1d0c03f6f87ccabb7877420cc02ba",
+          "runtimeSha256": "c58bb5b2572474cb2a0dc56f95e06e3de972a3e45315acea6fad131bc9c38159",
+          "originalManifest": "artifacts/qualification/managed-ann-r2a-development-20261004/scalar03-originals/manifest.json",
+          "runner": "actual_AppHost_unit_scalar_DOTNET_EnableHWIntrinsic_0"
+        },
+        "independentPostFailureSourceReview": "no_blocking_findings_maximum_owned_and_two_real_native_corruption_cases_static_only"
+      },
+      {
+        "id": "TASK-ANN-R2B-NATIVE-SEAMS",
+        "owner": "query_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "state": "complete_read_only_inventory_no_implementation_permission",
+        "requirements": [
+          "REQ-ANN-007",
+          "REQ-ANN-008"
+        ],
+        "acceptance": [
+          "AC-ANN-007",
+          "AC-ANN-008"
+        ],
+        "planTasks": [
+          "KL-031",
+          "KL-059"
+        ],
+        "contracts": [
+          "docs/Features/Search/ManagedAnn.md",
+          "docs/Features/Search/ManagedAnnSeed.md",
+          "docs/ADR/ADR-019-managed-ann.md"
+        ],
+        "permissions": "read_only_checkout_and_private_notes_no_gates_writes_or_Git",
+        "fileOwnership": [],
+        "dependencies": [
+          "TASK-ANN-R2A-ROOT-CONTRACT",
+          "TASK-ANN-R2A-CANONICAL-SEED"
+        ],
+        "startCondition": "accepted_R1_R2A_contracts_and_frozen_seed_source_reviewed; discovery_only_before_R2_format_and_lifecycle_contract",
+        "artifacts": [
+          "native_snapshot_one_cut_outbox_consumer_pin_publication_and_assembly_API_inventory",
+          "explicit_missing_ANN_format_crash_atomicity_pin_capture_auth_neutral_vs_principal_scope_contracts"
+        ],
+        "verification": [
+          "root independently validates actual native signatures_and_boundaries_before_accepting_R2_contract"
+        ],
+        "joinCondition": "inventory only; no persisted_projection_replay_or_public_search acceptance claimed",
+        "runtimeQualified": false,
         "allAcceptanceClosed": false
       }
     ],
@@ -13540,6 +14046,116 @@
       }
     ],
     "nodeEpochDevelopmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json",
-    "nodeEpochDelivered0d78Evidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
+    "nodeEpochDelivered0d78Evidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json",
+    "annR1Checkpoint": {
+      "commit": "eca51325477d22aeb5fc12677860d0d22eb3968a",
+      "branch": "main",
+      "files": 60,
+      "entireRequestedWorkingTreeScopeCommitted": true,
+      "workingTreeCleanAfterCommit": true,
+      "pushed": true,
+      "verification": "full Release build17 and full formatter17 pass; prior unchanged focused ANN normal19/19 and scalar19/19 pass; C0/full-runtime/RF3/delivered-Linux gates remain pending",
+      "pushEvidence": "fresh_git_fetch_origin_main_2026_10_04T13_41Z_confirms_origin_main_contains_eca5132",
+      "verifiedRemoteHead": "15ea5030c6fc010b29127b4b8de07bd255afc7ff"
+    },
+    "fullRecovery18Development": {
+      "entryPoint": "Aspire_AppHost_recovery_closed_suite_unfiltered",
+      "headSha": "eca51325477d22aeb5fc12677860d0d22eb3968a",
+      "sourceBeforeSha256": "6334c5b83e0b6d1ea00cf6ba2d5564b195f3f032dc1eef5a492f601a57290627",
+      "runtimeSha256": "ca3b7850cf2de78ec23e5fbb7de25c7406945151941c7379a6748ad3eae0df1c",
+      "nativePassed": 257,
+      "nativeFailed": 0,
+      "nativeSkipped": 0,
+      "nativeCancelled": 0,
+      "nativeTimedOut": 0,
+      "nativeFlaky": 0,
+      "nativeDurationMs": 554123.433,
+      "processCrashTrials": 1000,
+      "maximumConcurrentStorageTrials": 4,
+      "appHostExitCode": 0,
+      "ownedKnownProcessesRemaining": false,
+      "sourceCohortUnchanged": false,
+      "runtimeCohortUnchanged": true,
+      "sourceCohortLimitation": "25 concurrent benchmark_workflow_governance_and_UnitTests source paths changed; original before_after inventories retained; no unchanged whole current source qualification claimed",
+      "originals": "artifacts/qualification/recovery18-development-20261004/originals/manifest.json",
+      "originalFiles": 28,
+      "evidenceClass": "macOS_local_development_actual_native_reports_only",
+      "powerLossDurabilityQualified": false,
+      "deliveredExactSourceLinuxQualified": false,
+      "allAcceptanceClosed": false
+    },
+    "nativeCqrsC0Focused02Development": {
+      "summary": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "durationMs": 2004.464,
+      "originalManifest": "artifacts/qualification/native-cqrs-c0-development-20261004/focused02-originals/manifest.json",
+      "unchangedOracleFiles": 9,
+      "sourceUnchanged": true,
+      "compiledRuntimeUnchanged": true,
+      "allProductAcceptanceClosed": false
+    },
+    "annR2ADevelopment": {
+      "fullStatic23Development": {
+        "buildExitCode": 0,
+        "warnings": 0,
+        "errors": 0,
+        "elapsedSeconds": 56.72,
+        "formatterExitCode": 0,
+        "governanceExitCode": 0,
+        "sourceUnchangedDuringBuild": true,
+        "sourceSha256": "036cf2b6bed56f8e75932f5d8bd13bf9d3f1d0c03f6f87ccabb7877420cc02ba",
+        "originalManifest": "artifacts/qualification/managed-ann-r2a-development-20261004/static23-originals/manifest.json"
+      },
+      "focused02Development": {
+        "exitCode": 0,
+        "summary": {
+          "total": 34,
+          "passed": 34,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "nativeDurationMs": 7603.609,
+        "sourceUnchanged": true,
+        "runtimeUnchanged": true,
+        "sourceSha256": "036cf2b6bed56f8e75932f5d8bd13bf9d3f1d0c03f6f87ccabb7877420cc02ba",
+        "runtimeSha256": "c58bb5b2572474cb2a0dc56f95e06e3de972a3e45315acea6fad131bc9c38159",
+        "originalManifest": "artifacts/qualification/managed-ann-r2a-development-20261004/focused02-originals/manifest.json"
+      },
+      "scalar03Development": {
+        "exitCode": 0,
+        "summary": {
+          "total": 34,
+          "passed": 34,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "nativeDurationMs": 7272.075,
+        "sourceUnchanged": true,
+        "runtimeUnchanged": true,
+        "sourceSha256": "036cf2b6bed56f8e75932f5d8bd13bf9d3f1d0c03f6f87ccabb7877420cc02ba",
+        "runtimeSha256": "c58bb5b2572474cb2a0dc56f95e06e3de972a3e45315acea6fad131bc9c38159",
+        "originalManifest": "artifacts/qualification/managed-ann-r2a-development-20261004/scalar03-originals/manifest.json",
+        "runner": "actual_AppHost_unit_scalar_DOTNET_EnableHWIntrinsic_0"
+      },
+      "sourceFiles": 9,
+      "testFiles": 12,
+      "nativeCases": 34,
+      "localDevelopmentGatePassed": true,
+      "productRuntimeQualified": false,
+      "allAcceptanceClosed": false
+    }
   }
 }

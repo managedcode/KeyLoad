@@ -1013,8 +1013,24 @@ candidate is not connected to public search; node-local projection persistence,
 source-cut replay and authorized public approximation require their separate
 accepted contracts and actual qualification.
 
+[ManagedAnnSeed](Features/Search/ManagedAnnSeed.md) freezes the R2A input boundary:
+Core/Search captures persisted authority, copied full-space visible vectors and
+scalar source/applied/outbox witnesses inside one node-local read cut. Its private
+ordinal sort and exact-bit hash run after releasing the storage gate, under finite
+owned/peak/work limits. No signing key, full document, view or store handle escapes.
+This local seed is historical input, not current authorization, pinned replay or
+a published ANN generation. Orleans projection coordination and public native
+CQRS/identity integration require their subsequent accepted contracts and gates.
+The R2A local development checkpoint passed 34/34 actual Aspire normal and scalar
+cases after full Release/formatter/governance checks; source/runtime inventory
+proof and retained originals are linked from the seed spec. Persistent projection,
+current public authorization and delivered-source Linux/RF3 acceptance stay open.
+
 ```mermaid
 classDiagram
+    AnnSeedCollector --> ReadExecutionBudget : one charged canonical cut
+    AnnSeedCollector --> AnnSeed : owned historical input
+    AnnSeed --> PackedAnnBuilder : later explicit integration
     AnnWorkBudget --> ReadExecutionBudget : work and elapsed checks
     PackedAnnBuilder --> PackedAnnGraph : actual level offsets
     PackedAnnBuilder --> PackedAnnVectors : owned bounded blocks
