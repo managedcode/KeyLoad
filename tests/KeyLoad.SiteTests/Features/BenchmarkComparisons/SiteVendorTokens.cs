@@ -5,7 +5,6 @@ internal static class SiteVendorTokens
     public const string FeatureDirectory = SiteAssetTokens.FeatureRelativePath;
     public const string FeatureOutputDirectory = "Features/BenchmarkComparisons";
     public const string BuildEntry = SiteAssetTokens.BuilderRelativePath;
-    public const string AggregateDirectory = "isolated-capture";
     public const string AggregateScriptDirectory = "scripts/Features/BenchmarkComparisons";
     public static readonly string[] RootAssets =
     ["favicon.ico", "favicon-32x32.png", "favicon-96x96.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png"];

@@ -27,11 +27,11 @@ internal sealed class SiteVendorTestScope : IAsyncDisposable
         {
             scope.CreateTemporary();
             await CopyFeatureAsync(inputs, scope.FeatureSource, token);
-            await CopyBuilderEntryAsync(inputs, scope.Inputs.Repository, token);
+            await CopyFileAsync(inputs, scope.Inputs.Repository, SiteVendorTokens.BuildEntry, token);
+            await CopyFileAsync(inputs, scope.Inputs.Repository, SiteMetadataTokens.ComparisonContractPath, token);
             await CopyRootAssetsAsync(inputs, scope.Inputs.Repository, token);
             await CopyTreeAsync(Path.Combine(inputs.Repository, SiteVendorTokens.AggregateScriptDirectory),
                 Path.Combine(scope.Inputs.Repository, SiteVendorTokens.AggregateScriptDirectory), token);
-            await CopyAggregateAsync(inputs, scope.Inputs.Aggregate, token);
             var isolatedInputs = new SiteIsolatedInputs(scope.Inputs, scope.Inputs.Aggregate);
             scope.FixtureState = new SiteIsolatedFixture(isolatedInputs, fixture.Root, fixture.Catalog, fixture.Projection);
             return scope;
@@ -98,15 +98,8 @@ internal sealed class SiteVendorTestScope : IAsyncDisposable
     private void CreateTemporary()
     {
         _temporary = SiteTempDirectory.Create();
-        InputState = new(_temporary.Path, Path.Combine(_temporary.Path, SiteVendorTokens.AggregateDirectory), _sourceInputs.EvidenceRun,
+        InputState = new(_temporary.Path, _sourceInputs.Aggregate, _sourceInputs.EvidenceRun,
             _sourceInputs.MeasuredRevision, _sourceInputs.SiteRevision);
-    }
-
-    private static async Task CopyAggregateAsync(SiteTestInputs inputs, string destination, CancellationToken token)
-    {
-        Directory.CreateDirectory(destination);
-        await File.WriteAllBytesAsync(Path.Combine(destination, "aggregate.json"),
-            await File.ReadAllBytesAsync(Path.Combine(inputs.Aggregate, "aggregate.json"), token), token);
     }
 
     private static async Task CopyFeatureAsync(SiteTestInputs inputs, string destination, CancellationToken token)
@@ -115,10 +108,10 @@ internal sealed class SiteVendorTestScope : IAsyncDisposable
         await CopyDirectoryAsync(source, destination, token);
     }
 
-    private static async Task CopyBuilderEntryAsync(SiteTestInputs inputs, string destination, CancellationToken token)
+    private static async Task CopyFileAsync(SiteTestInputs inputs, string destination, string relative, CancellationToken token)
     {
-        var source = Path.Combine(inputs.Repository, SiteVendorTokens.BuildEntry);
-        var target = Path.Combine(destination, SiteVendorTokens.BuildEntry);
+        var source = Path.Combine(inputs.Repository, relative);
+        var target = Path.Combine(destination, relative);
         Directory.CreateDirectory(Path.GetDirectoryName(target)!);
         await File.WriteAllBytesAsync(target, await File.ReadAllBytesAsync(source, token), token);
     }

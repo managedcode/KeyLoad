@@ -16,9 +16,13 @@ internal static class SiteIsolatedNodeProcess
         var script = Path.Combine(temporary.Path, "isolated-probe.mjs");
         var requestPath = Path.Combine(temporary.Path, "request.json");
         await File.WriteAllTextAsync(script, SiteIsolatedNodeProgram.Source, cancellationToken);
-        await File.WriteAllBytesAsync(requestPath, JsonSerializer.SerializeToUtf8Bytes(request, JsonOptions), cancellationToken);
+        var requestBytes = JsonSerializer.SerializeToUtf8Bytes(request, JsonOptions);
+        await File.WriteAllBytesAsync(requestPath, requestBytes, cancellationToken);
+        using var requestDocument = JsonDocument.Parse(requestBytes);
+        var admission = SiteHeavyChildClassification.IsProjection(requestDocument.RootElement)
+            ? SiteHeavyChildAdmission.Shared : null;
         var start = CreateStart(inputs.Repository, script, requestPath);
-        var result = await RunProcessAsync(start, cancellationToken).ConfigureAwait(false);
+        var result = await RunProcessAsync(start, cancellationToken, admission).ConfigureAwait(false);
         if (result.ExitCode != 0 || result.StandardError.Length != 0)
         {
             throw new InvalidOperationException(ProbeFailure);
@@ -28,13 +32,17 @@ internal static class SiteIsolatedNodeProcess
         return document.RootElement.Clone();
     }
 
-    public static async Task<SiteProcessResult> RunProcessAsync(ProcessStartInfo start, CancellationToken cancellationToken)
+    public static async Task<SiteProcessResult> RunProcessAsync(ProcessStartInfo start, CancellationToken cancellationToken,
+        SiteHeavyChildAdmission? admission = null)
     {
+        using var lease = admission is null ? null : await admission.AcquireAsync(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
         using var process = new Process { StartInfo = start, EnableRaisingEvents = true };
         if (!process.Start())
         {
             throw new InvalidOperationException(ProbeFailure);
         }
+        lease?.MarkStarted(process);
 
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(TimeSpan.FromSeconds(DeadlineSeconds));
@@ -46,16 +54,13 @@ internal static class SiteIsolatedNodeProcess
             var first = await Task.WhenAny(exit, stdout, stderr).ConfigureAwait(false);
             await first.ConfigureAwait(false);
             await exit.ConfigureAwait(false);
-            return new(process.ExitCode, await stdout.ConfigureAwait(false), await stderr.ConfigureAwait(false));
+            var result = new SiteProcessResult(process.ExitCode, await stdout.ConfigureAwait(false), await stderr.ConfigureAwait(false));
+            _ = lease?.CompleteIfSettled(stdout, stderr);
+            return result;
         }
         catch (Exception)
         {
-            try
-            { await SiteProcessCleanup.StopAsync(process).ConfigureAwait(false); }
-            finally
-            {
-                await SiteProcessCleanup.ObserveCapturesAsync(process, stdout, stderr).ConfigureAwait(false);
-            }
+            await SiteHeavyChildLease.StopAndObserveAsync(process, stdout, stderr, lease);
             throw;
         }
     }

@@ -11,8 +11,7 @@ internal static class SiteIsolatedBuilderProcess
     public static async Task<SiteProcessResult> RunAsync(SiteIsolatedFixture fixture, string output,
         CancellationToken token, string? input = null, string? additionalArgument = null)
     {
-        using var projection = JsonDocument.Parse(await File.ReadAllBytesAsync(fixture.Projection, token));
-        var cohort = projection.RootElement.GetProperty(SiteIsolatedFields.Cohort).Clone();
+        var cohort = await ReadCohortAsync(fixture.Projection, token);
         var start = new ProcessStartInfo(SiteTokens.NodeExecutable)
         {
             WorkingDirectory = fixture.Inputs.Site.Repository,
@@ -38,9 +37,15 @@ internal static class SiteIsolatedBuilderProcess
             start.ArgumentList.Add(argument);
         }
         var sources = await SiteBuilderDiagnostics.ReadBuilderSourcesAsync(fixture.Inputs.Site, token);
-        var result = await SiteIsolatedNodeProcess.RunProcessAsync(start, token);
+        var result = await SiteIsolatedNodeProcess.RunProcessAsync(start, token, SiteHeavyChildAdmission.Shared);
         await RetainAsync(fixture.Inputs.Site.SiteRevision, cohort, arguments.ToArray(), sources, result, token);
         return result;
+    }
+
+    private static async Task<JsonElement> ReadCohortAsync(string projectionPath, CancellationToken token)
+    {
+        using var projection = JsonDocument.Parse(await File.ReadAllBytesAsync(projectionPath, token));
+        return projection.RootElement.GetProperty(SiteIsolatedFields.Cohort).Clone();
     }
 
     private static async Task RetainAsync(string siteRevision, JsonElement cohort, string[] arguments,

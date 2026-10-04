@@ -46,7 +46,8 @@ internal static class SiteNodeProbeExecution
             var stderr = SiteProcessOutput.ReadAsync(process.StandardError, SiteTokens.NodeOutputExceeded, timeout.Token);
             try
             {
-                await process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(request).AsMemory(), timeout.Token);
+                await process.StandardInput.WriteLineAsync(
+                    JsonSerializer.Serialize(request, SiteTokens.JsonOptions).AsMemory(), timeout.Token);
                 process.StandardInput.Close();
                 var exit = process.WaitForExitAsync(timeout.Token);
                 await Task.WhenAny(exit, stdout, stderr);

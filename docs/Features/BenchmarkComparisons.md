@@ -694,8 +694,51 @@ KeyLoad engine repair and concurrent series-codec work are outside this task.
 | REQ-BC-FAIL-009 align native Redis transport | AC-BC-FAIL-009 each isolated Redis resource uses the documented native certificate opt-out for its existing authenticated RESP/TCP bootstrap; after actual Aspire startup, primary/replica endpoints retain scheme `redis` and native target port6379 with TLS disabled. Discovered mapped host ports remain dynamic; native client settings retain a password without `ssl=true`. Preserve health checks, wait dependencies, AOF `always`, native membership, direct-copy/cancellation checks and WAIT/WAITAOF acknowledgements | actual pinned resource-model regressions plus genuine Aspire-owned native Redis 1/2/3-node preflights; complete matrix and site qualification remain mandatory |
 | REQ-BC-FAIL-010 preserve exact OpenSearch vector ordering | AC-BC-FAIL-010 the native query preserves the unchanged shared float32-input/double-accumulated cosine oracle and ordinal ID tie order. Use native `scripted_metric` map/combine/reduce over actual vector doc values; round parsed query values back to float32 before double arithmetic, retain at most TopK candidates per shard, merge only bounded shard TopK states, validate finite native double scores and retain projected content from the existing native source only for admitted candidates. Do not sort through float `_score`, weaken recall/tolerances, rerank/fetch in the client, duplicate stored vectors, use ANN or change the corpus/native topology/ACK contracts | independent deterministic precision witness for query d000000170 (documents2289/1272), positive/negative native query/response TUnit checks, and genuine Aspire-owned OpenSearch VectorExact1/2/3 jobs with every five10000-operation repetition passing the unchanged oracle; complete same-run aggregate/site/Pages still required |
 | REQ-BC-FAIL-011 create the qualification evidence parent | AC-BC-FAIL-011 initialization creates the real workspace artifacts/site-evidence parent before any capture redirection, preserves existing directories/files, rejects file or symlink collisions at artifacts or site-evidence before output, and leaves isolated-capture absent for its exclusive producer. Never skip/rebind source/archive/270/277/test/coverage/browser/freshness gates | SiteQualificationStartupTests executes the actual initialization Bash block in fresh owned filesystems (new/existing parent, file/base-link/parent-link collisions), checks actual envelope redirection and unchanged targets, and runs as a mandatory Aspire-owned unit preparation gate; genuine new-source website qualification/Pages remains required |
+| REQ-BC-FAIL-012 execute the actual native probe contract | AC-BC-FAIL-012 C# probe requests serialize the existing lowercase operation/values contract; median arithmetic and odd/even/empty assertions remain unchanged. Native error probes preserve string error codes and use the actual native error name for numeric DOMException codes; real AbortController cancellation must still assert AbortError | Existing SiteMeasurementArithmeticTests and SiteIsolatedHttpTests, original failed TRX and focused genuine-input development checks |
+| REQ-BC-FAIL-013 complete disposable builder source | AC-BC-FAIL-013 SEO/vendor scratch repositories copy the exact canonical isolated-contract.json bytes from the actual source repository before invoking the actual builder. Vendor-only mutations use the accepted fixture's unchanged full original aggregate and270-worker inventory; they must not substitute an aggregate-only directory or duplicate the2GB raw inventory for each metadata mutation. Existing missing/link/corrupt-asset negatives must reach their intended checks before output; the valid vendor compression case must succeed. No fabricated contract, provider input, replacement builder or weaker assertion | Existing four SiteMetadataRejectionTests and three SiteVendorBuildTests, with actual source-byte copying and unchanged input authority |
+| REQ-BC-FAIL-014 bound heavy qualification children | AC-BC-FAIL-014 expensive full-cohort builder/archive-verification children share bounded admission before their existing300s active execution deadline starts. Retain complete277 inputs/270 workers, stdout/stderr bounds, caller cancellation and original-byte verification. Hold ownership until actual child exit and readers settle; cancelled queued requests start no child. Select limits from original timings and bounded source-exact development measurements, then require every complete site test and native coverage gate in genuine Linux GitHub | Real-process admission/cancellation/failure regressions, original-input single-versus-parallel phase/CPU/RSS development receipts, complete unfiltered Aspire-owned GitHub site/TRX/Node+Chrome coverage and Pages |
 
 [ADR-080](../ADR/ADR-080-benchmark-failure-isolation.md) owns the boundary change.
+The site follow-up is FAIL-SITE-PROBES (native worker, four test-helper files and
+the obsolete SiteVendorTokens.cs scratch-aggregate token),
+FAIL-SITE-ADMISSION (producer worker, exact heavy-child lifecycle helpers and
+regressions after the root contract), then FAIL-SITE-JOIN/DELIVERY (root).
+Native worker owns SiteNodeProbe.cs, SiteIsolatedNodeProgram.cs,
+SiteMetadataRejectionTests.cs and SiteVendorTestScope.cs. The producer first
+profiles the unchanged actual source/original input before admission changes.
+The original TRX contains25 builder cases and12 produce-rejection cases; with
+two active children,35 eligible cases may wait. The approved admission policy is
+two active children, a FIFO queue of at most64 waiters and a20-minute cancellable
+admission deadline before the unchanged300-second active deadline. Local
+source6e/original AA270 profiling with native V8 coverage measured44.014s for one
+builder and53.448/53.444s for two; full277-input verification measured48.428s
+single and59.707/75.799s concurrent. Peak RSS stayed below483MB per child in
+these bounded macOS development sessions; this does not measure GitHub resource
+saturation or qualify website performance. Heavy classification includes actual
+builders, produce requests and inputs/verify-inputs probes; light probes and
+native network capture retain their existing paths and deadlines. An unsettled
+child or reader poisons admission and rejects pending requests, rather than
+releasing unsafe capacity. Producer owns SiteHeavyChildAdmission.cs,
+SiteHeavyChildLease.cs, SiteHeavyChildTokens.cs, SiteHeavyChildClassification.cs,
+SiteHeavyChildProcessFixture.cs, SiteHeavyChildAdmissionTests.cs and
+SiteHeavyChildCleanupTests.cs; its existing-file edits are limited to
+SiteIsolatedNodeProcess.cs, SiteIsolatedBuilderProcess.cs,
+SiteIsolatedGitHubNodeProcess.cs and SiteIsolatedGitHubNativeProcess.cs, all in
+the existing SiteTests feature. The real-process regressions cover FIFO/capacity,
+queued cancellation, queue-full/deadline rejection before start, native start
+failure, active cancellation, output bounds and unsafe ownership fail-closed.
+Root owns requirements, workflow/source closure, integration, full checks and delivery.
+An original source-exact verification copy with an explicitly recorded candidate
+test patch can provide filtered local development evidence. Never relabel the
+immutable receipt, current HEAD, CI/GitHub executor or local results. Filtering
+does not satisfy the full site/coverage qualification; production gates stay intact.
+The final16-file harness candidate passed all26 selected genuine-input Aspire
+case assertions (16 existing,10 new lifecycle cases), without skips or cancellation.
+The filtered run retained its actual exit10 and one synthetic after-session
+coverage failure; it does not qualify the full site or publication. A separate
+actual main73 candidate passed the full Release build, formatter and governance.
+Exact source, native-input, runner and TRX identities are recorded in
+[the development receipt](../implementation/benchmark-site-harness-development-2026-10-04.json).
 Ordered task graph: FAIL-CONTRACT (root, complete) -> FAIL-SITE (site worker),
 FAIL-PRODUCER (tooling worker), FAIL-PREP (root/diagnostic worker) -> FAIL-JOIN
 (root review/build/format/governance/Aspire tests) -> FAIL-DELIVERY (scoped commit,

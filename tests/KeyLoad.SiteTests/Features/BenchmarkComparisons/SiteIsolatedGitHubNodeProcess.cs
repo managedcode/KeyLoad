@@ -14,8 +14,13 @@ internal static class SiteIsolatedGitHubNodeProcess
         var script = Path.Combine(temporary.Path, SiteIsolatedGitHubTokens.Probe);
         var requestPath = Path.Combine(temporary.Path, SiteIsolatedGitHubTokens.Request);
         await File.WriteAllTextAsync(script, SiteIsolatedGitHubNodeProgram.Source, token);
-        await File.WriteAllBytesAsync(requestPath, JsonSerializer.SerializeToUtf8Bytes(request, JsonOptions), token);
-        var result = await SiteIsolatedGitHubNativeProcess.RunProbeAsync(CreateStart(repository, script, requestPath, captureCoverage), token);
+        var requestBytes = JsonSerializer.SerializeToUtf8Bytes(request, JsonOptions);
+        await File.WriteAllBytesAsync(requestPath, requestBytes, token);
+        using var requestDocument = JsonDocument.Parse(requestBytes);
+        var admission = SiteHeavyChildClassification.IsArchive(requestDocument.RootElement)
+            ? SiteHeavyChildAdmission.Shared : null;
+        var result = await SiteIsolatedGitHubNativeProcess.RunProbeAsync(
+            CreateStart(repository, script, requestPath, captureCoverage), token, admission);
         if (result.ExitCode != 0 || result.StandardError.Length != 0)
         {
             throw new InvalidOperationException(SiteIsolatedGitHubTokens.NodeFailure);

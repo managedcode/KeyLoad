@@ -3267,7 +3267,7 @@
     "status": "in_progress",
     "feature": "docs/Features/BenchmarkComparisons.md",
     "decision": "docs/ADR/ADR-080-benchmark-failure-isolation.md",
-    "sourceStage": "authenticated_failed_cell_publication_with_native_startup_exact_opensearch_and_site_evidence_repairs",
+    "sourceStage": "native_competitors_full270_and_development_site_harness_qualified_full_site_publication_pending",
     "baselineRun": 37154664616,
     "originalFailedJob": 111299652762,
     "originalDiagnosticArtifact": 11286445994,
@@ -3404,7 +3404,19 @@
           "runtimeVersion": ".NET 10.0.12"
         }
       },
-      "githubQualified": false
+      "githubQualified": true,
+      "deliveredEvidence": {
+        "runId": 37173267644,
+        "attempt": 1,
+        "sourceRevision": "aa49aa93982866b85a80e771a749d9b968ffc9f2",
+        "jobId": 111350732727,
+        "artifactId": 11292606904,
+        "archiveSha256": "a43ab1cfdd96a93105ccd256c53de8aba49778298a1462297baa39e2806d6fed",
+        "passed": 10,
+        "skipped": 0,
+        "reportSha256": "6b8dbb9a72bdb2fece5aa2fbaf38d59a5ef18c51c6daafaf2353597e93c615fa",
+        "suite": "ImageRegistryReadinessTests"
+      }
     },
     "redisTransportRepair": {
       "requirement": "REQ-BC-FAIL-009",
@@ -3586,7 +3598,7 @@
       "pinnedApi": "OpenSearch3.6.0/k-NN3.6.0.0 vector docvalue whitelist supports scriptedmetric contexts, not NumberSortScript;generic vectorget(int) throws.",
       "selectedStrategy": "native bounded scripted_metric map/combine/reduce;actualvector docvalues;queryFloat32/doublearithmetic;TopKper shard;double scoredesc/IDordinal;sourcepayloadonlyadmittedcandidates;no clientrerank/fetch,storedvectorduplication ororaclechange",
       "sourceImplemented": true,
-      "nativeGitHubQualified": false,
+      "nativeGitHubQualified": true,
       "publicationQualified": false,
       "developmentQualified": true,
       "developmentReports": {
@@ -3618,6 +3630,30 @@
           "operatingSystem": "macOS 27.0.1",
           "runtimeVersion": ".NET 10.0.12"
         }
+      },
+      "deliveredNativeEvidence": {
+        "sourceRevision": "aa49aa93982866b85a80e771a749d9b968ffc9f2",
+        "runId": 37173267644,
+        "attempt": 1,
+        "originalJobs": 6,
+        "originalArchives": 12,
+        "nativePreflightNodes": [
+          1,
+          2,
+          3
+        ],
+        "fullVectorExactNodes": [
+          1,
+          2,
+          3
+        ],
+        "vectorSuccesses": 150000,
+        "vectorFailures": 0,
+        "pointReadSuccesses": 150000,
+        "tunitPassed": 6,
+        "tunitSkipped": 0,
+        "joinedProofSha256": "a52e31db6eef2017fa2d0475bc5aea4fb8c6081b02d8135c79fcdbbd6f506f21",
+        "publicationQualified": false
       }
     },
     "fullAggregateEvidence": {
@@ -3648,7 +3684,7 @@
       "repair": "Createonlyrealartifacts/site-evidence before output;rejectfile/symlink components;preserveexclusivecapturechild andallqualificationgates.",
       "sourceImplemented": true,
       "developmentQualified": true,
-      "githubQualified": false,
+      "githubQualified": true,
       "publicationQualified": false,
       "developmentReport": {
         "summary": {
@@ -3663,6 +3699,89 @@
         "sha256": "c41df501e76135178ad070ecee3ed632adccf49e86e1d36795623f6a3f27489d",
         "operatingSystem": "macOS 27.0.1",
         "runtimeVersion": ".NET 10.0.12"
+      },
+      "qualificationScope": "Actual AA-controlled/6e-source startup,source capture and277-input extraction succeeded;later site-harness tests failed;Pages skipped."
+    },
+    "nativeDeliveredCohort": {
+      "sourceRevision": "aa49aa93982866b85a80e771a749d9b968ffc9f2",
+      "runId": 37173267644,
+      "attempt": 1,
+      "aggregateJobId": 111365952960,
+      "aggregateConclusion": "success",
+      "cells": 270,
+      "numeric": 114,
+      "unsupportedCapability": 121,
+      "unsupportedTopology": 20,
+      "failedNullKeyLoad": 15,
+      "competitorOriginals": 240,
+      "numericCompetitorCells": 99,
+      "successfulCompetitorOperations": 4950000,
+      "keyLoadOriginals": 30,
+      "allOriginalsByteIdentical": true,
+      "aggregateSha256": "6dc151ef16261994007dc1fe145d00acd2867ab593f35989329dc74fa2ebe07a",
+      "projectionSha256": "6be633f6e829beaa644d555363bb54de7dc20b07ac734ff43afbf2e492731568",
+      "scaleQualified": false,
+      "publicationQualified": false
+    },
+    "siteHarnessRepair": {
+      "requirements": [
+        "REQ-BC-FAIL-012",
+        "REQ-BC-FAIL-013",
+        "REQ-BC-FAIL-014"
+      ],
+      "originalJobId": 111366680494,
+      "originalArtifactId": 11294231848,
+      "archiveDigest": "sha256:3c5adc4d8efa0f753652e9ed54b56b424f78b61e439b9d0a417ab884439e78f2",
+      "websiteSource": "6e09f03b1d3d98f5bd01479d025103982b9f87ee",
+      "controlAndMeasuredSource": "aa49aa93982866b85a80e771a749d9b968ffc9f2",
+      "sourceAndIntakeVerified": "2887 original source fingerprints;77 own source/action/policy files;329 receipt-bound entries including277 inputs",
+      "analyzersPassed": 118,
+      "analyzerCoveragePassed": true,
+      "sitePassed": 135,
+      "siteFailed": 23,
+      "directFixtureFailures": 9,
+      "childDeadlineFailures": 13,
+      "afterSessionCoverageFailures": 1,
+      "directCauses": "PascalCase probe request;numeric DOMException code;missing real canonical contract in seven scratch builder cases",
+      "heavyChildObservation": "11 builders and2 archive verifiers independently reached300s active deadlines during parallel burst;before-session native verification60.14s,after-session verification/coverage91.27s",
+      "implementationComplete": true,
+      "qualificationComplete": false,
+      "publicationQualified": false,
+      "preserved": "native original bytes,sources,300s active bound,270/277 checks,no-skip suite,native Node+Chrome coverage,freshness,Pages",
+      "directProbeImplementationComplete": true,
+      "directProbePatchSha256": "2be57ddb5fd70000a6b0cceb682e0896b79bb9914a7b0cb810d224cf9469c41d",
+      "siteProjectBuild": {
+        "warnings": 0,
+        "errors": 0,
+        "configuration": "Release",
+        "testsExecuted": true,
+        "fullSolution": "passed;Release;0warnings;0errors",
+        "currentBaseRevision": "73aebfd3f72695357834599e813aba77b9e274ad"
+      },
+      "developmentProfile": "docs/implementation/benchmark-site-harness-development-2026-10-04.json",
+      "developmentResourceProfileMeasured": true,
+      "githubResourceSaturationMeasured": false,
+      "admissionContract": {
+        "active": 2,
+        "fifoPendingLimit": 64,
+        "queueMinutes": 20,
+        "activeSeconds": 300,
+        "unsafeCleanup": "fail_closed"
+      },
+      "githubResourceContentionMeasured": false,
+      "candidateSourcePatchSha256": "5477cde7ec9bb987f3c068989f1302a571d749b35f50e243612c5b4ea697ed97",
+      "candidateSourceFiles": 16,
+      "additionalVendorFixtureFailure": "Development first run25/26 passed;positive vendor scope had aggregate.json without270 worker files. Final scope uses unchanged accepted original full input;all26case assertions passed.",
+      "developmentRegressions": {
+        "selectedPassed": 26,
+        "selectedFailed": 0,
+        "skipped": 0,
+        "admissionPassed": 10,
+        "originalProbeAndBuilderPassed": 16,
+        "trxSha256": "f047a5e8dc8823aea2603113e434fb82d8fdacf5503e5eae03f5be26a5ff098b",
+        "overallExitCode": 10,
+        "afterSessionCoverageGate": "failed as filtered development;full unfiltered qualification mandatory",
+        "publicationQualified": false
       }
     }
   }

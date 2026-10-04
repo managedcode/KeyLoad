@@ -10,6 +10,7 @@ internal static class SiteIsolatedNodeProgram
         const request = JSON.parse(await readFile(process.argv[2], 'utf8'));
         const module = name => import(pathToFileURL(join(request.repository,
           'site/Features/BenchmarkComparisons', 'isolated-' + name + '.mjs')));
+        const STRING_CODE_TYPE = 'string';
         function corruptOriginal(value, corruption) {
           if (corruption === null) return;
           const report = value.report, item = report.cases[0], measurement = item.measurement;
@@ -92,7 +93,8 @@ internal static class SiteIsolatedNodeProgram
           }
           process.stdout.write(JSON.stringify({ ok: true, result }));
         } catch (error) {
-          process.stdout.write(JSON.stringify({ ok: false, error: error.code ?? error.name }));
+          const code = typeof error.code === STRING_CODE_TYPE ? error.code : error.name;
+          process.stdout.write(JSON.stringify({ ok: false, error: code }));
         }
         """;
 }

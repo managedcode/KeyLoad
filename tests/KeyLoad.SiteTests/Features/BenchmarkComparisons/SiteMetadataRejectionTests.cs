@@ -72,6 +72,7 @@ internal sealed class SiteMetadataTestScope : IAsyncDisposable
             await CopyTree(Path.Combine(inputs.Repository, SiteMetadataTokens.AggregateDirectoryPath),
                 aggregateScriptRoot, token);
             await CopyTree(Path.Combine(inputs.Repository, "site/scripts"), Path.Combine(path, "site/scripts"), token);
+            await CopyFile(inputs.Repository, path, SiteMetadataTokens.ComparisonContractPath, token);
             await CopyFile(inputs.Repository, path, SiteMetadataTokens.FaviconSvgPath, token);
             var aggregate = Path.Combine(path, "isolated-capture", "aggregate.json");
             Directory.CreateDirectory(Path.GetDirectoryName(aggregate)!);

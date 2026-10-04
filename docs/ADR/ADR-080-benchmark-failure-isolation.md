@@ -1,7 +1,7 @@
 # ADR-080: Isolate benchmark failures during publication
 
 Status: Accepted; source implemented, delivered-source verification pending.
-Date: 2026-10-04. Related: REQ/AC-BC-FAIL-001..011, ADR-056/074/076.
+Date: 2026-10-04. Related: REQ/AC-BC-FAIL-001..014, ADR-056/074/076.
 
 ## Decision
 
@@ -129,6 +129,64 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
    remain rejected as measurement/publication evidence. The registry test alone
    accepts legitimate final-budget timeout facts and exposes Node stderr; its
    production30s/2s bounds and success predicate remain unchanged.
+   Under FAIL-SITE-PROBES (REQ/AC-BC-FAIL-012/013), genuine run37173267644
+   qualified all270 original cells and source/archive intake, but site135/158
+   passed. Nine direct failures are test-harness defects: default PascalCase
+   request serialization disagrees with lowercase Node arithmetic input; numeric
+   native DOMException.code is read as string; seven disposable SEO/vendor
+   repositories omit the eagerly imported canonical isolated-contract.json.
+   Native worker owns SiteNodeProbe.cs, SiteIsolatedNodeProgram.cs,
+   SiteMetadataRejectionTests.cs and SiteVendorTestScope.cs under SiteTests;
+   SiteVendorTokens.cs loses only the obsolete scratch-aggregate directory token.
+   Use existing SiteTokens.JsonOptions, actual native error.name only when code
+   is not a string, and exact source-byte copying of the canonical contract.
+   Vendor-only source mutations retain the accepted fixture's full original
+   aggregate/270-worker input directory as an unchanged read-only input. Remove
+   the aggregate-only scratch copy: the native validator requires all271files,
+   whose actual development inventory is2064912853bytes. Do not duplicate it
+   for every vendor metadata mutation or weaken inventory/byte validation.
+   Preserve median/AbortError assertions, real production builder, vendor bytes,
+   every intended asset rejection, native inputs and all coverage thresholds.
+   Existing16 focused cases are the regressions; root integrates/builds/formats
+   and records actual source/patch/input identity for development evidence.
+   Under FAIL-SITE-ADMISSION (REQ/AC-BC-FAIL-014), the same original TRX shows
+   eleven independent full builders and two archive-verification children each
+   reached the unchanged300s active deadline during the concurrent test burst.
+   Before-session full native verification succeeded in60.14s; after-session
+   verification/coverage completed in91.27s. Bounded original-input development
+   profiling now measures native V8-instrumented CPU-heavy execution: one builder
+   44.014s and two53.448/53.444s; full277-input verification48.428s single and
+   59.707/75.799s concurrent, with peak per-child RSS below483MB on the actual
+   macOS arm64 machine. These local observations do not prove GitHub saturation.
+   The original TRX has25 builder cases plus12 produce-rejection cases, allowing
+   35 pending requests with two active. Approve two active children, at most64
+   FIFO waiters and20 minutes for cancellable admission within the existing
+   30-minute Aspire site-suite budget. Classify actual builder/produce/full
+   inputs or CLI verify-inputs calls; light probes and native network capture
+   remain independent. Producer owns SiteHeavyChildAdmission.cs,
+   SiteHeavyChildLease.cs, SiteHeavyChildTokens.cs,
+   SiteHeavyChildClassification.cs, SiteHeavyChildProcessFixture.cs,
+   SiteHeavyChildAdmissionTests.cs and SiteHeavyChildCleanupTests.cs, and only
+   modifies SiteIsolatedNodeProcess.cs, SiteIsolatedBuilderProcess.cs,
+   SiteIsolatedGitHubNodeProcess.cs and SiteIsolatedGitHubNativeProcess.cs under
+   the same SiteTests feature. Scoped actual admission instances permit real
+   Node-child FIFO/capacity, queued-cancel, queue-full/deadline, start-failure,
+   active-cancel, output-bound and unsafe-ownership tests; no mocked process,
+   clock, transport or fabricated provider replaces the native dependency.
+   Admission precedes the existing active deadline and is bounded/cancellable.
+   Ownership lasts through real exit and settled readers, including failed or
+   cancelled children. Unsafe incomplete cleanup poisons admission and rejects
+   pending requests; it must not release capacity before exit/readers settle.
+   Keep full270/277/raw checks and add real-process tests for
+   concurrency, queued cancellation and failure/cleanup; do not extend300s,
+   fabricate input, omit tests, reduce coverage or make an alternative publisher.
+   All browser starts failed before Chrome; missing browser coverage is an
+   observed consequence, not permission to remove its required inventory.
+   Local development uses genuine original bytes and actual source/patch identity,
+   never forged CI/GitHub environment or rebound original website/control fields.
+   A focused development filter cannot qualify the full suite/coverage.
+   Rollback reverts only these test-harness/admission changes and truthfully
+   restores the observed qualification failure. No engine/data migration.
 5. Root reviews all diffs, builds solution, runs formatter/governance and focused
    Aspire-owned suites, then checkpoints scoped changes on current main and pushes.
 6. Genuine Linux Benchmarks run qualifies all cells, aggregate, site coverage/browser
@@ -136,7 +194,7 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
 
 Migration is additive to version4 dispositions; deploy producer/validators/site
 atomically. Rollback reverts this coherent change and restores the conservative
-publication gate, retaining immutable original artifacts. AC-BC-FAIL-001..011 map
+publication gate, retaining immutable original artifacts. AC-BC-FAIL-001..014 map
 to automated and actual-provider evidence in the feature specification. Root alone
 owns integration and shared contract updates; workers never commit or push.
 
