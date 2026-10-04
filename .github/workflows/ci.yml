@@ -103,6 +103,8 @@ jobs:
         run: node scripts/Features/RepositoryGovernance/verify.mjs
       - name: Test code analyzers
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers
+      - name: Test live benchmark progress capture
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-progress --KeyLoadTests:ReportTrx=true
       - name: Run unit tests
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit
       - name: Run unit tests without CPU intrinsics
