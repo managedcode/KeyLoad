@@ -21,3 +21,6 @@
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned slices: `ClientApi` and `BackupRestore`; target paths: `Features/ClientApi/` and `Features/BackupRestore/`.
 - Keep `Program.cs` as the CLI composition/dispatch entry point; feature command behavior belongs in its named slice.
+
+## Vertical-slice responsibility folders
+- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

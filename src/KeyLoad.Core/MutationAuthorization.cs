@@ -26,6 +26,16 @@ public sealed partial class DatabaseEngine
 
     private void ReauthorizeEffect(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect)
     {
+        if (effect is ApplyVectorProjection projection)
+        {
+            ReauthorizeVectorProjection(view, principal, partition, projection);
+            return;
+        }
+        if (effect is CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer)
+        {
+            ReauthorizeQueueTransfer(view, principal, partition, effect);
+            return;
+        }
         AuthorizeComposition(view, principal, partition, effect);
         var resource = Resource(view, partition, effect.Resource);
         var documentId = effect switch

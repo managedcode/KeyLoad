@@ -27,7 +27,7 @@ Unbounded shared contexts risk head-of-line blocking and stale authority. A per-
 
 ## Related requirements and implementation contract
 
-Related: `REQ-ROUTE-001/AC-ROUTE-001`, `REQ-MP-002/AC-MP-002..006`, `REQ-SEARCH-004/AC-SEARCH-004`, and `REQ-QUERY-006/AC-QUERY-006`; ADR-036 is the mandatory Orleans foundation reference. Current source includes `src/KeyLoad.Query/QueryEngine.cs`, `ReadExecutionBudget`, and per-request routing contracts; target helpers stay in QueryExecution/Search feature slices.
+Related: `REQ-ROUTE-001/AC-ROUTE-001`, `REQ-MP-002/AC-MP-002..006`, `REQ-SEARCH-004/AC-SEARCH-004`, and `REQ-QUERY-006/AC-QUERY-006`; ADR-036 is the mandatory Orleans foundation reference. Current source includes `src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs`, `ReadExecutionBudget`, and per-request routing contracts; target helpers stay in QueryExecution/Search feature slices.
 
 1. Freeze context lifetime, shared-versus-operation budget rules, and cancellation propagation before changing APIs.
 2. Test concurrent independent requests, cancellation at each stage, policy revocation between pages, and healthy subsequent operations using real storage and Kestrel/RF3.
@@ -35,4 +35,4 @@ Related: `REQ-ROUTE-001/AC-ROUTE-001`, `REQ-MP-002/AC-MP-002..006`, `REQ-SEARCH-
 4. Roll out without persisted format change; rollback removes only the optimization and retains request isolation.
 5. Qualify real SDK and official MCP calls through GitHub TUnit/recovery/RF3 suites; source-only build is not qualification.
 
-Current files: `src/KeyLoad.Query/QueryEngine.cs`, `src/KeyLoad.Core/ReadExecutionBudget.cs`, `src/KeyLoad.Orleans/CommandRouterGrain.cs`. Target paths are matching QueryExecution/Search feature folders. Root owns the router and integration join; dependencies are ADR-036, Admission, Search and Authorization.
+Current files: `src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs`, `src/KeyLoad.Core/ReadExecutionBudget.cs`, `src/KeyLoad.Orleans/CommandRouterGrain.cs`. Target paths are matching QueryExecution/Search feature folders. Root owns the router and integration join; dependencies are ADR-036, Admission, Search and Authorization.

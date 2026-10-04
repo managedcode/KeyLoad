@@ -11,9 +11,10 @@ namespace KeyLoad.Orleans;
 /// <param name="diagnostics">Logs unexpected node failures without serializing exceptions.</param>
 [global::Orleans.GrainType(GrainRoutingProtocol.CommandAlias), global::Orleans.Placement.PreferLocalPlacement]
 public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngine database, ICommitCoordinator coordinator,
-    TimeProvider clock, ILogger<CommandPartitionGrain> diagnostics) : Grain, ICommandPartitionGrain
+    TimeProvider clock, ILogger<CommandPartitionGrain> diagnostics)
+    : Grain, ICommandPartitionGrain
 {
-    private readonly GrainCommandExecutor commands = new(database, coordinator, clock);
+    private readonly GrainCommandExecutor commands = new(database, coordinator, clock, codec);
 
     /// <inheritdoc />
     /// <param name="signedRequest">The signed request whose partition key must match this actor.</param>
@@ -28,7 +29,9 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
             var request = codec.Verify(signedRequest);
             requestId = request.Envelope.RequestId;
             stage = GrainFailureStage.CapabilityExecution;
-            var reply = await commands.ExecuteAsync(request, this.GetPrimaryKeyString(), cancellationToken).ConfigureAwait(true);
+            var context = codec.HasPhaseObserver ? ((IGrainBase)this).GrainContext : null;
+            var reply = await commands.ExecuteAsync(request, this.GetPrimaryKeyString(), cancellationToken,
+                context).ConfigureAwait(true);
             if (reply.Error is { } code)
             {
                 GrainFailureDiagnostics.Log(diagnostics, Errors.Fail(code, GrainRoutingProtocol.InvalidRequest),

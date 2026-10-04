@@ -17,3 +17,6 @@
 
 ## Protected risks
 - Keep diagnostic IDs stable and unique. Compiler references must use the pinned SDK, with no private dependency payload attached to consumer runtime outputs. Preserve all unrelated dirty checkout changes.
+
+## Vertical-slice responsibility folders
+- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

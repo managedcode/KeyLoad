@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns Aspire application composition for KeyLoad services and infrastructure resources.
-- Entry point: `Program.cs`; benchmark resource composition: `BenchmarkResources.cs`.
+- Entry point: `Program.cs`; benchmark resource composition: `Features/BenchmarkComparisons/Resources/Features/BenchmarkComparisons/Resources/Features/BenchmarkComparisons/Resources/Features/BenchmarkComparisons/Resources/BenchmarkResources.cs`.
 
 ## Ownership and boundaries
 - Keep host wiring and genuinely shared infrastructure composition here. Feature-specific deployment behavior belongs under `Features/<SliceName>/` and the matching `docs/Features/<SliceName>.md`.
@@ -22,3 +22,6 @@
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned composition slices: `ClusterReplication`, `ClusterRouting`, `TestInfrastructure` and `BenchmarkComparisons`; target paths use the same `Features/<SliceName>/` convention. ClusterRouting's protocol image overrides follow NativeCqrsRequestV2 and ADR-082; they are allowed only in an explicitly selected ephemeral fixed-three-voter child test topology, never benchmark or ordinary production composition.
 - Keep `Program.cs` as the shared Aspire composition entry point; put feature-owned resource definitions under their named slice.
+
+## Vertical-slice responsibility folders
+- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

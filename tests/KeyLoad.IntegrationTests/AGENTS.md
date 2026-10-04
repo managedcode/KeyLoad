@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns caller-visible cluster and service integration tests.
-- Main suite files: `ClusterTests.cs`, `AdmissionClusterTests.cs`; topology fixture: `ClusterFixture.cs`.
+- Main suite files: `Features/ClusterReplication/Cases/Features/ClusterReplication/Cases/Features/ClusterReplication/Cases/Features/ClusterReplication/Cases/ClusterTests.cs`, `Features/ResourceExecution/Cases/AdmissionFeatures/ClusterReplication/Cases/Features/ClusterReplication/Cases/Features/ClusterReplication/Cases/Features/ClusterReplication/Cases/ClusterTests.cs`; topology fixture: `ClusterFixture.cs`.
 
 ## Ownership and boundaries
 - Test cases belong under canonical `Features/<SliceName>/` paths; shared cluster/container fixtures remain test infrastructure. Keep each feature's tests aligned with its docs and public contracts.
@@ -21,7 +21,11 @@
 - Owns `Features/RelationalStorage/` and QueryExecution unified SQL RF3 differential cases under ADR-054/055, through actual .NET/official MCP clients. Separate calls can observe different committed cuts; verify each contract and exact logical output rather than asserting cross-node cut equality.
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Shared cluster and SDK transport tests use `Features/ClusterReplication/` and `Features/ClientApi/`. Business integration cases MUST mirror their owning business slice under `Features/<same-business-SliceName>/`, including `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, `TimeSeries`, `Search`, `QueryExecution`, `Authorization` and `ChangeFeeds`.
-- `ClusterFixture.cs` is shared test infrastructure; `ClusterTests.cs` and `AdmissionClusterTests.cs` are current feature test entry points.
+- `ClusterFixture.cs` is shared test infrastructure; `Features/ClusterReplication/Cases/Features/ClusterReplication/Cases/Features/ClusterReplication/Cases/Features/ClusterReplication/Cases/ClusterTests.cs` and `Features/ResourceExecution/Cases/AdmissionFeatures/ClusterReplication/Cases/Features/ClusterReplication/Cases/Features/ClusterReplication/Cases/Features/ClusterReplication/Cases/ClusterTests.cs` are current feature test entry points.
 
 ## StorageRecovery cold RF3 qualification
 - New NodeEpochRf3 cases under Features/StorageRecovery implement ADR-077 through sequential genuine prior/current Aspire Docker RF3 waves, preserved private profile and all3-prepare-before-publish barrier. Ordinary ClusterFixture and its current image proof stay unchanged; root owns shared image/CLI/MCP joins. Offline converter children run within the Aspire-owned TUnit runner and never serve a standalone database. Preserve primary/cleanup failures and retain bind roots until all owned resources/processes/handles have settled.
+## Feature slice responsibility folders
+- Place every feature-owned source file under `Features/<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
+- Keep genuinely shared test infrastructure and project composition entry points at their existing shared ownership paths; do not duplicate them into a feature.
+- Structural moves preserve every source byte, namespace, type/serializer identity and test assertion. Do not change behavior, test logic or path references as part of a layout-only move; report source-path-sensitive joins to the solution integrator.

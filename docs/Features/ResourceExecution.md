@@ -467,7 +467,7 @@ range overwrite/tombstone/prefetch/lookahead/bounds, pre- and mid-cancellation,
 provider budget failure and healthy subsequent reads. GitHub executes them; no
 measurement claim follows from authored counters or local static validation.
 
-Актори: data caller, trusted control caller, operator та CI observer. Actual entry points: [CommandAdmissionGovernor](../../src/KeyLoad.Core/CommandAdmissionGovernor.cs), [HTTP admission](../../src/KeyLoad.Server/ApiEndpoints.cs), [ServiceDefaults telemetry](../../src/KeyLoad.ServiceDefaults/Extensions.cs), Aspire composition; shared resource contracts у [Admission](../../src/KeyLoad.Abstractions/Admission.cs) і [HttpAdmission](../../src/KeyLoad.Abstractions/HttpAdmission.cs). Public UI N/A; benchmark views належать BenchmarkComparisons.
+Актори: data caller, trusted control caller, operator та CI observer. Actual entry points: [CommandAdmissionGovernor](../../src/KeyLoad.Core/CommandAdmissionGovernor.cs), [HTTP admission](../../src/KeyLoad.Server/ApiEndpoints.cs), [ServiceDefaults telemetry](../../src/KeyLoad.ServiceDefaults/Extensions.cs), Aspire composition; shared resource contracts у [Admission](../../src/KeyLoad.Abstractions/Features/ResourceExecution/Contracts/Admission.cs) і [HttpAdmission](../../src/KeyLoad.Abstractions/Features/ResourceExecution/Contracts/HttpAdmission.cs). Public UI N/A; benchmark views належать BenchmarkComparisons.
 
 | Вимога | Acceptance / flows | Test mapping |
 |---|---|---|

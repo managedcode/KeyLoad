@@ -57,7 +57,7 @@ No persisted/wire migration, source rollback removes only diagnostic metadata
 and logging. Unknown metadata is sanitized, logging never receives exceptions,
 headers, body, arbitrary method/target text or private identities.
 
-Root policy вимагає простий agent API та інтегрований official MCP C# SDK server для всіх database/search/storage operations, з real .NET SDK і official MCP SDK клієнтами в Docker/Aspire RF3 тестах. Поточні HTTP operations у [ApiEndpoints](../../src/KeyLoad.Server/Features/ClientApi/ApiEndpoints.cs) і [KeyLoadClient](../../src/KeyLoad.Client/KeyLoadClient.cs) існують; завершеної official MCP/agent surface не знайдено.
+Root policy вимагає простий agent API та інтегрований official MCP C# SDK server для всіх database/search/storage operations, з real .NET SDK і official MCP SDK клієнтами в Docker/Aspire RF3 тестах. Поточні HTTP operations у [ApiEndpoints](../../src/KeyLoad.Server/Features/ClientApi/Transport/ApiEndpoints.cs) і [KeyLoadClient](../../src/KeyLoad.Client/KeyLoadClient.cs) існують; завершеної official MCP/agent surface не знайдено.
 
 Напрям: протокольні adapters належать ClientApi, а business behavior/requirements залишаються в owning DocumentStorage/EventStreams/Messaging/GraphTraversal/TimeSeries/Search/ChangeFeeds/BlobStorage slices. Ідентичність береться з persisted server credentials; model/tool arguments не можуть підмінити trusted roles. Кожна операція викликає окремий Orleans request grain за ADR-036 і використовує ту саму canonical authorization, bounds, outcomes та unknown-write retry semantics.
 

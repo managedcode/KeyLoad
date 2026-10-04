@@ -389,7 +389,7 @@
     },
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
-      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
       "docs/implementation/durability-audit.md",
       "docs/implementation/performance-source-r11.json",
       "docs/implementation/runtime-qualification-37065200835.json"
@@ -494,7 +494,7 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
-      "src/KeyLoad.Query/SearchEngine.cs"
+      "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs"
     ]
   },
   "KL-005": {
@@ -511,18 +511,18 @@
     "status": "in_progress",
     "evidence": [
       "benchmarks/KeyLoad.Benchmarks/Program.cs",
-      "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/ComparisonRunner.cs",
+      "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/ComparisonRunner.cs",
       "docs/Features/BenchmarkComparisons.md",
       "docs/ADR/ADR-034-cluster-comparisons.md",
       "docs/ADR/ADR-050-timeseries-timescale-comparison.md",
       "docs/Features/TimeSeries.md",
       "docs/ADR/ADR-050-timeseries-timescale-comparison.md",
-      "src/KeyLoad.AppHost/BenchmarkResources.cs",
-      "tests/KeyLoad.UnitTests/ComparisonHarnessTests.cs",
+      "src/KeyLoad.AppHost/Features/BenchmarkComparisons/Resources/BenchmarkResources.cs",
+      "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonHarnessTests.cs",
       "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/",
       "docs/implementation/comparative-benchmarks.md",
-      "benchmarks/KeyLoad.Comparisons/Targets/Neo4jTarget.cs",
-      "benchmarks/KeyLoad.Comparisons/ClientResourceSampler.cs",
+      "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/Neo4j/Neo4jTarget.cs",
+      "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/ResourceMeasurement/ClientResourceSampler.cs",
       "site/index.html",
       ".github/workflows/pages.yml",
       "docs/implementation/website.md",
@@ -625,7 +625,7 @@
     "evidence": [
       "src/KeyLoad.Abstractions/Storage/KeyCodec.cs",
       "tests/KeyLoad.UnitTests/KeyCodecTests.cs",
-      "src/KeyLoad.Abstractions/Features/StorageRecovery/KeyCodecReadPrimitives.cs",
+      "src/KeyLoad.Abstractions/Features/StorageRecovery/Serialization/KeyCodecReadPrimitives.cs",
       "tests/KeyLoad.UnitTests/Features/StorageRecovery",
       "docs/implementation/keycodec-crud-development-2026-10-04.json"
     ],
@@ -662,7 +662,7 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
-      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
       "docs/implementation/durability-audit.md"
     ]
   },
@@ -678,12 +678,12 @@
     "title": "Document CRUD та CAS",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Documents.cs",
+      "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
       "tests/KeyLoad.UnitTests/TransactionTests.cs",
       "tests/KeyLoad.UnitTests/Features/DocumentStorage",
       "docs/implementation/keycodec-crud-development-2026-10-04.json",
-      "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/McpDocumentCrudParityTests.cs"
     ],
     "qualification": {
       "sourceStage": "real_ZoneTree_CRUD_revision_validation_index_and_persisted_policy_matrix",
@@ -724,7 +724,7 @@
     "title": "Strict indexes і unique scope",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Documents.cs",
+      "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
       "tests/KeyLoad.UnitTests/TransactionTests.cs"
     ]
@@ -733,7 +733,7 @@
     "title": "Batch і persisted idempotency",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Documents.cs",
+      "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
       "tests/KeyLoad.UnitTests/TransactionTests.cs"
     ]
@@ -742,9 +742,9 @@
     "title": "Query AST, planner і cursors",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Query/QueryAst.cs",
-      "src/KeyLoad.Query/SqlParser.cs",
-      "src/KeyLoad.Query/QueryEngine.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
   },
@@ -760,7 +760,7 @@
     "title": "Security і telemetry baseline",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "src/KeyLoad.ServiceDefaults/Extensions.cs"
     ]
   },
@@ -768,11 +768,11 @@
     "title": "Committed projection outbox",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Abstractions/ChangeFeeds.cs",
-      "src/KeyLoad.Core/ProjectionOutbox.cs",
+      "src/KeyLoad.Abstractions/Features/ChangeFeeds/Contracts/ChangeFeeds.cs",
+      "src/KeyLoad.Core/Features/ChangeFeeds/Execution/ProjectionOutbox.cs",
       "docs/design/change-feeds.md",
       "tests/KeyLoad.UnitTests/ChangeFeedTests.cs",
-      "tests/KeyLoad.RecoveryTests/ProjectionRecoveryTests.cs"
+      "tests/KeyLoad.RecoveryTests/Features/EventStreams/Cases/ProjectionRecoveryTests.cs"
     ]
   },
   "KL-017": {
@@ -804,7 +804,7 @@
       "decision": "docs/ADR/ADR-082-native-cqrs-streams.md",
       "dependencyDelivery": "docs/implementation/native-cqrs-fatal-aggregate-delivery-2026-10-04.json",
       "implemented": "native_ManagedCode_Communication_10_2_9_IAsyncEnumerable_v2_signed_request_scope_IdentityCore_RequestContext_fresh_fixed_voter_protocol_cohort_bounded_stream_and_full_settlement",
-      "localDevelopment": "full_solution_Release19_and_formatter19_pass_C0_6_of6_C1_59_of59_full_unit3060_of3060_scalar18_AppHost134_no_final_test_report_repeat19_running",
+      "localDevelopment": "Release22_formatter22_pass_full_unit18_3060_of3060_scalar22_3059_of3060_exit2_comparison_cleanup_timeout_recovery23_AppHost_aborted_exit134_no_final_report_recovery24_pinned_Aspire_cli_restore_failed_before_tests_recovery25_escalated_actual_Aspire_entry_running",
       "pending": [
         "native_RF3_phase_interruption_and_same_command_receipt_effect_oracles",
         "actual_command_activation_migration_and_persisted_authority_reload",
@@ -812,7 +812,24 @@
         "full_scalar_recovery_and_exact_source_Linux_required_gates",
         "endurance_and_performance_qualification"
       ],
-      "acceptanceClosed": false
+      "acceptanceClosed": false,
+      "latestLinuxCI": {
+        "runId": 37220907026,
+        "sourceSha": "2801b03091efc5cf45b1268c6570457539f12f27",
+        "status": "failed",
+        "unit": {
+          "total": 3060,
+          "passed": 3055,
+          "failed": 5,
+          "skipped": 0,
+          "artifactId": 11310553232,
+          "originalZipSha256": "aa420cea0c8237a61545228b98f917b2f5b0f0428084beaa2c50ef6fa2ebdc2f"
+        },
+        "unitFailures": "native_C1_cohort_cancellation_shutdown_transition_unavailable_cases",
+        "scalarAndRecovery": "not_run_after_unit_failure",
+        "rf3": "image_native_command_journal_cap_failed_before_RF3_tests",
+        "qualificationClosed": false
+      }
     }
   },
   "KL-020": {
@@ -820,8 +837,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
-      "tests/KeyLoad.IntegrationTests/ClusterTests.cs",
-      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
     ]
   },
   "KL-021": {
@@ -947,9 +964,9 @@
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-073-logged-series-retention.md",
-      "src/KeyLoad.Core/Features/TimeSeries/SampleRetentionCommands.cs",
-      "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleRetentionLifecycleTests.cs",
-      "tests/KeyLoad.IntegrationTests/Features/TimeSeries/SampleRetentionRf3Tests.cs"
+      "src/KeyLoad.Core/Features/TimeSeries/Commands/SampleRetentionCommands.cs",
+      "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleRetentionLifecycleTests.cs",
+      "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleRetentionRf3Tests.cs"
     ],
     "decision": "docs/ADR/ADR-073-logged-series-retention.md",
     "sourceStage": "logged_bounded_retention_source_and_tests_authored_runtime_unqualified",
@@ -1024,9 +1041,9 @@
     "evidence": [
       "docs/ADR/ADR-019-managed-ann.md",
       "docs/Features/Search/ManagedAnn.md",
-      "src/KeyLoad.Query/Features/Search/PackedAnnIndex.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/PackedAnnRecallTests.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/PackedAnnReservationTests.cs"
+      "src/KeyLoad.Query/Features/Search/Execution/PackedAnnIndex.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnRecallTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs"
     ],
     "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
     "qualification": {
@@ -1050,9 +1067,9 @@
     "evidence": [
       "docs/Features/Search/ManagedAnnSeed.md",
       "docs/ADR/ADR-019-managed-ann.md",
-      "src/KeyLoad.Core/Features/Search/AnnSeedCollector.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/AnnSeedReadBudgetTests.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/AnnSeedReservationTests.cs"
+      "src/KeyLoad.Core/Features/Search/Execution/AnnSeedCollector.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedReadBudgetTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedReservationTests.cs"
     ],
     "sourceStage": "R2A_bounded_historical_seed_9_source_12_tests_34_cases_full_static23_and_unchanged_actual_Aspire_normal34_scalar34_local_pass_persisted_projection_replay_and_delivered_Linux_RF3_pending",
     "runtimeQualified": false,
@@ -1062,14 +1079,24 @@
   },
   "KL-032": {
     "title": "Filtered vector planner",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/Search/FilteredRetrieval.md",
+      "docs/ADR/ADR-087-filtered-retrieval.md"
+    ],
+    "implementation": {
+      "stage": "F1_exact_allowlist_implementation_and_real_store_tests_handed_to_root",
+      "owner": "lifecycle_wave",
+      "model": "Luna",
+      "acceptanceClosed": false,
+      "qualification": "F1_source_implemented_runtime_pending_F2_adaptive_ANN_and_F3_RF3_pending"
+    }
   },
   "KL-033": {
     "title": "Hybrid rank і Explain",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Query/SearchEngine.cs",
+      "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
       "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
     ]
   },
@@ -1087,13 +1114,13 @@
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/Checkpoints.cs",
       "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
-      "tests/KeyLoad.UnitTests/CheckpointTests.cs",
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/CheckpointTests.cs",
       "tests/KeyLoad.RecoveryTests/RaftSnapshotTests.cs",
       "tests/KeyLoad.RecoveryTests/InterruptedSnapshotTests.cs",
       "tests/KeyLoad.RecoveryTests/SnapshotInstallRecoveryTests.cs",
       "docs/design/replica-snapshots.md",
-      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
-      "tests/KeyLoad.IntegrationTests/ClusterTests.cs"
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
     ]
   },
   "KL-036": {
@@ -1120,15 +1147,15 @@
     "title": "Resource governor",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Query/QueryEngine.cs",
-      "src/KeyLoad.Core/ProjectionOutbox.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
+      "src/KeyLoad.Core/Features/ChangeFeeds/Execution/ProjectionOutbox.cs",
       "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
       "tests/KeyLoad.UnitTests/ProjectionProgressTests.cs",
       "src/KeyLoad.Core/CommandAdmissionGovernor.cs",
       "src/KeyLoad.Core/AdmittedCommandQueue.cs",
       "tests/KeyLoad.UnitTests/CommandAdmissionTests.cs",
       "tests/KeyLoad.UnitTests/CommandQueueTests.cs",
-      "tests/KeyLoad.IntegrationTests/AdmissionClusterTests.cs",
+      "tests/KeyLoad.IntegrationTests/Features/ResourceExecution/Cases/AdmissionClusterTests.cs",
       "src/KeyLoad.Core/HttpAdmissionGovernor.cs",
       "tests/KeyLoad.UnitTests/HttpAdmissionTests.cs",
       "src/KeyLoad.Core/ReadExecutionBudget.cs",
@@ -1258,8 +1285,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
-      "tests/KeyLoad.IntegrationTests/ClusterTests.cs",
-      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
     ]
   },
   "KL-042": {
@@ -1277,12 +1304,12 @@
     "evidence": [
       "docs/ADR/ADR-077-offline-native-data-epoch.md",
       "docs/Features/StorageRecovery.md",
-      "src/KeyLoad.Storage.ZoneTree/ZoneTreeFormatUpgrade.cs",
+      "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeFormatUpgrade.cs",
       "scripts/Features/StorageRecovery/build-native5-probe.sh",
-      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochUpgradeProcessRecoveryTests.cs",
-      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochPriorAcceptanceTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/EpochUpgradeProcessRecoveryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/EpochPriorAcceptanceTests.cs",
       "docs/implementation/native-async-search-development-2026-10-03.json",
-      "src/KeyLoad.Server/Features/StorageRecovery/ServerNodeFormatUpgrade.cs",
+      "src/KeyLoad.Server/Features/StorageRecovery/Hosting/ServerNodeFormatUpgrade.cs",
       "src/KeyLoad.Replication/Features/StorageRecovery",
       "src/KeyLoad.Storage.IO/Features/StorageRecovery",
       "docs/implementation/node-epoch-development-2026-10-04.json",
@@ -1361,11 +1388,11 @@
     "title": "Query capability manifest і AST version",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Abstractions/QueryAst.cs",
+      "src/KeyLoad.Abstractions/Features/QueryExecution/Contracts/QueryAst.cs",
       "docs/design/query-q1.md",
-      "src/KeyLoad.Query/QueryAst.cs",
-      "src/KeyLoad.Query/SqlParser.cs",
-      "src/KeyLoad.Query/QueryEngine.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
   },
@@ -1373,9 +1400,9 @@
     "title": "SQL dialect semantics",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Query/QueryAst.cs",
-      "src/KeyLoad.Query/SqlParser.cs",
-      "src/KeyLoad.Query/QueryEngine.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
   },
@@ -1383,9 +1410,9 @@
     "title": "SQL parser adapter і diagnostics",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Query/QueryAst.cs",
-      "src/KeyLoad.Query/SqlParser.cs",
-      "src/KeyLoad.Query/QueryEngine.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
   },
@@ -1393,11 +1420,11 @@
     "title": "Binder і field lineage",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Query/QueryAst.cs",
-      "src/KeyLoad.Query/QueryValidation.cs",
-      "src/KeyLoad.Client/KeyLoadQuery.cs",
-      "src/KeyLoad.Query/SqlParser.cs",
-      "src/KeyLoad.Query/QueryEngine.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryValidation.cs",
+      "src/KeyLoad.Client/Features/QueryExecution/Queries/KeyLoadQuery.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
   },
@@ -1405,9 +1432,9 @@
     "title": "Rule-based optimizer",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Query/QueryAst.cs",
-      "src/KeyLoad.Query/SqlParser.cs",
-      "src/KeyLoad.Query/QueryEngine.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
   },
@@ -1415,9 +1442,9 @@
     "title": "Batch executor і secure operator boundaries",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Query/QueryAst.cs",
-      "src/KeyLoad.Query/SqlParser.cs",
-      "src/KeyLoad.Query/QueryEngine.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
   },
@@ -1425,25 +1452,25 @@
     "title": "SQL/JSON/C# equivalence",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Abstractions/QueryAst.cs",
-      "src/KeyLoad.Query/QueryValidation.cs",
-      "src/KeyLoad.Client/KeyLoadQuery.cs",
+      "src/KeyLoad.Abstractions/Features/QueryExecution/Contracts/QueryAst.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryValidation.cs",
+      "src/KeyLoad.Client/Features/QueryExecution/Queries/KeyLoadQuery.cs",
       "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
-      "tests/KeyLoad.IntegrationTests/ClusterTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
     ]
   },
   "KL-052": {
     "title": "Ранній admission control",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Query/QueryAst.cs",
-      "src/KeyLoad.Query/QueryValidation.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryValidation.cs",
       "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
       "src/KeyLoad.Core/HttpAdmissionGovernor.cs",
       "tests/KeyLoad.UnitTests/HttpAdmissionTests.cs",
-      "tests/KeyLoad.IntegrationTests/AdmissionClusterTests.cs",
-      "src/KeyLoad.Query/SqlParser.cs",
-      "src/KeyLoad.Query/QueryEngine.cs",
+      "tests/KeyLoad.IntegrationTests/Features/ResourceExecution/Cases/AdmissionClusterTests.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
   },
@@ -1451,8 +1478,8 @@
     "title": "Session facade та independent query contexts",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Client/KeyLoadQuery.cs",
-      "src/KeyLoad.Query/QueryEngine.cs",
+      "src/KeyLoad.Client/Features/QueryExecution/Queries/KeyLoadQuery.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/QueryAdapterTests.cs"
     ]
   },
@@ -1467,8 +1494,24 @@
   },
   "KL-055": {
     "title": "GraphScope / GraphRetriever / GraphExpansion",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/Search/GraphRetrieval.md",
+      "docs/ADR/ADR-090-graph-search.md"
+    ],
+    "implementation": {
+      "stage": "G1_same_cut_graph_operator_source_implementation",
+      "owner": "lifecycle_wave",
+      "model": "Luna",
+      "acceptanceClosed": false,
+      "qualification": "implementation_in_progress_no_runtime_result",
+      "publicJoins": "HTTP_SDK_official_MCP_Orleans_read_kind_source_joined",
+      "remaining": [
+        "complete_mapped_operator_oracle_policy_expansion_budget_tests",
+        "SQL_equivalence_and_genuine_RF3_dotnet_MCP_fault_cases",
+        "exact_source_Linux_and_required_original_acceptance"
+      ]
+    }
   },
   "KL-056": {
     "title": "Three-way hybrid retrieval",
@@ -1484,7 +1527,7 @@
     "title": "BM25 corpus і statistics epochs",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Query/SearchEngine.cs",
+      "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
       "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
     ]
   },
@@ -1494,9 +1537,9 @@
     "evidence": [
       "docs/ADR/ADR-019-managed-ann.md",
       "docs/Features/Search/ManagedAnn.md",
-      "src/KeyLoad.Query/Features/Search/PackedAnnIndex.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/PackedAnnRecallTests.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/PackedAnnReservationTests.cs"
+      "src/KeyLoad.Query/Features/Search/Execution/PackedAnnIndex.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnRecallTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs"
     ],
     "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
     "qualification": {
@@ -1523,7 +1566,7 @@
     "title": "Principals, API keys і RBAC",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
     ]
@@ -1532,7 +1575,7 @@
     "title": "Sensitive field catalog",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
     ]
@@ -1541,7 +1584,7 @@
     "title": "Sensitive expression usage enforcement",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
     ]
@@ -1550,7 +1593,7 @@
     "title": "Єдиний safe projector",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
     ]
@@ -1559,7 +1602,7 @@
     "title": "Row ACL planner і graph enforcement",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
     ]
@@ -1568,7 +1611,7 @@
     "title": "Revocation epochs і cursor reauthorization",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
     ]
@@ -1585,7 +1628,7 @@
     "title": "Security adversarial matrix",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
     ]
@@ -1620,7 +1663,7 @@
     "title": "PostgreSQL baseline kit",
     "status": "in_progress",
     "evidence": [
-      "benchmarks/KeyLoad.Comparisons/Targets/PostgresTarget.cs",
+      "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/PostgreSQL/PostgresTarget.cs",
       "docs/implementation/comparative-benchmarks.md"
     ]
   },
@@ -1639,7 +1682,7 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Contracts.cs",
-      "src/KeyLoad.Core/Messaging.cs",
+      "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
       "docs/implementation/keycodec-crud-development-2026-10-04.json"
     ]
   },
@@ -1647,13 +1690,13 @@
     "title": "Hot-path allocation і SIMD оптимізація",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Query/SearchEngine.cs",
+      "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
       "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs",
-      "src/KeyLoad.Query/Features/Search/PreparedSimilarity.cs",
+      "src/KeyLoad.Query/Features/Search/Execution/PreparedSimilarity.cs",
       "docs/Features/Search.md",
       "docs/ADR/ADR-035-memory-performance.md",
-      "tests/KeyLoad.UnitTests/Features/Search/VectorMetricValidationTests.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/VectorMetricGoldenTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricValidationTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricGoldenTests.cs",
       "docs/implementation/performance-source-r11.json",
       "docs/implementation/keycodec-crud-development-2026-10-04.json"
     ],
@@ -1681,11 +1724,11 @@
     "title": "Resumable change feed і обмежені live queries",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/ChangeFeeds.cs",
-      "src/KeyLoad.Query/LiveQueries.cs",
+      "src/KeyLoad.Core/Features/ChangeFeeds/Execution/ChangeFeeds.cs",
+      "src/KeyLoad.Query/Features/ChangeFeeds/Execution/LiveQueries.cs",
       "docs/design/change-feeds.md",
       "tests/KeyLoad.UnitTests/LiveQueryTests.cs",
-      "tests/KeyLoad.IntegrationTests/ClusterTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
     ]
   },
   "KL-080": {
@@ -1693,8 +1736,8 @@
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-074-aspire-owned-test-entry.md",
-      "src/KeyLoad.AppHost/Features/TestInfrastructure/TestSuiteResources.cs",
-      "tests/KeyLoad.ComparisonTests/Features/TestInfrastructure/AspireTestEntryModelTests.cs",
+      "src/KeyLoad.AppHost/Features/TestInfrastructure/Hosting/TestSuiteResources.cs",
+      "tests/KeyLoad.ComparisonTests/Features/TestInfrastructure/Cases/AspireTestEntryModelTests.cs",
       "docs/implementation/owner-wave-001-development-2026-10-03.json"
     ],
     "decision": "docs/ADR/ADR-074-aspire-owned-test-entry.md",
@@ -1710,7 +1753,7 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Contracts.cs",
-      "src/KeyLoad.Abstractions/Subscriptions.cs",
+      "src/KeyLoad.Abstractions/Features/EventStreams/Contracts/Subscriptions.cs",
       "docs/implementation/durability-audit.md"
     ]
   },
@@ -1718,9 +1761,9 @@
     "title": "Event/queue keyspace і state envelopes",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Events.cs",
-      "src/KeyLoad.Core/EventSources.cs",
-      "src/KeyLoad.Core/SubscriptionGroups.cs",
+      "src/KeyLoad.Core/Features/EventStreams/Execution/Events.cs",
+      "src/KeyLoad.Core/Features/EventStreams/Execution/EventSources.cs",
+      "src/KeyLoad.Core/Features/Messaging/Execution/SubscriptionGroups.cs",
       "tests/KeyLoad.UnitTests/TransactionTests.cs"
     ]
   },
@@ -1728,7 +1771,7 @@
     "title": "AppendEvents, expected revision та dedup",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Events.cs",
+      "src/KeyLoad.Core/Features/EventStreams/Execution/Events.cs",
       "tests/KeyLoad.UnitTests/TransactionTests.cs",
       "tests/KeyLoad.UnitTests/SubscriptionTests.cs"
     ]
@@ -1737,8 +1780,8 @@
     "title": "ReadStream, feed cursors і catch-up",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Events.cs",
-      "src/KeyLoad.Core/EventSources.cs",
+      "src/KeyLoad.Core/Features/EventStreams/Execution/Events.cs",
+      "src/KeyLoad.Core/Features/EventStreams/Execution/EventSources.cs",
       "tests/KeyLoad.UnitTests/TransactionTests.cs",
       "tests/KeyLoad.UnitTests/SubscriptionTests.cs"
     ]
@@ -1748,9 +1791,9 @@
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md",
-      "src/KeyLoad.Abstractions/Features/EventStreams/AggregateReplayContracts.cs",
-      "src/KeyLoad.Core/Features/EventStreams/AggregateReplayReader.cs",
-      "src/KeyLoad.Client/Features/EventStreams/AggregateReplayReduction.cs"
+      "src/KeyLoad.Abstractions/Features/EventStreams/Contracts/AggregateReplayContracts.cs",
+      "src/KeyLoad.Core/Features/EventStreams/Recovery/AggregateReplayReader.cs",
+      "src/KeyLoad.Client/Features/EventStreams/Execution/AggregateReplayReduction.cs"
     ],
     "sourceStage": "snapshot_CAS_and_same_cut_replay_source_authored;bounded_pure_worker_root_review_and_runtime_pending",
     "decision": "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md",
@@ -1765,7 +1808,7 @@
     "title": "Durable enqueue і queue-lane state",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Messaging.cs",
+      "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
       "tests/KeyLoad.UnitTests/MessagingTests.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
@@ -1774,7 +1817,7 @@
     "title": "Claim, ACK, renew і delivery fencing",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Messaging.cs",
+      "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
       "tests/KeyLoad.UnitTests/MessagingTests.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
@@ -1783,7 +1826,7 @@
     "title": "Retry, DLQ, cancellation та expiry",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Messaging.cs",
+      "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
       "tests/KeyLoad.UnitTests/MessagingTests.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
@@ -1792,22 +1835,22 @@
     "title": "Durable groups і contiguous checkpoints",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/SubscriptionGroups.cs",
+      "src/KeyLoad.Core/Features/Messaging/Execution/SubscriptionGroups.cs",
       "tests/KeyLoad.UnitTests/SubscriptionTests.cs",
-      "tests/KeyLoad.RecoveryTests/SubscriptionRecoveryTests.cs",
-      "tests/KeyLoad.IntegrationTests/ClusterTests.cs"
+      "tests/KeyLoad.RecoveryTests/Features/ChangeFeeds/Cases/SubscriptionRecoveryTests.cs",
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
     ]
   },
   "KL-090": {
     "title": "Inbox і CommitProcessing",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Messaging.cs",
-      "src/KeyLoad.Core/SubscriptionGroups.cs",
+      "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
+      "src/KeyLoad.Core/Features/Messaging/Execution/SubscriptionGroups.cs",
       "src/KeyLoad.Core/MutationAuthorization.cs",
       "tests/KeyLoad.UnitTests/MessagingTests.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
-      "tests/KeyLoad.RecoveryTests/SubscriptionRecoveryTests.cs"
+      "tests/KeyLoad.RecoveryTests/Features/ChangeFeeds/Cases/SubscriptionRecoveryTests.cs"
     ]
   },
   "KL-091": {
@@ -1815,14 +1858,14 @@
     "status": "in_progress",
     "evidence": [
       "tests/KeyLoad.UnitTests/TransactionTests.cs",
-      "tests/KeyLoad.IntegrationTests/ClusterTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
     ]
   },
   "KL-092": {
     "title": "Persisted scheduler і clock contract",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Messaging.cs",
+      "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
       "tests/KeyLoad.UnitTests/MessagingTests.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
@@ -1837,15 +1880,25 @@
   },
   "KL-094": {
     "title": "Cross-partition transfer outbox",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/Messaging/RemoteTransfers.md",
+      "docs/ADR/ADR-088-remote-queue-transfers.md"
+    ],
+    "implementation": {
+      "stage": "root_accepted_functional_contract_write_authorized",
+      "owner": "cluster_wave",
+      "model": "Luna",
+      "acceptanceClosed": false,
+      "qualification": "implementation_in_progress_no_new_runtime_result"
+    }
   },
   "KL-095": {
     "title": "Event SQL, queue views та protocol",
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-072-authorized-sql-model-views.md",
-      "src/KeyLoad.Abstractions/Features/QueryExecution/ModelQuerySource.cs"
+      "src/KeyLoad.Abstractions/Features/QueryExecution/Contracts/ModelQuerySource.cs"
     ],
     "decision": "docs/ADR/ADR-072-authorized-sql-model-views.md",
     "sourceStage": "bounded_authorized_event_queue_SQL_sources_in_implementation_unqualified",
@@ -1859,7 +1912,7 @@
     "title": "Event/message RBAC і sensitive schemas",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Security/AuthorizationPolicy.cs",
+      "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "src/KeyLoad.Core/MutationAuthorization.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
       "tests/KeyLoad.UnitTests/SubscriptionTests.cs",
@@ -1868,15 +1921,25 @@
   },
   "KL-097": {
     "title": "Event-driven projections і search lineage",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/Search/EventProjectionLineage.md",
+      "docs/ADR/ADR-089-event-projection-lineage.md"
+    ],
+    "implementation": {
+      "stage": "root_accepted_functional_contract_write_authorized",
+      "owner": "query_wave",
+      "model": "Luna",
+      "acceptanceClosed": false,
+      "qualification": "implementation_in_progress_no_new_runtime_result"
+    }
   },
   "KL-098": {
     "title": "Eventing retention, purge і backup state",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
-      "src/KeyLoad.Core/EventSources.cs",
+      "src/KeyLoad.Core/Features/EventStreams/Execution/EventSources.cs",
       "src/KeyLoad.Artifacts/BackupArtifact.cs",
       "tests/KeyLoad.UnitTests/ArtifactTests.cs"
     ]
@@ -1886,9 +1949,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
-      "tests/KeyLoad.IntegrationTests/ClusterTests.cs",
-      "tests/KeyLoad.RecoveryTests/RecoveryTests.cs",
-      "tests/KeyLoad.RecoveryTests/SubscriptionRecoveryTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ChangeFeeds/Cases/SubscriptionRecoveryTests.cs"
     ]
   },
   "KL-100": {
@@ -1900,10 +1963,10 @@
     "title": "Eventing benchmark kit і .NET baselines",
     "status": "in_progress",
     "evidence": [
-      "benchmarks/KeyLoad.Comparisons/Targets/KeyLoadTarget.cs",
-      "benchmarks/KeyLoad.Comparisons/Targets/PostgresTarget.cs",
-      "benchmarks/KeyLoad.Comparisons/Targets/RabbitTarget.cs",
-      "tests/KeyLoad.ComparisonTests/ComparisonTests.cs",
+      "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/KeyLoad/KeyLoadTarget.cs",
+      "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/PostgreSQL/PostgresTarget.cs",
+      "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/RabbitMQ/RabbitTarget.cs",
+      "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Cases/ComparisonTests.cs",
       "docs/implementation/comparative-benchmarks.md"
     ]
   },
@@ -1911,7 +1974,7 @@
     "title": "Eventing failure і state-machine suite",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Messaging.cs",
+      "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
       "tests/KeyLoad.UnitTests/MessagingTests.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
@@ -1920,7 +1983,7 @@
     "title": "Eventing adversarial security suite",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/Messaging.cs",
+      "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
       "tests/KeyLoad.UnitTests/MessagingTests.cs",
       "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
     ]
@@ -1984,7 +2047,7 @@
                 "method": "AcMp003LargeNonmatchingPayloadsDoNotAllocateRawCorpusCopies",
                 "status": "error",
                 "message": "Expected to be 1048576\nbut found 1048511\n\nat Assert.That(addedStoredBytes).IsEqualTo((long)CorpusDocuments * PaddingCharacters)",
-                "source": "tests/KeyLoad.UnitTests/Features/Search/SearchResourceTests.cs"
+                "source": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchResourceTests.cs"
               }
             ]
           },
@@ -2002,7 +2065,7 @@
                 "method": "AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails",
                 "status": "error",
                 "message": "Expected exactly KeyLoadException but got AssertionException: Expected exactly KeyLoadException but no exception was thrown",
-                "source": "tests/KeyLoad.UnitTests/Features/Messaging/SourceReadBudgetTests.cs"
+                "source": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/SourceReadBudgetTests.cs"
               }
             ]
           },
@@ -2020,7 +2083,7 @@
                 "method": "KnownMethodCategoryIsClosed",
                 "status": "error",
                 "message": "Expected to contain \"ToolsCall\"\nbut received \"3 1 McpTransportDiagnosticsTests 4  MCP transport rejected at MethodHeaderEncoding for Other. 7ddcfc1e38ea9159286bc350b114682d 2466bc8c41d488e8 1 3 3 McpTransportDiagnosticsTests 4  MCP transport rejected at BodyMethodMismatch for Discovery. efec0d80cc8fe052a58c8e5a15767dbe 9699003b60e7c104 1\"\n\nat Assert.That(capture.Text).Contains(CategoryToolsCall)",
-                "source": "tests/KeyLoad.UnitTests/Features/ClientApi/McpTransportDiagnosticsTests.cs"
+                "source": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/McpTransportDiagnosticsTests.cs"
               }
             ]
           }
@@ -2060,77 +2123,77 @@
                 "status": "error",
                 "type": "System.IO.IOException",
                 "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-checkpoint-crash-cbea157881954effb1c25a59fb9f6538\\tree\\0.meta.wal' because it is being used by another process.",
-                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+                "source": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
               },
               {
                 "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(18)",
                 "status": "error",
                 "type": "System.IO.IOException",
                 "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-18-31-2515052916fe41d1b039405919a803a5\\tree\\0.meta.wal' because it is being used by another process.",
-                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+                "source": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
               },
               {
                 "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(16)",
                 "status": "error",
                 "type": "System.IO.IOException",
                 "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-16-4-53875e1e8a684cae8948b4a9381ebd18\\tree\\0.meta.wal' because it is being used by another process.",
-                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+                "source": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
               },
               {
                 "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(14)",
                 "status": "error",
                 "type": "System.IO.IOException",
                 "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-14-41-ae309d7e78cf438e8f53bfacaf267b2e\\tree\\0.meta.wal' because it is being used by another process.",
-                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+                "source": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
               },
               {
                 "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(11)",
                 "status": "error",
                 "type": "System.IO.IOException",
                 "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-11-44-de66262e0dd845c294fe9ac043982dff\\tree\\0.meta.wal' because it is being used by another process.",
-                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+                "source": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
               },
               {
                 "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(10)",
                 "status": "error",
                 "type": "System.IO.IOException",
                 "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-10-12-1a42116f5a9248debd689a1d99a69f6e\\tree\\0.meta.wal' because it is being used by another process.",
-                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+                "source": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
               },
               {
                 "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(8)",
                 "status": "error",
                 "type": "System.IO.IOException",
                 "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-8-39-567ef228a3d647aba535571bd1c20e08\\tree\\0.meta.wal' because it is being used by another process.",
-                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+                "source": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
               },
               {
                 "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(6)",
                 "status": "error",
                 "type": "System.Threading.Tasks.TaskCanceledException",
                 "message": "A task was canceled.",
-                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+                "source": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
               },
               {
                 "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(4)",
                 "status": "error",
                 "type": "System.Threading.Tasks.TaskCanceledException",
                 "message": "A task was canceled.",
-                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+                "source": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
               },
               {
                 "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(13)",
                 "status": "error",
                 "type": "System.IO.IOException",
                 "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-13-9-4f1cf75da3ae49458b7187f7d8372b9c\\tree\\0.meta.wal' because it is being used by another process.",
-                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+                "source": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
               },
               {
                 "name": "FiftySeededRealProcessCrashesPreserveAtomicTransactions(1)",
                 "status": "error",
                 "type": "System.IO.IOException",
                 "message": "The process cannot access the file 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\keyload-crash-1-7-476a1685219c488e9e5a581311d2139e\\tree\\0.meta.wal' because it is being used by another process.",
-                "source": "tests/KeyLoad.RecoveryTests/RecoveryTests.cs"
+                "source": "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
               }
             ]
           }
@@ -3476,7 +3539,7 @@
       "invoker": "Aspire-owned freshly built TUnit; owned canonical TMPDIR; actual ephemeral HTTP listeners",
       "sourceFiles": {
         "scripts/Features/BenchmarkComparisons/image-manifest.mjs": "3d15894b8427e7190ecd494548ae59edb9151b565a5dba74ea6be474a97202a7",
-        "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageRegistryReadinessFixture.mjs": "dac1b3b67da8dc48dc1b3c82baaf133f278e126a19e2f5e147022287e6fec076",
+        "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/ImageRegistryReadinessFixture.mjs": "dac1b3b67da8dc48dc1b3c82baaf133f278e126a19e2f5e147022287e6fec076",
         "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll": "eb86c57f759baf08567200f318f63b97d5c10bd8bd191a1bd0ccb4efaea1477a"
       },
       "reports": {
@@ -3573,9 +3636,9 @@
         "sourceRevision": "3aeb8cb7201ade69682d3f7106abd80ef137155e",
         "candidatePatchSha256": "67c6834fb7a390e59684b7d8516c54b0fe3ef76c0500d216ff1dd0a26b86ac62",
         "sourceFiles": {
-          "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedRedisResources.cs": "283621f15aeb23adc7b40319ab45a030458242e45542763c785908952f1519b9",
-          "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedResourceTopologyRedisTests.cs": "9909e073cb2faba4ad330dc79e90623ab798c1eb328c0e41ff5cd268ffdc3e77",
-          "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/RedisNativeReadinessRegression.cs": "f3c10491d7c5f1377591039f2111893ae6505e85edc3fe98481e9c46af130e72"
+          "src/KeyLoad.AppHost/Features/BenchmarkComparisons/Resources/IsolatedRedisResources.cs": "283621f15aeb23adc7b40319ab45a030458242e45542763c785908952f1519b9",
+          "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Cases/IsolatedResourceTopologyRedisTests.cs": "9909e073cb2faba4ad330dc79e90623ab798c1eb328c0e41ff5cd268ffdc3e77",
+          "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/RedisNativeReadinessRegression.cs": "f3c10491d7c5f1377591039f2111893ae6505e85edc3fe98481e9c46af130e72"
         },
         "runnerDllSha256": "ba7cf6baa9f2e0360be0019ded6a2c2c5191834362fb85dfe4551f6fe79b9665",
         "fullReleaseBuild": "passed;0warnings;0errors",

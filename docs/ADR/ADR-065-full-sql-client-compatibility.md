@@ -187,7 +187,7 @@ shared lexical/outcome boundary; workers must escalate contract drift.
 TASK-SQLC-R13 / AC006/007/008 source planning confirms that
 [IAtomicStore](../../src/KeyLoad.Abstractions/Storage/StorageContracts.cs) exposes
 callback-scoped reads/commits and
-[the gateway](../../src/KeyLoad.Server/Features/ClientApi/CanonicalOperationGateway.cs)
+[the gateway](../../src/KeyLoad.Server/Features/ClientApi/Execution/CanonicalOperationGateway.cs)
 dispatches one signed operation through an HTTP principal. A native session must
 not retain a storage view, impersonate that HTTP context or treat separate CALL
 commits as one SQL transaction. Freeze typed binding and same-cut model operators,

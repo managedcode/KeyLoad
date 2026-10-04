@@ -1,6 +1,6 @@
 # ADR-014: Persisted principals, scoped RBAC, and row policy
 
-Status: Accepted; all-interface GitHub qualification pending. Current persisted contract: principal/grant/api-key records in `src/KeyLoad.Abstractions/Contracts.cs`; current authorization enforcement is in `src/KeyLoad.Core/MutationAuthorization.cs`, identity/command persistence helpers in `src/KeyLoad.Core/DatabaseEngine.cs`, and shared policy primitives in `src/KeyLoad.Security/AuthorizationPolicy.cs`; product source [sections 14 and 29](../design/architecture-v0.3.uk.md).
+Status: Accepted; all-interface GitHub qualification pending. Current persisted contract: principal/grant/api-key records in `src/KeyLoad.Abstractions/Contracts.cs`; current authorization enforcement is in `src/KeyLoad.Core/MutationAuthorization.cs`, identity/command persistence helpers in `src/KeyLoad.Core/DatabaseEngine.cs`, and shared policy primitives in `src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs`; product source [sections 14 and 29](../design/architecture-v0.3.uk.md).
 
 ## Context and decision
 

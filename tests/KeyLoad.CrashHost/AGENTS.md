@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns the helper process used by real-process recovery qualification.
-- Executable entry point: `Program.cs`; reusable pause protocol: `Features/StorageRecovery/CrashFixtureValues.cs` and `CrashHostPause.cs`.
+- Executable entry point: `Program.cs`; reusable pause protocol: `Features/StorageRecovery/Models/CrashFixtureValues.cs` and `Features/StorageRecovery/Helpers/CrashHostPause.cs`.
 
 ## Ownership and boundaries
 - This helper is test infrastructure invoked by `RecoveryTests`; it does not own production storage or declare a durability guarantee.
@@ -34,3 +34,7 @@
   happens in this child.
   The UnitTests parent owns the existing outer lock through actual exit and both
   pipe drains. Run only as part of GitHub normal/scalar and full recovery gates.
+## Feature slice responsibility folders
+- Place every feature-owned source file under `Features/<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
+- Keep genuinely shared test infrastructure and project composition entry points at their existing shared ownership paths; do not duplicate them into a feature.
+- Structural moves preserve every source byte, namespace, type/serializer identity and test assertion. Do not change behavior, test logic or path references as part of a layout-only move; report source-path-sensitive joins to the solution integrator.

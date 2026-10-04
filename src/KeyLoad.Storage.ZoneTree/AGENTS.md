@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns the ZoneTree-backed storage adapter and checkpoint operations.
-- Main public entry point: `ZoneTreeStore.cs`; the replaced `Checkpoints.cs` behavior is owned by `Features/StorageRecovery/ZoneTreeCheckpointManager.cs` and the checkpoint codec/generation components.
+- Main public entry point: `ZoneTreeStore.cs`; the replaced `Checkpoints.cs` behavior is owned by `Features/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs` and the checkpoint codec/generation components.
 
 ## Ownership and boundaries
 - Storage feature behavior belongs under `Features/<SliceName>/` and its matching feature spec; keep provider-specific code behind storage abstractions.
@@ -23,3 +23,6 @@
 - Owned slice: `StorageRecovery`; target feature path: `Features/StorageRecovery/`, matching `docs/Features/StorageRecovery.md`.
 - `ZoneTreeStore.cs` is the public provider entry point; private behavior, including the replaced `Checkpoints.cs`, MUST remain under the named slice. Local backup/restore is owned by the matching `Features/BackupRestore/` slice.
 - ADR-046 accepts source-only replacement of private facade partial behavior with cohesive `Features/StorageRecovery/` runtime/journal/read/checkpoint owners and `Features/BackupRestore/` local backup helpers. The same public facade remains the physical owner; preserve formats, one gate/lock/tree/WAL, distinct cleanup orders and all required real qualification. Exact scope and migration join are in the `docs/Features/StorageRecovery.md` acceptance/execution contract and ADR-046; no new exception or ownership transfer is authorized.
+## Feature-local responsibility folders
+
+- Every populated `Features/<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.

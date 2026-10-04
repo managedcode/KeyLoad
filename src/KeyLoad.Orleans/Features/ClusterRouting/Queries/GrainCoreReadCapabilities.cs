@@ -14,6 +14,9 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
             GrainReadKind.EventSource => database.ReadEventSource(principal, GrainNativePayload.Read<ReadEventSourceRequest>(payload), cancellationToken),
             GrainReadKind.Subscription => database.GetSubscription(principal, GrainNativePayload.Read<GetSubscriptionRequest>(payload).Subscription),
             GrainReadKind.Message => Message(principal, GrainNativePayload.Read<InspectMessageRequest>(payload)),
+            GrainReadKind.QueueTransfer => Transfer(principal, GrainNativePayload.Read<InspectQueueTransferRequest>(payload), cancellationToken),
+            GrainReadKind.QueueTransferReceipt => TransferReceipt(principal,
+                GrainNativePayload.Read<InspectQueueTransferReceiptRequest>(payload), cancellationToken),
             GrainReadKind.Traverse => Traverse(principal, GrainNativePayload.ReadPublicInput<TraverseRequest>(payload), cancellationToken),
             GrainReadKind.Samples => Samples(principal, GrainNativePayload.Read<ReadSamplesRequest>(payload), cancellationToken),
             GrainReadKind.LatestSample => database.ReadLatestSample(principal, GrainNativePayload.Read<ReadLatestSampleRequest>(payload), cancellationToken),
@@ -34,13 +37,21 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
     internal static bool Handles(GrainReadKind kind) => kind is >= GrainReadKind.Document and <= GrainReadKind.Samples
         or GrainReadKind.ChangeFeed or GrainReadKind.OutboxStatus or GrainReadKind.ProjectionBatch
         or GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows
-        or GrainReadKind.SampleRetention or GrainReadKind.AggregateReplay;
+        or GrainReadKind.SampleRetention or GrainReadKind.AggregateReplay
+        or GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt;
 
     private StreamPage Stream(string principal, ReadStreamRequest request, CancellationToken cancellationToken)
         => database.ReadStream(principal, request.Stream, request.AfterRevision, request.Limit, cancellationToken);
 
     private MessageInspection? Message(string principal, InspectMessageRequest request)
         => database.InspectMessage(principal, request.Lane, request.Id);
+
+    private QueueTransferInspection? Transfer(string principal, InspectQueueTransferRequest request, CancellationToken cancellationToken)
+        => database.InspectQueueTransfer(principal, request.SourceQueue, request.TransferId, cancellationToken);
+
+    private QueueTransferReceiptInspection? TransferReceipt(string principal, InspectQueueTransferReceiptRequest request,
+        CancellationToken cancellationToken)
+        => database.InspectQueueTransferReceipt(principal, request.DestinationQueue, request.SourceQueue, request.TransferId, cancellationToken);
 
     private GraphTraversal Traverse(string principal, TraverseRequest request, CancellationToken cancellationToken)
         => database.Traverse(principal, request.Partition, request.Graph, request.Start, request.MaxDepth,

@@ -1,5 +1,11 @@
 # Search
 
+The accepted concurrent delivery contracts are
+[FilteredRetrieval](Search/FilteredRetrieval.md),
+[GraphRetrieval](Search/GraphRetrieval.md) and
+[EventProjectionLineage](Search/EventProjectionLineage.md). Their source stages
+retain this feature's original runtime, authorization, SQL and RF3 acceptance.
+
 Owner decision2026-10-03 selects ZoneTree.FullTextSearch as the full-text provider
 under [ADR-071](../ADR/ADR-071-canonical-zonetree-providers.md) and the remaining
 projection/freshness boundaries of [ADR-009](../ADR/ADR-009-search-provider-boundaries.md).
@@ -119,7 +125,7 @@ source-only rollback; production/API/data migration is N/A for this fixture repa
 TASK-MP-006D, REQ-SR-002 and AC-SEARCH-001 expand the metric edge proof before
 optimizing finite-value validation. Public `SearchEngine.Similarity` cases and
 real-store search cases live in NEW
-`tests/KeyLoad.UnitTests/Features/Search/VectorMetricValidationTests.cs` and
+`tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricValidationTests.cs` and
 `VectorMetricGoldenTests.cs`. The test worker owns only these files; the lead
 alone owns any `PreparedSimilarity.Validate` implementation, CI, docs and join.
 
@@ -143,14 +149,14 @@ matched actual server receipts.
 
 ## Повний пошуковий контракт
 
-Актори: authorized text/vector/hybrid caller та майбутній index-generation worker. Entry points: [SearchRequest](../../src/KeyLoad.Abstractions/Queries.cs), [SearchEngine](../../src/KeyLoad.Query/SearchEngine.cs), [canonical vectors](../../src/KeyLoad.Core/GraphAndSeries.cs), [.NET SDK](../../src/KeyLoad.Client/KeyLoadClient.cs) і [HTTP search](../../src/KeyLoad.Server/ApiEndpoints.cs). Source-present request-time lexical scoring, exact vector scoring і weighted rank fusion відрізняються від майбутніх provider-backed indexes.
+Актори: authorized text/vector/hybrid caller та майбутній index-generation worker. Entry points: [SearchRequest](../../src/KeyLoad.Abstractions/Queries.cs), [SearchEngine](../../src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs), [canonical vectors](../../src/KeyLoad.Core/GraphAndSeries.cs), [.NET SDK](../../src/KeyLoad.Client/KeyLoadClient.cs) і [HTTP search](../../src/KeyLoad.Server/ApiEndpoints.cs). Source-present request-time lexical scoring, exact vector scoring і weighted rank fusion відрізняються від майбутніх provider-backed indexes.
 
 | Вимога | Acceptance / flows | Test mapping |
 |---|---|---|
 | REQ-SEARCH-001: canonical vector space/revision/dimensions/metric мають exact semantics | AC-SEARCH-001: valid vector search збігається з exact metric oracle; nonfinite/malformed/dimension/space mismatch відхиляється; stale/deleted vector не входить у result; finite large/zero values мають declared handling | Existing `HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors`, `LargeFiniteVectorsAndSampleValuesRemainValidAndSimilarityDoesNotOverflow` у [GraphAndSearchTests](../../tests/KeyLoad.UnitTests/GraphAndSearchTests.cs); metric edge expansion PLANNED |
 | REQ-SEARCH-002: lexical/hybrid branches мають deterministic scoring, weights та ties | AC-SEARCH-002: empty/missing/repeated/Unicode terms і same-score IDs зберігають current lexical/fusion algorithm; corpus statistics і branch-rank windows не silently обрізані перед exact fusion | Existing hybrid test та REQ-SR-001/004 golden cases; full golden/multi-branch quality corpus PLANNED under [ADR-018](../ADR/ADR-018-global-rank-fusion.md) |
 | REQ-SEARCH-003: усі branches використовують один authorized current cut | AC-SEARCH-003: hidden rows/vertices/protected field-use заборонені; payload/metadata не містить omitted PII; invalid/revoked grants відхиляються до unsafe scoring; selected point reads залишаються в тому самому cut | Existing [SecurityAndQueryTests](../../tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs), GraphAndSearchTests; real SDK/MCP search adversarial expansion PLANNED |
-| REQ-SEARCH-004: work/cancellation/results і freshness semantics явні | AC-SEARCH-004: exact bounds зберігають result, excess budget/cancellation дає typed failure з healthy following call; source revision перевірена; derived watermark/generation не advertised до реалізації | Existing [ReadExecutionTests](../../tests/KeyLoad.UnitTests/Features/ResourceExecution/ReadExecutionTests.cs) `TextAndVectorBranchesShareOneReadByteBudget`, `SearchAndGraphResultBudgetsIncludeProtocolMetadata`; REQ-SR-003/005 і AC-MP preserved |
+| REQ-SEARCH-004: work/cancellation/results і freshness semantics явні | AC-SEARCH-004: exact bounds зберігають result, excess budget/cancellation дає typed failure з healthy following call; source revision перевірена; derived watermark/generation не advertised до реалізації | Existing [ReadExecutionTests](../../tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/ReadExecutionTests.cs) `TextAndVectorBranchesShareOneReadByteBudget`, `SearchAndGraphResultBudgetsIncludeProtocolMetadata`; REQ-SR-003/005 і AC-MP preserved |
 | REQ-SEARCH-005: provider/index lifecycle не змінює canonical authority | AC-SEARCH-005: PLANNED provider audit/rebuild/generation-swap/recovery tests доводять declared tokenizer/BM25 statistics/privacy/freshness; missing/incompatible projection дає declared fallback/error, не silently weaker result | PLANNED KL-028/029/031/039/067/097 suites; [ADR-009](../ADR/ADR-009-search-provider-boundaries.md), [ChangeFeeds](ChangeFeeds.md) |
 | REQ-SEARCH-006: ANN/global ranking/graph retrieval проходять окремі correctness-quality-resource gates | AC-SEARCH-006: PLANNED exact oracle і quality corpus перевіряють recall, ties, filter/row scope, global candidate completeness, versioned rank and recovery; unavailable capability explicit unsupported | PLANNED KL-030/032/055–060/074, [ADR-018](../ADR/ADR-018-global-rank-fusion.md), [ADR-019](../ADR/ADR-019-managed-ann.md); перший bounded managed HNSW candidate прийнято в [ManagedAnn](Search/ManagedAnn.md), реалізація/quality/lifecycle/public qualification очікують |
 

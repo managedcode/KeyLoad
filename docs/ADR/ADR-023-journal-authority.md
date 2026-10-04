@@ -34,4 +34,4 @@ Related: `REQ-FEED-001/AC-FEED-001`, `REQ-EVENT-003/AC-MP-005`, `REQ-MSG-003/AC-
 4. Roll out versioned manifests only with verified upgrade/rollback; never repurpose one journal's sequence as another public cursor.
 5. Qualify local recovery and RF3 snapshot/restore through GitHub process and cluster suites; separately qualify retention and endurance.
 
-Current source: `src/KeyLoad.Storage.ZoneTree/`, `src/KeyLoad.Core/ProjectionOutbox.cs`, `Events.cs`, `Messaging.cs`, `EventSources.cs`; tests include ChangeFeed, EventStreams, Messaging, Recovery, and Artifact suites. These paths are not proof of full capability qualification.
+Current source: `src/KeyLoad.Storage.ZoneTree/`, `src/KeyLoad.Core/Features/ChangeFeeds/Execution/ProjectionOutbox.cs`, `Events.cs`, `Messaging.cs`, `EventSources.cs`; tests include ChangeFeed, EventStreams, Messaging, Recovery, and Artifact suites. These paths are not proof of full capability qualification.

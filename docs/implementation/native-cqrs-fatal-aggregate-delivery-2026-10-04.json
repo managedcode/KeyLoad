@@ -113,7 +113,53 @@
         "manifestSha256": "192096527bf03216145e0c31fff84bad2ac251447aef62c447673d4108efe2a3",
         "unitAndAppHostExecutableDependencyClosureUnchanged": true,
         "failure": "AppHost resource-notification wait cancelled after a backchannel stop request; original stop reason and child terminal outcome unknown",
-        "repeat19": "running through the actual Aspire AppHost; no outcome claimed"
+        "repeat19": "completed with native Aspire exit2 and final3060/3059/1 reports; recorded separately as fullScalar19"
+      },
+      "fullScalar19": {
+        "nativeAspireCallerExitCode": 2,
+        "total": 3060,
+        "passed": 3059,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0,
+        "durationSeconds": 395.86693099999997,
+        "originalManifest": "artifacts/qualification/native-cqrs-c1-development-20261004/scalar19-originals/manifest.json",
+        "manifestSha256": "a918c28be7d2bec2e30590e47f4b598023b192ef445dec29243b321befc11bea",
+        "nativeJsonAndTrxAgree": true,
+        "unitAndAppHostExecutableDependencyClosureUnchanged": true,
+        "globalSourceUnchanged": false,
+        "globalRuntimeUnchanged": false,
+        "failure": "ReachableAuthenticatedThirdMismatchRejectsAnExistingMajority",
+        "cause": "undetermined; no retained per-voter availability telemetry in this evidence bundle",
+        "completeRepeatAfterFixtureIsolation": "pending; unchanged focused transition20 passed2/2"
+      },
+      "scalarTransition20": {
+        "nativeAspireCallerExitCode": 0,
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0,
+        "resultsDirectory": "TestResults/c1-transition20-20261004",
+        "originalCallerLog": "/private/tmp/keyload-c1-transition20-20261004.log",
+        "nativeJsonAndTrxAgree": true,
+        "scope": "unchanged two-case development repeat; does not close failed full scalar19"
+      },
+      "solutionBuild22": {
+        "nativeExitCode": 0,
+        "warnings": 0,
+        "errors": 0,
+        "durationSeconds": 32.28,
+        "originalLog": "/private/tmp/keyload-c1-build22-20261004.log",
+        "scope": "integrated native phase callbacks and SDK/MCP fault outcome helpers; future private file-control helpers excluded"
+      },
+      "fullSolutionFormatter22": {
+        "nativeExitCode": 0,
+        "originalLog": "/private/tmp/keyload-c1-format22-20261004.log"
       }
     },
     "historicalFailures": [

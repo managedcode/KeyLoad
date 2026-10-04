@@ -1,5 +1,9 @@
 # Messaging
 
+[RemoteTransfers](Messaging/RemoteTransfers.md) and ADR-088 define the current
+bounded cross-partition intent/receipt delivery stage. Source implementation does
+not close recovery, coordinator, RF3 or the original Messaging acceptance gates.
+
 TASK-RUNTIME-READ-BUDGET-W3 preserves REQ-MSG-009 and AC-MP-005/011/012 after
 the exact fa80c701 macOS failure of
 SourceReadBudgetTests.AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails.
@@ -26,7 +30,7 @@ Messaging owns durable work-queue state, topic event sources, persistent subscri
 | Surface | Current source | Target owner |
 |---|---|---|
 | Contracts | `src/KeyLoad.Abstractions/Contracts.cs`, `Subscriptions.cs` | `src/KeyLoad.Abstractions/Features/Messaging/` |
-| Backend | `src/KeyLoad.Core/Messaging.cs`, `EventSources.cs`, `SubscriptionGroups.cs`, `DatabaseEngine.cs` dispatch | `src/KeyLoad.Core/Features/Messaging/` |
+| Backend | `src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs`, `EventSources.cs`, `SubscriptionGroups.cs`, `DatabaseEngine.cs` dispatch | `src/KeyLoad.Core/Features/Messaging/` |
 | Tests | `tests/KeyLoad.UnitTests/Features/Messaging/` message/subscription suites; atomic batch cases in `Features/ResourceExecution/TransactionTests.cs` | Messaging and shared ResourceExecution slices; legacy declarations removed with assertions preserved |
 | Durable specification | This file | `docs/Features/Messaging.md` |
 | HTTP | `src/KeyLoad.Server/ApiEndpoints.cs`: command submit, queue receive/delivery/process/inspect, event read, and subscription configure/seek/pause/receive/delivery/process/status | Shared HTTP transport belongs to `src/KeyLoad.Server/Features/ClientApi/`; business behavior belongs to this Messaging slice. Publish/enqueue mutations use the shared command endpoint. |

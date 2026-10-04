@@ -23,6 +23,10 @@ internal static class MutationDiscriminatorNames
     internal const string PutVector = "putVector";
     internal const string QueueToGraph = "queueToGraph";
     internal const string GraphToQueue = "graphToQueue";
+    internal const string CreateQueueTransfer = "createQueueTransfer";
+    internal const string AcceptQueueTransfer = "acceptQueueTransfer";
+    internal const string CompleteQueueTransfer = "completeQueueTransfer";
+    internal const string ApplyVectorProjection = "applyVectorProjection";
 }
 
 /// <summary>Identifies the stable error category returned by KeyLoad operations.</summary>
@@ -257,6 +261,10 @@ public sealed record CommandOutcome([property: Orleans.Id(0)] string Fingerprint
 [JsonDerivedType(typeof(PutVector), MutationDiscriminatorNames.PutVector)]
 [JsonDerivedType(typeof(QueueToGraph), MutationDiscriminatorNames.QueueToGraph)]
 [JsonDerivedType(typeof(GraphToQueueMutation), MutationDiscriminatorNames.GraphToQueue)]
+[JsonDerivedType(typeof(CreateQueueTransfer), MutationDiscriminatorNames.CreateQueueTransfer)]
+[JsonDerivedType(typeof(AcceptQueueTransfer), MutationDiscriminatorNames.AcceptQueueTransfer)]
+[JsonDerivedType(typeof(CompleteQueueTransfer), MutationDiscriminatorNames.CompleteQueueTransfer)]
+[JsonDerivedType(typeof(ApplyVectorProjection), MutationDiscriminatorNames.ApplyVectorProjection)]
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.Mutation)]
 public abstract record Mutation([property: Orleans.Id(0)] string Resource);

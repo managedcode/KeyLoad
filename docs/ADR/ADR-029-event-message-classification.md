@@ -23,7 +23,7 @@ One broad resource-read grant is rejected because it cannot protect individual f
 
 ## Related requirements and implementation contract
 
-Related: `REQ-AUTH-006..009/AC-AUTH-006..009`, `REQ-MSG-002/AC-MSG-002`, `REQ-FEED-002/AC-FEED-002`, ADR-014/015/022/026; KL-062..068, KL-096/097, KL-103. Current checks are in `src/KeyLoad.Security/AuthorizationPolicy.cs`, `src/KeyLoad.Core/MutationAuthorization.cs`, `EventSources.cs`, `Messaging.cs`; feature contracts are [Authorization](../Features/Authorization.md), [Messaging](../Features/Messaging.md), and [ChangeFeeds](../Features/ChangeFeeds.md).
+Related: `REQ-AUTH-006..009/AC-AUTH-006..009`, `REQ-MSG-002/AC-MSG-002`, `REQ-FEED-002/AC-FEED-002`, ADR-014/015/022/026; KL-062..068, KL-096/097, KL-103. Current checks are in `src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs`, `src/KeyLoad.Core/MutationAuthorization.cs`, `EventSources.cs`, `Messaging.cs`; feature contracts are [Authorization](../Features/Authorization.md), [Messaging](../Features/Messaging.md), and [ChangeFeeds](../Features/ChangeFeeds.md).
 
 1. Freeze classification vocabulary, grant separation, schema evolution, and safe diagnostic policy.
 2. Add real persisted-policy canary tests across read, search, event, queue, DLQ, replay, projection, and required worker input.

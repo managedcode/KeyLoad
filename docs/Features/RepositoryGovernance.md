@@ -17,7 +17,7 @@ All requirements are mandatory. IDs remain stable when implementation changes.
 | REQ-MCAF-007 | Evidence / P0 | Keep conflicts, migration gaps and CI qualification explicit; publish only GitHub Actions performance JSON. | AC-MCAF-007: no unsupported readiness or benchmark claim is introduced. |
 | REQ-MCAF-008 | Repository hygiene / P0 | Remove temporary planning Markdown files and keep requirements, acceptance and execution contracts in canonical Feature/ADR documents. | AC-MCAF-008: no tracked or checkout `*.plan.md`, `*.brainstorm.md` or `*.acceptance.md`; all three patterns are ignored without exceptions. |
 | REQ-MCAF-009 | Validation / P0 | Repository rules validate durable documents and reject reintroduced working planning files. | AC-MCAF-009: the real Node validator passes without planning files and fails for each suffix at root or nested paths; prefix, ownership and skill checks remain. |
-| REQ-MCAF-010 | Architecture / P0 | Organize each vertical slice by its actual responsibilities instead of placing mixed role files in a flat feature root. The immediate migration covers every KeyLoad.Orleans slice. | AC-MCAF-010: every Orleans feature C# file belongs to a populated role folder; the before/after file-content inventory is identical, namespaces/aliases/Ids remain unchanged, live references resolve and Release compilation includes the moved files. |
+| REQ-MCAF-010 | Architecture / P0 | Organize each vertical slice by its actual responsibilities instead of placing mixed role files in a flat feature root. The migration covers every KeyLoad solution production, SDK, infrastructure, benchmark and test project. | AC-MCAF-010: every solution feature C# file belongs to a populated role folder; the before/after file-content inventory is identical, namespaces/aliases/Ids remain unchanged, live references resolve and Release compilation includes the moved files. |
 
 ## Slice surfaces
 
@@ -170,3 +170,51 @@ blocked the initial attempt). RF3 attempt:14/93 passed,79 failed;76 reject macOS
 temporary reparse paths, two require authentic GitHub RF3 image identity and one requires
 genuine prior-server proof. Unit/recovery verification remains pending; no delivered
 Linux GitHub runtime, fault, performance or durability qualification is claimed.
+
+## Whole-solution structural migration, owner scope 2026-10-04
+
+The owner explicitly selects the entire KeyLoad solution after the Orleans checkpoint.
+REQ-MCAF-010 / AC-MCAF-010 now apply to every production, SDK, infrastructure,
+benchmark and test project, with actual role folders inside each canonical feature.
+Executable site/tooling artifacts retain their existing fully colocated conventions;
+inspect them for mixed ownership and record their applicable structure without inventing
+C# role folders for HTML or shell entry points. Composition roots remain outside slices.
+
+| Task | Owner / exact write scope | Dependencies / join |
+|---|---|---|
+| TASK-MCAF-LAYOUT-003 | Engine worker: Core, Query, Storage.ZoneTree, Storage.IO, Security, Replication, Artifacts, Diagnostics; local policies and exact-content source moves only | Accepted whole-solution scope and this contract; return exhaustive old/new/hash map and role review |
+| TASK-MCAF-LAYOUT-004 | Surface worker: Abstractions, Server, Client, Cli, ServiceDefaults, AppHost, Analyzers, and all benchmark projects; local policies and exact-content source moves only | Same contract; no central config or runtime/API changes; return exhaustive map |
+| TASK-MCAF-LAYOUT-005 | Test worker: all tests projects; local policies and exact-content moves only | Same contract; group cases, fixtures, assertions, models and real-process infrastructure by actual responsibility; return map and path-sensitive concerns |
+| TASK-MCAF-LAYOUT-006 | Root: global maps, live path references, docs, site/tooling review, combined verification and scoped commits | Join all reviewed maps; preserve concurrent edits and historical immutable receipts |
+
+Workers read the full nearest policy and actual code before classifying files. They move
+feature-owned files into populated roles, retain namespaces/aliases/Ids and byte contents,
+and do not rewrite behavior, take over other tasks, alter APIs, install tools, weaken
+checks or commit/push. Existing nested ownership is retained; new flat files produced
+concurrently are reported for final join. Root owns every shared path repair. Each
+worker must return complete/blocked/failed/cancelled; missing or ambiguous ownership
+cannot silently count as complete. Root validates all bytes and paths, then repairs
+path-bound checks without changing their assertions, runs build/formatter/governance
+and AppHost suites, and records actual qualification separately from structural progress.
+
+Root structural split contract: `Core/GraphAndSeries.cs` mixes GraphTraversal,
+TimeSeries and Search. TASK-MCAF-LAYOUT-006 splits its existing `DatabaseEngine`
+partial declarations into the already owning feature/role folders. Preserve every
+method body, signature, documentation, namespace and serializer contract; only repeat
+the original using/namespace/partial-class shell. Exact file-hash equality applies to
+physical moves; this split additionally compares the concatenated original declaration
+bodies and records old/new ownership, then requires complete compilation and formatter.
+No logic rewrite, storage/API change or new abstraction is authorized by the split.
+
+The same exact-declaration split applies to `Abstractions/Queries.cs`: place each public
+request/result record in its owning DocumentStorage, EventStreams, Messaging,
+GraphTraversal, TimeSeries, QueryExecution, Search, BackupRestore or ClusterRouting
+slice under Contracts. Preserve XML documentation, signatures, attributes, aliases
+and field IDs. Repeat only required using/namespace headers; verify original declaration
+text and compile the complete solution. Concurrent API changes remain unstaged.
+
+The existing repository governance validator also rejects C# files directly at
+`Features/<SliceName>/` across all projects. Positive evidence is the complete live
+inventory; negative development evidence temporarily introduces one owned flat C#
+fixture, requires validator failure, removes it and requires success. This enforces
+REQ-MCAF-010 without changing runtime contracts; role meaning still requires code review.

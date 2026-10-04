@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns the public embedded microbenchmark fixture library required by BenchmarkDotNet's external generated runner.
-- Project entry: KeyLoad.BenchmarkScenarios.csproj; scenario entry: Features/BenchmarkComparisons/EmbeddedBenchmarks.cs.
+- Project entry: KeyLoad.BenchmarkScenarios.csproj; scenario entry: Features/BenchmarkComparisons/Benchmarks/EmbeddedBenchmarks.cs.
 - Read root AGENTS.md, docs/Architecture.md, BenchmarkComparisons REQ-BC-022, ADR-047 and embedded-benchmark acceptance/plan before implementation.
 
 ## Ownership and boundaries
@@ -25,3 +25,6 @@
 
 ## Owner-authorized local optimization, 2026-10-03
 - The explicit root owner correction supersedes the historical local execution prohibitions above for development verification. Use real local BenchmarkDotNet processes and bounded native fixtures to optimize code, retaining actual source, settings, machine and originals. Ordinary correctness tests also execute in CI; internal raw/code measurements must not appear in benchmarks.yml. Public database figures require authenticated original GitHub full-database comparisons with verified comparable hardware, resources, topology, durability and workloads.
+
+## Vertical-slice responsibility folders
+- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

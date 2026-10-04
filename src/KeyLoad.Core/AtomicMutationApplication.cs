@@ -27,7 +27,7 @@ public sealed partial class DatabaseEngine
                 DeleteDocument delete => Delete(tx, principal, partition, delete, now, context),
                 _ => null
             };
-            var receipt = image?.Receipt ?? ApplyNonDocumentMutation(tx, principal, partition, mutation, now);
+            var receipt = image?.Receipt ?? ApplyNonDocumentMutation(tx, principal, partition, mutation, now, position);
             if (derived)
             {
                 receipt = receipt with { CompositionReferences = CompositionMutationReferences(mutation) };
@@ -80,7 +80,7 @@ public sealed partial class DatabaseEngine
     }
 
     private MutationReceipt ApplyNonDocumentMutation(IAtomicTransaction tx, PrincipalRecord principal,
-        PartitionRef partition, Mutation mutation, DateTimeOffset now) => mutation switch
+        PartitionRef partition, Mutation mutation, DateTimeOffset now, long position) => mutation switch
         {
             AppendEvents events => Append(tx, principal, partition, events, now),
             PublishTopic topic => Publish(tx, principal, partition, topic, now),
@@ -91,6 +91,10 @@ public sealed partial class DatabaseEngine
             ExpireSamples samples => Expire(tx, principal, partition, samples, now),
             StoreAggregateSnapshot snapshot => SaveAggregateSnapshot(tx, principal, partition, snapshot),
             PutVector vector => Upsert(tx, principal, partition, vector),
+            CreateQueueTransfer transfer => ApplyCreateQueueTransfer(tx, principal, partition, transfer, now, position),
+            AcceptQueueTransfer transfer => ApplyAcceptQueueTransfer(tx, principal, partition, transfer, now, position),
+            CompleteQueueTransfer transfer => ApplyCompleteQueueTransfer(tx, principal, partition, transfer, now, position),
+            ApplyVectorProjection projection => ApplyVectorProjection(tx, principal, partition, projection),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedMutationMessage)
         };
 }

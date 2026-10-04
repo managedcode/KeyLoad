@@ -18,3 +18,6 @@
 - Applicable skills: none installed for this host; no skill/tool installation or global configuration changes.
 - Track each client/target ownership transfer and partial construction cleanup; detach console handlers before lifetime disposal. Keep credentials external and error output safe.
 - Preserve every unrelated shared-checkout change. Workers own only this new project; the lead alone changes library, solution, AppHost, inventory, docs and tests references.
+
+## Vertical-slice responsibility folders
+- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

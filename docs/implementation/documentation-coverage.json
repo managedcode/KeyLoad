@@ -106,7 +106,7 @@
           ],
           "requirementText": "REQ-AUTH-004: тільки persisted verifier/principal створює public server identity",
           "acceptanceText": "AC-AUTH-004: valid stored credential дає exact principal; unknown/expired/revoked/malformed key та client-supplied trusted roles fail closed без effects; restart/failover зберігають каталог",
-          "testOrReviewMapping": "Existing `UnsignedPeerRequestsAndClientSuppliedPrincipalAreRejected` у [ClusterTests](../../tests/KeyLoad.IntegrationTests/ClusterTests.cs); invalid catalog tests у [TransactionTests](../../tests/KeyLoad.UnitTests/TransactionTests.cs); full credential edge/RF3 parity PLANNED",
+          "testOrReviewMapping": "Existing `UnsignedPeerRequestsAndClientSuppliedPrincipalAreRejected` у [ClusterTests](../../tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs); invalid catalog tests у [TransactionTests](../../tests/KeyLoad.UnitTests/TransactionTests.cs); full credential edge/RF3 parity PLANNED",
           "acceptanceSources": [
             "docs/Features/Authorization.md"
           ],
@@ -1088,7 +1088,7 @@
           ],
           "requirementText": "REQ-CLIENT-004: supported typed operations і capabilities дзеркалять canonical server contracts",
           "acceptanceText": "AC-CLIENT-004: existing document/event/queue/group/graph/series/query/search/feed/admin calls повертають typed values/outcomes; unsupported capability/version дає явну помилку; equivalent query adapters дають однаковий result/authority",
-          "testOrReviewMapping": "Existing `SqlJsonAndCSharpUseTheSameAuthorizedHttpQueryContract` у [ClusterTests](../../tests/KeyLoad.IntegrationTests/ClusterTests.cs), [QueryAdapterTests](../../tests/KeyLoad.UnitTests/QueryAdapterTests.cs); operation-manifest parity expansion PLANNED",
+          "testOrReviewMapping": "Existing `SqlJsonAndCSharpUseTheSameAuthorizedHttpQueryContract` у [ClusterTests](../../tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs), [QueryAdapterTests](../../tests/KeyLoad.UnitTests/QueryAdapterTests.cs); operation-manifest parity expansion PLANNED",
           "acceptanceSources": [
             "docs/Features/ClientApi.md"
           ],
@@ -1811,8 +1811,8 @@
             "AC-MP-012"
           ],
           "requirementText": "REQ-EVENT-006: read/replay має ordered revisions, retained generation та bounded safe page",
-          "acceptanceText": "AC-EVENT-006: page/cursor продовжує retained stream без дубля/skip; empty tail валідний; invalid generation/history loss — typed failure; current payload/header policies застосовані | Existing [StreamReadResourceTests](../../tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceTests.cs), `FromNowAndTailCursorIncludeEveryLaterAppend` у SubscriptionTests; AC-MP-005/012 збережені",
-          "testOrReviewMapping": "Existing [StreamReadResourceTests](../../tests/KeyLoad.UnitTests/Features/EventStreams/StreamReadResourceTests.cs), `FromNowAndTailCursorIncludeEveryLaterAppend` у SubscriptionTests; AC-MP-005/012 збережені",
+          "acceptanceText": "AC-EVENT-006: page/cursor продовжує retained stream без дубля/skip; empty tail валідний; invalid generation/history loss — typed failure; current payload/header policies застосовані | Existing [StreamReadResourceTests](../../tests/KeyLoad.UnitTests/Features/EventStreams/Cases/StreamReadResourceTests.cs), `FromNowAndTailCursorIncludeEveryLaterAppend` у SubscriptionTests; AC-MP-005/012 збережені",
+          "testOrReviewMapping": "Existing [StreamReadResourceTests](../../tests/KeyLoad.UnitTests/Features/EventStreams/Cases/StreamReadResourceTests.cs), `FromNowAndTailCursorIncludeEveryLaterAppend` у SubscriptionTests; AC-MP-005/012 збережені",
           "acceptanceSources": [
             "docs/Features/EventStreams.md",
             "docs/Features/ResourceExecution.md"
@@ -3398,7 +3398,7 @@
           ],
           "requirementText": "REQ-STORAGE-005: journal/checkpoint recovery зберігає один complete acknowledged process cut",
           "acceptanceText": "AC-STORAGE-005: реальний process kill на prepare/publish/install boundaries відновлює цілий cut без partial transaction; torn tail має declared handling, corrupt complete frame fail closed; validated snapshot не змішується зі старим state",
-          "testOrReviewMapping": "Existing `FiftySeededRealProcessCrashesPreserveAtomicTransactions`, `ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration`, `CorruptCompleteFrameFailsClosedInsteadOfBeingDiscardedAsATornTail` у [RecoveryTests](../../tests/KeyLoad.RecoveryTests/RecoveryTests.cs), [InterruptedSnapshotTests](../../tests/KeyLoad.RecoveryTests/InterruptedSnapshotTests.cs)",
+          "testOrReviewMapping": "Existing `FiftySeededRealProcessCrashesPreserveAtomicTransactions`, `ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration`, `CorruptCompleteFrameFailsClosedInsteadOfBeingDiscardedAsATornTail` у [RecoveryTests](../../tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs), [InterruptedSnapshotTests](../../tests/KeyLoad.RecoveryTests/InterruptedSnapshotTests.cs)",
           "acceptanceSources": [
             "docs/Features/StorageRecovery.md"
           ],
@@ -3701,8 +3701,8 @@
             "AC-SERIES-005"
           ],
           "requirementText": "REQ-SERIES-005: ordered inclusive ranges зберігають authorisation і повну response межу",
-          "acceptanceText": "AC-SERIES-005: equal/min/max timestamps, empty range, limit і exact byte boundary дають визначений результат; unauthorized tags omit/deny за policy; exhausted/cancelled read не змінює data та не псує наступний read | Existing [TimeSeriesReadResourceTests](../../tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs); REQ-SERIES-001–003 та AC-MP-005/012 не замінюються",
-          "testOrReviewMapping": "Existing [TimeSeriesReadResourceTests](../../tests/KeyLoad.UnitTests/Features/TimeSeries/TimeSeriesReadResourceTests.cs); REQ-SERIES-001–003 та AC-MP-005/012 не замінюються",
+          "acceptanceText": "AC-SERIES-005: equal/min/max timestamps, empty range, limit і exact byte boundary дають визначений результат; unauthorized tags omit/deny за policy; exhausted/cancelled read не змінює data та не псує наступний read | Existing [TimeSeriesReadResourceTests](../../tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/TimeSeriesReadResourceTests.cs); REQ-SERIES-001–003 та AC-MP-005/012 не замінюються",
+          "testOrReviewMapping": "Existing [TimeSeriesReadResourceTests](../../tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/TimeSeriesReadResourceTests.cs); REQ-SERIES-001–003 та AC-MP-005/012 не замінюються",
           "acceptanceSources": [
             "docs/Features/ResourceExecution.md",
             "docs/Features/TimeSeries.md"
@@ -9483,12 +9483,12 @@
         "modelTier": "cost_efficient_coding_luna",
         "permissions": "exact_test_files_only_no_product_contract_changes",
         "files": [
-          "tests/KeyLoad.UnitTests/Features/ClientApi/McpCanonicalTestData.cs",
-          "tests/KeyLoad.UnitTests/Features/ClientApi/McpMutationTestData.cs",
-          "tests/KeyLoad.UnitTests/Features/ClientApi/McpPolymorphicSchemaTests.cs",
-          "tests/KeyLoad.UnitTests/Features/ClientApi/McpReadDecodeTests.cs",
-          "tests/KeyLoad.UnitTests/Features/BlobStorage/BlobAgentCatalogTests.cs",
-          "tests/KeyLoad.UnitTests/Features/BlobStorage/BlobStorageCompatibilityTests.cs"
+          "tests/KeyLoad.UnitTests/Features/ClientApi/Models/McpCanonicalTestData.cs",
+          "tests/KeyLoad.UnitTests/Features/ClientApi/Models/McpMutationTestData.cs",
+          "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/McpPolymorphicSchemaTests.cs",
+          "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/McpReadDecodeTests.cs",
+          "tests/KeyLoad.UnitTests/Features/BlobStorage/Cases/BlobAgentCatalogTests.cs",
+          "tests/KeyLoad.UnitTests/Features/BlobStorage/Cases/BlobStorageCompatibilityTests.cs"
         ],
         "contracts": [
           "docs/ADR/ADR-039-official-mcp-agent-api.md",
@@ -9529,8 +9529,8 @@
         "modelTier": "cost_efficient_coding_luna",
         "permissions": "exact_test_files_only_no_product_contract_changes",
         "files": [
-          "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleRetentionMutationTests.cs",
-          "tests/KeyLoad.UnitTests/Features/TimeSeries/SampleRetentionReadTests.cs"
+          "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleRetentionMutationTests.cs",
+          "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleRetentionReadTests.cs"
         ],
         "contracts": [
           "docs/ADR/ADR-073-logged-series-retention.md"
@@ -9569,8 +9569,8 @@
         "modelTier": "cost_efficient_coding_luna",
         "permissions": "exact_test_files_only_no_product_contract_changes",
         "files": [
-          "tests/KeyLoad.UnitTests/Features/QueryExecution/SqlModelViewReadTests.cs",
-          "tests/KeyLoad.UnitTests/Features/EventStreams/AggregateReplayAuthorityTests.cs"
+          "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SqlModelViewReadTests.cs",
+          "tests/KeyLoad.UnitTests/Features/EventStreams/Cases/AggregateReplayAuthorityTests.cs"
         ],
         "contracts": [
           "docs/ADR/ADR-072-authorized-sql-model-views.md",
@@ -9610,10 +9610,10 @@
         "modelTier": "strong_planning_integration_review",
         "permissions": "exact_test_files_only_no_product_contract_changes",
         "files": [
-          "tests/KeyLoad.UnitTests/Features/StorageRecovery/ZoneTreeExistingStoreFixture.cs",
-          "tests/KeyLoad.UnitTests/Features/StorageRecovery/EpochStorageFixture.cs",
-          "tests/KeyLoad.UnitTests/Features/StorageRecovery/EpochStoragePreservationTests.cs",
-          "tests/KeyLoad.UnitTests/Features/StorageRecovery/EpochStorageSnapshot.cs"
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Fixtures/ZoneTreeExistingStoreFixture.cs",
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Fixtures/EpochStorageFixture.cs",
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/EpochStoragePreservationTests.cs",
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Assertions/EpochStorageSnapshot.cs"
         ],
         "contracts": [
           "docs/ADR/ADR-077-offline-native-data-epoch.md"
@@ -9652,7 +9652,7 @@
         "modelTier": "cost_efficient_coding_luna",
         "permissions": "test_source_only",
         "files": [
-          "tests/KeyLoad.UnitTests/Features/QueryExecution/SqlModelViewReadTests.cs"
+          "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SqlModelViewReadTests.cs"
         ],
         "acceptanceIds": [
           "AC-SQLVIEW-002"
@@ -9682,9 +9682,9 @@
         "modelTier": "cost_efficient_coding_luna",
         "permissions": "test_source_only",
         "files": [
-          "tests/KeyLoad.UnitTests/Features/StorageRecovery/EpochStorageSnapshot.cs",
-          "tests/KeyLoad.UnitTests/Features/StorageRecovery/EpochStorageFixture.cs",
-          "tests/KeyLoad.UnitTests/Features/StorageRecovery/EpochStoragePreservationTests.cs"
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Assertions/EpochStorageSnapshot.cs",
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Fixtures/EpochStorageFixture.cs",
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/EpochStoragePreservationTests.cs"
         ],
         "acceptanceIds": [
           "AC-EPOCH-004"
@@ -9714,8 +9714,8 @@
         "modelTier": "cost_efficient_coding_luna",
         "permissions": "read_only",
         "files": [
-          "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ComparisonHostProcess.cs",
-          "tests/KeyLoad.UnitTests/Features/ClientApi/KeyLoadClientTransportTests.cs"
+          "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/ComparisonHostProcess.cs",
+          "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientTransportTests.cs"
         ],
         "acceptanceIds": [
           "AC-PERF-003",
@@ -10331,12 +10331,12 @@
         "owner": "cluster_wave_luna_high",
         "modelTier": "cost_efficient_bounded_caller_adaptation",
         "permissions": [
-          "tests/KeyLoad.UnitTests/Features/Search/SearchTests.cs",
-          "tests/KeyLoad.UnitTests/Features/Search/SearchStreamingTests.cs",
-          "tests/KeyLoad.UnitTests/Features/Search/SearchResourceTests.cs",
-          "tests/KeyLoad.UnitTests/Features/Search/SearchReadBudgetTests.cs",
-          "tests/KeyLoad.UnitTests/Features/Search/VectorMetricGoldenTests.cs",
-          "tests/KeyLoad.UnitTests/Features/Search/ImmutableVectorInputTests.cs"
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchStreamingTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchResourceTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchReadBudgetTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricGoldenTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/ImmutableVectorInputTests.cs"
         ],
         "contracts": [
           "docs/ADR/ADR-081-awaited-native-search-execution.md"
@@ -10380,12 +10380,12 @@
         "owner": "lifecycle_wave_luna_high",
         "modelTier": "cost_efficient_bounded_caller_adaptation",
         "permissions": [
-          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionAuthorityTests.cs",
-          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionScopeTests.cs",
-          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionRestartTests.cs",
-          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionBoundsTests.cs",
-          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionLeaseTests.cs",
-          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionParityTests.cs"
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionAuthorityTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionScopeTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionRestartTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionBoundsTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionLeaseTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionParityTests.cs"
         ],
         "contracts": [
           "docs/ADR/ADR-081-awaited-native-search-execution.md"
@@ -10469,7 +10469,7 @@
         "permissions": [
           "src/KeyLoad.Abstractions/Storage/KeyCodec.cs",
           "src/KeyLoad.Abstractions/Storage/KeyCodecDecimal.cs",
-          "src/KeyLoad.Abstractions/Features/StorageRecovery/KeyCodecReadPrimitives.cs",
+          "src/KeyLoad.Abstractions/Features/StorageRecovery/Serialization/KeyCodecReadPrimitives.cs",
           "new_src/KeyLoad.Abstractions/Features/StorageRecovery/KeyCodec_validation_helpers_only"
         ],
         "contracts": [
@@ -10683,7 +10683,7 @@
         "owner": "root",
         "modelTier": "planning_integration_final_review",
         "permissions": [
-          "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheReadPermitAcceptanceTests.cs",
+          "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/CacheReadPermitAcceptanceTests.cs",
           "docs/Features/ResourceExecution.md"
         ],
         "requirements": [
@@ -10719,7 +10719,7 @@
         "owner": "root",
         "modelTier": "planning_integration_final_review",
         "permissions": [
-          "tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeWireSupportedScalarAllocationTests.cs",
+          "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativeWireSupportedScalarAllocationTests.cs",
           "docs/ADR/ADR-060-native-internal-serialization.md",
           "docs/Features/InternalSerialization.md",
           "docs/Features/InternalSerialization/Acceptance.md"
@@ -10764,7 +10764,7 @@
         "owner": "query_wave_gpt_6_luna_high",
         "permissions": [
           "src/KeyLoad.Abstractions/Storage/KeyCodecDecimal.cs_invariant_parse_text_only",
-          "new_tests/KeyLoad.UnitTests/Features/StorageRecovery/KeyCodecCultureContractTests.cs"
+          "new_tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecCultureContractTests.cs"
         ],
         "contracts": [
           "docs/ADR/ADR-005-canonical-keyspace-codec.md",
@@ -10800,8 +10800,8 @@
         "id": "TASK-DSTORE-FIELD-MUTATION-ORACLES",
         "owner": "cluster_wave_gpt_6_luna_high",
         "permissions": [
-          "new_tests/KeyLoad.UnitTests/Features/DocumentStorage/DocumentReplacementFieldAuthorizationTests.cs",
-          "new_tests/KeyLoad.UnitTests/Features/DocumentStorage/DocumentDeleteIndexAuthorizationTests.cs"
+          "new_tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentReplacementFieldAuthorizationTests.cs",
+          "new_tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentDeleteIndexAuthorizationTests.cs"
         ],
         "contracts": [
           "docs/Features/DocumentStorage.md",
@@ -10953,7 +10953,7 @@
           "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/NodeEpoch*",
           "tests/KeyLoad.CrashHost/Features/StorageRecovery/NodeEpoch*",
           "tests/KeyLoad.UnitTests/Features/StorageRecovery/OfflineRegularFile*",
-          "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochUpgradeCleanup.cs"
+          "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Helpers/EpochUpgradeCleanup.cs"
         ],
         "requirementIds": [
           "REQ-STORAGE-025",
@@ -11005,14 +11005,14 @@
         "fileOwnership": [
           "src/KeyLoad.Server/Features/StorageRecovery/ServerNode*",
           "src/KeyLoad.Server/Features/StorageRecovery/NodeFormatUpgrade*",
-          "src/KeyLoad.Server/Features/StorageRecovery/ServerOfflineFormatUpgrade.cs",
-          "src/KeyLoad.Server/Features/ClientApi/ServerConfiguration.cs",
-          "src/KeyLoad.Storage.ZoneTree/ZoneTreeFormatUpgrade.cs",
-          "tests/KeyLoad.CrashHost/Features/StorageRecovery/EpochPriorSourceProbe.cs",
-          "tests/KeyLoad.CrashHost/Features/StorageRecovery/EpochUpgradeFixture.cs",
+          "src/KeyLoad.Server/Features/StorageRecovery/Hosting/ServerOfflineFormatUpgrade.cs",
+          "src/KeyLoad.Server/Features/ClientApi/Hosting/ServerConfiguration.cs",
+          "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeFormatUpgrade.cs",
+          "tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/EpochPriorSourceProbe.cs",
+          "tests/KeyLoad.CrashHost/Features/StorageRecovery/Fixtures/EpochUpgradeFixture.cs",
           "tests/KeyLoad.CrashHost/Program.cs",
-          "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochPriorExecutableFixture.cs",
-          "tests/KeyLoad.CrashHost/Features/StorageRecovery/CrashHostApplication.cs",
+          "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Fixtures/EpochPriorExecutableFixture.cs",
+          "tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/CrashHostApplication.cs",
           "src/KeyLoad.Storage.IO/AGENTS.md",
           "src/KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj",
           "root_owned_solution_and_project_references"
@@ -11101,8 +11101,8 @@
           "KL-026"
         ],
         "fileOwnership": [
-          "tests/KeyLoad.IntegrationTests/Features/TimeSeries/SampleRetentionRf3Tests.cs",
-          "tests/KeyLoad.IntegrationTests/Features/TimeSeries/SampleRetentionRf3RestartWorkflow.cs"
+          "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleRetentionRf3Tests.cs",
+          "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Helpers/SampleRetentionRf3RestartWorkflow.cs"
         ],
         "dependencies": [],
         "startCondition": "root_reviewed_original_37163610260_RF3_report_and_two_read_only_diagnoses",
@@ -11141,7 +11141,7 @@
         ],
         "fileOwnership": [
           "src/KeyLoad.Storage.IO/Features/StorageRecovery/*",
-          "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeSnapshotUpgradeFileLease.cs"
+          "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeSnapshotUpgradeFileLease.cs"
         ],
         "dependencies": [],
         "startCondition": "root_frozen_AC_EPOCH_012_and_public_OS_ABI_project_policy_before_write_release_20261004",
@@ -11183,9 +11183,9 @@
         ],
         "permissions": "test_only_existing_wire_and_persisted_authority_contract",
         "fileOwnership": [
-          "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityTests.cs",
-          "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityAssertions.cs",
-          "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityScenario.cs"
+          "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/McpDocumentCrudParityTests.cs",
+          "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Assertions/McpDocumentCrudParityAssertions.cs",
+          "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Helpers/McpDocumentCrudParityScenario.cs"
         ],
         "dependencies": [],
         "startCondition": "root_approved_exact_mirrored_success_and_stale_replacement_oracles_after_6e09f03_checkpoint",
@@ -11207,17 +11207,17 @@
         "sourceReview": {
           "files": [
             {
-              "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityAssertions.cs",
+              "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Assertions/McpDocumentCrudParityAssertions.cs",
               "bytes": 3429,
               "sha256": "3765e29f6aa9f78ceeca98d3fc69a947301a54f8de8d2cdd4dcbee7cbd6a58d2"
             },
             {
-              "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityScenario.cs",
+              "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Helpers/McpDocumentCrudParityScenario.cs",
               "bytes": 2107,
               "sha256": "79ce374e7d5efe4e7db19302d0645466cbdc5183a722b3a1fb5038f46bac9890"
             },
             {
-              "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityTests.cs",
+              "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/McpDocumentCrudParityTests.cs",
               "bytes": 6376,
               "sha256": "793be85426d1611ba2ffedf4532620f69fd46633be1786a2b2b039f0539d2714"
             }
@@ -11331,8 +11331,8 @@
         ],
         "exportRepairContract": "Root enforces frozen unknown-path rejection for empty directories and streamed 32-entry directory enumeration. Add genuine export positive and owned unknown-empty-directory negative through actual source verifier, restore only the owned empty test directory, verify all canonical export files/modes/digests and original tar preserved. No fake GitHub qualification.",
         "repairFileOwnership": [
-          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Native5ServerSourceVerifierNodeProcess.cs",
-          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Native5ServerSourceVerifierTests.cs"
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Processes/Native5ServerSourceVerifierNodeProcess.cs",
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/Native5ServerSourceVerifierTests.cs"
         ],
         "repairPermissions": "two_exact_source_verifier_test_files_no_process_execution_or_other_mutation"
       },
@@ -11367,15 +11367,15 @@
         "effort": "high",
         "permissions": "bounded_build1_repairs_only_no_execution_contract_config_or_assertion_weakening",
         "fileOwnership": [
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3Wave.cs",
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3Callers.cs",
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3Inventory.cs",
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3Profile.cs",
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3StatusOracle.cs",
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3CurrentWorkload.cs",
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3MigrationAssertions.cs",
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3ReadOracle.cs",
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3AuthorizationOracle.cs"
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3Wave.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3Callers.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3Inventory.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3Profile.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3StatusOracle.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3CurrentWorkload.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Assertions/NodeEpochRf3MigrationAssertions.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3ReadOracle.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3AuthorizationOracle.cs"
         ],
         "dependencies": [
           "TASK-NODE-EPOCH-COLD-SHARED",
@@ -11424,17 +11424,17 @@
         "fileOwnership": [
           "scripts/Features/BenchmarkComparisons/image-engine.mjs",
           "scripts/Features/BenchmarkComparisons/cleanup-images.mjs",
-          "tests/KeyLoad.IntegrationTests/Features/ClientApi/McpCallerHttp.cs",
-          "tests/KeyLoad.IntegrationTests/Features/ClientApi/McpOfficialClient.cs",
+          "tests/KeyLoad.IntegrationTests/Features/ClientApi/Helpers/McpCallerHttp.cs",
+          "tests/KeyLoad.IntegrationTests/Features/ClientApi/Helpers/McpOfficialClient.cs",
           "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3ImageProof*",
           "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3Offline*",
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3ReceiptReader.cs",
-          "src/KeyLoad.Server/Features/StorageRecovery/ServerOfflineFormatUpgrade.cs",
-          "src/KeyLoad.Server/Features/StorageRecovery/ServerNodeUpgradeVerifier.cs",
-          "src/KeyLoad.Server/Features/StorageRecovery/ServerNodeFormatUpgrade.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3ReceiptReader.cs",
+          "src/KeyLoad.Server/Features/StorageRecovery/Hosting/ServerOfflineFormatUpgrade.cs",
+          "src/KeyLoad.Server/Features/StorageRecovery/Validation/ServerNodeUpgradeVerifier.cs",
+          "src/KeyLoad.Server/Features/StorageRecovery/Hosting/ServerNodeFormatUpgrade.cs",
           "root-owned project references/friends and ci.yml",
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3ColdScenario.cs",
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3CurrentWaveRunner.cs"
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3ColdScenario.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3CurrentWaveRunner.cs"
         ],
         "dependencies": [],
         "artifacts": [
@@ -11459,7 +11459,7 @@
         ],
         "permissions": "new_unit_test_only",
         "scope": [
-          "tests/KeyLoad.UnitTests/Features/StorageRecovery/NodeEpochOfflineCliTests.cs"
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NodeEpochOfflineCliTests.cs"
         ],
         "dependencies": [
           "TASK-NODE-EPOCH-COLD-SHARED"
@@ -11538,7 +11538,7 @@
         ],
         "permissions": "one_exact_test_file_no_production_or_threshold_assertion_changes",
         "fileOwnership": [
-          "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheReadPermitAcceptanceTests.cs"
+          "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/CacheReadPermitAcceptanceTests.cs"
         ],
         "dependencies": [],
         "startCondition": "original_6e09_Linux_scalar_report_failed_real_elapsed_two_second_assertion",
@@ -11599,7 +11599,7 @@
         "permissions": "new_owned_algorithm_files_only_no_build_test_formatter_commit_dependency_shared_public_persistence_or_existing_source_changes",
         "fileOwnership": [
           "src/KeyLoad.Query/Features/Search/PackedAnn*.cs (new only)",
-          "src/KeyLoad.Query/Features/Search/AnnWorkBudget.cs (new only)"
+          "src/KeyLoad.Query/Features/Search/Admission/AnnWorkBudget.cs (new only)"
         ],
         "artifacts": [
           "complete immutable packed managed HNSW candidate",
@@ -12332,9 +12332,9 @@
               "docs/Features/BenchmarkComparisons/SiteMetadata.md",
               "docs/implementation/status.json",
               "site/Features/BenchmarkComparisons/index.html",
-              "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteIsolatedBuildTests.cs",
-              "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteMetadataBinaryAssertions.cs",
-              "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteMetadataTokens.cs"
+              "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteIsolatedBuildTests.cs",
+              "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Assertions/SiteMetadataBinaryAssertions.cs",
+              "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Contracts/SiteMetadataTokens.cs"
             ],
             "runtimeCohortUnchanged": true,
             "annSourceCohortUnchanged": true,
@@ -12463,7 +12463,7 @@
         ],
         "permissions": "exact_existing_cold_fixture_SDK_and_official_MCP_sample_conflict_expected_codes_only_no_production_input_tolerance_retry_or_other_assertion_changes",
         "fileOwnership": [
-          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3CurrentWorkload.cs"
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/Helpers/NodeEpochRf3CurrentWorkload.cs"
         ],
         "dependencies": [
           "TASK-NODE-EPOCH-COLD-FIXTURE"
@@ -13388,10 +13388,10 @@
           "src/KeyLoad.Orleans/KeyLoad.Orleans.csproj",
           "src/KeyLoad.Orleans/Features/ClusterRouting/Identity/GrainRequestContextState.cs",
           "src/KeyLoad.Orleans/Features/ClusterRouting/Identity/GrainIdentityContext.cs",
-          "src/KeyLoad.Server/Features/ClientApi/PersistedPrincipalRequestContextScope.cs",
-          "src/KeyLoad.Server/Features/ClientApi/CanonicalOperationGateway.cs",
-          "src/KeyLoad.Server/Features/Authorization/DatabaseCredentialResolver.cs",
-          "src/KeyLoad.Server/Features/ClusterRouting/OrleansSiloConfiguration.cs",
+          "src/KeyLoad.Server/Features/ClientApi/Identity/PersistedPrincipalRequestContextScope.cs",
+          "src/KeyLoad.Server/Features/ClientApi/Execution/CanonicalOperationGateway.cs",
+          "src/KeyLoad.Server/Features/Authorization/Identity/DatabaseCredentialResolver.cs",
+          "src/KeyLoad.Server/Features/ClusterRouting/Hosting/OrleansSiloConfiguration.cs",
           "root_native_serializer_and_leaf_authority_context_joins"
         ],
         "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",

@@ -66,3 +66,6 @@
 
 ## Separate database matrices, 2026-10-04
 - Owner correction requires one named job matrix per database in Benchmarks. Each target has its own three checks and thirty canonical node/scenario workloads with readable database/node/scenario names. All nine groups depend only on actual plan/image inputs and run independently without a max-parallel cap; steps within each isolated cell remain sequential. Aggregate joins every group and preserves authenticated failed/null results. This supersedes the shared preflight/CRUD/specialized grouping above without changing native topology, cell isolation, required suites or immutable evidence.
+
+## Feature-local executable artifacts
+- This module uses the root-approved fully colocated executable-artifact convention: keep each feature-owned script, website module or workflow with its canonical feature/artifact and its existing entry point. C# Grains/Models folders are N/A here because this module contains executable web, shell or YAML artifacts. Preserve source-bound historical receipts; update live consumers when solution source paths move.

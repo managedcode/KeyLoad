@@ -519,7 +519,7 @@ REQ/AC-BC-027, REQ-CQ-006 and AC-CQ-008/009 keep all original thresholds/sources
    complete; the missing native report or test failure never becomes a pass.
 2. TASK-SITE-NATIVE-FORMAT-014 owns only
    `scripts/Features/CodeQuality/site-analyzer-coverage.shared.ps1` and new
-   `tests/KeyLoad.Analyzers.Tests/Features/CodeQuality/SiteAnalyzerCoverageBranchDisplayTests.cs`.
+   `tests/KeyLoad.Analyzers.Tests/Features/CodeQuality/Cases/SiteAnalyzerCoverageBranchDisplayTests.cs`.
    Author real-PowerShell TUnit native decimal/display-rounding/malformed cases
    first; change only the full-token display regex. Observed0..100 integer or
    one/two decimal spellings are valid; covered/valid groups stay integer-only
@@ -603,7 +603,7 @@ TASK-SITE-ARGUMENT-ROLE-018 repair, not an oracle accepting the false positive.
    exact failed assertions/TRX/XML/source/PDB/run/job/artifact hashes. This red
    baseline cannot unblock017/final acceptance; no test or branch exit is ignored.
 3. After reviewed GitHub regression evidence, the same worker may edit only
-   src/KeyLoad.Analyzers/Features/CodeQuality/MachineKeyLiteralClassifier.cs and
+   src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MachineKeyLiteralClassifier.cs and
    MachineKeySemanticSymbols.cs. Resolve named arguments by actual parameter
    identity; positional and expanded params by bound parameter. Explicit key
    names qualify; current method/container/constructor heuristics qualify only

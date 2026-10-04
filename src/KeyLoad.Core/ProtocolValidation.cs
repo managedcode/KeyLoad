@@ -35,6 +35,8 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, MissingMutationEntryMessage);
         }
 
+        ValidateExtendedMutationStructure(mutation);
+
         var owner = mutation switch
         {
             PutDocument put => put.Collection,
@@ -51,6 +53,10 @@ public sealed partial class DatabaseEngine
             PutVector vector => vector.Collection,
             QueueToGraph projection => projection.Graph,
             GraphToQueueMutation projection => projection.Queue,
+            CreateQueueTransfer transfer => transfer.SourceQueue.Queue,
+            AcceptQueueTransfer transfer => transfer.DestinationQueue.Queue,
+            CompleteQueueTransfer transfer => transfer.SourceQueue.Queue,
+            ApplyVectorProjection projection => projection.Target.Collection,
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, "The mutation is unsupported.")
         };
         if (mutation.Resource != owner)
@@ -66,11 +72,29 @@ public sealed partial class DatabaseEngine
             PublishTopic topic => topic.Events.IsDefault || topic.Events.Any(item => item is null),
             AppendSamples samples => samples.Samples.IsDefault || samples.Samples.Any(item => item is null),
             PutVector vector => vector.Values.IsDefault,
+            ApplyVectorProjection projection => projection.Target.Values.IsDefault,
             _ => false
         };
         if (invalid)
         {
             throw Errors.Fail(ErrorCode.Validation, "A nested mutation entry or enum value is invalid.");
+        }
+    }
+
+    private static void ValidateExtendedMutationStructure(Mutation mutation)
+    {
+        var invalid = mutation switch
+        {
+            CreateQueueTransfer transfer => transfer.SourceQueue is null || transfer.Destination is null || transfer.Message is null,
+            AcceptQueueTransfer transfer => transfer.DestinationQueue is null,
+            CompleteQueueTransfer transfer => transfer.SourceQueue is null,
+            ApplyVectorProjection projection => projection.SourceStream is null || projection.SourceDocument is null
+                || projection.Target is null || projection.Target.Space is null,
+            _ => false
+        };
+        if (invalid)
+        {
+            throw Errors.Fail(ErrorCode.Validation, MissingMutationEntryMessage);
         }
     }
 }

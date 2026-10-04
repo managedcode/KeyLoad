@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns the reusable comparative benchmark harness library and its database targets under ADR-043; the sole executable belongs to KeyLoad.ComparisonHost in this repository.
-- Library entry points: Features/BenchmarkComparisons/ComparisonRunner.cs, Features/BenchmarkComparisons/BenchmarkDataset.cs, Features/BenchmarkComparisons/Contracts.cs and ReportWriter.cs; target adapters: Targets/ and the matching feature slice. CLI composition belongs to the host's Program.cs and feature helpers.
+- Library entry points: Features/BenchmarkComparisons/Execution/ComparisonRunner.cs, Features/BenchmarkComparisons/Corpus/BenchmarkDataset.cs, Features/BenchmarkComparisons/Contracts/Contracts.cs and Features/BenchmarkComparisons/Reporting/Features/BenchmarkComparisons/Reporting/Features/BenchmarkComparisons/Reporting/Features/BenchmarkComparisons/Reporting/Features/BenchmarkComparisons/Reporting/Features/BenchmarkComparisons/Reporting/ReportWriter.cs; target adapters: Targets/ and the matching feature slice. CLI composition belongs to the host's Program.cs and feature helpers.
 
 ## Ownership and boundaries
 - Own comparative workload definitions, target adapters, sampling and report serialization. Product semantics remain owned by their product slices; CI callers own qualification and publication decisions.
@@ -21,4 +21,7 @@
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned slice: `BenchmarkComparisons`; target feature path: `Features/BenchmarkComparisons/`, matching `docs/Features/BenchmarkComparisons.md`.
 - The sole executable entry point is now KeyLoad.ComparisonHost/Program.cs under ADR-043; all comparison behavior retains the same named slice. Do not restore a duplicate entry or internalize the public library API.
-- The runner has moved from the historical flat entry listed above to `Features/BenchmarkComparisons/ComparisonRunner.cs`; measurement and validation helpers belong in the same slice. This source move does not establish GitHub runtime qualification.
+- The runner has moved from the historical flat entry listed above to `Features/BenchmarkComparisons/Execution/ComparisonRunner.cs`; measurement and validation helpers belong in the same slice. This source move does not establish GitHub runtime qualification.
+
+## Vertical-slice responsibility folders
+- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

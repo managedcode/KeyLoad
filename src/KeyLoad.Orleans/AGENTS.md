@@ -13,11 +13,11 @@
 
 ## Commands and evidence
 - GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Orleans flows are exercised by `dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore --configuration Release` and recovery suite in `.github/workflows/ci.yml`; execute only in GitHub Actions.
+- Owner correction 2026-10-03 requires the Aspire-owned caller: after restore/build, run `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=<suite>`. Use `unit`, `unit-scalar`, `recovery` or `rf3` for the corresponding Orleans checks. AppHost owns each native test runner and its shutdown; RF3 additionally uses its real Docker cluster and discovered endpoints. Local development evidence is permitted; complete exact-source Linux GitHub qualification remains mandatory. Direct `dotnet test` is only the native child process composed by AppHost.
 
 ## Skills and protected risks
 - Owner-authorized applicable skill: Orleans 3.1.1 at `/Users/ksemenenko/.codex/skills/orleans/SKILL.md`; read it and relevant lifecycle/hosting references before implementing. The prior bootstrap prohibition remains for other unapproved installations.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- The Orleans skill above is installed and explicitly authorized; installation of other skills remains prohibited by owner direction.
 - Activation migration must not move storage ownership. Preserve real cluster topology, membership correctness and cancellation behavior; never claim local or single-node tests qualify RF3.
 
 ## Read-first and canonical slice ownership

@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns TUnit comparison-harness checks and the CI comparison workload entry point.
-- Main suite: `ComparisonTests.cs`; project: `KeyLoad.ComparisonTests.csproj`.
+- Main suite: `Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/ComparisonTests.cs`; project: `KeyLoad.Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/ComparisonTests.csproj`.
 
 ## Ownership and boundaries
 - Tests and comparison artifacts belong to the `BenchmarkComparisons` slice and matching `docs/Features/BenchmarkComparisons.md`.
@@ -21,4 +21,8 @@
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned test slice: `BenchmarkComparisons`; target path: `Features/BenchmarkComparisons/`, matching `docs/Features/BenchmarkComparisons.md`.
-- `ComparisonTests.cs` is the current entry point; keep test scenarios under the same named slice.
+- `Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/ComparisonTests.cs` is the current entry point; keep test scenarios under the same named slice.
+## Feature slice responsibility folders
+- Place every feature-owned source file under `Features/<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
+- Keep genuinely shared test infrastructure and project composition entry points at their existing shared ownership paths; do not duplicate them into a feature.
+- Structural moves preserve every source byte, namespace, type/serializer identity and test assertion. Do not change behavior, test logic or path references as part of a layout-only move; report source-path-sensitive joins to the solution integrator.

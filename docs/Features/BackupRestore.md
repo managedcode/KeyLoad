@@ -31,10 +31,10 @@ BackupRestore creates an offline backup of canonical storage and restores it int
 | Surface | Current source | Target owner |
 |---|---|---|
 | Storage backup/restore | `src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs` delegates to `Features/BackupRestore/ZoneTreeBackupRestore.cs` and its file/restore helpers | Private behavior is owned by `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/`; the public facade remains the shared entry point |
-| Archive and transfer | `src/KeyLoad.Artifacts/Features/BackupRestore/BackupArtifact.cs`, `ArtifactTransfer.cs` and focused helpers | Same canonical slice; legacy declarations removed |
-| CLI | `src/KeyLoad.Cli/Features/BackupRestore/CliBackupRestore.cs` behind the aggregate Program runner | Slice-local offline operations; exact dispatch/text/disposal parity under AC-CQ-010 and ADR-033 |
+| Archive and transfer | `src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs`, `ArtifactTransfer.cs` and focused helpers | Same canonical slice; legacy declarations removed |
+| CLI | `src/KeyLoad.Cli/Features/BackupRestore/Commands/CliBackupRestore.cs` behind the aggregate Program runner | Slice-local offline operations; exact dispatch/text/disposal parity under AC-CQ-010 and ADR-033 |
 | HTTP backup entry | `src/KeyLoad.Server/ApiEndpoints.cs` | Shared server boundary; no public restore route is defined |
-| Tests | `tests/KeyLoad.UnitTests/Features/BackupRestore/ArtifactTests.cs`; `tests/KeyLoad.RecoveryTests/RecoveryTests.cs` | Unit source is slice-local; remaining recovery layout debt targets matching `Features/BackupRestore/` |
+| Tests | `tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTests.cs`; `tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs` | Unit source is slice-local; remaining recovery layout debt targets matching `Features/BackupRestore/` |
 | Documentation | This spec; detailed storage/cluster design in `../design/architecture-v0.3.uk.md` | One canonical feature acceptance source |
 | UI and public blob API | None | N/A: operators use CLI/admin boundaries; archive chunking is not a user-facing blob contract |
 | Official MCP | No backup tool surface verified | Required MCP work is tracked in ClientApi; no tool name or route is inferred here |

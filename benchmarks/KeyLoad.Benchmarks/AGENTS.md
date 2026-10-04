@@ -31,3 +31,6 @@
 
 ## Owner-authorized local optimization, 2026-10-03
 - The explicit root owner correction supersedes the historical local execution prohibitions above for development verification. Run genuine local BenchmarkDotNet for code optimization, retaining exact source, settings, machine and original outputs. Internal raw/code measurements must not appear in benchmarks.yml. Website database figures require authenticated original GitHub full-database comparisons and matched verified hardware, resources, topology, durability and workloads; local results remain development evidence.
+
+## Vertical-slice responsibility folders
+- Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.

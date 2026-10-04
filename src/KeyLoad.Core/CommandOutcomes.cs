@@ -58,6 +58,7 @@ public sealed partial class DatabaseEngine
             new BlobStorageOperations(this).ValidateOutcomeAuthority(view, operation, previous.Result, previous.BlobAuthority);
         }
         ValidateCompositionOutcome(view, principal, operation, previous);
+        ReauthorizeExtendedOutcome(view, principal, operation, previous);
 
         if (operation.Kind == OperationKind.Receive && previous.Result.Error is null)
         {
@@ -79,6 +80,37 @@ public sealed partial class DatabaseEngine
             var projection = Payload<CommitProjectionBatchRequest>(operation);
             ProjectionClaims(view, projection, operation.EvaluatedAt, allowExpiredReceipt: true);
             ReauthorizeEffects(view, principal, projection.Consumer.Partition, projection.Effects);
+        }
+    }
+
+    private void ReauthorizeExtendedOutcome(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation,
+        StoredOutcome previous)
+    {
+        if (previous.Result.Error is not null)
+        {
+            return;
+        }
+        if (operation.Kind == OperationKind.Batch)
+        {
+            var command = Payload<CommandRequest>(operation);
+            ReauthorizeExtendedEffects(view, principal, command.Partition, command.Mutations);
+        }
+        else if (operation.Kind == OperationKind.Processing)
+        {
+            var processing = Payload<ProcessingRequest>(operation);
+            ReauthorizeExtendedEffects(view, principal, processing.Lane.Partition, processing.Effects);
+        }
+    }
+
+    private void ReauthorizeExtendedEffects(IKeyValueView view, PrincipalRecord principal, PartitionRef partition,
+        System.Collections.Immutable.ImmutableArray<Mutation> effects)
+    {
+        foreach (var effect in effects)
+        {
+            if (effect is ApplyVectorProjection or CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer)
+            {
+                ReauthorizeEffect(view, principal, partition, effect);
+            }
         }
     }
 

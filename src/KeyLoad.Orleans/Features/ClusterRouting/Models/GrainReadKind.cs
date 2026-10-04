@@ -66,5 +66,11 @@ public enum GrainReadKind
     /// <summary>Read the persisted exclusive time-series floor and purge progress.</summary>
     SampleRetention,
     /// <summary>Read one compatible snapshot and complete bounded event tail.</summary>
-    AggregateReplay
+    AggregateReplay,
+    /// <summary>Read one authorized durable source transfer and its signed intent.</summary>
+    QueueTransfer,
+    /// <summary>Read an authorized destination receipt without claiming source completion.</summary>
+    QueueTransferReceipt,
+    /// <summary>Execute distinct graph scope, retrieval and expansion under one read cut.</summary>
+    GraphSearch
 }

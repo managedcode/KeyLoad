@@ -12,6 +12,10 @@ public sealed class GrainRequestCodec
     private readonly TimeProvider clock;
     private readonly int maximumTokenCharacters;
 
+    internal IGrainRequestPhaseObserver? PhaseObserver { get; init; }
+
+    internal bool HasPhaseObserver => PhaseObserver is not null;
+
     /// <summary>Uses the shared durable signing key and incarnation, with the runtime system clock.</summary>
     /// <param name="database">Borrowed canonical database with immutable cluster signing scope.</param>
     /// <param name="clock">System clock for issuance and expiry checks.</param>
@@ -102,6 +106,31 @@ public sealed class GrainRequestCodec
         }
 
         return request;
+    }
+
+    internal ValueTask ObservePhaseAsync(DecodedGrainRequest request, GrainRequestPhase phase,
+        IGrainContext? context, CancellationToken cancellationToken)
+    {
+        var observer = PhaseObserver;
+        if (observer is null)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        ArgumentNullException.ThrowIfNull(context);
+        return observer.ObserveAsync(GrainRequestProbeIdentity.From(request.Envelope), phase, context, cancellationToken);
+    }
+
+    internal void ObserveProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext? context)
+    {
+        var observer = PhaseObserver;
+        if (observer is null)
+        {
+            return;
+        }
+
+        ArgumentNullException.ThrowIfNull(context);
+        observer.ProducerDisposed(identity, context);
     }
 
     private ReadOnlyMemory<byte> Encode(ReadOnlyMemory<byte> payload)

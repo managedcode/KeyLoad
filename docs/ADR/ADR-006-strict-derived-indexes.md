@@ -1,6 +1,6 @@
 # ADR-006: Strict synchronous indexes and derived projections
 
-Status: Accepted; implementation and GitHub qualification pending. Product source: [sections 7, 12, and 27](../design/architecture-v0.3.uk.md); current implementation: `src/KeyLoad.Core/Documents.cs`.
+Status: Accepted; implementation and GitHub qualification pending. Product source: [sections 7, 12, and 27](../design/architecture-v0.3.uk.md); current implementation: `src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs`.
 
 ## Context and decision
 

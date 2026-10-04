@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns focused TUnit tests for contracts and feature behavior, including queries, transactions, storage codecs, admission, change feeds, subscriptions, search, messaging and artifacts.
-- Test sources include `QueryAdapterTests.cs`, `TransactionTests.cs`, `KeyCodecTests.cs`, `CommandAdmissionTests.cs`, `GraphAndSearchTests.cs`, `TestDatabase.cs` and the other feature-named test files in this project.
+- Test sources include `Features/QueryExecution/Cases/QueryAdapterTests.cs`, `Features/ResourceExecution/Cases/TransactionTests.cs`, `Features/StorageRecovery/Cases/KeyCodecTests.cs`, `CommandAdmissionTests.cs`, `GraphAndSearchTests.cs`, `TestDatabase.cs` and the other feature-named test files in this project.
 
 ## Ownership and boundaries
 - Organize feature-owned tests under the same canonical `Features/<SliceName>/` used by implementation and `docs/Features/<SliceName>.md`; shared test infrastructure may remain outside slices.
@@ -38,3 +38,7 @@
 
 ## Owner-authorized local development verification, 2026-10-03
 - The explicit owner correction in root AGENTS.md supersedes the historical GitHub-only execution restrictions above for development verification. Run the actual TUnit command locally against a freshly built source snapshot; retain actual machine, source, command and original results. Local results are development evidence. Exact-source GitHub recovery/RF3/endurance and publication gates remain required, with every necessary suite executed.
+## Feature slice responsibility folders
+- Place every feature-owned source file under `Features/<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
+- Keep genuinely shared test infrastructure and project composition entry points at their existing shared ownership paths; do not duplicate them into a feature.
+- Structural moves preserve every source byte, namespace, type/serializer identity and test assertion. Do not change behavior, test logic or path references as part of a layout-only move; report source-path-sensitive joins to the solution integrator.

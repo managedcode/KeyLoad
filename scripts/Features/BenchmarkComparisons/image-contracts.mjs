@@ -208,7 +208,7 @@ export const processLimit = Object.freeze({
   maxInspectBytes: 64 * 1024,
   maxCommandEvidenceBytes: 8 * 1024 * 1024,
   maxCommandEvidenceRecordBytes: 512 * 1024,
-  maxNativeCommandRecords: 32,
+  maxNativeCommandRecords: 64,
   maxManifestBytes: 4 * 1024 * 1024,
   maxLogLines: 200,
   killGraceMs: 1000,

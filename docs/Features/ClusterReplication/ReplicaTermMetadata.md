@@ -54,7 +54,7 @@ sequenceDiagram
 
 |Surface|Paths and owner|
 |---|---|
-|Backend|`src/KeyLoad.Replication/Features/ClusterReplication/DurableReplicaLog.cs` and NEW `ReplicaTermObservation.cs`; bounded dependency Luna after test-source/root start|
+|Backend|`src/KeyLoad.Replication/Features/ClusterReplication/Storage/DurableReplicaLog.cs` and NEW `ReplicaTermObservation.cs`; bounded dependency Luna after test-source/root start|
 |Contracts|Existing signatures, wire and data shapes unchanged; root documents the required existing provider fence semantics in `StorageContracts.cs`|
 |Tests|NEW `tests/KeyLoad.RecoveryTests/Features/ClusterReplication/ReplicaTermMetadata*.cs`; R15 Luna; existing full unit/scalar/recovery and RF3 remain mandatory|
 |Frontend|N/A: private physical log metadata has no independent UI|

@@ -18,7 +18,7 @@ This module contains repository tooling that supports documented product and gov
 
 - Static governance validation: `node scripts/Features/RepositoryGovernance/verify.mjs`.
 - Isolated validation root: `node scripts/Features/RepositoryGovernance/verify.mjs --root <path>`.
-- Required application build and test qualification run in GitHub Actions as specified by the root `AGENTS.md`; do not run tests or benchmarks locally.
+- Owner correction 2026-10-03 permits local development tests and bounded experiments through the actual Aspire-owned caller: after restore/build, run `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=<suite>`. AppHost owns native runners, required topology and complete shutdown. Delivered-source Linux qualification and public comparison evidence still require genuine GitHub Actions artifacts; local results cannot substitute for them.
 
 ## Skills
 
@@ -64,3 +64,6 @@ No repository skills are installed or applicable to this tooling module. Do not 
 
 ## Latest completed result eligibility, 2026-10-04
 - Latest benchmark metrics means the newest completed own-main push/manual Benchmarks producer with success/failure conclusion. Pending, skipped and canceled workflows have no completed comparison cohort and MUST NOT displace ready JSON. Exclude them before choosing the latest eligible producer; then reject its missing/corrupt/failed aggregate without older fallback. A canceled workflow_run event still cannot authorize publication. This refines the latest-result rule without accepting incomplete or fabricated measurements.
+
+## Feature-local executable artifacts
+- This module uses the root-approved fully colocated executable-artifact convention: keep each feature-owned script, website module or workflow with its canonical feature/artifact and its existing entry point. C# Grains/Models folders are N/A here because this module contains executable web, shell or YAML artifacts. Preserve source-bound historical receipts; update live consumers when solution source paths move.

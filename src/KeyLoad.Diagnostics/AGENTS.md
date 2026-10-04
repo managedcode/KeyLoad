@@ -20,3 +20,6 @@
 - No project-local skill installed; do not install tools/skills or modify global configuration. Installed authorized Orleans guidance applies to unchanged producer lifecycles outside this BCL project.
 - Unknown/partial/degraded measurements are unavailable evidence, never zero or a performance winner. Snapshot reads are non-atomic; overlapping phases and whole-process samples are not request attribution.
 - Preserve root400/type200/function50/nesting3 limits, compiler/style diagnostics and all independent ownership. Stop on package/public/wire/security change or scope conflict.
+## Feature-local responsibility folders
+
+- Every populated `Features/<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.

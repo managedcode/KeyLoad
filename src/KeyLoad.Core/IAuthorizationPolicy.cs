@@ -13,6 +13,8 @@ public interface IAuthorizationPolicy
     void RequireFieldUse(PrincipalRecord principal, ResourceDefinition resource, string path);
     /// <summary>Requires permission to modify the field path.</summary>
     void RequireFieldWrite(PrincipalRecord principal, ResourceDefinition resource, string path);
+    /// <summary>Enumerates persisted field policies overlapping the requested path with the evaluator's canonical matching rules.</summary>
+    IEnumerable<SensitiveFieldPolicy> GetEffectiveFieldPolicies(ResourceDefinition resource, string path);
     /// <summary>Requires an explicit authorized replacement when protected data is redacted.</summary>
     void RequireReplacement(PrincipalRecord principal, ResourceDefinition resource, bool explicitReplacement);
     /// <summary>Projects JSON according to persisted field policy and reports omitted paths.</summary>

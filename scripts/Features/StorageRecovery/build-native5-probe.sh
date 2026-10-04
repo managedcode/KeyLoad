@@ -5,8 +5,10 @@ readonly prior_revision=7784b6b46b98ce994dd98070dc1f58fe4e506b91
 readonly prior_tree=b03bf1301a03b3fe00f419c3c7bf5285a34b63f9
 readonly repository=$(git rev-parse --show-toplevel)
 readonly destination="$repository/artifacts/native5-probe"
-readonly driver=tests/KeyLoad.CrashHost/Features/StorageRecovery/EpochPriorSourceProbe.cs
-readonly fixture=tests/KeyLoad.CrashHost/Features/StorageRecovery/EpochUpgradeFixture.cs
+readonly driver=tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/EpochPriorSourceProbe.cs
+readonly driver_destination=tests/KeyLoad.CrashHost/Features/StorageRecovery/EpochPriorSourceProbe.cs
+readonly fixture=tests/KeyLoad.CrashHost/Features/StorageRecovery/Fixtures/EpochUpgradeFixture.cs
+readonly fixture_destination=tests/KeyLoad.CrashHost/Features/StorageRecovery/EpochUpgradeFixture.cs
 readonly project=tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj
 
 [[ ! -e "$destination" && ! -L "$destination" ]]
@@ -20,8 +22,8 @@ tar -xf "$temporary/source.tar" -C "$temporary/source"
 
 # Only the probe and its raw-input fixture are overlaid. The prior provider,
 # serializer, identity validator, snapshot reader and project inputs stay exact.
-cp "$repository/$driver" "$temporary/source/$driver"
-cp "$repository/$fixture" "$temporary/source/$fixture"
+cp "$repository/$driver" "$temporary/source/$driver_destination"
+cp "$repository/$fixture" "$temporary/source/$fixture_destination"
 python3 - "$temporary/source/tests/KeyLoad.CrashHost/Program.cs" <<'PY'
 from pathlib import Path
 import sys

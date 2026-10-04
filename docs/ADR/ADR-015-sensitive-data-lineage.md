@@ -1,6 +1,6 @@
 # ADR-015: Sensitive-data omission, use, and lineage
 
-Status: Accepted; complete cross-projection privacy qualification pending. Current policy contracts are in `src/KeyLoad.Abstractions/Contracts.cs`, enforcement in `src/KeyLoad.Core/MutationAuthorization.cs` and `src/KeyLoad.Core/DatabaseEngine.cs`, and shared policy primitives in `src/KeyLoad.Security/AuthorizationPolicy.cs`; product source [sections 14, 26, 29–30, and 44](../design/architecture-v0.3.uk.md).
+Status: Accepted; complete cross-projection privacy qualification pending. Current policy contracts are in `src/KeyLoad.Abstractions/Contracts.cs`, enforcement in `src/KeyLoad.Core/MutationAuthorization.cs` and `src/KeyLoad.Core/DatabaseEngine.cs`, and shared policy primitives in `src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs`; product source [sections 14, 26, 29–30, and 44](../design/architecture-v0.3.uk.md).
 
 ## Context and decision
 

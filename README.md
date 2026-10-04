@@ -383,6 +383,11 @@ Not yet. Endurance, fault and power-loss qualification are still in progress.
 
 ## Repository map
 
+C# feature code uses `Features/<SliceName>/<Responsibility>/` throughout the solution,
+including SDK, infrastructure, benchmarks and tests. For example, ClusterRouting keeps
+`Grains`, `Commands`, `Queries`, `Contracts` and `Streaming` inside its own slice.
+Shared primitives and composition entry points remain at project roots.
+
 | Path | What's inside |
 |---|---|
 | [`src/KeyLoad.Server`](src/KeyLoad.Server) | The database server: HTTP API, MCP server and admin console |

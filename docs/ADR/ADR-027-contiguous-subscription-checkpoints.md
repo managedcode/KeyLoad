@@ -23,7 +23,7 @@ Max-ACK checkpointing is rejected because it skips pending input. Strict sequent
 
 ## Related requirements and implementation contract
 
-Related: `REQ-MSG-003/AC-MSG-003`, `REQ-FEED-004/AC-FEED-004`, ADR-023/025/026/030; KL-089, KL-093, KL-098/099, KL-102. Current group types/behavior are in `src/KeyLoad.Core/SubscriptionGroups.cs`, `EventSources.cs`, and `src/KeyLoad.Abstractions/Subscriptions.cs`.
+Related: `REQ-MSG-003/AC-MSG-003`, `REQ-FEED-004/AC-FEED-004`, ADR-023/025/026/030; KL-089, KL-093, KL-098/099, KL-102. Current group types/behavior are in `src/KeyLoad.Core/Features/Messaging/Execution/SubscriptionGroups.cs`, `EventSources.cs`, and `src/KeyLoad.Abstractions/Features/EventStreams/Contracts/Subscriptions.cs`.
 
 1. Freeze gap bounds, filter generation, checkpoint ownership, and retention-pin transition rules.
 2. Test ACK beyond a pending gap, gap ceiling, restart, seek/filter changes, retained-history discovery, migration, and concurrent workers.

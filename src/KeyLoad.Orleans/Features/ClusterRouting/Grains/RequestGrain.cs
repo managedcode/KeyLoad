@@ -23,14 +23,18 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
         string signedRequest, CancellationToken cancellationToken)
     {
         var requestId = this.GetPrimaryKey();
+        var phaseSettlement = codec.HasPhaseObserver ? new GrainRequestPhaseSettlement(codec) : null;
+        Action settled = phaseSettlement is null ? DeactivateOnIdle
+            : () => phaseSettlement.Settle(((IGrainBase)this).GrainContext, DeactivateOnIdle);
         return NativeCqrsStreamLifetime.Run(
             token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                writer => ExecuteCapabilityAsync(signedRequest, requestId, writer), token),
-            chunkSerializer, requestId, clock, DeactivateOnIdle, cancellationToken);
+                writer => ExecuteCapabilityAsync(signedRequest, requestId, writer, phaseSettlement), token),
+            chunkSerializer, requestId, clock, settled, cancellationToken);
     }
 
     private async ValueTask<Result<GrainOperationReply>> ExecuteCapabilityAsync(string signedRequest, Guid requestId,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer,
+        GrainRequestPhaseSettlement? phaseSettlement)
     {
         var command = false;
         var stage = GrainFailureStage.EnvelopeVerification;
@@ -39,9 +43,16 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
             writer.CancellationToken.ThrowIfCancellationRequested();
             var request = codec.VerifyRequest(signedRequest, requestId);
             GrainIdentityContext.Validate(request.Envelope, requestId);
+            phaseSettlement?.SetIdentity(request);
             stage = GrainFailureStage.CapabilityExecution;
             command = request.Envelope.CommandKind is not null;
             await writer.StartedAsync(new GrainRequestProgress(requestId)).ConfigureAwait(true);
+            if (codec.HasPhaseObserver)
+            {
+                await codec.ObservePhaseAsync(request, GrainRequestPhase.RequestStarted,
+                    ((IGrainBase)this).GrainContext, writer.CancellationToken).ConfigureAwait(true);
+            }
+
             writer.CancellationToken.ThrowIfCancellationRequested();
             GrainOperationReply reply;
             if (command)

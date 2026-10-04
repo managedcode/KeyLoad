@@ -109,3 +109,34 @@ build and AppHost unit/recovery/RF3 suites. Existing process-recovery and real S
 RF3 contracts remain mandatory. Missing infrastructure or unrelated concurrent compiler
 failures are reported and never relabelled as passing. This migration does not mark the
 ADR's other architecture debt or product qualification complete.
+
+The owner's subsequent whole-solution clarification extends the feature-local role
+migration to every production, contract, SDK, infrastructure, benchmark and test project.
+TASK-MCAF-LAYOUT-003/004/005 own disjoint exact-content project moves and local policy;
+TASK-MCAF-LAYOUT-006 owns central integration, current reference repair and verification.
+The owning RepositoryGovernance specification contains exact project scopes and join
+conditions. Test cases, fixtures, assertion helpers, models and process infrastructure
+are grouped within their original slice; executable site/tool artifacts retain their
+fully colocated artifact convention. No behavior or authority boundary changes are
+introduced. Capture all worker hashes before source moves and verify the complete join;
+never rewrite historical SHA-bound receipts or stage another task's code modifications.
+
+The root also owns the narrow structural split of `Core/GraphAndSeries.cs` into
+GraphTraversal, TimeSeries and Search partial declarations. Preserve complete original
+member text and signatures, document the role map and compare every declaration against
+the original snapshot. Only the using/namespace/partial-class shell is repeated; runtime
+behavior and existing private cross-model calls remain unchanged. This resolves the
+file's mixed-feature ownership rather than assigning it to an arbitrary one-model slice.
+
+The same exact-declaration split applies to `Abstractions/Queries.cs`: place each public
+request/result record in its owning DocumentStorage, EventStreams, Messaging,
+GraphTraversal, TimeSeries, QueryExecution, Search, BackupRestore or ClusterRouting
+slice under Contracts. Preserve XML documentation, signatures, attributes, aliases
+and field IDs. Repeat only required using/namespace headers; verify original declaration
+text and compile the complete solution. Concurrent API changes remain unstaged.
+
+The existing repository governance validator also rejects C# files directly at
+`Features/<SliceName>/` across all projects. Positive evidence is the complete live
+inventory; negative development evidence temporarily introduces one owned flat C#
+fixture, requires validator failure, removes it and requires success. This enforces
+REQ-MCAF-010 without changing runtime contracts; role meaning still requires code review.

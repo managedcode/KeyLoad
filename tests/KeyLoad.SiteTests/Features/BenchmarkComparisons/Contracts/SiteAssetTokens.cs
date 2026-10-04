@@ -1,0 +1,51 @@
+namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+
+internal static class SiteAssetTokens
+{
+    public const string ProbeRelativePath = "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Processes/node-probe.mjs";
+    public const string MedianOperation = "median";
+    public const string BuilderRelativePath = "site/scripts/build.mjs";
+    public const string SiteRootDirectory = "site";
+    public const string OutputDirectory = "output";
+    public const string TempDirectoryPrefix = "keyload-site-";
+    public const string IndexHtml = "index.html";
+    public const string FaviconSvg = "favicon.svg";
+    public const string FaviconSourcePath = "site/favicon.svg";
+    public const string NoJekyllFile = ".nojekyll";
+    public const string CnameFile = "CNAME";
+    public const string RobotsFile = "robots.txt";
+    public const string SitemapFile = "sitemap.xml";
+    public const string NoScriptTag = "<noscript>";
+    public const string Files = "files";
+    public const string Path = "path";
+    public const string SentinelFile = "sentinel.txt";
+    public const string SentinelValue = "preserve-existing-output";
+    public const string PreviewDirectoryPrefix = "..preview-";
+    public const string RealParentDirectory = "real-parent";
+    public const string LinkedParentDirectory = "linked-parent";
+    public const string LinkedInputOutput = "linked-input-output";
+    public const string FailedOutput = "failed-output";
+    public const string ThreeVendorRelativePath = "vendor/three/0.186.1";
+    public const string ThreeManifestFile = "manifest.json";
+    public const string ContractsModule = "contracts.mjs";
+    public const string BootstrapModule = "bootstrap.mjs";
+    public const string MeasurementModule = "measurements.mjs";
+    public const string LoaderModule = "measurement-loader.mjs";
+    public const string SceneModule = "cluster-scene.mjs";
+    public const string GeometryModule = "scene-geometry.mjs";
+    public const string LifecycleModule = "scene-lifecycle.mjs";
+    public const string ObserversModule = "scene-observers.mjs";
+    public const string Stylesheet = "styles.css";
+    public const string BrandStylesheet = "brand.css";
+    public const string ConsoleBrandStylesheetPath = "src/KeyLoad.Server/Features/AdminDashboard/Assets/brand.css";
+    public const string ConsoleLogoPath = "src/KeyLoad.Server/Features/AdminDashboard/Assets/logo.svg";
+    public const string TokenStylesheet = "tokens.css";
+    public const string SceneStylesheet = "scene.css";
+    public const string PosterAsset = "assets/cluster-poster.svg";
+    public const string MobilePosterAsset = "assets/cluster-poster-mobile.svg";
+    public const string WebGpuVendorModule = "three.webgpu.js";
+    public const string CoreVendorModule = "three.core.js";
+    public const string VendorLicense = "LICENSE";
+    public const string FeatureRelativePath = "site/Features/BenchmarkComparisons";
+    public const string EmittedFeatureRelativePath = "Features/BenchmarkComparisons";
+}

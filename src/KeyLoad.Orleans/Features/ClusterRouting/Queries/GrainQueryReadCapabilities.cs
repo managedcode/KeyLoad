@@ -11,6 +11,10 @@ internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngi
         {
             return await search.SearchAsync(principal, GrainNativePayload.Read<SearchRequest>(payload), cancellationToken).ConfigureAwait(true);
         }
+        if (kind == GrainReadKind.GraphSearch)
+        {
+            return await search.GraphSearchAsync(principal, GrainNativePayload.Read<GraphSearchRequest>(payload), cancellationToken).ConfigureAwait(true);
+        }
         return kind switch
         {
             GrainReadKind.Query => queries.Execute(principal, GrainNativePayload.Read<QueryRequest>(payload), clock, cancellationToken),

@@ -17,7 +17,8 @@ namespace KeyLoad.Orleans;
 [global::Orleans.GrainType(GrainRoutingProtocol.ReadAlias), global::Orleans.Placement.PreferLocalPlacement]
 public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine database, ICommitCoordinator coordinator,
     QueryEngine queries, SearchEngine search, INodeAdministration administration, TimeProvider clock,
-    ILogger<DatabaseReadGrain> diagnostics) : Grain, IDatabaseReadGrain
+    ILogger<DatabaseReadGrain> diagnostics)
+    : Grain, IDatabaseReadGrain
 {
     private readonly DatabaseEngine localDatabase = database;
     private readonly TimeProvider runtimeClock = clock;
@@ -55,7 +56,7 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
             phase = DatabasePhaseKind.AuthorizedReadCapability;
             phaseStarted = DatabasePhaseTelemetry.Begin();
             phaseActive = true;
-            var result = await ReadAsync(request, cancellationToken).ConfigureAwait(true);
+            var result = await ReadAsync(request, requestId, cancellationToken).ConfigureAwait(true);
             DatabasePhaseTelemetry.End(phase, DatabasePhaseOutcome.Completed, phaseStarted);
             phaseActive = false;
             stage = GrainFailureStage.ReplyEncoding;
@@ -94,12 +95,20 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         DatabasePhaseTelemetry.End(phase, outcome, started);
     }
 
-    private async Task<object?> ReadAsync(DecodedGrainRequest request, CancellationToken cancellationToken)
+    private async Task<object?> ReadAsync(DecodedGrainRequest request, Guid requestId,
+        CancellationToken cancellationToken)
     {
         var kind = request.Envelope.ReadKind!.Value;
         if (kind == GrainReadKind.Authenticate)
         {
             return GrainRequestAuthority.Authenticate(localDatabase, request.Payload, runtimeClock);
+        }
+
+        if (codec.HasPhaseObserver)
+        {
+            await codec.ObservePhaseAsync(request, GrainRequestPhase.AuthorizationReload,
+                ((IGrainBase)this).GrainContext, cancellationToken).ConfigureAwait(true);
+            ValidateFreshRequest(request, requestId, cancellationToken);
         }
 
         var principal = GrainRequestAuthority.Reload(localDatabase, request.Envelope.PrincipalId!, runtimeClock);
