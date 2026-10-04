@@ -682,7 +682,8 @@
       "src/KeyLoad.Core/DatabaseEngine.cs",
       "tests/KeyLoad.UnitTests/TransactionTests.cs",
       "tests/KeyLoad.UnitTests/Features/DocumentStorage",
-      "docs/implementation/keycodec-crud-development-2026-10-04.json"
+      "docs/implementation/keycodec-crud-development-2026-10-04.json",
+      "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityTests.cs"
     ],
     "qualification": {
       "sourceStage": "real_ZoneTree_CRUD_revision_validation_index_and_persisted_policy_matrix",
@@ -709,6 +710,13 @@
         "overallConclusion": "failure",
         "newNodeStageQualified": false,
         "originalReportsReceipt": "docs/implementation/node-epoch-development-2026-10-04.json"
+      },
+      "RF3ParitySource": {
+        "cases": 3,
+        "rootReviewed": true,
+        "ReleaseBuildAndFormatterPassed": true,
+        "actualRF3Executed": false,
+        "traceability": "TASK-DSTORE-RF3-PARITY"
       }
     }
   },

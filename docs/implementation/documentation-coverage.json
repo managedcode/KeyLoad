@@ -11162,6 +11162,85 @@
         "state": "root_reviewed_full_Aspire_local_normal2908_scalar2908_recovery257_passed_exact_Linux_cold_RF3_pending_20261004",
         "joinCondition": "all_migration_inputs_guarded_actual_FIFO_no_hang_lock_interop_and_exact_original_preservation",
         "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+      },
+      {
+        "id": "TASK-DSTORE-RF3-PARITY",
+        "owner": "cluster_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "contracts": [
+          "docs/Features/DocumentStorage.md",
+          "docs/ADR/ADR-002-command-idempotency.md"
+        ],
+        "requirementIds": [
+          "REQ-DSTORE-001"
+        ],
+        "acceptanceIds": [
+          "AC-DSTORE-001"
+        ],
+        "backlog": [
+          "KL-010"
+        ],
+        "permissions": "test_only_existing_wire_and_persisted_authority_contract",
+        "fileOwnership": [
+          "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityTests.cs",
+          "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityAssertions.cs",
+          "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityScenario.cs"
+        ],
+        "dependencies": [],
+        "startCondition": "root_approved_exact_mirrored_success_and_stale_replacement_oracles_after_6e09f03_checkpoint",
+        "artifacts": [
+          "both_real_clients_successfully_Patch_and_Delete",
+          "exact_revision_and_canonical_JSON_oracles",
+          "explicit_stale_replacement_and_same_ID_error_no_state_change",
+          "root_diff_review"
+        ],
+        "verification": [
+          "strict Release solution build",
+          "formatter",
+          "governance",
+          "Aspire actual Docker RF3 SDK and official MCP",
+          "exact delivered-source Linux original reports"
+        ],
+        "state": "source_root_reviewed_full_Release_and_formatter_passed_actual_RF3_unqualified",
+        "joinCondition": "both_write_directions_real_persisted_principal_no_public_semantic_change_no_skipped_gate",
+        "sourceReview": {
+          "files": [
+            {
+              "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityAssertions.cs",
+              "bytes": 3429,
+              "sha256": "3765e29f6aa9f78ceeca98d3fc69a947301a54f8de8d2cdd4dcbee7cbd6a58d2"
+            },
+            {
+              "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityScenario.cs",
+              "bytes": 2107,
+              "sha256": "79ce374e7d5efe4e7db19302d0645466cbdc5183a722b3a1fb5038f46bac9890"
+            },
+            {
+              "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/McpDocumentCrudParityTests.cs",
+              "bytes": 6376,
+              "sha256": "793be85426d1611ba2ffedf4532620f69fd46633be1786a2b2b039f0539d2714"
+            }
+          ],
+          "checks": {
+            "build": {
+              "exitCode": 0,
+              "path": "artifacts/qualification/document-crud-rf3-source-20261004-0342/build.log",
+              "bytes": 3544,
+              "sha256": "4fa3218fdabe416a159749258955aef7fa18be59c157ca9d5e6331a3fd9f1f84"
+            },
+            "formatter": {
+              "exitCode": 0,
+              "path": "artifacts/qualification/document-crud-rf3-source-20261004-0342/formatter.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "actualRF3Executed": false,
+          "publicContractsChanged": false,
+          "caseCount": 3,
+          "bothClientsEachPatchAndDelete": true
+        }
       }
     ],
     "qualificationRule": "Neither presence of source nor a local development result closes a full task. Preserve exact-source Linux fault/endurance and publication gates.",
