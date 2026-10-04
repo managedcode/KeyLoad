@@ -3139,7 +3139,7 @@
     "status": "in_progress",
     "feature": "docs/Features/BenchmarkComparisons.md",
     "decision": "docs/ADR/ADR-080-benchmark-failure-isolation.md",
-    "sourceStage": "authenticated_failed_cell_publication_with_native_preparation_repair_and_explicit_cancellation_cleanup",
+    "sourceStage": "authenticated_failed_cell_publication_with_native_registry_kurrent_redis_transport_repairs_and_explicit_cancellation_cleanup",
     "baselineRun": 37154664616,
     "originalFailedJob": 111299652762,
     "originalDiagnosticArtifact": 11286445994,
@@ -3190,7 +3190,7 @@
         "scope": "preparation and native preflight only;4096-record development workload; no scale, full cohort, winner or power-loss qualification"
       }
     },
-    "localDevelopmentVerification": "Delivered6ec Linux clean build, formatter, workflow inventory, registry10/10 and SDK/resource settings3/3 passed. Clean88e2cec snapshot passed full Release build, formatter and governance; actual full unit2821/2867 passed with46 failures, no skips/cancellation (including a registry port conflict, macOS temp-link rejections, missing Git metadata for the chunk child and an allocation assertion). Workflow cancellation3/3 and failed producer/finalizer2/2 passed through Aspire. Benchmark-only ephemeral-port follow-up freshly built clean with0warnings/errors; formatter and governance passed; actual registry10/10 normal and10/10 scalar passed through Aspire/TUnit with canonical owned TMPDIR. Complete delivered-source native/site/Pages qualification remains pending; no KeyLoad engine repair in this stage.",
+    "localDevelopmentVerification": "Delivered6ec Linux clean build, formatter, workflow inventory, registry10/10 and SDK/resource settings3/3 passed. Clean88e2cec snapshot passed full Release build, formatter and governance; actual full unit2821/2867 passed with46 failures, no skips/cancellation (including a registry port conflict, macOS temp-link rejections, missing Git metadata for the chunk child and an allocation assertion). Workflow cancellation3/3 and failed producer/finalizer2/2 passed through Aspire. Benchmark-only ephemeral-port follow-up freshly built clean with0warnings/errors; formatter and governance passed; actual registry10/10 normal and10/10 scalar passed through Aspire/TUnit with canonical owned TMPDIR. Complete delivered-source native/site/Pages qualification remains pending; no KeyLoad engine repair in this stage. Redis transport follow-up: fresh benchmark-only snapshot full Release0warnings/errors, formatter and governance passed; actual pinned resource models3/3 passed through Aspire/TUnit. Genuine new-source Redis1/2/3 startup/workload and complete website publication remain pending.",
     "runtimeQualified": false,
     "publicationQualified": false,
     "keyLoadEngineChanges": false,
@@ -3277,6 +3277,82 @@
         }
       },
       "githubQualified": false
+    },
+    "redisTransportRepair": {
+      "requirement": "REQ-BC-FAIL-009",
+      "originalSourceRevision": "6ec9233a5de963efd85fda041bc5d6d3d4b9972b",
+      "originalRunId": 37161833119,
+      "originalJobs": {
+        "n1": 111319875391,
+        "n2": 111319875411,
+        "n3": 111319875402
+      },
+      "provenFailurePhase": "Native Aspire startup before seeding or workload. Redis server accepted TCP6379 while native healthchecks attempted TLS; comparisons runner waited primaryhealthy until actual60min testcasecancel.",
+      "originalArchives": [
+        {
+          "artifactId": 11289029479,
+          "name": "comparison-preflight-redis-n1-point-read",
+          "digest": "sha256:6e963b3cc15bf8a79b3328712636ec72147c2e3e1f46e4689ddaa793ef1ac1bc"
+        },
+        {
+          "artifactId": 11288519787,
+          "name": "comparison-preflight-qualification-redis-n1-point-read",
+          "digest": "sha256:9bb2fab3ea9c39e9eae39d45d6ae8b9fc1dbc789b7656110002b283037807ca0"
+        },
+        {
+          "artifactId": 11289538105,
+          "name": "comparison-preflight-redis-n2-point-read",
+          "digest": "sha256:16fe4c4fca48dd680d1efc0986337f8c0b78a20a63ff73be9a2420b96dc46b3b"
+        },
+        {
+          "artifactId": 11289572992,
+          "name": "comparison-preflight-qualification-redis-n2-point-read",
+          "digest": "sha256:96627401553c71807f98036a137bab1d64b6db02224deaae4fc546991e706ce0"
+        },
+        {
+          "artifactId": 11289009755,
+          "name": "comparison-preflight-redis-n3-point-read",
+          "digest": "sha256:53a7c302c24004dc5f964a372893b77a7b9df63d8f5916d9c6c1a9e86d222006"
+        },
+        {
+          "artifactId": 11289618006,
+          "name": "comparison-preflight-qualification-redis-n3-point-read",
+          "digest": "sha256:a552fbfaf70045b1b3ae6774586892fc2f5bb3553b257d7a6fc7132814575ea8"
+        }
+      ],
+      "originalTeardown": "all3 succeeded;failedStages empty;actual failed/null availability envelopes uploaded",
+      "nativeApi": "resource-local WithoutHttpsCertificate;single-call experimental opt-in;native TCP target6379 and discovered mapped host ports",
+      "preserved": "password,healthcheck,WaitFor,AOFalways,native replication,direct-copy,cancellation,WAIT/WAITAOF acknowledgement",
+      "development": {
+        "scope": "local development; actual pinned native resource model, not Docker startup or GitHub qualification",
+        "sourceRevision": "3aeb8cb7201ade69682d3f7106abd80ef137155e",
+        "candidatePatchSha256": "67c6834fb7a390e59684b7d8516c54b0fe3ef76c0500d216ff1dd0a26b86ac62",
+        "sourceFiles": {
+          "src/KeyLoad.AppHost/Features/BenchmarkComparisons/IsolatedRedisResources.cs": "283621f15aeb23adc7b40319ab45a030458242e45542763c785908952f1519b9",
+          "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/IsolatedResourceTopologyRedisTests.cs": "9909e073cb2faba4ad330dc79e90623ab798c1eb328c0e41ff5cd268ffdc3e77",
+          "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/RedisNativeReadinessRegression.cs": "f3c10491d7c5f1377591039f2111893ae6505e85edc3fe98481e9c46af130e72"
+        },
+        "runnerDllSha256": "ba7cf6baa9f2e0360be0019ded6a2c2c5191834362fb85dfe4551f6fe79b9665",
+        "fullReleaseBuild": "passed;0warnings;0errors",
+        "formatter": "passed",
+        "governance": "passed",
+        "invoker": "freshly built Aspire/TUnit comparison runner with owned canonical TMPDIR",
+        "report": {
+          "summary": {
+            "total": 3,
+            "passed": 3,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "sha256": "29566022b609fb9e8ee50614fc3bbe35c79532c27e3712cbe7720a8bd194ab10",
+          "operatingSystem": "macOS 27.0.1",
+          "runtimeVersion": ".NET 10.0.12"
+        }
+      },
+      "nativeGitHubQualified": false
     }
   }
 }

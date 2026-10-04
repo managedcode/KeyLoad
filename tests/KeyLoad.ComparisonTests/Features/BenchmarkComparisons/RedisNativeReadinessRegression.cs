@@ -1,5 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Testing;
 using KeyLoad.Comparisons.Targets;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -11,12 +12,14 @@ internal static class RedisNativeReadinessRegression
     private const string Primary = "primary";
     private const string ProbePrefix = "keyload-native-readiness:";
     private const string GuidFormat = "N";
+    private const string NativeScheme = "redis";
     private const int MinimumNodes = 1, MaximumNodes = 3;
+    private const int NativePort = 6379;
     private static readonly string[] NodeNames = [Primary, "replica1", "replica2"];
     private static readonly TimeSpan ProbeExpiry = TimeSpan.FromMinutes(2);
     private static readonly TimeSpan CancellationDelay = TimeSpan.FromSeconds(1);
 
-    /// <summary>AC-ISO-002/003/006: supplement the container's strict proof with real external copy and cancellation operations.</summary>
+    /// <summary>AC-ISO-002/003/006 and AC-BC-FAIL-009: prove native authenticated TCP, external copies and cancellation.</summary>
     internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(app);
@@ -24,9 +27,11 @@ internal static class RedisNativeReadinessRegression
         ArgumentOutOfRangeException.ThrowIfGreaterThan(nodeCount, MaximumNodes);
         var resources = app.Services.GetRequiredService<DistributedApplicationModel>().Resources.OfType<RedisResource>().ToArray();
         await Assert.That(resources.Select(resource => resource.Name)).IsEquivalentTo(NodeNames.Take(nodeCount));
+        await VerifyNativeTransportAsync(app, resources, token);
         await using var clients = new RedisNativeReadinessRegressionConnections();
         await clients.ConnectAsync(app, resources, token);
         var database = clients.Primary.GetDatabase();
+        await database.PingAsync(CommandFlags.DemandMaster).WaitAsync(token);
         var probe = ProbePrefix + Guid.NewGuid().ToString(GuidFormat);
         var payload = Guid.NewGuid().ToString(GuidFormat);
         var created = false;
@@ -48,6 +53,23 @@ internal static class RedisNativeReadinessRegression
             {
                 await database.KeyDeleteAsync(probe, CommandFlags.DemandMaster);
             }
+        }
+    }
+
+    private static async Task VerifyNativeTransportAsync(DistributedApplication app, RedisResource[] resources,
+        CancellationToken token)
+    {
+        foreach (var resource in resources)
+        {
+            var endpoint = resource.Annotations.OfType<EndpointAnnotation>().Single();
+            await Assert.That(endpoint.UriScheme).IsEqualTo(NativeScheme);
+            await Assert.That(endpoint.TargetPort).IsEqualTo(NativePort);
+            await Assert.That(endpoint.TlsEnabled).IsFalse();
+            var connectionString = await app.GetConnectionStringAsync(resource.Name, token);
+            await Assert.That(string.IsNullOrWhiteSpace(connectionString)).IsFalse();
+            var options = ConfigurationOptions.Parse(connectionString!);
+            await Assert.That(options.Ssl).IsFalse();
+            await Assert.That(string.IsNullOrWhiteSpace(options.Password)).IsFalse();
         }
     }
 

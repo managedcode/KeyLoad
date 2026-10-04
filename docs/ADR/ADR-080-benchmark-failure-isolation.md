@@ -51,6 +51,22 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
    hosts/URLs/environment overrides. Root integrates this port-isolation follow-up,
    reviews the unchanged production callers and reruns the10 original scenarios
    through freshly built Aspire/TUnit before the next scoped checkpoint.
+   Under FAIL-PREP-REDIS (REQ/AC-BC-FAIL-009), preserve the existing isolated
+   password-authenticated RESP/TCP bootstrap and native6379 replication. Use the
+   official resource-local `WithoutHttpsCertificate()` call, with compiler opt-in
+   ASPIRECERTIFICATES001 limited to the native API and direct annotation checks.
+   This prevents the pinned Aspire13.6 BeforeStart callback from changing the
+   endpoint/discovered connection to TLS while the owned bootstrap stays plain.
+   Native-failures agent owns only IsolatedRedisResources.cs, the existing Redis
+   resource-model regression and actual RedisNativeReadinessRegression transport
+   checks. Root owns docs, integration, build/format/Aspire verification, scoped
+   checkpoint and genuine new-source1/2/3-node preflight/publication evidence.
+   Resource tests require explicit certificate opt-out, fixed native port/scheme
+   and authenticated non-TLS client configuration; real startup tests also retain
+   PONG/write/direct-copy/cancellation and AOF/ack contracts. Never remove health
+   checks, alter shared TLS/trust settings, disable certificate validation or
+   change another engine's resources. Rollback is the scoped call/check removal
+   and honestly restores the known readiness mismatch; no storage migration.
    Under FAIL-PREP-KURRENT, `KurrentTarget.InitializeAsync` constructs the actual
    SDK writer only after `KurrentClusterVerifier.VerifyAsync` proves membership.
    Three SDK/resource-model tests belong to ComparisonTests and run in common

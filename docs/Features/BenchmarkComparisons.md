@@ -691,6 +691,7 @@ KeyLoad engine repair and concurrent series-codec work are outside this task.
 | REQ-BC-FAIL-006 bounded registry readiness | AC-BC-FAIL-006 each native HTTP probe has at most2s within the unchanged30s total; only settled non-aborted HTTP200 succeeds; private no-follow diagnostics remain at most121 records/64KiB and evidence-write failures propagate. Actual fixture listeners use kernel-assigned loopback ports; optional numeric port accepts only integers1..65535 before HTTP/evidence, while both production callers keep the default5000 | `ImageRegistryReadinessTests`:10 actual loopback HTTP/error/bounds cases, including rejected port inputs before I/O, plus genuine pinned Docker image export/import in GitHub |
 | REQ-BC-FAIL-007 Kurrent writer starts after membership | AC-BC-FAIL-007 verify all native1/2/3-member views before constructing the SDK writer; retain native DNS seeds, TLS verification, leader preference, NoStream semantics, acknowledgements, replica-copy oracle and cleanup | `IsolatedKurrentDiscoverySettingsTests`:3 actual SDK/resource-model cases; genuine Aspire-owned StreamAppend preflights for1/2/3 nodes |
 | REQ-BC-FAIL-008 explicit cancellation stops owned work | AC-BC-FAIL-008 workload, finalization and result upload use `!cancelled()` so ordinary failure still finalizes while cancellation stops execution/publication; `always()` cleanup retains bounded diagnostics and safely removes owned registries whose setup was cancelled | `WorkflowBenchmarkFailureTests`, unchanged canceled-job/producer rejection regressions and actual GitHub lifecycle |
+| REQ-BC-FAIL-009 align native Redis transport | AC-BC-FAIL-009 each isolated Redis resource uses the documented native certificate opt-out for its existing authenticated RESP/TCP bootstrap; after actual Aspire startup, primary/replica endpoints retain scheme `redis` and native target port6379 with TLS disabled. Discovered mapped host ports remain dynamic; native client settings retain a password without `ssl=true`. Preserve health checks, wait dependencies, AOF `always`, native membership, direct-copy/cancellation checks and WAIT/WAITAOF acknowledgements | actual pinned resource-model regressions plus genuine Aspire-owned native Redis 1/2/3-node preflights; complete matrix and site qualification remain mandatory |
 
 [ADR-080](../ADR/ADR-080-benchmark-failure-isolation.md) owns the boundary change.
 Ordered task graph: FAIL-CONTRACT (root, complete) -> FAIL-SITE (site worker),
@@ -799,6 +800,28 @@ temporary directory. The production callers still omit the optional port.
 Source/module/fixture/runner and original report hashes are retained in the local
 development receipt and status. Complete delivered-source GitHub publication is
 pending; these development results do not qualify a full cohort or website.
+
+The original source6ec Redis preflights now prove a separate preparation defect:
+jobs111319875391/111319875411 started native Redis8.4.0 on plain TCP, but the
+Aspire13.6 healthcheck attempted TLS and blocked `app.StartAsync` until the60-minute
+case deadline. Both failed jobs finalized and uploaded null-report availability
+envelopes, then completed owned cleanup successfully. No workload measurements
+started. FAIL-PREP-REDIS uses the documented resource-local native
+`WithoutHttpsCertificate()` API to preserve the existing authenticated RESP/TCP
+contract; it does not alter a connection string by hand or disable certificate
+validation. Its experimental compiler opt-in is limited to that API and direct
+annotation verification. Root integrates the bounded benchmark-only change after
+the native source review, runs focused regressions and full build/format checks,
+then verifies genuine new-source preflights and complete publication. No Redis
+measurement repair or full-cohort publication is claimed before that evidence.
+
+The Redis transport candidate (archive of3aeb8cb plus its scoped benchmark patch)
+passed full Release build with0warnings/errors, formatter and governance. Its
+freshly built actual pinned resource-model regressions passed3/3 through the
+Aspire/TUnit comparison entry point, without skips/cancellation/timeouts. The
+experimental opt-in is confined to the resource API and actual annotation checks.
+These model results do not prove Docker startup or workload execution; new-source
+native1/2/3 preflights and complete aggregate/site/Pages acceptance remain pending.
 
 ```mermaid
 flowchart LR

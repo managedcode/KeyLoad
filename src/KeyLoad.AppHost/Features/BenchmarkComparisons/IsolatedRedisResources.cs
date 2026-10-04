@@ -67,7 +67,7 @@ internal static class IsolatedRedisResources
         var name = NodeNames[index];
         var directory = context.DataDirectory(name);
         ClusterProfileStore.PrepareDirectory(directory);
-        var node = context.Builder.AddRedis(name, password: password)
+        var node = UseNativeTcp(context.Builder.AddRedis(name, password: password))
             .WithImageTag(Version).WithImageSHA256(BenchmarkResources.RedisDigest[7..])
             .WithContainerNetworkAlias(name).WithDataBindMount(directory)
             .WithBindMount(script, ScriptTarget, isReadOnly: true).WithEntrypoint(Shell)
@@ -82,5 +82,13 @@ internal static class IsolatedRedisResources
             node.WithContainerRuntimeArgs(UserArgument, user);
         }
         return node;
+    }
+
+    private static IResourceBuilder<RedisResource> UseNativeTcp(IResourceBuilder<RedisResource> node)
+    {
+        // ADR-080: the owned authenticated bootstrap and replica links use native TCP on port 6379.
+#pragma warning disable ASPIRECERTIFICATES001
+        return node.WithoutHttpsCertificate();
+#pragma warning restore ASPIRECERTIFICATES001
     }
 }

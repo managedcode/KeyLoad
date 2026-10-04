@@ -16,8 +16,10 @@ internal sealed class IsolatedResourceTopologyRedisTests
     private const string ReplicationHostGuard = "[ \"$KEYLOAD_REDIS_PRIMARY\" = primary.dev.internal ] || exit 1";
     private const string ReplicationConfiguration = "'replicaof primary.dev.internal 6379'";
     private const string IncorrectReplicationConfiguration = "'replicaof primary 6379'";
+    private const string NativeScheme = "redis";
+    private const int NativePort = 6379;
 
-    /// <summary>AC-ISO-003/005: one native primary and direct replicas, authenticated and persisted independently.</summary>
+    /// <summary>AC-ISO-003/005 and AC-BC-FAIL-009: native authenticated TCP resources with explicit certificate opt-out.</summary>
     [Test]
     [Arguments(1)]
     [Arguments(2)]
@@ -62,6 +64,7 @@ internal sealed class IsolatedResourceTopologyRedisTests
 
     private static async Task VerifyNodeAsync(IsolatedResourceTopologyFixture fixture, RedisResource node, RedisResource primary)
     {
+        await VerifyNativeTransportAsync(node);
         await IsolatedResourceTopologyFixture.VerifyPrivateDataAsync(node, fixture.Context.Root);
         await IsolatedResourceTopologyFixture.VerifyUserAsync(node);
         await Assert.That(node.PasswordParameter).IsSameReferenceAs(primary.PasswordParameter);
@@ -88,6 +91,21 @@ internal sealed class IsolatedResourceTopologyRedisTests
         await Assert.That(node.Annotations.OfType<ContainerNetworkAliasAnnotation>().Single().Alias).IsEqualTo(node.Name);
         await Assert.That(node.Annotations.OfType<ContainerImageAnnotation>().Single().SHA256)
             .IsEqualTo(BenchmarkResources.RedisDigest[7..]);
+    }
+
+    private static async Task VerifyNativeTransportAsync(RedisResource node)
+    {
+        // Inspect the actual pinned Aspire annotation; a missing explicit opt-out must fail this regression.
+#pragma warning disable ASPIRECERTIFICATES001
+        var certificate = node.Annotations.OfType<HttpsCertificateAnnotation>().Single();
+        await Assert.That(certificate.Certificate).IsNull();
+        await Assert.That(certificate.UseDeveloperCertificate).IsFalse();
+#pragma warning restore ASPIRECERTIFICATES001
+        var endpoint = node.Annotations.OfType<EndpointAnnotation>().Single();
+        await Assert.That(endpoint.UriScheme).IsEqualTo(NativeScheme);
+        await Assert.That(endpoint.TargetPort).IsEqualTo(NativePort);
+        await Assert.That(endpoint.TlsEnabled).IsFalse();
+        await Assert.That(node.Annotations.OfType<HealthCheckAnnotation>().Any()).IsTrue();
     }
 
     private static async Task VerifyBootstrapReplicationAsync(string path)
