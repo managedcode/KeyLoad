@@ -23,12 +23,12 @@ internal sealed class NativeTextProjectionRestartTests
             new PutDocument(Collection, "two", "{\"text\":\"needle other\"}"));
         var indexDirectory = Path.Combine(database.Directory, "native-text");
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query, Limit: 10);
-        var expected = new SearchEngine(database.Database).Search("root", request,
+        var expected = await new SearchEngine(database.Database).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
 
         var beforeRestart = new NativeTextProjection(indexDirectory, database.Database.Limits,
             database.Store.Identity.NodeId);
-        var firstResult = new SearchEngine(database.Database, beforeRestart).Search("root", request,
+        var firstResult = await new SearchEngine(database.Database, beforeRestart).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
         await AssertEquivalentAsync(expected, firstResult);
         await AssertRecognizedNativeGenerationAsync(indexDirectory, database);
@@ -36,7 +36,7 @@ internal sealed class NativeTextProjectionRestartTests
 
         using var afterRestart = new NativeTextProjection(indexDirectory, database.Database.Limits,
             database.Store.Identity.NodeId);
-        var rebuiltResult = new SearchEngine(database.Database, afterRestart).Search("root", request,
+        var rebuiltResult = await new SearchEngine(database.Database, afterRestart).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
 
         await AssertEquivalentAsync(expected, rebuiltResult);
@@ -54,7 +54,7 @@ internal sealed class NativeTextProjectionRestartTests
         using (var projection = new NativeTextProjection(indexDirectory, database.Database.Limits,
                    database.Store.Identity.NodeId))
         {
-            _ = new SearchEngine(database.Database, projection).Search("root",
+            _ = await new SearchEngine(database.Database, projection).SearchAsync("root",
                 new(database.Partition, Collection, TextPath, Query));
         }
         var generation = Directory.EnumerateDirectories(indexDirectory)
@@ -102,7 +102,7 @@ internal sealed class NativeTextProjectionRestartTests
         using (var projection = new NativeTextProjection(indexDirectory, database.Database.Limits,
                    database.Store.Identity.NodeId))
         {
-            _ = new SearchEngine(database.Database, projection).Search("root",
+            _ = await new SearchEngine(database.Database, projection).SearchAsync("root",
                 new(database.Partition, Collection, TextPath, Query));
         }
         var generation = Directory.EnumerateDirectories(indexDirectory)

@@ -30,11 +30,11 @@ internal sealed class NativeTextProjectionParityTests
             Limit = 3
         };
 
-        var expectedText = oracle.Search("root", textRequest, token);
-        var expectedHybrid = oracle.Search("root", hybridRequest, token);
-        var actualText = native.Search("root", textRequest, token);
+        var expectedText = await oracle.SearchAsync("root", textRequest, token);
+        var expectedHybrid = await oracle.SearchAsync("root", hybridRequest, token);
+        var actualText = await native.SearchAsync("root", textRequest, token);
         var firstGeneration = CurrentGeneration(database);
-        var actualHybrid = native.Search("root", hybridRequest, token);
+        var actualHybrid = await native.SearchAsync("root", hybridRequest, token);
 
         await AssertEquivalentAsync(expectedText, actualText);
         await AssertEquivalentAsync(expectedHybrid, actualHybrid);
@@ -60,9 +60,9 @@ internal sealed class NativeTextProjectionParityTests
         SeedCorpus(database);
         using var projection = CreateProjection(database, _ => tokenHash);
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query, Limit: 20);
-        var expected = new SearchEngine(database.Database).Search("root", request,
+        var expected = await new SearchEngine(database.Database).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
-        var actual = new SearchEngine(database.Database, projection).Search("root", request,
+        var actual = await new SearchEngine(database.Database, projection).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
 
         await AssertEquivalentAsync(expected, actual);

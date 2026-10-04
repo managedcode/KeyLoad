@@ -1,6 +1,6 @@
 # ADR-081 — Awaited bounded native search execution
 
-Status: Accepted implementation contract; source and runtime qualification pending.
+Status: Accepted implementation contract; reviewed source and local development gates passed; exact-source Linux and public RF3 qualification pending.
 Related: KL-029, REQ-FTS-003/005/007 and AC-FTS-003/005/007 in
 [NativeFullTextProjection](../Features/Search/NativeFullTextProjection.md),
 ADR-034, ADR-078, AC-MCP-001 and AC-SQLVIEW-003.
@@ -22,6 +22,14 @@ captured continuation is the concrete hazard.
 Provider source: [ZoneTreeMaintainer at pinned13ee11e](https://github.com/ZoneTree/ZoneTree/blob/13ee11e19007301fdea72b9210de62f6257f4929/src/ZoneTree/Core/ZoneTreeMaintainer.cs).
 Actual causality and repaired liveness require the real public RF3 regression.
 Local default-scheduler tests alone do not establish the Orleans join.
+
+The [local integration receipt](../implementation/native-async-search-development-2026-10-03.json)
+binds the reviewed precommit source and runtime inventories to complete Aspire
+normal/scalar2866 tests each with identical identities and recovery228, without
+skips or flaky results. The three new real-native admission/projection oracles,
+all10 native-text process cuts,14 epoch cases and1000 unique seeded atomic
+process-crash receipts pass. This is macOS development evidence; the new public
+RF3 oracle and exact delivered-source Linux artifacts remain required.
 
 ## Execution and ownership contract
 
@@ -83,7 +91,16 @@ Repair fixtures under existing accepted contracts, without product changes:
 2. TASK-FTS-ASYNC-INTEGRATE, root: only Query/SearchEngine.cs and new cohesive
    Query/Features/Search helpers if needed, Orleans/ClusterRouting
    GrainQueryReadCapabilities.cs and DatabaseReadGrain.cs. Preserve exact core,
-   authorization/error/admission paths; no central or DTO edits.
+   authorization/error/admission paths; no central or DTO edits. Root also
+   adapts the existing NativePublicReadFixture/Elements async diagnostic bridge
+   and CrashHost Search/NativeTextCrashScenario calls to the awaited API, keeping
+   the same diagnostic, real-process pause and canonical-preservation oracles.
+   Existing async search, relational-linkage, admission and process-recovery
+   callers await the new API without weakening their results or errors. The
+   allocation control retains its existing synchronous measurement helper:
+   warmup and GC.GetAllocatedBytesForCurrentThread before/Search/after must run
+   on the actual measured thread. Caller-thread counts around awaited worker
+   execution are invalid. No generic sync adapter or diagnostic suppression.
 3. TASK-FTS-ASYNC-ORACLE, lifecycle_wave Luna/high: new UnitTests/Features/Search
    NativeTextAsync* and IntegrationTests/Features/Search NativeTextAsyncRf3*
    files only. Use actual ZoneTree/native FTS and real RF3 SDK/official MCP.

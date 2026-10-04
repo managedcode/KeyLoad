@@ -4,9 +4,13 @@ namespace KeyLoad.Orleans;
 
 internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngine search, TimeProvider clock)
 {
-    internal object Execute(GrainReadKind kind, string principal, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+    internal async ValueTask<object> ExecuteAsync(GrainReadKind kind, string principal, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (kind == GrainReadKind.Search)
+        {
+            return await search.SearchAsync(principal, GrainNativePayload.Read<SearchRequest>(payload), cancellationToken).ConfigureAwait(true);
+        }
         return kind switch
         {
             GrainReadKind.Query => queries.Execute(principal, GrainNativePayload.Read<QueryRequest>(payload), clock, cancellationToken),
@@ -14,7 +18,6 @@ internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngi
             GrainReadKind.QueryCapabilities => Capabilities(payload),
             GrainReadKind.LiveQueryStart => queries.StartLiveQuery(principal, GrainNativePayload.ReadPublicInput<StartLiveQueryRequest>(payload), clock, cancellationToken),
             GrainReadKind.LiveQueryRead => queries.ReadLiveQuery(principal, GrainNativePayload.ReadPublicInput<ReadLiveQueryRequest>(payload), clock, cancellationToken),
-            GrainReadKind.Search => search.Search(principal, GrainNativePayload.Read<SearchRequest>(payload), cancellationToken),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

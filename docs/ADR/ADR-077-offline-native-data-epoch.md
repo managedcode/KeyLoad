@@ -21,6 +21,12 @@ this reachable commit has exactly the same complete source tree as the original
 tree before building. Historical development receipts keep their actual original
 commit, archive and binary hashes; they are not relabeled as a new execution.
 
+TASK-EPOCH-PROBE-BIND corrects the overlaid probe's reported source revision to
+the exact reachable archived revision above. CI recovery requires successful
+probe preparation and retains the original probe receipt and binaries alongside
+the recovery reports. A matching tree alone cannot make two different execution
+receipts interchangeable; driver and executable file hashes remain verified.
+
 ADR-057's identity4/WAL3/checkpoint2 matrix records its qualified historical
 generation; it does not describe the current identity5/WAL4/checkpoint3 source.
 This ADR adjudicates that difference without changing historical receipts.
@@ -201,3 +207,13 @@ applied cut and raw records rather than immutable materialized-tree bytes. All
 upgrade, unsupported-open, snapshot-reader refusal and read-only published-target
 retry comparisons retain the complete byte inventory. No previous provider or
 serializer source is patched to produce the oracle.
+
+The [bound local integration receipt](../implementation/native-async-search-development-2026-10-03.json)
+rebuilds the actual reachable7784b6b source/tree with exactly the two declared
+CrashHost driver overlays. All75 executable files and both driver source hashes
+remain verified after the complete Aspire recovery suite:228/228 pass, including
+all14 epoch cases, with1000 unique seeded atomic process-crash receipts retained.
+Historical2532-bound artifacts are preserved separately without relabeling.
+Exact delivered-source Linux originals and a genuine homogeneous Docker/Aspire
+RF3 cold-upgrade fixture remain required; ordinary current-format RF3 startup
+does not qualify the previous-to-current cold-upgrade contract.

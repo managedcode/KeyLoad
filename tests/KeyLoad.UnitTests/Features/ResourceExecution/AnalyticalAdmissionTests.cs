@@ -74,7 +74,7 @@ internal sealed class AnalyticalAdmissionTests
         Assert.ThrowsExactly<KeyLoadException>(() => query.Execute(Principal,
             new(db.Partition, InvalidSql, AllowFullScan: true)));
         await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(0);
-        await Assert.That(search.Search(Principal,
+        await Assert.That(await search.SearchAsync(Principal,
             new(db.Partition, Collection, SearchField, SearchTerm))).IsEmpty();
     }
 
@@ -98,7 +98,7 @@ internal sealed class AnalyticalAdmissionTests
         }, cancellation.CancelAsync, held.ReleaseAsync,
             () => tasks.AssertWorkerIsCancelledAsync(admitted!));
         await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(0);
-        await Assert.That(search.Search(Principal, request)).IsEmpty();
+        await Assert.That(await search.SearchAsync(Principal, request)).IsEmpty();
     }
 
     [Test]
@@ -113,7 +113,7 @@ internal sealed class AnalyticalAdmissionTests
             new(db.Partition, Collection, SearchField, SearchTerm)));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(0);
-        await Assert.That(search.Search(Principal,
+        await Assert.That(await search.SearchAsync(Principal,
             new(db.Partition, "empty", SearchField, SearchTerm))).IsEmpty();
     }
 
@@ -141,7 +141,7 @@ internal sealed class AnalyticalAdmissionTests
         await Assert.That(after.OwnedPointLookups - before.OwnedPointLookups).IsEqualTo(0L);
         await Assert.That(after.BorrowedPointLookups - before.BorrowedPointLookups).IsEqualTo(0L);
         await Assert.That(after.RangeVisitAttempts - before.RangeVisitAttempts).IsEqualTo(0L);
-        await Assert.That(new SearchEngine(independent.Database).Search(Principal,
+        await Assert.That(await new SearchEngine(independent.Database).SearchAsync(Principal,
             new(independent.Partition, Collection, SearchField, SearchTerm))).IsEmpty();
         await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(1);
         await Assert.That(independent.Database.QueryReadsInFlight).IsEqualTo(0);

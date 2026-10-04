@@ -102,9 +102,10 @@ jobs:
       - name: Run unit tests without CPU intrinsics
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit-scalar
       - name: Build the previous storage executable
+        id: native5
         run: bash scripts/Features/StorageRecovery/build-native5-probe.sh
       - name: Test recovery after process crashes
-        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.native5.outcome == 'success' }}
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery
       - name: Save test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -114,6 +115,7 @@ jobs:
           path: |
             **/TestResults/**
             artifacts/qualification/**
+            artifacts/native5-probe/**
           if-no-files-found: ignore
       - name: Save build diagnostics
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

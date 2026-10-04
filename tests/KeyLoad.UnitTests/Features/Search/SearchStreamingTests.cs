@@ -23,7 +23,7 @@ internal sealed class SearchStreamingTests
         db.Commit(new PutVector(Collection, "shared", VectorPath, [0.5f, 0], space, 1),
             new PutVector(Collection, "vector-first", VectorPath, [1, 0], space, 1));
 
-        var result = await Assert.That(new SearchEngine(db.Database).Search("root",
+        var result = await Assert.That(await new SearchEngine(db.Database).SearchAsync("root",
             new(db.Partition, Collection, TextPath, "alpha", VectorPath, [1, 0], space, Limit: 1),
             TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
         await Assert.That(result.Document.Reference.Id).IsEqualTo("shared");
@@ -40,7 +40,7 @@ internal sealed class SearchStreamingTests
             new PutDocument(Collection, "missing", "{}"),
             new PutDocument(Collection, "other", "{\"text\":\"" + string.Join(' ', Enumerable.Repeat("gamma", 100)) + "\"}"));
 
-        var result = new SearchEngine(db.Database).Search("root", new(db.Partition, Collection, TextPath, "alpha beta"),
+        var result = await new SearchEngine(db.Database).SearchAsync("root", new(db.Partition, Collection, TextPath, "alpha beta"),
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.Select(row => row.Document.Reference.Id))
             .IsEquivalentTo(new[] { "z", "a" }, CollectionOrdering.Matching);
@@ -56,7 +56,7 @@ internal sealed class SearchStreamingTests
         db.Commit(new PutDocument(Collection, "z", "{\"text\":\"alpha\"}"),
             new PutDocument(Collection, "a", "{\"text\":\"alpha\"}"));
 
-        var result = new SearchEngine(db.Database).Search("root", new(db.Partition, Collection, TextPath, "alpha"),
+        var result = await new SearchEngine(db.Database).SearchAsync("root", new(db.Partition, Collection, TextPath, "alpha"),
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.Select(row => row.Document.Reference.Id))
             .IsEquivalentTo(new[] { "a", "z" }, CollectionOrdering.Matching);
@@ -78,11 +78,11 @@ internal sealed class SearchStreamingTests
         var search = new SearchEngine(db.Database);
         var request = new SearchRequest(db.Partition, Collection, VectorField: VectorPath, Vector: [1, 0], Space: space);
 
-        var visible = await Assert.That(search.Search("alice", request,
+        var visible = await Assert.That(await search.SearchAsync("alice", request,
             TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
         await Assert.That(visible.Document.Reference.Id).IsEqualTo("alice");
         var otherSpace = space with { Id = "different" };
-        await Assert.That(search.Search("alice", request with { Space = otherSpace },
+        await Assert.That(await search.SearchAsync("alice", request with { Space = otherSpace },
             TestContext.Current!.Execution.CancellationToken)).IsEmpty();
     }
 
@@ -94,11 +94,12 @@ internal sealed class SearchStreamingTests
         db.Commit(new PutDocument(Collection, "a", "{\"text\":\"alpha\",\"padding\":\"" + new string('x', 1_024) + "\"}"));
         var position = db.Store.Position;
         var bounded = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, new() { MaxBatchBytes = 128 }));
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => bounded.Search("root",
-            new(db.Partition, Collection, TextPath, "alpha"), TestContext.Current!.Execution.CancellationToken)).Code)
+        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => bounded.SearchAsync("root",
+            new(db.Partition, Collection, TextPath, "alpha"), TestContext.Current!.Execution.CancellationToken)))!;
+        await Assert.That(failure.Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(db.Store.Position).IsEqualTo(position);
-        await Assert.That(new SearchEngine(db.Database).Search("root", new(db.Partition, Collection, TextPath, "alpha"),
+        await Assert.That(await new SearchEngine(db.Database).SearchAsync("root", new(db.Partition, Collection, TextPath, "alpha"),
             TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
     }
 }

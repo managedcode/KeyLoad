@@ -895,7 +895,8 @@
     "evidence": [
       "docs/ADR/ADR-078-native-full-text-projection.md",
       "docs/Features/Search/NativeFullTextProjection.md",
-      "docs/implementation/native-full-text-development-2026-10-03.json"
+      "docs/implementation/native-full-text-development-2026-10-03.json",
+      "docs/implementation/native-async-search-development-2026-10-03.json"
     ],
     "qualification": {
       "source": "native_provider_generation_join_reviewed_and_development_verified",
@@ -907,7 +908,19 @@
         "fullFormatter": "passed",
         "governance": "passed"
       },
-      "remaining": "exact-source Linux full-suite, package and Docker RF3 SDK/MCP gates; incremental replay/freshness and measured resource gates; no acceleration claim"
+      "remaining": "exact-source Linux full-suite, package and Docker RF3 SDK/MCP gates; incremental replay/freshness and measured resource gates; no acceleration claim",
+      "awaitedExecutionDevelopment": {
+        "receipt": "docs/implementation/native-async-search-development-2026-10-03.json",
+        "normalUnit": 2866,
+        "scalarUnit": 2866,
+        "identicalUnitTestIdentities": true,
+        "recovery": 228,
+        "newNativeAsyncUnit": 3,
+        "nativeTextProcessCuts": 10,
+        "unchangedSourceAndRuntime": true,
+        "actualPublicRf3": "pending",
+        "exactDeliveredSourceLinux": "pending"
+      }
     }
   },
   "KL-030": {
@@ -1112,16 +1125,18 @@
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeFormatUpgrade.cs",
       "scripts/Features/StorageRecovery/build-native5-probe.sh",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochUpgradeProcessRecoveryTests.cs",
-      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochPriorAcceptanceTests.cs"
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochPriorAcceptanceTests.cs",
+      "docs/implementation/native-async-search-development-2026-10-03.json"
     ],
     "decision": "docs/ADR/ADR-077-offline-native-data-epoch.md",
-    "sourceStage": "reviewed_native5_to_separate_native6_source_and_Aspire_14_case_local_process_recovery_passed",
+    "sourceStage": "reviewed_truthful_7784_prior_binary_binding_all14_epoch_cases_and_full_Aspire_local_recovery228_passed",
     "runtimeQualified": false,
     "remaining": [
-      "homogeneous_Docker_Aspire_RF3_cold_upgrade_SDK_official_MCP",
-      "complete_exact_source_Linux_original_qualification"
+      "homogeneous_Docker_Aspire_RF3_cold_upgrade_fixture_and_SDK_official_MCP_qualification",
+      "complete_exact_delivered_source_Linux_original_qualification"
     ],
-    "developmentEvidence": "docs/implementation/epoch-upgrade-development-2026-10-03.json"
+    "developmentEvidence": "docs/implementation/epoch-upgrade-development-2026-10-03.json",
+    "fullSuiteDevelopmentEvidence": "docs/implementation/native-async-search-development-2026-10-03.json"
   },
   "KL-044": {
     "title": "Release gate і operational handbook",

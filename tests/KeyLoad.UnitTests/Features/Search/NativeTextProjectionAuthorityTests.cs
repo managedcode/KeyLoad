@@ -30,33 +30,36 @@ internal sealed class NativeTextProjectionAuthorityTests
         var request = new SearchRequest(database.Partition, Collection, TextPath, "needle", Limit: 10);
         var token = TestContext.Current!.Execution.CancellationToken;
 
-        var first = await Assert.That(search.Search(ReaderId, request, token)).HasSingleItem();
+        var first = await Assert.That(await search.SearchAsync(ReaderId, request, token)).HasSingleItem();
         await Assert.That(first.Document.Reference.Id).IsEqualTo(VisibleId);
         await Assert.That(first.Document.Json).IsEqualTo("{\"other\":\"visible\"}");
         var firstGeneration = CurrentGeneration(database);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => search.Search(DeniedId, request, token)).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
+            search.Search(DeniedId, request, token)).Code)
             .IsEqualTo(ErrorCode.PermissionDenied);
 
         PatchVisibleSecret(database);
-        var updated = await Assert.That(search.Search(ReaderId, request with { Text = "changed" }, token)).HasSingleItem();
+        var updated = await Assert.That(await search.SearchAsync(ReaderId,
+            request with { Text = "changed" }, token)).HasSingleItem();
         await Assert.That(updated.Document.Reference.Id).IsEqualTo(VisibleId);
         await Assert.That(updated.Document.Json).IsEqualTo("{\"other\":\"visible\"}");
         var updatedGeneration = CurrentGeneration(database);
         await Assert.That(updatedGeneration).IsNotEqualTo(firstGeneration);
 
         database.Commit(new DeleteDocument(Collection, VisibleId, 2));
-        var afterDelete = search.Search(ReaderId, request with { Text = "changed" }, token);
+        var afterDelete = await search.SearchAsync(ReaderId, request with { Text = "changed" }, token);
         await Assert.That(afterDelete).IsEmpty();
         var deletedGeneration = CurrentGeneration(database);
         await Assert.That(deletedGeneration).IsNotEqualTo(updatedGeneration);
 
         AdvanceReaderPolicyEpoch(database);
-        _ = search.Search(ReaderId, request with { Text = "changed" }, token);
+        _ = await search.SearchAsync(ReaderId, request with { Text = "changed" }, token);
         var policyGeneration = CurrentGeneration(database);
         await Assert.That(policyGeneration).IsNotEqualTo(deletedGeneration);
 
         RevokeReader(database);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => search.Search(ReaderId, request with { Text = "changed" }, token)).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
+            search.Search(ReaderId, request with { Text = "changed" }, token)).Code)
             .IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(database.Store.Position).IsGreaterThan(0L);
     }

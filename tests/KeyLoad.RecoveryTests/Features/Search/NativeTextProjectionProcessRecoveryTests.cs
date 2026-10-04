@@ -204,9 +204,9 @@ internal static class NativeTextProjectionRecoveryAssertions
             await AssertCanonicalCutAsync(store, receipt);
             var database = new DatabaseEngine(store, new AuthorizationPolicy());
             var request = new SearchRequest(receipt.Partition, receipt.Collection, "/text", receipt.Query, Limit: 10);
-            var oracle = new SearchEngine(database).Search(CrashFixtureValues.Principal, request, cancellationToken);
+            var oracle = await new SearchEngine(database).SearchAsync(CrashFixtureValues.Principal, request, cancellationToken);
             using var projection = new NativeTextProjection(indexDirectory, database.Limits, store.Identity.NodeId);
-            var actual = new SearchEngine(database, projection).Search(CrashFixtureValues.Principal, request, cancellationToken);
+            var actual = await new SearchEngine(database, projection).SearchAsync(CrashFixtureValues.Principal, request, cancellationToken);
 
             await AssertParityAsync(oracle, actual, receipt.ExpectedIds);
             await AssertCanonicalCutAsync(store, receipt);

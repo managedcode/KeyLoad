@@ -28,11 +28,11 @@ internal sealed class NativeTextProjectionLeaseTests
             await Assert.That(saturated.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         }
 
-        _ = new SearchEngine(database.Database, projection).Search("root",
+        _ = await new SearchEngine(database.Database, projection).SearchAsync("root",
             new(database.Partition, Collection, TextPath, "needle"), TestContext.Current!.Execution.CancellationToken);
         var cancelled = await CancelActiveVerificationAsync(database, projection);
         await Assert.That(cancelled.CancellationToken.IsCancellationRequested).IsTrue();
-        var result = await Assert.That(new SearchEngine(database.Database, projection).Search("root",
+        var result = await Assert.That(await new SearchEngine(database.Database, projection).SearchAsync("root",
             new(database.Partition, Collection, TextPath, "needle"),
             TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
         await Assert.That(result.Document.Reference.Id).IsEqualTo("one");
@@ -57,7 +57,7 @@ internal sealed class NativeTextProjectionLeaseTests
         await Assert.That(recordFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(tokenFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(database.Store.Position).IsEqualTo(position);
-        var recovered = new SearchEngine(database.Database, projection).Search("root", request,
+        var recovered = await new SearchEngine(database.Database, projection).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(recovered.Length).IsEqualTo(2);
         await Assert.That(recovered.Select(row => row.Document.Reference.Id).Order(StringComparer.Ordinal))

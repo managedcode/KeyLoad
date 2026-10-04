@@ -13,6 +13,7 @@ public sealed class SearchEngine(DatabaseEngine database, ITextProjection? textP
     private const string InvalidVector = "A finite vector and a matching typed vector space are required.";
     private const string MissingSelectedDocument = "A selected search document is unavailable.";
     private const string ResultExceeded = "The search result byte budget is exceeded.";
+    private const string UnsafeSynchronousSearch = "Await SearchAsync when native text search runs on a scheduler or synchronization context.";
     private const int MaxLimit = 1_000;
     private const int MaxTextBytes = 4_096;
     private const int MaxVectorDimension = 4_096;
@@ -25,9 +26,34 @@ public sealed class SearchEngine(DatabaseEngine database, ITextProjection? textP
     public RankedDocument[] Search(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
+        if (request.Text is not null && textProjection is not null
+            && (TaskScheduler.Current != TaskScheduler.Default || SynchronizationContext.Current is not null))
+        {
+            throw new InvalidOperationException(UnsafeSynchronousSearch);
+        }
         var budget = new ReadExecutionBudget(database.Limits, cancellationToken: cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
+        return SearchCore(principalId, request, budget);
+    }
+
+    /// <summary>Awaits exact search and native projection settlement without blocking the caller's execution context.</summary>
+    /// <param name="principalId">Persisted principal identity.</param>
+    /// <param name="request">Search fields, query and result limit.</param>
+    /// <param name="cancellationToken">Caller cancellation for admission and the complete worker.</param>
+    /// <returns>Ranked and authorized documents after complete lease settlement.</returns>
+    public async Task<RankedDocument[]> SearchAsync(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var budget = new ReadExecutionBudget(database.Limits, cancellationToken: cancellationToken);
+        budget.Check();
+        using var reservation = database.AdmitQuery(cancellationToken);
+        return await Task.Run(() => SearchCore(principalId, request, budget), cancellationToken).ConfigureAwait(false);
+    }
+
+    private RankedDocument[] SearchCore(string principalId, SearchRequest request, ReadExecutionBudget budget)
+    {
+        budget.Check();
         Validate(request);
         var similarity = request.Vector is { } vector
             ? PreparedSimilarity.Create(vector.AsMemory(), request.Space!.Metric) : null;
@@ -65,7 +91,7 @@ public sealed class SearchEngine(DatabaseEngine database, ITextProjection? textP
             return ranker.Rank();
         }
 
-        var lease = textProjection?.Acquire(CreateTextProjectionScope(principal, resource, request), budget);
+        var lease = textProjection?.Acquire(TextProjectionLifecycle.CreateScope(database, principal, resource, request), budget);
         Exception? primaryFailure = null;
         try
         {
@@ -89,32 +115,7 @@ public sealed class SearchEngine(DatabaseEngine database, ITextProjection? textP
         }
         finally
         {
-            DisposeTextProjection(lease, primaryFailure);
-        }
-    }
-
-    private TextProjectionScope CreateTextProjectionScope(PrincipalRecord principal, ResourceDefinition resource,
-        SearchRequest request)
-    {
-        var identity = database.Store.Identity;
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
-            database.Store.Position, request.Partition, request.Collection, request.TextField!, principal.Id,
-            principal.PolicyEpoch, resource.SchemaVersion);
-    }
-
-    private static void DisposeTextProjection(ITextProjectionLease? lease, Exception? primaryFailure)
-    {
-        if (lease is null)
-        {
-            return;
-        }
-        try
-        {
-            lease.Dispose();
-        }
-        catch (Exception cleanupFailure) when (primaryFailure is not null)
-        {
-            throw new AggregateException(primaryFailure, cleanupFailure);
+            TextProjectionLifecycle.Dispose(lease, primaryFailure);
         }
     }
 

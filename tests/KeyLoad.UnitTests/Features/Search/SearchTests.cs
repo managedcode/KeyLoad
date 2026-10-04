@@ -37,13 +37,13 @@ internal sealed class SearchTests
             new PutVector(Orders, DocumentA, EmbeddingPath, [1, 0], Space, VectorVersion),
             new PutVector(Orders, DocumentB, EmbeddingPath, [0, 1], Space, VectorVersion));
         var search = new SearchEngine(database.Database);
-        var result = search.Search(RootIdentity, new(database.Partition, Orders, TextPath, ClusterTerm, EmbeddingPath, [1, 0], Space),
+        var result = await search.SearchAsync(RootIdentity, new(database.Partition, Orders, TextPath, ClusterTerm, EmbeddingPath, [1, 0], Space),
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result[0].Document.Reference.Id).IsEqualTo(DocumentA);
         await Assert.That(result[0].Score).IsEqualTo(2.0 / FusionConstant).Within(TwelveDecimalPlacesTolerance);
 
         database.Commit(new PatchDocument(Orders, DocumentA, [new(TextPath, PatchKind.Set, ChangedText)], VectorVersion));
-        var vectors = search.Search(RootIdentity, new(database.Partition, Orders, VectorField: EmbeddingPath, Vector: [1, 0], Space: Space),
+        var vectors = await search.SearchAsync(RootIdentity, new(database.Partition, Orders, VectorField: EmbeddingPath, Vector: [1, 0], Space: Space),
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(System.Linq.Enumerable.Single(vectors).Document.Reference.Id).IsEqualTo(DocumentB);
     }
@@ -61,7 +61,7 @@ internal sealed class SearchTests
             new PutVector(Orders, LargeDocument, EmbeddingPath, [.. values], space, VectorVersion),
             new AppendSamples(Metrics, LargeSeriesId, [new(SampleId, TimeProvider.System.GetUtcNow(), LargeFiniteSampleValue)]));
 
-        var match = await Assert.That(new SearchEngine(database.Database).Search(RootIdentity, new(database.Partition, Orders,
+        var match = await Assert.That(await new SearchEngine(database.Database).SearchAsync(RootIdentity, new(database.Partition, Orders,
             VectorField: EmbeddingPath, Vector: [.. values], Space: space), TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
         await Assert.That(match.Document.Reference.Id).IsEqualTo(LargeDocument);
         await Assert.That(SearchEngine.Similarity(values, values, DistanceMetric.Cosine)).IsEqualTo(1).Within(TwelveDecimalPlacesTolerance);

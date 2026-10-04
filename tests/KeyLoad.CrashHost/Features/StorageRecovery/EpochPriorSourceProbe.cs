@@ -8,7 +8,7 @@ namespace KeyLoad.CrashHost;
 internal static class EpochPriorSourceProbe
 {
     internal const string Mode = "epoch5-native-probe";
-    internal const string SourceRevision = "2532f781fec8f2546a033c396a7dbce0e9b4b781";
+    internal const string SourceRevision = "7784b6b46b98ce994dd98070dc1f58fe4e506b91";
     internal const string CreateOperation = "create";
     internal const string InspectOperation = "inspect";
     internal const string VerifySnapshotOperation = "verifySnapshot";

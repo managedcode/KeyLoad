@@ -55,8 +55,8 @@ internal static class NativeTextCrashScenario
         var search = new SearchEngine(database, projection);
         if (replacement)
         {
-            _ = search.Search(CrashFixtureValues.Principal,
-                new(partition, CrashFixtureValues.Orders, TextPath, InitialQuery));
+            _ = await search.SearchAsync(CrashFixtureValues.Principal,
+                new(partition, CrashFixtureValues.Orders, TextPath, InitialQuery)).ConfigureAwait(false);
             ReplaceFirstDocument(database, partition);
         }
 
@@ -66,8 +66,8 @@ internal static class NativeTextCrashScenario
             CanonicalDocumentIds);
         await File.WriteAllBytesAsync(receiptPath, NativeSerialization.Serialize(receipt));
         boundary.Armed = true;
-        _ = search.Search(CrashFixtureValues.Principal,
-            new(partition, CrashFixtureValues.Orders, TextPath, query));
+        _ = await search.SearchAsync(CrashFixtureValues.Principal,
+            new(partition, CrashFixtureValues.Orders, TextPath, query)).ConfigureAwait(false);
         if (!boundary.Observed)
         {
             throw new InvalidOperationException(ChangedStageMessage);

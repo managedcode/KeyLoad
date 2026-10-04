@@ -8867,8 +8867,11 @@
           "Docker_Aspire_RF3_SDK_official_MCP",
           "exact_source_Linux_CI_original_artifacts"
         ],
-        "state": "source_reviewed_Release_and_14_case_Aspire_local_process_gate_passed_Linux_RF3_pending",
-        "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification"
+        "state": "source_reviewed_prior_binary_and_all14_epoch_cases_with_full_Aspire_recovery228_passed_exact_Linux_and_homogeneous_cold_RF3_pending",
+        "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification",
+        "developmentEvidence": [
+          "docs/implementation/native-async-search-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-EPOCH-JOIN",
@@ -8896,7 +8899,8 @@
           "KL-043"
         ],
         "dependencies": [
-          "TASK-EPOCH-CONTRACT"
+          "TASK-EPOCH-CONTRACT",
+          "TASK-EPOCH-PROBE-BIND"
         ],
         "startCondition": "accepted_frozen_contract_and_disjoint_exact_ownership",
         "artifacts": [
@@ -8913,8 +8917,11 @@
           "Docker_Aspire_RF3_SDK_official_MCP",
           "exact_source_Linux_CI_original_artifacts"
         ],
-        "state": "prior_binary_refusal_and_five_cut_process_development_evidence_passed_full_exact_source_Linux_RF3_pending",
-        "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification"
+        "state": "source_reviewed_prior_binary_and_all14_epoch_cases_with_full_Aspire_recovery228_passed_exact_Linux_and_homogeneous_cold_RF3_pending",
+        "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification",
+        "developmentEvidence": [
+          "docs/implementation/native-async-search-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-FTS-QUERY",
@@ -10018,14 +10025,14 @@
           "actual_Aspire_unit_scalar_and_Docker_RF3_SDK_official_MCP",
           "exact_source_Linux_original_reports"
         ],
-        "state": "contract_frozen_waiting_explicit_write_release",
+        "state": "contract_frozen_explicit_write_release_20261003",
         "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening"
       },
       {
         "id": "TASK-FTS-ASYNC-INTEGRATE",
         "owner": "root",
         "modelTier": "strong_planning_integration_review",
-        "permissions": "Query_SearchEngine_and_Orleans_read_dispatch_only",
+        "permissions": "Query_SearchEngine_and_cohesive_Search_helper_Orleans_read_dispatch_existing_native_read_test_adapter_CrashHost_native_text_async_calls_RelationalLinkage_AnalyticalAdmission_and_native_process_recovery_callers_only",
         "contracts": [
           "docs/ADR/ADR-081-awaited-native-search-execution.md"
         ],
@@ -10056,8 +10063,11 @@
           "actual_Aspire_unit_scalar_and_Docker_RF3_SDK_official_MCP",
           "exact_source_Linux_original_reports"
         ],
-        "state": "contract_frozen_waiting_explicit_write_release",
-        "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening"
+        "state": "source_reviewed_full_Release_formatter_and_Aspire_normal_scalar2866_recovery228_development_passed_exact_Linux_and_public_RF3_pending",
+        "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening",
+        "developmentEvidence": [
+          "docs/implementation/native-async-search-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-FTS-ASYNC-ORACLE",
@@ -10094,8 +10104,11 @@
           "actual_Aspire_unit_scalar_and_Docker_RF3_SDK_official_MCP",
           "exact_source_Linux_original_reports"
         ],
-        "state": "contract_frozen_waiting_explicit_write_release",
-        "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening"
+        "state": "source_reviewed_full_Release_formatter_and_Aspire_normal_scalar2866_recovery228_development_passed_exact_Linux_and_public_RF3_pending",
+        "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening",
+        "developmentEvidence": [
+          "docs/implementation/native-async-search-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-RF3-ORACLE-REPAIR",
@@ -10157,7 +10170,9 @@
         "dependencies": [
           "TASK-FTS-ASYNC-INTEGRATE",
           "TASK-FTS-ASYNC-ORACLE",
-          "TASK-RF3-ORACLE-REPAIR"
+          "TASK-RF3-ORACLE-REPAIR",
+          "TASK-FTS-ASYNC-CALLERS-QUERY",
+          "TASK-FTS-ASYNC-CALLERS-NATIVE"
         ],
         "startCondition": "root_frozen_contract_and_explicit_source_freeze_release",
         "artifacts": [
@@ -10170,8 +10185,11 @@
           "actual_Aspire_unit_scalar_and_Docker_RF3_SDK_official_MCP",
           "exact_source_Linux_original_reports"
         ],
-        "state": "contract_frozen_waiting_explicit_write_release",
-        "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening"
+        "state": "source_reviewed_full_Release_formatter_and_Aspire_normal_scalar2866_recovery228_development_passed_exact_Linux_and_public_RF3_pending",
+        "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening",
+        "developmentEvidence": [
+          "docs/implementation/native-async-search-development-2026-10-03.json"
+        ]
       },
       {
         "id": "TASK-CHUNK-PROVENANCE-ORACLE",
@@ -10209,6 +10227,151 @@
         "developmentEvidence": [
           "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
         ]
+      },
+      {
+        "id": "TASK-EPOCH-PROBE-BIND",
+        "owner": "root_with_query_wave_luna_high",
+        "modelTier": "strong_root_review_cost_efficient_bounded_revision_fix",
+        "permissions": "EpochPriorSourceProbe_source_revision_only_worker_root_CI_step_gate_original_artifacts_and_docs",
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "requirements": [
+          "REQ-STORAGE-021",
+          "REQ-STORAGE-022",
+          "REQ-STORAGE-023",
+          "REQ-STORAGE-024"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-001",
+          "AC-EPOCH-002",
+          "AC-EPOCH-003",
+          "AC-EPOCH-004",
+          "AC-EPOCH-005",
+          "AC-EPOCH-006"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "dependencies": [
+          "TASK-EPOCH-CONTRACT"
+        ],
+        "startCondition": "existing_ADR077_exact_reachable_revision_tree_and_original_Linux_failure_diagnosis_root_write_release",
+        "artifacts": [
+          "actual_7784b6b_source_export_probe_with_bound_driver_receipt",
+          "preserved_historical_2532_receipt_without_relabeling",
+          "recovery_requires_successful_probe_preparation_and_uploads_original_probe"
+        ],
+        "verification": [
+          "root_minimal_diff_review",
+          "strict_full_Release_build",
+          "formatter_governance",
+          "actual_full_Aspire_process_recovery",
+          "exact_source_Linux_original_reports"
+        ],
+        "state": "source_reviewed_actual_75_file_two_driver_prior_probe_verified_and_full_Aspire_recovery228_passed_exact_Linux_pending",
+        "joinCondition": "13_original_upgrade_failures_and_all_required_recovery_cases_pass_with_truthful_immutable_prior_source_binding",
+        "developmentEvidence": [
+          "docs/implementation/native-async-search-development-2026-10-03.json"
+        ]
+      },
+      {
+        "id": "TASK-FTS-ASYNC-CALLERS-QUERY",
+        "owner": "cluster_wave_luna_high",
+        "modelTier": "cost_efficient_bounded_caller_adaptation",
+        "permissions": [
+          "tests/KeyLoad.UnitTests/Features/Search/SearchTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/SearchStreamingTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/SearchResourceTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/SearchReadBudgetTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/VectorMetricGoldenTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/ImmutableVectorInputTests.cs"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-081-awaited-native-search-execution.md"
+        ],
+        "requirements": [
+          "REQ-FTS-003",
+          "REQ-FTS-005",
+          "REQ-FTS-007"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-003",
+          "AC-FTS-005",
+          "AC-FTS-007"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-ASYNC-INTEGRATE"
+        ],
+        "startCondition": "strict_build_CA1849_actual_diagnostics_root_frozen_unchanged_request_result_error_budget_and_thread_affine_measurement_contract",
+        "artifacts": [
+          "awaited_existing_result_oracles_without_diagnostic_suppression",
+          "preserved_sync_API_assertions_and_actual_thread_allocation_control"
+        ],
+        "verification": [
+          "root_complete_diff_review",
+          "strict_full_Release_build",
+          "formatter_governance",
+          "actual_full_Aspire_unit_scalar_process_recovery",
+          "exact_source_Linux_RF3_original_reports"
+        ],
+        "state": "source_reviewed_full_Release_formatter_and_Aspire_normal_scalar2866_recovery228_development_passed_exact_Linux_and_public_RF3_pending",
+        "joinCondition": "all_existing_correctness_fault_scope_budget_and_allocation_assertions_preserved_and_actual_required_gates_pass",
+        "developmentEvidence": [
+          "docs/implementation/native-async-search-development-2026-10-03.json"
+        ]
+      },
+      {
+        "id": "TASK-FTS-ASYNC-CALLERS-NATIVE",
+        "owner": "lifecycle_wave_luna_high",
+        "modelTier": "cost_efficient_bounded_caller_adaptation",
+        "permissions": [
+          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionAuthorityTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionScopeTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionRestartTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionBoundsTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionLeaseTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/NativeTextProjectionParityTests.cs"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-081-awaited-native-search-execution.md"
+        ],
+        "requirements": [
+          "REQ-FTS-003",
+          "REQ-FTS-005",
+          "REQ-FTS-007"
+        ],
+        "acceptanceIds": [
+          "AC-FTS-003",
+          "AC-FTS-005",
+          "AC-FTS-007"
+        ],
+        "backlog": [
+          "KL-029"
+        ],
+        "dependencies": [
+          "TASK-FTS-ASYNC-INTEGRATE"
+        ],
+        "startCondition": "strict_build_CA1849_actual_diagnostics_root_frozen_unchanged_request_result_error_budget_and_thread_affine_measurement_contract",
+        "artifacts": [
+          "awaited_existing_result_oracles_without_diagnostic_suppression",
+          "preserved_sync_API_assertions_and_actual_thread_allocation_control"
+        ],
+        "verification": [
+          "root_complete_diff_review",
+          "strict_full_Release_build",
+          "formatter_governance",
+          "actual_full_Aspire_unit_scalar_process_recovery",
+          "exact_source_Linux_RF3_original_reports"
+        ],
+        "state": "source_reviewed_full_Release_formatter_and_Aspire_normal_scalar2866_recovery228_development_passed_exact_Linux_and_public_RF3_pending",
+        "joinCondition": "all_existing_correctness_fault_scope_budget_and_allocation_assertions_preserved_and_actual_required_gates_pass",
+        "developmentEvidence": [
+          "docs/implementation/native-async-search-development-2026-10-03.json"
+        ]
       }
     ],
     "qualificationRule": "Neither presence of source nor a local development result closes a full task. Preserve exact-source Linux fault/endurance and publication gates.",
@@ -10218,7 +10381,8 @@
       "docs/implementation/epoch-upgrade-development-2026-10-03.json",
       "docs/implementation/native-full-text-development-2026-10-03.json",
       "docs/implementation/full-unit-repair-development-2026-10-03.json",
-      "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+      "docs/implementation/sample-chunk-codec-development-2026-10-03.json",
+      "docs/implementation/native-async-search-development-2026-10-03.json"
     ]
   }
 }

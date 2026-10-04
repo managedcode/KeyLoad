@@ -23,7 +23,7 @@ internal sealed class NativeTextProjectionBoundsTests
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
-        var indexRoot = CreateNativeGeneration(database);
+        var indexRoot = await CreateNativeGenerationAsync(database);
         var generation = FindGeneration(indexRoot);
         var native = Path.Combine(generation, NativeTextProtocol.NativeDirectory);
         var inventory = NativeTextFileIO.MeasureRegularFiles(generation, NativeTextProtocol.MaximumFiles,
@@ -53,7 +53,7 @@ internal sealed class NativeTextProjectionBoundsTests
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
-        var indexRoot = CreateNativeGeneration(database);
+        var indexRoot = await CreateNativeGenerationAsync(database);
         var generation = FindGeneration(indexRoot);
         var native = Path.Combine(generation, NativeTextProtocol.NativeDirectory);
         var inventory = NativeTextFileIO.MeasureRegularFiles(generation, NativeTextProtocol.MaximumFiles,
@@ -82,7 +82,7 @@ internal sealed class NativeTextProjectionBoundsTests
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
-        var generation = FindGeneration(CreateNativeGeneration(database));
+        var generation = FindGeneration(await CreateNativeGenerationAsync(database));
         var path = Path.Combine(generation, NativeTextProtocol.ManifestFile);
         var bytes = await File.ReadAllBytesAsync(path, TestContext.Current!.Execution.CancellationToken);
         var manifest = NativeTextEnvelopeCodec.Decode<NativeTextManifest>(bytes);
@@ -109,7 +109,7 @@ internal sealed class NativeTextProjectionBoundsTests
         using var projection = new NativeTextProjection(Path.Combine(database.Directory, "native-text"),
             database.Database.Limits, database.Store.Identity.NodeId);
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query, Limit: 10);
-        _ = new SearchEngine(database.Database, projection).Search("root", request);
+        _ = await new SearchEngine(database.Database, projection).SearchAsync("root", request);
         var scope = CaptureScope(database);
         var documents = ReadCanonicalDocuments(database);
         VerifyPostingWork(projection, scope, documents, ExactPostingBytes);
@@ -117,7 +117,7 @@ internal sealed class NativeTextProjectionBoundsTests
             VerifyPostingWork(projection, scope, documents, ExactPostingBytes - 1));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        var following = new SearchEngine(database.Database, projection).Search("root", request,
+        var following = await new SearchEngine(database.Database, projection).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(following.Length).IsEqualTo(2);
     }
@@ -149,11 +149,11 @@ internal sealed class NativeTextProjectionBoundsTests
         await Assert.That(database.Store.Position).IsGreaterThan(0L);
     }
 
-    private static string CreateNativeGeneration(TestDatabase database)
+    private static async Task<string> CreateNativeGenerationAsync(TestDatabase database)
     {
         var root = Path.Combine(database.Directory, "native-text");
         using var projection = new NativeTextProjection(root, database.Database.Limits, database.Store.Identity.NodeId);
-        _ = new SearchEngine(database.Database, projection).Search("root",
+        _ = await new SearchEngine(database.Database, projection).SearchAsync("root",
             new(database.Partition, Collection, TextPath, Query));
         return root;
     }

@@ -76,7 +76,7 @@ internal sealed class VectorMetricGoldenTests
             new PutVector(Collection, MiddleId, VectorField, [.. middle], space, VectorVersion),
             new PutVector(Collection, LastId, VectorField, [.. last], space, VectorVersion));
 
-        var results = new SearchEngine(database.Database).Search(Principal,
+        var results = await new SearchEngine(database.Database).SearchAsync(Principal,
             new(database.Partition, Collection, VectorField: VectorField, Vector: [.. query], Space: space),
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(results.Select(result => result.Document.Reference.Id))

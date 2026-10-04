@@ -71,10 +71,10 @@ internal static class NativePublicReadFixture
         return codec.Verify(codec.CreateRead(Guid.NewGuid(), principal, kind, payload));
     }
 
-    internal static object ExecuteQuery(TestDatabase database, DecodedGrainRequest request)
+    internal static async Task<object> ExecuteQueryAsync(TestDatabase database, DecodedGrainRequest request)
     {
         var principal = GrainRequestAuthority.Reload(database.Database, request.Envelope.PrincipalId!, TimeProvider.System);
-        return new GrainQueryReadCapabilities(new QueryEngine(database.Database), new SearchEngine(database.Database),
-            TimeProvider.System).Execute(request.Envelope.ReadKind!.Value, principal.Id, request.Payload, CancellationToken.None);
+        return await new GrainQueryReadCapabilities(new QueryEngine(database.Database), new SearchEngine(database.Database),
+            TimeProvider.System).ExecuteAsync(request.Envelope.ReadKind!.Value, principal.Id, request.Payload, CancellationToken.None).ConfigureAwait(false);
     }
 }

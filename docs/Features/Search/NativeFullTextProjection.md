@@ -27,6 +27,16 @@ TASK-FTS-QUERY / NATIVE / TEST depend on root frozen contracts and the completed
 epoch source build. Root owns integration, validation, receipts and commits.
 TASK-FTS-ASYNC-CONTRACT/INTEGRATE/ORACLE/JOIN map REQ-FTS-007 to AC-FTS-007
 under [ADR-081](../../ADR/ADR-081-awaited-native-search-execution.md).
+Its concrete oracles are `NativeTextAsyncProjectionTests` (full canonical
+publish/reuse/new-cut result parity), `NativeTextAsyncAdmissionTests` (pre-cancel,
+real native posting pause, saturation and joined cancellation cleanup), and
+`NativeTextAsyncRf3Tests` (actual SDK/official MCP freshness, persisted policy
+epochs, credential revocation and healthy three-node status). Their source is
+reviewed. The [awaited-execution development receipt](../../implementation/native-async-search-development-2026-10-03.json)
+records normal/scalar2866 tests each with identical identities, recovery228 and
+unchanged source/runtime inventories. All three new native unit oracles and10
+native-text process cuts pass. Genuine public RF3 liveness and exact delivered-source
+Linux outcomes remain separately required; AC-FTS-007 is not fully qualified.
 TASK-RF3-ORACLE-REPAIR corrects independently diagnosed catalog, persisted write
 grant, metadata-pointer and policy-epoch fixtures; it cannot weaken authorization
 or qualify the scheduler repair without genuine RF3 execution.

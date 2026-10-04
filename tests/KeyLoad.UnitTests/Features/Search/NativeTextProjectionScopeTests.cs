@@ -24,9 +24,9 @@ internal sealed class NativeTextProjectionScopeTests
         using var projection = new NativeTextProjection(Path.Combine(database.Directory, "native-text"),
             database.Database.Limits, database.Store.Identity.NodeId);
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query);
-        var oracle = new SearchEngine(database.Database).Search("root", request);
+        var oracle = await new SearchEngine(database.Database).SearchAsync("root", request);
         var search = new SearchEngine(database.Database, projection);
-        var canonical = search.Search("root", request, TestContext.Current!.Execution.CancellationToken);
+        var canonical = await search.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken);
         var canonicalGeneration = CurrentGeneration(database);
         var scope = CaptureScope(database);
         var alteredSchemaScope = scope with { SchemaVersion = checked(scope.SchemaVersion + 1) };
@@ -38,7 +38,7 @@ internal sealed class NativeTextProjectionScopeTests
             lease.VerifyCandidates([Query], documents.Select(document => document.Reference).ToArray(), budget);
         }
         var mismatchedGeneration = CurrentGeneration(database);
-        var rebuilt = search.Search("root", request, TestContext.Current!.Execution.CancellationToken);
+        var rebuilt = await search.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(canonicalGeneration).IsNotEqualTo(mismatchedGeneration);
         await Assert.That(CurrentGeneration(database)).IsNotEqualTo(mismatchedGeneration);

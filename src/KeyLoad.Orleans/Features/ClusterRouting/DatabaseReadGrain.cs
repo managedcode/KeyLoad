@@ -111,7 +111,7 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
 
         if (kind is not (GrainReadKind.Backup or GrainReadKind.Admission or GrainReadKind.NodeStatus))
         {
-            return query.Execute(kind, principal.Id, request.Payload, cancellationToken);
+            return await query.ExecuteAsync(kind, principal.Id, request.Payload, cancellationToken).ConfigureAwait(true);
         }
 
         GrainNativePayload.RequireNoDto(request.Payload);

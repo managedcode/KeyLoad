@@ -27,19 +27,19 @@ internal sealed class ImmutableVectorInputTests
         db.Commit(new PutVector(Collection, Rival, VectorField, [0.5f, 0], Space, 1));
         source[0] = 0;
         var search = new SearchEngine(db.Database);
-        var invalid = Assert.ThrowsExactly<KeyLoadException>(() => search.Search(Principal,
+        var invalid = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => search.SearchAsync(Principal,
             new(db.Partition, Collection, VectorField: VectorField,
-                Vector: default(ImmutableArray<float>), Space: Space)));
+                Vector: default(ImmutableArray<float>), Space: Space))))!;
         await Assert.That(invalid.Code).IsEqualTo(ErrorCode.Validation);
 
         var querySource = new float[] { 1, 0 };
         var query = ImmutableArray.CreateRange(querySource);
         querySource[0] = 0;
-        var ranked = await Assert.That(search.Search(Principal,
+        var ranked = await Assert.That(await search.SearchAsync(Principal,
             new(db.Partition, Collection, VectorField: VectorField, Vector: query, Space: Space, Limit: 1))).HasSingleItem();
         await Assert.That(ranked.Document.Reference.Id).IsEqualTo(Hit);
         await Assert.That(ranked.Score).IsEqualTo(1.0 / 61);
-        await Assert.That(search.Search(Principal,
+        await Assert.That(await search.SearchAsync(Principal,
             new(db.Partition, Collection, TextField, QueryTerm))).HasSingleItem();
     }
 }

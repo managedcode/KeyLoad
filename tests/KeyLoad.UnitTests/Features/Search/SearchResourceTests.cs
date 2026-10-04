@@ -42,8 +42,8 @@ internal sealed class SearchResourceTests
         var token = TestContext.Current!.Execution.CancellationToken;
         for (var index = 0; index < MeasurementPairs; index++)
         {
-            search.Search("root", small, token);
-            search.Search("root", large, token);
+            Measure(small, out _);
+            Measure(large, out _);
         }
 
         long minimumSmall = long.MaxValue, minimumLarge = long.MaxValue;
@@ -111,7 +111,7 @@ internal sealed class SearchResourceTests
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, HitId, "{\"text\":\"needle\"}"));
         var request = new SearchRequest(db.Partition, Collection, TextPath, SearchTerm);
-        var expected = new SearchEngine(db.Database).Search("root", request);
+        var expected = await new SearchEngine(db.Database).SearchAsync("root", request);
         var exactBytes = JsonDefaults.Serialize(expected).Length;
         var exact = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization,
             new() { MaxBatchBytes = exactBytes }));
@@ -119,15 +119,15 @@ internal sealed class SearchResourceTests
             new() { MaxBatchBytes = exactBytes - 1 }));
         var position = db.Store.Position;
 
-        var accepted = exact.Search("root", request, TestContext.Current!.Execution.CancellationToken);
-        var rejected = Assert.ThrowsExactly<KeyLoadException>(() => shortBudget.Search("root", request,
-            TestContext.Current!.Execution.CancellationToken));
+        var accepted = await exact.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken);
+        var rejected = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => shortBudget.SearchAsync("root", request,
+            TestContext.Current!.Execution.CancellationToken)))!;
 
         await Assert.That(JsonDefaults.Serialize(accepted))
             .IsEquivalentTo(JsonDefaults.Serialize(expected), CollectionOrdering.Matching);
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(db.Store.Position).IsEqualTo(position);
-        await Assert.That(exact.Search("root", request, TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
+        await Assert.That(await exact.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
     }
 
     [Test]
@@ -140,12 +140,12 @@ internal sealed class SearchResourceTests
         var search = new SearchEngine(db.Database);
         var position = db.Store.Position;
 
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => search.Search("root",
-            new(db.Partition, Collection, TextPath, SearchTerm), TestContext.Current!.Execution.CancellationToken));
+        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => search.SearchAsync("root",
+            new(db.Partition, Collection, TextPath, SearchTerm), TestContext.Current!.Execution.CancellationToken)))!;
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(db.Store.Position).IsEqualTo(position);
-        var healthy = await Assert.That(search.Search("root", new(db.Partition, Collection,
+        var healthy = await Assert.That(await search.SearchAsync("root", new(db.Partition, Collection,
             VectorField: VectorPath, Vector: [1, 0], Space: Space),
             TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
         await Assert.That(healthy.Document.Reference.Id).IsEqualTo(HitId);
