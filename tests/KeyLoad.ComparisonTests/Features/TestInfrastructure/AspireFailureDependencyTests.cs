@@ -7,11 +7,11 @@ namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
 internal sealed class AspireFailureDependencyTests
 {
     [Test]
-    [Arguments(KnownResourceStates.FailedToStart, null)]
-    [Arguments(KnownResourceStates.RuntimeUnhealthy, null)]
-    [Arguments(KnownResourceStates.Finished, 0)]
-    [Arguments(KnownResourceStates.Exited, 0)]
-    [Arguments(KnownResourceStates.Running, 7)]
+    [Arguments(nameof(KnownResourceStates.FailedToStart), null)]
+    [Arguments(nameof(KnownResourceStates.RuntimeUnhealthy), null)]
+    [Arguments(nameof(KnownResourceStates.Finished), 0)]
+    [Arguments(nameof(KnownResourceStates.Exited), 0)]
+    [Arguments(nameof(KnownResourceStates.Running), 7)]
     public async Task AcTest012TransitiveLongLivedDependencyTerminalDuringLoadFailsPromptly(string state, int? exit)
     {
         await using var fixture = new AspireFailureNotificationFixture();
@@ -30,10 +30,10 @@ internal sealed class AspireFailureDependencyTests
     }
 
     [Test]
-    [Arguments(KnownResourceStates.Finished, null)]
-    [Arguments(KnownResourceStates.Finished, 3)]
-    [Arguments(KnownResourceStates.FailedToStart, 0)]
-    [Arguments(KnownResourceStates.RuntimeUnhealthy, 0)]
+    [Arguments(nameof(KnownResourceStates.Finished), null)]
+    [Arguments(nameof(KnownResourceStates.Finished), 3)]
+    [Arguments(nameof(KnownResourceStates.FailedToStart), 0)]
+    [Arguments(nameof(KnownResourceStates.RuntimeUnhealthy), 0)]
     public async Task AcTest013BootstrapMustHaveItsExpectedOriginalExitAndCannotFail(string state, int? exit)
     {
         await using var fixture = new AspireFailureNotificationFixture();

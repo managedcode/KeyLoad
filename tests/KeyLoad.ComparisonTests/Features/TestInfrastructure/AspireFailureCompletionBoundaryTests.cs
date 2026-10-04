@@ -53,7 +53,8 @@ internal sealed class AspireFailureCompletionBoundaryTests
         {
             await fixture.PublishAsync(fixture.Leaf, KnownResourceStates.Exited, 137).WaitAsync(deadline.Token);
             var error = await Assert.ThrowsAsync<DistributedApplicationException>(() => completion.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token));
-            await Assert.That(error.Message).Contains(fixture.Leaf.Name);
+            await Assert.That(error).IsNotNull();
+            await Assert.That(error!.Message).Contains(fixture.Leaf.Name);
             await Assert.That(error.Message).Contains(KnownResourceStates.Exited);
             await Assert.That(error.Message).Contains("137");
         }
@@ -91,7 +92,7 @@ internal sealed class AspireFailureCompletionBoundaryTests
         var completion = AspireResourceCompletion.WaitForExitAsync(fixture.Application, fixture.Runner.Name, deadline.Token);
         try
         {
-            await fixture.PublishAsync(fixture.Parameter, KnownResourceStates.RuntimeUnhealthy).WaitAsync(deadline.Token);
+            await fixture.PublishAsync(fixture.Configuration, KnownResourceStates.RuntimeUnhealthy).WaitAsync(deadline.Token);
             await fixture.PublishAsync(fixture.Runner, KnownResourceStates.Exited, 0).WaitAsync(deadline.Token);
             await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token)).IsEqualTo(0);
         }

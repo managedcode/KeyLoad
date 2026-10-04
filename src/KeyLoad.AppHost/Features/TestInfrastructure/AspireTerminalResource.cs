@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Text;
-using Aspire.Hosting.ApplicationModel;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
 
@@ -13,12 +12,17 @@ internal static class AspireTerminalResource
     private static readonly CompositeFormat FailureTemplate = CompositeFormat.Parse(FailureFormat);
 
     internal static bool IsTerminal(CustomResourceSnapshot snapshot)
-        => snapshot.ExitCode is not null || snapshot.State?.Text is KnownResourceStates.FailedToStart
-            or KnownResourceStates.RuntimeUnhealthy or KnownResourceStates.Finished or KnownResourceStates.Exited;
+        => snapshot.ExitCode is not null || HasFailedState(snapshot)
+            || string.Equals(snapshot.State?.Text, KnownResourceStates.Finished, StringComparison.Ordinal)
+            || string.Equals(snapshot.State?.Text, KnownResourceStates.Exited, StringComparison.Ordinal);
+
+    internal static bool HasFailedState(CustomResourceSnapshot snapshot)
+        => string.Equals(snapshot.State?.Text, KnownResourceStates.FailedToStart, StringComparison.Ordinal)
+            || string.Equals(snapshot.State?.Text, KnownResourceStates.RuntimeUnhealthy, StringComparison.Ordinal);
 
     internal static int RunnerExit(string resourceName, CustomResourceSnapshot snapshot)
     {
-        if (snapshot.State?.Text is KnownResourceStates.FailedToStart or KnownResourceStates.RuntimeUnhealthy || snapshot.ExitCode is null)
+        if (HasFailedState(snapshot) || snapshot.ExitCode is null)
         {
             throw Failure(resourceName, snapshot);
         }
@@ -32,7 +36,7 @@ internal static class AspireTerminalResource
             return;
         }
         if (expectedExit is not null && snapshot.ExitCode == expectedExit
-            && snapshot.State?.Text is not (KnownResourceStates.FailedToStart or KnownResourceStates.RuntimeUnhealthy))
+            && !HasFailedState(snapshot))
         {
             return;
         }
@@ -54,10 +58,10 @@ internal static class AspireTerminalResource
 
     private static string ClosedState(CustomResourceSnapshot snapshot) => snapshot.State?.Text switch
     {
-        KnownResourceStates.FailedToStart => KnownResourceStates.FailedToStart,
-        KnownResourceStates.RuntimeUnhealthy => KnownResourceStates.RuntimeUnhealthy,
-        KnownResourceStates.Finished => KnownResourceStates.Finished,
-        KnownResourceStates.Exited => KnownResourceStates.Exited,
+        var state when string.Equals(state, KnownResourceStates.FailedToStart, StringComparison.Ordinal) => KnownResourceStates.FailedToStart,
+        var state when string.Equals(state, KnownResourceStates.RuntimeUnhealthy, StringComparison.Ordinal) => KnownResourceStates.RuntimeUnhealthy,
+        var state when string.Equals(state, KnownResourceStates.Finished, StringComparison.Ordinal) => KnownResourceStates.Finished,
+        var state when string.Equals(state, KnownResourceStates.Exited, StringComparison.Ordinal) => KnownResourceStates.Exited,
         _ => ExitOnly
     };
 }

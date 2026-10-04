@@ -12,7 +12,7 @@ internal sealed class AspireFailureNotificationFixture : IAsyncDisposable
     internal const string ServerName = "required-server";
     internal const string LeafName = "required-leaf";
     internal const string BootstrapName = "required-bootstrap";
-    internal const string ParameterName = "owned-configuration";
+    internal const string ConfigurationName = "owned-configuration";
     private const string Image = "mcr.microsoft.com/dotnet/runtime";
     private const string ImageTag = "10.0";
 
@@ -24,8 +24,8 @@ internal sealed class AspireFailureNotificationFixture : IAsyncDisposable
         Server = builder.AddContainer(ServerName, Image, ImageTag).Resource;
         Leaf = builder.AddContainer(LeafName, Image, ImageTag).Resource;
         Bootstrap = builder.AddContainer(BootstrapName, Image, ImageTag).Resource;
-        Parameter = builder.AddParameter(ParameterName, "native-configuration-value").Resource;
-        Runner.Annotations.Add(new WaitAnnotation(Parameter, WaitType.WaitUntilHealthy));
+        Configuration = builder.AddResource(new AspireFailureConfigurationResource(ConfigurationName)).Resource;
+        Runner.Annotations.Add(new WaitAnnotation(Configuration, WaitType.WaitUntilHealthy));
         if (includeDependencies)
         {
             Runner.Annotations.Add(new WaitAnnotation(Server, WaitType.WaitUntilHealthy)
@@ -46,7 +46,7 @@ internal sealed class AspireFailureNotificationFixture : IAsyncDisposable
     internal ContainerResource Server { get; }
     internal ContainerResource Leaf { get; }
     internal ContainerResource Bootstrap { get; }
-    internal ParameterResource Parameter { get; }
+    internal AspireFailureConfigurationResource Configuration { get; }
     internal ResourceNotificationService Notifications => Application.ResourceNotifications;
 
     internal Task PublishAsync(IResource resource, string state, int? exit = null, HealthStatus? health = null)
@@ -57,3 +57,5 @@ internal sealed class AspireFailureNotificationFixture : IAsyncDisposable
 
     public async ValueTask DisposeAsync() => await Application.DisposeAsync();
 }
+
+internal sealed class AspireFailureConfigurationResource(string name) : Resource(name), IResourceWithoutLifetime;

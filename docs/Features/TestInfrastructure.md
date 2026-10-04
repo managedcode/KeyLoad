@@ -34,7 +34,7 @@ at source `15ea5030c6fc010b29127b4b8de07bd255afc7ff`, not inferred CLI text.
 | REQ-TEST-014: original outcome, ownership and cleanup remain intact | AC-TEST-014: native runner exit codes, startup exceptions and cancellation remain failures where applicable; AppHost stopping cancels waits; every notification task is canceled/joined, existing diagnostics and stop/disposal remain; unrelated database cells are unaffected |
 
 TASK-TEST-FAILFAST-CONTRACT (root, complete): requirements/ADR and owning source
-review. TASK-TEST-FAILFAST-NATIVE (progress_runner, implementation): only new
+review. TASK-TEST-FAILFAST-NATIVE (progress_runner, locally verified): only new
 AppHost Features/TestInfrastructure lifecycle helpers and ComparisonTests
 Features/TestInfrastructure native notification regressions. TASK-TEST-FAILFAST-JOIN
 (root, after helper): TestSuiteApplication and IsolatedNativeCase integration,
@@ -44,6 +44,24 @@ RF3 CQRS/authorization failures belong to their existing owner. Public database,
 stored data, dependencies and topology are N/A: this is private test orchestration.
 Native service tests establish notification handling, not real Docker failure
 qualification; delivered Linux tests and failure artifact review remain required.
+
+Local development evidence, 2026-10-04: the complete Release solution build has
+zero warnings/errors; the full required formatter and repository governance pass.
+The canonical Aspire comparison entry with `/*/*/AspireFailure*/*` reports
+36/36 TUnit cases passed in 3.017 seconds, with no skipped, cancelled, timed-out
+or flaky cases. The retained report is
+`TestResults/aspire-failure-local3/KeyLoad.ComparisonTests-macos-net10.0.tunit-report.json`.
+The existing `AspireTestEntry*` model/artifact regressions also pass 5/5 through
+the same entry; their original report remains in `TestResults/aspire-failure-entry/`.
+This includes genuine DCP missing-executable startup failure and native
+BeforeStart failure/cancellation, preserving the original outcome and joining
+tasks before cleanup. The no-lifetime case uses Aspire's real custom-resource
+extension seam, `Resource, IResourceWithoutLifetime`, and native notifications;
+neither native parameters nor certificate collections implement that marker in
+the pinned 13.6 runtime. No database/service substitute is used. These checks
+ran on macOS against the current working tree, which also contains concurrent
+engine changes; they do not qualify an exact delivered Linux SHA or its complete
+unit, recovery, RF3 and benchmark suites.
 
 Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 

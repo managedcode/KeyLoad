@@ -1,6 +1,7 @@
 # ADR-086: Stop owned test workloads on terminal Aspire failure
 
-Status: Accepted implementation contract; native qualification pending.
+Status: Accepted implementation contract; local development regressions passed;
+delivered-source Linux qualification pending.
 Date: 2026-10-04. Related: REQ/AC-TEST-012..014, ADR-074, ADR-085.
 
 ## Decision

@@ -1,4 +1,3 @@
-using Aspire.Hosting.ApplicationModel;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;

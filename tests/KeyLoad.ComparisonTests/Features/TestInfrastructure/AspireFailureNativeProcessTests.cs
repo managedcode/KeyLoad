@@ -15,26 +15,12 @@ internal sealed class AspireFailureNativeProcessTests
         var runner = builder.AddExecutable(AspireFailureNotificationFixture.RunnerName,
             Path.Combine(directory.FullName, "missing-owned-executable"), directory.FullName);
         var application = builder.Build();
-        var failure = application.ResourceNotifications.WaitForResourceAsync(runner.Resource.Name,
-            update => AspireTerminalResource.IsTerminal(update.Snapshot), deadline.Token);
-        var execution = AspireResourceCompletion.RunToExitAsync(application, runner.Resource.Name, deadline.Token);
         try
         {
-            var native = await failure.WaitAsync(deadline.Token);
-            if (native.Snapshot.ExitCode is { } exit && native.Snapshot.State?.Text is not
-                (KnownResourceStates.FailedToStart or KnownResourceStates.RuntimeUnhealthy))
-            {
-                await Assert.That(exit).IsNotEqualTo(0);
-                await Assert.That(await execution.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token)).IsEqualTo(exit);
-            }
-            else
-            {
-                await Assert.ThrowsAsync<DistributedApplicationException>(() => execution.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token));
-            }
+            await VerifyAndJoinFailureAsync(application, runner.Resource.Name, deadline);
         }
         finally
         {
-            await AspireFailureAssertions.JoinAsync(deadline, failure, execution);
             try
             {
                 using var cleanup = AspireFailureAssertions.CreateDeadline();
@@ -53,4 +39,33 @@ internal sealed class AspireFailureNativeProcessTests
             }
         }
     }
+
+    private static async Task VerifyAndJoinFailureAsync(DistributedApplication application, string runnerName, CancellationTokenSource deadline)
+    {
+        var failure = WaitForFailureAsync(application, runnerName, deadline.Token);
+        var execution = AspireResourceCompletion.RunToExitAsync(application, runnerName, deadline.Token);
+        try
+        {
+            var native = await failure.WaitAsync(deadline.Token);
+            if (native.Snapshot.ExitCode is { } exit && !AspireTerminalResource.HasFailedState(native.Snapshot))
+            {
+                await Assert.That(exit).IsNotEqualTo(0);
+                await Assert.That(await execution.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token)).IsEqualTo(exit);
+            }
+            else
+            {
+                await Assert.ThrowsAsync<DistributedApplicationException>(() => execution.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token));
+            }
+        }
+        finally
+        {
+            await deadline.CancelAsync();
+            await ((Task)failure).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+            await ((Task)execution).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        }
+    }
+
+    private static async Task<ResourceEvent> WaitForFailureAsync(DistributedApplication application, string resourceName, CancellationToken token)
+        => await application.ResourceNotifications.WaitForResourceAsync(resourceName,
+            update => AspireTerminalResource.IsTerminal(update.Snapshot), token).ConfigureAwait(false);
 }

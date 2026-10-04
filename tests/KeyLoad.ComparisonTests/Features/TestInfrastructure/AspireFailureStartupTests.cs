@@ -61,7 +61,8 @@ internal sealed class AspireFailureStartupTests
         try
         {
             var error = await Assert.ThrowsAsync<FileNotFoundException>(() => execution.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token));
-            await Assert.That(error.FileName).IsEqualTo(Path.Combine(directory.FullName, "missing-startup-input"));
+            await Assert.That(error).IsNotNull();
+            await Assert.That(error!.FileName).IsEqualTo(Path.Combine(directory.FullName, "missing-startup-input"));
             await Assert.That(execution.IsCompleted).IsTrue();
         }
         finally

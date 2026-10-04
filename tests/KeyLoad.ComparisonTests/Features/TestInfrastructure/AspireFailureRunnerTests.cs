@@ -7,10 +7,10 @@ namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
 internal sealed class AspireFailureRunnerTests
 {
     [Test]
-    [Arguments(KnownResourceStates.FailedToStart)]
-    [Arguments(KnownResourceStates.RuntimeUnhealthy)]
-    [Arguments(KnownResourceStates.Finished)]
-    [Arguments(KnownResourceStates.Exited)]
+    [Arguments(nameof(KnownResourceStates.FailedToStart))]
+    [Arguments(nameof(KnownResourceStates.RuntimeUnhealthy))]
+    [Arguments(nameof(KnownResourceStates.Finished))]
+    [Arguments(nameof(KnownResourceStates.Exited))]
     public async Task AcTest012RunnerTerminalWithoutOriginalExitFailsWithinFiveSeconds(string state)
     {
         await using var fixture = new AspireFailureNotificationFixture(includeDependencies: false);
@@ -47,8 +47,8 @@ internal sealed class AspireFailureRunnerTests
     }
 
     [Test]
-    [Arguments(KnownResourceStates.FailedToStart)]
-    [Arguments(KnownResourceStates.RuntimeUnhealthy)]
+    [Arguments(nameof(KnownResourceStates.FailedToStart))]
+    [Arguments(nameof(KnownResourceStates.RuntimeUnhealthy))]
     public async Task AcTest012FailedRunnerCannotSucceedWithZeroExit(string state)
     {
         await using var fixture = new AspireFailureNotificationFixture(includeDependencies: false);

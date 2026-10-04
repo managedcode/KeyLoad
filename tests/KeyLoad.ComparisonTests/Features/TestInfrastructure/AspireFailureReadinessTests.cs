@@ -7,9 +7,9 @@ namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
 internal sealed class AspireFailureReadinessTests
 {
     [Test]
-    [Arguments(KnownResourceStates.FailedToStart)]
-    [Arguments(KnownResourceStates.RuntimeUnhealthy)]
-    [Arguments(KnownResourceStates.Exited)]
+    [Arguments(nameof(KnownResourceStates.FailedToStart))]
+    [Arguments(nameof(KnownResourceStates.RuntimeUnhealthy))]
+    [Arguments(nameof(KnownResourceStates.Exited))]
     public async Task AcTest014NativeReadinessFailureCancelsAndJoinsStartingSibling(string state)
     {
         await using var fixture = new AspireFailureNotificationFixture();
