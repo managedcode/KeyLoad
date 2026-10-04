@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.Search;
 using KeyLoad.Core.Features.TimeSeries;
 
 namespace KeyLoad.Core;
