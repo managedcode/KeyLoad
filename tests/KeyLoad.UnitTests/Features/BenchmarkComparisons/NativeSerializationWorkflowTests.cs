@@ -5,15 +5,12 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 internal sealed class NativeSerializationWorkflowTests
 {
     private const string Workflow = "benchmarks.yml";
-    private const string AggregateNeeds = "needs: [comparison-build, comparison-plan, comparison-images, comparison-preflight, comparison-crud, comparison-specialized]";
     private static readonly string[] CompletePipelineJobs =
     [
         "comparison-build",
         "comparison-plan",
         "comparison-images",
-        "comparison-preflight",
-        "comparison-crud",
-        "comparison-specialized",
+        .. WorkflowDatabaseGroups.JobIds,
         "comparison-aggregate"
     ];
     private static readonly string[] RemovedDiagnosticJobs = ["native-serialization", "raw-storage", "internal-codec"];
@@ -43,7 +40,7 @@ internal sealed class NativeSerializationWorkflowTests
         }
 
         var aggregate = WorkflowLayoutSource.JobBlock(workflow, "comparison-aggregate");
-        await Assert.That(aggregate.Contains(AggregateNeeds, StringComparison.Ordinal)).IsTrue();
+        await Assert.That(aggregate.Contains(WorkflowDatabaseGroups.AggregateNeeds, StringComparison.Ordinal)).IsTrue();
         await Assert.That(aggregate.Contains("Check all 270 benchmark results", StringComparison.Ordinal)).IsTrue();
         await Assert.That(aggregate.Contains("raw-storage", StringComparison.Ordinal)).IsFalse();
         await Assert.That(aggregate.Contains("internal-codec", StringComparison.Ordinal)).IsFalse();

@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from 'node:util';
 import { KEYS, validateCohort } from './aggregate-contracts.mjs';
 import { createIsolatedPlan } from './isolated-plan.mjs';
-import { GH, digestPattern, hashPattern, positive, shaPattern, timestamp } from './isolated-github-contract.mjs';
+import { GH, digestPattern, hashPattern, matchesIsolatedJobName, positive, shaPattern, timestamp } from './isolated-github-contract.mjs';
 import { SITE_GH, artifactLimit, exact, requireSite, safeRelative, siteAggregateSteps } from './site-isolated-github-contract.mjs';
 
 function validateArtifact(value, name, limit) {
@@ -64,10 +64,12 @@ function validateProjectedJob(job, cohort, name, requiredSteps, worker = false) 
 
 function validateWorkers(receipt, plan) {
   const expected = new Set(plan.cells.map(cell => cell.id));
+  const cells = new Map(plan.cells.map(cell => [cell.id, cell]));
   requireSite(Array.isArray(receipt.workers) && receipt.workers.length === expected.size);
   for (const worker of receipt.workers) {
     requireSite(exact(worker, ['id', 'job', 'artifact']) && expected.delete(worker.id));
-    validateProjectedJob(worker.job, receipt.cohort, GH.casePrefix + worker.id, GH.workerSteps, true);
+    requireSite(matchesIsolatedJobName(worker.job?.name, cells.get(worker.id)));
+    validateProjectedJob(worker.job, receipt.cohort, worker.job.name, GH.workerSteps, true);
     validateArtifact(worker.artifact, GH.artifactPrefix + worker.id, GH.workerZipBytes);
   }
   requireSite(exact(receipt.image, ['job', 'artifact']));

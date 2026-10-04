@@ -10,7 +10,8 @@ internal static class IsolatedCurrentJobNodeProgram
         const job = JSON.parse(await readFile(fixturePath, 'utf8'));
         const cohort = { sourceRevision: 'dbd01269e5a1e526c3773b213b201950300f1df6', runId: 37120639751,
           attempt: 1, repository: 'managedcode/KeyLoad', ref: 'refs/heads/main', workflow: 'Benchmarks' };
-        const name = 'Benchmark / rabbitmq-n2-document-delete';
+        const name = 'RabbitMQ / 2 nodes / Document delete';
+        job.name = name;
         if (corruption === 'running' || corruption === 'legacy-running' || corruption === 'missing-attempt-running') {
           job.status = 'in_progress';
         }

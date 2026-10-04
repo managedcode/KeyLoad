@@ -1,7 +1,7 @@
 import { createRunContext } from './image-inputs.mjs';
 import { createIsolatedPlan, validateIsolatedPlan } from './isolated-plan.mjs';
 import { validateCohort } from './aggregate-contracts.mjs';
-import { GH, positive, requireGitHub } from './isolated-github-contract.mjs';
+import { GH, isolatedJobName, positive, requireGitHub } from './isolated-github-contract.mjs';
 
 export function createGitHubContext(environment, platform) {
   const native = createRunContext(environment, platform);
@@ -18,8 +18,7 @@ export function createGitHubContext(environment, platform) {
 export function requireCurrentJobName(name, plan) {
   requireGitHub(typeof name === 'string');
   if (name === GH.imageJob) return name;
-  const prefix = name.startsWith(GH.casePrefix) ? GH.casePrefix : GH.preflightPrefix;
-  requireGitHub(name.startsWith(prefix) && plan.cells.some(cell => prefix + cell.id === name));
+  requireGitHub(plan.cells.some(cell => isolatedJobName(cell) === name || isolatedJobName(cell, true) === name));
   return name;
 }
 

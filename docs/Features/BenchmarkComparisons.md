@@ -974,3 +974,27 @@ flowchart LR
   Failure --> Aggregate
   Aggregate --> Site[Qualified website]
 ```
+
+## Database job groups, 2026-10-04
+
+REQ-BC-GROUP-001 maps to AC-BC-GROUP-001: Benchmarks exposes nine separately
+named database job matrices. Each contains only its own target, three preflight
+checks and all 30 canonical node/scenario workloads. Every cell retains its own
+Linux runner. Database groups run concurrently with only plan/image dependencies;
+steps inside each cell run in order. No shared cross-database matrix or parallelism
+cap. Aggregate waits for every group and retains failed/null results.
+
+REQ-BC-GROUP-002 maps to AC-BC-GROUP-002: readable database/node/scenario job names
+must agree with authenticated job discovery, finalization, aggregation and website
+receipt validation. Canonical plan schema, cell IDs, workload counts, artifacts,
+measurements and topology remain unchanged. Frozen historical names remain valid
+only as exact cell-name contracts in original authenticated receipts; no result
+bytes are rewritten. ADR-080 owns the implementation contract.
+
+TASK-BC-GROUP-001: root owns workflow, planner/name validators and documentation;
+worker owns disjoint source-contract TUnit assertions. Update mapped
+WorkflowLayout/WorkflowBenchmarkFailure/NativeSerializationWorkflow/IsolatedPlanCli
+assertions before joining. Owner explicitly requests no tests or benchmarks for
+this Actions layout task: verify YAML, JavaScript syntax, matrix inventory and diff
+statically; do not dispatch workflows. Runtime/native qualification is unverified.
+Backend/API/storage/transport and database tests are outside this change.

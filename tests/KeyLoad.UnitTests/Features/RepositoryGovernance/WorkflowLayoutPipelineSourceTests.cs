@@ -17,9 +17,8 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         var jobs = WorkflowLayoutSource.JobIds(benchmarks);
         var expectedJobs = new[]
         {
-            "comparison-build", "comparison-plan", "comparison-images", "comparison-preflight",
-            "comparison-crud", "comparison-specialized", "comparison-aggregate",
-        }.Order(StringComparer.Ordinal).ToArray();
+            "comparison-build", "comparison-plan", "comparison-images", "comparison-aggregate"
+        }.Concat(WorkflowDatabaseGroups.JobIds).Order(StringComparer.Ordinal).ToArray();
         await Assert.That(jobs.Order(StringComparer.Ordinal).SequenceEqual(expectedJobs)).IsTrue();
 
         var build = WorkflowLayoutSource.JobBlock(benchmarks, "comparison-build");
@@ -31,9 +30,10 @@ internal sealed class WorkflowLayoutPipelineSourceTests
             StringComparison.Ordinal)).IsTrue();
         await Assert.That(WorkflowLayoutSource.JobBlock(benchmarks, "comparison-images")
             .Contains("\n    needs:", StringComparison.Ordinal)).IsFalse();
-        await AssertNativeJob(benchmarks, "comparison-preflight");
-        await AssertNativeJob(benchmarks, "comparison-crud");
-        await AssertNativeJob(benchmarks, "comparison-specialized");
+        foreach (var jobId in WorkflowDatabaseGroups.JobIds)
+        {
+            await AssertNativeJob(benchmarks, jobId);
+        }
         await AssertAggregate(WorkflowLayoutSource.JobBlock(benchmarks, "comparison-aggregate"));
         await AssertPinnedImage(WorkflowLayoutSource.JobBlock(benchmarks, "comparison-images"));
         await AssertDatabaseOnly(benchmarks);
@@ -66,9 +66,8 @@ internal sealed class WorkflowLayoutPipelineSourceTests
 
     private static async Task AssertAggregate(string job)
     {
-        await Assert.That(job.Contains("needs: [comparison-build, comparison-plan, comparison-images, comparison-preflight, comparison-crud, comparison-specialized]",
+        await Assert.That(job.Contains(WorkflowDatabaseGroups.AggregateNeeds,
             StringComparison.Ordinal)).IsTrue();
-        await Assert.That(job.Contains("comparison-crud, comparison-specialized", StringComparison.Ordinal)).IsTrue();
         var steps = WorkflowStepNameTests.StepBlocks(job);
         var expected = new[]
         {

@@ -63,3 +63,6 @@
 
 ## Independent website queue, 2026-10-04
 - CI website generation MUST NOT wait for unrelated ordinary CI/RF3 execution from another run. Push/manual CI runs use their own run identity; PR keeps its existing ref-based cancellation. Website qualification and deployment use separate bounded job concurrency groups with cancel-in-progress=false, preserving source/latest-evidence freshness and all gates. This implements the owner-authorized independent website action without canceling database or test work.
+
+## Separate database matrices, 2026-10-04
+- Owner correction requires one named job matrix per database in Benchmarks. Each target has its own three checks and thirty canonical node/scenario workloads with readable database/node/scenario names. All nine groups depend only on actual plan/image inputs and run independently without a max-parallel cap; steps within each isolated cell remain sequential. Aggregate joins every group and preserves authenticated failed/null results. This supersedes the shared preflight/CRUD/specialized grouping above without changing native topology, cell isolation, required suites or immutable evidence.

@@ -26,7 +26,7 @@ internal sealed class WorkflowLayoutAspireEntryTests
         await AssertNoDirectTestCommandsAsync();
         await AssertImageTestLaunchesAsync();
         var benchmarks = WorkflowLayoutSource.Read("benchmarks.yml");
-        foreach (var jobId in new[] { "comparison-preflight", "comparison-crud", "comparison-specialized" })
+        foreach (var jobId in WorkflowDatabaseGroups.JobIds)
         {
             var job = WorkflowLayoutSource.JobBlock(benchmarks, jobId);
             await Assert.That(job.Contains(AppHostCommand, StringComparison.Ordinal)).IsTrue();

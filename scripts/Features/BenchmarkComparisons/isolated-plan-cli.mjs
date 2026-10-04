@@ -2,7 +2,7 @@ import { constants } from 'node:fs';
 import { lstat, open, writeFile } from 'node:fs/promises';
 import { dirname, parse, resolve } from 'node:path';
 import { requireIsolatedPlan } from './isolated-plan-contract.mjs';
-import { createPreflightMatrix } from './isolated-preflight.mjs';
+import { createDatabaseMatrices } from './isolated-preflight.mjs';
 
 const options = new Set(['--output', '--github-output']);
 const maximumPathLength = 4096;
@@ -54,9 +54,7 @@ export async function runIsolatedPlanCli(arguments_, plan) {
   try {
     if (output !== undefined) await writeFile(output, text, { encoding: 'utf8', flag: 'wx' });
     if (github !== null) {
-      await github.writeFile('crud_matrix=' + JSON.stringify(plan.matrices.crud) + '\n'
-        + 'specialized_matrix=' + JSON.stringify(plan.matrices.specialized) + '\n'
-        + 'preflight_matrix=' + JSON.stringify(createPreflightMatrix(plan)) + '\n', 'utf8');
+      await github.writeFile('database_matrices=' + JSON.stringify(createDatabaseMatrices(plan)) + '\n', 'utf8');
     }
     process.stdout.write(text);
   } finally {

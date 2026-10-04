@@ -15,7 +15,7 @@ internal sealed class WorkflowBenchmarkFailureTests
     public async Task EveryCellFinalizesAvailabilityAfterActualWorkloadOutcomeBeforeUpload()
     {
         var workflow = WorkflowLayoutSource.Read("benchmarks.yml");
-        foreach (var jobId in new[] { "comparison-preflight", "comparison-crud", "comparison-specialized" })
+        foreach (var jobId in WorkflowDatabaseGroups.JobIds)
         {
             var job = WorkflowLayoutSource.JobBlock(workflow, jobId);
             var steps = WorkflowStepNameTests.StepBlocks(job);
@@ -66,8 +66,12 @@ internal sealed class WorkflowBenchmarkFailureTests
         await Assert.That(aggregate.Contains("needs.comparison-images.result == 'success'", StringComparison.Ordinal)).IsTrue();
         await Assert.That(aggregate.Contains("needs.comparison-plan.result == 'success'", StringComparison.Ordinal)).IsTrue();
         await Assert.That(aggregate.Contains("needs.comparison-build.result == 'success'", StringComparison.Ordinal)).IsFalse();
-        await Assert.That(aggregate.Contains("needs.comparison-crud.result == 'success'", StringComparison.Ordinal)).IsFalse();
-        await Assert.That(aggregate.Contains("comparison-preflight, comparison-crud, comparison-specialized", StringComparison.Ordinal)).IsTrue();
+        foreach (var jobId in WorkflowDatabaseGroups.JobIds)
+        {
+            await Assert.That(aggregate.Contains("needs." + jobId + ".result == 'success'", StringComparison.Ordinal)).IsFalse();
+        }
+
+        await Assert.That(aggregate.Contains(WorkflowDatabaseGroups.AggregateNeeds, StringComparison.Ordinal)).IsTrue();
         foreach (var jobId in new[] { "qualify", "deploy" })
         {
             await Assert.That(WorkflowLayoutSource.JobBlock(workflow, jobId)).IsEqualTo(string.Empty);

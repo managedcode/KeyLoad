@@ -4,6 +4,12 @@ internal sealed class IsolatedGitHubCompleteTests
 {
     [Test]
     [Arguments("valid")]
+    [Arguments("modern")]
+    [Arguments("modern-failed")]
+    [Arguments("modern-duplicate")]
+    [Arguments("modern-foreign-name")]
+    [Arguments("modern-preflight-replaces-worker")]
+    [Arguments("modern-mixed")]
     [Arguments("missing-cell-job")]
     [Arguments("missing-cell-artifact")]
     [Arguments("duplicate-case-name")]
@@ -19,8 +25,9 @@ internal sealed class IsolatedGitHubCompleteTests
             ["--input-type=module", "-e", IsolatedGitHubCompleteProgram.Source,
                 IsolatedAggregateNodeProcess.Module("isolated-github-selection.mjs"), corruption],
             TestContext.Current!.Execution.CancellationToken);
-        await Assert.That(result.ExitCode).IsEqualTo(corruption == "valid" ? 0 : 1);
-        await Assert.That(result.Output.Trim()).IsEqualTo(corruption == "valid" ? "accepted" : "rejected");
+        var valid = corruption is "valid" or "modern" or "modern-failed";
+        await Assert.That(result.ExitCode).IsEqualTo(valid ? 0 : 1);
+        await Assert.That(result.Output.Trim()).IsEqualTo(valid ? "accepted" : "rejected");
         await Assert.That(result.Error).IsEmpty();
     }
 }

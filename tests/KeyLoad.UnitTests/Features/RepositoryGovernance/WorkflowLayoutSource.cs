@@ -52,6 +52,24 @@ internal static class WorkflowLayoutSource
 
     internal static string JobBlock(string workflow, string jobId)
     {
+        var block = ReadJobBlock(workflow, jobId);
+        foreach (var (property, anchor) in new[] { ("env", "database-environment"), ("steps", "database-steps") })
+        {
+            var alias = "    " + property + ": *" + anchor;
+            if (block.Contains(alias, StringComparison.Ordinal))
+            {
+                var owner = ReadJobBlock(workflow, "comparison-keyload");
+                block = block.Replace(alias, ReadDatabaseAnchor(owner, property, anchor), StringComparison.Ordinal);
+            }
+
+            block = block.Replace("    " + property + ": &" + anchor, "    " + property + ":", StringComparison.Ordinal);
+        }
+
+        return block;
+    }
+
+    private static string ReadJobBlock(string workflow, string jobId)
+    {
         var output = new StringBuilder();
         var inJobs = false;
         var inJob = false;
@@ -86,6 +104,31 @@ internal static class WorkflowLayoutSource
         }
 
         return output.ToString();
+    }
+
+    private static string ReadDatabaseAnchor(string owner, string property, string anchor)
+    {
+        var lines = owner.Split('\n');
+        var heading = "    " + property + ": &" + anchor;
+        var index = Array.IndexOf(lines, heading);
+        if (index < 0 || lines.Count(line => line == heading) != 1)
+        {
+            throw new InvalidOperationException("The database job anchor is missing or ambiguous.");
+        }
+
+        var output = new StringBuilder("    " + property + ":");
+        foreach (var line in lines.Skip(index + 1))
+        {
+            if (line.Length > 0 && !string.IsNullOrWhiteSpace(line)
+                && line.TakeWhile(char.IsWhiteSpace).Count() <= 4)
+            {
+                break;
+            }
+
+            output.Append('\n').Append(line);
+        }
+
+        return output.ToString().TrimEnd('\n');
     }
 
     internal static string EventBlock(string workflow)

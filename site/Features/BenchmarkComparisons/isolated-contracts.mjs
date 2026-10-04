@@ -79,6 +79,24 @@ export const runUrl = cohort => `https://github.com/${ISOLATED.repository}/actio
 export const rawPath = id => `workers/${id}/worker.json`;
 export const artifactUrl = (cohort, artifact) => `${runUrl(cohort)}/artifacts/${artifact.id}`;
 
+const JOB_SCENARIOS = Object.freeze({
+  PointRead: 'Point read', DocumentWrite: 'Document write', DocumentUpdate: 'Document update',
+  DocumentDelete: 'Document delete', VectorExact: 'Exact vector search', QueueCycle: 'Queue cycle',
+  GraphNeighbors: 'Graph neighbors', GraphTraverse: 'Graph traversal',
+  StreamAppend: 'Stream append', StreamRead: 'Stream read',
+});
+const HISTORICAL_JOB_PREFIX = 'Benchmark / ';
+
+export function isolatedJobLabel(cell, preflight = false) {
+  const nodes = `${cell.nodeCount} node${cell.nodeCount === 1 ? '' : 's'}`;
+  return preflight ? `Check / ${nodes}` : `${nodes} / ${JOB_SCENARIOS[cell.scenario]}`;
+}
+
+export const isolatedJobName = (cell, preflight = false) => `${cell.target} / ${isolatedJobLabel(cell, preflight)}`;
+// Original authenticated archives retain their exact historical display names.
+export const matchesIsolatedJobName = (name, cell) =>
+  name === isolatedJobName(cell) || name === HISTORICAL_JOB_PREFIX + cell.id;
+
 export function isolatedCells() {
   return ISOLATED.targets.flatMap(target => ISOLATED.nodes.flatMap(nodeCount =>
     [...ISOLATED.crud, ...ISOLATED.specialized].map(scenario => ({

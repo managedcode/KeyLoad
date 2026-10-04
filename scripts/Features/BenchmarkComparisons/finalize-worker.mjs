@@ -8,7 +8,7 @@ import { createIsolatedPlan, readIsolatedContract } from './isolated-plan.mjs';
 import { createDirectory, requireDirectory } from './image-bundle-files.mjs';
 import { createGitHubContext } from './isolated-github-context.mjs';
 import { captureCurrentJob } from './isolated-github-job.mjs';
-import { GH, positive, requireGitHub } from './isolated-github-contract.mjs';
+import { GH, isolatedJobName, positive, requireGitHub } from './isolated-github-contract.mjs';
 import { hashRegularFile, readJson, writeJson } from './isolated-github-files.mjs';
 
 const FINAL = Object.freeze({ workers: ['artifacts', 'comparisons', 'isolated', 'workers'],
@@ -59,8 +59,8 @@ export async function finalizeCurrentWorker(environment = process.env, argv = pr
   requireGitHub(argv.length === 0);
   const context = createGitHubContext(environment, process.platform);
   const cell = context.plan.cells.find(item => item.id === environment[FINAL.cell]);
-  requireGitHub(cell !== undefined && environment.KEYLOAD_COMPARISON_JOB_NAME ===
-    (environment.KEYLOAD_COMPARISON_JOB_NAME?.startsWith(GH.preflightPrefix) ? GH.preflightPrefix : GH.casePrefix) + cell.id);
+  requireGitHub(cell !== undefined && [isolatedJobName(cell), isolatedJobName(cell, true)]
+    .includes(environment.KEYLOAD_COMPARISON_JOB_NAME));
   let jobId = Number(environment[FINAL.identity]);
   if (!positive(jobId)) jobId = (await captureCurrentJob(environment, [], true)).id;
   return finalizeWorker({ workspace: context.native.workspace, cell, cohort: context.cohort, jobId,

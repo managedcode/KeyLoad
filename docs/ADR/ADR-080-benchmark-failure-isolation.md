@@ -294,3 +294,32 @@ serialization, and adds separate qualification/deployment job groups. Website
 work starts independently while all ordinary suites remain mandatory. Root owns
 this CI policy/YAML/regression join; unchanged source/latest-evidence freshness
 and false cancellation protect publication, without canceling existing tests.
+
+## Database groups, 2026-10-04
+
+REQ/AC-BC-GROUP-001/002 replace the shared preflight/CRUD/specialized display groups
+with nine database matrices derived from the unchanged canonical plan. Each matrix
+has 3 checks and 30 workloads; all 297 isolated Linux jobs retain sequential
+prepare/build/run/finalize/upload/cleanup steps. All database groups fan out from
+plan/images concurrently, and aggregate joins every database group even on workload
+failure. YAML anchors share step definitions while leaving native top-level GitHub
+step conclusions visible. Exactly three workflows remain.
+
+Ordered delivery: root updates requirements/policy; root edits planner, workflow
+and exact name validators; a worker updates disjoint source-contract TUnit
+assertions; root joins and statically checks YAML/syntax/full inventory/diff, then
+commits the scoped stage on current main. The owner explicitly excludes executing
+tests, benchmarks or workflow dispatch for this Actions-only task. This evidence
+exception does not assert runtime qualification. Original authenticated historical
+job names remain accepted as exact cell contracts, preserving already produced JSON.
+No data/dependency/topology migration; rollback restores workflow/planner/name
+contracts together without modifying immutable evidence. Agent coordination is
+limited to static contract review and disjoint test-source updates.
+
+```mermaid
+flowchart LR
+  Inputs[Plan and native images] --> KeyLoad[KeyLoad matrix]
+  Inputs --> Databases[Eight separate competitor matrices]
+  KeyLoad --> Aggregate[Complete authenticated aggregation]
+  Databases --> Aggregate
+```

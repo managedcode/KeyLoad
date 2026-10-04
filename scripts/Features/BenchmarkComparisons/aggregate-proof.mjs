@@ -1,13 +1,13 @@
 import { AGGREGATE, KEYS, exactKeys, matches, positive, requireValue, validateCohort } from './aggregate-contracts.mjs';
 import { validateIsolatedPlan } from './isolated-plan.mjs';
+import { matchesIsolatedJobName } from './isolated-github-contract.mjs';
 
 const ERROR = AGGREGATE.errors.proof;
-const JOB_PREFIX = 'Benchmark / ';
 const ARTIFACT_PREFIX = 'comparison-worker-';
 const GITHUB = 'https://github.com/';
 
 function validateJob(job, cell, cohort, identities) {
-  requireValue(exactKeys(job, KEYS.job) && positive(job.id) && !identities.has(job.id) && job.name === JOB_PREFIX + cell.id &&
+  requireValue(exactKeys(job, KEYS.job) && positive(job.id) && !identities.has(job.id) && matchesIsolatedJobName(job.name, cell) &&
     job.url === `${GITHUB}${cohort.repository}/actions/runs/${cohort.runId}/job/${job.id}` && [AGGREGATE.success, AGGREGATE.failure].includes(job.conclusion) &&
     Array.isArray(job.steps) && job.steps.length === AGGREGATE.steps.length, ERROR);
   identities.add(job.id);

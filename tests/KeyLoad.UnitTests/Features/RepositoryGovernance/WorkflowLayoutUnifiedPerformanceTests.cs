@@ -14,7 +14,6 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
     private const string PinnedImageTest = "TimeSeriesIntensivePinnedImageTests";
     private const string FactsArtifact = "name: timeseries-native-pinned-image-facts";
     private const string NativeNeeds = "needs: [comparison-plan, comparison-images]";
-    private const string AggregateNeeds = "needs: [comparison-build, comparison-plan, comparison-images, comparison-preflight, comparison-crud, comparison-specialized]";
     private const string ContractPath = "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/isolated-contract.json";
     private const string RegistryReadinessTest = "ImageRegistryReadinessTests";
     private const string KurrentDiscoveryTest = "IsolatedKurrentDiscoverySettingsTests";
@@ -87,11 +86,13 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
             await Assert.That(job.Contains("\n    needs:", StringComparison.Ordinal)).IsFalse();
         }
 
-        await AssertNativeMatrix(workflow, "comparison-preflight", "preflight");
-        await AssertNativeMatrix(workflow, "comparison-crud", "crud");
-        await AssertNativeMatrix(workflow, "comparison-specialized", "specialized");
+        foreach (var (key, name) in WorkflowDatabaseGroups.Entries)
+        {
+            await AssertNativeMatrix(workflow, key, name);
+        }
+
         var aggregate = WorkflowLayoutSource.JobBlock(workflow, "comparison-aggregate");
-        await Assert.That(aggregate.Contains(AggregateNeeds, StringComparison.Ordinal)).IsTrue();
+        await Assert.That(aggregate.Contains(WorkflowDatabaseGroups.AggregateNeeds, StringComparison.Ordinal)).IsTrue();
         await Assert.That(aggregate.Contains("always() && !cancelled()", StringComparison.Ordinal)).IsTrue();
         await Assert.That(aggregate.Contains("needs.comparison-plan.result == 'success'", StringComparison.Ordinal)).IsTrue();
         await Assert.That(aggregate.Contains("needs.comparison-images.result == 'success'", StringComparison.Ordinal)).IsTrue();
@@ -123,20 +124,39 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
         await Assert.That(preflights * crud.Length).IsEqualTo(108);
         await Assert.That(preflights * specialized.Length).IsEqualTo(162);
         await Assert.That(preflights * (crud.Length + specialized.Length)).IsEqualTo(270);
-        await Assert.That(preflights * crud.Length <= 256 && preflights * specialized.Length <= 256).IsTrue();
+        await Assert.That(nodes.Length * (1 + crud.Length + specialized.Length)).IsEqualTo(33);
+        await Assert.That(nodes.Length * (1 + crud.Length + specialized.Length) <= 256).IsTrue();
     }
 
-    private static async Task AssertNativeMatrix(string workflow, string jobId, string output)
+    private static async Task AssertNativeMatrix(string workflow, string key, string name)
     {
-        var job = WorkflowLayoutSource.JobBlock(workflow, jobId);
+        var job = WorkflowLayoutSource.JobBlock(workflow, "comparison-" + key);
         await Assert.That(job.Contains(NativeNeeds, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(job.Contains("matrix: ${{ fromJSON(needs.comparison-plan.outputs." + output + ") }}",
+        await Assert.That(job.Contains("matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases)." + key + " }}",
             StringComparison.Ordinal)).IsTrue();
+        await Assert.That(job.Contains("name: " + name + " / ${{ matrix.label }}", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("runs-on: ubuntu-latest", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("fail-fast: false", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("max-parallel:", StringComparison.Ordinal)).IsFalse();
         await Assert.That(job.Contains("IsolatedNativeComparisonTests", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("continue-on-error:", StringComparison.Ordinal)).IsFalse();
+    }
+
+    [Test]
+    public async Task AcBcGroup001SharedDatabaseAnchorsResolveToEveryExplicitJob()
+    {
+        var workflow = WorkflowLayoutSource.Read(BenchmarksFile);
+        await Assert.That(Count(workflow, "env: &database-environment")).IsEqualTo(1);
+        await Assert.That(Count(workflow, "steps: &database-steps")).IsEqualTo(1);
+        await Assert.That(Count(workflow, "env: *database-environment")).IsEqualTo(8);
+        await Assert.That(Count(workflow, "steps: *database-steps")).IsEqualTo(8);
+        foreach (var jobId in WorkflowDatabaseGroups.JobIds)
+        {
+            var job = WorkflowLayoutSource.JobBlock(workflow, jobId);
+            await Assert.That(job.Contains("KEYLOAD_COMPARISON_JOB_NAME: ${{ matrix.jobName }}", StringComparison.Ordinal)).IsTrue();
+            await Assert.That(job.Contains("*database-", StringComparison.Ordinal)).IsFalse();
+            await Assert.That(WorkflowStepNameTests.StepBlocks(job).Length).IsGreaterThan(0);
+        }
     }
 
     private static async Task AssertTimeSeriesContracts(string images)

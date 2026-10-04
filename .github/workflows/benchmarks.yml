@@ -40,9 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
-      crud: ${{ steps.plan.outputs.crud_matrix }}
-      specialized: ${{ steps.plan.outputs.specialized_matrix }}
-      preflight: ${{ steps.plan.outputs.preflight_matrix }}
+      databases: ${{ steps.plan.outputs.database_matrices }}
     steps:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -184,24 +182,24 @@ jobs:
             artifacts/code-quality/**
           if-no-files-found: error
           retention-days: 90
-  comparison-preflight:
-    name: Check database / ${{ matrix.id }}
+  comparison-keyload:
+    name: KeyLoad / ${{ matrix.label }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
     permissions: {contents: read, actions: read}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-plan.outputs.preflight) }}
-    env:
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).keyload }}
+    env: &database-environment
       GH_TOKEN: ${{ github.token }}
       KEYLOAD_COMPARISON_CELL_ID: ${{ matrix.id }}
-      KEYLOAD_COMPARISON_JOB_NAME: Check database / ${{ matrix.id }}
+      KEYLOAD_COMPARISON_JOB_NAME: ${{ matrix.jobName }}
       Benchmarks__Target: ${{ matrix.target }}
       Benchmarks__NodeCount: ${{ matrix.nodeCount }}
       Benchmarks__Scenario: ${{ matrix.scenario }}
       Benchmarks__EvidenceProfile: ${{ matrix.profile }}
-    steps:
+    steps: &database-steps
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Prepare database containers
@@ -235,7 +233,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: comparison-preflight-${{ matrix.id }}
+          name: ${{ matrix.artifactPrefix }}${{ matrix.id }}
           path: artifacts/comparisons/isolated/workers/${{ matrix.id }}/*
           if-no-files-found: error
           retention-days: 90
@@ -244,132 +242,98 @@ jobs:
         uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellTeardown
         with:
           setup-outcome: ${{ steps.images.outcome }}
-          artifact-name: comparison-preflight-qualification-${{ matrix.id }}
-  comparison-crud:
-    name: Benchmark / ${{ matrix.id }}
+          artifact-name: ${{ matrix.qualificationPrefix }}${{ matrix.id }}
+  comparison-postgresql:
+    name: PostgreSQL + pgvector / ${{ matrix.label }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
     permissions: {contents: read, actions: read}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-plan.outputs.crud) }}
-    env:
-      GH_TOKEN: ${{ github.token }}
-      KEYLOAD_COMPARISON_CELL_ID: ${{ matrix.id }}
-      KEYLOAD_COMPARISON_JOB_NAME: Benchmark / ${{ matrix.id }}
-      Benchmarks__Target: ${{ matrix.target }}
-      Benchmarks__NodeCount: ${{ matrix.nodeCount }}
-      Benchmarks__Scenario: ${{ matrix.scenario }}
-      Benchmarks__EvidenceProfile: ${{ matrix.profile }}
-    steps:
-      - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Prepare database containers
-        id: images
-        uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellSetup
-        with:
-          bundle-artifact-id: ${{ needs.comparison-images.outputs.bundle-artifact-id }}
-      - name: Restore .NET packages
-        run: dotnet restore KeyLoad.slnx
-      - name: Build benchmark tests
-        id: benchmark-build
-        run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
-      - name: Run database workload
-        id: workload
-        if: ${{ !cancelled() }}
-        env:
-          PREPARATION_OUTCOME: ${{ steps.images.outcome }}
-          BUILD_OUTCOME: ${{ steps.benchmark-build.outcome }}
-        run: |
-          if [ "$PREPARATION_OUTCOME" != success ] || [ "$BUILD_OUTCOME" != success ]; then
-            echo '::error::Benchmark preparation failed; no measurement data is available.'
-            exit 1
-          fi
-          dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=140
-      - name: Record benchmark availability
-        if: ${{ !cancelled() }}
-        env:
-          KEYLOAD_WORKLOAD_OUTCOME: ${{ steps.workload.outcome }}
-        run: node scripts/Features/BenchmarkComparisons/finalize-worker.mjs
-      - name: Save benchmark results
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: comparison-worker-${{ matrix.id }}
-          path: artifacts/comparisons/isolated/workers/${{ matrix.id }}/*
-          if-no-files-found: error
-          retention-days: 90
-      - name: Clean up containers and save logs
-        if: always()
-        uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellTeardown
-        with:
-          setup-outcome: ${{ steps.images.outcome }}
-          artifact-name: comparison-case-qualification-${{ matrix.id }}
-  comparison-specialized:
-    name: Benchmark / ${{ matrix.id }}
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).postgresql }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-qdrant:
+    name: Qdrant / ${{ matrix.label }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
     permissions: {contents: read, actions: read}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-plan.outputs.specialized) }}
-    env:
-      GH_TOKEN: ${{ github.token }}
-      KEYLOAD_COMPARISON_CELL_ID: ${{ matrix.id }}
-      KEYLOAD_COMPARISON_JOB_NAME: Benchmark / ${{ matrix.id }}
-      Benchmarks__Target: ${{ matrix.target }}
-      Benchmarks__NodeCount: ${{ matrix.nodeCount }}
-      Benchmarks__Scenario: ${{ matrix.scenario }}
-      Benchmarks__EvidenceProfile: ${{ matrix.profile }}
-    steps:
-      - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Prepare database containers
-        id: images
-        uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellSetup
-        with:
-          bundle-artifact-id: ${{ needs.comparison-images.outputs.bundle-artifact-id }}
-      - name: Restore .NET packages
-        run: dotnet restore KeyLoad.slnx
-      - name: Build benchmark tests
-        id: benchmark-build
-        run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
-      - name: Run database workload
-        id: workload
-        if: ${{ !cancelled() }}
-        env:
-          PREPARATION_OUTCOME: ${{ steps.images.outcome }}
-          BUILD_OUTCOME: ${{ steps.benchmark-build.outcome }}
-        run: |
-          if [ "$PREPARATION_OUTCOME" != success ] || [ "$BUILD_OUTCOME" != success ]; then
-            echo '::error::Benchmark preparation failed; no measurement data is available.'
-            exit 1
-          fi
-          dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=140
-      - name: Record benchmark availability
-        if: ${{ !cancelled() }}
-        env:
-          KEYLOAD_WORKLOAD_OUTCOME: ${{ steps.workload.outcome }}
-        run: node scripts/Features/BenchmarkComparisons/finalize-worker.mjs
-      - name: Save benchmark results
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: comparison-worker-${{ matrix.id }}
-          path: artifacts/comparisons/isolated/workers/${{ matrix.id }}/*
-          if-no-files-found: error
-          retention-days: 90
-      - name: Clean up containers and save logs
-        if: always()
-        uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellTeardown
-        with:
-          setup-outcome: ${{ steps.images.outcome }}
-          artifact-name: comparison-case-qualification-${{ matrix.id }}
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).qdrant }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-rabbitmq:
+    name: RabbitMQ / ${{ matrix.label }}
+    needs: [comparison-plan, comparison-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions: {contents: read, actions: read}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).rabbitmq }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-redis:
+    name: Redis / ${{ matrix.label }}
+    needs: [comparison-plan, comparison-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions: {contents: read, actions: read}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).redis }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-neo4j:
+    name: Neo4j / ${{ matrix.label }}
+    needs: [comparison-plan, comparison-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions: {contents: read, actions: read}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).neo4j }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-mongodb:
+    name: MongoDB / ${{ matrix.label }}
+    needs: [comparison-plan, comparison-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions: {contents: read, actions: read}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).mongodb }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-opensearch:
+    name: OpenSearch / ${{ matrix.label }}
+    needs: [comparison-plan, comparison-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions: {contents: read, actions: read}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).opensearch }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-kurrentdb:
+    name: KurrentDB / ${{ matrix.label }}
+    needs: [comparison-plan, comparison-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions: {contents: read, actions: read}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).kurrentdb }}
+    env: *database-environment
+    steps: *database-steps
   comparison-aggregate:
     name: Combine benchmark results
-    needs: [comparison-build, comparison-plan, comparison-images, comparison-preflight, comparison-crud, comparison-specialized]
+    needs: [comparison-build, comparison-plan, comparison-images, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb]
     if: ${{ always() && !cancelled() && needs.comparison-plan.result == 'success' && needs.comparison-images.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 150

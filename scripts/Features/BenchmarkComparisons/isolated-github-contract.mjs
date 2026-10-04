@@ -1,8 +1,10 @@
+export { isolatedJobName, matchesIsolatedJobName } from '../../../site/Features/BenchmarkComparisons/isolated-contracts.mjs';
+
 export const GH = Object.freeze({
   repository: 'managedcode/KeyLoad', workflow: 'Benchmarks', workflowPath: '.github/workflows/benchmarks.yml',
   api: 'repos/managedcode/KeyLoad/actions', host: 'github.com', apiVersion: '2022-11-28',
   imageJob: 'Build Docker images', imageArtifact: 'comparison-image-bundle', casePrefix: 'Benchmark / ',
-  preflightPrefix: 'Check database / ', artifactPrefix: 'comparison-worker-', captureDirectory: 'keyload-cell-github',
+  artifactPrefix: 'comparison-worker-', captureDirectory: 'keyload-cell-github',
   imageSteps: Object.freeze(['Check Docker image export and import', 'Save Docker images']),
   workerSteps: Object.freeze(['Run database workload', 'Save benchmark results']),
   pageSize: 100, pages: 20, items: 2000, metadataBytes: 16777216, workerZipBytes: 134217728,

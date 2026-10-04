@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 internal sealed class IsolatedPlanCliTests
 {
     [Test]
-    public async Task AcIso002CliRetainsFullPlanAndEmitsBothCompleteGithubMatrices()
+    public async Task AcIso002AndBcGroup001CliRetainsFullPlanAndEmitsNineDatabaseMatrices()
     {
         using var directory = new IsolatedPlanDirectory();
         var planPath = directory.PathFor("case plan.json");
@@ -22,12 +22,11 @@ internal sealed class IsolatedPlanCliTests
         var canonical = (await IsolatedPlanNodeProcess.ProbeAsync("create"))[IsolatedPlanFields.Value]!;
         await Assert.That(JsonNode.DeepEquals(plan, canonical)).IsTrue();
         var lines = await File.ReadAllLinesAsync(githubPath, token);
-        await Assert.That(lines.Length).IsEqualTo(4);
+        await Assert.That(lines.Length).IsEqualTo(2);
         await Assert.That(lines[0]).IsEqualTo("sentinel=preserved");
-        await VerifyMatrixAsync(lines[1], "crud_matrix=", plan[IsolatedPlanFields.Matrices]![IsolatedPlanFields.Crud]!, 108);
-        await VerifyMatrixAsync(lines[2], "specialized_matrix=", plan[IsolatedPlanFields.Matrices]![IsolatedPlanFields.Specialized]!, 162);
-        var preflight = (await IsolatedPlanNodeProcess.ProbeAsync("preflight", plan))[IsolatedPlanFields.Value]!;
-        await VerifyMatrixAsync(lines[3], "preflight_matrix=", preflight, 27);
+        const string prefix = "database_matrices=";
+        await Assert.That(lines[1].StartsWith(prefix, StringComparison.Ordinal)).IsTrue();
+        await IsolatedDatabaseMatrixAssertions.VerifyAsync(JsonNode.Parse(lines[1][prefix.Length..])!.AsObject(), plan);
     }
 
     [Test]
@@ -80,13 +79,5 @@ internal sealed class IsolatedPlanCliTests
         await Assert.That(result.ExitCode).IsEqualTo(1);
         await Assert.That(result.Output).IsEmpty();
         await Assert.That(result.Error.Trim()).IsEqualTo("Isolated comparison planning failed.");
-    }
-
-    private static async Task VerifyMatrixAsync(string line, string prefix, JsonNode expected, int count)
-    {
-        await Assert.That(line.StartsWith(prefix, StringComparison.Ordinal)).IsTrue();
-        var matrix = JsonNode.Parse(line[prefix.Length..])!;
-        await Assert.That(JsonNode.DeepEquals(matrix, expected)).IsTrue();
-        await Assert.That(matrix[IsolatedPlanFields.Include]!.AsArray().Count).IsEqualTo(count);
     }
 }

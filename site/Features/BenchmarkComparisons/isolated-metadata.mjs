@@ -1,4 +1,4 @@
-import { ISOLATED, WIRE, assertIsolated, date, exact, matches, positive, rawPath, runUrl, same } from './isolated-contracts.mjs';
+import { ISOLATED, WIRE, assertIsolated, date, exact, matches, matchesIsolatedJobName, positive, rawPath, runUrl, same } from './isolated-contracts.mjs';
 
 export function validateCohort(value) {
   assertIsolated(exact(value, WIRE.cohort) && matches(ISOLATED.sha, value.sourceRevision) && positive(value.runId) &&
@@ -14,9 +14,9 @@ export function validateOptions(value, nodeCount) {
     (nodeCount === undefined || value.topology === ISOLATED.topology[nodeCount]));
 }
 
-function validateJob(job, id, cohort, jobs, disposition) {
+function validateJob(job, cell, cohort, jobs, disposition) {
   const failed = disposition === ISOLATED.failed;
-  assertIsolated(exact(job, WIRE.job) && positive(job.id) && !jobs.has(job.id) && job.name === 'Benchmark / ' + id &&
+  assertIsolated(exact(job, WIRE.job) && positive(job.id) && !jobs.has(job.id) && matchesIsolatedJobName(job.name, cell) &&
     job.url === `${runUrl(cohort)}/job/${job.id}` && job.conclusion === (failed ? ISOLATED.failure : ISOLATED.success) &&
     Array.isArray(job.steps) && job.steps.length === ISOLATED.steps.length);
   jobs.add(job.id);
@@ -38,7 +38,7 @@ function validateArtifact(artifact, id, artifacts) {
 export function validateWorkerMetadata(worker, cell, cohort, identities, keys = WIRE.worker) {
   assertIsolated(exact(worker, keys) && same(worker, cell, ['id', 'target', 'nodeCount', 'scenario', 'profile']) &&
     worker.rawPath === rawPath(cell.id) && matches(ISOLATED.hash, worker.rawSha256));
-  validateJob(worker.job, cell.id, cohort, identities.jobs, worker.disposition);
+  validateJob(worker.job, cell, cohort, identities.jobs, worker.disposition);
   validateArtifact(worker.artifact, cell.id, identities.artifacts);
   const unsupported = ISOLATED.unsupportedTopologies.find(item => item.target === cell.target &&
     item.nodeCounts.includes(cell.nodeCount));
