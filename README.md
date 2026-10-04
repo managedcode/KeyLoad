@@ -47,6 +47,8 @@ The server uses ZoneTree.FullTextSearch for bounded derived text candidates whil
 
 A bounded lossless time-series chunk codec has [development evidence](docs/implementation/sample-chunk-codec-development-2026-10-03.json) from full Aspire unit/scalar suites and matched native-codec controls. Canonical chunk storage, rewrite/recovery and RF3 qualification remain in progress under KL-078.
 
+Canonical key validation and persisted document permissions have [development evidence](docs/implementation/keycodec-crud-development-2026-10-04.json): 2,889 tests pass in each Aspire normal/scalar suite and 228 recovery tests pass, with 1,000 unique atomic process-crash trials. This includes invariant decimal keys, malformed-input bounds, owned storage bytes, CRUD revisions, index rollback and isolated field/row authorization controls. Complete delivered-source Linux and Docker/Aspire RF3 qualification remain pending.
+
 ## Get started
 
 Install the .NET SDK selected in [global.json](global.json) and Docker, then build from the repository root:

@@ -18,6 +18,9 @@ public static class KeyCodec
 {
     /// <summary>Gets the version byte written at the start of every encoded key.</summary>
     public const byte Version = 1;
+    private const int MaximumComponents = 256;
+    private const string TooManyComponentsMessage = "Key component count exceeds the supported limit.";
+    private const string InvalidTextMessage = "Key text is not valid Unicode.";
     private static readonly UTF8Encoding Utf8 = new(false, true);
 
     /// <summary>Encodes the supplied components into a version 1 sortable binary key.</summary>
@@ -28,6 +31,10 @@ public static class KeyCodec
     public static byte[] Encode(params object?[] components)
     {
         ArgumentNullException.ThrowIfNull(components);
+        if (components.Length > MaximumComponents)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, TooManyComponentsMessage);
+        }
 
         using var stream = new MemoryStream();
         stream.WriteByte(Version);
@@ -54,6 +61,11 @@ public static class KeyCodec
         var offset = 1;
         while (offset < key.Length)
         {
+            if (values.Count == MaximumComponents)
+            {
+                throw BadKey();
+            }
+
             var tag = key[offset++];
             object? value = tag switch
             {
@@ -63,16 +75,12 @@ public static class KeyCodec
                 0x30 => unchecked((long)(ReadUInt64(key, ref offset) ^ (1UL << 63))),
                 0x31 => KeyCodecDecimal.Read(key, ref offset),
                 0x32 => ReadDouble(key, ref offset),
-                0x40 => new DateTimeOffset(unchecked((long)(ReadUInt64(key, ref offset) ^ (1UL << 63))), TimeSpan.Zero),
-                0x50 => Utf8.GetString(ReadEscaped(key, ref offset)),
+                0x40 => ReadTimestamp(key, ref offset),
+                0x50 => ReadText(key, ref offset),
                 0x60 => ReadEscaped(key, ref offset),
                 _ => throw BadKey()
             };
             values.Add(value);
-            if (values.Count > 256)
-            {
-                throw BadKey();
-            }
         }
         return values.ToArray();
     }
@@ -160,7 +168,14 @@ public static class KeyCodec
     private static void WriteText(Stream stream, string value)
     {
         stream.WriteByte(0x50);
-        WriteEscaped(stream, Utf8.GetBytes(value));
+        try
+        {
+            WriteEscaped(stream, Utf8.GetBytes(value));
+        }
+        catch (EncoderFallbackException)
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidTextMessage);
+        }
     }
 
     private static void WriteBinary(Stream stream, byte[] value)
@@ -181,34 +196,6 @@ public static class KeyCodec
         }
         stream.WriteByte(0);
         stream.WriteByte(0);
-    }
-
-    private static byte[] ReadEscaped(ReadOnlySpan<byte> key, ref int offset)
-    {
-        using var bytes = new MemoryStream();
-        while (offset < key.Length)
-        {
-            var b = ReadByte(key, ref offset);
-            if (b != 0)
-            {
-                bytes.WriteByte(b);
-                continue;
-            }
-
-            var escape = ReadByte(key, ref offset);
-            if (escape == 0)
-            {
-                return bytes.ToArray();
-            }
-
-            if (escape != 0xFF)
-            {
-                throw BadKey();
-            }
-
-            bytes.WriteByte(0);
-        }
-        throw BadKey();
     }
 
 }

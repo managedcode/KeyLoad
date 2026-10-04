@@ -470,3 +470,39 @@ retain every tracked base file and only its declared overlays. Its results prove
 only that image, not a green shared checkout or delivered GitHub qualification.
 Images containing cancelled R19 overlays remain historical evidence and cannot
 qualify the final five-source delivery. Required exact-source CI/RF3 gates remain.
+
+## 2026-10-04 same-body nullable allocation warmup
+
+TASK-IS-ALLOCATION-WARM-BODY is accepted under the owner's complete104-task
+acceptance instruction. The original full Aspire normal report again measured
+Normalize262480B and Require262144B on unchanged production serialization source,
+while all other2885 cases passed. Scheduling isolation alone therefore does not
+establish a repeatable warmed measurement. Preserve that original failed report;
+no specific CLR/GC/cache cause is proven by its336B difference.
+
+Root owns only NativeWireSupportedScalarAllocationTests and this mapped
+REQ/AC-IS-PERF005 verification correction. Its nullable control uses two named,
+non-inlined synchronous measurement helpers, each containing the original4096
+iterations, existing types and current-thread allocation counters. Warm those
+EXACT helper bodies32 times before measuring each once. This supersedes only the
+old warmup-loop shape: it warms the actual measured IL instead of a separate
+short loop. Terminal0B control, exact nullable equality, last-normalized type,
+NotInParallel exclusion and all production code remain unchanged. Both counters,
+data creation and assertions retain their original synchronous/outside-window
+boundaries. No tolerance, inequality, min selection, retries, GC manipulation,
+runtime switch, skip or package replacement is accepted.
+
+Review the one-file diff, run the strict build/formatter/governance, then run the
+focused allocation control and complete normal/scalar/recovery suites through
+Aspire. Retain source/runtime before/after inventories and original reports;
+exact delivered-source Linux qualification remains separate. Rollback restores
+only the test helper/warmup shape. No persisted/public format or product boundary
+changes, so the existing ADR is sufficient.
+
+The [2026-10-04 development receipt](../implementation/keycodec-crud-development-2026-10-04.json)
+retains the failed nullable allocation control and the same-body warmup repair.
+Both original exact controls pass in full Aspire normal/scalar2889/2889 suites;
+recovery228/228 passes with unchanged complete source/runtime inventories.
+No tolerance, product cache, runtime switch or allocation bound was changed.
+This is local development evidence; exact delivered-source Linux and RF3
+qualification and comparative performance remain required.

@@ -7,6 +7,11 @@ namespace KeyLoad.Storage;
 
 internal static class KeyCodecDecimal
 {
+    private const int MinimumExponent = -27;
+    private const int MaximumExponent = 29;
+    private const int MaximumScale = 28;
+    private const string MaximumCoefficient = "79228162514264337593543950335";
+
     internal static void Write(Stream stream, decimal value)
     {
         stream.WriteByte(0x31);
@@ -46,10 +51,61 @@ internal static class KeyCodecDecimal
             throw BadKey();
         }
 
-        var exponent = ReadExponent(key, ref offset, sign);
+        var exponent = ReadExponent(key, ref offset, sign) - 64;
         var digits = ReadDigits(key, ref offset, sign);
-        return decimal.Parse($"{(sign == 0 ? "-" : "")}{digits}e{exponent - 64 - digits.Length}",
-            NumberStyles.Float, CultureInfo.InvariantCulture);
+        if (digits[0] == '0' || digits[^1] == '0')
+        {
+            throw BadKey();
+        }
+
+        var scale = digits.Length - exponent;
+        if (!IsRepresentableMagnitude(digits, exponent, scale))
+        {
+            throw BadKey();
+        }
+
+        var text = string.Create(CultureInfo.InvariantCulture, $"{(sign == 0 ? "-" : "")}{digits}e{exponent - digits.Length}");
+        if (!decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
+            || value == 0 || !HasExpectedScaleAndSign(value, sign, Math.Max(0, scale)))
+        {
+            throw BadKey();
+        }
+
+        return value;
+    }
+
+    private static bool IsRepresentableMagnitude(string digits, int exponent, int scale)
+    {
+        if (exponent is < MinimumExponent or > MaximumExponent || scale > MaximumScale)
+        {
+            return false;
+        }
+
+        var integerDigits = Math.Max(digits.Length, exponent);
+        if (integerDigits < MaximumCoefficient.Length)
+        {
+            return true;
+        }
+
+        for (var index = 0; index < MaximumCoefficient.Length; index++)
+        {
+            var digit = index < digits.Length ? digits[index] : '0';
+            if (digit != MaximumCoefficient[index])
+            {
+                return digit < MaximumCoefficient[index];
+            }
+        }
+
+        return true;
+    }
+
+    private static bool HasExpectedScaleAndSign(decimal value, byte sign, int expectedScale)
+    {
+        Span<int> parts = stackalloc int[4];
+        _ = decimal.GetBits(value, parts);
+        var actualScale = (parts[3] >> 16) & 0xFF;
+        var isNegative = (parts[3] & int.MinValue) != 0;
+        return actualScale == expectedScale && isNegative == (sign == 0);
     }
 
     private static byte ReadExponent(ReadOnlySpan<byte> key, ref int offset, byte sign)

@@ -1,5 +1,30 @@
 # StorageRecovery
 
+## KL-007 v1 key and captured-envelope completion
+
+The accepted [ADR-005 validation contract](../ADR/ADR-005-canonical-keyspace-codec.md#2026-10-04-v1-validation-and-ownership-completion)
+preserves valid durable key bytes and defines explicit normalization, arity and
+safe malformed-input errors. The [2026-10-04 development receipt](../implementation/keycodec-crud-development-2026-10-04.json)
+records14 new KeyCodec cases plus4 original cases in full Aspire normal/scalar
+suites at2889/2889 each, recovery228/228 and1000 unique atomic process cuts.
+Complete source/runtime inventories remain unchanged across those three suites.
+Exact delivered-source Linux and Docker/Aspire RF3 qualification remain pending;
+process-kill evidence does not qualify power-loss durability.
+
+| Requirement | Measurable acceptance and owned TUnit mapping |
+|---|---|
+| REQ-KEYCODEC-001: preserve ordered v1 bytes and explicit type normalization | AC-KEYCODEC-001: original goldens and10,000 seeded decimals stay exact; an independent10,000 mixed-type/composite corpus roundtrips to the defined normalized values and sorts by a semantic oracle; negatives, valid Unicode/escaping, all type tags and extrema pass. Fractional decimal literal vectors retain their bytes and decode exactly under InvariantCulture and a custom CurrentCulture with a non-ASCII negative sign. New KeyCodecMixedCorpus/KeyCodecMixedCorpusTests, KeyCodecGoldenContractTests and KeyCodecCultureContractTests under UnitTests/Features/StorageRecovery. |
+| REQ-KEYCODEC-002: corrupted input fails through safe typed errors | AC-KEYCODEC-002: literal invalid/truncated UTF-8, escapes, scalars, bool/tags, timestamp extrema violations, decimal overflow/rounding/underflow and noncanonical numeric forms return exact Corruption; empty/unknown versions remain FormatUnsupported. New KeyCodecMalformedContractTests; no payload values in messages. |
+| REQ-KEYCODEC-003: writer and reader share finite component bounds | AC-KEYCODEC-003:0,1 and256 components encode/decode exactly;257 writer input fails ResourceExhausted before encoding an unsupported component and257 persisted components fail Corruption before decoding the final malformed component. Invalid UTF-16/nonfinite input gives Validation and unsupported CLR types UnsupportedCapability. New KeyCodecInputContractTests. |
+| REQ-KEYCODEC-004: native captured envelopes cannot alias canonical storage to caller-owned buffers | AC-KEYCODEC-004: actual ZoneTree staging copies input key/value before mutation/pool reuse; mutating a returned independently owned KeyValueRecord does not change committed bytes; generated existing envelope roundtrip and real reopen preserve the exact original content. New KeyCodecEnvelopeOwnershipTests, existing permanent native aliases/Ids, real provider only. |
+
+Canonical map: shared codec/storage carriers in Abstractions/Storage and new
+cohesive validation helpers in Abstractions/Features/StorageRecovery; provider
+ownership in Storage.ZoneTree/Features/StorageRecovery; matching real-provider
+UnitTests/Features/StorageRecovery. Root owns this spec, ADR/task graph and final
+evidence. Physical placement, apply/replication/native WAL authority and public
+JSON stay unchanged. UI/SDK/MCP schema work N/A: no new wire operation.
+
 ## Native data epoch and explicit offline copy upgrade
 
 [ADR-077](../ADR/ADR-077-offline-native-data-epoch.md) freezes KL-043's supported

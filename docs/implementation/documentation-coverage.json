@@ -10372,6 +10372,408 @@
         "developmentEvidence": [
           "docs/implementation/native-async-search-development-2026-10-03.json"
         ]
+      },
+      {
+        "id": "TASK-KEYCODEC-CONTRACT",
+        "owner": "root_high_capability",
+        "modelTier": "strong_planning_integration_review",
+        "permissions": "ADR005_StorageRecovery_REQ_KEYCODEC_task_graph_only",
+        "contracts": [
+          "docs/ADR/ADR-005-canonical-keyspace-codec.md"
+        ],
+        "requirements": [
+          "REQ-KEYCODEC-001",
+          "REQ-KEYCODEC-002",
+          "REQ-KEYCODEC-003",
+          "REQ-KEYCODEC-004"
+        ],
+        "acceptanceIds": [
+          "AC-KEYCODEC-001",
+          "AC-KEYCODEC-002",
+          "AC-KEYCODEC-003",
+          "AC-KEYCODEC-004"
+        ],
+        "backlog": [
+          "KL-007"
+        ],
+        "dependencies": [],
+        "startCondition": "owner_all104_instruction_actual_source_audit_and_preserved_valid_v1_bytes",
+        "artifacts": [
+          "explicit_v1_normalization_256_component_typed_corruption_and_captured_storage_ownership_contract"
+        ],
+        "verification": [
+          "root_complete_diff_review",
+          "full_strict_Release_build",
+          "full_formatter_governance",
+          "actual_Aspire_full_normal_scalar_and_process_recovery",
+          "exact_source_Linux_Docker_Aspire_RF3_original_artifacts"
+        ],
+        "state": "accepted_root_frozen_20261004_before_worker_write_release",
+        "joinCondition": "valid_golden_and_frozen_identity_bytes_unchanged_no_alias_format_or_authority_migration"
+      },
+      {
+        "id": "TASK-KEYCODEC-VALIDATION",
+        "owner": "query_wave_gpt_6_luna_high",
+        "modelTier": "cost_efficient_bounded_coding",
+        "permissions": [
+          "src/KeyLoad.Abstractions/Storage/KeyCodec.cs",
+          "src/KeyLoad.Abstractions/Storage/KeyCodecDecimal.cs",
+          "src/KeyLoad.Abstractions/Features/StorageRecovery/KeyCodecReadPrimitives.cs",
+          "new_src/KeyLoad.Abstractions/Features/StorageRecovery/KeyCodec_validation_helpers_only"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-005-canonical-keyspace-codec.md"
+        ],
+        "requirements": [
+          "REQ-KEYCODEC-001",
+          "REQ-KEYCODEC-002",
+          "REQ-KEYCODEC-003"
+        ],
+        "acceptanceIds": [
+          "AC-KEYCODEC-001",
+          "AC-KEYCODEC-002",
+          "AC-KEYCODEC-003"
+        ],
+        "backlog": [
+          "KL-007"
+        ],
+        "dependencies": [
+          "TASK-KEYCODEC-CONTRACT"
+        ],
+        "startCondition": "root_explicit_write_release_after_f7e394f_stage_commit_push_and_frozen_contract",
+        "artifacts": [
+          "safe_typed_malformed_key_errors_and_symmetric_arity_without_valid_writer_byte_change"
+        ],
+        "verification": [
+          "root_complete_diff_review",
+          "full_strict_Release_build",
+          "full_formatter_governance",
+          "actual_Aspire_full_normal_scalar_and_process_recovery",
+          "exact_source_Linux_Docker_Aspire_RF3_original_artifacts"
+        ],
+        "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
+        "joinCondition": "all_valid_v1_keys_roundtrip_and_no_new_format_copy_suppression_or_exception_payload_leak",
+        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+      },
+      {
+        "id": "TASK-KEYCODEC-ORACLES",
+        "owner": "lifecycle_wave_gpt_6_luna_high",
+        "modelTier": "cost_efficient_bounded_coding",
+        "permissions": "new_KeyCodec_prefixed_UnitTests_Features_StorageRecovery_files_only",
+        "contracts": [
+          "docs/ADR/ADR-005-canonical-keyspace-codec.md"
+        ],
+        "requirements": [
+          "REQ-KEYCODEC-001",
+          "REQ-KEYCODEC-002",
+          "REQ-KEYCODEC-003",
+          "REQ-KEYCODEC-004"
+        ],
+        "acceptanceIds": [
+          "AC-KEYCODEC-001",
+          "AC-KEYCODEC-002",
+          "AC-KEYCODEC-003",
+          "AC-KEYCODEC-004"
+        ],
+        "backlog": [
+          "KL-007"
+        ],
+        "dependencies": [
+          "TASK-KEYCODEC-CONTRACT"
+        ],
+        "startCondition": "root_explicit_write_release_after_frozen_exact_error_normalization_and_ownership_contract",
+        "artifacts": [
+          "independent10000_mixed_semantic_order_and_normalized_roundtrip_corpus",
+          "literal_malformed_and_preserved_golden_vectors",
+          "actual_ZoneTree_captured_key_value_pool_and_owned_result_isolation_reopen_native_envelope_oracles"
+        ],
+        "verification": [
+          "root_complete_diff_review",
+          "full_strict_Release_build",
+          "full_formatter_governance",
+          "actual_Aspire_full_normal_scalar_and_process_recovery",
+          "exact_source_Linux_Docker_Aspire_RF3_original_artifacts"
+        ],
+        "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
+        "joinCondition": "existing_goldens_unchanged_independent_oracles_real_store_no_mock_skip_or_deep_CLR_immutability_claim",
+        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+      },
+      {
+        "id": "TASK-DSTORE-MUTATION-MATRIX",
+        "owner": "cluster_wave_gpt_6_luna_high",
+        "modelTier": "cost_efficient_bounded_regression_coding",
+        "permissions": "new_UnitTests_Features_DocumentStorage_DocumentCrudRevision_DocumentPutValidationAtomicity_DocumentScalarIndexMutation_DocumentFieldMutationAuthorization_DocumentRowTenantMutationAuthorization_and_cohesive_fixture_files_only",
+        "contracts": [
+          "docs/Features/DocumentStorage.md",
+          "docs/ADR/ADR-005-canonical-keyspace-codec.md",
+          "docs/ADR/ADR-014-principals-rbac-row-policy.md"
+        ],
+        "requirements": [
+          "REQ-DSTORE-001",
+          "REQ-DSTORE-002",
+          "REQ-DSTORE-003"
+        ],
+        "acceptanceIds": [
+          "AC-DSTORE-001",
+          "AC-DSTORE-002",
+          "AC-DSTORE-003"
+        ],
+        "backlog": [
+          "KL-010",
+          "KL-011",
+          "KL-015"
+        ],
+        "dependencies": [],
+        "startCondition": "root_reviewed_corrected_tmp_draft_and_frozen_existing_semantics_feature_mapping_before_explicit_write_release",
+        "artifacts": [
+          "exact_CRUD_tombstone_recreate_revisions",
+          "mutation_path_duplicate_depth_bytes_atomic_rollback",
+          "persisted_scalar_index_transitions_unique_partition_isolation",
+          "persisted_field_row_tenant_denials_and_healthy_owner_followup"
+        ],
+        "verification": [
+          "root_complete_diff_review",
+          "full_strict_Release_build",
+          "full_formatter_governance",
+          "actual_Aspire_full_normal_scalar_and_process_recovery",
+          "exact_source_Linux_Docker_Aspire_RF3_original_artifacts"
+        ],
+        "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
+        "joinCondition": "unchanged_product_errors_authority_and_atomicity_no_duplicate_existing_CAS_or_weakened_assertions",
+        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+      },
+      {
+        "id": "TASK-DEPENDENCY-CLOSURE-DISCOVERY",
+        "owner": "query_wave_gpt_6_luna_high",
+        "modelTier": "cost_efficient_readonly_research",
+        "permissions": "read_only_repository_assets_and_exact_cached_nupkg_metadata; write_private_tmp_report_only",
+        "requirements": [
+          "REQ-TEST-004"
+        ],
+        "acceptanceIds": [
+          "AC-TEST-004"
+        ],
+        "backlog": [
+          "KL-001"
+        ],
+        "dependencies": [],
+        "startCondition": "root_verified_current39_pins_and_fresh_restore_all26_graphs_unchanged_no_dependency_defect_claim",
+        "artifacts": [
+          "actual_resolved_transitive_native_compression_license_source_inventory_draft",
+          "docs/implementation/dependency-closure-2026-10-04.json"
+        ],
+        "verification": [
+          "all26_actual_resolved_graphs_exact_cache_metadata_paths_and_hashes",
+          "root_review_before_repository_join"
+        ],
+        "state": "readonly_root_review_and_all222_artifact_hashes_verified_20261004",
+        "joinCondition": "no_feed_latest_legal_or_platform_support_claim_no_repository_package_policy_change"
+      },
+      {
+        "id": "TASK-EPOCH-RF3-BOOTSTRAP-DISCOVERY",
+        "owner": "cluster_wave_gpt_6_luna_high",
+        "modelTier": "cost_efficient_readonly_research",
+        "permissions": "read_only_current_and_immutable_prior_source; write_private_tmp_report_only",
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "requirements": [
+          "REQ-STORAGE-007"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-006"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "dependencies": [],
+        "startCondition": "root_reviewed_cold_upgrade_join_discovery_actual_one_source_vs_three_source_bootstrap_question",
+        "artifacts": [
+          "exact_consensus_bootstrap_old_product_seed_prior_source_driver_options_and_constraints"
+        ],
+        "verification": [
+          "owning_source_line_evidence",
+          "root_decision_before_any_implementation"
+        ],
+        "state": "readonly_ready_for_explicit_worker_release",
+        "joinCondition": "no_fake_old_image_receipt_node_identity_or_invented_legacy_bytes_no_source_build_runtime_mutation"
+      },
+      {
+        "id": "TASK-EPOCH-PRIOR-SEED-DISCOVERY",
+        "owner": "lifecycle_wave_gpt_6_luna_high",
+        "modelTier": "cost_efficient_readonly_research",
+        "permissions": "read_only_current_drivers_and_immutable_prior_source; write_private_tmp_report_only",
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "requirements": [
+          "REQ-STORAGE-007"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-006"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "dependencies": [],
+        "startCondition": "current_native5_probe_genuine_but_only_generic_raw_seed_missing_persisted_product_auth_and_samples",
+        "artifacts": [
+          "actual_prior_DatabaseEngine_bootstrap_principal_sample_append_profile_seed_API_inventory"
+        ],
+        "verification": [
+          "exact_prior_source_revision_tree_and_owning_source_lines",
+          "root_contract_before_any_driver_change"
+        ],
+        "state": "readonly_ready_for_explicit_worker_release",
+        "joinCondition": "no_old_provider_serializer_patch_manual_legacy_bytes_fake_server_image_or_unowned_secret_receipt"
+      },
+      {
+        "id": "TASK-CACHE-REALCLOCK-ISOLATION",
+        "owner": "root",
+        "modelTier": "planning_integration_final_review",
+        "permissions": [
+          "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheReadPermitAcceptanceTests.cs",
+          "docs/Features/ResourceExecution.md"
+        ],
+        "requirements": [
+          "REQ-CACHE-004",
+          "REQ-CACHE-007"
+        ],
+        "acceptanceIds": [
+          "AC-CACHE-012",
+          "AC-CACHE-010"
+        ],
+        "backlog": [
+          "KL-040",
+          "KL-076",
+          "KL-077"
+        ],
+        "dependencies": [],
+        "startCondition": "original_full2886_Aspire_report_retained_with_prepare_age_pass_but_receipt_age_upper_failure_under_parallel_verification",
+        "artifacts": [
+          "one_method_only_keyless_TUnit_NotInParallel_preserving_every_clock_bound_assertion_and_production_permit"
+        ],
+        "verification": [
+          "full_strict_Release_build",
+          "full_formatter_governance",
+          "Aspire_full_normal_scalar_recovery_originals",
+          "delivered_exact_source_Linux_RF3_CI"
+        ],
+        "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
+        "joinCondition": "no_scope_expansion_clock_double_tolerance_timeout_retry_skip_or_production_change",
+        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+      },
+      {
+        "id": "TASK-IS-ALLOCATION-WARM-BODY",
+        "owner": "root",
+        "modelTier": "planning_integration_final_review",
+        "permissions": [
+          "tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeWireSupportedScalarAllocationTests.cs",
+          "docs/ADR/ADR-060-native-internal-serialization.md",
+          "docs/Features/InternalSerialization.md",
+          "docs/Features/InternalSerialization/Acceptance.md"
+        ],
+        "requirements": [
+          "REQ-IS-PERF005"
+        ],
+        "acceptanceIds": [
+          "AC-IS-PERF005"
+        ],
+        "backlog": [
+          "KL-077"
+        ],
+        "dependencies": [],
+        "startCondition": "retained_original_Aspire_unit2885_of2886_on_unchanged_production_source_and_verified_before_after_inventories; exact_nullable_control_repeated_baseline_only336B_delta_despite_existing_NotInParallel",
+        "artifacts": [
+          "same_noninlined_synchronous4096_body_used_for32_warm_windows_and_one_measured_window_per_control",
+          "both_exact_original_assertions_retained_and_no_production_source_change"
+        ],
+        "verification": [
+          "focused_Aspire_allocation_control",
+          "strict_Release_full_build_formatter_governance",
+          "full_Aspire_normal_scalar_recovery_original_reports_and_unchanged_source_runtime",
+          "exact_delivered_source_Linux_CI"
+        ],
+        "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
+        "joinCondition": "no_tolerance_inequality_min_retry_GC_runtime_switch_skip_or_product_cache_change",
+        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+      },
+      {
+        "modelTier": "cost_efficient_bounded_coding",
+        "dependencies": [],
+        "startCondition": "root_canonical_contract_accepted_20261004_after_unchanged_normal3_scalar1_snapshots_then_explicit_write_release",
+        "verification": [
+          "root_complete_diff_review",
+          "full_strict_Release_build_formatter_governance",
+          "actual_Aspire_full_normal_scalar_and_process_recovery_originals",
+          "exact_delivered_source_Linux_Docker_Aspire_RF3"
+        ],
+        "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
+        "id": "TASK-KEYCODEC-CULTURE",
+        "owner": "query_wave_gpt_6_luna_high",
+        "permissions": [
+          "src/KeyLoad.Abstractions/Storage/KeyCodecDecimal.cs_invariant_parse_text_only",
+          "new_tests/KeyLoad.UnitTests/Features/StorageRecovery/KeyCodecCultureContractTests.cs"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-005-canonical-keyspace-codec.md",
+          "docs/Features/StorageRecovery.md"
+        ],
+        "requirements": [
+          "REQ-KEYCODEC-001"
+        ],
+        "acceptanceIds": [
+          "AC-KEYCODEC-001"
+        ],
+        "backlog": [
+          "KL-007"
+        ],
+        "artifacts": [
+          "invariant_parse_text_preserving_writer_bytes",
+          "literal_positive_negative_fractional_decimal_custom_culture_oracle"
+        ],
+        "joinCondition": "no_writer_byte_or_native_alias_change_no_global_default_culture_mutation_restore_CurrentCulture_in_finally",
+        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+      },
+      {
+        "modelTier": "cost_efficient_bounded_coding",
+        "dependencies": [],
+        "startCondition": "root_canonical_contract_accepted_20261004_after_unchanged_normal3_scalar1_snapshots_then_explicit_write_release",
+        "verification": [
+          "root_complete_diff_review",
+          "full_strict_Release_build_formatter_governance",
+          "actual_Aspire_full_normal_scalar_and_process_recovery_originals",
+          "exact_delivered_source_Linux_Docker_Aspire_RF3"
+        ],
+        "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
+        "id": "TASK-DSTORE-FIELD-MUTATION-ORACLES",
+        "owner": "cluster_wave_gpt_6_luna_high",
+        "permissions": [
+          "new_tests/KeyLoad.UnitTests/Features/DocumentStorage/DocumentReplacementFieldAuthorizationTests.cs",
+          "new_tests/KeyLoad.UnitTests/Features/DocumentStorage/DocumentDeleteIndexAuthorizationTests.cs"
+        ],
+        "contracts": [
+          "docs/Features/DocumentStorage.md",
+          "docs/Features/Authorization.md"
+        ],
+        "requirements": [
+          "REQ-DSTORE-003",
+          "REQ-AUTH-006"
+        ],
+        "acceptanceIds": [
+          "AC-DSTORE-003"
+        ],
+        "backlog": [
+          "KL-010",
+          "KL-011",
+          "KL-015"
+        ],
+        "artifacts": [
+          "replacement_isolated_missing_write_grant_denial_then_valid_control",
+          "Delete_isolated_missing_index_use_denial_then_valid_control_without_field_write"
+        ],
+        "joinCondition": "real_persisted_principals_ZoneTree_and_exact_revision_JSON_index_oracles_no_new_Delete_field_write_semantics",
+        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
       }
     ],
     "qualificationRule": "Neither presence of source nor a local development result closes a full task. Preserve exact-source Linux fault/endurance and publication gates.",
@@ -10382,7 +10784,20 @@
       "docs/implementation/native-full-text-development-2026-10-03.json",
       "docs/implementation/full-unit-repair-development-2026-10-03.json",
       "docs/implementation/sample-chunk-codec-development-2026-10-03.json",
-      "docs/implementation/native-async-search-development-2026-10-03.json"
+      "docs/implementation/native-async-search-development-2026-10-03.json",
+      {
+        "scope": "KeyCodec_native_DocumentStorage_CRUD_and_oracle_completion",
+        "receipt": "docs/implementation/keycodec-crud-development-2026-10-04.json",
+        "newKeyCodecCases": 14,
+        "newCrudCases": 8,
+        "normalUnit": 2889,
+        "scalarUnit": 2889,
+        "recovery": 228,
+        "atomicCrashTrials": 1000,
+        "unchangedSourceAndRuntime": true,
+        "exactDeliveredSourceLinuxQualified": false,
+        "dockerAspireRf3Qualified": false
+      }
     ]
   }
 }

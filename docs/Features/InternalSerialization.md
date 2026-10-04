@@ -96,3 +96,11 @@ remain separate from the historical image that produced this pair.
 The owner cancelled the unrelated process-helper repair branch. This delivery
 contains only the admission shortcut and its four scalar regression files;
 source-image results containing cancelled helpers remain historical evidence.
+
+The 2026-10-04 ADR060 verification correction warms the nullable allocation
+control's exact non-inlined synchronous measurement helpers32 times, using the
+same4096-iteration bodies subsequently measured once. Exact0B/equality and all
+production serialization semantics remain unchanged. The original full-suite
+336B baseline-only difference remains retained as a failed run; this correction
+requires fresh complete Aspire normal/scalar reports and exact-source Linux
+qualification before claiming the gate.

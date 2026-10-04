@@ -332,8 +332,20 @@
       "Directory.Packages.props",
       "global.json",
       "docs/implementation/dependency-survey.json",
-      ".github/workflows/ci.yml"
-    ]
+      ".github/workflows/ci.yml",
+      "docs/implementation/dependency-closure-2026-10-04.json",
+      "docs/implementation/keycodec-crud-development-2026-10-04.json"
+    ],
+    "developmentQualification": {
+      "receipt": "docs/implementation/keycodec-crud-development-2026-10-04.json",
+      "centralPins": 39,
+      "resolvedPackageVersions": 222,
+      "projects": 26,
+      "unusedCentralPinRemoved": "ManagedCode.Storage.Orleans10.0.13",
+      "resolvedGraphsUnchanged": true,
+      "allCachedPackageArtifactsIndependentlyHashed": true,
+      "globalLinuxCleanRestoreNativeLicenseAndPlatformGates": "pending"
+    }
   },
   "KL-002": {
     "title": "Формальні API та consistency contracts",
@@ -612,8 +624,28 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Storage/KeyCodec.cs",
-      "tests/KeyLoad.UnitTests/KeyCodecTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/KeyCodecTests.cs",
+      "src/KeyLoad.Abstractions/Features/StorageRecovery/KeyCodecReadPrimitives.cs",
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery",
+      "docs/implementation/keycodec-crud-development-2026-10-04.json"
+    ],
+    "qualification": {
+      "sourceStage": "root_reviewed_valid_v1_preserving_validation_and_invariant_decimal_read",
+      "runtimeQualified": false,
+      "localDevelopment": {
+        "newKeyCodecCases": 14,
+        "originalKeyCodecCases": 4,
+        "normalUnit": 2889,
+        "scalarUnit": 2889,
+        "recovery": 228,
+        "unchangedSourceAndRuntime": true
+      },
+      "receipt": "docs/implementation/keycodec-crud-development-2026-10-04.json",
+      "remaining": [
+        "exact_delivered_source_Linux_full_gates",
+        "actual_Docker_Aspire_RF3_SDK_and_official_MCP_complete_qualification"
+      ]
+    }
   },
   "KL-008": {
     "title": "Storage adapter і lifetime",
@@ -638,8 +670,26 @@
     "evidence": [
       "src/KeyLoad.Core/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
-      "tests/KeyLoad.UnitTests/TransactionTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/TransactionTests.cs",
+      "tests/KeyLoad.UnitTests/Features/DocumentStorage",
+      "docs/implementation/keycodec-crud-development-2026-10-04.json"
+    ],
+    "qualification": {
+      "sourceStage": "real_ZoneTree_CRUD_revision_validation_index_and_persisted_policy_matrix",
+      "runtimeQualified": false,
+      "localDevelopment": {
+        "newCrudCases": 8,
+        "normalUnit": 2889,
+        "scalarUnit": 2889,
+        "recovery": 228,
+        "unchangedSourceAndRuntime": true
+      },
+      "receipt": "docs/implementation/keycodec-crud-development-2026-10-04.json",
+      "remaining": [
+        "exact_delivered_source_Linux_full_gates",
+        "actual_Docker_Aspire_RF3_SDK_and_official_MCP_complete_qualification"
+      ]
+    }
   },
   "KL-011": {
     "title": "Strict indexes і unique scope",
@@ -1007,7 +1057,8 @@
       "src/KeyLoad.Core/ReadExecutionBudget.cs",
       "tests/KeyLoad.UnitTests/ReadExecutionTests.cs",
       "docs/design/bounded-reads.md",
-      "docs/design/command-admission.md"
+      "docs/design/command-admission.md",
+      "docs/implementation/keycodec-crud-development-2026-10-04.json"
     ],
     "disposableCacheWorkstream": {
       "status": "R100_wire_source_review_approved_R104_exact5bb_RF3_pass_verify_failed_R115_Node_source21_join_approved_current_full_development_failed_other_owner_SiteTests21_native_pending",
@@ -1408,7 +1459,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Contracts.cs",
-      "src/KeyLoad.Core/Messaging.cs"
+      "src/KeyLoad.Core/Messaging.cs",
+      "docs/implementation/keycodec-crud-development-2026-10-04.json"
     ]
   },
   "KL-077": {
@@ -1422,7 +1474,8 @@
       "docs/ADR/ADR-035-memory-performance.md",
       "tests/KeyLoad.UnitTests/Features/Search/VectorMetricValidationTests.cs",
       "tests/KeyLoad.UnitTests/Features/Search/VectorMetricGoldenTests.cs",
-      "docs/implementation/performance-source-r11.json"
+      "docs/implementation/performance-source-r11.json",
+      "docs/implementation/keycodec-crud-development-2026-10-04.json"
     ],
     "simd": {
       "ownerDirection": "confirmed_SIMD_dotNET_intrinsics_first_Rust_after_profiling",

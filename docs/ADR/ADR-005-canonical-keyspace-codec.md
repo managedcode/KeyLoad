@@ -32,3 +32,77 @@ flowchart LR
     Store --> Range[Deterministic bounded range]
     Codec --> Golden[Golden compatibility vectors]
 ```
+
+## 2026-10-04 v1 validation and ownership completion
+
+KL-007 adds REQ-KEYCODEC-001..004 and AC-KEYCODEC-001..004 in
+[StorageRecovery](../Features/StorageRecovery.md). This freezes validation of
+the existing format; every byte emitted for a supported valid existing key
+remains unchanged. Identity digests, native aliases/Ids, data epoch6, journals,
+RF3 and public wire DTOs remain unchanged. No format migration is introduced.
+
+The v1 type order is missing10, null11, bool20, int64/normalized int30, decimal31,
+finite double32, UTC timestamp40, UTF-8 string50, and byte array60 (hex tags).
+Guid is an existing input convenience normalized to its lowercase `N` string;
+it is not a separate tagged type. Timestamps normalize their comparison identity
+to UTC; decimal scale and floating signed zero normalize numeric identity.
+Different numeric tags remain different types. Preserve these mappings and
+UTF-8 ordinal ordering, including zero escaping and composite prefix ordering.
+
+| Boundary | Frozen result |
+|---|---|
+| Encode0..256 components | Exact existing valid writer bytes; empty composite is version byte1 |
+| Encode257+ components | ResourceExhausted before buffer creation or component encoding |
+| Unsupported CLR component | Existing UnsupportedCapability |
+| Nonfinite double or invalid UTF-16 string | Validation with a constant safe message |
+| Empty/unknown key version | Existing FormatUnsupported |
+| Invalid/truncated tag, scalar, escape, UTF-8, timestamp or decimal | Corruption with a constant safe message |
+| Decode257+ components | Corruption before decoding component257 |
+| Noncanonical negative-zero double or nonzero-form decimal zero | Corruption; these bytes are never emitted by the valid v1 writer |
+| Noncanonical decimal leading/trailing zero, exponent, precision or scale | Corruption; reject rounding/underflow rather than aliasing another canonical key |
+
+Decimal decoding must accept every value emitted by the existing writer,
+including its extrema and all scales0..28. Bound canonical nonzero exponents
+and significant digits before parsing; use the BCL decimal parser with exact
+representability checks. Both parse-text construction and parsing must use
+InvariantCulture: a changed CurrentCulture or custom non-ASCII negative sign
+cannot change a durable key's meaning. Pin literal positive/negative fractional
+decimal v1 vectors and decode them under such a culture, restoring the caller's
+culture in finally. TASK-KEYCODEC-CULTURE assigns only this invariant construction
+and new KeyCodecCultureContractTests to query_wave Luna/high before the final
+normal/scalar/recovery source freeze. Do not add a duplicate decimal serializer or re-encode
+every decoded key. Keep successful hot paths free of new full-envelope copies.
+Invalid UTF text and timestamps use narrow validation; never retain offending
+data in an error or relax existing malformed guards.
+
+The immutable payload-envelope requirement means storage captures independently
+owned key/value bytes at staging and preserves their committed content across
+caller/pool reuse and returned-result mutation. Its existing carriers are
+StorageMutation and KeyValueRecord with permanent aliases/Ids. The read result
+is an independently owned copy; this does not promise a deeply immutable CLR
+backing array. Test the actual authoritative storage isolation, native envelope
+roundtrip and reopen, rather than changing those carriers or adding a new API.
+
+Ordered implementation: root freezes this contract, feature mapping and task
+graph; query_wave Luna/high owns only KeyCodec.cs, KeyCodecDecimal.cs,
+KeyCodecReadPrimitives.cs and cohesive new Features/StorageRecovery/KeyCodec*
+validation helpers if needed; lifecycle_wave Luna/high owns new KeyCodec*
+UnitTests/Features/StorageRecovery corpus, malformed, golden and real-store
+ownership tests; root reviews every diff and joins full build/formatter,
+Aspire normal/scalar/recovery and exact-source Linux/RF3 originals.
+Existing10,000 decimal cases and all golden vectors remain intact; add an
+independent10,000 generated mixed-type/composite corpus and literal corruption
+vectors. No skips, mock provider, suppressed diagnostic or altered tolerance.
+
+Rollout is a homogeneous current-format build after qualification. No canonical
+writer output changes, rewrite or dual-version reader is allowed. Rollback
+restores prior validation while preserving valid durable keys; its malformed
+exception leaks remain explicitly unqualified. SDK/MCP/frontend changes N/A:
+unchanged database operations. Dependency repair N/A: the defect is KeyLoad-owned.
+
+The [2026-10-04 local receipt](../implementation/keycodec-crud-development-2026-10-04.json)
+records14 new KeyCodec cases and4 original cases in unchanged full Aspire
+normal/scalar suites at2889/2889 each, recovery228/228 and1000 unique actual
+atomic process cuts. Literal fractional decimal goldens pass under invariant
+and custom-sign cultures. Exact delivered-source Linux/RF3 originals, endurance,
+power-loss and measured acceleration remain separate required gates.

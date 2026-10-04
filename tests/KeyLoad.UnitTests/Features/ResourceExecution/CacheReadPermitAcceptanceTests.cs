@@ -37,6 +37,7 @@ internal sealed class CacheReadPermitAcceptanceTests
     }
 
     [Test]
+    [NotInParallel]
     public async Task AcceptedReceiptExpiresFromItsRealPrepareTimestamp()
     {
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30), TimeProvider.System);

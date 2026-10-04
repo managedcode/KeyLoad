@@ -77,6 +77,17 @@ CacheMemoryBudget and System-clock CacheReadPermit in new
 `ZoneTreeCoordinatedPointCache*Tests.cs` and real fixture/support files under
 UnitTests/ResourceExecution, executed only by GitHub unit normal/scalar.
 
+The2026-10-04 full Aspire development run retained an unchanged real-clock
+expiry observation failure in AcceptedReceiptExpiresFromItsRealPrepareTimestamp:
+the observation arrived after its original upper bound while concurrent local
+solution verification was active. TASK-CACHE-REALCLOCK-ISOLATION applies only a
+method-level keyless TUnit NotInParallel to that case. Preserve TimeProvider.System,
+the2second preparation delay,10second preparation limit,15second lease,
+30second test deadline, original lower/upper age assertions and renewal/revision
+checks. No production clock, lease, retry, tolerance, skip or other test changes.
+Root owns full normal/scalar qualification; source isolation does not prove
+against external process interference or VM preemption.
+
 AC-CACHE-012 requires `IsCurrentAcceptance` to validate the complete immutable
 accepted receipt and existing prepare-origin15second lease from one state read.
 Default, stale, altered PreviousRevision/Continuous, withdrawn, expired or closed

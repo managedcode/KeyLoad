@@ -34,9 +34,9 @@ The current root-level files are documented migration debt under ADR-032, not th
 
 | Requirement | Measurable acceptance | Existing TUnit evidence or planned test |
 |---|---|---|
-| REQ-DSTORE-001: validate scoped CRUD, revisions, and document authority | AC-DSTORE-001 passes when create/read/replace/patch/delete produce monotone revisions, exact-CAS concurrency has one winner, and invalid/stale writes or direct mutation of event-authoritative resources are rejected without partial state. | Existing `ConcurrentCompareAndSwapHasOneWinner`; planned `DocumentCrudRevisionAuthorityAndValidationCases` for create/missing/delete/invalid JSON/authority matrix. CI qualification pending. |
-| REQ-DSTORE-002: maintain declared scalar indexes atomically | AC-DSTORE-002 passes when replacing/deleting a document removes its old keys, writes new keys, and a duplicate partition-unique value rejects the full mutation batch. | Existing `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `AcMp003PointAndIndexDereferenceConsumeTheSameRawReadBudget`; planned persisted old/new index transition matrix. CI qualification pending. |
-| REQ-DSTORE-003: enforce row/field policy at every document boundary | AC-DSTORE-003 passes when unauthorized row writes/reads and protected field use fail or project according to policy; tenant or row ownership cannot be supplied to gain access. | Existing `NestedSensitiveFieldsAreOmittedAndAliasedPredicateAndSortAreDenied`, `RowScopeAndTenantCannotBeForged`; planned focused document CRUD authorization matrix if existing cases do not cover every mutation. CI qualification pending. |
+| REQ-DSTORE-001: validate scoped CRUD, revisions, and document authority | AC-DSTORE-001 passes when create/read/replace/patch/delete produce monotone revisions, exact-CAS concurrency has one winner, and invalid/stale writes or direct mutation of event-authoritative resources are rejected without partial state. | Existing `ConcurrentCompareAndSwapHasOneWinner`; actual `DocumentCrudRevisionTests` and `DocumentPutValidationAtomicityTests` cover create/missing/delete/invalid JSON/authority. Local full-suite evidence below; exact-source CI qualification pending. |
+| REQ-DSTORE-002: maintain declared scalar indexes atomically | AC-DSTORE-002 passes when replacing/deleting a document removes its old keys, writes new keys, and a duplicate partition-unique value rejects the full mutation batch. | Existing `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `AcMp003PointAndIndexDereferenceConsumeTheSameRawReadBudget`; actual `DocumentScalarIndexMutationTests` covers persisted old/new index transitions and rollback. Local full-suite evidence below; exact-source CI qualification pending. |
+| REQ-DSTORE-003: enforce row/field policy at every document boundary | AC-DSTORE-003 passes when unauthorized row writes/reads and protected field use fail or project according to policy; tenant or row ownership cannot be supplied to gain access. | Existing `NestedSensitiveFieldsAreOmittedAndAliasedPredicateAndSortAreDenied`, `RowScopeAndTenantCannotBeForged`; actual field/row/tenant matrix plus isolated replacement-write and Delete-index-use controls. Local full-suite evidence below; exact-source CI qualification pending. |
 | REQ-DSTORE-004: share an atomic transaction domain with eligible events and queues | AC-DSTORE-004 passes when document + event + local enqueue commit together or all remain absent, same command retry returns the stored outcome, and identical partition-key text in unrelated domains stays isolated. | Existing `DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`, `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `SameLiteralPartitionKeyCannotCrossTransactionDomains`. CI qualification pending. |
 | REQ-DSTORE-005: reuse transaction-scoped document images | AC-DSTORE-005 passes when one before-record lookup supplies CRUD and outbox; no final staged lookup/decode is required; exact bytes, revisions, tombstones, indexes, authorization, quotas and sequential same-ID mutations remain intact. | TASK-MP-007I in ADR-035; new real-store paired-size/counter and before/after/failure cases plus existing transaction/change-feed/recovery/RF3 regressions; GitHub evidence pending. |
 
@@ -45,6 +45,37 @@ assigns CRUD handlers and new matching tests to one worker, and shared
 AtomicMutationApplication caller integration to the lead. Internal context/result
 carriers stay under Features/DocumentStorage and within one atomic transaction.
 UI/SDK/MCP schema migration is N/A: public contracts and persisted bytes stay exact.
+
+The2026-10-04 regression-completion stage maps AC-DSTORE-001 to
+DocumentCrudRevisionTests and DocumentPutValidationAtomicityTests, AC-DSTORE-002
+to DocumentScalarIndexMutationTests, and AC-DSTORE-003 to
+DocumentFieldMutationAuthorizationTests and DocumentRowTenantMutationAuthorizationTests.
+These use actual TestDatabase/ZoneTree and the existing contracts: no new product
+semantics or mutation DTO. Root owns this mapping and join; cluster_wave Luna/high
+owns only these new UnitTests/Features/DocumentStorage files and their cohesive
+fixture. Include duplicate JSON members, document-byte/depth bounds after an
+earlier staged indexed mutation, exact rollback, tombstone/recreate revisions,
+unique-index isolation, persisted field grants and healthy owner follow-up.
+
+Field-write grants gate create/replacement/patch of protected fields. Whole-row
+Delete follows the existing DocumentsWrite capability and row-write policy,
+plus any index-field-use grant required for strict maintenance. It does not
+introduce a field-write requirement for whole-row deletion. This distinguishes
+the current lifecycle and field-mutation contracts in REQ-AUTH-006; neither
+client-supplied row ownership nor an administrator label establishes authority.
+
+TASK-DSTORE-FIELD-MUTATION-ORACLES closes the remaining AC-DSTORE-003 boundaries
+with separate DocumentReplacementFieldAuthorizationTests and
+DocumentDeleteIndexAuthorizationTests. Replacement denial uses a principal that
+already has DocumentsWrite, field-read and indexed field-use grants, isolating the missing
+field-write grant; exact original revision/JSON/index entries remain unchanged,
+and a principal with both grants replaces successfully. Delete denial isolates
+the missing indexed field-use grant and preserves the live record/index; its
+allowed control has field-use but no field-write grant and produces the exact
+next tombstone revision while removing the index entry. These are existing
+persisted-policy semantics, not a public contract or schema change. cluster_wave
+Luna/high owns only the two new files; root reviews and integrates actual Aspire
+normal/scalar/recovery and exact delivered-source Linux/RF3 qualification.
 
 ## Flows and failure behavior
 
@@ -63,4 +94,4 @@ flowchart LR
     Commit --> Read[Authorized projected read or bounded query]
 ```
 
-Named tests are source mappings, not passing results. Product build, TUnit, process-recovery and Aspire RF3 qualification run only in GitHub Actions under the repository policy. Required official MCP parity through Aspire RF3 is pending; no MCP implementation or result is claimed. No document-specific UI, cross-partition unique constraint, or production-readiness claim is introduced by this specification.
+The [2026-10-04 development receipt](../implementation/keycodec-crud-development-2026-10-04.json) records8 new real-ZoneTree CRUD cases in full Aspire normal/scalar suites at2889/2889 each and recovery228/228, with unchanged source/runtime and1000 unique atomic process cuts. Local development verification is authorized through unified Aspire; delivered-source qualification still requires complete Linux GitHub original build/TUnit/recovery/Docker RF3 artifacts. Required official MCP parity through Aspire RF3 remains pending. Document-specific UI is N/A; cross-partition unique constraints and production readiness remain unqualified.
