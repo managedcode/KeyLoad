@@ -134,7 +134,8 @@ export async function runWorkload() {
   ], root, progress);
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+const evaluated = process.execArgv.some(argument => argument === '--eval' || argument === '-e');
+if (!evaluated && process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   runWorkload().then(code => { process.exitCode = code; }).catch(() => {
     process.stderr.write('Native benchmark entry failed.\n');
     process.exitCode = 1;

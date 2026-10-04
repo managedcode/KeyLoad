@@ -64,5 +64,8 @@ new capture filter, and an existing cache receipt acceptance regression failed.
 The [run 37212016437](https://github.com/managedcode/KeyLoad/actions/runs/37212016437)
 capture artifact has 28/29 passed: native logger capture rejected Aspire's UTC
 timestamp prefix. These failures are retained as evidence; the timestamp, module
-mode and filter inventory corrections require another genuine Linux run. Full
+mode and filter inventory corrections require another genuine Linux run. An
+evaluated Node import must not trigger the script's production entry merely
+because its first argument contains the module path; the real child regressions
+also verify this boundary. Full
 unit/scalar, recovery, RF3 and complete native workload gates are not qualified.
