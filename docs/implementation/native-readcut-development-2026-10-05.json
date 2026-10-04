@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-development-native-read-cut-and-index-lifetime",
+  "qualified": false,
+  "acceptanceClosed": false,
+  "source": {
+    "baseHead": "5fa61f27a34b5c573579fca3a84b8e5201dbd82e",
+    "dirtyStage": true,
+    "stage69PreInventory": "/private/tmp/keyload-stage69-pretest-inventory-20261005.json",
+    "stage69PreInventorySha256": "ccfdf757d7ee7edb6e7b7201400f1bbc067762d63b12b0441abb73222d4167ec",
+    "stage69Guard": {
+      "preInventorySha256": "ccfdf757d7ee7edb6e7b7201400f1bbc067762d63b12b0441abb73222d4167ec",
+      "postInventorySha256": "19826e2c3b0e63256c127b668b13f6c9da7bf0133c1435b0fc1e83e34d8fa704",
+      "sourceFiles": 3431,
+      "runtimeFiles": 662,
+      "sourceUnchanged": true,
+      "runtimeUnchanged": true,
+      "postRuntimeReorderedToPreSha256": "ffd0cd7d9b1b77b7333c9599731a99a6af173d2e5ef42a3b8ccd55a1ff4bc8c0",
+      "note": "Runtime row ordering differs between inventories; exact path/length/hash maps are compared and have zero changes."
+    }
+  },
+  "originalFocused69": {
+    "entry": "TMPDIR=/private/tmp dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit --KeyLoadTests:Filter=/*/*/NativeReadCut*/* --KeyLoadTests:ResultsDirectory=TestResults/native-readcut69-20261005 --KeyLoadTests:ReportTrx=true",
+    "exitCode": 2,
+    "originalReport": "TestResults/native-readcut69-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+    "reportSha256": "0f5e375a03438e56b320545897b6704f9d26ad108df4936d768091ed27de3b0a",
+    "summary": {
+      "total": 13,
+      "passed": 12,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "totalDurationMs": 1935.548,
+    "failure": "AcCut002IdleLeaseExpiryFailsBeforeAnotherNativeAdvanceAndStillReleasesSlot saw two newly constructed observations of the same elapsed budget, producing an unwanted aggregate. Root now retains one elapsed-failure identity; unchanged oracle awaits run71."
+  },
+  "priorFullUnit61b": {
+    "baseHead": "5fa61f27a34b5c573579fca3a84b8e5201dbd82e",
+    "sourceWasClean": true,
+    "sourceInventorySha256": "5d29a247e74cc2bde718625829ae0cdae6aa2313abcbdbd2edd66b83dec3e39d",
+    "exitCode": 137,
+    "completeReport": false,
+    "result": "aborted_after_actual_six_minute_no_progress_stall_with_original_diagnostics_and_owned_Aspire_stop",
+    "originalPartialTrx": "TestResults/c1-unit61b-20261005/trx-stream-ddb14cc492cf4e88a9d3f82d9fcf132c.bin",
+    "failuresObserved": [
+      "NativeText live published WAL sharing violation before replacement barrier",
+      "Four unchanged actual10000-record ANN deadline cases"
+    ],
+    "runtimePostGuard": "not_captured_before_following_builds_no_unchanged_runtime_claim",
+    "shutdown": "Actual Aspire stop returned0 and all five observed owned PIDs settled; no complete full-suite pass/count exists",
+    "partialSha256": "6058b3e53cb226e995d520b9a30a0776e7a0d49f48e2b6064cb7737673d87e00"
+  },
+  "build71": {
+    "entry": "dotnet build KeyLoad.slnx --no-restore --configuration Release --disable-build-servers -m:1 -nr:false -p:UseSharedCompilation=false",
+    "exitCode": 0,
+    "warnings": 0,
+    "errors": 0,
+    "elapsedSeconds": 68.71,
+    "originalLog": "/private/tmp/keyload-build71-20261005.log",
+    "sha256": "025e39295e2716c3f91ccf23500bccf661ef8acafb0b93adad799cc7f503f62e"
+  },
+  "priorBuild70": {
+    "exitCode": 1,
+    "error": "KLD0032 local function total58 exceeds50; extracted unchanged path validation into private helpers.",
+    "originalLog": "/private/tmp/keyload-build70-20261005.log"
+  },
+  "stage71": "read_cut13_pass_full_build_format_governance_pass_index_native_failures_preserved_pending_repair",
+  "remaining": [
+    "L1 live-owned preflight closed corruption and current-native overlap checks",
+    "Complete unit/scalar/recovery/RF3 exact-source Linux gates",
+    "L2B actual bounded same-cut retention pin/replay/catalog/restart",
+    "No full-task closure or performance/power-loss/readiness claim"
+  ],
+  "stage71Guard": {
+    "preInventorySha256": "50ab40d9c9df2f6c3a778973bf5ec7572614b340511ca4fccc94f52bf7db8054",
+    "sourceInventorySha256": "7eccee7c18e1a2cd3811558fbb3d23aa90259e451dda1f68cd9afdc84c238970",
+    "runtimeInventorySha256": "eb8a74fddc60972489c850f2353eba2947bdd50b9e733e672eb5d80a765d2000",
+    "sourceUnchanged": true,
+    "runtimeUnchanged": true,
+    "sourceFiles": 3437,
+    "runtimeFiles": 662,
+    "runs": [
+      "native-readcut71",
+      "native-text71"
+    ]
+  },
+  "stage71GuardSha256": "b7fd62efbb4c25d62ebccda67fa25a659e80f55da42daf9e358e3e84a43db199",
+  "focused71": {
+    "entry": "TMPDIR=/private/tmp dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit --KeyLoadTests:Filter=/*/*/NativeReadCut*/* --KeyLoadTests:ResultsDirectory=TestResults/native-readcut71-20261005 --KeyLoadTests:ReportTrx=true",
+    "exitCode": 0,
+    "originalReport": "TestResults/native-readcut71-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+    "reportSha256": "772188f9c0e668d5bd9310e953bb09c2f6426b9f924ba3172c5d00e1e40bb43d",
+    "summary": {
+      "total": 13,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "totalDurationMs": 1618.13,
+    "scope": "13 selected real ZoneTree native read-cut development tests; no full suite qualification"
+  },
+  "format71": {
+    "entry": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+    "exitCode": 0,
+    "originalLog": "/private/tmp/keyload-format71-20261005.log"
+  },
+  "governance71": {
+    "entry": "node scripts/Features/RepositoryGovernance/verify.mjs",
+    "exitCode": 0,
+    "originalLog": "/private/tmp/keyload-governance71-20261005.log"
+  },
+  "nativeText71": {
+    "entry": "TMPDIR=/private/tmp dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit --KeyLoadTests:Filter=/*/*/NativeText*/* --KeyLoadTests:ResultsDirectory=TestResults/native-text71-20261005 --KeyLoadTests:ReportTrx=true",
+    "exitCode": 137,
+    "completeReport": false,
+    "originalPartialTrx": "TestResults/native-text71-20261005/trx-stream-cc476854372f4193885e47f98b1bf00f.bin",
+    "partialSha256": "cfd44433a4f4eca4f7ac607623a43158e0748bc366d0adb8e5901789069e7501",
+    "managedStacks": "/private/tmp/keyload-native-text71-managed-stacks-20261005.txt",
+    "managedStacksSha256": "a1646c8b6ed033d9fdfb2b4a99a628fa8027061ddadc784e090e325923ba3335",
+    "originalAspireProgress": "/private/tmp/keyload-native-text71-progress2-20261005.json",
+    "originalAspireProgressSha256": "42de8b7bf93e6c1854a057c7ceb8bc21d1b399b2bb09821d34f702a6a35bfcfd",
+    "result": "aborted_after_no_progress_native_fixture_wait_with_owned_Aspire_stop",
+    "observedFailures": [
+      "Live generation VerifyLengths incorrectly compares a running native WAL length to its closed publication inventory",
+      "ThreeOwnedLeaves exact-order oracle compares sorted disk leaves to creation order",
+      "FailedRetirement fixture waits in projection Dispose/WaitForQuiet after replacement failure while its old lease remains unjoined"
+    ],
+    "shutdown": "Actual aspire stop native0; original caller137. No complete native-text result or passing count claimed."
+  }
+}

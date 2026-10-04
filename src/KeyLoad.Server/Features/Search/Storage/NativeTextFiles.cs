@@ -20,10 +20,11 @@ internal static class NativeTextFiles
     }
 
     internal static void WriteOwner(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope,
-        DatabaseLimits limits)
+        DatabaseLimits limits, NativeTextGenerationSlot? first = null, NativeTextGenerationSlot? second = null,
+        NativeTextGenerationSlot? third = null)
     {
         NativeTextValidation.ValidateScope(scope, sourceNodeId);
-        NativeTextGenerationFiles.CreateOwner(root, leaf, sourceNodeId, scope, limits);
+        NativeTextGenerationFiles.CreateOwner(root, leaf, sourceNodeId, scope, limits, first, second, third);
     }
 
     internal static NativeTextOwnerReceipt ReadOwnerForProvider(string root, string leaf, Guid sourceNodeId)

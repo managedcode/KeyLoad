@@ -37,6 +37,15 @@ An elapsed-budget error reported after successful cleanup must not retain a
 closed handle. Scalar cut construction precedes native iterator creation, so a
 failed allocation cannot lose an iterator created just before attachment.
 
+TASK-CUT-ELAPSED-IDENTITY preserves AC-CUT-002/003 after the original Aspire
+read-cut69 run (12/13 passed). An elapsed limit is one lease-lifetime failure;
+observing that same expired limit during traversal and joined disposal must
+retain the same exception identity instead of manufacturing two independent
+failures. Independent native, callback and cleanup failures remain separate.
+Root owns the minimal Work helper repair and the unchanged idle-expiry test;
+the required oracle remains exactly BudgetExceeded, released admission and a
+healthy following real native lease. No timeout, bound or assertion is weakened.
+
 TASK-CUT-R2-FAILURE-JOIN refines AC-CUT-003 before joining the private L2-A
 packet. Luna query_wave owns only read-cut Lifecycle cleanup/disposal and new
 StorageRecovery test helpers/cases in its private overlay. A synchronous cleanup

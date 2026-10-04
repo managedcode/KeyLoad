@@ -6,9 +6,10 @@ namespace KeyLoad.Server.Features.Search;
 internal static class NativeTextGenerationFiles
 {
     internal static void CreateOwner(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope,
-        DatabaseLimits limits)
+        DatabaseLimits limits, NativeTextGenerationSlot? first, NativeTextGenerationSlot? second,
+        NativeTextGenerationSlot? third)
     {
-        EnsureGenerationCapacity(root, sourceNodeId, limits);
+        EnsureGenerationCapacity(root, sourceNodeId, limits, first, second, third);
         var path = Path.Combine(root, leaf);
         if (Directory.Exists(path) || File.Exists(path))
         {
@@ -120,7 +121,7 @@ internal static class NativeTextGenerationFiles
         NativeTextInventory.Verify(generationPath, owner.OwnedPaths, manifest.Files);
     }
 
-    private static void VerifyGenerationEntries(string path)
+    internal static void VerifyGenerationEntries(string path)
     {
         foreach (var entry in Directory.EnumerateFileSystemEntries(path))
         {
@@ -140,7 +141,8 @@ internal static class NativeTextGenerationFiles
         }
     }
 
-    private static void EnsureGenerationCapacity(string root, Guid sourceNodeId, DatabaseLimits limits)
+    private static void EnsureGenerationCapacity(string root, Guid sourceNodeId, DatabaseLimits limits,
+        NativeTextGenerationSlot? first, NativeTextGenerationSlot? second, NativeTextGenerationSlot? third)
     {
         NativeTextRootFiles.VerifyReceipt(root, sourceNodeId);
         var count = 0;
@@ -160,7 +162,16 @@ internal static class NativeTextGenerationFiles
                     ? NativeTextErrors.BoundExceeded() : NativeTextErrors.Ownership();
             }
             var leaf = Path.GetFileName(entry);
-            ValidateGeneration(entry, root, leaf, sourceNodeId, limits);
+            var live = NativeTextLiveGenerationPreflight.Find(root, entry, leaf, sourceNodeId,
+                first, second, third);
+            if (live is null)
+            {
+                ValidateGeneration(entry, root, leaf, sourceNodeId, limits);
+            }
+            else
+            {
+                NativeTextLiveGenerationPreflight.Validate(live, entry, root, leaf, sourceNodeId, limits);
+            }
             var measured = NativeTextFileIO.MeasureRegularFiles(entry, NativeTextProtocol.MaximumFiles,
                 NativeTextProtocol.MaximumDiskBytes);
             if (measured.Files > NativeTextProtocol.MaximumFiles - files

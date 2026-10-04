@@ -2,8 +2,8 @@ using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Server;
-using KeyLoad.Storage;
 using KeyLoad.Server.Features.Search;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Search;
 

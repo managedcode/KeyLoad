@@ -51,6 +51,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
 
     internal ZoneTreeStoreOptions Options { get; }
     internal ReaderWriterLockSlim Gate { get; } = new();
+    internal ZoneTreeReadCutLifecycle NativeReadCuts { get; } = new();
     internal FileStream Ownership { get; set; } = null!;
     internal FileStream Journal { get; set; } = null!;
     internal IZoneTree<Memory<byte>, Memory<byte>> Tree { get; set; } = null!;
@@ -107,13 +108,18 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
 
     public void Dispose()
     {
+        NativeReadCuts.EnsureDisposalCanJoin();
+        if (!ZoneTreePointCacheStoreGate.CanBeginDisposal(this, CacheLifecycle))
+        {
+            return;
+        }
+        NativeReadCuts.CloseAndJoin();
         if (guarded)
         {
             DisposeExisting();
             return;
         }
-        if (!ZoneTreePointCacheStoreGate.CanBeginDisposal(this, CacheLifecycle)
-            || !CacheLifecycle.TryBeginClose(out var control))
+        if (!CacheLifecycle.TryBeginClose(out var control))
         {
             return;
         }
@@ -152,8 +158,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
 
     private void DisposeExisting()
     {
-        if (!ZoneTreePointCacheStoreGate.CanBeginDisposal(this, CacheLifecycle)
-            || !CacheLifecycle.TryBeginClose(out var control))
+        if (!CacheLifecycle.TryBeginClose(out var control))
         {
             return;
         }

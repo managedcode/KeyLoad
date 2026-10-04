@@ -5,6 +5,16 @@ full acceptance instruction. Source and runtime qualification pending. Owner:
 KeyLoad integration lead. Related REQ-STORAGE-007/021..024, AC-STORAGE-007 and
 AC-EPOCH-001..006; EventStreams AC-EVENT-008/010, TimeSeries AC-SERIES-013/016.
 
+Private RF3 control preflight additionally consumes the existing Storage.IO
+regular-file primitive from AppHost under TASK-CRS-C1-APPHOST-REGULAR and
+AC-CRS-004 in NativeCqrsRequestV2. Root owns the internal AppHost friend and
+project-reference additions. Inspect/OpenWithIdentity binds bounded owner-file
+reads to a real regular native handle without following links or blocking on
+FIFO payloads. This adds only a trusted pre-start caller; the primitive's ABI,
+locking/error contract, database formats, stopped upgrade protocol and required
+Linux qualification remain unchanged. Rollback removes the private-control
+consumer after owned AppHost resources and readers have joined, never user data.
+
 ## Problem and supported formats
 
 The exact previous executable at

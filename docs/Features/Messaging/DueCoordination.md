@@ -6,6 +6,32 @@ UTC due arithmetic, caller/creator checks, occurrence identities, queue limits
 and atomic transitions remain the authority. No separate durable due index or
 storage-format transition is introduced.
 
+TASK-DUE-RF3-AUTH-ORACLES preserves REQ/AC-DUE-002/003/004 and
+REQ/AC-JOBS-004/005 after original run37242346547 at5fa61f2. Luna lifecycle_wave
+owns a private overlay of DueFaultRf3SeedWriter, DueNoQuorumRf3Run,
+RecurringSagaRf3Support, RecurringSchedulePolicyRf3Tests and
+DueRecurringRf3Assertions, plus a feature-local pure creator model and identity
+writer if required. Root owns these docs, source joins and all gates.
+Configure the leader/cold-wave schedule and saga using a real persisted scoped
+principal/API key created by the private profile administrator. The administrator
+may configure resources and identity; it must not substitute for the retained
+schedule/saga creator or receive an authorization bypass. Bind the exact three
+queue scopes, required capabilities and actual payload/header policies and
+field grants; preserve every canonical identity, deadline, replay and cold/fault
+assertion. Keep credentials only in the private owned fixture, never a receipt.
+For the no-quorum case, keep the restricted creator for all database work and
+use the existing profile administrator only for the restored/survivor Status
+topology assertions. Preserve exact leader, voter, caught-up and single-effect
+checks. Protected schedule redaction paths are JSON pointers: the independent
+oracle is payload:/secret and headers:/secret, with unchanged projected bodies,
+ordered paths, cross-client parity and no-disclosure checks. No product change,
+new fault, clock, role supplied by a client, corpus/timing reduction or weakened
+assertion is authorized. Existing ADR-092/094 remain sufficient; no new wire,
+storage, trust boundary or topology is introduced. Implement setup authority,
+restricted-work/admin-status separation, then exact projection oracles; review
+all base/post hashes before root joins and runs serialized Aspire RF3. Source
+and compiler success alone do not close these criteria or the full118-case gate.
+
 TASK-DUE-RF3-C adds the genuine no-quorum public recurrence gate for AC-DUE-003.
 TASK-DUE-RF3-BUILD preserves AC-DUE-002/003/004 and ADR-094 while making the
 existing S1 and S2 Messaging RF3 fixtures compile under the unchanged repository

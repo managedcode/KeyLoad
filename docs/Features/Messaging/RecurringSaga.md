@@ -5,6 +5,22 @@ Root accepts S1 on 2026-10-04 for KL-100 under
 durable schedules, stable occurrences, saga CAS and atomic timeout messages;
 general workflow replay or external exactly-once execution is not advertised.
 
+TASK-JOBS-RF3-PROJECTED-DELIVERY preserves REQ/AC-JOBS-003/004/005 and
+AC-DUE-003 after original run37242346547. Luna query_wave owns only private
+SagaTimeoutRf3Assertions and DueSagaRf3Assertions, plus only their two receive
+helper callsites in SagaTimeoutRf3Tests and SagaDueRf3Tests to pass the actual
+already-owned identity.Secret for the no-disclosure oracle. The existing creator has
+protected field use/write grants but lacks read permission; receiving a timeout
+must therefore return the independently expected empty payload/header objects,
+while retaining exact request/message identity, one delivery, lease metadata,
+ACK/replay parity and the empty subsequent receive. Add direct no-disclosure
+checks on the official MCP receive reply for the protected payload/header and
+credential; preserve all existing projected inspection and one-transition
+checks. Do not grant new read authority, weaken field policies, change product
+projection or omit the receipt/lease oracle. Existing ADR-092/094 suffice since
+this corrects the fixture's contradictory read expectation only. Root reviews,
+joins and runs the actual Aspire RF3 clients before recording runtime evidence.
+
 ## Frozen S1 contracts
 
 Generated native v1 records use sequential IDs from0 and feature-owned literal

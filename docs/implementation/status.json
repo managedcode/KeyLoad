@@ -1198,15 +1198,18 @@
       "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextGenerationLifetimeTests.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextGenerationCapacityTests.cs",
       "docs/Features/StorageRecovery/NativeReadCuts.md",
-      "docs/ADR/ADR-097-native-read-cut-leases.md"
+      "docs/ADR/ADR-097-native-read-cut-leases.md",
+      "docs/implementation/native-readcut-development-2026-10-05.json",
+      "docs/implementation/runtime-qualification-37242346547.json",
+      "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Queries/ZoneTreeReadCutLease.cs",
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutConsistencyTests.cs"
     ],
     "implementation": {
-      "stage": "L1_generation_leases_joined_source_L2A_native_capture_private_implementation",
+      "stage": "L1_live_owned_preflight_and_L2A_native_snapshot_capture_joined_source_development_regressions_pending",
       "owner": "query_wave",
       "runtimeQualified": false,
       "remaining": [
-        "L1_full_combined_Aspire_unit_scalar_recovery_RF3",
-        "L2A_native_snapshot_capture_lifetime_join_and_provider_regressions",
+        "L1_and_L2A_full_combined_Aspire_unit_scalar_recovery_RF3",
         "L2B_same_cut_delta_retention_replay_catalog_switch_and_interrupted_build_recovery",
         "delivered_source_Linux_fault_resource_and_original_online_index_acceptance"
       ]
@@ -2112,7 +2115,15 @@
         "S2_due_service_native_GrainServiceGraph_published_dependency_consumer_regressions",
         "actual_SDK_official_MCP_Aspire_RF3_autonomous_policy_leader_loss_cold_restart_and_no_quorum",
         "lost_ACK_exact_canonical_no_quorum_restart_backpressure_and_complete_Linux_acceptance"
-      ]
+      ],
+      "latestOriginalRf3": {
+        "sourceRevision": "5fa61f27a34b5c573579fca3a84b8e5201dbd82e",
+        "receipt": "docs/implementation/runtime-qualification-37242346547.json",
+        "fullSuitePassed": 103,
+        "fullSuiteTotal": 118,
+        "fullSuiteFailed": 15,
+        "qualified": false
+      }
     }
   },
   "KL-101": {

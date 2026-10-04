@@ -11,11 +11,11 @@
 
 ## Commands and evidence
 - GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Storage and checkpoint behavior is exercised by `dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release` and RecoveryTests through `.github/workflows/ci.yml`; tests run only in GitHub Actions.
+- Owner correction2026-10-03 supersedes the former direct caller and local-execution prohibition: after restore/build, storage and checkpoint development tests use `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit` and the same caller with `Suite=recovery`. Native `dotnet test` is only the AppHost-owned child process. Exact-source Linux GitHub qualification remains mandatory through `.github/workflows/ci.yml`.
 
 ## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
-- Preserve atomicity, ordering, crash-recovery and disposal invariants. Do not add fake storage proofs, local qualification runs or unlocked dependency versions.
+- Preserve atomicity, ordering, crash-recovery and disposal invariants. Do not add fake storage proofs, present local development evidence as delivered-source qualification, or use unlocked dependency versions.
 
 ## Read-first and canonical slice ownership
 - Disposable point-cache infrastructure belongs to `Features/ResourceExecution/` under ADR-058. StorageRecovery still owns the real gate, Apply, snapshots and recovery joins; the cache cannot replace native records/WAL, scoped reads or authorization. Explicit embedded opt-in uses an externally shared pool; RF3 admission remains cold until the authenticated Orleans control contract is delivered and qualified. Index, fills and retired pinned bytes remain charged for their actual owned lifetime.

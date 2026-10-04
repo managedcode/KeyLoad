@@ -5,6 +5,29 @@ the same-partition exact branch of KL-056. [ADR-090](../../ADR/ADR-090-graph-sea
 implements architecture sections26.2–26.4. This contract retains the original
 SQL, distributed ranking, performance and RF3 qualification requirements.
 
+TASK-GSEARCH-RF3-RANK-FAILOVER preserves REQ/AC-GSEARCH-003/006 and ADR-090
+after original run37242346547. Luna cluster_wave owns only a private overlay of
+GraphSearchRf3Tests, SqlGraphSearchRf3Tests, GraphSearchRf3LeaderLossTests and
+a feature-local bounded survivor-status helper if needed. Preserve exact corpus,
+policy, projected results, expansion, public SDK/official MCP parity and faults.
+The independent graph branch sorts shortest hops then full EntityRef and feeds
+one-based ordinal ranks to weightedRrfV1. Equal-hop alpha and beta therefore
+contribute1/(60+1) and1/(60+2); adding one-hop delta precedes two-hop gamma,
+giving ranks3 and4. Do not use hop distance as the final fused ordinal rank.
+Derive the SQL fixture's complete expected order from its declared corpus, never
+from production ranking output. Before the single post-leader-loss mutation,
+use both real surviving administrator SDK Status calls under the existing finite
+eventual-observation contract to witness a successful current quorum, compatible
+RF3 routing and an agreeing non-null survivor leader. Keep the continuously
+running voter identities and existing scoped kill/restart/catch-up assertions.
+This witness is test ordering, not a product retry or an authorization repair:
+original report says OwnershipLost and does not establish its root cause.
+Issue one unchanged mutation/command only after the witness; never turn an
+uncertain outcome into a new-ID retry or swallow the actual write error.
+Root owns joins, verification and the exact original evidence. Existing ADR-090
+and cluster fault contract suffice; no new public/data/topology contract.
+Private review and compiler success cannot close the required real RF3 gate.
+
 ## Versioned public contract
 
 G1 adds an explicit `GraphSearchRequest` and `GraphSearchResult`; it does not

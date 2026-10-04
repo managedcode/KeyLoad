@@ -93,6 +93,44 @@ internal sealed class NativeTextGenerationLifetimeTests
     }
 
     [Test]
+    public async Task LivePreflightRejectsUnknownEntryAndPreservesTheBorrowedGeneration()
+    {
+        using var database = new TestDatabase();
+        database.Configure(Collection, ResourceKind.Collection);
+        database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle original\"}"));
+        var root = Path.Combine(database.Directory, "native-text-live-preflight");
+        using var projection = NewProjection(database, root);
+        var cancellation = TestContext.Current!.Execution.CancellationToken;
+        var request = new SearchRequest(database.Partition, Collection, TextPath, Query);
+        var engine = new SearchEngine(database.Database, projection);
+        var original = await engine.SearchAsync("root", request, cancellation);
+        var originalPath = GenerationPaths(root).Single();
+        var leaseBudget = new ReadExecutionBudget(database.Database.Limits);
+        using var lease = projection.Acquire(CaptureScope(database), leaseBudget);
+        lease.BeginRecord(original[0].Document.Reference, original[0].Document.Revision);
+        lease.ObserveToken(Query);
+        var unknownPath = Path.Combine(originalPath, "unknown-live-preflight.bin");
+        var unknownBytes = new byte[] { 0x31, 0x52, 0x73 };
+        await File.WriteAllBytesAsync(unknownPath, unknownBytes, cancellation);
+        database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle revised\"}"));
+
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Search("root", request, cancellation));
+
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
+        await Assert.That(Directory.Exists(originalPath)).IsTrue();
+        await Assert.That(GenerationPaths(root)).HasSingleItem();
+        await Assert.That(await File.ReadAllBytesAsync(unknownPath, cancellation))
+            .IsEquivalentTo(unknownBytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        File.Delete(unknownPath);
+        var replacement = await engine.SearchAsync("root", request, cancellation);
+        lease.VerifyCandidates([Query], [original[0].Document.Reference], leaseBudget);
+        await Assert.That(replacement).HasSingleItem();
+        await Assert.That(replacement[0].Document.Revision).IsGreaterThan(original[0].Document.Revision);
+        await Assert.That(GenerationPaths(root).Length).IsEqualTo(2);
+        lease.Dispose();
+    }
+
+    [Test]
     public async Task AggregateCensusCanRunWhileASecondNativeGenerationIsPausedBetweenPostings()
         => await NativeTextGenerationCensusOverlap.RunAsync(TestContext.Current!.Execution.CancellationToken);
 

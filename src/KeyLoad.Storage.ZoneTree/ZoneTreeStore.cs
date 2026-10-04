@@ -88,6 +88,17 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
         }
     }
 
+    internal ZoneTreeReadCutLease CaptureNativeReadCut(IKeyValueView view, ZoneTreeReadCutLimits limits,
+        CancellationToken cancellationToken)
+    {
+        if (!ReferenceEquals(view, this) || !runtime.Gate.IsReadLockHeld || runtime.Gate.IsWriteLockHeld)
+        {
+            throw Errors.Fail(ErrorCode.Validation, "A native read cut must be captured inside this store's gated read callback.");
+        }
+
+        return runtime.NativeReadCuts.Capture(runtime, limits, cancellationToken);
+    }
+
     byte[]? IKeyValueView.ReadOwnedValue(byte[] key) => runtime.View.ReadOwnedValue(key);
     ScanPage IKeyValueView.Scan(byte[] prefix, int maxRecords, byte[]? afterKey) => runtime.View.Scan(prefix, maxRecords, afterKey);
     bool IKeyValueView.ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer)

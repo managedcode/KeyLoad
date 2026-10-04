@@ -1,5 +1,14 @@
 # RemoteTransfers within Messaging
 
+TASK-XFER-RF3-RECEIPT-VALUE preserves REQ/AC-XFER-002/003/005 after original
+run37242346547. Luna query_wave owns only the SDK/official MCP ACK comparison
+inside RemoteTransfersRf3Tests. Compare every field of both independently
+deserialized public receipts using the existing canonical public JSON serializer;
+ImmutableArray backing-array identity is not receipt-value equality. Preserve
+command IDs, mutation count/content, token, exact duplicate replay, target ACK
+and empty-receive checks. No production, public wire or native format change;
+existing ADRs suffice. Root owns integration and actual Aspire RF3 verification.
+
 Root accepts the KL-094 implementation contract on 2026-10-04.
 Decision: [ADR-088](../../ADR/ADR-088-remote-queue-transfers.md).
 Scope is durable queue-to-queue outputs within one tenant/database and the same

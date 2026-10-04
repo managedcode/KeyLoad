@@ -1,5 +1,15 @@
 # ClientApi
 
+TASK-MCP-RF3-CATALOG-INVENTORY preserves REQ/AC-CLIENT-006 and AC-MCP-001.
+Luna query_wave owns the private McpCallerProtocol tool-count inventory and
+discovery assertions only if the actual current canonical tool names are absent.
+Derive the exact count/names from the real server operation catalog, retain
+bounded paging, uniqueness, schema and annotation checks, and independently
+compare the complete declared catalog. Original run37242346547 observed62 tools
+against the obsolete56-count oracle. Do not infer a passing discovery result
+from editing that count. Existing ADR-039 remains sufficient; root reviews the
+exact diff and runs the official MCP client through the actual Aspire RF3 gate.
+
 REQ-SQLC-003 / AC-SQLC-003P preserves AC-MCP-002/003 in the Accepted
 [ADR-065 public/native oracle stage](../ADR/ADR-065-full-sql-client-compatibility.md).
 UnitTests ClientApi canonical command/read/polymorphic corpus and NEW

@@ -292,3 +292,36 @@ The32-arm limit includes every distinct observed, temporarily pending or retired
 Implementation order and ownership: cluster_wave Luna/high prepares only new Server/Features/ClusterRouting/RequestCqrsProbe* helpers as a private patch against the reviewed native phase interface; root owns NodeOptions, silo-only DI registration, AppHost validation/mount composition, fixture joins and combined gates. query_wave Luna/high prepares only new IntegrationTests/Features/ClusterRouting/RequestCqrsProbe* control helpers against these exact records; actual fault test entry points are a later bounded join after both helpers are reviewed. lifecycle_wave prepares the failed scalar18 original evidence bundle without source edits. Workers must not change shared files, public contracts, canonical data, credentials, thresholds, packages, tests of another scope, CI or Git state. Return base/post hashes and exact private patches; no shared build/test execution. Root reviews and integrates each bounded stage, runs the real Aspire caller and commits checkpoints with truthful pending RF3/Linux acceptance. Native migration control is excluded from this schema and retains its separately required native idle-migration join.
 
 TASK-CRS-C1-CONTROL-REBASE, accepted 2026-10-05, continues the same frozen control contract after the owner's feature-layout migration. Review the existing private Server, IntegrationTests and AppHost packets before preparing replacements; preserve their verified work rather than duplicating it. Cluster worker owns only Server probe helpers, lifecycle worker now owns only IntegrationTests probe control helpers, and query worker owns only AppHost probe helpers. Place pure models and contracts under the canonical slice Models/Contracts folders and executable responsibilities under their actual feature-local folders. Preserve every schema, quota, permission, native-phase, lifetime, retirement, image and provenance requirement above. The rebased packets remain private until root has reviewed their complete diffs and base/post inventory. Shared options, registration, hosting, fault-test entry points, gates and Git actions remain root-owned; the rebased helper source alone does not qualify a real RF3 fault.
+
+TASK-CRS-C1-CONTROL-UNIT maps the private-control portion of AC-CRS-004 to new
+RequestCqrsProbeCodecTests and RequestCqrsProbeRecordFileTests in the ClusterRouting
+unit slice. Exercise the actual source-generated private codec with all four
+valid kinds, write/read arm exclusivity and every selected phase/action; reject
+unknown/duplicate/case-changed fields, integer enums, null/missing values,
+invalid IDs/principal bounds, invalid UTF-8, truncated/trailing/nested data and
+record byte excess. Exactly8192 bytes of a valid record plus legal whitespace
+is accepted,8193 is rejected. File cases use actual owned0600 regular files and
+the existing native no-follow file API; linked/nonregular files are rejected
+without opening or blocking on their payload. Preserve original fixed safe
+errors and controlled private-canary absence from error text. No fake grain,
+silo, provider, caller authority, image or GitHub metadata is created. These
+mechanism controls prove private metadata/file bounds only; actual native
+phase, public privacy, producer settlement and RF3 scenarios remain mandatory.
+Cluster worker owns only the new unit Cases/Helpers/Models files as a private
+patch against the reviewed Server R4 helper packet. Root integrates dependencies,
+executes the actual Aspire caller, preserves originals and commits the stage.
+
+TASK-CRS-C1-APPHOST-REGULAR closes the private owner-file opening portion of
+AC-CRS-004 under ADR-077's existing regular-file contract. AppHost preflight
+must use the existing OfflineRegularFile.Inspect/OpenWithIdentity primitive for
+each owner.json, retaining the inspected native identity through bounded reading.
+Reject nonregular/link inputs before payload reading, enforce0600 and1..8192
+bytes, read exactly the inspected length and reject any trailing growth. Keep
+the fixed safe AppHost configuration error, strict owner schema, private root
+and image validations unchanged. No new OS binding, shared-mode workaround,
+public endpoint, canonical record or persisted format is introduced. Root owns
+the internal AppHost friend/project-reference join and all composition changes.
+Query worker revises only its six private AppHost helper files from the reviewed
+R2 packet, with original base/post hashes, without checkout writes or gates.
+Actual no-follow/FIFO mechanisms and complete Aspire/RF3/Linux gates remain
+required; static source repair does not qualify a started topology.

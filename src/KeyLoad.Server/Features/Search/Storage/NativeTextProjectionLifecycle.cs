@@ -37,7 +37,8 @@ internal sealed class NativeTextProjectionLifecycle
         {
             physicalGate.Run(() =>
             {
-                NativeTextFiles.WriteOwner(Root, leaf, SourceNodeId, scope, limits);
+                state.CaptureSlots(out var first, out var second, out var third);
+                NativeTextFiles.WriteOwner(Root, leaf, SourceNodeId, scope, limits, first, second, third);
                 state.MarkOwnerCreated(slot);
             });
             faultObserver?.Invoke(NativeTextFaultStage.OwnerFlushed);

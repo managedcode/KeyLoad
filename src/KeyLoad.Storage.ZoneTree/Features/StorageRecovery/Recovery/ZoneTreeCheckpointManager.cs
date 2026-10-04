@@ -76,6 +76,8 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
                 throw Errors.Fail(ErrorCode.OwnershipLost, StaleSnapshot);
             }
 
+            runtime.NativeReadCuts.RequireNoActiveLeaseForTreeReplacement();
+
             File.Copy(path, temporary, false);
             var snapshot = ReadStaged(temporary, expectedAppliedPosition);
             ZoneTreeCheckpointGeneration.Replace(runtime, temporary, snapshot.Position, replaceTree: true);

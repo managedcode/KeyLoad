@@ -50,6 +50,36 @@ replacement task. Any observation deadline cancels that source, resumes its
 actual posting barrier and joins the original task before disposing the lease
 or projection; a second timeout-abandoned wait is not cleanup evidence.
 
+TASK-LEASE-LIVE-PREFLIGHT, accepted 2026-10-05, refines AC-LEASE-001/002/003
+after the actual unfiltered Aspire unit61b failure. Capacity preflight currently
+hash-opens the existing published WAL while its native index still owns that
+file; replacement therefore fails before reaching its posting barrier. Inside
+the existing physical gate, capture only the manager's at-most-three actual
+generation references. An exact manager-owned, published generation with a
+still-open native index receives a bounded live ownership/layout/size preflight
+without reopening native payload files. Verify its root, leaf, source-node and
+scope against the retained verified generation and owner/manifest metadata;
+reject unknown, linked, nonregular or foreign paths and retain all file, depth,
+generation and aggregate-byte ceilings. Runtime generation references cannot
+be supplied by a caller, inferred from a sharing exception, or substituted with
+an arbitrary trusted-leaf list. Every other generation keeps the complete
+existing checksum validation. Closed publication, reopen, retirement, deletion
+and restart retain full inventory checks; no format or provider sharing mode
+changes. Native mutation/census ownership remains in the physical gate, while
+manager admission is never held across callbacks or awaited work.
+
+Query worker owns only a private patch for the consumed NativeTextProjectionLifecycle,
+NativeTextFiles/NativeTextGenerationFiles capacity join and feature-local live
+preflight helpers, plus the real Search overlap regressions. Root reviews the
+exact live-object provenance and every cold validation call before applying it.
+Keep the existing corpora, deadlines, byte/file limits, native provider and
+old-reader/result assertions. Cleanup resumes the actual barrier even if old
+lease disposal fails, cancels and joins the original replacement task, then
+reports every distinct failure. Exercise real published-reader replacement,
+invalidation, unknown-path denial and closed/restart corruption controls through
+the actual Aspire caller. This source repair does not qualify L1, L2 or RF3;
+full suites and exact-source Linux evidence remain required.
+
 Frontend/new SDK/MCP syntax N/A: unchanged public search surfaces consume this
 manager. Migration N/A: no canonical record or persisted index format changes.
 Rollback stops the capable node and rebuilds disposable indexes; no canonical
