@@ -26,15 +26,16 @@ internal sealed class WorkflowLayoutAspireEntryTests
         await AssertNoDirectTestCommandsAsync();
         await AssertImageTestLaunchesAsync();
         var benchmarks = WorkflowLayoutSource.Read("benchmarks.yml");
+        var entry = ReadRepositoryFile("scripts/Features/BenchmarkComparisons/run-workload.mjs");
         foreach (var jobId in WorkflowDatabaseGroups.JobIds)
         {
             var job = WorkflowLayoutSource.JobBlock(benchmarks, jobId);
-            await Assert.That(job.Contains(AppHostCommand, StringComparison.Ordinal)).IsTrue();
-            await Assert.That(job.Contains("--KeyLoadTests:Suite=comparison", StringComparison.Ordinal)).IsTrue();
-            await Assert.That(job.Contains("--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*",
-                StringComparison.Ordinal)).IsTrue();
-            await Assert.That(job.Contains("--KeyLoadTests:TimeoutMinutes=140", StringComparison.Ordinal)).IsTrue();
+            await Assert.That(job.Contains("node scripts/Features/BenchmarkComparisons/run-workload.mjs", StringComparison.Ordinal)).IsTrue();
         }
+        await Assert.That(entry.Contains("'run', '--project', 'src/KeyLoad.AppHost', '--no-build', '--no-restore', '--configuration', 'Release'", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(entry.Contains("--KeyLoadTests:Suite=comparison", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(entry.Contains("--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(entry.Contains("--KeyLoadTests:TimeoutMinutes=140", StringComparison.Ordinal)).IsTrue();
     }
 
     [Test]

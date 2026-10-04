@@ -27,17 +27,21 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
         ValidateTargets(targets, scenario);
 
         var started = TimeProvider.System.GetUtcNow();
+        await using var observer = new ComparisonProgressObserver(progress);
+        observer.Begin(ComparisonProgressPhase.Oracle, 0);
+        cancellationToken.ThrowIfCancellationRequested();
         var dataset = new BenchmarkDataset(options);
         var cases = new List<ComparisonCase>();
-        PrepareOracle(dataset, scenario);
+        PrepareOracle(dataset, scenario, observer, cancellationToken);
         for (var repetition = 0; repetition < options.Repetitions; repetition++)
         {
             var offset = repetition % targets.Length;
             foreach (var target in targets.Skip(offset).Concat(targets.Take(offset)))
             {
-                await RunTargetAsync(target, dataset, repetition, cases, scenario, cancellationToken);
+                await RunTargetAsync(target, dataset, repetition, cases, scenario, observer, cancellationToken);
             }
         }
+        observer.Complete();
         return new(3, Guid.NewGuid(), started, options, dataset.Sha256, LoadModel,
             RuntimeInformation.OSDescription, RuntimeInformation.ProcessArchitecture.ToString(), Environment.ProcessorCount,
             RuntimeInformation.FrameworkDescription, storage, sourceRevision,
@@ -61,10 +65,16 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
         }
     }
 
-    private void PrepareOracle(BenchmarkDataset dataset, Scenario? selectedScenario)
+    private void PrepareOracle(BenchmarkDataset dataset, Scenario? selectedScenario,
+        ComparisonProgressObserver observer, CancellationToken cancellationToken)
     {
-        for (var operation = 0; operation < Math.Max(options.Operations, options.Warmup); operation++)
+        var operations = selectedScenario is null or Scenario.VectorExact or Scenario.GraphNeighbors or Scenario.GraphTraverse
+            ? Math.Max(options.Operations, options.Warmup) : 0;
+        observer.Begin(ComparisonProgressPhase.Oracle, 0, operations);
+        cancellationToken.ThrowIfCancellationRequested();
+        for (var operation = 0; operation < operations; operation++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (selectedScenario is null or Scenario.VectorExact)
             {
                 dataset.ExactNeighbors(dataset.Input(Scenario.VectorExact, 0, operation, false));
@@ -73,19 +83,21 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
             {
                 var root = dataset.Input(Scenario.GraphTraverse, 0, operation, false);
                 dataset.Reachable(root, 1);
+                cancellationToken.ThrowIfCancellationRequested();
                 dataset.Reachable(root, options.GraphDepth);
             }
+            observer.Settle(success: true);
         }
     }
 
     private async Task RunTargetAsync(IComparisonTarget target, BenchmarkDataset dataset, int repetition,
-        List<ComparisonCase> cases, Scenario? selectedScenario, CancellationToken cancellationToken)
+        List<ComparisonCase> cases, Scenario? selectedScenario, ComparisonProgressObserver observer, CancellationToken cancellationToken)
     {
         var scenarios = selectedScenario is { } selected ? [selected] : Enum.GetValues<Scenario>();
         string? failure = null;
         if (repetition == 0)
         {
-            progress?.Invoke($"Preparing {target.Profile.Name}");
+            observer.Begin(ComparisonProgressPhase.Initialize, repetition + 1);
             try
             {
                 await target.InitializeAsync(dataset, cancellationToken);
@@ -104,12 +116,12 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
 
         foreach (var scenario in scenarios)
         {
-            cases.Add(await RunCaseAsync(target, dataset, scenario, repetition, failure, cancellationToken));
+            cases.Add(await RunCaseAsync(target, dataset, scenario, repetition, failure, observer, cancellationToken));
         }
     }
 
     private async Task<ComparisonCase> RunCaseAsync(IComparisonTarget target, BenchmarkDataset dataset,
-        Scenario scenario, int repetition, string? setupFailure, CancellationToken cancellationToken)
+        Scenario scenario, int repetition, string? setupFailure, ComparisonProgressObserver observer, CancellationToken cancellationToken)
     {
         if (setupFailure is not null)
         {
@@ -124,10 +136,9 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
             return new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Unsupported, target.UnsupportedReason, null, []);
         }
 
-        progress?.Invoke($"{target.Profile.Name}: {scenario}, repetition {repetition + 1}/{options.Repetitions}");
         ComparisonCase result;
         try
-        { result = await new ComparisonMeasurer(options).MeasureAsync(target, dataset, scenario, repetition, cancellationToken); }
+        { result = await new ComparisonMeasurer(options, observer).MeasureAsync(target, dataset, scenario, repetition, cancellationToken); }
         catch (Exception error) when (!cancellationToken.IsCancellationRequested)
         { result = new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Failed, ComparisonErrors.Safe(error), null, []); }
         await ComparisonFailureDiagnostics.ObserveAsync(target, result, cancellationToken);

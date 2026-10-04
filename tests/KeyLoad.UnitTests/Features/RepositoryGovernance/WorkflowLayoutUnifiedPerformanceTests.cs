@@ -138,7 +138,7 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
         await Assert.That(job.Contains("runs-on: ubuntu-latest", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("fail-fast: false", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("max-parallel:", StringComparison.Ordinal)).IsFalse();
-        await Assert.That(job.Contains("IsolatedNativeComparisonTests", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(job.Contains("node scripts/Features/BenchmarkComparisons/run-workload.mjs", StringComparison.Ordinal)).IsTrue();
         await Assert.That(job.Contains("continue-on-error:", StringComparison.Ordinal)).IsFalse();
     }
 

@@ -1,5 +1,8 @@
 # BenchmarkComparisons
 
+[Live progress repair](BenchmarkComparisons/LiveProgress.md) under ADR-085 owns
+bounded Actions visibility and cancellation diagnostics for native workloads.
+
 ## Current complete-cohort publication
 
 Owner-directed immediate legacy removal is governed by

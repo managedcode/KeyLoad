@@ -18,11 +18,13 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     private readonly Dictionary<string, ComparisonResourceLogBuffer> logs;
     private readonly ConcurrentDictionary<string, Task> logCaptures = new(StringComparer.Ordinal);
     private readonly Task capture;
+    private readonly ComparisonProgressFile? progress;
     private readonly object stopGate = new();
     private Task? stopping;
     private int disposed;
 
-    public ComparisonTestLogCapture(DistributedApplication application, IEnumerable<string>? selectedResources = null)
+    public ComparisonTestLogCapture(DistributedApplication application, IEnumerable<string>? selectedResources = null,
+        string? progressPath = null)
     {
         this.application = application;
         var names = (selectedResources ?? []).Append(ComparisonResourceName).Distinct(StringComparer.Ordinal).ToArray();
@@ -35,6 +37,7 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
             name == ComparisonResourceName ? MaximumRetainedLines : MaximumNodeLines,
             MaximumResourceBytes, MaximumLineBytes), StringComparer.Ordinal);
         var logger = application.Services.GetRequiredService<ResourceLoggerService>();
+        progress = progressPath is null ? null : new ComparisonProgressFile(progressPath);
         capture = Task.Run(() => CaptureResourcesAsync(logger), CancellationToken.None);
     }
 
@@ -61,7 +64,14 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
         }
         finally
         {
-            await JoinCapturesAsync();
+            try
+            {
+                await JoinCapturesAsync();
+            }
+            finally
+            {
+                await (progress?.StopAsync() ?? Task.CompletedTask);
+            }
         }
     }
 
@@ -138,12 +148,21 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
             {
                 foreach (var line in batch)
                 {
-                    logs[name].Add(line.Content);
+                    CaptureLine(name, line.Content);
                 }
             }
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
         {
+        }
+    }
+
+    private void CaptureLine(string name, string line)
+    {
+        logs[name].Add(line);
+        if (name == ComparisonResourceName)
+        {
+            progress?.Observe(line);
         }
     }
 }

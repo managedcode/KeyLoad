@@ -1,0 +1,142 @@
+import { spawn } from 'node:child_process';
+import { constants } from 'node:fs';
+import { lstat, open } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { setTimeout as delay } from 'node:timers/promises';
+
+const intervalMilliseconds = 30_000;
+const maximumProgressBytes = 512;
+const maximumSnapshotBytes = maximumProgressBytes + 1;
+const maximumInteger = 2_147_483_647;
+const marker = /^KeyLoadBenchmarkProgress phase=(oracle|initialize|warmup|prepare|measure|validate|complete) repetition=(\d{1,10}) completed=(\d{1,10}) total=(\d{1,10}) failed=(\d{1,10}) elapsedSeconds=(\d+(?:\.\d+)?)$/;
+const missingFile = 'ENOENT';
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+
+export function validProgress(line) {
+  if (line.length > maximumProgressBytes) return false;
+  const match = marker.exec(line);
+  if (!match) return false;
+  const [repetition, completed, total, failed, elapsed] = match.slice(2).map(Number);
+  return [repetition, completed, total, failed].every(value => Number.isInteger(value) && value <= maximumInteger)
+    && Number.isFinite(elapsed) && failed <= completed && completed <= total;
+}
+
+export async function readProgress(file) {
+  let handle;
+  try {
+    const metadata = await lstat(file);
+    if (!metadata.isFile() || metadata.size > maximumSnapshotBytes) return null;
+    handle = await open(file, constants.O_RDONLY | constants.O_NOFOLLOW);
+    const opened = await handle.stat();
+    if (!opened.isFile() || opened.size > maximumSnapshotBytes) return null;
+    const buffer = Buffer.alloc(maximumSnapshotBytes + 1);
+    const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0);
+    if (bytesRead > maximumSnapshotBytes) return null;
+    const line = buffer.subarray(0, bytesRead).toString('utf8').trimEnd();
+    return validProgress(line) ? line : null;
+  } catch (error) {
+    if (error.code === missingFile) return null;
+    return null;
+  } finally {
+    await handle?.close().catch(() => {});
+  }
+}
+
+function signalChild(child, signal) {
+  if (!Number.isInteger(child.pid)) return;
+  try {
+    if (process.platform === 'win32') child.kill(signal);
+    else process.kill(-child.pid, signal);
+  } catch (error) {
+    if (error.code !== 'ESRCH') throw error;
+  }
+}
+
+function ownSignals(child) {
+  let requested;
+  let force;
+  let terminate;
+  const cancel = signal => {
+    if (requested) return;
+    requested = signal;
+    signalChild(child, signal);
+    terminate = setTimeout(() => signalChild(child, 'SIGTERM'), 35_000);
+    force = setTimeout(() => signalChild(child, 'SIGKILL'), 45_000);
+  };
+  const interrupt = () => cancel('SIGINT');
+  const terminateHandler = () => cancel('SIGTERM');
+  process.on('SIGINT', interrupt);
+  process.on('SIGTERM', terminateHandler);
+  return {
+    result: () => requested === 'SIGINT' ? 130 : requested === 'SIGTERM' ? 143 : null,
+    close: () => {
+      clearTimeout(force);
+      clearTimeout(terminate);
+      process.off('SIGINT', interrupt);
+      process.off('SIGTERM', terminateHandler);
+    }
+  };
+}
+
+async function observeProgress(file, childExit, period) {
+  const lifetime = new AbortController();
+  const started = Date.now();
+  const completion = childExit.then(() => lifetime.abort());
+  while (!lifetime.signal.aborted) {
+    try { await delay(period, undefined, { signal: lifetime.signal }); }
+    catch (error) { if (error.name !== 'AbortError') throw error; }
+    const line = await readProgress(file);
+    if (line) await writeProgress(`${line}\n`);
+    else if (!lifetime.signal.aborted) await writeProgress(`Waiting for native benchmark progress; AppHost elapsed ${Math.floor((Date.now() - started) / 1000)}s.\n`);
+  }
+  await completion;
+}
+
+async function writeProgress(line) {
+  await new Promise(resolve => {
+    try { process.stdout.write(line, () => resolve()); }
+    catch { resolve(); }
+  });
+}
+
+// Tests exercise this lifecycle with genuine short-lived child processes.
+// The production entry below always runs the repository's closed Aspire command.
+export async function runProgressProcess(command, arguments_, workingDirectory, progressFile, period = intervalMilliseconds) {
+  if (!Number.isInteger(period) || period < 1 || period > intervalMilliseconds) throw new Error('Invalid progress interval.');
+  const child = spawn(command, arguments_, { cwd: workingDirectory, stdio: 'inherit', detached: process.platform !== 'win32' });
+  const signals = ownSignals(child);
+  const outputError = () => {};
+  process.stdout.on('error', outputError);
+  const completion = new Promise(resolve => {
+    child.once('error', () => resolve(1));
+    child.once('exit', (code, signal) => resolve(code ?? (signal === 'SIGINT' ? 130 : signal === 'SIGTERM' ? 143 : 1)));
+  });
+  try {
+    await observeProgress(progressFile, completion, period);
+    return signals.result() ?? await completion;
+  } finally {
+    signals.close();
+    process.stdout.off('error', outputError);
+  }
+}
+
+export async function runWorkload() {
+  const cell = process.env.KEYLOAD_COMPARISON_CELL_ID;
+  if (typeof cell !== 'string' || cell.length > 256 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(cell)) {
+    throw new Error('The native comparison cell identity is invalid.');
+  }
+  const progress = path.join(root, 'artifacts/comparisons/isolated/failures', cell, 'progress.log');
+  return await runProgressProcess('dotnet', [
+    'run', '--project', 'src/KeyLoad.AppHost', '--no-build', '--no-restore', '--configuration', 'Release', '--',
+    '--KeyLoadTests:Suite=comparison', '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*',
+    '--KeyLoadTests:TimeoutMinutes=140'
+  ], root, progress);
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  runWorkload().then(code => { process.exitCode = code; }).catch(() => {
+    process.stderr.write('Native benchmark entry failed.\n');
+    process.exitCode = 1;
+  });
+}

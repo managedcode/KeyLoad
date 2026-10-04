@@ -61,7 +61,7 @@ internal sealed class WorkflowLayoutPipelineSourceTests
     {
         var job = WorkflowLayoutSource.JobBlock(workflow, jobId);
         await Assert.That(job.Contains("runs-on: ubuntu-latest", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(job.Contains("IsolatedNativeComparisonTests", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(job.Contains("node scripts/Features/BenchmarkComparisons/run-workload.mjs", StringComparison.Ordinal)).IsTrue();
     }
 
     private static async Task AssertAggregate(string job)

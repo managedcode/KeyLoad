@@ -24,6 +24,7 @@ internal sealed class WorkflowBenchmarkFailureTests
             var upload = steps.Single(step => step.Contains(UploadName, StringComparison.Ordinal));
             await Assert.That(workload.Contains(NotCancelled, StringComparison.Ordinal)).IsTrue();
             await Assert.That(workload.Contains("exit 1", StringComparison.Ordinal)).IsTrue();
+            await Assert.That(workload.Contains("node scripts/Features/BenchmarkComparisons/run-workload.mjs", StringComparison.Ordinal)).IsTrue();
             await Assert.That(finalize.Contains(NotCancelled, StringComparison.Ordinal)).IsTrue();
             await Assert.That(finalize.Contains("${{ steps.workload.outcome }}", StringComparison.Ordinal)).IsTrue();
             await Assert.That(finalize.Contains("finalize-worker.mjs", StringComparison.Ordinal)).IsTrue();

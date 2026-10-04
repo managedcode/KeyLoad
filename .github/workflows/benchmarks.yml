@@ -133,6 +133,12 @@ jobs:
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/keyload-admission
       - name: Test bounded database log buffers
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonResourceLogBufferTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/log-buffer
+      - name: Test live benchmark progress capture
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-progress
+      - name: Test live benchmark process entry
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/NativeBenchmarkProgressEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-entry
+      - name: Test benchmark phase and attempt counters
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/ComparisonLiveProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-counters
       - name: Test KeyLoad replay admission
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadReplayAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-admission
       - name: Test Redis replica error reporting
@@ -223,7 +229,7 @@ jobs:
             echo '::error::Benchmark preparation failed; no measurement data is available.'
             exit 1
           fi
-          dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=140
+          node scripts/Features/BenchmarkComparisons/run-workload.mjs
       - name: Record benchmark availability
         if: ${{ !cancelled() }}
         env:

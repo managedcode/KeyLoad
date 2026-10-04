@@ -4,7 +4,7 @@ using System.Text;
 
 namespace KeyLoad.Comparisons;
 
-internal sealed class ComparisonMeasurer(ComparisonOptions options)
+internal sealed class ComparisonMeasurer(ComparisonOptions options, ComparisonProgressObserver observer)
 {
     private const string FailedAttemptDetail = "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.";
 
@@ -28,6 +28,7 @@ internal sealed class ComparisonMeasurer(ComparisonOptions options)
     private async Task<ComparisonCase> MeasureOwnedAsync(IComparisonTarget target, BenchmarkDataset dataset,
         Scenario scenario, int repetition, List<IComparisonSession> sessions, CancellationToken cancellationToken)
     {
+        observer.Begin(ComparisonProgressPhase.Initialize, repetition + 1);
         var inputs = Enumerable.Range(0, options.Operations).Select(operation => dataset.Input(scenario, repetition, operation, false)).ToArray();
         for (var worker = 0; worker < options.Concurrency; worker++)
         {
@@ -35,14 +36,18 @@ internal sealed class ComparisonMeasurer(ComparisonOptions options)
         }
 
         await WarmupAsync(sessions, dataset, scenario, repetition, cancellationToken);
+        observer.Begin(ComparisonProgressPhase.Prepare, repetition + 1);
         await ComparisonMutationPreparation.PrepareAsync(sessions, inputs, scenario, options.TimeoutSeconds, cancellationToken);
         var samples = new OperationSample[options.Operations];
         var outputs = new OperationResult?[options.Operations];
         await using var resources = new ClientResourceSampler();
+        observer.Begin(ComparisonProgressPhase.Measure, repetition + 1, options.Operations);
         var clock = Stopwatch.StartNew();
         await ExecuteBatchAsync(sessions, inputs, scenario, samples, outputs, clock, cancellationToken);
         clock.Stop();
         var clientResources = await resources.StopAsync();
+        observer.Begin(ComparisonProgressPhase.Validate, repetition + 1, samples.Length, samples.Length,
+            samples.Count(sample => !sample.Success));
         if (ComparisonMutationPreparation.Required(scenario))
         {
             await ComparisonMutationValidation.ValidateAsync(sessions, dataset, scenario, inputs, samples, outputs, cancellationToken);
@@ -52,6 +57,7 @@ internal sealed class ComparisonMeasurer(ComparisonOptions options)
             await ComparisonValidation.ValidateBatchAsync(sessions[0], dataset, scenario, inputs, samples, outputs, cancellationToken);
         }
         var measurement = ComparisonStatistics.Summarize(samples, clock.Elapsed.TotalSeconds) with { ClientResources = clientResources };
+        observer.Begin(ComparisonProgressPhase.Complete, repetition + 1, measurement.Attempts, measurement.Attempts, measurement.Failures);
         return new(target.Profile.Name, scenario, repetition, measurement.Failures == 0 ? ComparisonStatuses.Measured : ComparisonStatuses.Failed,
             measurement.Failures == 0 ? null : FailedAttemptDetail, measurement,
             ImmutableCollectionsMarshal.AsImmutableArray(samples));
@@ -61,14 +67,25 @@ internal sealed class ComparisonMeasurer(ComparisonOptions options)
         int repetition, CancellationToken cancellationToken)
     {
         var warmup = Enumerable.Range(0, options.Warmup).Select(operation => dataset.Input(scenario, repetition, operation, true)).ToArray();
+        observer.Begin(ComparisonProgressPhase.Prepare, repetition + 1);
         await ComparisonMutationPreparation.PrepareAsync(sessions, warmup, scenario, options.TimeoutSeconds, cancellationToken);
+        observer.Begin(ComparisonProgressPhase.Warmup, repetition + 1, options.Warmup);
         for (var operation = 0; operation < options.Warmup; operation++)
         {
             using var deadline = ComparisonDeadline.Create(options.TimeoutSeconds, cancellationToken);
             var input = warmup[operation];
             var session = sessions[operation % sessions.Count];
-            var output = await session.ExecuteAsync(scenario, input, deadline.Token);
-            await ComparisonValidation.ValidateOperationAsync(session, dataset, scenario, input, output, deadline.Token);
+            var success = false;
+            try
+            {
+                var output = await session.ExecuteAsync(scenario, input, deadline.Token);
+                await ComparisonValidation.ValidateOperationAsync(session, dataset, scenario, input, output, deadline.Token);
+                success = true;
+            }
+            finally
+            {
+                observer.Settle(success);
+            }
         }
     }
 
@@ -87,18 +104,32 @@ internal sealed class ComparisonMeasurer(ComparisonOptions options)
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
-                using var deadline = ComparisonDeadline.Create(options.TimeoutSeconds, cancellationToken);
-                var started = clock.Elapsed.TotalMilliseconds;
-                string? failure = null;
-                try
-                { outputs[operation] = await session.ExecuteAsync(scenario, inputs[operation], deadline.Token); }
-                catch (Exception error) when (!cancellationToken.IsCancellationRequested) { failure = ComparisonErrors.Safe(error); }
-                samples[operation] = new(operation, worker, started, clock.Elapsed.TotalMilliseconds, failure is null, failure,
-                    Encoding.UTF8.GetByteCount(inputs[operation].Json), outputs[operation]?.Message?.Id, outputs[operation]?.Queue);
+                await ExecuteAttemptAsync(session, inputs, scenario, samples, outputs, clock, operation, worker, cancellationToken);
             }
         }));
     }
 
+    private async Task ExecuteAttemptAsync(IComparisonSession session, BenchmarkDocument[] inputs, Scenario scenario,
+        OperationSample[] samples, OperationResult?[] outputs, Stopwatch clock, int operation, int worker, CancellationToken cancellationToken)
+    {
+        using var deadline = ComparisonDeadline.Create(options.TimeoutSeconds, cancellationToken);
+        var started = clock.Elapsed.TotalMilliseconds;
+        var success = false;
+        try
+        {
+            string? failure = null;
+            try
+            { outputs[operation] = await session.ExecuteAsync(scenario, inputs[operation], deadline.Token); }
+            catch (Exception error) when (!cancellationToken.IsCancellationRequested) { failure = ComparisonErrors.Safe(error); }
+            samples[operation] = new(operation, worker, started, clock.Elapsed.TotalMilliseconds, failure is null, failure,
+                Encoding.UTF8.GetByteCount(inputs[operation].Json), outputs[operation]?.Message?.Id, outputs[operation]?.Queue);
+            success = failure is null;
+        }
+        finally
+        {
+            observer.Settle(success);
+        }
+    }
 }
 
 internal static class ComparisonStatistics
