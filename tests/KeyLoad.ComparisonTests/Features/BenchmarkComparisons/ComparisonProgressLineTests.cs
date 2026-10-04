@@ -53,6 +53,22 @@ internal sealed class ComparisonProgressLineTests
     }
 
     [Test]
+    public async Task ExtractsOnlyAValidMarkerFromThePinnedNativeUtcTimestamp()
+    {
+        const string timestamp = "2026-10-04T15:20:43.3755008Z ";
+        await Assert.That(ComparisonProgressLine.TryFromNativeLog(timestamp + Marker, out var native)).IsTrue();
+        await Assert.That(native).IsEqualTo(Marker);
+        await Assert.That(ComparisonProgressLine.TryFromNativeLog(Marker, out var raw)).IsTrue();
+        await Assert.That(raw).IsEqualTo(Marker);
+        foreach (var invalid in new[] { "private " + Marker, timestamp + " " + Marker, timestamp + Marker + " private=payload",
+            timestamp.Replace("10-04", "02-30", StringComparison.Ordinal) + Marker, timestamp[..^1] + Marker })
+        {
+            await Assert.That(ComparisonProgressLine.TryFromNativeLog(invalid, out var rejected)).IsFalse();
+            await Assert.That(rejected).IsEmpty();
+        }
+    }
+
+    [Test]
     public async Task DerivesOnlyTheValidatedCellSiblingFailurePath()
     {
         var root = Path.Combine(Path.GetTempPath(), "comparison-progress-path");

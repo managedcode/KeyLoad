@@ -160,9 +160,9 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     private void CaptureLine(string name, string line)
     {
         logs[name].Add(line);
-        if (name == ComparisonResourceName)
+        if (name == ComparisonResourceName && ComparisonProgressLine.TryFromNativeLog(line, out var marker))
         {
-            progress?.Observe(line);
+            progress?.Observe(marker);
         }
     }
 }

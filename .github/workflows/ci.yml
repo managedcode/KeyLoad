@@ -105,6 +105,12 @@ jobs:
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers
       - name: Test live benchmark progress capture
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-progress --KeyLoadTests:ReportTrx=true
+      - name: Test live benchmark process entry
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/NativeBenchmarkProgressEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-entry --KeyLoadTests:ReportTrx=true
+      - name: Test benchmark phase and attempt counters
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/ComparisonLiveProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-counters --KeyLoadTests:ReportTrx=true
+      - name: Test Aspire workflow entry contracts
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/WorkflowLayoutAspireEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-workflow --KeyLoadTests:ReportTrx=true
       - name: Run unit tests
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit
       - name: Run unit tests without CPU intrinsics

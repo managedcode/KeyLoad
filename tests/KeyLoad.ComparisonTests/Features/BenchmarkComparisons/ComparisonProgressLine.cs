@@ -9,6 +9,8 @@ internal static partial class ComparisonProgressLine
     internal const int MaximumCharacters = 512;
     internal const string FileName = "progress.log";
     private const int MaximumCellCharacters = 128;
+    private const int TimestampCharacters = 28;
+    private const string TimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'";
     private const string InvalidEvidence = "The isolated progress evidence path is invalid.";
     private const string Workers = "workers";
     private const string Failures = "failures";
@@ -48,6 +50,30 @@ internal static partial class ComparisonProgressLine
         return Path.Combine(isolated.FullName, Failures, directory.Name, FileName);
     }
 
+    internal static bool TryFromNativeLog(string line, out string marker)
+    {
+        marker = string.Empty;
+        if (IsValid(line))
+        {
+            marker = line;
+            return true;
+        }
+        if (line.Length <= TimestampCharacters + 1 || line.Length > MaximumCharacters + TimestampCharacters + 1
+            || line[TimestampCharacters] != ' ' || !NativeTimestamp().IsMatch(line[..TimestampCharacters])
+            || !DateTimeOffset.TryParseExact(line.AsSpan(0, TimestampCharacters), TimestampFormat,
+                CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out _))
+        {
+            return false;
+        }
+        var body = line[(TimestampCharacters + 1)..];
+        if (!IsValid(body))
+        {
+            return false;
+        }
+        marker = body;
+        return true;
+    }
+
     private static bool Count(ReadOnlySpan<char> value, out int count)
         => int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out count);
 
@@ -56,4 +82,7 @@ internal static partial class ComparisonProgressLine
 
     [GeneratedRegex("\\A[a-z0-9]+(?:-[a-z0-9]+)*\\z", RegexOptions.CultureInvariant, 100)]
     private static partial Regex CellName();
+
+    [GeneratedRegex("\\A[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{7}Z\\z", RegexOptions.CultureInvariant, 100)]
+    private static partial Regex NativeTimestamp();
 }

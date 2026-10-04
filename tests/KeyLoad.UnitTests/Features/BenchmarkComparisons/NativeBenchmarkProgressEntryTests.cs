@@ -4,6 +4,7 @@ internal sealed class NativeBenchmarkProgressEntryTests
 {
     private const string Module = "run-workload.mjs";
     private const string NodeEval = "--eval";
+    private const string ModuleMode = "--input-type=module";
     private const string Accepted = "accepted:";
 
     // AC-BC-LIVE-002/003: real child output, original exit, cancellation and confined file reads.
@@ -17,10 +18,10 @@ internal sealed class NativeBenchmarkProgressEntryTests
     {
         using var directory = new ImageBundleTestDirectory();
         var result = await IsolatedAggregateNodeProcess.RunAsync(
-            [NodeEval, NativeBenchmarkProgressNodeProgram.Source, IsolatedAggregateNodeProcess.Module(Module), scenario, directory.Root],
+            [ModuleMode, NodeEval, NativeBenchmarkProgressNodeProgram.Source, IsolatedAggregateNodeProcess.Module(Module), scenario, directory.Root],
             TestContext.Current!.Execution.CancellationToken);
-        await Assert.That(result.ExitCode).IsEqualTo(0);
         await Assert.That(result.Error).IsEmpty();
+        await Assert.That(result.ExitCode).IsEqualTo(0);
         await Assert.That(result.Output).Contains(Accepted + scenario);
         if (scenario == "live-exit")
         {

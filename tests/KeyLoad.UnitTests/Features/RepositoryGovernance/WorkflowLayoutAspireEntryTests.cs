@@ -167,6 +167,7 @@ internal sealed class WorkflowLayoutAspireEntryTests
             "/*/*/MongoReadinessResourceTests/*", "/*/*/MongoReadinessIdentityTests/*",
             "/*/*/MongoReadinessTaskFailureTests/*", "/*/*/IsolatedKurrentVolumeRegressionFailureTests/*",
             "/*/*/IsolatedKeyLoadAdmissionTests/*", "/*/*/ComparisonResourceLogBufferTests/*",
+            "/*/*/ComparisonProgress*/*",
             "/*/*/IsolatedKeyLoadReplayAdmissionTests/*", "/*/*/RedisReplicaDiagnosticTests/*",
             "/*/*/MongoBootstrapDiagnosticTests/*", "/*/*/KurrentCleanupDiagnosticTests/*",
             "/*/*/KurrentStreamOwnershipTests/*", "/*/*/ComparisonReplayDiagnosticLogTests/*",
