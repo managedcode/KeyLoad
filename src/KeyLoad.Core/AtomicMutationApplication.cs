@@ -91,10 +91,15 @@ public sealed partial class DatabaseEngine
             ExpireSamples samples => Expire(tx, principal, partition, samples, now),
             StoreAggregateSnapshot snapshot => SaveAggregateSnapshot(tx, principal, partition, snapshot),
             PutVector vector => Upsert(tx, principal, partition, vector),
-            CreateQueueTransfer transfer => ApplyCreateQueueTransfer(tx, principal, partition, transfer, now, position),
+            CreateQueueTransfer transfer => ApplyCreateQueueTransfer(tx, principal, partition, transfer, now),
             AcceptQueueTransfer transfer => ApplyAcceptQueueTransfer(tx, principal, partition, transfer, now, position),
-            CompleteQueueTransfer transfer => ApplyCompleteQueueTransfer(tx, principal, partition, transfer, now, position),
+            CompleteQueueTransfer transfer => ApplyCompleteQueueTransfer(tx, principal, partition, transfer),
             ApplyVectorProjection projection => ApplyVectorProjection(tx, principal, partition, projection),
+            ConfigureRecurringSchedule schedule => ApplyConfigureRecurringSchedule(tx, principal, partition, schedule, now),
+            EmitRecurringOccurrences schedule => ApplyEmitRecurringOccurrences(tx, principal, partition, schedule, now),
+            CancelRecurringSchedule schedule => ApplyCancelRecurringSchedule(tx, principal, partition, schedule, now),
+            CompareExchangeSaga saga => ApplyCompareExchangeSaga(tx, principal, partition, saga, now),
+            ExpireSaga saga => ApplyExpireSaga(tx, principal, partition, saga, now),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedMutationMessage)
         };
 }

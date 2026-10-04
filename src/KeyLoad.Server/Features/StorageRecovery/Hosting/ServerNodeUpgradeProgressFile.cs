@@ -7,8 +7,9 @@ internal static class ServerNodeUpgradeProgressFile
     {
         var inventory = Capture(stage);
         var temporary = Path.Combine(stage, ServerNodeUpgradeProtocol.ProgressReceipt + ".tmp");
-        ServerNodeUpgradeReceiptFile.Write(temporary, new ServerNodeUpgradeProgress(1, owner, inventory.Sha256,
-            (int)boundary), ServerNodeUpgradeProtocol.ProgressMagic);
+        ServerNodeUpgradeReceiptFile.Write(temporary, new ServerNodeUpgradeProgress(
+            ServerNodeUpgradeProtocol.ProgressFormatVersion, owner, inventory.Sha256, (int)boundary,
+            owner.SourceEpoch, owner.TargetEpoch), ServerNodeUpgradeProtocol.ProgressMagic);
         File.Move(temporary, Path.Combine(stage, ServerNodeUpgradeProtocol.ProgressReceipt), overwrite: true);
         observer?.Invoke(boundary);
     }
@@ -30,7 +31,9 @@ internal static class ServerNodeUpgradeProgressFile
     {
         var progress = ServerNodeUpgradeReceiptFile.Read<ServerNodeUpgradeProgress>(
             Path.Combine(directory, ServerNodeUpgradeProtocol.ProgressReceipt), ServerNodeUpgradeProtocol.ProgressMagic);
-        if (progress.FormatVersion != 1 || progress.SourceOwner != owner || progress.StageCode is < 0 or > 5
+        if (progress.FormatVersion != ServerNodeUpgradeProtocol.ProgressFormatVersion
+            || progress.SourceOwner != owner || progress.SourceEpoch != owner.SourceEpoch
+            || progress.TargetEpoch != owner.TargetEpoch || progress.StageCode is < 0 or > 5
             || !ServerNodeUpgradeReceiptValidation.IsDigest(progress.InventorySha256))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
         return progress;

@@ -32,6 +32,23 @@ internal sealed class GraphSearchOperatorTests
     }
 
     [Test]
+    public async Task ZeroWeightRetrieverPerformsTheWalkButContributesNoHits()
+    {
+        using var database = new TestDatabase();
+        GraphSearchTestSupport.Configure(database);
+        GraphSearchTestSupport.AddPath(database);
+        var walk = GraphSearchTestSupport.Walk(database,
+            GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root));
+        var request = new GraphSearchRequest(1,
+            new(database.Partition, GraphSearchTestSupport.Documents), Retriever: new(walk, Weight: 0));
+
+        var result = await new SearchEngine(database.Database).GraphSearchAsync("root", request,
+            TestContext.Current!.Execution.CancellationToken);
+
+        await Assert.That(result.Hits).IsEmpty();
+    }
+
+    [Test]
     public async Task ScopeTraversesIntermediateCollectionsAndAppliesEndpointAllowlistOnlyToHits()
     {
         using var database = new TestDatabase();

@@ -72,5 +72,11 @@ public enum GrainReadKind
     /// <summary>Read an authorized destination receipt without claiming source completion.</summary>
     QueueTransferReceipt,
     /// <summary>Execute distinct graph scope, retrieval and expansion under one read cut.</summary>
-    GraphSearch
+    GraphSearch,
+    /// <summary>Inspect a recurring schedule through current persisted projection policies.</summary>
+    RecurringSchedule,
+    /// <summary>Inspect current projected saga state without exposing its retained timeout template.</summary>
+    Saga,
+    /// <summary>Compile versioned SQL graph operators to the same authorized search executor.</summary>
+    SqlGraphSearch
 }

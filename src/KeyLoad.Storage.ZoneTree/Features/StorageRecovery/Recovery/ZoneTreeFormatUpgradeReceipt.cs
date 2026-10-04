@@ -62,9 +62,10 @@ internal static class ZoneTreeFormatUpgradeReceiptFile
 
     private static void Validate(ZoneTreeFormatUpgradeReceipt receipt)
     {
-        if (receipt is null || receipt.FormatVersion != 1 || !IsNormalized(receipt.SourceDirectory)
+        if (receipt is null || receipt.FormatVersion != ZoneTreePersistenceFormat.UpgradeReceiptVersion || !IsNormalized(receipt.SourceDirectory)
             || !IsNormalized(receipt.DestinationDirectory) || receipt.SourceNodeId == Guid.Empty
-            || receipt.SourceIncarnation == Guid.Empty || receipt.SourceDataEpoch != ZoneTreePersistenceFormat.SourceDataEpoch
+            || receipt.SourceIncarnation == Guid.Empty
+            || receipt.SourceDataEpoch is not (ZoneTreePersistenceFormat.Native5DataEpoch or ZoneTreePersistenceFormat.Native6DataEpoch)
             || receipt.TargetDataEpoch != ZoneTreePersistenceFormat.CurrentDataEpoch
             || !IsDigest(receipt.SourceIdentitySha256) || !IsDigest(receipt.SourceJournalSha256))
         {

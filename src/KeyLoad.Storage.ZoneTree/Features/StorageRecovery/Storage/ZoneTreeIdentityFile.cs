@@ -121,7 +121,7 @@ internal static class ZoneTreeIdentityFile
         File.Move(temporary, path, true);
     }
 
-    internal static StoreIdentity ReadNative5ForUpgrade(ReadOnlySpan<byte> bytes)
+    internal static StoreIdentity ReadStoppedSourceForUpgrade(ReadOnlySpan<byte> bytes)
     {
         var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeIdentityEnvelope>(bytes,
             ZoneTreeMetadataBinary.IdentityMagic, IdentityFormatUnsupported);
@@ -131,7 +131,8 @@ internal static class ZoneTreeIdentityFile
         }
 
         var identity = NativeSerialization.Deserialize<StoreIdentity>(envelope.Payload);
-        if (identity.FormatVersion != SourceDataEpoch || identity.KeyCodecVersion != KeyCodec.Version)
+        if (identity.FormatVersion is not (Native5DataEpoch or Native6DataEpoch)
+            || identity.KeyCodecVersion != KeyCodec.Version)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
         }

@@ -1,5 +1,4 @@
 using System.Text;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -8,6 +7,7 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private const string TransferLaneScopeMessage = "The transfer lane does not match its operation partition.";
+    private const string TransferReceiptCorruptMessage = "Persisted destination transfer receipt is inconsistent.";
 
     /// <summary>Reads transfer state and protocol tokens after reloading persisted administrator and data authority.</summary>
     /// <param name="principalId">The authenticated persisted principal.</param>
@@ -44,6 +44,8 @@ public sealed partial class DatabaseEngine
     public QueueTransferReceiptInspection? InspectQueueTransferReceipt(string principalId,
         QueueLaneRef destination, QueueLaneRef source, Guid transferId, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(destination);
+        ArgumentNullException.ThrowIfNull(source);
         var budget = new ReadExecutionBudget(Limits, Clock, cancellationToken);
         budget.Check();
         JsonData.Identifier(principalId);
@@ -116,12 +118,12 @@ public sealed partial class DatabaseEngine
         if (record.Source != source || record.Destination != destination || record.TransferId != transferId
             || record.PrincipalId is null || record.Fingerprint is null || record.ReceiptToken is null)
         {
-            throw Errors.Fail(ErrorCode.Corruption, "Persisted destination transfer receipt is inconsistent.");
+            throw Errors.Fail(ErrorCode.Corruption, TransferReceiptCorruptMessage);
         }
         var claims = Verify<RemoteTransferReceiptClaims>(record.ReceiptToken, Limits.MaxBatchBytes);
         if (claims is null || claims.Source is null || claims.Destination is null || claims.TargetCommit is null)
         {
-            throw Errors.Fail(ErrorCode.Corruption, "Persisted destination transfer receipt is inconsistent.");
+            throw Errors.Fail(ErrorCode.Corruption, TransferReceiptCorruptMessage);
         }
         if (claims.Purpose != RemoteTransferProtocol.ReceiptPurpose || claims.Incarnation != Store.Identity.Incarnation
             || claims.Source != source || claims.Destination != destination || claims.TransferId != transferId
@@ -130,11 +132,11 @@ public sealed partial class DatabaseEngine
             || record.TargetCommit.AtomicPartitionId != destination.Partition.AtomicPartitionId
             || record.TargetCommit.Position < 1 || record.TargetCommit.OwnershipEpoch != 1)
         {
-            throw Errors.Fail(ErrorCode.Corruption, "Persisted destination transfer receipt is inconsistent.");
+            throw Errors.Fail(ErrorCode.Corruption, TransferReceiptCorruptMessage);
         }
     }
 
-    private void ValidateTransferSource(QueueLaneRef source, Guid transferId, PartitionRef partition)
+    private static void ValidateTransferSource(QueueLaneRef source, Guid transferId, PartitionRef partition)
     {
         ValidateTransferLane(source);
         ValidatePartition(partition);

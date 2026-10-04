@@ -1,13 +1,9 @@
-using KeyLoad.Storage;
-
 namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
     private const string TransferAdministratorMessage = "Cluster administration is required for queue transfers.";
-    private const string TransferGrantMessage = "The persisted principal lacks a required queue transfer grant.";
-
-    private void RequireTransferAdministrator(PrincipalRecord principal)
+    private static void RequireTransferAdministrator(PrincipalRecord principal)
     {
         if (!principal.ClusterAdministrator)
         {

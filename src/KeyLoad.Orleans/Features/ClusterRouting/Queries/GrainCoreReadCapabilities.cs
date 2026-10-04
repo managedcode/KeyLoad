@@ -17,6 +17,9 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
             GrainReadKind.QueueTransfer => Transfer(principal, GrainNativePayload.Read<InspectQueueTransferRequest>(payload), cancellationToken),
             GrainReadKind.QueueTransferReceipt => TransferReceipt(principal,
                 GrainNativePayload.Read<InspectQueueTransferReceiptRequest>(payload), cancellationToken),
+            GrainReadKind.RecurringSchedule => Schedule(principal,
+                GrainNativePayload.Read<InspectRecurringScheduleRequest>(payload), cancellationToken),
+            GrainReadKind.Saga => Saga(principal, GrainNativePayload.Read<InspectSagaRequest>(payload), cancellationToken),
             GrainReadKind.Traverse => Traverse(principal, GrainNativePayload.ReadPublicInput<TraverseRequest>(payload), cancellationToken),
             GrainReadKind.Samples => Samples(principal, GrainNativePayload.Read<ReadSamplesRequest>(payload), cancellationToken),
             GrainReadKind.LatestSample => database.ReadLatestSample(principal, GrainNativePayload.Read<ReadLatestSampleRequest>(payload), cancellationToken),
@@ -38,7 +41,8 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
         or GrainReadKind.ChangeFeed or GrainReadKind.OutboxStatus or GrainReadKind.ProjectionBatch
         or GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows
         or GrainReadKind.SampleRetention or GrainReadKind.AggregateReplay
-        or GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt;
+        or GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt
+        or GrainReadKind.RecurringSchedule or GrainReadKind.Saga;
 
     private StreamPage Stream(string principal, ReadStreamRequest request, CancellationToken cancellationToken)
         => database.ReadStream(principal, request.Stream, request.AfterRevision, request.Limit, cancellationToken);
@@ -56,6 +60,13 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
     private GraphTraversal Traverse(string principal, TraverseRequest request, CancellationToken cancellationToken)
         => database.Traverse(principal, request.Partition, request.Graph, request.Start, request.MaxDepth,
             request.MaxVertices, request.MaxEdges, request.Labels?.ToArray(), cancellationToken);
+
+    private RecurringScheduleInspection? Schedule(string principal, InspectRecurringScheduleRequest request,
+        CancellationToken cancellationToken)
+        => database.InspectRecurringSchedule(principal, request.Lane, request.ScheduleId, cancellationToken);
+
+    private SagaInspection? Saga(string principal, InspectSagaRequest request, CancellationToken cancellationToken)
+        => database.InspectSaga(principal, request.Lane, request.SagaId, cancellationToken);
 
     private SampleRecord[] Samples(string principal, ReadSamplesRequest request, CancellationToken cancellationToken)
         => database.ReadSamples(principal, request.Partition, request.Set, request.SeriesId,

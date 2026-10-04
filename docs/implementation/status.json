@@ -804,7 +804,7 @@
       "decision": "docs/ADR/ADR-082-native-cqrs-streams.md",
       "dependencyDelivery": "docs/implementation/native-cqrs-fatal-aggregate-delivery-2026-10-04.json",
       "implemented": "native_ManagedCode_Communication_10_2_9_IAsyncEnumerable_v2_signed_request_scope_IdentityCore_RequestContext_fresh_fixed_voter_protocol_cohort_bounded_stream_and_full_settlement",
-      "localDevelopment": "Release22_formatter22_pass_full_unit18_3060_of3060_scalar22_3059_of3060_exit2_comparison_cleanup_timeout_recovery23_AppHost_aborted_exit134_no_final_report_recovery24_pinned_Aspire_cli_restore_failed_before_tests_recovery25_escalated_actual_Aspire_entry_running",
+      "localDevelopment": "Release22_formatter22_pass_full_unit18_3060_of3060_scalar22_3059_of3060_exit2_comparison_cleanup_timeout_recovery23_AppHost_aborted_exit134_recovery24_CLI_restore_failed_recovery25_actual_Aspire_native_exit2_219_of260_41_missing_immutable_native5_probe_failures",
       "pending": [
         "native_RF3_phase_interruption_and_same_command_receipt_effect_oracles",
         "actual_command_activation_migration_and_persisted_authority_reload",
@@ -829,6 +829,18 @@
         "scalarAndRecovery": "not_run_after_unit_failure",
         "rf3": "image_native_command_journal_cap_failed_before_RF3_tests",
         "qualificationClosed": false
+      },
+      "latestRecoveryDevelopment": {
+        "suite": "recovery",
+        "caller": "actual_Aspire_13_6_AppHost",
+        "total": 260,
+        "passed": 219,
+        "failed": 41,
+        "skipped": 0,
+        "nativeExit": 2,
+        "failure": "all_41_require_verified_immutable_native5_probe_missing_at_admission",
+        "originalReport": "TestResults/c1-recovery25-20261004/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+        "sourceQualified": false
       }
     }
   },
@@ -1373,6 +1385,14 @@
       "actualColdRf3Executed": true,
       "coldRf3Qualified": false,
       "completeGate": false
+    },
+    "nextEpoch": {
+      "requirements": "docs/Features/StorageRecovery/Epoch7.md",
+      "decision": "docs/ADR/ADR-091-epoch7-interpretation-fence.md",
+      "stage": "strict_epoch7_checkpoint5_and_explicit_source5_or6_converter_implementation",
+      "owner": "query_wave",
+      "AppHostPriorProbePreparation": "source_implemented_not_runtime_verified",
+      "runtimeQualified": false
     }
   },
   "KL-044": {
@@ -1956,8 +1976,24 @@
   },
   "KL-100": {
     "title": "Delayed jobs, recurring occurrences і saga state",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/Messaging/RecurringSaga.md",
+      "docs/ADR/ADR-092-recurring-saga.md",
+      "src/KeyLoad.Abstractions/Features/Messaging/Contracts/RecurringSagaContracts.cs",
+      "src/KeyLoad.Core/Features/Messaging/Commands/RecurringScheduleCommands.cs",
+      "src/KeyLoad.Core/Features/Messaging/Commands/SagaCommands.cs"
+    ],
+    "implementation": {
+      "stage": "S1_canonical_schedule_and_saga_CAS_source_with_shared_atomic_and_authorization_joins_tests_in_progress",
+      "owner": "cluster_wave",
+      "runtimeQualified": false,
+      "remaining": [
+        "S1_combined_build_and_Aspire_mapped_regressions",
+        "S2_native_Orleans_CQRS_due_coordinator_restart_and_backpressure",
+        "public_SDK_official_MCP_Aspire_RF3_and_complete_Linux_acceptance"
+      ]
+    }
   },
   "KL-101": {
     "title": "Eventing benchmark kit і .NET baselines",

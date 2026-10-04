@@ -7,40 +7,43 @@ namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 internal sealed class NodeEpochImageSourceAcceptanceTests
 {
     private const string TrialPrefix = "keyload-node-epoch-image-source-";
-    private const string SourceName = "native5-source";
-    private const string ImageName = "native3-image.bin";
-    private const string ConvertedName = "native4-image.bin";
+    private const string SourceName = "native-source";
+    private const string ImageName = "native-source-image.bin";
+    private const string ConvertedName = "native7-image.bin";
     private const string JournalName = "commands.wal";
-    private const int ExpectedDataEpoch = 5;
+    private const int Native5DataEpoch = 5;
+    private const int Native6DataEpoch = 6;
     private const long ExpectedRecordCount = 4;
     private const int ProbeTimeoutSeconds = 25;
     private const int CleanupSeconds = 30;
 
     [Test]
-    public async Task AcEpoch007ActualPriorCheckpoint3ImageVerifiesWithoutChangingItsSource()
+    [Arguments(Native5DataEpoch)]
+    [Arguments(Native6DataEpoch)]
+    public async Task AcEpoch7ActualPriorCheckpointImageVerifiesWithoutChangingItsSource(int dataEpoch)
     {
-        await RunTrialAsync(VerifyActualImageAsync, TestContext.Current!.Execution.CancellationToken);
+        await RunTrialAsync(VerifyActualImageAsync, dataEpoch, TestContext.Current!.Execution.CancellationToken);
     }
 
-    private static async Task VerifyActualImageAsync(string root, CancellationToken cancellationToken)
+    private static async Task VerifyActualImageAsync(string root, int dataEpoch, CancellationToken cancellationToken)
     {
         var source = Path.Combine(root, SourceName);
         var image = Path.Combine(root, ImageName);
         var converted = Path.Combine(root, ConvertedName);
-        var prior = await EpochPriorExecutableFixture.CreateAsync(source, true, cancellationToken);
+        var prior = await EpochPriorExecutableFixture.CreateAsync(source, true, cancellationToken, dataEpoch);
         var sourceInventory = await EpochUpgradeFileInventory.CaptureAsync(source, cancellationToken);
         File.Copy(Path.Combine(source, JournalName), image);
         var originalImage = await File.ReadAllBytesAsync(image, cancellationToken);
 
-        var oldReader = await EpochPriorExecutableFixture.VerifySnapshotAsync(source, image, cancellationToken);
+        var oldReader = await EpochPriorExecutableFixture.VerifySnapshotAsync(source, image, cancellationToken, dataEpoch);
         await AssertPriorReaderAsync(prior, oldReader);
-        var snapshot = ZoneTreeSnapshotFormatUpgrade.VerifySource(image, prior.Incarnation);
+        var snapshot = ZoneTreeSnapshotFormatUpgrade.VerifySource(image, prior.Incarnation, dataEpoch);
         await AssertCurrentReader(prior, snapshot);
-        var convertedSnapshot = ZoneTreeSnapshotFormatUpgrade.Upgrade(image, converted, prior.Incarnation);
+        var convertedSnapshot = ZoneTreeSnapshotFormatUpgrade.Upgrade(image, converted, prior.Incarnation, dataEpoch);
         await AssertCurrentReader(prior, convertedSnapshot);
         await AssertCurrentFileReader(root, converted, prior);
         var oldReaderRejectsCurrent = await EpochPriorExecutableFixture.VerifySnapshotAsync(source, converted,
-            cancellationToken);
+            cancellationToken, dataEpoch);
         await Assert.That(oldReaderRejectsCurrent.ErrorCode).IsEqualTo(ErrorCode.FormatUnsupported.ToString());
 
         var unchangedImage = await File.ReadAllBytesAsync(image, cancellationToken);
@@ -53,7 +56,7 @@ internal sealed class NodeEpochImageSourceAcceptanceTests
     {
         await Assert.That(actual.ErrorCode).IsNull();
         await Assert.That(actual.SourceRevision).IsEqualTo(expected.SourceRevision);
-        await Assert.That(actual.DataEpoch).IsEqualTo(ExpectedDataEpoch);
+        await Assert.That(actual.DataEpoch).IsEqualTo(expected.DataEpoch);
         await Assert.That(actual.NodeId).IsEqualTo(expected.NodeId);
         await Assert.That(actual.Incarnation).IsEqualTo(expected.Incarnation);
         await Assert.That(actual.Position).IsEqualTo(expected.Position);
@@ -88,7 +91,7 @@ internal sealed class NodeEpochImageSourceAcceptanceTests
         }
     }
 
-    private static async Task RunTrialAsync(Func<string, CancellationToken, Task> trial,
+    private static async Task RunTrialAsync(Func<string, int, CancellationToken, Task> trial, int dataEpoch,
         CancellationToken callerToken)
     {
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
@@ -99,7 +102,7 @@ internal sealed class NodeEpochImageSourceAcceptanceTests
         try
         {
             Directory.CreateDirectory(root);
-            await trial(root, timeout.Token);
+            await trial(root, dataEpoch, timeout.Token);
         }
         catch (Exception failure)
         {

@@ -56,12 +56,16 @@ internal static class VectorProjectionEligibility
             return false;
         }
 
+        return HasCompatiblePolicy(database, view, partition, collection, lineage, sourceResource, budget);
+    }
+
+    private static bool HasCompatiblePolicy(DatabaseEngine database, IKeyValueView view, PartitionRef partition,
+        string collection, VectorProjectionLineage lineage, ResourceDefinition sourceResource,
+        ReadExecutionBudget budget)
+    {
         var targetResource = budget.ReadRecord<ResourceDefinition>(view,
-            KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection));
-        if (targetResource is null)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
-        }
+            KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection))
+            ?? throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
         ValidateResource(targetResource, collection, partition);
         var sourceClasses = VectorProjectionPolicy.Classifications(database.Authorization, sourceResource,
             lineage.InputField);

@@ -2,7 +2,7 @@ namespace KeyLoad.Replication;
 
 internal static class PeerDiscoveryProtocol
 {
-    internal const string Purpose = "keyload-discovery-request-data-epoch6";
+    internal const string Purpose = "keyload-discovery-request-data-epoch7";
     internal const string TimeHeader = "X-KeyLoad-Time";
     internal const string NonceHeader = "X-KeyLoad-Nonce";
     internal const string SignatureHeader = "X-KeyLoad-Signature";

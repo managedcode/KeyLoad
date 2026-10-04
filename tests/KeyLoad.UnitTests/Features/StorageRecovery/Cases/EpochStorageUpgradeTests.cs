@@ -20,12 +20,14 @@ internal sealed class EpochStorageUpgradeTests
     private const string UnrelatedDestinationFile = "unrelated.bin";
 
     [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task AcEpoch002OfflineUpgradeCopiesNativeAuthorityDataAndPositions(bool checkpoint)
+    [Arguments(false, EpochStorageFixture.Native5Epoch)]
+    [Arguments(true, EpochStorageFixture.Native5Epoch)]
+    [Arguments(false, EpochStorageFixture.Native6Epoch)]
+    [Arguments(true, EpochStorageFixture.Native6Epoch)]
+    public async Task AcEpoch002OfflineUpgradeCopiesNativeAuthorityDataAndPositions(bool checkpoint, int sourceEpoch)
     {
         using var fixture = new EpochStorageFixture();
-        var original = await fixture.CreateNativeSourceAsync(checkpoint);
+        var original = await fixture.CreateNativeSourceAsync(checkpoint, sourceEpoch);
         var sourceFiles = await EpochStorageFixture.CaptureAsync(fixture.Source);
         var upgraded = ZoneTreeFormatUpgrade.Upgrade(fixture.Source, fixture.DestinationOptions(original));
         await EpochStorageFixture.AssertIdentityPreservedAsync(original, upgraded);
@@ -47,13 +49,16 @@ internal sealed class EpochStorageUpgradeTests
     }
 
     [Test]
-    [Arguments(EpochStorageFixture.LegacyEpoch)]
-    [Arguments(7)]
+    [Arguments(EpochStorageFixture.Native5Epoch)]
+    [Arguments(EpochStorageFixture.Native6Epoch)]
+    [Arguments(8)]
     public async Task AcEpoch001OrdinaryCurrentOpenRejectsOldAndUnknownBeforeChangingFiles(int version)
     {
         using var fixture = new EpochStorageFixture();
-        var identity = await fixture.CreateNativeSourceAsync(checkpoint: false);
-        if (version != EpochStorageFixture.LegacyEpoch)
+        var sourceEpoch = version is EpochStorageFixture.Native5Epoch or EpochStorageFixture.Native6Epoch
+            ? version : EpochStorageFixture.Native5Epoch;
+        var identity = await fixture.CreateNativeSourceAsync(checkpoint: false, sourceEpoch);
+        if (version != sourceEpoch)
         {
             ZoneTreeIdentityFile.Write(Path.Combine(fixture.Source, "identity.json"),
                 identity with { FormatVersion = version });
@@ -155,7 +160,7 @@ internal sealed class EpochStorageUpgradeTests
     private static Task SetUnknownIdentityAsync(EpochStorageFixture fixture, StoreIdentity identity)
     {
         ZoneTreeIdentityFile.Write(Path.Combine(fixture.Source, "identity.json"),
-            identity with { FormatVersion = 7 });
+            identity with { FormatVersion = 8 });
         return Task.CompletedTask;
     }
 

@@ -7,8 +7,12 @@ internal static class ServerNodeUpgradeReceiptValidation
     internal static void Verify(ServerNodeUpgradeOwner owner, ServerNodeUpgradeReceipt receipt,
         NodeOptions options)
     {
-        if (receipt.FormatVersion != 1 || owner.FormatVersion != 1
-            || receipt.SourceEpoch != ServerNodeUpgradeProtocol.SourceEpoch || receipt.TargetEpoch != ServerNodeUpgradeProtocol.TargetEpoch
+        if (receipt.FormatVersion != ServerNodeUpgradeProtocol.ReceiptFormatVersion
+            || owner.FormatVersion != ServerNodeUpgradeProtocol.OwnerFormatVersion
+            || receipt.SourceEpoch != owner.SourceEpoch
+            || owner.SourceEpoch is not (ServerNodeUpgradeProtocol.Native5SourceEpoch
+                or ServerNodeUpgradeProtocol.Native6SourceEpoch)
+            || receipt.TargetEpoch != owner.TargetEpoch || owner.TargetEpoch != ServerNodeUpgradeProtocol.TargetEpoch
             || receipt.OriginalSource != owner.OriginalSource || receipt.FinalDestination != owner.FinalDestination
             || receipt.OriginalInventorySha256 != owner.OriginalInventorySha256
             || receipt.CanonicalSourceIdentitySha256 != owner.CanonicalIdentitySha256

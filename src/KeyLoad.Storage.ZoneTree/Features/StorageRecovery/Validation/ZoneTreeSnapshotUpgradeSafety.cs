@@ -21,6 +21,12 @@ internal static class ZoneTreeSnapshotUpgradeSafety
         { throw Errors.Fail(ErrorCode.Validation, ZoneTreePersistenceFormat.SnapshotScopeInvalid); }
     }
 
+    internal static void ValidateSourceEpoch(int sourceDataEpoch)
+    {
+        if (sourceDataEpoch is not (ZoneTreePersistenceFormat.Native5DataEpoch or ZoneTreePersistenceFormat.Native6DataEpoch))
+        { throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.SnapshotFormatUnsupported); }
+    }
+
     internal static void ValidatePaths(string source, string destination)
     {
         if (string.Equals(source, destination, PathComparison()))

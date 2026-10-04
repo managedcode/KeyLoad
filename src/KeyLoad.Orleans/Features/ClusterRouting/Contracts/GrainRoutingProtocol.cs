@@ -17,7 +17,7 @@ internal static class GrainRoutingProtocol
     internal const string MissingPrincipal = "The internal request requires a persisted principal.";
     internal const string AdministrationRequired = "Cluster administration is required.";
     internal const string ReplyBudgetExceeded = "The database reply exceeds its byte budget.";
-    internal const int RequestInterfaceVersion = 2;
+    internal const int RequestInterfaceVersion = 3;
     internal const int CapabilityInterfaceVersion = 1;
     internal const int EnvelopeMetadataBytes = 65_536;
     internal const int MaximumReplyBytes = 16_777_216;

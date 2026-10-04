@@ -67,7 +67,8 @@ internal static class ZoneTreeFormatUpgradeBuilder
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.BackupFileVerificationFailed);
         }
         journal.Position = 0;
-        var position = ZoneTreeFormatUpgradeJournal.ReplaySource(journal, options, runtime);
+        var position = ZoneTreeFormatUpgradeJournal.ReplaySource(journal, options, runtime,
+            source.Identity.FormatVersion);
         options.FaultObserver?.Invoke(CommitStage.UpgradeRecovered, position, 0);
         return position;
     }

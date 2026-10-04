@@ -11,23 +11,34 @@ internal sealed class EpochUpgradeProcessRecoveryTests
     private const int CleanupSeconds = 30;
 
     [Test]
-    [Arguments(CommitStage.UpgradeSourceVerified, false)]
-    [Arguments(CommitStage.UpgradePrepared, false)]
-    [Arguments(CommitStage.UpgradeRecovered, false)]
-    [Arguments(CommitStage.UpgradeCheckpointFlushed, false)]
-    [Arguments(CommitStage.UpgradePublished, false)]
-    [Arguments(CommitStage.UpgradeSourceVerified, true)]
-    [Arguments(CommitStage.UpgradePrepared, true)]
-    [Arguments(CommitStage.UpgradeRecovered, true)]
-    [Arguments(CommitStage.UpgradeCheckpointFlushed, true)]
-    [Arguments(CommitStage.UpgradePublished, true)]
-    public async Task AcEpoch001To006OfflineUpgradeCrashRetainsSourceAndPublishesOnlyCompleteCurrentTarget(
-        CommitStage stage, bool compacted)
+    [Arguments(CommitStage.UpgradeSourceVerified, false, 5)]
+    [Arguments(CommitStage.UpgradePrepared, false, 5)]
+    [Arguments(CommitStage.UpgradeRecovered, false, 5)]
+    [Arguments(CommitStage.UpgradeCheckpointFlushed, false, 5)]
+    [Arguments(CommitStage.UpgradePublished, false, 5)]
+    [Arguments(CommitStage.UpgradeSourceVerified, true, 5)]
+    [Arguments(CommitStage.UpgradePrepared, true, 5)]
+    [Arguments(CommitStage.UpgradeRecovered, true, 5)]
+    [Arguments(CommitStage.UpgradeCheckpointFlushed, true, 5)]
+    [Arguments(CommitStage.UpgradePublished, true, 5)]
+    [Arguments(CommitStage.UpgradeSourceVerified, false, 6)]
+    [Arguments(CommitStage.UpgradePrepared, false, 6)]
+    [Arguments(CommitStage.UpgradeRecovered, false, 6)]
+    [Arguments(CommitStage.UpgradeCheckpointFlushed, false, 6)]
+    [Arguments(CommitStage.UpgradePublished, false, 6)]
+    [Arguments(CommitStage.UpgradeSourceVerified, true, 6)]
+    [Arguments(CommitStage.UpgradePrepared, true, 6)]
+    [Arguments(CommitStage.UpgradeRecovered, true, 6)]
+    [Arguments(CommitStage.UpgradeCheckpointFlushed, true, 6)]
+    [Arguments(CommitStage.UpgradePublished, true, 6)]
+    public async Task AcEpoch7OfflineUpgradeCrashRetainsSourceAndPublishesOnlyCompleteCurrentTarget(
+        CommitStage stage, bool compacted, int dataEpoch)
     {
-        await RunTrialAsync(stage, compacted, TestContext.Current!.Execution.CancellationToken);
+        await RunTrialAsync(stage, compacted, dataEpoch, TestContext.Current!.Execution.CancellationToken);
     }
 
-    private static async Task RunTrialAsync(CommitStage stage, bool compacted, CancellationToken callerToken)
+    private static async Task RunTrialAsync(CommitStage stage, bool compacted, int dataEpoch,
+        CancellationToken callerToken)
     {
         var root = Path.Combine(Path.GetTempPath(), TrialPrefix + Guid.NewGuid().ToString("N"));
         var source = Path.Combine(root, "source");
@@ -40,7 +51,7 @@ internal sealed class EpochUpgradeProcessRecoveryTests
         try
         {
             Directory.CreateDirectory(root);
-            var receipt = await EpochPriorExecutableFixture.CreateAsync(source, compacted, timeout.Token);
+            var receipt = await EpochPriorExecutableFixture.CreateAsync(source, compacted, timeout.Token, dataEpoch);
             var sourceInventory = await EpochUpgradeFileInventory.CaptureAsync(source, timeout.Token);
             process = StartCrashProcess(source, target, stage);
             await AwaitCrashBoundaryAsync(process, timeout.Token);

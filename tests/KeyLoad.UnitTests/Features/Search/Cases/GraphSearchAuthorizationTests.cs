@@ -48,11 +48,15 @@ internal sealed class GraphSearchAuthorizationTests
         var denied = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
             GraphSearchTestSupport.Reader, new(1, search, Retriever: new(walk)),
             TestContext.Current!.Execution.CancellationToken)))!;
+        var zeroWeightDenied = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
+            GraphSearchTestSupport.Reader, new(1, search, Retriever: new(walk, Weight: 0)),
+            TestContext.Current!.Execution.CancellationToken)))!;
         GraphSearchTestSupport.PersistReader(database, fieldGrants: [SecretGrant]);
         var allowed = await engine.GraphSearchAsync(GraphSearchTestSupport.Reader,
             new(1, search, Retriever: new(walk)), TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(zeroWeightDenied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(allowed.Hits.Select(hit => hit.Document.Reference.Id).ToArray())
             .IsEqualTo([GraphSearchTestSupport.FirstHit, GraphSearchTestSupport.SecondHit]);
     }

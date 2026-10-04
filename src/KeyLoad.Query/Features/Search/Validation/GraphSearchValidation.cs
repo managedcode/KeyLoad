@@ -7,6 +7,7 @@ internal static class GraphSearchValidation
 {
     private const string InvalidVersion = "The graph search version is unsupported.";
     private const string MissingOperator = "At least one graph operator is required.";
+    private const string InvalidRequest = "The graph search request is invalid.";
     private const string InvalidWalk = "The graph walk specification is invalid.";
     private const int VersionOne = 1;
     private const int MaximumDepth = 16;
@@ -22,6 +23,10 @@ internal static class GraphSearchValidation
         if (request.Scope is null && request.Retriever is null && request.Expansion is null)
         {
             throw Errors.Fail(ErrorCode.Validation, MissingOperator);
+        }
+        if (request.Search is null)
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
         SearchRequestValidation.Validate(request.Search, limits, request.Retriever is not null);
         DatabaseEngine.ValidatePartition(request.Search.Partition);

@@ -9,7 +9,7 @@ internal static class ServerNodeFormatUpgrade
         var paths = Validate(source, destinationOptions);
         using var sourceLocks = ServerNodeUpgradeLocks.Acquire(paths.Source);
         var original = ReadSource(paths.Source, sourceLocks);
-        var owner = ServerNodeUpgradeAuthority.Bind(paths, original);
+        var owner = ServerNodeUpgradeAuthority.Bind(paths, original, destinationOptions);
         if (Directory.Exists(paths.Destination))
         { return VerifyPublished(paths, destinationOptions, original, owner, sourceLocks); }
         ServerNodeUpgradeStage.RequireAbsentTarget(paths.Destination);
@@ -26,7 +26,7 @@ internal static class ServerNodeFormatUpgrade
         var paths = Validate(source, destinationOptions);
         using var sourceLocks = ServerNodeUpgradeLocks.Acquire(paths.Source);
         var original = ReadSource(paths.Source, sourceLocks);
-        var owner = ServerNodeUpgradeAuthority.Bind(paths, original);
+        var owner = ServerNodeUpgradeAuthority.Bind(paths, original, destinationOptions);
         if (Directory.Exists(paths.Destination))
         { return VerifyPublished(paths, destinationOptions, original, owner, sourceLocks); }
         var receipt = VerifyPreparedTarget(paths.Stage, owner, destinationOptions, published: false);
@@ -40,7 +40,7 @@ internal static class ServerNodeFormatUpgrade
         var paths = Validate(source, destinationOptions);
         using var sourceLocks = ServerNodeUpgradeLocks.Acquire(paths.Source);
         var original = ReadSource(paths.Source, sourceLocks);
-        var owner = ServerNodeUpgradeAuthority.Bind(paths, original);
+        var owner = ServerNodeUpgradeAuthority.Bind(paths, original, destinationOptions);
         if (Directory.Exists(paths.Destination))
         { return VerifyPublished(paths, destinationOptions, original, owner, sourceLocks); }
         using var targetLocks = ServerNodeUpgradeLocks.Acquire(paths.Stage);

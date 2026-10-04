@@ -1,6 +1,7 @@
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
 
 [RequestCqrsCohortDataSource]
+[NotInParallel]
 internal sealed class RequestCqrsCohortCancellationTests(RequestCqrsCohortRuntimeFixture runtime)
 {
     private static readonly TimeSpan TestBound = TimeSpan.FromSeconds(20);

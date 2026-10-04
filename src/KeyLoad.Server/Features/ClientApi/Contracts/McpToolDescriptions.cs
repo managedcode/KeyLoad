@@ -12,6 +12,9 @@ internal static class McpToolDescriptions
     private const string MessagesInspect = "Inspect authorized queue message metadata and visible payload; result is null when absent.";
     private const string QueueTransferInspect = "Read one persisted source transfer and signed intent under current administrator, data and field grants; null when absent.";
     private const string QueueTransferReceipt = "Read the committed signed destination receipt for a transfer; this does not assert source completion. Null when absent.";
+    private const string ScheduleInspect = "Read one recurring schedule with current payload and header projection; null when absent.";
+    private const string SagaInspect = "Read projected current saga state and deadline; null when absent.";
+    private const string QuerySearch = "Execute the bounded Q1.Search.v1 SQL graph-search profile under the same current policy and read cut as graph search.";
     private const string GraphTraverse = "Traverse a graph with explicit depth, vertex and edge limits under the current principal.";
     private const string SeriesRead = "Read a bounded time-series page in the supplied UTC time range.";
     private const string SeriesLatest = "Read the latest authorized sample at or before an optional inclusive UTC timestamp; sample is null when absent.";
@@ -60,6 +63,9 @@ internal static class McpToolDescriptions
         McpToolNames.MessagesInspect => MessagesInspect,
         McpToolNames.QueueTransferInspect => QueueTransferInspect,
         McpToolNames.QueueTransferReceipt => QueueTransferReceipt,
+        McpToolNames.ScheduleInspect => ScheduleInspect,
+        McpToolNames.SagaInspect => SagaInspect,
+        McpToolNames.QuerySearch => QuerySearch,
         McpToolNames.GraphTraverse => GraphTraverse,
         McpToolNames.SeriesRead => SeriesRead,
         McpToolNames.SeriesLatest => SeriesLatest,

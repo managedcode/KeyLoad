@@ -18,15 +18,17 @@ public sealed partial class QueryEngine
     private static readonly TimeSpan CursorLifetime = TimeSpan.FromMinutes(5);
     private readonly record struct CursorState(int Offset, long Cut, long SourceEpoch);
     private readonly DatabaseEngine database;
+    private readonly SearchEngine graphSearch;
     private readonly LiveQueryExecutor liveQueries;
     private readonly ModelQueryExecutor modelQueries;
 
     /// <summary>Creates a query engine over one node-local database.</summary>
     /// <param name="database">Database owning query reads and admission.</param>
-    public QueryEngine(DatabaseEngine database)
+    public QueryEngine(DatabaseEngine database, SearchEngine? searchEngine = null)
     {
         ArgumentNullException.ThrowIfNull(database);
         this.database = database;
+        graphSearch = searchEngine ?? new SearchEngine(database);
         liveQueries = new(database, this);
         modelQueries = new(database, this);
     }
@@ -41,6 +43,22 @@ public sealed partial class QueryEngine
         CancellationToken cancellationToken = default)
         => Execute(principalId, budget => new(request.Partition, new SqlParser(request.Sql, database.Limits, budget).Parse(), request.Parameters,
             request.AllowFullScan, request.Cursor), timeProvider, cancellationToken);
+
+    /// <summary>Executes a bounded Q1.Search.v1 statement through the canonical graph-search engine.</summary>
+    /// <param name="principalId">Persisted database principal identifier.</param>
+    /// <param name="request">Versioned SQL graph-search request.</param>
+    /// <param name="cancellationToken">Caller cancellation for bounded parse and search work.</param>
+    /// <returns>The same graph-search result produced by the direct request contract.</returns>
+    public async Task<GraphSearchResult> SearchSqlAsync(string principalId, SqlGraphSearchRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var budget = new ReadExecutionBudget(database.Limits, cancellationToken: cancellationToken);
+        budget.Check();
+        var graphRequest = SqlGraphSearchParser.Parse(request, database.Limits, budget);
+        budget.Check();
+        return await graphSearch.GraphSearchAsync(principalId, graphRequest, cancellationToken).ConfigureAwait(false);
+    }
     /// <summary>Executes a typed bounded query against one authorized read cut.</summary>
     /// <param name="principalId">Persisted database principal identifier.</param>
     /// <param name="request">Validated AST input and optional continuation.</param>
@@ -53,7 +71,7 @@ public sealed partial class QueryEngine
     public QueryCapabilityManifest Capabilities => new(1, 1, "Q1", "atomicPartition", "decimal", "distinctFromNull",
         ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS MISSING"],
         database.Limits.MaxResults, database.Limits.MaxScanRecords, database.Limits.MaxQueryBytes, database.Limits.MaxQueryDepth, true, true,
-        database.Limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery", "modelViewsV1"]);
+        database.Limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery", "modelViewsV1", SqlGraphSearchSyntax.ProfileName]);
     private QueryPage Execute(string principalId, Func<ReadExecutionBudget, AstQueryRequest> adapt, TimeProvider? timeProvider,
         CancellationToken cancellationToken)
     {

@@ -5,6 +5,9 @@ namespace KeyLoad.Client;
 /// <summary>Reads durable queue-transfer protocol state through the shared SDK transport.</summary>
 public static class QueueTransferClient
 {
+    private const string InspectPath = "/v1/queues/transfers/inspect";
+    private const string ReceiptPath = "/v1/queues/transfers/receipt";
+
     /// <summary>Reads the authorized source intent and completion state.</summary>
     /// <param name="client">The authenticated KeyLoad client.</param>
     /// <param name="request">The complete source lane and stable transfer identity.</param>
@@ -15,7 +18,7 @@ public static class QueueTransferClient
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<QueueTransferInspection?>("/v1/queues/transfers/inspect", request, false, null, cancellationToken);
+        return client.Send<QueueTransferInspection?>(InspectPath, request, false, null, cancellationToken);
     }
 
     /// <summary>Reads the committed destination receipt without asserting source completion.</summary>
@@ -28,6 +31,6 @@ public static class QueueTransferClient
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<QueueTransferReceiptInspection?>("/v1/queues/transfers/receipt", request, false, null, cancellationToken);
+        return client.Send<QueueTransferReceiptInspection?>(ReceiptPath, request, false, null, cancellationToken);
     }
 }

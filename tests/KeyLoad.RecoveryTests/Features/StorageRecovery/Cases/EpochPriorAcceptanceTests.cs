@@ -10,21 +10,23 @@ internal sealed class EpochPriorAcceptanceTests
     private const int CleanupTimeoutSeconds = 30;
 
     [Test]
-    public async Task AcEpoch004ActualEpoch5ExecutableRejectsCurrent6StoreWithoutMutation()
+    [Arguments(5)]
+    [Arguments(6)]
+    public async Task AcEpoch7ActualPriorExecutableRejectsCurrent7StoreWithoutMutation(int dataEpoch)
     {
         await RunTrialAsync(async (root, token) =>
         {
             var source = Path.Combine(root, "source");
             var target = Path.Combine(root, "target");
-            var original = await EpochPriorExecutableFixture.CreateAsync(source, false, token);
+            var original = await EpochPriorExecutableFixture.CreateAsync(source, false, token, dataEpoch);
             var sourceFiles = await EpochUpgradeFileInventory.CaptureAsync(source, token);
             _ = ZoneTreeFormatUpgrade.Upgrade(source, new(target));
             var targetFiles = await EpochUpgradeFileInventory.CaptureAsync(target, token);
 
-            var rejected = await EpochPriorExecutableFixture.InspectAsync(target, token);
+            var rejected = await EpochPriorExecutableFixture.InspectAsync(target, token, dataEpoch);
             await Assert.That(rejected.ErrorCode).IsEqualTo(ErrorCode.FormatUnsupported.ToString());
             await AssertInventoriesUnchangedAsync(source, sourceFiles, target, targetFiles, token);
-            var stillReadable = await EpochPriorExecutableFixture.InspectAsync(source, token);
+            var stillReadable = await EpochPriorExecutableFixture.InspectAsync(source, token, dataEpoch);
             await AssertSameOriginalIdentityAsync(stillReadable, original);
             await EpochUpgradeFileInventory.AssertAuthorityUnchangedAsync(source, sourceFiles, token);
             await EpochUpgradeFileInventory.AssertUnchangedAsync(target, targetFiles, token);
@@ -32,18 +34,20 @@ internal sealed class EpochPriorAcceptanceTests
     }
 
     [Test]
-    public async Task AcEpoch004ActualEpoch5CheckpointReaderRejectsCheckpoint4WithoutMutation()
+    [Arguments(5)]
+    [Arguments(6)]
+    public async Task AcEpoch7ActualPriorCheckpointReaderRejectsCheckpoint5WithoutMutation(int dataEpoch)
     {
         await RunTrialAsync(async (root, token) =>
         {
             var source = Path.Combine(root, "source");
             var target = Path.Combine(root, "target");
-            var original = await EpochPriorExecutableFixture.CreateAsync(source, false, token);
-            var initialInspection = await EpochPriorExecutableFixture.InspectAsync(source, token);
+            var original = await EpochPriorExecutableFixture.CreateAsync(source, false, token, dataEpoch);
+            var initialInspection = await EpochPriorExecutableFixture.InspectAsync(source, token, dataEpoch);
             await AssertSameOriginalIdentityAsync(initialInspection, original);
 
             _ = ZoneTreeFormatUpgrade.Upgrade(source, new(target));
-            var checkpoint = Path.Combine(target, "current-checkpoint4.bin");
+            var checkpoint = Path.Combine(target, "current-checkpoint5.bin");
             using (var current = new ZoneTreeStore(new(target)))
             {
                 _ = current.CreateSnapshot(checkpoint, original.AppliedPosition);
@@ -51,10 +55,10 @@ internal sealed class EpochPriorAcceptanceTests
             var sourceFiles = await EpochUpgradeFileInventory.CaptureAsync(source, token);
             var targetFiles = await EpochUpgradeFileInventory.CaptureAsync(target, token);
 
-            var rejected = await EpochPriorExecutableFixture.VerifySnapshotAsync(source, checkpoint, token);
+            var rejected = await EpochPriorExecutableFixture.VerifySnapshotAsync(source, checkpoint, token, dataEpoch);
             await Assert.That(rejected.ErrorCode).IsEqualTo(ErrorCode.FormatUnsupported.ToString());
             await AssertInventoriesUnchangedAsync(source, sourceFiles, target, targetFiles, token);
-            var stillReadable = await EpochPriorExecutableFixture.InspectAsync(source, token);
+            var stillReadable = await EpochPriorExecutableFixture.InspectAsync(source, token, dataEpoch);
             await AssertSameOriginalIdentityAsync(stillReadable, original);
             await EpochUpgradeFileInventory.AssertAuthorityUnchangedAsync(source, sourceFiles, token);
             await EpochUpgradeFileInventory.AssertUnchangedAsync(target, targetFiles, token);

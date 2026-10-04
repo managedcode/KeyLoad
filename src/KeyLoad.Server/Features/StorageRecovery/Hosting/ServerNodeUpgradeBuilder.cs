@@ -16,11 +16,15 @@ internal static class ServerNodeUpgradeBuilder
         var authority = ServerNodeUpgradeAuthority.VerifyCopies(inputs, options);
         if (authority.Canonical.NodeId == authority.Replica.NodeId)
         { throw Errors.Fail(ErrorCode.Corruption, ServerNodeUpgradeProtocol.Corrupt); }
+        if (authority.Canonical.FormatVersion != authority.Replica.FormatVersion
+            || authority.Canonical.FormatVersion is not (ServerNodeUpgradeProtocol.Native5SourceEpoch
+                or ServerNodeUpgradeProtocol.Native6SourceEpoch))
+        { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
         ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.SourceVerified, observer);
         ConvertStores(inputs, paths.Stage, options);
         ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.StoresConverted, observer);
-        var preparation = Preflight(paths, options, original, owner);
-        var images = PrepareImages(paths, options, original);
+        var preparation = Preflight(paths, options, original, owner, authority.Canonical.FormatVersion);
+        var images = PrepareImages(paths, options, original, authority.Canonical.FormatVersion);
         ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.ImagesConverted, observer);
         PublishImages(preparation.Plan, paths, options, images);
         ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.DescriptorFlushed, observer);
@@ -47,21 +51,21 @@ internal static class ServerNodeUpgradeBuilder
     }
 
     private static ServerNodeUpgradePreparation Preflight(ServerNodeUpgradePaths paths, NodeOptions options,
-        ServerNodeUpgradeInventory original, ServerNodeUpgradeOwner owner)
+        ServerNodeUpgradeInventory original, ServerNodeUpgradeOwner owner, int sourceDataEpoch)
         => ServerNodeUpgradeStores.Run(paths.Stage, options, stores =>
         {
             var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy());
             var configuration = options.CreateReplicaConfiguration(paths.Stage);
             var plan = ReplicaSnapshotFormatUpgrade.Preflight(database, stores.Replica, configuration,
                 Path.Combine(paths.Source, ServerNodeUpgradeProtocol.Snapshots),
-                path => ZoneTreeSnapshotFormatUpgrade.VerifySource(path, options.Incarnation));
+                path => ZoneTreeSnapshotFormatUpgrade.VerifySource(path, options.Incarnation, sourceDataEpoch));
             using var log = new DurableReplicaLog(stores.Replica, configuration, canonicalDatabase: database);
             return new ServerNodeUpgradePreparation(plan,
-                CreateReceipt(paths, original, owner, database, stores.Replica, log.State));
+                CreateReceipt(paths, original, owner, database, stores.Replica, log.State, sourceDataEpoch));
         });
 
     private static Dictionary<string, StorageSnapshot> PrepareImages(ServerNodeUpgradePaths paths,
-        NodeOptions options, ServerNodeUpgradeInventory original)
+        NodeOptions options, ServerNodeUpgradeInventory original, int sourceDataEpoch)
     {
         var directory = Path.Combine(paths.Stage, ServerNodeUpgradeProtocol.PreparedImages);
         ServerNodeUpgradeFiles.CreatePrivateDirectory(directory);
@@ -71,7 +75,7 @@ internal static class ServerNodeUpgradeBuilder
         {
             var name = Path.GetFileName(image.Path);
             images.Add(name, ZoneTreeSnapshotFormatUpgrade.Upgrade(Path.Combine(paths.Source, image.Path),
-                Path.Combine(directory, name), options.Incarnation));
+                Path.Combine(directory, name), options.Incarnation, sourceDataEpoch));
         }
         return images;
     }
@@ -95,11 +99,11 @@ internal static class ServerNodeUpgradeBuilder
 
     private static ServerNodeUpgradeReceipt CreateReceipt(ServerNodeUpgradePaths paths,
         ServerNodeUpgradeInventory original, ServerNodeUpgradeOwner owner, DatabaseEngine canonical,
-        ZoneTreeStore replica, ReplicaHardState state)
-        => new(1, paths.Source, paths.Destination, original.Sha256, owner.CanonicalIdentitySha256,
+        ZoneTreeStore replica, ReplicaHardState state, int sourceDataEpoch)
+        => new(ServerNodeUpgradeProtocol.ReceiptFormatVersion, paths.Source, paths.Destination, original.Sha256, owner.CanonicalIdentitySha256,
             owner.CanonicalJournalSha256, owner.ReplicaIdentitySha256, owner.ReplicaJournalSha256,
             canonical.Store.Identity.NodeId, replica.Identity.NodeId, canonical.Store.Identity.Incarnation,
-            ServerNodeUpgradeProtocol.SourceEpoch, ServerNodeUpgradeProtocol.TargetEpoch,
+            sourceDataEpoch, ServerNodeUpgradeProtocol.TargetEpoch,
             canonical.Store.Position, canonical.LastApplied, replica.Position, canonical.Store.Identity.ReadGeneration,
             replica.Identity.ReadGeneration, state, string.Empty, original.BackupCount);
 }

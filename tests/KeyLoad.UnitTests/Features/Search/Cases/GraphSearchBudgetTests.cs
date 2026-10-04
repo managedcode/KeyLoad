@@ -76,6 +76,21 @@ internal sealed class GraphSearchBudgetTests
         await Assert.That(partitionFailure.Code).IsEqualTo(ErrorCode.Validation);
     }
 
+    [Test]
+    public async Task NullNestedSearchFailsWithTypedValidation()
+    {
+        using var database = new TestDatabase();
+        GraphSearchTestSupport.Configure(database);
+        var root = GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects,
+            GraphSearchTestSupport.Root);
+        var request = new GraphSearchRequest(1, null!, Retriever: new(GraphSearchTestSupport.Walk(database, root)));
+
+        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
+            new SearchEngine(database.Database).GraphSearchAsync("root", request, Token())))!;
+
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
+    }
+
     private static GraphSearchRequest BuildRequest(PartitionRef partition)
     {
         var seed = new EntityRef(partition, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);

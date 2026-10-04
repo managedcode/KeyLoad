@@ -57,6 +57,11 @@ public sealed partial class DatabaseEngine
             AcceptQueueTransfer transfer => transfer.DestinationQueue.Queue,
             CompleteQueueTransfer transfer => transfer.SourceQueue.Queue,
             ApplyVectorProjection projection => projection.Target.Collection,
+            ConfigureRecurringSchedule schedule => schedule.Definition.Lane.Queue,
+            EmitRecurringOccurrences schedule => schedule.Lane.Queue,
+            CancelRecurringSchedule schedule => schedule.Lane.Queue,
+            CompareExchangeSaga saga => saga.Lane.Queue,
+            ExpireSaga saga => saga.Lane.Queue,
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, "The mutation is unsupported.")
         };
         if (mutation.Resource != owner)
@@ -85,11 +90,17 @@ public sealed partial class DatabaseEngine
     {
         var invalid = mutation switch
         {
-            CreateQueueTransfer transfer => transfer.SourceQueue is null || transfer.Destination is null || transfer.Message is null,
-            AcceptQueueTransfer transfer => transfer.DestinationQueue is null,
-            CompleteQueueTransfer transfer => transfer.SourceQueue is null,
+            CreateQueueTransfer transfer => transfer.SourceQueue?.Partition is null || transfer.Destination?.Partition is null || transfer.Message is null,
+            AcceptQueueTransfer transfer => transfer.DestinationQueue?.Partition is null,
+            CompleteQueueTransfer transfer => transfer.SourceQueue?.Partition is null,
             ApplyVectorProjection projection => projection.SourceStream is null || projection.SourceDocument is null
+                || projection.SourceStream.Partition is null || projection.SourceDocument.Partition is null
                 || projection.Target is null || projection.Target.Space is null,
+            ConfigureRecurringSchedule schedule => schedule.Definition?.Lane?.Partition is null,
+            EmitRecurringOccurrences schedule => schedule.Lane?.Partition is null,
+            CancelRecurringSchedule schedule => schedule.Lane?.Partition is null,
+            CompareExchangeSaga saga => saga.Lane?.Partition is null || saga.Timeout is { Queue.Partition: null },
+            ExpireSaga saga => saga.Lane?.Partition is null,
             _ => false
         };
         if (invalid)

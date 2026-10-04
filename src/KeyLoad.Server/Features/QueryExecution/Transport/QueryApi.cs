@@ -6,6 +6,7 @@ namespace KeyLoad.Server;
 internal static class QueryApi
 {
     private const string QueryPath = "/v1/query";
+    private const string SearchPath = "/v1/query/search";
     private const string AstPath = "/v1/query/ast";
     private const string CapabilitiesPath = "/v1/query/capabilities";
     private const string LiveStartPath = "/v1/query/live/start";
@@ -13,6 +14,8 @@ internal static class QueryApi
 
     internal static void Map(WebApplication app)
     {
+        app.MapPost(SearchPath, (SqlGraphSearchRequest request, HttpContext context) =>
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.SqlGraphSearch, request));
         app.MapPost(SqlOperationProtocol.Route, ExecuteSqlAsync);
         app.MapPost(QueryPath, (QueryRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.Query, request));

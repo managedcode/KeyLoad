@@ -37,6 +37,11 @@ Implementation contract:
 5. G2 implements SQL equivalence and actual .NET/official MCP RF3 fault cases
    before complete task closure. Keep Linux source/run/job/artifact evidence;
    build or development subset success is not whole-task qualification.
+   Its frozen Q1.Search.v1 statement grammar, dedicated SqlGraphSearchRequest,
+   exact lowering, rejection/parameter rules and same-executor ownership are in
+   GraphRetrieval's G2 contract. Root owns wire admission and public adapters;
+   lifecycle_wave owns the bounded QueryExecution parser, manifest profile and
+   mapped real-store lowering/parity tests. Scalar QueryPage stays unchanged.
 
 No persisted data converter, automatic store migration, dependency change or
 physical placement change is involved. Nodes lacking the application capability

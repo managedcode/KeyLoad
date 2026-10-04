@@ -10,7 +10,7 @@ internal sealed class NativeStoreOpenPreflightTests
     private const int ChecksumOffset = 20;
     private const int IncompleteHeaderBytes = 7;
     private const int ChangedByte = 1;
-    private const int CurrentIdentityVersion = 6;
+    private const int CurrentIdentityVersion = 7;
     private const string MissingReceipt = "The native preflight inspector did not return a receipt.";
 
     [Test]
@@ -98,6 +98,26 @@ internal sealed class NativeStoreOpenPreflightTests
         var before = await files.CaptureHashesAsync();
         var expected = defect == NativeStoreOpenPreflightDefect.LegacyTornPayload ? ErrorCode.FormatUnsupported : ErrorCode.Corruption;
         await AssertRejectedAsync(files, guarded, expected);
+        await files.AssertHashesUnchangedAsync(before);
+        await files.Source.AssertOwnerAvailableAsync();
+    }
+
+    [Test]
+    [Arguments(ZoneTreePersistenceFormat.SourceCheckpointMagic)]
+    [Arguments(ZoneTreePersistenceFormat.Native6CheckpointMagic)]
+    public async Task AcEpoch7OrdinaryOpenRejectsHistoricalCheckpointProfilesWithoutMutation(ulong magic)
+    {
+        using var files = new NativeStoreOpenPreflightFiles();
+        files.Compact();
+        await files.SetCheckpointMagicAsync(magic);
+        var before = await files.CaptureHashesAsync();
+
+        var error = Assert.ThrowsExactly<KeyLoadException>(() =>
+        {
+            using var store = new ZoneTreeStore(files.Source.Options);
+        });
+
+        await Assert.That(error.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await files.AssertHashesUnchangedAsync(before);
         await files.Source.AssertOwnerAvailableAsync();
     }

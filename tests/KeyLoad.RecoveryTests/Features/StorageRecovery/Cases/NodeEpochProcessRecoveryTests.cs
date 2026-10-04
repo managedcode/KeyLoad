@@ -14,19 +14,25 @@ internal sealed class NodeEpochProcessRecoveryTests
     private const int CleanupTimeoutSeconds = 30;
 
     [Test]
-    [Arguments(NodeFormatUpgradeStage.SourceVerified)]
-    [Arguments(NodeFormatUpgradeStage.StoresConverted)]
-    [Arguments(NodeFormatUpgradeStage.ImagesConverted)]
-    [Arguments(NodeFormatUpgradeStage.DescriptorFlushed)]
-    [Arguments(NodeFormatUpgradeStage.TargetVerified)]
-    [Arguments(NodeFormatUpgradeStage.Published)]
+    [Arguments(NodeFormatUpgradeStage.SourceVerified, 5)]
+    [Arguments(NodeFormatUpgradeStage.StoresConverted, 5)]
+    [Arguments(NodeFormatUpgradeStage.ImagesConverted, 5)]
+    [Arguments(NodeFormatUpgradeStage.DescriptorFlushed, 5)]
+    [Arguments(NodeFormatUpgradeStage.TargetVerified, 5)]
+    [Arguments(NodeFormatUpgradeStage.Published, 5)]
+    [Arguments(NodeFormatUpgradeStage.SourceVerified, 6)]
+    [Arguments(NodeFormatUpgradeStage.StoresConverted, 6)]
+    [Arguments(NodeFormatUpgradeStage.ImagesConverted, 6)]
+    [Arguments(NodeFormatUpgradeStage.DescriptorFlushed, 6)]
+    [Arguments(NodeFormatUpgradeStage.TargetVerified, 6)]
+    [Arguments(NodeFormatUpgradeStage.Published, 6)]
     public async Task AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(
-        NodeFormatUpgradeStage stage)
+        NodeFormatUpgradeStage stage, int dataEpoch)
     {
-        await RunTrialAsync(stage, TestContext.Current!.Execution.CancellationToken);
+        await RunTrialAsync(stage, dataEpoch, TestContext.Current!.Execution.CancellationToken);
     }
 
-    private static async Task RunTrialAsync(NodeFormatUpgradeStage stage, CancellationToken callerToken)
+    private static async Task RunTrialAsync(NodeFormatUpgradeStage stage, int dataEpoch, CancellationToken callerToken)
     {
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         var root = Path.Combine(Path.GetTempPath(), TrialPrefix + Guid.NewGuid().ToString("N"));
@@ -41,7 +47,7 @@ internal sealed class NodeEpochProcessRecoveryTests
         try
         {
             Directory.CreateDirectory(root);
-            var prior = await EpochPriorExecutableFixture.CreateNodeAsync(source, profile, timeout.Token);
+            var prior = await EpochPriorExecutableFixture.CreateNodeAsync(source, profile, timeout.Token, dataEpoch);
             var original = await NodeEpochInventoryCapture.CaptureAsync(source, timeout.Token);
             process = StartCrashProcess(source, destination, stage, profile);
             await AwaitBoundaryAsync(process, timeout.Token);
@@ -79,7 +85,7 @@ internal sealed class NodeEpochProcessRecoveryTests
         CancellationToken cancellationToken)
     {
         var prepared = ServerNodeFormatUpgrade.Prepare(source, options);
-        await Assert.That(prepared.TargetEpoch).IsEqualTo(6);
+        await Assert.That(prepared.TargetEpoch).IsEqualTo(7);
         await Assert.That(prepared.CanonicalNodeId).IsEqualTo(prior.NodeId);
         await Assert.That(prepared.Incarnation).IsEqualTo(prior.Incarnation);
         await Assert.That(prepared.CanonicalPosition).IsEqualTo(prior.Position);
@@ -95,12 +101,12 @@ internal sealed class NodeEpochProcessRecoveryTests
         await Assert.That(Directory.Exists(destination)).IsTrue();
         await Assert.That(Directory.Exists(destination + ServerNodeUpgradeProtocol.StageSuffix)).IsFalse();
         await NodeEpochInventoryCapture.AssertUnchangedAsync(source, original, cancellationToken);
-        await NodeEpochCoordinatorAssertions.AssertHistoricalImagesAsync(source, destination, cancellationToken);
+        await NodeEpochCoordinatorAssertions.AssertHistoricalImagesAsync(source, destination, prior, cancellationToken);
         await NodeEpochCoordinatorAssertions.ApplyLaterOperationAsync(profile, destination,
             cancellationToken);
         var targetAfterWrite = await NodeEpochInventoryCapture.CaptureAsync(destination, cancellationToken);
         var retry = ServerNodeFormatUpgrade.Prepare(source, options);
-        await Assert.That(retry.TargetEpoch).IsEqualTo(6);
+        await Assert.That(retry.TargetEpoch).IsEqualTo(7);
         await NodeEpochInventoryCapture.AssertUnchangedAsync(destination, targetAfterWrite, cancellationToken);
         await NodeEpochInventoryCapture.AssertUnchangedAsync(source, original, cancellationToken);
         await NodeEpochCoordinatorAssertions.AssertLaterResourceAsync(profile, destination);

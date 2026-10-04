@@ -9,25 +9,33 @@ internal sealed class EpochReplicaPurposeTests
     private const string LegacyRequestPurpose = "keyload-replica-request-v2";
     private const string LegacyReplyPurpose = "keyload-replica-reply-v2";
     private const string LegacyDiscoveryPurpose = "keyload-replica-discovery-v2";
-    private const string CurrentRequestPurpose = "keyload-replica-request-data-epoch6-rpc2";
-    private const string CurrentReplyPurpose = "keyload-replica-reply-data-epoch6-rpc2";
-    private const string CurrentDiscoveryPurpose = "keyload-replica-discovery-data-epoch6";
+    private const string CurrentRequestPurpose = "keyload-replica-request-data-epoch7-rpc3";
+    private const string CurrentReplyPurpose = "keyload-replica-reply-data-epoch7-rpc3";
+    private const string CurrentDiscoveryPurpose = "keyload-replica-discovery-data-epoch7";
+    private const string Epoch6RequestPurpose = "keyload-replica-request-data-epoch6-rpc2";
+    private const string Epoch6ReplyPurpose = "keyload-replica-reply-data-epoch6-rpc2";
+    private const string Epoch6DiscoveryPurpose = "keyload-replica-discovery-data-epoch6";
     private const int SnapshotTerm = 1;
     private const int SnapshotPosition = 1;
     private const int SnapshotLength = 1;
     private const byte SnapshotContent = 1;
 
     [Test]
-    [Arguments(ReplicaRpc.RequestVote)]
-    [Arguments(ReplicaRpc.Append)]
-    [Arguments(ReplicaRpc.SnapshotBegin)]
-    [Arguments(ReplicaRpc.SnapshotChunk)]
-    [Arguments(ReplicaRpc.SnapshotComplete)]
-    public async Task AcEpoch005OldPurposeRequestsFailBeforePayloadAdmission(ReplicaRpc method)
+    [Arguments(ReplicaRpc.RequestVote, LegacyRequestPurpose)]
+    [Arguments(ReplicaRpc.RequestVote, Epoch6RequestPurpose)]
+    [Arguments(ReplicaRpc.Append, LegacyRequestPurpose)]
+    [Arguments(ReplicaRpc.Append, Epoch6RequestPurpose)]
+    [Arguments(ReplicaRpc.SnapshotBegin, LegacyRequestPurpose)]
+    [Arguments(ReplicaRpc.SnapshotBegin, Epoch6RequestPurpose)]
+    [Arguments(ReplicaRpc.SnapshotChunk, LegacyRequestPurpose)]
+    [Arguments(ReplicaRpc.SnapshotChunk, Epoch6RequestPurpose)]
+    [Arguments(ReplicaRpc.SnapshotComplete, LegacyRequestPurpose)]
+    [Arguments(ReplicaRpc.SnapshotComplete, Epoch6RequestPurpose)]
+    public async Task AcEpoch005OldPurposeRequestsFailBeforePayloadAdmission(ReplicaRpc method, string rejectedPurpose)
     {
         using var fixture = new ReplicaSecurityFixture();
         var request = CurrentRequest(fixture, method);
-        var stale = request with { Signature = EpochReplicaMac.Request(fixture.Options, request, LegacyRequestPurpose) };
+        var stale = request with { Signature = EpochReplicaMac.Request(fixture.Options, request, rejectedPurpose) };
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(stale));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Unauthenticated);
 
@@ -38,12 +46,14 @@ internal sealed class EpochReplicaPurposeTests
     }
 
     [Test]
-    public async Task AcEpoch005OldPurposeRepliesCannotPassRequestBoundVerification()
+    [Arguments(LegacyReplyPurpose)]
+    [Arguments(Epoch6ReplyPurpose)]
+    public async Task AcEpoch005OldPurposeRepliesCannotPassRequestBoundVerification(string rejectedPurpose)
     {
         using var fixture = new ReplicaSecurityFixture();
         var request = fixture.Vote();
         var current = fixture.Receiver.CreateReply(request, ReadOnlyMemory<byte>.Empty);
-        var stale = current with { Signature = EpochReplicaMac.Reply(fixture.Options, current, LegacyReplyPurpose) };
+        var stale = current with { Signature = EpochReplicaMac.Reply(fixture.Options, current, rejectedPurpose) };
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Sender.VerifyReply(request, stale));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Unauthenticated);
         fixture.Sender.VerifyReply(request, current);
@@ -77,13 +87,15 @@ internal sealed class EpochReplicaPurposeTests
     }
 
     [Test]
-    public async Task AcEpoch005OldPurposeDiscoveryResponsesFailBeforeAddressAcceptance()
+    [Arguments(LegacyDiscoveryPurpose)]
+    [Arguments(Epoch6DiscoveryPurpose)]
+    public async Task AcEpoch005OldPurposeDiscoveryResponsesFailBeforeAddressAcceptance(string rejectedPurpose)
     {
         using var fixture = new ReplicaSecurityFixture();
         var nonce = Guid.NewGuid();
         var bytes = NativeSerialization.Serialize(fixture.Discovery.Read());
         var stale = EpochReplicaMac.Discovery(fixture.Options, fixture.Configuration.Incarnation,
-            ReplicaSecurityFixture.VoterB, nonce, bytes, LegacyDiscoveryPurpose);
+            ReplicaSecurityFixture.VoterB, nonce, bytes, rejectedPurpose);
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Sender.VerifyDiscovery(
             ReplicaSecurityFixture.VoterB, bytes, nonce, stale));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Unauthenticated);

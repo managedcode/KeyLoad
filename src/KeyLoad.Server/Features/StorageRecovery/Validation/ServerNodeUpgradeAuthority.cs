@@ -5,14 +5,24 @@ namespace KeyLoad.Server;
 
 internal sealed record ServerNodeUpgradeAuthority(StoreIdentity Canonical, StoreIdentity Replica)
 {
-    internal static ServerNodeUpgradeOwner Bind(ServerNodeUpgradePaths paths, ServerNodeUpgradeInventory original)
+    internal static ServerNodeUpgradeOwner Bind(ServerNodeUpgradePaths paths, ServerNodeUpgradeInventory original,
+        NodeOptions options)
     {
         if (original.Entries.Any(entry => entry.Path is "database/identity.json" or "replica/identity.json"
             && entry.Length > 4_096))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
-        return new(1, paths.Source, paths.Destination, original.Sha256,
+        var canonical = ZoneTreeFormatUpgrade.VerifySource(StoreOptions(
+            Path.Combine(paths.Source, ServerNodeUpgradeProtocol.Canonical), options));
+        var replica = ZoneTreeFormatUpgrade.VerifySource(StoreOptions(
+            Path.Combine(paths.Source, ServerNodeUpgradeProtocol.Replica), options));
+        if (canonical.FormatVersion != replica.FormatVersion
+            || canonical.FormatVersion is not (ServerNodeUpgradeProtocol.Native5SourceEpoch
+                or ServerNodeUpgradeProtocol.Native6SourceEpoch))
+        { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
+        return new(ServerNodeUpgradeProtocol.OwnerFormatVersion, paths.Source, paths.Destination, original.Sha256,
             original.FileDigest("database/identity.json"), original.FileDigest("database/commands.wal"),
-            original.FileDigest("replica/identity.json"), original.FileDigest("replica/commands.wal"));
+            original.FileDigest("replica/identity.json"), original.FileDigest("replica/commands.wal"),
+            canonical.FormatVersion, ServerNodeUpgradeProtocol.TargetEpoch);
     }
 
     internal static ServerNodeUpgradeAuthority VerifyCopies(string input, NodeOptions options)

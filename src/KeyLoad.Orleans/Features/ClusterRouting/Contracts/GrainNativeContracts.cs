@@ -2,7 +2,7 @@ namespace KeyLoad.Orleans;
 
 internal static class GrainNativeContracts
 {
-    internal const string RequestPurpose = "keyload-grain-request-data-epoch6-rpc2";
+    internal const string RequestPurpose = "keyload-grain-request-data-epoch7-rpc3";
     internal const string EnvelopeAlias = "keyload.request.envelope.v2";
     internal const string ValueAlias = "keyload.request.value.v1";
     internal const string SignedTokenPrefix = "KLT2.";

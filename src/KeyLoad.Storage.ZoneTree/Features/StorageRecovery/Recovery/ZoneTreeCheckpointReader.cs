@@ -17,6 +17,13 @@ internal static class ZoneTreeCheckpointReader
         Guid expectedIncarnation)
         => Read(input, options, apply, SourceFormat, expectedIncarnation);
 
+    internal static StorageSnapshot ReadNative4ForUpgrade(
+        FileStream input,
+        ZoneTreeStoreOptions options,
+        Action<StorageMutation> apply,
+        Guid expectedIncarnation)
+        => Read(input, options, apply, Native6SourceFormat, expectedIncarnation);
+
     private static StorageSnapshot Read(
         FileStream input,
         ZoneTreeStoreOptions options,
@@ -37,7 +44,7 @@ internal static class ZoneTreeCheckpointReader
         var appliedKey = KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey);
         while (true)
         {
-            var maximumPosition = format == SourceFormat ? options.MaxSnapshotBytes : long.MaxValue;
+            var maximumPosition = format == CurrentFormat ? long.MaxValue : options.MaxSnapshotBytes;
             var frame = ZoneTreeCheckpointFrame.Read(input, options, maximumPosition);
             if (metadata is null)
             {
@@ -99,9 +106,13 @@ internal static class ZoneTreeCheckpointReader
         ZoneTreePersistenceFormat.CheckpointMagic, ZoneTreePersistenceFormat.CheckpointDataMagic,
         ZoneTreePersistenceFormat.CheckpointEndMagic);
 
-    private static CheckpointFormat SourceFormat => new(ZoneTreePersistenceFormat.SourceCheckpointVersion,
+    private static CheckpointFormat SourceFormat => new(ZoneTreePersistenceFormat.Native5CheckpointVersion,
         ZoneTreePersistenceFormat.SourceCheckpointMagic, ZoneTreePersistenceFormat.SourceCheckpointDataMagic,
         ZoneTreePersistenceFormat.SourceCheckpointEndMagic);
+
+    private static CheckpointFormat Native6SourceFormat => new(ZoneTreePersistenceFormat.Native6CheckpointVersion,
+        ZoneTreePersistenceFormat.Native6CheckpointMagic, ZoneTreePersistenceFormat.Native6CheckpointDataMagic,
+        ZoneTreePersistenceFormat.Native6CheckpointEndMagic);
 
     private readonly record struct CheckpointFormat(int Version, ulong HeaderMagic, ulong DataMagic, ulong EndMagic);
 

@@ -9,11 +9,14 @@ internal static class EpochPriorSourceProbe
 {
     internal const string Mode = "epoch5-native-probe";
     internal const string SourceRevision = "7784b6b46b98ce994dd98070dc1f58fe4e506b91";
+    internal const string Native6Mode = "epoch6-native-probe";
+    internal const string Native6SourceRevision = "2801b03091efc5cf45b1268c6570457539f12f27";
     internal const string CreateOperation = "create";
     internal const string CreateNodeOperation = "createNode";
     internal const string InspectOperation = "inspect";
     internal const string VerifySnapshotOperation = "verifySnapshot";
     private const int ExpectedDataEpoch = 5;
+    private const int Native6DataEpoch = 6;
     private const int RejectedExitCode = 1;
     private const int MaximumInputCharacters = 16384;
     private const string InvalidProbe = "The prior-executable probe input or data epoch is invalid.";
@@ -29,7 +32,7 @@ internal static class EpochPriorSourceProbe
 
     internal static async Task<bool> TryRunAsync(string[] args)
     {
-        if (args.Length != 1 || args[0] != Mode)
+        if (args.Length != 1 || args[0] is not (Mode or Native6Mode))
         {
             return false;
         }
@@ -44,12 +47,13 @@ internal static class EpochPriorSourceProbe
             EpochPriorSourceReply reply;
             try
             {
-                reply = await ExecuteAsync(request);
+                reply = await ExecuteAsync(request, args[0] == Mode ? ExpectedDataEpoch : Native6DataEpoch);
             }
             catch (KeyLoadException failure)
             {
                 Environment.ExitCode = RejectedExitCode;
-                reply = EpochPriorSourceReply.Rejected(failure.Code);
+                reply = EpochPriorSourceReply.Rejected(failure.Code) with
+                { SourceRevision = SourceRevisionForEpoch(args[0] == Mode ? ExpectedDataEpoch : Native6DataEpoch) };
             }
             await output.WriteLineAsync(JsonSerializer.Serialize(reply, JsonOptions));
             await output.FlushAsync();
@@ -62,7 +66,21 @@ internal static class EpochPriorSourceProbe
         return true;
     }
 
-    private static async Task<EpochPriorSourceReply> ExecuteAsync(EpochPriorSourceRequest request)
+    internal static string SourceRevisionForEpoch(int epoch) => epoch switch
+    {
+        ExpectedDataEpoch => SourceRevision,
+        Native6DataEpoch => Native6SourceRevision,
+        _ => throw new ArgumentOutOfRangeException(nameof(epoch))
+    };
+
+    internal static string ModeForEpoch(int epoch) => epoch switch
+    {
+        ExpectedDataEpoch => Mode,
+        Native6DataEpoch => Native6Mode,
+        _ => throw new ArgumentOutOfRangeException(nameof(epoch))
+    };
+
+    private static async Task<EpochPriorSourceReply> ExecuteAsync(EpochPriorSourceRequest request, int expectedDataEpoch)
     {
         if (string.IsNullOrWhiteSpace(request.Directory) || !KnownOperation(request.Operation))
         {
@@ -74,16 +92,21 @@ internal static class EpochPriorSourceProbe
         }
         if (request.Operation == CreateNodeOperation)
         {
-            return await EpochUpgradeFixture.CreateNodeAsync(request.Directory,
+            var reply = await EpochUpgradeFixture.CreateNodeAsync(request.Directory,
                 request.NodeProfile ?? throw Errors.Fail(ErrorCode.Validation, InvalidProbe));
+            if (reply.DataEpoch != expectedDataEpoch)
+            {
+                throw Errors.Fail(ErrorCode.FormatUnsupported, InvalidProbe);
+            }
+            return reply with { SourceRevision = SourceRevisionForEpoch(expectedDataEpoch) };
         }
         if (request.Operation == VerifySnapshotOperation)
         {
-            return VerifySnapshot(request);
+            return VerifySnapshot(request) with { SourceRevision = SourceRevisionForEpoch(expectedDataEpoch) };
         }
 
         using var store = new ZoneTreeStore(new(request.Directory));
-        if (store.Identity.FormatVersion != ExpectedDataEpoch)
+        if (store.Identity.FormatVersion != expectedDataEpoch)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, InvalidProbe);
         }
@@ -93,7 +116,8 @@ internal static class EpochPriorSourceProbe
         }
         var applied = store.Read(view => NativeSerialization.Deserialize<long>(
             view.ReadOwnedValue(EpochUpgradeFixture.AppliedKey)!));
-        return EpochPriorSourceReply.Succeeded(store.Identity, store.Position, applied);
+        return EpochPriorSourceReply.Succeeded(store.Identity, store.Position, applied) with
+        { SourceRevision = SourceRevisionForEpoch(expectedDataEpoch) };
     }
 
     private static EpochPriorSourceReply VerifySnapshot(EpochPriorSourceRequest request)

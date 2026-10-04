@@ -1,4 +1,6 @@
-# Native CQRS request RPC v2
+# Native CQRS stream contract v2
+
+The active epoch7 admission contract is [ADR-091](../../ADR/ADR-091-epoch7-interpretation-fence.md): application RequestInterfaceVersion3 and signed data-epoch7-rpc3 purposes admit the new feature cohort, while native stream shapes, v2 aliases/Ids and KLT2 framing remain frozen. The epoch6/rpc2 pins recorded below describe the prior C1 stage and do not authorize a mixed epoch6/7 deployment. Cancellation/shutdown/unavailable cohort fixtures now run without parallel contention, preserving every native RPC/TTL bound and failure oracle after the original Linux5-failure report.
 
 Status: root implementation contract accepted, 2026-10-04; C1 implementation and regression fixtures are authored. The unchanged six C0 Aspire oracles also passed with published Communication10.2.9. C1 product qualification remains required; authored fault fixtures and local mechanism results do not close it. Canonical slice: ClusterRouting; parent [NativeCqrs](NativeCqrs.md). Decision: [ADR-082](../../ADR/ADR-082-native-cqrs-streams.md). Related slices: ClusterReplication, ClientApi, Authorization, ResourceExecution and StorageRecovery.
 

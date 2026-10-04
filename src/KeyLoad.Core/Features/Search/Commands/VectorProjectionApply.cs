@@ -148,9 +148,7 @@ public sealed partial class DatabaseEngine
         var record = view.GetRecord<EventRecord>(eventKey)
             ?? throw Errors.Fail(ErrorCode.Corruption, ProjectionLineageCorruptMessage);
         if (record.Stream != stream || record.Revision != request.SourceEventRevision
-            || record.EventSequence < 1 || record.Data is null || record.Data.SchemaVersion < 1
-            || !eventKey.AsSpan().SequenceEqual(KeySpace.Partition(EventSpace, partition,
-                stream.StreamSet, stream.StreamId, stream.Generation, record.Revision)))
+            || record.EventSequence < 1 || record.Data is null || record.Data.SchemaVersion < 1)
         {
             throw Errors.Fail(ErrorCode.Corruption, ProjectionLineageCorruptMessage);
         }
@@ -194,7 +192,7 @@ public sealed partial class DatabaseEngine
             request.Target.Field, request.Target.Space, target.SchemaVersion, request.ReducerId,
             request.ReducerVersion, request.ReducerGeneration, targetClasses);
 
-    private MutationReceipt ReuseProjectionEffect(IAtomicTransaction transaction, PartitionRef partition,
+    private static MutationReceipt ReuseProjectionEffect(IAtomicTransaction transaction, PartitionRef partition,
         ApplyVectorProjection request, ResourceDefinition sourceResource, ResourceDefinition targetResource,
         System.Collections.Immutable.ImmutableArray<string> sourceClasses,
         System.Collections.Immutable.ImmutableArray<string> targetClasses, string fingerprint,
@@ -230,7 +228,7 @@ public sealed partial class DatabaseEngine
         return document;
     }
 
-    private void PutCanonicalVector(IAtomicTransaction transaction, PartitionRef partition, PutVector vector,
+    private static void PutCanonicalVector(IAtomicTransaction transaction, PartitionRef partition, PutVector vector,
         DocumentRecord document)
     {
         var record = new VectorRecord(vector.Id, vector.Field, vector.Space, vector.Values, document.Revision);

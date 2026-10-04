@@ -117,11 +117,13 @@ public sealed partial class DatabaseEngine
                 UpsertEdge or DeleteEdge or QueueToGraph => Capability.GraphWrite,
                 GraphToQueueMutation => Capability.QueuePublish,
                 CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer => Capability.QueuePublish,
+                ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule
+                    or CompareExchangeSaga or ExpireSaga => Capability.SchedulerManage | Capability.QueuePublish,
                 AppendSamples => Capability.SeriesAppend,
                 ExpireSamples => Capability.SeriesManage,
                 StoreAggregateSnapshot => Capability.EventsSnapshotsManage | Capability.EventsRead,
                 PutVector => Capability.DocumentsWrite,
-                ApplyVectorProjection => Capability.DocumentsWrite,
+                global::KeyLoad.ApplyVectorProjection => Capability.DocumentsWrite,
                 _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedBatchMutationMessage)
             };
             Authorization.Require(principal, request.Partition, mutation.Resource, capability);
@@ -137,7 +139,11 @@ public sealed partial class DatabaseEngine
 
     private void AuthorizeExtendedMutation(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)
     {
-        if (mutation is ApplyVectorProjection projection)
+        if (mutation is ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule or CompareExchangeSaga or ExpireSaga)
+        {
+            AuthorizeRecurringSagaRequest(view, principal, partition, mutation);
+        }
+        else if (mutation is ApplyVectorProjection projection)
         {
             ReauthorizeVectorProjection(view, principal, partition, projection);
         }

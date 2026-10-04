@@ -33,8 +33,12 @@ internal static class ServerNodeUpgradeProtocol
     internal const int MaximumTotalPathCharacters = 4_194_304;
     internal const long MaximumSourceBytes = 549_755_813_888;
     internal const int BufferBytes = 65_536;
-    internal const int SourceEpoch = 5;
-    internal const int TargetEpoch = 6;
+    internal const int OwnerFormatVersion = 2;
+    internal const int ReceiptFormatVersion = 2;
+    internal const int ProgressFormatVersion = 2;
+    internal const int Native5SourceEpoch = 5;
+    internal const int Native6SourceEpoch = 6;
+    internal const int TargetEpoch = 7;
     internal const string Invalid = "The stopped node upgrade has an unsupported path, receipt or artifact.";
     internal const string Corrupt = "The stopped node upgrade source or target does not match its verified authority.";
     internal const string Limit = "The stopped node inventory exceeds its finite resource budget.";

@@ -59,6 +59,10 @@ statistics remain the complete authorized corpus. Traversal never applies that
 endpoint predicate to intermediate vertices. Retriever produces only visible
 Search.Collection endpoints, sorted by shortest hops then full EntityRef;
 missing branches contribute zero and duplicate paths never amplify score.
+Zero-weight branches still validate their request and execute their current
+authorization and bounded read work, but contribute no candidates or score to
+fusion. A zero-weight-only retriever therefore produces no hits; it does not
+bypass GraphRead, seed visibility, label-use checks or shared resource bounds.
 Current edge authority is persisted GraphRead; edge label policy applies when
 Labels is non-null, using exactly the `label` field-use path, including empty
 label arrays. Expansion excludes all selected-hit EntityRefs from its context
@@ -93,6 +97,71 @@ only nodes supporting the new capability before serving the endpoint; rollback
 rejects unsupported graph requests, never silently drops an operator. Interactive
 UI N/A: this is a SDK/SQL/MCP database capability. Current evidence is source
 implementation in progress; no runtime or performance qualification is claimed.
+
+## G2: versioned SQL SEARCH profile
+
+This is a bounded Q1.Search.v1 profile of the shared SQL language, not full SQL
+conformance or a SQL client connection protocol. The dedicated typed
+`SqlGraphSearchRequest(Version, QueryRequest Query)` uses native IDs0/1 and alias
+`keyload.contract.sql-graph-search-request.v1`. Version must be1, Cursor must be
+null and AllowFullScan must be explicitly true. Root joins the native read kind,
+HTTP `/v1/query/search`, SDK `SearchSqlAsync` and official MCP
+`keyload_query_search`; all return the existing GraphSearchResult. Current
+application capability3 admits it. Existing scalar QueryPage is unchanged.
+
+The complete accepted statement order is:
+
+```text
+SEARCH FROM collection
+ [TEXT field MATCH string-or-@parameter [WEIGHT number]]
+ [VECTOR field MATCH @parameter SPACE (id, dimension, metric, model, version)
+  [WEIGHT number]]
+ [SCOPE GRAPH graph SEEDS ((collection, id), ...)
+  DEPTH integer VERTICES integer EDGES integer [LABELS (value, ...)]]
+ [RETRIEVE GRAPH graph SEEDS ((collection, id), ...)
+  DEPTH integer VERTICES integer EDGES integer [LABELS (value, ...)]
+  [WEIGHT number]]
+ [EXPAND GRAPH graph DEPTH integer VERTICES integer EDGES integer
+  [LABELS (value, ...)]]
+ [ALLOW IDS (value, ...)] [LIMIT integer] [FUSION integer]
+```
+
+Collection/field/graph/space identifiers follow current bounded SQL identifier
+rules; seed IDs, label/allowed-ID values and MATCH text accept quoted strings or
+named JSON string parameters. Seed collection is an identifier in the same
+request partition. Vector MATCH is a named JSON array of finite float-compatible
+numbers, with exact supplied space dimension and defined VectorMetric. Empty
+LABELS/ALLOW IDS retain the direct API's empty-set semantics; empty/default seed
+sets reject. Weights default1, limit10, fusion60; walk caps are explicit. At least
+one graph operator is required; graph-only retrieval is valid. Duplicate,
+reordered, unknown clauses, missing/wrong-kind parameters, nonfinite/overflow
+numbers, unsupported cursor/version and trailing tokens reject Validation.
+No clause can be silently ignored or manufacture a different identity scope.
+
+Use the existing bounded tokenizer/token cursor and named constants, preserve
+their whole-SQL token/depth/byte limits, and cap JSON parameters/the complete
+request before building arrays. Parser output is exactly GraphSearchRequest;
+the final G1 validation remains authoritative. Execute solely through
+SearchEngine.GraphSearchAsync with the original principal and cancellation.
+There is no second traversal implementation, extra store read or SQL-specific
+authorization path. Manifest ReadProfiles adds `graph-search-v1`, while its Q1
+baseline and honest scalar conformance inventory remain unchanged.
+
+AC-GSEARCH-006 maps G2 syntax and real-store direct/SQL equivalence to new
+`SqlGraphSearchParserTests`, `SqlGraphSearchParityTests` and
+`SqlGraphSearchRejectionTests` in QueryExecution/Cases with Helpers fixtures.
+Cover all operator combinations, multi-seed/different-collection intermediates,
+empty labels/allowlist, zero weights, exact lowering and invalid parameter/budget
+cases. Root extends genuine Aspire RF3 SDK/official MCP parity with policy,
+write and fault changes before closing the criterion. Public UI N/A.
+
+Root freezes this contract/ADR and owns public adapters/capability/central docs.
+Luna lifecycle_wave owns new Abstractions QueryExecution SQL-search DTO, Query
+QueryExecution parser/validation/executor/manifest profile joins and mapped new
+Unit QueryExecution tests, preserving G1 source and unrelated SQL behavior.
+It escalates unsupported grammar or public contract changes rather than inventing
+fallback syntax. Root reviews/builds/runs actual Aspire gates and commits the
+verified stage while other feature workers continue.
 
 ```mermaid
 flowchart LR

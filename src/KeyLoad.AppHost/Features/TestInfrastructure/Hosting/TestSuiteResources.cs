@@ -1,3 +1,5 @@
+using KeyLoad.AppHost.Features.StorageRecovery;
+
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
 
 internal static class TestSuiteResources
@@ -9,12 +11,12 @@ internal static class TestSuiteResources
         {
             throw new InvalidOperationException("The test AppHost must run from the KeyLoad source checkout.");
         }
+        var resultsDirectory = ResolvePath(root, settings.ResultsDirectory ?? Path.Combine("TestResults", settings.Suite));
         var arguments = new List<string>
         {
             "test", "--project", Path.Combine(root, "tests", settings.Project),
             "--no-build", "--no-restore", "--configuration", "Release",
-            "--results-directory", ResolvePath(root, settings.ResultsDirectory
-                ?? Path.Combine("TestResults", settings.Suite))
+            "--results-directory", resultsDirectory
         };
         if (settings.ReportTrx)
         {
@@ -37,6 +39,15 @@ internal static class TestSuiteResources
         }
         var runner = builder.AddExecutable(settings.ResourceName, "dotnet", root, [.. arguments])
             .WithEnvironment(TestSuiteSettings.SuiteEnvironment, "");
+        if (settings.Suite == PriorProbeResources.RecoverySuite)
+        {
+            var probesDirectory = PriorProbeResources.CreateDirectoryPath(resultsDirectory);
+            foreach (var preparation in PriorProbeResources.Add(builder, root, probesDirectory))
+            {
+                runner.WaitForCompletion(preparation);
+            }
+            runner.WithEnvironment(PriorProbeResources.DirectoryEnvironment, probesDirectory);
+        }
         if (settings.Suite == "comparison" && settings.ComparisonTarget is not null)
         {
             runner.WithEnvironment("Benchmarks__Target", settings.ComparisonTarget);

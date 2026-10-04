@@ -32,7 +32,7 @@ internal static class ZoneTreeJournalRecovery
         runtime.Journal.ReadExactly(header);
         runtime.Journal.Position = 0;
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
-        if (magic == SourceCheckpointMagic)
+        if (magic is SourceCheckpointMagic or Native6CheckpointMagic)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, JournalFormatUpgradeRequired);
         }

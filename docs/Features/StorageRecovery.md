@@ -27,6 +27,10 @@ JSON stay unchanged. UI/SDK/MCP schema work N/A: no new wire operation.
 
 ## Native data epoch and explicit offline copy upgrade
 
+The active next-epoch interpretation and conversion contract is
+[epoch7](StorageRecovery/Epoch7.md), under ADR-091. The native5-to6 receipts
+below remain truthful historical evidence and do not qualify the new format.
+
 [ADR-077](../ADR/ADR-077-offline-native-data-epoch.md) freezes KL-043's supported
 native5 -> separate native6 transition. Source is authored and root-reviewed;
 provider and RecoveryTests development Release builds passed with zero warnings

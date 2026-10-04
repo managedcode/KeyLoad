@@ -55,5 +55,12 @@ internal sealed class NativeStoreOpenPreflightFiles : IDisposable
         await File.WriteAllBytesAsync(Source.JournalPath, bytes);
     }
 
+    internal async Task SetCheckpointMagicAsync(ulong magic)
+    {
+        var bytes = await File.ReadAllBytesAsync(Source.JournalPath);
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(bytes, magic);
+        await File.WriteAllBytesAsync(Source.JournalPath, bytes);
+    }
+
     public void Dispose() => Source.Dispose();
 }

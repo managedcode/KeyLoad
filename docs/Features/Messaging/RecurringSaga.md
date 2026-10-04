@@ -69,7 +69,11 @@ destination queue; both queues must share the exact atomic partition.
 
 Persisted SchedulerManage plus relevant QueuePublish grants are required for
 configuration/cancellation/emission/saga writes; root adds the next unused
-Capability bit. All payload/header write grants apply. Emission additionally
+Capability bit. All payload/header write grants apply. Explicit persisted
+scheduler/publish capabilities are required even for a cluster
+administrator, using the existing policy evaluator with its administrator bypass
+disabled for these checks. This applies to both caller and retained creator.
+Emission additionally
 reloads the original creator and its CURRENT scheduler/data/field/header-use
 authority before using retained templates; a revoked creator cannot emit jobs.
 Timeout similarly rechecks the persisted saga creator and source field-use plus
@@ -86,6 +90,23 @@ obeys real destination queue quotas. Validate all nested identities, enums,
 JSON/default arrays, input bytes and same-partition scope before writes. Read
 inspection uses one Clock-based ReadExecutionBudget, current principal, and
 cancellation; never return partial lists or invented timing guarantees.
+
+Inspection DTOs are `InspectRecurringScheduleRequest(Lane,ScheduleId)` and
+`RecurringScheduleInspection(Definition,Revision,Generation,NextOrdinal,
+Cancelled,Redacted,RedactedFields)`. Definition payload and headers are projected
+under their respective current policies, with distinct payload/header redacted
+paths. `InspectSagaRequest(Lane,SagaId)` returns
+`SagaInspection(Lane,SagaId,Revision,Phase,StateJson,Deadline,Redacted,
+RedactedFields)`, projecting StateJson and omitting the raw timeout template.
+Neither reply exposes persisted creator identity. Public Core
+`InspectRecurringSchedule`/`InspectSaga` take principalId, Lane, Guid and final
+optional CancellationToken and return nullable replies. Root owns their
+HTTP/SDK/official MCP adapters. SchedulerManage is appended at bit37; existing
+numeric capability values remain frozen and prior All grants gain no implicit bit.
+The public reads are `/v1/queues/schedules/inspect` and
+`/v1/queues/sagas/inspect`, .NET `InspectRecurringScheduleAsync` and
+`InspectSagaAsync`, and MCP `keyload_schedule_inspect` and `keyload_saga_inspect`.
+Each reuses the native separate request grain and existing bounded read transport.
 
 ## Requirements, acceptance and stages
 
@@ -105,6 +126,16 @@ Aspire development gates while other agents implement their scopes, then commits
 the coherent stage. S2 freezes the periodic coordinator/fair due-index and real
 process/RF3 failure contract before implementation. Root records all original
 Linux acceptance and source/run/job/artifact results before complete KL-100 closure.
+
+After S1 source handoff, Luna cluster_wave owns new IntegrationTests Messaging
+Cases/Helpers for S1 public mutation and inspection parity over the existing
+genuine Aspire RF3 fixture: SDK/official MCP configure, emit/catch-up/CAS,
+unknown-response replay, timeout atomicity, current creator revocation and
+redacted inspection. These qualify the canonical S1 transitions, not autonomous
+S2 scheduling. The same worker may add the already-required F1 RemoteTransfers
+public intent/accept/receipt/complete and repeated target acceptance oracles.
+Do not change shared fixtures/topology, manufacture failures, bypass discovered
+endpoints, weaken outcomes or run gates. Root owns combined execution and faults.
 
 No dependency or automatic migration is introduced. New persisted contracts need
 the epoch7 old-reader rejection/explicit stopped-copy upgrade workstream before

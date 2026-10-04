@@ -7,10 +7,11 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal sealed class EpochStorageFixture : IDisposable
 {
-    internal const int LegacyEpoch = 5;
-    internal const int CurrentEpoch = 6;
-    internal const int LegacyCheckpointVersion = 3;
-    internal const int CurrentCheckpointVersion = 4;
+    internal const int Native5Epoch = 5;
+    internal const int Native6Epoch = 6;
+    internal const int CurrentEpoch = 7;
+    internal const int Native5CheckpointVersion = 3;
+    internal const int Native6CheckpointVersion = 4;
     internal const long ExpectedReadGeneration = 9;
     internal const string JournalName = "commands.wal";
     internal const string UpgradeStageSuffix = ".upgrade";
@@ -42,8 +43,12 @@ internal sealed class EpochStorageFixture : IDisposable
     internal byte[] SecondKey { get; } = [0x01, 0x00, 0xFE];
     internal byte[] SecondValue { get; } = [0xFF, 0x02, 0x00, 0x81];
 
-    internal async Task<StoreIdentity> CreateNativeSourceAsync(bool checkpoint)
+    internal async Task<StoreIdentity> CreateNativeSourceAsync(bool checkpoint, int sourceEpoch = Native5Epoch)
     {
+        if (sourceEpoch is not (Native5Epoch or Native6Epoch))
+        {
+            throw new ArgumentOutOfRangeException(nameof(sourceEpoch));
+        }
         StoreIdentity identity;
         using (var store = new ZoneTreeStore(SourceOptions))
         {
@@ -62,11 +67,11 @@ internal sealed class EpochStorageFixture : IDisposable
             identity = store.Identity with { ReadGeneration = ExpectedReadGeneration };
         }
 
-        identity = identity with { FormatVersion = LegacyEpoch };
+        identity = identity with { FormatVersion = sourceEpoch };
         ZoneTreeIdentityFile.Write(Path.Combine(Source, "identity.json"), identity);
         if (checkpoint)
         {
-            await RewriteCheckpointToLegacyAsync(Path.Combine(Source, JournalName));
+            await RewriteCheckpointToSourceAsync(Path.Combine(Source, JournalName), sourceEpoch);
         }
         return identity;
     }
@@ -89,14 +94,19 @@ internal sealed class EpochStorageFixture : IDisposable
         await Assert.That(actual.ReadGeneration).IsEqualTo(expected.ReadGeneration);
     }
 
-    internal static async Task RewriteCheckpointToLegacyAsync(string journalPath)
+    internal static async Task RewriteCheckpointToSourceAsync(string journalPath, int sourceEpoch)
     {
         var bytes = await File.ReadAllBytesAsync(journalPath);
-        await File.WriteAllBytesAsync(journalPath, CreateCurrentCheckpointAsLegacy(bytes));
+        await File.WriteAllBytesAsync(journalPath, CreateCurrentCheckpointAsSource(bytes, sourceEpoch));
     }
 
-    internal static byte[] CreateCurrentCheckpointAsLegacy(ReadOnlySpan<byte> current)
+    internal static byte[] CreateCurrentCheckpointAsSource(ReadOnlySpan<byte> current, int sourceEpoch)
     {
+        if (sourceEpoch is not (Native5Epoch or Native6Epoch))
+        {
+            throw new ArgumentOutOfRangeException(nameof(sourceEpoch));
+        }
+        var checkpointVersion = sourceEpoch == Native5Epoch ? Native5CheckpointVersion : Native6CheckpointVersion;
         using var input = new MemoryStream(current.ToArray(), writable: false);
         using var output = new MemoryStream(current.Length);
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
@@ -109,11 +119,11 @@ internal sealed class EpochStorageFixture : IDisposable
             var position = BinaryPrimitives.ReadInt64LittleEndian(header.AsSpan(FramePositionOffset));
             var payload = new byte[length];
             input.ReadExactly(payload);
-            var oldMagic = LegacyMagic(magic);
+            var oldMagic = SourceMagic(magic, sourceEpoch);
             if (magic == ZoneTreePersistenceFormat.CheckpointMagic)
             {
                 var metadata = NativeSerialization.Deserialize<ZoneTreeCheckpointMetadata>(payload);
-                payload = NativeSerialization.Serialize(metadata with { Version = LegacyCheckpointVersion });
+                payload = NativeSerialization.Serialize(metadata with { Version = checkpointVersion });
             }
             else if (magic == ZoneTreePersistenceFormat.CheckpointEndMagic)
             {
@@ -127,12 +137,15 @@ internal sealed class EpochStorageFixture : IDisposable
         return output.ToArray();
     }
 
-    private static ulong LegacyMagic(ulong current)
+    private static ulong SourceMagic(ulong current, int sourceEpoch)
         => current switch
         {
-            0x34545043444C4BUL => 0x33545043444C4BUL,
-            0x34415444444C4BUL => 0x33415444444C4BUL,
-            0x34444E45444C4BUL => 0x33444E45444C4BUL,
+            0x35545043444C4BUL when sourceEpoch == Native5Epoch => 0x33545043444C4BUL,
+            0x35545043444C4BUL when sourceEpoch == Native6Epoch => 0x34545043444C4BUL,
+            0x35415444444C4BUL when sourceEpoch == Native5Epoch => 0x33415444444C4BUL,
+            0x35415444444C4BUL when sourceEpoch == Native6Epoch => 0x34415444444C4BUL,
+            0x35544E45444C4BUL when sourceEpoch == Native5Epoch => 0x33444E45444C4BUL,
+            0x35544E45444C4BUL when sourceEpoch == Native6Epoch => 0x34444E45444C4BUL,
             _ => throw new InvalidDataException("The current fixture contains an unknown checkpoint frame.")
         };
 

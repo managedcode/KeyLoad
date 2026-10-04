@@ -8,8 +8,9 @@ namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 
 internal static class EpochUpgradeRecoveryAssertions
 {
-    private const int SourceDataEpoch = 5;
-    private const int TargetDataEpoch = 6;
+    private const int Native5SourceEpoch = 5;
+    private const int Native6SourceEpoch = 6;
+    private const int TargetDataEpoch = 7;
     private const string SystemNamespace = "system";
     private const string LastAppliedKey = "last-applied";
     private static readonly byte[] PostUpgradeKey = KeyCodec.Encode(EpochUpgradeFixture.Namespace, "post-upgrade");
@@ -75,7 +76,7 @@ internal static class EpochUpgradeRecoveryAssertions
 
     internal static async Task AssertIdentityAsync(StoreIdentity actual, EpochPriorProbeReceipt source)
     {
-        await Assert.That(source.DataEpoch).IsEqualTo(SourceDataEpoch);
+        await Assert.That(source.DataEpoch is Native5SourceEpoch or Native6SourceEpoch).IsTrue();
         await Assert.That(actual.FormatVersion).IsEqualTo(TargetDataEpoch);
         await Assert.That(actual.NodeId).IsEqualTo(source.NodeId);
         await Assert.That(actual.Incarnation).IsEqualTo(source.Incarnation);
@@ -118,7 +119,7 @@ internal static class EpochUpgradeRecoveryAssertions
         Dictionary<string, string> expectedInventory, CancellationToken cancellationToken)
     {
         await EpochUpgradeFileInventory.AssertUnchangedAsync(source, expectedInventory, cancellationToken);
-        await Assert.That(receipt.DataEpoch).IsEqualTo(SourceDataEpoch);
+        await Assert.That(receipt.DataEpoch is Native5SourceEpoch or Native6SourceEpoch).IsTrue();
         await Assert.That(receipt.Position).IsEqualTo(1);
         await Assert.That(receipt.AppliedPosition).IsEqualTo(EpochUpgradeFixture.AppliedPosition);
     }

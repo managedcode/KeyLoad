@@ -18,7 +18,7 @@ internal static class NodeEpochCoordinatorAssertions
     private const long NodeSnapshotRecordCount = 3;
 
     internal static async Task AssertHistoricalImagesAsync(string source, string destination,
-        CancellationToken cancellationToken)
+        EpochPriorProbeReceipt sourceReceipt, CancellationToken cancellationToken)
     {
         var sourceImages = Directory.GetFiles(Path.Combine(source, "snapshots"), "*.snapshot")
             .Order(StringComparer.Ordinal).ToArray();
@@ -29,11 +29,12 @@ internal static class NodeEpochCoordinatorAssertions
         foreach (var sourceImage in sourceImages)
         {
             var targetImage = Path.Combine(destination, "snapshots", Path.GetFileName(sourceImage));
-            var prior = await EpochPriorExecutableFixture.VerifySnapshotAsync(
-                Path.Combine(source, ServerNodeUpgradeProtocol.Canonical), sourceImage, cancellationToken);
+            var imageReceipt = await EpochPriorExecutableFixture.VerifySnapshotAsync(
+                Path.Combine(source, ServerNodeUpgradeProtocol.Canonical), sourceImage, cancellationToken,
+                sourceReceipt.DataEpoch);
             var verifierRoot = Path.GetDirectoryName(destination)
                 ?? throw new InvalidDataException("The target node has no trial root.");
-            await AssertCurrentImageAsync(verifierRoot, targetImage, prior);
+            await AssertCurrentImageAsync(verifierRoot, targetImage, imageReceipt);
         }
     }
 

@@ -11,14 +11,16 @@ internal sealed class NodeEpochCoordinatorAcceptanceTests
     private const int TimeoutSeconds = 120;
     private const int CleanupSeconds = 30;
     [Test]
-    public async Task AcEpoch008PreparesThenPublishesEveryHistoricalImageAndPreservesLaterWritesOnRetry()
+    [Arguments(5)]
+    [Arguments(6)]
+    public async Task AcEpoch7PreparesThenPublishesEveryHistoricalImageAndPreservesLaterWritesOnRetry(int dataEpoch)
     {
         await RunTrialAsync(async (root, token) =>
         {
             var source = Path.Combine(root, SourceName);
             var destination = Path.Combine(root, TargetName);
             var profile = NodeEpochComponentProfile.Create();
-            var prior = await EpochPriorExecutableFixture.CreateNodeAsync(source, profile, token);
+            var prior = await EpochPriorExecutableFixture.CreateNodeAsync(source, profile, token, dataEpoch);
             var sourceInventory = await NodeEpochInventoryCapture.CaptureAsync(source, token);
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
 
@@ -32,7 +34,7 @@ internal sealed class NodeEpochCoordinatorAcceptanceTests
             await AssertReceiptAsync(published, prior);
             await Assert.That(Directory.Exists(destination)).IsTrue();
             await Assert.That(Directory.Exists(destination + ServerNodeUpgradeProtocol.StageSuffix)).IsFalse();
-            await NodeEpochCoordinatorAssertions.AssertHistoricalImagesAsync(source, destination, token);
+            await NodeEpochCoordinatorAssertions.AssertHistoricalImagesAsync(source, destination, prior, token);
             await NodeEpochInventoryCapture.AssertUnchangedAsync(source, sourceInventory, token);
 
             await NodeEpochCoordinatorAssertions.ApplyLaterOperationAsync(profile, destination, token);
@@ -130,8 +132,8 @@ internal sealed class NodeEpochCoordinatorAcceptanceTests
 
     private static async Task AssertReceiptAsync(ServerNodeUpgradeReceipt actual, EpochPriorProbeReceipt prior)
     {
-        await Assert.That(actual.SourceEpoch).IsEqualTo(5);
-        await Assert.That(actual.TargetEpoch).IsEqualTo(6);
+        await Assert.That(actual.SourceEpoch).IsEqualTo(prior.DataEpoch);
+        await Assert.That(actual.TargetEpoch).IsEqualTo(7);
         await Assert.That(actual.CanonicalNodeId).IsEqualTo(prior.NodeId);
         await Assert.That(actual.ReplicaNodeId).IsNotEqualTo(actual.CanonicalNodeId);
         await Assert.That(actual.Incarnation).IsEqualTo(prior.Incarnation);

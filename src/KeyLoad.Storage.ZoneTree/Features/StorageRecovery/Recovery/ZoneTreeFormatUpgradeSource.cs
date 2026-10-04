@@ -72,11 +72,12 @@ internal sealed class ZoneTreeFormatUpgradeSource : IDisposable
         VerifyRegularFile(journalPath);
         var identityBytes = ZoneTreeMetadataFile.Read(identityPath, ZoneTreePersistenceFormat.MaximumIdentityFileBytes,
             ZoneTreePersistenceFormat.IdentityFormatUnsupported);
-        var identity = ZoneTreeIdentityFile.ReadNative5ForUpgrade(identityBytes.Span);
+        var identity = ZoneTreeIdentityFile.ReadStoppedSourceForUpgrade(identityBytes.Span);
         VerifyAuthority(identity, options);
         using var journal = new FileStream(journalPath, FileMode.Open, FileAccess.Read, FileShare.Read,
             ZoneTreePersistenceFormat.FileBufferBytes, FileOptions.SequentialScan);
-        var position = ZoneTreeFormatUpgradeJournal.ValidateSource(journal, options, identity.Incarnation);
+        var position = ZoneTreeFormatUpgradeJournal.ValidateSource(journal, options, identity.Incarnation,
+            identity.FormatVersion);
         journal.Position = 0;
         var journalDigest = Digest(journal);
         return new(directory, identity, Digest(identityBytes.Span), journalDigest, position, ownership);
@@ -120,7 +121,7 @@ internal static class ZoneTreeFormatUpgradeJournal
     internal static long ValidateCurrent(FileStream journal, ZoneTreeStoreOptions options, Guid expectedIncarnation)
     {
         journal.Position = 0;
-        var position = ReadCurrentCheckpoint(journal, options, expectedIncarnation);
+        var position = ZoneTreeFormatUpgradeCheckpoint.ReadCurrent(journal, options, expectedIncarnation);
         var header = new byte[ZoneTreePersistenceFormat.HeaderLength];
         while (journal.Position < journal.Length)
         {
@@ -134,10 +135,12 @@ internal static class ZoneTreeFormatUpgradeJournal
         return position;
     }
 
-    internal static long ValidateSource(FileStream journal, ZoneTreeStoreOptions options, Guid expectedIncarnation)
+    internal static long ValidateSource(FileStream journal, ZoneTreeStoreOptions options, Guid expectedIncarnation,
+        int sourceDataEpoch)
     {
         journal.Position = 0;
-        var position = ReadSourceCheckpoint(journal, options, expectedIncarnation);
+        var position = ZoneTreeFormatUpgradeCheckpoint.ReadSource(journal, options, expectedIncarnation,
+            sourceDataEpoch);
         var header = new byte[ZoneTreePersistenceFormat.HeaderLength];
         while (journal.Position < journal.Length)
         {
@@ -151,10 +154,12 @@ internal static class ZoneTreeFormatUpgradeJournal
         return position;
     }
 
-    internal static long ReplaySource(FileStream journal, ZoneTreeStoreOptions options, ZoneTreeStoreRuntime runtime)
+    internal static long ReplaySource(FileStream journal, ZoneTreeStoreOptions options, ZoneTreeStoreRuntime runtime,
+        int sourceDataEpoch)
     {
         journal.Position = 0;
-        var position = ReadSourceCheckpoint(journal, options, runtime.Apply, runtime.Identity.Incarnation);
+        var position = ZoneTreeFormatUpgradeCheckpoint.ReadSource(journal, options, runtime.Apply,
+            runtime.Identity.Incarnation, sourceDataEpoch);
         runtime.SetPosition(position);
         var header = new byte[ZoneTreePersistenceFormat.HeaderLength];
         while (journal.Position < journal.Length)
@@ -164,67 +169,6 @@ internal static class ZoneTreeFormatUpgradeJournal
             runtime.SetPosition(position);
         }
         return position;
-    }
-
-    private static long ReadSourceCheckpoint(FileStream journal, ZoneTreeStoreOptions options, Guid expectedIncarnation)
-        => ReadSourceCheckpoint(journal, options, static _ => { }, expectedIncarnation);
-
-    private static long ReadSourceCheckpoint(FileStream journal, ZoneTreeStoreOptions options,
-        Action<StorageMutation> apply, Guid expectedIncarnation)
-    {
-        if (journal.Length == 0)
-        {
-            return 0;
-        }
-        if (journal.Length < sizeof(ulong))
-        {
-            throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.JournalSequenceInvalid);
-        }
-        Span<byte> magicBytes = stackalloc byte[sizeof(ulong)];
-        journal.ReadExactly(magicBytes);
-        journal.Position = 0;
-        var magic = BinaryPrimitives.ReadUInt64LittleEndian(magicBytes);
-        if (magic == ZoneTreePersistenceFormat.SourceCheckpointMagic)
-        {
-            return ZoneTreeCheckpointReader.ReadNative3ForUpgrade(journal, options, apply,
-                expectedIncarnation).Position;
-        }
-        if (magic == ZoneTreePersistenceFormat.JournalMagic)
-        {
-            return 0;
-        }
-        throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.JournalFormatUpgradeRequired);
-    }
-
-    private static long ReadCurrentCheckpoint(FileStream journal, ZoneTreeStoreOptions options,
-        Guid expectedIncarnation)
-    {
-        if (journal.Length == 0)
-        {
-            return 0;
-        }
-        if (journal.Length < sizeof(ulong))
-        {
-            throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.JournalSequenceInvalid);
-        }
-        Span<byte> magicBytes = stackalloc byte[sizeof(ulong)];
-        journal.ReadExactly(magicBytes);
-        journal.Position = 0;
-        var magic = BinaryPrimitives.ReadUInt64LittleEndian(magicBytes);
-        if (magic == ZoneTreePersistenceFormat.CheckpointMagic)
-        {
-            var checkpoint = ZoneTreeCheckpointReader.Read(journal, options, static _ => { });
-            if (checkpoint.Incarnation != expectedIncarnation)
-            {
-                throw Errors.Fail(ErrorCode.TokenInvalidated, ZoneTreePersistenceFormat.SnapshotScopeInvalid);
-            }
-            return checkpoint.Position;
-        }
-        if (magic == ZoneTreePersistenceFormat.JournalMagic)
-        {
-            return 0;
-        }
-        throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.JournalFormatUpgradeRequired);
     }
 
     private static long ValidateAndReadFrame(FileStream journal, ZoneTreeStoreOptions options, byte[] header,

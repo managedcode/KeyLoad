@@ -9,7 +9,7 @@ internal sealed class EpochStoragePreservationTests
     private const int SourcePosition = 1;
 
     [Test]
-    public async Task AcEpoch004CurrentMaintenanceInstallBackupAndRestoreRetainEpoch6()
+    public async Task AcEpoch004CurrentMaintenanceInstallBackupAndRestoreRetainEpoch7()
     {
         using var fixture = new EpochStorageFixture();
         StorageSnapshot snapshot;
@@ -24,26 +24,26 @@ internal sealed class EpochStoragePreservationTests
             });
             store.SetDispatchPaused(true);
             snapshot = store.CreateSnapshot(fixture.Snapshot);
-            await AssertEpoch6Async(store.Identity);
+            await AssertEpoch7Async(store.Identity);
             await AssertRejectedLegacyInstallPreservesSnapshotAsync(store, fixture, snapshot);
 
             store.Compact();
-            await AssertEpoch6Async(store.Identity);
+            await AssertEpoch7Async(store.Identity);
             var installed = store.InstallSnapshot(fixture.Snapshot, snapshot.AppliedPosition);
             await Assert.That(installed.Position).IsEqualTo(SourcePosition);
-            await AssertEpoch6Async(store.Identity);
+            await AssertEpoch7Async(store.Identity);
             await AssertValuesAsync(store, fixture);
             store.CreateBackup(fixture.Backup);
         }
 
         var restoredIdentity = ZoneTreeStore.Restore(fixture.Backup, fixture.Restored);
-        await AssertEpoch6Async(restoredIdentity);
+        await AssertEpoch7Async(restoredIdentity);
         using var restored = new ZoneTreeStore(new(fixture.Restored));
-        await AssertEpoch6Async(restored.Identity);
+        await AssertEpoch7Async(restored.Identity);
         await AssertValuesAsync(restored, fixture);
     }
 
-    private static async Task AssertEpoch6Async(StoreIdentity identity)
+    private static async Task AssertEpoch7Async(StoreIdentity identity)
         => await Assert.That(identity.FormatVersion).IsEqualTo(EpochStorageFixture.CurrentEpoch);
 
     private static async Task AssertRejectedLegacyInstallPreservesSnapshotAsync(ZoneTreeStore store,
@@ -54,16 +54,25 @@ internal sealed class EpochStoragePreservationTests
         var identityBytes = await File.ReadAllBytesAsync(identityPath);
         var sourceInventory = CaptureSourceInventory(fixture.Source);
         var position = store.Position;
-        var oldSnapshotPath = fixture.Snapshot + ".checkpoint3";
-        await File.WriteAllBytesAsync(oldSnapshotPath,
-            EpochStorageFixture.CreateCurrentCheckpointAsLegacy(snapshotBytes));
+        await AssertRejectedSourceCheckpointAsync(store, fixture, snapshotBytes, snapshot, identityBytes,
+            sourceInventory, position, identityPath, EpochStorageFixture.Native5Epoch);
+        await AssertRejectedSourceCheckpointAsync(store, fixture, snapshotBytes, snapshot, identityBytes,
+            sourceInventory, position, identityPath, EpochStorageFixture.Native6Epoch);
+    }
 
+    private static async Task AssertRejectedSourceCheckpointAsync(ZoneTreeStore store, EpochStorageFixture fixture,
+        byte[] snapshotBytes, StorageSnapshot snapshot, byte[] identityBytes, string[] sourceInventory,
+        long position, string identityPath, int sourceEpoch)
+    {
+        var oldSnapshotPath = fixture.Snapshot + ".checkpoint" + sourceEpoch;
+        await File.WriteAllBytesAsync(oldSnapshotPath,
+            EpochStorageFixture.CreateCurrentCheckpointAsSource(snapshotBytes, sourceEpoch));
         var oldInstall = Assert.ThrowsExactly<KeyLoadException>(() =>
             store.InstallSnapshot(oldSnapshotPath, snapshot.AppliedPosition));
         await Assert.That(oldInstall.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-
-        var afterSnapshot = store.CreateSnapshot(fixture.Snapshot + ".after-refusal", snapshot.AppliedPosition);
-        var afterSnapshotBytes = await File.ReadAllBytesAsync(fixture.Snapshot + ".after-refusal");
+        var afterPath = fixture.Snapshot + ".after-refusal" + sourceEpoch;
+        var afterSnapshot = store.CreateSnapshot(afterPath, snapshot.AppliedPosition);
+        var afterSnapshotBytes = await File.ReadAllBytesAsync(afterPath);
         var afterIdentityBytes = await File.ReadAllBytesAsync(identityPath);
         await Assert.That(afterSnapshot).IsEqualTo(snapshot);
         await Assert.That(afterSnapshotBytes.SequenceEqual(snapshotBytes)).IsTrue();

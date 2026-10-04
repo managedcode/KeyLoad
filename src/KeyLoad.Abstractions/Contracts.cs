@@ -27,6 +27,11 @@ internal static class MutationDiscriminatorNames
     internal const string AcceptQueueTransfer = "acceptQueueTransfer";
     internal const string CompleteQueueTransfer = "completeQueueTransfer";
     internal const string ApplyVectorProjection = "applyVectorProjection";
+    internal const string ConfigureRecurringSchedule = "configureRecurringSchedule";
+    internal const string EmitRecurringOccurrences = "emitRecurringOccurrences";
+    internal const string CancelRecurringSchedule = "cancelRecurringSchedule";
+    internal const string CompareExchangeSaga = "compareExchangeSaga";
+    internal const string ExpireSaga = "expireSaga";
 }
 
 /// <summary>Identifies the stable error category returned by KeyLoad operations.</summary>
@@ -265,6 +270,11 @@ public sealed record CommandOutcome([property: Orleans.Id(0)] string Fingerprint
 [JsonDerivedType(typeof(AcceptQueueTransfer), MutationDiscriminatorNames.AcceptQueueTransfer)]
 [JsonDerivedType(typeof(CompleteQueueTransfer), MutationDiscriminatorNames.CompleteQueueTransfer)]
 [JsonDerivedType(typeof(ApplyVectorProjection), MutationDiscriminatorNames.ApplyVectorProjection)]
+[JsonDerivedType(typeof(ConfigureRecurringSchedule), MutationDiscriminatorNames.ConfigureRecurringSchedule)]
+[JsonDerivedType(typeof(EmitRecurringOccurrences), MutationDiscriminatorNames.EmitRecurringOccurrences)]
+[JsonDerivedType(typeof(CancelRecurringSchedule), MutationDiscriminatorNames.CancelRecurringSchedule)]
+[JsonDerivedType(typeof(CompareExchangeSaga), MutationDiscriminatorNames.CompareExchangeSaga)]
+[JsonDerivedType(typeof(ExpireSaga), MutationDiscriminatorNames.ExpireSaga)]
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.Mutation)]
 public abstract record Mutation([property: Orleans.Id(0)] string Resource);

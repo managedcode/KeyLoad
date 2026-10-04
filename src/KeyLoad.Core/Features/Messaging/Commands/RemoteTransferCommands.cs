@@ -1,5 +1,4 @@
 using System.Text;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -15,7 +14,7 @@ public sealed partial class DatabaseEngine
     private const string TransferCapacityMessage = "The retained queue transfer capacity is exhausted.";
 
     internal MutationReceipt ApplyCreateQueueTransfer(IAtomicTransaction tx, PrincipalRecord principal,
-        PartitionRef partition, CreateQueueTransfer request, DateTimeOffset now, long position)
+        PartitionRef partition, CreateQueueTransfer request, DateTimeOffset now)
     {
         ValidateTransferSource(request, partition);
         RequireTransferAdministrator(principal);
@@ -97,7 +96,7 @@ public sealed partial class DatabaseEngine
     }
 
     internal MutationReceipt ApplyCompleteQueueTransfer(IAtomicTransaction tx, PrincipalRecord principal,
-        PartitionRef partition, CompleteQueueTransfer request, DateTimeOffset now, long position)
+        PartitionRef partition, CompleteQueueTransfer request)
     {
         ValidateTransferSource(request.SourceQueue, request.TransferId, partition);
         RequireTransferAdministrator(principal);
@@ -221,7 +220,7 @@ public sealed partial class DatabaseEngine
         ValidateTransferPair(claims.Source, claims.Destination);
         if (claims.Purpose != RemoteTransferProtocol.IntentPurpose || claims.Incarnation != Store.Identity.Incarnation
             || claims.Destination != destination || claims.PrincipalId != principalId || claims.TransferId == Guid.Empty
-            || claims.Message is null || claims.Message.Queue != claims.Destination.Queue
+            || claims.Message.Queue != claims.Destination.Queue
             || JsonData.Fingerprint(claims.Message) != claims.Fingerprint)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);

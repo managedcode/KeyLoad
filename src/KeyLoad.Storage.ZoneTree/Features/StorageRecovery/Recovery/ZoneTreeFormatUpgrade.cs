@@ -1,11 +1,11 @@
 namespace KeyLoad.Storage.ZoneTree;
 
-/// <summary>Copies one stopped native5 store into a separately published native6 store.</summary>
+    /// <summary>Copies one stopped native5 or native6 store into a separately published native7 store.</summary>
 public static class ZoneTreeFormatUpgrade
 {
-    /// <summary>Validates a private stopped native5 authority copy without opening or rebuilding its tree.</summary>
+    /// <summary>Validates a private stopped native5 or native6 authority copy without opening or rebuilding its tree.</summary>
     /// <param name="sourceOptions">Private copied source and exact configured authority and finite budgets.</param>
-    /// <returns>The actual verified native5 identity; signing credentials remain private to the caller.</returns>
+    /// <returns>The actual verified source identity; signing credentials remain private to the caller.</returns>
     public static StoreIdentity VerifySource(ZoneTreeStoreOptions sourceOptions)
     {
         ArgumentNullException.ThrowIfNull(sourceOptions);
@@ -16,7 +16,7 @@ public static class ZoneTreeFormatUpgrade
     }
 
     /// <summary>Validates the existing native receipt for a converted store owned by an exact source copy.</summary>
-    /// <param name="source">Private original native5 authority copy.</param>
+    /// <param name="source">Private original native5 or native6 authority copy.</param>
     /// <param name="destinationOptions">Matching converted target and configured source authority.</param>
     public static void VerifyOwnedReceipt(string source, ZoneTreeStoreOptions destinationOptions)
     {
@@ -30,7 +30,7 @@ public static class ZoneTreeFormatUpgrade
     }
 
     /// <summary>Removes only the verified nested receipt after its owning node has captured complete authority.</summary>
-    /// <param name="source">Private original native5 authority copy retained until node verification.</param>
+    /// <param name="source">Private original native5 or native6 authority copy retained until node verification.</param>
     /// <param name="destinationOptions">The verified converted target.</param>
     public static void RemoveOwnedReceipt(string source, ZoneTreeStoreOptions destinationOptions)
     {
@@ -38,7 +38,7 @@ public static class ZoneTreeFormatUpgrade
         File.Delete(Path.Combine(destinationOptions.Directory, ZoneTreeFormatUpgradeStage.ReceiptFileName));
     }
 
-    /// <summary>Performs the closed native5/WAL4/checkpoint3 to native6/WAL4/checkpoint4 offline copy.</summary>
+    /// <summary>Performs the closed native5/WAL4/checkpoint3 or native6/WAL4/checkpoint4 to native7/WAL4/checkpoint5 offline copy.</summary>
     /// <param name="source">Existing source store directory, held under its canonical owner lock.</param>
     /// <param name="destinationOptions">Separate target directory, matching source authority and storage budgets.</param>
     /// <returns>The new current-format identity after verified atomic publication.</returns>
@@ -102,9 +102,9 @@ public static class ZoneTreeFormatUpgrade
     }
 
     private static ZoneTreeFormatUpgradeReceipt CreateReceipt(UpgradePaths paths,
-        ZoneTreeFormatUpgradeSource source) => new(1, paths.Source, paths.Destination,
+        ZoneTreeFormatUpgradeSource source) => new(ZoneTreePersistenceFormat.UpgradeReceiptVersion, paths.Source, paths.Destination,
             source.IdentityDigest, source.JournalDigest, source.Identity.NodeId, source.Identity.Incarnation,
-            ZoneTreePersistenceFormat.SourceDataEpoch, ZoneTreePersistenceFormat.CurrentDataEpoch);
+            source.Identity.FormatVersion, ZoneTreePersistenceFormat.CurrentDataEpoch);
 
     private static ZoneTreeStoreOptions TargetOptions(ZoneTreeStoreOptions options, string directory,
         StoreIdentity sourceIdentity) => options with

@@ -37,7 +37,9 @@ internal sealed record ServerNodeUpgradeOwner(
     [property: global::Orleans.Id(4)] string CanonicalIdentitySha256,
     [property: global::Orleans.Id(5)] string CanonicalJournalSha256,
     [property: global::Orleans.Id(6)] string ReplicaIdentitySha256,
-    [property: global::Orleans.Id(7)] string ReplicaJournalSha256);
+    [property: global::Orleans.Id(7)] string ReplicaJournalSha256,
+    [property: global::Orleans.Id(8)] int SourceEpoch,
+    [property: global::Orleans.Id(9)] int TargetEpoch);
 
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(ServerNodeUpgradeProtocol.EnvelopeAlias)]
@@ -51,4 +53,6 @@ internal sealed record ServerNodeUpgradeProgress(
     [property: global::Orleans.Id(0)] int FormatVersion,
     [property: global::Orleans.Id(1)] ServerNodeUpgradeOwner SourceOwner,
     [property: global::Orleans.Id(2)] string InventorySha256,
-    [property: global::Orleans.Id(3)] int StageCode);
+    [property: global::Orleans.Id(3)] int StageCode,
+    [property: global::Orleans.Id(4)] int SourceEpoch,
+    [property: global::Orleans.Id(5)] int TargetEpoch);

@@ -11,7 +11,7 @@ internal static class EpochPriorExecutableProcess
     private const int CleanupSeconds = 15;
 
     internal static async Task<EpochPriorProcessResult> RunAsync(string executable, string request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, int dataEpoch = 5)
     {
         var start = new ProcessStartInfo(Executable)
         {
@@ -22,7 +22,7 @@ internal static class EpochPriorExecutableProcess
             UseShellExecute = false
         };
         start.ArgumentList.Add(executable);
-        start.ArgumentList.Add(EpochPriorSourceProbe.Mode);
+        start.ArgumentList.Add(EpochPriorSourceProbe.ModeForEpoch(dataEpoch));
         using var process = Process.Start(start) ?? throw new InvalidOperationException(FailedStart);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));

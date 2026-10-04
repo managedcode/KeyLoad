@@ -1,4 +1,5 @@
 using System.Runtime.ExceptionServices;
+using KeyLoad.AppHost.Features.StorageRecovery;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -13,7 +14,7 @@ internal static class TestSuiteApplication
             app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping);
         deadline.CancelAfter(settings.Timeout);
         using var outputLifetime = new CancellationTokenSource();
-        var output = TestSuiteOutput.ForwardAsync(app, settings.ResourceName, outputLifetime.Token);
+        var output = ForwardOutputAsync(app, settings, outputLifetime.Token);
         var execution = ExecuteAsync(app, settings.ResourceName, deadline.Token);
         try
         {
@@ -40,6 +41,14 @@ internal static class TestSuiteApplication
 
     private static async Task<int> ExecuteAsync(DistributedApplication app, string resource, CancellationToken token)
         => await AspireResourceCompletion.RunToExitAsync(app, resource, token).ConfigureAwait(false);
+
+    private static Task ForwardOutputAsync(DistributedApplication app, TestSuiteSettings settings, CancellationToken token)
+    {
+        string[] resources = settings.Suite == PriorProbeResources.RecoverySuite
+            ? [settings.ResourceName, PriorProbeResources.Native5Resource, PriorProbeResources.Native6Resource]
+            : [settings.ResourceName];
+        return Task.WhenAll(resources.Select(name => TestSuiteOutput.ForwardAsync(app, name, token)));
+    }
 
     private static async Task CollectAsync(Func<Task> action, List<Exception> failures)
     {

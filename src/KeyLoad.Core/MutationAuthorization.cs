@@ -26,6 +26,11 @@ public sealed partial class DatabaseEngine
 
     private void ReauthorizeEffect(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect)
     {
+        if (effect is ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule or CompareExchangeSaga or ExpireSaga)
+        {
+            ReauthorizeRecurringSagaEffect(view, principal, partition, effect);
+            return;
+        }
         if (effect is ApplyVectorProjection projection)
         {
             ReauthorizeVectorProjection(view, principal, partition, projection);

@@ -11,6 +11,9 @@ internal static class McpToolNames
     internal const string MessagesInspect = "keyload_messages_inspect";
     internal const string QueueTransferInspect = "keyload_queue_transfer_inspect";
     internal const string QueueTransferReceipt = "keyload_queue_transfer_receipt";
+    internal const string ScheduleInspect = "keyload_schedule_inspect";
+    internal const string SagaInspect = "keyload_saga_inspect";
+    internal const string QuerySearch = "keyload_query_search";
     internal const string GraphTraverse = "keyload_graph_traverse";
     internal const string SeriesRead = "keyload_series_read";
     internal const string SeriesLatest = TimeSeriesReadProtocol.LatestTool;

@@ -66,8 +66,11 @@ internal static class GraphSearchExecutor
             return;
         }
         var branch = SearchBranchExecution.RankText(database, textProjection, view, principal, resource, search, budget);
-        fusion.AddBranch(FilterScope(FilteredSearchBranch.Apply(branch, eligibility, budget), scoped, budget),
-            search.TextWeight);
+        if (search.TextWeight > 0)
+        {
+            fusion.AddBranch(FilterScope(FilteredSearchBranch.Apply(branch, eligibility, budget), scoped, budget),
+                search.TextWeight);
+        }
     }
 
     private static void AddVectorBranch(DatabaseEngine database, PrincipalRecord principal, IKeyValueView view,
@@ -79,7 +82,10 @@ internal static class GraphSearchExecutor
             return;
         }
         var branch = VectorRanker.Rank(database, view, principal, search, similarity, budget, eligibility);
-        fusion.AddBranch(FilterScope(branch, scoped, budget), search.VectorWeight);
+        if (search.VectorWeight > 0)
+        {
+            fusion.AddBranch(FilterScope(branch, scoped, budget), search.VectorWeight);
+        }
     }
 
     private static void AddRetrieverBranch(DatabaseEngine database, PrincipalRecord principal, IKeyValueView view,
@@ -103,7 +109,10 @@ internal static class GraphSearchExecutor
             }
         }
         candidates.Sort(GraphRetrieverOrder.Instance);
-        fusion.AddBranch([.. candidates], request.Retriever.Weight);
+        if (request.Retriever.Weight > 0)
+        {
+            fusion.AddBranch([.. candidates], request.Retriever.Weight);
+        }
     }
 
     private static GraphSearchReachability[] ReadEntries(DatabaseEngine database, IKeyValueView view,
