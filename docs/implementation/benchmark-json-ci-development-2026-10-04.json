@@ -248,5 +248,24 @@
     "fullWebsiteCoverageAndPublication": "pending",
     "noLocalBrowserRunForThisStage": true,
     "representativeScaleQualification": false
+  },
+  "deliveredLatestEligibilityFollowup": {
+    "parentCodeCheckpoint": "873cd1a36ad14ab966065c924c71a292ea681083",
+    "actualOriginalCIJob": 111408451894,
+    "originalEvidenceArtifactId": 11300230252,
+    "originalEvidenceDigest": "sha256:afd6f4ebab3744b016c978945ee5fb2abfba0ebc3e05c426deade9a74bc4d021",
+    "originalMetadataConfirmedNewestCompletedWasCanceled": 37190736149,
+    "productionParserOverOriginalAPISelectedReadyJSON": 37184989107,
+    "productionParserFileSha256": "a0454cc821f44b45ebc931d95a3fd415816d5932f555ee4161a3c1547e486818",
+    "newestEligibleAggregateFailureDoesNotFallBack": true,
+    "fullDevelopmentBuild": {
+      "passed": true,
+      "warnings": 0,
+      "errors": 0,
+      "logSha256": "149dfb0ec99bc886622d2a750a954a538af8b1dfce202108d914048cbf001922"
+    },
+    "formatPassed": true,
+    "nativeCIRecheck": "pending next scoped push",
+    "browserExecutedLocally": false
   }
 }

@@ -39,7 +39,8 @@ export function flattenSiteRuns(pages) {
 }
 
 export function selectLatestSiteProducer(runs, workflow) {
-  const completed = runs.map(run => validateSiteRun(run, workflow)).filter(run => run.status === 'completed');
+  const completed = runs.map(run => validateSiteRun(run, workflow))
+    .filter(run => run.status === 'completed' && SITE_GH.producerConclusions.includes(run.conclusion));
   completed.sort((left, right) => right.run_number - left.run_number);
   const run = completed[0];
   requireSite(run !== undefined && SITE_GH.producerConclusions.includes(run.conclusion));

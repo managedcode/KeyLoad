@@ -137,6 +137,7 @@ internal sealed class SiteBenchmarkLatestProducerTests
     [Test]
     [Arguments("newerPending")]
     [Arguments("olderOtherEvent")]
+    [Arguments("cancelledLatest")]
     public async Task AC_BC_FAIL_020_LatestCompletedProducerSpansPushAndManualWhileIgnoringPending(string scenario)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
@@ -156,7 +157,6 @@ internal sealed class SiteBenchmarkLatestProducerTests
     [Test]
     [Arguments("failedAggregate")]
     [Arguments("missingAggregate")]
-    [Arguments("cancelledLatest")]
     [Arguments("noCompleted")]
     public async Task AC_BC_FAIL_020_InvalidLatestCompletedProducerCannotFallBackToOlderMeasurements(string scenario)
     {

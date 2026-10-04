@@ -61,3 +61,6 @@ No repository skills are installed or applicable to this tooling module. Do not 
 
 ## Latest benchmark selection, 2026-10-04
 - The latest owner clarification requires every separate CI website build, whether own-main push/manual or actual completed Benchmarks workflow_run, to consume the newest completed own-main Benchmarks push/manual producer. Authenticate the trigger separately from the latest selected run/attempt/source/event/conclusion; require its successful complete aggregate and original archives, reject invalid latest evidence without historical fallback, and repeat latest selection for predeploy freshness. This explicitly supersedes publication selection pinned blindly to the triggering producer.
+
+## Latest completed result eligibility, 2026-10-04
+- Latest benchmark metrics means the newest completed own-main push/manual Benchmarks producer with success/failure conclusion. Pending, skipped and canceled workflows have no completed comparison cohort and MUST NOT displace ready JSON. Exclude them before choosing the latest eligible producer; then reject its missing/corrupt/failed aggregate without older fallback. A canceled workflow_run event still cannot authorize publication. This refines the latest-result rule without accepting incomplete or fabricated measurements.

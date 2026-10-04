@@ -47,3 +47,6 @@
 
 ## Latest benchmark and separate build action, 2026-10-04
 - The latest owner clarification explicitly permits static website building after benchmark JSON or a separate CI trigger, superseding the interim static-build prohibition above. The selected independent CI action runs on own-main push/manual and completed Benchmarks events, always consumes the newest completed own-main push/manual benchmark and its successful authenticated aggregate, and retains original source/run/attempt, failed/null cells, all website gates and predeploy freshness. Never fall back to older evidence after rejecting the latest completed producer.
+
+## Latest completed result eligibility, 2026-10-04
+- Latest benchmark metrics means the newest completed own-main push/manual Benchmarks producer with success/failure conclusion. Pending, skipped and canceled workflows have no completed comparison cohort and MUST NOT displace ready JSON. Exclude them before choosing the latest eligible producer; then reject its missing/corrupt/failed aggregate without older fallback. A canceled workflow_run event still cannot authorize publication. This refines the latest-result rule without accepting incomplete or fabricated measurements.

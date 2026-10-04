@@ -3847,6 +3847,25 @@
         "skipped": 0,
         "trxSha256": "91e50a30de911b506dd83962b509bf720d9adfebf527b742aefff4f3dc3faa2d",
         "qualification": "development_only"
+      },
+      "checkpointRevision": "873cd1a36ad14ab966065c924c71a292ea681083",
+      "genuineCITriggers": {
+        "pushRun": 37192832065,
+        "completedBenchmarkWorkflowRun": 37192849271,
+        "separateWebsiteJobsCreated": true,
+        "ordinarySuitesNotRepeatedForWorkflowRun": true
+      },
+      "deliveredLatestSelectionRepair": {
+        "cause": "newer canceled pending workflows selected ahead of completed 73 JSON",
+        "originalJobId": 111408451894,
+        "originalArtifactId": 11300230252,
+        "originalArtifactDigest": "sha256:afd6f4ebab3744b016c978945ee5fb2abfba0ebc3e05c426deade9a74bc4d021",
+        "apiMetadataSha256": "f8816dacf8a60b68a41b8911185b8c97f2e27cbd816980f1331972b929d19007",
+        "repair": "filter_completed_success_or_failure_candidates_before_selecting_latest; no_older_fallback_after_invalid_selected_aggregate",
+        "originalAPIProductionParserSelected": 37184989107,
+        "developmentBuildWarnings": 0,
+        "developmentBuildErrors": 0,
+        "nativeCIReverification": "pending_next_scoped_push"
       }
     }
   }

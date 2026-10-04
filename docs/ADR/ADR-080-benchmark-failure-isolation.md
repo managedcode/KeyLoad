@@ -19,8 +19,9 @@ no dependency on ordinary CI/RF3. Preserve every archive/source/TUnit/browser/
 coverage gate and least-privilege needs-gated deployment.
 
 Every website build selects the newest completed own-main Benchmarks run by run
-number across push/workflow_dispatch producers; pending runs cannot replace ready
-JSON. Require its success/failure conclusion and successful complete aggregate.
+number across push/workflow_dispatch producers with success/failure conclusion;
+pending, skipped and canceled workflows have no completed comparison cohort and
+are excluded before choosing the latest. Require its successful complete aggregate.
 After selecting the newest completed run, missing/corrupt/expired/failed aggregate
 evidence rejects publication without older fallback. Authenticate an actual
 workflow_run trigger separately: it may refer to an older completed run while a
@@ -273,3 +274,13 @@ flowchart TD
   Validator --> Site[Successful values and unavailable cells]
   Site --> Gates[Full site qualification and Pages]
 ```
+
+## Delivered selection correction
+
+Original GitHub metadata after873cd1a shows runs55/54 canceled while waiting,
+run56 active and the genuine completed270-cell JSON at run53/73. Cancellation
+is not a completed comparison result. Filter candidates to completed success/
+failure producers before selecting highest run number; the actual canceled event
+still cannot authorize publication. Preserve no-fallback rejection after the
+newest eligible producer has a failed/missing/corrupt aggregate. The original
+metadata digest is f8816dacf8a60b68a41b8911185b8c97f2e27cbd816980f1331972b929d19007.

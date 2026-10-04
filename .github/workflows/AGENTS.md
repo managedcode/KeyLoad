@@ -57,3 +57,6 @@
 
 ## Owner-directed failed-cell publication, 2026-10-04
 - ADR-080 and the latest explicit owner instruction supersede the all-success cohort requirement: finish every independent workload and publish authenticated successful measurements while failed workloads retain null reports and actual failed job/workload conclusions. Keep complete planned-cell artifact accounting, successful image authority, full site qualification, exact source/run/attempt identity and least privileges. Unrelated KeyLoad build/runtime failures do not by themselves skip aggregation or website jobs; missing/corrupt evidence and failed site gates still block publication.
+
+## Latest completed result eligibility, 2026-10-04
+- Latest benchmark metrics means the newest completed own-main push/manual Benchmarks producer with success/failure conclusion. Pending, skipped and canceled workflows have no completed comparison cohort and MUST NOT displace ready JSON. Exclude them before choosing the latest eligible producer; then reject its missing/corrupt/failed aggregate without older fallback. A canceled workflow_run event still cannot authorize publication. This refines the latest-result rule without accepting incomplete or fabricated measurements.
