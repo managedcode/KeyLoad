@@ -47,7 +47,9 @@ The server uses ZoneTree.FullTextSearch for bounded derived text candidates whil
 
 A bounded lossless time-series chunk codec has [development evidence](docs/implementation/sample-chunk-codec-development-2026-10-03.json) from full Aspire unit/scalar suites and matched native-codec controls. Canonical chunk storage, rewrite/recovery and RF3 qualification remain in progress under KL-078.
 
-Canonical key validation and persisted document permissions have [development evidence](docs/implementation/keycodec-crud-development-2026-10-04.json): 2,889 tests pass in each Aspire normal/scalar suite and 228 recovery tests pass, with 1,000 unique atomic process-crash trials. This includes invariant decimal keys, malformed-input bounds, owned storage bytes, CRUD revisions, index rollback and isolated field/row authorization controls. Complete delivered-source Linux and Docker/Aspire RF3 qualification remain pending.
+Canonical key validation and persisted document permissions have [development evidence](docs/implementation/keycodec-crud-development-2026-10-04.json): 2,889 tests pass in each Aspire normal/scalar suite and 228 recovery tests pass, with 1,000 unique atomic process-crash trials. This includes invariant decimal keys, malformed-input bounds, owned storage bytes, CRUD revisions, index rollback and isolated field/row authorization controls. On the earlier delivered `e97bf30` source, Linux build/unit/scalar/recovery passed; its RF3 suite was 83/84 and remains a failed complete gate.
+
+Whole-node offline native5-to6 conversion, retained checkpoint sidecars and guarded regular-file reads have [development evidence](docs/implementation/node-epoch-development-2026-10-04.json): 2,908 tests pass in each full Aspire unit/scalar suite, and 257 recovery tests pass. The 42 new component cases include six actual node-stage process kills; the full recovery run also retains 1,000 unique atomic crash trials. Genuine old-to-current Docker/Aspire RF3 and new exact-source Linux qualification remain open.
 
 ## Get started
 

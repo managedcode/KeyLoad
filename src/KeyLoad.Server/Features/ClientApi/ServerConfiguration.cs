@@ -13,8 +13,7 @@ internal static class ServerConfiguration
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
-        var node = builder.Configuration.GetSection(ServerProtocol.ConfigurationSection).Get<NodeOptions>() ?? new();
-        node.Validate();
+        var node = ReadNode(builder.Configuration);
         builder.WebHost.ConfigureKestrel(server => server.Limits.MaxRequestBodySize = ServerProtocol.KestrelMaximumBodyBytes);
         builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
         builder.Services.ConfigureHttpJsonOptions(options => ConfigureJson(options.SerializerOptions));
@@ -31,6 +30,23 @@ internal static class ServerConfiguration
         app.MapKeyLoadApi();
         app.MapMcp(McpFramingProtocol.Path);
         return app;
+    }
+
+    internal static NodeOptions ReadOfflineNode(string destination)
+    {
+        var builder = WebApplication.CreateBuilder([]);
+        var node = (builder.Configuration.GetSection(ServerProtocol.ConfigurationSection).Get<NodeOptions>() ?? new())
+            with
+        { DataDirectory = destination };
+        node.Validate();
+        return node;
+    }
+
+    private static NodeOptions ReadNode(ConfigurationManager configuration)
+    {
+        var node = configuration.GetSection(ServerProtocol.ConfigurationSection).Get<NodeOptions>() ?? new();
+        node.Validate();
+        return node;
     }
 
     private static void ConfigureJson(System.Text.Json.JsonSerializerOptions options)

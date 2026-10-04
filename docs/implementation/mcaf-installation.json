@@ -30,6 +30,7 @@
     "src/KeyLoad.Security/KeyLoad.Security.csproj",
     "src/KeyLoad.Server/KeyLoad.Server.csproj",
     "src/KeyLoad.ServiceDefaults/KeyLoad.ServiceDefaults.csproj",
+    "src/KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj",
     "src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj",
     "tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
     "tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj",

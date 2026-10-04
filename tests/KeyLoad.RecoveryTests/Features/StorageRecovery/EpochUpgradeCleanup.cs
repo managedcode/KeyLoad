@@ -9,10 +9,18 @@ internal static class EpochUpgradeCleanup
 
     internal static async Task SettleAsync(Process? process, string root, string source,
         Exception? activeFailure, CancellationToken cancellationToken)
+        => await SettleCoreAsync(process, root, source, nodeRoot: false, activeFailure, cancellationToken);
+
+    internal static async Task SettleNodeAsync(Process? process, string root, string source,
+        Exception? activeFailure, CancellationToken cancellationToken)
+        => await SettleCoreAsync(process, root, source, nodeRoot: true, activeFailure, cancellationToken);
+
+    private static async Task SettleCoreAsync(Process? process, string root, string source, bool nodeRoot,
+        Exception? activeFailure, CancellationToken cancellationToken)
     {
         try
         {
-            await CleanupAsync(process, root, source, cancellationToken);
+            await CleanupAsync(process, root, source, nodeRoot, cancellationToken);
         }
         catch (Exception cleanupFailure)
         {
@@ -24,25 +32,40 @@ internal static class EpochUpgradeCleanup
         }
     }
 
-    private static async Task CleanupAsync(Process? process, string root, string source,
+    private static async Task CleanupAsync(Process? process, string root, string source, bool nodeRoot,
         CancellationToken cancellationToken)
     {
         var failures = new List<Exception>();
+        var processSettled = process is null;
+        var nodeReadinessPassed = !nodeRoot || !Directory.Exists(source);
         if (process is not null)
         {
-            if (!process.HasExited)
+            await SettleProcessAsync(process, failures, cancellationToken);
+            processSettled = ObserveHasExited(process, failures);
+            if (processSettled)
             {
-                Observe(() => process.Kill(entireProcessTree: true), failures);
-                await ObserveAsync(() => process.WaitForExitAsync(cancellationToken), failures);
+                Observe(process.Dispose, failures);
             }
-            Observe(process.Dispose, failures);
+            else
+            {
+                failures.Add(new IOException("The owned process did not exit; its trial root was retained."));
+            }
         }
-        if (Directory.Exists(source))
+        if (processSettled && Directory.Exists(source))
         {
-            await ObserveAsync(() => KilledProcessFileReadiness.WaitAsync(source, cancellationToken), failures);
-            Observe(() => EpochUpgradeFileInventory.AssertNativeHandlesReleased(source), failures);
+            if (nodeRoot)
+            {
+                var readinessFailureCount = failures.Count;
+                await ObserveAsync(() => NodeEpochFileReadiness.WaitAsync(source, cancellationToken), failures);
+                nodeReadinessPassed = failures.Count == readinessFailureCount;
+            }
+            else
+            {
+                await ObserveAsync(() => KilledProcessFileReadiness.WaitAsync(source, cancellationToken), failures);
+                Observe(() => EpochUpgradeFileInventory.AssertNativeHandlesReleased(source), failures);
+            }
         }
-        if (Directory.Exists(root))
+        if (processSettled && nodeReadinessPassed && Directory.Exists(root))
         {
             await ObserveAsync(() => StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken), failures);
         }
@@ -54,6 +77,24 @@ internal static class EpochUpgradeCleanup
         {
             throw new AggregateException(failures);
         }
+    }
+
+    private static async Task SettleProcessAsync(Process process, List<Exception> failures,
+        CancellationToken cancellationToken)
+    {
+        if (ObserveHasExited(process, failures))
+        {
+            return;
+        }
+        Observe(() => process.Kill(entireProcessTree: true), failures);
+        await ObserveAsync(() => process.WaitForExitAsync(cancellationToken), failures);
+    }
+
+    private static bool ObserveHasExited(Process process, List<Exception> failures)
+    {
+        var hasExited = false;
+        Observe(() => hasExited = process.HasExited, failures);
+        return hasExited;
     }
 
     private static void Observe(Action stage, List<Exception> failures)

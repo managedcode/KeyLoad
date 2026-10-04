@@ -7,5 +7,6 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
     <ProjectReference Include="../KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
+    <ProjectReference Include="../KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj" />
   </ItemGroup>
 </Project>

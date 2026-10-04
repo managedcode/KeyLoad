@@ -83,9 +83,12 @@ internal static class SampleRetentionRf3RestartWorkflow
     private static async Task ApplyQuorumPageAsync(RestartContext context, CancellationToken cancellationToken)
     {
         var command = ExpireCommand(context, 2);
-        var result = ClusterReplicationTestSupport.Success(await context.Clients[context.Leader]
-            .CommitAsync(command, cancellationToken));
+        var result = ClusterReplicationTestSupport.Success(await ClusterReplicationTestSupport.RetryDuringElectionAsync(
+            () => context.Clients[context.Leader].CommitAsync(command, cancellationToken), cancellationToken));
         await Assert.That(result.Mutations).HasSingleItem();
+        var replay = ClusterReplicationTestSupport.Success(await ClusterReplicationTestSupport.RetryDuringElectionAsync(
+            () => context.Clients[context.Leader].CommitAsync(command, cancellationToken), cancellationToken));
+        await Assert.That(replay.Token).IsEqualTo(result.Token);
         await SampleRetentionRf3RecoveryAssertions.VerifyActiveNodesAsync(context.Clients,
             context.Follower, context.Mcp, context.Scenario, new(context.Cutoff, 3, false),
             ["retention-3", "at-retention-floor"], cancellationToken);

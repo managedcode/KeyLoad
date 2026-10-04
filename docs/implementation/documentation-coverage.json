@@ -8363,6 +8363,57 @@
         "developmentEvidence": [
           "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
         ]
+      },
+      {
+        "id": "REQ-STORAGE-025",
+        "feature": "docs/Features/StorageRecovery.md",
+        "acceptanceIds": [
+          "AC-EPOCH-007",
+          "AC-EPOCH-012"
+        ],
+        "implementationTask": "TASK-NODE-EPOCH-IMAGE",
+        "adrs": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "evidenceState": "root_accepted_source_contract_runtime_pending",
+        "regularFileTask": "TASK-NODE-EPOCH-REGULAR-FILE"
+      },
+      {
+        "id": "REQ-STORAGE-026",
+        "feature": "docs/Features/StorageRecovery.md",
+        "acceptanceIds": [
+          "AC-EPOCH-008",
+          "AC-EPOCH-009",
+          "AC-EPOCH-012"
+        ],
+        "implementationTask": "TASK-NODE-EPOCH-COORDINATOR",
+        "adrs": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "evidenceState": "root_accepted_source_contract_runtime_pending",
+        "regularFileTask": "TASK-NODE-EPOCH-REGULAR-FILE"
+      },
+      {
+        "id": "REQ-STORAGE-027",
+        "feature": "docs/Features/StorageRecovery.md",
+        "acceptanceIds": [
+          "AC-EPOCH-010",
+          "AC-EPOCH-011"
+        ],
+        "implementationTask": "TASK-NODE-EPOCH-RF3",
+        "adrs": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "evidenceState": "root_accepted_source_contract_runtime_pending"
       }
     ],
     "decisions": [
@@ -10774,6 +10825,343 @@
         ],
         "joinCondition": "real_persisted_principals_ZoneTree_and_exact_revision_JSON_index_oracles_no_new_Delete_field_write_semantics",
         "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+      },
+      {
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "startCondition": "root_accepted_canonical_contract_after_three_read_only_reviews_and_e97bf30_checkpoint",
+        "permissions": "disjoint_bounded_source_implementation_no_contract_schema_or_limit_changes",
+        "artifacts": [
+          "source",
+          "real_TUnit_oracles",
+          "root_review",
+          "original_source_bound_results"
+        ],
+        "verification": [
+          "Release solution build",
+          "formatter",
+          "governance",
+          "Aspire TUnit normal/scalar",
+          "Aspire process recovery",
+          "Linux exact-source Docker/Aspire RF3 via SDK and official MCP"
+        ],
+        "state": "root_reviewed_full_Aspire_local_normal2908_scalar2908_recovery257_passed_exact_Linux_cold_RF3_pending_20261004",
+        "joinCondition": "root_full_diff_review_and_original_exact_source_results_no_skipped_gates",
+        "id": "TASK-NODE-EPOCH-IMAGE",
+        "owner": "query_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "fileOwnership": [
+          "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeSnapshotFormatUpgrade*",
+          "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeCheckpointWriter*"
+        ],
+        "requirementIds": [
+          "REQ-STORAGE-025"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-007",
+          "AC-EPOCH-012"
+        ],
+        "dependencies": [
+          "TASK-NODE-EPOCH-REGULAR-FILE"
+        ],
+        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+      },
+      {
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "startCondition": "root_accepted_canonical_contract_after_three_read_only_reviews_and_e97bf30_checkpoint",
+        "permissions": "disjoint_bounded_source_implementation_no_contract_schema_or_limit_changes",
+        "artifacts": [
+          "source",
+          "real_TUnit_oracles",
+          "root_review",
+          "original_source_bound_results"
+        ],
+        "verification": [
+          "Release solution build",
+          "formatter",
+          "governance",
+          "Aspire TUnit normal/scalar",
+          "Aspire process recovery",
+          "Linux exact-source Docker/Aspire RF3 via SDK and official MCP"
+        ],
+        "state": "root_reviewed_full_Aspire_local_normal2908_scalar2908_recovery257_passed_exact_Linux_cold_RF3_pending_20261004",
+        "joinCondition": "root_full_diff_review_and_original_exact_source_results_no_skipped_gates",
+        "id": "TASK-NODE-EPOCH-REPLICA",
+        "owner": "cluster_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "fileOwnership": [
+          "src/KeyLoad.Replication/Features/StorageRecovery/ReplicaSnapshotFormatUpgrade*",
+          "src/KeyLoad.Replication/Features/StorageRecovery/ReplicaSnapshotUpgrade*",
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/NodeEpochReplica*"
+        ],
+        "requirementIds": [
+          "REQ-STORAGE-026"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-008",
+          "AC-EPOCH-012"
+        ],
+        "dependencies": [
+          "TASK-NODE-EPOCH-IMAGE",
+          "TASK-NODE-EPOCH-REGULAR-FILE"
+        ],
+        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+      },
+      {
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "startCondition": "root_accepted_canonical_contract_after_three_read_only_reviews_and_e97bf30_checkpoint",
+        "permissions": "disjoint_bounded_source_implementation_no_contract_schema_or_limit_changes",
+        "artifacts": [
+          "source",
+          "real_TUnit_oracles",
+          "root_review",
+          "original_source_bound_results"
+        ],
+        "verification": [
+          "Release solution build",
+          "formatter",
+          "governance",
+          "Aspire TUnit normal/scalar",
+          "Aspire process recovery",
+          "Linux exact-source Docker/Aspire RF3 via SDK and official MCP"
+        ],
+        "state": "root_reviewed_full_Aspire_local_normal2908_scalar2908_recovery257_passed_exact_Linux_cold_RF3_pending_20261004",
+        "joinCondition": "root_full_diff_review_and_original_exact_source_results_no_skipped_gates",
+        "id": "TASK-NODE-EPOCH-ORACLES",
+        "owner": "lifecycle_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "fileOwnership": [
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/NodeEpochImage*",
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/NodeEpochCoordinator*",
+          "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/NodeEpoch*",
+          "tests/KeyLoad.CrashHost/Features/StorageRecovery/NodeEpoch*",
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/OfflineRegularFile*",
+          "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochUpgradeCleanup.cs"
+        ],
+        "requirementIds": [
+          "REQ-STORAGE-025",
+          "REQ-STORAGE-026"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-007",
+          "AC-EPOCH-008",
+          "AC-EPOCH-009",
+          "AC-EPOCH-012"
+        ],
+        "dependencies": [
+          "TASK-NODE-EPOCH-IMAGE",
+          "TASK-NODE-EPOCH-REPLICA",
+          "TASK-NODE-EPOCH-COORDINATOR",
+          "TASK-NODE-EPOCH-REGULAR-FILE"
+        ],
+        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+      },
+      {
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "startCondition": "root_accepted_canonical_contract_after_three_read_only_reviews_and_e97bf30_checkpoint",
+        "permissions": "disjoint_bounded_source_implementation_no_contract_schema_or_limit_changes",
+        "artifacts": [
+          "source",
+          "real_TUnit_oracles",
+          "root_review",
+          "original_source_bound_results"
+        ],
+        "verification": [
+          "Release solution build",
+          "formatter",
+          "governance",
+          "Aspire TUnit normal/scalar",
+          "Aspire process recovery",
+          "Linux exact-source Docker/Aspire RF3 via SDK and official MCP"
+        ],
+        "state": "root_reviewed_full_Aspire_local_normal2908_scalar2908_recovery257_passed_exact_Linux_cold_RF3_pending_20261004",
+        "joinCondition": "root_full_diff_review_and_original_exact_source_results_no_skipped_gates",
+        "id": "TASK-NODE-EPOCH-COORDINATOR",
+        "owner": "root",
+        "model": "gpt-6",
+        "effort": "high",
+        "fileOwnership": [
+          "src/KeyLoad.Server/Features/StorageRecovery/ServerNode*",
+          "src/KeyLoad.Server/Features/StorageRecovery/NodeFormatUpgrade*",
+          "src/KeyLoad.Server/Features/StorageRecovery/ServerOfflineFormatUpgrade.cs",
+          "src/KeyLoad.Server/Features/ClientApi/ServerConfiguration.cs",
+          "src/KeyLoad.Storage.ZoneTree/ZoneTreeFormatUpgrade.cs",
+          "tests/KeyLoad.CrashHost/Features/StorageRecovery/EpochPriorSourceProbe.cs",
+          "tests/KeyLoad.CrashHost/Features/StorageRecovery/EpochUpgradeFixture.cs",
+          "tests/KeyLoad.CrashHost/Program.cs",
+          "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochPriorExecutableFixture.cs",
+          "tests/KeyLoad.CrashHost/Features/StorageRecovery/CrashHostApplication.cs",
+          "src/KeyLoad.Storage.IO/AGENTS.md",
+          "src/KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj",
+          "root_owned_solution_and_project_references"
+        ],
+        "requirementIds": [
+          "REQ-STORAGE-026"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-008",
+          "AC-EPOCH-009",
+          "AC-EPOCH-012"
+        ],
+        "dependencies": [
+          "TASK-NODE-EPOCH-IMAGE",
+          "TASK-NODE-EPOCH-REPLICA",
+          "TASK-NODE-EPOCH-REGULAR-FILE"
+        ],
+        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+      },
+      {
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "startCondition": "root_accepted_canonical_contract_after_three_read_only_reviews_and_e97bf30_checkpoint",
+        "permissions": "disjoint_bounded_source_implementation_no_contract_schema_or_limit_changes",
+        "artifacts": [
+          "source",
+          "real_TUnit_oracles",
+          "root_review",
+          "original_source_bound_results"
+        ],
+        "verification": [
+          "Release solution build",
+          "formatter",
+          "governance",
+          "Aspire TUnit normal/scalar",
+          "Aspire process recovery",
+          "Linux exact-source Docker/Aspire RF3 via SDK and official MCP"
+        ],
+        "state": "accepted_implementation_not_runtime_qualified",
+        "joinCondition": "root_full_diff_review_and_original_exact_source_results_no_skipped_gates",
+        "id": "TASK-NODE-EPOCH-RF3",
+        "owner": "root",
+        "model": "gpt-6",
+        "effort": "high",
+        "fileOwnership": [
+          "src/KeyLoad.AppHost/Features/TestInfrastructure",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpoch*",
+          "tests/KeyLoad.IntegrationTests/ClusterFixture*",
+          ".github/workflows/ci.yml",
+          "scripts/Features/TestInfrastructure"
+        ],
+        "requirementIds": [
+          "REQ-STORAGE-027"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-010",
+          "AC-EPOCH-011"
+        ],
+        "dependencies": [
+          "TASK-NODE-EPOCH-COORDINATOR",
+          "TASK-NODE-EPOCH-ORACLES"
+        ]
+      },
+      {
+        "id": "TASK-SERIES-RF3-ORACLE-JOIN",
+        "owner": "root",
+        "model": "gpt-6",
+        "effort": "high",
+        "permissions": "existing_contract_test_oracle_corrections_only",
+        "requirementIds": [
+          "REQ-SERIES-013",
+          "REQ-SERIES-016"
+        ],
+        "acceptanceIds": [
+          "AC-SERIES-013",
+          "AC-SERIES-016"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-073-logged-series-retention.md"
+        ],
+        "backlog": [
+          "KL-026"
+        ],
+        "fileOwnership": [
+          "tests/KeyLoad.IntegrationTests/Features/TimeSeries/SampleRetentionRf3Tests.cs",
+          "tests/KeyLoad.IntegrationTests/Features/TimeSeries/SampleRetentionRf3RestartWorkflow.cs"
+        ],
+        "dependencies": [],
+        "startCondition": "root_reviewed_original_37163610260_RF3_report_and_two_read_only_diagnoses",
+        "artifacts": [
+          "typed_problem_denial_assertion",
+          "stable_command_retry_and_explicit_replay",
+          "original_RF3_report"
+        ],
+        "verification": [
+          "Release build",
+          "formatter",
+          "Aspire real Docker RF3 SDK and official MCP"
+        ],
+        "state": "source_reviewed_build_formatter_passed_current_RF3_execution_pending",
+        "joinCondition": "no_bound_increase_no_swallowed_error_no_new_command_id_original_passed_reports",
+        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+      },
+      {
+        "id": "TASK-NODE-EPOCH-REGULAR-FILE",
+        "owner": "query_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "permissions": "new_internal_storage_IO_primitive_and_image_lease_only_root_frozen_OS_ABI_no_packages",
+        "requirementIds": [
+          "REQ-STORAGE-025",
+          "REQ-STORAGE-026"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-012"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "fileOwnership": [
+          "src/KeyLoad.Storage.IO/Features/StorageRecovery/*",
+          "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/ZoneTreeSnapshotUpgradeFileLease.cs"
+        ],
+        "dependencies": [],
+        "startCondition": "root_frozen_AC_EPOCH_012_and_public_OS_ABI_project_policy_before_write_release_20261004",
+        "artifacts": [
+          "shared_primitive",
+          "retained_handle_image_join",
+          "root_review",
+          "source_bound_actual_reports"
+        ],
+        "verification": [
+          "Release solution build",
+          "formatter",
+          "governance",
+          "Aspire TUnit normal/scalar",
+          "Aspire bounded FIFO and prior-source process recovery",
+          "Linux exact-source Docker/Aspire RF3"
+        ],
+        "state": "root_reviewed_full_Aspire_local_normal2908_scalar2908_recovery257_passed_exact_Linux_cold_RF3_pending_20261004",
+        "joinCondition": "all_migration_inputs_guarded_actual_FIFO_no_hang_lock_interop_and_exact_original_preservation",
+        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
       }
     ],
     "qualificationRule": "Neither presence of source nor a local development result closes a full task. Preserve exact-source Linux fault/endurance and publication gates.",
@@ -10798,6 +11186,7 @@
         "exactDeliveredSourceLinuxQualified": false,
         "dockerAspireRf3Qualified": false
       }
-    ]
+    ],
+    "nodeEpochDevelopmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
   }
 }

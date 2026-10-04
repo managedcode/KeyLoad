@@ -12,7 +12,8 @@ internal static class CrashHostApplication
         {
             return;
         }
-        if (await NativeTextCrashScenario.TryRunAsync(args))
+        if (await NodeEpochCrashScenario.TryRunAsync(args) || await NodeEpochRegularFileScenario.TryRunAsync(args)
+            || await NativeTextCrashScenario.TryRunAsync(args))
         {
             return;
         }

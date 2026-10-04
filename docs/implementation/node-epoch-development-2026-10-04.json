@@ -1,0 +1,1300 @@
+{
+  "schemaVersion": 1,
+  "scope": "KL043_whole_node_native5_to6_snapshot_sidecar_offline_component_and_regular_file_development",
+  "capturedAtUtc": "2026-10-04T03:30:29.957Z",
+  "contracts": [
+    "docs/ADR/ADR-077-offline-native-data-epoch.md",
+    "docs/Features/StorageRecovery.md",
+    "docs/Features/TimeSeries.md"
+  ],
+  "backlog": [
+    "KL-043",
+    "KL-026"
+  ],
+  "requirements": [
+    "REQ-STORAGE-025",
+    "REQ-STORAGE-026",
+    "REQ-STORAGE-027",
+    "REQ-SERIES-013",
+    "REQ-SERIES-016"
+  ],
+  "acceptanceIds": [
+    "AC-EPOCH-007",
+    "AC-EPOCH-008",
+    "AC-EPOCH-009",
+    "AC-EPOCH-012"
+  ],
+  "source": {
+    "head": "aa49aa93982866b85a80e771a749d9b968ffc9f2",
+    "workingTree": "root_reviewed_dirty_precommit_source",
+    "inventory": {
+      "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/source-before.json",
+      "bytes": 606427,
+      "sha256": "cc0d314128c9007e271e90c13bec5f326716bff8925c4727babb190511e2b465"
+    },
+    "fileCount": 2886,
+    "sha256": "38d6420d89b7d45d6d5555ef8280fc0959fb249513b5ca61e345362e625b15e0",
+    "unchangedAcrossNormalScalarRecovery": true,
+    "documentationAndThisReceiptAddedAfterExecution": true
+  },
+  "runtime": {
+    "inventory": {
+      "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/runtime-before.json",
+      "bytes": 203824,
+      "sha256": "9ef9c381f8964bcfbdfd5ed2a23a0b662e8267ebc22b65abf417c00bdc1f9d9f"
+    },
+    "roots": [
+      "tests/KeyLoad.UnitTests/bin/Release/net10.0",
+      "tests/KeyLoad.RecoveryTests/bin/Release/net10.0",
+      "tests/KeyLoad.CrashHost/bin/Release/net10.0",
+      "src/KeyLoad.AppHost/bin/Release/net10.0"
+    ],
+    "fileCount": 940,
+    "totalBytes": 330996452,
+    "sha256": "a2a2d67079473e508267441e9d7a8753f55d4337c72ca3000392f76aead46fd6",
+    "unchangedAcrossNormalScalarRecovery": true
+  },
+  "benchmarkRelease": {
+    "inventory": {
+      "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/benchmark-release-before.json",
+      "bytes": 22424,
+      "sha256": "d4b573d39976942c54e1b7db2a4939c7eba897c00cf04f22f3848a7d85b15d32"
+    },
+    "fileCount": 129,
+    "sha256": "9eed279070bb234d43e124545924ffaa19f2310150a5913482e18a981c040630",
+    "measurementsExecutedForThisStage": false
+  },
+  "preserved": {
+    "currentDataEpoch": 6,
+    "priorDataEpoch": 5,
+    "journalVersion": 4,
+    "currentCheckpointVersion": 4,
+    "priorCheckpointVersion": 3,
+    "replicaLogVersion": 2,
+    "rawUserContent": true,
+    "permanentNativeAliasesAndIds": true,
+    "canonicalIdentityAndWalAuthority": true,
+    "nodeLocalZoneTreeOwnership": true,
+    "replicationAndRecoveryJournals": true,
+    "persistedAuthorization": true
+  },
+  "checks": {
+    "fullReleaseBuild": {
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "projects": 27,
+      "log": {
+        "path": "/private/tmp/keyload-node-epoch-full-build17.log",
+        "bytes": 3544,
+        "sha256": "0a6a33ad5ac1f9e1b10191a256194e8d26ca06f15f31bbc58981a797bef3c0c2"
+      },
+      "sealedOriginal": {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/full-build17.log",
+        "bytes": 3544,
+        "sha256": "0a6a33ad5ac1f9e1b10191a256194e8d26ca06f15f31bbc58981a797bef3c0c2"
+      }
+    },
+    "fullFormatter": {
+      "exitCode": 0,
+      "log": {
+        "path": "/private/tmp/keyload-node-epoch-format5.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "sealedOriginal": {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/format5.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "aspireUnit": {
+      "path": "TestResults/owner-wave-001/node-epoch-full-unit1/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "bytes": 8640567,
+      "sha256": "7bb0d2e358f79df37a1b19c02e9594974d09da25ffa6d53e54725da628acc30e",
+      "sealedOriginal": {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/full-unit1.tunit-report.json",
+        "bytes": 8640567,
+        "sha256": "7bb0d2e358f79df37a1b19c02e9594974d09da25ffa6d53e54725da628acc30e"
+      },
+      "summary": {
+        "total": 2908,
+        "passed": 2908,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 231598.825,
+      "operatingSystem": "macOS 27.0.1",
+      "runtimeVersion": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0",
+      "identitiesSha256": "d616fb914a6496bacf03bf7bc0a4ad799e74725a914e23f87f72e171defeb50e"
+    },
+    "aspireScalar": {
+      "path": "TestResults/owner-wave-001/node-epoch-full-scalar1/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "bytes": 8639570,
+      "sha256": "ddf938ffe5b095ac0dd18e66a6f6e87e0cd0db99bf2e23c506c0800229244723",
+      "sealedOriginal": {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/full-scalar1.tunit-report.json",
+        "bytes": 8639570,
+        "sha256": "ddf938ffe5b095ac0dd18e66a6f6e87e0cd0db99bf2e23c506c0800229244723"
+      },
+      "summary": {
+        "total": 2908,
+        "passed": 2908,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 255901.357,
+      "operatingSystem": "macOS 27.0.1",
+      "runtimeVersion": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0",
+      "identitiesSha256": "d616fb914a6496bacf03bf7bc0a4ad799e74725a914e23f87f72e171defeb50e",
+      "suite": "unit-scalar",
+      "runnerEnvironment": {
+        "DOTNET_EnableHWIntrinsic": "0"
+      }
+    },
+    "sameUnitIdentities": true,
+    "aspireRecovery": {
+      "path": "TestResults/owner-wave-001/node-epoch-full-recovery1/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+      "bytes": 742386,
+      "sha256": "164c0a9db8fa80cad31de5b66cbcbb074018bb616fee2e4df8c8f6530c891d5d",
+      "sealedOriginal": {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/full-recovery1.tunit-report.json",
+        "bytes": 742386,
+        "sha256": "164c0a9db8fa80cad31de5b66cbcbb074018bb616fee2e4df8c8f6530c891d5d"
+      },
+      "summary": {
+        "total": 257,
+        "passed": 257,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 178676.123,
+      "operatingSystem": "macOS 27.0.1",
+      "runtimeVersion": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0",
+      "identitiesSha256": "b6327bcfa290ae6498b32393f39f7e18a992e3c7beedb36f30c6f44d0270d47f"
+    },
+    "focused": [
+      {
+        "path": "TestResults/owner-wave-001/node-epoch-focused-unit2/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 14557,
+        "sha256": "b3570dcb3645687ade6548b6eb702b3f82783c1f02e97b3080ec756d953a70f7",
+        "sealedOriginal": {
+          "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/node-epoch-focused-unit2.tunit-report.json",
+          "bytes": 14557,
+          "sha256": "b3570dcb3645687ade6548b6eb702b3f82783c1f02e97b3080ec756d953a70f7"
+        },
+        "summary": {
+          "total": 4,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "totalDurationMs": 304.81,
+        "operatingSystem": "macOS 27.0.1",
+        "runtimeVersion": ".NET 10.0.12",
+        "tunitVersion": "1.72.10.0",
+        "identitiesSha256": "9e516a37046d3104f6881c1d142fa8146170e82f88e2dba0971dac213e6b4e1a"
+      },
+      {
+        "path": "TestResults/owner-wave-001/node-epoch-replica-focused-unit2/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 32684,
+        "sha256": "3e243f389e3bc92348ad5454f3aea9ebb317416b4f3c274e24e9839ce1daa580",
+        "sealedOriginal": {
+          "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/node-epoch-replica-focused-unit2.tunit-report.json",
+          "bytes": 32684,
+          "sha256": "3e243f389e3bc92348ad5454f3aea9ebb317416b4f3c274e24e9839ce1daa580"
+        },
+        "summary": {
+          "total": 9,
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "totalDurationMs": 805.071,
+        "operatingSystem": "macOS 27.0.1",
+        "runtimeVersion": ".NET 10.0.12",
+        "tunitVersion": "1.72.10.0",
+        "identitiesSha256": "5b59cbfc2abfe8072579ebce646a632762c1f5aac654a3a5da8f94acd426bb53"
+      },
+      {
+        "path": "TestResults/owner-wave-001/node-epoch-focused-recovery3/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+        "bytes": 92290,
+        "sha256": "d263c7b5e28864e8dd37eb0757de1f541fa6a1d4effc91f97f50e7919fdff778",
+        "sealedOriginal": {
+          "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/node-epoch-focused-recovery3.tunit-report.json",
+          "bytes": 92290,
+          "sha256": "d263c7b5e28864e8dd37eb0757de1f541fa6a1d4effc91f97f50e7919fdff778"
+        },
+        "summary": {
+          "total": 29,
+          "passed": 29,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "totalDurationMs": 15512.698,
+        "operatingSystem": "macOS 27.0.1",
+        "runtimeVersion": ".NET 10.0.12",
+        "tunitVersion": "1.72.10.0",
+        "identitiesSha256": "8fb45f3b433191e75aaf2fcb2f7ff84dac9867555e25a49e1d7e92c238629cb5"
+      }
+    ],
+    "governance": {
+      "exitCode": 0,
+      "staticOnly": true,
+      "log": {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/governance-final.log",
+        "bytes": 126,
+        "sha256": "9f2e6fce971c91fe39e70cbd3474beb57e8c04429f2016ec731ecc1f4592bce0"
+      }
+    }
+  },
+  "mappedCases": {
+    "replica": [
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochReplicaUnknownInventoryTests.1.1.AcEpoch008UnknownSnapshotEntryFailsClosedAndPreservesEvidence.1.1.0",
+        "className": "NodeEpochReplicaUnknownInventoryTests",
+        "methodName": "AcEpoch008UnknownSnapshotEntryFailsClosedAndPreservesEvidence",
+        "displayName": "AcEpoch008UnknownSnapshotEntryFailsClosedAndPreservesEvidence",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochReplicaEmptySnapshotTests.1.1.AcEpoch008EmptyReplicaConversionCreatesNoMetadataCommit.1.1.0",
+        "className": "NodeEpochReplicaEmptySnapshotTests",
+        "methodName": "AcEpoch008EmptyReplicaConversionCreatesNoMetadataCommit",
+        "displayName": "AcEpoch008EmptyReplicaConversionCreatesNoMetadataCommit",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochReplicaUnownedOutputTests.1.1.AcEpoch008FailedConverterDoesNotDeleteUnownedDestinationFile.1.1.0",
+        "className": "NodeEpochReplicaUnownedOutputTests",
+        "methodName": "AcEpoch008FailedConverterDoesNotDeleteUnownedDestinationFile",
+        "displayName": "AcEpoch008FailedConverterDoesNotDeleteUnownedDestinationFile",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochReplicaMissingStateTests.1.1.AcEpoch008MissingHardStateIsRejectedWithoutInitialization.1.1.0",
+        "className": "NodeEpochReplicaMissingStateTests",
+        "methodName": "AcEpoch008MissingHardStateIsRejectedWithoutInitialization",
+        "displayName": "AcEpoch008MissingHardStateIsRejectedWithoutInitialization",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochReplicaPendingTransferTests.1.1.AcEpoch008PreflightRefusesPendingTransferWithoutChangingAuthorityOrFiles.1.1.0",
+        "className": "NodeEpochReplicaPendingTransferTests",
+        "methodName": "AcEpoch008PreflightRefusesPendingTransferWithoutChangingAuthorityOrFiles",
+        "displayName": "AcEpoch008PreflightRefusesPendingTransferWithoutChangingAuthorityOrFiles",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochReplicaPathSafetyTests.1.1.AcEpoch008SnapshotSourceAndDestinationAliasIsRejectedBeforeStoreAccess.1.1.0",
+        "className": "NodeEpochReplicaPathSafetyTests",
+        "methodName": "AcEpoch008SnapshotSourceAndDestinationAliasIsRejectedBeforeStoreAccess",
+        "displayName": "AcEpoch008SnapshotSourceAndDestinationAliasIsRejectedBeforeStoreAccess",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochReplicaPathSafetyTests.1.1.AcEpoch008LinkedSnapshotSourceIsRejectedWithoutFollowingIt.1.1.0",
+        "className": "NodeEpochReplicaPathSafetyTests",
+        "methodName": "AcEpoch008LinkedSnapshotSourceIsRejectedWithoutFollowingIt",
+        "displayName": "AcEpoch008LinkedSnapshotSourceIsRejectedWithoutFollowingIt",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochReplicaSnapshotConversionTests.1.1.AcEpoch008RewritesCurrentSnapshotDescriptorAndPreservesOpaqueSourceInventory.1.1.0",
+        "className": "NodeEpochReplicaSnapshotConversionTests",
+        "methodName": "AcEpoch008RewritesCurrentSnapshotDescriptorAndPreservesOpaqueSourceInventory",
+        "displayName": "AcEpoch008RewritesCurrentSnapshotDescriptorAndPreservesOpaqueSourceInventory",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochReplicaBindingTests.1.1.AcEpoch008ChangedSourceIdentityRejectsPlanBeforeCreatingDestination.1.1.0",
+        "className": "NodeEpochReplicaBindingTests",
+        "methodName": "AcEpoch008ChangedSourceIdentityRejectsPlanBeforeCreatingDestination",
+        "displayName": "AcEpoch008ChangedSourceIdentityRejectsPlanBeforeCreatingDestination",
+        "status": "passed"
+      }
+    ],
+    "regularFile": [
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileEntryTypeTests.1.1.AcEpoch012RejectsDirectorySymlinkSocketAndDeviceWithoutChangingTargets.1.1.0",
+        "className": "OfflineRegularFileEntryTypeTests",
+        "methodName": "AcEpoch012RejectsDirectorySymlinkSocketAndDeviceWithoutChangingTargets",
+        "displayName": "AcEpoch012RejectsDirectorySymlinkSocketAndDeviceWithoutChangingTargets",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileLockTests.1.1.AcEpoch012InteropWithBclFileShareLocksInBothDirections.1.1.0",
+        "className": "OfflineRegularFileLockTests",
+        "methodName": "AcEpoch012InteropWithBclFileShareLocksInBothDirections",
+        "displayName": "AcEpoch012InteropWithBclFileShareLocksInBothDirections",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileIdentityTests.1.1.AcEpoch012RejectsARegularPathReplacedAfterInspection.1.1.0",
+        "className": "OfflineRegularFileIdentityTests",
+        "methodName": "AcEpoch012RejectsARegularPathReplacedAfterInspection",
+        "displayName": "AcEpoch012RejectsARegularPathReplacedAfterInspection",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileIdentityTests.1.1.AcEpoch012ReadsOnlyTheInspectedRegularFile.1.1.0",
+        "className": "OfflineRegularFileIdentityTests",
+        "methodName": "AcEpoch012ReadsOnlyTheInspectedRegularFile",
+        "displayName": "AcEpoch012ReadsOnlyTheInspectedRegularFile",
+        "status": "passed"
+      }
+    ],
+    "nodeRecovery": [
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochRegularFileReplacementTests.1.1.AcEpoch012InspectedRegularFileReplacedByFifoIsRejectedWithoutReadingEitherPath.1.1.0",
+        "className": "NodeEpochRegularFileReplacementTests",
+        "methodName": "AcEpoch012InspectedRegularFileReplacedByFifoIsRejectedWithoutReadingEitherPath",
+        "displayName": "AcEpoch012InspectedRegularFileReplacedByFifoIsRejectedWithoutReadingEitherPath",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorRejectionTests.1.1.AcEpoch010RejectsCorruptProgressReceiptAndPreservesOwnedStage.1.1.0",
+        "className": "NodeEpochCoordinatorRejectionTests",
+        "methodName": "AcEpoch010RejectsCorruptProgressReceiptAndPreservesOwnedStage",
+        "displayName": "AcEpoch010RejectsCorruptProgressReceiptAndPreservesOwnedStage",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorRejectionTests.1.1.AcEpoch010RejectsCorruptOwnerReceiptAndPreservesOwnedStage.1.1.0",
+        "className": "NodeEpochCoordinatorRejectionTests",
+        "methodName": "AcEpoch010RejectsCorruptOwnerReceiptAndPreservesOwnedStage",
+        "displayName": "AcEpoch010RejectsCorruptOwnerReceiptAndPreservesOwnedStage",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorRejectionTests.1.1.AcEpoch010RefusesAnAlreadyOwnedOriginalNodeLockWithoutMutation.1.1.0",
+        "className": "NodeEpochCoordinatorRejectionTests",
+        "methodName": "AcEpoch010RefusesAnAlreadyOwnedOriginalNodeLockWithoutMutation",
+        "displayName": "AcEpoch010RefusesAnAlreadyOwnedOriginalNodeLockWithoutMutation",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorRejectionTests.1.1.AcEpoch010RejectsForeignNestedStageFileAndPreservesBothInventories.1.1.0",
+        "className": "NodeEpochCoordinatorRejectionTests",
+        "methodName": "AcEpoch010RejectsForeignNestedStageFileAndPreservesBothInventories",
+        "displayName": "AcEpoch010RejectsForeignNestedStageFileAndPreservesBothInventories",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorRejectionTests.1.1.AcEpoch010RejectsUnrelatedDestinationAndPreservesBothInventories.1.1.0",
+        "className": "NodeEpochCoordinatorRejectionTests",
+        "methodName": "AcEpoch010RejectsUnrelatedDestinationAndPreservesBothInventories",
+        "displayName": "AcEpoch010RejectsUnrelatedDestinationAndPreservesBothInventories",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorAcceptanceTests.1.1.AcEpoch008PreparesThenPublishesEveryHistoricalImageAndPreservesLaterWritesOnRetry.1.1.0",
+        "className": "NodeEpochCoordinatorAcceptanceTests",
+        "methodName": "AcEpoch008PreparesThenPublishesEveryHistoricalImageAndPreservesLaterWritesOnRetry",
+        "displayName": "AcEpoch008PreparesThenPublishesEveryHistoricalImageAndPreservesLaterWritesOnRetry",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorAcceptanceTests.1.1.AcEpoch008RejectsIncomingSnapshotEvidenceBeforeAnyTargetPublication.1.1.0",
+        "className": "NodeEpochCoordinatorAcceptanceTests",
+        "methodName": "AcEpoch008RejectsIncomingSnapshotEvidenceBeforeAnyTargetPublication",
+        "displayName": "AcEpoch008RejectsIncomingSnapshotEvidenceBeforeAnyTargetPublication",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorAcceptanceTests.1.1.AcEpoch009CorruptPreparedReceiptIsPreservedAndCannotBePublished.1.1.0",
+        "className": "NodeEpochCoordinatorAcceptanceTests",
+        "methodName": "AcEpoch009CorruptPreparedReceiptIsPreservedAndCannotBePublished",
+        "displayName": "AcEpoch009CorruptPreparedReceiptIsPreservedAndCannotBePublished",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorAcceptanceTests.1.1.AcEpoch008PreservesUnknownSourceArtifactsAndRefusesPublication.1.1.0",
+        "className": "NodeEpochCoordinatorAcceptanceTests",
+        "methodName": "AcEpoch008PreservesUnknownSourceArtifactsAndRefusesPublication",
+        "displayName": "AcEpoch008PreservesUnknownSourceArtifactsAndRefusesPublication",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochPublishedProgressTests.1.1.AcEpoch009RejectsMissingPublishedProgressWithoutMutatingEitherNode.1.1.0",
+        "className": "NodeEpochPublishedProgressTests",
+        "methodName": "AcEpoch009RejectsMissingPublishedProgressWithoutMutatingEitherNode",
+        "displayName": "AcEpoch009RejectsMissingPublishedProgressWithoutMutatingEitherNode",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochPublishedProgressTests.1.1.AcEpoch009RejectsCorruptPublishedProgressWithoutMutatingEitherNode.1.1.0",
+        "className": "NodeEpochPublishedProgressTests",
+        "methodName": "AcEpoch009RejectsCorruptPublishedProgressWithoutMutatingEitherNode",
+        "displayName": "AcEpoch009RejectsCorruptPublishedProgressWithoutMutatingEitherNode",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochRegularFileFifoTests.1.1.AcEpoch012RejectsFifoAtOldSnapshotSourceWithoutSourceMutation.1.1.0",
+        "className": "NodeEpochRegularFileFifoTests",
+        "methodName": "AcEpoch012RejectsFifoAtOldSnapshotSourceWithoutSourceMutation",
+        "displayName": "AcEpoch012RejectsFifoAtOldSnapshotSourceWithoutSourceMutation",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochRegularFileFifoTests.1.1.AcEpoch012RejectsFifoAtRequiredNodeOwnerLockWithoutSourceMutation.1.1.0",
+        "className": "NodeEpochRegularFileFifoTests",
+        "methodName": "AcEpoch012RejectsFifoAtRequiredNodeOwnerLockWithoutSourceMutation",
+        "displayName": "AcEpoch012RejectsFifoAtRequiredNodeOwnerLockWithoutSourceMutation",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochRegularFileFifoTests.1.1.AcEpoch012RejectsFifoInOrdinaryNodeInventoryWithoutSourceMutation.1.1.0",
+        "className": "NodeEpochRegularFileFifoTests",
+        "methodName": "AcEpoch012RejectsFifoInOrdinaryNodeInventoryWithoutSourceMutation",
+        "displayName": "AcEpoch012RejectsFifoInOrdinaryNodeInventoryWithoutSourceMutation",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochSourceLayoutRejectionTests.1.1.AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal(System.String).2.1.0",
+        "className": "NodeEpochSourceLayoutRejectionTests",
+        "methodName": "AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal",
+        "displayName": "AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal(replica)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochSourceLayoutRejectionTests.1.1.AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal(System.String).1.1.0",
+        "className": "NodeEpochSourceLayoutRejectionTests",
+        "methodName": "AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal",
+        "displayName": "AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal(database)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochImageSourceAcceptanceTests.1.1.AcEpoch007ActualPriorCheckpoint3ImageVerifiesWithoutChangingItsSource.1.1.0",
+        "className": "NodeEpochImageSourceAcceptanceTests",
+        "methodName": "AcEpoch007ActualPriorCheckpoint3ImageVerifiesWithoutChangingItsSource",
+        "displayName": "AcEpoch007ActualPriorCheckpoint3ImageVerifiesWithoutChangingItsSource",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochPathValidationTests.1.1.AcEpoch011RejectsSameNestedAndCaseVariedSourceTargetsBeforeMutation.1.1.0",
+        "className": "NodeEpochPathValidationTests",
+        "methodName": "AcEpoch011RejectsSameNestedAndCaseVariedSourceTargetsBeforeMutation",
+        "displayName": "AcEpoch011RejectsSameNestedAndCaseVariedSourceTargetsBeforeMutation",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochPathValidationTests.1.1.AcEpoch011RejectsSourceNestedUnderCurrentStageBeforeMutation.1.1.0",
+        "className": "NodeEpochPathValidationTests",
+        "methodName": "AcEpoch011RejectsSourceNestedUnderCurrentStageBeforeMutation",
+        "displayName": "AcEpoch011RejectsSourceNestedUnderCurrentStageBeforeMutation",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochImageRejectionTests.1.1.AcEpoch007EnforcesConfiguredImageByteBoundBeforeCreatingOutput.1.1.0",
+        "className": "NodeEpochImageRejectionTests",
+        "methodName": "AcEpoch007EnforcesConfiguredImageByteBoundBeforeCreatingOutput",
+        "displayName": "AcEpoch007EnforcesConfiguredImageByteBoundBeforeCreatingOutput",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochImageRejectionTests.1.1.AcEpoch007RequiresMatchingIncarnationBeforeConvertingImage.1.1.0",
+        "className": "NodeEpochImageRejectionTests",
+        "methodName": "AcEpoch007RequiresMatchingIncarnationBeforeConvertingImage",
+        "displayName": "AcEpoch007RequiresMatchingIncarnationBeforeConvertingImage",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochImageRejectionTests.1.1.AcEpoch007RejectsCorruptAndTrailingImagesWithoutOutputOrMutation.1.1.0",
+        "className": "NodeEpochImageRejectionTests",
+        "methodName": "AcEpoch007RejectsCorruptAndTrailingImagesWithoutOutputOrMutation",
+        "displayName": "AcEpoch007RejectsCorruptAndTrailingImagesWithoutOutputOrMutation",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).1.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(SourceVerified)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).2.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(StoresConverted)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).3.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(ImagesConverted)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).4.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(DescriptorFlushed)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).5.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(TargetVerified)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).6.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(Published)",
+        "status": "passed"
+      }
+    ],
+    "actualNodeProcessKills": [
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).1.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(SourceVerified)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).2.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(StoresConverted)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).3.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(ImagesConverted)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).4.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(DescriptorFlushed)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).5.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(TargetVerified)",
+        "status": "passed"
+      },
+      {
+        "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).6.1.0",
+        "className": "NodeEpochProcessRecoveryTests",
+        "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+        "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(Published)",
+        "status": "passed"
+      }
+    ]
+  },
+  "crashTrials": {
+    "count": 1000,
+    "uniqueSeedTrialPairs": true,
+    "atomicCuts": true,
+    "maximumActiveTrials": 4,
+    "stages": {
+      "MutationApplied": 206,
+      "JournalFlushed": 163,
+      "HeaderWritten": 214,
+      "ApplyCompleted": 214,
+      "PayloadWritten": 203
+    },
+    "originals": [
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-00.jsonl",
+        "bytes": 9245,
+        "sha256": "3f4101e79755346d0d4c074da538c28c4c07ab4fc3ca1547598c1fdf63c5a294"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-01.jsonl",
+        "bytes": 9240,
+        "sha256": "e8242a0b478cd9ff98fe49dcf9c46fd7fedbf496f21211399dddf9a47e2b445f"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-02.jsonl",
+        "bytes": 9244,
+        "sha256": "e4014c9a408eb67999efc75f275cb23c7edb28e44170dd4aae657c32814ed9fc"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-03.jsonl",
+        "bytes": 9236,
+        "sha256": "bb031ea5ee3b5e5e04564db8d9a785982b4756d5acb74ff3b0d54721961b7f38"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-04.jsonl",
+        "bytes": 9239,
+        "sha256": "a98189382a12620949f3fd208081be8da20a7135cf143b208c0f3d03f1ed34b1"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-05.jsonl",
+        "bytes": 9243,
+        "sha256": "4a4f2c4ab803d7ce1cae28dbf75551e3f9b66a0db931498cf4256abb882c4b67"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-06.jsonl",
+        "bytes": 9248,
+        "sha256": "ec1f03626d4d902280d07d957625f4f4d571996617cd0bd83c826fda8c56adfa"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-07.jsonl",
+        "bytes": 9236,
+        "sha256": "804c44b0d1f73e65cf3c4f96da4dc8827c3934bc139b2d7331a22ae59b2d9c11"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-08.jsonl",
+        "bytes": 9239,
+        "sha256": "e57a5ab144ff374248da9d927254a7901ef1097eeec0ee29a2e43f0b22e06fcc"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-09.jsonl",
+        "bytes": 9234,
+        "sha256": "3ed8240aab7135b4e35caf9b57912a574827946ed02b1b7dd3c1d50c614ab473"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-10.jsonl",
+        "bytes": 9239,
+        "sha256": "5cb878a2aee5e8b9d2ac52639bef9f1f2370df7f16d65c50c0e098e0710d84df"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-11.jsonl",
+        "bytes": 9238,
+        "sha256": "bfee7a838f1312690cd595630586c68b75d0d951a40686bed265bb2c346f38dd"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-12.jsonl",
+        "bytes": 9249,
+        "sha256": "165c26c3a0f3afe89c18a9dbdf9a034672d4109daad9f97c7080e34859f8a774"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-13.jsonl",
+        "bytes": 9234,
+        "sha256": "8373037f910ee8a7140a0151b57b081a66b8ce496ae54e47869ae3e407eedb96"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-14.jsonl",
+        "bytes": 9239,
+        "sha256": "39debd2b7b0ed16f3f45a1a32b2358628775830a34bd5bfd2c929e1c3c1c5836"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-15.jsonl",
+        "bytes": 9244,
+        "sha256": "efdfe9ff1bfd7ae0d86799fecd6158b6b159bcab5d2b2d4f881816839b861d82"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-16.jsonl",
+        "bytes": 9243,
+        "sha256": "f0ab763668960254f91c6dbb4208ee86c476e75e733206e0a22c559aca6b4c6e"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-17.jsonl",
+        "bytes": 9231,
+        "sha256": "487eeb46e92248a41288f82e1947d7e2980320990e378adc92b9a8e40909436a"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-18.jsonl",
+        "bytes": 9240,
+        "sha256": "0087b47c79766ef2bb4517995e62b732eb9756c45371df9d40ea009fcee219cf"
+      },
+      {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/crash-trials-19.jsonl",
+        "bytes": 9231,
+        "sha256": "2528faf3223637c86c141c07d3339643d26623908e32e9b590d774aa3236906f"
+      }
+    ]
+  },
+  "priorExecutable": {
+    "receipt": {
+      "path": "artifacts/native5-probe/native5-probe.json",
+      "bytes": 13517,
+      "sha256": "4966a2aaef9db54860097fc701e85d6e4a569f33dc88a25c8c9e9839a7402ef9"
+    },
+    "sealedOriginal": {
+      "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/native5-probe.json",
+      "bytes": 13517,
+      "sha256": "4966a2aaef9db54860097fc701e85d6e4a569f33dc88a25c8c9e9839a7402ef9"
+    },
+    "sourceRevision": "7784b6b46b98ce994dd98070dc1f58fe4e506b91",
+    "sourceTree": "b03bf1301a03b3fe00f419c3c7bf5285a34b63f9",
+    "originalArchiveSha256": "e0072dfab6e265ccc4ca4b5717aa5a978903330a36287c58c8e91a604b0bf2c5",
+    "runtimeFiles": 75,
+    "driverSources": [
+      {
+        "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/EpochPriorSourceProbe.cs",
+        "bytes": 6494,
+        "sha256": "1b7b3fbfc7b7370e813bd7357c1ac2612955885e7cdee7c6ac720c974bb6e4d5"
+      },
+      {
+        "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/EpochUpgradeFixture.cs",
+        "bytes": 4448,
+        "sha256": "72bcadd2060b97262af2e24a2265e22e348c5166b272a1419139cdc4f33f8b2e"
+      }
+    ],
+    "runtimeAndDriversVerifiedAfterFullRecovery": true,
+    "zeroOverlayServerImage": false,
+    "githubQualifiedForThisStage": false
+  },
+  "regularFileIO": {
+    "project": "src/KeyLoad.Storage.IO",
+    "newPackageReferences": false,
+    "publicOsApis": [
+      "Linux libc statx/open/flock",
+      "macOS libc lstat/fstat/open/flock"
+    ],
+    "offlineAbiContract": "little_endian_Linux_or_macOS_x64_or_arm64_fail_closed_elsewhere",
+    "retainedSafeHandle": true,
+    "reopenOriginalAfterInspection": false,
+    "nonblockingNoFollow": true,
+    "symbolicLinkSocketDeviceFifoRejected": true,
+    "bclLockInteropVerifiedOnDevelopmentMachine": true,
+    "LinuxRuntimeQualified": false
+  },
+  "dependencies": {
+    "restoredProjects": 27,
+    "exactPackageVersions": 222,
+    "addedPackageVersions": [],
+    "removedPackageVersions": [],
+    "priorPackageArtifactInventory": "docs/implementation/dependency-closure-2026-10-04.json",
+    "currentResolvedGraphs": {
+      "path": "/private/tmp/keyload-node-epoch-assets-inventory-20261004.json",
+      "bytes": 17274,
+      "sha256": "168e9792fdc3a81027fed004798314020beb718ea2f69d8037380dfddcab2501",
+      "sealedOriginal": {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/restored-project-assets.json",
+        "bytes": 17274,
+        "sha256": "168e9792fdc3a81027fed004798314020beb718ea2f69d8037380dfddcab2501"
+      }
+    },
+    "newProjectDirectPackageReferences": 0,
+    "exactDeliveredSourceLinuxCleanRestoreQualified": false
+  },
+  "earlierAttempts": {
+    "retainedFailures": [
+      {
+        "path": "TestResults/owner-wave-001/node-epoch-focused-unit1/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 22068,
+        "sha256": "5155689ce523beeddad4f0b82082d9cd0cc6e2d4cc905e1155913db99b4a550e",
+        "sealedOriginal": {
+          "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/node-epoch-focused-unit1-failed.tunit-report.json",
+          "bytes": 22068,
+          "sha256": "5155689ce523beeddad4f0b82082d9cd0cc6e2d4cc905e1155913db99b4a550e"
+        },
+        "summary": {
+          "total": 4,
+          "passed": 3,
+          "failed": 1,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "totalDurationMs": 136.778,
+        "operatingSystem": "macOS 27.0.1",
+        "runtimeVersion": ".NET 10.0.12",
+        "tunitVersion": "1.72.10.0",
+        "identitiesSha256": "9e516a37046d3104f6881c1d142fa8146170e82f88e2dba0971dac213e6b4e1a",
+        "reason": "socket_fixture_closed_the_socket_before_type_inspection_and_the_runtime_unlinked_its_path",
+        "failures": [
+          {
+            "id": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileEntryTypeTests.1.1.AcEpoch012RejectsDirectorySymlinkSocketAndDeviceWithoutChangingTargets.1.1.0",
+            "className": "OfflineRegularFileEntryTypeTests",
+            "methodName": "AcEpoch012RejectsDirectorySymlinkSocketAndDeviceWithoutChangingTargets",
+            "displayName": "AcEpoch012RejectsDirectorySymlinkSocketAndDeviceWithoutChangingTargets",
+            "status": "error"
+          }
+        ]
+      },
+      {
+        "path": "TestResults/owner-wave-001/node-epoch-replica-focused-unit1/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 38544,
+        "sha256": "5c28ca4f273a138fcce90c48aee153366ea40a3bfd803a7c2658de00ac152575",
+        "sealedOriginal": {
+          "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/node-epoch-replica-focused-unit1-failed.tunit-report.json",
+          "bytes": 38544,
+          "sha256": "5c28ca4f273a138fcce90c48aee153366ea40a3bfd803a7c2658de00ac152575"
+        },
+        "summary": {
+          "total": 9,
+          "passed": 8,
+          "failed": 1,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "totalDurationMs": 696.81,
+        "operatingSystem": "macOS 27.0.1",
+        "runtimeVersion": ".NET 10.0.12",
+        "tunitVersion": "1.72.10.0",
+        "identitiesSha256": "5b59cbfc2abfe8072579ebce646a632762c1f5aac654a3a5da8f94acd426bb53",
+        "reason": "fixture_requested_trimmed_index_instead_of_seeding_and_reading_actual_retained_suffix",
+        "failures": [
+          {
+            "id": "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochReplicaSnapshotConversionTests.1.1.AcEpoch008RewritesCurrentSnapshotDescriptorAndPreservesOpaqueSourceInventory.1.1.0",
+            "className": "NodeEpochReplicaSnapshotConversionTests",
+            "methodName": "AcEpoch008RewritesCurrentSnapshotDescriptorAndPreservesOpaqueSourceInventory",
+            "displayName": "AcEpoch008RewritesCurrentSnapshotDescriptorAndPreservesOpaqueSourceInventory",
+            "status": "error"
+          }
+        ]
+      },
+      {
+        "path": "TestResults/owner-wave-001/node-epoch-focused-recovery1/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+        "bytes": 372160,
+        "sha256": "d5fa27de17b1c69f86ff7490ea5d7a92e61b80bd52bc9b544fbbd7f942a6782c",
+        "sealedOriginal": {
+          "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/node-epoch-focused-recovery1-failed.tunit-report.json",
+          "bytes": 372160,
+          "sha256": "d5fa27de17b1c69f86ff7490ea5d7a92e61b80bd52bc9b544fbbd7f942a6782c"
+        },
+        "summary": {
+          "total": 29,
+          "passed": 5,
+          "failed": 24,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "totalDurationMs": 50430.378,
+        "operatingSystem": "macOS 27.0.1",
+        "runtimeVersion": ".NET 10.0.12",
+        "tunitVersion": "1.72.10.0",
+        "identitiesSha256": "8fb45f3b433191e75aaf2fcb2f7ff84dac9867555e25a49e1d7e92c238629cb5",
+        "reason": "node_teardown_used_single_store_owner_path_and_readiness",
+        "failures": [
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochPublishedProgressTests.1.1.AcEpoch009RejectsMissingPublishedProgressWithoutMutatingEitherNode.1.1.0",
+            "className": "NodeEpochPublishedProgressTests",
+            "methodName": "AcEpoch009RejectsMissingPublishedProgressWithoutMutatingEitherNode",
+            "displayName": "AcEpoch009RejectsMissingPublishedProgressWithoutMutatingEitherNode",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochPublishedProgressTests.1.1.AcEpoch009RejectsCorruptPublishedProgressWithoutMutatingEitherNode.1.1.0",
+            "className": "NodeEpochPublishedProgressTests",
+            "methodName": "AcEpoch009RejectsCorruptPublishedProgressWithoutMutatingEitherNode",
+            "displayName": "AcEpoch009RejectsCorruptPublishedProgressWithoutMutatingEitherNode",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorRejectionTests.1.1.AcEpoch010RejectsCorruptProgressReceiptAndPreservesOwnedStage.1.1.0",
+            "className": "NodeEpochCoordinatorRejectionTests",
+            "methodName": "AcEpoch010RejectsCorruptProgressReceiptAndPreservesOwnedStage",
+            "displayName": "AcEpoch010RejectsCorruptProgressReceiptAndPreservesOwnedStage",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorRejectionTests.1.1.AcEpoch010RejectsUnrelatedDestinationAndPreservesBothInventories.1.1.0",
+            "className": "NodeEpochCoordinatorRejectionTests",
+            "methodName": "AcEpoch010RejectsUnrelatedDestinationAndPreservesBothInventories",
+            "displayName": "AcEpoch010RejectsUnrelatedDestinationAndPreservesBothInventories",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorRejectionTests.1.1.AcEpoch010RejectsCorruptOwnerReceiptAndPreservesOwnedStage.1.1.0",
+            "className": "NodeEpochCoordinatorRejectionTests",
+            "methodName": "AcEpoch010RejectsCorruptOwnerReceiptAndPreservesOwnedStage",
+            "displayName": "AcEpoch010RejectsCorruptOwnerReceiptAndPreservesOwnedStage",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorRejectionTests.1.1.AcEpoch010RejectsForeignNestedStageFileAndPreservesBothInventories.1.1.0",
+            "className": "NodeEpochCoordinatorRejectionTests",
+            "methodName": "AcEpoch010RejectsForeignNestedStageFileAndPreservesBothInventories",
+            "displayName": "AcEpoch010RejectsForeignNestedStageFileAndPreservesBothInventories",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorRejectionTests.1.1.AcEpoch010RefusesAnAlreadyOwnedOriginalNodeLockWithoutMutation.1.1.0",
+            "className": "NodeEpochCoordinatorRejectionTests",
+            "methodName": "AcEpoch010RefusesAnAlreadyOwnedOriginalNodeLockWithoutMutation",
+            "displayName": "AcEpoch010RefusesAnAlreadyOwnedOriginalNodeLockWithoutMutation",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochSourceLayoutRejectionTests.1.1.AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal(System.String).2.1.0",
+            "className": "NodeEpochSourceLayoutRejectionTests",
+            "methodName": "AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal",
+            "displayName": "AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal(replica)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochSourceLayoutRejectionTests.1.1.AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal(System.String).1.1.0",
+            "className": "NodeEpochSourceLayoutRejectionTests",
+            "methodName": "AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal",
+            "displayName": "AcEpoch011RejectsUnknownStoreSiblingAndPreservesOriginal(database)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochPathValidationTests.1.1.AcEpoch011RejectsSameNestedAndCaseVariedSourceTargetsBeforeMutation.1.1.0",
+            "className": "NodeEpochPathValidationTests",
+            "methodName": "AcEpoch011RejectsSameNestedAndCaseVariedSourceTargetsBeforeMutation",
+            "displayName": "AcEpoch011RejectsSameNestedAndCaseVariedSourceTargetsBeforeMutation",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochPathValidationTests.1.1.AcEpoch011RejectsSourceNestedUnderCurrentStageBeforeMutation.1.1.0",
+            "className": "NodeEpochPathValidationTests",
+            "methodName": "AcEpoch011RejectsSourceNestedUnderCurrentStageBeforeMutation",
+            "displayName": "AcEpoch011RejectsSourceNestedUnderCurrentStageBeforeMutation",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochRegularFileFifoTests.1.1.AcEpoch012RejectsFifoInOrdinaryNodeInventoryWithoutSourceMutation.1.1.0",
+            "className": "NodeEpochRegularFileFifoTests",
+            "methodName": "AcEpoch012RejectsFifoInOrdinaryNodeInventoryWithoutSourceMutation",
+            "displayName": "AcEpoch012RejectsFifoInOrdinaryNodeInventoryWithoutSourceMutation",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochRegularFileFifoTests.1.1.AcEpoch012RejectsFifoAtRequiredNodeOwnerLockWithoutSourceMutation.1.1.0",
+            "className": "NodeEpochRegularFileFifoTests",
+            "methodName": "AcEpoch012RejectsFifoAtRequiredNodeOwnerLockWithoutSourceMutation",
+            "displayName": "AcEpoch012RejectsFifoAtRequiredNodeOwnerLockWithoutSourceMutation",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochRegularFileFifoTests.1.1.AcEpoch012RejectsFifoAtOldSnapshotSourceWithoutSourceMutation.1.1.0",
+            "className": "NodeEpochRegularFileFifoTests",
+            "methodName": "AcEpoch012RejectsFifoAtOldSnapshotSourceWithoutSourceMutation",
+            "displayName": "AcEpoch012RejectsFifoAtOldSnapshotSourceWithoutSourceMutation",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorAcceptanceTests.1.1.AcEpoch008PreservesUnknownSourceArtifactsAndRefusesPublication.1.1.0",
+            "className": "NodeEpochCoordinatorAcceptanceTests",
+            "methodName": "AcEpoch008PreservesUnknownSourceArtifactsAndRefusesPublication",
+            "displayName": "AcEpoch008PreservesUnknownSourceArtifactsAndRefusesPublication",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorAcceptanceTests.1.1.AcEpoch008RejectsIncomingSnapshotEvidenceBeforeAnyTargetPublication.1.1.0",
+            "className": "NodeEpochCoordinatorAcceptanceTests",
+            "methodName": "AcEpoch008RejectsIncomingSnapshotEvidenceBeforeAnyTargetPublication",
+            "displayName": "AcEpoch008RejectsIncomingSnapshotEvidenceBeforeAnyTargetPublication",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorAcceptanceTests.1.1.AcEpoch008PreparesThenPublishesEveryHistoricalImageAndPreservesLaterWritesOnRetry.1.1.0",
+            "className": "NodeEpochCoordinatorAcceptanceTests",
+            "methodName": "AcEpoch008PreparesThenPublishesEveryHistoricalImageAndPreservesLaterWritesOnRetry",
+            "displayName": "AcEpoch008PreparesThenPublishesEveryHistoricalImageAndPreservesLaterWritesOnRetry",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochCoordinatorAcceptanceTests.1.1.AcEpoch009CorruptPreparedReceiptIsPreservedAndCannotBePublished.1.1.0",
+            "className": "NodeEpochCoordinatorAcceptanceTests",
+            "methodName": "AcEpoch009CorruptPreparedReceiptIsPreservedAndCannotBePublished",
+            "displayName": "AcEpoch009CorruptPreparedReceiptIsPreservedAndCannotBePublished",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).2.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(StoresConverted)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).4.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(DescriptorFlushed)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).6.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(Published)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).3.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(ImagesConverted)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).5.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(TargetVerified)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).1.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(SourceVerified)",
+            "status": "error"
+          }
+        ]
+      },
+      {
+        "path": "TestResults/owner-wave-001/node-epoch-focused-recovery2/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+        "bytes": 150942,
+        "sha256": "52d7931e818f743f1bc84aec258bd8f8855ff8a15d194997af919a321b5bbefa",
+        "sealedOriginal": {
+          "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/node-epoch-focused-recovery2-failed.tunit-report.json",
+          "bytes": 150942,
+          "sha256": "52d7931e818f743f1bc84aec258bd8f8855ff8a15d194997af919a321b5bbefa"
+        },
+        "summary": {
+          "total": 29,
+          "passed": 23,
+          "failed": 6,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "totalDurationMs": 20968.414,
+        "operatingSystem": "macOS 27.0.1",
+        "runtimeVersion": ".NET 10.0.12",
+        "tunitVersion": "1.72.10.0",
+        "identitiesSha256": "8fb45f3b433191e75aaf2fcb2f7ff84dac9867555e25a49e1d7e92c238629cb5",
+        "reason": "old_ordinary_engine_inspection_mutated_original_tree_metadata_before_verify_prepared",
+        "failures": [
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).1.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(SourceVerified)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).2.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(StoresConverted)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).3.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(ImagesConverted)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).4.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(DescriptorFlushed)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).5.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(TargetVerified)",
+            "status": "error"
+          },
+          {
+            "id": "KeyLoad.RecoveryTests.Features.StorageRecovery.NodeEpochProcessRecoveryTests.1.1.AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(KeyLoad.Server.NodeFormatUpgradeStage).6.1.0",
+            "className": "NodeEpochProcessRecoveryTests",
+            "methodName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode",
+            "displayName": "AcEpoch009ActualNodeStageKillPreservesOriginalAndRetryPublishesCompleteNode(Published)",
+            "status": "error"
+          }
+        ]
+      }
+    ],
+    "allCorrectedCasesRerunInFullSuites": true
+  },
+  "earlierDeliveredSource": {
+    "sourceSha": "e97bf30af7ecff5aff467385832ed89a70fe6ee7",
+    "runId": "37168813668",
+    "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668",
+    "overallConclusion": "failure",
+    "newNodeStagePresent": false,
+    "LinuxOriginalReports": [
+      {
+        "path": "artifacts/qualification/e97-gh-37168813668-linux-originals-20261004/TestResults/analyzers/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+        "bytes": 354825,
+        "sha256": "e33dda224d4ff98805b31c0d5487008eda7f56b6067ffcabbbd61864677c2ee1",
+        "sealedOriginal": {
+          "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/e97-analyzers.tunit-report.json",
+          "bytes": 354825,
+          "sha256": "e33dda224d4ff98805b31c0d5487008eda7f56b6067ffcabbbd61864677c2ee1"
+        },
+        "summary": {
+          "total": 118,
+          "passed": 118,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "totalDurationMs": 98897.348,
+        "operatingSystem": "Ubuntu 24.04.5 LTS",
+        "runtimeVersion": ".NET 10.0.12",
+        "tunitVersion": "1.72.10.0",
+        "identitiesSha256": "910a0446240939d84077b2ade1002ddadfdc1f1510b858dab8e380cdb61093c8"
+      },
+      {
+        "path": "artifacts/qualification/e97-gh-37168813668-linux-originals-20261004/TestResults/unit/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+        "bytes": 8807110,
+        "sha256": "5a569200be2a5eddeffb074cb73182c12b10b549055e9b7eac7017dfbc0fee9e",
+        "sealedOriginal": {
+          "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/e97-unit.tunit-report.json",
+          "bytes": 8807110,
+          "sha256": "5a569200be2a5eddeffb074cb73182c12b10b549055e9b7eac7017dfbc0fee9e"
+        },
+        "summary": {
+          "total": 2889,
+          "passed": 2889,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "totalDurationMs": 371953.7136,
+        "operatingSystem": "Ubuntu 24.04.5 LTS",
+        "runtimeVersion": ".NET 10.0.12",
+        "tunitVersion": "1.72.10.0",
+        "identitiesSha256": "939538a1ac00e124874d43b4e7e611fd2d438e48fbbc296fd23df02e25dc12f0"
+      },
+      {
+        "path": "artifacts/qualification/e97-gh-37168813668-linux-originals-20261004/TestResults/unit-scalar/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+        "bytes": 8807875,
+        "sha256": "5819600b997ed203fc916f4498e7a0cd7e106a1567f5062ff1eff18d57385b47",
+        "sealedOriginal": {
+          "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/e97-unit-scalar.tunit-report.json",
+          "bytes": 8807875,
+          "sha256": "5819600b997ed203fc916f4498e7a0cd7e106a1567f5062ff1eff18d57385b47"
+        },
+        "summary": {
+          "total": 2889,
+          "passed": 2889,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "totalDurationMs": 375846.4683,
+        "operatingSystem": "Ubuntu 24.04.5 LTS",
+        "runtimeVersion": ".NET 10.0.12",
+        "tunitVersion": "1.72.10.0",
+        "identitiesSha256": "939538a1ac00e124874d43b4e7e611fd2d438e48fbbc296fd23df02e25dc12f0"
+      },
+      {
+        "path": "artifacts/qualification/e97-gh-37168813668-linux-originals-20261004/TestResults/recovery/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+        "bytes": 669142,
+        "sha256": "f3632537ed8a0a41ef9043598db4a776d1c14692078fbbd60169610a1df3adb9",
+        "sealedOriginal": {
+          "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/e97-recovery.tunit-report.json",
+          "bytes": 669142,
+          "sha256": "f3632537ed8a0a41ef9043598db4a776d1c14692078fbbd60169610a1df3adb9"
+        },
+        "summary": {
+          "total": 228,
+          "passed": 228,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "totalDurationMs": 295328.0468,
+        "operatingSystem": "Ubuntu 24.04.5 LTS",
+        "runtimeVersion": ".NET 10.0.12",
+        "tunitVersion": "1.72.10.0",
+        "identitiesSha256": "20314afeeac5ae9c509b154296b0df3678db86c671cedb63943a99206b7186bf"
+      }
+    ],
+    "rf3": {
+      "path": "artifacts/qualification/e97-gh-37168813668-rf3-originals-20261004/TestResults/rf3/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "bytes": 1575040,
+      "sha256": "8c0c860a16ec01f3a0ddaa25e7403e6c58c4ff7054075928ba568872c99edac9",
+      "sealedOriginal": {
+        "path": "artifacts/qualification/node-epoch-stage-development-20261004-0246/e97-rf3-failed.tunit-report.json",
+        "bytes": 1575040,
+        "sha256": "8c0c860a16ec01f3a0ddaa25e7403e6c58c4ff7054075928ba568872c99edac9"
+      },
+      "summary": {
+        "total": 84,
+        "passed": 83,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 295911.8799,
+      "operatingSystem": "Ubuntu 24.04.5 LTS",
+      "runtimeVersion": ".NET 10.0.12",
+      "tunitVersion": "1.72.10.0",
+      "identitiesSha256": "d6e578c911e8c210c534cf57cd8831a5b235184c0af34f298b73bc04d38b76a3",
+      "failures": [
+        {
+          "id": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleRetentionRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.SeriesReadCannotAdvanceRetentionButCanReadItsPersistedProgress.1.1.0",
+          "className": "SampleRetentionRf3Tests(ClusterFixture)",
+          "methodName": "SeriesReadCannotAdvanceRetentionButCanReadItsPersistedProgress",
+          "displayName": "SeriesReadCannotAdvanceRetentionButCanReadItsPersistedProgress",
+          "status": "error"
+        }
+      ],
+      "reason": "SampleRetention typed ErrorCode assertion indexed missing Problem.Extensions code"
+    },
+    "currentSourceRepairs": [
+      "read typed Problem.ErrorCode",
+      "same stable command identity bounded UnknownWriteOutcome retry and explicit replay"
+    ],
+    "qualificationTransferredToNewSource": false
+  },
+  "qualification": {
+    "localDevelopmentOnly": true,
+    "sourceImplemented": true,
+    "exactDeliveredSourceLinuxQualified": false,
+    "DockerAspireRf3Qualified": false,
+    "genuinePriorToCurrentColdRf3Qualified": false,
+    "AC_EPOCH_010": false,
+    "AC_EPOCH_011": false,
+    "fullBacklogTasksClosed": false,
+    "performanceAccelerationQualified": false,
+    "enduranceQualified": false,
+    "powerLossQualified": false,
+    "coverageQualified": false
+  },
+  "remaining": [
+    "actual homogeneous native5 Docker RF3 prior source image with independent original provenance",
+    "stopped all-three prepare/verify barrier then current Docker RF3 through SDK and official MCP",
+    "exact delivered source Linux full build formatter analyzer normal scalar recovery RF3 original artifacts",
+    "actual Linux regular-file ABI FIFO socket device lock-interoperability qualification",
+    "independent endurance power-loss coverage and performance gates"
+  ]
+}

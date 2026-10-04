@@ -6,6 +6,7 @@
     <Project Path="src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <Project Path="src/KeyLoad.Core/KeyLoad.Core.csproj" />
     <Project Path="src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
+    <Project Path="src/KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj" />
     <Project Path="src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <Project Path="src/KeyLoad.Query/KeyLoad.Query.csproj" />
     <Project Path="src/KeyLoad.Security/KeyLoad.Security.csproj" />

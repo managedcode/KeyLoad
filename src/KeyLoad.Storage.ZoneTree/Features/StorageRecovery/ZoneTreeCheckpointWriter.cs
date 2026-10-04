@@ -5,6 +5,38 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeCheckpointWriter
 {
+    internal static StorageSnapshot WriteMutations(FileStream output, ZoneTreeStoreOptions options,
+        StorageSnapshot snapshot, Action<Action<StorageMutation>> visit)
+    {
+        ArgumentNullException.ThrowIfNull(output);
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(visit);
+        if (snapshot.Incarnation == Guid.Empty || snapshot.Position < 0 || snapshot.AppliedPosition < 0
+            || snapshot.RecordCount < 0)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointCutInvalid);
+        }
+
+        var metadata = new ZoneTreeCheckpointMetadata(ZoneTreePersistenceFormat.CheckpointVersion,
+            KeyCodec.Version, snapshot.Incarnation, snapshot.Position, snapshot.AppliedPosition);
+        using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        WriteFrame(output, options, ZoneTreePersistenceFormat.CheckpointMagic, metadata.Position,
+            NativeSerialization.Serialize(metadata), digest);
+        var records = WriteMutations(output, options, metadata.Position, visit, digest);
+        if (records != snapshot.RecordCount)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointVerificationFailed);
+        }
+
+        var footer = new ZoneTreeCheckpointFooter(records, Convert.ToHexStringLower(digest.GetHashAndReset()));
+        WriteFrame(output, options, ZoneTreePersistenceFormat.CheckpointEndMagic, metadata.Position,
+            NativeSerialization.Serialize(footer), null);
+        options.FaultObserver?.Invoke(CommitStage.SnapshotWritten, metadata.Position, 0);
+        output.Flush(true);
+        options.FaultObserver?.Invoke(CommitStage.SnapshotFlushed, metadata.Position, 0);
+        return snapshot;
+    }
+
     internal static StorageSnapshot Write(
         string path,
         ZoneTreeStoreOptions options,
@@ -68,6 +100,40 @@ internal static class ZoneTreeCheckpointWriter
                 }
             }
         }
+
+        if (batch.Count != 0)
+        {
+            WriteBatch(output, options, position, batch, digest);
+        }
+
+        return records;
+    }
+
+    private static long WriteMutations(FileStream output, ZoneTreeStoreOptions options, long position,
+        Action<Action<StorageMutation>> visit, IncrementalHash digest)
+    {
+        var batch = new List<StorageMutation>();
+        long batchBytes = 0;
+        long records = 0;
+        visit(mutation =>
+        {
+            if (mutation is null || mutation.Key.IsEmpty || mutation.Value is not { } value)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid);
+            }
+
+            var copy = new StorageMutation(mutation.Key.ToArray(), value.ToArray());
+            batch.Add(copy);
+            batchBytes = checked(batchBytes + copy.Key.Length + copy.Value!.Value.Length);
+            records = checked(records + 1);
+            if (batchBytes >= ZoneTreePersistenceFormat.CheckpointBatchBytes
+                || batch.Count >= ZoneTreePersistenceFormat.CheckpointBatchRecords)
+            {
+                WriteBatch(output, options, position, batch, digest);
+                batch.Clear();
+                batchBytes = 0;
+            }
+        });
 
         if (batch.Count != 0)
         {

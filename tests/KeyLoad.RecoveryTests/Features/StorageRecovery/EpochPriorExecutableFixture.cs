@@ -20,6 +20,17 @@ internal static class EpochPriorExecutableFixture
         return receipt;
     }
 
+    internal static async Task<EpochPriorProbeReceipt> CreateNodeAsync(string directory, EpochPriorNodeProfile profile,
+        CancellationToken cancellationToken)
+    {
+        var receipt = await InvokeAsync(new(directory, EpochPriorSourceProbe.CreateNodeOperation,
+            NodeProfile: profile), cancellationToken);
+        if (receipt.ErrorCode is not null || receipt.DataEpoch != ExpectedDataEpoch
+            || receipt.NodeId == Guid.Empty || receipt.Incarnation != profile.Incarnation || receipt.AppliedPosition != 3)
+        { throw new InvalidDataException(InvalidReceipt); }
+        return receipt;
+    }
+
     internal static Task<EpochPriorProbeReceipt> InspectAsync(string directory, CancellationToken cancellationToken)
         => InvokeAsync(new(directory, EpochPriorSourceProbe.InspectOperation), cancellationToken);
 

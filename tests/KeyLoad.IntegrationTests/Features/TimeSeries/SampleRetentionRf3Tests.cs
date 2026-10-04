@@ -10,7 +10,6 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 [NotInParallel]
 internal sealed class SampleRetentionRf3Tests(ClusterFixture fixture)
 {
-    private const string ProblemCode = "code";
     [Test]
     public async Task RetentionPagesAndReplayPreserveOneLogicalFloorAcrossSdkAndOfficialMcp()
     {
@@ -60,7 +59,7 @@ internal sealed class SampleRetentionRf3Tests(ClusterFixture fixture)
                 TimeSeriesRf3Scenario.Start.AddMinutes(3), 1)]);
         var denied = await reader.CommitAsync(command, deadline.Token);
         await Assert.That(denied.IsSuccess).IsFalse();
-        await Assert.That(denied.Problem!.Extensions![ProblemCode]?.ToString()).IsEqualTo(ErrorCode.PermissionDenied.ToString());
+        await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
         await McpCallerAssertions.ErrorAsync(
             await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, deadline.Token), ErrorCode.PermissionDenied, true);
         await AssertStatusAsync(reader, mcp, scenario, new(null, 0, false), deadline.Token);

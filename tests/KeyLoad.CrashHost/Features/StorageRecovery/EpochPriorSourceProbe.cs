@@ -10,6 +10,7 @@ internal static class EpochPriorSourceProbe
     internal const string Mode = "epoch5-native-probe";
     internal const string SourceRevision = "7784b6b46b98ce994dd98070dc1f58fe4e506b91";
     internal const string CreateOperation = "create";
+    internal const string CreateNodeOperation = "createNode";
     internal const string InspectOperation = "inspect";
     internal const string VerifySnapshotOperation = "verifySnapshot";
     private const int ExpectedDataEpoch = 5;
@@ -43,7 +44,7 @@ internal static class EpochPriorSourceProbe
             EpochPriorSourceReply reply;
             try
             {
-                reply = Execute(request);
+                reply = await ExecuteAsync(request);
             }
             catch (KeyLoadException failure)
             {
@@ -61,15 +62,20 @@ internal static class EpochPriorSourceProbe
         return true;
     }
 
-    private static EpochPriorSourceReply Execute(EpochPriorSourceRequest request)
+    private static async Task<EpochPriorSourceReply> ExecuteAsync(EpochPriorSourceRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Directory) || !KnownOperation(request.Operation))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidProbe);
         }
-        if (request.Operation == CreateOperation && Directory.Exists(request.Directory))
+        if (request.Operation is CreateOperation or CreateNodeOperation && Directory.Exists(request.Directory))
         {
             throw Errors.Fail(ErrorCode.Conflict, InvalidProbe);
+        }
+        if (request.Operation == CreateNodeOperation)
+        {
+            return await EpochUpgradeFixture.CreateNodeAsync(request.Directory,
+                request.NodeProfile ?? throw Errors.Fail(ErrorCode.Validation, InvalidProbe));
         }
         if (request.Operation == VerifySnapshotOperation)
         {
@@ -100,11 +106,11 @@ internal static class EpochPriorSourceProbe
     }
 
     private static bool KnownOperation(string operation)
-        => operation is CreateOperation or InspectOperation or VerifySnapshotOperation;
+        => operation is CreateOperation or CreateNodeOperation or InspectOperation or VerifySnapshotOperation;
 }
 
 internal sealed record EpochPriorSourceRequest(string Directory, string Operation, bool Compacted = false,
-    string? Snapshot = null);
+    string? Snapshot = null, EpochPriorNodeProfile? NodeProfile = null);
 
 internal sealed record EpochPriorSourceReply(string SourceRevision, int DataEpoch, long Position,
     long AppliedPosition, Guid NodeId, Guid Incarnation, long ReadGeneration, bool DispatchPaused,

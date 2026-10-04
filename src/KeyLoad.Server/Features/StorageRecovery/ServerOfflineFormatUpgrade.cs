@@ -6,9 +6,11 @@ namespace KeyLoad.Server;
 internal static class ServerOfflineFormatUpgrade
 {
     private const string Command = "upgrade-native-store";
+    private const string PrepareNode = "prepare-native-node";
+    private const string PublishNode = "publish-native-node";
     private const string SourceOption = "--source=";
     private const string DestinationOption = "--destination=";
-    private const string Usage = "Use upgrade-native-store --source=<stopped-store> --destination=<new-store>.";
+    private const string Usage = "Use upgrade-native-store, prepare-native-node or publish-native-node with --source=<stopped-source> --destination=<new-target>.";
     private const string Complete = "Native store upgrade completed. Verify every RF3 store before starting compatible voters.";
     private const int ArgumentCount = 3;
     private const int MaximumPathCharacters = 4096;
@@ -16,14 +18,26 @@ internal static class ServerOfflineFormatUpgrade
     internal static async Task<bool> TryRunAsync(string[] args)
     {
         ArgumentNullException.ThrowIfNull(args);
-        if (args.Length == 0 || !string.Equals(args[0], Command, StringComparison.Ordinal))
+        if (args.Length == 0 || args[0] is not (Command or PrepareNode or PublishNode))
         {
             return false;
         }
 
         var paths = Parse(args);
-        _ = ZoneTreeFormatUpgrade.Upgrade(paths.Source, new(paths.Destination));
-        await Console.Out.WriteLineAsync(Complete).ConfigureAwait(false);
+        if (args[0] == Command)
+        {
+            _ = ZoneTreeFormatUpgrade.Upgrade(paths.Source, new(paths.Destination));
+            await Console.Out.WriteLineAsync(Complete).ConfigureAwait(false);
+        }
+        else
+        {
+            var options = ServerConfiguration.ReadOfflineNode(paths.Destination);
+            _ = args[0] == PrepareNode ? ServerNodeFormatUpgrade.Prepare(paths.Source, options)
+                : ServerNodeFormatUpgrade.Publish(paths.Source, options);
+            await Console.Out.WriteLineAsync(args[0] == PrepareNode
+                ? "Node prepared. Prepare and verify every stopped RF3 node before publishing any node."
+                : "Node published. Verify all three current nodes before starting compatible voters.").ConfigureAwait(false);
+        }
         return true;
     }
 

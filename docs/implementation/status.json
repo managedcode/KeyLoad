@@ -642,9 +642,19 @@
       },
       "receipt": "docs/implementation/keycodec-crud-development-2026-10-04.json",
       "remaining": [
-        "exact_delivered_source_Linux_full_gates",
-        "actual_Docker_Aspire_RF3_SDK_and_official_MCP_complete_qualification"
-      ]
+        "complete_exact_source_Linux_Docker_Aspire_RF3_gate"
+      ],
+      "earlierDeliveredSource": {
+        "sha": "e97bf30af7ecff5aff467385832ed89a70fe6ee7",
+        "runId": "37168813668",
+        "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668",
+        "linuxBuildUnitScalarRecoveryPassed": true,
+        "rf3Passed": 83,
+        "rf3Total": 84,
+        "overallConclusion": "failure",
+        "newNodeStageQualified": false,
+        "originalReportsReceipt": "docs/implementation/node-epoch-development-2026-10-04.json"
+      }
     }
   },
   "KL-008": {
@@ -686,9 +696,20 @@
       },
       "receipt": "docs/implementation/keycodec-crud-development-2026-10-04.json",
       "remaining": [
-        "exact_delivered_source_Linux_full_gates",
-        "actual_Docker_Aspire_RF3_SDK_and_official_MCP_complete_qualification"
-      ]
+        "complete_exact_source_Linux_Docker_Aspire_RF3_gate",
+        "successful_Patch_Delete_and_stale_explicit_replacement_through_both_real_RF3_clients"
+      ],
+      "earlierDeliveredSource": {
+        "sha": "e97bf30af7ecff5aff467385832ed89a70fe6ee7",
+        "runId": "37168813668",
+        "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668",
+        "linuxBuildUnitScalarRecoveryPassed": true,
+        "rf3Passed": 83,
+        "rf3Total": 84,
+        "overallConclusion": "failure",
+        "newNodeStageQualified": false,
+        "originalReportsReceipt": "docs/implementation/node-epoch-development-2026-10-04.json"
+      }
     }
   },
   "KL-011": {
@@ -1177,17 +1198,30 @@
       "scripts/Features/StorageRecovery/build-native5-probe.sh",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochUpgradeProcessRecoveryTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/EpochPriorAcceptanceTests.cs",
-      "docs/implementation/native-async-search-development-2026-10-03.json"
+      "docs/implementation/native-async-search-development-2026-10-03.json",
+      "src/KeyLoad.Server/Features/StorageRecovery/ServerNodeFormatUpgrade.cs",
+      "src/KeyLoad.Replication/Features/StorageRecovery",
+      "src/KeyLoad.Storage.IO/Features/StorageRecovery",
+      "docs/implementation/node-epoch-development-2026-10-04.json"
     ],
     "decision": "docs/ADR/ADR-077-offline-native-data-epoch.md",
-    "sourceStage": "reviewed_truthful_7784_prior_binary_binding_all14_epoch_cases_and_full_Aspire_local_recovery228_passed",
+    "sourceStage": "root_reviewed_whole_node_native5_to6_checkpoint_sidecar_and_safe_regular_handle_component",
     "runtimeQualified": false,
     "remaining": [
       "homogeneous_Docker_Aspire_RF3_cold_upgrade_fixture_and_SDK_official_MCP_qualification",
       "complete_exact_delivered_source_Linux_original_qualification"
     ],
-    "developmentEvidence": "docs/implementation/epoch-upgrade-development-2026-10-03.json",
-    "fullSuiteDevelopmentEvidence": "docs/implementation/native-async-search-development-2026-10-03.json"
+    "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json",
+    "fullSuiteDevelopmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json",
+    "localDevelopment": {
+      "normalUnit": 2908,
+      "scalarUnit": 2908,
+      "recovery": 257,
+      "newNodeAndIoCases": 42,
+      "actualNodeStageProcessKills": 6,
+      "uniqueAtomicCrashTrials": 1000,
+      "unchangedSourceAndRuntime": true
+    }
   },
   "KL-044": {
     "title": "Release gate і operational handbook",
