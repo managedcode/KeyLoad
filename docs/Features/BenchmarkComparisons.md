@@ -720,6 +720,8 @@ KeyLoad engine repair and concurrent series-codec work are outside this task.
 
 | REQ-BC-FAIL-020 latest metrics for every website build | AC-BC-FAIL-020 select the highest run-number completed own-main Benchmarks run with success/failure conclusion across push/workflow_dispatch producers; pending, skipped and canceled runs have no finished comparison cohort and are not candidates. Require success/failure producer conclusion, successful aggregate and all original270/277 proofs. Reject missing/corrupt/latest failed aggregation without older fallback. Own-main CI push/manual and workflow_run all use this selection; changed latest tuple before deploy prevents stale refresh | Real producer-selection positive/negative TUnit cases, native CI capture and freshness/provider join |
 
+| REQ-BC-FAIL-021 independent website queue | AC-BC-FAIL-021 own-main CI push/manual uses run-specific workflow concurrency so an unrelated older ordinary CI/RF3 run cannot queue the website consumer. PR retains ref cancellation; website qualify/deploy use distinct job-level serialization with cancel-in-progress=false. All tests, source/latest JSON and freshness gates remain unchanged | WorkflowLayoutCiSourceTests and actual CI job start while older ordinary source tests run |
+
 TASK-FAIL-SEPARATE-001 (root) records policy/requirements/ADR before edits.
 TASK-FAIL-SEPARATE-002 (root) removes site generation and qualify/deploy from
 Benchmarks, adds independent CI own-main push/manual and workflow_run website jobs, and prevents ordinary CI suites

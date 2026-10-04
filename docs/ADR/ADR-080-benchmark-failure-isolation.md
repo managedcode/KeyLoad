@@ -284,3 +284,13 @@ failure producers before selecting highest run number; the actual canceled event
 still cannot authorize publication. Preserve no-fallback rejection after the
 newest eligible producer has a failed/missing/corrupt aggregate. The original
 metadata digest is f8816dacf8a60b68a41b8911185b8c97f2e27cbd816980f1331972b929d19007.
+
+## Independent website execution queue
+
+The delivered ee7 CI push37193589875 queued behind an older ordinary CI scalar/
+recovery run under the legacy main-wide workflow group. REQ/AC-BC-FAIL-021 makes
+push/manual CI groups run-specific, retains PR ref cancellation and workflow_run
+serialization, and adds separate qualification/deployment job groups. Website
+work starts independently while all ordinary suites remain mandatory. Root owns
+this CI policy/YAML/regression join; unchanged source/latest-evidence freshness
+and false cancellation protect publication, without canceling existing tests.

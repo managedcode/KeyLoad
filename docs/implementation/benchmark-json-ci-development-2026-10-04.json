@@ -267,5 +267,46 @@
     "formatPassed": true,
     "nativeCIRecheck": "pending next scoped push",
     "browserExecutedLocally": false
+  },
+  "independentWebsiteQueueFollowup": {
+    "oldQueuedCI": 37193589875,
+    "blockedByOrdinarySourceCI": 37192832065,
+    "workflowGroups": "run-specific push/manual; PR ref cancellation preserved; completed-workflow site channel preserved",
+    "websiteJobGroups": [
+      "keyload-site-qualification",
+      "keyload-site-deployment"
+    ],
+    "cancelInProgress": false,
+    "ordinaryRequiredSuitesAndAllWebsiteGatesPreserved": true,
+    "fullDevelopmentBuild": {
+      "passed": true,
+      "warnings": 0,
+      "errors": 0,
+      "logSha256": "adb249402deef8c2804582accfe5bbc820f54527024c1ee2c8ec7d72deef977e"
+    },
+    "formatPassed": true,
+    "focusedAspireUnitTests": {
+      "counts": {
+        "total": "34",
+        "executed": "34",
+        "passed": "34",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "sha256": "a078f3f0777130176bffe71592a59ce398c4b039e4ff9c32983ac1525fb6e6c6",
+      "githubQualification": false
+    },
+    "deliveredNativeRecheck": "pending scoped push"
   }
 }

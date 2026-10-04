@@ -10,7 +10,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: keyload-ci-${{ github.event_name == 'workflow_run' && 'site' || github.ref }}
+  group: keyload-ci-${{ github.event_name == 'workflow_run' && 'site' || github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   repository-checks:
@@ -205,6 +205,9 @@ jobs:
           if-no-files-found: error
   qualify:
     name: Check website
+    concurrency:
+      group: keyload-site-qualification
+      cancel-in-progress: false
     if: >-
       github.repository == 'managedcode/KeyLoad' && github.event.repository.id == 477801965 &&
       ((github.ref == 'refs/heads/main' &&
@@ -238,6 +241,9 @@ jobs:
         uses: ./control/.github/workflows/Features/BenchmarkComparisons/QualifySite
   deploy:
     name: Publish website
+    concurrency:
+      group: keyload-site-deployment
+      cancel-in-progress: false
     needs: qualify
     if: ${{ always() && !cancelled() && needs.qualify.result == 'success' && needs.qualify.outputs.mode == 'publish' }}
     runs-on: ubuntu-latest

@@ -68,14 +68,19 @@ internal sealed class WorkflowLayoutCiSourceTests
     }
 
     [Test]
-    public async Task AcBcFail018IndependentWebsiteChannelRetainsQualifiedLeastPrivilegePagesDelivery()
+    public async Task AcBcFail018And021IndependentWebsiteQueueRetainsQualifiedLeastPrivilegePagesDelivery()
     {
         var ci = WorkflowLayoutSource.Read(CiFile);
-        await Assert.That(ci.Contains("group: keyload-ci-${{ github.event_name == 'workflow_run' && 'site' || github.ref }}",
+        await Assert.That(ci.Contains("group: keyload-ci-${{ github.event_name == 'workflow_run' && 'site' || github.event_name == 'pull_request' && github.ref || github.run_id }}",
             StringComparison.Ordinal)).IsTrue();
         await Assert.That(ci.Contains("cancel-in-progress: ${{ github.event_name == 'pull_request' }}",
             StringComparison.Ordinal)).IsTrue();
         var deploy = WorkflowLayoutSource.JobBlock(ci, "deploy");
+        var qualify = WorkflowLayoutSource.JobBlock(ci, "qualify");
+        await Assert.That(qualify.Contains("concurrency:\n      group: keyload-site-qualification\n      cancel-in-progress: false",
+            StringComparison.Ordinal)).IsTrue();
+        await Assert.That(deploy.Contains("concurrency:\n      group: keyload-site-deployment\n      cancel-in-progress: false",
+            StringComparison.Ordinal)).IsTrue();
         await Assert.That(deploy.Contains("needs: qualify", StringComparison.Ordinal)).IsTrue();
         await Assert.That(deploy.Contains("always() && !cancelled()", StringComparison.Ordinal)).IsTrue();
         await Assert.That(deploy.Contains("needs.qualify.result == 'success'", StringComparison.Ordinal)).IsTrue();

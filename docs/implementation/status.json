@@ -3814,7 +3814,8 @@
         "REQ-BC-FAIL-017",
         "REQ-BC-FAIL-018",
         "REQ-BC-FAIL-019",
-        "REQ-BC-FAIL-020"
+        "REQ-BC-FAIL-020",
+        "REQ-BC-FAIL-021"
       ],
       "ownerCorrection": "Independent static build action may follow JSON or run through CI; no benchmark Chrome/site tests; every site build uses latest completed authenticated benchmark",
       "implementation": "source_implemented_and_development_verified",
@@ -3866,6 +3867,21 @@
         "developmentBuildWarnings": 0,
         "developmentBuildErrors": 0,
         "nativeCIReverification": "pending_next_scoped_push"
+      },
+      "independentWebsiteQueue": {
+        "ordinaryPushManualGroup": "own_run_id",
+        "pullRequestCancellationPreserved": true,
+        "qualificationGroup": "keyload-site-qualification",
+        "deploymentGroup": "keyload-site-deployment",
+        "websiteCancelInProgress": false,
+        "fullDevelopmentBuildAndFormat": "passed",
+        "focusedAspireRegressions": {
+          "passed": 34,
+          "failed": 0,
+          "skipped": 0,
+          "trxSha256": "a078f3f0777130176bffe71592a59ce398c4b039e4ff9c32983ac1525fb6e6c6"
+        },
+        "nativeReverification": "pending next scoped push"
       }
     }
   }

@@ -459,3 +459,6 @@ A bounded website qualification candidate contains the20-project historical runt
 
 ## Latest completed result eligibility, 2026-10-04
 - Latest benchmark metrics means the newest completed own-main push/manual Benchmarks producer with success/failure conclusion. Pending, skipped and canceled workflows have no completed comparison cohort and MUST NOT displace ready JSON. Exclude them before choosing the latest eligible producer; then reject its missing/corrupt/failed aggregate without older fallback. A canceled workflow_run event still cannot authorize publication. This refines the latest-result rule without accepting incomplete or fabricated measurements.
+
+## Independent website queue, 2026-10-04
+- CI website generation MUST NOT wait for unrelated ordinary CI/RF3 execution from another run. Push/manual CI runs use their own run identity; PR keeps its existing ref-based cancellation. Website qualification and deployment use separate bounded job concurrency groups with cancel-in-progress=false, preserving source/latest-evidence freshness and all gates. This implements the owner-authorized independent website action without canceling database or test work.
