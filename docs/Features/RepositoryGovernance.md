@@ -218,3 +218,16 @@ The existing repository governance validator also rejects C# files directly at
 inventory; negative development evidence temporarily introduces one owned flat C#
 fixture, requires validator failure, removes it and requires success. This enforces
 REQ-MCAF-010 without changing runtime contracts; role meaning still requires code review.
+
+Whole-solution source checkpoint: `ebe6f1a`; import-only cleanup: `594173a`.
+[Development receipt](../implementation/vertical-slice-layout-2026-10-04.json) binds
+structural reference tree `7e5dc117ec315105b4f1bc237653e07e929e8772` to the base
+`37a9da0`, excluding concurrent feature bodies. Complete reference inventory, original
+GraphAndSeries member text and original HEAD query declarations verified; Release
+solution build and formatter passed; AppHost governance regressions passed 37/37.
+The shared checkout build still fails in concurrent Messaging/Search implementation.
+The full unit attempt has no completed result after native DCP watcher timeout and
+controlled shutdown; causality for the long suite is unproven. Readiness fixture
+regressions also passed 10/10 through AppHost, for 47/47 targeted cases. The website
+session hook requires authentic source/archive preparation missing from this local
+reference. Complete Linux runtime/RF3/fault/endurance gates remain pending.

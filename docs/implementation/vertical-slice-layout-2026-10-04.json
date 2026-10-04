@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-04",
+  "feature": "RepositoryGovernance",
+  "requirements": [
+    "REQ-MCAF-010"
+  ],
+  "acceptance": [
+    "AC-MCAF-010"
+  ],
+  "tasks": [
+    "TASK-MCAF-LAYOUT-003",
+    "TASK-MCAF-LAYOUT-004",
+    "TASK-MCAF-LAYOUT-005",
+    "TASK-MCAF-LAYOUT-006"
+  ],
+  "scope": "entire KeyLoad solution",
+  "sourceCheckpoint": "ebe6f1a",
+  "importCleanupCheckpoint": "594173a",
+  "structuralReference": {
+    "baseCommit": "37a9da0",
+    "tree": "7e5dc117ec315105b4f1bc237653e07e929e8772",
+    "scope": "structural migration without concurrent implementation bodies",
+    "inventoryMissing": 0,
+    "inventoryChanged": 0,
+    "trackedSourceMovesAfterOrleansCheckpoint": 2399,
+    "splitSourceFiles": 2,
+    "splitOutputFiles": 20,
+    "originalGraphMemberTextVerified": true,
+    "originalHeadQueryDeclarationTextVerified": true,
+    "flatFeatureCSharpFiles": 0
+  },
+  "developmentVerification": {
+    "os": "macOS",
+    "githubQualified": false,
+    "referenceSolutionReleaseBuild": {
+      "status": "passed",
+      "warnings": 0,
+      "errors": 0
+    },
+    "referenceSolutionFormatter": "passed",
+    "governanceGuard": "passed including temporary negative flat-file fixture",
+    "appHostGovernanceRegressions": {
+      "total": 37,
+      "passed": 37,
+      "failed": 0,
+      "skipped": 0
+    },
+    "fullUnitSuite": {
+      "status": "canceled; complete-suite qualification pending",
+      "reason": "Native DCP Endpoint watch emitted Polly.TimeoutRejectedException after 60 seconds; full unit execution produced no completed report before controlled cancellation. Timeout causality for the long suite is unproven; this is not a failed-test verdict.",
+      "ownedOuterAppHostCleanup": "verified"
+    },
+    "siteSuite": {
+      "status": "blocked in BeforeTestSession hook",
+      "total": 203,
+      "passed": 0,
+      "failed": 203,
+      "reason": "Missing absolute repository/artifact roots, exact GitHub source revision and authenticated archive preparation; no site case bodies executed."
+    },
+    "readinessFixtureRegressions": {
+      "status": "passed through AppHost",
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "sharedCheckoutBuild": {
+      "status": "failed",
+      "errors": 30,
+      "scope": "concurrent Search/Messaging implementation, including recurring schedules and remote transfers; structural reference passes"
+    },
+    "priorRecoveryAttempt": {
+      "scope": "before whole-solution migration",
+      "total": 260,
+      "passed": 259,
+      "failed": 1,
+      "failure": "AcEpoch010RejectsForeignNestedStageFileAndPreservesBothInventories: expected KeyLoadException, observed IOException"
+    },
+    "priorRf3Attempt": {
+      "scope": "before whole-solution migration",
+      "total": 93,
+      "passed": 14,
+      "failed": 79,
+      "reason": "macOS reparse-path rejection and missing authentic GitHub RF3/prior-server image proof"
+    },
+    "linuxGitHubFullUnitRecoveryRf3FaultEnduranceQualification": "pending"
+  },
+  "artifactsDirectory": "artifacts/vertical-slice-layout-2026-10-04",
+  "runtimeBehaviorChangeIntended": false,
+  "historicalSourceReceiptsRewritten": false
+}

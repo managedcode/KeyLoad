@@ -4052,5 +4052,17 @@
         "nativeReverification": "pending next scoped push"
       }
     }
+  },
+  "REPOSITORY-LAYOUT-001": {
+    "title": "Feature-local responsibility structure across the entire solution",
+    "status": "in_progress",
+    "sourceStatus": "complete",
+    "evidence": [
+      "AGENTS.md",
+      "docs/Features/RepositoryGovernance.md",
+      "docs/ADR/ADR-032-mcaf-governance.md",
+      "docs/implementation/vertical-slice-layout-2026-10-04.json"
+    ],
+    "qualificationStatus": "Structural reference build/formatter and 47/47 targeted AppHost regressions pass locally. Complete unit suite remains unqualified after controlled cancellation; website suite lacks authenticated source/archive preconditions; shared checkout build fails in concurrent code; Linux RF3/fault/endurance gates pending."
   }
 }
