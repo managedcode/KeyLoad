@@ -46,7 +46,7 @@ with `TimeProvider.System` and the silo startup cancellation token. Later provid
 calls use independent bounded request deadlines, so cancellation of the startup
 token does not prevent membership shutdown. Membership never owns files and never
 resolves an Orleans client while constructing its provider. Source ownership is
-the new `Features/ClusterRouting/ReplicaMembershipTable.cs` and cohesive helpers;
+the new `Features/ClusterRouting/Topology/ReplicaMembershipTable.cs` and cohesive helpers;
 the lead replaces the old provider and composes the actual silo. The frozen primary
 constructor accepts database, coordinator, replica endpoint, cluster ID, internal
 principal ID, TimeProvider, and startup CancellationToken in that order.

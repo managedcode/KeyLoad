@@ -179,7 +179,7 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | src/KeyLoad.Query | QueryEngine.cs, SqlParser.cs, SearchEngine.cs; Features/ChangeFeeds/LiveQueryExecutor.cs behind LiveQueries.cs facade | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
 | src/KeyLoad.Artifacts | Features/BackupRestore/ArtifactTransfer.cs, BackupArtifact.cs | BackupRestore; verified artifact transport and format ownership. |
 | src/KeyLoad.Replication | Features/ClusterReplication/ClusterCoordinator.cs, DurableReplicaLog.cs, ReplicaMaterializer.cs | ClusterReplication, StorageRecovery; ordered durable apply and quorum authority behind the active Orleans server composition; delivered-SHA RF3 qualification pending. |
-| src/KeyLoad.Orleans | Features/ClusterRouting/RequestGrain.cs, DatabaseReadGrain.cs, CommandPartitionGrain.cs, ReplicaMembershipTable.cs | ClusterRouting; active server composition routes through grains while node-local hosts own storage; forced activation-migration qualification pending. |
+| src/KeyLoad.Orleans | Features/ClusterRouting/Grains/{RequestGrain,DatabaseReadGrain,CommandPartitionGrain}.cs; Topology/ReplicaMembershipTable.cs | ClusterRouting; active server composition routes through grains while node-local hosts own storage; forced activation-migration qualification pending. |
 | src/KeyLoad.Server | Program.cs, NodeOptions.cs, Features/ClientApi/, Features/ClusterRouting/OrleansNode.cs and feature API files | Composition root and public API; caller identity never supplies trusted roles. |
 | src/KeyLoad.Client | KeyLoadClient.cs, KeyLoadQuery.cs | ClientApi shared transport; business operations mirror the same canonical slices as core/contracts/API/tests. |
 | src/KeyLoad.Cli | Program.cs, Hosting/KeyLoadCliApplication.cs, Features/ClientApi/CliClientApi.cs and Features/BackupRestore/CliBackupRestore.cs | Composition-only administrative entry point and typed ClientApi/BackupRestore feature owners. |
@@ -223,6 +223,17 @@ classDiagram
 | tests/KeyLoad.Analyzers.Tests | KeyLoad.Analyzers.Tests.csproj, Features/CodeQuality/ | CodeQuality; real Roslyn/Orleans metadata regressions, TUnit and CI-only execution. |
 
 ## Feature convention and migration
+
+Each vertical slice groups actual responsibilities in populated local role folders;
+`Features/<SliceName>/` is an ownership boundary, not a flat file collection.
+KeyLoad.Orleans now separates routing grains, commands, queries, models, contracts,
+streaming, identity, serialization, diagnostics and topology. Its replication slice
+separates grain services, discovery, transport, authentication, replay and wire models;
+ResourceExecution separates cache-control models, contracts, serialization,
+authentication and validation. AdminDashboard and BlobStorage own query capabilities
+in `Queries/`. The migration preserves namespaces, aliases/Ids and runtime behavior.
+The owner contract and checks are in [RepositoryGovernance](Features/RepositoryGovernance.md)
+and [ADR-032](ADR/ADR-032-mcaf-governance.md).
 
 Canonical slice names use PascalCase consistently: RepositoryGovernance, BenchmarkComparisons, DocumentStorage, RelationalStorage, EventStreams, Messaging, GraphTraversal, TimeSeries, Search, QueryExecution, Authorization, ChangeFeeds, StorageRecovery, ClusterReplication, ClusterRouting, ClientApi, BackupRestore, BlobStorage, ResourceExecution, CodeQuality and TestInfrastructure. Their owning contracts and navigation are in the [Feature index](README.md).
 

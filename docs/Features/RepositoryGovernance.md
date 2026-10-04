@@ -17,6 +17,7 @@ All requirements are mandatory. IDs remain stable when implementation changes.
 | REQ-MCAF-007 | Evidence / P0 | Keep conflicts, migration gaps and CI qualification explicit; publish only GitHub Actions performance JSON. | AC-MCAF-007: no unsupported readiness or benchmark claim is introduced. |
 | REQ-MCAF-008 | Repository hygiene / P0 | Remove temporary planning Markdown files and keep requirements, acceptance and execution contracts in canonical Feature/ADR documents. | AC-MCAF-008: no tracked or checkout `*.plan.md`, `*.brainstorm.md` or `*.acceptance.md`; all three patterns are ignored without exceptions. |
 | REQ-MCAF-009 | Validation / P0 | Repository rules validate durable documents and reject reintroduced working planning files. | AC-MCAF-009: the real Node validator passes without planning files and fails for each suffix at root or nested paths; prefix, ownership and skill checks remain. |
+| REQ-MCAF-010 | Architecture / P0 | Organize each vertical slice by its actual responsibilities instead of placing mixed role files in a flat feature root. The immediate migration covers every KeyLoad.Orleans slice. | AC-MCAF-010: every Orleans feature C# file belongs to a populated role folder; the before/after file-content inventory is identical, namespaces/aliases/Ids remain unchanged, live references resolve and Release compilation includes the moved files. |
 
 ## Slice surfaces
 
@@ -120,3 +121,52 @@ REQ-MCAF-008/009 and AC-MCAF-008/009 supersede only the earlier requirement for 
 Testing methodology: AC-008 uses complete file/Git inventory and real `git check-ignore` checks at root/nested paths for every suffix. AC-009 uses TUnit/Microsoft.Testing.Platform to execute the original Node validator on real filesystem copies of the current repository's required policy/inventory documents, with no planning files (pass) and each suffix at root or nested paths (fail). Existing prefix, project/module, required document and skill rejection checks remain. Static review verifies live links and that only the explicitly authorized file-placement policy changed. Local development checks do not establish RF3, recovery, performance or production qualification.
 
 Local verification, 2026-10-03: removed 59 tracked files and 123 additional checkout files; all three suffixes are ignored at root and nested paths, including the former governance exceptions. The live Node validator passes with 26 projects and four modules. The original nine TUnit cases pass with no failures or skips; their focused Release build has zero warnings/errors and the scoped formatter passes. Reference review preserves existing REQ/AC occurrences and Markdown fences and resolves every new local link. The shared solution build is blocked by concurrent, untracked scaled-storage tests requiring unfinished Fixture/Snapshot types; those files are outside this delivery.
+
+## Feature-local responsibility structure, 2026-10-04
+
+REQ-MCAF-010 / AC-MCAF-010 extend MCAF-ARCH-001 and [ADR-032](../ADR/ADR-032-mcaf-governance.md).
+A feature folder remains the ownership boundary; role folders inside it make grains,
+commands, queries, models and supporting protocols discoverable. Global layer folders,
+empty placeholder folders and namespace/wire-contract changes are outside this migration.
+
+TASK-MCAF-LAYOUT-001: root owns policy, this specification, ADR-032, Architecture and
+all physical moves in `src/KeyLoad.Orleans/Features/`. TASK-MCAF-LAYOUT-002: read-only
+reviewer inventories responsibilities and path-bound consumers, then reviews the final
+map. Shared documentation and source moves have one integration owner because the
+current routing files contain concurrent CQRS changes. Reviewer starts after the root
+policy correction; integration joins only after its exact mapping and concerns are reviewed.
+
+Ordered work: capture exact file contents; group routing, replication and cache metadata
+by actual role; move small read-capability slices into Queries; repair current source
+navigation; compare the complete byte inventory and ensure no flat C# files remain;
+run governance, formatter, solution Release build and relevant AppHost suites. Positive
+flow resolves a grain/query/model through its owning slice and role. Negative flow
+rejects lost, duplicated, flat or changed source files. Edge flow preserves dirty and new
+files byte for byte. Compiler/style failures and unavailable test infrastructure remain
+explicit blockers. No runtime behavior changes are intended, so no new behavior test
+is added: the structural criteria use explicit complete-inventory/manual role review
+plus existing compilation and runtime suites. Local checks do not qualify RF3 or durability.
+
+```mermaid
+flowchart LR
+    Slice[Owning feature] --> Grains[Grains]
+    Slice --> Commands[Commands]
+    Slice --> Queries[Queries]
+    Slice --> Models[Models and contracts]
+    Slice --> Protocols[Streaming and supporting roles]
+    Grains --> Verify[Unchanged source and runtime contracts]
+    Commands --> Verify
+    Queries --> Verify
+    Models --> Verify
+    Protocols --> Verify
+```
+
+Structural development verification, 2026-10-04: moved all108 current Orleans C#
+files (105 tracked files and three concurrent new source files) across all five slices;
+complete SHA-256 inventory and independent role review passed with unchanged source.
+Governance and the full solution formatter passed. Release solution build passed with
+zero warnings/errors (MSBuild servers disabled, single build worker after sandbox IPC
+blocked the initial attempt). RF3 attempt:14/93 passed,79 failed;76 reject macOS
+temporary reparse paths, two require authentic GitHub RF3 image identity and one requires
+genuine prior-server proof. Unit/recovery verification remains pending; no delivered
+Linux GitHub runtime, fault, performance or durability qualification is claimed.

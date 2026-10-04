@@ -80,3 +80,32 @@ flowchart LR
     Links --> Verify[Real Node validator and TUnit checks]
     Verify --> Deliver[Reviewed scoped Git delivery]
 ```
+
+## Owner-directed feature-local role migration, 2026-10-04
+
+Decision: MCAF-ARCH-001 requires populated responsibility folders inside each owning
+feature. A flat collection of unrelated grains, commands, queries, models and helpers
+is not the target structure. Roles stay inside the canonical slice rather than becoming
+global layers. Requirements: REQ-MCAF-010; acceptance: AC-MCAF-010; execution:
+TASK-MCAF-LAYOUT-001/002 in RepositoryGovernance. This stage covers KeyLoad.Orleans.
+
+Implementation contract: root first adds policy and captures exact current source bytes,
+then moves every feature source to its actual role, preserving dirty/untracked work,
+namespaces, API signatures, Orleans aliases/Ids and serialization. Routing owns Grains,
+Commands, Queries, Models, Contracts, Streaming, Identity, Serialization, Diagnostics and
+Topology. Replication owns GrainServices, Discovery, Transport, Authentication, Replay,
+Contracts and Models. ResourceExecution owns Models, Contracts, Serialization,
+Authentication and Validation. Small read-capability slices own Queries. The read-only
+reviewer verifies responsibility assignment and path consumers; root owns all writes,
+reference updates, combined checks and delivery. New API/data/dependencies/topology,
+behavior fixes and other projects' layout migrations are outside this stage.
+
+Rollout is an exact-content physical move with current documentation path repair;
+MSBuild's existing recursive source glob includes the files. Rollback reverses physical
+paths without losing later code edits; it does not revoke the owner's mandatory rule.
+Verification compares every pre/post file byte and complete inventory, checks no flat
+feature C# file remains, reviews live links, and runs governance, formatter, Release
+build and AppHost unit/recovery/RF3 suites. Existing process-recovery and real SDK/MCP
+RF3 contracts remain mandatory. Missing infrastructure or unrelated concurrent compiler
+failures are reported and never relabelled as passing. This migration does not mark the
+ADR's other architecture debt or product qualification complete.

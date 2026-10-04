@@ -2,10 +2,11 @@
 
 ## Purpose and entry points
 - Own the internal immutable cache-control metadata and bounded validation, canonical transcript, authentication and correlation primitives accepted by ADR-058 R82.
-- Unused internal source entry points: CacheControlWire, CacheControlAuthenticator and CacheControlCorrelation; native qualification remains pending. The exact types/aliases/Ids/APIs are in docs/Features/ResourceExecution/CacheControlV1.md.
+- Unused internal source entry points: `Serialization/CacheControlWire.cs`, `Authentication/CacheControlAuthenticator.cs` and `Validation/CacheControlCorrelation.cs`; native qualification remains pending. The exact types/aliases/Ids/APIs are in docs/Features/ResourceExecution/CacheControlV1.md.
 - Read the solution and Orleans project AGENTS.md, docs/Architecture.md, ResourceExecution feature and ADR-058 before changing this slice.
 
 ## Boundaries and ownership
+- Owner correction 2026-10-04 requires populated `Models/`, `Contracts/`, `Serialization/`, `Authentication/` and `Validation/` folders inside this slice. Keep cache-control messages and proofs in Models, marker interfaces/constants in Contracts, byte encoding in Serialization, secret/MAC ownership in Authentication and shape/correlation checks in Validation. Do not recreate flat C# files or change namespaces, aliases/Ids or runtime behavior during moves.
 - Root owns shared generated metadata, enums, marker interfaces, primitives, docs/config and final integration. Workers must stay within explicit disjoint file scopes and escalate ambiguity.
 - R82 adds unused internal primitives only. Keep receiver/coordinator/replay/timers/discovery/server DI/native probes and RF3 cache admission outside this approved stage.
 - Preserve node-local physical store ownership, one-grain-per-data-request, current public authorization/read barriers and every existing database/replica/token/persisted byte contract.
@@ -19,6 +20,7 @@
 - Development source build: dotnet build KeyLoad.slnx --no-restore --configuration Release; formatter: dotnet format KeyLoad.slnx --verify-no-changes --no-restore; governance: node scripts/Features/RepositoryGovernance/verify.mjs.
 - Test execution is GitHub Actions only. Native UnitTests normal/scalar use actual pinned Orleans Serializer/DI and real .NET crypto; required recovery and Docker/Aspire RF3 run through the actual SDK/MCP clients.
 - Do not run local tests, crypto qualifications, benchmarks or test images. A local build, deterministic source vector or contract review does not qualify runtime, coverage, performance or power loss.
+- Owner correction 2026-10-03 explicitly supersedes the historical local-execution prohibition above: local development checks are permitted through `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=<suite>`. AppHost owns execution and cleanup; use unit/unit-scalar/recovery/rf3 as applicable. Exact-source Linux GitHub runtime, coverage, performance and fault qualification remain separate mandatory gates.
 
 ## Skills and protected risks
 - Apply the already owner-authorized Orleans skill at /Users/ksemenenko/.codex/skills/orleans/SKILL.md. Install no other skills/tools or global configuration.
