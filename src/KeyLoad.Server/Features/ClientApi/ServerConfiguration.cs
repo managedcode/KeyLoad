@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using KeyLoad.Core;
 using KeyLoad.Orleans;
@@ -76,7 +77,15 @@ internal static class ServerConfiguration
         services.AddSingleton<INodeAdministration, NodeAdministration>();
         services.AddSingleton<OrleansNode>();
         services.AddSingleton<GrainRequestCodec>();
-        services.AddSingleton(provider => new PeerSecurity(Convert.FromBase64String(options.PeerSecret),
-            provider.GetRequiredService<TimeProvider>(), TimeSpan.FromMilliseconds(options.PeerConnectTimeoutMilliseconds)));
+        services.AddSingleton(provider => CreatePeerSecurity(options, provider.GetRequiredService<TimeProvider>()));
+    }
+
+    private static PeerSecurity CreatePeerSecurity(NodeOptions options, TimeProvider clock)
+    {
+        var credential = Convert.FromBase64String(options.PeerSecret);
+        try
+        { return new(credential, clock, TimeSpan.FromMilliseconds(options.PeerConnectTimeoutMilliseconds)); }
+        finally
+        { CryptographicOperations.ZeroMemory(credential); }
     }
 }

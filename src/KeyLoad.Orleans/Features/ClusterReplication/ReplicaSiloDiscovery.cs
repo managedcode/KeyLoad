@@ -8,13 +8,17 @@ namespace KeyLoad.Orleans;
 /// <param name="Incarnation">The database incarnation served by this silo.</param>
 /// <param name="SiloAddress">The actual Orleans address including runtime generation.</param>
 /// <param name="TransportReady">Whether the local node-owned endpoint has attached this silo transport.</param>
+/// <param name="ApplicationRpcVersion">The transient request interface version; missing fields are incompatible.</param>
+/// <param name="PeerEnvelopeVersion">The authenticated replica envelope version.</param>
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(ReplicaNativeWireContracts.DiscoveryAlias)]
 public sealed record ReplicaSiloDiscovery(
     [property: global::Orleans.Id(0)] string VoterId,
     [property: global::Orleans.Id(1)] string ClusterId,
     [property: global::Orleans.Id(2)] Guid Incarnation,
     [property: global::Orleans.Id(3)] string SiloAddress,
-    [property: global::Orleans.Id(4)] bool TransportReady);
+    [property: global::Orleans.Id(4)] bool TransportReady,
+    [property: global::Orleans.Id(5)] int ApplicationRpcVersion = 0,
+    [property: global::Orleans.Id(6)] int PeerEnvelopeVersion = 0);
 
 /// <summary>Publishes the actual local Orleans runtime generation after early service initialization.</summary>
 /// <param name="configuration">The local voter and current database incarnation.</param>
@@ -32,7 +36,8 @@ public sealed class ReplicaSiloDiscoveryState(ReplicaConfiguration configuration
     /// <summary>Returns a bounded description of the currently initialized silo generation.</summary>
     /// <returns>The local voter, cluster, incarnation, runtime address and readiness state.</returns>
     public ReplicaSiloDiscovery Read() => new(configuration.LocalId, options.ClusterId, configuration.Incarnation,
-        RuntimeAddress, Volatile.Read(ref ready) != 0);
+        RuntimeAddress, Volatile.Read(ref ready) != 0, GrainRoutingProtocol.RequestInterfaceVersion,
+        ReplicaTransportProtocol.Version);
 
     /// <summary>Marks the per-silo replica endpoint available without waiting for a quorum.</summary>
     /// <remarks>The node-local endpoint must already be attached before this state is published.</remarks>

@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.ExceptionServices;
 using KeyLoad.Orleans;
+using ManagedCode.Communication.CQRS;
+using Orleans.Serialization;
 
 namespace KeyLoad.Server;
 
@@ -27,6 +29,27 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
 
     /// <summary>Authenticator for exact discovery response bytes.</summary>
     public ReplicaEnvelopeAuthenticator? Authentication => Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaEnvelopeAuthenticator>();
+
+    /// <summary>True only while authenticated compatible fixed-voter observations establish a fresh cohort.</summary>
+    public bool HasCompatibleCohort => Grains is not null
+        && Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaSiloDiscoveryClient>().HasCompatibleCohort == true;
+
+    /// <summary>Checks all configured voters within the caller's deadline before routing or readiness.</summary>
+    /// <param name="cancellationToken">Bounds the actual discovery attempts and their cleanup.</param>
+    public Task EnsureCompatibleCohortAsync(CancellationToken cancellationToken)
+        => RuntimeServices.GetRequiredService<ReplicaSiloDiscoveryClient>().EnsureCompatibleCohortAsync(cancellationToken);
+
+    /// <summary>Admits and scopes persisted identity with this running silo's native serializers.</summary>
+    /// <param name="principal">The persisted subject, absent only for credential authentication.</param>
+    /// <param name="requestId">The fresh request identity.</param>
+    /// <param name="commandId">The stable command identity, empty for reads.</param>
+    /// <param name="cancellationToken">Cancels validation and actual native encoding.</param>
+    public PersistedPrincipalRequestContextScope OpenRequestContext(PrincipalRecord? principal, Guid requestId, Guid commandId,
+        CancellationToken cancellationToken)
+        => new(RuntimeServices, principal, requestId, commandId, cancellationToken);
+
+    private IServiceProvider RuntimeServices => Grains is not null && Volatile.Read(ref host) is { } running
+        ? running.Services : throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
 
     /// <summary>Starts the native transport before its quorum-backed membership provider initializes.</summary>
     /// <param name="cancellationToken">Application startup cancellation, shared with membership initialization.</param>
@@ -73,13 +96,20 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
         CancellationToken cancellationToken)
     {
         var factory = Grains ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
+        var services = RuntimeServices;
+        var clock = services.GetRequiredService<TimeProvider>();
+        using var deadline = new CancellationTokenSource(GrainRequestStreamProtocol.ExecutionLifetime, clock);
+        using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
+        await EnsureCompatibleCohortAsync(execution.Token).ConfigureAwait(false);
         GrainOperationReply reply;
         try
         {
-            reply = await factory.GetGrain<IRequestGrain>(requestId).ExecuteAsync(signedRequest, cancellationToken)
-                .WaitAsync(cancellationToken).ConfigureAwait(false);
+            reply = await GrainRequestStreamConsumer.DrainAsync(
+                token => factory.GetGrain<IRequestGrain>(requestId).ExecuteStreamAsync(signedRequest, token),
+                services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+                requestId, clock, execution.Token).ConfigureAwait(false);
         }
-        catch (Exception failure) when (OrleansRpcFailure.IsNative(failure))
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
             throw OrleansRpcFailure.Translate(failure, command, requestId, loggerFactory.CreateLogger<OrleansNode>(),
                 cancellationToken);

@@ -34,11 +34,13 @@ internal static class CanonicalOperationGateway
         GrainOperationReply reply;
         try
         {
-            reply = await context.RequestServices.GetRequiredService<OrleansNode>()
-                .ExecuteAsync(requestId, signed, commandKind.HasValue, cancellationToken).ConfigureAwait(false);
+            var node = context.RequestServices.GetRequiredService<OrleansNode>();
+            using var requestContext = node.OpenRequestContext(principal, requestId,
+                commandId, cancellationToken);
+            reply = await node.ExecuteAsync(requestId, signed, commandKind.HasValue, cancellationToken).ConfigureAwait(false);
             outcome = DatabasePhaseOutcome.Completed;
         }
-        catch (OperationCanceledException)
+        catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })
         {
             outcome = DatabasePhaseTelemetry.CancellationOutcome(cancellationToken);
             throw;

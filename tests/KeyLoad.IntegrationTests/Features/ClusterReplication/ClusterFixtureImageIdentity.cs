@@ -31,6 +31,15 @@ internal static class ClusterFixtureImageIdentity
     /// <summary>AC-IMAGE-002/003 checks actual immutable manifest bytes and all three RF3 resources before start.</summary>
     internal static async Task VerifyAsync(DistributedApplication app, CancellationToken cancellationToken)
     {
+        var reference = await ReadVerifiedReferenceAsync(cancellationToken);
+        var digest = reference[(reference.LastIndexOf(ReferenceDigestPrefix, StringComparison.Ordinal)
+            + ReferenceDigestPrefix.Length)..];
+        await VerifyResourcesAsync(app, reference, digest);
+    }
+
+    /// <summary>Verifies the original current manifest and source-bound receipt without creating resources.</summary>
+    internal static async Task<string> ReadVerifiedReferenceAsync(CancellationToken cancellationToken)
+    {
         var path = Path.GetFullPath(Environment.GetEnvironmentVariable(ReceiptEnvironment)
             ?? throw new InvalidOperationException(MissingIdentity));
         var source = Environment.GetEnvironmentVariable(SourceEnvironment)
@@ -48,7 +57,7 @@ internal static class ClusterFixtureImageIdentity
         await Assert.That(image.GetProperty(RevisionProperty).GetString()).IsEqualTo(source);
         var reference = image.GetProperty(ReferenceProperty).GetString()!;
         await Assert.That(reference.EndsWith(ReferenceDigestPrefix + digest[DigestPrefix.Length..], StringComparison.Ordinal)).IsTrue();
-        await VerifyResourcesAsync(app, reference, digest[DigestPrefix.Length..]);
+        return reference;
     }
 
     private static async Task VerifyResourcesAsync(DistributedApplication app, string reference, string digest)

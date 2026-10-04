@@ -1,4 +1,5 @@
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 
 namespace KeyLoad.AppHost.Hosting;
@@ -36,6 +37,7 @@ internal static class KeyLoadAppHostApplication
     internal static void AddKeyLoad(IDistributedApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
+        ProtocolCohortImages.ValidateMode(builder.Configuration);
         if (TestSuiteSettings.Read(builder.Configuration) is { } tests)
         {
             TestSuiteResources.Add(builder, tests);

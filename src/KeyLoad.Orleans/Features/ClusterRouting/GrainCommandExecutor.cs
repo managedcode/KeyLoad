@@ -10,6 +10,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
+            GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
             if (GrainPartitionResolver.Resolve(request) != actorKey)
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
@@ -19,6 +20,8 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
             cancellationToken.ThrowIfCancellationRequested();
             var envelope = request.Envelope;
+            GrainRequestScope.Validate(envelope, database.Store.Identity.Incarnation, clock.GetUtcNow());
+            GrainIdentityContext.Validate(envelope, envelope.RequestId);
             stage = GrainFailureStage.Authorization;
             var principal = GrainRequestAuthority.Reload(database, envelope.PrincipalId!, clock);
             var kind = envelope.CommandKind ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);

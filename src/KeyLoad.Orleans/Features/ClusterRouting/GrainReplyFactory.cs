@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ManagedCode.Communication;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.Orleans;
@@ -26,6 +27,28 @@ internal static class GrainReplyFactory
 
         cancellationToken.ThrowIfCancellationRequested();
         return Value(result.NativeValue, cancellationToken);
+    }
+
+    internal static Result<GrainOperationReply> StreamResult(GrainOperationReply reply)
+    {
+        ArgumentNullException.ThrowIfNull(reply);
+        if (reply.Error is { } code)
+        {
+            if (!reply.Payload.IsEmpty || reply.SafeDetail is not { } detail)
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+            }
+
+            return Result<GrainOperationReply>.Fail(GrainRequestStreamProblem.Create(code, detail));
+        }
+
+        if (reply.Payload.IsEmpty || reply.Payload.Length > GrainRoutingProtocol.MaximumReplyBytes
+            || reply.SafeDetail is not null)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+        }
+
+        return Result<GrainOperationReply>.Succeed(reply);
     }
 
     internal static GrainOperationReply Failure(Exception error, bool command, ILogger? diagnostics,

@@ -7,18 +7,18 @@
 ## Ownership and boundaries
 - Keep host wiring and genuinely shared infrastructure composition here. Feature-specific deployment behavior belongs under `Features/<SliceName>/` and the matching `docs/Features/<SliceName>.md`.
 - Aspire owns resource orchestration, not database storage state or atomic partition identity. Each node-local `PartitionHost` owns storage, journals, file locks and the apply gate; Orleans grains route commands and physical placement remains separate from atomic partition identity.
-- Existing RF3 composition launches host processes and is tracked implementation debt. Do not replace the required Docker/Aspire RF3 topology with an in-memory or single-node demonstration.
+- ClusterResources composes actual Docker RF3 resources. Do not replace the required Docker/Aspire RF3 topology with an in-memory or single-node demonstration. The accepted ADR-082 protocol-cohort test seam preserves fixed three-voter membership and node-local storage ownership.
 
 ## Commands and evidence
 - The canonical Aspire-owned test entry is defined by root AGENTS.md and ADR-074. AppHost defaults to Release because the pinned Aspire CLI evaluates RunCommand without forwarding outer dotnet-run configuration; verify the actual launched path and native TUnit outcomes. Do not bypass CLI/DCP or count stale Debug output as current qualification.
 - GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Integration/RF3 behavior is invoked by `dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore --configuration Release` in `.github/workflows/ci.yml`; execute qualification only in GitHub Actions.
+- Owner correction2026-10-03 requires every test caller, including integration/RF3, to use `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=<suite>`. Native dotnet test is only the owned child process; preserve all suites and original artifacts. Delivered-source qualification remains actual Linux GitHub Actions evidence.
 
 ## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
-- Do not start local AppHost or qualification resources. Preserve secret boundaries, resource health dependencies and the required Orleans RF3 topology.
+- Owner correction2026-10-03 explicitly permits local development through the same Aspire-owned entry. Preserve secret boundaries, resource health dependencies, scoped fault injection, complete resource shutdown and the required Orleans RF3 topology; local results do not qualify delivered-source Linux or public performance gates.
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned composition slices: `ClusterReplication` and `BenchmarkComparisons`; target paths: `Features/ClusterReplication/` and `Features/BenchmarkComparisons/`.
+- Owned composition slices: `ClusterReplication`, `ClusterRouting`, `TestInfrastructure` and `BenchmarkComparisons`; target paths use the same `Features/<SliceName>/` convention. ClusterRouting's protocol image overrides follow NativeCqrsRequestV2 and ADR-082; they are allowed only in an explicitly selected ephemeral fixed-three-voter child test topology, never benchmark or ordinary production composition.
 - Keep `Program.cs` as the shared Aspire composition entry point; put feature-owned resource definitions under their named slice.

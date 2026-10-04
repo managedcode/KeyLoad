@@ -797,7 +797,23 @@
     "evidence": [
       "src/KeyLoad.Orleans/ConsensusMembershipTable.cs",
       "src/KeyLoad.Orleans/CommandRouterGrain.cs"
-    ]
+    ],
+    "nativeRequestCqrs": {
+      "status": "implementation_checkpoint_with_local_unit_pass_RF3_and_exact_source_qualification_pending",
+      "requirements": "docs/Features/ClusterRouting/NativeCqrsRequestV2.md",
+      "decision": "docs/ADR/ADR-082-native-cqrs-streams.md",
+      "dependencyDelivery": "docs/implementation/native-cqrs-fatal-aggregate-delivery-2026-10-04.json",
+      "implemented": "native_ManagedCode_Communication_10_2_9_IAsyncEnumerable_v2_signed_request_scope_IdentityCore_RequestContext_fresh_fixed_voter_protocol_cohort_bounded_stream_and_full_settlement",
+      "localDevelopment": "full_solution_Release19_and_formatter19_pass_C0_6_of6_C1_59_of59_full_unit3060_of3060_scalar18_AppHost134_no_final_test_report_repeat19_running",
+      "pending": [
+        "native_RF3_phase_interruption_and_same_command_receipt_effect_oracles",
+        "actual_command_activation_migration_and_persisted_authority_reload",
+        "actual_MCP_fatal_host_and_reachable_public_resource_fault_case",
+        "full_scalar_recovery_and_exact_source_Linux_required_gates",
+        "endurance_and_performance_qualification"
+      ],
+      "acceptanceClosed": false
+    }
   },
   "KL-020": {
     "title": "Три-вузловий replicated apply",

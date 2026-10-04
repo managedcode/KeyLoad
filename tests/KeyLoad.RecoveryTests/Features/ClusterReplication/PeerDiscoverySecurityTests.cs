@@ -145,16 +145,19 @@ internal sealed class PeerDiscoverySecurityTests
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             {
-                _ = new PeerSecurity(new byte[length], TimeProvider.System).CreateHandler();
+                using var invalid = new PeerSecurity(new byte[length], TimeProvider.System);
+                using var invalidHandler = invalid.CreateHandler();
             }).Code).IsEqualTo(ErrorCode.Validation);
         }
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            _ = new PeerSecurity(fixture.Secret, TimeProvider.System, replayCapacity: 0).CreateHandler();
+            using var invalid = new PeerSecurity(fixture.Secret, TimeProvider.System, replayCapacity: 0);
+            using var invalidHandler = invalid.CreateHandler();
         }).Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            _ = new PeerSecurity(fixture.Secret, TimeProvider.System, TimeSpan.Zero).CreateHandler();
+            using var invalid = new PeerSecurity(fixture.Secret, TimeProvider.System, TimeSpan.Zero);
+            using var invalidHandler = invalid.CreateHandler();
         }).Code).IsEqualTo(ErrorCode.Validation);
     }
 }

@@ -6,12 +6,12 @@
 
 ## Ownership and boundaries
 - Test cases belong under canonical `Features/<SliceName>/` paths; shared cluster/container fixtures remain test infrastructure. Keep each feature's tests aligned with its docs and public contracts.
-- Required qualification is Docker/Aspire RF3 through the real .NET SDK and official MCP C# SDK clients. The current host-process RF3 implementation is migration debt and does not satisfy the target topology.
+- Required qualification is Docker RF3 owned by the actual Aspire AppHost through the real .NET SDK and official MCP C# SDK clients. AppHost owns membership resources, readiness, test-runner dependencies, execution and shutdown. Any retained host-process or independently launched Docker fixture is migration debt and does not satisfy the target topology.
 - Preserve atomic partition versus physical placement and node-local `PartitionHost` ownership; use real Orleans routing. Do not replace external dependencies with mocks, fakes or in-memory/single-node proofs.
 
 ## Commands and evidence
-- GitHub Actions invoking command: `dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore --configuration Release` in `.github/workflows/ci.yml` after solution restore/build.
-- Tests and qualification run only in GitHub Actions. Capture the exact workflow run, SHA, job URL and artifacts; no skipped suite counts as passing.
+- Local and GitHub Actions caller entry after solution restore/build: `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=rf3`. The native TUnit child is composed by AppHost; direct test execution is not an alternative caller entry.
+- Owner-authorized local tests are development evidence. Delivered qualification runs on exact-source Linux GitHub Actions. Capture the exact workflow run, SHA, job URL and original artifacts; no skipped suite counts as passing.
 
 ## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.

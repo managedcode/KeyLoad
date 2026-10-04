@@ -55,7 +55,7 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
         var identity = partition.Database.Store.Identity;
         return new(identity.NodeId.ToString(), identity.Incarnation, state.MaterializedPosition, state.LeaderId,
             partition.Configuration.VoterIds.Length, partition.Database.Durability,
-            services.GetRequiredService<OrleansNode>().Grains is not null, Environment.ProcessId, identity.ReadGeneration);
+            services.GetRequiredService<OrleansNode>().HasCompatibleCohort, Environment.ProcessId, identity.ReadGeneration);
     }
 
     /// <summary>Observes and drains any accepted backup before the physical owner closes its store.</summary>

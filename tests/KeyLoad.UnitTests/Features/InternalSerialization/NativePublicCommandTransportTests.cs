@@ -2,6 +2,7 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Orleans;
 using KeyLoad.Server;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
@@ -23,7 +24,7 @@ internal sealed class NativePublicCommandTransportTests
             operation.Kind, operation.Id, decoded.Payload));
         var actorKey = GrainPartitionResolver.Resolve(request);
         var executor = new GrainCommandExecutor(database.Database, new EmbeddedCoordinator(database.Database), TimeProvider.System);
-        var result = await executor.ExecuteAsync(request, actorKey, CancellationToken.None);
+        var result = await SignedGrainRequestTestContext.ExecuteAsync(executor, request, actorKey, CancellationToken.None);
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.SafeDetail).IsEqualTo(NativePublicNormalizationFixture.Detail(shape));
         var stored = NativePublicNormalizationFixture.Stored(database, operation);
@@ -32,7 +33,7 @@ internal sealed class NativePublicCommandTransportTests
         var retry = codec.Verify(codec.CreateCommand(Guid.NewGuid(), operation.PrincipalId,
             operation.Kind, operation.Id, decoded.Payload));
         await Assert.That(retry.Envelope.RequestId).IsNotEqualTo(request.Envelope.RequestId);
-        var repeated = await executor.ExecuteAsync(retry, actorKey, CancellationToken.None);
+        var repeated = await SignedGrainRequestTestContext.ExecuteAsync(executor, retry, actorKey, CancellationToken.None);
         await Assert.That(repeated).IsEqualTo(result);
         await Assert.That(NativePublicNormalizationFixture.Stored(database, operation)).IsEqualTo(stored);
     }

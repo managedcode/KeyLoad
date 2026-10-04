@@ -41,6 +41,7 @@ internal static class ReplicaDiscoveryEndpoints
         deadline.CancelAfter(ServerProtocol.ReadyTimeout);
         try
         {
+            await node.EnsureCompatibleCohortAsync(deadline.Token).ConfigureAwait(false);
             await partition.Coordinator.ReadBarrierAsync(deadline.Token).ConfigureAwait(false);
             return Results.Ok(new ReadyReply(ServerProtocol.ReadyStatus, partition.Configuration.VoterIds.Length));
         }

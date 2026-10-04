@@ -5,12 +5,14 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal sealed class EpochGrainRequestPurposeTests
 {
     private const string LegacyPurpose = "keyload-grain-request-v2";
-    private const string CurrentPurpose = "keyload-grain-request-data-epoch6";
+    private const string CurrentPurpose = "keyload-grain-request-data-epoch6-rpc2";
     private const string PrincipalId = "root";
     private const int NoDtoMarker = 0;
 
     [Test]
-    public async Task AcEpoch005OldSignedRequestPurposeFailsBeforeActorRouting()
+    [Arguments(LegacyPurpose)]
+    [Arguments("keyload-grain-request-data-epoch6")]
+    public async Task AcEpoch005OldSignedRequestPurposeFailsBeforeActorRouting(string rejectedPurpose)
     {
         using var fixture = new TestDatabase();
         var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System);
@@ -22,7 +24,7 @@ internal sealed class EpochGrainRequestPurposeTests
         await Assert.That(GrainNativeContracts.SignedTokenPrefix).IsEqualTo("KLT2.");
         await Assert.That(GrainNativeContracts.EnvelopeAlias).IsEqualTo("keyload.request.envelope.v2");
 
-        var stale = fixture.Database.Sign(envelope with { Purpose = LegacyPurpose });
+        var stale = fixture.Database.Sign(envelope with { Purpose = rejectedPurpose });
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => codec.VerifyRead(stale, requestId));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(GrainNativeContracts.RequestPurpose).IsEqualTo(CurrentPurpose);

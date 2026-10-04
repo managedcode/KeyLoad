@@ -7,11 +7,11 @@
 
 ## Ownership and boundaries
 - Workflow changes belong to the feature or infrastructure contract they implement and must preserve the repository's single-repository, canonical-slice architecture. Workflow YAML is delivery infrastructure, not a place to hide missing product behavior.
-- Qualification and tests must run in GitHub Actions. Do not add local qualification shortcuts, skipped suites, fake runtime proof, unaudited performance values, or claims beyond the run's actual SHA and artifacts.
+- Delivered-source qualification must run in GitHub Actions. Owner correction 2026-10-03 permits local development tests through the same Aspire-owned entry point; those results cannot replace exact-source Linux qualification. Do not add local qualification shortcuts, skipped suites, fake runtime proof, unaudited performance values, or claims beyond the run's actual SHA and artifacts.
 - Keep permissions least-privileged, actions pinned, secrets out of logs, and Pages evidence bound to the successful source run/revision.
 
 ## Commands and evidence
-- CI test commands are the workflow's actual invocations: `dotnet build KeyLoad.slnx --no-restore --configuration Release`; `dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release`; equivalent commands for `tests/KeyLoad.IntegrationTests`, `tests/KeyLoad.RecoveryTests` and `tests/KeyLoad.ComparisonTests` as defined in `ci.yml`.
+- CI build commands are the workflow's actual invocations: `dotnet build KeyLoad.slnx --no-restore --configuration Release`. Owner correction 2026-10-03 requires every test caller to invoke `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=<suite>` for the closed `analyzers`, `unit`, `unit-scalar`, `recovery`, `rf3`, `comparison` and `site` suites. Direct `dotnet test` is only the AppHost-composed child runner. AppHost owns Docker RF3 resources, discovered endpoints, readiness, runner dependencies, execution and shutdown; unit and recovery runners use that entry without requiring a fictitious RF3 topology. Preserve native reports, coverage, every required suite and exact-source Linux evidence.
 - Pages invokes `node --test site/scripts/measurements.test.mjs` and `node site/scripts/build.mjs` against the downloaded comparison artifact. Dispatch/inspect using the root workflow, retain run/job URLs, exact SHA and artifacts. These checks are not to be run locally as substitutes for CI qualification.
 
 ## Skills and protected risks

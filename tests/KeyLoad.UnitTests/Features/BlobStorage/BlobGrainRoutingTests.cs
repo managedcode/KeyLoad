@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Orleans;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.BlobStorage;
 
@@ -66,7 +67,7 @@ internal sealed class BlobGrainRoutingTests
             var valid = codec.Verify(Sign(codec, item, Guid.NewGuid()));
             foreach (var key in keys)
             {
-                var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => executor.ExecuteAsync(valid, key,
+                var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => SignedGrainRequestTestContext.ExecuteAsync(executor, valid, key,
                     TestContext.Current!.Execution.CancellationToken)) ?? throw new InvalidOperationException();
                 await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);
             }

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.ClusterRouting;
 
 internal static class ClusterResources
 {
@@ -50,7 +51,7 @@ internal static class ClusterResources
         ClusterProfileStore.Validate(profile);
         var root = Path.GetFullPath(dataRoot);
         ClusterProfileStore.PrepareDirectory(root);
-        var image = RuntimeContainerImage.Read(builder, RuntimeContainerImage.ServerConfiguration);
+        var images = ProtocolCohortImages.Read(builder, ephemeral, benchmarkNodeCount);
         var signing = builder.AddParameter(SigningParameter, profile.SigningKey, secret: true);
         var peer = builder.AddParameter(PeerParameter, profile.PeerSecret, secret: true);
         var admin = builder.AddParameter(AdminParameter, profile.AdminKey, secret: true);
@@ -62,7 +63,7 @@ internal static class ClusterResources
             var name = nodeNames[index];
             var directory = Path.Combine(root, name);
             ClusterProfileStore.PrepareDirectory(directory);
-            var resource = image.Add(builder, name)
+            var resource = images[name].Add(builder, name)
                 .WithContainerName(string.Format(CultureInfo.InvariantCulture, ContainerNameCompositeFormat,
                     profile.Incarnation.ToString(ClusterGuidFormat), name))
                 .WithContainerNetworkAlias(name)

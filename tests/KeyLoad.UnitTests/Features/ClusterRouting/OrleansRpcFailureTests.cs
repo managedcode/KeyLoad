@@ -1,11 +1,12 @@
 using System.Text.Json;
+using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>AC-AISQL-011/AC-ROUTE-009: initial native RPC failures preserve outcome uncertainty and privacy.</summary>
+/// <summary>AC-CRS-005 and AC-ROUTE-009: interrupted request streams preserve outcome uncertainty and privacy.</summary>
 [NotInParallel(LoggingEventSourceIsolation.Key)]
 internal sealed class OrleansRpcFailureTests
 {
@@ -27,7 +28,7 @@ internal sealed class OrleansRpcFailureTests
         {
             var requestId = Guid.NewGuid();
             var (failure, output) = TranslateAndCapture(error, command, requestId);
-            await Assert.That(OrleansRpcFailure.IsNative(error)).IsTrue();
+            await Assert.That(NativeCqrsBoundaryErrors.IsNonFatal(error)).IsTrue();
             await Assert.That(failure.Code).IsEqualTo(expectedCode);
             await Assert.That(failure.Message).IsEqualTo(expectedDetail);
             await Assert.That(failure.InnerException).IsNull();
@@ -41,9 +42,9 @@ internal sealed class OrleansRpcFailureTests
     }
 
     [Test]
-    public async Task AcRoute009DomainRecoveryAndOtherFailuresRemainOutsideTheNativeCatch()
+    public async Task AcCrs005UnvalidatedStreamFailuresDoNotExposeArbitraryExceptionDetails()
     {
-        Exception[] excluded =
+        Exception[] failures =
         [
             Errors.Fail(ErrorCode.RecoveryRequired, PrivateCanary),
             Errors.Fail(ErrorCode.PermissionDenied, PrivateCanary),
@@ -51,18 +52,23 @@ internal sealed class OrleansRpcFailureTests
             new ArgumentException(PrivateCanary), new InvalidOperationException(PrivateCanary),
             new IOException(PrivateCanary)
         ];
-        foreach (var error in excluded)
+        foreach (var error in failures)
         {
-            await Assert.That(OrleansRpcFailure.IsNative(error)).IsFalse();
+            var (failure, output) = TranslateAndCapture(error, true, Guid.NewGuid());
+            await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnknownWriteOutcome);
+            await Assert.That(failure.Message).IsEqualTo(CommandDetail);
+            await Assert.That(failure.InnerException).IsNull();
+            await Assert.That(output).DoesNotContain(PrivateCanary);
+            await Assert.That(output).DoesNotContain(error.GetType().FullName!);
         }
-        await Assert.That(((KeyLoadException)excluded[0]).Code).IsEqualTo(ErrorCode.RecoveryRequired);
-        await Assert.That(excluded[0].Message).IsEqualTo(PrivateCanary);
+        await Assert.That(((KeyLoadException)failures[0]).Code).IsEqualTo(ErrorCode.RecoveryRequired);
+        await Assert.That(failures[0].Message).IsEqualTo(PrivateCanary);
     }
 
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task AcRoute009CallerCancellationWinsOverANativeFailureAndProducesNoFailureLog(bool command)
+    public async Task AcCrs005CallerCancellationPreservesWriteUncertaintyAndDistinctReadCancellation(bool command)
     {
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
@@ -71,11 +77,19 @@ internal sealed class OrleansRpcFailureTests
         var logger = factory.CreateLogger(nameof(GrainFailureDiagnosticsTests));
         foreach (var (error, _) in NativeFailures())
         {
-            var cancelled = Assert.ThrowsExactly<OperationCanceledException>(() =>
-                OrleansRpcFailure.Translate(error, command, Guid.NewGuid(), logger, cancellation.Token));
-            await Assert.That(cancelled.CancellationToken).IsEqualTo(cancellation.Token);
+            var cancelled = OrleansRpcFailure.Translate(error, command, Guid.NewGuid(), logger, cancellation.Token);
+            await Assert.That(cancelled.Code).IsEqualTo(command ? ErrorCode.UnknownWriteOutcome : ErrorCode.Cancelled);
+            await Assert.That(cancelled.InnerException).IsNull();
         }
-        await Assert.That(capture.Text).IsEqualTo(string.Empty);
+        if (command)
+        {
+            await Assert.That(capture.Text).Contains(ErrorCode.UnknownWriteOutcome.ToString());
+            await Assert.That(capture.Text).DoesNotContain(PrivateCanary);
+        }
+        else
+        {
+            await Assert.That(capture.Text).IsEqualTo(string.Empty);
+        }
     }
 
     [Test]
@@ -90,7 +104,7 @@ internal sealed class OrleansRpcFailureTests
         var (failure, output) = TranslateAndCapture(original, command, requestId);
         var expectedCode = command ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost;
 
-        await Assert.That(OrleansRpcFailure.IsNative(original)).IsTrue();
+        await Assert.That(NativeCqrsBoundaryErrors.IsNonFatal(original)).IsTrue();
         await Assert.That(original.CancellationToken).IsEqualTo(foreignCancellation.Token);
         await Assert.That(failure.Code).IsEqualTo(expectedCode);
         await Assert.That(failure.Message).IsEqualTo(command ? CommandDetail : ReadDetail);
@@ -103,16 +117,22 @@ internal sealed class OrleansRpcFailureTests
     }
 
     [Test]
-    public async Task AcRoute009TranslatorCannotAccidentallyConvertAStorageRecoveryError()
+    public async Task AcCrs006TranslatorRejectsFatalRuntimeFailuresWithoutConversionOrLogging()
     {
-        var original = Errors.Fail(ErrorCode.RecoveryRequired, PrivateCanary);
+        Type[] fatalTypes = [typeof(OutOfMemoryException), typeof(StackOverflowException), typeof(AccessViolationException)];
         using var capture = new EventSourceLogCapture();
         using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
         var logger = factory.CreateLogger(nameof(GrainFailureDiagnosticsTests));
-        var rejected = Assert.ThrowsExactly<ArgumentException>(() =>
-            OrleansRpcFailure.Translate(original, true, Guid.NewGuid(), logger, CancellationToken.None));
-        await Assert.That(rejected.Message).DoesNotContain(PrivateCanary);
-        await Assert.That(original.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+        foreach (var fatalType in fatalTypes)
+        {
+            var original = (Exception)Activator.CreateInstance(fatalType, PrivateCanary)!;
+            await Assert.That(original.GetType()).IsEqualTo(fatalType);
+            await Assert.That(original.Message).IsEqualTo(PrivateCanary);
+            var rejected = Assert.ThrowsExactly<ArgumentException>(() =>
+                OrleansRpcFailure.Translate(original, true, Guid.NewGuid(), logger, CancellationToken.None));
+            await Assert.That(rejected.Message).DoesNotContain(PrivateCanary);
+            await Assert.That(NativeCqrsBoundaryErrors.IsNonFatal(original)).IsFalse();
+        }
         await Assert.That(capture.Text).IsEqualTo(string.Empty);
     }
 

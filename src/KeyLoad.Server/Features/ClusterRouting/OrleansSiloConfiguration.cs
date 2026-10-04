@@ -3,8 +3,11 @@ using KeyLoad.Core;
 using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Replication;
+using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Orleans.Graph.Extensions;
+using ManagedCode.Orleans.Identity.Core.Serializations;
 using Orleans.Configuration;
+using Orleans.Serialization;
 
 namespace KeyLoad.Server;
 
@@ -35,6 +38,10 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton<QueryEngine>();
         services.AddSingleton(_ => new SearchEngine(partition.Database, partition.TextProjection));
         services.AddSingleton<GrainRequestCodec>();
+        services.AddSerializer(serialization => serialization
+            .AddAssembly(typeof(GrainRequestProgress).Assembly)
+            .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
+            .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
         services.AddSingleton<ReplicaSiloDiscoveryState>();
         services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(partition.Configuration, peers,
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), TimeProvider.System,
@@ -60,8 +67,10 @@ internal static class OrleansSiloConfiguration
             membership.IAmAliveTablePublishTimeout = OrleansNodeProtocol.MembershipRefresh;
             membership.TableRefreshTimeout = OrleansNodeProtocol.MembershipRefresh;
         });
-        silo.Configure<SiloMessagingOptions>(messaging => messaging.MaxMessageBodySize = checked(replica.MaxAppendBytes
-            + ReplicaTransportProtocol.MaximumMetadataBytes + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes));
+        silo.Configure<SiloMessagingOptions>(messaging => messaging.MaxMessageBodySize = Math.Max(
+            checked(replica.MaxAppendBytes + ReplicaTransportProtocol.MaximumMetadataBytes
+                + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes),
+            checked(GrainRequestStreamProtocol.MaximumCompletedBytes + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes)));
         silo.AddGrainService<PartitionReplicaGrainService>();
         // ADR-036: owner explicitly requires these two native experimental services.
 #pragma warning disable ORLEANSEXP003
@@ -72,8 +81,8 @@ internal static class OrleansSiloConfiguration
 #pragma warning restore ORLEANSEXP001
         silo.AddOrleansGraph(configureGraph: graph => graph.AllowClientCallGrain<IRequestGrain>()
             .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
-            .MethodByName(nameof(IRequestGrain.ExecuteAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
+            .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
             .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()
-            .MethodByName(nameof(IRequestGrain.ExecuteAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And());
+            .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And());
     }
 }

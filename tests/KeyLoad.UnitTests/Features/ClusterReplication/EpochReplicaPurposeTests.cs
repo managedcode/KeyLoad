@@ -9,8 +9,8 @@ internal sealed class EpochReplicaPurposeTests
     private const string LegacyRequestPurpose = "keyload-replica-request-v2";
     private const string LegacyReplyPurpose = "keyload-replica-reply-v2";
     private const string LegacyDiscoveryPurpose = "keyload-replica-discovery-v2";
-    private const string CurrentRequestPurpose = "keyload-replica-request-data-epoch6";
-    private const string CurrentReplyPurpose = "keyload-replica-reply-data-epoch6";
+    private const string CurrentRequestPurpose = "keyload-replica-request-data-epoch6-rpc2";
+    private const string CurrentReplyPurpose = "keyload-replica-reply-data-epoch6-rpc2";
     private const string CurrentDiscoveryPurpose = "keyload-replica-discovery-data-epoch6";
     private const int SnapshotTerm = 1;
     private const int SnapshotPosition = 1;
@@ -48,6 +48,32 @@ internal sealed class EpochReplicaPurposeTests
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Unauthenticated);
         fixture.Sender.VerifyReply(request, current);
         await Assert.That(ReplicaTransportProtocol.ReplyPurpose).IsEqualTo(CurrentReplyPurpose);
+    }
+
+    [Test]
+    public async Task AcCrs003PriorEpoch6PeerEnvelopeCannotAcknowledgeCurrentRequests()
+    {
+        using var fixture = new ReplicaSecurityFixture();
+        var currentRequest = fixture.Vote();
+        var oldRequest = currentRequest with { Version = ReplicaTransportProtocol.DiscoveryMacVersion };
+        oldRequest = oldRequest with
+        {
+            Signature = EpochReplicaMac.Request(fixture.Options, oldRequest,
+                "keyload-replica-request-data-epoch6", ReplicaTransportProtocol.DiscoveryMacVersion)
+        };
+        var rejectedRequest = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(oldRequest));
+        await Assert.That(rejectedRequest.Code).IsEqualTo(ErrorCode.Unauthenticated);
+
+        var currentReply = fixture.Receiver.CreateReply(currentRequest, ReadOnlyMemory<byte>.Empty);
+        var oldReply = currentReply with { Version = ReplicaTransportProtocol.DiscoveryMacVersion };
+        oldReply = oldReply with
+        {
+            Signature = EpochReplicaMac.Reply(fixture.Options, oldReply,
+                "keyload-replica-reply-data-epoch6", ReplicaTransportProtocol.DiscoveryMacVersion)
+        };
+        var rejectedReply = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Sender.VerifyReply(currentRequest, oldReply));
+        await Assert.That(rejectedReply.Code).IsEqualTo(ErrorCode.Unauthenticated);
+        fixture.Sender.VerifyReply(currentRequest, currentReply);
     }
 
     [Test]
@@ -105,13 +131,15 @@ internal static class EpochReplicaMac
 {
     private const int NoError = -1;
 
-    internal static byte[] Request(ReplicaPeerOptions options, ReplicaPeerEnvelope request, string purpose)
+    internal static byte[] Request(ReplicaPeerOptions options, ReplicaPeerEnvelope request, string purpose,
+        int macVersion = ReplicaTransportProtocol.Version)
         => Message(options, purpose, request.Incarnation, request.Sender, request.Recipient, request.Method,
-            request.RuntimeAddress, request.Timestamp, request.Nonce, request.Payload.Span, null, null);
+            request.RuntimeAddress, request.Timestamp, request.Nonce, request.Payload.Span, null, null, macVersion);
 
-    internal static byte[] Reply(ReplicaPeerOptions options, ReplicaPeerReply reply, string purpose)
+    internal static byte[] Reply(ReplicaPeerOptions options, ReplicaPeerReply reply, string purpose,
+        int macVersion = ReplicaTransportProtocol.Version)
         => Message(options, purpose, reply.Incarnation, reply.Sender, reply.Recipient, reply.Method,
-            reply.RuntimeAddress, reply.Timestamp, reply.RequestNonce, reply.Payload.Span, reply.Error, reply.SafeDetail);
+            reply.RuntimeAddress, reply.Timestamp, reply.RequestNonce, reply.Payload.Span, reply.Error, reply.SafeDetail, macVersion);
 
     internal static string Discovery(ReplicaPeerOptions options, Guid incarnation, string voter, Guid nonce,
         ReadOnlySpan<byte> payload, string purpose)
@@ -119,7 +147,7 @@ internal static class EpochReplicaMac
         using var buffer = new MemoryStream();
         using var writer = new BinaryWriter(buffer, ReplicaTransportProtocol.Utf8, leaveOpen: true);
         writer.Write(purpose);
-        writer.Write(ReplicaTransportProtocol.Version);
+        writer.Write(ReplicaTransportProtocol.DiscoveryMacVersion);
         writer.Write(options.ClusterId);
         writer.Write(incarnation.ToByteArray());
         writer.Write(voter);
@@ -133,12 +161,12 @@ internal static class EpochReplicaMac
 
     private static byte[] Message(ReplicaPeerOptions options, string purpose, Guid incarnation, string sender,
         string recipient, ReplicaRpc method, string address, long timestamp, Guid nonce, ReadOnlySpan<byte> payload,
-        ErrorCode? error, string? detail)
+        ErrorCode? error, string? detail, int macVersion)
     {
         using var buffer = new MemoryStream();
         using var writer = new BinaryWriter(buffer, ReplicaTransportProtocol.Utf8, leaveOpen: true);
         writer.Write(purpose);
-        writer.Write(ReplicaTransportProtocol.Version);
+        writer.Write(macVersion);
         writer.Write(options.ClusterId);
         writer.Write(incarnation.ToByteArray());
         writer.Write(sender);

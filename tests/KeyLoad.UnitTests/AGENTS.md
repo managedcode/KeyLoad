@@ -10,8 +10,8 @@
 - TUnit with Microsoft.Testing.Platform is the target. Existing xUnit/VSTest references are migration debt, not permission to add another framework.
 
 ## Commands and evidence
-- GitHub Actions invoking command: `dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release` in `.github/workflows/ci.yml`, following solution restore/build.
-- Execute tests only in GitHub Actions. Preserve exact run/SHA/job links for qualification; no skipped suite counts as passing.
+- Owner correction 2026-10-03 requires the actual Aspire caller after restore/build: `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit`, or `unit-scalar` for the native hardware-intrinsics-disabled suite. The AppHost owns test-runner execution, native exit status and shutdown. Direct `dotnet test` is only its composed MTP child process, never an alternative caller entry.
+- Delivered-source qualification executes in Linux GitHub Actions. Preserve exact run/SHA/job links and original MTP/TRX/coverage artifacts; no skipped suite counts as passing. Owner-authorized local development uses the same Aspire entry and remains development evidence.
 
 ## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.

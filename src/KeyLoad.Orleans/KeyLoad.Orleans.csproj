@@ -2,6 +2,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.Server" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
     <ProjectReference Include="../KeyLoad.Query/KeyLoad.Query.csproj" />
     <ProjectReference Include="../KeyLoad.Replication/KeyLoad.Replication.csproj" />
@@ -9,5 +10,6 @@
     <PackageReference Include="Microsoft.Orleans.Server" />
     <PackageReference Include="ManagedCode.Communication.Orleans" />
     <PackageReference Include="ManagedCode.Orleans.Graph" />
+    <PackageReference Include="ManagedCode.Orleans.Identity.Core" />
   </ItemGroup>
 </Project>

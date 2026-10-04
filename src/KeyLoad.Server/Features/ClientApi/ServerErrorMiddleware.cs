@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
@@ -26,7 +27,7 @@ internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<Server
         {
             // The caller owns this cancellation; a committed command is resolved by its stable retry ID.
         }
-        catch (Exception error) when (!context.Response.HasStarted)
+        catch (Exception error) when (!context.Response.HasStarted && NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             RequestFailureDiagnostic.LogFailure(logger, context, error);
             await WriteAsync(context, ErrorCode.RecoveryRequired, UnexpectedFailure).ConfigureAwait(false);

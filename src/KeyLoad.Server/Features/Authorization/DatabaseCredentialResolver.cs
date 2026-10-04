@@ -25,11 +25,13 @@ internal static class DatabaseCredentialResolver
         GrainOperationReply reply;
         try
         {
-            reply = await context.RequestServices.GetRequiredService<OrleansNode>()
-                .ExecuteAsync(requestId, token, false, context.RequestAborted).ConfigureAwait(false);
+            var node = context.RequestServices.GetRequiredService<OrleansNode>();
+            using var requestContext = node.OpenRequestContext(null, requestId,
+                Guid.Empty, context.RequestAborted);
+            reply = await node.ExecuteAsync(requestId, token, false, context.RequestAborted).ConfigureAwait(false);
             outcome = DatabasePhaseOutcome.Completed;
         }
-        catch (OperationCanceledException)
+        catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })
         {
             outcome = DatabasePhaseTelemetry.CancellationOutcome(context.RequestAborted);
             throw;

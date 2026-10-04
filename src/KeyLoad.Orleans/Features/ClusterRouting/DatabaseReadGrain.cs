@@ -41,6 +41,7 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
             cancellationToken.ThrowIfCancellationRequested();
             requestId = this.GetPrimaryKey();
             var request = codec.VerifyRead(signedRequest, requestId);
+            GrainIdentityContext.Validate(request.Envelope, requestId);
             stage = GrainFailureStage.QuorumRead;
             phase = request.Envelope.ReadKind == GrainReadKind.Authenticate
                 ? DatabasePhaseKind.AuthorizedAuthenticationBarrier : DatabasePhaseKind.AuthorizedOperationBarrier;
@@ -49,7 +50,7 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
             await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
             DatabasePhaseTelemetry.End(phase, DatabasePhaseOutcome.Completed, phaseStarted);
             phaseActive = false;
-            cancellationToken.ThrowIfCancellationRequested();
+            ValidateFreshRequest(request, requestId, cancellationToken);
             stage = GrainFailureStage.CapabilityExecution;
             phase = DatabasePhaseKind.AuthorizedReadCapability;
             phaseStarted = DatabasePhaseTelemetry.Begin();
@@ -77,6 +78,13 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
             }
             DeactivateOnIdle();
         }
+    }
+
+    private void ValidateFreshRequest(DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        GrainRequestScope.Validate(request.Envelope, localDatabase.Store.Identity.Incarnation, runtimeClock.GetUtcNow());
+        GrainIdentityContext.Validate(request.Envelope, requestId);
     }
 
     private static void EndFailedPhase(Exception error, DatabasePhaseKind phase, long started, CancellationToken cancellationToken)

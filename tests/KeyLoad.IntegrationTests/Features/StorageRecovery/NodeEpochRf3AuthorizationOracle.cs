@@ -29,14 +29,18 @@ internal static class NodeEpochRf3AuthorizationOracle
     {
         await using var admin = await NodeEpochRf3Callers.ConnectAsync(app, NodeEpochRf3Protocol.Node1,
             NodeEpochRf3Protocol.Node2, profile.AdminKey, cancellationToken).ConfigureAwait(false);
+        await NodeEpochRf3CredentialRevocationOracle.VerifyAsync(app, admin, workload, cancellationToken)
+            .ConfigureAwait(false);
         var revokedPrincipal = workload.Reader.Principal with
         { Revoked = true, PolicyEpoch = workload.Reader.Principal.PolicyEpoch + 1 };
         var saved = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(),
             revokedPrincipal, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(saved.PolicyEpoch).IsEqualTo(revokedPrincipal.PolicyEpoch);
         var revokedCredential = workload.Reader.Credential with { Revoked = true };
-        await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(), revokedCredential,
-            cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
+        var rejectedKeyUpdate = await admin.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(), revokedCredential,
+            cancellationToken).ConfigureAwait(false);
+        await Assert.That(rejectedKeyUpdate.IsFailed).IsTrue();
+        await Assert.That(rejectedKeyUpdate.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Unauthenticated));
         await AssertDeniedAsync(reader, workload, cancellationToken).ConfigureAwait(false);
         await AssertAdminHealthyAsync(admin, cancellationToken).ConfigureAwait(false);
     }

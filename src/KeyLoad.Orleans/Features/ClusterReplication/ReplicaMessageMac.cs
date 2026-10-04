@@ -20,7 +20,7 @@ internal sealed class ReplicaMessageMac(ReadOnlyMemory<byte> credential, string 
         using var buffer = new MemoryStream();
         using var writer = new BinaryWriter(buffer, ReplicaTransportProtocol.Utf8, leaveOpen: true);
         writer.Write(ReplicaTransportProtocol.DiscoveryPurpose);
-        writer.Write(ReplicaTransportProtocol.Version);
+        writer.Write(ReplicaTransportProtocol.DiscoveryMacVersion);
         writer.Write(clusterId);
         writer.Write(incarnation.ToByteArray());
         writer.Write(voterId);

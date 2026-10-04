@@ -12,7 +12,7 @@
 
 ## Commands and evidence
 - Static governance inventory check: `node scripts/Features/RepositoryGovernance/verify.mjs` (run by the lead integration owner as static validation; it is not a runtime test).
-- Product tests/builds and qualification are GitHub Actions only, using `.github/workflows/ci.yml`. Cite exact run/SHA/job/artifact evidence; do not claim a doc review is product qualification.
+- Delivered-source qualification uses Linux GitHub Actions in `.github/workflows/ci.yml`, with exact run/SHA/job/artifact evidence. Owner correction 2026-10-03 permits local development builds and tests; every KeyLoad test caller must use `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=<suite>`, with AppHost-owned resources and shutdown. Unit/process runners use that entry without pretending to need RF3; RF3 tests use its discovered Docker topology and real SDK/official MCP clients. Label local results as development evidence; neither they nor a doc review replace product qualification.
 
 ## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.

@@ -1,0 +1,111 @@
+{
+  "stage": "NativeCqrs C1 owning fatal-exception repair delivery",
+  "status": "dependencyDeliveredConsumerQualificationPending",
+  "sourceRepository": "managedcode/Communication",
+  "sourceSha": "bec54168254c00c21bc875d8a9aef5c2ad8030d3",
+  "version": "10.2.8",
+  "remoteTag": "v10.2.8",
+  "canonicalRuns": {
+    "release": {
+      "conclusion": "success",
+      "headSha": "bec54168254c00c21bc875d8a9aef5c2ad8030d3",
+      "status": "completed",
+      "url": "https://github.com/managedcode/Communication/actions/runs/37206764247"
+    },
+    "ci": {
+      "conclusion": "success",
+      "headSha": "bec54168254c00c21bc875d8a9aef5c2ad8030d3",
+      "status": "completed",
+      "url": "https://github.com/managedcode/Communication/actions/runs/37206764246"
+    },
+    "codeql": {
+      "conclusion": "success",
+      "headSha": "bec54168254c00c21bc875d8a9aef5c2ad8030d3",
+      "status": "completed",
+      "url": "https://github.com/managedcode/Communication/actions/runs/37206764277"
+    }
+  },
+  "verifiedPackages": [
+    {
+      "package": "ManagedCode.Communication",
+      "version": "10.2.8",
+      "githubSha256": "a242b61bb1c0559f8bc5e591dc9fd9b207396cf199966310bf2305f55cff14a7",
+      "feedSha256": "6e3790cce74c9e16cfda59293ab64902f4c5d23877b59fff889304050a9cafed",
+      "nativePayloadEntries": 9,
+      "payloadByteIdentical": true,
+      "additionalFeedEntry": ".signature.p7s",
+      "dlls": {
+        "lib/net10.0/ManagedCode.Communication.dll": "e0f2a39c5b64b1037ed7909f71948e2158dde952d9323464a494f6fa3864dcc9"
+      },
+      "repositoryCommit": "bec54168254c00c21bc875d8a9aef5c2ad8030d3"
+    },
+    {
+      "package": "ManagedCode.Communication.AspNetCore",
+      "version": "10.2.8",
+      "githubSha256": "84d8c1356d2da9780dc2fd8c64b4d8539294f4d0e61c9ee367306dd103e9dc37",
+      "feedSha256": "17dde511ddd2fea4f7aef852dc5a3711fb4573c67faab22a35f0976ed42766ee",
+      "nativePayloadEntries": 9,
+      "payloadByteIdentical": true,
+      "additionalFeedEntry": ".signature.p7s",
+      "dlls": {
+        "lib/net10.0/ManagedCode.Communication.AspNetCore.dll": "fe028cc7c9719af375ea8020e4342c2e1188ea78b40725eff62f11ef94d03d39"
+      },
+      "repositoryCommit": "bec54168254c00c21bc875d8a9aef5c2ad8030d3"
+    },
+    {
+      "package": "ManagedCode.Communication.Extensions",
+      "version": "10.2.8",
+      "githubSha256": "bbe407f5c76826ab9078e5310b8bdb138d1f08b2e7dd4cc5d2164084c4f59332",
+      "feedSha256": "a79abc6d067428723f82318d4ecc126cc296227e54769fb2e86c023fc936d3d7",
+      "nativePayloadEntries": 9,
+      "payloadByteIdentical": true,
+      "additionalFeedEntry": ".signature.p7s",
+      "dlls": {
+        "lib/net10.0/ManagedCode.Communication.Extensions.dll": "d3998e9cbc46d988185c12d82073306c72a3b1db6444467970f04139d61fef1f"
+      },
+      "repositoryCommit": "bec54168254c00c21bc875d8a9aef5c2ad8030d3"
+    },
+    {
+      "package": "ManagedCode.Communication.Orleans",
+      "version": "10.2.8",
+      "githubSha256": "4ad7e23fc29ac98fa7453ba0982f3cd64752840114e0c7dd380e385d566e5ef3",
+      "feedSha256": "1990fd424db3a0e310ecd0cf63e2f0f613853a86419b74838f21bf9cf7f3c109",
+      "nativePayloadEntries": 9,
+      "payloadByteIdentical": true,
+      "additionalFeedEntry": ".signature.p7s",
+      "dlls": {
+        "lib/net10.0/ManagedCode.Communication.Orleans.dll": "76c5b711998d69c4e64653a973e1931df59737f52a94f59f428544a5fa566ee7"
+      },
+      "repositoryCommit": "bec54168254c00c21bc875d8a9aef5c2ad8030d3"
+    }
+  ],
+  "owningLocalTests": {
+    "total": 1352,
+    "passed": 1352,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "timedOut": 0,
+    "flaky": 0
+  },
+  "owningLocalDurationMs": 34913.749,
+  "originalManifest": "artifacts/qualification/native-cqrs-fatal-owning-development-20261004/publication-originals/manifest.json",
+  "owningFullFormatter": {
+    "passed": false,
+    "diagnostics": 15793,
+    "unchangedPathsOnly": true,
+    "canonicalRequiredGate": false,
+    "changedFilesVerifyPassed": true
+  },
+  "keyLoadCentralPins": [
+    "ManagedCode.Communication",
+    "ManagedCode.Communication.AspNetCore",
+    "ManagedCode.Communication.Orleans"
+  ],
+  "keyLoadConsumerRestorePassed": false,
+  "keyLoadConsumerTestsPassed": false,
+  "keyLoadRequiredFullFormatterPassed": false,
+  "unchangedC0RepeatPassed": false,
+  "c1ProductQualified": false,
+  "allAcceptanceCriteriaClosed": false
+}

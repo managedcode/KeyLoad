@@ -19,9 +19,15 @@ internal static class McpCallerAssertions
     /// <returns>The actual typed value, including an allowed null result.</returns>
     internal static async Task<T> SdkSuccessAsync<T>(Result<T> result)
     {
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess).IsTrue().Because("The canonical SDK outcome reported "
+            + ClosedErrorCode(result.Problem?.ErrorCode) + ".");
         return result.Value!;
     }
+
+    private static string ClosedErrorCode(string? actual)
+        => actual is { Length: > 0 and <= 64 } && Enum.TryParse<ErrorCode>(actual, out var parsed)
+            && Enum.IsDefined(parsed) && string.Equals(parsed.ToString(), actual, StringComparison.Ordinal)
+            ? parsed.ToString() : "Unclassified";
 
     /// <summary>Requires the exact success wrapper, a nonempty execution GUID and a bounded native text summary.</summary>
     /// <typeparam name="T">The public canonical result type.</typeparam>

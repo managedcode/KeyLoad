@@ -17,7 +17,7 @@ const archiveDeadlineMs = 60000;
 const settlementMs = 10000;
 const killGraceMs = 1000;
 const invalidSource = 'The immutable native5 source export is invalid.';
-const expectedGlobalMetadata = Buffer.from('52 comment=7784b6b46b98ce994dd98070dc1f58fe4e506b91\n', 'ascii');
+const native5Revision = '7784b6b46b98ce994dd98070dc1f58fe4e506b91';
 
 export async function runPriorCommand(command, args, cwd, maximumOutputBytes = maximumTreeBytes) {
   const child = spawn(command, args, { cwd, shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -57,7 +57,7 @@ export async function createAndInspectGitArchive(workspace, target, revision, gi
   const child = spawn('git', ['-c', 'tar.umask=0022', 'archive', '--format=tar', revision], {
     cwd: workspace, shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
   });
-  const inspection = new ArchiveInspection(gitEntries);
+  const inspection = new ArchiveInspection(gitEntries, revision);
   let failure;
   let streamEnded = false;
   let requestStop = () => {};
@@ -106,13 +106,13 @@ export async function extractVerifiedArchive(archivePath, destination, workspace
   if (!result.success) throw new Error(invalidSource);
 }
 
-export async function verifyRetainedArchive(directory, name, rows, expectedBytes, expectedSha256) {
+export async function verifyRetainedArchive(directory, name, rows, expectedBytes, expectedSha256, revision = native5Revision) {
   const target = path.join(directory, name);
   const before = await lstat(target);
   if (!before.isFile() || before.isSymbolicLink() || before.size !== expectedBytes || before.size > maximumArchiveBytes
     || (before.mode & 0o077) !== 0 || before.uid !== process.getuid()) throw new Error(invalidSource);
   const entries = new Map(rows.map(row => [row.path, Object.freeze({ mode: row.mode, bytes: row.bytes, sha256: row.sha256 })]));
-  const inspection = new ArchiveInspection(entries);
+  const inspection = new ArchiveInspection(entries, revision);
   const handle = await open(target, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
   const buffer = Buffer.allocUnsafe(chunkBytes);
   let offset = 0;
@@ -186,7 +186,9 @@ function unsettledError(primary) {
 }
 
 class ArchiveInspection {
-  constructor(gitEntries) {
+  constructor(gitEntries, revision) {
+    if (typeof revision !== 'string' || !/^[a-f0-9]{40}$/.test(revision)) throw new Error(invalidSource);
+    this.expectedGlobalMetadata = Buffer.from(`52 comment=${revision}\n`, 'ascii');
     this.gitEntries = gitEntries;
     this.files = [];
     this.seenPaths = new Set();
@@ -260,10 +262,10 @@ class ArchiveInspection {
     validateArchivePath(pathValue);
     if (type === 'g') {
       if (this.headerCount !== 0 || this.globalMetadataSeen || pathValue !== 'pax_global_header'
-        || mode !== 0o666 || size !== expectedGlobalMetadata.length) throw new Error(invalidSource);
+        || mode !== 0o666 || size !== this.expectedGlobalMetadata.length) throw new Error(invalidSource);
       this.globalMetadataSeen = true;
       this.headerCount++;
-      this.pendingMetadata = { bytes: Buffer.alloc(expectedGlobalMetadata.length), count: 0 };
+      this.pendingMetadata = { bytes: Buffer.alloc(this.expectedGlobalMetadata.length), count: 0 };
       return;
     }
     if (!this.globalMetadataSeen) throw new Error(invalidSource);
@@ -300,13 +302,13 @@ class ArchiveInspection {
     const remaining = blockBytes - pending.count;
     if (this.block.length === 0) return false;
     const count = Math.min(this.block.length, remaining, chunkBytes);
-    const contentCount = Math.max(0, Math.min(count, expectedGlobalMetadata.length - pending.count));
+    const contentCount = Math.max(0, Math.min(count, this.expectedGlobalMetadata.length - pending.count));
     if (contentCount > 0) this.block.copy(pending.bytes, pending.count, 0, contentCount);
     if (count > contentCount && this.block.subarray(contentCount, count).some(value => value !== 0)) throw new Error(invalidSource);
     pending.count += count;
     this.block = this.block.subarray(count);
     if (pending.count < blockBytes) return false;
-    if (!pending.bytes.equals(expectedGlobalMetadata)) throw new Error(invalidSource);
+    if (!pending.bytes.equals(this.expectedGlobalMetadata)) throw new Error(invalidSource);
     this.pendingMetadata = null;
     return true;
   }

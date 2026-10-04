@@ -11,7 +11,7 @@
 
 ## Commands and evidence
 - GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Replication/recovery behavior is exercised by `dotnet test --project tests/KeyLoad.RecoveryTests --no-build --no-restore --configuration Release` and IntegrationTests via `.github/workflows/ci.yml`; tests run only in GitHub Actions.
+- Replication/recovery behavior is exercised through the actual Aspire-owned caller after solution restore/build: `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery`, and the same caller with `--KeyLoadTests:Suite=rf3` for Docker RF3 SDK/MCP qualification. AppHost owns native test-runner execution and shutdown and, for RF3, every Docker voter and readiness dependency; direct test execution is not an alternative caller entry. Owner-authorized local runs are development evidence; exact-source Linux GitHub qualification with all required original artifacts remains mandatory.
 
 ## Skills and protected risks
 - Owner-authorized applicable skill: global [Orleans](/Users/ksemenenko/.codex/skills/orleans/SKILL.md) 3.1.1; apply its state ownership and failure-model guidance. The prior bootstrap prohibition remains for other unapproved installations.

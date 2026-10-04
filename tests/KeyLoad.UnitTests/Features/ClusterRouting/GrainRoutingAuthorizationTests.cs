@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Orleans;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests;
 
@@ -61,12 +62,12 @@ internal sealed class GrainRoutingAuthorizationTests
         var second = codec.Verify(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, commandId, NativeSerialization.Serialize(command)));
         var key = GrainPartitionResolver.Resolve(first);
         await Assert.That(first.Envelope.RequestId).IsNotEqualTo(second.Envelope.RequestId);
-        var initial = await executor.ExecuteAsync(first, key, CancellationToken.None);
-        var replay = await executor.ExecuteAsync(second, key, CancellationToken.None);
+        var initial = await SignedGrainRequestTestContext.ExecuteAsync(executor, first, key, CancellationToken.None);
+        var replay = await SignedGrainRequestTestContext.ExecuteAsync(executor, second, key, CancellationToken.None);
         await Assert.That(initial.Payload.Span.SequenceEqual(replay.Payload.Span)).IsTrue();
         await Assert.That(fixture.Database.GetDocument(Root, new(fixture.Partition, Collection, DocumentId))!.Revision).IsEqualTo(FirstRevision);
         var wrongKey = (fixture.Partition with { TransactionDomainId = OtherDomain }).AtomicPartitionId;
-        var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => executor.ExecuteAsync(second, wrongKey, CancellationToken.None))
+        var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => SignedGrainRequestTestContext.ExecuteAsync(executor, second, wrongKey, CancellationToken.None))
             ?? throw new InvalidOperationException();
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);
     }
@@ -88,7 +89,7 @@ internal sealed class GrainRoutingAuthorizationTests
             PolicyEpoch = principal.PolicyEpoch + PolicyEpochIncrement
         }));
         var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System);
-        var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => executor.ExecuteAsync(request,
+        var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => SignedGrainRequestTestContext.ExecuteAsync(executor, request,
             fixture.Partition.AtomicPartitionId, CancellationToken.None))
             ?? throw new InvalidOperationException();
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);
@@ -108,7 +109,7 @@ internal sealed class GrainRoutingAuthorizationTests
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System);
-        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => executor.ExecuteAsync(valid,
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => SignedGrainRequestTestContext.ExecuteAsync(executor, valid,
             fixture.Partition.AtomicPartitionId, cancellation.Token));
         await Assert.That(fixture.Database.Outcome(Root, command.CommandId)).IsNull();
     }

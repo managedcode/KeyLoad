@@ -55,21 +55,9 @@ internal static class NodeEpochRf3OfflineProcessIo
         {
             failures.Add(failure);
         }
-        using var deadline = new CancellationTokenSource(NodeEpochRf3OfflineProtocol.CleanupDeadline);
-        await ObserveAsync(exit, failures, deadline.Token).ConfigureAwait(false);
-        await ObserveAsync(output, failures, deadline.Token).ConfigureAwait(false);
-        await ObserveAsync(error, failures, deadline.Token).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(() => exit, failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(() => output, failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(() => error, failures).ConfigureAwait(false);
         return failures;
-    }
-
-    private static async Task ObserveAsync(Task task, List<Exception> failures, CancellationToken cancellationToken)
-    {
-        await ServerFailureObserver.ObserveAsync(() => task.WaitAsync(cancellationToken), failures).ConfigureAwait(false);
-        if (!task.IsCompleted)
-        {
-            _ = task.ContinueWith(static terminal => _ = terminal.Exception,
-                CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
-                TaskScheduler.Default);
-        }
     }
 }

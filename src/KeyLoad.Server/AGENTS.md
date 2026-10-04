@@ -11,7 +11,7 @@
 
 ## Commands and evidence
 - GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Public service behavior is exercised through IntegrationTests: `dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore --configuration Release`, dispatched only by `.github/workflows/ci.yml`.
+- Owner correction2026-10-03 requires public service verification through the actual Aspire caller: `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=rf3`. Direct native `dotnet test` is only the AppHost-owned child, never an alternative caller entry. Local development is authorized; exact-source Linux GitHub qualification remains mandatory.
 
 ## Skills and protected risks
 - Owner-authorized applicable skill: Orleans 3.1.1 at `/Users/ksemenenko/.codex/skills/orleans/SKILL.md`; apply it to silo startup, provider configuration, directory/migration and shutdown. The prior bootstrap prohibition remains for other unapproved installations.

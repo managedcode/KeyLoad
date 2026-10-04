@@ -5,12 +5,13 @@ using Microsoft.AspNetCore.Http;
 namespace KeyLoad.Replication;
 
 /// <summary>Authenticates only bounded, bodyless silo discovery; replica commands use native signed Orleans envelopes.</summary>
-public sealed class PeerSecurity
+public sealed class PeerSecurity : IDisposable
 {
     private readonly byte[] secret;
     private readonly TimeProvider clock;
     private readonly TimeSpan connectTimeout;
     private readonly PeerDiscoveryReplay replay;
+    private int disposed;
 
     /// <summary>Copies the configured peer credential once and fixes the clock and bounded replay capacity.</summary>
     /// <param name="secret">The shared 32-byte peer credential.</param>
@@ -37,6 +38,7 @@ public sealed class PeerSecurity
     public void Sign(HttpRequestMessage request)
     {
         ArgumentNullException.ThrowIfNull(request);
+        ThrowIfDisposed();
         if (!PeerDiscoveryRequest.Valid(request))
         { throw Errors.Fail(ErrorCode.Validation, PeerDiscoveryProtocol.InvalidRequest); }
         var timestamp = clock.GetUtcNow().ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
@@ -51,11 +53,16 @@ public sealed class PeerSecurity
 
     /// <summary>Creates the real bounded socket handler; it signs only permitted discovery requests.</summary>
     /// <returns>An independently owned HTTP handler with automatic redirects disabled.</returns>
-    public HttpMessageHandler CreateHandler() => new SignedHandler(this)
+    /// <remarks>The handler borrows this signer, which must outlive all of its active requests.</remarks>
+    public HttpMessageHandler CreateHandler()
     {
-        InnerHandler = new SocketsHttpHandler
-        { ConnectTimeout = connectTimeout, PooledConnectionLifetime = PeerDiscoveryProtocol.ConnectionLifetime, AllowAutoRedirect = false }
-    };
+        ThrowIfDisposed();
+        return new SignedHandler(this)
+        {
+            InnerHandler = new SocketsHttpHandler
+            { ConnectTimeout = connectTimeout, PooledConnectionLifetime = PeerDiscoveryProtocol.ConnectionLifetime, AllowAutoRedirect = false }
+        };
+    }
 
     /// <summary>Validates the exact request and an empty body before consuming bounded nonce admission.</summary>
     /// <param name="request">The actual receiver request.</param>
@@ -65,6 +72,7 @@ public sealed class PeerSecurity
     public async Task<bool> ValidateAsync(HttpRequest request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
+        ThrowIfDisposed();
         cancellationToken.ThrowIfCancellationRequested();
         if (!PeerDiscoveryRequest.Valid(request)
             || !PeerDiscoverySignature.Read(request, out var timestamp, out var nonce, out var nonceText, out var signature))
@@ -85,6 +93,17 @@ public sealed class PeerSecurity
     {
         request.Headers.Remove(header);
         request.Headers.Add(header, value);
+    }
+
+    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != 0, this);
+
+    /// <summary>Clears the owned credential after the owner has joined every active borrower.</summary>
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref disposed, 1) == 0)
+        {
+            CryptographicOperations.ZeroMemory(secret);
+        }
     }
 
     private sealed class SignedHandler(PeerSecurity security) : DelegatingHandler

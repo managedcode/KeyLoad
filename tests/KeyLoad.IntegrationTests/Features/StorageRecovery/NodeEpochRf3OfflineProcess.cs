@@ -27,6 +27,7 @@ internal static class NodeEpochRf3OfflineProcess
         catch (Exception primary)
         {
             var failures = await NodeEpochRf3OfflineProcessIo.SettleAsync(process, exit, output, error).ConfigureAwait(false);
+            failures.RemoveAll(failure => ReferenceEquals(failure, primary));
             if (failures.Count > 0)
             { throw new AggregateException(new[] { primary }.Concat(failures)); }
             throw;

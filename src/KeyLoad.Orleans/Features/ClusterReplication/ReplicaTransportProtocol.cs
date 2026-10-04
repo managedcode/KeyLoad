@@ -7,7 +7,9 @@ namespace KeyLoad.Orleans;
 public static class ReplicaTransportProtocol
 {
     /// <summary>Authenticated envelope format version.</summary>
-    public const int Version = 2;
+    public const int Version = 3;
+    /// <summary>Unchanged discovery MAC version, independent of application peer envelopes.</summary>
+    public const int DiscoveryMacVersion = 2;
     /// <summary>Orleans replica service interface version.</summary>
     public const ushort InterfaceVersion = 1;
     /// <summary>Required cluster peer credential length.</summary>
@@ -53,9 +55,9 @@ public static class ReplicaTransportProtocol
     /// <summary>Stable RPC method identity.</summary>
     public const string ExchangeAlias = "keyload.replica.exchange.v1";
     /// <summary>Request HMAC domain separator.</summary>
-    public const string RequestPurpose = "keyload-replica-request-data-epoch6";
+    public const string RequestPurpose = "keyload-replica-request-data-epoch6-rpc2";
     /// <summary>Reply HMAC domain separator.</summary>
-    public const string ReplyPurpose = "keyload-replica-reply-data-epoch6";
+    public const string ReplyPurpose = "keyload-replica-reply-data-epoch6-rpc2";
     /// <summary>Discovery response HMAC domain separator.</summary>
     public const string DiscoveryPurpose = "keyload-replica-discovery-data-epoch6";
     /// <summary>Exact discovery response signature header.</summary>
@@ -72,6 +74,8 @@ public static class ReplicaTransportProtocol
     public const string InvalidOptions = "Replica peer identities, credentials and discovery limits are invalid.";
     /// <summary>Unavailable or unauthenticated discovery failure detail.</summary>
     public const string InvalidDiscovery = "Replica discovery returned an invalid, unauthenticated or unavailable runtime address.";
+    /// <summary>Authenticated peer protocol mismatch, separate from an unavailable voter.</summary>
+    public const string IncompatibleCohort = "The configured replica cohort uses incompatible request or peer protocols.";
     /// <summary>Payload budget failure detail.</summary>
     public const string PayloadExceeded = ReplicaProtocol.PayloadExceeded;
     /// <summary>Malformed exact-byte protocol failure detail.</summary>

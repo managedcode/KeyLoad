@@ -160,6 +160,9 @@ jobs:
       - name: Build the genuine previous KeyLoad server image
         id: prior-images
         run: node scripts/Features/StorageRecovery/prepare-native5-server-image.mjs
+      - name: Build the genuine epoch-six RPC1 KeyLoad server image
+        id: rpc1-images
+        run: node scripts/Features/ClusterRouting/prepare-rpc1-server-image.mjs
       - name: Configure Docker image references
         shell: bash
         env:
@@ -168,11 +171,16 @@ jobs:
           KEYLOAD_PRIOR_SERVER_IMAGE: ${{ steps.prior-images.outputs.prior-server-image }}
           KEYLOAD_PRIOR_IMAGE_RECEIPT: ${{ steps.prior-images.outputs.prior-image-receipt }}
           KEYLOAD_PRIOR_SERVER_MANIFEST: ${{ steps.prior-images.outputs.prior-server-manifest }}
+          KEYLOAD_RPC1_SERVER_IMAGE: ${{ steps.rpc1-images.outputs.KEYLOAD_RPC1_SERVER_IMAGE }}
+          KEYLOAD_RPC1_IMAGE_RECEIPT: ${{ steps.rpc1-images.outputs.KEYLOAD_RPC1_IMAGE_RECEIPT }}
+          KEYLOAD_RPC1_SERVER_MANIFEST: ${{ steps.rpc1-images.outputs.KEYLOAD_RPC1_SERVER_MANIFEST }}
         run: |
           test -n "$KEYLOAD_SERVER_IMAGE" && test -n "$KEYLOAD_RUNNER_IMAGE"
           test -n "$KEYLOAD_PRIOR_SERVER_IMAGE" && test -n "$KEYLOAD_PRIOR_IMAGE_RECEIPT" && test -n "$KEYLOAD_PRIOR_SERVER_MANIFEST"
+          test -n "$KEYLOAD_RPC1_SERVER_IMAGE" && test -n "$KEYLOAD_RPC1_IMAGE_RECEIPT" && test -n "$KEYLOAD_RPC1_SERVER_MANIFEST"
           printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
           printf 'KEYLOAD_PRIOR_SERVER_IMAGE=%s\nKEYLOAD_PRIOR_IMAGE_RECEIPT=%s\nKEYLOAD_PRIOR_SERVER_MANIFEST=%s\n' "$KEYLOAD_PRIOR_SERVER_IMAGE" "$KEYLOAD_PRIOR_IMAGE_RECEIPT" "$KEYLOAD_PRIOR_SERVER_MANIFEST" >> "$GITHUB_ENV"
+          printf 'KEYLOAD_RPC1_SERVER_IMAGE=%s\nKEYLOAD_RPC1_IMAGE_RECEIPT=%s\nKEYLOAD_RPC1_SERVER_MANIFEST=%s\n' "$KEYLOAD_RPC1_SERVER_IMAGE" "$KEYLOAD_RPC1_IMAGE_RECEIPT" "$KEYLOAD_RPC1_SERVER_MANIFEST" >> "$GITHUB_ENV"
       - name: Find Chrome for admin tests
         shell: bash
         run: |

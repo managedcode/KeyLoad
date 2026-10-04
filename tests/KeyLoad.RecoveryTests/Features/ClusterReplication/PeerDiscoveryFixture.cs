@@ -151,6 +151,8 @@ internal sealed class PeerDiscoveryFixture : IDisposable
     {
         foreach (var body in bodies)
         { body.Dispose(); }
+        Sender.Dispose();
+        Receiver.Dispose();
         CryptographicOperations.ZeroMemory(Secret);
     }
 }

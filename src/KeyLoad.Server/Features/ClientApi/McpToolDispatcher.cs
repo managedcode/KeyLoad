@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.Orleans;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -34,7 +35,8 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
         { return state.Failure(error.Code, CanonicalOperationGateway.RequestId(context)); }
         catch (JsonException)
         { return state.Failure(ErrorCode.Validation, CanonicalOperationGateway.RequestId(context)); }
-        catch (Exception error) when (error is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+        catch (Exception error) when ((error is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+            && NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             LogFailure(context.RequestServices.GetRequiredService<ILogger<McpToolDispatcher>>(),
                 error.GetType().FullName ?? error.GetType().Name, null);
