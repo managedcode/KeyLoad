@@ -1,7 +1,7 @@
 # ADR-067: One composable database for AI agents
 
 Status: Accepted. Date: 2026-10-03. Owner: root integration agent.
-REQ-COMP-001–006 / AC-COMP-001–008, [DatabaseComposition](../Features/DatabaseComposition.md).
+REQ-COMP-001–007 / AC-COMP-001–009, [DatabaseComposition](../Features/DatabaseComposition.md).
 
 ## Decision
 
@@ -69,6 +69,9 @@ flowchart LR
 7. TASK-COMP-005 records development versus exact-source GitHub proof separately;
    build/analyzers/format/governance, normal/scalar, process recovery and RF3 gates
    remain mandatory. Full site publication waits on complete Benchmarks producer.
+8. TASK-COMP-008 (root) owns the README and landing AI-native thesis copy and the
+   SiteProductCopy/SiteProductThesis* content tests for REQ-COMP-007/AC-COMP-009.
+   It changes no runtime contract, storage, serialization or topology.
 
 Determinism: replicated apply cannot use a local elapsed deadline or caller
 cancellation to choose effects. A frozen monotonic TimeProvider feeds the existing

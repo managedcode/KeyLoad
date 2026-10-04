@@ -12,8 +12,6 @@ internal static class SiteDatabaseCompositionTokens
     internal const string HtmlSectionEnd = "</section>";
     internal const string ReadmeCompositionStart = "## One database, connected models";
     internal const string ReadmeCompositionEnd = "## Quick start";
-    internal const string MissingRepository = "Composition content tests require the actual site repository path.";
-    internal const string MissingSection = "The public database composition section is missing or incomplete.";
     internal const string OneDatabase = "one database for AI agents";
     internal const string CanonicalLinks = "canonical entity references";
     internal const string FamiliarSql = "SQL is the familiar shared language";
@@ -27,31 +25,21 @@ internal static class SiteDatabaseCompositionTokens
     internal const string CanonicalCall = "CALL keyload_documents_commit(@arguments)";
     internal const string SdkCommit = "CommitAsync";
     internal const string OfficialMcp = "official MCP";
-    internal const string ProceduralStage = "initial bounded procedural composition stage";
-    internal const string QualificationPending = "exact-source qualification pending";
     internal const string AtomicScope = "same atomic partition and transaction domain";
     internal const string LeaseBoundary = "does not lease or ACK";
     internal const string BlobsSameDatabase = "blobs remain part of the same database";
-    internal const string BlobOperationsBoundary =
-        "staged upload and publication use their existing operations outside this initial graph/queue batch";
     internal const string FullSqlPending = "Full declarative SQL";
     internal const string NativeClientPending = "native SQL-client protocol";
     internal const string CrossPartitionPending = "cross-partition composition";
-    internal const string RequiredPending = "remain required and pending";
-    internal const string ReadmeCurrentApi = "current composition API";
-    internal const string ReadmePreview = "development preview";
+    internal const string CurrentApi = "current composition API";
+    internal const string Preview = "development preview";
     internal const string AtomicRollback = "succeeds or rolls back together";
-    internal const string ReadmeBlobBoundary = "separate upload and publication operations";
-    internal const string ReadmePendingFeatures = "still in development";
-    internal const string ReadmePendingQualification = "remain under qualification";
+    internal const string BlobBoundary = "separate upload and publication operations";
+    internal const string PendingFeatures = "still in development";
+    internal const string PendingQualification = "remain under qualification";
     internal const string FeaturePath = "docs/Features/DatabaseComposition.md";
     internal const string AdrPath = "docs/ADR/ADR-067-composable-agent-database.md";
     internal const string GitHubRoot = "https://github.com/managedcode/KeyLoad/blob/main/";
-    internal const string HtmlTagPattern = "<[^>]*>";
-    internal const string WordSeparator = " ";
-    internal const int PatternTimeoutMilliseconds = 1000;
-    internal const int ReadmeSectionIndex = 0;
-    internal const int HtmlSectionIndex = 1;
 
     internal static readonly string[] Models =
         ["documents", "typed tables", "graphs", "blobs", "queues", "events", "vectors/search", "time series"];
@@ -59,14 +47,9 @@ internal static class SiteDatabaseCompositionTokens
     internal static readonly string[] Flows =
         [QueueFlow, GraphFlow, LinkedEntities, GraphRelationships, QueuedActions, QueueMutation, GraphMutation];
 
+    // README and landing state the same current stage, atomic scope and readiness contracts.
     internal static readonly string[] StageContracts =
-        [CanonicalCall, SdkCommit, OfficialMcp, ProceduralStage, QualificationPending, AtomicScope,
-            LeaseBoundary, BlobsSameDatabase, BlobOperationsBoundary, FullSqlPending, NativeClientPending,
-            CrossPartitionPending, RequiredPending];
-
-    // README uses product language; retain the same scope and readiness assertions.
-    internal static readonly string[] ReadmeStageContracts =
-        [CanonicalCall, SdkCommit, OfficialMcp, ReadmeCurrentApi, ReadmePreview, AtomicScope, AtomicRollback,
-            LeaseBoundary, BlobsSameDatabase, ReadmeBlobBoundary, FullSqlPending, NativeClientPending,
-            CrossPartitionPending, ReadmePendingFeatures, ReadmePendingQualification];
+        [CanonicalCall, SdkCommit, OfficialMcp, CurrentApi, Preview, AtomicScope, AtomicRollback,
+            LeaseBoundary, BlobsSameDatabase, BlobBoundary, FullSqlPending, NativeClientPending,
+            CrossPartitionPending, PendingFeatures, PendingQualification];
 }

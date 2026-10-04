@@ -1,13 +1,13 @@
 <p align="center">
-  <img src="site/favicon.svg" width="88" height="88" alt="KeyLoad logo">
+  <img src="site/favicon.svg" width="88" height="88" alt="KeyLoad, the AI-native database for AI agents">
 </p>
 
 <h1 align="center">KeyLoad</h1>
 
 <p align="center">
-  <strong>One database for AI agents.</strong><br>
-  Documents, typed tables, graphs, vectors/search, blobs, queues, events and time series in one replicated cluster.<br>
-  Everything links to everything else, and you reach all of it through SQL, MCP and the .NET SDK.
+  <strong>The AI-native database. One database for AI agents.</strong><br>
+  Documents, typed tables, graphs, vectors/search, blobs, queues, events and time series in one replicated .NET cluster.<br>
+  Everything links to everything else, and agents reach all of it through SQL, a built-in MCP server and a typed .NET SDK.
 </p>
 
 <p align="center">
@@ -15,6 +15,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-black" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/.NET-10-512BD4" alt=".NET 10">
   <img src="https://img.shields.io/badge/built%20on-Orleans-0b5cad" alt="Built on Orleans">
+  <img src="https://img.shields.io/badge/storage-ZoneTree-222222" alt="ZoneTree storage">
   <img src="https://img.shields.io/badge/MCP-server%20built%20in-6e56cf" alt="MCP server built in">
   <img src="https://img.shields.io/badge/status-development%20preview-orange" alt="Development preview">
 </p>
@@ -22,52 +23,96 @@
 <p align="center">
   <a href="https://www.keyload.cloud/">Website</a> ·
   <a href="#quick-start">Quick start</a> ·
-  <a href="docs/README.md">Documentation</a> ·
-  <a href="docs/Architecture.md">Architecture</a> ·
+  <a href="#capability-matrix">Capabilities</a> ·
+  <a href="#why-net-orleans-and-zonetree">Why .NET, Orleans and ZoneTree</a> ·
+  <a href="docs/README.md">Docs</a> ·
   <a href="#project-status">Status</a>
 </p>
 
 ---
 
-## Why KeyLoad?
+## Why an AI-native database?
 
-A typical AI agent stack ends up as five systems glued together: Postgres for records, a vector database for embeddings, Redis or RabbitMQ for tasks, S3 for files and Kafka for events. Each one has its own permissions, its own failure modes and its own copy of the truth. The agent spends its time keeping them in sync.
+**Agents shouldn't need a dozen databases.** Yet an agent that needs memory and the ability to act can easily end up wired to seven: Postgres for records, a vector database for embeddings, Redis or RabbitMQ for tasks, S3 for files, Kafka for events, a graph database for relationships and a time-series database for metrics. Every one of them brings its own client, credentials, permission model, backups and failure modes. The agent, and your team, spend their time keeping seven copies of the truth in sync.
 
-KeyLoad puts all of that in **one database**:
+```mermaid
+flowchart TB
+    subgraph Today["Today: one agent, seven systems"]
+        direction TB
+        A1["AI agent"] --> PG[("Postgres<br/>records")]
+        A1 --> VDB[("Vector DB<br/>embeddings")]
+        A1 --> MQ[("Redis / RabbitMQ<br/>tasks")]
+        A1 --> S3[("S3<br/>files")]
+        A1 --> KF[("Kafka<br/>events")]
+        A1 --> GDB[("Graph DB<br/>relationships")]
+        A1 --> TSDB[("Time-series DB<br/>metrics")]
+    end
+    subgraph One["With KeyLoad: one database"]
+        direction TB
+        A2["AI agent"] --> KL[("KeyLoad<br/>every model, one reference,<br/>one permission check")]
+    end
+    Today ~~~ One
+```
 
-- 🔗 **One reference for everything.** All models share canonical entity references. A queue message can point to a document, that document can be a node in a knowledge graph, and its files, embeddings and history stay attached to it.
-- 🗣️ **One language.** SQL is the familiar shared language for querying and combining the models. Agents get the same operations as MCP tools, and applications get them through a typed .NET SDK.
-- 🔐 **One permission model.** API keys and access policies live in the database itself. Every call is checked, down to rows and fields, and clients can't grant themselves roles.
-- 🛡️ **Replicated from day one.** The default server is a three-node cluster that keeps three copies of your data (RF3). It runs on [Orleans](https://github.com/dotnet/orleans), with [ZoneTree](https://github.com/ZoneTree/ZoneTree) storage on each node.
+KeyLoad is an **AI-native database**: it's designed around how agents work, not bolted onto a database built for something else.
+
+- **One reference for everything.** All models share canonical entity references. A queue message can point to a document, that document can be a node in a knowledge graph, and its files, embeddings and history stay attached to it.
+- **One language.** SQL is the familiar shared language for querying and combining the models. Agents get the same operations as MCP tools, and applications get them through a typed .NET SDK.
+- **One permission model.** API keys and access policies live in the database itself. Every call is checked, down to rows and fields, and neither clients nor prompts can grant themselves extra roles.
+- **One atomic write.** A document, its event, a graph edge and the follow-up task in the same partition commit together, or not at all.
+- **Limits on every operation.** Full scans must be requested explicitly, and every request has caps on work and memory, so a runaway request is rejected at its limit instead of running unbounded.
+- **Replicated from day one.** The default server is a three-node cluster that keeps three copies of your data (RF3), on [Orleans](https://github.com/dotnet/orleans) with [ZoneTree](https://github.com/ZoneTree/ZoneTree) storage on each node.
+
+### Why we think this is the future
+
+Agents don't think in tables, queues or buckets. Picture a support agent handling a refund: it takes the ticket off a queue, loads the customer and the order, finds similar past cases with vector search, links the case into a knowledge graph, attaches the receipt and schedules a follow-up. Spread across separate systems, that one step turns into a distributed saga held together by glue code and stale copies, and the agent needs a key to every one of them.
+
+When everything lives in one database, that step should become **one authorized operation**. Today its writes within one partition already commit atomically, while leased receives, blob uploads and cross-partition work are still separate steps. Our goal is that building context becomes one query instead of a join written in prompt code, and that access is one policy you can read. That's why we're building KeyLoad: so that nobody has to stand up and run a stack of databases just to let agents get work done.
+
+KeyLoad is a development preview today: the [status section](#project-status) lists what works and what's still in progress. If you'd rather run one database than seven, **star the repo** to follow along, [try the quick start](#quick-start) and [open an issue](https://github.com/managedcode/KeyLoad/issues) describing the agent workload you want it to handle.
 
 ## What you can build
 
 | You want to… | KeyLoad gives you |
 |---|---|
-| Give an agent long-term **memory and retrieval** | Documents, files and embeddings in one place, with vector, text and hybrid search |
+| Give an agent long-term **memory and retrieval (RAG)** | Documents, files and embeddings in one place, with vector, full-text and hybrid search |
 | Build a **knowledge graph** | Relationships between any entities, including typed rows, and graph traversal |
 | Run **reliable agent workflows** | Queues with scheduling, leases, retries and dead letters, stored next to the data they change |
 | Make **event-driven** apps | Ordered event history, durable subscriptions, change feeds and projections |
-| Analyse **time series** | Timestamped samples, range reads, aggregates, time windows and retention |
+| Analyze **time series** | Timestamped samples, range reads, aggregates, time windows and retention |
 | Store **files** for agents | Chunked uploads and partial reads of large blobs |
 
 ## One database, connected models
 
-| Model | What it holds |
-|---|---|
-| 📄 Documents | JSON records with indexes and revision checks |
-| 🧾 Typed tables | Rows with a schema, primary keys and unique constraints |
-| 🕸️ Graphs | Edges between entities and traversal |
-| 🧭 Vectors and search | Vector similarity, full-text search and combined ranking |
-| 📦 Files and blobs | Large files stored in chunks, readable by byte range |
-| 📬 Queues | Scheduled work, leases, retries and dead-letter handling |
-| 📜 Events and topics | Ordered history, subscriptions and checkpoints |
-| 📈 Time series | Samples over time, aggregates and windows |
+### Capability matrix
+
+| Model | In one atomic commit | Read and query | SQL | MCP tools |
+|---|---|---|---|---|
+| 📄 Documents | ✅ Put, patch, delete with revision checks | Get by key, indexed queries, live queries | `SELECT` | `keyload_documents_*`, `keyload_query_*` |
+| 🧾 Typed tables | ✅ Rows with a schema, primary keys and unique constraints | Indexed queries | `SELECT` | `keyload_documents_commit`, `keyload_sql_execute` |
+| 🕸️ Graphs | ✅ Add and remove edges | Graph traversal | `CALL` | `keyload_graph_traverse` |
+| 🧭 Vectors and search | ✅ Store a vector with its document | Exact vector, full-text and hybrid search | `CALL` | `keyload_search_execute` |
+| 📬 Queues and topics | ✅ Enqueue, publish | Receive with leases, ACK, retries, dead letters, peek | `SELECT … FROM QUEUE_MESSAGES(…)` | `keyload_messages_*`, `keyload_subscriptions_*` for topics |
+| 📜 Events | ✅ Append with an expected revision | Read, replay, durable subscriptions | `SELECT … FROM EVENTS(…)` | `keyload_streams_*`, `keyload_subscriptions_*` |
+| 📈 Time series | ✅ Append samples | Ranges, latest value, aggregates, windows, retention | `CALL` | `keyload_series_*` |
+| 📦 Files and blobs | Separate upload and publish steps | Chunked uploads, byte-range reads | `CALL` | `keyload_blobs_*` |
+| 🔁 Change feeds | Document changes recorded in the same commit | Resumable change feed, projections | `CALL` | `keyload_changes_read`, `keyload_projections_*` |
+
+`SELECT` reads data. `CALL` runs any operation from the same catalog the MCP server exposes, so every model is reachable from SQL.
+
+### Models that work together
 
 These aren't separate silos. Collections, tables and queues live in the same database and reference each other, so one request can work across models:
 
 - **Queue to knowledge graph** (`QueueToGraph`). Reads ready messages from a queue, resolves their linked entities and writes the new knowledge-graph relationships.
 - **Graph to queued actions** (`GraphToQueueMutation`). Follows graph relationships and can enqueue actions for each entity it finds.
+
+```mermaid
+flowchart LR
+    Q[["Queue: inbox"]] -->|"QueueToGraph"| E["Linked entities<br/>documents and rows"]
+    E --> G(("Knowledge graph"))
+    G -->|"GraphToQueueMutation"| A[["Queue: actions"]]
+```
 
 **What the first version does.** The current composition API runs through .NET `CommitAsync`, SQL `CALL keyload_documents_commit(@arguments)` or the official MCP server:
 
@@ -106,11 +151,53 @@ flowchart LR
 ```
 
 1. A caller sends an operation to any node, through the SDK, MCP, SQL or plain HTTP.
-2. KeyLoad gives that request its own [Orleans](https://github.com/dotnet/orleans) grain, which checks permissions and calls the database grains it needs.
+2. KeyLoad gives that request its own [Orleans](https://github.com/dotnet/orleans) grain, which calls only the database grains it needs.
 3. Database grains route the work to the storage owner on each node. Storage stays on its node, even when Orleans moves grains around the cluster.
-4. A write is acknowledged only after a majority of the three replicas has stored it durably. If a node fails, the other two keep the acknowledged data.
+4. A write is acknowledged only after a majority of the three replicas has persisted it. If a node fails, the other two keep the acknowledged data.
+
+Here's one agent tool call, end to end:
+
+```mermaid
+sequenceDiagram
+    participant Agent as AI agent
+    participant Node as Any KeyLoad node
+    participant Req as Request grain
+    participant Part as Partition grain
+    participant Reps as Three ZoneTree replicas
+    Agent->>Node: MCP tool call with an API key
+    Note over Node,Req: Key and permissions are checked against the database
+    Node->>Req: A new grain for this request
+    Req->>Part: One atomic command
+    Part->>Reps: Replicate
+    Reps-->>Part: A majority persisted it
+    Part-->>Agent: One result, all or nothing
+```
 
 You'll find the full picture in the [architecture map](docs/Architecture.md).
+
+## Why .NET, Orleans and ZoneTree
+
+We picked a stack where the database, its cluster and its storage all run in one runtime, inside one process per node, with no glue in between.
+
+**[.NET 10](https://github.com/dotnet/runtime): a fast, memory-efficient runtime.**
+- `Span<T>`, pooled buffers and hardware intrinsics let hot paths avoid allocations and use SIMD. Vectorized paths are a priority workstream, and we'll publish measurements before claiming any speedup.
+- One language end to end. The server, SDK, CLI, analyzers and tests are all C#.
+- [Aspire](https://github.com/dotnet/aspire) orchestrates the whole three-node cluster, locally and in CI, from one AppHost.
+- Open source, cross-platform and at home in Linux containers.
+
+**[Orleans](https://github.com/dotnet/orleans): a cluster runtime that's proven in production.**
+- Virtual actors (grains) that the cluster places, activates and moves for you. Orleans came out of Microsoft Research and has powered Halo's cloud services, among others.
+- KeyLoad gives each request its own grain, so isolation, cancellation and backpressure work per request.
+- Membership and failure detection are built in. KeyLoad also turns on Orleans' experimental distributed grain directory and activation repartitioning, which we're still qualifying.
+- Fast generated binary serialization between nodes.
+
+**[ZoneTree](https://github.com/ZoneTree/ZoneTree): storage that lives inside the node.**
+- An embedded, persistent, ordered key-value engine written in C#. Data lives in each node's own process, with no extra network hop and no native interop.
+- A write-ahead log on each node, and ordered keys for range scans and indexes.
+- One storage engine under every model: documents, rows, graphs, vectors, queues, events, time series and blobs.
+- [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) adds the full-text index on the same foundation.
+
+Together: **Orleans moves the routing, and ZoneTree keeps the data in place.** Storage never travels with a grain, so the cluster can rebalance work without copying files between nodes.
 
 ## Quick start
 
@@ -219,7 +306,7 @@ EXPLAIN SELECT * FROM orders                                   -- see the query 
 CALL keyload_documents_commit(@arguments)                      -- run any database operation
 ```
 
-Scans of a whole collection have to be enabled explicitly with `AllowFullScan`. Full SQL, including joins, is still in progress. The [query guide](docs/Features/QueryExecution.md) lists the supported syntax, and the [compatibility inventory](docs/implementation/sql-client-conformance.json) tracks the rest.
+Model views (`QUEUE_MESSAGES`, `EVENTS`) and unindexed filters require `AllowFullScan: true`, and model views don't support cursors. Full SQL, including joins, is still in progress. The [query guide](docs/Features/QueryExecution.md) lists the supported syntax, and the [compatibility inventory](docs/implementation/sql-client-conformance.json) tracks the rest.
 
 ### From an AI agent (MCP)
 
@@ -250,11 +337,49 @@ The agent sees exactly what its API key allows. Permissions are stored in the da
 | Queue ↔ graph composition within one partition | [Approximate vector search (ANN)](docs/Features/Search/ManagedAnn.md); vector search is exact for now |
 | Three-node Orleans cluster, crash recovery, local backup and restore | Production, endurance and power-loss qualification |
 | Admin console and CLI | [Storage upgrades](docs/Features/StorageRecovery.md) from older versions, which still have an [open cold-cluster failure](docs/implementation/node-epoch-linux-0d78-2026-10-04.json) |
-| | Published performance comparisons with other databases |
+| | The full performance comparison with other databases (current runs are on the [website](https://www.keyload.cloud/#benchmarks)) |
 
 Full-text search comes from [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch). KeyLoad then ranks the results it finds and checks permissions on each one.
 
-For detailed status, see the [implementation tracker](docs/implementation/status.json) and the [qualification records](docs/implementation/documentation-coverage.json). We publish performance numbers only from real GitHub Actions runs, on the [website](https://www.keyload.cloud/).
+For detailed status, see the [implementation tracker](docs/implementation/status.json) and the [qualification records](docs/implementation/). We publish performance numbers only from real GitHub Actions runs, on the [website](https://www.keyload.cloud/).
+
+## FAQ
+
+### What is an AI-native database?
+
+A database designed around how AI agents work: every kind of agent data in one place, linked by shared references, reachable through MCP and SQL, with permissions an agent can't talk its way around. That's what KeyLoad is built to be.
+
+### Is KeyLoad a vector database for .NET?
+
+It includes vector search, but vectors don't sit in a separate store. They live next to the documents, graph, queues and files they belong to, and one request can use all of them. Vector search is exact today, and [approximate (ANN) search](docs/Features/Search/ManagedAnn.md) is in progress.
+
+### Can KeyLoad be the memory layer for my agents?
+
+That's the main use case. Documents, embeddings, files, a knowledge graph and event history live together, so long-term memory, retrieval (RAG) and the task queue share one store and one permission model.
+
+### Does KeyLoad replace Postgres, Redis, Kafka or S3?
+
+For agent workloads, that's the goal: one database instead of a stack of them. KeyLoad is still a development preview, so check the [project status](#project-status) before you move anything.
+
+### How do AI agents connect?
+
+Every node runs a built-in MCP server at `/mcp`. Point any MCP client at it with an API key, and the agent can use exactly the operations that key allows.
+
+### Why build a database on Orleans?
+
+Orleans already handles cluster membership, failure detection and request routing for .NET. KeyLoad gives every request its own grain, while ZoneTree keeps each node's data on that node. See [Why .NET, Orleans and ZoneTree](#why-net-orleans-and-zonetree).
+
+### Can I use KeyLoad from Python, TypeScript or another language?
+
+Yes, through MCP or the HTTP API under `/v1/`. The typed SDK is .NET for now.
+
+### Is KeyLoad open source?
+
+Yes. KeyLoad is MIT-licensed and developed in the open on GitHub.
+
+### Can I run it in production?
+
+Not yet. Endurance, fault and power-loss qualification are still in progress.
 
 ## Repository map
 
@@ -303,7 +428,7 @@ KeyLoad is developed by [Managed Code](https://www.managed-code.com/) and stands
 | [Cartograph](https://github.com/angelhernandezm/Cartograph) | Segmented backup archives and catalogs |
 | [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet) | Logs, metrics and traces |
 
-Development and presentation also use [Aspire](https://github.com/dotnet/aspire) for Docker orchestration, [TUnit](https://github.com/thomhurst/TUnit) for tests, [Roslyn](https://github.com/dotnet/roslyn) for the repository's own code analyzers, [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet) for microbenchmarks, and [Three.js](https://github.com/mrdoob/three.js) for the website's cluster illustration. The database comparisons connect through the official clients [Npgsql](https://github.com/npgsql/npgsql), [MongoDB .NET Driver](https://github.com/mongodb/mongo-csharp-driver), [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis), [RabbitMQ .NET Client](https://github.com/rabbitmq/rabbitmq-dotnet-client) and [KurrentDB .NET Client](https://github.com/kurrent-io/KurrentDB-Client-Dotnet).
+Development and presentation also use [Aspire](https://github.com/dotnet/aspire) for Docker orchestration, [TUnit](https://github.com/thomhurst/TUnit) for tests, [Roslyn](https://github.com/dotnet/roslyn) for the repository's own code analyzers, [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet) for microbenchmarks, and [Three.js](https://github.com/mrdoob/three.js) for the website's cluster illustration. The benchmark suite compares KeyLoad with the free community editions of [PostgreSQL](https://github.com/postgres/postgres) with [pgvector](https://github.com/pgvector/pgvector), [TimescaleDB](https://github.com/timescale/timescaledb), [MongoDB](https://github.com/mongodb/mongo), [Redis](https://github.com/redis/redis), [RabbitMQ](https://github.com/rabbitmq/rabbitmq-server), [KurrentDB](https://github.com/kurrent-io/KurrentDB), [Neo4j](https://github.com/neo4j/neo4j), [Qdrant](https://github.com/qdrant/qdrant) and [OpenSearch](https://github.com/opensearch-project/OpenSearch), connecting through the official clients [Npgsql](https://github.com/npgsql/npgsql), [MongoDB .NET Driver](https://github.com/mongodb/mongo-csharp-driver), [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis), [RabbitMQ .NET Client](https://github.com/rabbitmq/rabbitmq-dotnet-client) and [KurrentDB .NET Client](https://github.com/kurrent-io/KurrentDB-Client-Dotnet).
 
 ## License
 
