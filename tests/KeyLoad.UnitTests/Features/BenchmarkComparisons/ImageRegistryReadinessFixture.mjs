@@ -24,7 +24,7 @@ async function runReadinessScenario() {
     if (scenario === 'evidence-unsafe') await prepareUnsafeEvidence();
     const started = Date.now();
     let failure;
-    try { await waitForRegistry(context); } catch (error) { failure = error; }
+    try { await waitForRegistry(context, fixture.port); } catch (error) { failure = error; }
     const elapsedMs = Date.now() - started;
     if (scenario === 'evidence-unsafe') {
       assert.equal(failure?.message, message.unsafeEvidencePath);
@@ -77,8 +77,10 @@ function serveRequest(fixture, request, response) {
 async function listenFixture(fixture) {
   await new Promise((resolve, reject) => {
     fixture.server.once('error', reject);
-    fixture.server.listen(registry.port, registry.host, () => {
+    fixture.server.listen(0, registry.host, () => {
       fixture.server.removeListener('error', reject);
+      fixture.port = fixture.server.address().port;
+      assert(Number.isInteger(fixture.port) && fixture.port > 0 && fixture.port <= 65535);
       fixture.listening = true;
       resolve();
     });
@@ -153,6 +155,7 @@ function assertSuccessfulReadiness(failure, elapsedMs, rows, fixture) {
 }
 
 async function assertEvidenceBounds() {
+  await assertRejectedRegistryPorts();
   const valid = Object.freeze({ sequence: 1, startedAt: '2026-10-04T00:00:00.000Z', durationMs: 12,
     timeoutMs: 2000, status: 200, aborted: false, phase: 'body-cancel', outcome: 'ready', errorCode: null });
   for (const input of invalidEvidence(valid)) {
@@ -169,6 +172,23 @@ async function assertEvidenceBounds() {
   assert.equal(await readFile(readinessFile, 'utf8'), initial);
   assert((await stat(readinessFile)).size < 64 * 1024);
   await assertEvidenceByteLimit(valid);
+}
+
+async function assertRejectedRegistryPorts() {
+  const fixture = makeFixture();
+  try {
+    await listenFixture(fixture);
+    const invalid = [0, -1, 65536, 1.5, NaN, Infinity, null, {}, String(fixture.port)];
+    for (const port of invalid) {
+      await assert.rejects(waitForRegistry(context, port), {
+        name: 'RangeError', message: 'The owned loopback registry port is invalid.',
+      });
+    }
+    assert.equal(fixture.requests, 0);
+    await assert.rejects(stat(context.evidenceDirectory), { code: 'ENOENT' });
+  } finally {
+    await closeFixture(fixture);
+  }
 }
 
 async function assertEvidenceByteLimit(valid) {

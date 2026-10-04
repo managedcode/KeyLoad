@@ -8,6 +8,8 @@ const metadataSeparator = '|';
 const mediaTypeParameterSeparator = ';';
 const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 const invalidDeadline = 'The owned image HTTP deadline is invalid.';
+const invalidRegistryPort = 'The owned loopback registry port is invalid.';
+const maxRegistryPort = 65535;
 const timeoutMessage = 'The owned image HTTP operation exceeded its time bound.';
 const cleanupErrorGroups = new WeakMap();
 
@@ -90,14 +92,19 @@ export function parseManifestEvidence(bytes, digestHeader, contentTypeHeader, ex
   });
 }
 
-export async function waitForRegistry(context) {
+export async function waitForRegistry(context, registryPort = registry.port) {
+  if (!Number.isInteger(registryPort) || registryPort <= 0 || registryPort > maxRegistryPort) {
+    throw new RangeError(invalidRegistryPort);
+  }
+  const url = new URL(registryProtocol.path, registry.url);
+  url.port = String(registryPort);
   const deadline = Date.now() + processLimit.readinessTimeoutMs;
   let sequence = 0;
   while (Date.now() < deadline) {
     const remaining = deadline - Date.now();
     if (remaining <= 0) break;
     sequence++;
-    const result = await probeRegistry(context, sequence, Math.min(processLimit.readinessProbeTimeoutMs, remaining));
+    const result = await probeRegistry(context, sequence, Math.min(processLimit.readinessProbeTimeoutMs, remaining), url);
     if (result.outcome === registryReadinessTokens.outcome.ready && Date.now() < deadline) return;
     const backoff = Math.min(processLimit.readinessIntervalMs, deadline - Date.now());
     if (backoff > 0) await wait(backoff);
@@ -105,7 +112,7 @@ export async function waitForRegistry(context) {
   throw new Error(message.registryTimeout);
 }
 
-async function probeRegistry(context, sequence, timeoutMs) {
+async function probeRegistry(context, sequence, timeoutMs, url) {
   const started = Date.now();
   let signal;
   let status = null;
@@ -115,7 +122,7 @@ async function probeRegistry(context, sequence, timeoutMs) {
   try {
     await withHttpDeadline(timeoutMs, async value => {
       signal = value;
-      const response = await fetch(`${registry.url}${registryProtocol.path}`, { signal, redirect: 'error' });
+      const response = await fetch(url, { signal, redirect: 'error' });
       status = response.status;
       phase = registryReadinessTokens.phase.bodyCancel;
       await response.body?.cancel();

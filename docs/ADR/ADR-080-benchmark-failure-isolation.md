@@ -41,6 +41,16 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
    Run these actual loopback fixture tests before `prepare-images.mjs` owns the
    same registry port; restore/build the native test runners first. Keep the
    actual pinned image export/import checks after image construction.
+   The readiness helper accepts an optional numeric loopback port with default
+   registry.port; validate integer1..65535 before URL construction, HTTP or
+   evidence I/O. Both production callers retain their no-argument default5000.
+   Actual HTTP fixtures listen on kernel-assigned port0, retain that listener
+   until cleanup and pass only its observed port. Extend the existing bounded
+   evidence case with invalid-number/type checks, zero HTTP requests and absent
+   evidence assertions; do not change OS settings/processes or accept arbitrary
+   hosts/URLs/environment overrides. Root integrates this port-isolation follow-up,
+   reviews the unchanged production callers and reruns the10 original scenarios
+   through freshly built Aspire/TUnit before the next scoped checkpoint.
    Under FAIL-PREP-KURRENT, `KurrentTarget.InitializeAsync` constructs the actual
    SDK writer only after `KurrentClusterVerifier.VerifyAsync` proves membership.
    Three SDK/resource-model tests belong to ComparisonTests and run in common

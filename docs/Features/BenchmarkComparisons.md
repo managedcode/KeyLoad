@@ -688,7 +688,7 @@ KeyLoad engine repair and concurrent series-codec work are outside this task.
 | REQ-BC-FAIL-003 authenticated partial results | AC-BC-FAIL-003 failed job accepted only with failed workload, successful result upload and matching failed envelope; missing/malformed/expired/mixed evidence rejected | producer/aggregate/site negative and positive TUnit regressions |
 | REQ-BC-FAIL-004 honest site | AC-BC-FAIL-004 successful competitors retain values; failed cells have no numeric values and expose actual job link | independent numeric oracle, projection validation and real Chrome |
 | REQ-BC-FAIL-005 repair shared preparation | AC-BC-FAIL-005 diagnose exact failed logs, repair benchmark setup/build invocation, retain native isolated topology and Aspire ownership | exact failed-source log, focused regression, delivered-source GitHub rerun |
-| REQ-BC-FAIL-006 bounded registry readiness | AC-BC-FAIL-006 each native HTTP probe has at most2s within the unchanged30s total; only settled non-aborted HTTP200 succeeds; private no-follow diagnostics remain at most121 records/64KiB and evidence-write failures propagate | `ImageRegistryReadinessTests`:10 actual loopback HTTP/error/bounds cases, plus genuine pinned Docker image export/import in GitHub |
+| REQ-BC-FAIL-006 bounded registry readiness | AC-BC-FAIL-006 each native HTTP probe has at most2s within the unchanged30s total; only settled non-aborted HTTP200 succeeds; private no-follow diagnostics remain at most121 records/64KiB and evidence-write failures propagate. Actual fixture listeners use kernel-assigned loopback ports; optional numeric port accepts only integers1..65535 before HTTP/evidence, while both production callers keep the default5000 | `ImageRegistryReadinessTests`:10 actual loopback HTTP/error/bounds cases, including rejected port inputs before I/O, plus genuine pinned Docker image export/import in GitHub |
 | REQ-BC-FAIL-007 Kurrent writer starts after membership | AC-BC-FAIL-007 verify all native1/2/3-member views before constructing the SDK writer; retain native DNS seeds, TLS verification, leader preference, NoStream semantics, acknowledgements, replica-copy oracle and cleanup | `IsolatedKurrentDiscoverySettingsTests`:3 actual SDK/resource-model cases; genuine Aspire-owned StreamAppend preflights for1/2/3 nodes |
 | REQ-BC-FAIL-008 explicit cancellation stops owned work | AC-BC-FAIL-008 workload, finalization and result upload use `!cancelled()` so ordinary failure still finalizes while cancellation stops execution/publication; `always()` cleanup retains bounded diagnostics and safely removes owned registries whose setup was cancelled | `WorkflowBenchmarkFailureTests`, unchanged canceled-job/producer rejection regressions and actual GitHub lifecycle |
 
@@ -774,6 +774,31 @@ Aspire-owned TUnit bridge; the new C# follow-up runner was not built successfull
 Full Release, scoped Unit build and formatter were blocked by concurrent
 KeyCodec/CRUD source/test diagnostics. New workflow C# tests and actual complete
 publication remain pending; none of that engine work is staged in this repair.
+
+The clean88e2cec snapshot passed full Release build, formatter and governance.
+Its actual full unit report has2821/2867 passes,46 failures, no skips/cancellation:
+workflow cancellation3/3 and all selected workflow-layout groups passed. One
+registry case failed with original `EADDRINUSE`; concurrent local tests and an
+observed system ControlCenter listener share port5000. FAIL-PREP-REGISTRY therefore
+uses an OS-owned ephemeral port for each actual HTTP fixture. Only a numeric port
+on the fixed loopback URL is configurable in the readiness helper; preparation,
+bundle publication, Docker mapping, manifest fetch and cleanup keep their existing
+default5000. The evidence-bounds case verifies invalid numbers/types produce no
+requests or evidence directory. Other full-unit failures include temp-path link
+rejection and a native allocation assertion; those are not repaired here. Reruns
+use an owned canonical temporary directory and retain the original failed report.
+Clean-snapshot failed-envelope producer/finalizer2/2 passed through Aspire. The
+chunk development child failed because that archive has no Git metadata; its
+original stderr proves the failed `git check-ignore`, rather than a codec defect.
+
+The subsequent benchmark-only port-isolation candidate (archive of88e2cec plus
+its scoped patch) passed full Release build with0warnings/errors, formatter and
+governance. Its freshly built actual Aspire/TUnit registry scenarios passed10/10
+normal and10/10 scalar, no skips/cancellation/timeouts, using an owned canonical
+temporary directory. The production callers still omit the optional port.
+Source/module/fixture/runner and original report hashes are retained in the local
+development receipt and status. Complete delivered-source GitHub publication is
+pending; these development results do not qualify a full cohort or website.
 
 ```mermaid
 flowchart LR

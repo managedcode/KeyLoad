@@ -3190,7 +3190,7 @@
         "scope": "preparation and native preflight only;4096-record development workload; no scale, full cohort, winner or power-loss qualification"
       }
     },
-    "localDevelopmentVerification": "Earlier integrated Release build/formatter and Aspire registry10/10, SDK settings3/3, producer/finalizer2/2, GitHub evidence84/84 and original report probes48/48 passed. Delivered6ec Linux clean build, formatter, workflow inventory and native image checks passed. Follow-up current JS registry fixtures passed10/10 normal and10/10 scalar through the existing Aspire/TUnit bridge (not a newly compiled C# runner). Governance and diff checks pass. Current full Release, scoped Unit build and formatter are blocked by concurrent KeyCodec/CRUD source/test diagnostics outside benchmark scope; new workflow C# tests and complete delivered-source native/site/Pages qualification remain pending.",
+    "localDevelopmentVerification": "Delivered6ec Linux clean build, formatter, workflow inventory, registry10/10 and SDK/resource settings3/3 passed. Clean88e2cec snapshot passed full Release build, formatter and governance; actual full unit2821/2867 passed with46 failures, no skips/cancellation (including a registry port conflict, macOS temp-link rejections, missing Git metadata for the chunk child and an allocation assertion). Workflow cancellation3/3 and failed producer/finalizer2/2 passed through Aspire. Benchmark-only ephemeral-port follow-up freshly built clean with0warnings/errors; formatter and governance passed; actual registry10/10 normal and10/10 scalar passed through Aspire/TUnit with canonical owned TMPDIR. Complete delivered-source native/site/Pages qualification remains pending; no KeyLoad engine repair in this stage.",
     "runtimeQualified": false,
     "publicationQualified": false,
     "keyLoadEngineChanges": false,
@@ -3198,7 +3198,7 @@
       "requirement": "REQ-BC-FAIL-008",
       "ordinaryFailure": "preserves original failed workload and authenticated null-report upload",
       "explicitCancellation": "stops workload/finalization/result upload; bounded always cleanup validates owned partial setup",
-      "qualification": "source reviewed; focused Aspire regression and genuine delivered-source lifecycle pending"
+      "qualification": "Clean88e2cec actual Aspire/TUnit workflow cancellation3/3 passed; genuine delivered-source lifecycle pending."
     },
     "registryDeadlineRegression": {
       "ciRunId": 37161833095,
@@ -3230,6 +3230,53 @@
         "normalReportSha256": "fbd9c1894275e594821a547fbf8a3278a504cc7b1ea2dbacc4a25f41c9dd99a4",
         "scalarReportSha256": "723d3a6c7211b30fe09e45a962e2a82274bed38fb1573c00eff43003b455c8de"
       }
+    },
+    "registryPortIsolation": {
+      "requirement": "REQ-BC-FAIL-006",
+      "production": "both no-argument callers retain fixed loopback port5000",
+      "fixture": "actual listeners own kernel-assigned ports through cleanup; invalid integer/type inputs rejected before HTTP or evidence I/O",
+      "developmentSource": "88e2cec05d31008e9887fe8e970756b7691b7734",
+      "candidatePatchSha256": "f46d5eadfdf74aa61e785383e610454925ccc08c2afdcae3af93eb4b65539c89",
+      "fullReleaseBuild": "passed;0warnings;0errors",
+      "formatter": "passed",
+      "governance": "passed",
+      "invoker": "Aspire-owned freshly built TUnit; owned canonical TMPDIR; actual ephemeral HTTP listeners",
+      "sourceFiles": {
+        "scripts/Features/BenchmarkComparisons/image-manifest.mjs": "3d15894b8427e7190ecd494548ae59edb9151b565a5dba74ea6be474a97202a7",
+        "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/ImageRegistryReadinessFixture.mjs": "dac1b3b67da8dc48dc1b3c82baaf133f278e126a19e2f5e147022287e6fec076",
+        "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll": "eb86c57f759baf08567200f318f63b97d5c10bd8bd191a1bd0ccb4efaea1477a"
+      },
+      "reports": {
+        "normal": {
+          "summary": {
+            "total": 10,
+            "passed": 10,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "sha256": "a211bc3a675c2c5a4b89134c080496962cfd42effefe48bd86741c5b6377e543",
+          "operatingSystem": "macOS 27.0.1",
+          "runtimeVersion": ".NET 10.0.12"
+        },
+        "scalar": {
+          "summary": {
+            "total": 10,
+            "passed": 10,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "sha256": "749ed17a17a1318fd216e822ca478976dfd49c182720c3aba1f24a2250e3b6da",
+          "operatingSystem": "macOS 27.0.1",
+          "runtimeVersion": ".NET 10.0.12"
+        }
+      },
+      "githubQualified": false
     }
   }
 }
