@@ -1,7 +1,7 @@
 # ADR-080: Isolate benchmark failures during publication
 
 Status: Accepted; source implemented, delivered-source verification pending.
-Date: 2026-10-04. Related: REQ/AC-BC-FAIL-001..007, ADR-056/074/076.
+Date: 2026-10-04. Related: REQ/AC-BC-FAIL-001..008, ADR-056/074/076.
 
 ## Decision
 
@@ -46,6 +46,15 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
    Three SDK/resource-model tests belong to ComparisonTests and run in common
    preparation; existing native StreamAppend preflights qualify1/2/3-node semantics
    and copy/cleanup behavior. No provider replacement, URI or ACK/retry change.
+   Under FAIL-CANCEL, the three matrix workload/finalizer/upload stages use the
+   explicit `!cancelled()` status condition, preserving execution after ordinary
+   failure. Cleanup remains `always()` and allows cancelled image setup only
+   through the existing run/attempt/repository/container ownership validation.
+   Update existing workflow regressions before integration. Keep aggregate,
+   site qualification and deploy dependency guards unchanged; cancelled jobs
+   remain rejected as measurement/publication evidence. The registry test alone
+   accepts legitimate final-budget timeout facts and exposes Node stderr; its
+   production30s/2s bounds and success predicate remain unchanged.
 5. Root reviews all diffs, builds solution, runs formatter/governance and focused
    Aspire-owned suites, then checkpoints scoped changes on current main and pushes.
 6. Genuine Linux Benchmarks run qualifies all cells, aggregate, site coverage/browser
@@ -53,7 +62,7 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
 
 Migration is additive to version4 dispositions; deploy producer/validators/site
 atomically. Rollback reverts this coherent change and restores the conservative
-publication gate, retaining immutable original artifacts. AC-BC-FAIL-001..007 map
+publication gate, retaining immutable original artifacts. AC-BC-FAIL-001..008 map
 to automated and actual-provider evidence in the feature specification. Root alone
 owns integration and shared contract updates; workers never commit or push.
 

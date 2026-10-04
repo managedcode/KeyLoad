@@ -119,7 +119,9 @@ function assertDeadline(failure, elapsedMs, rows) {
   assert(elapsedMs >= 30000 && elapsedMs < 32000);
   assert.equal(rows.some(row => row.outcome === 'ready'), false);
   if (scenario === 'status-deadline') {
-    assert(rows.every(row => row.status === 503 && row.outcome === 'http-status'));
+    assert(rows.some(row => row.status === 503 && row.outcome === 'http-status'));
+    assert(rows.every(row => row.status === 503 && row.outcome === 'http-status' && !row.aborted
+      || row.outcome === 'timeout' && row.aborted && (row.status === null || row.status === 503)));
   } else {
     assert(rows.every(row => row.status === null && row.aborted && row.outcome === 'timeout'));
     assert(rows.at(-1).timeoutMs < 2000);

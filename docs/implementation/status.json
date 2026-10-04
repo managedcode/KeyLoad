@@ -3139,7 +3139,7 @@
     "status": "in_progress",
     "feature": "docs/Features/BenchmarkComparisons.md",
     "decision": "docs/ADR/ADR-080-benchmark-failure-isolation.md",
-    "sourceStage": "authenticated_failed_cell_publication_with_bounded_registry_probes_and_kurrent_writer_after_membership",
+    "sourceStage": "authenticated_failed_cell_publication_with_native_preparation_repair_and_explicit_cancellation_cleanup",
     "baselineRun": 37154664616,
     "originalFailedJob": 111299652762,
     "originalDiagnosticArtifact": 11286445994,
@@ -3160,11 +3160,76 @@
       "kurrentFailureJobId": 111309323419,
       "kurrentDiagnosticArtifactId": 11286971852,
       "kurrentDefect": "Writer SDK eagerly discovered before verified membership during PreLeader; pinned selector can cache follower, exact selected endpoint was not logged",
-      "qualification": "Aspire local registry10/10 and native SDK settings3/3 passed; exact-source native Linux rerun pending"
+      "qualification": "Genuine Linux source6ec: common image preparation, registry10/10 and SDK/resource settings3/3 passed; native Kurrent1/2/3-node StreamAppend preflights each measured five successful10000-operation repetitions. Complete270 aggregate/site/Pages pending.",
+      "deliveredSource": {
+        "sourceRevision": "6ec9233a5de963efd85fda041bc5d6d3d4b9972b",
+        "runId": 37161833119,
+        "imageJobId": 111318367954,
+        "imageArtifactId": 11288810076,
+        "imageArchiveDigest": "sha256:a26d5a11aca3e5e5ca8366e8eff34d9f5de2e31e09371429ad9ef4264ff4289f",
+        "kurrentPreflights": [
+          {
+            "nodes": 1,
+            "jobId": 111319875471,
+            "artifactId": 11288133701,
+            "archiveDigest": "sha256:1dfce81897567bd9f327466cce361e4180f21f032ef04fa7176930969712f3b7"
+          },
+          {
+            "nodes": 2,
+            "jobId": 111319875448,
+            "artifactId": 11288840411,
+            "archiveDigest": "sha256:38b25e73b5f09599ac98e484bd7528c6b327f440072d1364c2f2272f3eab4cdd"
+          },
+          {
+            "nodes": 3,
+            "jobId": 111319875440,
+            "artifactId": 11288083670,
+            "archiveDigest": "sha256:1ab97c6c8cfe003573d4547e5f60bfbbb859d929a5a23cfdc30dde6b88f15a76"
+          }
+        ],
+        "scope": "preparation and native preflight only;4096-record development workload; no scale, full cohort, winner or power-loss qualification"
+      }
     },
-    "localDevelopmentVerification": "Local macOS development: initial integrated full Release build and formatter passed with zero warnings/errors. Aspire registry10/10 and SDK settings3/3 passed. Workflow24 cases:23 passed including the new mandatory-preparation regression; the old22-filter inventory assertion was updated for the added23rd native comparison filter and awaits clean-source CI. Repeat full checks are blocked by concurrent uncommitted NativeTextAsync CA1849/IDE0005 outside benchmark scope. Earlier producer/finalizer2/2, GitHub evidence84/84, original report probes48/48 and workflow23/23 passed. Exact-source Linux native/site/Pages qualification pending.",
+    "localDevelopmentVerification": "Earlier integrated Release build/formatter and Aspire registry10/10, SDK settings3/3, producer/finalizer2/2, GitHub evidence84/84 and original report probes48/48 passed. Delivered6ec Linux clean build, formatter, workflow inventory and native image checks passed. Follow-up current JS registry fixtures passed10/10 normal and10/10 scalar through the existing Aspire/TUnit bridge (not a newly compiled C# runner). Governance and diff checks pass. Current full Release, scoped Unit build and formatter are blocked by concurrent KeyCodec/CRUD source/test diagnostics outside benchmark scope; new workflow C# tests and complete delivered-source native/site/Pages qualification remain pending.",
     "runtimeQualified": false,
     "publicationQualified": false,
-    "keyLoadEngineChanges": false
+    "keyLoadEngineChanges": false,
+    "cancellationRepair": {
+      "requirement": "REQ-BC-FAIL-008",
+      "ordinaryFailure": "preserves original failed workload and authenticated null-report upload",
+      "explicitCancellation": "stops workload/finalization/result upload; bounded always cleanup validates owned partial setup",
+      "qualification": "source reviewed; focused Aspire regression and genuine delivered-source lifecycle pending"
+    },
+    "registryDeadlineRegression": {
+      "ciRunId": 37161833095,
+      "originalTestArtifactId": 11288433105,
+      "archiveDigest": "sha256:32e24616888d0842b893243f2d7cb1f9e7e447927aefde9346eb01cd224a4c4b",
+      "normal": "2863/2863 passed",
+      "scalar": "2862/2863; status-deadline fixture failed and did not retain Node assertion stderr",
+      "repair": "test accepts final-budget abortedtimeout(null/503) while preserving30s/2s/private evidence/no-ready constraints; bridge checks original stderr first",
+      "fullCiStatus": "failure;13 prior-epoch recovery failures lacked the skipped native5 executable;18 RF3 product failures outside benchmark scope; no engine repair in this stage",
+      "developmentFixture": {
+        "machine": "macOS27.0.1/.NET10.0.12",
+        "invoker": "existing Aspire-owned TUnit runner;current JS fixture/module;not freshly compiled follow-up C# runner",
+        "normal": {
+          "passed": 10,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0
+        },
+        "scalar": {
+          "passed": 10,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0
+        },
+        "fixtureSha256": "e624869f5256dab4f6b22520dece5c155722ed4162d90c2da6771d25718020dc",
+        "runnerDllSha256": "010bf86581d639eed1ed9cd7ff704eca5e01ba2c1cedf67be53d770876ac9a0a",
+        "normalReportSha256": "fbd9c1894275e594821a547fbf8a3278a504cc7b1ea2dbacc4a25f41c9dd99a4",
+        "scalarReportSha256": "723d3a6c7211b30fe09e45a962e2a82274bed38fb1573c00eff43003b455c8de"
+      }
+    }
   }
 }

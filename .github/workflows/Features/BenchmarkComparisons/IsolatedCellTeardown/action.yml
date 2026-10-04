@@ -11,7 +11,7 @@ runs:
   using: composite
   steps:
     - name: Clean up this job's Docker registry
-      if: ${{ always() && (inputs.setup-outcome == 'success' || inputs.setup-outcome == 'failure') }}
+      if: ${{ always() && (inputs.setup-outcome == 'success' || inputs.setup-outcome == 'failure' || inputs.setup-outcome == 'cancelled') }}
       shell: bash
       run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
     - name: Save container logs and test results

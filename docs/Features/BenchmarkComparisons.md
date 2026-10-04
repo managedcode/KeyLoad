@@ -690,12 +690,19 @@ KeyLoad engine repair and concurrent series-codec work are outside this task.
 | REQ-BC-FAIL-005 repair shared preparation | AC-BC-FAIL-005 diagnose exact failed logs, repair benchmark setup/build invocation, retain native isolated topology and Aspire ownership | exact failed-source log, focused regression, delivered-source GitHub rerun |
 | REQ-BC-FAIL-006 bounded registry readiness | AC-BC-FAIL-006 each native HTTP probe has at most2s within the unchanged30s total; only settled non-aborted HTTP200 succeeds; private no-follow diagnostics remain at most121 records/64KiB and evidence-write failures propagate | `ImageRegistryReadinessTests`:10 actual loopback HTTP/error/bounds cases, plus genuine pinned Docker image export/import in GitHub |
 | REQ-BC-FAIL-007 Kurrent writer starts after membership | AC-BC-FAIL-007 verify all native1/2/3-member views before constructing the SDK writer; retain native DNS seeds, TLS verification, leader preference, NoStream semantics, acknowledgements, replica-copy oracle and cleanup | `IsolatedKurrentDiscoverySettingsTests`:3 actual SDK/resource-model cases; genuine Aspire-owned StreamAppend preflights for1/2/3 nodes |
+| REQ-BC-FAIL-008 explicit cancellation stops owned work | AC-BC-FAIL-008 workload, finalization and result upload use `!cancelled()` so ordinary failure still finalizes while cancellation stops execution/publication; `always()` cleanup retains bounded diagnostics and safely removes owned registries whose setup was cancelled | `WorkflowBenchmarkFailureTests`, unchanged canceled-job/producer rejection regressions and actual GitHub lifecycle |
 
 [ADR-080](../ADR/ADR-080-benchmark-failure-isolation.md) owns the boundary change.
 Ordered task graph: FAIL-CONTRACT (root, complete) -> FAIL-SITE (site worker),
 FAIL-PRODUCER (tooling worker), FAIL-PREP (root/diagnostic worker) -> FAIL-JOIN
 (root review/build/format/governance/Aspire tests) -> FAIL-DELIVERY (scoped commit,
-push, genuine complete GitHub benchmark run and Pages receipt). All workers have
+push, genuine complete GitHub benchmark run and Pages receipt). FAIL-CANCEL is a
+root-owned follow-up before FAIL-JOIN: preserve ordinary-failure finalization,
+stop explicitly cancelled work, extend owned-registry cleanup and test all three
+matrix branches. Registry deadline regressions accept a final bounded aborted
+probe as well as a settled HTTP503; total/probe bounds and no-ready assertions
+remain unchanged. The C# bridge reports original Node stderr before exit status.
+All workers have
 disjoint write scopes; root owns contracts, workflows, receipts, inventories and
 docs. Local verification is development evidence; publication requires authentic
 GitHub artifacts and full existing site qualification. Interrupted jobs without
@@ -739,9 +746,34 @@ Native-stage local development checks: initial full Release build and formatter
 passed; Aspire registry10/10 and actual SDK/resource settings3/3 passed. The new
 mandatory preparation workflow regression passed. The full24-case workflow filter
 had23 passes and exposed its old22-comparison-filter inventory expectation; source
-now enumerates the added23rd filter explicitly. Its clean-source rerun is pending.
-Concurrent uncommitted NativeTextAsync CA1849/IDE0005 prevent repeat shared-checkout
-full checks; those product changes remain outside this repair and are not staged.
+now enumerates the added23rd filter explicitly. Genuine source6ec9233 run37161833119
+passed clean Linux build, formatter and common pinned-image export/import. Original
+artifact11288810076 contains registry10/10 and SDK/resource settings3/3 with no
+failures/skips. Kurrent native1/2/3-node StreamAppend preflights all passed; their
+original artifacts11288133701/11288840411/11288083670 retain actual distinct native
+members and five10000-operation successful repetitions per cell. This4096-record
+profile proves preparation/preflight only; required scale/cohort/site gates remain.
+
+CI37161833095 passed normal2863/2863 units but failed scalar status-deadline:
+the fixture incorrectly required every final probe to settle as HTTP503, even
+though its remaining budget can legitimately expire. Original Node stderr was not
+retained by the assertion ordering, so that particular assertion remains an
+inference until the focused rerun. The test accepts only settled503 or aborted
+timeout(null/503), retains all bounds and forbids ready facts. Production readiness
+is unchanged. The bridge checks stderr first. Thirteen prior-epoch recovery tests
+lacked the executable skipped after that scalar failure;18 RF3 product failures
+remain outside benchmark scope.
+
+Run37158699545 also exposed workflow cancellation being delayed by `always()`
+workload steps. FAIL-CANCEL changes only nine matrix execution/finalization/upload
+conditions to `!cancelled()`; ordinary failure still runs the same failed-envelope
+path. All owned cleanup remains `always()` with cancelled partial image setup
+accepted through unchanged ownership validation. Source review passed. Current JS
+registry fixtures passed10/10 normal and10/10 scalar through the existing
+Aspire-owned TUnit bridge; the new C# follow-up runner was not built successfully.
+Full Release, scoped Unit build and formatter were blocked by concurrent
+KeyCodec/CRUD source/test diagnostics. New workflow C# tests and actual complete
+publication remain pending; none of that engine work is staged in this repair.
 
 ```mermaid
 flowchart LR

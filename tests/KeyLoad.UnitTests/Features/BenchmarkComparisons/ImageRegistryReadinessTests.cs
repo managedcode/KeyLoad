@@ -30,8 +30,8 @@ internal sealed class ImageRegistryReadinessTests
         var result = await IsolatedAggregateNodeProcess.RunAsync(
             [fixture, IsolatedAggregateNodeProcess.Module(ModuleName), scenario, directory.Root],
             TestContext.Current!.Execution.CancellationToken);
+        await Assert.That(result.Error).IsEmpty();
         await Assert.That(result.ExitCode).IsEqualTo(0);
         await Assert.That(result.Output.Trim()).IsEqualTo(AcceptedPrefix + scenario);
-        await Assert.That(result.Error).IsEmpty();
     }
 }

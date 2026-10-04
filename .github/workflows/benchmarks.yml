@@ -165,7 +165,7 @@ jobs:
           compression-level: 0
           retention-days: 90
       - name: Clean up Docker registry after image failure
-        if: ${{ always() && steps.roundtrip.outcome != 'success' && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
+        if: ${{ always() && steps.roundtrip.outcome != 'success' && (steps.images.outcome == 'success' || steps.images.outcome == 'failure' || steps.images.outcome == 'cancelled') }}
         run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
       - name: Save Docker image checks and test results
         if: always()
@@ -212,7 +212,7 @@ jobs:
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Run database workload
         id: workload
-        if: always()
+        if: ${{ !cancelled() }}
         env:
           PREPARATION_OUTCOME: ${{ steps.images.outcome }}
           BUILD_OUTCOME: ${{ steps.benchmark-build.outcome }}
@@ -223,12 +223,12 @@ jobs:
           fi
           dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=140
       - name: Record benchmark availability
-        if: always()
+        if: ${{ !cancelled() }}
         env:
           KEYLOAD_WORKLOAD_OUTCOME: ${{ steps.workload.outcome }}
         run: node scripts/Features/BenchmarkComparisons/finalize-worker.mjs
       - name: Save benchmark results
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: comparison-preflight-${{ matrix.id }}
@@ -273,7 +273,7 @@ jobs:
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Run database workload
         id: workload
-        if: always()
+        if: ${{ !cancelled() }}
         env:
           PREPARATION_OUTCOME: ${{ steps.images.outcome }}
           BUILD_OUTCOME: ${{ steps.benchmark-build.outcome }}
@@ -284,12 +284,12 @@ jobs:
           fi
           dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=140
       - name: Record benchmark availability
-        if: always()
+        if: ${{ !cancelled() }}
         env:
           KEYLOAD_WORKLOAD_OUTCOME: ${{ steps.workload.outcome }}
         run: node scripts/Features/BenchmarkComparisons/finalize-worker.mjs
       - name: Save benchmark results
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: comparison-worker-${{ matrix.id }}
@@ -334,7 +334,7 @@ jobs:
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Run database workload
         id: workload
-        if: always()
+        if: ${{ !cancelled() }}
         env:
           PREPARATION_OUTCOME: ${{ steps.images.outcome }}
           BUILD_OUTCOME: ${{ steps.benchmark-build.outcome }}
@@ -345,12 +345,12 @@ jobs:
           fi
           dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*' --KeyLoadTests:TimeoutMinutes=140
       - name: Record benchmark availability
-        if: always()
+        if: ${{ !cancelled() }}
         env:
           KEYLOAD_WORKLOAD_OUTCOME: ${{ steps.workload.outcome }}
         run: node scripts/Features/BenchmarkComparisons/finalize-worker.mjs
       - name: Save benchmark results
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: comparison-worker-${{ matrix.id }}
