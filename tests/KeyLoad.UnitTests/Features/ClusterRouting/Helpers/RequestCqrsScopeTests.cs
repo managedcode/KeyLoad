@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using KeyLoad.Orleans;
-using KeyLoad.Server;
 using ManagedCode.Orleans.Identity.Core.Constants;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -50,7 +49,7 @@ internal static class RequestCqrsScopeCases
             userSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousUser);
             stateSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousState);
             var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-                _ = new PersistedPrincipalRequestContextScope(fixture.Cluster.ServiceProvider, principal,
+                _ = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
                     Guid.Empty, Guid.Empty, CancellationToken.None));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);
             await userSlot.AssertPriorAsync(RequestCqrsPriorContextValue.Object, previousUser);
@@ -75,7 +74,7 @@ internal static class RequestCqrsScopeCases
         {
             userSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousUser);
             stateSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousState);
-            using (new PersistedPrincipalRequestContextScope(fixture.Cluster.ServiceProvider, null,
+            using (new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, null,
                 requestId, Guid.Empty, CancellationToken.None))
             {
                 await Assert.That(RequestContext.Keys.Contains(OrleansIdentityConstants.USER_CLAIMS,
@@ -121,7 +120,7 @@ internal static class RequestCqrsScopeCases
         RequestContext.Set(UnrelatedKey, graphContext);
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
-        using (new PersistedPrincipalRequestContextScope(fixture.Cluster.ServiceProvider, principal,
+        using (new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
             requestId, commandId, CancellationToken.None))
         {
             var published = (ClaimsPrincipal?)RequestContext.Get(OrleansIdentityConstants.USER_CLAIMS);

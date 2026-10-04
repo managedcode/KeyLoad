@@ -45,7 +45,7 @@ internal sealed class SagaTimeoutTests
     [Test]
     public async Task CompletionWinsSerializedTimeoutRaceAndQueueCapacityFailureRollsBackTimeout()
     {
-        using var fixture = new RecurringSagaDatabase();
+        using var fixture = new RecurringSagaDatabase(timeoutQueuePolicy: new() { MaxStoredMessages = 1 });
         var completedId = Guid.NewGuid();
         var deadline = RecurringSagaDatabase.Epoch.AddMinutes(1);
         _ = fixture.Commit(fixture.Partition, new CompareExchangeSaga(fixture.Queue, completedId, 0,
@@ -58,11 +58,11 @@ internal sealed class SagaTimeoutTests
         await Assert.That(fixture.Database.InspectMessage(RecurringSagaDatabase.RootPrincipal,
             fixture.TimeoutQueue, TimeoutId(completedId, 1))).IsNull();
 
-        fixture.ConfigureQueue(fixture.TimeoutQueue, new() { MaxStoredMessages = 1 }, deadline);
         var occupiedId = Guid.NewGuid();
         _ = fixture.Apply(OperationKind.Batch,
             new CommandRequest(occupiedId, fixture.Partition,
-                [new EnqueueMessage(fixture.TimeoutQueue.Queue, "occupied", "{}")]), id: occupiedId, time: deadline);
+                [new EnqueueMessage(fixture.TimeoutQueue.Queue, "occupied", "{}")]), id: occupiedId, time: deadline)
+            .Get<CommitReceipt>();
         var blockedId = Guid.NewGuid();
         var blockedDeadline = deadline.AddMinutes(1);
         _ = fixture.CommitAs(RecurringSagaDatabase.RootPrincipal, fixture.Partition, deadline,

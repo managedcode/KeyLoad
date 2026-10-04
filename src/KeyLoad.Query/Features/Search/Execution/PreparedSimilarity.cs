@@ -21,11 +21,15 @@ internal sealed class PreparedSimilarity
     public static PreparedSimilarity Create(ReadOnlyMemory<float> query, DistanceMetric metric)
     {
         Validate(query.Span);
-        if (!Enum.IsDefined(metric))
-        {
-            throw Errors.Fail(ErrorCode.Validation, InvalidMetric);
-        }
+        ValidateMetric(metric);
         return new(query, metric);
+    }
+
+    internal static PreparedSimilarity CreatePacked(PackedAnnVectors vectors, int ordinal, DistanceMetric metric)
+    {
+        ArgumentNullException.ThrowIfNull(vectors);
+        ValidateMetric(metric);
+        return new(vectors.Memory(ordinal), metric);
     }
 
     public double Score(ReadOnlyMemory<float> candidate)
@@ -35,6 +39,22 @@ internal sealed class PreparedSimilarity
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidVector);
         }
+        return ScoreCore(candidate);
+    }
+
+    internal double ScorePacked(PackedAnnVectors vectors, int ordinal)
+    {
+        ArgumentNullException.ThrowIfNull(vectors);
+        if (vectors.Dimension != query.Length)
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidVector);
+        }
+        var candidate = vectors.Memory(ordinal);
+        return ScoreCore(candidate);
+    }
+
+    private double ScoreCore(ReadOnlyMemory<float> candidate)
+    {
         return metric switch
         {
             DistanceMetric.DotProduct => Dot(query.Span, candidate.Span),
@@ -42,6 +62,14 @@ internal sealed class PreparedSimilarity
             DistanceMetric.Cosine => Cosine(candidate.Span),
             _ => throw Errors.Fail(ErrorCode.Validation, InvalidMetric)
         };
+    }
+
+    private static void ValidateMetric(DistanceMetric metric)
+    {
+        if (!Enum.IsDefined(metric))
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidMetric);
+        }
     }
 
     private double Cosine(ReadOnlySpan<float> candidate)

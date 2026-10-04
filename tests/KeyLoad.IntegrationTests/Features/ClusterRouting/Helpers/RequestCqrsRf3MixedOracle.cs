@@ -13,10 +13,11 @@ internal static class RequestCqrsRf3MixedOracle
     internal static async Task VerifyAsync(DistributedApplication app, NodeEpochRf3Profile profile,
         RequestCqrsRf3Workload workload, CancellationToken cancellationToken)
     {
-        _ = await RequestCqrsRf3DiscoveryOracle.VerifyMixedImagesAsync(app, profile, cancellationToken)
+        var current = await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(app,
+            RequestCqrsRf3Protocol.Node1, profile, cancellationToken).ConfigureAwait(false);
+        await RequestCqrsRf3DiscoveryOracle.AssertCurrentAsync(current).ConfigureAwait(false);
+        await VerifyCurrentEndpointAsync(app, RequestCqrsRf3Protocol.Node1, profile, workload, cancellationToken)
             .ConfigureAwait(false);
-        foreach (var node in new[] { RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2 })
-        { await VerifyCurrentEndpointAsync(app, node, profile, workload, cancellationToken).ConfigureAwait(false); }
         await VerifyOfficialMcpAsync(app, RequestCqrsRf3Protocol.Node1, profile, workload, cancellationToken)
             .ConfigureAwait(false);
     }

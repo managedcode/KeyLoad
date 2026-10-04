@@ -26,6 +26,10 @@ Implementation contract:
    the existing bounded ManagedCode Communication CQRS consumer. No direct Apply,
    synthetic privileged scheduler principal, copied dispatcher or hosted timer
    outside Orleans is allowed.
+   The actual service-source DSL gap in the owning Graph package is repaired and
+   published under [GrainServiceGraph](../Features/ClusterRouting/GrainServiceGraph.md),
+   REQ/AC-SGRAPH-001..003, before the consumer package/runtime join. Coordinator
+   client entry, AllowAll and fabricated native Graph context are prohibited.
 4. Tests cover finite sweep/cursor/byte/deadline/corruption/cancellation bounds,
    current creator authority and stable unknown-response retry. Actual Aspire
    RF3 SDK/official MCP tests must observe autonomous emission/expiry, duplicates,

@@ -82,6 +82,20 @@ current authority. Inspection requires QueueInspect and projects payload, header
 and StateJson with the current resource policies, never exposes unredacted raw
 templates merely because the caller may manage a scheduler.
 
+TASK-JOBS-S1-CREATOR-CAS refines REQ/AC-JOBS-004: each fresh saga update must
+reload the retained creator inside the same canonical transaction, after the
+existing revision/phase validation and before any state, capacity or queue
+write. Require its current scheduler, source state/header write and any new
+timeout destination publish/write authority independently of the caller.
+Creation has no retained creator and keeps the existing caller checks. Reuse
+the already validated retained record rather than decoding it again; successful
+receipt replay retains its existing current-authority recheck. Root owns this
+shared apply/authorization join. The real-store
+`ReplacementAndSagaCasRecheckRetainedCreatorFieldWriteAuthority` must reject a
+different authorized caller after creator revocation with unchanged revision
+and exact state, then succeed once after restoring the creator. No wire,
+storage epoch, policy bypass or autonomous scheduling claim changes.
+
 Canonical schedule/saga records, watermarks and finite per-lane counters are
 native generated ZoneTree values. Combined retained schedule/saga record count
 is capped by MaxScanRecords and serialized retained bytes by MaxBatchBytes;
@@ -139,6 +153,29 @@ endpoints, weaken outcomes or run gates. Root owns combined execution and faults
 
 ### S1 canonical process recovery stage
 
+TASK-JOBS-S1-AUTONOMOUS-RF3 adapts the existing public S1 fixtures to active S2
+without disabling the native service. For the schedule CAS fixture, create a
+future generation1 and prove its exact zero watermark before replacement;
+replace with generation2 having exactly two past due instants separated by one
+hour and a third safely in the future. Public bounded catch-up and autonomous
+work may interleave, but the final generation2 watermark must be exactly2,
+both independent occurrence IDs/due instants must exist and the third must not.
+Replay the complete original public receipt through the other client.
+For creator/caller policy tests, create future work, revoke the creator before
+the real due instant, and prove unchanged state after it. Check caller rejection
+while creator remains revoked; restore the caller and then creator before the
+positive transition and full projected SDK/MCP inspection. Use a long interval
+so the one accepted due occurrence remains exact. For saga expiry, independently
+derive the frozen S2 command ID, use the same creator and exact ExpireSaga payload,
+and require complete SDK/MCP receipt convergence whether service or public call
+commits first. Retain real early Validation, Waiting before deadline, TimedOut
+revision2, one timeout ID/message, ACK replay and no second transition.
+The service is always active; no fake clock, private expiry call, weakened
+terminal assertion or expected-response race may stand in for these proofs.
+Luna cluster_wave owns only the three existing Messaging RF3 cases and their
+RecurringSagaRf3Support/SagaTimeoutRf3Assertions helpers plus a feature-local
+test identity helper. Root owns integration, all gates and original evidence.
+
 Luna cluster_wave next owns new CrashHost Messaging Helpers and RecoveryTests
 Messaging Cases/Assertions/Helpers for recurring emission and saga expiry at the
 existing canonical CommitStage boundaries: HeaderWritten, PayloadWritten,
@@ -159,6 +196,17 @@ configure the saga with a valid future deadline and await that actual deadline
 before arming expiry. No clock double, direct timestamp rewrite or power-loss
 claim is permitted. Root runs the actual Aspire recovery suite; this process
 stage does not qualify autonomous S2 coordination or RF3.
+
+TASK-JOBS-S1-RECOVERY-RECEIPTS refines the retry oracle for AC-JOBS-001/002/003:
+compare the complete receipt's deterministic native serialized value, including
+every nested mutation result and array, rather than record reference equality.
+Recovered, repeated and resolved outcomes must equal that same complete value;
+retain the independent exact token, queue counters, retained state and outbox
+tail assertions. Luna cluster_wave owns only the two Messaging recovery
+assertion files and a feature-local assertion helper if needed, in a private
+patch. No production serialization, fault timing or atomicity contract changes.
+Root reviews the patch, joins it after the active compiled gate, and runs the
+actual Aspire recovery suite before recording evidence.
 
 The worker prepares its scoped source patch outside the checkout while root
 verifies the prior frozen compilation, with exact base/post hashes and explicit

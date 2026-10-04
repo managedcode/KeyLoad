@@ -156,3 +156,43 @@ The fifth original Aspire cohort passes18/19 tests, including all15 independent1
 The regression must execute repeated real wide searches against one actual shared ReadExecutionBudget and AnnWorkBudget with a one-second TimeProvider.System deadline. Each successful call retains the existing charged execution and per-call deltas. Immediately before each invocation capture the cumulative EdgeVisits; the invocation interrupted by the deadline must add positive edge visits and return no AnnSearchResult. Prior completed calls cannot substitute for evidence that the failing invocation traversed the graph. No delay, fake clock, inflated work cap, relaxed assertion or product slowdown is allowed. Retain the separate real in-progress cancellation case and the healthy following search.
 
 Root owns the contract and runtime evidence. cluster_wave may change only its new PackedAnnWideSearchBoundary test helper and add a cohesive new PackedAnn deadline helper if required by the existing method/type limits; it may not change product sources, budgets, defaults, fixtures, existing shared helpers, packages, docs or Git. Bound and join the actual worker and cleanup without hiding unexpected failures. Root reviews the implementation, rebuilds and repeats the real Aspire normal/scalar gates before qualification.
+
+## Accepted packed-owned validation refinement, 2026-10-04
+
+Unit44b completes3197/3204 cases. Four unchanged10,000-row ANN builds exceed
+the ordinary30-second read deadline before recall/filter/deadline assertions.
+The source repeats finite-component validation on vectors already copied and
+checked into private packed blocks. Root accepts TASK-ANN-R1-OWNED-SCORES:
+retain every untrusted Create/Score validation and the identical metric formulas,
+but permit internal CreatePacked/ScorePacked only with an actual PackedAnnVectors
+carrier and ordinal. Make its block constructor private so Copy remains the sole
+finite-checked ownership factory. Keep dimension/ordinal/metric checks, original
+budget/deadline/cancellation charges and all existing options/corpus/oracles.
+No retained norm array, normalization, approximation or public bypass is added.
+
+REQ-ANN-009 / AC-ANN-009: real-store copied packed vectors score exactly like
+the existing untrusted/public metric oracle for all three metrics, ordinary,
+zero, subnormal, large finite values and dimensions1/4096; NaN/infinite or invalid
+untrusted input and invalid copy/metric/dimension remain typed rejection.
+Mutation of original vectors after Copy cannot change packed scores. New
+PackedAnnOwnedSimilarityTests map this criterion; existing metric/ownership and
+all four failed10,000-row tests remain unchanged and mandatory.
+
+The DotProduct candidate lists are unique: SearchLayer marks each candidate
+visited before admission, and reciprocal overflow verifies the added source is
+absent from existing unique adjacency. A dedicated simple-selection path may
+copy the already-ranked nonself candidates up to degree, then perform the
+unchanged ordinal adjacency sort, without repeated membership scans. Charge
+each actual examination/copy/sort and keep source-score/lower-ordinal ties exact.
+Cosine/Euclidean diversification stays unchanged. Real graph/recall tests must
+prove unique bounded adjacency and unchanged quality; a source argument alone
+does not establish performance or deadline success.
+
+Root owns this contract, ADR and all joins/gates. Luna cluster_wave owns only
+PreparedSimilarity, PackedAnnVectors, PackedAnnConstruction,
+PackedAnnNeighborSelection, PackedAnnLayerSearch and PackedAnnExactSearch plus
+new cohesive Search helpers/tests needed for this refinement, in a private exact
+current-source patch. Preserve numeric limits and existing tests. Review owned
+carrier/uniqueness invariants, run full Release/format/governance and unchanged
+Aspire normal/scalar/related recovery/RF3; retain original failures and exact-source
+Linux results. No acceleration or qualification claim precedes those results.

@@ -28,18 +28,19 @@ internal sealed class RecurringOccurrenceTests
         var commandId = Guid.NewGuid();
         var due = Emit(fixture, id, 1, 2, RecurringSagaDatabase.Epoch.AddSeconds(2), commandId);
         await Assert.That(due.Mutations[0].Revision).IsEqualTo(1);
-        await AssertMessage(fixture, id, 0, firstDue);
-        await AssertMessage(fixture, id, 1, firstDue.AddSeconds(1));
+        await AssertMessage(fixture, id, 0, firstDue, TimeSpan.FromMinutes(1));
+        await AssertMessage(fixture, id, 1, firstDue.AddSeconds(1), TimeSpan.FromMinutes(1));
         var replay = Emit(fixture, id, 1, 2, RecurringSagaDatabase.Epoch.AddSeconds(2), commandId);
-        await Assert.That(replay.Mutations[0]).IsEqualTo(due.Mutations[0]);
+        await Assert.That(NativeSerialization.Serialize(replay.Mutations[0]).AsSpan()
+            .SequenceEqual(NativeSerialization.Serialize(due.Mutations[0]))).IsTrue();
         await Assert.That(replay.Token).IsEqualTo(due.Token);
         _ = Emit(fixture, id, 1, 2, RecurringSagaDatabase.Epoch.AddSeconds(2));
         await Assert.That(Message(fixture, id, 2)).IsNull();
 
         var next = Emit(fixture, id, 1, 32, RecurringSagaDatabase.Epoch.AddSeconds(4));
         await Assert.That(next.Mutations[0].Revision).IsEqualTo(1);
-        await AssertMessage(fixture, id, 2, firstDue.AddSeconds(2));
-        await AssertMessage(fixture, id, 3, firstDue.AddSeconds(3));
+        await AssertMessage(fixture, id, 2, firstDue.AddSeconds(2), TimeSpan.FromMinutes(1));
+        await AssertMessage(fixture, id, 3, firstDue.AddSeconds(3), TimeSpan.FromMinutes(1));
         await Assert.That(Message(fixture, id, 4)).IsNull();
     }
 
@@ -90,13 +91,14 @@ internal sealed class RecurringOccurrenceTests
             OccurrenceId(scheduleId, 1, ordinal));
 
     private static async Task AssertMessage(RecurringSagaDatabase fixture, Guid scheduleId, long ordinal,
-        DateTimeOffset dueAt)
+        DateTimeOffset dueAt, TimeSpan? timeToLive = null)
     {
         var message = Message(fixture, scheduleId, ordinal)!;
         await Assert.That(message.Metadata.Id).IsEqualTo(OccurrenceId(scheduleId, 1, ordinal));
         await Assert.That(message.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(message.Metadata.NotBefore).IsEqualTo(dueAt);
-        await Assert.That(message.Metadata.ExpiresAt).IsEqualTo(dueAt.AddMinutes(1));
+        DateTimeOffset? expectedExpiry = timeToLive is { } lifetime ? dueAt.Add(lifetime) : null;
+        await Assert.That(message.Metadata.ExpiresAt).IsEqualTo(expectedExpiry);
         await Assert.That(message.PayloadJson).IsEqualTo(Payload);
         await Assert.That(message.HeadersJson).IsEqualTo(Headers);
     }

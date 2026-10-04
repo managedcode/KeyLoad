@@ -13,7 +13,7 @@ internal static class PackedAnnConstruction
             return;
         }
         budget.Charge(vectors.Span(ordinal).Length);
-        var similarity = PreparedSimilarity.Create(vectors.Memory(ordinal), space.Metric);
+        var similarity = PreparedSimilarity.CreatePacked(vectors, ordinal, space.Metric);
         var current = entryPoint;
         for (var layer = maximumLevel; layer > level; layer--)
         {

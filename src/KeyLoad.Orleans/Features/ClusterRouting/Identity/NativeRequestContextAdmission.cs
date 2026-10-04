@@ -1,8 +1,8 @@
 using System.Security.Claims;
-using KeyLoad.Orleans;
+using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 
-namespace KeyLoad.Server;
+namespace KeyLoad.Orleans;
 
 internal static class NativeRequestContextAdmission
 {

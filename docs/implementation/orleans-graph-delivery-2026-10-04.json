@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "owned_dependency_delivery",
+  "dependency": "ManagedCode.Orleans.Graph",
+  "version": "10.0.10",
+  "sourceRepository": "https://github.com/managedcode/Orleans.Graph",
+  "sourceCommit": "ca63ac200abe1536169ce2c59d6e6137a5559d63",
+  "local": {
+    "buildExit": 0,
+    "formatterExit": 0,
+    "tests": {
+      "passed": 99,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "github": {
+    "ci": {
+      "url": "https://github.com/managedcode/Orleans.Graph/actions/runs/37238040709",
+      "conclusion": "success"
+    },
+    "release": {
+      "url": "https://github.com/managedcode/Orleans.Graph/actions/runs/37238040722",
+      "conclusion": "success"
+    },
+    "codeql": {
+      "url": "https://github.com/managedcode/Orleans.Graph/actions/runs/37238040761",
+      "conclusion": "success"
+    },
+    "releaseUrl": "https://github.com/managedcode/Orleans.Graph/releases/tag/v10.0.10"
+  },
+  "nuget": {
+    "feed": "https://api.nuget.org/v3/index.json",
+    "index": "https://api.nuget.org/v3-flatcontainer/managedcode.orleans.graph/index.json",
+    "package": "https://api.nuget.org/v3-flatcontainer/managedcode.orleans.graph/10.0.10/managedcode.orleans.graph.10.0.10.nupkg",
+    "available": true,
+    "downloadedBytes": 126985,
+    "sha256": "c1dd0fc89d40898eebbc32992c5cfa0d035b51c374e583e319308fd965b58042",
+    "nuspecRepositoryCommit": "ca63ac200abe1536169ce2c59d6e6137a5559d63",
+    "verifiedAtUtc": "2026-10-04T22:20:07.772450+00:00"
+  },
+  "consumer": {
+    "packageManifest": "Directory.Packages.props",
+    "resolvedAssetVersion": "10.0.10",
+    "focusedRegressions": "pending",
+    "acceptanceClosed": false
+  }
+}

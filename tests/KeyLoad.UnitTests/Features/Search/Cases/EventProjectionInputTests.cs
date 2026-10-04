@@ -30,7 +30,8 @@ internal sealed class EventProjectionInputTests
         await Assert.That(lineage.InputField).IsEqualTo(EventProjectionFixture.InputField);
         await Assert.That(lineage.ReducerGeneration).IsEqualTo(1L);
         await Assert.That(nativeLineage.Contains(EventProjectionFixture.Secret, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(retry).IsEqualTo(receipt);
+        await Assert.That(NativeSerialization.Serialize(retry).AsSpan()
+            .SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
         await Assert.That(fixture.VectorBytes()!.SequenceEqual(originalVector)).IsTrue();
         await Assert.That(search.Select(result => result.Document.Reference.Id).ToArray())
             .IsEquivalentTo(new[] { EventProjectionFixture.TargetId }, CollectionOrdering.Matching);

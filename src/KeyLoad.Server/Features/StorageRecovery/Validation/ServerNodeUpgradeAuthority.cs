@@ -11,10 +11,14 @@ internal sealed record ServerNodeUpgradeAuthority(StoreIdentity Canonical, Store
         if (original.Entries.Any(entry => entry.Path is "database/identity.json" or "replica/identity.json"
             && entry.Length > 4_096))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
-        var canonical = ZoneTreeFormatUpgrade.VerifySource(StoreOptions(
-            Path.Combine(paths.Source, ServerNodeUpgradeProtocol.Canonical), options));
-        var replica = ZoneTreeFormatUpgrade.VerifySource(StoreOptions(
-            Path.Combine(paths.Source, ServerNodeUpgradeProtocol.Replica), options));
+        var authority = ServerNodeUpgradePrivateDirectory.Run(Path.GetDirectoryName(paths.Destination)!, directory =>
+        {
+            var inputs = Path.Combine(directory, ServerNodeUpgradeProtocol.Inputs);
+            CopyInputs(paths.Source, inputs);
+            return VerifyCopies(inputs, options);
+        });
+        var canonical = authority.Canonical;
+        var replica = authority.Replica;
         if (canonical.FormatVersion != replica.FormatVersion
             || canonical.FormatVersion is not (ServerNodeUpgradeProtocol.Native5SourceEpoch
                 or ServerNodeUpgradeProtocol.Native6SourceEpoch))

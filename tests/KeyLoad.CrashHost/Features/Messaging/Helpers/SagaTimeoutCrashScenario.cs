@@ -30,7 +30,7 @@ internal static class SagaTimeoutCrashScenario
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
-        var database = CrashDatabase.Create(store);
+        var database = CrashDatabase.Create(store, tenantId: Partition.TenantId);
         var lane = new QueueLaneRef(Partition, Queue);
         var timeoutLane = new QueueLaneRef(Partition, TimeoutQueue);
         ConfigureQueue(database, Queue, ConfigureWorkQueueId);

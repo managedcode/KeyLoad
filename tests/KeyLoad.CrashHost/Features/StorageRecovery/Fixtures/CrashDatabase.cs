@@ -7,12 +7,13 @@ namespace KeyLoad.CrashHost;
 
 internal static class CrashDatabase
 {
-    internal static DatabaseEngine Create(ZoneTreeStore store, bool boundOutbox = false)
+    internal static DatabaseEngine Create(ZoneTreeStore store, bool boundOutbox = false,
+        string tenantId = CrashFixtureValues.System)
     {
         var database = boundOutbox
             ? new DatabaseEngine(store, new AuthorizationPolicy(), new() { MaxOutboxRecords = 1 })
             : new DatabaseEngine(store, new AuthorizationPolicy());
-        database.Bootstrap(new(CrashFixtureValues.Principal, CrashFixtureValues.System,
+        database.Bootstrap(new(CrashFixtureValues.Principal, tenantId,
                 [new(CrashFixtureValues.Wildcard, CrashFixtureValues.Wildcard, Capability.All)], [CrashFixtureValues.Wildcard])
         { ClusterAdministrator = true },
             DatabaseEngine.Credential(CrashFixtureValues.Principal, CrashFixtureValues.Principal, CrashFixtureValues.Credential));

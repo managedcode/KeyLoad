@@ -31,3 +31,7 @@
 - The R82 primitive stage has no production caller, eligibility side effect, receiver, timers, DI/cache enablement or persisted/public/replica format migration. Later stages require a separately frozen contract and genuine RF3 evidence.
 - Read [the local slice policy](Features/ResourceExecution/AGENTS.md) and [CacheControlV1](../../docs/Features/ResourceExecution/CacheControlV1.md) before implementation.
 - The earlier bootstrap statement about no installed skills does not negate the explicitly owner-authorized Orleans skill listed above; keep the prohibition on any other unapproved installation.
+
+## Messaging due coordination
+- ADR-094 and `docs/Features/Messaging/DueCoordination.md` own `Features/Messaging/GrainServices/`, `Grains/`, `Contracts/` and `Execution/`. Only leader discovery hints enter a partition coordinator, then a fresh signed native CQRS request grain; no grain owns open storage or bypasses canonical authorization/commit execution.
+- The existing identity publisher and admission helper are shared in `Features/ClusterRouting/Identity/GrainRequestIdentityScope.cs` and `NativeRequestContextAdmission.cs`. Preserve the actual silo serializers, subject-only claims, limits and exact restoration; never duplicate a weaker coordinator identity path.

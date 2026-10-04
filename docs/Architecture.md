@@ -11,6 +11,16 @@ and graph relationships -> queued actions. Logical resources organize one databa
 derivation stage through the existing atomic command and SQL CALL. Full
 declarative SQL and client protocol remain mandatory under ADR-065.
 
+Current parallel implementation contracts are [DueCoordination](Features/Messaging/DueCoordination.md)
+under ADR-094 (leader hints through fresh authorized Orleans CQRS requests),
+[OnlineGenerationLifetime](Features/Search/OnlineGenerationLifetime.md) under
+ADR-095 (bounded native index leases and retirement, original KL-039), and
+[GlobalBranchWindows](Features/Search/GlobalBranchWindows.md) under ADR-096
+(bounded per-modality merge before RRF, original KL-057). Each remains open until
+its mapped acceptance evidence exists. [NativeReadCuts](Features/StorageRecovery/NativeReadCuts.md)
+under ADR-097 supplies the next provider-owned L2-A snapshot lifetime primitive;
+delta retention/catalog cutover and actual multi-shard fan-out remain required.
+
 ```mermaid
 flowchart LR
     Caller[Agent SQL SDK MCP] --> Request[One authorized Orleans request]

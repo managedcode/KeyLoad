@@ -17,12 +17,19 @@ internal static class NodeEpochRf3MigrationAssertions
         }
     }
 
-    internal static async Task VerifyReceiptAsync(ServerNodeUpgradeReceipt receipt, string nodeName,
-        NodeEpochRf3Profile profile, NodeStatus status, NodeEpochRf3Inventory[] inventories)
+    private const int GoldenReceiptFormatVersion = 2;
+    private const int Native5SourceEpoch = 5;
+    private const int Native6SourceEpoch = 6;
+    private const int Native7TargetEpoch = 7;
+
+    internal static async Task VerifyReceiptAsync(ServerNodeUpgradeReceipt receipt, int expectedSourceEpoch,
+        string nodeName, NodeEpochRf3Profile profile, NodeStatus status, NodeEpochRf3Inventory[] inventories)
     {
-        await Assert.That(receipt.FormatVersion).IsEqualTo(1);
-        await Assert.That(receipt.SourceEpoch).IsEqualTo(5);
-        await Assert.That(receipt.TargetEpoch).IsEqualTo(6);
+        if (expectedSourceEpoch is not (Native5SourceEpoch or Native6SourceEpoch))
+        { throw new ArgumentOutOfRangeException(nameof(expectedSourceEpoch)); }
+        await Assert.That(receipt.FormatVersion).IsEqualTo(GoldenReceiptFormatVersion);
+        await Assert.That(receipt.SourceEpoch).IsEqualTo(expectedSourceEpoch);
+        await Assert.That(receipt.TargetEpoch).IsEqualTo(Native7TargetEpoch);
         await Assert.That(receipt.Incarnation).IsEqualTo(profile.Incarnation);
         await Assert.That(receipt.CanonicalNodeId).IsEqualTo(Guid.Parse(status.NodeId));
         await Assert.That(receipt.CanonicalAppliedPosition).IsGreaterThanOrEqualTo(status.Applied);

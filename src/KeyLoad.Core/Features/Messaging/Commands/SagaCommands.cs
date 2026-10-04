@@ -16,6 +16,10 @@ public sealed partial class DatabaseEngine
         var key = RecurringSagaStorage.SagaKey(request.Lane, request.SagaId);
         var existing = tx.GetRecord<SagaRecord>(key);
         RequireSagaCas(request.ExpectedRevision, request.Phase, existing, request.Lane, request.SagaId);
+        if (existing is not null)
+        {
+            RequireSagaCreatorWrite(tx, existing, request.Timeout, now);
+        }
         var next = NewSagaRecord(existing, request, principal.Id);
         var nextBytes = RecurringSagaStorage.SerializedBytes(next);
         var capacity = existing is null

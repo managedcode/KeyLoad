@@ -1,9 +1,8 @@
-using KeyLoad.Orleans;
 using ManagedCode.Orleans.Identity.Core.Constants;
 
-namespace KeyLoad.Server;
+namespace KeyLoad.Orleans;
 
-internal sealed class PersistedPrincipalRequestContextScope : IDisposable
+internal sealed class GrainRequestIdentityScope : IDisposable
 {
     private readonly object? previousPrincipal;
     private readonly object? previousState;
@@ -11,7 +10,7 @@ internal sealed class PersistedPrincipalRequestContextScope : IDisposable
     private readonly bool hadState;
     private bool disposed;
 
-    internal PersistedPrincipalRequestContextScope(IServiceProvider runtimeServices, PrincipalRecord? principal,
+    internal GrainRequestIdentityScope(IServiceProvider runtimeServices, PrincipalRecord? principal,
         Guid requestId, Guid commandId, CancellationToken cancellationToken)
     {
         var state = new GrainRequestContextState(requestId, commandId);

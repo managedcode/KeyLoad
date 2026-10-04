@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using KeyLoad.Orleans;
-using KeyLoad.Server;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Orleans.Identity.Core.Constants;
@@ -51,7 +50,7 @@ internal static class RequestCqrsScopeFlowCases
         try
         {
             var producerSawScope = false;
-            using (new PersistedPrincipalRequestContextScope(fixture.Cluster.ServiceProvider, principal,
+            using (new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
                 requestId, commandId, CancellationToken.None))
             {
                 var reply = await GrainRequestStreamConsumer.DrainAsync(
@@ -91,7 +90,7 @@ internal static class RequestCqrsScopeFlowCases
         var commandId = Guid.NewGuid();
         try
         {
-            using var scope = new PersistedPrincipalRequestContextScope(fixture.Cluster.ServiceProvider, principal,
+            using var scope = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
                 requestId, commandId, CancellationToken.None);
             arrive();
             await bothReady.Task;

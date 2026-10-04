@@ -6,7 +6,7 @@ internal static class PackedAnnLayerSearch
         int dimension, AnnWorkBudget budget)
     {
         budget.ChargeDistance(dimension);
-        return similarity.Score(vectors.Memory(node));
+        return similarity.ScorePacked(vectors, node);
     }
 
     internal static int Greedy(PackedAnnGraph graph, PackedAnnVectors vectors,

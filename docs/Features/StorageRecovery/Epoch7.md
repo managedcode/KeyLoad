@@ -42,6 +42,13 @@ An automatic live migration or an in-place identity rewrite is out of scope.
   in its descriptor, nested receipts and progress. Preparation, verification and
   publication require matching full-node authority; never convert just the
   primary store and abandon replica/current snapshot state.
+- AC-EPOCH7-003/004 keeps the original node, canonical and replica owner locks
+  continuously exclusive. Authority verification uses bounded private copies of
+  only the canonical identity/WAL pairs through the existing stopped-source API;
+  it must never reacquire an original owner lock or weaken its sharing mode.
+  The same private-directory lifecycle joins primary and cleanup failures and
+  deletes its owned copies on success/failure. Existing node acceptance,
+  rejection, published-retry and process-cut tests exercise this real path.
 - All five serving request/reply/discovery signature purpose families move from
   data-epoch6 to data-epoch7. The bounded CQRS stream wire shape/aliases/IDs remain
   v2; application RequestInterfaceVersion becomes3 and its purpose is
@@ -108,6 +115,16 @@ their receipts. The obsolete separately invoked native5 wrapper is removed.
 No new dependency, public client migration endpoint or UI is needed. Storage
 conversion is a local stopped-server administrative operation; public SDK/MCP
 still exercises preserved data and the newly admitted feature contracts.
+
+TASK-EPOCH7-RECOVERY44-PRIOR-READER refines AC-EPOCH7-002/004: each process retry
+must pass its independently selected source epoch through the owned prior-copy
+inspection helper to the matching immutable native5 or native6 executable.
+Keep exact null error, source revision, data epoch, node identity, applied
+position and original inventory assertions. No default native5 reader may be
+used to inspect a native6 source. Luna query_wave owns only the process case and
+prior inspection helper in a private patch, with root owning integration and
+the actual Aspire recovery gate. The separate observed exclusive-lock EAGAIN
+failure remains unresolved; this change must not add retries or weaken locks.
 
 ```mermaid
 flowchart LR

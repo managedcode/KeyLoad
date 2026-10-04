@@ -20,14 +20,16 @@ internal static class NativeTextRootFiles
 
     internal static void RetireRestartGenerations(string root, Guid sourceNodeId, DatabaseLimits limits)
     {
-        var leaves = new List<string>(2);
+        var leaves = new List<string>(NativeTextPhysicalBudget.MaximumGenerations);
+        var files = 0;
+        long bytes = 0;
         foreach (var entry in Directory.EnumerateFileSystemEntries(root))
         {
             if (Path.GetFileName(entry) == NativeTextProtocol.RootReceiptFile)
             {
                 continue;
             }
-            if (leaves.Count == 2)
+            if (leaves.Count == NativeTextPhysicalBudget.MaximumGenerations)
             {
                 throw NativeTextErrors.BoundExceeded();
             }
@@ -38,6 +40,15 @@ internal static class NativeTextRootFiles
             }
             leaves.Add(leaf);
             NativeTextGenerationFiles.ValidateGeneration(entry, root, leaf, sourceNodeId, limits);
+            var measured = NativeTextFileIO.MeasureRegularFiles(entry, NativeTextProtocol.MaximumFiles,
+                NativeTextProtocol.MaximumDiskBytes);
+            if (measured.Files > NativeTextProtocol.MaximumFiles - files
+                || measured.Bytes > NativeTextProtocol.MaximumDiskBytes - bytes)
+            {
+                throw NativeTextErrors.BoundExceeded();
+            }
+            files += measured.Files;
+            bytes += measured.Bytes;
         }
         foreach (var leaf in leaves)
         {

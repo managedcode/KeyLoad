@@ -51,7 +51,10 @@ internal sealed class SqlGraphSearchParityTests
             SqlGraphSearchTestSupport.Request(database.Partition, sql), cancellationToken);
 
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        await Assert.That(actual.Hits[0].Score).IsEqualTo(actual.Hits[1].Score);
+        await Assert.That(actual.Hits[0].Document.Reference.Id).IsEqualTo(GraphSearchTestSupport.FirstHit);
+        await Assert.That(actual.Hits[1].Document.Reference.Id).IsEqualTo(GraphSearchTestSupport.SecondHit);
+        await Assert.That(actual.Hits[0].Score).IsEqualTo(1d / (SqlGraphSearchTestSupport.Fusion + 1));
+        await Assert.That(actual.Hits[1].Score).IsEqualTo(1d / (SqlGraphSearchTestSupport.Fusion + 2));
     }
 
     [Test]

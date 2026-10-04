@@ -4,8 +4,11 @@ using KeyLoad.Server;
 namespace KeyLoad.IntegrationTests.Features.StorageRecovery;
 
 internal sealed class NodeEpochRf3Migration(string priorRoot, string currentRoot,
-    NodeEpochRf3Profile profile, NodeEpochRf3NodeObservation[] originalNodes)
+    NodeEpochRf3Profile profile, NodeEpochRf3NodeObservation[] originalNodes, int expectedSourceEpoch = 5)
 {
+    private const int Native5SourceEpoch = 5;
+    private const int Native6SourceEpoch = 6;
+    private readonly int sourceEpoch = ValidateSourceEpoch(expectedSourceEpoch);
     private const string PrepareOperation = "prepare-native-node";
     private const string VerifyOperation = "verify-native-node";
     private const string PublishOperation = "publish-native-node";
@@ -100,7 +103,7 @@ internal sealed class NodeEpochRf3Migration(string priorRoot, string currentRoot
                 profile, nodeName, cancellationToken).ConfigureAwait(false);
             await Assert.That(verified.ExitCode).IsEqualTo(0);
             var receipt = NodeEpochRf3ReceiptReader.Read(Stage(nodeName));
-            await NodeEpochRf3MigrationAssertions.VerifyReceiptAsync(receipt, nodeName, profile,
+            await NodeEpochRf3MigrationAssertions.VerifyReceiptAsync(receipt, sourceEpoch, nodeName, profile,
                 originalNodes[index].Status, sourceInventories).ConfigureAwait(false);
             receipts[index] = receipt;
         }
@@ -177,8 +180,17 @@ internal sealed class NodeEpochRf3Migration(string priorRoot, string currentRoot
                 .ConfigureAwait(false);
             await Assert.That(verified.ExitCode).IsEqualTo(0);
             var receipt = NodeEpochRf3ReceiptReader.Read(Target(nodeName));
-            await Assert.That(receipt).IsEqualTo(receipts[index]);
+            var expected = KeyLoad.NativeSerialization.Serialize(receipts[index]);
+            var actual = KeyLoad.NativeSerialization.Serialize(receipt);
+            await Assert.That(actual.AsSpan().SequenceEqual(expected)).IsTrue();
         }
+    }
+
+    private static int ValidateSourceEpoch(int expectedSourceEpoch)
+    {
+        if (expectedSourceEpoch is not (Native5SourceEpoch or Native6SourceEpoch))
+        { throw new ArgumentOutOfRangeException(nameof(expectedSourceEpoch)); }
+        return expectedSourceEpoch;
     }
 
     private string Target(string nodeName) => Path.Combine(currentRoot, nodeName);

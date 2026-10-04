@@ -24,6 +24,24 @@ without explicit scope for the particular user stores. Implementation remains
 Accepted until mapped real process, SDK/MCP RF3 and exact-source Linux evidence
 exists. Missing probe artifacts fail the gate and must not skip tests.
 
+The C1 RF3 correction is TASK-CRS-C1-EPOCH7 in
+[NativeCqrsRequestV2](../Features/ClusterRouting/NativeCqrsRequestV2.md). Its fixed
+genuine RPC1 baseline is native6, so current readers use the existing explicit
+all-three-Prepare-before-Publish stopped-copy upgrade. A separate owned mixed
+copy with published native7 node1 and untouched native6 node2/3 is permitted only
+as a cross-epoch loss-of-compatible-quorum fault wave; current node1 must fail serving
+and settle completely before homogeneous native7 serving. Preserve original
+profile/data/image proofs, C1 receipt workload and node identity, then verify
+current cold restart and current writes through both real clients. This does not
+qualify a same-epoch protocol-only fault or authorize old readers over native7,
+rolling conversion, relabelled images, stale rollback or user-store migration.
+Two compatible current voters retain the legitimate RF3 majority when the prior
+signing purpose cannot authenticate as a current observation. The negative
+fixture must not assert unavailable serving for that valid majority or invent
+an authenticated mismatch; it uses one current voter and two genuine prior voters.
+Root owns the shared preparation seam, docs and all gates; Luna lifecycle_wave
+owns only the private feature-local C1 fixture patch and obsolete-helper removal.
+
 ```mermaid
 flowchart TB
   Contract[New persisted interpretation] --> Data[Strict epoch7 admission]

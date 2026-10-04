@@ -24,7 +24,7 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
         inner = new(new(directory));
         Database = new(this, new AuthorizationPolicy());
         Database.Bootstrap(new(RootPrincipal, Tenant, [new("*", "*", Capability.All)], ["*"])
-            { ClusterAdministrator = true }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
+        { ClusterAdministrator = true }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
         Configure(GraphSearchTestSupport.Documents, ResourceKind.Collection);
         Configure(GraphSearchTestSupport.Projects, ResourceKind.Collection);
         Configure(GraphSearchTestSupport.Graph, ResourceKind.Graph);

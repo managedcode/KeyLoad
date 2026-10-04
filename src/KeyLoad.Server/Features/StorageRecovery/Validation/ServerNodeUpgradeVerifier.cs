@@ -7,12 +7,7 @@ namespace KeyLoad.Server;
 internal static class ServerNodeUpgradeVerifier
 {
     internal static ReplicaHardState Verify(string directory, ServerNodeUpgradeReceipt receipt, NodeOptions options, bool published)
-    {
-        var verifier = Path.Combine(Path.GetDirectoryName(receipt.FinalDestination)!,
-            ".node-upgrade-verify-" + Guid.NewGuid().ToString("N"));
-        ServerNodeUpgradeFiles.CreatePrivateDirectory(verifier);
-        Exception? failure = null;
-        try
+        => ServerNodeUpgradePrivateDirectory.Run(Path.GetDirectoryName(receipt.FinalDestination)!, verifier =>
         {
             ServerNodeUpgradeAuthority.CopyStore(directory, verifier, ServerNodeUpgradeProtocol.Canonical);
             ServerNodeUpgradeAuthority.CopyStore(directory, verifier, ServerNodeUpgradeProtocol.Replica);
@@ -20,24 +15,7 @@ internal static class ServerNodeUpgradeVerifier
             ServerNodeUpgradeAuthority.CopyInputs(receipt.OriginalSource, oldCopies);
             var authority = ServerNodeUpgradeAuthority.VerifyCopies(oldCopies, options);
             return VerifyCopies(directory, verifier, receipt, options, authority, published);
-        }
-        catch (Exception error)
-        {
-            failure = error;
-            throw;
-        }
-        finally
-        {
-            DeletePreservingFailure(verifier, failure);
-        }
-    }
-
-    private static void DeletePreservingFailure(string verifier, Exception? failure)
-    {
-        try
-        { Directory.Delete(verifier, recursive: true); }
-        catch (Exception cleanup) when (failure is not null) { throw new AggregateException(failure, cleanup); }
-    }
+        });
 
     private static ReplicaHardState VerifyCopies(string original, string verifier, ServerNodeUpgradeReceipt receipt,
         NodeOptions options, ServerNodeUpgradeAuthority authority, bool published)

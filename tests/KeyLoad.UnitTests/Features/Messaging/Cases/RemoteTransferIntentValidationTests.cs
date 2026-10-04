@@ -48,8 +48,9 @@ internal sealed class RemoteTransferIntentValidationTests
         [
             fixture.Database.Sign(claims with { Purpose = WrongPurpose }),
             fixture.Database.Sign(claims with { Incarnation = Guid.NewGuid() }),
-            fixture.Database.Sign(claims with { Source = wrongSource }),
-            fixture.Database.Sign(claims with { TransferId = Guid.NewGuid() }),
+            RemoteTransferTokenTestSupport.TamperClaims(fixture.Database, validToken, claims with { Source = wrongSource }),
+            RemoteTransferTokenTestSupport.TamperClaims(fixture.Database, validToken, claims with { TransferId = Guid.NewGuid() }),
+            fixture.Database.Sign(claims with { TransferId = Guid.Empty }),
             fixture.Database.Sign(claims with { Destination = wrongDestination }),
             fixture.Database.Sign(claims with { PrincipalId = WrongPrincipal }),
             fixture.Database.Sign(claims with { Fingerprint = WrongFingerprint }),

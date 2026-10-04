@@ -115,9 +115,9 @@ internal sealed class FilteredSearchRf3Tests(ClusterFixture fixture)
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SearchExecute,
             request, deadline.Token), ErrorCode.BudgetExceeded, dispatched: true);
         var resultLimit = scenario.Vector(ImmutableArray.Create("a")) with { Limit = 1_001 };
-        await AssertSdkFailureAsync(await sdk.SearchAsync(resultLimit, deadline.Token), ErrorCode.BudgetExceeded);
+        await AssertSdkFailureAsync(await sdk.SearchAsync(resultLimit, deadline.Token), ErrorCode.Validation);
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SearchExecute,
-            resultLimit, deadline.Token), ErrorCode.BudgetExceeded, dispatched: true);
+            resultLimit, deadline.Token), ErrorCode.Validation, dispatched: true);
 
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();

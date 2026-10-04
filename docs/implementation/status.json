@@ -1152,8 +1152,28 @@
   },
   "KL-039": {
     "title": "Online index generation swap",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/Search/OnlineGenerationLifetime.md",
+      "docs/ADR/ADR-095-online-generation-leases.md",
+      "src/KeyLoad.Server/Features/Search/Storage/NativeTextProjectionLifecycle.cs",
+      "src/KeyLoad.Server/Features/Search/Lifecycle/NativeTextProjectionSlotSet.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextGenerationLifetimeTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextGenerationCapacityTests.cs",
+      "docs/Features/StorageRecovery/NativeReadCuts.md",
+      "docs/ADR/ADR-097-native-read-cut-leases.md"
+    ],
+    "implementation": {
+      "stage": "L1_generation_leases_joined_source_L2A_native_capture_private_implementation",
+      "owner": "query_wave",
+      "runtimeQualified": false,
+      "remaining": [
+        "L1_full_combined_Aspire_unit_scalar_recovery_RF3",
+        "L2A_native_snapshot_capture_lifetime_join_and_provider_regressions",
+        "L2B_same_cut_delta_retention_replay_catalog_switch_and_interrupted_build_recovery",
+        "delivered_source_Linux_fault_resource_and_original_online_index_acceptance"
+      ]
+    }
   },
   "KL-040": {
     "title": "Resource governor",
@@ -1542,8 +1562,24 @@
   },
   "KL-057": {
     "title": "Global branch ranking",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/Search/GlobalBranchWindows.md",
+      "docs/ADR/ADR-096-global-branch-windows.md",
+      "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchWindowMerger.cs",
+      "src/KeyLoad.Query/Features/Search/Queries/SearchRankFusion.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs"
+    ],
+    "implementation": {
+      "stage": "R1_bounded_global_branch_window_kernel_and_real_local_fusion_join_compiled_development_only",
+      "owner": "root integration; Luna lifecycle_wave implementation",
+      "runtimeQualified": false,
+      "remaining": [
+        "R1_actual_Aspire_unit_and_existing_RF3_regressions",
+        "real_multiple_logical_shard_fanout_authorized_read_cut_and_statistics_contract",
+        "full_original_global_ranking_quality_performance_and_exact_source_Linux_acceptance"
+      ]
+    }
   },
   "KL-058": {
     "title": "BM25 corpus і statistics epochs",
@@ -2000,16 +2036,23 @@
       "docs/ADR/ADR-092-recurring-saga.md",
       "src/KeyLoad.Abstractions/Features/Messaging/Contracts/RecurringSagaContracts.cs",
       "src/KeyLoad.Core/Features/Messaging/Commands/RecurringScheduleCommands.cs",
-      "src/KeyLoad.Core/Features/Messaging/Commands/SagaCommands.cs"
+      "src/KeyLoad.Core/Features/Messaging/Commands/SagaCommands.cs",
+      "docs/Features/Messaging/DueCoordination.md",
+      "docs/ADR/ADR-094-orleans-due-coordination.md",
+      "docs/Features/ClusterRouting/GrainServiceGraph.md",
+      "docs/implementation/orleans-graph-delivery-2026-10-04.json",
+      "src/KeyLoad.Orleans/Features/Messaging/GrainServices/RecurringDueGrainService.cs",
+      "src/KeyLoad.Orleans/Features/Messaging/Grains/RecurringDueCoordinatorGrain.cs"
     ],
     "implementation": {
-      "stage": "S1_canonical_schedule_and_saga_CAS_source_with_shared_atomic_and_authorization_joins_tests_in_progress",
+      "stage": "S1_canonical_schedule_saga_and_S2_native_Orleans_due_service_joined_source_public_RF3_source_in_progress",
       "owner": "cluster_wave",
       "runtimeQualified": false,
       "remaining": [
-        "S1_combined_build_and_Aspire_mapped_regressions",
-        "S2_native_Orleans_CQRS_due_coordinator_restart_and_backpressure",
-        "public_SDK_official_MCP_Aspire_RF3_and_complete_Linux_acceptance"
+        "combined_Release_format_and_Aspire_mapped_regressions",
+        "S2_due_service_native_GrainServiceGraph_published_dependency_consumer_regressions",
+        "actual_SDK_official_MCP_Aspire_RF3_autonomous_policy_leader_loss_cold_restart_and_no_quorum",
+        "lost_ACK_exact_canonical_no_quorum_restart_backpressure_and_complete_Linux_acceptance"
       ]
     }
   },

@@ -75,7 +75,9 @@ internal sealed class RemoteTransferReceiptTests
             fixture.Database.Sign(receipt with { Destination = otherTarget }),
             fixture.Database.Sign(receipt with { PrincipalId = Principal }),
             fixture.Database.Sign(receipt with { Fingerprint = ChangedFingerprint }),
-            fixture.Database.Sign(receipt with { TargetCommit = receipt.TargetCommit with { Position = receipt.TargetCommit.Position + 1 } }),
+            fixture.Database.Sign(receipt with { TargetCommit = receipt.TargetCommit with { Position = 0 } }),
+            RemoteTransferTokenTestSupport.TamperClaims(fixture.Database, validToken,
+                receipt with { TargetCommit = receipt.TargetCommit with { Position = receipt.TargetCommit.Position + 1 } }),
             validToken[..^1] + "!"
         ];
     }

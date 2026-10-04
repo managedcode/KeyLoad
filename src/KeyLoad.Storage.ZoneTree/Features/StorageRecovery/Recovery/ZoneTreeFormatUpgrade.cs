@@ -1,6 +1,6 @@
 namespace KeyLoad.Storage.ZoneTree;
 
-    /// <summary>Copies one stopped native5 or native6 store into a separately published native7 store.</summary>
+/// <summary>Copies one stopped native5 or native6 store into a separately published native7 store.</summary>
 public static class ZoneTreeFormatUpgrade
 {
     /// <summary>Validates a private stopped native5 or native6 authority copy without opening or rebuilding its tree.</summary>

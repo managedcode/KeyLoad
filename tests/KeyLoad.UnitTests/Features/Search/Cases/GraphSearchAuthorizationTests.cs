@@ -41,7 +41,8 @@ internal sealed class GraphSearchAuthorizationTests
         GraphSearchTestSupport.PersistReader(database);
         var walk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root))
-        with { Labels = [GraphSearchTestSupport.Label] };
+        with
+        { Labels = [GraphSearchTestSupport.Label] };
         var search = RetrievalRequest(database);
         var engine = new SearchEngine(database.Database);
 

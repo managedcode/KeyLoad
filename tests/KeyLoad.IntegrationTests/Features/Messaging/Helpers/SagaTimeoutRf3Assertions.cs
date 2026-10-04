@@ -7,21 +7,28 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 internal static class SagaTimeoutRf3Assertions
 {
     private const string InspectTool = "keyload_saga_inspect";
+    private static readonly TimeSpan ProgressWindow = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(250);
 
     internal static async Task AssertProjectedAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        MessagingRf3Scenario scenario, Guid sagaId, string credential, CancellationToken cancellationToken)
+        MessagingRf3Scenario scenario, Guid sagaId, DateTimeOffset expectedDeadline, string credential,
+        CancellationToken cancellationToken)
     {
         var request = new InspectSagaRequest(scenario.SourceQueue, sagaId);
         var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectSagaAsync(request, cancellationToken));
         var reply = await mcp.CallAsync(InspectTool, request, cancellationToken);
         var mcpView = await McpCallerAssertions.SuccessAsync<SagaInspection?>(reply);
         await Assert.That(sdkView).IsNotNull();
+        await Assert.That(mcpView.Value).IsNotNull();
         await Assert.That(sdkView!.Phase).IsEqualTo(SagaPhase.Waiting);
         await Assert.That(sdkView.StateJson).IsEqualTo("{}");
         await Assert.That(sdkView.Redacted).IsTrue();
         await Assert.That(sdkView.Deadline).IsNotNull();
-        await Assert.That(JsonDefaults.Serialize(mcpView.Value)).IsEqualTo(JsonDefaults.Serialize(sdkView));
+        await Assert.That(sdkView.Deadline).IsEqualTo(expectedDeadline);
+        await Assert.That(JsonDefaults.Serialize(mcpView.Value).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(sdkView))).IsTrue();
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.SagaTimeoutPayload);
+        await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedHeaders);
     }
 
     internal static async Task WaitUntilAsync(DateTimeOffset dueAt, CancellationToken cancellationToken)
@@ -33,28 +40,34 @@ internal static class SagaTimeoutRf3Assertions
         }
     }
 
-    internal static async Task<CommandRequest> ExpireAtDeadlineAsync(McpOfficialClient mcp,
-        MessagingRf3Scenario scenario, Guid sagaId, DateTimeOffset dueAt, CancellationToken cancellationToken)
+    internal static async Task WaitForTimedOutAsync(KeyLoadClient sdk, MessagingRf3Scenario scenario,
+        Guid sagaId, CancellationToken cancellationToken)
     {
-        var until = dueAt.AddSeconds(10);
+        var until = TimeProvider.System.GetUtcNow() + ProgressWindow;
         while (TimeProvider.System.GetUtcNow() < until)
         {
-            var request = RecurringSagaRf3Support.Command(Guid.NewGuid(), scenario.SourcePartition,
-                new ExpireSaga(scenario.SourceQueue, sagaId, 1));
-            var reply = await mcp.CallAsync(McpCallerTools.DocumentsCommit, request, cancellationToken);
-            if (reply.IsError is not true)
+            var view = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectSagaAsync(
+                new(scenario.SourceQueue, sagaId), cancellationToken));
+            if (view is null)
             {
-                _ = await McpCallerAssertions.SuccessAsync<CommitReceipt>(reply);
-                return request;
+                throw new InvalidOperationException("The persisted waiting saga disappeared before timeout.");
             }
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched: true);
-            await Task.Delay(TimeSpan.FromMilliseconds(50), cancellationToken);
+            if (view.Phase == SagaPhase.TimedOut && view.Revision == 2)
+            {
+                return;
+            }
+            if (view.Phase != SagaPhase.Waiting || view.Revision != 1)
+            {
+                throw new InvalidOperationException("The saga left Waiting without its autonomous terminal transition.");
+            }
+            await Task.Delay(PollInterval, cancellationToken);
         }
-        throw new TimeoutException("The logged saga deadline did not become due within its bounded RF3 window.");
+        throw new TimeoutException("The autonomous timeout did not commit within its bounded RF3 window.");
     }
 
     internal static async Task AssertPhaseAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         MessagingRf3Scenario scenario, Guid sagaId, SagaPhase phase, long expectedRevision,
+        DateTimeOffset expectedDeadline,
         CancellationToken cancellationToken)
     {
         var request = new InspectSagaRequest(scenario.SourceQueue, sagaId);
@@ -62,38 +75,75 @@ internal static class SagaTimeoutRf3Assertions
         var mcpView = await McpCallerAssertions.SuccessAsync<SagaInspection?>(
             await mcp.CallAsync(InspectTool, request, cancellationToken));
         await Assert.That(sdkView).IsNotNull();
+        await Assert.That(mcpView.Value).IsNotNull();
         await Assert.That(sdkView!.Phase).IsEqualTo(phase);
         await Assert.That(sdkView.Revision).IsEqualTo(expectedRevision);
-        await Assert.That(mcpView.Value).IsEqualTo(sdkView);
+        await Assert.That(sdkView.Deadline).IsEqualTo(expectedDeadline);
+        await Assert.That(JsonDefaults.Serialize(mcpView.Value).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(sdkView))).IsTrue();
     }
 
-    internal static async Task AssertTimeoutMessageAsync(KeyLoadClient sdk, MessagingRf3Scenario scenario,
-        Guid sagaId, DateTimeOffset dueAt, CancellationToken cancellationToken)
+    internal static async Task AssertTimeoutMessageAsync(KeyLoadClient sdk, McpOfficialClient mcp,
+        MessagingRf3Scenario scenario, Guid sagaId, DateTimeOffset dueAt, string credential,
+        CancellationToken cancellationToken)
     {
-        var message = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
-            new(scenario.TimeoutQueue, TimeoutMessageId(sagaId)), cancellationToken));
-        await Assert.That(message).IsNotNull();
-        await Assert.That(message!.Metadata.State).IsEqualTo(MessageState.Ready);
-        await Assert.That(message.Metadata.ExpiresAt).IsEqualTo(dueAt.AddMinutes(1));
-        await Assert.That(message.PayloadJson).IsEqualTo("{}");
-        await Assert.That(message.HeadersJson).IsEqualTo("{}");
+        var request = new InspectMessageRequest(scenario.TimeoutQueue, TimeoutMessageId(sagaId));
+        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
+        var reply = await mcp.CallAsync(McpCallerTools.MessagesInspect, request, cancellationToken);
+        var mcpView = await McpCallerAssertions.SuccessAsync<MessageInspection?>(reply);
+        await Assert.That(sdkView).IsNotNull();
+        await Assert.That(mcpView.Value).IsNotNull();
+        await Assert.That(sdkView!.Metadata.Id).IsEqualTo(TimeoutMessageId(sagaId));
+        await Assert.That(sdkView.Metadata.State).IsEqualTo(MessageState.Ready);
+        await Assert.That(sdkView.Metadata.NotBefore).IsNull();
+        await Assert.That(sdkView.Metadata.ExpiresAt).IsEqualTo(dueAt.AddMinutes(1));
+        await Assert.That(sdkView.PayloadJson).IsEqualTo("{}");
+        await Assert.That(sdkView.HeadersJson).IsEqualTo("{}");
+        await Assert.That(JsonDefaults.Serialize(mcpView.Value).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(sdkView))).IsTrue();
+        await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.SagaTimeoutPayload);
+        await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedHeaders);
     }
 
-    internal static async Task AcknowledgeSingleTimeoutAsync(KeyLoadClient sdk, MessagingRf3Scenario scenario,
-        Guid sagaId, CancellationToken cancellationToken)
+    internal static async Task AcknowledgeSingleTimeoutAsync(KeyLoadClient sdk, McpOfficialClient mcp,
+        MessagingRf3Scenario scenario, Guid sagaId, CancellationToken cancellationToken)
     {
-        var received = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(
-            new(Guid.NewGuid(), scenario.TimeoutQueue, MaxMessages: 2), cancellationToken));
-        await Assert.That(received.Deliveries).HasSingleItem();
-        var delivery = received.Deliveries[0];
+        var delivery = await ReceiveSingleTimeoutAsync(mcp, scenario, sagaId, cancellationToken);
+        var ack = new DeliveryCommand(Guid.NewGuid(), scenario.TimeoutQueue, delivery.Token, DeliveryAction.Ack);
+        var mcpReceipt = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+            await mcp.CallAsync(McpCallerTools.MessagesComplete, ack, cancellationToken));
+        var sdkReceipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteAsync(ack, cancellationToken));
+        await Assert.That(JsonDefaults.Serialize(mcpReceipt.Value).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(sdkReceipt))).IsTrue();
+        await AssertEmptyReceiveAsync(sdk, mcp, scenario, cancellationToken);
+    }
+
+    private static async Task<Delivery> ReceiveSingleTimeoutAsync(McpOfficialClient mcp,
+        MessagingRf3Scenario scenario, Guid sagaId, CancellationToken cancellationToken)
+    {
+        var request = new ReceiveRequest(Guid.NewGuid(), scenario.TimeoutQueue, MaxMessages: 2);
+        var reply = await mcp.CallAsync(McpCallerTools.MessagesReceive, request, cancellationToken);
+        var received = await McpCallerAssertions.SuccessAsync<ReceiveResult>(reply);
+        await Assert.That(received.Value.RequestId).IsEqualTo(request.RequestId);
+        await Assert.That(received.Value.Deliveries).HasSingleItem();
+        var delivery = received.Value.Deliveries[0];
         await Assert.That(delivery.Id).IsEqualTo(TimeoutMessageId(sagaId));
         await Assert.That(delivery.PayloadJson).IsEqualTo(MessagingRf3Scenario.SagaTimeoutPayload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(MessagingRf3Scenario.ProtectedHeaders);
-        var ack = new DeliveryCommand(Guid.NewGuid(), scenario.TimeoutQueue, delivery.Token, DeliveryAction.Ack);
-        _ = await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteAsync(ack, cancellationToken));
-        var next = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(
+        return delivery;
+    }
+
+    private static async Task AssertEmptyReceiveAsync(KeyLoadClient sdk, McpOfficialClient mcp,
+        MessagingRf3Scenario scenario, CancellationToken cancellationToken)
+    {
+        var sdkResult = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(
             new(Guid.NewGuid(), scenario.TimeoutQueue, MaxMessages: 2), cancellationToken));
-        await Assert.That(next.Deliveries).IsEmpty();
+        await Assert.That(sdkResult.Deliveries).IsEmpty();
+        var request = new ReceiveRequest(Guid.NewGuid(), scenario.TimeoutQueue, MaxMessages: 2);
+        var reply = await mcp.CallAsync(McpCallerTools.MessagesReceive, request, cancellationToken);
+        var mcpResult = await McpCallerAssertions.SuccessAsync<ReceiveResult>(reply);
+        await Assert.That(mcpResult.Value.RequestId).IsEqualTo(request.RequestId);
+        await Assert.That(mcpResult.Value.Deliveries).IsEmpty();
     }
 
     internal static async Task AssertNoSecondTransitionAsync(KeyLoadClient sdk, MessagingRf3Scenario scenario,

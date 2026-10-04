@@ -8,20 +8,22 @@ internal sealed class EventProjectionPolicyTests
 {
     private const string SourceOwner = "projection-source-owner";
     private const string OtherOwner = "projection-other-owner";
+    private const string SharedTargetProject = "projection-shared-target";
     private const string Reclassified = "projection-reclassified";
     private const string NestedPath = "/record/body/value";
 
     [Test]
     public async Task AcLineage002HiddenDeletedAndRevisedSourcesAreSkippedAtTheCurrentReadCut()
     {
-        using var fixture = new EventProjectionFixture(sourceAccess: new(SourceOwner));
+        using var fixture = new EventProjectionFixture(sourceAccess: new(SourceOwner),
+            targetAccess: new(ProjectId: SharedTargetProject));
         fixture.Apply(fixture.Request());
         fixture.ConfigureReader([EventProjectionFixture.InputUse, EventProjectionFixture.VectorUse],
-            restrictRows: true, owner: OtherOwner);
+            restrictRows: true, owner: OtherOwner, projects: [SharedTargetProject]);
         var hidden = await fixture.SearchAsync();
 
         fixture.ConfigureReader([EventProjectionFixture.InputUse, EventProjectionFixture.VectorUse],
-            restrictRows: true, owner: SourceOwner);
+            restrictRows: true, owner: SourceOwner, projects: [SharedTargetProject]);
         var visible = await fixture.SearchAsync();
         fixture.Harness.Commit(new PatchDocument(EventProjectionFixture.Collection, EventProjectionFixture.SourceId,
             [new(EventProjectionFixture.InputField, PatchKind.Set, "\"changed\"")], 1));

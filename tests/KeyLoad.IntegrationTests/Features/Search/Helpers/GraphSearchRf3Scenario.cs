@@ -58,9 +58,9 @@ internal sealed record GraphSearchRf3Scenario(PartitionRef Partition)
         var id = "graph-rf3-reader-" + Guid.NewGuid().ToString("N");
         var principal = new PrincipalRecord(id, Partition.TenantId,
         [
-            new("database", Documents, Capability.Query | Capability.DocumentsRead),
-            new("database", Projects, Capability.DocumentsRead),
-            new("database", Graph, Capability.GraphRead)
+            new(Partition.DatabaseId, Documents, Capability.Query | Capability.DocumentsRead),
+            new(Partition.DatabaseId, Projects, Capability.DocumentsRead),
+            new(Partition.DatabaseId, Graph, Capability.GraphRead)
         ], []);
         return await ConfigureIdentityAsync(fixture, principal, cancellationToken);
     }
@@ -105,7 +105,7 @@ internal sealed record GraphSearchRf3Scenario(PartitionRef Partition)
         CancellationToken cancellationToken)
     {
         var graph = new ResourceDefinition(Graph, ResourceKind.Graph, partition.TransactionDomainId)
-        { FieldPolicies = [new("label", "graph-label", RawUseGrant: LabelFieldGrant)] };
+        { FieldPolicies = [new("/label", "graph-label", RawUseGrant: LabelFieldGrant)] };
         await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, graph), cancellationToken));
     }

@@ -6,26 +6,6 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class RequestCqrsRf3DiscoveryOracle
 {
-    internal static async Task<ReplicaSiloDiscovery[]> VerifyMixedImagesAsync(DistributedApplication app,
-        NodeEpochRf3Profile profile, CancellationToken cancellationToken)
-    {
-        var old = await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(app, RequestCqrsRf3Protocol.Node3,
-            profile, cancellationToken).ConfigureAwait(false);
-        await Assert.That(old.ApplicationRpcVersion).IsEqualTo(0);
-        await Assert.That(old.PeerEnvelopeVersion).IsEqualTo(0);
-        var current = new ReplicaSiloDiscovery[RequestCqrsRf3Protocol.CurrentMajority];
-        for (var index = 0; index < current.Length; index++)
-        {
-            current[index] = await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(app,
-                RequestCqrsRf3Protocol.NodeName(index), profile, cancellationToken).ConfigureAwait(false);
-            await AssertCurrentAsync(current[index]).ConfigureAwait(false);
-        }
-        await Assert.That(current[0].SiloAddress).IsNotEqualTo(current[1].SiloAddress);
-        await Assert.That(old.SiloAddress).IsNotEqualTo(current[0].SiloAddress);
-        await Assert.That(old.SiloAddress).IsNotEqualTo(current[1].SiloAddress);
-        return current;
-    }
-
     internal static async Task<ReplicaSiloDiscovery[]> CaptureCurrentAsync(DistributedApplication app,
         NodeEpochRf3Profile profile, CancellationToken cancellationToken)
     {

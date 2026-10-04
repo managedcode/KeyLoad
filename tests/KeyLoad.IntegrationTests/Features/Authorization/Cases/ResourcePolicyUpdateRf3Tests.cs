@@ -30,14 +30,18 @@ internal sealed class ResourcePolicyUpdateRf3Tests(ClusterFixture fixture)
             cursors, deadline.Token);
         await VerifyStaleAndUnauthorizedWritesAsync(fixture, admin, scenario, deadline.Token);
         scenario = scenario with
-        { Reader = await ResourcePolicyUpdateRf3Scenario.ReplaceReaderGrantsAsync(admin, scenario.Reader,
-            [ResourcePolicyUpdateRf3Protocol.ReadGrantV2, ResourcePolicyUpdateRf3Protocol.UseGrantV2], deadline.Token) };
+        {
+            Reader = await ResourcePolicyUpdateRf3Scenario.ReplaceReaderGrantsAsync(admin, scenario.Reader,
+            [ResourcePolicyUpdateRf3Protocol.ReadGrantV2, ResourcePolicyUpdateRf3Protocol.UseGrantV2], deadline.Token)
+        };
         await ResourcePolicyUpdateRf3Assertions.AssertPolicyAllowedAsync(fixture, scenario,
             scenario.Reader, readerMcp, deadline.Token);
         await VerifySdkRetryCannotRestoreOldPolicyAsync(fixture, admin, scenario, versionTwo, deadline.Token);
         scenario = scenario with
-        { Reader = await ResourcePolicyUpdateRf3Scenario.ReplaceReaderGrantsAsync(admin, scenario.Reader,
-            [ResourcePolicyUpdateRf3Protocol.ReadGrantV4, ResourcePolicyUpdateRf3Protocol.UseGrantV4], deadline.Token) };
+        {
+            Reader = await ResourcePolicyUpdateRf3Scenario.ReplaceReaderGrantsAsync(admin, scenario.Reader,
+            [ResourcePolicyUpdateRf3Protocol.ReadGrantV4, ResourcePolicyUpdateRf3Protocol.UseGrantV4], deadline.Token)
+        };
         await ResourcePolicyUpdateRf3Assertions.AssertPolicyAllowedAsync(fixture, scenario,
             scenario.Reader, readerMcp, deadline.Token);
     }

@@ -7,7 +7,7 @@ internal static class NodeEpochPriorInspection
     private static readonly string[] AuthorityFiles = ["identity.json", "commands.wal"];
 
     internal static async Task<EpochPriorProbeReceipt> InspectCopyAsync(string source,
-        NodeEpochInventory original, CancellationToken cancellationToken)
+        NodeEpochInventory original, int dataEpoch, CancellationToken cancellationToken)
     {
         var trial = Path.GetDirectoryName(source)
             ?? throw new InvalidDataException("The prior node has no owned trial directory.");
@@ -25,7 +25,7 @@ internal static class NodeEpochPriorInspection
             await Assert.That(copied[name])
                 .IsEqualTo(original.Files[Path.Combine(ServerNodeUpgradeProtocol.Canonical, name)]);
         }
-        var receipt = await EpochPriorExecutableFixture.InspectAsync(copy, cancellationToken);
+        var receipt = await EpochPriorExecutableFixture.InspectAsync(copy, cancellationToken, dataEpoch);
         await KilledProcessFileReadiness.WaitAsync(copy, cancellationToken);
         EpochUpgradeFileInventory.AssertNativeHandlesReleased(copy);
         await NodeEpochInventoryCapture.AssertUnchangedAsync(source, original, cancellationToken);

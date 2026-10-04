@@ -135,13 +135,13 @@ The RF3 observation helper `RequestCqrsRf3SignedDiscovery.ReadAsync(DistributedA
 
 AC-CRS-003 credential settlement includes the actual copied PeerSecurity credential, not merely an unused outer array. PeerSecurity implements IDisposable, rejects use after disposal and clears its owned managed credential after its borrowers settle. Socket handlers borrow that security owner and remain independently disposable. ReplicaDiscoveryExchange owns one PeerSecurity instance and its HttpClient, disposing the HTTP handler before clearing the security owner after the discovery lifetime drains. Server DI owns its separate inbound singleton; fixture/observer owners dispose their own security instances. This preserves signing/replay and public wire semantics while removing the redundant outer discovery credential copy. Focused native peer-security ownership/disposal regressions supplement the HTTP cancellation/shutdown and real RF3 gates; they do not establish that runtime copies outside these owners are erased.
 
-The two-key publisher `PersistedPrincipalRequestContextScope(IServiceProvider, PrincipalRecord?, Guid, Guid, CancellationToken)` admits principal/state with the serializers from the actual running silo provider before setting either key. `OrleansNode.OpenRequestContext` supplies that live provider to the shared SDK/MCP and credential gateways; tests must use a real running TestCluster provider. A newly built stand-alone serializer container is not equivalent evidence. Direct real-database leaf unit tests supply the same closed context around their existing signed operations, preserving all persisted revocation, partition and receipt oracles; they do not prove native transport or RF3.
+The shared two-key publisher `GrainRequestIdentityScope(IServiceProvider, PrincipalRecord?, Guid, Guid, CancellationToken)` in Orleans `Features/ClusterRouting/Identity/` admits principal/state with the serializers from the actual running silo provider before setting either key. `OrleansNode.OpenRequestContext` supplies that live provider to the shared SDK/MCP and credential gateways; the native due coordinator uses the same owner through ADR-094. Tests must use a real running TestCluster provider. A newly built stand-alone serializer container is not equivalent evidence. Direct real-database leaf unit tests supply the same closed context around their existing signed operations, preserving all persisted revocation, partition and receipt oracles; they do not prove native transport or RF3. This rehomes the existing scope and admission implementation without changing serialized claims, aliases, field IDs, limits or exact disposal restoration.
 
 For the fixed valid chunk shape, independently admitted Started and Completed maxima sum exactly to the aggregate ceiling. Retain the aggregate admission guard and actual native maximum-payload/one-over controls. Do not invent an unreachable valid-shape aggregate overflow by modifying counters or adding prohibited fields; those fields are rejected earlier by shape validation. Tests record actual encoded sum and the implication of the per-chunk bounds separately from malformed-shape rejection.
 
-Implementation remains ordered: root shared types/identity/counting/cohort joins, private producer patch, independent real native unit fixtures, genuine same-data-epoch old/new Aspire RF3 fault fixtures, then full gates. The existing EmbeddedCoordinator no-op read barrier is local canonical regression only and cannot prove fresh RF3 authorization. The accepted same-epoch image contract below is implemented in the test-only AppHost composition and genuine-source image scripts, with mixed-binary and follower-rejoin fixtures authored. The complete solution compiles; actual image production and RF3 execution are still pending, so this source does not qualify mixed-image admission or rejoin.
+Implementation remains ordered: root shared types/identity/counting/cohort joins, private producer patch, independent real native unit fixtures, genuine old/new Aspire RF3 fault fixtures under the current data-epoch contract, then full gates. The existing EmbeddedCoordinator no-op read barrier is local canonical regression only and cannot prove fresh RF3 authorization. The original image/source proof below remains immutable, while the current epoch7 fixture correction follows ADR-091 and the explicit contract below. Image production and full RF3 execution are mandatory; source presence does not qualify mixed-image admission or rejoin.
 
-## Same-epoch image and AppHost test contract, 2026-10-04
+## Genuine prior image and AppHost test contract, 2026-10-04
 
 TASK-CRS-C1-IMAGE and TASK-CRS-C1-RF3 implement AC-CRS-001/002/003/005/006 using a genuine prior executable. The fixed RPC1/peer2 baseline is Git commit `377886f35928866f083806062b446056d64539e3`, tree `937b2c0d576ef29afb33e943ddd452722ee6a16b`, with data epoch6. Root independently checked all3016 native Git files, modes, blob identities and content bytes: expanded bytes25738907, canonical source inventory SHA256 `70e92d99a96ed508ab4a1e617a5884d95cf3bfc97e99f3e131748a99cd6b640f`. Its exact Git archive is28180480 bytes, SHA256 `f4a36d2febcae6e35e857c735cbebe55d41ecd9dc2652b22a67b5f541039807f`. Native5's existing epoch5 source, image proof and cold storage upgrade remain a separate mandatory gate.
 
@@ -151,7 +151,75 @@ Root owns the AppHost join: new `src/KeyLoad.AppHost/Features/ClusterRouting/Top
 
 New `RequestCqrsRf3*.cs` integration files own their separate mixed-wave model/proof, actual SDK and official MCP callers, finite observation deadlines and canonical profile/data roots. All Docker resources, start, readiness and shutdown belong to the actual AppHost. A mixed cohort is expected to have unavailable current readiness; wait for real resource startup and signed discovery rather than requiring every node to become Healthy. On each current node, readiness must be503 and a read through its real SDK must fail with closed OwnershipLost. The official MCP SDK must observe the real current endpoint's503 transport rejection during initialization, or a closed OwnershipLost tool failure if an already-established session reaches the gateway. Assert typed status/code only; never log raw body, Problem detail or credentials. This does not claim to fence an old-protocol majority.
 
-Required waves retain exactly the same epoch6 data root and persisted local profile: homogeneous RPC1 seeding through genuine SDK/MCP; complete awaited AppHost stop and released node/storage/replica locks; mixed two-current/one-RPC1 rejection; complete stop; homogeneous current success with preserved state and stable-command receipts; complete stop; homogeneous RPC1 cold rollback with preserved supported state. A separate homogeneous-current wave deterministically selects an actual follower from the real authoritative node statuses and stops that voter through scoped inspected fault injection. It proves both clients still operate through the two compatible survivors, and rejoins that same voter through Aspire's native Start command with changed process/silo generation and recovered readiness. A configured node name alone does not establish follower status. Shutdown must await owned disposal and retain cleanup failures; a WaitAsync timeout which abandons DisposeAsync is not settlement evidence. Live cache transitions/expiry and HTTP shutdown controls remain separate mechanism tests and cannot substitute for these genuine binary waves.
+The original same-epoch/old-reader rollback wave contract is superseded by ADR-091's strict epoch7 admission. The actual prior image remains epoch6/RPC1; it must never be overlaid or relabelled as epoch7. Required current waves use the stopped-copy upgrade contract below. A separate homogeneous-current wave deterministically selects an actual follower from authoritative node statuses, stops that voter through scoped inspected fault injection, proves both clients still operate through the two compatible survivors, and rejoins the same voter through Aspire's native Start command with changed process/silo generation and recovered readiness. A configured node name alone does not establish follower status. Shutdown awaits actual owned disposal and retains cleanup failures; timeout-abandoned disposal is not settlement evidence. Live cache transitions/expiry and HTTP shutdown controls remain separate mechanism tests.
+
+### C1 epoch7 stopped-copy and incompatible-image correction
+
+TASK-CRS-C1-EPOCH7 preserves the fixed genuine RPC1/native6 source proof and
+original C1 document/queue/principal/receipt workload. Seed that workload through
+the existing RequestCqrsRf3Wave on three verified RPC1 images, capture real node
+identity and membership through NodeEpochRf3StatusOracle, and completely settle
+the wave and every canonical/replica/node lock. Reuse NodeEpochRf3Migration and
+the existing shared target-preparation method: exact stopped source inventories
+and profile, invalid-third negative barrier, all three Prepare/Verify results
+before any Publish, and unchanged original input verification. Do not replace
+the C1 workload with a sample-only migration fixture or infer native6 from a
+native5 image. The separate native5 whole-node fixture remains mandatory.
+
+The shared migration oracle pins receipt format2 and target epoch7 independently
+of the returned receipt. Its constructor takes the expected source epoch before
+any upgrade mutation: existing verified native5 fixtures default to5; C1 passes6
+after its genuine RPC1/native6 image proof. Reject other source expectations.
+Preserve every original inventory, identity, position and snapshot digest check.
+Compare complete decoded published receipts by canonical value, including all
+nested native byte values, rather than collection object identity.
+
+Before current serving, create one owned negative mixed root containing complete
+copies of published epoch7 node1 and untouched original epoch6 node2/3, with exact
+profile bytes and verified current/RPC1/RPC1 per-voter image references. This
+is an explicit incompatible-format/RPC fault wave, not a supported deployment or
+rolling upgrade. Assert signed current-node self-discovery reports RPC3/peer3,
+current node1 readiness503, and SDK/MCP closed OwnershipLost or MCP initialization503.
+The prior discovery uses the epoch6 signing purpose and cannot be authenticated
+as a version-zero record by the epoch7 verifier; never assert that false witness.
+Settle the entire negative wave and release its private locks before continuing.
+
+TASK-CRS-C1-EPOCH7-NO-QUORUM pins this negative wave to one compatible current
+voter: two compatible current voters form the legitimate RF3 majority and may
+serve when the old signing purpose prevents authenticated peer observations.
+The negative fixture must therefore observe signed current node1 identity only
+and prove absence of a compatible quorum through its real unavailable endpoint.
+It must not invent an authenticated incompatible peer or change production
+cohort admission. All homogeneous-current migration, preserved-receipt, restart
+and compatible-survivor assertions remain mandatory and unchanged. Root freezes
+this correction before the private fixture patch and owns final integration.
+
+Start homogeneous current RF3 on the actual published target root, verify all
+original C1 state and same-command receipts through real SDK/official MCP, and
+commit the current-write oracle. Stop fully, restart homogeneous current on that
+same target, then verify the retained current write/receipt and actual changed
+runtime generations. The prior originals and target inputs remain distinct;
+old binaries never open current epoch7 data and no stale-authority rollback is
+claimed. Retain roots on primary or cleanup failure and clean successful owned
+roots only after every AppHost/process/disposal settles.
+
+This negative wave establishes cross-epoch loss of compatible quorum only. It does
+not satisfy a protocol-only authenticated same-epoch old-binary gate; the fixed
+baseline is incapable of that proof. Authenticated version/tamper/cache mechanism
+tests and genuine compatible-survivor/follower-rejoin gates remain required and
+must retain their separate evidence. No original acceptance is closed by this
+source correction.
+
+Ownership: root freezes ADR/specification and owns all gates. Luna lifecycle_wave
+privately replaces RequestCqrsRf3ColdMigrationTests, its mixed/discovery oracle
+join, and new feature-local epoch-mismatch copy/scenario helpers. Shared joins
+expose the existing NodeEpochRf3CurrentWaveRunner.PrepareTargetsAsync as internal
+test infrastructure and correct the explicit source-aware golden expectations
+in NodeEpochRf3Migration and NodeEpochRf3MigrationAssertions as specified above,
+without changing the prepare/publish barrier, order or data oracles. Existing
+immutable image verifiers/scripts, production epochs, profile format, public SDK/
+MCP and original C1 workload remain unchanged. Remove newly unused legacy helpers
+and assertions in the same patch after an exact reference inventory.
 
 TASK-CRS-C1-IMAGE-JOURNAL refines AC-CRS-003 for the complete current/native5/RPC1 image preparation and owned-registry cleanup sequence. Actual Linux CI run37220907026 at2801b03 retained exactly32 successful native command records; RPC1 build and image inspection succeeded, but appending the next push result and cleanup result failed at the shared32-record journal cap. No test runner started, and this run does not qualify RF3. Admit at most64 native journal records for the complete bounded sequence, retaining the unchanged256KiB combined command output,512KiB encoded record,8MiB journal, process deadlines, actual exit status, sanitized diagnostics and ownership checks. Command65 or a byte-limit violation still fails closed and leaves every prior record unchanged. Root owns the one shared image-contract capacity change; lifecycle_wave owns only new private RequestCqrsImageJournalTests files under the ClusterRouting unit slice. Native Node child processes and real private files must prove the complete sequence remains recordable, the64/65 boundary and joined bounded-output failure. These development regressions cannot authenticate GitHub or fabricate a successful image; a fresh genuine Linux image/RF3 job remains mandatory.
 

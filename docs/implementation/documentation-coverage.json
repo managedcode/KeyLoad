@@ -13388,7 +13388,7 @@
           "src/KeyLoad.Orleans/KeyLoad.Orleans.csproj",
           "src/KeyLoad.Orleans/Features/ClusterRouting/Identity/GrainRequestContextState.cs",
           "src/KeyLoad.Orleans/Features/ClusterRouting/Identity/GrainIdentityContext.cs",
-          "src/KeyLoad.Server/Features/ClientApi/Identity/PersistedPrincipalRequestContextScope.cs",
+          "src/KeyLoad.Orleans/Features/ClusterRouting/Identity/GrainRequestIdentityScope.cs",
           "src/KeyLoad.Server/Features/ClientApi/Execution/CanonicalOperationGateway.cs",
           "src/KeyLoad.Server/Features/Authorization/Identity/DatabaseCredentialResolver.cs",
           "src/KeyLoad.Server/Features/ClusterRouting/Hosting/OrleansSiloConfiguration.cs",

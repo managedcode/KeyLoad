@@ -27,7 +27,7 @@ internal static class RecurringScheduleCrashScenario
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
-        var database = CrashDatabase.Create(store);
+        var database = CrashDatabase.Create(store, tenantId: Partition.TenantId);
         var lane = new QueueLaneRef(Partition, Queue);
         ConfigureQueue(database);
         var firstDue = TimeProvider.System.GetUtcNow().AddMinutes(-1);

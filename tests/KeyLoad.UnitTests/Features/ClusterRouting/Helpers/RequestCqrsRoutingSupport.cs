@@ -1,5 +1,4 @@
 using KeyLoad.Orleans;
-using KeyLoad.Server;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -197,7 +196,7 @@ internal static class RequestCqrsNativeCommandStream
     {
         using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound);
         using IDisposable context = publishContext
-            ? new PersistedPrincipalRequestContextScope(fixture.Cluster.ServiceProvider, contextPrincipal,
+            ? new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, contextPrincipal,
                 requestId, commandId, deadline.Token)
             : RequestCqrsClientContext.Set(null, false, null, includeState: false);
         var actor = fixture.Cluster.Client.GetGrain<IRequestGrain>(requestId);

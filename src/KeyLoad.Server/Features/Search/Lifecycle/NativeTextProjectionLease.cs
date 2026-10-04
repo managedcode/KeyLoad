@@ -4,7 +4,8 @@ using KeyLoad.Query.Features.Search;
 namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeTextProjectionLease(NativeTextProjection owner, NativeTextGeneration generation,
-    ReadExecutionBudget budget, Func<string, ulong> tokenHash, Action<NativeTextFaultStage>? faultObserver,
+    NativeTextGenerationSlot slot, ReadExecutionBudget budget, Func<string, ulong> tokenHash,
+    Action<NativeTextFaultStage>? faultObserver,
     bool building) : ITextProjectionLease
 {
     private int recordIndex = -1;
@@ -26,7 +27,7 @@ internal sealed class NativeTextProjectionLease(NativeTextProjection owner, Nati
         recordIndex++;
         if (building)
         {
-            generation.AddRecord(reference, revision, budget);
+            owner.MutatePhysical(() => generation.AddRecord(reference, revision, budget));
         }
         else if (recordIndex >= generation.Records.Count
             || generation.Records[recordIndex].Reference != reference
@@ -51,7 +52,7 @@ internal sealed class NativeTextProjectionLease(NativeTextProjection owner, Nati
             return;
         }
         var hash = tokenHash(token);
-        generation.Index.UpsertRecord(hash, (ulong)recordIndex + 1, previousToken);
+        owner.MutatePhysical(() => generation.Index.UpsertRecord(hash, (ulong)recordIndex + 1, previousToken));
         if (!postingObserved)
         {
             postingObserved = true;
@@ -60,7 +61,7 @@ internal sealed class NativeTextProjectionLease(NativeTextProjection owner, Nati
         previousToken = hash;
         if (++postingsSinceBoundCheck >= 64)
         {
-            NativeTextFiles.CheckGenerationBound(generation.Path, budget);
+            owner.CheckPhysical(budget);
             postingsSinceBoundCheck = 0;
         }
     }
@@ -104,14 +105,14 @@ internal sealed class NativeTextProjectionLease(NativeTextProjection owner, Nati
             return;
         }
         disposed = true;
-        owner.Release(generation, budget, building, invalid, completed);
+        owner.Release(generation, slot, budget, building, invalid, completed);
     }
 
     private void VerifyCompleteVisit()
     {
         if (building)
         {
-            NativeTextFiles.CheckGenerationBound(generation.Path);
+            owner.CheckPhysical(budget);
             return;
         }
         if (recordIndex + 1 != generation.Records.Count)

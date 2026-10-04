@@ -45,7 +45,8 @@ internal sealed class EventProjectionReplayTests
         var search = await fixture.SearchAsync();
 
         await Assert.That(lineage).IsNotNull();
-        await Assert.That(retry).IsEqualTo(receipt);
+        await Assert.That(NativeSerialization.Serialize(retry).AsSpan()
+            .SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
         await Assert.That(fixture.VectorBytes()!.SequenceEqual(persistedVector)).IsTrue();
         await Assert.That(search.Select(result => result.Document.Reference.Id).ToArray())
             .IsEquivalentTo(new[] { EventProjectionFixture.TargetId }, CollectionOrdering.Matching);

@@ -35,16 +35,17 @@ internal sealed class RecurringSagaDatabase : IDisposable
     internal IAtomicStore Store => store;
 
     internal RecurringSagaDatabase(DatabaseLimits? databaseLimits = null, SensitiveFieldPolicy[]? fields = null,
-        SensitiveFieldPolicy[]? headers = null, QueuePolicy? queuePolicy = null)
+        SensitiveFieldPolicy[]? headers = null, QueuePolicy? queuePolicy = null,
+        QueuePolicy? timeoutQueuePolicy = null)
     {
         limits = databaseLimits ?? new();
         directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         store = new(new(directory));
         Database = new(store, new AuthorizationPolicy(), limits);
         Database.Bootstrap(new(RootPrincipal, TenantId, [new("*", "*", Capability.All)], ["*"])
-            { ClusterAdministrator = true }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, Credential));
+        { ClusterAdministrator = true }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, Credential));
         ConfigureQueueDefinition(Queue, fields, headers, queuePolicy, null);
-        ConfigureQueueDefinition(TimeoutQueue, null, null, null, null);
+        ConfigureQueueDefinition(TimeoutQueue, null, null, timeoutQueuePolicy, null);
     }
 
     internal OperationResult Apply<T>(OperationKind kind, T payload, string principal = RootPrincipal,
@@ -70,7 +71,12 @@ internal sealed class RecurringSagaDatabase : IDisposable
     }
 
     internal void AddPrincipal(PrincipalRecord principal, DateTimeOffset? time = null)
-        => _ = Apply(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal), time: time);
+    {
+        var previous = store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(principal.Id)));
+        var updated = previous is null ? principal : principal with { PolicyEpoch = checked(previous.PolicyEpoch + 1) };
+        _ = Apply(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(updated), time: time)
+            .Get<PrincipalRecord>();
+    }
 
     internal void ConfigureQueue(QueueLaneRef lane, QueuePolicy? queuePolicy = null, DateTimeOffset? time = null)
         => ConfigureQueueDefinition(lane, null, null, queuePolicy, time);

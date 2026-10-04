@@ -45,7 +45,8 @@ internal sealed class RemoteTransfersRf3Tests(ClusterFixture fixture)
             await mcp.CallAsync(McpCallerTools.DocumentsCommit, originalAccept, deadline.Token));
         var receipt = await ReadDestinationReceiptAsync(sdk, mcp, scenario, transferId, identity.Secret, deadline.Token);
         var replayed = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(originalAccept, deadline.Token));
-        await Assert.That(replayed).IsEqualTo(accepted.Value);
+        await Assert.That(JsonDefaults.Serialize(replayed).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(accepted.Value))).IsTrue();
 
         await AcknowledgeTransferredMessageAsync(sdk, mcp, scenario, deadline.Token);
         await AcceptAfterAcknowledgementAsync(sdk, scenario, intent, transferId, receipt, deadline.Token);

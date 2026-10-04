@@ -155,9 +155,13 @@ public sealed partial class DatabaseEngine
 
     private void RequireSagaCreatorWrite(IKeyValueView view, QueueLaneRef lane, Guid sagaId,
         SagaTimeoutDefinition? timeout, DateTimeOffset now)
+        => RequireSagaCreatorWrite(view, RequireSaga(view, lane, sagaId), timeout, now);
+
+    private void RequireSagaCreatorWrite(IKeyValueView view, SagaRecord record,
+        SagaTimeoutDefinition? timeout, DateTimeOffset now)
     {
-        var record = RequireSaga(view, lane, sagaId);
         var creator = Principal(view, record.CreatorPrincipalId, now);
+        var lane = record.Lane;
         var source = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         RequireScheduleCapability(creator, lane);
         RequireQueueFieldWrites(creator, source);

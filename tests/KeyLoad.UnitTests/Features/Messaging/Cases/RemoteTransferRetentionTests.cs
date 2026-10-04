@@ -61,11 +61,12 @@ internal sealed class RemoteTransferRetentionTests
         var transferId = first.TransferId;
         var stored = measured.Database.Store.Read(view => view.GetRecord<RemoteTransferIntentRecord>(
             RemoteTransferStorage.IntentKey(measured.SourceQueue, transferId)))!;
-        var byteLimit = checked(stored.ReceiptReservationBytes - 1);
+        var accountedBytes = RemoteTransferStorage.SourceAccountedBytes(stored);
+        var byteLimit = checked((int)accountedBytes - 1);
         var next = Create(measured, measured.SourceQueue, SecondId);
         var requestBytes = Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(
             new CommandRequest(Guid.NewGuid(), measured.SourcePartition, [next]), JsonDefaults.Options));
-        await Assert.That(stored.ReceiptReservationBytes).IsGreaterThan(byteLimit);
+        await Assert.That(accountedBytes).IsGreaterThan(byteLimit);
         await Assert.That(requestBytes).IsLessThan(byteLimit);
 
         using var limited = new RemoteTransferDatabase(measured.Database.Limits with { MaxBatchBytes = byteLimit });

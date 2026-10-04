@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>All fourteen real public mutation DTOs, independent of catalog discovery.</summary>
+/// <summary>All twenty-three real public mutation DTOs, independent of catalog discovery.</summary>
 internal static class McpMutationTestData
 {
     private const string EventId = "mcp-event";
@@ -30,10 +30,21 @@ internal static class McpMutationTestData
     private const string GraphToQueueKind = "graphToQueue";
     private const string ExpireSamplesKind = "expireSamples";
     private const string StoreAggregateSnapshotKind = "storeAggregateSnapshot";
+    private const string VectorProjectionKind = "applyVectorProjection";
+    private const string CreateTransferKind = "createQueueTransfer";
+    private const string AcceptTransferKind = "acceptQueueTransfer";
+    private const string CompleteTransferKind = "completeQueueTransfer";
+    private const string ConfigureScheduleKind = "configureRecurringSchedule";
+    private const string EmitOccurrencesKind = "emitRecurringOccurrences";
+    private const string CancelScheduleKind = "cancelRecurringSchedule";
+    private const string CompareExchangeSagaKind = "compareExchangeSaga";
+    private const string ExpireSagaKind = "expireSaga";
     internal static readonly ImmutableArray<string> Discriminators =
         [PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind,
          EnqueueKind, UpsertEdgeKind, DeleteEdgeKind, SamplesKind, VectorKind,
-         QueueToGraphKind, GraphToQueueKind, ExpireSamplesKind, StoreAggregateSnapshotKind];
+         QueueToGraphKind, GraphToQueueKind, ExpireSamplesKind, StoreAggregateSnapshotKind,
+         VectorProjectionKind, CreateTransferKind, AcceptTransferKind, CompleteTransferKind,
+         ConfigureScheduleKind, EmitOccurrencesKind, CancelScheduleKind, CompareExchangeSagaKind, ExpireSagaKind];
 
     internal static ImmutableArray<Mutation> Create() =>
     [
@@ -57,7 +68,8 @@ internal static class McpMutationTestData
         new ExpireSamples(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
             DateTimeOffset.UnixEpoch, SampleRetentionDefaults.DefaultDeletes),
         new StoreAggregateSnapshot(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
-            Revision, Model, Dimension, McpCanonicalTestData.EmptyJson, 0, Revision)
+            Revision, Model, Dimension, McpCanonicalTestData.EmptyJson, 0, Revision),
+        .. McpDerivedMutationTestData.Create()
     ];
 
     private static EventData Event() => new(EventId, EventType, McpCanonicalTestData.EmptyJson);

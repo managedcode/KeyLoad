@@ -21,7 +21,7 @@ internal static class PackedAnnNeighborSelection
     {
         if (metric == DistanceMetric.DotProduct)
         {
-            return FillPruned(source, nodes, candidateCount, maximum, 0, scratch, budget);
+            return SelectSimple(source, nodes, candidateCount, maximum, scratch, budget);
         }
         var selected = 0;
         for (var index = 0; index < candidateCount && selected < maximum; index++)
@@ -29,7 +29,7 @@ internal static class PackedAnnNeighborSelection
             budget.Check();
             var candidate = nodes[index];
             budget.Charge(dimension);
-            var similarity = PreparedSimilarity.Create(vectors.Memory(candidate), metric);
+            var similarity = PreparedSimilarity.CreatePacked(vectors, candidate, metric);
             if (IsDiverse(sourceScores[index], similarity, scratch.SelectedNeighbors, selected,
                 vectors, dimension, budget))
             {
@@ -142,7 +142,7 @@ internal static class PackedAnnNeighborSelection
         PackedAnnBuildScratch scratch, AnnWorkBudget budget)
     {
         budget.Charge(dimension);
-        var similarity = PreparedSimilarity.Create(vectors.Memory(node), metric);
+        var similarity = PreparedSimilarity.CreatePacked(vectors, node, metric);
         for (var index = 0; index < existing; index++)
         {
             budget.Charge(1);
@@ -152,6 +152,26 @@ internal static class PackedAnnNeighborSelection
         }
         scratch.NeighborNodes[existing] = added;
         scratch.NeighborScores[existing] = PackedAnnLayerSearch.Score(vectors, added, similarity, dimension, budget);
+    }
+
+    private static int SelectSimple(int source, int[] nodes, int candidateCount, int maximum,
+        PackedAnnBuildScratch scratch, AnnWorkBudget budget)
+    {
+        var selected = 0;
+        for (var index = 0; index < candidateCount && selected < maximum; index++)
+        {
+            budget.Check();
+            budget.Charge(1);
+            var candidate = nodes[index];
+            if (candidate == source)
+            {
+                continue;
+            }
+            budget.Charge(1);
+            scratch.SelectedNeighbors[selected++] = candidate;
+        }
+        SortSelected(scratch.SelectedNeighbors, selected, budget);
+        return selected;
     }
 
     private static void SortPairs(int[] nodes, double[] scores, int count, AnnWorkBudget budget)

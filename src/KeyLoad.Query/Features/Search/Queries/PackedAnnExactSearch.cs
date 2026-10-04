@@ -64,7 +64,7 @@ internal static class PackedAnnExactSearch
         AnnCandidate[] candidates, int found, AnnWorkBudget budget)
     {
         budget.ChargeDistance(state.Space.Dimension);
-        var score = similarity.Score(state.Vectors.Memory(ordinal));
+        var score = similarity.ScorePacked(state.Vectors, ordinal);
         return InsertTop(candidates, found,
             new(ordinal, state.Ids[ordinal], state.Revisions[ordinal], score), budget);
     }

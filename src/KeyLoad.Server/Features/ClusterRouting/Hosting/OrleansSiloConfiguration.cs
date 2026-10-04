@@ -31,6 +31,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(partition.Database);
         services.AddSingleton<ICommitCoordinator>(partition.Coordinator);
         services.AddSingleton<IReplicaEndpoint>(partition.Consensus);
+        services.AddSingleton(partition.Consensus);
         services.AddSingleton(partition.Configuration);
         services.AddSingleton(peers);
         services.AddSingleton(TimeProvider.System);
@@ -72,6 +73,7 @@ internal static class OrleansSiloConfiguration
                 + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes),
             checked(GrainRequestStreamProtocol.MaximumCompletedBytes + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes)));
         silo.AddGrainService<PartitionReplicaGrainService>();
+        silo.AddGrainService<RecurringDueGrainService>();
         // ADR-036: owner explicitly requires these two native experimental services.
 #pragma warning disable ORLEANSEXP003
         silo.AddDistributedGrainDirectory();
@@ -80,6 +82,10 @@ internal static class OrleansSiloConfiguration
         silo.AddActivationRepartitioner();
 #pragma warning restore ORLEANSEXP001
         silo.AddOrleansGraph(configureGraph: graph => graph.AllowClientCallGrain<IRequestGrain>()
+            .AddGrainServiceTransition<RecurringDueGrainService, IRecurringDueCoordinatorGrain>(
+                nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync))
+            .AddGrainTransition<IRecurringDueCoordinatorGrain, IRequestGrain>()
+            .MethodByName(nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
             .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
             .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
             .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()

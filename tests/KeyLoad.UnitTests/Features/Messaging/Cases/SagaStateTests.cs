@@ -40,7 +40,7 @@ internal sealed class SagaStateTests
             [new CompareExchangeSaga(fixture.Queue, Guid.NewGuid(), 0, SagaPhase.TimedOut, WaitingState)]));
         await Assert.That(directTimeout.Error).IsEqualTo(ErrorCode.Validation);
         var malformedState = fixture.Apply(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), fixture.Partition,
-            [new CompareExchangeSaga(fixture.Queue, Guid.NewGuid(), 0, SagaPhase.Waiting, "{\"broken\":" )]));
+            [new CompareExchangeSaga(fixture.Queue, Guid.NewGuid(), 0, SagaPhase.Waiting, "{\"broken\":")]));
         await Assert.That(malformedState.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, sagaId)!.Revision).IsEqualTo(3);

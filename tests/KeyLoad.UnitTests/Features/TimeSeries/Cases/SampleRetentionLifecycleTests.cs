@@ -117,7 +117,7 @@ internal sealed class SampleRetentionLifecycleTests
         using var entered = new ManualResetEventSlim();
         using var release = new ManualResetEventSlim();
         using var commitStarted = new ManualResetEventSlim();
-        var heldRead = Task.Run(() => db.Store.Read(view =>
+        var heldRead = Task.Factory.StartNew(() => db.Store.Read(view =>
         {
             entered.Set();
             if (!release.Wait(TimeSpan.FromSeconds(5)))
@@ -126,7 +126,7 @@ internal sealed class SampleRetentionLifecycleTests
             }
 
             return 0;
-        }));
+        }), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         if (!entered.Wait(TimeSpan.FromSeconds(5)))
         {
             release.Set();
@@ -134,12 +134,12 @@ internal sealed class SampleRetentionLifecycleTests
             throw new TimeoutException("The real store read gate was not acquired.");
         }
 
-        var expiry = Task.Run(() =>
+        var expiry = Task.Factory.StartNew(() =>
         {
             commitStarted.Set();
             return db.Commit(new ExpireSamples(SampleAggregateTestData.Set,
                 SampleAggregateTestData.Series, cutoff));
-        });
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         try
         {
             if (!commitStarted.Wait(TimeSpan.FromSeconds(5)))

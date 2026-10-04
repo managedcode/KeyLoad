@@ -22,7 +22,7 @@ internal static class NodeEpochRf3CurrentWaveRunner
             failures).ConfigureAwait(false);
     }
 
-    private static async Task PrepareTargetsAsync(NodeEpochRf3TrialRoots roots, NodeEpochRf3Migration migration,
+    internal static async Task PrepareTargetsAsync(NodeEpochRf3TrialRoots roots, NodeEpochRf3Migration migration,
         CancellationToken cancellationToken)
     {
         var sourceInventories = await migration.CaptureSourcesAsync(cancellationToken).ConfigureAwait(false);

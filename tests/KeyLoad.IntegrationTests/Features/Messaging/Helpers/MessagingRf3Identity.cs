@@ -20,7 +20,8 @@ internal sealed record MessagingRf3Identity(PrincipalRecord Principal, ApiKeyRec
     {
         var principalId = PrincipalPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var principal = new PrincipalRecord(principalId, tenantId,
-            [.. grants], fieldGrants) { ClusterAdministrator = clusterAdministrator };
+            [.. grants], fieldGrants)
+        { ClusterAdministrator = clusterAdministrator };
         var credentialId = CredentialPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var secret = credentialId + SecretSeparator + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes));
         var credential = new ApiKeyRecord(credentialId, principalId,

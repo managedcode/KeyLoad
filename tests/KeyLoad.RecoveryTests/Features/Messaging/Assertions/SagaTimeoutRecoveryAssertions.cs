@@ -112,7 +112,7 @@ internal static class SagaTimeoutRecoveryAssertions
         if (recoveredOutcome is not null)
         {
             await Assert.That(receipt.Token).IsEqualTo(recoveredOutcome.Token);
-            await Assert.That(receipt.Mutations[0]).IsEqualTo(recoveredOutcome.Mutations[0]);
+            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(recoveredOutcome, receipt);
         }
     }
 
@@ -124,7 +124,8 @@ internal static class SagaTimeoutRecoveryAssertions
         var resolved = database.ResolveOutcome(operation).Get<CommitReceipt>();
         await Assert.That(repeated.Token).IsEqualTo(first.Token);
         await Assert.That(resolved.Token).IsEqualTo(first.Token);
-        await Assert.That(repeated.Mutations[0]).IsEqualTo(first.Mutations[0]);
+        await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(first, repeated);
+        await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(first, resolved);
         await Assert.That(database.GetOutboxStatus(CrashFixtureValues.Principal,
             SagaTimeoutCrashScenario.Partition).Head.Tail).IsEqualTo(seedTail + 1);
         await Assert.That(ReadQueueCounters(store, timeoutLane).StoredMessages).IsEqualTo(1L);

@@ -36,7 +36,7 @@ internal sealed class EventProjectionFixture : IDisposable
     internal string TargetCollection { get; }
 
     internal EventProjectionFixture(string? targetClassification = SourceClass, RowAccess? sourceAccess = null,
-        bool separateTarget = false, string? sourceClassification = SourceClass)
+        bool separateTarget = false, string? sourceClassification = SourceClass, RowAccess? targetAccess = null)
     {
         TargetCollection = separateTarget ? SeparateTargetCollection : Collection;
         Harness = new EventProjectionHarness();
@@ -49,7 +49,7 @@ internal sealed class EventProjectionFixture : IDisposable
         }
         Harness.Commit(
             new PutDocument(Collection, SourceId, "{\"input\":\"" + Secret + "\"}", Access: sourceAccess),
-            new PutDocument(TargetCollection, TargetId, "{\"input\":\"derived\"}"));
+            new PutDocument(TargetCollection, TargetId, "{\"input\":\"derived\"}", Access: targetAccess));
         Harness.Commit(new AppendEvents(StreamSet, StreamId,
             [new EventData("projection-event", "SourceUpdated", "{\"source\":\"" + Secret + "\"}")],
             ExpectedStreamRevision.NoStream));
@@ -82,7 +82,8 @@ internal sealed class EventProjectionFixture : IDisposable
             SchemaVersion = checked(current.SchemaVersion + 1)
         };
         Harness.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(Partition.TenantId,
-            Partition.DatabaseId, replacement) { ExpectedSchemaVersion = current.SchemaVersion }).Get<ResourceDefinition>();
+            Partition.DatabaseId, replacement)
+        { ExpectedSchemaVersion = current.SchemaVersion }).Get<ResourceDefinition>();
     }
 
     internal void ConfigureWorker(bool revoked = false, string[]? additionalStreams = null, string[]? grants = null)
@@ -91,9 +92,9 @@ internal sealed class EventProjectionFixture : IDisposable
             additionalStreams: additionalStreams);
 
     internal void ConfigureReader(string[] grants, bool revoked = false, bool restrictRows = false,
-        string? owner = null)
+        string? owner = null, string[]? projects = null)
         => ConfigurePrincipal(ReaderId, Capability.Query | Capability.DocumentsRead | Capability.VectorSearch,
-            grants, revoked, restrictRows, owner);
+            grants, revoked, restrictRows, owner, projects: projects);
 
     internal ApplyVectorProjection Request(ImmutableArray<float>? values = null, long sourceRevision = 1,
         string eventId = "projection-event")
@@ -144,7 +145,8 @@ internal sealed class EventProjectionFixture : IDisposable
     public void Dispose() => Harness.Dispose();
 
     private void ConfigurePrincipal(string id, Capability capabilities, string[] grants, bool revoked = false,
-        bool restrictRows = false, string? owner = null, string[]? additionalStreams = null)
+        bool restrictRows = false, string? owner = null, string[]? additionalStreams = null,
+        string[]? projects = null)
     {
         var scopes = new List<ScopeGrant> { new(Partition.DatabaseId, Collection, capabilities) };
         if (!string.Equals(TargetCollection, Collection, StringComparison.Ordinal))
@@ -164,6 +166,7 @@ internal sealed class EventProjectionFixture : IDisposable
             PolicyEpoch = Database.Store.Read(view =>
                 (view.GetRecord<PrincipalRecord>(KeySpace.Principal(id))?.PolicyEpoch ?? 0) + 1),
             OwnerId = owner,
+            Projects = [.. projects ?? []],
             RestrictRows = restrictRows,
             Revoked = revoked
         };

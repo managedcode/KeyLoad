@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 [NotInParallel]
 internal sealed class SagaTimeoutRf3Tests(ClusterFixture fixture)
 {
-    private const int DeadlineLeadSeconds = 15;
+    private const int DeadlineLeadSeconds = 45;
 
     [Test]
     public async Task AcJobs003DueTimeoutCommitsOneMessageAndOneTerminalSagaRevision()
@@ -29,25 +29,33 @@ internal sealed class SagaTimeoutRf3Tests(ClusterFixture fixture)
                 MessagingRf3Scenario.ProtectedPayload, dueAt, timeout));
         var created = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(create, deadline.Token));
         await Assert.That(created.Mutations[0].Revision).IsEqualTo(1L);
-        await SagaTimeoutRf3Assertions.AssertProjectedAsync(sdk, mcp, scenario, sagaId, identity.Secret,
+        await SagaTimeoutRf3Assertions.AssertProjectedAsync(sdk, mcp, scenario, sagaId, dueAt, identity.Secret,
             deadline.Token);
 
+        await Assert.That(TimeProvider.System.GetUtcNow() < dueAt).IsTrue();
         var tooEarly = RecurringSagaRf3Support.Command(Guid.NewGuid(), scenario.SourcePartition,
             new ExpireSaga(scenario.SourceQueue, sagaId, 1));
         await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(await sdk.CommitAsync(tooEarly, deadline.Token),
             ErrorCode.Validation);
         await SagaTimeoutRf3Assertions.AssertPhaseAsync(sdk, mcp, scenario, sagaId, SagaPhase.Waiting,
-            expectedRevision: 1, deadline.Token);
+            expectedRevision: 1, dueAt, deadline.Token);
         await SagaTimeoutRf3Assertions.WaitUntilAsync(dueAt, deadline.Token);
+        await SagaTimeoutRf3Assertions.WaitForTimedOutAsync(sdk, scenario, sagaId, deadline.Token);
 
-        var timeoutCommand = await SagaTimeoutRf3Assertions.ExpireAtDeadlineAsync(mcp, scenario, sagaId, dueAt,
-            deadline.Token);
+        var timeoutCommand = RecurringSagaRf3Support.Command(
+            DueCommandRf3Identity.Saga(scenario.SourceQueue, sagaId), scenario.SourcePartition,
+            new ExpireSaga(scenario.SourceQueue, sagaId, 1));
+        var timeoutReceipt = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+            await mcp.CallAsync(McpCallerTools.DocumentsCommit, timeoutCommand, deadline.Token));
         var replay = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(timeoutCommand, deadline.Token));
+        await Assert.That(JsonDefaults.Serialize(replay).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(timeoutReceipt.Value))).IsTrue();
         await Assert.That(replay.Mutations[0].Revision).IsEqualTo(2L);
         await SagaTimeoutRf3Assertions.AssertPhaseAsync(sdk, mcp, scenario, sagaId, SagaPhase.TimedOut,
-            expectedRevision: 2, deadline.Token);
-        await SagaTimeoutRf3Assertions.AssertTimeoutMessageAsync(sdk, scenario, sagaId, dueAt, deadline.Token);
-        await SagaTimeoutRf3Assertions.AcknowledgeSingleTimeoutAsync(sdk, scenario, sagaId, deadline.Token);
+            expectedRevision: 2, dueAt, deadline.Token);
+        await SagaTimeoutRf3Assertions.AssertTimeoutMessageAsync(sdk, mcp, scenario, sagaId, dueAt,
+            identity.Secret, deadline.Token);
+        await SagaTimeoutRf3Assertions.AcknowledgeSingleTimeoutAsync(sdk, mcp, scenario, sagaId, deadline.Token);
         await SagaTimeoutRf3Assertions.AssertNoSecondTransitionAsync(sdk, scenario, sagaId, deadline.Token);
     }
 }

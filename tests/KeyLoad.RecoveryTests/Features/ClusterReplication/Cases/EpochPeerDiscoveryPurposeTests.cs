@@ -8,7 +8,7 @@ namespace KeyLoad.RecoveryTests.Features.ClusterReplication;
 internal sealed class EpochPeerDiscoveryPurposeTests
 {
     private const string LegacyPurpose = "keyload-discovery-request-v1";
-    private const string CurrentPurpose = "keyload-discovery-request-data-epoch6";
+    private const string CurrentPurpose = "keyload-discovery-request-data-epoch7";
 
     [Test]
     public async Task AcEpoch005LegacySignedDiscoveryGetIsRejectedWithoutSpendingNonceAdmission()

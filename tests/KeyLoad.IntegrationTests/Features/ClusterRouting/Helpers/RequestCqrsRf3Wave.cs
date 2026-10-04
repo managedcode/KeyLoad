@@ -11,6 +11,8 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
 {
+    private const string DueLeaderLossScenario = "messaging-due-leader-loss";
+    private const string DueNoQuorumScenario = "messaging-due-no-quorum";
     private readonly string dataRoot;
     private readonly ContainerRuntimeControl runtime;
     private DistributedApplication? application;
@@ -60,6 +62,20 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
 
     internal Task KillAsync(string node, CancellationToken cancellationToken)
         => runtime.KillAsync(node, RequestCqrsRf3Protocol.FollowerLossScenario, cancellationToken);
+
+    internal Task KillLeaderAsync(string node, CancellationToken cancellationToken)
+    {
+        if (!IsNode(node))
+        { throw new ArgumentOutOfRangeException(nameof(node)); }
+        return runtime.KillAsync(node, DueLeaderLossScenario, cancellationToken);
+    }
+
+    internal Task KillDueNoQuorumAsync(string node, CancellationToken cancellationToken)
+    {
+        if (!IsNode(node))
+        { throw new ArgumentOutOfRangeException(nameof(node)); }
+        return runtime.KillAsync(node, DueNoQuorumScenario, cancellationToken);
+    }
 
     internal Task RestartAsync(string node, CancellationToken cancellationToken)
         => runtime.RestartAsync(node, cancellationToken);

@@ -55,7 +55,7 @@ internal sealed class NodeEpochProcessRecoveryTests
             await process.WaitForExitAsync(timeout.Token);
             await NodeEpochFileReadiness.WaitAsync(source, timeout.Token);
             await AssertAfterKillAsync(source, destination, stage, original, timeout.Token);
-            await RetryAndVerifyAsync(source, destination, options, profile, prior, original, timeout.Token);
+            await RetryAndVerifyAsync(source, destination, options, profile, prior, original, dataEpoch, timeout.Token);
         }
         catch (Exception failure)
         {
@@ -82,7 +82,7 @@ internal sealed class NodeEpochProcessRecoveryTests
 
     private static async Task RetryAndVerifyAsync(string source, string destination, NodeOptions options,
         EpochPriorNodeProfile profile, EpochPriorProbeReceipt prior, NodeEpochInventory original,
-        CancellationToken cancellationToken)
+        int dataEpoch, CancellationToken cancellationToken)
     {
         var prepared = ServerNodeFormatUpgrade.Prepare(source, options);
         await Assert.That(prepared.TargetEpoch).IsEqualTo(7);
@@ -90,7 +90,7 @@ internal sealed class NodeEpochProcessRecoveryTests
         await Assert.That(prepared.Incarnation).IsEqualTo(prior.Incarnation);
         await Assert.That(prepared.CanonicalPosition).IsEqualTo(prior.Position);
         await Assert.That(prepared.CanonicalAppliedPosition).IsEqualTo(3L);
-        var oldSource = await NodeEpochPriorInspection.InspectCopyAsync(source, original, cancellationToken);
+        var oldSource = await NodeEpochPriorInspection.InspectCopyAsync(source, original, dataEpoch, cancellationToken);
         await Assert.That(oldSource.ErrorCode).IsNull();
         await Assert.That(oldSource.SourceRevision).IsEqualTo(prior.SourceRevision);
         await Assert.That(oldSource.DataEpoch).IsEqualTo(prior.DataEpoch);

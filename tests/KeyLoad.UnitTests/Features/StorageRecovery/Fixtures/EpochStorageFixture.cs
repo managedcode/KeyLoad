@@ -146,8 +146,8 @@ internal sealed class EpochStorageFixture : IDisposable
             0x35545043444C4BUL when sourceEpoch == Native6Epoch => 0x34545043444C4BUL,
             0x35415444444C4BUL when sourceEpoch == Native5Epoch => 0x33415444444C4BUL,
             0x35415444444C4BUL when sourceEpoch == Native6Epoch => 0x34415444444C4BUL,
-            0x35544E45444C4BUL when sourceEpoch == Native5Epoch => 0x33444E45444C4BUL,
-            0x35544E45444C4BUL when sourceEpoch == Native6Epoch => 0x34444E45444C4BUL,
+            ZoneTreePersistenceFormat.CheckpointEndMagic when sourceEpoch == Native5Epoch => 0x33444E45444C4BUL,
+            ZoneTreePersistenceFormat.CheckpointEndMagic when sourceEpoch == Native6Epoch => 0x34444E45444C4BUL,
             _ => throw new InvalidDataException("The current fixture contains an unknown checkpoint frame.")
         };
 

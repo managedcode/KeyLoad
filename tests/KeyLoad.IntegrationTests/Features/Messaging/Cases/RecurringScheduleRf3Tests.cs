@@ -21,14 +21,18 @@ internal sealed class RecurringScheduleRf3Tests(ClusterFixture fixture)
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
         var scheduleId = Guid.NewGuid();
-        var first = RecurringSagaRf3Support.Definition(scenario, scheduleId, TimeProvider.System.GetUtcNow().AddMinutes(-2));
+        var firstDueAt = TimeProvider.System.GetUtcNow().AddMinutes(5);
+        var first = RecurringSagaRf3Support.Definition(scenario, scheduleId, firstDueAt);
         var create = RecurringSagaRf3Support.Command(Guid.NewGuid(), scenario.SourcePartition,
             new ConfigureRecurringSchedule(first, 0));
         var created = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(create, deadline.Token));
         await Assert.That(created.Mutations[0].Revision).IsEqualTo(1L);
+        await RecurringScheduleRf3Assertions.AssertScheduleAsync(sdk, mcp, scenario, scheduleId,
+            expectedRevision: 1, expectedGeneration: 1, expectedNextOrdinal: 0, firstDueAt,
+            identity.Secret, deadline.Token);
 
-        var replacement = RecurringSagaRf3Support.Definition(scenario, scheduleId,
-            TimeProvider.System.GetUtcNow().AddMinutes(-1));
+        var replacementFirstDueAt = TimeProvider.System.GetUtcNow().AddHours(-1).AddMinutes(-5);
+        var replacement = RecurringSagaRf3Support.Definition(scenario, scheduleId, replacementFirstDueAt);
         var replace = RecurringSagaRf3Support.Command(Guid.NewGuid(), scenario.SourcePartition,
             new ConfigureRecurringSchedule(replacement, 1));
         var replaced = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
@@ -39,26 +43,25 @@ internal sealed class RecurringScheduleRf3Tests(ClusterFixture fixture)
             new ConfigureRecurringSchedule(first, 1));
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, stale,
             deadline.Token), ErrorCode.RevisionConflict, dispatched: true);
-        await RecurringScheduleRf3Assertions.AssertScheduleAsync(sdk, mcp, scenario, scheduleId,
-            expectedRevision: 2, expectedGeneration: 2, expectedNextOrdinal: 0, deadline.Token);
+        await Assert.That(replacementFirstDueAt.AddHours(1)).IsLessThan(TimeProvider.System.GetUtcNow());
+        await Assert.That(replacementFirstDueAt.AddHours(2)).IsGreaterThan(TimeProvider.System.GetUtcNow());
 
         var emit = RecurringSagaRf3Support.Command(Guid.NewGuid(), scenario.SourcePartition,
             new EmitRecurringOccurrences(scenario.SourceQueue, scheduleId, 2, DueMessageCount));
         var emitted = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync(McpCallerTools.DocumentsCommit, emit, deadline.Token));
         var retried = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(emit, deadline.Token));
-        await Assert.That(retried).IsEqualTo(emitted.Value);
+        await Assert.That(JsonDefaults.Serialize(retried).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(emitted.Value))).IsTrue();
         await Assert.That(retried.Mutations[0].Revision).IsEqualTo(2L);
         await RecurringScheduleRf3Assertions.AssertScheduleAsync(sdk, mcp, scenario, scheduleId,
-            expectedRevision: 2, expectedGeneration: 2, expectedNextOrdinal: DueMessageCount, deadline.Token);
-        await RecurringScheduleRf3Assertions.AssertOccurrenceAsync(sdk, scenario, scheduleId, 1,
-            replacement.FirstDueAt, deadline.Token);
-        await RecurringScheduleRf3Assertions.AssertOccurrenceAsync(sdk, scenario, scheduleId, 2,
-            replacement.FirstDueAt.AddSeconds(1), deadline.Token);
-        var extra = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
-            new(scenario.SourceQueue,
-                RecurringScheduleRf3Assertions.OccurrenceMessageId(scheduleId, generation: 2, ordinal: 3)),
-            deadline.Token));
-        await Assert.That(extra).IsNull();
+            expectedRevision: 2, expectedGeneration: 2, expectedNextOrdinal: DueMessageCount,
+            replacementFirstDueAt, identity.Secret, deadline.Token);
+        await RecurringScheduleRf3Assertions.AssertOccurrenceAsync(sdk, mcp, scenario, scheduleId,
+            generation: 2, ordinal: 0, replacementFirstDueAt, identity.Secret, deadline.Token);
+        await RecurringScheduleRf3Assertions.AssertOccurrenceAsync(sdk, mcp, scenario, scheduleId,
+            generation: 2, ordinal: 1, replacementFirstDueAt.AddHours(1), identity.Secret, deadline.Token);
+        await RecurringScheduleRf3Assertions.AssertOccurrenceAbsentAsync(sdk, mcp, scenario, scheduleId,
+            generation: 2, ordinal: 2, deadline.Token);
     }
 }

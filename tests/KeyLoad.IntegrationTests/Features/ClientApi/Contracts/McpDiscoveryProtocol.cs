@@ -17,6 +17,11 @@ internal static class McpDiscoveryProtocol
     internal const string Source = "source";
     internal const string Subscription = "subscription";
     internal const string Lane = "lane";
+    internal const string SourceQueue = "sourceQueue";
+    internal const string DestinationQueue = "destinationQueue";
+    internal const string TransferId = "transferId";
+    internal const string ScheduleId = "scheduleId";
+    internal const string SagaId = "sagaId";
     internal const string Id = "id";
     internal const string Partition = "partition";
     internal const string Graph = "graph";
@@ -29,6 +34,8 @@ internal static class McpDiscoveryProtocol
     internal const string Width = "width";
     internal const string Sql = "sql";
     internal const string Query = "query";
+    internal const string Search = "search";
+    internal const string Version = "version";
     internal const string Collection = "collection";
     internal const string Cursor = "cursor";
     internal const string Consumer = "consumer";

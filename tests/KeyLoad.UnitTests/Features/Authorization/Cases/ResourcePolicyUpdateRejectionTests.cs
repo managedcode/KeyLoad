@@ -34,7 +34,8 @@ internal sealed class ResourcePolicyUpdateRejectionTests
     {
         using var fixture = new ResourcePolicyUpdateFixture();
         var operation = fixture.ConfigureResource(new("missing-policy-resource", ResourceKind.Collection,
-            ResourcePolicyUpdateFixture.DomainId) { SchemaVersion = 2 }, 1);
+            ResourcePolicyUpdateFixture.DomainId)
+        { SchemaVersion = 2 }, 1);
 
         var failure = ResourcePolicyUpdateFixture.Failure(fixture.Apply(operation));
 
@@ -151,7 +152,8 @@ internal sealed class ResourcePolicyUpdateRejectionTests
     public async Task AcRpol002BlobQuotaIsOutsideThePolicyOnlyReplacementSet()
     {
         var previous = new ResourceDefinition("blob-policy", ResourceKind.BlobStore,
-            ResourcePolicyUpdateFixture.DomainId) { BlobPolicy = new() };
+            ResourcePolicyUpdateFixture.DomainId)
+        { BlobPolicy = new() };
         var previousPolicy = previous.BlobPolicy!;
         var replacement = previous with
         {

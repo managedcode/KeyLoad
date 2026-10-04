@@ -144,18 +144,38 @@ internal static class NativeTextGenerationFiles
     {
         NativeTextRootFiles.VerifyReceipt(root, sourceNodeId);
         var count = 0;
+        var files = 0;
+        long bytes = 0;
         foreach (var entry in Directory.EnumerateFileSystemEntries(root))
         {
             if (Path.GetFileName(entry) == NativeTextProtocol.RootReceiptFile)
             {
                 continue;
             }
-            if (++count > 1 || !NativeTextValidation.IsGenerationLeaf(Path.GetFileName(entry))
+            if (++count > NativeTextPhysicalBudget.MaximumGenerations
+                || !NativeTextValidation.IsGenerationLeaf(Path.GetFileName(entry))
                 || !Directory.Exists(entry))
             {
-                throw count > 1 ? NativeTextErrors.BoundExceeded() : NativeTextErrors.Ownership();
+                throw count > NativeTextPhysicalBudget.MaximumGenerations
+                    ? NativeTextErrors.BoundExceeded() : NativeTextErrors.Ownership();
             }
-            ValidateGeneration(entry, root, Path.GetFileName(entry), sourceNodeId, limits);
+            var leaf = Path.GetFileName(entry);
+            ValidateGeneration(entry, root, leaf, sourceNodeId, limits);
+            var measured = NativeTextFileIO.MeasureRegularFiles(entry, NativeTextProtocol.MaximumFiles,
+                NativeTextProtocol.MaximumDiskBytes);
+            if (measured.Files > NativeTextProtocol.MaximumFiles - files
+                || measured.Bytes > NativeTextProtocol.MaximumDiskBytes - bytes)
+            {
+                throw NativeTextErrors.BoundExceeded();
+            }
+            files += measured.Files;
+            bytes += measured.Bytes;
+        }
+        if (count >= NativeTextPhysicalBudget.MaximumGenerations
+            || files >= NativeTextProtocol.MaximumFiles
+            || bytes > NativeTextProtocol.MaximumDiskBytes - 65_536)
+        {
+            throw NativeTextErrors.BoundExceeded();
         }
     }
 }

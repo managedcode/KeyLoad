@@ -7,37 +7,46 @@ internal static class NativeTextSettlement
 {
     internal static void Release(string root, DatabaseLimits limits, NativeTextGeneration generation,
         Guid sourceNodeId, ReadExecutionBudget budget, bool building, bool invalidate, bool completed, bool isCurrent,
-        Action clearCurrent, Action<NativeTextFaultStage>? faultObserver)
+        Action clearCurrent, Action clearUnpublishedBuild, Action<NativeTextFaultStage>? faultObserver,
+        NativeTextProjectionPhysicalGate physicalGate)
     {
         if (invalidate && isCurrent)
         {
-            Refresh(root, limits, generation, completed ? budget : null, faultObserver);
-            NativeTextFiles.DeleteOwnedGeneration(root, generation.Leaf, sourceNodeId, limits);
-            clearCurrent();
+            Refresh(root, limits, generation, completed ? budget : null, faultObserver, physicalGate);
+            physicalGate.Run(() =>
+            {
+                NativeTextFiles.DeleteOwnedGeneration(root, generation.Leaf, sourceNodeId, limits);
+                clearCurrent();
+            });
             return;
         }
         if (building && !generation.Published)
         {
-            generation.DisposeIndex();
-            NativeTextFiles.DeleteBuildingGeneration(root, generation.Leaf, sourceNodeId, limits);
+            physicalGate.Run(generation.DisposeIndex);
+            physicalGate.Run(() =>
+            {
+                NativeTextFiles.DeleteBuildingGeneration(root, generation.Leaf, sourceNodeId, limits);
+                clearUnpublishedBuild();
+            });
             return;
         }
         if (generation.CurrentIndex is not null)
         {
-            Refresh(root, limits, generation, completed ? budget : null, faultObserver);
+            Refresh(root, limits, generation, completed ? budget : null, faultObserver, physicalGate);
         }
     }
 
     internal static void Refresh(string root, DatabaseLimits limits, NativeTextGeneration generation,
-        ReadExecutionBudget? budget, Action<NativeTextFaultStage>? faultObserver)
+        ReadExecutionBudget? budget, Action<NativeTextFaultStage>? faultObserver,
+        NativeTextProjectionPhysicalGate physicalGate)
     {
-        var files = generation.CloseAndCapture(budget);
+        var files = physicalGate.Run(() => generation.CloseAndCapture(budget));
         try
         {
-            CheckForSettlement(generation, budget);
-            WriteManifest(root, limits, generation, files, budget);
+            physicalGate.Run(() => CheckForSettlement(generation, budget));
+            physicalGate.Run(() => WriteManifest(root, limits, generation, files, budget));
             faultObserver?.Invoke(NativeTextFaultStage.NativeInventoryFlushed);
-            NativeTextFiles.PublishManifest(root, generation.Leaf);
+            physicalGate.Run(() => NativeTextFiles.PublishManifest(root, generation.Leaf));
             faultObserver?.Invoke(NativeTextFaultStage.ManifestPublished);
         }
         catch (Exception cleanupFailure) when (generation.DeferredBudgetFailure is { } primary)

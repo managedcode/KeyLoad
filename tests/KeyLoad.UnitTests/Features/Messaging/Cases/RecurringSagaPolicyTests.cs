@@ -28,7 +28,7 @@ internal sealed class RecurringSagaPolicyTests
         fixture.AddPrincipal(Principal(NoPublish, Capability.SchedulerManage, [FieldWrite]));
         fixture.AddPrincipal(Principal(NoWrite, Capability.SchedulerManage | Capability.QueuePublish, []));
         fixture.AddPrincipal(new(AdminWithoutScheduler, RecurringSagaDatabase.TenantId, [], [])
-            { ClusterAdministrator = true });
+        { ClusterAdministrator = true });
         var id = Guid.NewGuid();
         var definition = Definition(fixture, id);
 
@@ -170,6 +170,13 @@ internal sealed class RecurringSagaPolicyTests
         var retained = fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal, fixture.Queue, sagaId)!;
         await Assert.That(retained.Revision).IsEqualTo(1);
         await Assert.That(retained.StateJson).IsEqualTo(Payload);
+
+        fixture.AddPrincipal(Principal(Scheduler, capabilities, [FieldWrite]));
+        _ = fixture.CommitAs(Caller, fixture.Partition, RecurringSagaDatabase.Epoch,
+            new CompareExchangeSaga(fixture.Queue, sagaId, 1, SagaPhase.Waiting, UpdatedState));
+        var updated = fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal, fixture.Queue, sagaId)!;
+        await Assert.That(updated.Revision).IsEqualTo(2);
+        await Assert.That(updated.StateJson).IsEqualTo(UpdatedState);
     }
 
     private static PrincipalRecord Principal(string id, Capability capabilities, string[] fieldGrants)

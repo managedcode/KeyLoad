@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <InternalsVisibleTo Include="KeyLoad.Orleans" />
+    <InternalsVisibleTo Include="KeyLoad.Server" />
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <PackageReference Include="ManagedCode.TimeSeries" />
     <PackageReference Include="Microsoft.Orleans.Sdk" />

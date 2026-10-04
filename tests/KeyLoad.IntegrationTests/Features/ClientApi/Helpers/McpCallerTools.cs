@@ -9,6 +9,10 @@ internal static class McpCallerTools
     internal const string EventsRead = "keyload_events_read";
     internal const string SubscriptionsStatus = "keyload_subscriptions_status";
     internal const string MessagesInspect = "keyload_messages_inspect";
+    internal const string QueueTransferInspect = "keyload_queue_transfer_inspect";
+    internal const string QueueTransferReceipt = "keyload_queue_transfer_receipt";
+    internal const string ScheduleInspect = "keyload_schedule_inspect";
+    internal const string SagaInspect = "keyload_saga_inspect";
     internal const string GraphTraverse = "keyload_graph_traverse";
     internal const string SeriesRead = "keyload_series_read";
     internal const string SeriesLatest = "keyload_series_latest";
@@ -16,6 +20,7 @@ internal static class McpCallerTools
     internal const string SeriesWindows = "keyload_series_windows";
     internal const string SeriesRetention = "keyload_series_retention";
     internal const string QueryExecute = "keyload_query_execute";
+    internal const string QuerySearch = "keyload_query_search";
     internal const string QueryAst = "keyload_query_ast";
     internal const string QueryCapabilities = "keyload_query_capabilities";
     internal const string ChangesRead = "keyload_changes_read";
@@ -24,6 +29,7 @@ internal static class McpCallerTools
     internal const string OutboxStatus = "keyload_outbox_status";
     internal const string ProjectionsRead = "keyload_projections_read";
     internal const string SearchExecute = "keyload_search_execute";
+    internal const string SearchGraph = "keyload_search_graph";
     internal const string AdminBackup = "keyload_admin_backup";
     internal const string AdminAdmission = "keyload_admin_admission";
     internal const string AdminStatus = "keyload_admin_status";

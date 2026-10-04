@@ -1,3 +1,6 @@
+using KeyLoad.Core;
+using KeyLoad.Storage;
+
 namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class GraphSearchTestSupport
@@ -55,8 +58,15 @@ internal static class GraphSearchTestSupport
             new ScopeGrant(DatabaseScope, Projects, Capability.DocumentsRead),
             new ScopeGrant(DatabaseScope, Graph, Capability.GraphRead | extra)
         };
-        database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new PrincipalRecord(
-            Reader, Tenant, [.. grants], [.. fieldGrants ?? []]) { RestrictRows = restrictRows, OwnerId = ownerId }));
+        var previous = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(Reader)));
+        var principal = new PrincipalRecord(Reader, Tenant, [.. grants], [.. fieldGrants ?? []])
+        {
+            RestrictRows = restrictRows,
+            OwnerId = ownerId,
+            PolicyEpoch = previous is null ? 1 : checked(previous.PolicyEpoch + 1)
+        };
+        _ = database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal))
+            .Get<PrincipalRecord>();
     }
 
     internal static GraphWalkSpec Walk(params EntityRef[] seeds)

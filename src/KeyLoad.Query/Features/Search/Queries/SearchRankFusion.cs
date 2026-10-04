@@ -8,9 +8,10 @@ internal sealed class SearchRankFusion(int constant, int limit, ReadExecutionBud
 
     public void AddBranch(SearchScore[] branch, double weight)
     {
+        branch = GlobalBranchSinglePartitionAdapter.Prepare(branch);
         for (var rank = 0; rank < branch.Length; rank++)
         {
-            budget.Check();
+            GlobalBranchSinglePartitionAdapter.ValidateAt(branch, rank, budget);
             var reference = branch[rank].Reference;
             scores[reference] = scores.GetValueOrDefault(reference) + weight / ((double)constant + rank + 1);
         }
@@ -18,7 +19,7 @@ internal sealed class SearchRankFusion(int constant, int limit, ReadExecutionBud
 
     public SearchScore[] Select()
     {
-        var comparer = new WorstFirstComparer();
+        var comparer = GlobalBranchOrder.WorstFirst(budget);
         var selected = new PriorityQueue<SearchScore, SearchScore>(comparer);
         foreach (var (reference, score) in scores)
         {
@@ -34,17 +35,8 @@ internal sealed class SearchRankFusion(int constant, int limit, ReadExecutionBud
                 selected.Enqueue(candidate, candidate);
             }
         }
-        return selected.UnorderedItems.Select(item => item.Element)
-            .OrderByDescending(candidate => candidate.Score)
-            .ThenBy(candidate => candidate.Reference.Id, StringComparer.Ordinal).ToArray();
-    }
-
-    private sealed class WorstFirstComparer : IComparer<SearchScore>
-    {
-        public int Compare(SearchScore left, SearchScore right)
-        {
-            var score = left.Score.CompareTo(right.Score);
-            return score != 0 ? score : -StringComparer.Ordinal.Compare(left.Reference.Id, right.Reference.Id);
-        }
+        var result = selected.UnorderedItems.Select(item => item.Element).ToArray();
+        GlobalBranchOrder.SortScores(result, budget);
+        return result;
     }
 }

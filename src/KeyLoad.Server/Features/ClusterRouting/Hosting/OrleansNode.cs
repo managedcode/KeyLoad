@@ -44,7 +44,7 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
     /// <param name="requestId">The fresh request identity.</param>
     /// <param name="commandId">The stable command identity, empty for reads.</param>
     /// <param name="cancellationToken">Cancels validation and actual native encoding.</param>
-    public PersistedPrincipalRequestContextScope OpenRequestContext(PrincipalRecord? principal, Guid requestId, Guid commandId,
+    public GrainRequestIdentityScope OpenRequestContext(PrincipalRecord? principal, Guid requestId, Guid commandId,
         CancellationToken cancellationToken)
         => new(RuntimeServices, principal, requestId, commandId, cancellationToken);
 

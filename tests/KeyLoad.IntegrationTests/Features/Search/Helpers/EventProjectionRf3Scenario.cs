@@ -80,9 +80,9 @@ internal sealed record EventProjectionRf3Scenario(PartitionRef Partition, Stream
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey);
-        var resource = Resource(partition, ChangedSourceClass);
+        var resource = Resource(partition, ChangedSourceClass) with { SchemaVersion = 2 };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, resource), cancellationToken));
+            new(partition.TenantId, partition.DatabaseId, resource) { ExpectedSchemaVersion = 1 }, cancellationToken));
     }
 
     internal CommandRequest ChangeSourceCommand()
