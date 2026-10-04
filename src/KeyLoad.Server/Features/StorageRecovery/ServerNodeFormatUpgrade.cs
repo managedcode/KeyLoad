@@ -95,7 +95,7 @@ internal static class ServerNodeFormatUpgrade
         if (!published && ServerNodeUpgradeInventory.Capture(directory, locks.Held, excludePreparedReceipt: true).Sha256
             != receipt.PreparedTargetInventorySha256)
         { throw Errors.Fail(ErrorCode.Corruption, ServerNodeUpgradeProtocol.Corrupt); }
-        ServerNodeUpgradeVerifier.Verify(directory, receipt, options, published);
+        _ = ServerNodeUpgradeVerifier.Verify(directory, receipt, options, published);
         original.RequireSame(ServerNodeUpgradeInventory.Capture(directory, locks.Held));
         return receipt;
     }

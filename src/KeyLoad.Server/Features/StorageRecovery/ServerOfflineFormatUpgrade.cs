@@ -7,10 +7,11 @@ internal static class ServerOfflineFormatUpgrade
 {
     private const string Command = "upgrade-native-store";
     private const string PrepareNode = "prepare-native-node";
+    private const string VerifyNode = "verify-native-node";
     private const string PublishNode = "publish-native-node";
     private const string SourceOption = "--source=";
     private const string DestinationOption = "--destination=";
-    private const string Usage = "Use upgrade-native-store, prepare-native-node or publish-native-node with --source=<stopped-source> --destination=<new-target>.";
+    private const string Usage = "Use upgrade-native-store, prepare-native-node, verify-native-node or publish-native-node with --source=<stopped-source> --destination=<new-target>.";
     private const string Complete = "Native store upgrade completed. Verify every RF3 store before starting compatible voters.";
     private const int ArgumentCount = 3;
     private const int MaximumPathCharacters = 4096;
@@ -18,27 +19,45 @@ internal static class ServerOfflineFormatUpgrade
     internal static async Task<bool> TryRunAsync(string[] args)
     {
         ArgumentNullException.ThrowIfNull(args);
-        if (args.Length == 0 || args[0] is not (Command or PrepareNode or PublishNode))
+        if (args.Length == 0 || args[0] is not (Command or PrepareNode or VerifyNode or PublishNode))
         {
             return false;
         }
 
-        var paths = Parse(args);
-        if (args[0] == Command)
+        try
         {
-            _ = ZoneTreeFormatUpgrade.Upgrade(paths.Source, new(paths.Destination));
-            await Console.Out.WriteLineAsync(Complete).ConfigureAwait(false);
+            var paths = Parse(args);
+            await ExecuteAsync(args[0], paths.Source, paths.Destination).ConfigureAwait(false);
         }
-        else
+        catch (KeyLoadException failure)
         {
-            var options = ServerConfiguration.ReadOfflineNode(paths.Destination);
-            _ = args[0] == PrepareNode ? ServerNodeFormatUpgrade.Prepare(paths.Source, options)
-                : ServerNodeFormatUpgrade.Publish(paths.Source, options);
-            await Console.Out.WriteLineAsync(args[0] == PrepareNode
-                ? "Node prepared. Prepare and verify every stopped RF3 node before publishing any node."
-                : "Node published. Verify all three current nodes before starting compatible voters.").ConfigureAwait(false);
+            await Console.Error.WriteLineAsync(failure.Code.ToString()).ConfigureAwait(false);
+            Environment.ExitCode = 1;
         }
         return true;
+    }
+
+    private static async Task ExecuteAsync(string operation, string source, string destination)
+    {
+        if (operation == Command)
+        {
+            _ = ZoneTreeFormatUpgrade.Upgrade(source, new(destination));
+            await Console.Out.WriteLineAsync(Complete).ConfigureAwait(false);
+            return;
+        }
+        var options = ServerConfiguration.ReadOfflineNode(destination);
+        _ = operation switch
+        {
+            PrepareNode => ServerNodeFormatUpgrade.Prepare(source, options),
+            VerifyNode => ServerNodeFormatUpgrade.VerifyPrepared(source, options),
+            _ => ServerNodeFormatUpgrade.Publish(source, options)
+        };
+        await Console.Out.WriteLineAsync(operation switch
+        {
+            PrepareNode => "Node prepared. Prepare and verify every stopped RF3 node before publishing any node.",
+            VerifyNode => "Node verified. Verify all three current nodes before starting compatible voters.",
+            _ => "Node published. Verify all three current nodes before starting compatible voters."
+        }).ConfigureAwait(false);
     }
 
     private static (string Source, string Destination) Parse(string[] args)

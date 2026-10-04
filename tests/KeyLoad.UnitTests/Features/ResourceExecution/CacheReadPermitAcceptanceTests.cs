@@ -46,7 +46,7 @@ internal sealed class CacheReadPermitAcceptanceTests
         using var permit = new CacheReadPermit(TimeProvider.System);
         var clock = TimeProvider.System;
         var prepared = clock.GetTimestamp();
-        await Task.Delay(TimeSpan.FromSeconds(2), clock, linked.Token);
+        await WaitForPrepareAgeAsync(clock, prepared, TimeSpan.FromSeconds(2), linked.Token);
         var beforeAccept = clock.GetTimestamp();
         await Assert.That(permit.TryAccept(Guid.NewGuid(), 1, prepared, out var receipt)).IsTrue();
         await Assert.That(permit.IsCurrentAcceptance(receipt)).IsTrue();
@@ -54,12 +54,8 @@ internal sealed class CacheReadPermitAcceptanceTests
         var acceptedPrepareAge = clock.GetElapsedTime(prepared, beforeAccept);
         await Assert.That(acceptedPrepareAge >= TimeSpan.FromSeconds(2)).IsTrue();
         await Assert.That(acceptedPrepareAge < CacheReadPermitLimits.PrepareValidity).IsTrue();
-        var currentPrepareAge = clock.GetElapsedTime(prepared, clock.GetTimestamp());
-        var remaining = CacheReadPermitLimits.LeaseValidity + TimeSpan.FromMilliseconds(50) - currentPrepareAge;
-        if (remaining > TimeSpan.Zero)
-        {
-            await Task.Delay(remaining, clock, linked.Token);
-        }
+        await WaitForPrepareAgeAsync(clock, prepared,
+            CacheReadPermitLimits.LeaseValidity + TimeSpan.FromMilliseconds(50), linked.Token);
 
         var current = permit.IsCurrentAcceptance(receipt);
         var captured = permit.TryCapture(out var expiredRevision);
@@ -75,4 +71,19 @@ internal sealed class CacheReadPermitAcceptanceTests
         await Assert.That(renewal).IsEqualTo(new CacheReadPermitAcceptance(2, 1, false));
         await Assert.That(permit.IsCurrent(receipt.Revision)).IsFalse();
     }
+
+    private static async Task WaitForPrepareAgeAsync(TimeProvider clock, long prepared,
+        TimeSpan minimumAge, CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var remaining = minimumAge - clock.GetElapsedTime(prepared, clock.GetTimestamp());
+            if (remaining <= TimeSpan.Zero)
+            { return; }
+            await Task.Delay(remaining < MinimumWait ? MinimumWait : remaining, clock, cancellationToken);
+        }
+    }
+
+    private static readonly TimeSpan MinimumWait = TimeSpan.FromMilliseconds(1);
 }

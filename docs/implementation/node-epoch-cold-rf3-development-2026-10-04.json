@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-04",
+  "scope": "KL043_genuine_prior_server_image_proof_cold_RF3_fixture_and_offline_CLI_development",
+  "contracts": [
+    "docs/ADR/ADR-077-offline-native-data-epoch.md",
+    "docs/Features/StorageRecovery.md"
+  ],
+  "backlog": [
+    "KL-043",
+    "KL-040"
+  ],
+  "requirements": [
+    "REQ-STORAGE-027",
+    "REQ-CACHE-004",
+    "REQ-CACHE-007"
+  ],
+  "acceptanceIds": [
+    "AC-EPOCH-006",
+    "AC-EPOCH-010",
+    "AC-EPOCH-011",
+    "AC-CACHE-012"
+  ],
+  "source": {
+    "gitHeadBeforeCommit": "df79b641151d2c5bc02913200a93bf8367607992",
+    "workingTree": "reviewed_dirty_source_with_exact_inventory_not_delivered_GitHub_qualification",
+    "inventory": {
+      "path": "artifacts/qualification/cold-rf3-development-20261004/cohort-before.json",
+      "bytes": 1597725,
+      "sha256": "7a809f9572246186c13b0770615bc06c775c7ca0f504dec10cb93d6278c07068"
+    },
+    "files": 2930,
+    "bytes": 25014882,
+    "sha256": "bdff3dd7a04e105d1f94c29517913122f36511334e411c36a061e8e3fbfcebcd",
+    "unchangedAcrossSuites": true,
+    "documentationAddedAfterExecution": true
+  },
+  "runtime": {
+    "stableExecutableInventory": {
+      "stableExecutableFiles": 2638,
+      "stableExecutableBytes": 934364853,
+      "stableExecutableTranscriptSha256": "f54b749f9a79cc774b196766b045b5ca5a590f29ef08fa8196b85d2a83d687f4"
+    },
+    "stableExecutableInventoryUnchanged": true,
+    "completeRuntimeOutputInventoryUnchanged": false,
+    "generatedBenchmarkOutputObservation": {
+      "path": "artifacts/qualification/cold-rf3-development-20261004/normal-runtime-output-observation.json",
+      "bytes": 171033,
+      "sha256": "7609b6f5b9aff3b7c819740c21e68a648158a6e0eb717a3712d741e48f26f6aa"
+    },
+    "changedGeneratedBenchmarkEntries": 194,
+    "explanation": "The complete inventory includes generated BenchmarkDotNet build outputs. Those two bounded generated directories changed during normal unit controls; every other solution executable/runtime entry remained identical. Scalar and recovery complete output inventories also match. The original failed whole-output guard is retained rather than relabelled as success."
+  },
+  "checks": {
+    "fullReleaseBuild": {
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 46.44,
+      "projects": 27,
+      "original": {
+        "path": "artifacts/qualification/cold-rf3-development-20261004/originals/keyload-cold-rf3-build5-20261004.log",
+        "bytes": 3544,
+        "sha256": "e6e0cd99a634c39df4997483bc3ac2c79d84fd4c8b41594994f512ce71c26a45"
+      }
+    },
+    "fullFormatter": {
+      "exitCode": 0,
+      "original": {
+        "path": "artifacts/qualification/cold-rf3-development-20261004/originals/keyload-cold-rf3-format3-20261004.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "sameNormalScalarCaseIds": true,
+    "unitCaseIdsSha256": "fbb0ff7b96c5bbb7752fa1a6f13e53febbe82f448acfb7800869ef4dbc77fa51",
+    "unit-normal": {
+      "summary": {
+        "total": 2919,
+        "passed": 2918,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "original": {
+        "path": "artifacts/qualification/cold-rf3-development-20261004/originals/unit-normal/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 8678171,
+        "sha256": "a20f4bbd3f47e465edd2ca88aed7f7fe72b0e415ad617ad127c5979946685d9a"
+      },
+      "caseIdsSha256": "fbb0ff7b96c5bbb7752fa1a6f13e53febbe82f448acfb7800869ef4dbc77fa51",
+      "newColdUpgradeCases": 11
+    },
+    "unit-scalar": {
+      "summary": {
+        "total": 2919,
+        "passed": 2919,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "original": {
+        "path": "artifacts/qualification/cold-rf3-development-20261004/originals/unit-scalar/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "bytes": 8673589,
+        "sha256": "bcc51aad444fe2d6d99bc97791bed2ae0cc14b500d597d0f4a23b5846406a6ad"
+      },
+      "caseIdsSha256": "fbb0ff7b96c5bbb7752fa1a6f13e53febbe82f448acfb7800869ef4dbc77fa51",
+      "newColdUpgradeCases": 11
+    },
+    "recovery": {
+      "summary": {
+        "total": 257,
+        "passed": 257,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "original": {
+        "path": "artifacts/qualification/cold-rf3-development-20261004/originals/recovery/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+        "bytes": 742400,
+        "sha256": "8854f02c9255e8ca613976d75afa212a925809bd9d7f4347097898e3bfda3230"
+      },
+      "caseIdsSha256": "cb0d208893dba224c4bffe8e45f7bc9bd47aed1fdb5c1eb3e66ae5f16541019c",
+      "newColdUpgradeCases": 0
+    },
+    "governance": {
+      "exitCode": 0,
+      "staticOnly": true,
+      "projects": 27,
+      "modules": 4
+    },
+    "gitDiffCheck": {
+      "exitCode": 0,
+      "staticOnly": true
+    }
+  },
+  "mappedColdUpgradeCases": [
+    "KeyLoad.UnitTests.Features.StorageRecovery.Native5ServerProofParserTests.1.1.AcEpoch010RejectsPriorSourceOverlayAndPinnedBaseDrift.1.1.0",
+    "KeyLoad.UnitTests.Features.StorageRecovery.Native5ServerProofParserTests.1.1.AcEpoch010SyntheticParserInputBindsCurrentProducerToDistinctPriorSource.1.1.0",
+    "KeyLoad.UnitTests.Features.StorageRecovery.Native5ServerProofParserTests.1.1.AcEpoch010RejectsImageManifestAndReferenceDrift.1.1.0",
+    "KeyLoad.UnitTests.Features.StorageRecovery.Native5ServerProofParserTests.1.1.AcEpoch010RejectsProducerRunAndTargetMixing.1.1.0",
+    "KeyLoad.UnitTests.Features.StorageRecovery.Native5ServerProofParserTests.1.1.AcEpoch010RejectsUnknownMalformedDuplicateAndOverBoundInputs.1.1.0",
+    "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochOfflineCliTests.1.1.AcEpoch010InvalidOfflineArgumentsReturnOnlyCanonicalCodeWithoutStartingServer(System.String).4.1.0",
+    "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochOfflineCliTests.1.1.AcEpoch010InvalidOfflineArgumentsReturnOnlyCanonicalCodeWithoutStartingServer(System.String).1.1.0",
+    "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochOfflineCliTests.1.1.AcEpoch010InvalidOfflineArgumentsReturnOnlyCanonicalCodeWithoutStartingServer(System.String).2.1.0",
+    "KeyLoad.UnitTests.Features.StorageRecovery.NodeEpochOfflineCliTests.1.1.AcEpoch010InvalidOfflineArgumentsReturnOnlyCanonicalCodeWithoutStartingServer(System.String).3.1.0",
+    "KeyLoad.UnitTests.Features.StorageRecovery.Native5ServerSourceVerifierTests.1.1.AcEpoch010VerifierChecksGenuineSourceSidecarsWithControlledImageInput.1.1.0",
+    "KeyLoad.UnitTests.Features.StorageRecovery.Native5ServerPaxArchiveTests.1.1.AcEpoch010VerifierAcceptsOnlyTheLeadingPinnedPaxComment.1.1.0"
+  ],
+  "qualification": {
+    "localDevelopmentOnly": true,
+    "coldFixtureSourceImplemented": true,
+    "normalUnitGatePassed": false,
+    "scalarUnitGatePassed": true,
+    "recoveryGatePassed": true,
+    "genuinePriorImageBuilt": false,
+    "genuineColdRf3Executed": false,
+    "exactDeliveredSourceLinuxQualified": false,
+    "AC_EPOCH_010": false,
+    "AC_EPOCH_011": false,
+    "fullBacklogTasksClosed": false,
+    "enduranceQualified": false,
+    "powerLossQualified": false,
+    "coverageQualified": false,
+    "performanceQualified": false,
+    "productionReady": false
+  },
+  "remaining": [
+    "actual source-bound prior image build and manifest verification in the genuine Linux Docker RF3 CI job",
+    "both actual homogeneous Aspire RF3 waves through .NET SDK and official MCP clients, including retained-source negative upgrade barriers and subsequent recovery",
+    "complete delivered-source Linux build/formatter/analyzers/normal/scalar/recovery/RF3 gates",
+    "existing exact nullable allocation control has one normal-run failure; no test, tolerance, production code or runtime switch was changed to conceal it",
+    "independent endurance/power-loss/coverage/performance acceptance gates"
+  ],
+  "normalFailure": {
+    "id": "KeyLoad.UnitTests.Features.InternalSerialization.NativeWireSupportedScalarAllocationTests.1.1.AcIsPerf005NullableRequireMatchesUnchangedNormalizeAllocation.1.1.0",
+    "displayName": "AcIsPerf005NullableRequireMatchesUnchangedNormalizeAllocation",
+    "methodName": "AcIsPerf005NullableRequireMatchesUnchangedNormalizeAllocation",
+    "className": "NativeWireSupportedScalarAllocationTests",
+    "status": "error",
+    "durationMs": 43.721,
+    "startTime": "2026-10-04T05:03:35.0179800+00:00",
+    "endTime": "2026-10-04T05:03:35.0617010+00:00",
+    "exception": {
+      "type": "TUnit.Assertions.Exceptions.AssertionException",
+      "message": "Expected to be 262480\nbut found 262144\n\nat Assert.That(requireAllocated).IsEqualTo(normalized.AllocatedBytes)",
+      "stackTrace": "   at TUnit.Assertions.Core.Assertion`1.ThrowOrAccumulateFailure(AssertionResult result)\n   at TUnit.Assertions.Core.Assertion`1.ExecuteCoreAsync()\n   at TUnit.Assertions.Core.Assertion`1.AssertAsync()\n   at KeyLoad.UnitTests.Features.InternalSerialization.NativeWireSupportedScalarAllocationTests.AcIsPerf005NullableRequireMatchesUnchangedNormalizeAllocation() in /Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeWireSupportedScalarAllocationTests.cs:line 51\n   at TUnit.Core.ExecutableTest`1.InvokeTestAsync(Object instance, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.TestExecutor.ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, Nullable`1 testTimeout)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)\n   at TUnit.Engine.Services.TestExecution.TestCoordinator.ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)"
+    },
+    "filePath": "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/InternalSerialization/NativeWireSupportedScalarAllocationTests.cs",
+    "lineNumber": 37,
+    "endLineNumber": 52,
+    "traceId": "c7f4c8dfee6d99c646a7b6e50cfdc1fd",
+    "spanId": "9da1eca235042656"
+  },
+  "sealedOriginalsManifest": {
+    "path": "artifacts/qualification/cold-rf3-development-20261004/sealed-files-manifest.json",
+    "files": 22,
+    "sha256": "e4c321eab759e53a93b808500e1381d55a187241a5248b1c70bb74fde9b0728d"
+  }
+}

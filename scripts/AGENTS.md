@@ -54,3 +54,6 @@ No repository skills are installed or applicable to this tooling module. Do not 
 
 ## Owner-directed failed-cell publication, 2026-10-04
 - Under ADR-080 the complete authenticated planned-cell inventory may include terminal failed workloads with the fixed safe reason and null report, original failed job/workload conclusions and successful result upload. Successful cells retain their real measurements. This explicit owner correction supersedes all-success publication wording above; missing/corrupt/mixed/expired evidence remains rejected and supplied parser fixtures cannot authenticate GitHub.
+
+## StorageRecovery genuine prior-server image
+- ADR-077 owns new native5-server tooling under Features/StorageRecovery. Serving old nodes require its immutable zero-overlay source, distinct current producer identity, exact blob/mode/inventory proof, pinned native image build and bounded strict original artifacts. The existing component probe driver overlays never authorize serving-image overlays. Reuse only the current CI job-owned registry; preserve current image proofs and cleanup. Root owns shared image helper/CI integration; workers own only explicitly released new files.

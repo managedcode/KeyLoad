@@ -8,6 +8,7 @@
     <ProjectReference Include="../../src/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Replication/KeyLoad.Replication.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" IsAspireProjectResource="false" />
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="ModelContextProtocol.Core" />
     <PackageReference Include="TUnit" />

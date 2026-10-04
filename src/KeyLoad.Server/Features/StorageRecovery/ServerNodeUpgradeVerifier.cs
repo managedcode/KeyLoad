@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 
 internal static class ServerNodeUpgradeVerifier
 {
-    internal static void Verify(string directory, ServerNodeUpgradeReceipt receipt, NodeOptions options, bool published)
+    internal static ReplicaHardState Verify(string directory, ServerNodeUpgradeReceipt receipt, NodeOptions options, bool published)
     {
         var verifier = Path.Combine(Path.GetDirectoryName(receipt.FinalDestination)!,
             ".node-upgrade-verify-" + Guid.NewGuid().ToString("N"));
@@ -19,7 +19,7 @@ internal static class ServerNodeUpgradeVerifier
             var oldCopies = Path.Combine(verifier, "prior");
             ServerNodeUpgradeAuthority.CopyInputs(receipt.OriginalSource, oldCopies);
             var authority = ServerNodeUpgradeAuthority.VerifyCopies(oldCopies, options);
-            VerifyCopies(directory, verifier, receipt, options, authority, published);
+            return VerifyCopies(directory, verifier, receipt, options, authority, published);
         }
         catch (Exception error)
         {
@@ -39,7 +39,7 @@ internal static class ServerNodeUpgradeVerifier
         catch (Exception cleanup) when (failure is not null) { throw new AggregateException(failure, cleanup); }
     }
 
-    private static void VerifyCopies(string original, string verifier, ServerNodeUpgradeReceipt receipt,
+    private static ReplicaHardState VerifyCopies(string original, string verifier, ServerNodeUpgradeReceipt receipt,
         NodeOptions options, ServerNodeUpgradeAuthority authority, bool published)
         => ServerNodeUpgradeStores.Run(verifier, options, stores =>
         {
@@ -50,6 +50,6 @@ internal static class ServerNodeUpgradeVerifier
             ServerNodeUpgradeCurrentState.Verify(receipt, database, stores.Replica, log.State, authority, published);
             ServerNodeUpgradeCurrentImages.Verify(original, stores.Canonical, log.State, configuration.MaxSnapshotBytes,
                 Path.Combine(verifier, "verified-images"));
-            return true;
+            return log.State;
         });
 }

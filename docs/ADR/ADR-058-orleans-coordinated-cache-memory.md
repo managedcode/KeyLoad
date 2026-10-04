@@ -593,3 +593,7 @@ No public/data/version/topology migration. Rollback reverts only this test repai
 previous failed tests remain evidence and cannot be weakened. No local tests or
 crypto are executed. Coverage, receiver/control/migration/probe, performance and
 production-readiness gates remain separate and open.
+
+## Real prepare-age timer repair (2026-10-04)
+
+The original Linux scalar report for source `6e09f03b1d3d98f5bd01479d025103982b9f87ee`, run `37174348261`, failed AC-CACHE-012 because one `Task.Delay(2s)` completed before the measured monotonic prepare age reached two seconds. Root owns TASK-CACHE-REAL-PREPARE-AGE-TIMER-REPAIR in `CacheReadPermitAcceptanceTests.cs`: wait until the actual `TimeProvider.System.GetElapsedTime` threshold, with the existing linked30-second deadline and a1ms minimum delay to avoid a sub-tick busy loop. Use the same real-age wait before expiry observation. Preserve every prepare-validity, lease-validity, acceptance-origin, expiry, capture, revision and renewal assertion and threshold. No production lease, fake clock, serializer, public API, policy or topology change. Rollback affects only this test helper. Complete build/format/governance and normal/scalar Aspire TUnit, then retain exact delivered-source Linux original reports; the failed run cannot count as green and its skipped recovery is not qualified.

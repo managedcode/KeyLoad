@@ -6,6 +6,7 @@
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <InternalsVisibleTo Include="KeyLoad.CrashHost" />
     <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
+    <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
     <ProjectReference Include="../KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../KeyLoad.Orleans/KeyLoad.Orleans.csproj" />
     <ProjectReference Include="../KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />

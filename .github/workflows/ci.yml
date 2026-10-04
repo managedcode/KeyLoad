@@ -140,14 +140,22 @@ jobs:
       - name: Build KeyLoad server and benchmark Docker images
         id: images
         run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs
+      - name: Build the genuine previous KeyLoad server image
+        id: prior-images
+        run: node scripts/Features/StorageRecovery/prepare-native5-server-image.mjs
       - name: Configure Docker image references
         shell: bash
         env:
           KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
           KEYLOAD_RUNNER_IMAGE: ${{ steps.images.outputs.load-generator-image }}
+          KEYLOAD_PRIOR_SERVER_IMAGE: ${{ steps.prior-images.outputs.prior-server-image }}
+          KEYLOAD_PRIOR_IMAGE_RECEIPT: ${{ steps.prior-images.outputs.prior-image-receipt }}
+          KEYLOAD_PRIOR_SERVER_MANIFEST: ${{ steps.prior-images.outputs.prior-server-manifest }}
         run: |
           test -n "$KEYLOAD_SERVER_IMAGE" && test -n "$KEYLOAD_RUNNER_IMAGE"
+          test -n "$KEYLOAD_PRIOR_SERVER_IMAGE" && test -n "$KEYLOAD_PRIOR_IMAGE_RECEIPT" && test -n "$KEYLOAD_PRIOR_SERVER_MANIFEST"
           printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
+          printf 'KEYLOAD_PRIOR_SERVER_IMAGE=%s\nKEYLOAD_PRIOR_IMAGE_RECEIPT=%s\nKEYLOAD_PRIOR_SERVER_MANIFEST=%s\n' "$KEYLOAD_PRIOR_SERVER_IMAGE" "$KEYLOAD_PRIOR_IMAGE_RECEIPT" "$KEYLOAD_PRIOR_SERVER_MANIFEST" >> "$GITHUB_ENV"
       - name: Find Chrome for admin tests
         shell: bash
         run: |

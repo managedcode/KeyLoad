@@ -1,4 +1,6 @@
 using System.Text.Json;
+using Aspire.Hosting;
+using KeyLoad.Server;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 
@@ -26,32 +28,36 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     /// <param name="key">The actual credential, or null to test a missing bearer header.</param>
     /// <param name="cancellationToken">The external bounded caller lifetime.</param>
     /// <returns>The owner of the actual SDK and HTTP resources.</returns>
-    internal static async Task<McpOfficialClient> ConnectAsync(ClusterFixture fixture, string node,
+    internal static Task<McpOfficialClient> ConnectAsync(ClusterFixture fixture, string node,
         string? key, CancellationToken cancellationToken)
     {
-        var connection = McpCallerHttp.Create(fixture, node);
-        var transport = CreateTransport(connection, key);
-        McpOfficialClient owner;
-        try
-        {
-            owner = new(connection, transport);
-        }
-        catch (Exception)
-        {
-            try
-            { await transport.DisposeAsync().ConfigureAwait(false); }
-            finally { connection.Dispose(); }
-            throw;
-        }
+        ArgumentNullException.ThrowIfNull(fixture);
+        return ConnectAsync(fixture.App, node, key, cancellationToken);
+    }
 
+    /// <summary>Connects the official SDK through a genuine caller-owned Aspire application wave.</summary>
+    /// <param name="app">The actual running Aspire application.</param>
+    /// <param name="node">The actual Aspire endpoint resource.</param>
+    /// <param name="key">The persisted credential used at the public boundary.</param>
+    /// <param name="cancellationToken">The bounded caller lifetime.</param>
+    /// <returns>The actual native SDK, transport and HTTP resource owner.</returns>
+    internal static async Task<McpOfficialClient> ConnectAsync(DistributedApplication app, string node,
+        string? key, CancellationToken cancellationToken)
+    {
+        var connection = McpCallerHttp.Create(app, node);
+        var transport = CreateTransport(connection, key);
+        var owner = new McpOfficialClient(connection, transport);
         try
         {
             await owner.InitializeAsync(cancellationToken).ConfigureAwait(false);
             return owner;
         }
-        catch (Exception)
+        catch (Exception primary)
         {
-            await owner.DisposeAsync().ConfigureAwait(false);
+            try
+            { await owner.DisposeAsync().ConfigureAwait(false); }
+            catch (Exception cleanup)
+            { throw new AggregateException(primary, cleanup); }
             throw;
         }
     }
@@ -103,16 +109,11 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     /// <returns>The completed native resource cleanup.</returns>
     public async ValueTask DisposeAsync()
     {
-        try
-        {
-            if (client is { } native)
-            { await native.DisposeAsync().ConfigureAwait(false); }
-        }
-        finally
-        {
-            try
-            { await transport.DisposeAsync().ConfigureAwait(false); }
-            finally { http.Dispose(); }
-        }
+        var failures = new List<Exception>();
+        if (client is { } native)
+        { await ServerFailureObserver.ObserveAsync(() => native.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        await ServerFailureObserver.ObserveAsync(() => transport.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        ServerFailureObserver.Observe(http.Dispose, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 }

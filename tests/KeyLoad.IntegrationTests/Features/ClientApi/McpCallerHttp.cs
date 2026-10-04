@@ -1,3 +1,4 @@
+using Aspire.Hosting;
 using Aspire.Hosting.Testing;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
@@ -12,8 +13,18 @@ internal static class McpCallerHttp
     internal static HttpClient Create(ClusterFixture fixture, string node)
     {
         ArgumentNullException.ThrowIfNull(fixture);
+        return Create(fixture.App, node);
+    }
+
+    /// <summary>Uses an actual endpoint from the caller-owned Aspire application wave.</summary>
+    /// <param name="app">The genuine initialized Aspire application.</param>
+    /// <param name="node">The native Aspire resource name.</param>
+    /// <returns>The disposable HTTP client backed by the actual endpoint.</returns>
+    internal static HttpClient Create(DistributedApplication app, string node)
+    {
+        ArgumentNullException.ThrowIfNull(app);
         ArgumentException.ThrowIfNullOrWhiteSpace(node);
-        var http = fixture.App.CreateHttpClient(node, McpCallerProtocol.HttpEndpoint);
+        var http = app.CreateHttpClient(node, McpCallerProtocol.HttpEndpoint);
         http.Timeout = Timeout.InfiniteTimeSpan;
         return http;
     }

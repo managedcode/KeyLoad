@@ -66,7 +66,11 @@ export function makeTaggedReference(kind, tag) {
   return `${imageReference.repositoryPrefix}${name}${imageReference.tagSeparator}${tag}`;
 }
 
-export async function buildProductImage(context, kind, taggedReference) {
+export async function buildProductImage(context, kind, taggedReference, imageSource = undefined) {
+  const source = imageSource ?? context;
+  if (!path.isAbsolute(source.workspace ?? '')
+    || source.workspace.length > validation.maxPathLength
+    || !validation.shaPattern.test(source.sourceSha ?? '')) throw new Error(message.invalidWorkspace);
   const dockerfile = kind === imageKind.server ? imageBuild.serverDockerfile : imageBuild.runnerDockerfile;
   const args = [
     buildArgument.buildx,
@@ -79,11 +83,11 @@ export async function buildProductImage(context, kind, taggedReference) {
     buildArgument.file,
     dockerfile,
     buildArgument.label,
-    `${registry.sourceLabel}=${context.sourceSha}`,
+    `${registry.sourceLabel}=${source.sourceSha}`,
     imageBuild.context,
   ];
   await requireDockerSuccess(context, kind === imageKind.server ? 'build-server' : 'build-comparisons', args, {
-    cwd: context.workspace,
+    cwd: source.workspace,
     timeoutMs: processLimit.buildTimeoutMs,
   });
   const metadata = await requireDockerSuccess(context, kind === imageKind.server ? 'inspect-server-image' : 'inspect-comparisons-image', [
@@ -96,7 +100,7 @@ export async function buildProductImage(context, kind, taggedReference) {
     cwd: context.workspace,
     timeoutMs: processLimit.inspectTimeoutMs,
   });
-  const imageMetadata = parseImageMetadata(metadata, context.sourceSha);
+  const imageMetadata = parseImageMetadata(metadata, source.sourceSha);
   return Object.freeze({ taggedReference, ...imageMetadata });
 }
 

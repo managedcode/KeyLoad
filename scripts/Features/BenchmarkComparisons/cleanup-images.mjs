@@ -61,6 +61,13 @@ export async function cleanupImages(environment = process.env, argv = process.ar
   return exitCode.success;
 }
 
+export async function requireRunningOwnedRegistry(context) {
+  const inspected = await inspectOwnedName(context);
+  if (!inspected.found) throw new Error(message.foreignRegistry);
+  assertRegistryOwnership(context, inspected.container);
+  if (inspected.container.State?.Running !== true) throw new Error(message.foreignRegistry);
+}
+
 async function removeIfStillOwned(context, originalContainer) {
   const latest = await inspectOwnedName(context);
   if (!latest.found) return true;

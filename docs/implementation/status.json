@@ -1087,7 +1087,9 @@
       "tests/KeyLoad.UnitTests/ReadExecutionTests.cs",
       "docs/design/bounded-reads.md",
       "docs/design/command-admission.md",
-      "docs/implementation/keycodec-crud-development-2026-10-04.json"
+      "docs/implementation/keycodec-crud-development-2026-10-04.json",
+      "docs/implementation/node-epoch-linux-6e09-2026-10-04.json",
+      "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json"
     ],
     "disposableCacheWorkstream": {
       "status": "R100_wire_source_review_approved_R104_exact5bb_RF3_pass_verify_failed_R115_Node_source21_join_approved_current_full_development_failed_other_owner_SiteTests21_native_pending",
@@ -1176,6 +1178,13 @@
         "historicalEvidence": "docs/implementation/garnet-zonetree-github-f403-2026-10-03.json",
         "qualification": "Historical diagnostic results do not qualify the current provider integration or performance."
       }
+    },
+    "linux6e09Evidence": {
+      "path": "docs/implementation/node-epoch-linux-6e09-2026-10-04.json",
+      "completeGate": false,
+      "scalarFailed": 1,
+      "recoverySkipped": true,
+      "coldRf3Pending": true
     }
   },
   "KL-041": {
@@ -1210,10 +1219,12 @@
       "src/KeyLoad.Server/Features/StorageRecovery/ServerNodeFormatUpgrade.cs",
       "src/KeyLoad.Replication/Features/StorageRecovery",
       "src/KeyLoad.Storage.IO/Features/StorageRecovery",
-      "docs/implementation/node-epoch-development-2026-10-04.json"
+      "docs/implementation/node-epoch-development-2026-10-04.json",
+      "docs/implementation/node-epoch-linux-6e09-2026-10-04.json",
+      "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json"
     ],
     "decision": "docs/ADR/ADR-077-offline-native-data-epoch.md",
-    "sourceStage": "root_reviewed_whole_node_native5_to6_checkpoint_sidecar_and_safe_regular_handle_component",
+    "sourceStage": "genuine_prior_image_builder_proof_and_two_wave_RF3_fixture_source_complete_native_RF3_pending",
     "runtimeQualified": false,
     "remaining": [
       "homogeneous_Docker_Aspire_RF3_cold_upgrade_fixture_and_SDK_official_MCP_qualification",
@@ -1229,6 +1240,28 @@
       "actualNodeStageProcessKills": 6,
       "uniqueAtomicCrashTrials": 1000,
       "unchangedSourceAndRuntime": true
+    },
+    "linux6e09Evidence": {
+      "path": "docs/implementation/node-epoch-linux-6e09-2026-10-04.json",
+      "completeGate": false,
+      "scalarFailed": 1,
+      "recoverySkipped": true,
+      "coldRf3Pending": true
+    },
+    "coldRf3DevelopmentEvidence": {
+      "path": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json",
+      "normalPassed": 2918,
+      "normalTotal": 2919,
+      "normalFailed": 1,
+      "scalarPassed": 2919,
+      "scalarTotal": 2919,
+      "recoveryPassed": 257,
+      "recoveryTotal": 257,
+      "newCasesPassedInNormalAndScalar": 11,
+      "sourceAndStableExecutableInventoryUnchanged": true,
+      "completeRuntimeOutputInventoryUnchanged": false,
+      "genuineColdRf3Executed": false,
+      "completeGate": false
     }
   },
   "KL-044": {

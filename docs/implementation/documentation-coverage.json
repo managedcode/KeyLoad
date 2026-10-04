@@ -11241,6 +11241,314 @@
           "caseCount": 3,
           "bothClientsEachPatchAndDelete": true
         }
+      },
+      {
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md",
+          "docs/Features/StorageRecovery.md"
+        ],
+        "requirementIds": [
+          "REQ-STORAGE-027"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-010",
+          "AC-EPOCH-011"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "startCondition": "root_approved_exact_cold_RF3_contract_after_df79b64_checkpoint",
+        "verification": [
+          "strict Release build",
+          "formatter",
+          "governance",
+          "Aspire TUnit",
+          "actual exact-source Linux Docker RF3 SDK and official MCP original artifacts"
+        ],
+        "state": "accepted_source_implementation_in_progress_runtime_pending",
+        "joinCondition": "root_review_original_complete_gates_zero_overlay_prior_distinct_producer_no_skips",
+        "id": "TASK-NODE-EPOCH-PRIOR-SERVER",
+        "owner": "query_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "permissions": "frozen_exact_disjoint_files_no_contract_change",
+        "fileOwnership": [
+          "scripts/Features/StorageRecovery/native5-server-*.mjs",
+          "scripts/Features/StorageRecovery/prepare-native5-server-image.mjs",
+          "scripts/Features/StorageRecovery/verify-native5-server-image.mjs"
+        ],
+        "dependencies": [
+          "TASK-NODE-EPOCH-COLD-SHARED"
+        ],
+        "artifacts": [
+          "source",
+          "mapped oracles",
+          "root review",
+          "original source-bound results"
+        ]
+      },
+      {
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md",
+          "docs/Features/StorageRecovery.md"
+        ],
+        "requirementIds": [
+          "REQ-STORAGE-027"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-010",
+          "AC-EPOCH-011"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "startCondition": "root_approved_exact_cold_RF3_contract_after_df79b64_checkpoint",
+        "verification": [
+          "strict Release build",
+          "formatter",
+          "governance",
+          "Aspire TUnit",
+          "actual exact-source Linux Docker RF3 SDK and official MCP original artifacts"
+        ],
+        "state": "accepted_source_implementation_in_progress_runtime_pending",
+        "joinCondition": "root_review_original_complete_gates_zero_overlay_prior_distinct_producer_no_skips",
+        "id": "TASK-NODE-EPOCH-PRIOR-PROOF-ORACLES",
+        "owner": "cluster_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "permissions": "frozen_exact_disjoint_files_no_contract_change",
+        "fileOwnership": [
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Native5Server*"
+        ],
+        "dependencies": [
+          "TASK-NODE-EPOCH-PRIOR-SERVER"
+        ],
+        "artifacts": [
+          "source",
+          "mapped oracles",
+          "root review",
+          "original source-bound results"
+        ],
+        "exportRepairContract": "Root enforces frozen unknown-path rejection for empty directories and streamed 32-entry directory enumeration. Add genuine export positive and owned unknown-empty-directory negative through actual source verifier, restore only the owned empty test directory, verify all canonical export files/modes/digests and original tar preserved. No fake GitHub qualification.",
+        "repairFileOwnership": [
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Native5ServerSourceVerifierNodeProcess.cs",
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Native5ServerSourceVerifierTests.cs"
+        ],
+        "repairPermissions": "two_exact_source_verifier_test_files_no_process_execution_or_other_mutation"
+      },
+      {
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md",
+          "docs/Features/StorageRecovery.md"
+        ],
+        "requirementIds": [
+          "REQ-STORAGE-027"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-010",
+          "AC-EPOCH-011"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "startCondition": "root_approved_exact_cold_RF3_contract_after_df79b64_checkpoint",
+        "verification": [
+          "strict Release build",
+          "formatter",
+          "governance",
+          "Aspire TUnit",
+          "actual exact-source Linux Docker RF3 SDK and official MCP original artifacts"
+        ],
+        "state": "root_reviewed_source_full_build_formatter_scalar2919_recovery257_pass_normal2918of2919_native_cold_RF3_pending",
+        "joinCondition": "root_review_original_complete_gates_zero_overlay_prior_distinct_producer_no_skips",
+        "id": "TASK-NODE-EPOCH-COLD-FIXTURE",
+        "owner": "lifecycle_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "permissions": "bounded_build1_repairs_only_no_execution_contract_config_or_assertion_weakening",
+        "fileOwnership": [
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3Wave.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3Callers.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3Inventory.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3Profile.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3StatusOracle.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3CurrentWorkload.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3MigrationAssertions.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3ReadOracle.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3AuthorizationOracle.cs"
+        ],
+        "dependencies": [
+          "TASK-NODE-EPOCH-COLD-SHARED",
+          "TASK-NODE-EPOCH-PRIOR-SERVER"
+        ],
+        "artifacts": [
+          "source",
+          "mapped oracles",
+          "root review",
+          "original source-bound results"
+        ],
+        "repairContract": "Reuse tested ServerFailureObserver for actual cleanup observation; preserve synchronous Flush(true) through root OfflineFiles.FlushToDisk; preserve caps/ownership/oracles; root takes ColdScenario and CurrentWaveRunner disposal/order joins.",
+        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json"
+      },
+      {
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md",
+          "docs/Features/StorageRecovery.md"
+        ],
+        "requirementIds": [
+          "REQ-STORAGE-027"
+        ],
+        "acceptanceIds": [
+          "AC-EPOCH-010",
+          "AC-EPOCH-011"
+        ],
+        "backlog": [
+          "KL-043"
+        ],
+        "startCondition": "root_approved_exact_cold_RF3_contract_after_df79b64_checkpoint",
+        "verification": [
+          "strict Release build",
+          "formatter",
+          "governance",
+          "Aspire TUnit",
+          "actual exact-source Linux Docker RF3 SDK and official MCP original artifacts"
+        ],
+        "state": "root_reviewed_source_full_build_formatter_scalar2919_recovery257_pass_normal2918of2919_native_cold_RF3_pending",
+        "joinCondition": "root_review_original_complete_gates_zero_overlay_prior_distinct_producer_no_skips",
+        "id": "TASK-NODE-EPOCH-COLD-SHARED",
+        "owner": "root",
+        "model": "gpt-6",
+        "effort": "high",
+        "permissions": "frozen_exact_disjoint_files_no_contract_change",
+        "fileOwnership": [
+          "scripts/Features/BenchmarkComparisons/image-engine.mjs",
+          "scripts/Features/BenchmarkComparisons/cleanup-images.mjs",
+          "tests/KeyLoad.IntegrationTests/Features/ClientApi/McpCallerHttp.cs",
+          "tests/KeyLoad.IntegrationTests/Features/ClientApi/McpOfficialClient.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3ImageProof*",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3Offline*",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3ReceiptReader.cs",
+          "src/KeyLoad.Server/Features/StorageRecovery/ServerOfflineFormatUpgrade.cs",
+          "src/KeyLoad.Server/Features/StorageRecovery/ServerNodeUpgradeVerifier.cs",
+          "src/KeyLoad.Server/Features/StorageRecovery/ServerNodeFormatUpgrade.cs",
+          "root-owned project references/friends and ci.yml",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3ColdScenario.cs",
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3CurrentWaveRunner.cs"
+        ],
+        "dependencies": [],
+        "artifacts": [
+          "source",
+          "mapped oracles",
+          "root review",
+          "original source-bound results"
+        ],
+        "cleanupContract": "Await-using owns each wave; observe body and disposal faults into the same scenario failure list, do not advance waves after any fault; retained-wave final settlement preserves every failure and keeps private roots on errors.",
+        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json"
+      },
+      {
+        "id": "TASK-NODE-EPOCH-OFFLINE-CLI-REGRESSION",
+        "owner": "root",
+        "modelTier": "high_capability_root",
+        "requirements": [
+          "REQ-STORAGE-027"
+        ],
+        "acceptance": [
+          "AC-EPOCH-010"
+        ],
+        "permissions": "new_unit_test_only",
+        "scope": [
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/NodeEpochOfflineCliTests.cs"
+        ],
+        "dependencies": [
+          "TASK-NODE-EPOCH-COLD-SHARED"
+        ],
+        "startCondition": "frozen_root_cli_failure_contract_before_source",
+        "artifacts": [
+          "four_recognized_commands_real_child_validation_oracles"
+        ],
+        "verification": [
+          "root_strict_build_formatter",
+          "Aspire_full_normal_and_scalar_unit"
+        ],
+        "state": "accepted_source_implementation_in_progress_runtime_pending",
+        "joinCondition": "root_review_actual_exit_stdout_stderr_no_serving_startup"
+      },
+      {
+        "id": "TASK-NEXT-ANN-ACCEPTANCE-ASSESSMENT",
+        "owner": "query_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "requirements": [
+          "REQ-SEARCH-005",
+          "REQ-SEARCH-006"
+        ],
+        "acceptance": [
+          "AC-SEARCH-005",
+          "AC-SEARCH-006"
+        ],
+        "planTasks": [
+          "KL-030",
+          "KL-031",
+          "KL-032",
+          "KL-059"
+        ],
+        "permissions": "repository_read_only_primary_source_requests_and_bounded_owned_tmp_package_provenance_no_install_restore_build_tests_or_other_execution",
+        "fileOwnership": [],
+        "dependencies": [],
+        "startCondition": "root_bounded_provenance_audit_authorized_after_candidate_report",
+        "artifacts": [
+          "actual_requirement_ADR_source_test_and_provider_inventory",
+          "concrete_missing_contracts_and_disjoint_implementation_candidates"
+        ],
+        "verification": [
+          "read_actual_owning_sources_no_runtime_or_qualification_claim"
+        ],
+        "state": "published_package_provenance_resolved_root_contract_selection_pending",
+        "joinCondition": "root_selects_and_freezes_exact_contracts_before_any_implementation",
+        "findings": "Hnsw.Net 0.1.4 exact NuGet package hash/signature, nuspec/PDB SourceLink commit180849906276e9c0127b7ee8b4994aea86a5e504 and matching tag/CI are audited. No API cancellation or built-in corpus/dimension/visited/concurrency/load admission; root must decide bounded suitability and freeze contracts before any implementation.",
+        "provenanceAuditContract": "Inspect primary NuGet 0.1.4 nupkg/snupkg and GitHub release/tag/workflow metadata. Download at most 4 MiB per artifact into a fresh private owned /private/tmp directory only, inspect bounded ZIP metadata/nuspec/PDB SourceLink with existing tools, do not load/execute assemblies or install packages/tools. Bind exact published package SHA512 to repository commit if actual producer metadata supports it, otherwise report unavailable. No repository writes or delivery claim.",
+        "followupAudit": "Read exact audited source packing, growth, reachable-node/distance-work bounds, worst memory retention, level generation/deletion/reinsert/serialization semantics; report static facts only, no commands except existing curl/python/read operations, no package or tool execution, no implementation."
+      },
+      {
+        "id": "TASK-CACHE-REAL-PREPARE-AGE-TIMER-REPAIR",
+        "owner": "root",
+        "model": "gpt-6",
+        "effort": "high",
+        "requirementIds": [
+          "REQ-CACHE-004",
+          "REQ-CACHE-007"
+        ],
+        "acceptanceIds": [
+          "AC-CACHE-012"
+        ],
+        "backlog": [
+          "KL-040"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-058-orleans-coordinated-cache-memory.md",
+          "docs/Features/ResourceExecution.md"
+        ],
+        "permissions": "one_exact_test_file_no_production_or_threshold_assertion_changes",
+        "fileOwnership": [
+          "tests/KeyLoad.UnitTests/Features/ResourceExecution/CacheReadPermitAcceptanceTests.cs"
+        ],
+        "dependencies": [],
+        "startCondition": "original_6e09_Linux_scalar_report_failed_real_elapsed_two_second_assertion",
+        "artifacts": [
+          "original failing report",
+          "bounded real monotonic age wait helper",
+          "source-bound normal/scalar reports"
+        ],
+        "verification": [
+          "strict Release build",
+          "formatter",
+          "governance",
+          "TUnit normal and scalar through Aspire",
+          "delivered-source Linux CI original reports"
+        ],
+        "state": "original_timer_thresholds_pass_in_complete_Aspire_normal_and_scalar_reports_exact_Linux_pending",
+        "joinCondition": "retain every original expiry/renewal assertion and real TimeProvider.System timestamp; no fake clock, threshold relaxation, skipped test or CI pass claim",
+        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json"
       }
     ],
     "qualificationRule": "Neither presence of source nor a local development result closes a full task. Preserve exact-source Linux fault/endurance and publication gates.",

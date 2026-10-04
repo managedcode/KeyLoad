@@ -9,5 +9,6 @@
     <InternalsVisibleTo Include="KeyLoad.Replication" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <InternalsVisibleTo Include="KeyLoad.CrashHost" />
+    <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
   </ItemGroup>
 </Project>

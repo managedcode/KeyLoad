@@ -22,3 +22,6 @@
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Shared cluster and SDK transport tests use `Features/ClusterReplication/` and `Features/ClientApi/`. Business integration cases MUST mirror their owning business slice under `Features/<same-business-SliceName>/`, including `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, `TimeSeries`, `Search`, `QueryExecution`, `Authorization` and `ChangeFeeds`.
 - `ClusterFixture.cs` is shared test infrastructure; `ClusterTests.cs` and `AdmissionClusterTests.cs` are current feature test entry points.
+
+## StorageRecovery cold RF3 qualification
+- New NodeEpochRf3 cases under Features/StorageRecovery implement ADR-077 through sequential genuine prior/current Aspire Docker RF3 waves, preserved private profile and all3-prepare-before-publish barrier. Ordinary ClusterFixture and its current image proof stay unchanged; root owns shared image/CLI/MCP joins. Offline converter children run within the Aspire-owned TUnit runner and never serve a standalone database. Preserve primary/cleanup failures and retain bind roots until all owned resources/processes/handles have settled.
