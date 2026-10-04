@@ -67,13 +67,16 @@
         <img src="./favicon.svg" width="32" height="32" alt="">
         <span>KeyLoad</span>
       </a>
-      <nav aria-label="Main navigation">
+      <nav class="site-nav" id="site-menu" aria-label="Main navigation" popover>
         <a href="#product">Product</a>
         <a href="#engine">Engine</a>
         <a href="#benchmarks">Benchmarks</a>
         <a href="https://github.com/managedcode/KeyLoad/tree/main/docs">Docs</a>
-        <a class="nav-cta" href="https://github.com/managedcode/KeyLoad" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
       </nav>
+      <div class="site-header-actions">
+        <a class="nav-cta" href="https://github.com/managedcode/KeyLoad" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+        <button class="nav-toggle" type="button" popovertarget="site-menu" aria-label="Menu"><span class="nav-toggle-bars" aria-hidden="true"></span></button>
+      </div>
     </div>
   </header>
 

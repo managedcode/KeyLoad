@@ -8,4 +8,7 @@
   --tok-key: #c9b4ff;
   --tok-str: #9fb4ff;
   --tok-val: #ffc9ad;
+  --header-top: 14px;
+  --header-height: 56px;
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.75 4.5 6 7.75 9.25 4.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }

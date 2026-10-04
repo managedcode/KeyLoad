@@ -1,7 +1,7 @@
 import { IDS, SELECTORS, CONFIG, TEXT } from './contracts.mjs';
 import { mountIsolatedLab } from './isolated-lab.mjs';
 
-const EVENTS = Object.freeze({ hide: 'pagehide', show: 'pageshow', click: 'click' });
+const EVENTS = Object.freeze({ hide: 'pagehide', show: 'pageshow', click: 'click', change: 'change' });
 const SCENE = Object.freeze({ module: './cluster-scene.mjs', unavailable: 'Static architectural illustration', delay: 100,
   hidden: 'hidden', initialGeneration: 0, nextGeneration: 1 });
 let mounted = false;
@@ -71,7 +71,21 @@ function bindCopy() {
   });
 }
 
+function bindMenu() {
+  const menu = document.getElementById(IDS.menu);
+  if (!menu?.hidePopover) return;
+  const close = () => { if (menu.matches(SELECTORS.menuOpen)) menu.hidePopover(); };
+  menu.addEventListener(EVENTS.click, event => {
+    if (!event.target.closest(SELECTORS.menuLink)) return;
+    // Focus left inside the popover is restored to the toggle on hide, which cancels the fragment scroll.
+    document.activeElement?.blur();
+    close();
+  });
+  matchMedia(CONFIG.wideNavigationQuery).addEventListener(EVENTS.change, close);
+}
+
 window.addEventListener(EVENTS.hide, stop);
 window.addEventListener(EVENTS.show, start);
 bindCopy();
+bindMenu();
 start();
