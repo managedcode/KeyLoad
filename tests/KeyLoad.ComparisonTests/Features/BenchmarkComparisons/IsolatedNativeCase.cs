@@ -1,5 +1,6 @@
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,12 +36,8 @@ internal static class IsolatedNativeCase
         try
         {
             await IsolatedNativeReportAssertions.VerifyModelAsync(containers, selection, timeout.Token);
-            await app.StartAsync(timeout.Token);
-            await app.ResourceNotifications.WaitForResourceAsync(Runner,
-                resource => resource.Snapshot.ExitCode is not null || resource.Snapshot.State?.Text == KnownResourceStates.FailedToStart,
-                timeout.Token);
-            await Assert.That(app.ResourceNotifications.TryGetCurrentState(Runner, out var state)).IsTrue();
-            await Assert.That(state!.Snapshot.ExitCode).IsEqualTo(0);
+            var exitCode = await AspireResourceCompletion.RunToExitAsync(app, Runner, timeout.Token);
+            await Assert.That(exitCode).IsEqualTo(0);
             await IsolatedNativeReportAssertions.VerifyReportAsync(output, selection, timeout.Token);
             await IsolatedNativeRegressions.VerifyAsync(app, selection, timeout.Token);
         }

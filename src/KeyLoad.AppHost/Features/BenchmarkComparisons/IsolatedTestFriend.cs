@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo(KeyLoad.AppHost.Features.BenchmarkComparisons.IsolatedTestFriend.AssemblyName)]
+[assembly: InternalsVisibleTo("KeyLoad.IntegrationTests")]
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 

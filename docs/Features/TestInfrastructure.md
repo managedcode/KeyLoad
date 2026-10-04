@@ -16,6 +16,35 @@ ComparisonTests Features/TestInfrastructure; shared IntegrationTests fixture and
 CI composition are root-owned joins. No public database or persisted format change.
 Local entry runs are development evidence; delivered-source Linux gates remain.
 
+## Prompt termination on owned Aspire failure
+
+[ADR-086](../ADR/ADR-086-aspire-terminal-failure.md) defines the private lifecycle
+repair prompted by CI [37202347856](https://github.com/managedcode/KeyLoad/actions/runs/37202347856).
+Its original reports show RF3 87/88 passed (cold-upgrade authorization assertion)
+and unit 2947/2953 passed (six native CQRS cases); they do not establish an AppHost
+crash. Website tests were 201/202 passed, with a real Chrome node-selection
+assertion failure. Dashboard-disabled CLI warnings appeared before successful
+suites too. These facts come from the original RF3, unit and site TUnit artifacts
+at source `15ea5030c6fc010b29127b4b8de07bd255afc7ff`, not inferred CLI text.
+
+| Requirement | Acceptance and evidence |
+|---|---|
+| REQ-TEST-012: owned terminal Aspire failures stop waiting promptly | AC-TEST-012: a runner's FailedToStart, RuntimeUnhealthy, Finished/Exited without an original exit code, or a required long-lived dependency's terminal state fails its workload without consuming the suite deadline; genuine native notification tests settle within five seconds of publication |
+| REQ-TEST-013: completion and planned fault contracts remain intact | AC-TEST-013: expected WaitForCompletion exit is allowed; nonzero/missing completion exit fails; healthy/running and transient health snapshots continue waiting; no dependencies remains valid; guards are canceled and joined before intentional comparison node kill/restart assertions |
+| REQ-TEST-014: original outcome, ownership and cleanup remain intact | AC-TEST-014: native runner exit codes, startup exceptions and cancellation remain failures where applicable; AppHost stopping cancels waits; every notification task is canceled/joined, existing diagnostics and stop/disposal remain; unrelated database cells are unaffected |
+
+TASK-TEST-FAILFAST-CONTRACT (root, complete): requirements/ADR and owning source
+review. TASK-TEST-FAILFAST-NATIVE (progress_runner, implementation): only new
+AppHost Features/TestInfrastructure lifecycle helpers and ComparisonTests
+Features/TestInfrastructure native notification regressions. TASK-TEST-FAILFAST-JOIN
+(root, after helper): TestSuiteApplication and IsolatedNativeCase integration,
+CI focused selection, docs, review and exact-source validation. vector_runtime
+owns read-only lifecycle review. These tasks preserve concurrent engine changes;
+RF3 CQRS/authorization failures belong to their existing owner. Public database,
+stored data, dependencies and topology are N/A: this is private test orchestration.
+Native service tests establish notification handling, not real Docker failure
+qualification; delivered Linux tests and failure artifact review remain required.
+
 Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 
 REQ-TEST-008 / AC-TEST-008 (TASK-RUNTIME-EVENTSOURCE-W3) coordinates the actual

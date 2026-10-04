@@ -39,22 +39,7 @@ internal static class TestSuiteApplication
     }
 
     private static async Task<int> ExecuteAsync(DistributedApplication app, string resource, CancellationToken token)
-    {
-        await app.StartAsync(token).ConfigureAwait(false);
-        return await WaitForExitAsync(app, resource, token).ConfigureAwait(false);
-    }
-
-    private static async Task<int> WaitForExitAsync(DistributedApplication app, string resource, CancellationToken token)
-    {
-        await app.ResourceNotifications.WaitForResourceAsync(resource,
-            state => state.Snapshot.ExitCode is not null || state.Snapshot.State?.Text == KnownResourceStates.FailedToStart,
-            token).ConfigureAwait(false);
-        if (!app.ResourceNotifications.TryGetCurrentState(resource, out var state) || state.Snapshot.ExitCode is null)
-        {
-            throw new InvalidOperationException("The Aspire test runner failed to start or has no original exit status.");
-        }
-        return state.Snapshot.ExitCode.Value;
-    }
+        => await AspireResourceCompletion.RunToExitAsync(app, resource, token).ConfigureAwait(false);
 
     private static async Task CollectAsync(Func<Task> action, List<Exception> failures)
     {

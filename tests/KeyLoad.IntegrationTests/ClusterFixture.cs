@@ -1,6 +1,7 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.TestInfrastructure;
@@ -73,8 +74,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             await App.StartAsync(timeout.Token);
             ReadPrivateProfile();
 
-            await Task.WhenAll(Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
-                .Select(number => App.ResourceNotifications.WaitForResourceHealthyAsync(ClusterFixtureProtocol.NodeName(number), timeout.Token)));
+            await AspireStartupReadiness.WaitForHealthyAsync(App,
+                Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
+                    .Select(ClusterFixtureProtocol.NodeName), timeout.Token);
         }
         catch (Exception startupFailure)
         {

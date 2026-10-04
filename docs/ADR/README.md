@@ -165,3 +165,8 @@ series-codec qualification stage; canonical layout, rewrite/migration and fault
 qualification remain separate. [ADR-081](ADR-081-awaited-native-search-execution.md)
 freezes awaited admitted native search execution and independent RF3 oracle
 repairs. Both retain source/runtime and exact-source Linux qualification gates.
+
+[ADR-086](ADR-086-aspire-terminal-failure.md) defines prompt termination on actual
+owned Aspire resource failures, preserving original outcomes, dependency
+completion, planned fault injection and independent comparison jobs. Native
+notification regressions and delivered-source qualification remain pending.
