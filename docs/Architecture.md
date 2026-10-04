@@ -109,6 +109,14 @@ The [documentation index](README.md) is the complete entry point for 22 canonica
 
 Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
 
+The owner also requires ManagedCode.Communication native CQRS IAsyncEnumerable
+results and long operations through Orleans. [NativeCqrs](Features/ClusterRouting/NativeCqrs.md)
+and [ADR-082](ADR/ADR-082-native-cqrs-streams.md) first qualify the actual Graph
+filter/enumerator context and cleanup join. Current request RPCv1 returns bounded
+Task replies; the stream RPC/transport and durable-operation contracts remain
+pending. Native enumeration does not transfer node-owned storage or supply
+persisted authority, retry receipts or durability.
+
 [ADR-052](ADR/ADR-052-timeseries-bounded-aggregates.md) accepts the additive
 [TimeSeries](Features/TimeSeries.md) latest/aggregate/window slice. New typed
 Abstractions DTOs mirror Client/Server/Core TimeSeries owners and real matching
@@ -994,6 +1002,27 @@ one analytical reservation spans the complete awaited default-scheduler read and
 native settlement while the Orleans request grain yields. Physical handles,
 committed state and authorization remain node-local/canonical. Genuine RF3
 liveness qualification is required before claiming the scheduler repair delivered.
+
+## Managed ANN computational candidate
+
+[ADR-019](ADR/ADR-019-managed-ann.md) and [ManagedAnn](Features/Search/ManagedAnn.md)
+define the immutable Query/Search computational candidate. A private builder
+copies bounded canonical vector input into owned packed arrays. Each search uses
+its own admitted scratch and the existing exact metric implementation. This
+candidate is not connected to public search; node-local projection persistence,
+source-cut replay and authorized public approximation require their separate
+accepted contracts and actual qualification.
+
+```mermaid
+classDiagram
+    AnnWorkBudget --> ReadExecutionBudget : work and elapsed checks
+    PackedAnnBuilder --> PackedAnnGraph : actual level offsets
+    PackedAnnBuilder --> PackedAnnVectors : owned bounded blocks
+    PackedAnnBuilder --> PackedAnnIndex : complete immutable state
+    PackedAnnIndex --> AnnWorkBudget : per call admission
+    PackedAnnIndex --> PreparedSimilarity : unchanged scores
+    PackedAnnIndex --> AnnSearchResult : candidates mode and counters
+```
 
 ## Independent benchmark failure publication
 

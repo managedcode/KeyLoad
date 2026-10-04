@@ -20,6 +20,7 @@
     <ProjectReference Include="../KeyLoad.CrashHost/KeyLoad.CrashHost.csproj" />
     <PackageReference Include="TUnit" />
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Orleans.TestingHost" PrivateAssets="all" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 </Project>

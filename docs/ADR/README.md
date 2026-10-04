@@ -34,7 +34,7 @@ exact versions і pure SDK upcasting. Implementation/runtime qualification pendi
 | [ADR-016 atomic/physical placement](ADR-016-atomic-physical-placement.md) | Accepted | ClusterRouting, DocumentStorage |
 | [ADR-017 migration tokens](ADR-017-migration-tokens.md) | Proposed | ClusterRouting, ClusterReplication |
 | [ADR-018 global rank fusion](ADR-018-global-rank-fusion.md) | Proposed | Search |
-| [ADR-019 managed ANN](ADR-019-managed-ann.md) | Proposed | Search |
+| [ADR-019 managed ANN](ADR-019-managed-ann.md) | Accepted R1 candidate; runtime and public qualification pending | Search |
 | [ADR-020 independent contexts](ADR-020-independent-query-contexts.md) | Accepted | ClientApi, QueryExecution, ClusterRouting |
 | [ADR-021 comparable PostgreSQL baseline](ADR-021-comparable-postgres-baseline.md) | Accepted | BenchmarkComparisons |
 | [ADR-022 policy epoch/revocation](ADR-022-policy-epoch-revocation.md) | Accepted | Authorization, QueryExecution, ChangeFeeds |
@@ -80,6 +80,8 @@ exact versions і pure SDK upcasting. Implementation/runtime qualification pendi
 | [ADR-067 composable agent database](ADR-067-composable-agent-database.md) | Accepted; bounded atomic composition source, full SQL and exact-SHA qualification pending | DatabaseComposition, QueryExecution, ClientApi |
 
 | [ADR-068 native benchmark gate repair](ADR-068-native-benchmark-gate-repair.md) | Accepted bounded current-job capture; native and complete cohort qualification pending | BenchmarkComparisons |
+| [ADR-082 native CQRS streams](ADR-082-native-cqrs-streams.md) | Accepted C0 real runtime proof; product contracts and qualification pending | ClusterRouting, ClientApi, Search |
+| [ADR-083 native CQRS HTTP bounds](ADR-083-cqrs-http-transport-bounds.md) | Accepted owning repair contract; release/feed and consumer qualification pending | ClientApi, ResourceExecution |
 
 ## Ідентичність і пріоритет
 

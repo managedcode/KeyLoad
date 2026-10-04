@@ -126,9 +126,9 @@ internal static class NodeEpochRf3CurrentWorkload
         var command = AppendCommand(workload, changed, NodeEpochRf3Workload.Tags(10));
         var sdk = await admin.Sdk.CommitAsync(command, cancellationToken).ConfigureAwait(false);
         await Assert.That(sdk.IsFailed).IsTrue();
-        await Assert.That(sdk.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.DuplicateEventId));
+        await Assert.That(sdk.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Conflict));
         await McpCallerAssertions.ErrorAsync(await admin.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            command, cancellationToken).ConfigureAwait(false), ErrorCode.DuplicateEventId, dispatched: true).ConfigureAwait(false);
+            command, cancellationToken).ConfigureAwait(false), ErrorCode.Conflict, dispatched: true).ConfigureAwait(false);
         await NodeEpochRf3ReadOracle.VerifySeriesAsync(reader, workload, NodeEpochRf3ReadOracle.Prior(workload),
             cancellationToken).ConfigureAwait(false);
     }

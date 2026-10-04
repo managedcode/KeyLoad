@@ -1,0 +1,221 @@
+{
+  "schemaVersion": 1,
+  "kind": "keyload.node-epoch.delivered-linux-observation",
+  "date": "2026-10-04",
+  "sourceSha": "0d78eb43dceac2f386dca7bbccb11f9d1e3d43a3",
+  "runId": 37179484629,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629",
+  "repository": "managedcode/KeyLoad",
+  "status": "completed",
+  "conclusion": "failure",
+  "complete": false,
+  "currentWorkingSourceQualified": false,
+  "sealedOriginals": "artifacts/qualification/0d78-gh-37179484629-linux-originals-20261004",
+  "sealedManifestSha256": "9a62580fddf9a72ade3451641956342ebea6f6fc118463a4c3c0ea070e0211b0",
+  "originalArtifactMetadata": "artifact-metadata.json",
+  "originalArtifacts": [
+    {
+      "id": 11295153271,
+      "name": "code-quality-ubuntu-latest",
+      "bytes": 1802822,
+      "expired": false
+    },
+    {
+      "id": 11295122183,
+      "name": "docker-rf3-qualification",
+      "bytes": 572065,
+      "expired": false
+    },
+    {
+      "id": 11295022448,
+      "name": "code-quality-docker-rf3",
+      "bytes": 887133,
+      "expired": false
+    },
+    {
+      "id": 11294912643,
+      "name": "docker-rf3-image-evidence",
+      "bytes": 4605064,
+      "expired": false
+    },
+    {
+      "id": 11294634112,
+      "name": "test-results-ubuntu-latest",
+      "bytes": 11755494,
+      "expired": false
+    },
+    {
+      "id": 11294437588,
+      "name": "analyzer-rule-evidence",
+      "bytes": 970248,
+      "expired": false
+    }
+  ],
+  "jobs": [
+    {
+      "id": 111368948885,
+      "name": "Test three-node database",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629/job/111368948885"
+    },
+    {
+      "id": 111368949024,
+      "name": "Check repository rules",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629/job/111368949024"
+    },
+    {
+      "id": 111368949040,
+      "name": "Test code analyzers",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629/job/111368949040"
+    },
+    {
+      "id": 111368975987,
+      "name": "Build and test KeyLoad (ubuntu-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629/job/111368975987"
+    }
+  ],
+  "reports": {
+    "analyzersIndependent": {
+      "path": "analyzer-rule-evidence/TestResults/analyzers/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "bytes": 354727,
+      "sha256": "71acd8af75fdbdde3d8beaef6054ca09ba27dc3af4e98fa422f0b3141476fa60",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "caseCount": 118,
+      "uniqueIds": 118,
+      "caseIdSha256": "2500efdc068d6702107b28fbc67fe77eb20dcdb6ccb5cbe1128c8f0aa5c0d8a7"
+    },
+    "rf3": {
+      "path": "docker-rf3-qualification/TestResults/rf3/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "bytes": 1724614,
+      "sha256": "903e916b429c69970d499226ba0f5a0e9228c5326bb7fcfac77f78f409113ce3",
+      "summary": {
+        "total": 88,
+        "passed": 87,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "caseCount": 88,
+      "uniqueIds": 88,
+      "caseIdSha256": "bef78d29147f4abb15a825d405084b0f9fdbfe2c8ef66d8ac49bee82936c44d0"
+    },
+    "analyzersMain": {
+      "path": "test-results-ubuntu-latest/TestResults/analyzers/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "bytes": 354764,
+      "sha256": "df4c626fbde83027d6e39adf4e2fdb83b6b09448fca6136a88a40c7e31a8ab6e",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "caseCount": 118,
+      "uniqueIds": 118,
+      "caseIdSha256": "2500efdc068d6702107b28fbc67fe77eb20dcdb6ccb5cbe1128c8f0aa5c0d8a7"
+    },
+    "recovery": {
+      "path": "test-results-ubuntu-latest/TestResults/recovery/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+      "bytes": 762322,
+      "sha256": "1253665491841c5c1208db8f443924166097c499ee635da1e74b0a02dd553806",
+      "summary": {
+        "total": 257,
+        "passed": 257,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "caseCount": 257,
+      "uniqueIds": 257,
+      "caseIdSha256": "cb0d208893dba224c4bffe8e45f7bc9bd47aed1fdb5c1eb3e66ae5f16541019c"
+    },
+    "unitNormal": {
+      "path": "test-results-ubuntu-latest/TestResults/unit/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "bytes": 8904958,
+      "sha256": "3afac53b8c8ecc3d37da1abbf307504e9982e35ff6ea601eb320b3de7f181418",
+      "summary": {
+        "total": 2919,
+        "passed": 2919,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "caseCount": 2919,
+      "uniqueIds": 2919,
+      "caseIdSha256": "fbb0ff7b96c5bbb7752fa1a6f13e53febbe82f448acfb7800869ef4dbc77fa51"
+    },
+    "unitScalar": {
+      "path": "test-results-ubuntu-latest/TestResults/unit-scalar/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "bytes": 8906822,
+      "sha256": "d9cd5268e045b35202290b4ce5fad0880410f036fa2a321ac5f597146b9a62cb",
+      "summary": {
+        "total": 2919,
+        "passed": 2919,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "caseCount": 2919,
+      "uniqueIds": 2919,
+      "caseIdSha256": "fbb0ff7b96c5bbb7752fa1a6f13e53febbe82f448acfb7800869ef4dbc77fa51"
+    }
+  },
+  "unitCaseIdentitiesMatch": true,
+  "priorServerImage": {
+    "actuallyBuiltInLinuxCi": true,
+    "actualPriorSourceSha": "7784b6b46b98ce994dd98070dc1f58fe4e506b91",
+    "actualPriorTreeSha": "b03bf1301a03b3fe00f419c3c7bf5285a34b63f9",
+    "overlayCount": 0,
+    "sourceInventorySha256": "2d60112c44b55fdbcfd36bdeb14bf821e38d55e43df09c0c85f10558a5e332d0",
+    "actualImmutableImageReference": "127.0.0.1:5000/keyload/server:7784b6b46b98ce994dd98070dc1f58fe4e506b91-37179484629-1@sha256:ef37250d6fda4240fc4308b3a12e91f8dd7e4a3849c08e6b4f52468654aa54dc",
+    "manifestSha256": "sha256:ef37250d6fda4240fc4308b3a12e91f8dd7e4a3849c08e6b4f52468654aa54dc",
+    "receiptSha256": "a1db3127e18b0ddab369633df567f003dac6a17c214014210ef4876064e5ef57",
+    "independentOriginalProofVerification": "static verifyNative5ServerProof over private0700 byte-identical copies with0600 files; original GitHub extraction unchanged; source inventory and retained archive validated",
+    "scope": "actual previous serving image provenance only; not complete cold fixture acceptance"
+  },
+  "coldRf3": {
+    "actuallyExecuted": true,
+    "passed": false,
+    "acceptanceQualified": false,
+    "failedCaseId": "KeyLoad.IntegrationTests.Features.StorageRecovery.NodeEpochRf3ColdUpgradeTests.1.1.AcEpoch010And011UpgradePriorThreeVoterStateBeforeStartingCurrentRf3.1.1.0",
+    "failureType": "TUnit.Assertions.Exceptions.AssertionException",
+    "failureMessage": "Expected to be equal to \"DuplicateEventId\"\nbut received \"Conflict\"\n\nat Assert.That(sdk.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.DuplicateEventId))",
+    "failedSourcePath": "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3ColdUpgradeTests.cs",
+    "stageObserved": "post-upgrade current RF3 changed sample replay; later retention/revocation/current writes/follower recovery/final snapshot/source assertions not completed",
+    "repairContract": "docs/ADR/ADR-077-offline-native-data-epoch.md#delivered-source-cold-rf3-sample-conflict-oracle-correction-2026-10-04",
+    "repairScope": "exact SDK and official MCP Conflict oracle for canonical changed sample ID; production/input/no-mutation assertions unchanged",
+    "repairState": "source corrected; renewed exact-source genuine RF3 pending"
+  },
+  "fullBacklogClosed": false,
+  "powerLossQualified": false,
+  "enduranceQualified": false,
+  "performanceQualified": false,
+  "coverageQualified": false,
+  "productionReady": false
+}

@@ -11359,7 +11359,7 @@
           "Aspire TUnit",
           "actual exact-source Linux Docker RF3 SDK and official MCP original artifacts"
         ],
-        "state": "root_reviewed_source_full_build_formatter_scalar2919_recovery257_pass_normal2918of2919_native_cold_RF3_pending",
+        "state": "delivered_0d78_Linux_build_format_normal2919_scalar2919_recovery257_pass_actual_prior_image_built_cold_RF3_87of88_sample_conflict_oracle_source_corrected_renewed_RF3_pending",
         "joinCondition": "root_review_original_complete_gates_zero_overlay_prior_distinct_producer_no_skips",
         "id": "TASK-NODE-EPOCH-COLD-FIXTURE",
         "owner": "lifecycle_wave",
@@ -11388,7 +11388,8 @@
           "original source-bound results"
         ],
         "repairContract": "Reuse tested ServerFailureObserver for actual cleanup observation; preserve synchronous Flush(true) through root OfflineFiles.FlushToDisk; preserve caps/ownership/oracles; root takes ColdScenario and CurrentWaveRunner disposal/order joins.",
-        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json"
+        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json",
+        "deliveredEvidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
       },
       {
         "contracts": [
@@ -11413,7 +11414,7 @@
           "Aspire TUnit",
           "actual exact-source Linux Docker RF3 SDK and official MCP original artifacts"
         ],
-        "state": "root_reviewed_source_full_build_formatter_scalar2919_recovery257_pass_normal2918of2919_native_cold_RF3_pending",
+        "state": "delivered_0d78_Linux_build_format_normal2919_scalar2919_recovery257_pass_actual_prior_image_built_cold_RF3_87of88_sample_conflict_oracle_source_corrected_renewed_RF3_pending",
         "joinCondition": "root_review_original_complete_gates_zero_overlay_prior_distinct_producer_no_skips",
         "id": "TASK-NODE-EPOCH-COLD-SHARED",
         "owner": "root",
@@ -11443,7 +11444,8 @@
           "original source-bound results"
         ],
         "cleanupContract": "Await-using owns each wave; observe body and disposal faults into the same scenario failure list, do not advance waves after any fault; retained-wave final settlement preserves every failure and keeps private roots on errors.",
-        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json"
+        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json",
+        "deliveredEvidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
       },
       {
         "id": "TASK-NODE-EPOCH-OFFLINE-CLI-REGRESSION",
@@ -11490,7 +11492,8 @@
           "KL-030",
           "KL-031",
           "KL-032",
-          "KL-059"
+          "KL-059",
+          "KL-060"
         ],
         "permissions": "repository_read_only_primary_source_requests_and_bounded_owned_tmp_package_provenance_no_install_restore_build_tests_or_other_execution",
         "fileOwnership": [],
@@ -11503,11 +11506,16 @@
         "verification": [
           "read_actual_owning_sources_no_runtime_or_qualification_claim"
         ],
-        "state": "published_package_provenance_resolved_root_contract_selection_pending",
+        "state": "read_only_primary_source_audit_complete_root_R1_candidate_contract_accepted_no_runtime_qualification",
         "joinCondition": "root_selects_and_freezes_exact_contracts_before_any_implementation",
         "findings": "Hnsw.Net 0.1.4 exact NuGet package hash/signature, nuspec/PDB SourceLink commit180849906276e9c0127b7ee8b4994aea86a5e504 and matching tag/CI are audited. No API cancellation or built-in corpus/dimension/visited/concurrency/load admission; root must decide bounded suitability and freeze contracts before any implementation.",
         "provenanceAuditContract": "Inspect primary NuGet 0.1.4 nupkg/snupkg and GitHub release/tag/workflow metadata. Download at most 4 MiB per artifact into a fresh private owned /private/tmp directory only, inspect bounded ZIP metadata/nuspec/PDB SourceLink with existing tools, do not load/execute assemblies or install packages/tools. Bind exact published package SHA512 to repository commit if actual producer metadata supports it, otherwise report unavailable. No repository writes or delivery claim.",
-        "followupAudit": "Read exact audited source packing, growth, reachable-node/distance-work bounds, worst memory retention, level generation/deletion/reinsert/serialization semantics; report static facts only, no commands except existing curl/python/read operations, no package or tool execution, no implementation."
+        "followupAudit": "Read exact audited source packing, growth, reachable-node/distance-work bounds, worst memory retention, level generation/deletion/reinsert/serialization semantics; report static facts only, no commands except existing curl/python/read operations, no package or tool execution, no implementation.",
+        "contracts": [
+          "docs/ADR/ADR-019-managed-ann.md",
+          "docs/Features/Search/ManagedAnn.md"
+        ],
+        "candidateDecision": "Independently authored KeyLoad-owned packed managed HNSW R1; no external package admitted; exact public search unchanged; online persistence/lifecycle and public capability contracts remain pending."
       },
       {
         "id": "TASK-CACHE-REAL-PREPARE-AGE-TIMER-REPAIR",
@@ -11546,9 +11554,1966 @@
           "TUnit normal and scalar through Aspire",
           "delivered-source Linux CI original reports"
         ],
-        "state": "original_timer_thresholds_pass_in_complete_Aspire_normal_and_scalar_reports_exact_Linux_pending",
+        "state": "original_thresholds_pass_complete_normal_scalar_delivered_0d78_Linux_reports_no_global_CI_completion_claim",
         "joinCondition": "retain every original expiry/renewal assertion and real TimeProvider.System timestamp; no fake clock, threshold relaxation, skipped test or CI pass claim",
-        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json"
+        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json",
+        "deliveredEvidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
+      },
+      {
+        "requirements": [
+          "REQ-ANN-001",
+          "REQ-ANN-002",
+          "REQ-ANN-003",
+          "REQ-ANN-004",
+          "REQ-ANN-005",
+          "REQ-ANN-006"
+        ],
+        "acceptance": [
+          "AC-ANN-001",
+          "AC-ANN-002",
+          "AC-ANN-003",
+          "AC-ANN-004",
+          "AC-ANN-005",
+          "AC-ANN-006"
+        ],
+        "planTasks": [
+          "KL-030",
+          "KL-059",
+          "KL-032",
+          "KL-060"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-019-managed-ann.md",
+          "docs/Features/Search/ManagedAnn.md"
+        ],
+        "dependencies": [
+          "TASK-NEXT-ANN-ACCEPTANCE-ASSESSMENT"
+        ],
+        "startCondition": "root_R1_API_bounds_AC_and_ADR_contract_accepted_2026_10_04",
+        "state": "15_actual_10000_record_recall_cells_pass_unchanged_options_R1_full_acceptance_pending",
+        "joinCondition": "root_reviews_every_diff_and_actual_AC_before_strict_full_build_formatter_governance_Aspire_normal_scalar_and_stage_commit_no_acceptance_or_public_capability_claim_from_source_only",
+        "id": "TASK-ANN-R1-PACKED-ALGORITHM",
+        "owner": "query_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "permissions": "new_owned_algorithm_files_only_no_build_test_formatter_commit_dependency_shared_public_persistence_or_existing_source_changes",
+        "fileOwnership": [
+          "src/KeyLoad.Query/Features/Search/PackedAnn*.cs (new only)",
+          "src/KeyLoad.Query/Features/Search/AnnWorkBudget.cs (new only)"
+        ],
+        "artifacts": [
+          "complete immutable packed managed HNSW candidate",
+          "checked pre-allocation and work admission",
+          "exact PreparedSimilarity scoring and explicit fallback modes"
+        ],
+        "verification": [
+          "worker static source review only",
+          "root numeric analyzer strict solution build",
+          "root independent real-store TUnit through Aspire"
+        ],
+        "resourceRefinementContract": "docs/Features/Search/ManagedAnn.md#accepted-packing-and-reservation-refinement-2026-10-04",
+        "rootTraversalBudgetContract": "docs/Features/Search/ManagedAnn.md#root-traversal-and-real-budget-review-2026-10-04",
+        "rootInsertionWorkContract": "docs/Features/Search/ManagedAnn.md#accepted-insertion-work-correction-2026-10-04",
+        "rootWorstCacheContract": "docs/Features/Search/ManagedAnn.md#accepted-worst-slot-cache-refinement-2026-10-04",
+        "rootDualHeapContract": "docs/Features/Search/ManagedAnn.md#accepted-bounded-dual-heap-refinement-2026-10-04",
+        "rootDotProductSelectionContract": "docs/Features/Search/ManagedAnn.md#accepted-dotproduct-neighbor-selection-refinement-2026-10-04"
+      },
+      {
+        "requirements": [
+          "REQ-ANN-001",
+          "REQ-ANN-002",
+          "REQ-ANN-003",
+          "REQ-ANN-004",
+          "REQ-ANN-005",
+          "REQ-ANN-006"
+        ],
+        "acceptance": [
+          "AC-ANN-001",
+          "AC-ANN-002",
+          "AC-ANN-003",
+          "AC-ANN-004",
+          "AC-ANN-005",
+          "AC-ANN-006"
+        ],
+        "planTasks": [
+          "KL-030",
+          "KL-059",
+          "KL-032",
+          "KL-060"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-019-managed-ann.md",
+          "docs/Features/Search/ManagedAnn.md"
+        ],
+        "dependencies": [
+          "TASK-NEXT-ANN-ACCEPTANCE-ASSESSMENT"
+        ],
+        "startCondition": "root_R1_API_bounds_AC_and_ADR_contract_accepted_2026_10_04",
+        "state": "all_19_actual_normal_and_scalar_cases_pass_unchanged_source_runtime_minimum_recall_0_988_full_gates_pending",
+        "joinCondition": "root_reviews_every_diff_and_actual_AC_before_strict_full_build_formatter_governance_Aspire_normal_scalar_and_stage_commit_no_acceptance_or_public_capability_claim_from_source_only",
+        "id": "TASK-ANN-R1-INDEPENDENT-TESTS",
+        "owner": "cluster_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "permissions": "new_owned_real_store_test_files_only_no_build_test_formatter_commit_or_existing_test_helper_assertion_changes",
+        "fileOwnership": [
+          "tests/KeyLoad.UnitTests/Features/Search/PackedAnn*.cs (new only)"
+        ],
+        "artifacts": [
+          "independent real ZoneTree bounds metrics cancellation filter ownership and mutation cases",
+          "10000 actual loaded records and 100 independent queries per metric_selectivity_correlation cell exact oracle RecallAt10"
+        ],
+        "verification": [
+          "worker static case_API review only",
+          "root actual Aspire TUnit normal and scalar original reports"
+        ],
+        "resourceRefinementContract": "docs/Features/Search/ManagedAnn.md#accepted-packing-and-reservation-refinement-2026-10-04",
+        "rootTraversalBudgetContract": "docs/Features/Search/ManagedAnn.md#root-traversal-and-real-budget-review-2026-10-04",
+        "rootInsertionWorkContract": "docs/Features/Search/ManagedAnn.md#accepted-insertion-work-correction-2026-10-04",
+        "rootWorstCacheContract": "docs/Features/Search/ManagedAnn.md#accepted-worst-slot-cache-refinement-2026-10-04",
+        "rootDualHeapContract": "docs/Features/Search/ManagedAnn.md#accepted-bounded-dual-heap-refinement-2026-10-04",
+        "rootDotProductSelectionContract": "docs/Features/Search/ManagedAnn.md#accepted-dotproduct-neighbor-selection-refinement-2026-10-04",
+        "rootRealDeadlineContract": "docs/Features/Search/ManagedAnn.md#accepted-real-shared-request-deadline-regression-2026-10-04"
+      },
+      {
+        "requirements": [
+          "REQ-ANN-007",
+          "REQ-ANN-008"
+        ],
+        "acceptance": [
+          "AC-ANN-007",
+          "AC-ANN-008"
+        ],
+        "planTasks": [
+          "KL-031",
+          "KL-032",
+          "KL-059",
+          "KL-060",
+          "KL-039",
+          "KL-097"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-019-managed-ann.md",
+          "docs/Features/Search/ManagedAnn.md"
+        ],
+        "dependencies": [
+          "TASK-NEXT-ANN-ACCEPTANCE-ASSESSMENT"
+        ],
+        "startCondition": "root_R1_API_bounds_AC_and_ADR_contract_accepted_2026_10_04",
+        "state": "complete_read_only_actual_source_join_and_gap_audit_no_R2_format_or_public_contract_approved",
+        "joinCondition": "root freezes exact R2 persistence_source_cut and R3 public authorization_completeness contracts before implementation",
+        "id": "TASK-ANN-R2-LIFECYCLE-ASSESSMENT",
+        "owner": "lifecycle_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "permissions": "read_only_actual_owning_sources_no_repository_write_runtime_package_execution_or_contract_invention",
+        "fileOwnership": [],
+        "artifacts": [
+          "exact canonical cut_outbox replay_native manifest_chunk publication_lock_lease recovery join inventory",
+          "ordered missing R2_R3 contract decisions and disjoint candidate ownership"
+        ],
+        "verification": [
+          "actual owning source line review only"
+        ],
+        "findings": "Canonical PutVector may replace values at unchanged document revision; one-cut snapshot+outbox head capture is missing; persisted public consumer APIs require administrator and retention overlap; NativeTextProjection demonstrates node-local generated manifest/lease/settlement but is not an ANN format; hidden-row scoring and source/policy/schema/readgeneration must be frozen by root before R2/R3 writes.",
+        "replicatedPinAssessment": {
+          "state": "source_only_root_lifecycle_contract_pending",
+          "facts": [
+            "existing_consumers_are_persisted_admin_authorized_RF3_commands_not_local_pins",
+            "pin_before_seed_can_protect_tail_but_seed_tail_requires_ordered_no_effect_checkpoint_reconciliation",
+            "each_node_local_projection_requires_independent_replicated_checkpoint_or_explicit_minimum_progress",
+            "one_shared_pin_can_allow_purge_past_slower_replica",
+            "released_consumer_rows_remain_and_count_against_64_limit_no_expiry_or_reuse",
+            "cluster_principal_is_Membership_only_no_invented_trusted_role_or_internal_bypass"
+          ],
+          "requiredRootContracts": [
+            "maintenance_authority",
+            "bounded_per_node_pin_identity_and_cleanup",
+            "atomic_source_and_tail_cut",
+            "replay_checkpoint_publish_order",
+            "node_incarnation_generation_failover_and_gap_rebuild"
+          ]
+        }
+      },
+      {
+        "requirements": [
+          "REQ-ANN-001",
+          "REQ-ANN-002",
+          "REQ-ANN-003",
+          "REQ-ANN-004",
+          "REQ-ANN-005",
+          "REQ-ANN-006"
+        ],
+        "acceptance": [
+          "AC-ANN-001",
+          "AC-ANN-002",
+          "AC-ANN-003",
+          "AC-ANN-004",
+          "AC-ANN-005",
+          "AC-ANN-006"
+        ],
+        "planTasks": [
+          "KL-030",
+          "KL-059",
+          "KL-032",
+          "KL-060"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-019-managed-ann.md",
+          "docs/Features/Search/ManagedAnn.md"
+        ],
+        "dependencies": [
+          "TASK-ANN-R1-PACKED-ALGORITHM",
+          "TASK-ANN-R1-INDEPENDENT-TESTS"
+        ],
+        "startCondition": "root_R1_API_bounds_AC_and_ADR_contract_accepted_2026_10_04",
+        "state": "full_build_formatter17_and_all_19_normal_all_19_scalar_Aspire_development_cases_pass_required_full_runtime_and_delivered_Linux_gates_pending",
+        "joinCondition": "root_reviews_every_diff_and_actual_AC_before_strict_full_build_formatter_governance_Aspire_normal_scalar_and_stage_commit_no_acceptance_or_public_capability_claim_from_source_only",
+        "id": "TASK-ANN-R1-ROOT-JOIN",
+        "owner": "root",
+        "model": "gpt-6",
+        "effort": "high",
+        "permissions": "exclusive shared_documentation_integration_review_build_formatter_governance_Aspire_evidence_commit_push_and_Linux_CI_join",
+        "fileOwnership": [
+          "docs/ADR/ADR-019-managed-ann.md",
+          "docs/Features/Search.md",
+          "docs/Features/Search/ManagedAnn.md",
+          "docs/implementation/documentation-coverage.json",
+          "docs/implementation/status.json",
+          "root reviewed R1 algorithm and test repair joins"
+        ],
+        "artifacts": [
+          "source reviewed against accepted contract",
+          "strict solution and original normal_scalar Aspire reports",
+          "stage commit on main and exact delivered SHA Linux CI"
+        ],
+        "verification": [
+          "strict Release solution build",
+          "full formatter and governance",
+          "real TUnit normal_scalar through Aspire",
+          "complete original Linux delivered-source CI reports"
+        ],
+        "reviewFindings": [
+          "candidate_ef_is_retained_capacity_not_an_arbitrary_expansion_limit",
+          "fake_TimeProvider_cancellation_deadline_tests_rejected_real_System_clock_required",
+          "exact_small_mode_expected_edge_counter_zero_not_positive",
+          "Algorithm1_new_neighbor_count_M_is_distinct_from_retained_base_maximum_2M",
+          "reciprocal_reselection_only_on_degree_overflow",
+          "validated_owned_ID_ordinals_preserve_order_without_repeated_strings",
+          "selected_neighbor_transfer_copy_now_charged",
+          "worst_slot_cache_resets_append_maintains_rejection_unchanged_replacement_exact_charged_recomputation",
+          "dual_heap_map_arbitrary_removal_worst_root_sifts_even_odd_counts_reset_and_reservations_independently_reviewed"
+        ],
+        "localBuildObservations": [
+          {
+            "attempt": 1,
+            "passed": false,
+            "errors": 3,
+            "diagnostics": [
+              "CS0102"
+            ],
+            "reason": "new_admission_record_generated_property_names_collide_with_private_methods",
+            "repair": "private_calculation_helpers_renamed"
+          },
+          {
+            "attempt": 2,
+            "passed": false,
+            "errors": 5,
+            "diagnostics": [
+              "IDE0060",
+              "IDE0270",
+              "IDE0005"
+            ],
+            "reason": "new_algorithm_unused_parameters_usings_and_null_check_style",
+            "repair": "unused_parameters_and_usings_removed_preserving_typed_null_Validation"
+          },
+          {
+            "attempt": 3,
+            "passed": false,
+            "errors": 56,
+            "productProjectsCompiled": true,
+            "reason": "new_test_collection_expression_syntax_cascades_imports_wrong_private_oracle_field_and_async_cleanup_style_nesting",
+            "repair": "batch_delegated_to_same_disjoint_worker_no_suppression_or_criterion_waiver"
+          },
+          {
+            "attempt": 4,
+            "passed": false,
+            "errors": 2,
+            "warnings": 0,
+            "elapsedSeconds": 55.6,
+            "diagnostics": [
+              "CA2025"
+            ],
+            "reason": "remaining_new_real_cancellation_observer_using_CTS_lifetime",
+            "repair": "explicit_finally_disposal_after_both_tasks_settle_no_suppressions"
+          },
+          {
+            "attempt": 5,
+            "passed": true,
+            "errors": 0,
+            "warnings": 0,
+            "elapsedSeconds": 79.74,
+            "reason": "strict_full_Release_solution_build_after_reviewed_repairs",
+            "nativeSarifActiveErrors": {
+              "KeyLoad.Query": 0,
+              "KeyLoad.UnitTests": 0
+            }
+          },
+          {
+            "attempt": 6,
+            "passed": true,
+            "errors": 0,
+            "warnings": 0,
+            "elapsedSeconds": 35.16,
+            "reason": "current_source_after_formatting_only_repairs",
+            "nativeSarifActiveErrors": {
+              "KeyLoad.Query": 0,
+              "KeyLoad.UnitTests": 0
+            }
+          },
+          {
+            "attempt": 7,
+            "passed": true,
+            "warnings": 0,
+            "errors": 0,
+            "elapsedSeconds": 127.75,
+            "reason": "accepted_insertion_work_correction_before_independent_copy_charge_review"
+          },
+          {
+            "attempt": 8,
+            "passed": true,
+            "warnings": 0,
+            "errors": 0,
+            "elapsedSeconds": 5.48,
+            "reason": "same_source_with_missing_bounded_selected_neighbor_copy_charge_restored"
+          },
+          {
+            "attempt": 9,
+            "passed": true,
+            "warnings": 0,
+            "errors": 0,
+            "elapsedSeconds": 60.61,
+            "reason": "accepted_operation_local_worst_cache_after_root_and_independent_review",
+            "nativeSarifActiveErrors": {
+              "KeyLoad.Query": 0,
+              "KeyLoad.UnitTests": 0
+            }
+          },
+          {
+            "attempt": 10,
+            "passed": true,
+            "warnings": 0,
+            "errors": 0,
+            "elapsedSeconds": 86.74,
+            "reason": "accepted_dual_heap_root_and_independent_map_root_reset_reservation_review_pass",
+            "nativeSarifActiveErrors": {
+              "KeyLoad.Query": 0,
+              "KeyLoad.UnitTests": 0
+            }
+          },
+          {
+            "attempt": 14,
+            "passed": true,
+            "exitCode": 0,
+            "warnings": 0,
+            "errors": 0,
+            "elapsedSeconds": 152.1,
+            "originalManifest": "artifacts/qualification/managed-ann-r1-development-20261004/build14-originals/manifest.json",
+            "runtimeTestResult": false
+          },
+          {
+            "attempt": 15,
+            "passed": false,
+            "exitCode": 1,
+            "warnings": 0,
+            "errors": 1,
+            "elapsedSeconds": 107.26,
+            "diagnostics": [
+              "CA1068"
+            ],
+            "repair": "new_test_helper_CancellationToken_moved_to_last_parameter_no_behavior_change",
+            "originalManifest": "artifacts/qualification/managed-ann-r1-development-20261004/build15-originals/manifest.json",
+            "runtimeTestResult": false
+          },
+          {
+            "attempt": 16,
+            "passed": true,
+            "exitCode": 0,
+            "warnings": 0,
+            "errors": 0,
+            "elapsedSeconds": 42.11,
+            "originalManifest": "artifacts/qualification/managed-ann-r1-development-20261004/build16-originals/manifest.json",
+            "runtimeTestResult": false
+          }
+        ],
+        "localStaticGates": {
+          "formatter": {
+            "attempt1ExitCode": 2,
+            "reason": "new_test_initializer_whitespace_only",
+            "attempt2ExitCode": 0,
+            "passed": true,
+            "attempt3ExitCode": 0,
+            "attempt4ExitCode": 0,
+            "attempt5ExitCode": 0
+          },
+          "governance": {
+            "passed": true,
+            "projects": 27,
+            "modules": 4
+          },
+          "gitDiffCheck": {
+            "passed": true
+          }
+        },
+        "localRuntimeObservations": [
+          {
+            "attempt": 1,
+            "suite": "unit",
+            "filter": "/*/*/PackedAnn*/*",
+            "caller": "Aspire_AppHost",
+            "exitCode": 2,
+            "passed": 17,
+            "errors": 2,
+            "total": 19,
+            "failurePhase": "10000_record_index_build_before_recall_or_deadline_assertions",
+            "failureCode": "BudgetExceeded",
+            "configuredBuildWorkLimit": 1000000000,
+            "sourceAndRuntimeCohortUnchanged": true,
+            "reportSha256": "75ce21715c207b20d166eebab16183bd39fb0964ec72c28ccba2b0fa9cac7da4",
+            "report": "artifacts/qualification/managed-ann-r1-development-20261004/focused01-originals/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+            "recallCellsQualified": 0,
+            "allAcceptanceClosed": false
+          },
+          {
+            "attempt": 2,
+            "suite": "unit",
+            "filter": "/*/*/PackedAnn*/*",
+            "caller": "Aspire_AppHost",
+            "exitCode": 2,
+            "passed": 17,
+            "errors": 2,
+            "total": 19,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0,
+            "durationMs": 23448.195,
+            "failurePhase": "10000_record_build_FindWorst_before_recall_or_deadline_assertions",
+            "failureCode": "BudgetExceeded",
+            "configuredBuildWorkLimit": 1000000000,
+            "sourceAndRuntimeCohortUnchanged": true,
+            "reportSha256": "b3460a9de3075dcbc79fbc0f527b32ed5a80b48c96b558d1568914a2897638ec",
+            "originalTrxSha256": "c2824492b6bdd00ffa1f75338a9e0523fbae0d74358bf749f262651557f194d9",
+            "report": "artifacts/qualification/managed-ann-r1-development-20261004/focused02-originals/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+            "recallCellsQualified": 0,
+            "allAcceptanceClosed": false
+          },
+          {
+            "attempt": 3,
+            "suite": "unit",
+            "filter": "/*/*/PackedAnn*/*",
+            "caller": "Aspire_AppHost",
+            "exitCode": 2,
+            "passed": 17,
+            "errors": 2,
+            "total": 19,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0,
+            "failurePhase": "10000_record_build_reciprocal_links_before_recall_or_deadline_assertions",
+            "failureCode": "BudgetExceeded",
+            "configuredBuildWorkLimit": 1000000000,
+            "sourceAndRuntimeCohortUnchanged": true,
+            "reportSha256": "c3f2ad7db5e141f81af31826c8ef0872aac8e2accbce33e4aea2271afef77353",
+            "originalTrxSha256": "71e08885582563c9c23533d1d7328042c41e35e14e3b3f79b27a5b8af6af3a45",
+            "report": "artifacts/qualification/managed-ann-r1-development-20261004/focused03-originals/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+            "recallCellsQualified": 0,
+            "allAcceptanceClosed": false
+          },
+          {
+            "attempt": 4,
+            "suite": "unit",
+            "filter": "/*/*/PackedAnn*/*",
+            "caller": "Aspire_AppHost",
+            "exitCode": 2,
+            "passed": 17,
+            "errors": 2,
+            "total": 19,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0,
+            "durationMs": 35134.857,
+            "failurePhase": "DotProduct_10000_record_build_reciprocal_work_before_DotProduct_recall_or_deadline_assertions",
+            "failureCode": "BudgetExceeded",
+            "configuredBuildWorkLimit": 1000000000,
+            "reportSha256": "813629c594f2ddc7eaa20ad8fe75436b37dff13a1332756b193d4042de0836ac",
+            "originalTrxSha256": "63058227f28d235f4b1933c25503a99ef8e95d69c53dff6c2923ea5515511568",
+            "report": "artifacts/qualification/managed-ann-r1-development-20261004/focused04-originals/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+            "actualObservedCells": [
+              {
+                "metric": 0,
+                "cell": "all",
+                "recordCount": 10000,
+                "queryCount": 100,
+                "dimension": 16,
+                "topK": 10,
+                "seed": 5423839510519694385,
+                "recall": 1,
+                "modes": [
+                  "Approximate"
+                ],
+                "workUnits": 7937320,
+                "distanceEvaluations": 174346,
+                "edgeVisits": 339826,
+                "settings": {
+                  "Connections": 16,
+                  "EfConstruction": 128,
+                  "EfSearch": 128,
+                  "MaxLevel": 16,
+                  "ExactThreshold": 256,
+                  "MaxRecords": 5000000,
+                  "MaxIndexBytes": 268435456,
+                  "MaxScratchBytes": 8388608,
+                  "Seed": 5423839510519694385
+                }
+              },
+              {
+                "metric": 0,
+                "cell": "10-percent",
+                "recordCount": 10000,
+                "queryCount": 100,
+                "dimension": 16,
+                "topK": 10,
+                "seed": 5423839510519694385,
+                "recall": 0.998,
+                "modes": [
+                  "Approximate"
+                ],
+                "workUnits": 9363437,
+                "distanceEvaluations": 211847,
+                "edgeVisits": 432503,
+                "settings": {
+                  "Connections": 16,
+                  "EfConstruction": 128,
+                  "EfSearch": 128,
+                  "MaxLevel": 16,
+                  "ExactThreshold": 256,
+                  "MaxRecords": 5000000,
+                  "MaxIndexBytes": 268435456,
+                  "MaxScratchBytes": 8388608,
+                  "Seed": 5423839510519694385
+                }
+              },
+              {
+                "metric": 0,
+                "cell": "1-percent",
+                "recordCount": 10000,
+                "queryCount": 100,
+                "dimension": 16,
+                "topK": 10,
+                "seed": 5423839510519694385,
+                "recall": 1,
+                "modes": [
+                  "ExactSmallSet"
+                ],
+                "workUnits": 1510592,
+                "distanceEvaluations": 10000,
+                "edgeVisits": 0,
+                "settings": {
+                  "Connections": 16,
+                  "EfConstruction": 128,
+                  "EfSearch": 128,
+                  "MaxLevel": 16,
+                  "ExactThreshold": 256,
+                  "MaxRecords": 5000000,
+                  "MaxIndexBytes": 268435456,
+                  "MaxScratchBytes": 8388608,
+                  "Seed": 5423839510519694385
+                }
+              },
+              {
+                "metric": 0,
+                "cell": "0.1-percent",
+                "recordCount": 10000,
+                "queryCount": 100,
+                "dimension": 16,
+                "topK": 10,
+                "seed": 5423839510519694385,
+                "recall": 1,
+                "modes": [
+                  "ExactSmallSet"
+                ],
+                "workUnits": 1276613,
+                "distanceEvaluations": 1000,
+                "edgeVisits": 0,
+                "settings": {
+                  "Connections": 16,
+                  "EfConstruction": 128,
+                  "EfSearch": 128,
+                  "MaxLevel": 16,
+                  "ExactThreshold": 256,
+                  "MaxRecords": 5000000,
+                  "MaxIndexBytes": 268435456,
+                  "MaxScratchBytes": 8388608,
+                  "Seed": 5423839510519694385
+                }
+              },
+              {
+                "metric": 0,
+                "cell": "geometry-correlated-10-percent",
+                "recordCount": 10000,
+                "queryCount": 100,
+                "dimension": 16,
+                "topK": 10,
+                "seed": 5423839510519694385,
+                "recall": 1,
+                "modes": [
+                  "Approximate"
+                ],
+                "workUnits": 7937320,
+                "distanceEvaluations": 174346,
+                "edgeVisits": 339826,
+                "settings": {
+                  "Connections": 16,
+                  "EfConstruction": 128,
+                  "EfSearch": 128,
+                  "MaxLevel": 16,
+                  "ExactThreshold": 256,
+                  "MaxRecords": 5000000,
+                  "MaxIndexBytes": 268435456,
+                  "MaxScratchBytes": 8388608,
+                  "Seed": 5423839510519694385
+                }
+              },
+              {
+                "metric": 1,
+                "cell": "all",
+                "recordCount": 10000,
+                "queryCount": 100,
+                "dimension": 16,
+                "topK": 10,
+                "seed": 5423839510519694385,
+                "recall": 1,
+                "modes": [
+                  "Approximate"
+                ],
+                "workUnits": 8062724,
+                "distanceEvaluations": 180037,
+                "edgeVisits": 346399,
+                "settings": {
+                  "Connections": 16,
+                  "EfConstruction": 128,
+                  "EfSearch": 128,
+                  "MaxLevel": 16,
+                  "ExactThreshold": 256,
+                  "MaxRecords": 5000000,
+                  "MaxIndexBytes": 268435456,
+                  "MaxScratchBytes": 8388608,
+                  "Seed": 5423839510519694385
+                }
+              },
+              {
+                "metric": 1,
+                "cell": "10-percent",
+                "recordCount": 10000,
+                "queryCount": 100,
+                "dimension": 16,
+                "topK": 10,
+                "seed": 5423839510519694385,
+                "recall": 1,
+                "modes": [
+                  "Approximate"
+                ],
+                "workUnits": 8987200,
+                "distanceEvaluations": 204309,
+                "edgeVisits": 406876,
+                "settings": {
+                  "Connections": 16,
+                  "EfConstruction": 128,
+                  "EfSearch": 128,
+                  "MaxLevel": 16,
+                  "ExactThreshold": 256,
+                  "MaxRecords": 5000000,
+                  "MaxIndexBytes": 268435456,
+                  "MaxScratchBytes": 8388608,
+                  "Seed": 5423839510519694385
+                }
+              },
+              {
+                "metric": 1,
+                "cell": "1-percent",
+                "recordCount": 10000,
+                "queryCount": 100,
+                "dimension": 16,
+                "topK": 10,
+                "seed": 5423839510519694385,
+                "recall": 1,
+                "modes": [
+                  "ExactSmallSet"
+                ],
+                "workUnits": 1510608,
+                "distanceEvaluations": 10000,
+                "edgeVisits": 0,
+                "settings": {
+                  "Connections": 16,
+                  "EfConstruction": 128,
+                  "EfSearch": 128,
+                  "MaxLevel": 16,
+                  "ExactThreshold": 256,
+                  "MaxRecords": 5000000,
+                  "MaxIndexBytes": 268435456,
+                  "MaxScratchBytes": 8388608,
+                  "Seed": 5423839510519694385
+                }
+              },
+              {
+                "metric": 1,
+                "cell": "0.1-percent",
+                "recordCount": 10000,
+                "queryCount": 100,
+                "dimension": 16,
+                "topK": 10,
+                "seed": 5423839510519694385,
+                "recall": 1,
+                "modes": [
+                  "ExactSmallSet"
+                ],
+                "workUnits": 1276582,
+                "distanceEvaluations": 1000,
+                "edgeVisits": 0,
+                "settings": {
+                  "Connections": 16,
+                  "EfConstruction": 128,
+                  "EfSearch": 128,
+                  "MaxLevel": 16,
+                  "ExactThreshold": 256,
+                  "MaxRecords": 5000000,
+                  "MaxIndexBytes": 268435456,
+                  "MaxScratchBytes": 8388608,
+                  "Seed": 5423839510519694385
+                }
+              },
+              {
+                "metric": 1,
+                "cell": "geometry-correlated-10-percent",
+                "recordCount": 10000,
+                "queryCount": 100,
+                "dimension": 16,
+                "topK": 10,
+                "seed": 5423839510519694385,
+                "recall": 1,
+                "modes": [
+                  "Approximate"
+                ],
+                "workUnits": 8062724,
+                "distanceEvaluations": 180037,
+                "edgeVisits": 346399,
+                "settings": {
+                  "Connections": 16,
+                  "EfConstruction": 128,
+                  "EfSearch": 128,
+                  "MaxLevel": 16,
+                  "ExactThreshold": 256,
+                  "MaxRecords": 5000000,
+                  "MaxIndexBytes": 268435456,
+                  "MaxScratchBytes": 8388608,
+                  "Seed": 5423839510519694385
+                }
+              }
+            ],
+            "recallCellsObservedPassing": 10,
+            "allAcceptanceClosed": false,
+            "fullSourceCohortUnchanged": false,
+            "changedSourcePaths": [
+              "docs/ADR/ADR-080-benchmark-failure-isolation.md",
+              "docs/Features/BenchmarkComparisons.md",
+              "docs/Features/BenchmarkComparisons/SiteMetadata.md",
+              "docs/implementation/status.json",
+              "site/Features/BenchmarkComparisons/index.html",
+              "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteIsolatedBuildTests.cs",
+              "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteMetadataBinaryAssertions.cs",
+              "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/SiteMetadataTokens.cs"
+            ],
+            "runtimeCohortUnchanged": true,
+            "annSourceCohortUnchanged": true,
+            "annChangedPaths": [],
+            "qualification": "local_development_only_full_source_guard_failed_foreign_docs"
+          },
+          {
+            "attempt": 5,
+            "caller": "Aspire_AppHost",
+            "suite": "unit",
+            "filter": "/*/*/PackedAnn*/*",
+            "exitCode": 2,
+            "summary": {
+              "total": 19,
+              "passed": 18,
+              "failed": 1,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "durationMs": 52988.561,
+            "recallCellsObservedPassing": 15,
+            "minimumRecall": 0.988,
+            "requiredRecall": 0.95,
+            "wholeSourceCohortUnchanged": false,
+            "annSourceCohortUnchanged": true,
+            "runtimeCohortUnchanged": true,
+            "changedSourcePaths": [
+              "docs/implementation/benchmark-json-ci-development-2026-10-04.json"
+            ],
+            "originalManifest": "artifacts/qualification/managed-ann-r1-development-20261004/focused05-originals/manifest.json",
+            "remainingFailure": "One optimized real search completed before the actual one-second deadline; regression must charge repeated searches to one shared request budget without slowing product code.",
+            "allAcceptanceClosed": false
+          },
+          {
+            "attempt": 6,
+            "caller": "Aspire_AppHost",
+            "suite": "unit",
+            "filter": "/*/*/PackedAnn*/*",
+            "exitCode": 0,
+            "summary": {
+              "total": 19,
+              "passed": 19,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "durationMs": 77139.071,
+            "wholeSourceCohortUnchanged": true,
+            "runtimeCohortUnchanged": true,
+            "recallCellsObservedPassing": 15,
+            "minimumRecall": 0.988,
+            "requiredRecall": 0.95,
+            "originalManifest": "artifacts/qualification/managed-ann-r1-development-20261004/focused06-originals/manifest.json",
+            "localFocusedDevelopmentPassed": true,
+            "allAcceptanceClosed": false
+          },
+          {
+            "attempt": 7,
+            "caller": "Aspire_AppHost",
+            "suite": "unit-scalar",
+            "filter": "/*/*/PackedAnn*/*",
+            "exitCode": 0,
+            "summary": {
+              "total": 19,
+              "passed": 19,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "durationMs": 46604.578,
+            "wholeSourceCohortUnchanged": true,
+            "runtimeCohortUnchanged": true,
+            "recallCellsObservedPassing": 15,
+            "minimumRecall": 0.988,
+            "requiredRecall": 0.95,
+            "originalManifest": "artifacts/qualification/managed-ann-r1-development-20261004/scalar07-originals/manifest.json",
+            "localFocusedDevelopmentPassed": true,
+            "allAcceptanceClosed": false
+          }
+        ],
+        "rootInsertionWorkContract": "docs/Features/Search/ManagedAnn.md#accepted-insertion-work-correction-2026-10-04",
+        "rootWorstCacheContract": "docs/Features/Search/ManagedAnn.md#accepted-worst-slot-cache-refinement-2026-10-04",
+        "rootDualHeapContract": "docs/Features/Search/ManagedAnn.md#accepted-bounded-dual-heap-refinement-2026-10-04",
+        "rootDotProductSelectionContract": "docs/Features/Search/ManagedAnn.md#accepted-dotproduct-neighbor-selection-refinement-2026-10-04",
+        "rootRealDeadlineContract": "docs/Features/Search/ManagedAnn.md#accepted-real-shared-request-deadline-regression-2026-10-04",
+        "localFocusedR1NormalAndScalarPassed": true,
+        "currentDependencyStaticDevelopment": {
+          "managedCodeCommunication": "10.2.7",
+          "managedCodeOrleansGraph": "10.0.6",
+          "restoreExitCode": 0,
+          "fullReleaseBuildExitCode": 0,
+          "fullReleaseBuildSeconds": 108.67,
+          "warnings": 0,
+          "errors": 0,
+          "fullFormatterExitCode": 0,
+          "originalManifest": "artifacts/qualification/native-dependencies-static17-development-20261004/originals/manifest.json",
+          "runtimeTestResult": false,
+          "fullSourceInventoryCapturedBeforeBuild": false,
+          "exactDeliveredSourceQualification": false
+        }
+      },
+      {
+        "id": "TASK-NODE-EPOCH-COLD-SAMPLE-CONFLICT-ORACLE",
+        "owner": "root",
+        "model": "gpt-6",
+        "effort": "high",
+        "requirements": [
+          "REQ-STORAGE-027"
+        ],
+        "acceptance": [
+          "AC-EPOCH-010",
+          "AC-EPOCH-011"
+        ],
+        "planTasks": [
+          "KL-043"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-077-offline-native-data-epoch.md",
+          "docs/Features/StorageRecovery.md"
+        ],
+        "permissions": "exact_existing_cold_fixture_SDK_and_official_MCP_sample_conflict_expected_codes_only_no_production_input_tolerance_retry_or_other_assertion_changes",
+        "fileOwnership": [
+          "tests/KeyLoad.IntegrationTests/Features/StorageRecovery/NodeEpochRf3CurrentWorkload.cs"
+        ],
+        "dependencies": [
+          "TASK-NODE-EPOCH-COLD-FIXTURE"
+        ],
+        "startCondition": "original_0d78_RF3_87of88_report_and_actual_canonical_sample_Conflict_contract_verified",
+        "artifacts": [
+          "original_0d78_RF3_report_and_image_proof",
+          "exact_sdk_mcp_Conflict_expected_codes"
+        ],
+        "verification": [
+          "root_strict_solution_build_formatter_governance",
+          "actual_renewed_delivered_source_Docker_Aspire_RF3_original_reports"
+        ],
+        "state": "canonical_sample_Conflict_oracle_source_corrected_runtime_pending",
+        "joinCondition": "every_original_no_mutation_retention_revocation_current_write_follower_recovery_snapshot_and_prior_source_integrity_assertion_executes_no_partial_acceptance",
+        "deliveredEvidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
+      },
+      {
+        "id": "TASK-NEXT-JOBS-ACCEPTANCE-ASSESSMENT",
+        "owner": "lifecycle_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "planTasks": [
+          "KL-100"
+        ],
+        "requirements": "discover_actual_existing_stable_REQ_AC_and_ADR_inventory_before_root_implementation_contract",
+        "permissions": "read_only_actual_repo_owning_sources_no_write_runtime_build_test_formatter_package_network_or_commit",
+        "fileOwnership": [],
+        "dependencies": [],
+        "startCondition": "ANN_R2_read_only_audit_delivered_and_worker_slot_free_root_authorizes_independent_KL100_discovery",
+        "artifacts": [
+          "actual delayed_jobs_recurring_occurrences_saga_specification_and_code_inventory",
+          "missing_acceptance_and_durable_replay_authorization_dispatch_recovery_contracts",
+          "proposed_disjoint_slices_and_meaningful_unit_process_RF3_SQL_SDK_MCP_gates"
+        ],
+        "verification": [
+          "actual_source_and_rule_review_only_no_qualification_claim"
+        ],
+        "state": "complete_read_only_existing_MSG_acceptance_clock_transfer_dependencies_and_missing_recurring_saga_contracts_audited_no_implementation_approved",
+        "joinCondition": "root_freezes_actual_REQ_AC_ADR_contracts_before_any_jobs_implementation_no_architecture_invention",
+        "findings": "One-shot NotBefore/ExpiresAt, bounded Receive-driven due sweep, retry leases and logged nondecreasing EvaluatedAt exist. No Schedule/Recurring/Saga/OccurrenceId/coordinator/model/API or accepted standalone job contract. Root must freeze recurrence/timezone/misfire/identity/CAS/authorization/clock-gate/cancel-timeout/saga/cross-partition semantics under ADR028 and KL090/092/094 before writing."
+      },
+      {
+        "id": "TASK-NEXT-CLOCK-AUTHORITY-ASSESSMENT",
+        "owner": "lifecycle_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "planTasks": [
+          "KL-092",
+          "KL-100"
+        ],
+        "requirements": [
+          "REQ-MSG-004",
+          "REQ-MSG-006"
+        ],
+        "acceptance": [
+          "AC-MSG-004",
+          "AC-MSG-006"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-028-persisted-scheduling-time.md",
+          "docs/Features/Messaging.md"
+        ],
+        "permissions": "read_only_actual_clock_replication_readiness_peer_and_Orleans_owning_sources_no_implementation_runtime_write_package_network_or_commit",
+        "fileOwnership": [],
+        "dependencies": [
+          "TASK-NEXT-JOBS-ACCEPTANCE-ASSESSMENT"
+        ],
+        "startCondition": "KL100_RO_audit_complete_clock_sanity_predecessor_missing_root_requests_exact_existing_join_inventory",
+        "artifacts": [
+          "actual evaluated_time_provider_leader_admission_peer_auth_status_readiness_and_logged_clock_source_joins",
+          "missing trusted_clock_skew_uncertainty_owner_term_fence_contract_decisions",
+          "concrete disjoint source and real process_RF3 acceptance seams"
+        ],
+        "verification": [
+          "actual_source_review_only_no_architecture_or_qualification_claim"
+        ],
+        "state": "complete_read_only_actual_leader_timestamp_and_term_path_verified_clock_health_gate_peer_uncertainty_and_scheduler_readiness_missing_no_runtime_or_implementation_claim",
+        "joinCondition": "root_freezes_exact_ClockAuthority_ADR_and_tests_before_any_clock_scheduler_implementation",
+        "observedClockAuthority": {
+          "loggedEvaluation": "leader_gate_GetUtcNow_overwrite_before_log_append_then_quorum_materialization",
+          "persistedClock": "system_clock_non_decreasing_UTC_watermark_only",
+          "peerEnvelopeFreshnessSeconds": 30,
+          "nativeTermFencingExists": true,
+          "clockHealthGateImplemented": false,
+          "schedulerReadinessImplemented": false,
+          "runtimeExecuted": false,
+          "rootContractApproved": false
+        }
+      },
+      {
+        "id": "TASK-ANN-R2-NATIVE-SNAPSHOT-SEAM-ASSESSMENT",
+        "owner": "lifecycle_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "planTasks": [
+          "KL-031",
+          "KL-039",
+          "KL-097"
+        ],
+        "requirements": [
+          "REQ-ANN-007",
+          "REQ-ANN-008"
+        ],
+        "acceptance": [
+          "AC-ANN-007",
+          "AC-ANN-008"
+        ],
+        "contracts": [
+          "docs/ADR/ADR-019-managed-ann.md",
+          "docs/Features/Search/ManagedAnn.md"
+        ],
+        "permissions": "read_only_actual_storage_snapshot_pin_vector_authorization_generation_native_API_sources_and_available_dependency_source_no_writes_runtime_or_architecture_invention",
+        "fileOwnership": [],
+        "dependencies": [
+          "TASK-ANN-R2-LIFECYCLE-ASSESSMENT"
+        ],
+        "startCondition": "root_requires_exact_existing_bounded_native_snapshot_and_owned_corpus_capture_seams_before_R2_contract",
+        "artifacts": [
+          "exact_actual_read_snapshot_creation_pin_gate_and_disposal_methods_and_limits",
+          "whether_vector_and_persisted_policy_source_plus_outbox_position_can_be_captured_same_cut_then_iterated_outside_apply_gate",
+          "missing_private_native_snapshot_collector_join_points_and_same_revision_update_invalidations_no_invented_API"
+        ],
+        "verification": [
+          "bounded_actual_source_read_only_no_runtime_qualification"
+        ],
+        "state": "complete_read_only_same_cut_owned_capture_exists_no_live_native_snapshot_iterator_or_atomic_outbox_pin_join_no_runtime",
+        "joinCondition": "root_freezes_actual_supported_R2_source_cut_and_resource_lifetime_contract_before_write_capable_implementation",
+        "actualSourceFacts": {
+          "sameCut": "IAtomicStore.Read_callback_with_gate_Position_Identity_owned_bounded_vector_and_policy_copies",
+          "nativeSnapshot": "full_tree_durable_checkpoint_under_gate_not_off_gate_iterator",
+          "nativePinnedIteratorExists": false,
+          "defaultMaxScanRecords": 10000,
+          "defaultMaxQueryReadBytes": 67108864,
+          "atomicSeedRetentionPinImplemented": false,
+          "documentRevisionSufficientFreshness": false,
+          "R2ContractApproved": false,
+          "runtimeExecuted": false
+        },
+        "replicatedPinAssessment": {
+          "state": "source_only_root_lifecycle_contract_pending",
+          "facts": [
+            "existing_consumers_are_persisted_admin_authorized_RF3_commands_not_local_pins",
+            "pin_before_seed_can_protect_tail_but_seed_tail_requires_ordered_no_effect_checkpoint_reconciliation",
+            "each_node_local_projection_requires_independent_replicated_checkpoint_or_explicit_minimum_progress",
+            "one_shared_pin_can_allow_purge_past_slower_replica",
+            "released_consumer_rows_remain_and_count_against_64_limit_no_expiry_or_reuse",
+            "cluster_principal_is_Membership_only_no_invented_trusted_role_or_internal_bypass"
+          ],
+          "requiredRootContracts": [
+            "maintenance_authority",
+            "bounded_per_node_pin_identity_and_cleanup",
+            "atomic_source_and_tail_cut",
+            "replay_checkpoint_publish_order",
+            "node_incarnation_generation_failover_and_gap_rebuild"
+          ]
+        }
+      },
+      {
+        "id": "TASK-OWNER-CQRS-NATIVE-STREAM-ASSESSMENT",
+        "owner": "root",
+        "requirements": [
+          "owner_2026_10_04_Orleans_and_Communication_native_async_result_long_operation_rule"
+        ],
+        "state": "source_assessment_and_C0_REQ_AC_ADR_accepted_product_contracts_pending",
+        "contracts": [
+          "AGENTS.md",
+          "docs/Features/ClusterRouting/NativeCqrs.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md",
+          "docs/Features/Search/ManagedAnn.md"
+        ],
+        "sourceFacts": [
+          "ManagedCode.Communication_10_2_6_ICommand_and_CqrsStreamChunk_native_types_exist_no_IQuery_dispatcher",
+          "CqrsStream_Create_bounded_capacity_1_and_cooperative_cancellation_Orleans_chunk_serializer",
+          "KeyLoad_IRequestGrain_ExecuteAsync_has_one_implementer_and_OrleansNode_caller",
+          "existing_signed_request_persisted_authorization_read_barrier_quorum_and_native_reply_path_must_remain_authoritative",
+          "KeyLoad_current_Product_contains_no_IAsyncEnumerable_CQRS_stream_or_long_operation_handles",
+          "native_SSE_helpers_exist_but_HTTP_frame_error_body_bounds_need_owning_repository_work_before_public_admission",
+          "Communication_normalizer_permissive_malformed_post_terminal_semantics_must_not_be_claimed_as_exactly_one_terminal_on_arbitrary_input"
+        ],
+        "nextOrderedStages": [
+          "root_freeze_typed_internal_request_grain_native_CQRS_stream_contract_and_REQ_AC_ADR",
+          "single_canonical_request_grain_stream_preserving_normal_bounded_response_and_authority",
+          "real_Orleans_RF3_cancellation_error_serializer_and_SDK_MCP_parity",
+          "separate_public_result_progress_durable_long_operation_contract_and_dependency_bounds_repair_if_required"
+        ],
+        "verification": [
+          "read_only_actual_KeyLoad_and_Communication_source_audit_no_runtime_proof"
+        ],
+        "rpcAdmissionAssessment": {
+          "state": "source_only_pre_write_ADR_join_pending",
+          "currentRequestRpc": "keyload.request.v1_interface1_Task_reply",
+          "nativeEnvelopePurpose": "data_epoch6_separate_from_RPC_contract",
+          "applicationRpcCohortCheckExists": false,
+          "discoveryFields": [
+            "voterId",
+            "clusterId",
+            "incarnation",
+            "siloAddress",
+            "transportReady"
+          ],
+          "requiredRootJoins": [
+            "new_request_alias_interface_method_shape",
+            "OrleansGraph_async_execution_scope",
+            "explicit_signed_discovery_and_readiness_RPC_cohort_admission",
+            "cold_upgrade_vs_mixed_runtime_contract",
+            "bounded_safe_chunk_and_final_failure_cancellation_protocol"
+          ]
+        },
+        "nativeEnumerationGraphAssessment": {
+          "sourceOnly": true,
+          "graphVersion": "10.0.6",
+          "orleansVersion": "10.3.1",
+          "facts": [
+            "Graph_filters_scope_to_context_Invoke_without_explicit_MoveNext_or_Dispose_hooks",
+            "Orleans_retains_pull_batched_enumerator_with_linked_cancellation_and_terminal_cleanup",
+            "Communication_real_TestCluster_proves_chunks_and_scheduler_but_not_Graph_context_cancel_or_early_dispose"
+          ],
+          "requiredProof": [
+            "real_Graph_nested_leaf_call_after_yield",
+            "actual_cancellation_and_early_Dispose_cleanup",
+            "mid_stream_fault_terminal_semantics",
+            "concurrent_stream_CallHistory_isolation"
+          ],
+          "runtimeQualified": false
+        },
+        "transportSourceAssessment": {
+          "sourceOnly": true,
+          "officialMcpVersion": "2.2.0",
+          "progressJoin": "McpClient.CallToolAsync_IProgress_and_request_Params.ProgressToken_Server.NotifyProgressAsync",
+          "existingOutgoingMessageCap": true,
+          "existingProgressCountCap": false,
+          "liveAbortAndOperationCleanupQualified": false,
+          "communicationSseBoundsMissing": [
+            "pre_parser_frame_byte_limit",
+            "aggregate_stream_bound",
+            "non_success_body_byte_limit",
+            "safe_invalid_body_fallback"
+          ],
+          "productTransportImplemented": false
+        },
+        "transportBoundsContract": "docs/Features/ClientApi/CqrsTransportBounds.md"
+      },
+      {
+        "requirements": [
+          "REQ-NCQRS-001",
+          "REQ-NCQRS-002",
+          "REQ-NCQRS-003"
+        ],
+        "acceptance": [
+          "AC-NCQRS-001",
+          "AC-NCQRS-002",
+          "AC-NCQRS-003"
+        ],
+        "contracts": [
+          "docs/Features/ClusterRouting/NativeCqrs.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "model": "gpt-6",
+        "effort": "high",
+        "joinCondition": "actual_native_runtime_source_review_full_strict_gates_and_original_Aspire_reports_no_product_RF3_claim",
+        "id": "TASK-NCQRS-C0-CONTRACT",
+        "owner": "root",
+        "state": "accepted_C0_contract_complete_product_contracts_pending",
+        "dependencies": [
+          "TASK-OWNER-CQRS-NATIVE-STREAM-ASSESSMENT"
+        ],
+        "permissions": "root_only_shared_REQ_AC_ADR_and_pin_contract",
+        "fileOwnership": [
+          "docs/Features/ClusterRouting/NativeCqrs.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "startCondition": "root_C0_REQ_AC_ADR_accepted_and_explicit_write_release_outside_active_runtime_cohort",
+        "artifacts": [
+          "genuine_native_Graph_Communication_Orleans_observation_not_database_RF3_qualification"
+        ],
+        "verification": [
+          "strict_full_Release_build_formatter_governance",
+          "actual_focused_C0_and_full_normal_scalar_TUnit_via_Aspire",
+          "delivered_source_Linux_original_artifacts"
+        ]
+      },
+      {
+        "requirements": [
+          "REQ-NCQRS-001",
+          "REQ-NCQRS-002",
+          "REQ-NCQRS-003"
+        ],
+        "acceptance": [
+          "AC-NCQRS-001",
+          "AC-NCQRS-002",
+          "AC-NCQRS-003"
+        ],
+        "contracts": [
+          "docs/Features/ClusterRouting/NativeCqrs.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "joinCondition": "actual_native_runtime_source_review_full_strict_gates_and_original_Aspire_reports_no_product_RF3_claim",
+        "id": "TASK-NCQRS-C0-RUNTIME-ORACLES",
+        "owner": "cluster_wave",
+        "state": "nine_native_test_files_compile_actual_six_failures_unchanged_oracles_wait_for_published_owner_Graph_repair",
+        "dependencies": [
+          "TASK-NCQRS-C0-CONTRACT"
+        ],
+        "permissions": "new_owned_native_runtime_test_files_only_no_build_test_format_git_or_shared_changes",
+        "fileOwnership": [
+          "tests/KeyLoad.UnitTests/Features/ClusterRouting/NativeCqrs*.cs"
+        ],
+        "startCondition": "root_C0_REQ_AC_ADR_accepted_test_only_pin_reference_added_no_active_runtime_cohort",
+        "artifacts": [
+          "genuine_native_Graph_Communication_Orleans_observation_not_database_RF3_qualification"
+        ],
+        "verification": [
+          "strict_full_Release_build_formatter_governance",
+          "actual_focused_C0_and_full_normal_scalar_TUnit_via_Aspire",
+          "delivered_source_Linux_original_artifacts"
+        ],
+        "sourceReviewCorrections": [
+          "native_denial_not_wide_InvalidOperationException_mask",
+          "originating_Graph_edge_from_actual_CallHistory_not_leaf_current_caller",
+          "actual_native_grain_ID_and_primary_key_identity_oracles"
+        ],
+        "rootAdditionalReview": [
+          "actual_TUnit_IAsyncInitializer_native_deploy_30s_token_and_failed_start_cleanup",
+          "native_stop_30s_token_and_actual_dispose_await",
+          "native_identity_oracle_method_split_without_assertion_loss"
+        ]
+      },
+      {
+        "requirements": [
+          "REQ-NCQRS-001",
+          "REQ-NCQRS-002",
+          "REQ-NCQRS-003"
+        ],
+        "acceptance": [
+          "AC-NCQRS-001",
+          "AC-NCQRS-002",
+          "AC-NCQRS-003"
+        ],
+        "contracts": [
+          "docs/Features/ClusterRouting/NativeCqrs.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "model": "gpt-6",
+        "effort": "high",
+        "joinCondition": "actual_native_runtime_source_review_full_strict_gates_and_original_Aspire_reports_no_product_RF3_claim",
+        "id": "TASK-NCQRS-C0-JOIN",
+        "owner": "root",
+        "state": "full_build14_pass_C0_actual_six_failures_native_Graph_StartEnumeration_bypass_owner_repair_required",
+        "dependencies": [
+          "TASK-NCQRS-C0-RUNTIME-ORACLES",
+          "TASK-NCQRS-GRAPH-OWNER-ENUMERATION"
+        ],
+        "permissions": "exclusive_shared_pin_project_reference_source_review_and_all_runtime_evidence_Git",
+        "fileOwnership": [
+          "Directory.Packages.props",
+          "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj",
+          "shared_docs_and_evidence"
+        ],
+        "startCondition": "root_C0_REQ_AC_ADR_accepted_and_explicit_write_release_outside_active_runtime_cohort",
+        "artifacts": [
+          "genuine_native_Graph_Communication_Orleans_observation_not_database_RF3_qualification"
+        ],
+        "verification": [
+          "strict_full_Release_build_formatter_governance",
+          "actual_focused_C0_and_full_normal_scalar_TUnit_via_Aspire",
+          "delivered_source_Linux_original_artifacts"
+        ],
+        "restoreObservation": {
+          "command": "dotnet restore KeyLoad.slnx --disable-parallel",
+          "exitCode": 0,
+          "projectsRestored": 27,
+          "packageLockFilesGenerated": false,
+          "runtimeProof": false
+        },
+        "localBuildObservations": [
+          {
+            "attempt": 11,
+            "exitCode": 1,
+            "durationSeconds": 235.49,
+            "warnings": 0,
+            "errors": 55,
+            "C0Errors": 7,
+            "SiteErrors": 48,
+            "originalManifest": "artifacts/qualification/managed-ann-r1-development-20261004/build11-originals/manifest.json",
+            "runtimeTestResult": false
+          },
+          {
+            "attempt": 12,
+            "exitCode": 1,
+            "durationSeconds": 209.98,
+            "warnings": 0,
+            "errors": 94,
+            "C0Errors": 40,
+            "SiteErrors": 54,
+            "originalManifest": "artifacts/qualification/managed-ann-r1-development-20261004/build12-originals/manifest.json",
+            "runtimeTestResult": false
+          },
+          {
+            "attempt": 13,
+            "exitCode": 1,
+            "durationSeconds": 73.42,
+            "warnings": 0,
+            "errors": 20,
+            "C0Errors": 20,
+            "SiteErrors": 0,
+            "originalManifest": "artifacts/qualification/managed-ann-r1-development-20261004/build13-originals/manifest.json",
+            "runtimeTestResult": false
+          },
+          {
+            "attempt": 14,
+            "passed": true,
+            "exitCode": 0,
+            "warnings": 0,
+            "errors": 0,
+            "elapsedSeconds": 152.1,
+            "originalManifest": "artifacts/qualification/managed-ann-r1-development-20261004/build14-originals/manifest.json",
+            "runtimeTestResult": false
+          }
+        ],
+        "rootAdditionalReview": [
+          "106_assertions_converted_to_existing_native_TUnit_without_new_package",
+          "consumer_and_actual_producer_settlement_joined_on_all_lifetime_exits",
+          "body_and_cleanup_failures_preserved",
+          "failed_native_deploy_and_cleanup_errors_aggregated"
+        ],
+        "localRuntimeObservations": [
+          {
+            "attempt": 1,
+            "caller": "Aspire_AppHost",
+            "suite": "unit",
+            "filter": "/*/*/NativeCqrs*/*",
+            "exitCode": 2,
+            "summary": {
+              "total": 6,
+              "passed": 0,
+              "failed": 6,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "durationMs": 23222.334,
+            "sourceStable": true,
+            "wholeRuntimeInventoryStable": false,
+            "compiledRuntimeStable": true,
+            "originalManifest": "artifacts/qualification/native-cqrs-c0-development-20261004/focused01-originals/manifest.json",
+            "allAcceptanceClosed": false
+          }
+        ]
+      },
+      {
+        "id": "TASK-NCQRS-HTTP-OWNER-BOUNDS",
+        "owner": "lifecycle_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "state": "10_2_7_canonical_Linux_release_all_1345_pass_all_four_NuGet_packages_source_and_repository_signatures_verified_consumer_gates_pending",
+        "requirements": [
+          "REQ-CHB-001",
+          "REQ-CHB-002",
+          "REQ-CHB-003",
+          "REQ-CHB-004",
+          "REQ-CHB-005"
+        ],
+        "acceptance": [
+          "AC-CHB-001",
+          "AC-CHB-002",
+          "AC-CHB-003",
+          "AC-CHB-004",
+          "AC-CHB-005"
+        ],
+        "contracts": [
+          "docs/Features/ClientApi/CqrsTransportBounds.md",
+          "docs/ADR/ADR-083-cqrs-http-transport-bounds.md"
+        ],
+        "dependencies": [
+          "TASK-OWNER-CQRS-NATIVE-STREAM-ASSESSMENT"
+        ],
+        "fileOwnership": [
+          "private_tmp_reviewable_patch_for_Communication_Cqrs_client_helpers_options_constants_and_CQRS_tests_README"
+        ],
+        "permissions": "staged_private_tmp_patch_only_no_owning_checkout_edits_build_version_Git_or_KeyLoad_shared_changes",
+        "startCondition": "root_CHB_contract_frozen_and_explicit_worker_write_release",
+        "joinCondition": "root_scoped_owning_gates_canonical_release_all_four_published_NuGet_packages_verified_then_three_KeyLoad_pins_and_Aspire_consumer_gates",
+        "runtimeQualified": false,
+        "publicationQualified": true,
+        "publicLimitTitles": [
+          "cqrs_stream_frame_limit_exceeded",
+          "cqrs_stream_failure_body_limit_exceeded",
+          "cqrs_stream_total_limit_exceeded"
+        ],
+        "rootReviewFindings": [
+          "reader_WaitAsync_timeout_detached_owned_work_requires_real_cancellation_and_join",
+          "early_MoveNext_and_Dispose_need_actual_bounds_and_all_exit_cleanup",
+          "one_byte_TestServer_writes_may_coalesce_split_CRLF_requires_observed_phase_boundary"
+        ],
+        "localNativeHttpBaseline": {
+          "ownerHead": "112f6ac47d5b54c40939ec7192cb20b6b54f3e97",
+          "completedBenchmarks": 3,
+          "payloadBytes": [
+            128,
+            4096,
+            65536
+          ],
+          "sourceUnchanged": true,
+          "originalManifest": "artifacts/qualification/native-cqrs-http-owning-development-20261004/baseline03-originals/manifest.json",
+          "publicGitHubQualification": false,
+          "latencyConclusive": false,
+          "limitation": "ShortRun broad confidence intervals; local development baseline only",
+          "currentBaselineManifest": "artifacts/qualification/native-cqrs-http-owning-development-20261004/baseline04-originals/manifest.json"
+        },
+        "owningUpstreamRefresh": {
+          "previousHead": "112f6ac47d5b54c40939ec7192cb20b6b54f3e97",
+          "currentHead": "66ab285ea55394757015e8ece6cdded9c422fff0",
+          "method": "clean fast-forward without stash/reset/force",
+          "changes": "four upstream maintenance commits; current-source baseline04 and owning restore complete"
+        },
+        "localOwningFullGate": {
+          "build04": {
+            "exitCode": 0,
+            "warnings": 0,
+            "errors": 0,
+            "elapsedSeconds": 5.44
+          },
+          "tests03": {
+            "total": 1344,
+            "passed": 1344,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "originalManifest": "artifacts/qualification/native-cqrs-http-owning-development-20261004/tests03-originals/manifest.json",
+          "publicGitHubQualification": false
+        },
+        "localNativeHttpAfter01": {
+          "originalManifest": "artifacts/qualification/native-cqrs-http-owning-development-20261004/after01-originals/manifest.json",
+          "completedBenchmarks": 3,
+          "sourceUnchanged": true,
+          "publicGitHubQualification": false,
+          "latencyConclusive": false
+        },
+        "rootAllocationContract": "docs/Features/ClientApi/CqrsTransportBounds.md#accepted-measured-allocation-correction-2026-10-04",
+        "owningRepairBuilds": [
+          {
+            "attempt": 5,
+            "exitCode": 1,
+            "warnings": 0,
+            "errors": 5,
+            "durationSeconds": 17.85,
+            "diagnostics": [
+              "CS0103"
+            ],
+            "reason": "missing_native_CQRS_namespace_import_in_new_regression",
+            "repair": "native_using_added_without_behavior_or_oracle_change"
+          },
+          {
+            "attempt": 6,
+            "exitCode": 0,
+            "warnings": 0,
+            "errors": 0,
+            "durationSeconds": 12.43
+          },
+          {
+            "attempt": 7,
+            "exitCode": 0,
+            "warnings": 0,
+            "errors": 0,
+            "durationSeconds": 7.61
+          },
+          {
+            "attempt": 8,
+            "exitCode": 0,
+            "warnings": 0,
+            "errors": 0,
+            "durationSeconds": 20.77
+          }
+        ],
+        "localOwningFullGateCurrent": {
+          "build07": {
+            "exitCode": 0,
+            "warnings": 0,
+            "errors": 0,
+            "durationSeconds": 7.61
+          },
+          "tests05": {
+            "total": 1345,
+            "passed": 1345,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "durationMs": 15530.504,
+          "originalManifest": "artifacts/qualification/native-cqrs-http-owning-development-20261004/tests05-originals/manifest.json",
+          "publicGitHubQualification": false
+        },
+        "localNativeHttpAfter02": {
+          "originalManifest": "artifacts/qualification/native-cqrs-http-owning-development-20261004/after02-originals/manifest.json",
+          "completedBenchmarks": 3,
+          "sourceUnchanged": true,
+          "ownerFiles": 362,
+          "harnessFiles": 2,
+          "payloadBytes": [
+            128,
+            4096,
+            65536
+          ],
+          "bytesAllocatedPerOperation": [
+            14103,
+            26588,
+            214606
+          ],
+          "baseline04BytesAllocatedPerOperation": [
+            13771,
+            26364,
+            214021
+          ],
+          "after01BytesAllocatedPerOperation": [
+            22289,
+            34826,
+            222874
+          ],
+          "publicGitHubQualification": false,
+          "latencyConclusive": false,
+          "limitation": "ShortRun on the actual local macOS development machine; no GitHub qualification or website claim"
+        },
+        "telemetryOracleCorrection": {
+          "tests04": {
+            "total": 1345,
+            "passed": 1344,
+            "failed": 1,
+            "skipped": 0
+          },
+          "originalManifest": "artifacts/qualification/native-cqrs-http-owning-development-20261004/tests04-originals/manifest.json",
+          "sourceProvenContract": "error.type = exception.GetType().Name; problem.error_code = exception.GetType().FullName; original exception reference and stack assertions retained",
+          "subsequentFullGate": "tests05 all 1345 pass"
+        },
+        "finalVersionedOwningGate": {
+          "version": "10.2.7",
+          "sourceUnchanged": true,
+          "tests06": {
+            "total": 1345,
+            "passed": 1345,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "timedOut": 0,
+            "flaky": 0
+          },
+          "originalManifest": "artifacts/qualification/native-cqrs-http-owning-development-20261004/tests06-originals/manifest.json"
+        },
+        "owningRelease": {
+          "version": "10.2.7",
+          "sourceSha": "6dae0a68960055f01216c186448787000fd0b6e6",
+          "remoteMainVerified": true,
+          "canonicalRepository": "managedcode/Communication",
+          "runId": 37196454147,
+          "url": "https://github.com/managedcode/Communication/actions/runs/37196454147",
+          "status": "completed",
+          "conclusion": "success",
+          "linuxTests": {
+            "total": 1345,
+            "passed": 1345,
+            "failed": 0,
+            "skipped": 0
+          },
+          "originalPackageArtifacts": 4,
+          "allOriginalNuspecCommitsVerified": true,
+          "coreFeedIndexVerified": true,
+          "consumerQualified": false,
+          "allFourFeedPackagesVerified": true,
+          "allOriginalPackageEntriesByteEqual": true,
+          "nativeRepositorySignatureVerificationExitCode": 0,
+          "originalManifest": "artifacts/qualification/native-cqrs-http-owning-development-20261004/publication02-originals/manifest.json"
+        }
+      },
+      {
+        "id": "TASK-NCQRS-GRAPH-OWNER-ENUMERATION",
+        "owner": "query_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "state": "owning_10_0_9_full_95_pass_87_17_line_coverage_scoped_commit_pushed_canonical_publication_and_consumer_gates_pending",
+        "requirements": [
+          "REQ-GSE-001",
+          "REQ-GSE-002",
+          "REQ-GSE-003",
+          "REQ-GSE-004"
+        ],
+        "acceptance": [
+          "AC-GSE-001",
+          "AC-GSE-002",
+          "AC-GSE-003",
+          "AC-GSE-004"
+        ],
+        "contracts": [
+          "docs/Features/ClusterRouting/NativeCqrs.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "dependencies": [
+          "TASK-NCQRS-C0-RUNTIME-ORACLES"
+        ],
+        "fileOwnership": [
+          "private_tmp_scoped_Orleans.Graph_AsyncEnumeration_helpers_filters_context_registration_native_tests_and_docs"
+        ],
+        "permissions": "private_staged_patch_only_no_actual_checkout_build_test_Git_version_or_KeyLoad_changes",
+        "startCondition": "root_REQ_AC_GSE_and_ADR_frozen_before_explicit_write_release",
+        "joinCondition": "root_reviews_applies_owner_formatter_build_full_native_TUnit_patch_release_verified_NuGet_then_unchanged_Aspire_C0_and_full_Linux_gates",
+        "artifacts": [
+          "native_generated_method_metadata_original_policy_tracking",
+          "server_local_delegating_request_and_scoped_native_enumeration",
+          "real_client_silo_origin_lifetime_isolation_and_catalog_regressions"
+        ],
+        "verification": [
+          "owning_canonical_formatter_full_Release_build_full_TUnit",
+          "exact_source_successful_release_and_verified_NuGet",
+          "unchanged_six_KeyLoad_C0_cases_through_Aspire"
+        ],
+        "runtimeQualified": false,
+        "publicationQualified": false,
+        "owningDevelopmentGates": {
+          "baseHead": "fbbf9e83ac200ca746193d48f4cc13fea49f5548",
+          "initialPatchSha256": "f3cb1562961d18a689a724c273a3936d39a27f534e4fc058225d314c696925fa",
+          "scopeFiles": 20,
+          "sourceFiles": 123,
+          "formatter05ExitCode": 0,
+          "build05": {
+            "exitCode": 0,
+            "warnings": 0,
+            "errors": 0,
+            "elapsedSeconds": 6.09
+          },
+          "tests01": {
+            "exitCode": 2,
+            "summary": {
+              "total": 95,
+              "passed": 90,
+              "failed": 5,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "nativeDurationMs": 18467.448,
+            "sourceUnchanged": true,
+            "originalManifest": "artifacts/qualification/native-graph-enumeration-owning-development-20261004/tests01-originals/manifest.json"
+          },
+          "targetPatchVersion": "10.0.9",
+          "targetFeedVersionPreviouslyAbsent": true,
+          "tests02": {
+            "exitCode": 0,
+            "summary": {
+              "total": 95,
+              "passed": 95,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0
+            },
+            "sourceUnchanged": true,
+            "originalManifest": "artifacts/qualification/native-graph-enumeration-owning-development-20261004/tests02-originals/manifest.json"
+          },
+          "build06": {
+            "exitCode": 0,
+            "warnings": 0,
+            "errors": 0,
+            "elapsedSeconds": 2.98
+          },
+          "formatter06ExitCode": 0,
+          "finalVersioned": {
+            "version": "10.0.9",
+            "commit": "6ca993425c812c337394f7f17f915ebab0ca5ade",
+            "scopeFiles": 21,
+            "remoteMainExactShaVerified": true,
+            "formatter07ExitCode": 0,
+            "fullBuild07": {
+              "exitCode": 0,
+              "warnings": 0,
+              "errors": 0,
+              "elapsedSeconds": 5.17
+            },
+            "tests03": {
+              "exitCode": 0,
+              "total": 95,
+              "passed": 95,
+              "failed": 0,
+              "skipped": 0,
+              "cancelled": 0,
+              "timedOut": 0,
+              "flaky": 0,
+              "nativeDurationMs": 18505.311
+            },
+            "canonicalCoverage": {
+              "exitCode": 0,
+              "nativeSuiteTotal": 95,
+              "nativeSuitePassed": 95,
+              "lineRate": 0.8717,
+              "requiredLineRate": 0.8,
+              "reportRendered": true
+            },
+            "sourceFiles": 123,
+            "sourceUnchanged": true,
+            "originalManifest": "artifacts/qualification/native-graph-enumeration-owning-development-20261004/final-versioned-originals/manifest.json",
+            "canonicalPublicationQualified": false,
+            "consumerQualified": false
+          }
+        }
+      },
+      {
+        "id": "TASK-NCQRS-C1-CONTRACT",
+        "owner": "root",
+        "model": "root_planning_and_integration_model",
+        "effort": "inherited",
+        "state": "accepted_contract_product_writes_wait_for_C0_and_published_dependencies",
+        "requirements": [
+          "REQ-CRS-001",
+          "REQ-CRS-002",
+          "REQ-CRS-003",
+          "REQ-CRS-004",
+          "REQ-CRS-005",
+          "REQ-CRS-006"
+        ],
+        "acceptance": [
+          "AC-CRS-001",
+          "AC-CRS-002",
+          "AC-CRS-003",
+          "AC-CRS-004",
+          "AC-CRS-005",
+          "AC-CRS-006"
+        ],
+        "contracts": [
+          "docs/Features/ClusterRouting/NativeCqrsRequestV2.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "dependencies": [
+          "TASK-NCQRS-C0-CONTRACT"
+        ],
+        "fileOwnership": [
+          "docs/Features/ClusterRouting/NativeCqrsRequestV2.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
+        "runtimeQualified": false,
+        "allAcceptanceClosed": false
+      },
+      {
+        "id": "TASK-NCQRS-C1-IDENTITY-CONTEXT",
+        "owner": "root",
+        "model": "root_planning_and_integration_model",
+        "effort": "inherited",
+        "state": "published_Core_10_0_3_provenance_verified_contract_frozen_product_join_waits_for_C0",
+        "requirements": [
+          "REQ-CRS-006"
+        ],
+        "acceptance": [
+          "AC-CRS-006"
+        ],
+        "contracts": [
+          "docs/Features/ClusterRouting/NativeCqrsRequestV2.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "dependencies": [
+          "TASK-NCQRS-C1-CONTRACT",
+          "TASK-NCQRS-C0-JOIN"
+        ],
+        "fileOwnership": [
+          "Directory.Packages.props",
+          "src/KeyLoad.Orleans/KeyLoad.Orleans.csproj",
+          "src/KeyLoad.Orleans/Features/ClusterRouting/GrainRequestContextState.cs",
+          "src/KeyLoad.Orleans/Features/ClusterRouting/GrainIdentityContext.cs",
+          "src/KeyLoad.Server/Features/ClientApi/PersistedPrincipalRequestContextScope.cs",
+          "src/KeyLoad.Server/Features/ClientApi/CanonicalOperationGateway.cs",
+          "src/KeyLoad.Server/Features/Authorization/DatabaseCredentialResolver.cs",
+          "src/KeyLoad.Server/Features/ClusterRouting/OrleansSiloConfiguration.cs",
+          "root_native_serializer_and_leaf_authority_context_joins"
+        ],
+        "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
+        "nativePackageProvenance": {
+          "id": "ManagedCode.Orleans.Identity.Core",
+          "version": "10.0.3",
+          "sourceCommit": "92e10b4ee00a86c9584fe44fd62727ffaf7c5551",
+          "canonicalReleaseRun": "https://github.com/managedcode/Orleans.Identity/actions/runs/35936636303",
+          "canonicalCiRun": "https://github.com/managedcode/Orleans.Identity/actions/runs/35936636395",
+          "canonicalChecksPassed": true,
+          "feedIndexContainsVersion": true,
+          "originalPackageEntriesByteEqual": true,
+          "originalEntryCount": 9,
+          "nativeRepositorySignatureVerificationExitCode": 0,
+          "originalManifest": "artifacts/qualification/native-cqrs-identity-core-development-20261004/publication-originals/manifest.json",
+          "consumerReferenceAdded": false,
+          "consumerQualified": false
+        },
+        "runtimeQualified": false,
+        "allAcceptanceClosed": false
+      },
+      {
+        "id": "TASK-NCQRS-C1-RPC-ROUTING",
+        "owner": "query_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "state": "pending_C0_join",
+        "requirements": [
+          "REQ-CRS-001",
+          "REQ-CRS-002",
+          "REQ-CRS-003",
+          "REQ-CRS-004",
+          "REQ-CRS-005",
+          "REQ-CRS-006"
+        ],
+        "acceptance": [
+          "AC-CRS-001",
+          "AC-CRS-002",
+          "AC-CRS-003",
+          "AC-CRS-004",
+          "AC-CRS-005",
+          "AC-CRS-006"
+        ],
+        "contracts": [
+          "docs/Features/ClusterRouting/NativeCqrsRequestV2.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "dependencies": [
+          "TASK-NCQRS-C1-CONTRACT",
+          "TASK-NCQRS-C0-JOIN"
+        ],
+        "fileOwnership": [
+          "private_staged_RequestGrain_and_new_ClusterRouting_producer_failure_lifetime_helpers_only"
+        ],
+        "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
+        "runtimeQualified": false,
+        "allAcceptanceClosed": false
+      },
+      {
+        "id": "TASK-NCQRS-C1-RUNTIME-ORACLES",
+        "owner": "cluster_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "state": "pending_C0_join",
+        "requirements": [
+          "REQ-CRS-001",
+          "REQ-CRS-002",
+          "REQ-CRS-003",
+          "REQ-CRS-004",
+          "REQ-CRS-005",
+          "REQ-CRS-006"
+        ],
+        "acceptance": [
+          "AC-CRS-001",
+          "AC-CRS-002",
+          "AC-CRS-003",
+          "AC-CRS-004",
+          "AC-CRS-005",
+          "AC-CRS-006"
+        ],
+        "contracts": [
+          "docs/Features/ClusterRouting/NativeCqrsRequestV2.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "dependencies": [
+          "TASK-NCQRS-C1-CONTRACT",
+          "TASK-NCQRS-C0-JOIN"
+        ],
+        "fileOwnership": [
+          "new_tests_KeyLoad_UnitTests_Features_ClusterRouting_RequestCqrs_files_only"
+        ],
+        "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
+        "runtimeQualified": false,
+        "allAcceptanceClosed": false
+      },
+      {
+        "id": "TASK-NCQRS-C1-COHORT-FAULTS",
+        "owner": "lifecycle_wave",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "state": "pending_C0_join_and_root_exact_file_freeze",
+        "requirements": [
+          "REQ-CRS-001",
+          "REQ-CRS-002",
+          "REQ-CRS-003",
+          "REQ-CRS-004",
+          "REQ-CRS-005",
+          "REQ-CRS-006"
+        ],
+        "acceptance": [
+          "AC-CRS-001",
+          "AC-CRS-002",
+          "AC-CRS-003",
+          "AC-CRS-004",
+          "AC-CRS-005",
+          "AC-CRS-006"
+        ],
+        "contracts": [
+          "docs/Features/ClusterRouting/NativeCqrsRequestV2.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "dependencies": [
+          "TASK-NCQRS-C1-CONTRACT",
+          "TASK-NCQRS-C0-JOIN"
+        ],
+        "fileOwnership": [
+          "root_to_freeze_private_cohort_readiness_and_actual_process_RF3_tests"
+        ],
+        "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
+        "runtimeQualified": false,
+        "allAcceptanceClosed": false
+      },
+      {
+        "id": "TASK-NCQRS-C1-ROOT-JOIN",
+        "owner": "root",
+        "model": "root_planning_and_integration_model",
+        "effort": "inherited",
+        "state": "pending_implementation_and_required_complete_gates",
+        "requirements": [
+          "REQ-CRS-001",
+          "REQ-CRS-002",
+          "REQ-CRS-003",
+          "REQ-CRS-004",
+          "REQ-CRS-005",
+          "REQ-CRS-006"
+        ],
+        "acceptance": [
+          "AC-CRS-001",
+          "AC-CRS-002",
+          "AC-CRS-003",
+          "AC-CRS-004",
+          "AC-CRS-005",
+          "AC-CRS-006"
+        ],
+        "contracts": [
+          "docs/Features/ClusterRouting/NativeCqrsRequestV2.md",
+          "docs/ADR/ADR-082-native-cqrs-streams.md"
+        ],
+        "dependencies": [
+          "TASK-NCQRS-C1-RPC-ROUTING",
+          "TASK-NCQRS-C1-RUNTIME-ORACLES",
+          "TASK-NCQRS-C1-COHORT-FAULTS",
+          "TASK-NCQRS-C1-IDENTITY-CONTEXT",
+          "TASK-NCQRS-HTTP-OWNER-BOUNDS"
+        ],
+        "fileOwnership": [
+          "root_generated_types_aliases_Ids_version_MAC_discovery_package_Server_AppHost_docs_status_Git_and_qualification_joins"
+        ],
+        "startCondition": "accepted_root_contract_and_published_packages_unchanged_six_C0_Aspire_oracles_pass",
+        "runtimeQualified": false,
+        "allAcceptanceClosed": false
       }
     ],
     "qualificationRule": "Neither presence of source nor a local development result closes a full task. Preserve exact-source Linux fault/endurance and publication gates.",
@@ -11574,6 +13539,7 @@
         "dockerAspireRf3Qualified": false
       }
     ],
-    "nodeEpochDevelopmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+    "nodeEpochDevelopmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json",
+    "nodeEpochDelivered0d78Evidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
   }
 }

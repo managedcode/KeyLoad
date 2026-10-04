@@ -1004,8 +1004,29 @@
   },
   "KL-030": {
     "title": "ANN provider qualification",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/ADR/ADR-019-managed-ann.md",
+      "docs/Features/Search/ManagedAnn.md",
+      "src/KeyLoad.Query/Features/Search/PackedAnnIndex.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/PackedAnnRecallTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/PackedAnnReservationTests.cs"
+    ],
+    "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
+    "qualification": {
+      "R1ComputationalAcceptancePassed": false,
+      "projectionLifecycleQualified": false,
+      "publicAnnCapabilityEnabled": false,
+      "deliveredLinuxSourceQualified": false,
+      "performanceQualified": false,
+      "allAcceptanceClosed": false,
+      "localR1TargetedNormalAndScalarPassed": true
+    },
+    "developmentEvidence": [
+      "artifacts/qualification/managed-ann-r1-development-20261004/focused06-originals/manifest.json",
+      "artifacts/qualification/managed-ann-r1-development-20261004/scalar07-originals/manifest.json",
+      "artifacts/qualification/native-dependencies-static17-development-20261004/originals/manifest.json"
+    ]
   },
   "KL-031": {
     "title": "ANN projection lifecycle",
@@ -1089,7 +1110,8 @@
       "docs/design/command-admission.md",
       "docs/implementation/keycodec-crud-development-2026-10-04.json",
       "docs/implementation/node-epoch-linux-6e09-2026-10-04.json",
-      "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json"
+      "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json",
+      "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
     ],
     "disposableCacheWorkstream": {
       "status": "R100_wire_source_review_approved_R104_exact5bb_RF3_pass_verify_failed_R115_Node_source21_join_approved_current_full_development_failed_other_owner_SiteTests21_native_pending",
@@ -1185,6 +1207,23 @@
       "scalarFailed": 1,
       "recoverySkipped": true,
       "coldRf3Pending": true
+    },
+    "linux0d78Evidence": {
+      "path": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json",
+      "sourceSha": "0d78eb43dceac2f386dca7bbccb11f9d1e3d43a3",
+      "normalPassed": 2919,
+      "normalTotal": 2919,
+      "scalarPassed": 2919,
+      "scalarTotal": 2919,
+      "recoveryPassed": 257,
+      "recoveryTotal": 257,
+      "rf3Passed": 87,
+      "rf3Total": 88,
+      "rf3Failed": 1,
+      "actualPriorServingImageBuilt": true,
+      "actualColdRf3Executed": true,
+      "coldRf3Qualified": false,
+      "completeGate": false
     }
   },
   "KL-041": {
@@ -1221,10 +1260,11 @@
       "src/KeyLoad.Storage.IO/Features/StorageRecovery",
       "docs/implementation/node-epoch-development-2026-10-04.json",
       "docs/implementation/node-epoch-linux-6e09-2026-10-04.json",
-      "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json"
+      "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json",
+      "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
     ],
     "decision": "docs/ADR/ADR-077-offline-native-data-epoch.md",
-    "sourceStage": "genuine_prior_image_builder_proof_and_two_wave_RF3_fixture_source_complete_native_RF3_pending",
+    "sourceStage": "genuine_prior_image_built_and_cold_RF3_executed_exact_sample_conflict_oracle_corrected_renewed_RF3_pending",
     "runtimeQualified": false,
     "remaining": [
       "homogeneous_Docker_Aspire_RF3_cold_upgrade_fixture_and_SDK_official_MCP_qualification",
@@ -1261,6 +1301,23 @@
       "sourceAndStableExecutableInventoryUnchanged": true,
       "completeRuntimeOutputInventoryUnchanged": false,
       "genuineColdRf3Executed": false,
+      "completeGate": false
+    },
+    "linux0d78Evidence": {
+      "path": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json",
+      "sourceSha": "0d78eb43dceac2f386dca7bbccb11f9d1e3d43a3",
+      "normalPassed": 2919,
+      "normalTotal": 2919,
+      "scalarPassed": 2919,
+      "scalarTotal": 2919,
+      "recoveryPassed": 257,
+      "recoveryTotal": 257,
+      "rf3Passed": 87,
+      "rf3Total": 88,
+      "rf3Failed": 1,
+      "actualPriorServingImageBuilt": true,
+      "actualColdRf3Executed": true,
+      "coldRf3Qualified": false,
       "completeGate": false
     }
   },
@@ -1406,8 +1463,29 @@
   },
   "KL-059": {
     "title": "Managed ANN implementation qualification",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/ADR/ADR-019-managed-ann.md",
+      "docs/Features/Search/ManagedAnn.md",
+      "src/KeyLoad.Query/Features/Search/PackedAnnIndex.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/PackedAnnRecallTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/PackedAnnReservationTests.cs"
+    ],
+    "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
+    "qualification": {
+      "R1ComputationalAcceptancePassed": false,
+      "projectionLifecycleQualified": false,
+      "publicAnnCapabilityEnabled": false,
+      "deliveredLinuxSourceQualified": false,
+      "performanceQualified": false,
+      "allAcceptanceClosed": false,
+      "localR1TargetedNormalAndScalarPassed": true
+    },
+    "developmentEvidence": [
+      "artifacts/qualification/managed-ann-r1-development-20261004/focused06-originals/manifest.json",
+      "artifacts/qualification/managed-ann-r1-development-20261004/scalar07-originals/manifest.json",
+      "artifacts/qualification/native-dependencies-static17-development-20261004/originals/manifest.json"
+    ]
   },
   "KL-060": {
     "title": "Adaptive filtered retrieval",

@@ -11,6 +11,12 @@ full exact-SHA RF3 qualification remains required.
 
 Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 
+The owner2026-10-04 native CQRS/result/long-operation requirement is specified in
+[NativeCqrs](ClusterRouting/NativeCqrs.md) and [ADR-082](../ADR/ADR-082-native-cqrs-streams.md).
+Only the real Graph/native-enumeration compatibility test stage is accepted for
+implementation; product RPC/transport and long-operation lifecycle joins remain
+pending. Current Task replies do not satisfy the new streamed-result requirement.
+
 | Requirement | Acceptance and observable evidence |
 |---|---|
 | REQ-ROUTE-001: every database operation runs through a distinct Orleans request grain and calls the relevant database capabilities. | AC-ROUTE-001: .NET/MCP client writes and reads reach request grains; independent concurrent requests have distinct grain keys and stable command retry IDs. |
