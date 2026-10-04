@@ -17,6 +17,8 @@ intermediate JSON or edge payloads, use an independent read gate, cross partitio
 silently truncate a graph, or substitute ANN for an exact branch. A shared budget
 charges all roots/operators; shortest-hop identity deduplication prevents cycles
 and multiple paths from multiplying contributions.
+Label filtering requires the persisted graph field policy at canonical `/label`,
+including empty label filters; a plain `label` name cannot bypass that policy.
 
 Implementation contract:
 
@@ -42,6 +44,13 @@ Implementation contract:
    GraphRetrieval's G2 contract. Root owns wire admission and public adapters;
    lifecycle_wave owns the bounded QueryExecution parser, manifest profile and
    mapped real-store lowering/parity tests. Scalar QueryPage stays unchanged.
+
+6. G3 strengthens the existing same-partition KL-056 path using deliberately
+   conflicting text/vector/graph branch ranks, a separately computed weighted
+   RRF oracle, current authorization, and actual direct/SQL .NET/MCP RF3 parity.
+   The exact frozen corpus/test ownership and private patch join are in
+   GraphRetrieval's G3 section. This adds qualification for existing contracts,
+   not a second executor or global distributed rank claim.
 
 No persisted data converter, automatic store migration, dependency change or
 physical placement change is involved. Nodes lacking the application capability

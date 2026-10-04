@@ -65,19 +65,13 @@ internal static class McpToolDescriptions
         McpToolNames.QueueTransferReceipt => QueueTransferReceipt,
         McpToolNames.ScheduleInspect => ScheduleInspect,
         McpToolNames.SagaInspect => SagaInspect,
-        McpToolNames.QuerySearch => QuerySearch,
         McpToolNames.GraphTraverse => GraphTraverse,
-        McpToolNames.SeriesRead => SeriesRead,
-        McpToolNames.SeriesLatest => SeriesLatest,
-        McpToolNames.SeriesAggregate => SeriesAggregate,
-        McpToolNames.SeriesWindows => SeriesWindows,
-        McpToolNames.SeriesRetention => SeriesRetention,
-        McpToolNames.QueryExecute => QueryExecute,
-        McpToolNames.QueryAst => QueryAst,
-        McpToolNames.QueryCapabilities => QueryCapabilities,
+        McpToolNames.SeriesRead or McpToolNames.SeriesLatest or McpToolNames.SeriesAggregate
+            or McpToolNames.SeriesWindows or McpToolNames.SeriesRetention => SeriesDescription(name),
+        McpToolNames.QuerySearch or McpToolNames.QueryExecute or McpToolNames.QueryAst
+            or McpToolNames.QueryCapabilities or McpToolNames.QueryLiveStart or McpToolNames.QueryLiveRead
+            => QueryDescription(name),
         McpToolNames.ChangesRead => ChangesRead,
-        McpToolNames.QueryLiveStart => QueryLiveStart,
-        McpToolNames.QueryLiveRead => QueryLiveRead,
         McpToolNames.OutboxStatus => OutboxStatus,
         McpToolNames.ProjectionsRead => ProjectionsRead,
         McpToolNames.SearchExecute => SearchExecute,
@@ -106,5 +100,26 @@ internal static class McpToolDescriptions
         AdminDashboardProtocol.SnapshotTool or AdminDashboardProtocol.ResourcesTool or AdminDashboardProtocol.QueueTool
             => AdminDashboardMcpCatalog.Description(name),
         _ => BlobMcpDescriptions.For(name)
+    };
+
+    private static string SeriesDescription(string name) => name switch
+    {
+        McpToolNames.SeriesRead => SeriesRead,
+        McpToolNames.SeriesLatest => SeriesLatest,
+        McpToolNames.SeriesAggregate => SeriesAggregate,
+        McpToolNames.SeriesWindows => SeriesWindows,
+        McpToolNames.SeriesRetention => SeriesRetention,
+        _ => throw new ArgumentOutOfRangeException(nameof(name))
+    };
+
+    private static string QueryDescription(string name) => name switch
+    {
+        McpToolNames.QuerySearch => QuerySearch,
+        McpToolNames.QueryExecute => QueryExecute,
+        McpToolNames.QueryAst => QueryAst,
+        McpToolNames.QueryCapabilities => QueryCapabilities,
+        McpToolNames.QueryLiveStart => QueryLiveStart,
+        McpToolNames.QueryLiveRead => QueryLiveRead,
+        _ => throw new ArgumentOutOfRangeException(nameof(name))
     };
 }

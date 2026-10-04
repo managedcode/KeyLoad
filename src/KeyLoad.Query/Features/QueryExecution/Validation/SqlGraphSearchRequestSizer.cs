@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
@@ -23,7 +22,11 @@ internal static class SqlGraphSearchRequestSizer
         {
             JsonSerializer.Serialize(counter, request, JsonDefaults.Options);
         }
-        catch (Exception error) when (error is JsonException or InvalidOperationException)
+        catch (JsonException)
+        {
+            throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.WrapperDetail);
+        }
+        catch (InvalidOperationException)
         {
             throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.WrapperDetail);
         }

@@ -19,6 +19,14 @@ internal static class McpCatalogExpectations
     private const string SubscriptionsStatusRoute = "/v1/subscriptions/status";
     internal const string MessagesInspect = "keyload_messages_inspect";
     private const string MessagesInspectRoute = "/v1/queues/inspect";
+    internal const string QueueTransferInspect = "keyload_queue_transfer_inspect";
+    private const string QueueTransferInspectRoute = "/v1/queues/transfers/inspect";
+    internal const string QueueTransferReceipt = "keyload_queue_transfer_receipt";
+    private const string QueueTransferReceiptRoute = "/v1/queues/transfers/receipt";
+    internal const string ScheduleInspect = "keyload_schedule_inspect";
+    private const string ScheduleInspectRoute = "/v1/queues/schedules/inspect";
+    internal const string SagaInspect = "keyload_saga_inspect";
+    private const string SagaInspectRoute = "/v1/queues/sagas/inspect";
     internal const string GraphTraverse = "keyload_graph_traverse";
     private const string GraphTraverseRoute = "/v1/graph/traverse";
     internal const string SeriesRead = "keyload_series_read";
@@ -33,6 +41,8 @@ internal static class McpCatalogExpectations
     private const string SeriesRetentionRoute = "/v1/series/retention";
     internal const string QueryExecute = "keyload_query_execute";
     private const string QueryExecuteRoute = "/v1/query";
+    internal const string QuerySearch = "keyload_query_search";
+    private const string QuerySearchRoute = "/v1/query/search";
     internal const string QueryAst = "keyload_query_ast";
     private const string QueryAstRoute = "/v1/query/ast";
     internal const string QueryCapabilities = "keyload_query_capabilities";
@@ -49,6 +59,8 @@ internal static class McpCatalogExpectations
     private const string ProjectionsReadRoute = "/v1/admin/projections/read";
     internal const string SearchExecute = "keyload_search_execute";
     private const string SearchExecuteRoute = "/v1/search";
+    internal const string SearchGraph = "keyload_search_graph";
+    private const string SearchGraphRoute = "/v1/search/graph";
     internal const string AdminBackup = "keyload_admin_backup";
     private const string AdminBackupRoute = "/v1/admin/backup";
     internal const string AdminAdmission = "keyload_admin_admission";
@@ -98,7 +110,7 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 56;
+    internal const int Count = 62;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
@@ -107,6 +119,10 @@ internal static class McpCatalogExpectations
         (EventsRead, EventsReadRoute, GrainReadKind.EventSource, null),
         (SubscriptionsStatus, SubscriptionsStatusRoute, GrainReadKind.Subscription, null),
         (MessagesInspect, MessagesInspectRoute, GrainReadKind.Message, null),
+        (QueueTransferInspect, QueueTransferInspectRoute, GrainReadKind.QueueTransfer, null),
+        (QueueTransferReceipt, QueueTransferReceiptRoute, GrainReadKind.QueueTransferReceipt, null),
+        (ScheduleInspect, ScheduleInspectRoute, GrainReadKind.RecurringSchedule, null),
+        (SagaInspect, SagaInspectRoute, GrainReadKind.Saga, null),
         (GraphTraverse, GraphTraverseRoute, GrainReadKind.Traverse, null),
         (SeriesRead, SeriesReadRoute, GrainReadKind.Samples, null),
         (SeriesLatest, SeriesLatestRoute, GrainReadKind.LatestSample, null),
@@ -114,6 +130,7 @@ internal static class McpCatalogExpectations
         (SeriesWindows, SeriesWindowsRoute, GrainReadKind.AggregateSampleWindows, null),
         (SeriesRetention, SeriesRetentionRoute, GrainReadKind.SampleRetention, null),
         (QueryExecute, QueryExecuteRoute, GrainReadKind.Query, null),
+        (QuerySearch, QuerySearchRoute, GrainReadKind.SqlGraphSearch, null),
         (QueryAst, QueryAstRoute, GrainReadKind.AstQuery, null),
         (QueryCapabilities, QueryCapabilitiesRoute, GrainReadKind.QueryCapabilities, null),
         (ChangesRead, ChangesReadRoute, GrainReadKind.ChangeFeed, null),
@@ -122,6 +139,7 @@ internal static class McpCatalogExpectations
         (OutboxStatus, OutboxStatusRoute, GrainReadKind.OutboxStatus, null),
         (ProjectionsRead, ProjectionsReadRoute, GrainReadKind.ProjectionBatch, null),
         (SearchExecute, SearchExecuteRoute, GrainReadKind.Search, null),
+        (SearchGraph, SearchGraphRoute, GrainReadKind.GraphSearch, null),
         (AdminBackup, AdminBackupRoute, GrainReadKind.Backup, null),
         (AdminAdmission, AdminAdmissionRoute, GrainReadKind.Admission, null),
         (AdminStatus, AdminStatusRoute, GrainReadKind.NodeStatus, null),

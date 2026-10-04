@@ -15,7 +15,7 @@ internal static class VectorProjectionKeys
             request.SourceEventId, request.SourceDocument.Collection, request.SourceDocument.Id,
             request.SourceDocumentRevision, request.InputField, request.ReducerId, request.ReducerVersion,
             request.ReducerGeneration, request.Target.Collection, request.Target.Id, request.Target.Field,
-            request.Target.Space.Id, request.Target.Space.Dimension, request.Target.Space.Metric,
+            request.Target.Space.Id, request.Target.Space.Dimension, (int)request.Target.Space.Metric,
             request.Target.Space.Model, request.Target.Space.Version);
 
     internal static byte[] Effect(PartitionRef partition, VectorProjectionLineage lineage)
@@ -24,6 +24,6 @@ internal static class VectorProjectionKeys
             lineage.SourceEventId, lineage.SourceDocument.Collection, lineage.SourceDocument.Id,
             lineage.SourceDocumentRevision, lineage.InputField, lineage.ReducerId, lineage.ReducerVersion,
             lineage.ReducerGeneration, lineage.TargetCollection, lineage.TargetId, lineage.TargetField,
-            lineage.TargetSpace.Id, lineage.TargetSpace.Dimension, lineage.TargetSpace.Metric,
+            lineage.TargetSpace.Id, lineage.TargetSpace.Dimension, (int)lineage.TargetSpace.Metric,
             lineage.TargetSpace.Model, lineage.TargetSpace.Version);
 }

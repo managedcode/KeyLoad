@@ -16,6 +16,9 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         GrainReadKind.EventSource => new(true, true, false),
         GrainReadKind.Subscription => new(true, true, false),
         GrainReadKind.Message => new(true, true, false),
+        GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt
+            or GrainReadKind.RecurringSchedule or GrainReadKind.Saga
+            => new(true, true, false),
         GrainReadKind.Traverse => new(true, true, false),
         GrainReadKind.Samples => new(true, true, false),
         GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows
@@ -30,6 +33,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         GrainReadKind.OutboxStatus => new(true, true, false),
         GrainReadKind.ProjectionBatch => new(true, true, false),
         GrainReadKind.Search => new(true, true, false),
+        GrainReadKind.GraphSearch or GrainReadKind.SqlGraphSearch => new(true, true, false),
         GrainReadKind.Backup => new(false, false, false),
         GrainReadKind.Admission => new(true, true, false),
         GrainReadKind.NodeStatus => new(true, true, false),

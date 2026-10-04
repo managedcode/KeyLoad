@@ -1,4 +1,4 @@
-using KeyLoad.Core;
+using System.Globalization;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -28,19 +28,19 @@ internal sealed class RecurringOccurrenceTests
         var commandId = Guid.NewGuid();
         var due = Emit(fixture, id, 1, 2, RecurringSagaDatabase.Epoch.AddSeconds(2), commandId);
         await Assert.That(due.Mutations[0].Revision).IsEqualTo(1);
-        await AssertMessage(fixture, id, 1, firstDue);
-        await AssertMessage(fixture, id, 2, firstDue.AddSeconds(1));
+        await AssertMessage(fixture, id, 0, firstDue);
+        await AssertMessage(fixture, id, 1, firstDue.AddSeconds(1));
         var replay = Emit(fixture, id, 1, 2, RecurringSagaDatabase.Epoch.AddSeconds(2), commandId);
         await Assert.That(replay.Mutations[0]).IsEqualTo(due.Mutations[0]);
         await Assert.That(replay.Token).IsEqualTo(due.Token);
         _ = Emit(fixture, id, 1, 2, RecurringSagaDatabase.Epoch.AddSeconds(2));
-        await Assert.That(Message(fixture, id, 3)).IsNull();
+        await Assert.That(Message(fixture, id, 2)).IsNull();
 
         var next = Emit(fixture, id, 1, 32, RecurringSagaDatabase.Epoch.AddSeconds(4));
         await Assert.That(next.Mutations[0].Revision).IsEqualTo(1);
-        await AssertMessage(fixture, id, 3, firstDue.AddSeconds(2));
-        await AssertMessage(fixture, id, 4, firstDue.AddSeconds(3));
-        await Assert.That(Message(fixture, id, 5)).IsNull();
+        await AssertMessage(fixture, id, 2, firstDue.AddSeconds(2));
+        await AssertMessage(fixture, id, 3, firstDue.AddSeconds(3));
+        await Assert.That(Message(fixture, id, 4)).IsNull();
     }
 
     [Test]
@@ -51,18 +51,18 @@ internal sealed class RecurringOccurrenceTests
         var firstDue = RecurringSagaDatabase.Epoch;
         _ = fixture.Commit(fixture.Partition, new ConfigureRecurringSchedule(Definition(fixture, id, firstDue), 0));
         _ = Emit(fixture, id, 1, CatchUpBound, RecurringSagaDatabase.Epoch.AddSeconds(100));
-        await AssertMessage(fixture, id, 1, firstDue);
-        await AssertMessage(fixture, id, CatchUpBound, firstDue.AddSeconds(CatchUpBound - 1));
-        await Assert.That(Message(fixture, id, CatchUpBound + 1)).IsNull();
+        await AssertMessage(fixture, id, 0, firstDue);
+        await AssertMessage(fixture, id, CatchUpBound - 1, firstDue.AddSeconds(CatchUpBound - 1));
+        await Assert.That(Message(fixture, id, CatchUpBound)).IsNull();
 
         fixture.Reopen();
         var inspection = fixture.Database.InspectRecurringSchedule(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, id)!;
         await Assert.That(inspection.NextOrdinal).IsEqualTo(CatchUpBound);
         _ = Emit(fixture, id, inspection.Generation, CatchUpBound, RecurringSagaDatabase.Epoch.AddSeconds(100));
-        await AssertMessage(fixture, id, CatchUpBound + 1, firstDue.AddSeconds(CatchUpBound));
-        await AssertMessage(fixture, id, CatchUpBound * 2, firstDue.AddSeconds(CatchUpBound * 2 - 1));
-        await Assert.That(Message(fixture, id, CatchUpBound * 2 + 1)).IsNull();
+        await AssertMessage(fixture, id, CatchUpBound, firstDue.AddSeconds(CatchUpBound));
+        await AssertMessage(fixture, id, CatchUpBound * 2 - 1, firstDue.AddSeconds(CatchUpBound * 2 - 1));
+        await Assert.That(Message(fixture, id, CatchUpBound * 2)).IsNull();
         await Assert.That(fixture.Database.InspectRecurringSchedule(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, id)!.NextOrdinal).IsEqualTo(CatchUpBound * 2);
     }
@@ -102,5 +102,5 @@ internal sealed class RecurringOccurrenceTests
     }
 
     private static string OccurrenceId(Guid id, long generation, long ordinal)
-        => string.Concat("recurring-", id.ToString("N"), "-", generation.ToString("x16"), "-", ordinal.ToString("x16"));
+        => string.Concat("recurring-", id.ToString("N"), "-", generation.ToString("x16", CultureInfo.InvariantCulture), "-", ordinal.ToString("x16", CultureInfo.InvariantCulture));
 }

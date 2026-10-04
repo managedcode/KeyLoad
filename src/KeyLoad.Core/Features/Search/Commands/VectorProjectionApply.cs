@@ -147,7 +147,19 @@ public sealed partial class DatabaseEngine
             stream.StreamId, stream.Generation, request.SourceEventRevision);
         var record = view.GetRecord<EventRecord>(eventKey)
             ?? throw Errors.Fail(ErrorCode.Corruption, ProjectionLineageCorruptMessage);
-        if (record.Stream != stream || record.Revision != request.SourceEventRevision
+        ValidateProjectionEventRecord(request, record);
+        var identity = view.GetRecord<EventIdentity>(KeySpace.Partition(EventIdentitySpace,
+            partition, stream.StreamSet, stream.StreamId, stream.Generation, record.Data.EventId));
+        if (identity is null || identity.StreamId != stream.StreamId
+            || identity.Generation != stream.Generation || identity.Revision != record.Revision)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ProjectionLineageCorruptMessage);
+        }
+    }
+
+    private static void ValidateProjectionEventRecord(ApplyVectorProjection request, EventRecord record)
+    {
+        if (record.Stream != request.SourceStream || record.Revision != request.SourceEventRevision
             || record.EventSequence < 1 || record.Data is null || record.Data.SchemaVersion < 1)
         {
             throw Errors.Fail(ErrorCode.Corruption, ProjectionLineageCorruptMessage);
@@ -163,13 +175,6 @@ public sealed partial class DatabaseEngine
         if (record.Data.EventId != request.SourceEventId)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, SourceEventMismatchMessage);
-        }
-        var identity = view.GetRecord<EventIdentity>(KeySpace.Partition(EventIdentitySpace,
-            partition, stream.StreamSet, stream.StreamId, stream.Generation, record.Data.EventId));
-        if (identity is null || identity.StreamId != stream.StreamId
-            || identity.Generation != stream.Generation || identity.Revision != record.Revision)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, ProjectionLineageCorruptMessage);
         }
     }
 
@@ -241,7 +246,7 @@ public sealed partial class DatabaseEngine
             transaction.Delete(VectorProjectionKeys.Effect(partition, previousLineage));
             transaction.Delete(lineageKey);
         }
-        transaction.PutRecord(KeySpace.Partition("vector", partition, vector.Collection, vector.Field, vector.Id),
+        transaction.PutRecord(KeySpace.Partition(VisibleVectorReads.VectorKeySpace, partition, vector.Collection, vector.Field, vector.Id),
             record);
     }
 

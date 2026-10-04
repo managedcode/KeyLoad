@@ -36,12 +36,12 @@ internal sealed class EventProjectionFixture : IDisposable
     internal string TargetCollection { get; }
 
     internal EventProjectionFixture(string? targetClassification = SourceClass, RowAccess? sourceAccess = null,
-        bool separateTarget = false)
+        bool separateTarget = false, string? sourceClassification = SourceClass)
     {
         TargetCollection = separateTarget ? SeparateTargetCollection : Collection;
         Harness = new EventProjectionHarness();
         Harness.Configure(StreamSet, ResourceKind.StreamSet);
-        ConfigureCollection(targetClassification);
+        ConfigureCollection(targetClassification, sourceClassification);
         if (separateTarget)
         {
             Harness.Configure(TargetCollection, ResourceKind.Collection,
@@ -54,7 +54,7 @@ internal sealed class EventProjectionFixture : IDisposable
             [new EventData("projection-event", "SourceUpdated", "{\"source\":\"" + Secret + "\"}")],
             ExpectedStreamRevision.NoStream));
         ConfigureWorker();
-        ConfigureReader([InputUse]);
+        ConfigureReader([InputUse, VectorUse]);
     }
 
     internal void ConfigureCollection(string? targetClassification = SourceClass,
@@ -71,7 +71,19 @@ internal sealed class EventProjectionFixture : IDisposable
     }
 
     internal void ReclassifySource(string classification)
-        => ConfigureCollection(sourceClassification: classification);
+    {
+        var key = KeySpace.Resource(Partition.TenantId, Partition.DatabaseId, Collection);
+        var current = Harness.Store.Read(view => view.GetRecord<ResourceDefinition>(key))
+            ?? throw new InvalidOperationException("The projection source resource must exist before reclassification.");
+        var replacement = current with
+        {
+            FieldPolicies = [.. current.FieldPolicies.Select(policy => string.Equals(policy.Path, InputField,
+                StringComparison.Ordinal) ? policy with { Classification = classification } : policy)],
+            SchemaVersion = checked(current.SchemaVersion + 1)
+        };
+        Harness.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(Partition.TenantId,
+            Partition.DatabaseId, replacement) { ExpectedSchemaVersion = current.SchemaVersion }).Get<ResourceDefinition>();
+    }
 
     internal void ConfigureWorker(bool revoked = false, string[]? additionalStreams = null, string[]? grants = null)
         => ConfigurePrincipal(WorkerId, Capability.EventsRead | Capability.DocumentsRead | Capability.DocumentsWrite,
@@ -149,11 +161,14 @@ internal sealed class EventProjectionFixture : IDisposable
             [.. scopes],
             [.. grants])
         {
+            PolicyEpoch = Database.Store.Read(view =>
+                (view.GetRecord<PrincipalRecord>(KeySpace.Principal(id))?.PolicyEpoch ?? 0) + 1),
             OwnerId = owner,
             RestrictRows = restrictRows,
             Revoked = revoked
         };
-        Harness.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal));
+        Harness.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal))
+            .Get<PrincipalRecord>();
     }
 }
 
@@ -164,12 +179,13 @@ internal sealed class EventProjectionHarness : IDisposable
     private const string SystemTenant = "system";
     private const string Wildcard = "*";
     private const string RootCredential = "root.projection-test-credential-32-characters";
-    private bool bootstrapped;
+    private const string PartitionKey = "customer-1";
+    private readonly bool bootstrapped;
 
     internal string DirectoryPath { get; }
     internal ZoneTreeStore Store { get; private set; } = null!;
     internal DatabaseEngine Database { get; private set; } = null!;
-    internal PartitionRef Partition { get; } = new("tenant", "database", "orders", "customer-1");
+    internal PartitionRef Partition { get; } = new("tenant", "database", "orders", PartitionKey);
 
     internal EventProjectionHarness()
     {

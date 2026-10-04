@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -102,12 +101,12 @@ internal sealed class RecurringSagaPolicyTests
         await Assert.That(visible.Definition.HeadersJson).IsEqualTo("{}");
         await Assert.That(visible.Redacted).IsTrue();
         await Assert.That(visible.RedactedFields).IsEquivalentTo(
-            ["payload:secret", "headers:secret"], CollectionOrdering.Matching);
+            ["payload:/secret", "headers:/secret"], CollectionOrdering.Matching);
 
         var sagaView = fixture.Database.InspectSaga(Inspector, fixture.Queue, sagaId)!;
         await Assert.That(sagaView.StateJson).IsEqualTo("{}");
         await Assert.That(sagaView.Redacted).IsTrue();
-        await Assert.That(sagaView.RedactedFields).IsEquivalentTo(["state:secret"], CollectionOrdering.Matching);
+        await Assert.That(sagaView.RedactedFields).IsEquivalentTo(["state:/secret"], CollectionOrdering.Matching);
     }
 
     [Test]

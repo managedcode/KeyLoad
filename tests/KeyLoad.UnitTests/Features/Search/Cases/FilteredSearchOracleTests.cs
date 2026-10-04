@@ -66,7 +66,7 @@ internal sealed class FilteredSearchOracleTests
         }
     }
 
-    private static SearchRequest VectorOnly() => new(new("tenant", "database", "orders", "customer-1"),
+    private static SearchRequest VectorOnly() => new(new("tenant", "database", "orders", FilteredSearchTestSupport.PartitionKey),
         FilteredSearchTestSupport.Collection, VectorField: FilteredSearchTestSupport.VectorField,
         Vector: [1, 0], Space: FilteredSearchTestSupport.Space, Limit: Limit,
         FusionConstant: FilteredSearchTestSupport.FusionConstant);

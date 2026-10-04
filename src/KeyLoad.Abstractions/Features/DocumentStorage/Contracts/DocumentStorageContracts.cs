@@ -184,4 +184,10 @@ public sealed record DeleteDocument([property: Orleans.Id(0)] string Collection,
 /// <param name="Definition">Provides the resource configuration.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ConfigureResourceRequest)]
-public sealed record ConfigureResourceRequest([property: Orleans.Id(0)] string TenantId, [property: Orleans.Id(1)] string DatabaseId, [property: Orleans.Id(2)] ResourceDefinition Definition);
+public sealed record ConfigureResourceRequest([property: Orleans.Id(0)] string TenantId, [property: Orleans.Id(1)] string DatabaseId, [property: Orleans.Id(2)] ResourceDefinition Definition)
+{
+    /// <summary>Gets the existing resource version required for a policy-only replacement.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [Orleans.Id(3)]
+    public long? ExpectedSchemaVersion { get; init; }
+}

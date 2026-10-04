@@ -1317,7 +1317,7 @@
       "docs/ADR/ADR-077-offline-native-data-epoch.md",
       "docs/Features/StorageRecovery.md",
       "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeFormatUpgrade.cs",
-      "scripts/Features/StorageRecovery/build-native5-probe.sh",
+      "scripts/Features/StorageRecovery/build-prior-probe.sh",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/EpochUpgradeProcessRecoveryTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/EpochPriorAcceptanceTests.cs",
       "docs/implementation/native-async-search-development-2026-10-03.json",
@@ -1535,8 +1535,10 @@
   },
   "KL-056": {
     "title": "Three-way hybrid retrieval",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "2026-10-04 G1/G2 implement same-partition exact text/vector/graph fusion in src/KeyLoad.Query/Features/Search/Queries/GraphSearchExecutor.cs and SQL lowering; docs/Features/Search/GraphRetrieval.md and ADR-090 freeze G3 independent conflicting-rank .NET/MCP RF3 oracles. Source is unqualified; original whole-task gates remain open."
+    ]
   },
   "KL-057": {
     "title": "Global branch ranking",
@@ -1579,8 +1581,13 @@
   },
   "KL-060": {
     "title": "Adaptive filtered retrieval",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/Search/FilteredRetrieval.md",
+      "docs/ADR/ADR-087-filtered-retrieval.md",
+      "src/KeyLoad.Query/Features/Search/Queries/PackedAnnSearch.cs"
+    ],
+    "implementationStage": "F2 computational planner contract accepted; Luna implementation in progress. The current packed executor does not by itself qualify the newly specified adaptive planner, public approximation, RF3 or scale/performance criteria."
   },
   "KL-061": {
     "title": "Principals, API keys і RBAC",
@@ -1944,14 +1951,25 @@
     "status": "in_progress",
     "evidence": [
       "docs/Features/Search/EventProjectionLineage.md",
-      "docs/ADR/ADR-089-event-projection-lineage.md"
+      "docs/ADR/ADR-089-event-projection-lineage.md",
+      "src/KeyLoad.Core/Features/Search/Commands/VectorProjectionApply.cs",
+      "src/KeyLoad.Core/Features/Search/Queries/VectorProjectionKeys.cs",
+      "tests/KeyLoad.RecoveryTests/Features/Search/Cases/EventProjectionProcessRecoveryTests.cs",
+      "docs/Features/Authorization/ResourcePolicyUpdates.md",
+      "docs/implementation/c1-unit36-development-2026-10-04.json"
     ],
     "implementation": {
-      "stage": "root_accepted_functional_contract_write_authorized",
+      "stage": "P1_canonical_lineage_public_and_process_oracles_integrated_policy_CAS_join_in_progress",
       "owner": "query_wave",
       "model": "Luna",
       "acceptanceClosed": false,
-      "qualification": "implementation_in_progress_no_new_runtime_result"
+      "qualification": "build36_passed_full_local_unit36_3019_passed_146_failed_repairs_require_new_run",
+      "remaining": [
+        "fresh_normal_scalar_unit_and_process_recovery",
+        "public_SDK_official_MCP_Aspire_RF3",
+        "P2_outbox_worker_online_generation_and_index_watermark",
+        "delivered_source_Linux_full_acceptance"
+      ]
     }
   },
   "KL-098": {

@@ -20,6 +20,8 @@ internal static class EpochPriorExecutableArtifact
     private const int Native6CheckpointVersion = 4;
     private const string Native5Tree = "b03bf1301a03b3fe00f419c3c7bf5285a34b63f9";
     private const string Native6Tree = "678ac682c90294306a0ae4092c4c80b382c4a18b";
+    private const string Native5Archive = "e0072dfab6e265ccc4ca4b5717aa5a978903330a36287c58c8e91a604b0bf2c5";
+    private const string Native6Archive = "86e62558c443d39d068568a0e3d2792ec10130db587d4f3835c56eabe4747d96";
     private const string ProbeProducer = "immutable source export plus isolated test driver";
     private static readonly string[] DriverSources =
     [
@@ -47,7 +49,7 @@ internal static class EpochPriorExecutableArtifact
         if (receipt.SchemaVersion != 1 || receipt.SourceRevision != EpochPriorSourceProbe.SourceRevisionForEpoch(expectedDataEpoch)
             || receipt.SourceTree != profile.Tree || receipt.DataEpoch != expectedDataEpoch
             || receipt.JournalVersion != 4 || receipt.CheckpointVersion != profile.CheckpointVersion
-            || !IsDigest(receipt.OriginalArchiveSha256) || receipt.GitHubQualified
+            || receipt.OriginalArchiveSha256 != profile.Archive || receipt.GitHubQualified
             || receipt.Producer != ProbeProducer
             || receipt.Files.Length is < 1 or > MaximumFiles
             || !receipt.DriverSources.Select(source => source.Path).Order(StringComparer.Ordinal)
@@ -73,15 +75,12 @@ internal static class EpochPriorExecutableArtifact
         return Path.TrimEndingDirectorySeparator(Path.GetFullPath(configured));
     }
 
-    private static (string Tree, int CheckpointVersion) Profile(int epoch) => epoch switch
+    private static (string Tree, int CheckpointVersion, string Archive) Profile(int epoch) => epoch switch
     {
-        Native5Epoch => (Native5Tree, Native5CheckpointVersion),
-        Native6Epoch => (Native6Tree, Native6CheckpointVersion),
+        Native5Epoch => (Native5Tree, Native5CheckpointVersion, Native5Archive),
+        Native6Epoch => (Native6Tree, Native6CheckpointVersion, Native6Archive),
         _ => throw new ArgumentOutOfRangeException(nameof(epoch))
     };
-
-    private static bool IsDigest(string value)
-        => value is { Length: 64 } && value.All(character => character is >= '0' and <= '9' or >= 'a' and <= 'f');
 
     private static async Task VerifyFilesAsync(string root, EpochPriorArtifactFile[] files,
         CancellationToken cancellationToken)

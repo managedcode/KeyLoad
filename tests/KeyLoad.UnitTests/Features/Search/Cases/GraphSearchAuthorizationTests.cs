@@ -16,12 +16,12 @@ internal sealed class GraphSearchAuthorizationTests
         AddRestrictedGraph(database);
         GraphSearchTestSupport.PersistReader(database, restrictRows: true, ownerId: Alice);
         var engine = new SearchEngine(database.Database);
-        var hiddenSeedWalk = GraphSearchTestSupport.Walk(database,
+        var hiddenSeedWalk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Middle));
         var hiddenSeed = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
             GraphSearchTestSupport.Reader, new(1, RetrievalRequest(database),
                 Retriever: new(hiddenSeedWalk)), TestContext.Current!.Execution.CancellationToken)))!;
-        var visibleWalk = GraphSearchTestSupport.Walk(database,
+        var visibleWalk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root));
 
         var result = await engine.GraphSearchAsync(GraphSearchTestSupport.Reader,
@@ -39,9 +39,9 @@ internal sealed class GraphSearchAuthorizationTests
         GraphSearchTestSupport.Configure(database, protectLabels: true);
         GraphSearchTestSupport.AddPath(database);
         GraphSearchTestSupport.PersistReader(database);
-        var walk = GraphSearchTestSupport.Walk(database,
+        var walk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root))
-        { Labels = [GraphSearchTestSupport.Label] };
+        with { Labels = [GraphSearchTestSupport.Label] };
         var search = RetrievalRequest(database);
         var engine = new SearchEngine(database.Database);
 
@@ -58,7 +58,8 @@ internal sealed class GraphSearchAuthorizationTests
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(zeroWeightDenied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(allowed.Hits.Select(hit => hit.Document.Reference.Id).ToArray())
-            .IsEqualTo([GraphSearchTestSupport.FirstHit, GraphSearchTestSupport.SecondHit]);
+            .IsEquivalentTo([GraphSearchTestSupport.FirstHit, GraphSearchTestSupport.SecondHit],
+                TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 
     private static SearchRequest RetrievalRequest(TestDatabase database)

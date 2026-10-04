@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Storage;
 
@@ -9,7 +10,6 @@ public sealed partial class DatabaseEngine
     private const int MaxResourceFieldPolicies = 256;
     private const int MaxIndexFields = 8;
     private const int MaxConfiguredQueueLeaseSeconds = 3_600;
-    private const string ResourceMigrationRequiredMessage = "Resource migrations require an explicit migration job.";
     private const string InvalidResourceSchemaMessage = "The resource schema contains an invalid entry.";
     private const string ResourceSchemaBudgetMessage = "The resource schema exceeds its budget.";
     private const string DuplicateIndexNamesMessage = "Index names must be unique.";
@@ -23,10 +23,7 @@ public sealed partial class DatabaseEngine
         ValidateResource(request);
         var key = KeySpace.Resource(request.TenantId, request.DatabaseId, request.Definition.Name);
         var previous = transaction.GetRecord<ResourceDefinition>(key);
-        if (previous is not null && JsonData.Fingerprint(previous) != JsonData.Fingerprint(request.Definition))
-        {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, ResourceMigrationRequiredMessage);
-        }
+        ResourcePolicyUpdates.Validate(previous, request.Definition, request.ExpectedSchemaVersion);
         BlobStorageOperations.ConfigureResource(transaction, request, previous is null, Store.Identity.Incarnation);
         transaction.PutRecord(key, request.Definition);
         return Result(request.Definition);

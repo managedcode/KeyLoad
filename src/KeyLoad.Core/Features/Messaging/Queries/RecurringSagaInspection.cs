@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Text;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -52,7 +51,7 @@ public sealed partial class DatabaseEngine
         });
     }
 
-    private void ChargeRecurringRequest<T>(ReadExecutionBudget budget, string principalId, T request)
+    private static void ChargeRecurringRequest<T>(ReadExecutionBudget budget, string principalId, T request)
     {
         budget.Check();
         JsonData.Identifier(principalId);

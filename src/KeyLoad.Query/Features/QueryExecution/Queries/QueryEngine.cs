@@ -24,6 +24,7 @@ public sealed partial class QueryEngine
 
     /// <summary>Creates a query engine over one node-local database.</summary>
     /// <param name="database">Database owning query reads and admission.</param>
+    /// <param name="searchEngine">The shared authorized search executor.</param>
     public QueryEngine(DatabaseEngine database, SearchEngine? searchEngine = null)
     {
         ArgumentNullException.ThrowIfNull(database);

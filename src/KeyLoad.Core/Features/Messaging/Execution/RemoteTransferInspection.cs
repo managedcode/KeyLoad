@@ -13,6 +13,7 @@ public sealed partial class DatabaseEngine
     /// <param name="principalId">The authenticated persisted principal.</param>
     /// <param name="source">The complete source queue lane.</param>
     /// <param name="transferId">The caller-stable transfer identifier.</param>
+    /// <param name="cancellationToken">Cancels bounded inspection work.</param>
     /// <returns>The current transfer view, or null when the source identity is not retained.</returns>
     public QueueTransferInspection? InspectQueueTransfer(string principalId, QueueLaneRef source, Guid transferId,
         CancellationToken cancellationToken = default)
@@ -40,6 +41,7 @@ public sealed partial class DatabaseEngine
     /// <param name="destination">The complete destination queue lane.</param>
     /// <param name="source">The complete source queue lane.</param>
     /// <param name="transferId">The caller-stable transfer identifier.</param>
+    /// <param name="cancellationToken">Cancels bounded receipt inspection work.</param>
     /// <returns>The committed destination proof, or null when no receipt is retained.</returns>
     public QueueTransferReceiptInspection? InspectQueueTransferReceipt(string principalId,
         QueueLaneRef destination, QueueLaneRef source, Guid transferId, CancellationToken cancellationToken = default)

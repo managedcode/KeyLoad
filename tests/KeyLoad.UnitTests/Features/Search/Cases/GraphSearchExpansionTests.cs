@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Query;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -31,10 +30,11 @@ internal sealed class GraphSearchExpansionTests
         await Assert.That(result.Expansion.Documents.Select(item => item.Document.Reference).ToArray())
             .IsEquivalentTo([
                 GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Middle),
+                GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root),
                 GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Documents, GraphSearchTestSupport.SecondHit)
             ], TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(result.Expansion.Documents.Select(item => item.ShortestHops).ToArray())
-            .IsEqualTo([1, 2]);
+            .IsEquivalentTo([1, 1, 2], TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(result.Expansion.Documents.All(item => !item.Document.Redacted)).IsTrue();
     }
 
@@ -54,10 +54,12 @@ internal sealed class GraphSearchExpansionTests
 
         var selected = result.Hits.Select(item => item.Document.Reference).ToHashSet();
         await Assert.That(result.Hits.Select(item => item.Document.Reference.Id).ToArray())
-            .IsEqualTo([GraphSearchTestSupport.FirstHit, GraphSearchTestSupport.SecondHit]);
+            .IsEquivalentTo([GraphSearchTestSupport.FirstHit, GraphSearchTestSupport.SecondHit],
+                TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(result.Expansion!.Documents.Any(item => selected.Contains(item.Document.Reference))).IsFalse();
         await Assert.That(result.Expansion.Documents.Select(item => item.Document.Reference.Id).ToArray())
-            .IsEqualTo([GraphSearchTestSupport.Middle, GraphSearchTestSupport.Root]);
+            .IsEquivalentTo([GraphSearchTestSupport.Middle, GraphSearchTestSupport.Root],
+                TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 
     [Test]

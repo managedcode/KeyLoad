@@ -11,11 +11,11 @@
 
 ## Commands and evidence
 - The helper is built as part of the GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- It is invoked by `dotnet test --project tests/KeyLoad.RecoveryTests --no-build --no-restore --configuration Release` in `.github/workflows/ci.yml`; run it only through GitHub Actions qualification.
+- Owner correction2026-10-03 requires invocation only by the native child of `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery` (or the mapped guarded-store unit suite). AppHost owns the runner, prerequisites, artifacts, execution and shutdown. Local development is authorized; exact-source Linux GitHub qualification remains mandatory.
 
 ## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
-- Preserve real process boundaries and artifacts. Report exact Actions run/SHA/artifacts; do not run recovery qualifications locally.
+- Preserve real process boundaries and artifacts. Report exact Actions run/SHA/artifacts for qualification; local Aspire process checks remain development evidence and do not qualify power-loss or endurance.
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.

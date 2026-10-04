@@ -1,4 +1,6 @@
 using KeyLoad.Core.Features.Search;
+using KeyLoad.Storage;
+using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -26,7 +28,7 @@ internal sealed class EventProjectionReplayTests
         await Assert.That(effect).IsNull();
         await Assert.That(vector.SequenceEqual(before)).IsFalse();
         await Assert.That(search.Select(result => result.Document.Reference.Id).ToArray())
-            .IsEquivalentTo(new[] { EventProjectionFixture.TargetId });
+            .IsEquivalentTo(new[] { EventProjectionFixture.TargetId }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -46,7 +48,7 @@ internal sealed class EventProjectionReplayTests
         await Assert.That(retry).IsEqualTo(receipt);
         await Assert.That(fixture.VectorBytes()!.SequenceEqual(persistedVector)).IsTrue();
         await Assert.That(search.Select(result => result.Document.Reference.Id).ToArray())
-            .IsEquivalentTo(new[] { EventProjectionFixture.TargetId });
+            .IsEquivalentTo(new[] { EventProjectionFixture.TargetId }, CollectionOrdering.Matching);
     }
 
     [Test]

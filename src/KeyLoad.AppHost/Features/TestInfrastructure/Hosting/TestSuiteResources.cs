@@ -12,6 +12,30 @@ internal static class TestSuiteResources
             throw new InvalidOperationException("The test AppHost must run from the KeyLoad source checkout.");
         }
         var resultsDirectory = ResolvePath(root, settings.ResultsDirectory ?? Path.Combine("TestResults", settings.Suite));
+        var arguments = BuildArguments(root, settings, resultsDirectory);
+        var runner = builder.AddExecutable(settings.ResourceName, "dotnet", root, arguments)
+            .WithEnvironment(TestSuiteSettings.SuiteEnvironment, "");
+        if (settings.Suite == PriorProbeResources.RecoverySuite)
+        {
+            var probesDirectory = PriorProbeResources.CreateDirectoryPath(resultsDirectory);
+            foreach (var preparation in PriorProbeResources.Add(builder, root, probesDirectory))
+            {
+                runner.WaitForCompletion(preparation);
+            }
+            runner.WithEnvironment(PriorProbeResources.DirectoryEnvironment, probesDirectory);
+        }
+        if (settings.Suite == "comparison" && settings.ComparisonTarget is not null)
+        {
+            runner.WithEnvironment("Benchmarks__Target", settings.ComparisonTarget);
+        }
+        if (settings.Suite == "unit-scalar")
+        {
+            runner.WithEnvironment("DOTNET_EnableHWIntrinsic", "0");
+        }
+    }
+
+    private static string[] BuildArguments(string root, TestSuiteSettings settings, string resultsDirectory)
+    {
         var arguments = new List<string>
         {
             "test", "--project", Path.Combine(root, "tests", settings.Project),
@@ -37,25 +61,7 @@ internal static class TestSuiteResources
             arguments.Add("--treenode-filter");
             arguments.Add(settings.Filter);
         }
-        var runner = builder.AddExecutable(settings.ResourceName, "dotnet", root, [.. arguments])
-            .WithEnvironment(TestSuiteSettings.SuiteEnvironment, "");
-        if (settings.Suite == PriorProbeResources.RecoverySuite)
-        {
-            var probesDirectory = PriorProbeResources.CreateDirectoryPath(resultsDirectory);
-            foreach (var preparation in PriorProbeResources.Add(builder, root, probesDirectory))
-            {
-                runner.WaitForCompletion(preparation);
-            }
-            runner.WithEnvironment(PriorProbeResources.DirectoryEnvironment, probesDirectory);
-        }
-        if (settings.Suite == "comparison" && settings.ComparisonTarget is not null)
-        {
-            runner.WithEnvironment("Benchmarks__Target", settings.ComparisonTarget);
-        }
-        if (settings.Suite == "unit-scalar")
-        {
-            runner.WithEnvironment("DOTNET_EnableHWIntrinsic", "0");
-        }
+        return [.. arguments];
     }
 
     private static string ResolvePath(string root, string path)

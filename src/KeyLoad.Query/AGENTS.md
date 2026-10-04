@@ -11,11 +11,11 @@
 
 ## Commands and evidence
 - GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Query behavior is exercised by `dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release` and public flows in IntegrationTests, dispatched only through `.github/workflows/ci.yml`.
+- Owner correction2026-10-03 requires query tests through `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit`, or `unit-scalar`; public clients use `rf3` through that same AppHost entry. Preserve every complete suite, native artifacts and AppHost-owned resource cleanup. Local development is authorized; delivered-source Linux GitHub qualification remains mandatory.
 
 ## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
-- Preserve resource budgets, cancellation, validation and error semantics. Tests/qualification run only in GitHub Actions; no local test claims.
+- Preserve resource budgets, cancellation, validation and error semantics. Local Aspire results are development evidence; qualification requires exact-source Linux GitHub Actions artifacts and every required gate.
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.

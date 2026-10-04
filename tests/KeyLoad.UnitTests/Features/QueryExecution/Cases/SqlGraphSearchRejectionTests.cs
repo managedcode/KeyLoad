@@ -1,14 +1,19 @@
 using System.Text.Json;
 using KeyLoad.Query;
+using KeyLoad.UnitTests.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal sealed class SqlGraphSearchRejectionTests
 {
-    private const string GraphOnly = "SEARCH FROM \"graph-search-documents\" RETRIEVE GRAPH \"graph-search-links\" "
+    private const string SearchPrefix = "SEARCH FROM \"graph-search-documents\"";
+    private const string GraphTail = " RETRIEVE GRAPH \"graph-search-links\" "
         + "SEEDS ((\"graph-search-projects\",'root-node')) DEPTH 4 VERTICES 20 EDGES 40";
+    private const string GraphOnly = SearchPrefix + GraphTail;
     private const string DuplicateRetriever = GraphOnly + " RETRIEVE GRAPH \"graph-search-links\" "
         + "SEEDS ((\"graph-search-projects\",'root-node')) DEPTH 4 VERTICES 20 EDGES 40";
+    private const string TextParameter = "text";
+    private const string VectorParameter = "vector";
 
     [Test]
     public async Task InvalidVersionCursorAndFullScanFlagRejectBeforeRead()
@@ -40,20 +45,39 @@ internal sealed class SqlGraphSearchRejectionTests
     {
         using var database = new TestDatabase();
         var engine = new QueryEngine(database.Database);
-        const string textSql = "SEARCH FROM \"graph-search-documents\" TEXT text MATCH @text "
-            + GraphOnly["SEARCH FROM \"graph-search-documents\"".Length..];
-        const string vectorSql = "SEARCH FROM \"graph-search-documents\" VECTOR embedding MATCH @vector "
-            + "SPACE (\"graph-sql-space\",2,Cosine,\"graph-sql-model\",1) "
-            + GraphOnly["SEARCH FROM \"graph-search-documents\"".Length..];
+        const string textSql = SearchPrefix + " TEXT text MATCH @text " + GraphTail;
+        const string vectorSql = SearchPrefix + " VECTOR embedding MATCH @vector "
+            + "SPACE (\"graph-sql-space\",2,Cosine,\"graph-sql-model\",\"graphsqlversion\") "
+            + GraphTail;
 
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, textSql,
-            SqlGraphSearchTestSupport.Parameters(("text", new[] { "not", "a string" }))));
+            SqlGraphSearchTestSupport.Parameters((TextParameter, new[] { "not", "a string" }))));
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, textSql,
-            new Dictionary<string, JsonElement> { ["text"] = default }));
+            new Dictionary<string, JsonElement> { [TextParameter] = default }));
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, vectorSql,
-            SqlGraphSearchTestSupport.Parameters(("vector", new[] { 1f }))));
+            SqlGraphSearchTestSupport.Parameters((VectorParameter, new[] { 1f }))));
+        using var overflowingNumber = JsonDocument.Parse("[1e999,0]");
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, vectorSql,
-            SqlGraphSearchTestSupport.Parameters(("vector", new[] { float.PositiveInfinity, 0f }))));
+            new Dictionary<string, JsonElement> { [VectorParameter] = overflowingNumber.RootElement.Clone() }));
+    }
+
+    [Test]
+    public async Task EmptySqlLabelFilterStillRequiresPersistedLabelFieldUse()
+    {
+        using var database = new TestDatabase();
+        GraphSearchTestSupport.Configure(database, protectLabels: true);
+        GraphSearchTestSupport.AddPath(database);
+        GraphSearchTestSupport.PersistReader(database);
+        const string sql = "SEARCH FROM \"graph-search-documents\" SCOPE GRAPH \"graph-search-links\" "
+            + "SEEDS ((\"graph-search-projects\",'root-node')) DEPTH 4 VERTICES 20 EDGES 40 LABELS () "
+            + "RETRIEVE GRAPH \"graph-search-links\" SEEDS ((\"graph-search-projects\",'root-node')) "
+            + "DEPTH 4 VERTICES 20 EDGES 40";
+
+        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => new QueryEngine(database.Database).SearchSqlAsync(
+            GraphSearchTestSupport.Reader, SqlGraphSearchTestSupport.Request(database.Partition, sql),
+            TestContext.Current!.Execution.CancellationToken)))!;
+
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);
     }
 
     [Test]
@@ -64,14 +88,19 @@ internal sealed class SqlGraphSearchRejectionTests
             new KeyLoad.Security.AuthorizationPolicy(), new() { MaxQueryBytes = 512 }));
         var excessiveParameters = Enumerable.Range(0, 257)
             .ToDictionary(index => $"p{index}", index => System.Text.Json.JsonSerializer.SerializeToElement(index));
+        const string textSql = SearchPrefix + " TEXT text MATCH @text " + GraphTail;
 
         var parameterFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, GraphOnly, excessiveParameters))))!;
         var sizeFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, GraphOnly + " " + new string(' ', 600)))))!;
+        var parameterSizeFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.SearchSqlAsync("root",
+            SqlGraphSearchTestSupport.Request(database.Partition, textSql,
+                SqlGraphSearchTestSupport.Parameters((TextParameter, new string('n', 600)))))))!;
 
         await Assert.That(parameterFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(sizeFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(parameterSizeFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]

@@ -11,7 +11,7 @@ internal sealed class WalFileFixture : IDisposable
     internal const ulong CurrentMagic = 0x344C4157444C4BUL;
     internal const ulong LegacyMagic = 0x314C4157444C4BUL;
     internal const int HeaderBytes = 52;
-    internal const int CurrentIdentityVersion = 6;
+    internal const int CurrentIdentityVersion = 7;
     private const int PayloadLengthOffset = 8;
     private const int SequenceOffset = 12;
     private const int ChecksumOffset = 20;

@@ -78,9 +78,14 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.EventsRead, new ReadEventSourceRequest(Source)),
         Read(McpCatalogExpectations.SubscriptionsStatus, new GetSubscriptionRequest(Subscription)),
         Read(McpCatalogExpectations.MessagesInspect, new InspectMessageRequest(Lane, Entity)),
+        Read(McpCatalogExpectations.QueueTransferInspect, new InspectQueueTransferRequest(Lane, StableId)),
+        Read(McpCatalogExpectations.QueueTransferReceipt, new InspectQueueTransferReceiptRequest(Lane, Lane, StableId)),
+        Read(McpCatalogExpectations.ScheduleInspect, new InspectRecurringScheduleRequest(Lane, StableId)),
+        Read(McpCatalogExpectations.SagaInspect, new InspectSagaRequest(Lane, StableId)),
         Read(McpCatalogExpectations.GraphTraverse, new TraverseRequest(Partition, Resource, Reference)),
         Read(McpCatalogExpectations.SeriesRead, new ReadSamplesRequest(Partition, Resource, Entity, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch)),
         Read(McpCatalogExpectations.QueryExecute, new QueryRequest(Partition, Sql)),
+        Read(McpCatalogExpectations.QuerySearch, new SqlGraphSearchRequest(1, new(Partition, Sql))),
         Read(McpCatalogExpectations.QueryAst, Ast()),
         Read(McpCatalogExpectations.ChangesRead, new ReadChangeFeedRequest(Partition, Resource)),
         Read(McpCatalogExpectations.QueryLiveStart, new StartLiveQueryRequest(Ast())),
@@ -88,6 +93,8 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.OutboxStatus, new GetOutboxStatusRequest(Partition)),
         Read(McpCatalogExpectations.ProjectionsRead, new ReadProjectionBatchRequest(Consumer)),
         Read(McpCatalogExpectations.SearchExecute, new SearchRequest(Partition, Resource)),
+        Read(McpCatalogExpectations.SearchGraph, new GraphSearchRequest(1, new(Partition, Resource),
+            Retriever: new(new(Resource, [Reference])))),
         Read(McpCatalogExpectations.SeriesRetention, new ReadSampleRetentionRequest(Partition, Resource, Entity))
     ];
 

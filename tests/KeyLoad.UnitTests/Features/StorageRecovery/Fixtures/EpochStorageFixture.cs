@@ -26,6 +26,7 @@ internal sealed class EpochStorageFixture : IDisposable
     private const int FramePositionOffset = 12;
     private const int FrameChecksumOffset = 20;
     private const int ChecksumBytes = 32;
+    private const ulong CurrentJournalMagic = 0x344C4157444C4BUL;
     private readonly string root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
 
     internal EpochStorageFixture() => Directory.CreateDirectory(root);
@@ -140,6 +141,7 @@ internal sealed class EpochStorageFixture : IDisposable
     private static ulong SourceMagic(ulong current, int sourceEpoch)
         => current switch
         {
+            CurrentJournalMagic => CurrentJournalMagic,
             0x35545043444C4BUL when sourceEpoch == Native5Epoch => 0x33545043444C4BUL,
             0x35545043444C4BUL when sourceEpoch == Native6Epoch => 0x34545043444C4BUL,
             0x35415444444C4BUL when sourceEpoch == Native5Epoch => 0x33415444444C4BUL,

@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class GraphSearchTestSupport
@@ -22,7 +20,7 @@ internal static class GraphSearchTestSupport
     {
         database.Configure(Documents, ResourceKind.Collection);
         database.Configure(Projects, ResourceKind.Collection);
-        database.Configure(Graph, ResourceKind.Graph, fields: protectLabels ? [new("label", "graph-label")] : null);
+        database.Configure(Graph, ResourceKind.Graph, fields: protectLabels ? [new("/label", "graph-label")] : null);
     }
 
     internal static EntityRef Vertex(TestDatabase database, string collection, string id)
@@ -61,6 +59,6 @@ internal static class GraphSearchTestSupport
             Reader, Tenant, [.. grants], [.. fieldGrants ?? []]) { RestrictRows = restrictRows, OwnerId = ownerId }));
     }
 
-    internal static GraphWalkSpec Walk(TestDatabase database, params EntityRef[] seeds)
+    internal static GraphWalkSpec Walk(params EntityRef[] seeds)
         => new(Graph, [.. seeds], MaxDepth: 4, MaxVertices: 20, MaxEdges: 40);
 }

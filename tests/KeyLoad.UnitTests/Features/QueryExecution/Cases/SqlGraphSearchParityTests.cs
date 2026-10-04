@@ -11,7 +11,7 @@ internal sealed class SqlGraphSearchParityTests
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
         GraphSearchTestSupport.AddPath(database);
-        var walk = GraphSearchTestSupport.Walk(database,
+        var walk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, SqlGraphSearchTestSupport.Root));
         var direct = new GraphSearchRequest(1,
             new(database.Partition, SqlGraphSearchTestSupport.Collection, Limit: SqlGraphSearchTestSupport.Limit,
@@ -22,7 +22,7 @@ internal sealed class SqlGraphSearchParityTests
         var actual = await new QueryEngine(database.Database).SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, SqlGraphSearchTestSupport.RetrieverSql()), cancellationToken);
 
-        await Assert.That(JsonDefaults.Serialize(actual)).IsEqualTo(JsonDefaults.Serialize(expected));
+        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 
     [Test]
@@ -50,7 +50,7 @@ internal sealed class SqlGraphSearchParityTests
         var actual = await new QueryEngine(database.Database).SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, sql), cancellationToken);
 
-        await Assert.That(JsonDefaults.Serialize(actual)).IsEqualTo(JsonDefaults.Serialize(expected));
+        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(actual.Hits[0].Score).IsEqualTo(actual.Hits[1].Score);
     }
 
@@ -60,7 +60,7 @@ internal sealed class SqlGraphSearchParityTests
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
         GraphSearchTestSupport.AddPath(database);
-        var walk = GraphSearchTestSupport.Walk(database,
+        var walk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, SqlGraphSearchTestSupport.Root));
         var direct = new GraphSearchRequest(1,
             new(database.Partition, SqlGraphSearchTestSupport.Collection, SqlGraphSearchTestSupport.TextField,
@@ -77,7 +77,7 @@ internal sealed class SqlGraphSearchParityTests
         var actual = await new QueryEngine(database.Database).SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, sql), cancellationToken);
 
-        await Assert.That(JsonDefaults.Serialize(actual)).IsEqualTo(JsonDefaults.Serialize(expected));
+        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 
     [Test]
@@ -88,16 +88,16 @@ internal sealed class SqlGraphSearchParityTests
         GraphSearchTestSupport.AddPath(database);
         var direct = new GraphSearchRequest(1,
             new(database.Partition, SqlGraphSearchTestSupport.Collection),
-            Retriever: new(GraphSearchTestSupport.Walk(database,
+            Retriever: new(GraphSearchTestSupport.Walk(
                 GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, SqlGraphSearchTestSupport.Root)), 0));
-        var sql = SqlGraphSearchTestSupport.RetrieverSql() + " WEIGHT 0";
+        var sql = SqlGraphSearchTestSupport.RetrieverSql(weight: "0");
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
 
         var expected = await new SearchEngine(database.Database).GraphSearchAsync("root", direct, cancellationToken);
         var actual = await new QueryEngine(database.Database).SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, sql), cancellationToken);
 
-        await Assert.That(JsonDefaults.Serialize(actual)).IsEqualTo(JsonDefaults.Serialize(expected));
+        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(actual.Hits).IsEmpty();
     }
 
@@ -113,7 +113,7 @@ internal sealed class SqlGraphSearchParityTests
                 SqlGraphSearchTestSupport.VectorField, [1, 0], space, 1),
             new PutVector(SqlGraphSearchTestSupport.Collection, GraphSearchTestSupport.SecondHit,
                 SqlGraphSearchTestSupport.VectorField, [0, 1], space, 1));
-        var walk = GraphSearchTestSupport.Walk(database,
+        var walk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, SqlGraphSearchTestSupport.Root));
         var direct = new GraphSearchRequest(1,
             new(database.Partition, SqlGraphSearchTestSupport.Collection, SqlGraphSearchTestSupport.TextField,
@@ -125,7 +125,7 @@ internal sealed class SqlGraphSearchParityTests
                 SqlGraphSearchTestSupport.Vertices, SqlGraphSearchTestSupport.Edges,
                 System.Collections.Immutable.ImmutableArray<string>.Empty));
         const string sql = "SEARCH FROM \"graph-search-documents\" TEXT text MATCH @text WEIGHT 1 "
-            + "VECTOR embedding MATCH @vector SPACE (\"graph-sql-space\",2,Cosine,\"graph-sql-model\",1) WEIGHT 1 "
+            + "VECTOR embedding MATCH @vector SPACE (\"graph-sql-space\",2,Cosine,\"graph-sql-model\",\"graphsqlversion\") WEIGHT 1 "
             + "SCOPE GRAPH \"graph-search-links\" SEEDS ((\"graph-search-projects\",@root)) DEPTH 4 VERTICES 20 EDGES 40 LABELS (@label) "
             + "RETRIEVE GRAPH \"graph-search-links\" SEEDS ((\"graph-search-projects\",@root)) DEPTH 4 VERTICES 20 EDGES 40 WEIGHT 0.5 "
             + "EXPAND GRAPH \"graph-search-links\" DEPTH 4 VERTICES 20 EDGES 40 LABELS () "
@@ -140,7 +140,7 @@ internal sealed class SqlGraphSearchParityTests
         var actual = await new QueryEngine(database.Database).SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, sql, parameters), cancellationToken);
 
-        await Assert.That(JsonDefaults.Serialize(actual)).IsEqualTo(JsonDefaults.Serialize(expected));
+        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 
     [Test]
@@ -150,7 +150,7 @@ internal sealed class SqlGraphSearchParityTests
 
         var manifest = new QueryEngine(database.Database).Capabilities;
 
-        await Assert.That(manifest.Dialect).IsEqualTo("Q1");
+        await Assert.That(manifest.SqlDialect).IsEqualTo("Q1");
         await Assert.That(manifest.ReadProfiles).Contains("graph-search-v1");
     }
 
@@ -163,16 +163,16 @@ internal sealed class SqlGraphSearchParityTests
         var direct = new GraphSearchRequest(1,
             new(database.Partition, SqlGraphSearchTestSupport.Collection,
                 AllowedIds: System.Collections.Immutable.ImmutableArray<string>.Empty),
-            Retriever: new(GraphSearchTestSupport.Walk(database,
+            Retriever: new(GraphSearchTestSupport.Walk(
                 GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, SqlGraphSearchTestSupport.Root))));
         var actual = await new QueryEngine(database.Database).SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition,
-                SqlGraphSearchTestSupport.RetrieverSql() + " ALLOW IDS ()"),
+                SqlGraphSearchTestSupport.RetrieverSql(allowedIds: "")),
             TestContext.Current!.Execution.CancellationToken);
         var expected = await new SearchEngine(database.Database).GraphSearchAsync("root", direct,
             TestContext.Current!.Execution.CancellationToken);
 
-        await Assert.That(JsonDefaults.Serialize(actual)).IsEqualTo(JsonDefaults.Serialize(expected));
+        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(actual.Hits).IsEmpty();
     }
 }

@@ -37,7 +37,30 @@ public sealed partial class DatabaseEngine
 
         ValidateExtendedMutationStructure(mutation);
 
-        var owner = mutation switch
+        if (mutation.Resource != CanonicalMutationOwner(mutation))
+        {
+            throw Errors.Fail(ErrorCode.Validation, "The mutation resource and canonical owner differ.");
+        }
+
+        var invalid = mutation switch
+        {
+            PatchDocument patch => patch.Patches.IsDefault || patch.Patches.Any(item => item is null || item.Kind is not (PatchKind.Set or PatchKind.Remove)),
+            AppendEvents append => append.Events.IsDefault || append.Events.Any(item => item is null)
+                || append.ExpectedRevision.State is not (ExpectedStreamState.Any or ExpectedStreamState.Exact or ExpectedStreamState.NoStream),
+            PublishTopic topic => topic.Events.IsDefault || topic.Events.Any(item => item is null),
+            AppendSamples samples => samples.Samples.IsDefault || samples.Samples.Any(item => item is null),
+            PutVector vector => vector.Values.IsDefault,
+            ApplyVectorProjection projection => projection.Target.Values.IsDefault,
+            _ => false
+        };
+        if (invalid)
+        {
+            throw Errors.Fail(ErrorCode.Validation, "A nested mutation entry or enum value is invalid.");
+        }
+    }
+
+    private static string CanonicalMutationOwner(Mutation mutation)
+        => mutation switch
         {
             PutDocument put => put.Collection,
             PatchDocument patch => patch.Collection,
@@ -64,27 +87,6 @@ public sealed partial class DatabaseEngine
             ExpireSaga saga => saga.Lane.Queue,
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, "The mutation is unsupported.")
         };
-        if (mutation.Resource != owner)
-        {
-            throw Errors.Fail(ErrorCode.Validation, "The mutation resource and canonical owner differ.");
-        }
-
-        var invalid = mutation switch
-        {
-            PatchDocument patch => patch.Patches.IsDefault || patch.Patches.Any(item => item is null || item.Kind is not (PatchKind.Set or PatchKind.Remove)),
-            AppendEvents append => append.Events.IsDefault || append.Events.Any(item => item is null)
-                || append.ExpectedRevision.State is not (ExpectedStreamState.Any or ExpectedStreamState.Exact or ExpectedStreamState.NoStream),
-            PublishTopic topic => topic.Events.IsDefault || topic.Events.Any(item => item is null),
-            AppendSamples samples => samples.Samples.IsDefault || samples.Samples.Any(item => item is null),
-            PutVector vector => vector.Values.IsDefault,
-            ApplyVectorProjection projection => projection.Target.Values.IsDefault,
-            _ => false
-        };
-        if (invalid)
-        {
-            throw Errors.Fail(ErrorCode.Validation, "A nested mutation entry or enum value is invalid.");
-        }
-    }
 
     private static void ValidateExtendedMutationStructure(Mutation mutation)
     {
@@ -99,7 +101,8 @@ public sealed partial class DatabaseEngine
             ConfigureRecurringSchedule schedule => schedule.Definition?.Lane?.Partition is null,
             EmitRecurringOccurrences schedule => schedule.Lane?.Partition is null,
             CancelRecurringSchedule schedule => schedule.Lane?.Partition is null,
-            CompareExchangeSaga saga => saga.Lane?.Partition is null || saga.Timeout is { Queue.Partition: null },
+            CompareExchangeSaga saga => saga.Lane?.Partition is null
+                || saga.Timeout is { } timeout && timeout.Queue?.Partition is null,
             ExpireSaga saga => saga.Lane?.Partition is null,
             _ => false
         };

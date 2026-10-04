@@ -102,4 +102,23 @@ internal sealed class McpCatalogTests
         }
         return descriptor!;
     }
+
+    [Test]
+    public async Task AcMcp006MessagingInspectionAndGraphSearchAdvertiseReadOnlyNativeTools()
+    {
+        string[] names = [McpCatalogExpectations.QueueTransferInspect, McpCatalogExpectations.QueueTransferReceipt,
+            McpCatalogExpectations.ScheduleInspect, McpCatalogExpectations.SagaInspect,
+            McpCatalogExpectations.SearchGraph, McpCatalogExpectations.QuerySearch];
+        foreach (var name in names)
+        {
+            var operation = Find(name);
+            await Assert.That(operation.ReadOnly).IsTrue();
+            await Assert.That(operation.Idempotent).IsTrue();
+            await Assert.That(operation.Destructive).IsFalse();
+            var tool = operation.CreateTool();
+            await Assert.That(tool.Annotations!.ReadOnlyHint).IsTrue();
+            await Assert.That(tool.Annotations.IdempotentHint).IsTrue();
+            await Assert.That(tool.Annotations.DestructiveHint).IsFalse();
+        }
+    }
 }

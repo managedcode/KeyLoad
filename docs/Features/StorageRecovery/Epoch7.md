@@ -72,6 +72,13 @@ to the recovery runner. It contains native5-probe and native6-probe directories,
 each with its explicit native-epoch receipt. Reusing an artifact under another
 source or overwriting another run's directory is forbidden. The two isolated
 probe builds can run in parallel; both must complete successfully before tests.
+`PriorProbePrerequisiteTests` in ComparisonTests/StorageRecovery verifies the
+actual recovery AppHost model, both successful-completion dependencies, exact
+native command arguments and different results-owned directories per host.
+The recovery suite verifies the original source/tree/archive and assembly/driver
+hashes before executing either old binary. CI invokes only that recovery
+AppHost entry; its original TestResults upload retains both prepared probes and
+their receipts. The obsolete separately invoked native5 wrapper is removed.
 
 ## Ordered execution and ownership
 

@@ -24,10 +24,10 @@ internal sealed class SqlGraphSearchValueReader
     {
         var seeds = ImmutableArray.CreateBuilder<EntityRef>();
         cursor.Need(SqlSyntax.OpenParen);
-        cursor.Need(SqlSyntax.OpenParen);
         do
         {
             budget.Check();
+            cursor.Need(SqlSyntax.OpenParen);
             var collection = cursor.Identifier();
             cursor.Need(SqlSyntax.Comma);
             seeds.Add(new(query.Partition, collection, ReadStringValue()));

@@ -7,6 +7,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class AnnSeedReadBudgetTests
 {
+    private const string LineageKeySpace = "vector-projection-lineage";
     [Test]
     public async Task ActualReadBytesPassAtObservedLimitAndFailOneByteBelowWithoutMutation()
     {
@@ -104,6 +105,15 @@ internal sealed class AnnSeedReadBudgetTests
                     var vector = NativeSerialization.Deserialize<VectorRecord>(value);
                     CountRead(view, DocumentStorageKeys.RecordKey(database.Partition, AnnSeedTestSupport.Collection,
                         vector.DocumentId), counter);
+                    var document = view.GetRecord<DocumentRecord>(DocumentStorageKeys.RecordKey(database.Partition,
+                        AnnSeedTestSupport.Collection, vector.DocumentId));
+                    var principal = view.GetRecord<PrincipalRecord>(KeySpace.Principal(AnnSeedTestSupport.Principal))!;
+                    if (document is { Deleted: false } && document.Revision == vector.DocumentRevision
+                        && database.Database.Authorization.CanReadRow(principal, document.Access))
+                    {
+                        CountRead(view, KeySpace.Partition(LineageKeySpace, database.Partition,
+                            AnnSeedTestSupport.Collection, vector.Field, vector.DocumentId), counter);
+                    }
                     return true;
                 }, observer: counter.Add);
             return counter.Total;

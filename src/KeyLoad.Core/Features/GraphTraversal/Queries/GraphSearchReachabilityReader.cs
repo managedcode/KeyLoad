@@ -18,7 +18,7 @@ internal sealed class GraphSearchReachabilityReader(
     private const string MismatchedEdge = "A graph adjacency record does not match its canonical edge.";
     private const string MissingGraph = "The graph resource is unavailable.";
     private const string InvalidGraphResource = "The graph resource is invalid for this partition.";
-    private const string LabelField = "label";
+    private const string LabelField = "/label";
     private const string EdgeLimit = "The graph edge visit budget was exhausted.";
     private const string VertexLimit = "The graph vertex visit budget was exhausted.";
     private const string RetainedLimit = "The graph reachability byte budget was exhausted.";

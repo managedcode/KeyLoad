@@ -8,7 +8,9 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal sealed class OrleansWalLifecycleTests
 {
-    private const ulong CheckpointMagic = 0x34545043444C4BUL;
+    private const ulong CheckpointMagic = 0x35545043444C4BUL;
+    private const int CheckpointVersion = 5;
+    private const int PayloadLengthOffset = 8;
     private const int SigningKeyBytes = 32;
     private const long AppliedPosition = 7;
     private const string SnapshotFileName = "snapshot";
@@ -18,7 +20,7 @@ internal sealed class OrleansWalLifecycleTests
     private const string LastAppliedKey = "last-applied";
 
     [Test]
-    public async Task AcWal004CompactionKeepsCheckpointFourAndIdentitySixAfterBinaryWrites()
+    public async Task AcWal004CompactionKeepsCheckpointFiveAndIdentitySevenAfterBinaryWrites()
     {
         using var files = new WalFileFixture();
         StoreIdentity original;
@@ -29,8 +31,13 @@ internal sealed class OrleansWalLifecycleTests
             var snapshot = store.Compact();
             await Assert.That(snapshot.Position).IsEqualTo(1L);
             await Assert.That(snapshot.RecordCount).IsEqualTo(1L);
-            await Assert.That(BinaryPrimitives.ReadUInt64LittleEndian(await files.ReadJournalAsync()))
+            var checkpoint = await files.ReadJournalAsync();
+            await Assert.That(BinaryPrimitives.ReadUInt64LittleEndian(checkpoint))
                 .IsEqualTo(CheckpointMagic);
+            var payloadLength = BinaryPrimitives.ReadInt32LittleEndian(checkpoint.AsSpan(PayloadLengthOffset));
+            var metadata = NativeSerialization.Deserialize<ZoneTreeCheckpointMetadata>(
+                checkpoint.AsSpan(WalFileFixture.HeaderBytes, payloadLength));
+            await Assert.That(metadata.Version).IsEqualTo(CheckpointVersion);
             await WalFileFixture.AssertPreservedIdentity(original, store.Identity);
             await WalFileFixture.AssertPreservedIdentity(original, await files.ReadIdentityAsync());
         }

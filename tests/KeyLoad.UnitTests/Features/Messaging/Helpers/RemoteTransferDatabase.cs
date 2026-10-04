@@ -14,7 +14,11 @@ internal sealed class RemoteTransferDatabase : IDisposable
     internal const string DatabaseId = "database";
     internal const string SourceQueueName = "source";
     internal const string DestinationQueueName = "destination";
-    private const string Domain = "orders";
+    internal const string SourcePartitionId = "source-partition";
+    internal const string DestinationPartitionId = "destination-partition";
+    internal const string OtherSourcePartitionId = "other-source-partition";
+    internal const string OtherSourceQueueName = "source-other";
+    internal const string Domain = "orders";
     private const string RootCredential = "root.remote-transfer-unit-test-credential";
     private const string DirectoryPrefix = "keyload-remote-transfer-";
     private const string GuidFormat = "N";
@@ -23,8 +27,8 @@ internal sealed class RemoteTransferDatabase : IDisposable
     private ZoneTreeStore store;
     private bool disposed;
 
-    internal PartitionRef SourcePartition { get; } = new(TenantId, DatabaseId, Domain, "source-partition");
-    internal PartitionRef DestinationPartition { get; } = new(TenantId, DatabaseId, Domain, "destination-partition");
+    internal PartitionRef SourcePartition { get; } = new(TenantId, DatabaseId, Domain, SourcePartitionId);
+    internal PartitionRef DestinationPartition { get; } = new(TenantId, DatabaseId, Domain, DestinationPartitionId);
     internal QueueLaneRef SourceQueue => new(SourcePartition, SourceQueueName);
     internal QueueLaneRef DestinationQueue => new(DestinationPartition, DestinationQueueName);
     internal DatabaseEngine Database { get; private set; }
@@ -55,7 +59,7 @@ internal sealed class RemoteTransferDatabase : IDisposable
     internal OperationResult Apply<T>(OperationKind kind, T payload, string principal = RootPrincipal,
         Guid? id = null, DateTimeOffset? time = null)
     {
-        var commandId = id ?? Guid.NewGuid();
+        var commandId = id ?? (payload is CommandRequest command ? command.CommandId : Guid.NewGuid());
         var json = JsonSerializer.Serialize(payload, JsonDefaults.Options);
         return Database.Apply(new(commandId, kind, principal, time ?? TimeProvider.System.GetUtcNow(), json));
     }
@@ -72,6 +76,30 @@ internal sealed class RemoteTransferDatabase : IDisposable
     internal void ConfigureQueue(QueueLaneRef lane, SensitiveFieldPolicy[]? fields = null,
         SensitiveFieldPolicy[]? headers = null, QueuePolicy? queuePolicy = null)
         => Configure(lane, fields, headers, queuePolicy);
+
+    internal static long MeasureTargetReceiptGrowth(string firstId, string secondId, string payload)
+    {
+        using var measured = new RemoteTransferDatabase();
+        var otherSource = new QueueLaneRef(new(TenantId, DatabaseId, Domain, OtherSourcePartitionId),
+            OtherSourceQueueName);
+        measured.ConfigureQueue(otherSource);
+        var first = new CreateQueueTransfer(measured.SourceQueue, Guid.NewGuid(), measured.DestinationQueue,
+            new(measured.DestinationQueue.Queue, firstId, payload));
+        var second = new CreateQueueTransfer(otherSource, Guid.NewGuid(), measured.DestinationQueue,
+            new(measured.DestinationQueue.Queue, secondId, payload));
+        measured.Commit(measured.SourcePartition, first);
+        measured.Commit(otherSource.Partition, second);
+        var firstIntent = measured.Database.InspectQueueTransfer(RootPrincipal,
+            measured.SourceQueue, first.TransferId)!;
+        var secondIntent = measured.Database.InspectQueueTransfer(RootPrincipal,
+            otherSource, second.TransferId)!;
+        measured.Commit(measured.DestinationPartition,
+            new AcceptQueueTransfer(measured.DestinationQueue, firstIntent.IntentToken));
+        var before = measured.TargetCapacity(measured.DestinationQueue).StoredBytes;
+        measured.Commit(measured.DestinationPartition,
+            new AcceptQueueTransfer(measured.DestinationQueue, secondIntent.IntentToken));
+        return measured.TargetCapacity(measured.DestinationQueue).StoredBytes - before;
+    }
 
     internal void Reopen(DatabaseLimits? replacementLimits = null)
     {

@@ -137,6 +137,35 @@ public intent/accept/receipt/complete and repeated target acceptance oracles.
 Do not change shared fixtures/topology, manufacture failures, bypass discovered
 endpoints, weaken outcomes or run gates. Root owns combined execution and faults.
 
+### S1 canonical process recovery stage
+
+Luna cluster_wave next owns new CrashHost Messaging Helpers and RecoveryTests
+Messaging Cases/Assertions/Helpers for recurring emission and saga expiry at the
+existing canonical CommitStage boundaries: HeaderWritten, PayloadWritten,
+JournalFlushed, MutationApplied and ApplyCompleted. Use the actual
+CanonicalCrashBoundary and existing owned child/StorageTrialLease/readiness
+mechanisms. Root alone joins the new modes into CrashHostApplication; do not add
+another test caller or modify the physical recovery observer.
+
+AC-JOBS-001/002/003 require genuine process kill, reopen and stable retry through
+the real ZoneTree/Core path: schedule watermark plus its single due occurrence,
+or Waiting/TimedOut plus one timeout message, recover as one canonical cut.
+Before durable flush, recovered state may be wholly before or wholly after;
+JournalFlushed and later must preserve the committed effect and receipt. Retry
+the same persisted operation and command ID, verify its exact original token,
+one message and unchanged outbox tail. Never relax the atomicity oracle. Use a
+real past recurring due instant with the next interval safely in the future;
+configure the saga with a valid future deadline and await that actual deadline
+before arming expiry. No clock double, direct timestamp rewrite or power-loss
+claim is permitted. Root runs the actual Aspire recovery suite; this process
+stage does not qualify autonomous S2 coordination or RF3.
+
+The worker prepares its scoped source patch outside the checkout while root
+verifies the prior frozen compilation, with exact base/post hashes and explicit
+dispatch join instructions. It runs no builds/tests/formatter/Git. Root reviews,
+applies the complete harness and dispatch together, then executes the mapped
+cases and required full gates before recording runtime evidence.
+
 No dependency or automatic migration is introduced. New persisted contracts need
 the epoch7 old-reader rejection/explicit stopped-copy upgrade workstream before
 delivery; rollback never opens these stores using an unaware reader. Interactive

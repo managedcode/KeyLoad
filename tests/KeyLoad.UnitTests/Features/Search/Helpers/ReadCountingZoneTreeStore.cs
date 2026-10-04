@@ -12,6 +12,7 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
     private const string GuidFormat = "N";
     private const string RootPrincipal = "root";
     private const string Tenant = "tenant";
+    private const string PartitionKey = "customer-1";
     private const string RootCredential = "root.graph-search-credential-32-characters";
     private readonly string directory;
     private readonly ZoneTreeStore inner;
@@ -32,7 +33,7 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
     }
 
     internal DatabaseEngine Database { get; }
-    internal PartitionRef Partition { get; } = new(Tenant, "database", "orders", "customer-1");
+    internal PartitionRef Partition { get; } = new(Tenant, "database", "orders", PartitionKey);
     internal int ReadCalls => Volatile.Read(ref readCalls);
     public StoreIdentity Identity => inner.Identity;
     public long Position => inner.Position;
@@ -79,7 +80,8 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
 
     private void AddGraphData()
     {
-        Submit(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), Partition,
+        var commandId = Guid.NewGuid();
+        Submit(OperationKind.Batch, new CommandRequest(commandId, Partition,
         [
             new PutDocument(GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root, "{}"),
             new PutDocument(GraphSearchTestSupport.Documents, GraphSearchTestSupport.FirstHit, "{}"),
@@ -92,10 +94,10 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
                 new(Partition, GraphSearchTestSupport.Documents, GraphSearchTestSupport.FirstHit),
                 new(Partition, GraphSearchTestSupport.Documents, GraphSearchTestSupport.SecondHit),
                 GraphSearchTestSupport.Label)
-        ]));
+        ]), id: commandId).Get<CommitReceipt>();
     }
 
-    private OperationResult Submit<T>(OperationKind kind, T payload)
-        => Database.Apply(new(Guid.NewGuid(), kind, RootPrincipal, DateTimeOffset.UtcNow,
+    private OperationResult Submit<T>(OperationKind kind, T payload, Guid? id = null)
+        => Database.Apply(new(id ?? Guid.NewGuid(), kind, RootPrincipal, TimeProvider.System.GetUtcNow(),
             JsonSerializer.Serialize(payload, JsonDefaults.Options)));
 }

@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -16,7 +16,7 @@ internal sealed class EventProjectionCorruptionTests
             return true;
         });
 
-        var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => fixture.SearchAsync());
+        var error = (await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.SearchAsync))!;
 
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);
     }

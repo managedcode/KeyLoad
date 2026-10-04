@@ -13,6 +13,7 @@ internal sealed class SearchReadBudgetTests
     private const string TestVersion = "1";
     private const string DocumentKeySpace = "document";
     private const string VectorKeySpace = "vector";
+    private const string LineageKeySpace = "vector-projection-lineage";
     private const int VectorDimensions = 2;
     private const int VectorVersion = 1;
     private const int PaddingLength = 12_000;
@@ -48,8 +49,9 @@ internal sealed class SearchReadBudgetTests
             new PutVector(Orders, "a", EmbeddingPath, [1, 0], Space, VectorVersion));
         var documentBytes = Bytes(DocumentKeySpace, Orders);
         var vectorBytes = Bytes(VectorKeySpace, Orders, EmbeddingPath);
+        var lineageBytes = KeySpace.Partition(LineageKeySpace, database.Partition, Orders, EmbeddingPath, "a").LongLength;
         var bounded = new DatabaseEngine(database.Store, database.Database.Authorization,
-            new() { MaxQueryReadBytes = TwoDocuments * documentBytes + vectorBytes });
+            new() { MaxQueryReadBytes = TwoDocuments * documentBytes + vectorBytes + lineageBytes });
         var search = new SearchEngine(bounded);
         var token = TestContext.Current!.Execution.CancellationToken;
 

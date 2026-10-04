@@ -117,6 +117,12 @@ Task replies; the stream RPC/transport and durable-operation contracts remain
 pending. Native enumeration does not transfer node-owned storage or supply
 persisted authority, retry receipts or durability.
 
+[ResourcePolicyUpdates](Features/Authorization/ResourcePolicyUpdates.md) and
+[ADR-093](ADR/ADR-093-resource-policy-updates.md) freeze policy-only CAS through
+the existing RF3 metadata ConfigureResource path. Advancing its resource version
+invalidates existing read/index fences; physical schema and placement remain
+separate migrations. Implementation and public qualification are in progress.
+
 [ADR-052](ADR/ADR-052-timeseries-bounded-aggregates.md) accepts the additive
 [TimeSeries](Features/TimeSeries.md) latest/aggregate/window slice. New typed
 Abstractions DTOs mirror Client/Server/Core TimeSeries owners and real matching

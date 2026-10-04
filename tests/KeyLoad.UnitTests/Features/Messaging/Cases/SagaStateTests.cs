@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -7,6 +6,7 @@ internal sealed class SagaStateTests
     private const string WaitingState = "{\"step\":\"reserved\"}";
     private const string UpdatedState = "{\"step\":\"charged\"}";
     private const string CompletedState = "{\"step\":\"done\"}";
+    private const string OtherPartitionId = "other-partition";
 
     [Test]
     public async Task SagaCasRetainsWaitingStateAcrossReopenAndTerminalStateCannotRevive()
@@ -48,4 +48,30 @@ internal sealed class SagaStateTests
 
     private static CompareExchangeSaga Waiting(RecurringSagaDatabase fixture, Guid sagaId, string state)
         => new(fixture.Queue, sagaId, 0, SagaPhase.Waiting, state);
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task AcJobs004MalformedTimeoutQueueScopeRejectsWithoutCreatingSaga(bool crossPartition)
+    {
+        using var fixture = new RecurringSagaDatabase();
+        var sagaId = Guid.NewGuid();
+        var queue = crossPartition
+            ? new QueueLaneRef(new(RecurringSagaDatabase.TenantId, RecurringSagaDatabase.DatabaseId,
+                RecurringSagaDatabase.Domain, OtherPartitionId), RecurringSagaDatabase.TimeoutQueueName)
+            : new QueueLaneRef(fixture.Partition, string.Empty);
+        var timeout = new SagaTimeoutDefinition(queue, WaitingState, "{}");
+        var mutation = new CompareExchangeSaga(fixture.Queue, sagaId, 0, SagaPhase.Waiting, WaitingState,
+            RecurringSagaDatabase.Epoch.AddMinutes(1), timeout);
+        var commandId = Guid.NewGuid();
+        var before = fixture.Database.GetOutboxStatus(RecurringSagaDatabase.RootPrincipal, fixture.Partition).Head.Tail;
+        var rejected = fixture.Apply(OperationKind.Batch,
+            new CommandRequest(commandId, fixture.Partition, [mutation]), id: commandId);
+        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal, fixture.Queue, sagaId)).IsNull();
+        await Assert.That(fixture.Database.GetOutboxStatus(RecurringSagaDatabase.RootPrincipal, fixture.Partition).Head.Tail)
+            .IsEqualTo(before);
+        var healthy = fixture.Commit(fixture.Partition, Waiting(fixture, sagaId, WaitingState));
+        await Assert.That(healthy.Mutations[0].Revision).IsEqualTo(1);
+    }
 }

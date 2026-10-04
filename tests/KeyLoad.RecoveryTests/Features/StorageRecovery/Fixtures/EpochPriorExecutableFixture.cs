@@ -12,7 +12,7 @@ internal static class EpochPriorExecutableFixture
         CancellationToken cancellationToken, int dataEpoch = Native5DataEpoch)
     {
         var receipt = await InvokeAsync(new(directory, EpochPriorSourceProbe.CreateOperation, compacted),
-            cancellationToken, dataEpoch);
+            dataEpoch, cancellationToken);
         if (receipt.ErrorCode is not null || receipt.DataEpoch != dataEpoch
             || receipt.NodeId == Guid.Empty || receipt.Incarnation == Guid.Empty)
         {
@@ -25,7 +25,7 @@ internal static class EpochPriorExecutableFixture
         CancellationToken cancellationToken, int dataEpoch = Native5DataEpoch)
     {
         var receipt = await InvokeAsync(new(directory, EpochPriorSourceProbe.CreateNodeOperation,
-            NodeProfile: profile), cancellationToken, dataEpoch);
+            NodeProfile: profile), dataEpoch, cancellationToken);
         if (receipt.ErrorCode is not null || receipt.DataEpoch != dataEpoch
             || receipt.NodeId == Guid.Empty || receipt.Incarnation != profile.Incarnation || receipt.AppliedPosition != 3)
         { throw new InvalidDataException(InvalidReceipt); }
@@ -34,15 +34,15 @@ internal static class EpochPriorExecutableFixture
 
     internal static Task<EpochPriorProbeReceipt> InspectAsync(string directory, CancellationToken cancellationToken,
         int dataEpoch = Native5DataEpoch)
-        => InvokeAsync(new(directory, EpochPriorSourceProbe.InspectOperation), cancellationToken, dataEpoch);
+        => InvokeAsync(new(directory, EpochPriorSourceProbe.InspectOperation), dataEpoch, cancellationToken);
 
     internal static Task<EpochPriorProbeReceipt> VerifySnapshotAsync(string directory, string snapshot,
         CancellationToken cancellationToken, int dataEpoch = Native5DataEpoch)
         => InvokeAsync(new(directory, EpochPriorSourceProbe.VerifySnapshotOperation, Snapshot: snapshot),
-            cancellationToken, dataEpoch);
+            dataEpoch, cancellationToken);
 
     private static async Task<EpochPriorProbeReceipt> InvokeAsync(EpochPriorSourceRequest request,
-        CancellationToken cancellationToken, int dataEpoch)
+        int dataEpoch, CancellationToken cancellationToken)
     {
         var executable = await EpochPriorExecutableArtifact.VerifyAsync(dataEpoch, cancellationToken);
         var result = await EpochPriorExecutableProcess.RunAsync(executable,

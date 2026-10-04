@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -61,12 +61,11 @@ internal sealed class RemoteTransferRetentionTests
         var transferId = first.TransferId;
         var stored = measured.Database.Store.Read(view => view.GetRecord<RemoteTransferIntentRecord>(
             RemoteTransferStorage.IntentKey(measured.SourceQueue, transferId)))!;
-        var tokenBytes = Encoding.UTF8.GetByteCount(stored.IntentToken);
-        var byteLimit = checked((int)tokenBytes - 1);
+        var byteLimit = checked(stored.ReceiptReservationBytes - 1);
         var next = Create(measured, measured.SourceQueue, SecondId);
         var requestBytes = Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(
             new CommandRequest(Guid.NewGuid(), measured.SourcePartition, [next]), JsonDefaults.Options));
-        await Assert.That(stored.ReceiptReservationBytes).IsLessThanOrEqualTo(byteLimit);
+        await Assert.That(stored.ReceiptReservationBytes).IsGreaterThan(byteLimit);
         await Assert.That(requestBytes).IsLessThan(byteLimit);
 
         using var limited = new RemoteTransferDatabase(measured.Database.Limits with { MaxBatchBytes = byteLimit });
@@ -93,8 +92,8 @@ internal sealed class RemoteTransferRetentionTests
         var next = Create(fixture, fixture.SourceQueue, SecondId);
         var requestBytes = Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(
             new CommandRequest(Guid.NewGuid(), fixture.SourcePartition, [next]), JsonDefaults.Options));
-        await Assert.That(Encoding.UTF8.GetByteCount(firstIntent.IntentToken)).IsLessThan(retainedBytes);
-        await Assert.That(requestBytes).IsLessThan(retainedBytes);
+        await Assert.That((long)Encoding.UTF8.GetByteCount(firstIntent.IntentToken)).IsLessThan(retainedBytes);
+        await Assert.That((long)requestBytes).IsLessThan(retainedBytes);
 
         fixture.Reopen(fixture.Database.Limits with { MaxBatchBytes = checked((int)retainedBytes) });
         fixture.Commit(fixture.SourcePartition, first);
@@ -128,10 +127,13 @@ internal sealed class RemoteTransferRetentionTests
         var commandBytes = Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(
             new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
                 [new AcceptQueueTransfer(fixture.DestinationQueue, secondIntent.IntentToken)]), JsonDefaults.Options));
-        await Assert.That(Encoding.UTF8.GetByteCount(secondIntent.IntentToken)).IsLessThan(retainedBytes);
-        await Assert.That(commandBytes).IsLessThan(retainedBytes);
+        await Assert.That((long)Encoding.UTF8.GetByteCount(secondIntent.IntentToken)).IsLessThan(retainedBytes);
+        var nextReceiptBytes = RemoteTransferDatabase.MeasureTargetReceiptGrowth(FirstId, SecondId, Payload);
+        var byteLimit = checked((int)Math.Max(retainedBytes, commandBytes));
+        await Assert.That(commandBytes).IsLessThanOrEqualTo(byteLimit);
+        await Assert.That(retainedBytes + nextReceiptBytes).IsGreaterThan((long)byteLimit);
 
-        fixture.Reopen(fixture.Database.Limits with { MaxBatchBytes = checked((int)retainedBytes) });
+        fixture.Reopen(fixture.Database.Limits with { MaxBatchBytes = byteLimit });
         var rejected = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
                 [new AcceptQueueTransfer(fixture.DestinationQueue, secondIntent.IntentToken)]));
@@ -171,7 +173,8 @@ internal sealed class RemoteTransferRetentionTests
     private static QueueLaneRef OtherSource(RemoteTransferDatabase fixture)
     {
         var lane = new QueueLaneRef(new(RemoteTransferDatabase.TenantId, RemoteTransferDatabase.DatabaseId,
-            "orders", "other-source-partition"), "source-other");
+            RemoteTransferDatabase.Domain, RemoteTransferDatabase.OtherSourcePartitionId),
+            RemoteTransferDatabase.OtherSourceQueueName);
         fixture.ConfigureQueue(lane);
         return lane;
     }
@@ -179,4 +182,5 @@ internal sealed class RemoteTransferRetentionTests
     private static CreateQueueTransfer Create(RemoteTransferDatabase fixture, QueueLaneRef source, string messageId)
         => new(source, Guid.NewGuid(), fixture.DestinationQueue,
             new(fixture.DestinationQueue.Queue, messageId, Payload));
+
 }

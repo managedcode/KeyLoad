@@ -1,5 +1,4 @@
 using System.Text;
-using KeyLoad.Core;
 
 namespace KeyLoad.Query.Features.Search;
 

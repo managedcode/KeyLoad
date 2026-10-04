@@ -1,5 +1,6 @@
-using KeyLoad.Core;
+using KeyLoad.Core.Features.Search;
 using KeyLoad.Security;
+using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -28,7 +29,7 @@ internal sealed class EventProjectionPolicyTests
 
         await Assert.That(hidden).IsEmpty();
         await Assert.That(visible.Select(result => result.Document.Reference.Id).ToArray())
-            .IsEquivalentTo(new[] { EventProjectionFixture.TargetId });
+            .IsEquivalentTo(new[] { EventProjectionFixture.TargetId }, CollectionOrdering.Matching);
         await Assert.That(revised).IsEmpty();
     }
 
@@ -68,7 +69,7 @@ internal sealed class EventProjectionPolicyTests
         fixture.Apply(fixture.Request());
         fixture.ConfigureReader([EventProjectionFixture.InputUse, EventProjectionFixture.VectorUse], revoked: true);
 
-        var error = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => fixture.SearchAsync()))!;
+        var error = (await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.SearchAsync))!;
 
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Unauthenticated);
     }
@@ -76,15 +77,16 @@ internal sealed class EventProjectionPolicyTests
     [Test]
     public async Task AcLineage002UnclassifiedSourceAllowsAdditionalTargetClassifications()
     {
-        using var fixture = new EventProjectionFixture();
-        fixture.ConfigureCollection(targetClassification: "projection-extra", sourceClassification: null);
+        using var fixture = new EventProjectionFixture(targetClassification: "projection-extra",
+            sourceClassification: null);
 
         var receipt = fixture.Apply(fixture.Request());
         var lineage = fixture.Lineage()!;
 
         await Assert.That(receipt.Resource).IsEqualTo(EventProjectionFixture.Collection);
         await Assert.That(lineage.SourceClassifications).IsEmpty();
-        await Assert.That(lineage.TargetClassifications).IsEquivalentTo(new[] { "projection-extra" });
+        await Assert.That(lineage.TargetClassifications)
+            .IsEquivalentTo(new[] { "projection-extra" }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -121,7 +123,8 @@ internal sealed class EventProjectionPolicyTests
         };
         var classes = VectorProjectionPolicy.Classifications(new AuthorizationPolicy(), resource, NestedPath);
 
-        await Assert.That(classes).IsEquivalentTo(new[] { "ancestor", "descendant", "exact", "wildcard" });
+        await Assert.That(classes).IsEquivalentTo(new[] { "ancestor", "descendant", "exact", "wildcard" },
+            CollectionOrdering.Matching);
         await Assert.That(VectorProjectionPolicy.TargetIsAtLeastAsRestrictive(classes, [.. classes, "extra-target"]))
             .IsTrue();
         await Assert.That(VectorProjectionPolicy.TargetIsAtLeastAsRestrictive(classes, ["ancestor", "different"]))

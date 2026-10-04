@@ -87,4 +87,7 @@ internal sealed record AnnSearchResult(AnnCandidate[] Candidates, AnnSearchMode 
     long WorkUnits, long DistanceEvaluations, long EdgeVisits)
 {
     internal long ScratchBytesUpperBound { get; init; }
+    internal int EligibleCount { get; init; }
+    internal int ExpansionPasses { get; init; }
+    internal long FallbackDistanceEvaluations { get; init; }
 }

@@ -23,8 +23,8 @@ internal sealed class GraphSearchReadCutTests
 
         await Assert.That(store.ReadCalls).IsEqualTo(1);
         await Assert.That(result.Hits.Select(hit => hit.Document.Reference.Id).ToArray())
-            .IsEqualTo([GraphSearchTestSupport.FirstHit]);
+            .IsEquivalentTo([GraphSearchTestSupport.FirstHit], TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(result.Expansion!.Documents.Select(item => item.Document.Reference.Id).ToArray())
-            .IsEqualTo([GraphSearchTestSupport.SecondHit]);
+            .IsEquivalentTo([GraphSearchTestSupport.SecondHit], TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 }

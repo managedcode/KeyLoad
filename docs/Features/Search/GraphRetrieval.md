@@ -64,7 +64,7 @@ authorization and bounded read work, but contribute no candidates or score to
 fusion. A zero-weight-only retriever therefore produces no hits; it does not
 bypass GraphRead, seed visibility, label-use checks or shared resource bounds.
 Current edge authority is persisted GraphRead; edge label policy applies when
-Labels is non-null, using exactly the `label` field-use path, including empty
+Labels is non-null, using exactly the `/label` JSON-pointer field-use path, including empty
 label arrays. Expansion excludes all selected-hit EntityRefs from its context
 output; its seeds still count against traversal/work caps and shortest-hop
 distances. Scope and Retriever include authorized seeds at hop0.
@@ -162,6 +162,56 @@ Unit QueryExecution tests, preserving G1 source and unrelated SQL behavior.
 It escalates unsupported grammar or public contract changes rather than inventing
 fallback syntax. Root reviews/builds/runs actual Aspire gates and commits the
 verified stage while other feature workers continue.
+
+### G2 public RF3 test stage
+
+Luna lifecycle_wave now owns only new
+`tests/KeyLoad.IntegrationTests/Features/Search/Cases/GraphSearchRf3Tests.cs`
+and graph-specific `Helpers/` or `Assertions/` files, plus new
+`Features/QueryExecution/Cases/SqlGraphSearchRf3Tests.cs` and matching
+SQL-graph-specific helpers. AC-GSEARCH-006 requires the actual shared Aspire
+Docker RF3 fixture, discovered endpoints, persisted grants, real .NET SDK and
+official MCP clients. Assert independent expected IDs, ranks and context on
+direct/SQL replies, multi-seed and other-collection intermediates, explicit
+denials and policy/write changes. Add a scoped fixture-supported leader-loss
+case with committed-state verification and bounded cleanup. Shared topology,
+fixtures, central contracts and production sources remain root-owned. Workers
+author and self-review tests without building or running them; root reviews,
+builds and executes them through AppHost before recording any runtime result.
+
+## G3: three-way exact fusion qualification
+
+Root freezes the same-partition KL-056 test stage on 2026-10-04 under
+REQ-GSEARCH-003/006 and AC-GSEARCH-003/006. The existing G1 executor and G2 SQL
+lowering remain the implementation contract; no new public or stored contract
+is introduced. Three-way means text, exact vectors and graph retrieval in one
+authorized bounded read cut. Global multi-partition ranks remain KL-057.
+
+Use a genuine persisted corpus with deliberately different text, cosine-vector
+and shortest-hop rankings, a missing branch contribution, converging graph paths,
+and an ordinal tie. Define the expected branch orders from that fixed corpus
+independently of the production ranking/fusion helpers. A test-owned arithmetic
+oracle computes each unique ID's `textWeight/(K+textRank) +
+vectorWeight/(K+vectorRank) + graphWeight/(K+graphRank)`, using one-based ranks,
+zero for absent or zero-weight branches, and ordinal ID ties. Assert exact
+selected IDs and scores within a stated floating-point tolerance, including
+unequal positive weights and the all-zero result. Scope and AllowedIds intersect
+before branch ranks; graph traversal may still use eligible-policy intermediate
+vertices outside the result collection. Current persisted row/field/graph-label
+denial and revocation cannot be bypassed by a zero weight or empty allowed set.
+Expansion context stays separate and contributes no fusion score.
+
+Luna lifecycle_wave owns only new `ThreeWayHybrid*` UnitTests/Search and
+IntegrationTests/Search files in their Cases, Helpers, Assertions or Models roles.
+Author against real ZoneTree/Core/Query and the shared Aspire RF3 fixture, using
+actual .NET and official MCP clients for direct and SQL parity. Keep the next
+stage in `/private/tmp/keyload-three-way-fusion-20261004` while root runs the
+current compiled gates; provide an absent/base/post-hash patch manifest. Root
+owns review, source joins, Release/formatter/governance and Aspire execution.
+Failures escalate with the owning production path and smallest counterexample;
+workers cannot change semantics, suppress tests or edit shared fixtures. Source
+or local development success does not close Linux RF3, distributed ranking,
+scale, endurance or performance requirements.
 
 ```mermaid
 flowchart LR

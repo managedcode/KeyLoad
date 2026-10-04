@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-development-baseline",
+  "qualified": false,
+  "source": {
+    "gitHead": "58567d3",
+    "workingTreeSnapshot": "/private/tmp/keyload-stage36-source-20261004.json",
+    "snapshotSha256": "13b7d782562cdac84f557e010fe4102c53ecb5a5cc7c8ffbeb73b02140cd10f2",
+    "sourceDriftDuringRun": false,
+    "githubQualified": false
+  },
+  "build": {
+    "scope": "KeyLoad.slnx Release",
+    "exitCode": 0,
+    "warnings": 0,
+    "errors": 0,
+    "originalLog": "/private/tmp/keyload-build36-20261004.log"
+  },
+  "unit": {
+    "entry": "dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit --KeyLoadTests:ResultsDirectory=TestResults/c1-unit36-20261004 --KeyLoadTests:ReportTrx=true",
+    "exitCode": 2,
+    "summary": {
+      "total": 3165,
+      "passed": 3019,
+      "failed": 146,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "totalDurationMs": 276995.738,
+    "tunitVersion": "1.72.10.0",
+    "operatingSystem": "macOS 27.0.1",
+    "runtimeVersion": ".NET 10.0.12",
+    "originalReport": "TestResults/c1-unit36-20261004/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+    "originalReportSha256": "bd086a7b6de787829fcc836f881de77f334ca8d90f383944b0e57579cc9ffeab",
+    "originalTrx": "TestResults/c1-unit36-20261004/KeyLoad.UnitTests_net10.0_arm64.trx"
+  },
+  "diagnosedProductFailures": [
+    "MCP read-hint switch omitted six appended public capabilities",
+    "SQL multi-seed tuples did not consume subsequent opening parentheses",
+    "Graph label-use authorization used a noncanonical field path",
+    "Graph request sizing preceded typed nested-null validation",
+    "Projection effect keys passed an unsupported enum to key codec v1",
+    "Public resource classification changes had no supported policy-only CAS"
+  ],
+  "testRepairScope": [
+    "Current-format epoch7/checkpoint5 fixtures retain explicit historical refusal",
+    "Persisted principal epochs and field-use grants",
+    "Request/envelope command IDs, zero-based occurrences and exact capacity accounting",
+    "Ordered array-content assertions preserve ranking and output order"
+  ],
+  "remaining": [
+    "Fresh combined build, formatter and Aspire focused/full normal/scalar unit runs",
+    "Actual immutable native5/native6 prerequisite preparation and full process recovery",
+    "Genuine Aspire Docker RF3 SDK and official MCP suites",
+    "Delivered-source Linux gates, endurance and fault acceptance"
+  ],
+  "acceptanceClosed": false
+}

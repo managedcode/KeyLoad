@@ -1,34 +1,46 @@
 namespace KeyLoad.Query.Features.Search;
 
-internal readonly record struct PackedAnnApproximateResult(AnnCandidate[] Candidates, AnnSearchMode Mode);
-
 internal static class PackedAnnApproximateSearch
 {
     private const string EligibilityChanged = "The admitted ANN result count changed during candidate materialization.";
+
     internal static PackedAnnApproximateResult Run(PackedAnnState state, PreparedSimilarity similarity,
-        ulong[]? eligibility, int limit, AnnWorkBudget budget)
+        ulong[]? eligibility, FilteredVectorPlan plan, AnnWorkBudget budget)
     {
-        var capacity = Math.Min(state.Count, 4_096);
-        var buffers = new PackedAnnLayerBuffers(state.Count, capacity, true, budget);
+        var buffers = new PackedAnnLayerBuffers(state.Count, plan.Capacity, true, budget);
         var current = GreedyEntry(state, similarity, budget);
-        var ef = Math.Min(capacity, Math.Max(limit, state.Options.EfSearch));
+        var breadth = plan.InitialBreadth;
+        var expansionPasses = 0;
         while (true)
         {
             budget.Check();
             var found = PackedAnnLayerSearch.SearchLayer(state.Graph, state.Vectors, similarity,
-                current, 0, ef, state.Space.Dimension, buffers, budget);
+                current, 0, breadth, state.Space.Dimension, buffers, budget);
+            expansionPasses++;
             var eligible = CountLayerEligible(buffers, found, eligibility, budget);
-            if (eligible >= limit)
+            if (eligible >= plan.ResultCount)
             {
-                return new(CopyLayerCandidates(state, buffers, found, eligibility, limit, budget), AnnSearchMode.Approximate);
+                var candidates = CopyLayerCandidates(state, buffers, found, eligibility,
+                    plan.ResultCount, budget);
+                return new(candidates, AnnSearchMode.Approximate, expansionPasses, 0);
             }
-            if (ef == capacity)
+            if (breadth == plan.Capacity)
             {
-                return new(PackedAnnExactSearch.Run(state, similarity, eligibility, limit, budget),
-                    AnnSearchMode.ExactAfterInsufficientCandidates);
+                return RunExactFallback(state, similarity, eligibility, plan, expansionPasses, budget);
             }
-            ef = Math.Min(capacity, checked(ef * 2));
+            breadth = Math.Min(plan.Capacity, checked(breadth * 2));
         }
+    }
+
+    private static PackedAnnApproximateResult RunExactFallback(PackedAnnState state,
+        PreparedSimilarity similarity, ulong[]? eligibility, FilteredVectorPlan plan,
+        int expansionPasses, AnnWorkBudget budget)
+    {
+        var startedDistances = budget.DistanceEvaluations;
+        var candidates = PackedAnnExactSearch.Run(state, similarity, eligibility, plan.ResultCount, budget);
+        var fallbackDistances = checked(budget.DistanceEvaluations - startedDistances);
+        return new(candidates, AnnSearchMode.ExactAfterInsufficientCandidates,
+            expansionPasses, fallbackDistances);
     }
 
     private static int GreedyEntry(PackedAnnState state, PreparedSimilarity similarity, AnnWorkBudget budget)
@@ -48,6 +60,7 @@ internal static class PackedAnnApproximateSearch
         var eligible = 0;
         for (var index = 0; index < found; index++)
         {
+            budget.Check();
             budget.Charge(1);
             if (PackedAnnExactSearch.IsEligible(buffers.Nodes[index], eligibility))
             {

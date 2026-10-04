@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Query;
 using KeyLoad.UnitTests.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
@@ -13,7 +12,7 @@ internal static class SqlGraphSearchTestSupport
     internal const string TextField = GraphSearchTestSupport.TextField;
     internal const string VectorField = "/embedding";
     internal const string VectorModel = "graph-sql-model";
-    internal const string VectorVersion = "1";
+    internal const string VectorVersion = "graphsqlversion";
     internal const string VectorSpaceId = "graph-sql-space";
     internal const int Depth = 4;
     internal const int Vertices = 20;
@@ -28,9 +27,21 @@ internal static class SqlGraphSearchTestSupport
         Dictionary<string, JsonElement>? parameters = null, bool fullScan = true, string? cursor = null)
         => new(1, new(partition, sql, parameters, fullScan, cursor));
 
-    internal static string RetrieverSql(string graph = Graph, string collection = Collection)
-        => $"SEARCH FROM \"{collection}\" RETRIEVE GRAPH \"{graph}\" SEEDS ((\"{Projects}\",'{Root}')) "
-            + $"DEPTH {Depth} VERTICES {Vertices} EDGES {Edges} LIMIT {Limit} FUSION {Fusion}";
+    internal static string RetrieverSql(string graph = Graph, string collection = Collection,
+        string? weight = null, string? allowedIds = null)
+    {
+        var sql = $"SEARCH FROM \"{collection}\" RETRIEVE GRAPH \"{graph}\" SEEDS ((\"{Projects}\",'{Root}')) "
+            + $"DEPTH {Depth} VERTICES {Vertices} EDGES {Edges}";
+        if (weight is not null)
+        {
+            sql += $" WEIGHT {weight}";
+        }
+        if (allowedIds is not null)
+        {
+            sql += $" ALLOW IDS ({allowedIds})";
+        }
+        return sql + $" LIMIT {Limit} FUSION {Fusion}";
+    }
 
     internal static VectorSpace Space()
         => new(VectorSpaceId, 2, DistanceMetric.Cosine, VectorModel, VectorVersion);

@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -7,7 +6,7 @@ internal sealed class RemoteTransferInspectionTests
     private const string InspectorWithoutUse = "inspector-without-use";
     private const string InspectorWithoutQueueGrant = "inspector-without-queue-grant";
     private const string InspectorWithUse = "inspector-with-use";
-    private const string ProtectedPath = "secret";
+    private const string ProtectedPath = "/secret";
     private const string Classification = "restricted";
     private const string RawUse = "pii.use";
 

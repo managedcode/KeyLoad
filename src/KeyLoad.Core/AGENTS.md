@@ -11,7 +11,7 @@
 
 ## Commands and evidence
 - GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Core behavior is exercised by `dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --configuration Release` and the related integration/recovery suites, all dispatched through `.github/workflows/ci.yml` only.
+- Owner correction2026-10-03 requires the actual Aspire entry after solution restore/build: `dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit`; related process and RF3 checks use `recovery` and `rf3` through that same entry. AppHost owns child execution, dependencies, artifacts and shutdown. Local development is authorized; exact-source Linux GitHub qualification remains mandatory.
 
 ## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
@@ -27,6 +27,7 @@
 - Shared canonical JSON writing/hash transport belongs to `Features/ResourceExecution/` under ADR-035; preserve exact validation, fingerprints and signatures across its DocumentStorage, QueryExecution and ChangeFeeds callers.
 - Shared commit/outcome, canonical-key and authorization interfaces remain genuinely cross-feature building blocks. Admission/inbox lifecycle belongs to `Features/ResourceExecution/` under ADR-042; the node-local store and Orleans hosting clocks keep their existing owners.
 - Owns `Features/BlobStorage/` under ADR-038: canonical bounded raw parts/manifests/quotas, current persisted authority and gated range reads. No separate provider/outcome log, full-payload outbox or grain-owned files; the integration lead owns existing engine dispatch and resource/bootstrap joins.
+- Owns `Features/Authorization/Commands/ResourcePolicyUpdates.cs` under ADR-093: pure policy-only metadata CAS validation. The existing canonical ResourceConfiguration apply gate and persisted administrator authorization own the write; this helper owns no storage, routing or physical migration.
 ## Feature-local responsibility folders
 
 - Every populated `Features/<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.

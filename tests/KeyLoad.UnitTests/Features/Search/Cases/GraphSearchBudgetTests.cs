@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Query;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -9,6 +8,7 @@ internal sealed class GraphSearchBudgetTests
     private const string DatabaseId = "database";
     private const string Domain = "orders";
     private const string PartitionKey = "customer-1";
+    private const string OtherPartitionKey = "other-partition";
 
     [Test]
     public async Task GraphRequestByteLimitAcceptsExactSizeAndRejectsOneByteLess()
@@ -27,7 +27,9 @@ internal sealed class GraphSearchBudgetTests
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             new SearchEngine(excess.Database).GraphSearchAsync("root", request, Token())))!;
 
-        await Assert.That(accepted.Hits).HasSingleItem();
+        await Assert.That(accepted.Hits.Select(hit => hit.Document.Reference.Id).ToArray())
+            .IsEquivalentTo([GraphSearchTestSupport.FirstHit, GraphSearchTestSupport.SecondHit],
+                TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
@@ -41,7 +43,7 @@ internal sealed class GraphSearchBudgetTests
         var root = GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);
         var limited = new GraphSearchRequest(1,
             new(database.Partition, GraphSearchTestSupport.Documents),
-            Retriever: new(GraphSearchTestSupport.Walk(database, root) with { MaxEdges = 1 }));
+            Retriever: new(GraphSearchTestSupport.Walk(root) with { MaxEdges = 1 }));
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             engine.GraphSearchAsync("root", limited, Token())))!;
         using var canceled = new CancellationTokenSource();
@@ -53,7 +55,8 @@ internal sealed class GraphSearchBudgetTests
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(healthy.Hits.Select(hit => hit.Document.Reference.Id).ToArray())
-            .IsEqualTo([GraphSearchTestSupport.FirstHit, GraphSearchTestSupport.SecondHit]);
+            .IsEquivalentTo([GraphSearchTestSupport.FirstHit, GraphSearchTestSupport.SecondHit],
+                TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 
     [Test]
@@ -66,11 +69,11 @@ internal sealed class GraphSearchBudgetTests
         var search = new SearchRequest(database.Partition, GraphSearchTestSupport.Documents);
         var seed = GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);
         var versionFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
-            "root", new(2, search, Retriever: new(GraphSearchTestSupport.Walk(database, seed))), Token())))!;
-        var otherPartition = new PartitionRef(Tenant, DatabaseId, Domain, "other-partition");
+            "root", new(2, search, Retriever: new(GraphSearchTestSupport.Walk(seed))), Token())))!;
+        var otherPartition = new PartitionRef(Tenant, DatabaseId, Domain, OtherPartitionKey);
         var invalidSeed = new EntityRef(otherPartition, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);
         var partitionFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
-            "root", new(1, search, Retriever: new(GraphSearchTestSupport.Walk(database, invalidSeed))), Token())))!;
+            "root", new(1, search, Retriever: new(GraphSearchTestSupport.Walk(invalidSeed))), Token())))!;
 
         await Assert.That(versionFailure.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(partitionFailure.Code).IsEqualTo(ErrorCode.Validation);
@@ -83,7 +86,7 @@ internal sealed class GraphSearchBudgetTests
         GraphSearchTestSupport.Configure(database);
         var root = GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects,
             GraphSearchTestSupport.Root);
-        var request = new GraphSearchRequest(1, null!, Retriever: new(GraphSearchTestSupport.Walk(database, root)));
+        var request = new GraphSearchRequest(1, null!, Retriever: new(GraphSearchTestSupport.Walk(root)));
 
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             new SearchEngine(database.Database).GraphSearchAsync("root", request, Token())))!;

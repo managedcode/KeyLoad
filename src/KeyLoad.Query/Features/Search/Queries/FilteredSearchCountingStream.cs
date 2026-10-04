@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.Query.Features.Search;
 
 internal sealed class FilteredSearchCountingStream(int maximumBytes) : Stream

@@ -1,6 +1,4 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -71,7 +69,7 @@ internal sealed class RecurringSagaBudgetTests
         Assert.ThrowsExactly<OperationCanceledException>(() => fixture.Database.InspectSaga(
             RecurringSagaDatabase.RootPrincipal, fixture.Queue, Guid.NewGuid(), cancellation.Token));
         await Assert.That(fixture.Database.InspectRecurringSchedule(RecurringSagaDatabase.RootPrincipal,
-            fixture.Queue, scheduleId)!.ScheduleId).IsEqualTo(scheduleId);
+            fixture.Queue, scheduleId)!.Definition.ScheduleId).IsEqualTo(scheduleId);
     }
 
     private static RecurringSagaCapacity Capacity(RecurringSagaDatabase fixture)

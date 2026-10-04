@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -8,6 +7,8 @@ internal sealed class RemoteTransferIntentValidationTests
     private const string WrongPurpose = "keyload.queue-transfer.intent.invalid";
     private const string WrongPrincipal = "other-persisted-principal";
     private const string WrongFingerprint = "wrong-fingerprint";
+    private const string WrongSourcePartitionId = "wrong-source-partition";
+    private const string WrongDestinationPartitionId = "wrong-destination-partition";
 
     [Test]
     public async Task DestinationRejectsEverySignedIntentScopeMismatchWithoutEnqueueOrReceipt()
@@ -40,9 +41,9 @@ internal sealed class RemoteTransferIntentValidationTests
         string validToken)
     {
         var wrongSource = new QueueLaneRef(new(RemoteTransferDatabase.TenantId,
-            RemoteTransferDatabase.DatabaseId, "orders", "wrong-source-partition"), "wrong-source");
+            RemoteTransferDatabase.DatabaseId, "orders", WrongSourcePartitionId), "wrong-source");
         var wrongDestination = new QueueLaneRef(new(RemoteTransferDatabase.TenantId,
-            RemoteTransferDatabase.DatabaseId, "orders", "wrong-destination-partition"), "wrong-destination");
+            RemoteTransferDatabase.DatabaseId, "orders", WrongDestinationPartitionId), "wrong-destination");
         return
         [
             fixture.Database.Sign(claims with { Purpose = WrongPurpose }),

@@ -13,6 +13,6 @@ public static class SqlSearchClientExtensions
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<GraphSearchResult>(SearchPath, request, cancellationToken);
+        return client.Send<GraphSearchResult>(SearchPath, request, false, null, cancellationToken);
     }
 }

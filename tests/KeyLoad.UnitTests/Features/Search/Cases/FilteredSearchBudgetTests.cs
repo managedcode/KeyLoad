@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core;
 using KeyLoad.Query;
 using TUnit.Assertions.Enums;
 
@@ -62,7 +61,7 @@ internal sealed class FilteredSearchBudgetTests
     }
 
     private static SearchRequest VectorRequest(ImmutableArray<string> allowedIds)
-        => new(new("tenant", "database", "orders", "customer-1"), FilteredSearchTestSupport.Collection,
+        => new(new("tenant", "database", "orders", FilteredSearchTestSupport.PartitionKey), FilteredSearchTestSupport.Collection,
             VectorField: FilteredSearchTestSupport.VectorField, Vector: [1, 0],
             Space: FilteredSearchTestSupport.Space, AllowedIds: allowedIds);
 

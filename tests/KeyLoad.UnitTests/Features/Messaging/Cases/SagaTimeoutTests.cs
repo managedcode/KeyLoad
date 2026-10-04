@@ -1,4 +1,4 @@
-using KeyLoad.Core;
+using System.Globalization;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -87,5 +87,5 @@ internal sealed class SagaTimeoutTests
             time: now);
 
     private static string TimeoutId(Guid sagaId, long waitingRevision)
-        => string.Concat("saga-timeout-", sagaId.ToString("N"), "-", waitingRevision.ToString("x16"));
+        => string.Concat("saga-timeout-", sagaId.ToString("N"), "-", waitingRevision.ToString("x16", CultureInfo.InvariantCulture));
 }

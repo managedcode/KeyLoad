@@ -5,6 +5,7 @@ namespace KeyLoad.Query.Features.Search;
 internal static class PackedAnnSearch
 {
     private const string InvalidQuery = "The packed ANN query, result limit or eligibility bitmap is invalid.";
+    private const int MaximumBreadth = 4_096;
 
     internal static AnnSearchResult Run(PackedAnnState state, ReadOnlyMemory<float> query, int limit,
         ReadOnlyMemory<ulong>? eligibility, AnnWorkBudget budget)
@@ -22,37 +23,47 @@ internal static class PackedAnnSearch
         var copiedQuery = CopyQuery(state, query, budget);
         var similarity = PrepareSimilarity(state, copiedQuery, budget);
         var copiedEligibility = CopyEligibility(state.Count, eligibility, words, budget, out var eligibleCount);
-        var resultCount = Math.Min(limit, eligibleCount);
-        if (eligibleCount <= state.Options.ExactThreshold || state.Count == 0)
+        var capacity = Math.Max(1, Math.Min(state.Count, MaximumBreadth));
+        var plan = FilteredVectorPlanner.Create(state.Count, limit, eligibleCount,
+            state.Options.ExactThreshold, state.Options.EfSearch, capacity, budget);
+        if (eligibleCount == 0)
         {
-            return RunExact(state, similarity, copiedEligibility, resultCount, initialBytes, budget,
-                startedWork, startedDistances, startedEdges, AnnSearchMode.ExactSmallSet);
+            var emptyReservation = PackedAnnReservations.ExactQueryScratch(initialBytes, 0);
+            PackedAnnReservations.RequireScratch(emptyReservation, state.Options.MaxScratchBytes);
+            return Result([], AnnSearchMode.ExactSmallSet, emptyReservation, plan, 0, 0,
+                budget, startedWork, startedDistances, startedEdges);
         }
-        return RunApproximate(state, similarity, copiedEligibility, resultCount, initialBytes,
-            budget, startedWork, startedDistances, startedEdges);
+        if (plan.UseExact)
+        {
+            return RunExact(state, similarity, copiedEligibility, plan, initialBytes, budget,
+                startedWork, startedDistances, startedEdges);
+        }
+        return RunApproximate(state, similarity, copiedEligibility, plan, initialBytes, budget,
+            startedWork, startedDistances, startedEdges);
     }
 
     private static AnnSearchResult RunExact(PackedAnnState state, PreparedSimilarity similarity,
-        ulong[]? eligibility, int resultCount, long initialBytes, AnnWorkBudget budget,
-        long startedWork, long startedDistances, long startedEdges, AnnSearchMode mode)
+        ulong[]? eligibility, FilteredVectorPlan plan, long initialBytes, AnnWorkBudget budget,
+        long startedWork, long startedDistances, long startedEdges)
     {
-        var reservation = PackedAnnReservations.ExactQueryScratch(initialBytes, resultCount);
+        var reservation = PackedAnnReservations.ExactQueryScratch(initialBytes, plan.ResultCount);
         PackedAnnReservations.RequireScratch(reservation, state.Options.MaxScratchBytes);
-        var candidates = PackedAnnExactSearch.Run(state, similarity, eligibility, resultCount, budget);
-        return Result(candidates, mode, reservation, budget, startedWork, startedDistances, startedEdges);
+        var candidates = PackedAnnExactSearch.Run(state, similarity, eligibility, plan.ResultCount, budget);
+        return Result(candidates, AnnSearchMode.ExactSmallSet, reservation, plan, 0, 0,
+            budget, startedWork, startedDistances, startedEdges);
     }
 
     private static AnnSearchResult RunApproximate(PackedAnnState state, PreparedSimilarity similarity,
-        ulong[]? eligibility, int resultCount, long initialBytes, AnnWorkBudget budget,
+        ulong[]? eligibility, FilteredVectorPlan plan, long initialBytes, AnnWorkBudget budget,
         long startedWork, long startedDistances, long startedEdges)
     {
-        var capacity = Math.Min(state.Count, 4_096);
         var visitWords = checked((state.Count + 63) / 64);
-        var reservation = PackedAnnReservations.ApproximateQueryScratch(initialBytes, visitWords, capacity, resultCount);
+        var reservation = PackedAnnReservations.ApproximateQueryScratch(initialBytes, visitWords,
+            plan.Capacity, plan.ResultCount);
         PackedAnnReservations.RequireScratch(reservation, state.Options.MaxScratchBytes);
-        var approximate = PackedAnnApproximateSearch.Run(state, similarity, eligibility,
-            resultCount, budget);
-        return Result(approximate.Candidates, approximate.Mode, reservation, budget,
+        var approximate = PackedAnnApproximateSearch.Run(state, similarity, eligibility, plan, budget);
+        return Result(approximate.Candidates, approximate.Mode, reservation, plan,
+            approximate.ExpansionPasses, approximate.FallbackDistanceEvaluations, budget,
             startedWork, startedDistances, startedEdges);
     }
 
@@ -115,10 +126,14 @@ internal static class PackedAnnSearch
     }
 
     private static AnnSearchResult Result(AnnCandidate[] candidates, AnnSearchMode mode, long reservation,
-        AnnWorkBudget budget, long startedWork, long startedDistances, long startedEdges)
+        FilteredVectorPlan plan, int expansionPasses, long fallbackDistances, AnnWorkBudget budget,
+        long startedWork, long startedDistances, long startedEdges)
         => new(candidates, mode, checked(budget.WorkUnits - startedWork),
             checked(budget.DistanceEvaluations - startedDistances), checked(budget.EdgeVisits - startedEdges))
         {
-            ScratchBytesUpperBound = reservation
+            ScratchBytesUpperBound = reservation,
+            EligibleCount = plan.EligibleCount,
+            ExpansionPasses = expansionPasses,
+            FallbackDistanceEvaluations = fallbackDistances
         };
 }

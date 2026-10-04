@@ -6,7 +6,7 @@ namespace KeyLoad.Core.Features.Search;
 /// <summary>Visits visible, revision-matching vector/document pairs within one cut.</summary>
 internal static class VisibleVectorReads
 {
-    private const string VectorSpace = "vector";
+    internal const string VectorKeySpace = "vector";
     private const string VectorScanExceeded = "The exact vector scan exceeds its budget.";
 
     internal static void Visit(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
@@ -22,7 +22,7 @@ internal static class VisibleVectorReads
         ArgumentNullException.ThrowIfNull(budget);
         ArgumentNullException.ThrowIfNull(visitor);
         budget.Check();
-        var range = budget.VisitRange(view, KeySpace.Partition(VectorSpace, partition, collection, field),
+        var range = budget.VisitRange(view, KeySpace.Partition(VectorKeySpace, partition, collection, field),
             database.Limits.MaxScanRecords, (key, value) =>
             {
                 var vector = NativeSerialization.Deserialize<VectorRecord>(value);

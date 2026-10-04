@@ -38,7 +38,11 @@ wildcard and nonmatching paths through that actual evaluator.
 Dedup key binds source event, source revision, reducer generation and target full
 vector identity. Identical replay reuses the canonical effect receipt; changed
 payload conflicts. Stale job result fails RevisionConflict without modifying any
-vector/lineage. Ordinary PutVector replacements delete prior derived lineage,
+vector/lineage.
+The private effect key encodes `DistanceMetric` as its stable integer value in
+key codec v1. Both apply and lineage-based lookup use that same representation;
+the key codec and every existing scalar tag remain unchanged.
+Ordinary PutVector replacements delete prior derived lineage,
 rather than leave a false provenance claim. A reducer is pure computation by
 default; event replay emits no automatic jobs/external side effects. Projection
 workers consume the committed outbox with stable consumer/filter/generation and
@@ -75,6 +79,50 @@ comparison-host failure. Rollback pauses projections and retains canonical linea
 and effects; older peers must reject unknown capabilities before execution. No
 existing canonical bytes are rewritten. UI N/A; pure reducer API is server/worker
 operation, not a general workflow-engine compatibility claim.
+
+## P1 public RF3 test stage
+
+Luna query_wave owns new
+`tests/KeyLoad.IntegrationTests/Features/Search/Cases/EventProjectionRf3Tests.cs`
+and uniquely named projection `Helpers/` or `Assertions/` files. Map
+AC-LINEAGE-001/002/003 to real event/document/vector mutations and reads through
+the .NET SDK and official MCP client on the existing Aspire-owned Docker RF3
+fixture. Assert exact input binding, idempotent receipt reuse, stale/conflicting
+rejection without state changes and live source revision/policy eligibility.
+Add a scoped fixture-supported leader-loss replay case with committed-state
+verification. This proves explicit P1 operations, not the unimplemented P2
+outbox worker or generation lifecycle. No shared fixture, production contract,
+topology or gate changes are delegated. Root owns integration and actual tests.
+
+## P1 canonical process recovery stage
+
+Luna query_wave next owns new CrashHost Search Helpers and RecoveryTests Search
+Cases/Assertions/Helpers for one real ApplyVectorProjection operation through
+the existing CanonicalCrashBoundary. Root owns the CrashHostApplication mode
+join. Seed actual canonical source/target documents and the exact source event,
+then persist the original operation before arming the next atomic commit. Cover
+HeaderWritten, PayloadWritten, JournalFlushed, MutationApplied at index0 and
+ApplyCompleted using genuine owned child process kills, StorageTrialLease and
+existing killed-process file readiness, never another test caller or observer.
+
+AC-LINEAGE-001/002/003 require reopen to preserve one complete cut: canonical
+vector, its native lineage/effect, original outcome and outbox entry are either
+all absent or all committed. JournalFlushed and later require committed state.
+Use actual authorized exact search for the caller-visible vector oracle and
+native retained records for the independent atomicity oracle. Retrying the same
+original operation reuses its exact token and effect with no new outbox entry;
+changed payload rejects without modifying the committed vector. A following
+source revision change makes the derived vector ineligible under current reads.
+Preserve complete original data and receipt assertions; process kill is not
+power-loss evidence and does not qualify P2/RF3.
+
+Prepare the scoped source patch outside the checkout while root verifies its
+frozen prior compilation, with exact base/post hashes and dispatch instructions.
+Use existing published dependencies, true ZoneTree/Core/Query execution and
+bounded owned cleanup retaining primary and cleanup failures. No doubles,
+implicit native-format rewrites, builds/tests/formatter or Git are delegated.
+Root applies harness and dispatch together, self-reviews, and runs the actual
+Aspire recovery cases and required full gates before recording runtime evidence.
 
 ```mermaid
 flowchart LR

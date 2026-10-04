@@ -13,12 +13,13 @@ internal sealed class RecurringSagaDatabase : IDisposable
     internal const string DatabaseId = "database";
     internal const string QueueName = "jobs";
     internal const string TimeoutQueueName = "timeouts";
-    internal const string SecretPath = "secret";
+    internal const string SecretPath = "/secret";
     internal const string RawReadGrant = "pii.read";
     internal const string RawUseGrant = "pii.use";
     internal const string FieldWriteGrant = "pii.write";
     internal static readonly DateTimeOffset Epoch = new(2035, 1, 1, 0, 0, 0, TimeSpan.Zero);
-    private const string Domain = "orders";
+    internal const string Domain = "orders";
+    private const string PartitionId = "orders-1";
     private const string Credential = "root.recurring-saga-unit-test-credential";
     private const string DirectoryPrefix = "keyload-recurring-saga-";
     private const string GuidFormat = "N";
@@ -27,7 +28,7 @@ internal sealed class RecurringSagaDatabase : IDisposable
     private ZoneTreeStore store;
     private bool disposed;
 
-    internal PartitionRef Partition { get; } = new(TenantId, DatabaseId, Domain, "orders-1");
+    internal PartitionRef Partition { get; } = new(TenantId, DatabaseId, Domain, PartitionId);
     internal QueueLaneRef Queue => new(Partition, QueueName);
     internal QueueLaneRef TimeoutQueue => new(Partition, TimeoutQueueName);
     internal DatabaseEngine Database { get; private set; }
@@ -49,7 +50,7 @@ internal sealed class RecurringSagaDatabase : IDisposable
     internal OperationResult Apply<T>(OperationKind kind, T payload, string principal = RootPrincipal,
         Guid? id = null, DateTimeOffset? time = null)
     {
-        var commandId = id ?? Guid.NewGuid();
+        var commandId = id ?? (payload is CommandRequest command ? command.CommandId : Guid.NewGuid());
         var json = JsonSerializer.Serialize(payload, JsonDefaults.Options);
         return Database.Apply(new(commandId, kind, principal, time ?? Epoch, json));
     }

@@ -11,6 +11,7 @@ internal static class FilteredSearchTestSupport
     internal const string VectorUseGrant = "filtered.search.vector.use";
     internal const string Model = "filtered-model";
     internal const string Version = "v1";
+    internal const string PartitionKey = "customer-1";
     internal const int Dimension = 2;
     internal const int Revision = 1;
     internal const int FusionConstant = 13;
@@ -51,10 +52,10 @@ internal static class FilteredSearchTestSupport
 
     internal static SearchRequest Request(ImmutableArray<string>? allowedIds = null, bool hybrid = true)
         => hybrid
-            ? new SearchRequest(new("tenant", "database", "orders", "customer-1"), Collection,
+            ? new SearchRequest(new("tenant", "database", "orders", PartitionKey), Collection,
                 TextField, "alpha", VectorField, [1, 0], Space, Limit: 10, FusionConstant: FusionConstant,
                 AllowedIds: allowedIds)
-            : new SearchRequest(new("tenant", "database", "orders", "customer-1"), Collection,
+            : new SearchRequest(new("tenant", "database", "orders", PartitionKey), Collection,
                 TextField, "alpha", AllowedIds: allowedIds);
 
     internal static void PersistReader(TestDatabase database, string id, Capability capabilities,

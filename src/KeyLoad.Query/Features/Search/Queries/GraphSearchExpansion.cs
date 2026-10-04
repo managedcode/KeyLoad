@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Core.Features.GraphTraversal;
+using KeyLoad.Query.Features.Search;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query;
@@ -31,7 +32,7 @@ internal static class GraphSearchExpansion
     {
         var resources = new Dictionary<string, ResourceDefinition>(StringComparer.Ordinal);
         var results = new List<GraphContextDocument>(reachable.Length);
-        long retainedBytes = budget.MeasureResult(hits);
+        var retainedBytes = budget.MeasureResult(hits);
         foreach (var entry in reachable)
         {
             budget.Check();

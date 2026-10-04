@@ -105,6 +105,8 @@ jobs:
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers
       - name: Test prompt termination on Aspire resource failures
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/AspireFailure*/*' --KeyLoadTests:ResultsDirectory=TestResults/aspire-failure --KeyLoadTests:ReportTrx=true
+      - name: Test Aspire recovery prerequisite ownership
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/PriorProbePrerequisiteTests/*' --KeyLoadTests:ResultsDirectory=TestResults/recovery-prerequisites --KeyLoadTests:ReportTrx=true
       - name: Test live benchmark progress capture
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-progress --KeyLoadTests:ReportTrx=true
       - name: Test live benchmark process entry
@@ -117,11 +119,8 @@ jobs:
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit
       - name: Run unit tests without CPU intrinsics
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit-scalar
-      - name: Build the previous storage executable
-        id: native5
-        run: bash scripts/Features/StorageRecovery/build-native5-probe.sh
       - name: Test recovery after process crashes
-        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.native5.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery
       - name: Save test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -131,7 +130,6 @@ jobs:
           path: |
             **/TestResults/**
             artifacts/qualification/**
-            artifacts/native5-probe/**
           if-no-files-found: ignore
       - name: Save build diagnostics
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

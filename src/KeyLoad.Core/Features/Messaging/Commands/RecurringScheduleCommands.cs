@@ -13,12 +13,11 @@ public sealed partial class DatabaseEngine
     internal MutationReceipt ApplyConfigureRecurringSchedule(IAtomicTransaction tx, PrincipalRecord principal,
         PartitionRef partition, ConfigureRecurringSchedule request, DateTimeOffset now)
     {
-        _ = now;
         ArgumentNullException.ThrowIfNull(request);
         var definition = NormalizeScheduleDefinition(request.Definition);
         ValidateScheduleScope(definition.Lane, definition.ScheduleId, partition);
         var resource = Resource(tx, partition, definition.Lane.Queue, ResourceKind.WorkQueue);
-        AuthorizeRecurringScheduleWrite(principal, definition.Lane, resource);
+        RequireScheduleWriteAuthority(principal, definition.Lane, resource);
         var key = RecurringSagaStorage.ScheduleKey(definition.Lane, definition.ScheduleId);
         var existing = tx.GetRecord<RecurringScheduleRecord>(key);
         ValidateScheduleRevision(request.ExpectedRevision, existing, definition.Lane, definition.ScheduleId);
@@ -42,11 +41,10 @@ public sealed partial class DatabaseEngine
     internal MutationReceipt ApplyCancelRecurringSchedule(IAtomicTransaction tx, PrincipalRecord principal,
         PartitionRef partition, CancelRecurringSchedule request, DateTimeOffset now)
     {
-        _ = now;
         ArgumentNullException.ThrowIfNull(request);
         ValidateScheduleScope(request.Lane, request.ScheduleId, partition);
         var resource = Resource(tx, partition, request.Lane.Queue, ResourceKind.WorkQueue);
-        AuthorizeRecurringScheduleWrite(principal, request.Lane, resource);
+        RequireScheduleWriteAuthority(principal, request.Lane, resource);
         var record = RequireSchedule(tx, request.Lane, request.ScheduleId);
         RequireScheduleRevision(request.ExpectedRevision, record.Revision);
         RequireScheduleCreatorManagement(tx, record, now);
@@ -73,7 +71,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
         }
         var resource = Resource(tx, partition, request.Lane.Queue, ResourceKind.WorkQueue);
-        AuthorizeRecurringScheduleWrite(principal, request.Lane, resource);
+        RequireScheduleWriteAuthority(principal, request.Lane, resource);
         var record = RequireSchedule(tx, request.Lane, request.ScheduleId);
         if (record.Generation != request.ExpectedGeneration)
         {
@@ -89,7 +87,7 @@ public sealed partial class DatabaseEngine
             return ScheduleReceipt(RecurringSagaProtocol.EmitReceipt, request.Lane, request.ScheduleId, record.Revision);
         }
         var nextOrdinal = NextOccurrenceOrdinal(due[^1].Ordinal);
-        EmitOccurrences(tx, principal, record, resource, due, now);
+        EmitOccurrences(tx, principal, record, due, now);
         UpdateScheduleOrdinal(tx, record, nextOrdinal);
         return ScheduleReceipt(RecurringSagaProtocol.EmitReceipt, request.Lane, request.ScheduleId, record.Revision);
     }
@@ -120,9 +118,9 @@ public sealed partial class DatabaseEngine
     }
 
     private void EmitOccurrences(IAtomicTransaction tx, PrincipalRecord principal, RecurringScheduleRecord record,
-        ResourceDefinition resource, List<(long Ordinal, DateTimeOffset DueAt)> due, DateTimeOffset now)
+        List<(long Ordinal, DateTimeOffset DueAt)> due, DateTimeOffset now)
     {
-        RequireScheduleCreatorForEmission(tx, record, now, resource);
+        RequireScheduleCreator(tx, record.Lane, record.ScheduleId, now);
         foreach (var occurrence in due)
         {
             var message = OccurrenceMessage(record, occurrence.Ordinal, occurrence.DueAt);

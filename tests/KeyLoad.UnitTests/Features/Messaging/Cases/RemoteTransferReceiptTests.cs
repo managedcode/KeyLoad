@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -9,6 +8,8 @@ internal sealed class RemoteTransferReceiptTests
     private const string Payload = "{\"receipt\":true}";
     private const string ChangedFingerprint = "changed-fingerprint";
     private const string ChangedPurpose = "keyload.queue-transfer.receipt.invalid";
+    private const string OtherSourcePartitionId = "other-source-partition";
+    private const string OtherTargetPartitionId = "other-target-partition";
 
     [Test]
     public async Task OnlyTheMatchingSignedCommittedReceiptCanCompleteAndRetryTheSource()
@@ -62,9 +63,9 @@ internal sealed class RemoteTransferReceiptTests
         string validToken)
     {
         var otherSource = new QueueLaneRef(new(RemoteTransferDatabase.TenantId,
-            RemoteTransferDatabase.DatabaseId, "orders", "other-source-partition"), "other-source");
+            RemoteTransferDatabase.DatabaseId, "orders", OtherSourcePartitionId), "other-source");
         var otherTarget = new QueueLaneRef(new(RemoteTransferDatabase.TenantId,
-            RemoteTransferDatabase.DatabaseId, "orders", "other-target-partition"), "other-target");
+            RemoteTransferDatabase.DatabaseId, "orders", OtherTargetPartitionId), "other-target");
         return
         [
             fixture.Database.Sign(receipt with { Purpose = ChangedPurpose }),

@@ -9,17 +9,13 @@ internal static class PackedAnnExactSearch
         budget.Charge(resultCount);
         var candidates = new AnnCandidate[resultCount];
         var found = 0;
-        for (var ordinal = 0; ordinal < state.Count; ordinal++)
+        if (eligibility is null)
         {
-            budget.Check();
-            budget.Charge(1);
-            if (!IsEligible(ordinal, eligibility))
-            {
-                continue;
-            }
-            budget.ChargeDistance(state.Space.Dimension);
-            var score = similarity.Score(state.Vectors.Memory(ordinal));
-            found = InsertTop(candidates, found, new(ordinal, state.Ids[ordinal], state.Revisions[ordinal], score), budget);
+            found = ScanAll(state, similarity, candidates, found, budget);
+        }
+        else
+        {
+            found = ScanEligible(state, similarity, eligibility, candidates, found, budget);
         }
         if (found != candidates.Length)
         {
@@ -30,6 +26,48 @@ internal static class PackedAnnExactSearch
 
     internal static bool IsEligible(int ordinal, ulong[]? eligibility)
         => eligibility is null || (eligibility[ordinal >> 6] & (1UL << (ordinal & 63))) != 0;
+
+    private static int ScanAll(PackedAnnState state, PreparedSimilarity similarity,
+        AnnCandidate[] candidates, int found, AnnWorkBudget budget)
+    {
+        for (var ordinal = 0; ordinal < state.Count; ordinal++)
+        {
+            budget.Check();
+            budget.Charge(1);
+            found = ScoreOrdinal(state, similarity, ordinal, candidates, found, budget);
+        }
+        return found;
+    }
+
+    private static int ScanEligible(PackedAnnState state, PreparedSimilarity similarity, ulong[] eligibility,
+        AnnCandidate[] candidates, int found, AnnWorkBudget budget)
+    {
+        for (var wordIndex = 0; wordIndex < eligibility.Length; wordIndex++)
+        {
+            budget.Check();
+            budget.Charge(sizeof(ulong));
+            var bits = eligibility[wordIndex];
+            while (bits != 0)
+            {
+                budget.Check();
+                var bit = System.Numerics.BitOperations.TrailingZeroCount(bits);
+                var ordinal = checked(wordIndex * 64 + bit);
+                budget.Charge(1);
+                found = ScoreOrdinal(state, similarity, ordinal, candidates, found, budget);
+                bits &= bits - 1;
+            }
+        }
+        return found;
+    }
+
+    private static int ScoreOrdinal(PackedAnnState state, PreparedSimilarity similarity, int ordinal,
+        AnnCandidate[] candidates, int found, AnnWorkBudget budget)
+    {
+        budget.ChargeDistance(state.Space.Dimension);
+        var score = similarity.Score(state.Vectors.Memory(ordinal));
+        return InsertTop(candidates, found,
+            new(ordinal, state.Ids[ordinal], state.Revisions[ordinal], score), budget);
+    }
 
     internal static int InsertTop(AnnCandidate[] candidates, int found, AnnCandidate candidate, AnnWorkBudget budget)
     {
