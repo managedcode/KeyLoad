@@ -1,5 +1,4 @@
 using System.Globalization;
-using KeyLoad.Client;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 

@@ -47,11 +47,8 @@ internal static class SagaTimeoutRf3Assertions
         while (TimeProvider.System.GetUtcNow() < until)
         {
             var view = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectSagaAsync(
-                new(scenario.SourceQueue, sagaId), cancellationToken));
-            if (view is null)
-            {
-                throw new InvalidOperationException("The persisted waiting saga disappeared before timeout.");
-            }
+                new(scenario.SourceQueue, sagaId), cancellationToken))
+                ?? throw new InvalidOperationException("The persisted waiting saga disappeared before timeout.");
             if (view.Phase == SagaPhase.TimedOut && view.Revision == 2)
             {
                 return;

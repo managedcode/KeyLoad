@@ -1,4 +1,3 @@
-using KeyLoad.Client;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 

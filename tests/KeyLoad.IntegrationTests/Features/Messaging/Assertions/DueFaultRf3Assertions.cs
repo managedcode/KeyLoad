@@ -1,5 +1,6 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.StorageRecovery;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 

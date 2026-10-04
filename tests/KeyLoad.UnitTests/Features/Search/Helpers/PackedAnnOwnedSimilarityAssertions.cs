@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 
@@ -38,7 +37,7 @@ internal static class PackedAnnOwnedSimilarityAssertions
                 {
                     var neighbor = state.Graph.Neighbor(source, layer, offset);
                     await Assert.That(neighbor).IsNotEqualTo(source);
-                    await Assert.That(state.Levels[neighbor]).IsGreaterThanOrEqualTo(layer);
+                    await Assert.That((int)state.Levels[neighbor]).IsGreaterThanOrEqualTo(layer);
                     await Assert.That(seen.Add(neighbor)).IsTrue();
                 }
             }

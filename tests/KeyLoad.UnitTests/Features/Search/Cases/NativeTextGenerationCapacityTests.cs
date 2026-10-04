@@ -2,6 +2,7 @@ using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Server.Features.Search;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -90,7 +91,7 @@ internal sealed class NativeTextGenerationCapacityTests
         => Directory.EnumerateDirectories(root)
             .Where(path => Path.GetFileName(path).StartsWith(NativeTextProtocol.GenerationPrefix,
                 StringComparison.Ordinal))
-            .Select(Path.GetFileName).Order(StringComparer.Ordinal).ToArray();
+            .Select(path => Path.GetFileName(path)!).Order(StringComparer.Ordinal).ToArray();
 
     private static NativeTextProjection OpenForRestart(string root, TestDatabase database)
         => new(root, database.Database.Limits, database.Store.Identity.NodeId);

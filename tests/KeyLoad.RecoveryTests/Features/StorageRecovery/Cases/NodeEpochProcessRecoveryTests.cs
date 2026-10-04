@@ -85,19 +85,23 @@ internal sealed class NodeEpochProcessRecoveryTests
         int dataEpoch, CancellationToken cancellationToken)
     {
         var prepared = ServerNodeFormatUpgrade.Prepare(source, options);
+        NativeNodeUpgradeLockProbe.Verify(source, NativeNodeUpgradeLockBoundary.AfterPrepare);
         await Assert.That(prepared.TargetEpoch).IsEqualTo(7);
         await Assert.That(prepared.CanonicalNodeId).IsEqualTo(prior.NodeId);
         await Assert.That(prepared.Incarnation).IsEqualTo(prior.Incarnation);
         await Assert.That(prepared.CanonicalPosition).IsEqualTo(prior.Position);
         await Assert.That(prepared.CanonicalAppliedPosition).IsEqualTo(3L);
         var oldSource = await NodeEpochPriorInspection.InspectCopyAsync(source, original, dataEpoch, cancellationToken);
+        NativeNodeUpgradeLockProbe.Verify(source, NativeNodeUpgradeLockBoundary.AfterPriorSourceInspection);
         await Assert.That(oldSource.ErrorCode).IsNull();
         await Assert.That(oldSource.SourceRevision).IsEqualTo(prior.SourceRevision);
         await Assert.That(oldSource.DataEpoch).IsEqualTo(prior.DataEpoch);
         await Assert.That(oldSource.NodeId).IsEqualTo(prior.NodeId);
         await Assert.That(oldSource.AppliedPosition).IsEqualTo(prior.AppliedPosition);
         _ = ServerNodeFormatUpgrade.VerifyPrepared(source, options);
+        NativeNodeUpgradeLockProbe.Verify(source, NativeNodeUpgradeLockBoundary.AfterVerifyPrepared);
         _ = ServerNodeFormatUpgrade.Publish(source, options);
+        NativeNodeUpgradeLockProbe.Verify(source, NativeNodeUpgradeLockBoundary.AfterPublish);
         await Assert.That(Directory.Exists(destination)).IsTrue();
         await Assert.That(Directory.Exists(destination + ServerNodeUpgradeProtocol.StageSuffix)).IsFalse();
         await NodeEpochInventoryCapture.AssertUnchangedAsync(source, original, cancellationToken);

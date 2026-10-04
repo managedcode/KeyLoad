@@ -7,6 +7,30 @@ and atomic transitions remain the authority. No separate durable due index or
 storage-format transition is introduced.
 
 TASK-DUE-RF3-C adds the genuine no-quorum public recurrence gate for AC-DUE-003.
+TASK-DUE-RF3-BUILD preserves AC-DUE-002/003/004 and ADR-094 while making the
+existing S1 and S2 Messaging RF3 fixtures compile under the unchanged repository
+analyzers. Luna lifecycle_wave owns a private overlay of Messaging test files
+only, using the exact diagnostics from build56. Resolve actual contract members,
+unnecessary imports and nullable checks; extract executable units without
+changing their assertions, corpus, timing, faults or client paths. Each actual
+wave and official MCP client must have explicit ownership and unconditional
+joined disposal on every path, retaining both primary and cleanup failures.
+Use try/finally and the existing failure observer rather than swallowing a broad
+primary exception. Never replace cleanup with detached work or suppress a
+diagnostic. Root reviews the complete diff, joins after the current build ends,
+and owns full solution build, formatter and actual Aspire RF3 execution. A
+compiler fix is source evidence only and cannot close the runtime gate.
+
+TASK-DUE-ACK-DISCOVERY maps AC-DUE-003 to the remaining actual lost-ACK gate.
+Luna lifecycle_wave reads the native request phase observers and existing scoped
+RF3 fault fixtures and writes only a private source-bound proposal. Identify the
+exact real phase between committed autonomous due effects and receipt delivery,
+the original task/stream cleanup join, persisted creator and stable command
+identity, and independently observed SDK/MCP outcomes after restart/retry. No
+new test hook, public endpoint, trusted caller role or write-capable change is
+approved by discovery. Root freezes the exact fault/ownership contract before
+implementation; a delayed or rejected uncommitted attempt is not lost-ACK proof.
+
 Luna lifecycle_wave owns only new Messaging Cases/Helpers/Assertions/Models files
 in a private current-source overlay; root owns the shared wave fault join and
 gates. Start an isolated all-current Aspire RF3 wave with its immutable image

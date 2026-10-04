@@ -55,6 +55,19 @@ Workers must stop on ambiguity, overlapping ownership, changed contracts or a po
 
 ## Traceability and evidence
 
+TASK-DOCS-CURRENT-PATHS refines AC-DOCS-005/008 and AC-MCAF-010 after the owner's
+responsibility-folder migration. Root owns integration; Luna cluster_wave owns
+only a private proposed update of docs/implementation/status.json evidence paths
+and its explicit mapping receipt. Replace a moved path only after identifying its
+actual current file and owning task semantics; expand split files to the relevant
+current slice files. Unique basename matches are evidence, not permission to
+guess a renamed implementation. Preserve every task, status, title, requirement,
+qualification limitation and immutable historical run/source receipt. Report
+unresolved mappings with exact missing paths rather than dropping evidence or
+inventing a delivered capability. No production/test/workflow or policy changes.
+Root reviews the complete mapping and actual file existence before joining;
+static path repair is not runtime qualification or task acceptance completion.
+
 Every REQ maps to its same-numbered AC above, ADR-032, tasks in the execution table and validator/review evidence. All seven local configuration criteria passed independent review and integrated static validation; outcomes and native worker joins are recorded in implementation/mcaf-installation.json. This is not new GitHub runtime qualification. The initial inventory had 20 projects; concurrent CodeQuality work added two projects and their local policies, preserved by this installation. The current installation record covers all 22. Any delivered GitHub snapshot must include the recorded projects or the validator correctly fails; do not publish a governance-only commit with an inventory of omitted uncommitted projects.
 
 ## Повне покриття функцій та рішень

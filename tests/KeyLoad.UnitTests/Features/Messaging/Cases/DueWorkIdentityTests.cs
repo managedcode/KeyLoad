@@ -3,12 +3,15 @@ using KeyLoad.Orleans;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-public sealed class DueWorkIdentityTests
+internal sealed class DueWorkIdentityTests
 {
+    private const string FirstPartition = "partition-a";
+    private const string SecondPartition = "partition-b";
+
     [Test]
     public async Task CommandIdentityIsStableForTheFullCanonicalOccurrenceScope()
     {
-        var partition = new PartitionRef("tenant", "database", "domain", "partition-a");
+        var partition = new PartitionRef("tenant", "database", "domain", FirstPartition);
         var lane = new QueueLaneRef(partition, "jobs");
         var hint = new DueWorkHint(DueWorkKind.Schedule, lane, ScheduleId, "creator", 1, 7, 9,
             RecurringSagaDatabase.Epoch);
@@ -20,7 +23,7 @@ public sealed class DueWorkIdentityTests
         await Assert.That(DueWorkCommandIdentity.Create(hint with { Generation = 8 })).IsNotEqualTo(command);
         await Assert.That(DueWorkCommandIdentity.Create(hint with
         {
-            Lane = new(new(partition.TenantId, partition.DatabaseId, partition.TransactionDomainId, "partition-b"), "jobs")
+            Lane = new(new(partition.TenantId, partition.DatabaseId, partition.TransactionDomainId, SecondPartition), "jobs")
         })).IsNotEqualTo(command);
     }
 

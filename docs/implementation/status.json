@@ -502,8 +502,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
-      "src/KeyLoad.Artifacts/BackupArtifact.cs",
-      "tests/KeyLoad.UnitTests/ArtifactTests.cs"
+      "src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs",
+      "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTests.cs"
     ]
   },
   "KL-006": {
@@ -523,8 +523,10 @@
       "docs/implementation/comparative-benchmarks.md",
       "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/Neo4j/Neo4jTarget.cs",
       "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/ResourceMeasurement/ClientResourceSampler.cs",
-      "site/index.html",
-      ".github/workflows/pages.yml",
+      "site/Features/BenchmarkComparisons/index.html",
+      ".github/workflows/ci.yml",
+      ".github/workflows/Features/BenchmarkComparisons/QualifySite/action.yml",
+      ".github/workflows/Features/BenchmarkComparisons/DeploySite/action.yml",
       "docs/implementation/website.md",
       "docs/implementation/runtime-qualification-37060131271.json",
       "docs/implementation/performance-diagnosis-37060131271.json",
@@ -624,7 +626,7 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Storage/KeyCodec.cs",
-      "tests/KeyLoad.UnitTests/KeyCodecTests.cs",
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecTests.cs",
       "src/KeyLoad.Abstractions/Features/StorageRecovery/Serialization/KeyCodecReadPrimitives.cs",
       "tests/KeyLoad.UnitTests/Features/StorageRecovery",
       "docs/implementation/keycodec-crud-development-2026-10-04.json"
@@ -670,7 +672,7 @@
     "title": "Partition writer і command envelope",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Replication/ClusterCoordinator.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ClusterCoordinator.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs"
     ]
   },
@@ -680,7 +682,7 @@
     "evidence": [
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
-      "tests/KeyLoad.UnitTests/TransactionTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
       "tests/KeyLoad.UnitTests/Features/DocumentStorage",
       "docs/implementation/keycodec-crud-development-2026-10-04.json",
       "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/McpDocumentCrudParityTests.cs"
@@ -726,7 +728,7 @@
     "evidence": [
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
-      "tests/KeyLoad.UnitTests/TransactionTests.cs"
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs"
     ]
   },
   "KL-012": {
@@ -735,7 +737,7 @@
     "evidence": [
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
-      "tests/KeyLoad.UnitTests/TransactionTests.cs"
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs"
     ]
   },
   "KL-013": {
@@ -745,14 +747,14 @@
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-014": {
     "title": "Standalone server і C# SDK",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Server/ApiEndpoints.cs",
+      "src/KeyLoad.Server/Features/ClientApi/Transport/ApiEndpoints.cs",
       "src/KeyLoad.Client/KeyLoadClient.cs"
     ]
   },
@@ -771,7 +773,7 @@
       "src/KeyLoad.Abstractions/Features/ChangeFeeds/Contracts/ChangeFeeds.cs",
       "src/KeyLoad.Core/Features/ChangeFeeds/Execution/ProjectionOutbox.cs",
       "docs/design/change-feeds.md",
-      "tests/KeyLoad.UnitTests/ChangeFeedTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/EventStreams/Cases/ProjectionRecoveryTests.cs"
     ]
   },
@@ -779,15 +781,17 @@
     "title": "Consensus provider qualification",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Replication/DurableRaftLog.cs",
-      "tests/KeyLoad.RecoveryTests/RaftLogTests.cs"
+      "src/KeyLoad.Replication/Features/ClusterReplication/Storage/DurableReplicaLog.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs"
     ]
   },
   "KL-018": {
     "title": "Metadata bootstrap",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Replication/ClusterBootstrap.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipTable.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipStore.cs",
+      "src/KeyLoad.Server/Features/ClusterRouting/Hosting/OrleansSiloConfiguration.cs",
       "src/KeyLoad.Server/Program.cs"
     ]
   },
@@ -795,8 +799,11 @@
     "title": "Orleans membership і ownership adapter",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Orleans/ConsensusMembershipTable.cs",
-      "src/KeyLoad.Orleans/CommandRouterGrain.cs"
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipTable.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipStore.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/RequestGrain.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/CommandPartitionGrain.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/GrainPartitionResolver.cs"
     ],
     "nativeRequestCqrs": {
       "status": "implementation_checkpoint_with_local_unit_pass_RF3_and_exact_source_qualification_pending",
@@ -848,7 +855,8 @@
     "title": "Три-вузловий replicated apply",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ReplicaMaterializer.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Commands/ReplicaCanonicalApply.cs",
       "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
     ]
@@ -857,7 +865,7 @@
     "title": "Strong read і session tokens",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Replication/ClusterCoordinator.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ClusterCoordinator.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs"
     ]
   },
@@ -865,8 +873,11 @@
     "title": "Graph storage",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/GraphAndSeries.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs",
+      "src/KeyLoad.Core/Features/GraphTraversal/Storage/DatabaseEngine.GraphKeys.cs",
+      "src/KeyLoad.Core/Features/GraphTraversal/Commands/DatabaseEngine.GraphMutations.cs",
+      "src/KeyLoad.Core/Features/GraphTraversal/Queries/DatabaseEngine.GraphReads.cs",
+      "src/KeyLoad.Core/Features/GraphTraversal/Queries/GraphTraversalReader.cs",
+      "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphTraversalTests.cs",
       "docs/Features/TimeSeries.md",
       "docs/ADR/ADR-050-timeseries-timescale-comparison.md"
     ]
@@ -875,24 +886,33 @@
     "title": "Bounded graph traversal",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/GraphAndSeries.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+      "src/KeyLoad.Core/Features/GraphTraversal/Queries/DatabaseEngine.GraphReads.cs",
+      "src/KeyLoad.Core/Features/GraphTraversal/Queries/GraphSearchReachabilityReader.cs",
+      "src/KeyLoad.Core/Features/GraphTraversal/Queries/GraphTraversalReader.cs",
+      "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphTraversalTests.cs"
     ]
   },
   "KL-024": {
     "title": "Time-series core",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/GraphAndSeries.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+      "src/KeyLoad.Core/Features/TimeSeries/Commands/DatabaseEngine.SampleAppend.cs",
+      "src/KeyLoad.Core/Features/TimeSeries/Queries/DatabaseEngine.SampleReads.cs",
+      "src/KeyLoad.Core/Features/TimeSeries/Queries/TimeSeriesReadOperations.cs",
+      "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleOrderingTests.cs"
     ]
   },
   "KL-025": {
     "title": "Time-series range і aggregates",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/GraphAndSeries.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs",
+      "src/KeyLoad.Core/Features/TimeSeries/Queries/DatabaseEngine.SampleReads.cs",
+      "src/KeyLoad.Core/Features/TimeSeries/Queries/SampleRangeReader.cs",
+      "src/KeyLoad.Core/Features/TimeSeries/Queries/SampleAggregateReader.cs",
+      "src/KeyLoad.Core/Features/TimeSeries/Queries/SampleAggregateWindowReader.cs",
+      "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleOrderingTests.cs",
+      "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleAggregateTests.cs",
+      "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleAggregateWindowTests.cs",
       "docs/Features/TimeSeries.md",
       "docs/ADR/ADR-052-timeseries-bounded-aggregates.md",
       "src/KeyLoad.Core/Features/TimeSeries",
@@ -993,8 +1013,10 @@
     "title": "Canonical vectors і exact search",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/GraphAndSeries.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+      "src/KeyLoad.Core/Features/Search/Commands/DatabaseEngine.VectorWrites.cs",
+      "src/KeyLoad.Core/Features/Search/Queries/DatabaseEngine.VectorReads.cs",
+      "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs"
     ]
   },
   "KL-028": {
@@ -1109,27 +1131,42 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs"
     ]
   },
   "KL-034": {
     "title": "Search freshness contract",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/GraphAndSeries.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+      "src/KeyLoad.Core/Features/Search/Queries/DatabaseEngine.VectorReads.cs",
+      "src/KeyLoad.Core/Features/Search/Queries/VisibleVectorReads.cs",
+      "src/KeyLoad.Core/Features/Search/Commands/VectorProjectionApply.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/ImmutableVectorInputTests.cs"
     ]
   },
   "KL-035": {
     "title": "Replica snapshot і installation",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Storage.ZoneTree/Checkpoints.cs",
-      "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
+      "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs",
+      "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeCheckpointGeneration.cs",
+      "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeCheckpointMetadata.cs",
+      "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeCheckpointReader.cs",
+      "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeCheckpointWriter.cs",
+      "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeCheckpointReclaimer.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ReplicaMaterializer.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Storage/ReplicaSnapshotStore.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Recovery/ReplicaSnapshotReceiver.cs",
       "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/CheckpointTests.cs",
-      "tests/KeyLoad.RecoveryTests/RaftSnapshotTests.cs",
-      "tests/KeyLoad.RecoveryTests/InterruptedSnapshotTests.cs",
-      "tests/KeyLoad.RecoveryTests/SnapshotInstallRecoveryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTransferProcessRecoveryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTransferProcessRecoveryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTermMetadataSnapshotTests.cs",
       "docs/design/replica-snapshots.md",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
       "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
@@ -1181,17 +1218,17 @@
     "evidence": [
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
       "src/KeyLoad.Core/Features/ChangeFeeds/Execution/ProjectionOutbox.cs",
-      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
-      "tests/KeyLoad.UnitTests/ProjectionProgressTests.cs",
-      "src/KeyLoad.Core/CommandAdmissionGovernor.cs",
-      "src/KeyLoad.Core/AdmittedCommandQueue.cs",
-      "tests/KeyLoad.UnitTests/CommandAdmissionTests.cs",
-      "tests/KeyLoad.UnitTests/CommandQueueTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/QueryAdapterTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ProjectionProgressTests.cs",
+      "src/KeyLoad.Core/Features/ResourceExecution/Commands/CommandAdmissionGovernor.cs",
+      "src/KeyLoad.Core/Features/ResourceExecution/Commands/AdmittedCommandInbox.cs",
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/CommandAdmissionGovernorTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/AdmittedCommandInboxTests.cs",
       "tests/KeyLoad.IntegrationTests/Features/ResourceExecution/Cases/AdmissionClusterTests.cs",
-      "src/KeyLoad.Core/HttpAdmissionGovernor.cs",
-      "tests/KeyLoad.UnitTests/HttpAdmissionTests.cs",
+      "src/KeyLoad.Core/Features/ResourceExecution/Admission/HttpAdmissionGovernor.cs",
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/HttpAdmissionGovernorTests.cs",
       "src/KeyLoad.Core/ReadExecutionBudget.cs",
-      "tests/KeyLoad.UnitTests/ReadExecutionTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/ReadExecutionTests.cs",
       "docs/design/bounded-reads.md",
       "docs/design/command-admission.md",
       "docs/implementation/keycodec-crud-development-2026-10-04.json",
@@ -1316,7 +1353,9 @@
     "title": "Chaos і corruption suite",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ReplicaMaterializer.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Commands/ReplicaAppendReceiver.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Storage/ReplicaPersistence.cs",
       "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
     ]
@@ -1326,8 +1365,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
-      "src/KeyLoad.Artifacts/BackupArtifact.cs",
-      "tests/KeyLoad.UnitTests/ArtifactTests.cs"
+      "src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs",
+      "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTests.cs"
     ]
   },
   "KL-043": {
@@ -1433,7 +1472,7 @@
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-046": {
@@ -1443,7 +1482,7 @@
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-047": {
@@ -1453,7 +1492,7 @@
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-048": {
@@ -1465,7 +1504,7 @@
       "src/KeyLoad.Client/Features/QueryExecution/Queries/KeyLoadQuery.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-049": {
@@ -1475,7 +1514,7 @@
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-050": {
@@ -1485,7 +1524,7 @@
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-051": {
@@ -1495,7 +1534,7 @@
       "src/KeyLoad.Abstractions/Features/QueryExecution/Contracts/QueryAst.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryValidation.cs",
       "src/KeyLoad.Client/Features/QueryExecution/Queries/KeyLoadQuery.cs",
-      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/QueryAdapterTests.cs",
       "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
     ]
   },
@@ -1505,13 +1544,13 @@
     "evidence": [
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryValidation.cs",
-      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
-      "src/KeyLoad.Core/HttpAdmissionGovernor.cs",
-      "tests/KeyLoad.UnitTests/HttpAdmissionTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/QueryAdapterTests.cs",
+      "src/KeyLoad.Core/Features/ResourceExecution/Admission/HttpAdmissionGovernor.cs",
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/HttpAdmissionGovernorTests.cs",
       "tests/KeyLoad.IntegrationTests/Features/ResourceExecution/Cases/AdmissionClusterTests.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-053": {
@@ -1520,15 +1559,15 @@
     "evidence": [
       "src/KeyLoad.Client/Features/QueryExecution/Queries/KeyLoadQuery.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
-      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/QueryAdapterTests.cs"
     ]
   },
   "KL-054": {
     "title": "SQL differential і metamorphic suite",
     "status": "in_progress",
     "evidence": [
-      "tests/KeyLoad.UnitTests/QueryAdapterTests.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/QueryAdapterTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
       "docs/design/query-q1.md"
     ]
   },
@@ -1586,7 +1625,7 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs"
     ]
   },
   "KL-059": {
@@ -1630,8 +1669,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
-      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
     ]
   },
   "KL-062": {
@@ -1639,8 +1679,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
-      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
     ]
   },
   "KL-063": {
@@ -1648,8 +1689,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
-      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
     ]
   },
   "KL-064": {
@@ -1657,8 +1699,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
-      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
     ]
   },
   "KL-065": {
@@ -1666,8 +1709,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
-      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
     ]
   },
   "KL-066": {
@@ -1675,16 +1719,20 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
-      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
     ]
   },
   "KL-067": {
     "title": "Classification lineage у search projections",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Core/GraphAndSeries.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs"
+      "src/KeyLoad.Core/Features/Search/Commands/VectorProjectionApply.cs",
+      "src/KeyLoad.Core/Features/Search/Policies/VectorProjectionPolicy.cs",
+      "src/KeyLoad.Core/Features/Search/Execution/AnnSeedCollector.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedVisibilityTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedCutTests.cs"
     ]
   },
   "KL-068": {
@@ -1692,8 +1740,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
-      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
     ]
   },
   "KL-069": {
@@ -1708,8 +1757,11 @@
     "title": "Placement і tenant packing",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Orleans/ConsensusMembershipTable.cs",
-      "src/KeyLoad.Orleans/CommandRouterGrain.cs"
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipTable.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipStore.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/RequestGrain.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/CommandPartitionGrain.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/GrainPartitionResolver.cs"
     ]
   },
   "KL-071": {
@@ -1754,7 +1806,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
-      "tests/KeyLoad.UnitTests/GraphAndSearchTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricGoldenTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricValidationTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnRecallTests.cs",
       "src/KeyLoad.Query/Features/Search/Execution/PreparedSimilarity.cs",
       "docs/Features/Search.md",
       "docs/ADR/ADR-035-memory-performance.md",
@@ -1790,7 +1844,7 @@
       "src/KeyLoad.Core/Features/ChangeFeeds/Execution/ChangeFeeds.cs",
       "src/KeyLoad.Query/Features/ChangeFeeds/Execution/LiveQueries.cs",
       "docs/design/change-feeds.md",
-      "tests/KeyLoad.UnitTests/LiveQueryTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/LiveQueryTests.cs",
       "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
     ]
   },
@@ -1827,7 +1881,7 @@
       "src/KeyLoad.Core/Features/EventStreams/Execution/Events.cs",
       "src/KeyLoad.Core/Features/EventStreams/Execution/EventSources.cs",
       "src/KeyLoad.Core/Features/Messaging/Execution/SubscriptionGroups.cs",
-      "tests/KeyLoad.UnitTests/TransactionTests.cs"
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs"
     ]
   },
   "KL-083": {
@@ -1835,8 +1889,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/EventStreams/Execution/Events.cs",
-      "tests/KeyLoad.UnitTests/TransactionTests.cs",
-      "tests/KeyLoad.UnitTests/SubscriptionTests.cs"
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/SubscriptionTests.cs"
     ]
   },
   "KL-084": {
@@ -1845,8 +1899,8 @@
     "evidence": [
       "src/KeyLoad.Core/Features/EventStreams/Execution/Events.cs",
       "src/KeyLoad.Core/Features/EventStreams/Execution/EventSources.cs",
-      "tests/KeyLoad.UnitTests/TransactionTests.cs",
-      "tests/KeyLoad.UnitTests/SubscriptionTests.cs"
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/SubscriptionTests.cs"
     ]
   },
   "KL-085": {
@@ -1872,8 +1926,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
-      "tests/KeyLoad.UnitTests/MessagingTests.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-087": {
@@ -1881,8 +1935,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
-      "tests/KeyLoad.UnitTests/MessagingTests.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-088": {
@@ -1890,8 +1944,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
-      "tests/KeyLoad.UnitTests/MessagingTests.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-089": {
@@ -1899,7 +1953,7 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/SubscriptionGroups.cs",
-      "tests/KeyLoad.UnitTests/SubscriptionTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/SubscriptionTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/ChangeFeeds/Cases/SubscriptionRecoveryTests.cs",
       "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
     ]
@@ -1911,8 +1965,8 @@
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
       "src/KeyLoad.Core/Features/Messaging/Execution/SubscriptionGroups.cs",
       "src/KeyLoad.Core/MutationAuthorization.cs",
-      "tests/KeyLoad.UnitTests/MessagingTests.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/ChangeFeeds/Cases/SubscriptionRecoveryTests.cs"
     ]
   },
@@ -1920,7 +1974,7 @@
     "title": "Document + event + queue atomic batch",
     "status": "in_progress",
     "evidence": [
-      "tests/KeyLoad.UnitTests/TransactionTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
       "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
     ]
   },
@@ -1929,16 +1983,19 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
-      "tests/KeyLoad.UnitTests/MessagingTests.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-093": {
     "title": "Orleans coordinators і worker SDK",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Orleans/ConsensusMembershipTable.cs",
-      "src/KeyLoad.Orleans/CommandRouterGrain.cs"
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipTable.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipStore.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/RequestGrain.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/CommandPartitionGrain.cs",
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/GrainPartitionResolver.cs"
     ]
   },
   "KL-094": {
@@ -1977,9 +2034,10 @@
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "src/KeyLoad.Core/MutationAuthorization.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs",
-      "tests/KeyLoad.UnitTests/SubscriptionTests.cs",
-      "tests/KeyLoad.RecoveryTests/PeerSecurityTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/SubscriptionTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
     ]
   },
   "KL-097": {
@@ -2014,15 +2072,16 @@
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "src/KeyLoad.Core/Features/EventStreams/Execution/EventSources.cs",
-      "src/KeyLoad.Artifacts/BackupArtifact.cs",
-      "tests/KeyLoad.UnitTests/ArtifactTests.cs"
+      "src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs",
+      "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTests.cs"
     ]
   },
   "KL-099": {
     "title": "Eventing replication і migration",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Replication/ReplicatedStateMachine.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ReplicaMaterializer.cs",
+      "src/KeyLoad.Replication/Features/ClusterReplication/Commands/ReplicaCanonicalApply.cs",
       "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/ChangeFeeds/Cases/SubscriptionRecoveryTests.cs"
@@ -2072,8 +2131,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
-      "tests/KeyLoad.UnitTests/MessagingTests.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-103": {
@@ -2081,8 +2140,8 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
-      "tests/KeyLoad.UnitTests/MessagingTests.cs",
-      "tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
     ]
   },
   "KL-104": {

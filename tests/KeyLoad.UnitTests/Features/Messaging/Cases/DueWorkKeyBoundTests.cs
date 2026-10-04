@@ -4,7 +4,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-public sealed class DueWorkKeyBoundTests
+internal sealed class DueWorkKeyBoundTests
 {
     [Test]
     public async Task OversizedReadableKeyFailsThePrefixAndDefersItWithoutInventingACursor()
@@ -14,7 +14,7 @@ public sealed class DueWorkKeyBoundTests
             RecurringSagaDatabase.DatabaseId, RecurringSagaDatabase.Domain, PartitionId, fixture.Queue.Queue,
             new string('x', OversizedComponentCharacters));
         await Assert.That(key.Length > DueWorkProtocol.MaximumKeyBytes).IsTrue();
-        fixture.Store.Commit(transaction =>
+        fixture.Store.Commit((transaction, _) =>
         {
             transaction.Put(key, [0x01]);
             return true;

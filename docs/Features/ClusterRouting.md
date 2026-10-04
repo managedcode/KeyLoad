@@ -11,6 +11,19 @@ full exact-SHA RF3 qualification remains required.
 
 Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 
+TASK-PLACEMENT-DISCOVERY advances original KL-036/069/070/071/072 toward the
+freeze required by ADR-016/017 and AC-ROUTE-004/005, AC-REP-004. Luna
+cluster_wave reads the actual node-local host, generated identity/token contracts,
+replication recovery and router call paths; writes only a private source-bound
+design packet. Identify the minimum catalog, physical group/epoch fencing,
+persisted movement intent and snapshot/tail integration points, exact unavailable
+prerequisites and measurable real-process/RF3 cases. Existing whole-dataset RF3
+and activation movement must not be relabeled as physical placement. Root selects
+and freezes the implementation contract before any write-capable implementation;
+this discovery does not choose the still-proposed token format, migrate a store,
+change a public API or satisfy runtime acceptance. The join requires concrete
+current file/method evidence and an ordered, disjoint implementation graph.
+
 The owner2026-10-04 native CQRS/result/long-operation requirement is specified in
 [NativeCqrs](ClusterRouting/NativeCqrs.md) and [ADR-082](../ADR/ADR-082-native-cqrs-streams.md).
 Only the real Graph/native-enumeration compatibility test stage is accepted for

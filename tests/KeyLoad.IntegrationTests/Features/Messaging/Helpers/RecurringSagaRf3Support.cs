@@ -49,11 +49,8 @@ internal static class RecurringScheduleRf3Assertions
         while (TimeProvider.System.GetUtcNow() < until)
         {
             var view = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectRecurringScheduleAsync(
-                new(scenario.SourceQueue, scheduleId), cancellationToken));
-            if (view is null)
-            {
-                throw new InvalidOperationException("The persisted schedule disappeared during autonomous progress.");
-            }
+                new(scenario.SourceQueue, scheduleId), cancellationToken))
+                ?? throw new InvalidOperationException("The persisted schedule disappeared during autonomous progress.");
             if (view.NextOrdinal == expectedOrdinal)
             {
                 return;

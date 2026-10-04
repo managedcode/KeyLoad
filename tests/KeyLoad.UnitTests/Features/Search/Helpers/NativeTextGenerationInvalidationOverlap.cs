@@ -1,8 +1,8 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Server.Features.Search;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -32,7 +32,7 @@ internal static class NativeTextGenerationInvalidationOverlap
     }
 
     private static async Task RebuildAfterInvalidationAsync(TestDatabase database, NativeTextProjection projection,
-        SearchEngine engine, SearchRequest request, string root, IReadOnlyList<RankedDocument> original,
+        SearchEngine engine, SearchRequest request, string root, RankedDocument[] original,
         ITextProjectionLease retiredLease, ReadExecutionBudget retiredBudget, CancellationToken cancellation)
     {
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle revised\"}"));

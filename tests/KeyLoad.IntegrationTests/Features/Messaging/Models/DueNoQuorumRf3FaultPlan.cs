@@ -3,9 +3,9 @@ using KeyLoad.Orleans;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-internal sealed record DueFaultRf3LeaderCut(
-    string LeaderNode,
-    string[] Survivors,
+internal sealed record DueNoQuorumRf3FaultPlan(
+    string Leader,
+    string RecoveryNode,
+    string Survivor,
     NodeEpochRf3NodeObservation[] BeforeStatus,
-    ReplicaSiloDiscovery[] BeforeDiscovery,
-    long RequiredApplied);
+    ReplicaSiloDiscovery[] BeforeDiscovery);

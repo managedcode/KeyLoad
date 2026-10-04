@@ -1,4 +1,3 @@
-using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.Search;
 

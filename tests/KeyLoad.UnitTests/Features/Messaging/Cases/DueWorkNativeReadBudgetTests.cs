@@ -1,10 +1,9 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-public sealed class DueWorkNativeReadBudgetTests
+internal sealed class DueWorkNativeReadBudgetTests
 {
     [Test]
     public async Task FixedTailAndForwardScanChargeExactNativeBytesAndRejectOneByteLess()

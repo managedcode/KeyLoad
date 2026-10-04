@@ -3,7 +3,7 @@ using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-public sealed class DueWorkPageBudgetTests
+internal sealed class DueWorkPageBudgetTests
 {
     [Test]
     public async Task ValidValueCrossingAdmittedByteCapIsRevisitedAfterPrefixAlternation()

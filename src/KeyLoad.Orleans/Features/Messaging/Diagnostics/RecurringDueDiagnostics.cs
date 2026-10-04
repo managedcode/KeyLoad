@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.Orleans;

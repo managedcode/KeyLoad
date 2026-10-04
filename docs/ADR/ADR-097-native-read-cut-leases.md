@@ -33,6 +33,19 @@ capture until replacement completes. Ordinary Compact does not replace the nativ
 tree and remains allowed. Prove unchanged current health/identity after rejection,
 successful installation after disposal, and exact old-cut reads after compaction.
 
+Native disposal failure retains the actual unsettled iterator and active slot;
+later attempts retry that same handle and concurrent callers join the actual
+attempt. Clear ownership and release admission only after native disposal succeeds.
+Keep primary plus cleanup failures. Budget reporting after successful cleanup
+does not retain a closed handle. Construct scalar cut before opening the iterator.
+
+Shutdown joins native leases before cache closing/tree disposal. Failed native
+cleanup leaves tree/cache/owner handles owned for a subsequent joined retry and
+closes new lease admission. Reentrant disposal while this thread holds the runtime
+read/write gate rejects before state changes or waiting. Sequential prefix visits
+share one snapshot, one active traversal and cumulative record/byte/advance/time
+budgets; returned counters describe cumulative work across every visit.
+
 L2-B remains responsible for same-cut outbox/policy/applied metadata and retention,
 ordered delta catch-up, validated catalog switch and interrupted-build recovery.
 Neither this primitive nor L1 leased generations alone closes the original

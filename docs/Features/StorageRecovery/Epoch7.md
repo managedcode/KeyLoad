@@ -5,6 +5,32 @@ Messaging and Search persisted contracts. [ADR-091](../../ADR/ADR-091-epoch7-int
 owns the format decision. Existing ADR-077 native5 evidence remains historical;
 this contract extends its positive and negative controls to the new target.
 
+TASK-EPOCH7-NATIVE-LOCK-RELEASE refines AC-EPOCH7-003/004. Recovery44 retains one
+native5 DescriptorFlushed process-case failure: Publish rejects native flock
+acquisition for the original node.owner.lock with errno35 after parent Prepare
+and VerifyPrepared returned. The current FileShare.None readiness probes do not
+prove that the native flock is free. Do not infer a production handle leak or
+add a retry from this evidence.
+
+Root freezes a discriminating real-owner oracle before the next stage: after
+Prepare, after prior-source copy inspection, after VerifyPrepared and after
+Publish in the existing NodeEpochProcessRecoveryTests retry flow, acquire and
+dispose the actual existing ServerNodeUpgradeLocks for the original source.
+This opens its exact node/canonical/replica locks using the production native IO
+path, with no new lock implementation, forced release, retry or sharing change.
+Retain all original crash boundaries, prior-reader checks and publication/data
+oracles. A failure must identify its fixed boundary while preserving the original
+native exception. A focused negative control holds an actual native owner lease,
+requires the same probe to reject, releases it and requires a healthy probe;
+ordinary BCL FileStream exclusivity cannot substitute for this control.
+
+Luna cluster_wave owns a private patch for the existing retry-flow test and NEW
+RecoveryTests StorageRecovery Helpers/Cases for this native probe/control only.
+Root owns docs, production changes if exact holder evidence establishes a defect,
+serialized Aspire recovery, integration and stage commit. Frontend/SDK/MCP and
+format migration are N/A: this refines verification of unchanged offline native
+ownership. Source inspection or successful BCL readiness alone closes no AC.
+
 New transfer, recurring/saga and vector-lineage records change what a reader
 must understand. An epoch6 reader must never reopen epoch7 and serve projected
 vectors without their lineage or route unsupported mutations. The chosen design

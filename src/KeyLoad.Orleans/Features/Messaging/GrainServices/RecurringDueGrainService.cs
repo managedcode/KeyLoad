@@ -1,8 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Replication;
-using Orleans.Runtime;
-using Orleans.Services;
 
 namespace KeyLoad.Orleans;
 
@@ -15,9 +13,11 @@ namespace KeyLoad.Orleans;
 /// <param name="grainFactory">The Orleans factory for partition coordinator activations.</param>
 /// <param name="clock">The shared UTC clock used for due discovery and bounded polling.</param>
 /// <param name="diagnostics">Safe operational diagnostics for rejected pages and dispatch outcomes.</param>
-public sealed class RecurringDueGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
+public sealed class RecurringDueGrainService(GrainId id, Silo silo,
+    Microsoft.Extensions.Logging.ILoggerFactory loggerFactory,
     DatabaseEngine database, ReplicaConsensus consensus, IGrainFactory grainFactory, TimeProvider clock,
-    ILogger<RecurringDueGrainService> diagnostics) : GrainService(id, silo, loggerFactory), IRecurringDueGrainService
+    Microsoft.Extensions.Logging.ILogger<RecurringDueGrainService> diagnostics)
+    : GrainService(id, silo, loggerFactory), IRecurringDueGrainService
 {
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(1);
     private Task? loop;

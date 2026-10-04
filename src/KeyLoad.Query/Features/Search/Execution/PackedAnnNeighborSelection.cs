@@ -21,7 +21,7 @@ internal static class PackedAnnNeighborSelection
     {
         if (metric == DistanceMetric.DotProduct)
         {
-            return SelectSimple(source, nodes, candidateCount, maximum, scratch, budget);
+            return PackedAnnNeighborOrdering.SelectSimple(source, nodes, candidateCount, maximum, scratch, budget);
         }
         var selected = 0;
         for (var index = 0; index < candidateCount && selected < maximum; index++)
@@ -68,7 +68,7 @@ internal static class PackedAnnNeighborSelection
             }
             scratch.SelectedNeighbors[selected++] = candidate;
         }
-        SortSelected(scratch.SelectedNeighbors, selected, budget);
+        PackedAnnNeighborOrdering.SortSelected(scratch.SelectedNeighbors, selected, budget);
         return selected;
     }
 
@@ -154,26 +154,6 @@ internal static class PackedAnnNeighborSelection
         scratch.NeighborScores[existing] = PackedAnnLayerSearch.Score(vectors, added, similarity, dimension, budget);
     }
 
-    private static int SelectSimple(int source, int[] nodes, int candidateCount, int maximum,
-        PackedAnnBuildScratch scratch, AnnWorkBudget budget)
-    {
-        var selected = 0;
-        for (var index = 0; index < candidateCount && selected < maximum; index++)
-        {
-            budget.Check();
-            budget.Charge(1);
-            var candidate = nodes[index];
-            if (candidate == source)
-            {
-                continue;
-            }
-            budget.Charge(1);
-            scratch.SelectedNeighbors[selected++] = candidate;
-        }
-        SortSelected(scratch.SelectedNeighbors, selected, budget);
-        return selected;
-    }
-
     private static void SortPairs(int[] nodes, double[] scores, int count, AnnWorkBudget budget)
     {
         for (var index = 1; index < count; index++)
@@ -194,26 +174,6 @@ internal static class PackedAnnNeighborSelection
             }
             nodes[cursor] = node;
             scores[cursor] = score;
-        }
-    }
-
-    private static void SortSelected(int[] nodes, int count, AnnWorkBudget budget)
-    {
-        for (var index = 1; index < count; index++)
-        {
-            var node = nodes[index];
-            var cursor = index;
-            while (cursor > 0)
-            {
-                budget.Charge(1);
-                if (node >= nodes[cursor - 1])
-                {
-                    break;
-                }
-                nodes[cursor] = nodes[cursor - 1];
-                cursor--;
-            }
-            nodes[cursor] = node;
         }
     }
 

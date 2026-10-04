@@ -4,7 +4,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-public sealed class DueWorkDiscoveryTests
+internal sealed class DueWorkDiscoveryTests
 {
     [Test]
     public async Task AlternatesPrefixesAndBoundsRealZoneTreePages()
@@ -54,7 +54,7 @@ public sealed class DueWorkDiscoveryTests
         var malformedId = Guid.NewGuid();
         var malformedKey = KeySpace.Partition(DueWorkProtocol.ScheduleSpace, fixture.Partition,
             fixture.Queue.Queue, malformedId.ToString(DueWorkFields.GuidFormat));
-        fixture.Store.Commit(transaction =>
+        fixture.Store.Commit((transaction, _) =>
         {
             transaction.Put(malformedKey, [0xFF]);
             return true;
@@ -108,7 +108,7 @@ public sealed class DueWorkDiscoveryTests
     {
         using var fixture = new RecurringSagaDatabase();
         using var cancellation = new CancellationTokenSource();
-        cancellation.Cancel();
+        await cancellation.CancelAsync();
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
             DueWorkDiscovery.ReadPage(fixture.Database, null, DueWorkTestData.WakeAt, cancellation.Token));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);

@@ -1,8 +1,8 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Server;
+using KeyLoad.Storage;
 using KeyLoad.Server.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -29,12 +29,12 @@ internal static class NativeTextGenerationCensusOverlap
         using var lease = projection.Acquire(CaptureScope(database), new(database.Database.Limits));
         lease.BeginRecord(original[0].Document.Reference, original[0].Document.Revision);
         lease.ObserveToken(Query);
-        await RunReplacementAsync(database, projection, engine, request, root, original, lease, pause,
+        await RunReplacementAsync(database, engine, request, root, original, lease, pause,
             cancellation);
     }
 
-    private static async Task RunReplacementAsync(TestDatabase database, NativeTextProjection projection,
-        SearchEngine engine, SearchRequest request, string root, IReadOnlyList<RankedDocument> original,
+    private static async Task RunReplacementAsync(TestDatabase database,
+        SearchEngine engine, SearchRequest request, string root, RankedDocument[] original,
         ITextProjectionLease lease, NativeTextGenerationPause pause, CancellationToken cancellation)
     {
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle revised\"}"));
@@ -43,38 +43,30 @@ internal static class NativeTextGenerationCensusOverlap
         var replacementTask = Task.Run(() => engine.Search("root", request, replacementCancellation.Token));
         var joined = false;
         var failures = new List<Exception>();
-        try
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
-            pause.WaitUntilEntered(cancellation);
-            lease.Dispose();
-            pause.Resume();
-            RankedDocument[] replacement;
             try
             {
-                replacement = await replacementTask.WaitAsync(TimeSpan.FromSeconds(WaitSeconds), cancellation);
+                pause.WaitUntilEntered(cancellation);
+                lease.Dispose();
+                pause.Resume();
+                var replacement = await replacementTask.WaitAsync(TimeSpan.FromSeconds(WaitSeconds), cancellation);
+                joined = true;
+                await Assert.That(replacement).HasSingleItem();
+                await Assert.That(replacement[0].Document.Revision).IsGreaterThan(original[0].Document.Revision);
+                await Assert.That(GenerationPaths(root)).HasSingleItem();
             }
             finally
             {
-                joined = replacementTask.IsCompleted;
+                pause.Resume();
+                if (!joined)
+                {
+                    await ServerFailureObserver.ObserveAsync(replacementCancellation.CancelAsync, failures);
+                    await ServerFailureObserver.ObserveAsync(async () => await replacementTask, failures);
+                }
+                ServerFailureObserver.Observe(lease.Dispose, failures);
             }
-            await Assert.That(replacement).HasSingleItem();
-            await Assert.That(replacement[0].Document.Revision).IsGreaterThan(original[0].Document.Revision);
-            await Assert.That(GenerationPaths(root)).HasSingleItem();
-        }
-        catch (Exception error)
-        {
-            failures.Add(error);
-        }
-        finally
-        {
-            pause.Resume();
-            if (!joined)
-            {
-                await ServerFailureObserver.ObserveAsync(replacementCancellation.CancelAsync, failures);
-                await ServerFailureObserver.ObserveAsync(async () => await replacementTask, failures);
-            }
-            ServerFailureObserver.Observe(lease.Dispose, failures);
-        }
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

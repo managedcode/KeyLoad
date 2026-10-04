@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -41,7 +40,7 @@ internal static class DueWorkTestData
         var key = KeySpace.Partition(DueWorkProtocol.ScheduleSpace, fixture.Partition,
             fixture.Queue.Queue, keyId.ToString(DueWorkFields.GuidFormat));
         var value = NativeSerialization.Serialize(record);
-        fixture.Store.Commit(transaction =>
+        fixture.Store.Commit((transaction, _) =>
         {
             transaction.Put(key, value);
             return true;
@@ -67,7 +66,8 @@ internal static class DueWorkTestData
     }
 
     internal static Guid OrderedId(int suffix)
-        => Guid.ParseExact(string.Concat("000000000000000000000000000000", suffix.ToString("D2")), DueWorkFields.GuidFormat);
+        => Guid.ParseExact(string.Concat("000000000000000000000000000000",
+            suffix.ToString("D2", System.Globalization.CultureInfo.InvariantCulture)), DueWorkFields.GuidFormat);
 
     internal static string LargeJson(int characters)
         => string.Concat("{\"data\":\"", new string('x', characters), "\"}");
