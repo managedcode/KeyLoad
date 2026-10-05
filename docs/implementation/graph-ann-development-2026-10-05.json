@@ -1,0 +1,1919 @@
+{
+  "stage": "81",
+  "createdUtc": "2026-10-05T11:32:43.843615+00:00",
+  "evidenceKind": "local_development_only",
+  "sourceHeadDuringRuns": "1e8833c027cf232e35fe012cd3eed41c61a17f89",
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "architecture": "arm64",
+  "caller": "Actual Aspire AppHost owns each native TUnit process, execution and shutdown",
+  "build": {
+    "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release -m:1 -nr:false -p:UseSharedCompilation=false",
+    "exit": 0,
+    "warnings": 0,
+    "errors": 0,
+    "original": "/private/tmp/keyload-stage81t-build-20261005.log",
+    "sha256": "fa4468b6e14eef975ca992a1136483db8dad3b14c7bafbd6016e3d39b42ba963"
+  },
+  "formatter": {
+    "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+    "exit": 0,
+    "original": "/private/tmp/keyload-stage81-format-20261005.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "repositoryGovernance": "PASS: preserved root prefix, 27 projects, 4 modules, required governance, local policies and unchanged empty skill inventory",
+  "graphSqlAndMcp": [
+    {
+      "name": "graph-normal",
+      "suite": "unit",
+      "filter": "/*/KeyLoad.UnitTests.Features.GraphTraversal/*/*",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit",
+        "--KeyLoadTests:Filter=/*/KeyLoad.UnitTests.Features.GraphTraversal/*/*",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81p-graph-normal-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:04:09.427633+00:00",
+      "settledUtc": "2026-10-05T11:04:39.856387+00:00",
+      "exitCode": 0,
+      "expectedTests": 26,
+      "passed": true,
+      "summary": {
+        "total": 26,
+        "passed": 26,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-graph-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "d4a933813a437644f52b6de796ca3044d46f42df839b399ede6e208b8514d3b7"
+    },
+    {
+      "name": "mcp-catalog-normal",
+      "suite": "unit",
+      "filter": "/*/KeyLoad.UnitTests.Features.ClientApi/McpCatalogTests/*",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit",
+        "--KeyLoadTests:Filter=/*/KeyLoad.UnitTests.Features.ClientApi/McpCatalogTests/*",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81p-mcp-catalog-normal-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:05:08.711922+00:00",
+      "settledUtc": "2026-10-05T11:05:14.989742+00:00",
+      "exitCode": 0,
+      "expectedTests": 6,
+      "passed": true,
+      "summary": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-mcp-catalog-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "a67f4dc9936753d22d66c2b4526f758f832daa16272560a2ac28fccfe3ba0006"
+    },
+    {
+      "name": "mcp-catalog-scalar",
+      "suite": "unit-scalar",
+      "filter": "/*/KeyLoad.UnitTests.Features.ClientApi/McpCatalogTests/*",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit-scalar",
+        "--KeyLoadTests:Filter=/*/KeyLoad.UnitTests.Features.ClientApi/McpCatalogTests/*",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81p-mcp-catalog-scalar-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:05:14.990123+00:00",
+      "settledUtc": "2026-10-05T11:05:23.189580+00:00",
+      "exitCode": 0,
+      "expectedTests": 6,
+      "passed": true,
+      "summary": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-mcp-catalog-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "2af886c489137cf3f13fcb1e4a25abcf7fb99aaff44b671a131c51319f69137c"
+    }
+  ],
+  "sqlReports": [
+    {
+      "suite": "unit",
+      "report": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-sql-graph-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "sha256": "cb20482974c42ac6464ea733e95e16123536dfabcace2969be47ef1a9e53ac11",
+      "summary": {
+        "total": 11,
+        "passed": 11,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "suite": "unit-scalar",
+      "report": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-sql-graph-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "sha256": "94b6a3cc3e317694fe139d1c2b216601734be88c695a0cbe1b5c68cffa97cf9c",
+      "summary": {
+        "total": 11,
+        "passed": 11,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      }
+    }
+  ],
+  "annAfter": [
+    {
+      "name": "ann-count-after-normal",
+      "suite": "unit",
+      "filter": "/*/*/PackedAnnNeighborCountTests/*",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit",
+        "--KeyLoadTests:Filter=/*/*/PackedAnnNeighborCountTests/*",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81t-ann-count-after-normal-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:24:13.013383+00:00",
+      "settledUtc": "2026-10-05T11:24:19.610889+00:00",
+      "exitCode": 0,
+      "expectedTests": 1,
+      "passed": true,
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81t-ann-count-after-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "820406af49f8e61e53e93cb414e659bb28990835fa48c6adea7c5afa1fe791ae"
+    },
+    {
+      "name": "ann-count-after-scalar",
+      "suite": "unit-scalar",
+      "filter": "/*/*/PackedAnnNeighborCountTests/*",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit-scalar",
+        "--KeyLoadTests:Filter=/*/*/PackedAnnNeighborCountTests/*",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81t-ann-count-after-scalar-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:24:19.611451+00:00",
+      "settledUtc": "2026-10-05T11:24:27.277280+00:00",
+      "exitCode": 0,
+      "expectedTests": 1,
+      "passed": true,
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81t-ann-count-after-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "b9c6358029b9d3e314a5686f95da681f28a5cbd8357eead20869413e464c3ac6"
+    },
+    {
+      "name": "ann-recall-after-normal",
+      "suite": "unit",
+      "filter": "/*/*/PackedAnnRecallTests/*",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit",
+        "--KeyLoadTests:Filter=/*/*/PackedAnnRecallTests/*",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81t-ann-recall-after-normal-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:24:27.277636+00:00",
+      "settledUtc": "2026-10-05T11:24:58.975471+00:00",
+      "exitCode": 0,
+      "expectedTests": 1,
+      "passed": true,
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81t-ann-recall-after-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "1de7adf3228e46730cc1528b2b5b2b1109807264d65ab08ecc1d2588178bcbf5"
+    },
+    {
+      "name": "ann-recall-after-scalar",
+      "suite": "unit-scalar",
+      "filter": "/*/*/PackedAnnRecallTests/*",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit-scalar",
+        "--KeyLoadTests:Filter=/*/*/PackedAnnRecallTests/*",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81t-ann-recall-after-scalar-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:24:58.975852+00:00",
+      "settledUtc": "2026-10-05T11:25:38.614960+00:00",
+      "exitCode": 0,
+      "expectedTests": 1,
+      "passed": true,
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81t-ann-recall-after-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "3ff037297178079373281a6c9c84c6207d3e6a0f1f1128f113e78d3b03d675b1"
+    },
+    {
+      "name": "ann-adaptive-after-normal",
+      "suite": "unit",
+      "filter": "/*/*/AdaptiveFilteredPlannerTests/AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit",
+        "--KeyLoadTests:Filter=/*/*/AdaptiveFilteredPlannerTests/AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81t-ann-adaptive-after-normal-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:25:38.615415+00:00",
+      "settledUtc": "2026-10-05T11:25:53.329842+00:00",
+      "exitCode": 0,
+      "expectedTests": 1,
+      "passed": true,
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81t-ann-adaptive-after-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "613c47cc5ae0b9c5635b5d8bf1242ba650482986e14d69ea3e27c9b7a0686321"
+    },
+    {
+      "name": "ann-adaptive-after-scalar",
+      "suite": "unit-scalar",
+      "filter": "/*/*/AdaptiveFilteredPlannerTests/AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit-scalar",
+        "--KeyLoadTests:Filter=/*/*/AdaptiveFilteredPlannerTests/AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81t-ann-adaptive-after-scalar-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:25:53.330313+00:00",
+      "settledUtc": "2026-10-05T11:26:09.874046+00:00",
+      "exitCode": 0,
+      "expectedTests": 1,
+      "passed": true,
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81t-ann-adaptive-after-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "44b96ab918bbfa4aa19b79e4d27735dd08076e08191c43f2ec0f45c0a0ff8002"
+    }
+  ],
+  "annBroaderCorrectness": [
+    {
+      "name": "ann-correctness-normal",
+      "suite": "unit",
+      "filter": "/*/*/PackedAnn*Tests/*",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit",
+        "--KeyLoadTests:Filter=/*/*/PackedAnn*Tests/*",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81u-ann-correctness-normal-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:26:45.500359+00:00",
+      "settledUtc": "2026-10-05T11:27:32.199195+00:00",
+      "exitCode": 0,
+      "expectedTests": null,
+      "passed": true,
+      "summary": {
+        "total": 31,
+        "passed": 31,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81u-ann-correctness-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "abcb11a0c1b7ca86c827ae13b3b1b4d437c916d5fbf4c48d216b70db83cfd2f3"
+    },
+    {
+      "name": "ann-correctness-scalar",
+      "suite": "unit-scalar",
+      "filter": "/*/*/PackedAnn*Tests/*",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit-scalar",
+        "--KeyLoadTests:Filter=/*/*/PackedAnn*Tests/*",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81u-ann-correctness-scalar-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:27:32.199751+00:00",
+      "settledUtc": "2026-10-05T11:28:27.574817+00:00",
+      "exitCode": 0,
+      "expectedTests": null,
+      "passed": true,
+      "summary": {
+        "total": 31,
+        "passed": 31,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81u-ann-correctness-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "d7e5bef1c274b7efde799d37f9c1c6e6de56dcde0e67850f332377235aabec7c"
+    }
+  ],
+  "annBaselineBuilds": [
+    {
+      "run": "ann-recall-baseline-normal",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "Cosine",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "8930789041",
+        "allocatedBytes": "2698224",
+        "workUnits": "881272562",
+        "distanceEvaluations": "30896749",
+        "edgeVisits": "34796781"
+      }
+    },
+    {
+      "run": "ann-recall-baseline-normal",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "Euclidean",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "9614737334",
+        "allocatedBytes": "2698136",
+        "workUnits": "914882112",
+        "distanceEvaluations": "32533859",
+        "edgeVisits": "35355211"
+      }
+    },
+    {
+      "run": "ann-recall-baseline-normal",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "DotProduct",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "7255904708",
+        "allocatedBytes": "2698144",
+        "workUnits": "573922764",
+        "distanceEvaluations": "15866192",
+        "edgeVisits": "34989160"
+      }
+    },
+    {
+      "run": "ann-recall-baseline-scalar",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "Cosine",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "21246501625",
+        "allocatedBytes": "2698472",
+        "workUnits": "881272562",
+        "distanceEvaluations": "30896749",
+        "edgeVisits": "34796781"
+      }
+    },
+    {
+      "run": "ann-recall-baseline-scalar",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "Euclidean",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "12393523959",
+        "allocatedBytes": "2698136",
+        "workUnits": "914882112",
+        "distanceEvaluations": "32533859",
+        "edgeVisits": "35355211"
+      }
+    },
+    {
+      "run": "ann-recall-baseline-scalar",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "DotProduct",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "16920833125",
+        "allocatedBytes": "2698144",
+        "workUnits": "573922764",
+        "distanceEvaluations": "15866192",
+        "edgeVisits": "34989160"
+      }
+    },
+    {
+      "run": "ann-adaptive-baseline-normal",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "AdaptiveFallback",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "DotProduct",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "1",
+        "maxLevel": "16",
+        "exactThreshold": "0",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "16144881167",
+        "allocatedBytes": "2698480",
+        "workUnits": "573922764",
+        "distanceEvaluations": "15866192",
+        "edgeVisits": "34989160"
+      }
+    },
+    {
+      "run": "ann-adaptive-baseline-scalar",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "AdaptiveFallback",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "DotProduct",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "1",
+        "maxLevel": "16",
+        "exactThreshold": "0",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "7047272584",
+        "allocatedBytes": "2698480",
+        "workUnits": "573922764",
+        "distanceEvaluations": "15866192",
+        "edgeVisits": "34989160"
+      }
+    }
+  ],
+  "annAfterBuilds": [
+    {
+      "run": "ann-recall-after-normal",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "Cosine",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "6228312334",
+        "allocatedBytes": "2698224",
+        "workUnits": "842827232",
+        "distanceEvaluations": "30896749",
+        "edgeVisits": "34796781"
+      }
+    },
+    {
+      "run": "ann-recall-after-normal",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "Euclidean",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "5947655333",
+        "allocatedBytes": "2698136",
+        "workUnits": "875915152",
+        "distanceEvaluations": "32533859",
+        "edgeVisits": "35355211"
+      }
+    },
+    {
+      "run": "ann-recall-after-normal",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "DotProduct",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "4797181625",
+        "allocatedBytes": "2698144",
+        "workUnits": "535154337",
+        "distanceEvaluations": "15866192",
+        "edgeVisits": "34989160"
+      }
+    },
+    {
+      "run": "ann-recall-after-scalar",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "Cosine",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "8252577375",
+        "allocatedBytes": "2698224",
+        "workUnits": "842827232",
+        "distanceEvaluations": "30896749",
+        "edgeVisits": "34796781"
+      }
+    },
+    {
+      "run": "ann-recall-after-scalar",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "Euclidean",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "8618723208",
+        "allocatedBytes": "2698136",
+        "workUnits": "875915152",
+        "distanceEvaluations": "32533859",
+        "edgeVisits": "35355211"
+      }
+    },
+    {
+      "run": "ann-recall-after-scalar",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "RecallMetric",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "DotProduct",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "128",
+        "maxLevel": "16",
+        "exactThreshold": "256",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "5440884708",
+        "allocatedBytes": "2698144",
+        "workUnits": "535154337",
+        "distanceEvaluations": "15866192",
+        "edgeVisits": "34989160"
+      }
+    },
+    {
+      "run": "ann-adaptive-after-normal",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "AdaptiveFallback",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "DotProduct",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "1",
+        "maxLevel": "16",
+        "exactThreshold": "0",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "5066240000",
+        "allocatedBytes": "2698728",
+        "workUnits": "535154337",
+        "distanceEvaluations": "15866192",
+        "edgeVisits": "34989160"
+      }
+    },
+    {
+      "run": "ann-adaptive-after-scalar",
+      "nativeObservation": {
+        "phase": "Build",
+        "scenario": "AdaptiveFallback",
+        "rows": "10000",
+        "dimension": "16",
+        "metric": "DotProduct",
+        "connections": "16",
+        "efConstruction": "128",
+        "efSearch": "1",
+        "maxLevel": "16",
+        "exactThreshold": "0",
+        "maxRecords": "5000000",
+        "maxIndexBytes": "268435456",
+        "maxScratchBytes": "8388608",
+        "seed": "5423839510519694385",
+        "outcome": "Success",
+        "errorCode": "none",
+        "stopwatchFrequency": "1000000000",
+        "elapsedStopwatchTicks": "5520717333",
+        "allocatedBytes": "2698728",
+        "workUnits": "535154337",
+        "distanceEvaluations": "15866192",
+        "edgeVisits": "34989160"
+      }
+    }
+  ],
+  "annQualityCells": {
+    "normal": [
+      {
+        "metric": 0,
+        "cell": "all",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 174346,
+        "edgeVisits": 339826,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 0,
+        "cell": "10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 0.998,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 211847,
+        "edgeVisits": 432503,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 0,
+        "cell": "1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 10000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 0,
+        "cell": "0.1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 1000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 0,
+        "cell": "geometry-correlated-10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 174346,
+        "edgeVisits": 339826,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 1,
+        "cell": "all",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 180037,
+        "edgeVisits": 346399,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 1,
+        "cell": "10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 204309,
+        "edgeVisits": 406876,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 1,
+        "cell": "1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 10000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 1,
+        "cell": "0.1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 1000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 1,
+        "cell": "geometry-correlated-10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 180037,
+        "edgeVisits": 346399,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 2,
+        "cell": "all",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 0.999,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 160689,
+        "edgeVisits": 344773,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 2,
+        "cell": "10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 0.988,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 196255,
+        "edgeVisits": 444492,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 2,
+        "cell": "1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 10000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 2,
+        "cell": "0.1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 1000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 2,
+        "cell": "geometry-correlated-10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 0.999,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 160689,
+        "edgeVisits": 344773,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      }
+    ],
+    "scalar": [
+      {
+        "metric": 0,
+        "cell": "all",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 174346,
+        "edgeVisits": 339826,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 0,
+        "cell": "10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 0.998,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 211847,
+        "edgeVisits": 432503,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 0,
+        "cell": "1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 10000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 0,
+        "cell": "0.1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 1000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 0,
+        "cell": "geometry-correlated-10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 174346,
+        "edgeVisits": 339826,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 1,
+        "cell": "all",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 180037,
+        "edgeVisits": 346399,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 1,
+        "cell": "10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 204309,
+        "edgeVisits": 406876,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 1,
+        "cell": "1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 10000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 1,
+        "cell": "0.1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 1000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 1,
+        "cell": "geometry-correlated-10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 180037,
+        "edgeVisits": 346399,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 2,
+        "cell": "all",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 0.999,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 160689,
+        "edgeVisits": 344773,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 2,
+        "cell": "10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 0.988,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 196255,
+        "edgeVisits": 444492,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 2,
+        "cell": "1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 10000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 2,
+        "cell": "0.1-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 1,
+        "modes": [
+          "ExactSmallSet"
+        ],
+        "distanceEvaluations": 1000,
+        "edgeVisits": 0,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      },
+      {
+        "metric": 2,
+        "cell": "geometry-correlated-10-percent",
+        "recordCount": 10000,
+        "queryCount": 100,
+        "dimension": 16,
+        "topK": 10,
+        "seed": 5423839510519694385,
+        "recall": 0.999,
+        "modes": [
+          "Approximate"
+        ],
+        "distanceEvaluations": 160689,
+        "edgeVisits": 344773,
+        "settings": {
+          "Connections": 16,
+          "EfConstruction": 128,
+          "EfSearch": 128,
+          "MaxLevel": 16,
+          "ExactThreshold": 256,
+          "MaxRecords": 5000000,
+          "MaxIndexBytes": 268435456,
+          "MaxScratchBytes": 8388608,
+          "Seed": 5423839510519694385
+        }
+      }
+    ]
+  },
+  "annQualityIdentityMatchesBaseline": true,
+  "unchangedAfterInputs": {
+    "before": "/private/tmp/keyload-stage81t-before-20261005.json",
+    "beforeSha256": "3fce7b60ec309c4c53d0fbf47e1e03c6f9718dc5d6594e250dbedae36f9f6a6d",
+    "after": "/private/tmp/keyload-stage81u-after-20261005.json",
+    "afterSha256": "1e44c14149678cca58cc7ee7726886434372b25edf6660e0865017d65f517f9f",
+    "sourceCount": 3685,
+    "sourceSha256": "54dc83dc095c29989cae3d2d517fac47fcdd71eddea074aa24d9b0b76bb71854",
+    "runtimeCount": 1190,
+    "runtimeSha256": "ed67a636916b63b827ef3024fb6676f9ea48ea64c41159eee52889e5f32b2100",
+    "headUnchanged": true,
+    "allSourceUnchanged": true,
+    "allRuntimeUnchanged": true
+  },
+  "c1Development": [
+    {
+      "name": "c1-outcome-normal",
+      "suite": "unit",
+      "filter": "/*/*/C1Outcome*/*",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit",
+        "--KeyLoadTests:Filter=/*/*/C1Outcome*/*",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81p-c1-outcome-normal-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:05:23.190680+00:00",
+      "settledUtc": "2026-10-05T11:05:32.876878+00:00",
+      "exitCode": 2,
+      "expectedTests": 13,
+      "passed": false,
+      "summary": {
+        "total": 13,
+        "passed": 12,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-c1-outcome-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "64333f6b3ed458cef5af3c524d070897750c9bf3a4c6167c881e522ede1540c4"
+    },
+    {
+      "name": "c1-outcome-scalar",
+      "suite": "unit-scalar",
+      "filter": "/*/*/C1Outcome*/*",
+      "callerCommand": [
+        "dotnet",
+        "run",
+        "--project",
+        "src/KeyLoad.AppHost",
+        "--no-build",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--",
+        "--KeyLoadTests:Suite=unit-scalar",
+        "--KeyLoadTests:Filter=/*/*/C1Outcome*/*",
+        "--KeyLoadTests:ResultsDirectory=TestResults/stage81p-c1-outcome-scalar-20261005",
+        "--KeyLoadTests:ReportTrx=true"
+      ],
+      "startedUtc": "2026-10-05T11:05:32.877336+00:00",
+      "settledUtc": "2026-10-05T11:05:42.957305+00:00",
+      "exitCode": 0,
+      "expectedTests": 13,
+      "passed": true,
+      "summary": {
+        "total": 13,
+        "passed": 13,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-c1-outcome-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "3333b5d42ac48dc34c8f9b2b965b4e41400d075577745574af1a33fbd7a092f7"
+    }
+  ],
+  "c1KnownFailure": {
+    "normal": "12/13; final native outer-owner probe EAGAIN(35), original held-lock body assertions passed; actual phase lines retained in native errorOutput",
+    "scalar": "13/13",
+    "ownerOnly": "2/2 on unchanged source/runtime",
+    "cause": "Not yet established; concurrent process descriptor inheritance is a hypothesis only",
+    "repairStatus": "Diagnostics and preserving body/cleanup failures are integrated; no lock workaround, retry or weakened assertion"
+  },
+  "priorExactSourceCi": {
+    "runId": 37292025093,
+    "source": "1e8833c027cf232e35fe012cd3eed41c61a17f89",
+    "url": "https://github.com/managedcode/KeyLoad/actions/runs/37292025093",
+    "result": "failure",
+    "unit": "3306/3308",
+    "unitScalar": "skipped; workflow now runs scalar after normal failure if build passed",
+    "recovery": "297/297",
+    "rf3": "119/128",
+    "site": "200/203; includes coverage hook failure",
+    "artifacts": "Original authenticated native artifacts retained, not rewritten"
+  },
+  "limitations": [
+    "No current-source complete Linux qualification or production/endurance/power-loss claim",
+    "Graph/SQL SDK and official MCP source joined; genuine current-source RF3 remains pending",
+    "ANN local matched observations preserve actual settings and workload; no public performance winner, RSS guarantee or GitHub acceleration claim",
+    "64-row neighbor-shape fixture initially failed; real natural full/partial upper/base coverage now uses128; no production corpus/cap/deadline weakened",
+    "SCAT and KL037 accepted prerequisite contracts do not prove movement, split/merge, token lineage or distributed physical-owner execution"
+  ],
+  "runtimeQualified": false,
+  "allAcceptanceClosed": false,
+  "annBaselineReports": [
+    {
+      "name": "ann-count-baseline-normal",
+      "suite": "unit",
+      "filter": "/*/*/PackedAnnNeighborCountTests/*",
+      "exitCode": 2,
+      "passed": false,
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-ann-count-baseline-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "7ec12f0d7f437f70b3223379e140268a0be8f29c9c026f6b2037064c676bf12d"
+    },
+    {
+      "name": "ann-count-baseline-scalar",
+      "suite": "unit-scalar",
+      "filter": "/*/*/PackedAnnNeighborCountTests/*",
+      "exitCode": 2,
+      "passed": false,
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-ann-count-baseline-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "1eef42ff758881fbe1397862979e79109d53e00dd2e8d5e61b5d2c48e21dceaa"
+    },
+    {
+      "name": "ann-recall-baseline-normal",
+      "suite": "unit",
+      "filter": "/*/*/PackedAnnRecallTests/*",
+      "exitCode": 0,
+      "passed": true,
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-ann-recall-baseline-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "b855eedee1da91f651255e57440c92bbd4133c34619f504a61776c180b1e7071"
+    },
+    {
+      "name": "ann-recall-baseline-scalar",
+      "suite": "unit-scalar",
+      "filter": "/*/*/PackedAnnRecallTests/*",
+      "exitCode": 0,
+      "passed": true,
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-ann-recall-baseline-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "a2878d5550372471d8953fe0d0d8d79e7042daf154b926edaa9fe129a7572d4b"
+    },
+    {
+      "name": "ann-adaptive-baseline-normal",
+      "suite": "unit",
+      "filter": "/*/*/AdaptiveFilteredPlannerTests/AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch",
+      "exitCode": 0,
+      "passed": true,
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-ann-adaptive-baseline-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "966a754b190db4814b0a60a32501bc2942d150d9eb1ef7cd412fb62c9d8239db"
+    },
+    {
+      "name": "ann-adaptive-baseline-scalar",
+      "suite": "unit-scalar",
+      "filter": "/*/*/AdaptiveFilteredPlannerTests/AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch",
+      "exitCode": 0,
+      "passed": true,
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage81p-ann-adaptive-baseline-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "a069c5891e7d198f99e420e262f9f2b550e3d3d7089be30a0bd1ae761b02db11"
+    }
+  ],
+  "graphScalarReport": {
+    "suite": "unit-scalar",
+    "report": "TestResults/stage81p-graph-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+    "sha256": "1ef1ee8e85c9026251bb30c8558d85c2dceb02077c994225a3cfc50a2ad0b055",
+    "summary": {
+      "total": 26,
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "sourceSnapshot": "/private/tmp/keyload-stage81p-before-20261005.json"
+  }
+}

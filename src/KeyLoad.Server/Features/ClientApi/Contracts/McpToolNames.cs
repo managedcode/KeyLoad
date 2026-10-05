@@ -14,7 +14,9 @@ internal static class McpToolNames
     internal const string ScheduleInspect = "keyload_schedule_inspect";
     internal const string SagaInspect = "keyload_saga_inspect";
     internal const string QuerySearch = "keyload_query_search";
+    internal const string QueryGraphPath = "keyload_query_graph_path";
     internal const string GraphTraverse = "keyload_graph_traverse";
+    internal const string GraphShortestPath = "keyload_graph_shortest_path";
     internal const string SeriesRead = "keyload_series_read";
     internal const string SeriesLatest = TimeSeriesReadProtocol.LatestTool;
     internal const string SeriesAggregate = TimeSeriesReadProtocol.AggregateTool;

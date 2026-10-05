@@ -1,6 +1,5 @@
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.CrashHost.Features.ClusterRouting.Processes;
-using KeyLoad.Storage.IO;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -8,7 +7,6 @@ internal static class C1OutcomeInspectionAssertions
 {
     private const int SuccessExitCode = 0;
     private const int InvalidRequestExitCode = 2;
-    private const int OwnerProbeBufferBytes = 1024;
     private const string StoreOwnerFileName = "owner.lock";
     internal const string AdminId = "inspection-admin";
 
@@ -21,14 +19,18 @@ internal static class C1OutcomeInspectionAssertions
             fixture.DirectoryPath, nodeId ?? fixture.Identity.NodeId, incarnation ?? fixture.Identity.Incarnation,
             principalId ?? AdminId, commandId ?? fixture.CommandId);
         var input = C1OutcomeInspectionProtocol.SerializeRequest(request);
-        return await C1OutcomeInspectionProcess.RunAsync(input, fixture.OuterOwnerLockPath, cancellationToken);
+        var result = await C1OutcomeInspectionProcess.RunAsync(input, fixture.OuterOwnerLockPath, cancellationToken);
+        C1OutcomeInspectionOwnerPhase.ObserveChild(fixture, result);
+        return result;
     }
 
     internal static async Task<C1OutcomeInspectionProcessResult> RunRawAsync(
         C1OutcomeInspectionFixture fixture, ReadOnlyMemory<byte> input)
     {
         fixture.CloseStore();
-        return await C1OutcomeInspectionProcess.RunAsync(input, fixture.OuterOwnerLockPath);
+        var result = await C1OutcomeInspectionProcess.RunAsync(input, fixture.OuterOwnerLockPath);
+        C1OutcomeInspectionOwnerPhase.ObserveChild(fixture, result);
+        return result;
     }
 
     internal static async Task<C1OutcomeInspectionProcessResult> AssertJoinedAsync(
@@ -81,9 +83,11 @@ internal static class C1OutcomeInspectionAssertions
     internal static async Task AssertOuterOwnerReleasedAsync(C1OutcomeInspectionFixture fixture)
     {
         fixture.CloseStore();
-        using var outer = OfflineRegularFile.Open(fixture.OuterOwnerLockPath, FileAccess.ReadWrite, FileShare.None, OwnerProbeBufferBytes);
-        using var inner = OfflineRegularFile.Open(Path.Combine(fixture.DirectoryPath, StoreOwnerFileName),
-            FileAccess.ReadWrite, FileShare.None, OwnerProbeBufferBytes);
+        using var outer = C1OutcomeInspectionOwnerPhase.Acquire(fixture,
+            C1OutcomeInspectionOwnerRole.ExplicitOuter, fixture.OuterOwnerLockPath);
+        using var inner = C1OutcomeInspectionOwnerPhase.Acquire(fixture,
+            C1OutcomeInspectionOwnerRole.ExplicitDatabase,
+            Path.Combine(fixture.DirectoryPath, StoreOwnerFileName));
         await Assert.That(outer.Length).IsEqualTo(0);
         await Assert.That(inner.Length).IsEqualTo(0);
     }

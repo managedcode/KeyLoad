@@ -5,7 +5,8 @@ namespace KeyLoad.Core.Features.GraphTraversal;
 
 /// <summary>Resolves vertex visibility once per qualified identity within one read cut.</summary>
 internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
-    ReadExecutionBudget budget)
+    ReadExecutionBudget budget, Action<EntityRef>? admitVertex = null,
+    Action<PartitionRef, string>? admitCollection = null)
 {
     private const string VertexUnavailable = "The graph vertex is unavailable.";
     private readonly Dictionary<EntityRef, bool> visible = [];
@@ -19,6 +20,7 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         {
             throw Errors.Fail(ErrorCode.NotFound, VertexUnavailable);
         }
+        admitVertex?.Invoke(vertex);
         visible.Add(vertex, true);
     }
 
@@ -32,9 +34,9 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         }
         if (!CanReadCollection(vertex))
         {
-            return visible[vertex] = false;
+            return RememberVertex(vertex, false);
         }
-        return visible[vertex] = ReadVisibility(vertex);
+        return RememberVertex(vertex, ReadVisibility(vertex));
     }
 
     private bool CanReadCollection(EntityRef vertex)
@@ -51,6 +53,7 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         }
         catch (KeyLoadException exception) when (exception.Code is ErrorCode.NotFound or ErrorCode.PermissionDenied)
         {
+            admitCollection?.Invoke(vertex.Partition, vertex.Collection);
             collections[key] = false;
             return false;
         }
@@ -64,8 +67,17 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
             return;
         }
         database.Authorization.Require(principal, vertex.Partition, vertex.Collection, Capability.DocumentsRead);
-        database.Resource(view, vertex.Partition, vertex.Collection, ResourceKind.Collection);
+        var resourceView = admitCollection is null ? view : budget.CreateView(view);
+        database.Resource(resourceView, vertex.Partition, vertex.Collection, ResourceKind.Collection);
+        admitCollection?.Invoke(vertex.Partition, vertex.Collection);
         collections[key] = true;
+    }
+
+    private bool RememberVertex(EntityRef vertex, bool allowed)
+    {
+        admitVertex?.Invoke(vertex);
+        visible[vertex] = allowed;
+        return allowed;
     }
 
     private bool ReadVisibility(EntityRef vertex)

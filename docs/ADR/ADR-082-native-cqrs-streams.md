@@ -133,3 +133,17 @@ assertion, public contract, canonical data, topology or dependency is changed.
 Rollback removes the test-only lifecycle stage. Original failed artifacts
 remain evidence; mechanism tests and source review do not qualify real guard
 publication or the complete ADR.
+
+## C1 unit owner-probe phase observation, 2026-10-05
+
+TASK-CRS-C1-OWNER-PHASE implements REQ/AC-CRS-DIAG-004 in the linked
+NativeCqrsRequestV2 feature. Root freezes the exact fixed-role/numeric stderr
+schema, per-line/per-fixture bounds, native-error allowlist, original-child
+flags, helper ownership, real held-lock regression and Aspire/Linux evidence
+before lifecycle_wave writes privately. Preserve both native owner probes,
+their original lifetimes, cleanup joins, failure precedence and deletion guards.
+The 1e8833c Linux EAGAIN is not a proven storage/CLOEXEC defect. This stage
+changes only bounded test-parent observation, with no public or persisted
+contract, dependency or topology change; rollback removes that observation.
+Root integrates and runs all required gates. Neither a phase record nor a
+local pass qualifies C1 or marks this ADR Implemented.

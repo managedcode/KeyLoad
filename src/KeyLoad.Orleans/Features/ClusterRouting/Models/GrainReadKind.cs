@@ -78,5 +78,9 @@ public enum GrainReadKind
     /// <summary>Inspect current projected saga state without exposing its retained timeout template.</summary>
     Saga,
     /// <summary>Compile versioned SQL graph operators to the same authorized search executor.</summary>
-    SqlGraphSearch
+    SqlGraphSearch,
+    /// <summary>Read one authorized shortest graph path inside a committed partition cut.</summary>
+    GraphShortestPath,
+    /// <summary>Execute bounded SQL graph-path syntax through the canonical path reader.</summary>
+    SqlGraphPath
 }

@@ -21,6 +21,8 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
                 GrainNativePayload.Read<InspectRecurringScheduleRequest>(payload), cancellationToken),
             GrainReadKind.Saga => Saga(principal, GrainNativePayload.Read<InspectSagaRequest>(payload), cancellationToken),
             GrainReadKind.Traverse => Traverse(principal, GrainNativePayload.ReadPublicInput<TraverseRequest>(payload), cancellationToken),
+            GrainReadKind.GraphShortestPath => database.ShortestPath(principal,
+                GrainNativePayload.ReadPublicInput<GraphShortestPathRequest>(payload), cancellationToken: cancellationToken),
             GrainReadKind.Samples => Samples(principal, GrainNativePayload.Read<ReadSamplesRequest>(payload), cancellationToken),
             GrainReadKind.LatestSample => database.ReadLatestSample(principal, GrainNativePayload.Read<ReadLatestSampleRequest>(payload), cancellationToken),
             GrainReadKind.AggregateSamples => database.AggregateSamples(principal, GrainNativePayload.Read<AggregateSamplesRequest>(payload), cancellationToken),
@@ -42,7 +44,7 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
         or GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows
         or GrainReadKind.SampleRetention or GrainReadKind.AggregateReplay
         or GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt
-        or GrainReadKind.RecurringSchedule or GrainReadKind.Saga;
+        or GrainReadKind.RecurringSchedule or GrainReadKind.Saga or GrainReadKind.GraphShortestPath;
 
     private StreamPage Stream(string principal, ReadStreamRequest request, CancellationToken cancellationToken)
         => database.ReadStream(principal, request.Stream, request.AfterRevision, request.Limit, cancellationToken);

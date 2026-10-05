@@ -16,6 +16,8 @@ internal static class McpToolDescriptions
     private const string SagaInspect = "Read projected current saga state and deadline; null when absent.";
     private const string QuerySearch = "Execute the bounded Q1.Search.v1 SQL graph-search profile under the same current policy and read cut as graph search.";
     private const string GraphTraverse = "Traverse a graph with explicit depth, vertex and edge limits under the current principal.";
+    private const string GraphShortestPath = "Find one shortest directed path between authorized graph entities in one current read cut, with explicit depth, vertex and examined-edge limits.";
+    private const string QueryGraphPath = "Execute the bounded Q1.GraphPath.v1 SQL profile for one shortest directed graph path under the same current policy and read cut as the typed graph operation.";
     private const string SeriesRead = "Read a bounded time-series page in the supplied UTC time range.";
     private const string SeriesLatest = "Read the latest authorized sample at or before an optional inclusive UTC timestamp; sample is null when absent.";
     private const string SeriesAggregate = "Read complete raw count, sum, minimum, maximum and sum/count average in [from, untilExclusive); null end includes the maximum timestamp. Exceeding maxSamples rejects the whole result.";
@@ -66,9 +68,10 @@ internal static class McpToolDescriptions
         McpToolNames.ScheduleInspect => ScheduleInspect,
         McpToolNames.SagaInspect => SagaInspect,
         McpToolNames.GraphTraverse => GraphTraverse,
+        McpToolNames.GraphShortestPath => GraphShortestPath,
         McpToolNames.SeriesRead or McpToolNames.SeriesLatest or McpToolNames.SeriesAggregate
             or McpToolNames.SeriesWindows or McpToolNames.SeriesRetention => SeriesDescription(name),
-        McpToolNames.QuerySearch or McpToolNames.QueryExecute or McpToolNames.QueryAst
+        McpToolNames.QuerySearch or McpToolNames.QueryGraphPath or McpToolNames.QueryExecute or McpToolNames.QueryAst
             or McpToolNames.QueryCapabilities or McpToolNames.QueryLiveStart or McpToolNames.QueryLiveRead
             => QueryDescription(name),
         McpToolNames.ChangesRead => ChangesRead,
@@ -115,6 +118,7 @@ internal static class McpToolDescriptions
     private static string QueryDescription(string name) => name switch
     {
         McpToolNames.QuerySearch => QuerySearch,
+        McpToolNames.QueryGraphPath => QueryGraphPath,
         McpToolNames.QueryExecute => QueryExecute,
         McpToolNames.QueryAst => QueryAst,
         McpToolNames.QueryCapabilities => QueryCapabilities,

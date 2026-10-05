@@ -14,7 +14,9 @@ internal static class McpToolRoutes
     internal const string ScheduleInspect = "/v1/queues/schedules/inspect";
     internal const string SagaInspect = "/v1/queues/sagas/inspect";
     internal const string QuerySearch = "/v1/query/search";
+    internal const string QueryGraphPath = "/v1/query/graph-path";
     internal const string GraphTraverse = "/v1/graph/traverse";
+    internal const string GraphShortestPath = "/v1/graph/shortest-path";
     internal const string SeriesRead = "/v1/series/read";
     internal const string SeriesLatest = TimeSeriesReadProtocol.LatestRoute;
     internal const string SeriesAggregate = TimeSeriesReadProtocol.AggregateRoute;

@@ -40,9 +40,9 @@ internal sealed class SqlRf3ModelParityTests(ClusterFixture fixture)
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, fixture.AdminKey, deadline.Token);
         var traverse = new TraverseRequest(scenario.Partition, RelationalSqlRf3Tokens.Graph, scenario.First);
         var nativeGraph = await McpCallerAssertions.SdkSuccessAsync(await sdk.TraverseAsync(traverse, deadline.Token));
-        var sqlGraph = await SqlRf3Protocol.SdkAsync<GraphTraversal>(sdk,
+        var sqlGraph = await SqlRf3Protocol.SdkAsync<global::KeyLoad.GraphTraversal>(sdk,
             SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.GraphTraverse, traverse), deadline.Token);
-        var officialGraph = await SqlRf3Protocol.McpAsync<GraphTraversal>(mcp,
+        var officialGraph = await SqlRf3Protocol.McpAsync<global::KeyLoad.GraphTraversal>(mcp,
             SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.GraphTraverse, traverse), deadline.Token);
         await Assert.That(nativeGraph.Vertices.Length).IsEqualTo(RelationalSqlRf3Tokens.RootAndNeighbor);
         await Assert.That(nativeGraph.Vertices).Contains(scenario.First);

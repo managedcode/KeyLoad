@@ -118,6 +118,7 @@ jobs:
       - name: Run unit tests
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit
       - name: Run unit tests without CPU intrinsics
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit-scalar
       - name: Test recovery after process crashes
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}

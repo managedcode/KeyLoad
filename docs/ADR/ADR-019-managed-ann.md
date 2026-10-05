@@ -135,3 +135,16 @@ with original/fatal failure priority. Preserve every original resource limit,
 input, assertion and admission setting. No dependency, production, data or wire
 change occurs; rollback removes only the diagnostic wrappers. This stage measures
 failure context without claiming a cause, deadline repair or performance gain.
+
+Root accepts REQ/AC-ANN-015 and TASK-ANN-R1-NEIGHBOR-COUNT in
+[ManagedAnn](../Features/Search/ManagedAnn.md#accepted-adjacency-count-packing-2026-10-05).
+Query's owned RAM adjacency packs the count into its existing first slot within
+the unchanged five-million-record/degree128 admission. Preserve neighbor order,
+metric arithmetic, actual edge charges and every original resource/deadline cap;
+there is no data or public format migration. One Luna worker owns the narrow
+PackedAnnGraph source packet and independent native graph/candidate regressions;
+root owns contract review, exact-base join, unchanged-work before/after
+development observations, strict checks and Aspire normal/scalar/full Linux
+gates. Rollback restores only the scan representation. Qualification remains
+pending until the original full quality, authorization, recovery and RF3 gates
+have evidence; this source-level work reduction is not a measured speedup claim.

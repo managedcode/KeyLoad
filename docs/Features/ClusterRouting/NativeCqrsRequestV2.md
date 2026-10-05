@@ -788,3 +788,54 @@ Aspire mechanism cases and genuine exact-source Linux current-image RF3
 `AcCrsDiag002` acceptance. No product/public/persisted contract or dependency
 changes; rollback removes only the test lifecycle addition. ADR-082 remains
 Accepted until its complete qualification gates pass.
+
+## Accepted C1 unit owner-probe phase observation, 2026-10-05
+
+REQ-CRS-DIAG-004 / AC-CRS-DIAG-004 adds bounded test-parent phase evidence
+for the real C1 outcome inspector. The original Linux run37292025093 on
+1e8833c027cf232e35fe012cd3eed41c61a17f89 failed a final outer owner-lock
+acquisition. Its exception alone does not identify the holder or prove that
+an earlier explicit probe succeeded. Native O_CLOEXEC is already present.
+No lock repair, retry, deadline extension or removed cleanup guard is accepted
+from that evidence.
+
+TASK-CRS-C1-OWNER-PHASE emits only parent test stderr lines prefixed
+`C1_OUTCOME_OWNER_PHASE v=1`. Closed roles are ChildSettled, ExplicitOuter,
+ExplicitDatabase, FinalOuter and FinalDatabase. Acquire roles emit Begin,
+Success or Failure around the unchanged actual OfflineRegularFile.Open;
+Success means acquisition only, not proof of later disposal. ChildSettled uses
+Observed and the six original numeric0/1 flags ProcessReaped,
+InputWriterSettled, StandardOutputReaderSettled, StandardErrorReaderSettled,
+ProcessHandleClosed and OuterOwnerReleased before their existing assertions.
+A failure may add the existing numeric KeyLoad ErrorCode or a directly nested
+Win32Exception NativeErrorCode from the allowlist1,2,5,9,11,13,16,20,22,24,28,
+35,40. Unknown codes are omitted. Retain no exception text, path, process ID,
+principal, command ID, payload, credentials or arbitrary diagnostic fields.
+Each line is at most512 UTF-8 bytes; one fixture retains/emits at most32 lines.
+Diagnostic failure must not hide the original native failure. Original child
+stderr/receipt, both owner probes, simultaneous explicit lock lifetimes,
+joins, error precedence, deletion guard and all deadlines remain unchanged.
+
+The test-owned fixture lifetime must preserve a body failure together with
+cleanup/diagnostic failures: a common awaited RunOwnedAsync captures the actual
+body exception, observes original fixture disposal once, then uses the existing
+ServerFailureObserver failure policy. It never detaches cleanup or treats a
+wrapper completion as child settlement. Replace the using-only lifetimes of
+the existing C1OutcomeInspection cases with that common owner so a throwing
+Dispose cannot obscure an earlier native body failure. Keep the original body,
+assertions, exception instances and native fatal priority. This corrects the
+observed diagnostic ambiguity; it is not a lock-behavior fix.
+
+Ordered stages: root freezes this feature and ADR-082; lifecycle_wave Luna/high
+privately owns UnitTests ClusterRouting Helpers C1OutcomeInspectionFixture.cs,
+C1OutcomeInspectionAssertions.cs and at most one prefixed phase helper, and
+the existing prefixed C1OutcomeInspection Cases lifetime joins, with
+focused actual-native-lock cases under Cases if a safe existing seam permits
+them. Root reviews full hash-bound source, joins it, runs strict Release and
+Aspire unit/scalar cases, then retains exact-source Linux original phase output.
+AC-CRS-DIAG-004 requires real child flags and successful explicit/final native
+probe observations, plus a genuine held-native-lock failure exposing only
+allowed fixed/numeric fields and preserving its original exception. Phase
+output alone does not establish the lock holder, repair AC-CRS-005 or qualify
+RF3. No product/data/transport migration; rollback removes these test-parent
+observations. ADR-082 remains Accepted.

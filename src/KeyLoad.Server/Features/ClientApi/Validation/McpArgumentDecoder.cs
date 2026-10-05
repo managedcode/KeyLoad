@@ -9,7 +9,8 @@ internal static class McpArgumentDecoder
     internal static McpDecodedOperation Read<TRequest>(IDictionary<string, JsonElement>? arguments, GrainReadKind kind,
         int maximumPayloadBytes) =>
         new(kind, null, Guid.Empty,
-            kind is GrainReadKind.AstQuery or GrainReadKind.LiveQueryStart or GrainReadKind.LiveQueryRead or GrainReadKind.Traverse
+            kind is GrainReadKind.AstQuery or GrainReadKind.LiveQueryStart or GrainReadKind.LiveQueryRead
+                or GrainReadKind.Traverse or GrainReadKind.GraphShortestPath or GrainReadKind.SqlGraphPath
                 ? InternalNativePayload.SerializePublicInput(Request<TRequest>(arguments, false), maximumPayloadBytes)
                 : InternalNativePayload.Serialize(Request<TRequest>(arguments, false), maximumPayloadBytes));
 

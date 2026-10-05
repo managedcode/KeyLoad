@@ -925,8 +925,48 @@
       "src/KeyLoad.Core/Features/GraphTraversal/Queries/DatabaseEngine.GraphReads.cs",
       "src/KeyLoad.Core/Features/GraphTraversal/Queries/GraphSearchReachabilityReader.cs",
       "src/KeyLoad.Core/Features/GraphTraversal/Queries/GraphTraversalReader.cs",
-      "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphTraversalTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphTraversalTests.cs",
+      "docs/Features/GraphTraversal/ShortestPath.md",
+      "docs/ADR/ADR-098-bounded-graph-paths.md",
+      "src/KeyLoad.Core/Features/GraphTraversal/Queries/DatabaseEngine.GraphShortestPath.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.GraphPath.cs",
+      "tests/KeyLoad.IntegrationTests/Features/GraphTraversal/Cases/GraphPathRf3ParityTests.cs"
+    ],
+    "shortestPath": {
+      "status": "source_integrated_local_graph26_SQL11_MCP6_normal_scalar_pass_RF3_and_full_Linux_gates_pending",
+      "requirements": [
+        "REQ-GRAPH-007",
+        "REQ-GRAPH-008",
+        "REQ-GRAPH-009",
+        "REQ-GRAPH-010"
+      ],
+      "acceptance": [
+        "AC-GRAPH-006",
+        "AC-GRAPH-007",
+        "AC-GRAPH-008",
+        "AC-GRAPH-009"
+      ],
+      "profile": "Q1.GraphPath.v1",
+      "localDevelopment": {
+        "report": "TestResults/stage81k-graph-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "sha256": "15119ec55df614a7bdc396d8d7d01df29b68ac344af1f8aefb15ee30d8d51215",
+        "summary": {
+          "total": 26,
+          "passed": 26,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "sourceAndRuntimeUnchanged": true,
+        "sourceInventory": "/private/tmp/keyload-stage81k-before-20261005.json",
+        "afterInventory": "/private/tmp/keyload-stage81k-after-graph-20261005.json",
+        "stage81Receipt": "docs/implementation/graph-ann-development-2026-10-05.json"
+      },
+      "qualification": "pending",
+      "allAcceptanceClosed": false
+    }
   },
   "KL-024": {
     "title": "Time-series core",
@@ -1114,7 +1154,8 @@
       "src/KeyLoad.Query/Features/Search/Execution/PackedAnnIndex.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnRecallTests.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs",
-      "docs/implementation/c1-due-ann-development-2026-10-05.json"
+      "docs/implementation/c1-due-ann-development-2026-10-05.json",
+      "docs/implementation/graph-ann-development-2026-10-05.json"
     ],
     "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
     "qualification": {
@@ -1130,7 +1171,17 @@
       "artifacts/qualification/managed-ann-r1-development-20261004/focused06-originals/manifest.json",
       "artifacts/qualification/managed-ann-r1-development-20261004/scalar07-originals/manifest.json",
       "artifacts/qualification/native-dependencies-static17-development-20261004/originals/manifest.json"
-    ]
+    ],
+    "neighborCountDevelopment": {
+      "status": "source_integrated_local_packed_ann31_normal_and31_scalar_pass",
+      "requirement": "REQ-ANN-015",
+      "acceptance": "AC-ANN-015",
+      "receipt": "docs/implementation/graph-ann-development-2026-10-05.json",
+      "actualDatasetRecords": 10000,
+      "matchedAllMetricRecallAndFilterCells": true,
+      "runtimeQualified": false,
+      "allAcceptanceClosed": false
+    }
   },
   "KL-031": {
     "title": "ANN projection lifecycle",
@@ -1144,7 +1195,8 @@
       "docs/implementation/runtime-qualification-37249197752.json",
       "docs/implementation/ann-prepared-value-development-2026-10-05.json",
       "docs/implementation/command-outcome-pin-development-2026-10-05.json",
-      "docs/implementation/ann-construction-development-2026-10-05.json"
+      "docs/implementation/ann-construction-development-2026-10-05.json",
+      "docs/implementation/graph-ann-development-2026-10-05.json"
     ],
     "sourceStage": "R2A_bounded_historical_seed_9_source_12_tests_34_cases_full_static23_and_unchanged_actual_Aspire_normal34_scalar34_local_pass_persisted_projection_replay_and_delivered_Linux_RF3_pending",
     "runtimeQualified": false,
@@ -1176,6 +1228,16 @@
       "receipt": "docs/implementation/ann-construction-development-2026-10-05.json",
       "qualified": false,
       "acceptanceClosed": false
+    },
+    "neighborCountDevelopment": {
+      "status": "source_integrated_local_packed_ann31_normal_and31_scalar_pass",
+      "requirement": "REQ-ANN-015",
+      "acceptance": "AC-ANN-015",
+      "receipt": "docs/implementation/graph-ann-development-2026-10-05.json",
+      "actualDatasetRecords": 10000,
+      "matchedAllMetricRecallAndFilterCells": true,
+      "runtimeQualified": false,
+      "allAcceptanceClosed": false
     }
   },
   "KL-032": {
@@ -1744,7 +1806,8 @@
       "src/KeyLoad.Query/Features/Search/Execution/PackedAnnIndex.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnRecallTests.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs",
-      "docs/implementation/c1-due-ann-development-2026-10-05.json"
+      "docs/implementation/c1-due-ann-development-2026-10-05.json",
+      "docs/implementation/graph-ann-development-2026-10-05.json"
     ],
     "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
     "qualification": {
@@ -1767,6 +1830,16 @@
       "dimension": 16,
       "actualWideCase": "passed",
       "fullScalarLinux": "not_qualified",
+      "allAcceptanceClosed": false
+    },
+    "neighborCountDevelopment": {
+      "status": "source_integrated_local_packed_ann31_normal_and31_scalar_pass",
+      "requirement": "REQ-ANN-015",
+      "acceptance": "AC-ANN-015",
+      "receipt": "docs/implementation/graph-ann-development-2026-10-05.json",
+      "actualDatasetRecords": 10000,
+      "matchedAllMetricRecallAndFilterCells": true,
+      "runtimeQualified": false,
       "allAcceptanceClosed": false
     }
   },
@@ -1942,7 +2015,8 @@
       "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricGoldenTests.cs",
       "docs/implementation/performance-source-r11.json",
       "docs/implementation/keycodec-crud-development-2026-10-04.json",
-      "docs/implementation/ann-construction-development-2026-10-05.json"
+      "docs/implementation/ann-construction-development-2026-10-05.json",
+      "docs/implementation/graph-ann-development-2026-10-05.json"
     ],
     "simd": {
       "ownerDirection": "confirmed_SIMD_dotNET_intrinsics_first_Rust_after_profiling",
@@ -1961,6 +2035,16 @@
       "receipt": "docs/implementation/ann-construction-development-2026-10-05.json",
       "qualified": false,
       "acceptanceClosed": false
+    },
+    "neighborCountDevelopment": {
+      "status": "source_integrated_local_packed_ann31_normal_and31_scalar_pass",
+      "requirement": "REQ-ANN-015",
+      "acceptance": "AC-ANN-015",
+      "receipt": "docs/implementation/graph-ann-development-2026-10-05.json",
+      "actualDatasetRecords": 10000,
+      "matchedAllMetricRecallAndFilterCells": true,
+      "runtimeQualified": false,
+      "allAcceptanceClosed": false
     }
   },
   "KL-078": {

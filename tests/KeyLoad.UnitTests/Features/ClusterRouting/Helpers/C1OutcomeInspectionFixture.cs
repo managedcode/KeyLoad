@@ -1,10 +1,10 @@
+using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Security;
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using KeyLoad.Storage.IO;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -16,7 +16,9 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
     private const string StoreDirectoryName = "database";
     private const string OuterOwnerName = "node.owner.lock";
     private const string StoreOwnerName = "owner.lock";
-    private const int OwnerProbeBufferBytes = 1024;
+    private const int MaximumPhaseLineBytes = 512;
+    private const int MaximumPhaseLines = 32;
+    private const string PhaseBudgetMessage = "The outcome inspection phase observation exceeded its fixed bound.";
     private const string AdminId = "inspection-admin";
     private const string AdminSecret = "inspection.admin-secret-32-characters";
     private const string TenantId = "inspection-tenant";
@@ -29,6 +31,9 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
     private DatabaseEngine? InitializedDatabase { get; set; }
     private bool rootOwned;
     private bool storeClosed;
+    private int phaseLineCount;
+    private bool phaseBudgetReported;
+    private readonly List<Exception> phaseFailures = [];
 
     private C1OutcomeInspectionFixture()
     {
@@ -39,11 +44,23 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
         CommandId = Guid.NewGuid();
     }
 
-    internal static C1OutcomeInspectionFixture Create()
+    internal static async Task RunOwnedAsync(Func<C1OutcomeInspectionFixture, Task> body)
     {
-        var fixture = new C1OutcomeInspectionFixture();
-        fixture.Initialize();
-        return fixture;
+        var failures = new List<Exception>();
+        try
+        {
+            using var fixture = new C1OutcomeInspectionFixture();
+            ServerFailureObserver.Observe(fixture.Initialize, failures);
+            if (failures.Count == 0)
+            {
+                await ServerFailureObserver.ObserveAsync(() => body(fixture), failures).ConfigureAwait(false);
+            }
+        }
+        catch (Exception error) when (!C1OutcomeInspectionFailures.ContainsFatal(error))
+        { failures.Add(error); }
+        catch (Exception error) when (C1OutcomeInspectionFailures.ContainsFatal(error))
+        { failures.Add(error); }
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 
     internal string Root { get; }
@@ -98,6 +115,23 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
         Position = nativeStore.Position;
     }
 
+    internal void RecordOwnerPhase(string line)
+    {
+        var writer = Console.Error;
+        if (phaseLineCount >= MaximumPhaseLines
+            || Encoding.UTF8.GetByteCount(line) + Encoding.UTF8.GetByteCount(writer.NewLine) > MaximumPhaseLineBytes)
+        {
+            if (!phaseBudgetReported)
+            {
+                phaseBudgetReported = true;
+                phaseFailures.Add(new InvalidOperationException(PhaseBudgetMessage));
+            }
+            return;
+        }
+        phaseLineCount++;
+        ServerFailureObserver.Observe(() => writer.WriteLine(line), phaseFailures);
+    }
+
     internal void CloseStore()
     {
         if (store is null)
@@ -122,6 +156,7 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
         { cleanupFailures.Add(error); }
         if (rootOwned && storeClosed)
         { ServerFailureObserver.Observe(DeleteOwnedRoot, cleanupFailures); }
+        cleanupFailures.AddRange(phaseFailures);
         ServerFailureObserver.ThrowIfAny(cleanupFailures);
     }
 
@@ -141,14 +176,14 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
     {
         if (File.Exists(OuterOwnerLockPath))
         {
-            using var outer = OfflineRegularFile.Open(OuterOwnerLockPath, FileAccess.ReadWrite, FileShare.None,
-                OwnerProbeBufferBytes);
+            using var outer = C1OutcomeInspectionOwnerPhase.Acquire(this,
+                C1OutcomeInspectionOwnerRole.FinalOuter, OuterOwnerLockPath);
         }
         var storeOwnerPath = Path.Combine(DirectoryPath, StoreOwnerName);
         if (File.Exists(storeOwnerPath))
         {
-            using var inner = OfflineRegularFile.Open(storeOwnerPath, FileAccess.ReadWrite, FileShare.None,
-                OwnerProbeBufferBytes);
+            using var inner = C1OutcomeInspectionOwnerPhase.Acquire(this,
+                C1OutcomeInspectionOwnerRole.FinalDatabase, storeOwnerPath);
         }
     }
 }

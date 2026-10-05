@@ -54,6 +54,10 @@ Version/QueryRequest at generated IDs0/1 and alias
 AllowFullScan=true. Parsing, validation, reads and exact output share one
 ReadExecutionBudget started before parsing. Do not reset the deadline at the
 Core join. This explicit bounded profile does not claim full SQL/protocol support.
+Both SQL endpoint literals resolve within QueryRequest.Partition; the grammar
+has no separate endpoint-partition argument. An unauthorized whole SQL scope
+fails persisted authorization. Only the direct typed operation can express a
+foreign endpoint, which fails UnsupportedCapability.
 
 ## Requirements and acceptance
 
@@ -83,12 +87,19 @@ MaxBatchBytes: twice its exact JSON bytes plus128 fixed bytes per vertex or
 predecessor; twice partition/name metadata bytes plus128 per collection decision.
 Use checked arithmetic and cancellation checks. This includes frontier references
 and cache overhead conservatively; it is not a measured RSS claim.
+Traversal metadata and the exact serialized result have separate finite ledgers,
+each capped by MaxBatchBytes. Result admission reserves the empty-array envelope
+and each serialized array item plus its comma before retention; final measurement
+checks the complete protocol result. The metadata cap is not added to the output
+size when deciding the exact output boundary. These ledgers do not establish an
+aggregate RSS bound.
 
 ## Ordered ownership, verification and rollout
 
 1. Root freezes this spec/ADR before the Luna worker prepares private new
    Abstractions/Features/GraphTraversal/Contracts/GraphShortestPathRequest.cs and
-   GraphShortestPathResult.cs; Core/Features/GraphTraversal/Queries/
+   GraphShortestPathResult.cs with feature-local GraphShortestPathContractAliases.cs;
+   Core/Features/GraphTraversal/Queries/
    DatabaseEngine.GraphShortestPath.cs, GraphShortestPathReader.cs and cohesive
    local Models/Execution/Validation files. The only existing helper edit is
    Execution/GraphVertexVisibility.cs admission hooks. No shared routing/Git edits.
@@ -113,8 +124,10 @@ and cache overhead conservatively; it is not a measured RSS claim.
    privately. Frozen tools are keyload_graph_shortest_path and
    keyload_query_graph_path; SDK extensions are ShortestPathAsync and
    ShortestPathSqlAsync, each returning Result<GraphShortestPathResult>. A leader
-   loss uses the explicit graph-path-rf3-leader-loss fault scope; root alone joins
-   its existing native fault admission list. Use the real shared Aspire ClusterFixture
+   loss uses the explicit graph-path-rf3-leader-loss fault scope and only the
+   fixture-owned RF3 resource. The current fixture has no centralized scenario
+   allowlist; its named call-site scope and resource ownership are retained.
+   Use the real shared Aspire ClusterFixture
    and official MCP client; recover/restart every owned stopped node and retain
    primary/cleanup failures. No independent Docker launch or fabricated topology.
    A separately assigned Luna client worker may prepare only new

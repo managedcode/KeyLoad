@@ -4,6 +4,10 @@ internal sealed class PackedAnnGraph
 {
     private const string DegreeExceeded = "The ANN adjacency exceeds its admitted degree.";
     private const string InvalidAddress = "The ANN adjacency address is invalid.";
+    // Node ordinals stay below 2^23; the first slot packs its count above the ordinal.
+    private const int NeighborBits = 23;
+    private const int NeighborMask = (1 << NeighborBits) - 1;
+    private const int MaximumEncodedDegree = 1 << 8;
     private readonly int[] baseEdges;
     private readonly int[] upperOffsets;
     private readonly int[] upperEdges;
@@ -29,20 +33,19 @@ internal sealed class PackedAnnGraph
     {
         var slot = Slot(node, layer, offset);
         var encoded = layer == 0 ? baseEdges[slot] : upperEdges[slot];
+        if (offset == 0)
+        {
+            encoded &= NeighborMask;
+        }
         return encoded == 0 ? -1 : encoded - 1;
     }
 
     internal int NeighborCount(int node, int layer, AnnWorkBudget budget)
     {
-        for (var offset = 0; offset < Degree(layer); offset++)
-        {
-            budget.Charge(1);
-            if (Neighbor(node, layer, offset) < 0)
-            {
-                return offset;
-            }
-        }
-        return Degree(layer);
+        budget.Charge(1);
+        var firstSlot = Slot(node, layer, 0);
+        var encoded = layer == 0 ? baseEdges[firstSlot] : upperEdges[firstSlot];
+        return encoded >> NeighborBits;
     }
 
     internal void ReplaceNeighbors(int node, int layer, ReadOnlySpan<int> neighbors, AnnWorkBudget budget)
@@ -62,10 +65,21 @@ internal sealed class PackedAnnGraph
         {
             Array.Clear(upperEdges, start, degree);
         }
+        if (neighbors.Length >= MaximumEncodedDegree)
+        {
+            throw new InvalidOperationException(DegreeExceeded);
+        }
         for (var offset = 0; offset < neighbors.Length; offset++)
         {
             budget.Charge(1);
-            var encoded = checked(neighbors[offset] + 1);
+            var neighbor = neighbors[offset];
+            if ((uint)neighbor >= (uint)count || neighbor >= NeighborMask)
+            {
+                throw new InvalidOperationException(InvalidAddress);
+            }
+            var encoded = offset == 0
+                ? checked((int)(((uint)neighbors.Length << NeighborBits) | (uint)(neighbor + 1)))
+                : checked(neighbor + 1);
             if (layer == 0)
             {
                 baseEdges[start + offset] = encoded;

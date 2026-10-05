@@ -16,6 +16,8 @@ internal static class QueryApi
     {
         app.MapPost(SearchPath, (SqlGraphSearchRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.SqlGraphSearch, request));
+        app.MapPost(McpToolRoutes.QueryGraphPath, (SqlGraphPathRequest request, HttpContext context) =>
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.SqlGraphPath, request));
         app.MapPost(SqlOperationProtocol.Route, ExecuteSqlAsync);
         app.MapPost(QueryPath, (QueryRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.Query, request));

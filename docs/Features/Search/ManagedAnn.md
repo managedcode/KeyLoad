@@ -332,6 +332,35 @@ review of the single-call/measurement/privacy/failure boundaries. API, storage,
 frontend, SDK/MCP and migration are N/A for this test-only diagnostic stage.
 Rollback removes the observations and restores direct unchanged Build calls.
 
+## Accepted adjacency-count packing, 2026-10-05
+
+REQ-ANN-015 / AC-ANN-015: eliminate the repeated degree scan used only to count
+an already owned contiguous neighborhood. Preserve every ordered neighbor,
+selection rule, vector score, edge examination, index/scratch reservation and
+original work/deadline/cancellation cap. The private RAM representation may pack
+the count into the first existing int slot: ordinal+1 occupies bits0..22 and
+count occupies bits23..30. The admitted maximum5,000,000 records and base
+degree128 fit those fields. Empty neighborhoods remain zero. Read the count with
+one actual charged lookup; every subsequent edge visit remains charged.
+Removed count scans cease contributing work units because that work is gone.
+
+TASK-ANN-R1-NEIGHBOR-COUNT owns only Query Search Execution/PackedAnnGraph.cs.
+Root accepts this contract before joining its private base/post packet. An
+independent Luna worker owns new Search/Cases/PackedAnnNeighborCountTests.cs
+against an actual canonical TestDatabase corpus and genuine built graph arrays:
+all metrics, partial/full base and upper adjacency, replace/clear/restore,
+ordered deterministic replay, exact/one-under work, cancellation and public exact
+candidate/score parity. Preserve the existing 10,000-row recall/filter/deadline
+tests in normal and scalar modes. Root records the unchanged implementation
+baseline, then joins and runs the same source-bound workload after strict build.
+Local observations establish development evidence only; no speedup, diagnosis of
+the previous timeout, global benchmark winner or Linux qualification is assumed.
+
+This representation is disposable operation-owned RAM; no persisted index,
+canonical ZoneTree data, public payload, alias or field ID changes. Rollback
+restores the degree scan without rewriting data. Full existing Search acceptance
+and delivered-source Linux gates remain required.
+
 Ordered graph: root freezes the contract and ADR, cluster_wave Luna/high prepares
 only PackedAnnConstruction, PackedAnnLayerSearch, PreparedSimilarity,
 SimilarityMetricMath and the new Search/Contracts/IPackedAnnSimilarity.cs in a

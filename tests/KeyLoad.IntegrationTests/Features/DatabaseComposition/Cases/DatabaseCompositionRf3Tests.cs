@@ -81,7 +81,7 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
         await Assert.That(graph.Edges[0].Id).IsEqualTo(EdgePrefix + Message);
         await Assert.That(graph.Edges[0].From).IsEqualTo(scenario.First);
         await Assert.That(graph.Edges[0].To).IsEqualTo(scenario.Second);
-        await SqlRf3Protocol.EqualAsync(graph, await SqlRf3Protocol.McpAsync<GraphTraversal>(mcp,
+        await SqlRf3Protocol.EqualAsync(graph, await SqlRf3Protocol.McpAsync<global::KeyLoad.GraphTraversal>(mcp,
             SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.GraphTraverse, traversal), cancellationToken));
         var source = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(scenario.Inspect(Message), cancellationToken));
         await Assert.That(source!.Metadata.State).IsEqualTo(MessageState.Ready);

@@ -5,11 +5,13 @@ internal sealed class C1OutcomeInspectionIdentityTests
     [Test]
     public async Task AcCrs005WrongNodeOrIncarnationFailsClosed()
     {
-        using var fixture = C1OutcomeInspectionFixture.Create();
-        var wrongNode = await C1OutcomeInspectionAssertions.RunAsync(fixture, nodeId: Guid.NewGuid());
-        await C1OutcomeInspectionAssertions.AssertRejectedAsync(wrongNode);
-        var wrongIncarnation = await C1OutcomeInspectionAssertions.RunAsync(fixture, incarnation: Guid.NewGuid());
-        await C1OutcomeInspectionAssertions.AssertRejectedAsync(wrongIncarnation);
-        await C1OutcomeInspectionAssertions.AssertOuterOwnerReleasedAsync(fixture);
+        await C1OutcomeInspectionFixture.RunOwnedAsync(async fixture =>
+        {
+            var wrongNode = await C1OutcomeInspectionAssertions.RunAsync(fixture, nodeId: Guid.NewGuid());
+            await C1OutcomeInspectionAssertions.AssertRejectedAsync(wrongNode);
+            var wrongIncarnation = await C1OutcomeInspectionAssertions.RunAsync(fixture, incarnation: Guid.NewGuid());
+            await C1OutcomeInspectionAssertions.AssertRejectedAsync(wrongIncarnation);
+            await C1OutcomeInspectionAssertions.AssertOuterOwnerReleasedAsync(fixture);
+        }).ConfigureAwait(false);
     }
 }
