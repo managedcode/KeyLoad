@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-05",
+  "kind": "local-development",
+  "baseRevision": "88ce19ebd5e4405e2ca102a4ea5f2e1c61e46ed3",
+  "requirement": "REQ-DQUERY-PREREQ-005",
+  "acceptance": "AC-DQUERY-PREREQ-005",
+  "task": "TASK-DQUERY-CANCEL-OBSERVATION",
+  "scope": "Native synchronous partition-query cancellation observation and related functional regressions",
+  "source": [
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryCancellationTests.cs",
+      "sha256": "0cfcbd1c35211eb19d923611dc1fa4e53b9e0928309d2ebf9fd88385b83e81ee"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Helpers/PartitionQueryCancellationFailures.cs",
+      "sha256": "36c057734c08ae373d7b58c86339cda16edcf5b21433ffb9b2076481cdf9649a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Helpers/PartitionQueryCancellationObserver.cs",
+      "sha256": "cd1a9729069e70431ff743bf1d4246578989c9f93d2ce0a3ce98e2a9308d0193"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Helpers/PartitionQueryCancellationRun.cs",
+      "sha256": "8577045df2ba053e105f5a2894ae48cd10ba640e9c0301273fa734d9a5de527f"
+    }
+  ],
+  "preserved": {
+    "nativeZoneTreeRecords": 5000,
+    "operationDeadlineSeconds": 30,
+    "originalRequestAndCallerCancellationToken": true,
+    "exactCancellationTokenAsserted": true,
+    "noPartialResultAsserted": true,
+    "healthyFollowUpAsserted": true,
+    "originalObserverJoinedBeforeTokenEventAndStorageDisposal": true
+  },
+  "build": {
+    "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+    "exitCode": 0,
+    "warnings": 0,
+    "errors": 0,
+    "log": "/private/tmp/keyload-stage88b-query-cancellation-build-20261005.log",
+    "sha256": "9ba350ada494338827611cc0444cc68d718b4f25f2613f7d2a79e04d8030a350"
+  },
+  "initialBuildFailure": {
+    "errors": 8,
+    "warnings": 0,
+    "cause": "Six CA1031 catch diagnostics and two IDE0005 imports were repaired without suppression",
+    "log": "/private/tmp/keyload-stage88a-query-cancellation-build-20261005.log",
+    "logPresent": false
+  },
+  "formatter": {
+    "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+    "exitCode": 0,
+    "log": "/private/tmp/keyload-stage88-query-cancellation-format-20261005.log"
+  },
+  "governance": {
+    "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+    "exitCode": 0,
+    "actualInventory": "27 projects and 4 modules"
+  },
+  "nativeRuns": [
+    {
+      "suite": "unit",
+      "entryPoint": "Aspire-owned KeyLoad.AppHost",
+      "filter": "/*/*/PartitionQuery*/*",
+      "summary": {
+        "total": 25,
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "artifacts": [
+        {
+          "path": "TestResults/stage88c-partition-query/KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "8586c40ac8679e708b4ae7e0d3b907b22198a9d342628a3b4a82abf2c8ff603e"
+        },
+        {
+          "path": "TestResults/stage88c-partition-query/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "4fd32978b0d9a18cdf2c15a8948c2bd22a34cf206f53baa3e41e165028eef651"
+        },
+        {
+          "path": "TestResults/stage88c-partition-query/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "baf6b0ce1e54d4e9c8f9341aa68082396d1a4d752783bb45322acd319cbba2c8"
+        },
+        {
+          "path": "TestResults/stage88c-partition-query/_konstantins-macbook-pro_2026-10-05_20_30_56.9942060/In/konstantins-macbook-pro/KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "8586c40ac8679e708b4ae7e0d3b907b22198a9d342628a3b4a82abf2c8ff603e"
+        }
+      ],
+      "qualification": "local-development-only"
+    },
+    {
+      "suite": "unit-scalar",
+      "entryPoint": "Aspire-owned KeyLoad.AppHost",
+      "filter": "/*/*/PartitionQuery*/*",
+      "summary": {
+        "total": 25,
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "artifacts": [
+        {
+          "path": "TestResults/stage88d-partition-query-scalar/KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "0c007716c69268da77faf5ff723128e5027e019d2d8ad16538853bcb2404175b"
+        },
+        {
+          "path": "TestResults/stage88d-partition-query-scalar/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "f26f1a9938fbebaae4f1f2ecb0cefbcdc142aecabab1b3591faafa81a1f2244a"
+        },
+        {
+          "path": "TestResults/stage88d-partition-query-scalar/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "6740fca30a0e89ceb19f199cb8b79eb95ca0eb031b35ef4f1506dd77bfff1b2d"
+        },
+        {
+          "path": "TestResults/stage88d-partition-query-scalar/_konstantins-macbook-pro_2026-10-05_20_36_00.8989700/In/konstantins-macbook-pro/KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "0c007716c69268da77faf5ff723128e5027e019d2d8ad16538853bcb2404175b"
+        }
+      ],
+      "qualification": "local-development-only"
+    }
+  ],
+  "fullModuleAcceptanceClosed": false,
+  "deliveredLinuxQualified": false,
+  "remaining": [
+    "Full required unit/scalar/recovery/RF3 and exact-source Linux qualification remain required",
+    "Remote physical-owner fanout for KL-037 remains unimplemented",
+    "Functional coverage collection and module/file/line/branch gap review are separately required; these runs did not collect coverage"
+  ],
+  "priorFailures": "Original full-suite failures remain retained in partition-runtime-development-2026-10-05.json; focused passes do not replace them"
+}

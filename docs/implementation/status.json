@@ -1433,7 +1433,8 @@
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.PartitionQuery.cs",
       "src/KeyLoad.Client/Features/QueryExecution/Transport/PartitionQueryClient.cs",
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryPublicContractTests.cs",
-      "tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/PartitionQueryPublicRf3Tests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/PartitionQueryPublicRf3Tests.cs",
+      "docs/implementation/query-cancellation-development-2026-10-05.json"
     ],
     "sourceStage": "bounded_same_physical_owner_partition_query_public_sdk_http_mcp_and_native_orleans_read_path",
     "qualification": {
@@ -1441,6 +1442,16 @@
       "acceptance": "open",
       "remotePhysicalOwnerFanout": "not implemented",
       "fullTaskComplete": false
+    },
+    "queryCancellationDevelopment": {
+      "requirement": "REQ-DQUERY-PREREQ-005",
+      "acceptance": "AC-DQUERY-PREREQ-005",
+      "receipt": "docs/implementation/query-cancellation-development-2026-10-05.json",
+      "nativeNormal": "25_of25",
+      "nativeScalar": "25_of25",
+      "releaseBuild": "0_warnings_0_errors",
+      "fullModuleAcceptanceClosed": false,
+      "deliveredLinuxQualified": false
     }
   },
   "KL-038": {

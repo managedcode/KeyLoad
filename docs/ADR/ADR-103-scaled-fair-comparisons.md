@@ -110,3 +110,8 @@ cleanup failures, and run them through the canonical Aspire comparison entry.
 ComparisonTests owns this code, partition_pages owns its private guarded packet,
 and root owns integration/gates/evidence/commit. There is no data or wire migration;
 rollback cannot convert an unfinished original task into a passing qualification.
+The stage also replaces the collector's premature completed boolean with one
+memoized original completion task, preserves cancellation-callback failures
+while joining its original observation, and retains failed write settlement on
+repeated teardown. Its schema, byte/time bounds and unqualified categories stay
+unchanged. This lifecycle amendment precedes the private repair.

@@ -113,6 +113,12 @@ request cancellation or escalation through the original owner's supported API
 where available, retain the threshold failure, and ultimately await that same
 original task. Do not start a replacement operation, use an uncancellable shadow
 task, or dispose an owner while its observation/writer still uses it.
+The resource collector memoizes one original completion task. Concurrent or
+repeated completion calls await that same task, including its failure; a boolean
+set before cancellation/join is not completed settlement. Retain any native stop
+cancellation-callback failure and still join the original observation before
+disposing the CTS or writing/copying evidence. A failed evidence write remains
+the same failed completion on a later teardown call.
 
 AC-SCALE-017 requires genuine native lifecycle regressions to prove that cleanup
 does not pass an unfinished original operation, and that cancellation and failure
