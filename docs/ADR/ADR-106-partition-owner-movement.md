@@ -173,3 +173,51 @@ qualify it. Native membership CAS, persisted authority, schema/byte limits and
 public data-admission closure remain unchanged. Root owns the join and gates;
 Luna lifecycle_wave owns only the guarded implementation/test packet. There is
 no data/wire migration; rollback disables the new profile.
+
+## Accepted six-generation oracle and native parameter handoff, 2026-10-05
+
+REQ/AC-MEMBERSHIP-008 in PartitionTransfer closes the source oracle gap before
+implementation. The already-generated B physical ID/incarnation and secret are
+the same named Aspire ParameterResources used by the actual six-container model
+and resolved privately through native GetValueAsync in its owned test wave.
+No independently generated verifier credential, identity or membership provider
+is permitted. Decode the secret only within an owned joined/zeroed lifetime.
+
+The profile-only membership health reply carries a bounded closed fingerprint
+and counts derived from one actual native ReadAll call per node, including B's
+real proxy path. Its domain-separated length-framed SHA256 binds the six exact
+current Active SiloAddress generations without exposing addresses or row data.
+The independent integration oracle authenticates discovery from all six actual
+nodes using the shared A ClusterId and each distinct group incarnation/key,
+computes the expected active-generation digest, and compares all six native-view
+health responses. Boolean readiness alone does not prove this acceptance.
+
+Implement in order: same-resource AppHost handoff; bounded native view digest and
+closed health reply; six-node signed-discovery verifier; actual Aspire oracle
+and negative native controls; strict build/format and original exact-source Linux
+RF3 evidence. All code remains inside ClusterRouting responsibility folders.
+Existing three-node discovery helper, persisted membership, native CAS, MAC and
+serializer identities, wire caps, public closure, failover and original task
+teardown stay unchanged. Root owns integration/evidence; lifecycle_wave owns the
+guarded source/test packet. The additive health shape is confined to the new
+membership-only profile. Rollback disables that profile; Stage 1B data readiness
+and physical movement acceptance remain unqualified.
+
+## Accepted native authority route and provider ownership, 2026-10-05
+
+REQ/AC-MEMBERSHIP-009 and TASK-MOVE-1A repair two inspected source gaps before
+integration: the authority handler was not mapped, and externally registered
+disposable instances had no actual disposal owner. The exact native POST route,
+provider-owned factory/type registration, handler/DNS/call joins before endpoint
+credentials/gates and owner CTS disposal, failure preservation and negative
+admission contracts are frozen in PartitionTransfer before code.
+
+Implement in order: map the existing handler once in server composition; register
+its exact owner and endpoint with native DI ownership; preserve existing silo
+close/join then Kestrel stop/join then root-provider disposal; add native
+composition/lifecycle regressions and execute the existing actual six-container
+Aspire startup/authentication/teardown flow. lifecycle_wave owns the private
+guarded ServerConfiguration/transport/test correction; root owns source review,
+integration, strict checks, original Linux RF3 evidence and commit. No wire/data
+migration or public database opening occurs. Rollback disables the new profile;
+an unmapped route or undisposed owner cannot be reported as delivered membership.

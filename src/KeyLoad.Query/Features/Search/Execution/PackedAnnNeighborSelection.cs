@@ -80,10 +80,7 @@ internal static class PackedAnnNeighborSelection
             budget.Check();
             var target = neighbors[index];
             var existing = graph.NeighborCount(target, layer, budget);
-            if (ContainsNeighbors(graph, target, layer, existing, source, budget))
-            {
-                continue;
-            }
+            // Ascending insertion means no prior target can already link to this new source.
             var degree = graph.Degree(layer);
             if (existing < degree)
             {
@@ -120,20 +117,6 @@ internal static class PackedAnnNeighborSelection
             insertion--;
         }
         scratch.NeighborNodes[insertion] = source;
-    }
-
-    private static bool ContainsNeighbors(PackedAnnGraph graph, int node, int layer, int count, int value,
-        AnnWorkBudget budget)
-    {
-        for (var index = 0; index < count; index++)
-        {
-            budget.Charge(1);
-            if (graph.Neighbor(node, layer, index) == value)
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static void CopyAndScoreNeighbors(PackedAnnGraph graph, PackedAnnVectors vectors,

@@ -666,6 +666,88 @@
           "bytes": 5614
         }
       ]
+    },
+    {
+      "stage": "stage86q-recovery",
+      "suite": "recovery",
+      "scope": "complete_local_development_after_actual_catalog_bootstrap_repair",
+      "entryPoint": "Aspire AppHost",
+      "sourceCommit": "f5fe42fb2f2f15e98fdcbeea6df5266982c872cf",
+      "exitCode": 2,
+      "summary": {
+        "total": 300,
+        "passed": 299,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failedTests": [
+        {
+          "class": "NodeEpochCoordinatorRejectionTests",
+          "method": "AcEpoch010RejectsForeignNestedStageFileAndPreservesBothInventories",
+          "exceptionType": "System.IO.IOException"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "TestResults/stage86q-recovery/KeyLoad.RecoveryTests-macos-net10.0-report.html",
+          "sha256": "ab6b71ccaa588ee960b034a73da0057c3d68ac7f8c186ef091420ca46fa4f79f",
+          "bytes": 223963
+        },
+        {
+          "path": "TestResults/stage86q-recovery/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+          "sha256": "1dba6da6d3095ef19b35b40e5ba5a7aca1a0d2bfaa0550e61407a671ede77d17",
+          "bytes": 889127
+        },
+        {
+          "path": "TestResults/stage86q-recovery/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+          "sha256": "e250e9433d9d06796deaf28491a0c6cfd7efc209904340a982065cbcb12a7112",
+          "bytes": 419058
+        }
+      ]
+    },
+    {
+      "stage": "stage86q-scalar",
+      "suite": "unit-scalar",
+      "scope": "complete_local_development_current_checkpoint",
+      "entryPoint": "Aspire AppHost",
+      "sourceCommit": "f5fe42fb2f2f15e98fdcbeea6df5266982c872cf",
+      "exitCode": 2,
+      "summary": {
+        "total": 3492,
+        "passed": 3491,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failedTests": [
+        {
+          "class": "PartitionQueryCancellationTests",
+          "method": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+          "exceptionType": "TUnit.Assertions.Exceptions.AssertionException"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "TestResults/stage86q-scalar/KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "311c09f8ddb0cd56803b0b91c101017cd3d131ecb80d9070e57708f4c812c1b1",
+          "bytes": 1091375
+        },
+        {
+          "path": "TestResults/stage86q-scalar/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "5add832f8758425936d820df64cbfba8144196f8527c03ac36a6fb90b9f9ec03",
+          "bytes": 10591514
+        },
+        {
+          "path": "TestResults/stage86q-scalar/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "1b726f8a50b6f7002f6476b279d274e9b9c9657a53cf5ed2c5fdcc28b97d33df",
+          "bytes": 4785077
+        }
+      ]
     }
   ],
   "incompleteAttempts": [
@@ -686,7 +768,7 @@
   ],
   "qualificationComplete": false,
   "remaining": [
-    "Current complete scalar and recovery suites",
+    "Observed-progress cancellation failure and remaining native owner-lock recovery failure",
     "Current Docker/Aspire RF3 SDK and official MCP suite and owned local-image lifecycle",
     "Unit allocation and native owner-lock failures",
     "Exact delivered-source Linux full gates, faults, endurance and complete matched scaled comparison cohort"
@@ -697,5 +779,59 @@
     "inventorySha256": "f01aa823e14a0ce11e1b52f0635ff41914d2f3213c6b62045d43ce67ac353b36",
     "changedDuringFullUnit": []
   },
-  "allocationObservation": "No allocation product/test change: full stage86n saw Require262480 versus Normalize262144; full stage86q saw Require262144 versus Normalize262480. The one unchanged focused discriminator passed2/2. Both full-suite failures remain unresolved evidence; this control is not a full-suite pass."
+  "allocationObservation": "No allocation product/test change: full stage86n saw Require262480 versus Normalize262144; full stage86q saw Require262144 versus Normalize262480. The one unchanged focused discriminator passed2/2. Both full-suite failures remain unresolved evidence; this control is not a full-suite pass.",
+  "latestOriginalLinuxRun": {
+    "sourceCommit": "f5fe42fb2f2f15e98fdcbeea6df5266982c872cf",
+    "runId": 37364493890,
+    "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890",
+    "lastObservedStatus": "completed",
+    "conclusion": "failure",
+    "metadataSha256": "a1f411f8c38afe923fe12bdf6550ea9d976a9574a01595edefde901b4eabb041",
+    "jobs": [
+      {
+        "name": "Test code analyzers",
+        "databaseId": 111946329760,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111946329760"
+      },
+      {
+        "name": "Test three-node database",
+        "databaseId": 111946330165,
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111946330165"
+      },
+      {
+        "name": "Check website",
+        "databaseId": 111946330282,
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111946330282"
+      },
+      {
+        "name": "Check repository rules",
+        "databaseId": 111946330363,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111946330363"
+      },
+      {
+        "name": "Build and test KeyLoad (ubuntu-latest)",
+        "databaseId": 111949321762,
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111949321762"
+      },
+      {
+        "name": "Publish website",
+        "databaseId": 111952904397,
+        "status": "completed",
+        "conclusion": "skipped",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111952904397"
+      }
+    ],
+    "qualificationComplete": false,
+    "limit": "Analyzer and repository-rule jobs succeeded; RF3, website and solution jobs were cancelled without acquired-job steps. Required suites did not complete."
+  }
 }

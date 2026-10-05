@@ -81,6 +81,18 @@ Consumers retain the exact sidecar and authenticate its original artifact/provid
 
 Worker owns feature-local AppHost Contracts/Observation/Processes roles, minimal composition/lifecycle joins, bounded parser/identity/native regressions and scale-only script consumers. Root owns durable feature/ADR freeze, source integration, actual Aspire native Linux/Docker qualification, CI/publication, receipts and commits. Private implementation may rely on the existing 45 engine + 10 Aspire + 25 CI packets as explicit predecessor source, never silently overwrite their bases. A reviewable patch and base/post manifests are required. No checkout edits, gates or Git by the worker.
 
+REQ/AC-SCALE-016's native cgroup-v2 walk must honor the actual hierarchy root:
+the kernel defines `cpu.max` and `memory.max` only on non-root cgroups. Walk
+every admitted non-root ancestor and retain its minimum effective limits; stop
+at the verified real hierarchy root without inventing missing root limit files.
+Observe the actual effective cpuset and supported hierarchy/controller identity.
+An unreadable, malformed or missing required non-root observation still makes
+evidence unqualified; it is never silently replaced by `max`. The independent
+native Linux oracle must use the same documented root semantics without copying
+the production parser. A supported Linux envelope test must assert its actual
+value instead of conditionally omitting a null result. This source correction
+changes no sidecar schema, workload, bounds or qualification requirements.
+
 ## Accepted prerequisite: Aspire scale forwarding (REQ/AC-SCALE-014)
 
 Introduce only the separate KeyLoadTests:ScaleProfile test-harness selector. TestSuiteSettings accepts one exact canonical scaled ID only for Suite=comparison, the exact /*/*/IsolatedNativeComparisonTests/* filter, present native Benchmarks:Target, matching Benchmarks:EvidenceProfile, disabled Benchmarks:Enabled, no direct Benchmarks:ScaleProfile and no workload overrides. Reject missing suite, other suites, unknown/blank/case-mismatched IDs or mixed modes before any resource creation. Existing direct Benchmarks:ScaleProfile plus a suite remains rejected.
@@ -88,3 +100,38 @@ Introduce only the separate KeyLoadTests:ScaleProfile test-harness selector. Tes
 run-workload passes --KeyLoadTests:ScaleProfile=<id> to the outer AppHost. Its owned runner alone receives Benchmarks__ScaleProfile=<id>; clear KeyLoadTests__ScaleProfile alongside KeyLoadTests__Suite so the harness selector does not leak into the nested native AppHost. IsolatedNativeCase reads the exact ordinary ComparisonWorkerSelection from the runner environment and passes --Benchmarks:ScaleProfile=<id> to its own nested resource-owning AppHost. Preserve exact evidence/source/native topology and all control behavior. IsolatedNativeCase uses exactly 140 minutes for the closed scale profile and its existing 60 minutes for controls; all original tasks/resources are still joined.
 
 Worker owns the narrow TestSuiteSettings/TestSuiteResources/IsolatedNativeCase/run-workload joins and real Aspire model plus independent argument/environment regressions. This is a prerequisite repair to the accepted SCALE-014 path, not a new alternate test caller. Durable docs join before live implementation.
+
+## Accepted original teardown settlement (REQ/AC-SCALE-017)
+
+REQ-SCALE-017 requires the actual isolated AppHost owner to settle every original
+collector, capture, report-write, application-stop and disposal operation before
+releasing its dependencies or deleting its owned data. This applies to controls
+and scaled runs; successful workload results and control report schemas are
+unchanged. The existing 30-second teardown limit is a recorded failure threshold,
+not permission to detach the task with a continuation. After that threshold,
+request cancellation or escalation through the original owner's supported API
+where available, retain the threshold failure, and ultimately await that same
+original task. Do not start a replacement operation, use an uncancellable shadow
+task, or dispose an owner while its observation/writer still uses it.
+
+AC-SCALE-017 requires genuine native lifecycle regressions to prove that cleanup
+does not pass an unfinished original operation, and that cancellation and failure
+paths settle the original process/readers/capture before directory deletion.
+Retain the actual workload primary exception and each actual cleanup exception
+object, including nested aggregates and original cancellation tokens; do not
+flatten, replace them with a category string, or suppress them when a primary
+failure exists. Cleanup continues through all safely reachable stages. At final
+propagation, one original failure retains its stack, multiple failures retain
+ordered primary then cleanup objects, and native ManagedCode fatal classification
+remains visible and takes priority. The receipt contains only the existing safe
+stage categories and primary-presence flag, never exception text or payloads.
+
+TASK-SCALE-ORIGINAL-TEARDOWN is owned by ComparisonTests BenchmarkComparisons
+Helpers (`IsolatedNativeCase`, `IsolatedNativeTeardown` and populated settlement
+helpers), with Cases/Helpers for real native regressions. The resource collector
+joins from SCALE-016 participate in this same lifetime. Root owns the pre-code
+contract, review, Aspire execution, original evidence and commits; partition_pages
+owns the private guarded implementation packet. No change to provider topology,
+measurement timing, ACK/durability, source provenance or publication eligibility
+is authorized. Rollback may revert the repair but cannot claim successful
+settlement or qualification for a detached original task.

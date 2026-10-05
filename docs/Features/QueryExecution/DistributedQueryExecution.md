@@ -22,6 +22,28 @@ Orleans/SDK/official-MCP stages.
 | REQ-DQUERY-PREREQ-004: debit finite global work and memory grants before leaf execution/retention | AC-DQUERY-PREREQ-004: canonical request parsing/admission occurs once. The operator preallocates deterministic fixed per-leaf grants whose sums do not exceed the remaining existing `MaxScanRecords` (10,000), `MaxQueryReadBytes` (67,108,864) and `MaxBatchBytes` (8,388,608); candidates are charged/reserved before their owned order keys or projected rows are retained. Result count remains within `MaxResults` (1,000). Exact inclusive and one-over aggregate record, byte and retained-memory cases fail with `BudgetExceeded` and return no partial result. There is no work stealing or per-leaf reset of global totals. | Exact/one-over real ZoneTree reads and merge reservations; no partial rows on budget failure; later healthy query |
 | REQ-DQUERY-PREREQ-005: preserve one operation token/deadline and honest leaf completion | AC-DQUERY-PREREQ-005: the existing caller token and one 30-second `QueryDeadlineSeconds` lifetime cover validation, all sequential leaf reads and merge. Caller cancellation remains cancellation; elapsed/work limits use the existing typed budget errors. Each synchronous local leaf has settled before the next starts or the method returns. During-work cancellation is asserted only through an actual native read-progress observation that cancels a real `ReadExecutionBudget`, then proves no result and a healthy follow-up. A persisted authorization/budget failure in a later leaf produces no partial page. | Real progress-observed native cancellation following existing graph/partition cancellation patterns; persisted-failure and healthy-follow-up tests |
 
+The stage86q scalar original report establishes a test race: its async polling
+monitor accepted positive bytes after the synchronous query had already returned.
+TASK-DQUERY-CANCEL-OBSERVATION repairs only that test synchronization under
+AC-DQUERY-PREREQ-005. Keep the same 5,000 native ZoneTree rows, request, original
+CTS, 30-second operation budget and exact-token/no-result/healthy-follow-up
+assertions. A QueryExecution-local native observer thread is started and signals
+that it is armed BEFORE the synchronous query begins on the test thread. It
+observes the actual budget byte counter, retains the observed value and requests
+the same CTS on positive native work; no Task.Run/async-yield monitor races query
+completion. Bound arming, observation and the initial join to 15 seconds, retain
+and ultimately join the original thread before any CTS/event/store disposal,
+and preserve actual primary plus observer/settlement failures with the native
+ManagedCode fatal classification. A returned query, missed native progress or
+failed observer is still a test failure, never a successful cancellation or
+retry-to-green. No larger corpus, changed limit, fake clock/provider, product
+test hook or weaker assertion is permitted. The observed native OCE and exact
+caller token establish the passing flow; an armed thread alone is not that proof.
+Ownership is `tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryCancellationTests.cs`
+and populated QueryExecution `Helpers/` for its observer/failure settlement.
+ADR-100 already defines the same native synchronous/cancellation boundary;
+this test-only correction adds no public, persisted or runtime contract.
+
 ### Frozen internal contract
 
 These are internal Orleans-generated value contracts in

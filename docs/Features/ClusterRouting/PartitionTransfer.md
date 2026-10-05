@@ -266,3 +266,98 @@ native regression packet; root owns review, join, strict build/format and actual
 Aspire RF3 evidence. No persisted, public database or user authorization format
 changes occur. Rollback disables the explicit two-RF3 profile; it cannot revive
 an eager-DNS startup cycle or enable Stage 1B data operations.
+
+### Accepted independent six-generation oracle, 2026-10-05
+
+REQ-MEMBERSHIP-008: the two-RF3 test topology must hand its already-generated
+Group B identity and discovery credential to the owned native test wave through
+the actual Aspire model. `membership-physical-b` and `membership-incarnation-b`
+are canonical nonempty D-format GUID ParameterResources, distinct from Group A;
+`membership-peer-b` is the existing secret ParameterResource. Pass these same
+resource references to B's node configuration and A's trusted-group configuration.
+Do not independently generate or substitute test identities or credentials.
+The test resolves the three exact resources with native
+`ParameterResource.GetValueAsync` under its original cancellation/deadline and
+never records their values in logs, test output, artifacts or exception text.
+Decoded discovery-key bytes have an owned lifetime and are zeroed only after all
+original signed-discovery operations join. No credential is exposed by health.
+
+Group A and B use the same actual Orleans ClusterId derived from A, while their
+physical IDs, incarnations and three-voter discovery MAC keys remain distinct.
+A new feature-local test helper verifies all six real signed native discovery
+responses against that explicit cluster/group tuple and exact configured voter
+origin. Preserve the existing three-node signed-discovery helper and MAC version.
+Reject malformed/duplicate signatures, altered bodies, wrong group/cluster/voter,
+oversized bodies, duplicate addresses and noncanonical SiloAddress generations.
+There is no public database bypass, fake membership provider or new trusted role.
+
+For this membership-only profile, each successful `/health/membership-ready`
+response is a closed JSON object with exactly `version:1`, `activeSilos:6`,
+`membershipRows` in 6..48, and `activeFingerprint`, a lower-case 64-character
+SHA256. Its total UTF-8 response is at most 512 bytes. Derive all fields from ONE
+actual local `IMembershipTable.ReadAllAsync` result, using the native proxy on B.
+Require six distinct current Active canonical addresses, including the actual
+local generation, and the existing exact configured endpoint checks. Hash the
+six active full SiloAddress strings, including generations, sorted ordinally:
+ASCII `keyload.orleans.membership.active.v1`, little-endian UInt32 count, then
+for each address a little-endian UInt32 UTF-8 byte length and those exact bytes.
+Each address is at most 256 UTF-8 bytes. Never truncate rows or addresses. Failure
+returns the existing unavailable status; addresses, hostnames, row contents,
+secrets and resolver exceptions never appear in this health response. Heartbeat
+times and row ETags do not enter this active-generation fingerprint.
+
+AC-MEMBERSHIP-008: in the actual six-container Aspire case, independently read
+and authenticate native discovery from all six nodes, derive the expected hash
+from their exact current generations, and compare it with all six health replies
+and their closed schema/count/byte bounds. A wrong/stale generation, duplicate
+generation, wrong B credential/incarnation/shared ClusterId, missing resource,
+over-bound row/address or unavailable native view fails before any public data
+operation. Native digest controls cover permutation independence, generation
+changes, duplicate/cap rejection and framing ambiguity; they do not substitute
+for the six-container oracle. Real SDK and official MCP admission-closure checks
+remain mandatory at both groups. No TASK-MOVE acceptance closes from these source
+contracts or a health boolean alone.
+
+Traceability: REQ-MEMBERSHIP-008 -> AC-MEMBERSHIP-008 -> ADR-106 amendment ->
+TASK-MOVE-1A and AC-MEMBERSHIP-001. Luna lifecycle_wave owns the feature-local
+Aspire handoff, actual view fingerprint and test oracle; root owns guarded joins,
+strict gates and original Linux RF3 evidence. This additive profile-only health
+contract does not change stored records, existing discovery aliases/IDs/MACs,
+three-node behavior or public database admission. Rollback disables two-RF3;
+Stage 1B remains closed.
+
+### Accepted native endpoint registration and disposal, 2026-10-05
+
+REQ-MEMBERSHIP-009 requires the actual server composition to map exactly one
+`POST /internal/orleans/membership/v1` to the existing membership-authority
+handler. It preserves that handler's closed method/content/body/header checks,
+Group A authority readiness, original signed bytes, eight-call admission and
+joined DNS/store operations. Local and Proxy modes remain unavailable through
+this route; it does not open public database admission or add another dispatcher.
+The route must be present before Kestrel starts and before Group B's native
+membership provider calls it.
+
+The root service provider owns the membership authority owner and endpoint.
+Register the owner by type or a provider-owned factory, and register the endpoint
+with a provider-owned factory using the existing NodeOptions, that exact owner
+and TimeProvider. Do not register externally created disposable singleton
+instances or rely on an inaccessible constructor being selected by DI.
+OrleansNode first closes and joins the original admitted authority operations and
+clears the borrowed table. Kestrel then stops and joins its original handlers;
+only then does root-provider disposal dispose the endpoint's MAC credentials,
+pin gates, replay cache and admission gate, followed by the owner's CTS. Preserve
+the original failure objects and existing shutdown order. No credential or
+disposed-state probe is exposed to clients, logs or health responses.
+
+AC-MEMBERSHIP-009 maps to actual server-composition/lifecycle regressions and the
+existing Aspire six-node startup, authenticated membership and owned teardown
+cases: the native Group B call reaches the mapped handler, wrong method/auth
+still fails closed, Local/Proxy routes remain unavailable, and original authority
+handlers/DNS/calls settle before provider-owned disposal. Source registration
+alone is not runtime proof. Traceability is REQ-MEMBERSHIP-009 ->
+AC-MEMBERSHIP-009 -> ADR-106 amendment -> TASK-MOVE-1A; lifecycle_wave owns the
+private guarded correction in ServerConfiguration and populated feature-local
+transport/test ownership, and root owns integration and native evidence.
+There is no data/wire migration. Rollback disables the explicit profile and
+cannot retain an unmapped authority handler or abandoned disposable owner as a
+working six-node implementation.

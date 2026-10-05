@@ -206,3 +206,13 @@ the live independent consumer, normal original captures, exact caller
 cancellation, early stream completion and genuine SDK/MCP revocation outcomes.
 Rollback removes the test-only context. This addition is diagnostic evidence,
 not proof of the old cancellation cause or completion of this ADR.
+
+The accepted DIAG-006 implementation also observes failures at the original
+cleanup owner: each actual failure append notifies the same read-only lifecycle
+owner before later completion/fallback/join/disposal work mutates its states.
+This narrow optional feature-local callback covers captures, subscriber and
+independent-consumer owners and authority cleanup stages, without changing the
+shared failure observer, original ordering, tasks, exceptions or deadlines.
+Record observer failures without skipping native cleanup. Root freezes this
+ordering correction before private implementation and owns native regression
+evidence; dependency_closeout owns the guarded diagnostics packet correction.

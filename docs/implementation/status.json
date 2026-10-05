@@ -1222,7 +1222,8 @@
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnRecallTests.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs",
       "docs/implementation/c1-due-ann-development-2026-10-05.json",
-      "docs/implementation/graph-ann-development-2026-10-05.json"
+      "docs/implementation/graph-ann-development-2026-10-05.json",
+      "docs/implementation/ann-reciprocal-development-2026-10-05.json"
     ],
     "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
     "qualification": {
@@ -1248,6 +1249,17 @@
       "matchedAllMetricRecallAndFilterCells": true,
       "runtimeQualified": false,
       "allAcceptanceClosed": false
+    },
+    "reciprocalInsertionDevelopment": {
+      "acceptance": "AC-ANN-018",
+      "receipt": "docs/implementation/ann-reciprocal-development-2026-10-05.json",
+      "matchedFullGraphSha256BeforeAfter": true,
+      "nativeControlsBeforeAfterNormalAndScalar": "2_of2_each_original_run",
+      "broaderNormal": "79_of79",
+      "broaderScalar": "78_of79_original_default_all_metric_10k_build_deadline_failure",
+      "performanceImprovementEstablished": false,
+      "runtimeQualified": false,
+      "allAcceptanceClosed": false
     }
   },
   "KL-031": {
@@ -1263,7 +1275,8 @@
       "docs/implementation/ann-prepared-value-development-2026-10-05.json",
       "docs/implementation/command-outcome-pin-development-2026-10-05.json",
       "docs/implementation/ann-construction-development-2026-10-05.json",
-      "docs/implementation/graph-ann-development-2026-10-05.json"
+      "docs/implementation/graph-ann-development-2026-10-05.json",
+      "docs/implementation/ann-reciprocal-development-2026-10-05.json"
     ],
     "sourceStage": "R2A_bounded_historical_seed_9_source_12_tests_34_cases_full_static23_and_unchanged_actual_Aspire_normal34_scalar34_local_pass_persisted_projection_replay_and_delivered_Linux_RF3_pending",
     "runtimeQualified": false,
@@ -1303,6 +1316,17 @@
       "receipt": "docs/implementation/graph-ann-development-2026-10-05.json",
       "actualDatasetRecords": 10000,
       "matchedAllMetricRecallAndFilterCells": true,
+      "runtimeQualified": false,
+      "allAcceptanceClosed": false
+    },
+    "reciprocalInsertionDevelopment": {
+      "acceptance": "AC-ANN-018",
+      "receipt": "docs/implementation/ann-reciprocal-development-2026-10-05.json",
+      "matchedFullGraphSha256BeforeAfter": true,
+      "nativeControlsBeforeAfterNormalAndScalar": "2_of2_each_original_run",
+      "broaderNormal": "79_of79",
+      "broaderScalar": "78_of79_original_default_all_metric_10k_build_deadline_failure",
+      "performanceImprovementEstablished": false,
       "runtimeQualified": false,
       "allAcceptanceClosed": false
     }
@@ -1903,7 +1927,8 @@
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnRecallTests.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs",
       "docs/implementation/c1-due-ann-development-2026-10-05.json",
-      "docs/implementation/graph-ann-development-2026-10-05.json"
+      "docs/implementation/graph-ann-development-2026-10-05.json",
+      "docs/implementation/ann-reciprocal-development-2026-10-05.json"
     ],
     "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
     "qualification": {
@@ -1935,6 +1960,17 @@
       "receipt": "docs/implementation/graph-ann-development-2026-10-05.json",
       "actualDatasetRecords": 10000,
       "matchedAllMetricRecallAndFilterCells": true,
+      "runtimeQualified": false,
+      "allAcceptanceClosed": false
+    },
+    "reciprocalInsertionDevelopment": {
+      "acceptance": "AC-ANN-018",
+      "receipt": "docs/implementation/ann-reciprocal-development-2026-10-05.json",
+      "matchedFullGraphSha256BeforeAfter": true,
+      "nativeControlsBeforeAfterNormalAndScalar": "2_of2_each_original_run",
+      "broaderNormal": "79_of79",
+      "broaderScalar": "78_of79_original_default_all_metric_10k_build_deadline_failure",
+      "performanceImprovementEstablished": false,
       "runtimeQualified": false,
       "allAcceptanceClosed": false
     }
@@ -2237,7 +2273,63 @@
       "governance": "passed",
       "unit": "3490_of3492_2_failed_no_skips_or_cancellations",
       "fullTaskComplete": false,
-      "receipt": "docs/implementation/partition-runtime-development-2026-10-05.json"
+      "receipt": "docs/implementation/partition-runtime-development-2026-10-05.json",
+      "recovery": "299_of300_1_failed_no_skips_or_cancellations",
+      "unitScalar": "3491_of3492_1_failed_no_skips_or_cancellations"
+    },
+    "latestAttemptedLinuxRun": {
+      "sourceCommit": "f5fe42fb2f2f15e98fdcbeea6df5266982c872cf",
+      "runId": 37364493890,
+      "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890",
+      "lastObservedStatus": "completed",
+      "conclusion": "failure",
+      "metadataSha256": "a1f411f8c38afe923fe12bdf6550ea9d976a9574a01595edefde901b4eabb041",
+      "jobs": [
+        {
+          "name": "Test code analyzers",
+          "databaseId": 111946329760,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111946329760"
+        },
+        {
+          "name": "Test three-node database",
+          "databaseId": 111946330165,
+          "status": "completed",
+          "conclusion": "cancelled",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111946330165"
+        },
+        {
+          "name": "Check website",
+          "databaseId": 111946330282,
+          "status": "completed",
+          "conclusion": "cancelled",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111946330282"
+        },
+        {
+          "name": "Check repository rules",
+          "databaseId": 111946330363,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111946330363"
+        },
+        {
+          "name": "Build and test KeyLoad (ubuntu-latest)",
+          "databaseId": 111949321762,
+          "status": "completed",
+          "conclusion": "cancelled",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111949321762"
+        },
+        {
+          "name": "Publish website",
+          "databaseId": 111952904397,
+          "status": "completed",
+          "conclusion": "skipped",
+          "url": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890/job/111952904397"
+        }
+      ],
+      "qualificationComplete": false,
+      "limit": "Analyzer and repository-rule jobs succeeded; RF3, website and solution jobs were cancelled without acquired-job steps. Required suites did not complete."
     }
   },
   "KL-081": {

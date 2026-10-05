@@ -820,6 +820,21 @@ extend deadlines or change the parser, artifact schema or success conditions.
 The diagnostics owner may expose a read-only lifecycle snapshot of its native
 cleanup owner; no alternate collector or inferred task state is permitted.
 
+The existing native cleanup owners must notify this same lifecycle evidence
+owner immediately when an actual operation first appends a failure, before the
+next resource completion, fallback cancellation, join, retry or disposal changes
+the observed state. This includes each of the three resource completions,
+bounded capture drain, fallback/capture join, observer and independent-consumer
+close/join, and each actual authority cleanup stage. A snapshot taken only after
+an entire failing cleanup owner returns is not first-failure evidence. Use an
+optional feature-local read-only observation callback and closed cleanup-stage
+labels; keep the original tasks, operation order, joins, failures and deadlines.
+An observation failure is itself retained and must not prevent safely reachable
+native cleanup stages. Do not change the shared ServerFailureObserver, add a
+second collector or filter native cancellation. The terminal snapshot remains
+after all original joins; actual callback timing and bounded context are part of
+the native diagnostics regressions, not proof of the old CI initiating cause.
+
 TASK-CRS-DIAG-FIRST-FAILURE first freezes this contract and ADR-082, then
 privately implements bounded feature-local lifecycle helpers and read-only
 joins in the existing diagnostics scope, cleanup, subscriber observer,

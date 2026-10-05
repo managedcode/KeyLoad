@@ -72,6 +72,16 @@ Consumers retain the exact sidecar and authenticate its original artifact/provid
 
 Worker owns feature-local AppHost Contracts/Observation/Processes roles, minimal composition/lifecycle joins, bounded parser/identity/native regressions and scale-only script consumers. Root owns durable feature/ADR freeze, source integration, actual Aspire native Linux/Docker qualification, CI/publication, receipts and commits. Private implementation may rely on the existing 45 engine + 10 Aspire + 25 CI packets as explicit predecessor source, never silently overwrite their bases. A reviewable patch and base/post manifests are required. No checkout edits, gates or Git by the worker.
 
+The accepted SCALE-016 native-root correction follows the documented cgroup-v2
+root semantics: CPU/memory maximum interfaces exist on non-root cgroups. Preserve
+all actual non-root ancestor minima, effective cpuset and verified hierarchy
+identity; terminate at the real root rather than requiring nonexistent root
+limits. Missing/malformed/unreadable required child observations remain explicit
+unqualified evidence. The independent actual Linux oracle and supported-envelope
+regression must expose that distinction. Root owns integration/original Linux
+gates; partition_pages owns the guarded repair. No sidecar or stored schema
+changes occur and rollback cannot fabricate limits or reduce complete cohorts.
+
 ## Accepted prerequisite: Aspire scale forwarding (REQ/AC-SCALE-014)
 
 Introduce only the separate KeyLoadTests:ScaleProfile test-harness selector. TestSuiteSettings accepts one exact canonical scaled ID only for Suite=comparison, the exact /*/*/IsolatedNativeComparisonTests/* filter, present native Benchmarks:Target, matching Benchmarks:EvidenceProfile, disabled Benchmarks:Enabled, no direct Benchmarks:ScaleProfile and no workload overrides. Reject missing suite, other suites, unknown/blank/case-mismatched IDs or mixed modes before any resource creation. Existing direct Benchmarks:ScaleProfile plus a suite remains rejected.
@@ -79,3 +89,24 @@ Introduce only the separate KeyLoadTests:ScaleProfile test-harness selector. Tes
 run-workload passes --KeyLoadTests:ScaleProfile=<id> to the outer AppHost. Its owned runner alone receives Benchmarks__ScaleProfile=<id>; clear KeyLoadTests__ScaleProfile alongside KeyLoadTests__Suite so the harness selector does not leak into the nested native AppHost. IsolatedNativeCase reads the exact ordinary ComparisonWorkerSelection from the runner environment and passes --Benchmarks:ScaleProfile=<id> to its own nested resource-owning AppHost. Preserve exact evidence/source/native topology and all control behavior. IsolatedNativeCase uses exactly 140 minutes for the closed scale profile and its existing 60 minutes for controls; all original tasks/resources are still joined.
 
 Worker owns the narrow TestSuiteSettings/TestSuiteResources/IsolatedNativeCase/run-workload joins and real Aspire model plus independent argument/environment regressions. This is a prerequisite repair to the accepted SCALE-014 path, not a new alternate test caller. Durable docs join before live implementation.
+
+## Accepted stage 11: original teardown settlement, 2026-10-05
+
+REQ/AC-SCALE-017 and TASK-SCALE-ORIGINAL-TEARDOWN repair the inspected existing
+IsolatedNativeTeardown path, which detached a pending task after 30 seconds and
+replaced or suppressed actual cleanup failures. Freeze the exact owner/order,
+original-task join, native fatal classification and primary/cleanup preservation
+contract in ScalingQualification before implementation. The collector joins from
+stage 10 use the same lifetime; the existing control success path/report schemas
+remain unchanged.
+
+Implement in order: retain the original case failure; settle the original
+collector/capture and report writers; stop and dispose actual owners; delete data
+only after safe ownership release; write bounded safe categories; propagate the
+original ordered failures after all safely reachable stages. Keep 30 seconds as
+an escalation/failure threshold, never detached completion. Add genuine native
+Cases/Helpers regressions for pending settlement and simultaneous primary plus
+cleanup failures, and run them through the canonical Aspire comparison entry.
+ComparisonTests owns this code, partition_pages owns its private guarded packet,
+and root owns integration/gates/evidence/commit. There is no data or wire migration;
+rollback cannot convert an unfinished original task into a passing qualification.

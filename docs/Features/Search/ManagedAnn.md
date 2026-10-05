@@ -499,6 +499,18 @@ retains the original Linux normal/scalar deadline failures at source `788b8fd`
 and runs actual normal/scalar Aspire observations before any speed or deadline
 repair claim. Source proof alone is not a performance or acceptance result.
 
+The test-only successful-control observation uses a fixed v1 SHA-256 framing
+of the native state's count, entry point, maximum level, each ordinal's exact
+ID/revision/level and every layer's complete ordered adjacency. It hashes only
+the actual independent native snapshot, without a second graph builder or
+stored golden replacement. Capture build-only elapsed ticks and current-thread
+allocations before snapshot/assertion/output work; retain actual build work,
+distance and edge counters and the complete fixed options. Use the same two
+controls and test source for original and candidate builds in each native mode.
+Only successful complete hashes can establish graph parity; failed controls
+remain failed native reports and cannot supply a graph baseline. Hashing and
+fixed test output stay outside the product and its execution budget.
+
 Traceability: REQ-ANN-018 -> AC-ANN-018 -> ADR-019 amendment ->
 TASK-ANN-RECIPROCAL-INSERTION -> independent native graph tests and original
 Aspire reports. The Luna source owner produces a hash-guarded private packet

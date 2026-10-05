@@ -202,3 +202,12 @@ all strict/Aspire gates. A partial failed build cannot prove graph equivalence
 or speed. Migration is N/A: R1 remains an internal immutable candidate with no
 serialized/public contract; R2/R3 require separate accepted contracts. Rollback
 restores only the removed scan and helper.
+
+Root's successful-control observation joins AC-ANN-018 before code: fixed v1
+SHA-256 framing covers the actual complete native IDs/revisions/levels and
+ordered adjacency plus entry point/maximum level. Build-only ticks/allocations
+are captured before independent snapshot/assertion/output; actual counters and
+fixed options are retained. Identical control/test source runs on the original
+and candidate in each native mode. Failed builds cannot supply a graph hash or
+equivalence baseline. This remains test-only evidence with no public or
+persistence contract, and does not qualify acceleration by itself.

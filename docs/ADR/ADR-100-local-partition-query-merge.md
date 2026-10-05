@@ -3,6 +3,16 @@
 Status: Accepted; implementation and qualification pending.
 Date: 2026-10-05. Related work: KL-037 prerequisite only.
 
+The accepted TASK-DQUERY-CANCEL-OBSERVATION amendment implements
+AC-DQUERY-PREREQ-005 with an already-armed, owned native observation thread and
+the unchanged synchronous real ZoneTree query. Exact case/helper ownership,
+15-second observation/join bounds, original token/budget, no-result and healthy
+follow-up requirements are frozen in DistributedQueryExecution before code.
+Root owns review, joins and Aspire normal/scalar/full-gate evidence;
+dependency_closeout owns the private test packet. Preserve the earlier failed
+original report. No product boundary, data/wire format or migration changes;
+rollback may revert this test synchronization but cannot weaken its assertions.
+
 ## Context
 
 KL-037's original target requires query fan-out across logical shards. The

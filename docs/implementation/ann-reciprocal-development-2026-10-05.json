@@ -1,0 +1,648 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-05",
+  "checkpoint": "stage87-ann-reciprocal",
+  "kind": "local_development_not_GitHub_performance_or_full_qualification",
+  "baseRevision": "f5fe42fb2f2f15e98fdcbeea6df5266982c872cf",
+  "requirements": [
+    "AC-ANN-018"
+  ],
+  "sourceChange": "Only the impossible reciprocal ContainsNeighbor scan and its unused helper were removed; ordered graph, scores, distance/edge counts and existing budget checks were preserved.",
+  "beforeProductionSha256": "4742cc677e70dc735933383a465972b6a0fe28dbbe94790fb496fb1c2c8355dd",
+  "afterProductionSha256": "948a4ba53b282eefac3076a8807e9625682a0701041cb10d0a6e1dcf74073116",
+  "runs": [
+    {
+      "stage": "stage87b-ann-before",
+      "entryPoint": "Aspire AppHost",
+      "suite": "unit",
+      "scope": "two_predetermined_real_ZoneTree_ANN_controls_not_full_suite",
+      "exitCode": 0,
+      "summary": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "observations": [
+        {
+          "method": "TenThousandDotProductAdjacencyIsUniqueOrderedAndDeterministic",
+          "builds": [
+            {
+              "v": "1",
+              "rows": "10000",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "64",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "c8f928e0db8cc011d86efebb8d116d47ea5373535091c228217a54d85722d93e",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "1847598125",
+              "allocatedBytes": "1747328",
+              "workUnits": "154816216",
+              "distanceEvaluations": "3887168",
+              "edgeVisits": "5522232"
+            },
+            {
+              "v": "1",
+              "rows": "10000",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "64",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "c8f928e0db8cc011d86efebb8d116d47ea5373535091c228217a54d85722d93e",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "1968315542",
+              "allocatedBytes": "1747328",
+              "workUnits": "154816216",
+              "distanceEvaluations": "3887168",
+              "edgeVisits": "5522232"
+            }
+          ]
+        },
+        {
+          "method": "SmallDotProductAdjacencyIsUniqueOrderedAndDeterministic",
+          "builds": [
+            {
+              "v": "1",
+              "rows": "128",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "8",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "bf44758d8a8ef96d767a2f4520da7a19613a55607c3ac388340929ffd014b977",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "18019541",
+              "allocatedBytes": "32552",
+              "workUnits": "260776",
+              "distanceEvaluations": "8475",
+              "edgeVisits": "9450"
+            },
+            {
+              "v": "1",
+              "rows": "128",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "8",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "bf44758d8a8ef96d767a2f4520da7a19613a55607c3ac388340929ffd014b977",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "9574375",
+              "allocatedBytes": "32464",
+              "workUnits": "260776",
+              "distanceEvaluations": "8475",
+              "edgeVisits": "9450"
+            }
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "TestResults/stage87b-ann-before/KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "e209d10fbb02c5c26dedc0d7ec6d39ec40f67206249660f8e41cea316bd3e766",
+          "bytes": 151951
+        },
+        {
+          "path": "TestResults/stage87b-ann-before/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "0a3ffc96ef8983214c7a3d2120906b7ef2c43147a795ad5e9f2492ec066643a9",
+          "bytes": 9664
+        },
+        {
+          "path": "TestResults/stage87b-ann-before/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "be890c610cc9bd1d22dcc647c35c3cd6cb34291ca71786cdd78e1a4fe6ce0b6d",
+          "bytes": 6313
+        }
+      ]
+    },
+    {
+      "stage": "stage87b-ann-before-scalar",
+      "entryPoint": "Aspire AppHost",
+      "suite": "unit-scalar",
+      "scope": "two_predetermined_real_ZoneTree_ANN_controls_not_full_suite",
+      "exitCode": 0,
+      "summary": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "observations": [
+        {
+          "method": "SmallDotProductAdjacencyIsUniqueOrderedAndDeterministic",
+          "builds": [
+            {
+              "v": "1",
+              "rows": "128",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "8",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "bf44758d8a8ef96d767a2f4520da7a19613a55607c3ac388340929ffd014b977",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "25575791",
+              "allocatedBytes": "32304",
+              "workUnits": "260776",
+              "distanceEvaluations": "8475",
+              "edgeVisits": "9450"
+            },
+            {
+              "v": "1",
+              "rows": "128",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "8",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "bf44758d8a8ef96d767a2f4520da7a19613a55607c3ac388340929ffd014b977",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "12303458",
+              "allocatedBytes": "32712",
+              "workUnits": "260776",
+              "distanceEvaluations": "8475",
+              "edgeVisits": "9450"
+            }
+          ]
+        },
+        {
+          "method": "TenThousandDotProductAdjacencyIsUniqueOrderedAndDeterministic",
+          "builds": [
+            {
+              "v": "1",
+              "rows": "10000",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "64",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "c8f928e0db8cc011d86efebb8d116d47ea5373535091c228217a54d85722d93e",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "3618872625",
+              "allocatedBytes": "1747080",
+              "workUnits": "154816216",
+              "distanceEvaluations": "3887168",
+              "edgeVisits": "5522232"
+            },
+            {
+              "v": "1",
+              "rows": "10000",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "64",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "c8f928e0db8cc011d86efebb8d116d47ea5373535091c228217a54d85722d93e",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "2745830459",
+              "allocatedBytes": "1747328",
+              "workUnits": "154816216",
+              "distanceEvaluations": "3887168",
+              "edgeVisits": "5522232"
+            }
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "TestResults/stage87b-ann-before-scalar/KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "f61dda44d924c8c48e9bc5c2f45e3e896cf90181e923e81f57e4aa9542860b79",
+          "bytes": 151927
+        },
+        {
+          "path": "TestResults/stage87b-ann-before-scalar/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "433f8952e58c43c8e27d6c5771c87150eaf9513977ea56b7596f8d3395570414",
+          "bytes": 9665
+        },
+        {
+          "path": "TestResults/stage87b-ann-before-scalar/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "df2142c1e826585c2f0646fcb9d9dd8ec0b1c70a2aad99a9741e611d69654b6d",
+          "bytes": 6314
+        }
+      ]
+    },
+    {
+      "stage": "stage87c-ann-after",
+      "entryPoint": "Aspire AppHost",
+      "suite": "unit",
+      "scope": "two_predetermined_real_ZoneTree_ANN_controls_not_full_suite",
+      "exitCode": 0,
+      "summary": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "observations": [
+        {
+          "method": "SmallDotProductAdjacencyIsUniqueOrderedAndDeterministic",
+          "builds": [
+            {
+              "v": "1",
+              "rows": "128",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "8",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "bf44758d8a8ef96d767a2f4520da7a19613a55607c3ac388340929ffd014b977",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "13713500",
+              "allocatedBytes": "32552",
+              "workUnits": "257143",
+              "distanceEvaluations": "8475",
+              "edgeVisits": "9450"
+            },
+            {
+              "v": "1",
+              "rows": "128",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "8",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "bf44758d8a8ef96d767a2f4520da7a19613a55607c3ac388340929ffd014b977",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "6345125",
+              "allocatedBytes": "32464",
+              "workUnits": "257143",
+              "distanceEvaluations": "8475",
+              "edgeVisits": "9450"
+            }
+          ]
+        },
+        {
+          "method": "TenThousandDotProductAdjacencyIsUniqueOrderedAndDeterministic",
+          "builds": [
+            {
+              "v": "1",
+              "rows": "10000",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "64",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "c8f928e0db8cc011d86efebb8d116d47ea5373535091c228217a54d85722d93e",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "3252325375",
+              "allocatedBytes": "1747328",
+              "workUnits": "154483703",
+              "distanceEvaluations": "3887168",
+              "edgeVisits": "5522232"
+            },
+            {
+              "v": "1",
+              "rows": "10000",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "64",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "c8f928e0db8cc011d86efebb8d116d47ea5373535091c228217a54d85722d93e",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "6202418167",
+              "allocatedBytes": "1747328",
+              "workUnits": "154483703",
+              "distanceEvaluations": "3887168",
+              "edgeVisits": "5522232"
+            }
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "TestResults/stage87c-ann-after/KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "288f0170ebd4222579fefb8d8a2e2e1a0cce9b89f3d1b2cfd12d6d7a92a75e74",
+          "bytes": 151919
+        },
+        {
+          "path": "TestResults/stage87c-ann-after/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "2dc42689c78f68f3612e3d8947b07cee1de898eee2d72bcdfa000caf38f81671",
+          "bytes": 9659
+        },
+        {
+          "path": "TestResults/stage87c-ann-after/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "f2f08099bc51f4fdda81187d0cf99c1c6ebb57411f053c370bd7461c2ef426cd",
+          "bytes": 6313
+        }
+      ]
+    },
+    {
+      "stage": "stage87c-ann-after-scalar",
+      "entryPoint": "Aspire AppHost",
+      "suite": "unit-scalar",
+      "scope": "two_predetermined_real_ZoneTree_ANN_controls_not_full_suite",
+      "exitCode": 0,
+      "summary": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "observations": [
+        {
+          "method": "TenThousandDotProductAdjacencyIsUniqueOrderedAndDeterministic",
+          "builds": [
+            {
+              "v": "1",
+              "rows": "10000",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "64",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "c8f928e0db8cc011d86efebb8d116d47ea5373535091c228217a54d85722d93e",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "3173734625",
+              "allocatedBytes": "1747080",
+              "workUnits": "154483703",
+              "distanceEvaluations": "3887168",
+              "edgeVisits": "5522232"
+            },
+            {
+              "v": "1",
+              "rows": "10000",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "64",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "c8f928e0db8cc011d86efebb8d116d47ea5373535091c228217a54d85722d93e",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "1540277666",
+              "allocatedBytes": "1747328",
+              "workUnits": "154483703",
+              "distanceEvaluations": "3887168",
+              "edgeVisits": "5522232"
+            }
+          ]
+        },
+        {
+          "method": "SmallDotProductAdjacencyIsUniqueOrderedAndDeterministic",
+          "builds": [
+            {
+              "v": "1",
+              "rows": "128",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "8",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "bf44758d8a8ef96d767a2f4520da7a19613a55607c3ac388340929ffd014b977",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "28176792",
+              "allocatedBytes": "32304",
+              "workUnits": "257143",
+              "distanceEvaluations": "8475",
+              "edgeVisits": "9450"
+            },
+            {
+              "v": "1",
+              "rows": "128",
+              "dimension": "16",
+              "metric": "DotProduct",
+              "connections": "4",
+              "efConstruction": "8",
+              "efSearch": "1",
+              "maxLevel": "16",
+              "exactThreshold": "0",
+              "maxRecords": "5000000",
+              "maxIndexBytes": "268435456",
+              "maxScratchBytes": "8388608",
+              "seed": "5423839510519694385",
+              "outcome": "Success",
+              "graphSha256": "bf44758d8a8ef96d767a2f4520da7a19613a55607c3ac388340929ffd014b977",
+              "stopwatchFrequency": "1000000000",
+              "elapsedStopwatchTicks": "24001625",
+              "allocatedBytes": "32464",
+              "workUnits": "257143",
+              "distanceEvaluations": "8475",
+              "edgeVisits": "9450"
+            }
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "TestResults/stage87c-ann-after-scalar/KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "4ed95c88298c43ffc7b8d080160e02ee0ff37d02d1636750abe76839b2900f29",
+          "bytes": 151947
+        },
+        {
+          "path": "TestResults/stage87c-ann-after-scalar/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "63fc85a1cdb63c8217b3d4655ff43fa1e1eb9694e884391b71f422b25cc89a23",
+          "bytes": 9667
+        },
+        {
+          "path": "TestResults/stage87c-ann-after-scalar/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "f8a8ada14c88039c6e3148a195e2767f89b8f546ef98699fd312e395069647f4",
+          "bytes": 6311
+        }
+      ]
+    }
+  ],
+  "parity": {
+    "fullGraphHash": true,
+    "exactOptions": true,
+    "distanceEvaluations": true,
+    "edgeVisits": true,
+    "workUnitsReducedByRemovedFalseScanOnly": true
+  },
+  "performanceImprovementEstablished": false,
+  "performanceLimit": "Native local build-only timings vary and are not comparable authenticated performance evidence; candidate timing is not consistently lower. No acceleration claim.",
+  "fullTaskComplete": false,
+  "remaining": [
+    "Complete normal/scalar/search/recovery/RF3/endurance gates on delivered source",
+    "Original exact-source Linux default/adaptive ANN corpus and matched before-after resource/performance evidence"
+  ],
+  "broaderRegressions": [
+    {
+      "stage": "stage87d-ann-search",
+      "entryPoint": "Aspire AppHost",
+      "suite": "unit",
+      "filter": "/*/*/*Ann*/*",
+      "exitCode": 0,
+      "scope": "79 ANN named cases; not the complete unit suite",
+      "summary": {
+        "total": 79,
+        "passed": 79,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failedTests": [],
+      "artifacts": [
+        {
+          "path": "TestResults/stage87d-ann-search/KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "1e666893594af441375b1ae0ae96853223c4701c979e9411656a1e8d0684391f",
+          "bytes": 175771
+        },
+        {
+          "path": "TestResults/stage87d-ann-search/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "8cb7402cbd83e6e7b13b1b6bcfeb77859b8445cdc29434c16636303beff235d2",
+          "bytes": 249317
+        }
+      ],
+      "trxConfigured": false
+    },
+    {
+      "stage": "stage87d-ann-search-scalar",
+      "entryPoint": "Aspire AppHost",
+      "suite": "unit-scalar",
+      "filter": "/*/*/*Ann*/*",
+      "exitCode": 2,
+      "scope": "79 ANN named cases; not the complete unit suite",
+      "summary": {
+        "total": 79,
+        "passed": 78,
+        "failed": 1,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "failedTests": [
+        {
+          "class": "PackedAnnRecallTests",
+          "method": "AcAnn005TenThousandCanonicalRowsMeetRecallForEveryMetricFilterAndCorrelationCell",
+          "exceptionType": "KeyLoad.KeyLoadException"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "TestResults/stage87d-ann-search-scalar/KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "de9e0ee049f01df5c883bb8ad6ade0fe64297c0a0cdd2bbd5c01906b3de345d1",
+          "bytes": 176523
+        },
+        {
+          "path": "TestResults/stage87d-ann-search-scalar/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "f1bd05d8e0ddccd6ee18daf901330b6a379ab222e24f44d646e0286be6dad2cc",
+          "bytes": 251472
+        }
+      ],
+      "trxConfigured": false,
+      "failureObservation": "Original scalar 10,000-row all-metric recall test passed its cosine cells but Euclidean native build exceeded the unchanged 30-second read execution deadline. No retry, corpus/settings/limit/assertion change or performance qualification is claimed."
+    }
+  ]
+}
