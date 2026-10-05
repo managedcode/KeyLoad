@@ -13,15 +13,17 @@ namespace KeyLoad.Orleans;
 /// <param name="search">Existing authorized text, vector and hybrid search engine.</param>
 /// <param name="administration">Borrowed physical-node capabilities guarded by persisted administrator authority.</param>
 /// <param name="clock">Runtime system clock for persisted principal expiry and query deadlines.</param>
+/// <param name="workOwner">Silo-local admission and cancellation owner for verified reads.</param>
 /// <param name="diagnostics">Unexpected failure diagnostics; public replies contain only safe typed errors.</param>
 [global::Orleans.GrainType(GrainRoutingProtocol.ReadAlias), global::Orleans.Placement.PreferLocalPlacement]
 public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine database, ICommitCoordinator coordinator,
-    QueryEngine queries, SearchEngine search, INodeAdministration administration, TimeProvider clock,
+    QueryEngine queries, SearchEngine search, INodeAdministration administration, TimeProvider clock, NativeRequestWorkOwner workOwner,
     ILogger<DatabaseReadGrain> diagnostics)
     : Grain, IDatabaseReadGrain
 {
     private readonly DatabaseEngine localDatabase = database;
     private readonly TimeProvider runtimeClock = clock;
+    private readonly NativeRequestWorkOwner requestWorkOwner = workOwner;
     private readonly GrainCoreReadCapabilities core = new(database);
     private readonly GrainQueryReadCapabilities query = new(queries, search, clock);
     private readonly GrainBlobReadCapabilities blobs = new(database);
@@ -32,53 +34,75 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
     /// <returns>A bounded safe reply from the requested persisted-authorized capability.</returns>
     public async Task<GrainOperationReply> ExecuteAsync(string signedRequest, CancellationToken cancellationToken)
     {
-        var stage = GrainFailureStage.EnvelopeVerification;
-        var requestId = Guid.Empty;
-        var phase = DatabasePhaseKind.AuthorizedReadCapability;
-        var phaseStarted = -1L;
-        var phaseActive = false;
+        using var work = new NativeCapabilityWorkLifetime(cancellationToken);
         try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            requestId = this.GetPrimaryKey();
-            var request = codec.VerifyRead(signedRequest, requestId);
-            GrainIdentityContext.Validate(request.Envelope, requestId);
-            stage = GrainFailureStage.QuorumRead;
-            phase = request.Envelope.ReadKind == GrainReadKind.Authenticate
-                ? DatabasePhaseKind.AuthorizedAuthenticationBarrier : DatabasePhaseKind.AuthorizedOperationBarrier;
-            phaseStarted = DatabasePhaseTelemetry.Begin();
-            phaseActive = true;
-            await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
-            DatabasePhaseTelemetry.End(phase, DatabasePhaseOutcome.Completed, phaseStarted);
-            phaseActive = false;
-            ValidateFreshRequest(request, requestId, cancellationToken);
-            stage = GrainFailureStage.CapabilityExecution;
-            phase = DatabasePhaseKind.AuthorizedReadCapability;
-            phaseStarted = DatabasePhaseTelemetry.Begin();
-            phaseActive = true;
-            var result = await ReadAsync(request, requestId, cancellationToken).ConfigureAwait(true);
-            DatabasePhaseTelemetry.End(phase, DatabasePhaseOutcome.Completed, phaseStarted);
-            phaseActive = false;
-            stage = GrainFailureStage.ReplyEncoding;
-            return GrainReplyFactory.Value(result, cancellationToken);
+            var request = AdmitRead(signedRequest, work);
+            return await ExecuteReadAsync(request, work).ConfigureAwait(true);
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {
-            if (phaseActive)
+            work.PrimaryError = error;
+            try
             {
-                EndFailedPhase(error, phase, phaseStarted, cancellationToken);
-                phaseActive = false;
+                return GrainReplyFactory.Failure(error, false, diagnostics, work.RequestId, work.Stage,
+                    work.Token);
             }
-            return GrainReplyFactory.Failure(error, false, diagnostics, requestId, stage, cancellationToken);
+            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                work.PrimaryError = NativeCapabilityWorkLifetime.CombinePrimary(work.PrimaryError, failure);
+                throw;
+            }
+            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                work.PrimaryError = NativeCapabilityWorkLifetime.CombinePrimary(work.PrimaryError, failure);
+                throw;
+            }
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            work.PrimaryError = error;
+            throw;
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            work.PrimaryError = error;
+            throw;
         }
         finally
         {
-            if (phaseActive)
-            {
-                DatabasePhaseTelemetry.End(phase, DatabasePhaseOutcome.Faulted, phaseStarted);
-            }
-            DeactivateOnIdle();
+            NativeCapabilityWorkLifetime.Settle(work.PrimaryError, work, work.FailureTelemetry(),
+                DeactivateOnIdle);
         }
+    }
+
+    private DecodedGrainRequest AdmitRead(string signedRequest, NativeCapabilityWorkLifetime work)
+    {
+        work.Token.ThrowIfCancellationRequested();
+        work.RequestId = this.GetPrimaryKey();
+        var request = codec.VerifyRead(signedRequest, work.RequestId);
+        GrainIdentityContext.Validate(request.Envelope, work.RequestId);
+        work.Stage = GrainFailureStage.CapabilityExecution;
+        work.Admit(requestWorkOwner, work.RequestId, NativeRequestWorkKind.ReadCapability);
+        return request;
+    }
+
+    private async Task<GrainOperationReply> ExecuteReadAsync(DecodedGrainRequest request,
+        NativeCapabilityWorkLifetime work)
+    {
+        work.Stage = GrainFailureStage.QuorumRead;
+        var barrier = request.Envelope.ReadKind == GrainReadKind.Authenticate
+            ? DatabasePhaseKind.AuthorizedAuthenticationBarrier : DatabasePhaseKind.AuthorizedOperationBarrier;
+        work.BeginPhase(barrier);
+        await coordinator.ReadBarrierAsync(work.Token).ConfigureAwait(true);
+        work.CompletePhase();
+        ValidateFreshRequest(request, work.RequestId, work.Token);
+        work.Stage = GrainFailureStage.CapabilityExecution;
+        work.BeginPhase(DatabasePhaseKind.AuthorizedReadCapability);
+        var result = await ReadAsync(request, work.RequestId, work.Token).ConfigureAwait(true);
+        work.CompletePhase();
+        work.Stage = GrainFailureStage.ReplyEncoding;
+        return GrainReplyFactory.Value(result, work.Token);
     }
 
     private void ValidateFreshRequest(DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken)
@@ -86,13 +110,6 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         cancellationToken.ThrowIfCancellationRequested();
         GrainRequestScope.Validate(request.Envelope, localDatabase.Store.Identity.Incarnation, runtimeClock.GetUtcNow());
         GrainIdentityContext.Validate(request.Envelope, requestId);
-    }
-
-    private static void EndFailedPhase(Exception error, DatabasePhaseKind phase, long started, CancellationToken cancellationToken)
-    {
-        var outcome = error is OperationCanceledException
-            ? DatabasePhaseTelemetry.CancellationOutcome(cancellationToken) : DatabasePhaseOutcome.Faulted;
-        DatabasePhaseTelemetry.End(phase, outcome, started);
     }
 
     private async Task<object?> ReadAsync(DecodedGrainRequest request, Guid requestId,

@@ -5,8 +5,9 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal sealed class CacheReadPermitExpiryTests
 {
     private static readonly TimeSpan Margin = TimeSpan.FromMilliseconds(50);
-    private static readonly TimeSpan GrantPreparationDelay = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan GrantPreparationDelay = TimeSpan.FromSeconds(6);
     private static readonly TimeSpan TestBound = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan MinimumWait = TimeSpan.FromMilliseconds(1);
 
     [Test]
     public async Task PreparedAgeRejectsAtTenSecondsWithoutConsumingSequence()
@@ -29,6 +30,7 @@ internal sealed class CacheReadPermitExpiryTests
     }
 
     [Test]
+    [NotInParallel]
     public async Task LeaseExpiresAtFifteenSecondsFromItsPrepareTimestamp()
     {
         using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
@@ -37,7 +39,7 @@ internal sealed class CacheReadPermitExpiryTests
         using var permit = new CacheReadPermit(TimeProvider.System);
         var clock = TimeProvider.System;
         var prepared = clock.GetTimestamp();
-        await WaitForPreparedAgeAsync(clock, prepared, GrantPreparationDelay, linked.Token);
+        await WaitForMeasuredAgeAsync(clock, prepared, GrantPreparationDelay, linked.Token);
         var acceptStartedAt = clock.GetTimestamp();
         var accepted = permit.TryAccept(Guid.NewGuid(), 1, prepared, out _);
         await Assert.That(accepted).IsTrue();
@@ -47,7 +49,7 @@ internal sealed class CacheReadPermitExpiryTests
         var ageAtReceipt = clock.GetElapsedTime(prepared, acceptStartedAt);
         await Assert.That(ageAtReceipt >= GrantPreparationDelay).IsTrue();
         await Assert.That(ageAtReceipt < CacheReadPermitLimits.PrepareValidity).IsTrue();
-        await WaitForPreparedAgeAsync(clock, prepared, CacheReadPermitLimits.LeaseValidity + Margin, linked.Token);
+        await WaitForMeasuredAgeAsync(clock, prepared, CacheReadPermitLimits.LeaseValidity + Margin, linked.Token);
 
         var isCurrent = permit.IsCurrent(revision);
         var captured = permit.TryCapture(out var expiredRevision);
@@ -80,6 +82,22 @@ internal sealed class CacheReadPermitExpiryTests
 
             var remaining = minimumAge - elapsed;
             await Task.Delay(remaining + Margin, clock, cancellationToken);
+        }
+    }
+
+    private static async Task WaitForMeasuredAgeAsync(TimeProvider clock, long prepared, TimeSpan minimumAge,
+        CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var remaining = minimumAge - clock.GetElapsedTime(prepared, clock.GetTimestamp());
+            if (remaining <= TimeSpan.Zero)
+            {
+                return;
+            }
+
+            await Task.Delay(remaining < MinimumWait ? MinimumWait : remaining, clock, cancellationToken);
         }
     }
 }

@@ -477,3 +477,32 @@ measurement claim follows from authored counters or local static validation.
 Рішення: [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-028 scheduling time](../ADR/ADR-028-persisted-scheduling-time.md), [ADR-031 modular resource isolation](../ADR/ADR-031-modular-all-in-one-resource-isolation.md), ADR-035. TimeProvider.System залишається host/Orleans clock; operation clock не заморожує cluster runtime. Mixed query/search/graph/event/queue workloads потребують real correctness+liveness tests, а не окремих synthetic doubles.
 
 Shared primitive/config/telemetry composition мають одного integration owner; бізнес-work і matching tests залишаються в owning `Features/<SliceName>/`. Configuration validation, invalid bounds, zero/empty work, overflow, cancellation/deadline і healthy follow-up входять до AC. Freeze shared limits → real regression source → feature fixes → integrated GitHub gates → actual measurements. Local doc review не доводить numeric coverage, memory ceilings чи performance gain; metrics публікуються тільки з successful GitHub JSON.
+
+### TASK-CACHE-EXPIRY-ORACLE: real prepare-origin expiry measurement
+
+REQ-CACHE-EXPIRY-ORACLE-001 preserves REQ-CACHE-004/005 and the existing
+15-second prepare-origin lease and 10-second acceptance ceiling. A real-clock
+test must distinguish prepare age from receipt age while observing the actual
+permit and native ZoneTree cache. Source clocks, production bounds and persisted
+authority are unchanged. ADR-058 already specifies this contract; no new boundary
+or timing semantics are introduced.
+
+AC-CACHE-EXPIRY-ORACLE-001 maps to
+`CacheReadPermitExpiryTests.LeaseExpiresAtFifteenSecondsFromItsPrepareTimestamp`
+and `ZoneTreeCoordinatedPointCacheReadTests.ExpiredWarmReceiptFallsBackToOneNativeReadWithIdenticalBytes`.
+Only these two methods are isolated with TUnit `NotInParallel`. Accept at a
+measured prepare age of at least six seconds and below the unchanged ten-second
+ceiling; use monotonic elapsed-time polling with a one-millisecond minimum delay.
+Observe after prepare age reaches fifteen seconds plus the existing fifty-
+millisecond boundary margin, and still require receipt age below fifteen seconds.
+Keep the original thirty-second caller bound, stale capture/revision rejection,
+renewal proof, identical bytes and exactly one native fallback lookup. Open, seed
+and compose the real ZoneTree store before starting its lease measurement.
+Neither a fake clock nor an increased lease/deadline or removed assertion is an
+acceptable correction. Preserve the two failed original Linux reports from
+run 37249197752 before recording any new local or exact-source Linux result.
+
+The lead freezes and reviews this scope, joins the source and owns Aspire tests,
+receipts and commits. The query worker owns a private patch for only the two
+existing Cases files and, if required, one cohesive real-clock Helpers file.
+Other test methods, cache admission and production code are outside this stage.

@@ -7,6 +7,9 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
 {
     private const string OwnedResultFailure = "The real ZoneTree read returned no owned result.";
     private const byte MutatedFirstByte = 77;
+    private static readonly TimeSpan GrantPreparationDelay = TimeSpan.FromSeconds(6);
+    private static readonly TimeSpan ExpiryMargin = TimeSpan.FromMilliseconds(50);
+    private static readonly TimeSpan MinimumWait = TimeSpan.FromMilliseconds(1);
     private static readonly byte[] Key = "cache/coordinated/value"u8.ToArray();
     private static readonly byte[] Value = [0, 9, 128, 255];
 
@@ -81,6 +84,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
     }
 
     [Test]
+    [NotInParallel]
     public async Task ExpiredWarmReceiptFallsBackToOneNativeReadWithIdenticalBytes()
     {
         using var fixture = new ZoneTreeCoordinatedPointCacheFileFixture();
@@ -90,14 +94,17 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
                 TestContext.Current!.Execution.CancellationToken);
             using var permit = new CacheReadPermit(TimeProvider.System);
-            var clock = TimeProvider.System;
-            var prepared = clock.GetTimestamp();
-            await Task.Delay(TimeSpan.FromSeconds(2), clock, linked.Token);
-            var beforeAccept = clock.GetTimestamp();
-            await Assert.That(permit.TryAccept(Guid.NewGuid(), 1, prepared, out var receipt)).IsTrue();
             var store = fixture.OpenStore();
             ZoneTreeCoordinatedPointCacheTestSupport.Put(store, Key, Value);
             var control = ZoneTreeCoordinatedPointCacheTestSupport.CreateControl(store, fixture, permit);
+            var clock = TimeProvider.System;
+            var prepared = clock.GetTimestamp();
+            await WaitForPreparedAgeAsync(clock, prepared, GrantPreparationDelay, linked.Token);
+            var beforeAccept = clock.GetTimestamp();
+            await Assert.That(permit.TryAccept(Guid.NewGuid(), 1, prepared, out var receipt)).IsTrue();
+            var acceptanceAge = clock.GetElapsedTime(prepared, beforeAccept);
+            await Assert.That(acceptanceAge >= GrantPreparationDelay).IsTrue();
+            await Assert.That(acceptanceAge < CacheReadPermitLimits.PrepareValidity).IsTrue();
             await Assert.That(control.TryApply(receipt)).IsEqualTo(ZoneTreePointCacheControlResult.Applied);
             _ = store.Read(view => view.ReadOwnedValue(Key));
             var warm = control.GetDiagnostics();
@@ -125,11 +132,23 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
     private static async Task WaitUntilPreparedLeaseEndsAsync(TimeProvider clock, long prepared,
         CancellationToken cancellationToken)
     {
-        var currentAge = clock.GetElapsedTime(prepared, clock.GetTimestamp());
-        var remaining = CacheReadPermitLimits.LeaseValidity + TimeSpan.FromMilliseconds(50) - currentAge;
-        if (remaining > TimeSpan.Zero)
+        await WaitForPreparedAgeAsync(clock, prepared, CacheReadPermitLimits.LeaseValidity + ExpiryMargin,
+            cancellationToken);
+    }
+
+    private static async Task WaitForPreparedAgeAsync(TimeProvider clock, long prepared, TimeSpan minimumAge,
+        CancellationToken cancellationToken)
+    {
+        while (true)
         {
-            await Task.Delay(remaining, clock, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            var remaining = minimumAge - clock.GetElapsedTime(prepared, clock.GetTimestamp());
+            if (remaining <= TimeSpan.Zero)
+            {
+                return;
+            }
+
+            await Task.Delay(remaining < MinimumWait ? MinimumWait : remaining, clock, cancellationToken);
         }
     }
 }

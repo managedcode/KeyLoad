@@ -24,6 +24,38 @@ Persisting command identity with effects resolves lost responses across process 
 
 Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md), [ADR-011](ADR-011-format-upgrades.md), and [ADR-016](ADR-016-atomic-physical-placement.md). Stop if canonical fingerprint or dedup expiry behavior is not specified. Do not infer exactly-once handler execution or include an external API call in the database transaction.
 
+## TASK-DSTORE-COMMAND-100-RESTART implementation contract
+
+Current command outcomes have no automatic TTL or purge implementation. A
+matching authorized retry resolves its retained canonical outcome in the same
+store incarnation. This does not promise a finite minimum retention period,
+eternal replay after explicit store/record removal, or replay across a changed
+incarnation; an existing outcome from another incarnation is TokenInvalidated.
+Adding expiry, purge, a minimum temporal horizon or an outcome-format change
+requires its own accepted policy and migration contract before implementation.
+
+REQ-DSTORE-006 / AC-DSTORE-006 and original KL-012 require two actual CrashHost
+processes over one owned native ZoneTree store. The first commits one authorized
+document/event/queue batch, verifies exactly one hundred matching retries and
+changed-content Conflict, captures the original complete receipt as bounded test
+evidence, and waits at the existing real process-kill handshake. The parent kills
+and joins that child. A distinct second process opens the same store and verifies
+one hundred more matching retries, the retained authorized outcome, unchanged
+receipt and single effects, changed-content Conflict and healthy follow-up.
+Evidence sidecars are never canonical recovery authority. Physical commit/log
+position may advance on replay; the original receipt, domain effects and outbox
+cut must remain exact. A runner-only close/reopen is not process-restart proof,
+and process kill is not power-loss qualification.
+
+Ordered ownership: root freezes this contract and owns the minimal mode dispatch
+join in `tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/CrashHostApplication.cs`.
+The query worker owns new scenario/helper files only under CrashHost and
+RecoveryTests `Features/DocumentStorage/`; one canonical DocumentStorage slice
+applies on both surfaces. Root reviews, joins, runs the actual Aspire recovery
+entry, retains original artifacts and updates KL-012. No new project, public API,
+serializer/fingerprint change, TTL path or copied database implementation is in
+scope. Root retains the required exact-source Linux recovery and RF3 gates.
+
 ```mermaid
 flowchart LR
     Request[Authenticated command ID and payload] --> Canonical[Resolve scope and fingerprint]

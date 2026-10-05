@@ -3,39 +3,64 @@ using KeyLoad.Core;
 namespace KeyLoad.Orleans;
 
 internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
-    GrainRequestCodec? codec = null)
+    GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null)
 {
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string actorKey,
         CancellationToken cancellationToken, IGrainContext? context = null)
     {
         var stage = GrainFailureStage.PartitionResolution;
+        NativeCapabilityWorkLifetime? work = null;
+        Exception? primaryError = null;
         try
         {
             ValidateRoute(request, actorKey, cancellationToken);
+            stage = GrainFailureStage.CapabilityExecution;
+            work = NativeCapabilityWorkLifetime.Acquire(workOwner, request.Envelope.RequestId,
+                NativeRequestWorkKind.CommandCapability, cancellationToken);
+            var operationToken = work?.Token ?? cancellationToken;
             stage = GrainFailureStage.QuorumRead;
-            await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
-            ValidateFreshRequest(request, cancellationToken);
+            await coordinator.ReadBarrierAsync(operationToken).ConfigureAwait(true);
+            ValidateFreshRequest(request, operationToken);
             var envelope = request.Envelope;
             stage = GrainFailureStage.Authorization;
             await ObserveAndValidateRequestAsync(request, GrainRequestPhase.AuthorizationReload, context,
-                cancellationToken).ConfigureAwait(true);
+                operationToken).ConfigureAwait(true);
             var principal = GrainRequestAuthority.Reload(database, envelope.PrincipalId!, clock);
             var kind = envelope.CommandKind ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             stage = GrainFailureStage.CapabilityExecution;
             await ObserveAndValidateRequestAsync(request, GrainRequestPhase.BeforeSubmit, context,
-                cancellationToken).ConfigureAwait(true);
+                operationToken).ConfigureAwait(true);
             var result = await coordinator.SubmitNativeAsync(kind, envelope.CommandId, principal.Id,
-                request.Payload, cancellationToken).ConfigureAwait(true);
-            await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, cancellationToken)
+                request.Payload, operationToken).ConfigureAwait(true);
+            await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken)
                 .ConfigureAwait(true);
             stage = GrainFailureStage.ReplyEncoding;
-            return GrainReplyFactory.Operation(result, cancellationToken);
+            return GrainReplyFactory.Operation(result, operationToken);
         }
-        catch (Exception error) when (GrainBoundaryErrors.Handles(error))
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            GrainFailureDiagnostics.Mark(error, stage);
+            primaryError = MarkFailure(error, stage);
             throw;
         }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            primaryError = error;
+            throw;
+        }
+        finally
+        {
+            using var cleanup = work;
+            NativeCapabilityWorkLifetime.Settle(primaryError, work, null, null);
+        }
+    }
+
+    private static Exception MarkFailure(Exception error, GrainFailureStage stage)
+    {
+        if (GrainBoundaryErrors.Handles(error))
+        {
+            GrainFailureDiagnostics.Mark(error, stage);
+        }
+        return error;
     }
 
     private static void ValidateRoute(DecodedGrainRequest request, string actorKey, CancellationToken cancellationToken)

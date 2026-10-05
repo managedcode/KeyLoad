@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "stage": "TASK-CRS-CANCEL-FAILURE-JOIN",
+  "owningDependencyDelivered": true,
+  "keyLoadProductAcceptanceClosed": false,
+  "owningRepository": "https://github.com/managedcode/Communication",
+  "sourceSha": "7777c90761f04b4bcffec1b5846fb74f96b8c072",
+  "version": "10.2.11",
+  "repair": "CreateCore always joins the original producer after a cancellation callback failure, preserves distinct original cleanup failures and winning fatal aggregate identity. A real held-finally native regression proves disposal cannot finish early.",
+  "owningBuild": {
+    "nativeExit": 0,
+    "warnings": 0,
+    "errors": 0,
+    "elapsedSeconds": 1.65
+  },
+  "owningFullTUnit": {
+    "originalReport": "/private/tmp/keyload-communication-native-full2-20261005.json",
+    "reportSha256": "7065e02c9a85572e2514f82b87d0ce5c44db435d3fa1eff4bbd41816b741eb9f",
+    "summary": {
+      "total": 1363,
+      "passed": 1363,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "nativeExit": 0,
+    "durationSeconds": 10.443
+  },
+  "owningCoverage": {
+    "originalReport": "/private/tmp/keyload-communication-native-coverage2-20261005.xml",
+    "sha256": "4100d6b8f2e70aa50b29b39732d22747be5d56eb2ee3d8bbc2b36f027670f47c",
+    "numericThresholdClaimed": false
+  },
+  "owningFormatter": {
+    "scope": "changed files",
+    "nativeExit": 0
+  },
+  "githubRelease": {
+    "runId": 37250149897,
+    "url": "https://github.com/managedcode/Communication/actions/runs/37250149897",
+    "sourceSha": "7777c90761f04b4bcffec1b5846fb74f96b8c072",
+    "conclusion": "success",
+    "tag": "v10.2.11",
+    "releaseUrl": "https://github.com/managedcode/Communication/releases/tag/v10.2.11"
+  },
+  "nuGetVerification": {
+    "canonicalConsumerRestore": {
+      "source": "https://api.nuget.org/v3/index.json",
+      "nativeExit": 0,
+      "originalLog": "/private/tmp/keyload-communication10.2.11-consumer-restore-20261005.log"
+    },
+    "restoredPackages": [
+      {
+        "id": "ManagedCode.Communication",
+        "version": "10.2.11",
+        "source": "https://api.nuget.org/v3/index.json",
+        "nupkgSha256": "186667de11d6055facc242c699b6642e236a26913df13afa20bdcf66058a415f",
+        "bytes": 305302,
+        "repository": {
+          "type": "Github",
+          "url": "https://github.com/managedcode/Communication",
+          "branch": "refs/heads/main",
+          "commit": "7777c90761f04b4bcffec1b5846fb74f96b8c072"
+        },
+        "signed": true,
+        "runtimeDll": "tests/KeyLoad.UnitTests/bin/Release/net10.0/ManagedCode.Communication.dll",
+        "runtimeDllSha256": "542f338440b6e4e3f444b7ab513c9aa09db4440072990296b5e64b9f336d97d6",
+        "runtimeMatchesPublishedPayload": true
+      },
+      {
+        "id": "ManagedCode.Communication.AspNetCore",
+        "version": "10.2.11",
+        "source": "https://api.nuget.org/v3/index.json",
+        "nupkgSha256": "7c8ab356bec65cb6d449be694b0e13b0755f7af0e80e15df454d1d21b29d7368",
+        "bytes": 104109,
+        "repository": {
+          "type": "Github",
+          "url": "https://github.com/managedcode/Communication",
+          "branch": "refs/heads/main",
+          "commit": "7777c90761f04b4bcffec1b5846fb74f96b8c072"
+        },
+        "signed": true,
+        "runtimeDll": "tests/KeyLoad.UnitTests/bin/Release/net10.0/ManagedCode.Communication.AspNetCore.dll",
+        "runtimeDllSha256": "55f25d9a1fd5567526af267e694784b70400c95e447274ed2b452394b9b1f862",
+        "runtimeMatchesPublishedPayload": true
+      },
+      {
+        "id": "ManagedCode.Communication.Orleans",
+        "version": "10.2.11",
+        "source": "https://api.nuget.org/v3/index.json",
+        "nupkgSha256": "9060487afd0a75a9ae9d20789e5a0d51deb17091164322be9787b34ab4af849b",
+        "bytes": 151133,
+        "repository": {
+          "type": "Github",
+          "url": "https://github.com/managedcode/Communication",
+          "branch": "refs/heads/main",
+          "commit": "7777c90761f04b4bcffec1b5846fb74f96b8c072"
+        },
+        "signed": true,
+        "runtimeDll": "tests/KeyLoad.UnitTests/bin/Release/net10.0/ManagedCode.Communication.Orleans.dll",
+        "runtimeDllSha256": "0e4fc6f365387082df87bf30b2c9af3b5a82d3ae628585026d101ac555a4e54e",
+        "runtimeMatchesPublishedPayload": true
+      }
+    ],
+    "verification": "Actual official-feed signed nupkg bytes, repository commit and restored consumer DLL payload hashes were verified; successful CI alone was not used as publication evidence."
+  },
+  "consumer": {
+    "centralPin": "10.2.11",
+    "developmentEvidence": "docs/implementation/node-work-development-2026-10-05.json",
+    "focusedNativeOwnerKernel": "7/7",
+    "completeNormalUnit": "3247/3248; full gate failed by actual process identity observation",
+    "qualified": false,
+    "pending": [
+      "Complete scalar/full Linux qualification",
+      "C1 RF3 SDK/MCP fault, shutdown and migration",
+      "Resource/endurance/performance qualification"
+    ]
+  }
+}

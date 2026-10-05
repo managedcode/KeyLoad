@@ -1,4 +1,3 @@
-using System.Runtime.ExceptionServices;
 using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
@@ -32,10 +31,7 @@ internal static class ServerApplication
         }
         await ServerFailureObserver.ObserveAsync(RunLifetimeAsync, failures).ConfigureAwait(false);
         await ShutdownAsync(app, silo, administration, partition, failures).ConfigureAwait(false);
-        if (failures.Count == 1)
-        { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
-        if (failures.Count > 1)
-        { throw new AggregateException(failures); }
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static async Task WaitForStopAsync(CancellationToken stopping)
@@ -53,6 +49,10 @@ internal static class ServerApplication
         {
             await ServerFailureObserver.ObserveAsync(() => silo.StopAsync(deadline.Token), failures).ConfigureAwait(false);
             await ServerFailureObserver.ObserveAsync(() => silo.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
+            if (!silo.HasJoinedRequestWork)
+            {
+                return;
+            }
         }
         await ServerFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         if (administration is IAsyncDisposable borrowed)

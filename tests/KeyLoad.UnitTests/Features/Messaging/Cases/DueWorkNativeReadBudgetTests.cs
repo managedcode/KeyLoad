@@ -8,10 +8,17 @@ internal sealed class DueWorkNativeReadBudgetTests
     [Test]
     public async Task FixedTailAndForwardScanChargeExactNativeBytesAndRejectOneByteLess()
     {
-        var expectedBytes = MeasureSingleScheduleRead();
+        long expectedBytes;
+        using (var measurement = CreateFixture())
+        {
+            DueWorkTestData.PutSchedule(measurement, ScheduleId, ScheduleId, DueWorkTestData.EmptyJson);
+            expectedBytes = MeasureSingleScheduleRead(measurement);
+        }
+
         using var exact = CreateFixture(expectedBytes);
         DueWorkTestData.PutSchedule(exact, ScheduleId, ScheduleId, DueWorkTestData.EmptyJson);
         var page = DueWorkDiscovery.ReadPage(exact.Database, null, DueWorkTestData.WakeAt);
+        await Assert.That(page.ExaminedRecords).IsEqualTo(2);
         await Assert.That(page.ExaminedBytes).IsEqualTo(expectedBytes);
         await Assert.That(page.AdmittedValueBytes).IsLessThan(expectedBytes);
 
@@ -22,22 +29,25 @@ internal sealed class DueWorkNativeReadBudgetTests
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
-    private static long MeasureSingleScheduleRead()
+    private static long MeasureSingleScheduleRead(RecurringSagaDatabase fixture)
     {
-        var lane = new QueueLaneRef(new(RecurringSagaDatabase.TenantId, RecurringSagaDatabase.DatabaseId,
-            RecurringSagaDatabase.Domain, PartitionId), RecurringSagaDatabase.QueueName);
-        var definition = DueWorkTestData.Definition(lane, ScheduleId, RecurringSagaDatabase.Epoch.AddSeconds(-1));
-        var record = new RecurringScheduleRecord(lane, ScheduleId, RecurringSagaDatabase.RootPrincipal,
-            definition, 1, 1, 0, false);
-        var valueBytes = NativeSerialization.Serialize(record).LongLength;
-        var keyBytes = KeySpace.Partition(DueWorkProtocol.ScheduleSpace, lane.Partition, lane.Queue,
-            ScheduleId.ToString(DueWorkFields.GuidFormat)).LongLength;
-        return checked(2 * checked(keyBytes + valueBytes));
+        var key = KeySpace.Partition(DueWorkProtocol.ScheduleSpace, fixture.Partition, fixture.Queue.Queue,
+            ScheduleId.ToString(DueWorkFields.GuidFormat));
+        long observedValueBytes = -1;
+        var found = fixture.Store.Read(view => view.ReadValue(key, value => observedValueBytes = value.Length));
+        var valueBytes = found ? observedValueBytes : -1;
+        if (valueBytes < 0)
+        {
+            throw new InvalidOperationException(MissingScheduleRecord);
+        }
+        return checked(2 * checked(key.LongLength + valueBytes));
     }
+
+    private static RecurringSagaDatabase CreateFixture() => new();
 
     private static RecurringSagaDatabase CreateFixture(long maxQueryReadBytes)
         => new(new() { MaxQueryReadBytes = maxQueryReadBytes });
 
-    private const string PartitionId = "orders-1";
+    private const string MissingScheduleRecord = "The independently seeded schedule record is missing.";
     private static readonly Guid ScheduleId = Guid.ParseExact("00000000000000000000000000000001", DueWorkFields.GuidFormat);
 }

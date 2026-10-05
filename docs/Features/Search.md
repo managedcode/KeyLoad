@@ -167,3 +167,65 @@ Target map: Abstractions/Core/Query/Client/Server/tests `Features/Search/`; shar
 Accepted 2026-10-04 [ManagedAnn R1](Search/ManagedAnn.md) implements an independently authored first-party packed managed HNSW candidate with explicit pre-allocation memory/work/scratch admission and independent real-store recall/metric/filter tests. No external ANN package or public approximate search is enabled by that contract. Online native ZoneTree projection/replay and versioned SQL/SDK/MCP completeness/freshness are separate R2/R3 contracts and remain pending.
 
 Accepted R2A [ManagedAnnSeed](Search/ManagedAnnSeed.md), REQ/AC-ASD-001–006, implements a bounded Core/Search input seam: persisted minimum-grant authority, owned visible vectors and scalar source/applied/outbox metadata in one read cut, then charged ordinal sorting and exact-bit hashing outside the gate. Local actual Aspire normal/scalar development regressions passed 34/34 each after full Release/formatter/governance checks; their original reports and unchanged source/runtime inventories are recorded in the linked spec. It is a historical computational seed and does not complete the persistent projection, current-public-authorization, replay, recovery or delivered-source Linux/RF3 gates.
+
+## TASK-SEARCH-QUALITY-CORPUS: controlled relevance and window sensitivity
+
+Root freezes this first KL-074 implementation stage on2026-10-05 before delegated
+writes. REQ-SEARCH-007 / AC-SEARCH-007 add a controlled first-party quality oracle
+under [ADR-018](../ADR/ADR-018-global-rank-fusion.md). Its corpus is32 literal
+documents, fixed four-dimensional vectors and six literal query definitions,
+including English, Ukrainian, repeated and missing text, graph-only discovery,
+selective allowed IDs and an empty allowed set. Query definitions and relevance
+grades0..3 are authored before execution and must not derive from observed ranks.
+Persisted grants and independently declared eligible IDs define each query's
+eligible set; complete branch output is an observation, not its own eligibility
+oracle. Relevance judgments identify the controlled fixture, with no claim of an
+external evaluation dataset or production relevance target.
+
+Pass requires real node-local ZoneTree documents, vectors, graph edges and
+persisted authorization. Use the actual SearchEngine.GraphSearchAsync, current
+BM25 TextRanker, exact-vector branch, graph retriever and native
+ZoneTree.FullTextSearch projection. Native/scalar lexical parity preserves IDs,
+scores and stable order. Capture complete branches with limit32 only after
+seeding; all observations must retain the same committed position and authority.
+Verify complete candidate IDs against the independent eligible-set declarations,
+unchanged current generation, deterministic repeated order, and omission of
+ineligible IDs. Empty selection returns no candidates; missing branches contribute
+nothing. Existing cancellation, budget and authorization tests remain required.
+
+The independent metric helper computes Recall@5/10, MRR@10 and graded nDCG@5/10,
+using gain2^grade-1 and discount1/log2(rank+1). A query with no relevant eligible
+documents returns0 for each metric; duplicate ranked IDs are rejected. Literal
+hand-computed ordered-list goldens, perfect/reversed rankings, missing relevant
+IDs, ties and empty input verify the helper independently of production ranking.
+Every observed metric is finite and within0..1. Retain deterministic fixture-only
+query/window/metric observations for review; do not add timing thresholds or infer
+a production relevance threshold from these controlled samples.
+
+Frozen test-only window widths are1,4,8,32 per active branch. Truncate the real
+complete branch observations and invoke the actual SearchRankFusion kernel; also
+exercise GlobalBranchWindowMerger against equivalent explicit finite windows.
+Width32 must reproduce the complete branch union and production full fusion;
+smaller widths truthfully expose truncation and their observed candidate recall.
+Increasing widths must not lose union candidates. These sensitivity controls do
+not expose a request-time window knob, change scorer semantics, or prove a
+distributed global-ranking contract. A product window/scorer option needs its own
+ADR/API contract before implementation.
+
+Canonical ownership: only NEW UnitTests Features/Search/Cases,
+Helpers, Assertions and pure Models/Contracts as needed, all prefixed HybridQuality.
+Luna cluster_wave prepares an immutable private packet; root alone reviews,
+integrates, runs actual Aspire normal/scalar callers and commits. Production
+Search, public contracts, BenchmarkComparisons runners, website and shared fixtures
+receive no delegated writes. The parallel comparison owner retains actual scorer
+variants, pre-run primary-target selection, masking/freshness/timeouts, matched
+GitHub performance cohorts and gain/no-gain publication. Frontend and public SDK/MCP
+changes are N/A for this controlled unit oracle because request contracts are
+unchanged; their existing Search RF3 acceptance remains mandatory.
+
+Rollback removes only the new test harness and restores this stage's prior status;
+there is no data or wire migration. Root review verifies qrels are independent,
+tests use actual providers and observations are labeled. Required evidence is the
+original native reports and unchanged pre/post source/runtime input inventories.
+This stage does not close KL-074, AC-SEARCH-006, global ranking, RF3, Linux or
+performance/publication qualification.

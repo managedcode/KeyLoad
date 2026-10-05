@@ -33,3 +33,27 @@ Related: `REQ-SEARCH-001/AC-SEARCH-001`, `REQ-SEARCH-002/AC-SEARCH-002`, `REQ-SE
 5. Run TUnit and RF3 Search through .NET and official MCP SDK in GitHub Actions; publish quality evidence with source SHA before claiming qualification.
 
 Current source: `src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs`, `src/KeyLoad.Core/GraphAndSeries.cs`; current tests: `tests/KeyLoad.UnitTests/GraphAndSearchTests.cs`. Planned external/provider files are owned by Search, not this ADR. Dependencies: ADR-009, ADR-019, ADR-020, ADR-022. Owner: Search lead; global quality/review join: root.
+
+## Controlled prototype stage,2026-10-05
+
+TASK-SEARCH-QUALITY-CORPUS implements REQ/AC-SEARCH-007 in
+[Search](../Features/Search.md#task-search-quality-corpus-controlled-relevance-and-window-sensitivity).
+Root freezes32 fixed documents, four-dimensional vectors, six independent query
+and graded-qrel definitions, Recall@5/10, MRR@10, nDCG@5/10 and test-only
+per-branch widths1/4/8/32. Independent eligibility and metric goldens accompany
+real ZoneTree/ZoneTree.FullTextSearch and production three-way ranking. There is
+no production per-branch window control in SearchRequest; this stage therefore
+measures sensitivity over complete real branch observations using the existing
+fusion and merger kernels, with explicit truncation. It cannot qualify an absent
+request-time feature or a distributed scorer/statistics epoch.
+
+Ordered delivery: root freezes the linked REQ/AC contract; Luna cluster_wave adds
+only new HybridQuality-prefixed Search unit cases/helpers/pure data; root reviews
+the qrels, independent oracles, actual-provider ownership and numeric limits,
+integrates and runs Aspire normal/scalar tests with original source inventories,
+then commits. Existing production source and BenchmarkComparisons ownership stay
+with their current owners. No dependency, persisted format, wire or runtime
+ranking change occurs; removal of the controlled tests is the rollback. Actual
+native RF3 clients, scorer-variant and masking/freshness/performance comparisons,
+preselected primary target and authenticated gain/no-gain publication remain later
+join points. This ADR remains Proposed for the broader global-ranking contract.

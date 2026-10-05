@@ -10,9 +10,11 @@ namespace KeyLoad.Orleans;
 /// <param name="diagnostics">Operational logging for unexpected failures, without exception objects on the wire.</param>
 /// <param name="chunkSerializer">The actual registered Orleans serializer for request chunks.</param>
 /// <param name="clock">Runtime clock for the finite execution deadline.</param>
+/// <param name="workOwner">Silo-local owner for active request stream work.</param>
 [global::Orleans.GrainType(GrainRoutingProtocol.RequestAlias), global::Orleans.Placement.PreferLocalPlacement]
 public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> diagnostics,
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer, TimeProvider clock)
+    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer, TimeProvider clock,
+    NativeRequestWorkOwner workOwner)
     : Grain, IRequestGrain
 {
     /// <inheritdoc />
@@ -29,7 +31,7 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
         return NativeCqrsStreamLifetime.Run(
             token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => ExecuteCapabilityAsync(signedRequest, requestId, writer, phaseSettlement), token),
-            chunkSerializer, requestId, clock, settled, cancellationToken);
+            chunkSerializer, requestId, clock, settled, cancellationToken, workOwner);
     }
 
     private async ValueTask<Result<GrainOperationReply>> ExecuteCapabilityAsync(string signedRequest, Guid requestId,

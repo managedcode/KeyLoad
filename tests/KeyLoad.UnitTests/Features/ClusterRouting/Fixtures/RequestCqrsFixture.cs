@@ -31,7 +31,10 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
 {
     private const int ShutdownSeconds = 30;
     private const int StartupSeconds = 30;
-    private bool disposed;
+    private const string RequestWorkNotJoined = "The fixture request work has not joined.";
+    private readonly object disposalGate = new();
+    private Task? disposal;
+    private NativeRequestWorkOwner? requestWork;
     private static RequestCqrsClusterFixture? ActiveFixture { get; set; }
 
     internal RequestCqrsClusterFixture()
@@ -68,6 +71,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     internal TestCluster Cluster { get; }
     internal GrainRequestCodec Codec { get; }
     internal TestDatabase Database { get; }
+    internal NativeRequestWorkOwner RequestWork => requestWork ??= new();
 
     public async Task InitializeAsync()
     {
@@ -91,16 +95,41 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        if (disposed)
-        {
-            return;
-        }
+        var task = GetDisposalTask();
+        GC.SuppressFinalize(this);
+        return new(task);
+    }
 
-        disposed = true;
+    private Task GetDisposalTask()
+    {
+        TaskCompletionSource registered;
+        Task task;
+        lock (disposalGate)
+        {
+            if (disposal is not null)
+            {
+                return disposal;
+            }
+            registered = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            task = DisposeCoreAsync(registered.Task);
+            disposal = task;
+        }
+        registered.TrySetResult();
+        return task;
+    }
+
+    private async Task DisposeCoreAsync(Task registered)
+    {
+        await registered;
         var failures = new List<Exception>();
         await StopClusterAsync(failures);
+        if (requestWork is { IsJoined: false })
+        {
+            KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+            throw Errors.Fail(ErrorCode.OwnershipLost, RequestWorkNotJoined);
+        }
         await DisposeOwnedResourcesAsync(failures);
 
         if (failures.Count == 1)
@@ -113,11 +142,18 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
             throw new AggregateException(failures);
         }
 
-        GC.SuppressFinalize(this);
     }
 
     private async Task StopClusterAsync(List<Exception> failures)
     {
+        if (requestWork is not null)
+        {
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(requestWork.DrainAsync, failures);
+            if (!requestWork.IsJoined)
+            {
+                return;
+            }
+        }
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(ShutdownSeconds));
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
             () => Cluster.StopAllSilosAsync(deadline.Token), failures);
@@ -126,6 +162,10 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     private async Task DisposeOwnedResourcesAsync(List<Exception> failures)
     {
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => Cluster.DisposeAsync().AsTask(), failures);
+        if (requestWork is not null)
+        {
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => requestWork.DisposeAsync().AsTask(), failures);
+        }
         try
         {
             KeyLoad.Server.ServerFailureObserver.Observe(Database.Dispose, failures);
@@ -153,6 +193,7 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
         siloBuilder.Services.AddSingleton(fixture.Database.Database);
         siloBuilder.Services.AddSingleton<ICommitCoordinator>(new EmbeddedCoordinator(fixture.Database.Database));
         siloBuilder.Services.AddSingleton(TimeProvider.System);
+        siloBuilder.Services.AddSingleton(_ => fixture.RequestWork);
         siloBuilder.Services.AddSingleton<GrainRequestCodec>();
         siloBuilder.Services.AddSingleton(new RequestCqrsCapabilityLedger());
         siloBuilder.Services.AddSingleton<IConfigureGrainTypeComponents>(services =>

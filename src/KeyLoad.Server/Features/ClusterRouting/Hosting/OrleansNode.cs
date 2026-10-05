@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.ExceptionServices;
 using KeyLoad.Orleans;
 using ManagedCode.Communication.CQRS;
 using Orleans.Serialization;
@@ -16,6 +15,7 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
     ILoggerFactory loggerFactory) : IAsyncDisposable
 {
     private readonly object lifecycle = new();
+    private readonly NativeRequestWorkOwner requestWork = new();
     private IHost? host;
     private IGrainFactory? grains;
     private Task? shutdown;
@@ -23,6 +23,9 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
 
     /// <summary>Factory published only after native silo startup completes.</summary>
     public IGrainFactory? Grains => Volatile.Read(ref grains);
+
+    /// <summary>Allows physical cleanup only after every admitted native frame has actually joined.</summary>
+    internal bool HasJoinedRequestWork => requestWork.IsJoined;
 
     /// <summary>Early runtime discovery remains available during membership bootstrap.</summary>
     public ReplicaSiloDiscoveryState? Discovery => Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaSiloDiscoveryState>();
@@ -70,7 +73,8 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
     {
         await registered.ConfigureAwait(false);
         var address = await ResolveAddressAsync(cancellationToken).ConfigureAwait(false);
-        var built = OrleansSiloConfiguration.Build(partition, options, administration, loggerFactory, address, cancellationToken);
+        var built = OrleansSiloConfiguration.Build(partition, options, administration, loggerFactory, requestWork,
+            address, cancellationToken);
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref grains, built.Services.GetRequiredService<IGrainFactory>());
@@ -119,7 +123,7 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
         return reply;
     }
 
-    /// <summary>Stops membership before its replica lifecycle drains and before physical stores are released.</summary>
+    /// <summary>Joins native request work before stopping membership, replica lifecycles or physical owners.</summary>
     /// <param name="cancellationToken">Cancellation bounds this caller's wait, without interrupting owned cleanup.</param>
     public Task StopAsync(CancellationToken cancellationToken)
     {
@@ -138,24 +142,46 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
     private async Task StopCoreAsync(Task registered, Task? starting)
     {
         await registered.ConfigureAwait(false);
+        var drain = requestWork.DrainAsync();
         if (starting is not null)
         { await starting.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing); }
         Volatile.Write(ref grains, null);
-        var stopping = Volatile.Read(ref host);
-        if (stopping is null)
-        { return; }
-        using var deadline = new CancellationTokenSource(OrleansNodeProtocol.ShutdownTimeout);
         var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => drain, failures).ConfigureAwait(false);
+        if (!requestWork.IsJoined)
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RequestWorkNotJoined);
+        }
+        var stopping = Volatile.Read(ref host);
+        if (stopping is not null)
+        {
+            await StopHostAsync(stopping, failures).ConfigureAwait(false);
+        }
+        try
+        {
+            await requestWork.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private async Task StopHostAsync(IHost stopping, List<Exception> failures)
+    {
+        using var deadline = new CancellationTokenSource(OrleansNodeProtocol.ShutdownTimeout);
         await ServerFailureObserver.ObserveAsync(() => stopping.StopAsync(deadline.Token), failures).ConfigureAwait(false);
-        // A failed native Start has no lifecycle rollback. Drain our borrowed endpoint while its transport still exists.
+        // A failed native Start has no lifecycle rollback. Drain the endpoint while its transport still exists.
         ServerFailureObserver.Observe(() => stopping.Services.GetService<ReplicaSiloDiscoveryState>()?.StopDiscovery(), failures);
         await ServerFailureObserver.ObserveAsync(() => partition.Consensus.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
         Volatile.Write(ref host, null);
         await ServerFailureObserver.ObserveAsync(() => DisposeHostAsync(stopping), failures).ConfigureAwait(false);
-        if (failures.Count == 1)
-        { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
-        if (failures.Count > 1)
-        { throw new AggregateException(failures); }
     }
 
     private static async Task DisposeHostAsync(IHost stopping)

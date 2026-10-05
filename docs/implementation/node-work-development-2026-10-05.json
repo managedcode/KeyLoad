@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-development-stage",
+  "stage": "TASK-CRS-NODE-WORK-JOIN",
+  "qualified": false,
+  "acceptanceClosed": false,
+  "requirements": "docs/Features/ClusterRouting/NativeCqrsRequestV2.md",
+  "decision": "docs/ADR/ADR-082-native-cqrs-streams.md",
+  "source": {
+    "gitHead": "483a76a98a81962c6093f831261b5310635f3f67",
+    "workingTree": "reviewed node work ownership, published Communication10.2.11 and native Due/cache oracle corrections; exact original pre/post input inventories",
+    "githubQualified": false
+  },
+  "implementation": "Silo-owned bounded request/read/command frames close admission, cancel and join original native producers and capability finally work before native Silo.Stop and physical cleanup. Memoized drains retain original callback and producer failures; a timeout only observes the original join. No payload, identity principal or storage handles enter the registry.",
+  "dependencyDelivery": "docs/implementation/native-cqrs-cancel-join-delivery-2026-10-05.json",
+  "build": {
+    "scope": "KeyLoad.slnx Release",
+    "nativeExit": 0,
+    "warnings": 0,
+    "errors": 0,
+    "elapsedSeconds": 18.25,
+    "originalLog": "/private/tmp/keyload-node-work-build75g-20261005.log"
+  },
+  "focused": {
+    "originalReport": "TestResults/node-work75g-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+    "reportSha256": "52f317a95c1213666bffe14d0652079b5343c0056dbbbe0e9f364813184bb2cb",
+    "summary": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "totalDurationMs": 1600.966,
+    "failedMethods": [],
+    "nativeExit": 0,
+    "suite": "unit",
+    "scope": "7 selected NativeRequestWork owner/kernel cases",
+    "caller": "actual Aspire-owned AppHost",
+    "machine": "macOS local development"
+  },
+  "fullUnit": {
+    "originalReport": "TestResults/node-work75g-full-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+    "reportSha256": "4a1959d35d4f5195e6d74acfe3147ee13a93fa05db11423236c41e22f411b132",
+    "summary": {
+      "total": 3248,
+      "passed": 3247,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "totalDurationMs": 421651.857,
+    "failedMethods": [
+      {
+        "className": "IsolatedAggregateNodeLifetimeTests",
+        "methodName": "AcImageLife003CancellationKillsAndReapsRealNodeProcessTree",
+        "status": "error"
+      }
+    ],
+    "nativeExit": 2,
+    "suite": "unit",
+    "scope": "complete normal suite",
+    "caller": "actual Aspire-owned AppHost",
+    "machine": "macOS local development"
+  },
+  "originalFocusedFailure": {
+    "originalReport": "TestResults/node-work75f-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+    "reportSha256": "e5921b64cea5dc9eaf779db99ac2eaf0d5b07b32611a86558a15077268b4a87c",
+    "summary": {
+      "total": 7,
+      "passed": 6,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "totalDurationMs": 11490.156,
+    "failedMethods": [
+      {
+        "className": "NativeRequestWorkKernelTests(RequestCqrsClusterFixture)",
+        "methodName": "AcCrsWork001CallbackFailureIsObservedAfterProducerAndActivationSettle",
+        "status": "error"
+      }
+    ],
+    "nativeExit": 2,
+    "suite": "unit",
+    "scope": "7 selected NativeRequestWork owner/kernel cases before test registration lifetime correction",
+    "caller": "actual Aspire-owned AppHost",
+    "machine": "macOS local development"
+  },
+  "focusedCorrection": "Retain the original cancellation callback registration through the producer held finally and dispose it asynchronously after releasing that finally. Original gates, bounds, callback and producer tasks remain; no synthesized callback or increased deadline.",
+  "fullUnitLimit": "3247/3248 passed; one actual process StartTime observation failed in AcImageLife003CancellationKillsAndReapsRealNodeProcessTree, with a preserved cleanup cancellation. The full unit gate is failed; all five previous Linux unit failures passed on this source.",
+  "prePostInventoryProofs": {
+    "focusedBefore": {
+      "path": "/private/tmp/keyload-node-work-stage75g-pretest-inventory-20261005.json",
+      "fileSha256": "7ae3262e478c75d64272c6a43acd1e619078f2fd9b7d622d505763c861ef2c82",
+      "head": "483a76a98a81962c6093f831261b5310635f3f67",
+      "capturedUtc": "2026-10-05T01:56:18.668290+00:00",
+      "source": {
+        "count": 3466,
+        "sha256": "699f3250844546d0d1f0c683cbc65f66ab67e6c863d56f974a08b1e886ba306c"
+      },
+      "runtime": {
+        "count": 544,
+        "sha256": "78bd5ab2aa9e9253a2cede73772ff038c23563b669b76d2a1b918d986ff71378"
+      },
+      "runtimeOutputExclusions": [
+        "tests/KeyLoad.UnitTests/bin/Release/net10.0/logs"
+      ]
+    },
+    "focusedAfter": {
+      "path": "/private/tmp/keyload-node-work-stage75g-posttest-inventory-20261005.json",
+      "fileSha256": "027c0ad5cbc75dbf9e6d09e02e07ab9da7bd45cffd8fa7ee89580f0e0db61f45",
+      "head": "483a76a98a81962c6093f831261b5310635f3f67",
+      "capturedUtc": "2026-10-05T01:57:27.208325+00:00",
+      "source": {
+        "count": 3466,
+        "sha256": "699f3250844546d0d1f0c683cbc65f66ab67e6c863d56f974a08b1e886ba306c"
+      },
+      "runtime": {
+        "count": 544,
+        "sha256": "78bd5ab2aa9e9253a2cede73772ff038c23563b669b76d2a1b918d986ff71378"
+      },
+      "runtimeOutputExclusions": [
+        "tests/KeyLoad.UnitTests/bin/Release/net10.0/logs"
+      ]
+    },
+    "fullBefore": {
+      "path": "/private/tmp/keyload-node-work-stage75g-prefull-inventory-20261005.json",
+      "fileSha256": "55794441e235d078891911a8d0d3f987d9e22650ae809d345488ba802a3ce647",
+      "head": "483a76a98a81962c6093f831261b5310635f3f67",
+      "capturedUtc": "2026-10-05T01:57:58.245420+00:00",
+      "source": {
+        "count": 3466,
+        "sha256": "699f3250844546d0d1f0c683cbc65f66ab67e6c863d56f974a08b1e886ba306c"
+      },
+      "runtime": {
+        "count": 544,
+        "sha256": "78bd5ab2aa9e9253a2cede73772ff038c23563b669b76d2a1b918d986ff71378"
+      },
+      "runtimeOutputExclusions": [
+        "tests/KeyLoad.UnitTests/bin/Release/net10.0/logs"
+      ]
+    },
+    "fullAfter": {
+      "path": "/private/tmp/keyload-node-work-stage75g-postfull-inventory-20261005.json",
+      "fileSha256": "7858bc9f50b181b88579f45e35198712dad22607aafa8346a92ca81b0308f49f",
+      "head": "483a76a98a81962c6093f831261b5310635f3f67",
+      "capturedUtc": "2026-10-05T02:07:07.660025+00:00",
+      "source": {
+        "count": 3466,
+        "sha256": "699f3250844546d0d1f0c683cbc65f66ab67e6c863d56f974a08b1e886ba306c"
+      },
+      "runtime": {
+        "count": 544,
+        "sha256": "78bd5ab2aa9e9253a2cede73772ff038c23563b669b76d2a1b918d986ff71378"
+      },
+      "runtimeOutputExclusions": [
+        "tests/KeyLoad.UnitTests/bin/Release/net10.0/logs"
+      ]
+    }
+  },
+  "prePostVerified": {
+    "focused": true,
+    "fullUnit": true
+  },
+  "retainedOriginals": "artifacts/qualification/node-work75g-20261005",
+  "runtimeInventoryContract": "Only native TestCluster output logs beneath tests/KeyLoad.UnitTests/bin/Release/net10.0/logs are excluded from runtime input inventories, explicitly listed in the original inventory. Source and every executable/runtime input remain unchanged.",
+  "remaining": [
+    "Complete normal and scalar exact-source gates",
+    "Real Aspire RF3 held-phase shutdown/restart, migration, public SDK/official MCP and authority/fault cases",
+    "Exact-source Linux required suites, bounded resource/endurance and comparable performance qualification"
+  ],
+  "formatter": {
+    "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+    "nativeExit": 0,
+    "originalLog": "/private/tmp/keyload-node-work-format75g-recheck-20261005.log",
+    "originalAttempt": {
+      "nativeExit": 2,
+      "diagnostics": 9,
+      "kind": "WHITESPACE",
+      "file": "src/KeyLoad.Orleans/Features/ClusterRouting/Streaming/NativeCapabilityWorkLifetime.cs",
+      "originalLog": "/private/tmp/keyload-node-work-format75g-20261005.log"
+    },
+    "correction": "Only switch-label whitespace in the new helper was formatted after the reported test cohorts. Their original input inventories remain unchanged historical observations; this receipt does not claim the post-format commit was the tested input."
+  },
+  "governance": {
+    "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+    "nativeExit": 0,
+    "scope": "static policy inventory, not runtime qualification"
+  },
+  "postWhitespaceBuild": {
+    "scope": "KeyLoad.slnx Release",
+    "nativeExit": 0,
+    "warnings": 0,
+    "errors": 0,
+    "elapsedSeconds": 9.75,
+    "originalLog": "/private/tmp/keyload-node-work-build75h-20261005.log"
+  }
+}

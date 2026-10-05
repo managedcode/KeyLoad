@@ -8,13 +8,14 @@ namespace KeyLoad.Orleans;
 /// <param name="database">Borrowed canonical database used to reload persisted authority.</param>
 /// <param name="coordinator">Node-owned admission and quorum commit boundary.</param>
 /// <param name="clock">Runtime system clock for persisted principal expiry.</param>
+/// <param name="workOwner">Silo-local admission and cancellation owner for verified commands.</param>
 /// <param name="diagnostics">Logs unexpected node failures without serializing exceptions.</param>
 [global::Orleans.GrainType(GrainRoutingProtocol.CommandAlias), global::Orleans.Placement.PreferLocalPlacement]
 public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngine database, ICommitCoordinator coordinator,
-    TimeProvider clock, ILogger<CommandPartitionGrain> diagnostics)
+    TimeProvider clock, NativeRequestWorkOwner workOwner, ILogger<CommandPartitionGrain> diagnostics)
     : Grain, ICommandPartitionGrain
 {
-    private readonly GrainCommandExecutor commands = new(database, coordinator, clock, codec);
+    private readonly GrainCommandExecutor commands = new(database, coordinator, clock, codec, workOwner);
 
     /// <inheritdoc />
     /// <param name="signedRequest">The signed request whose partition key must match this actor.</param>

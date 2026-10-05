@@ -806,14 +806,16 @@
       "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/GrainPartitionResolver.cs",
       "docs/implementation/runtime-qualification-37245840909.json",
       "docs/implementation/native-text-development-2026-10-05.json",
-      "docs/implementation/runtime-qualification-37249197752.json"
+      "docs/implementation/runtime-qualification-37249197752.json",
+      "docs/implementation/node-work-development-2026-10-05.json",
+      "docs/implementation/native-cqrs-cancel-join-delivery-2026-10-05.json"
     ],
     "nativeRequestCqrs": {
       "status": "implementation_checkpoint_with_local_unit_pass_RF3_and_exact_source_qualification_pending",
       "requirements": "docs/Features/ClusterRouting/NativeCqrsRequestV2.md",
       "decision": "docs/ADR/ADR-082-native-cqrs-streams.md",
-      "dependencyDelivery": "docs/implementation/native-cqrs-fatal-aggregate-delivery-2026-10-04.json",
-      "implemented": "native_ManagedCode_Communication_10_2_9_IAsyncEnumerable_v2_signed_request_scope_IdentityCore_RequestContext_fresh_fixed_voter_protocol_cohort_bounded_stream_and_full_settlement",
+      "dependencyDelivery": "docs/implementation/native-cqrs-cancel-join-delivery-2026-10-05.json",
+      "implemented": "native_ManagedCode_Communication_10_2_11_IAsyncEnumerable_v2_signed_request_scope_IdentityCore_RequestContext_fresh_fixed_voter_protocol_cohort_bounded_stream_and_full_settlement",
       "localDevelopment": "Release22_formatter22_pass_full_unit18_3060_of3060_scalar22_3059_of3060_exit2_comparison_cleanup_timeout_recovery23_AppHost_aborted_exit134_recovery24_CLI_restore_failed_recovery25_actual_Aspire_native_exit2_219_of260_41_missing_immutable_native5_probe_failures",
       "pending": [
         "native_RF3_phase_interruption_and_same_command_receipt_effect_oracles",
@@ -850,6 +852,18 @@
         "source": "bounded_actual_Aspire_resource_log_subscriptions_joined_before_disposal",
         "runtime": "not_yet_verified_RF3_initialize400_cause_unproved",
         "receipt": "docs/implementation/native-text-development-2026-10-05.json"
+      },
+      "dependencyDeliveryHistory": [
+        "docs/implementation/native-cqrs-fatal-aggregate-delivery-2026-10-04.json"
+      ],
+      "nodeWorkDevelopment": {
+        "stage": "TASK-CRS-NODE-WORK-JOIN",
+        "receipt": "docs/implementation/node-work-development-2026-10-05.json",
+        "focused": "7_of7",
+        "completeUnit": "3247_of3248",
+        "nativeFullUnitExit": 2,
+        "qualified": false,
+        "acceptanceClosed": false
       }
     }
   },
@@ -1885,7 +1899,9 @@
       "docs/implementation/runtime-qualification-37245840909.json",
       "docs/implementation/native-text-development-2026-10-05.json",
       "docs/implementation/runtime-qualification-37249197752.json",
-      "docs/implementation/ann-prepared-value-development-2026-10-05.json"
+      "docs/implementation/ann-prepared-value-development-2026-10-05.json",
+      "docs/implementation/node-work-development-2026-10-05.json",
+      "docs/implementation/native-cqrs-cancel-join-delivery-2026-10-05.json"
     ],
     "decision": "docs/ADR/ADR-074-aspire-owned-test-entry.md",
     "sourceStage": "unified_Aspire_entry_5_local_development_cases_passed_original_TRX;complete_release_gates_pending",

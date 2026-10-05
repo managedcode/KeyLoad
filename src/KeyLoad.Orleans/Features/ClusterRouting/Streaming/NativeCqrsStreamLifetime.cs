@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using ManagedCode.Communication.CQRS;
 using Orleans.Serialization;
 
@@ -15,23 +14,30 @@ internal static class NativeCqrsStreamLifetime
     /// <param name="clock">Runtime clock for the finite execution deadline.</param>
     /// <param name="settled">Activation cleanup to run after native producer disposal completes.</param>
     /// <param name="cancellationToken">The request RPC cancellation token.</param>
+    /// <param name="owner">Optional silo-local owner for server request work.</param>
     /// <returns>The lazy bounded native chunk stream.</returns>
     internal static IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> Run(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, Action settled, CancellationToken cancellationToken)
-        => RunCore(createStream, serializer, requestId, clock, settled, cancellationToken, CancellationToken.None);
+        Guid requestId, TimeProvider clock, Action settled, CancellationToken cancellationToken,
+        NativeRequestWorkOwner? owner = null)
+        => RunCore(createStream, serializer, requestId, clock, settled, owner, cancellationToken, CancellationToken.None);
 
     private static async IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> RunCore(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, Action settled, CancellationToken cancellationToken,
-        [EnumeratorCancellation] CancellationToken enumerationToken)
+        Guid requestId, TimeProvider clock, Action settled, NativeRequestWorkOwner? owner,
+        CancellationToken cancellationToken, [EnumeratorCancellation] CancellationToken enumerationToken)
     {
         using var deadline = new CancellationTokenSource(GrainRequestStreamProtocol.ExecutionLifetime, clock);
         using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, enumerationToken);
-        using var execution = CancellationTokenSource.CreateLinkedTokenSource(request.Token, deadline.Token);
+        using var ownerRequest = owner is null ? null
+            : CancellationTokenSource.CreateLinkedTokenSource(request.Token, owner.ShutdownToken);
+        using var execution = CancellationTokenSource.CreateLinkedTokenSource(ownerRequest?.Token ?? request.Token,
+            deadline.Token);
         var admission = new NativeCqrsStreamAdmission(serializer, requestId);
+        var workLease = await NativeRequestWorkStreamSettlement.AcquireOrSettleAsync(owner, requestId, settled)
+            .ConfigureAwait(true);
         IAsyncEnumerator<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>? enumerator = null;
         Exception? primary = null;
         try
@@ -42,39 +48,25 @@ internal static class NativeCqrsStreamLifetime
             while (primary is null && enumerator is not null)
             {
                 var step = await ReadNextAsync(enumerator, admission, execution.Token).ConfigureAwait(true);
-                if (step.Error is not null)
+                if (step.Error is not null || !step.HasItem)
                 {
                     primary = step.Error;
-                    break;
-                }
-
-                if (!step.HasItem)
-                {
                     break;
                 }
 
                 yield return step.Item!;
             }
 
-            if (primary is null)
-            {
-                primary = admission.CompletionFailure(execution.Token);
-            }
+            primary ??= admission.CompletionFailure(execution.Token);
         }
         finally
         {
-            var settlementFailure = await NativeCqrsStreamSettlement.SettleAsync(enumerator, settled, primary)
-                .ConfigureAwait(true);
-            if (settlementFailure is not null)
-            {
-                ExceptionDispatchInfo.Capture(settlementFailure).Throw();
-            }
+            var settlementFailure = await NativeRequestWorkStreamSettlement.SettleAndReleaseAsync(enumerator,
+                settled, primary, workLease).ConfigureAwait(true);
+            NativeRequestWorkSettlement.Rethrow(settlementFailure);
         }
 
-        if (primary is not null)
-        {
-            ExceptionDispatchInfo.Capture(primary).Throw();
-        }
+        NativeRequestWorkSettlement.Rethrow(primary);
     }
 
     private static Exception? CreationFailure(NativeCqrsEnumeratorCreation creation)

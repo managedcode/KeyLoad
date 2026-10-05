@@ -70,6 +70,17 @@ AC-CRS-003 also hardens the existing canonical offline verifier/upgrade process 
 
 TASK-CRS-C1-FATAL uses published Communication10.2.9's native CqrsRuntimeFailures.FindFatal for direct and deeply nested AggregateException failures. New test-owned RequestCqrsFatalSettlement controls exercise native creation, pulls, disposal and activation cleanup, preserve exact preconstructed fatal identity with primary/disposal/activation precedence, and join every admitted cleanup before a healthy following stream. Ordinary failure and cancellation controls remain required. Owning publication and local mechanism tests alone do not qualify C1 or mark this ADR Implemented.
 
+Checkpoint2026-10-05: TASK-CRS-CANCEL-FAILURE-JOIN is delivered through actual
+published Communication10.2.11, successful Release37250149897 and verified official
+NuGet restoration/DLL bytes. Owning native TUnit passed1363/1363. TASK-CRS-NODE-WORK-JOIN
+is integrated with actual node drain preceding native silo stop and physical
+cleanup. Aspire-selected owner/kernel tests passed7/7; full normal unit passed
+3247/3248 and remains a failed gate because the actual Node process identity test
+failed. Both source/runtime input inventories are unchanged. See the linked
+feature's original development and delivery receipts. RF3, migration and complete
+scalar/Linux/resource/endurance qualification remain open; this ADR is not marked
+Implemented by a source checkpoint or an owning package release.
+
 Rollback of C0 removes unused test infrastructure; it cannot establish product stream readiness. Later product rollout, rollback, long-work checkpoint authority, terminal cancellation and fault qualification require their concrete accepted contracts. Frontend N/A: no UI. Required real SDK/MCP Docker/Aspire RF3, recovery, resource and exact-source Linux gates remain mandatory.
 
 TASK-CRS-C1-IMAGE/RF3 follow the accepted same-epoch image/AppHost contract in NativeCqrsRequestV2. The immutable prior executable is377886f35928866f083806062b446056d64539e3, data epoch6/RPC1/peer2, independently inventoried against all native Git blobs. A distinct ClusterRouting producer/proof binds that source separately from the actual current Linux docker-rf3 job. Root adds only an explicitly enabled ephemeral fixed-three-voter test image seam and preserves homogeneous current and native5 proofs. Genuine cold seed, mixed rejection, homogeneous current rollout/receipt preservation, homogeneous rollback, and two-survivor/rejoin waves use SDK/official MCP through owned Aspire resources; live HTTP/cache/shutdown controls remain separate. Per-voter admission, exact image/reference metadata, typed public rejection, finite bounds, cleanup/join ownership, files, worker roles and evidence are frozen in that feature contract before writes.

@@ -131,6 +131,24 @@ No public stream, binary alias/field ID, database format or dependency replaceme
 is introduced. Rollback retains the previous published package and its explicit
 failed-join evidence; no local package or project reference qualifies delivery.
 
+Delivery checkpoint2026-10-05: the owning repair is published as10.2.11 from
+Communication commit7777c90761f04b4bcffec1b5846fb74f96b8c072 through successful
+Release37250149897. Owning full native TUnit passed1363/1363. KeyLoad's three
+central references were restored from the official NuGet v3 feed; signed package
+repository commits and restored runner DLL bytes match the actual published
+payloads. The [delivery receipt](../../implementation/native-cqrs-cancel-join-delivery-2026-10-05.json)
+retains original evidence. Earlier10.2.9/10.2.10 records below remain history.
+
+NodeWork development checkpoint75g: full Release build passed with0 warnings and
+0 errors; actual Aspire selected owner/kernel tests passed7/7, including the real
+held-finally and throwing-callback join. Full normal unit passed3247/3248; its one
+failure was an actual process StartTime observation in the comparison process-tree
+test, with its cleanup cancellation retained. The full gate is failed. Both
+cohorts' HEAD, all source and executable/runtime input inventories stayed unchanged;
+only explicitly identified native TestCluster output logs are excluded from inputs.
+The [development receipt](../../implementation/node-work-development-2026-10-05.json)
+does not close the RF3 phase, migration, scalar/Linux, resource or endurance gates.
+
 TASK-CRS-C1-PRIOR-CHECKPOINT, accepted 2026-10-05, retains AC-CRS-002 and
 ADR-077/091's actual cold native6-to-native7 migration evidence after original
 run37242346547. One ten-document command does not produce the required native

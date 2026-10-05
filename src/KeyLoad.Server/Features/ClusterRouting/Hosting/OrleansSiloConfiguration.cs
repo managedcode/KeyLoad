@@ -14,17 +14,19 @@ namespace KeyLoad.Server;
 internal static class OrleansSiloConfiguration
 {
     internal static IHost Build(PartitionHost partition, NodeOptions options, INodeAdministration administration,
-        ILoggerFactory loggerFactory, IPAddress address, CancellationToken startupCancellation)
+        ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, IPAddress address,
+        CancellationToken startupCancellation)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
-        RegisterBorrowedServices(builder.Services, partition, administration, options, startupCancellation);
+        RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, startupCancellation);
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address));
         return builder.Build();
     }
 
     private static void RegisterBorrowedServices(IServiceCollection services, PartitionHost partition,
-        INodeAdministration administration, NodeOptions options, CancellationToken startupCancellation)
+        INodeAdministration administration, NodeOptions options, NativeRequestWorkOwner requestWork,
+        CancellationToken startupCancellation)
     {
         var peers = options.CreatePeerOptions();
         peers.Validate(partition.Configuration);
@@ -35,6 +37,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(partition.Configuration);
         services.AddSingleton(peers);
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton(requestWork);
         services.AddSingleton(administration);
         services.AddSingleton<QueryEngine>();
         services.AddSingleton(_ => new SearchEngine(partition.Database, partition.TextProjection));
