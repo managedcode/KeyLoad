@@ -10,7 +10,7 @@ implementation contract; the complete root [LICENSE](../../LICENSE) is authorita
 | Requirement | Acceptance and pass/fail evidence |
 | --- | --- |
 | REQ-LIC-001 standard license | AC-LIC-001: unchanged upstream BSL 1.1 Notice/Terms/Covenants, ManagedCode/KeyLoad parameters, Change Date 2030-10-05 and Apache 2.0 Change License. Exact standard-text comparison is the manual legal-text exception; absent or altered standard terms fail. |
-| REQ-LIC-002 accurate distribution metadata | AC-LIC-002: NuGet packs the actual root LICENSE as a file; README and site identify BSL/source availability and JSON-LD links to that license. Inspect an actual local package and built/source metadata; existing SiteMetadataTests retain the full actual-builder flow. An MIT expression or missing license file fails. |
+| REQ-LIC-002 accurate distribution metadata | AC-LIC-002: NuGet packs the actual root LICENSE as a file and dotnet publish copies it into server/CLI distribution roots; README and site identify BSL/source availability and JSON-LD links to that license. Inspect an actual local package/publish output and built/source metadata; existing SiteMetadataTests retain the full actual-builder flow. An MIT expression or missing license file fails. |
 | REQ-LIC-003 preserve independent licenses | AC-LIC-003: third-party license notices and vendored Three.js bytes remain unchanged. Review the scoped diff and original vendor manifest hashes; no dependency relicensing or runtime/storage changes are permitted. |
 
 TASK-LIC-001 freezes the contract, TASK-LIC-002 updates the license/metadata and

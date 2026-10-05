@@ -28,7 +28,8 @@ previously distributed copies, runtime behavior or product qualification gates.
    integration owner because the authoritative text and its consumers must agree.
 2. TASK-LIC-002: the lead owns LICENSE, Directory.Build.props, README.md and the
    BenchmarkComparisons site metadata plus its existing SiteMetadata TUnit
-   assertions. NuGet uses PackageLicenseFile and packs the actual root file.
+   assertions. NuGet uses PackageLicenseFile and packs the actual root file;
+   CopyToPublishDirectory also retains it in published server/CLI payloads.
    Preserve Three.js manifests, vendor files and every external notice.
 3. TASK-LIC-003: compare Notice/Terms/Covenants byte-for-byte with the retrieved
    upstream text; inspect real local NuGet license bytes and nuspec; parse the
@@ -44,6 +45,16 @@ Rollback changes future distribution source coherently; it cannot revoke rights
 already granted. A later license decision requires explicit owner direction.
 Public database APIs, persisted data, SDK transport, performance and RF3 topology
 are N/A because this decision changes only licensing and its distribution metadata.
+
+## Development evidence
+
+On 2026-10-05, the exact standard-text comparison, source JSON-LD, governance and
+original Three.js byte checks passed. A real local KeyLoad.Client NuGet package
+contains a file-type LICENSE declaration and the exact root license bytes.
+Canonical Release build remains blocked by CS1573 in OrleansNode.cs for the
+membershipAuthority XML parameter documentation. The owned no-build publish
+probes stalled and were stopped; publish-output proof and the authentic full
+site-builder suite remain unverified. These limitations keep this ADR Accepted.
 
 ```mermaid
 flowchart LR

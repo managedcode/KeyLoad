@@ -25,7 +25,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="" Visible="false" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'KeyLoad.Analyzers' and '$(MSBuildProjectName)' != 'KeyLoad.Analyzers.Tests'">
     <ProjectReference Include="$(MSBuildThisFileDirectory)src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj"
