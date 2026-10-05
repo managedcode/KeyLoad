@@ -15,6 +15,8 @@ internal sealed class SiteBrowserChrome : IAsyncDisposable
     public Process Process => processOwner.Process;
     public SiteBrowserCdpClient Cdp => cdp ?? throw new InvalidOperationException(SiteBrowserTokens.BrowserStartFailure);
     private int disposalStarted;
+    private int cdpDisposed;
+    private int coverageStopped;
 
     private SiteBrowserChrome(SiteBrowserProcessStart processOwner, string version, Uri endpoint)
     {
@@ -25,6 +27,9 @@ internal sealed class SiteBrowserChrome : IAsyncDisposable
 
     public string Version { get; }
     public Uri Endpoint { get; }
+    internal bool OriginalProcessExitObserved => processOwner.OriginalProcessExitObserved;
+    internal bool CdpDisposed => Volatile.Read(ref cdpDisposed) == SiteBrowserTokens.One;
+    internal bool CoverageStopped => Volatile.Read(ref coverageStopped) == SiteBrowserTokens.One;
     private int ownershipTransferredToCaller;
 
     public static async Task<SiteBrowserChrome> StartAsync(string browserPath, string profilePath,
@@ -41,12 +46,14 @@ internal sealed class SiteBrowserChrome : IAsyncDisposable
     private static async Task<SiteBrowserChrome> StartOwnedBrowserAsync(string browserPath, string profilePath,
         CancellationToken cancellationToken)
     {
-        await using var started = await SiteBrowserProcess.StartAsync(browserPath, profilePath, cancellationToken);
+        using var lease = await SiteBrowserSessionAdmission.Shared.AcquireAsync(cancellationToken);
+        await using var started = await SiteBrowserProcess.StartAsync(browserPath, profilePath, lease, cancellationToken);
         var baseUri = await SiteBrowserTarget.WaitForEndpointFile(started.Process, profilePath, cancellationToken);
         await using var browser = new SiteBrowserChrome(started, started.Version, baseUri);
         await browser.ConnectAndEnableInstrumentation(cancellationToken);
         started.Transfer();
         browser.TransferToCaller();
+        lease.TransferToCaller();
         return browser;
     }
 
@@ -78,6 +85,7 @@ internal sealed class SiteBrowserChrome : IAsyncDisposable
     {
         await CaptureCoverageAsync(cancellationToken);
         await StopCoverageAsync(cancellationToken);
+        Volatile.Write(ref coverageStopped, SiteBrowserTokens.One);
         return coverageSnapshots.Select(snapshot => snapshot.Clone()).ToArray();
     }
 
@@ -95,22 +103,27 @@ internal sealed class SiteBrowserChrome : IAsyncDisposable
             return;
         }
 
+        var cdpSettled = cdp is null;
         try
         {
             if (cdp is not null)
             {
                 await cdp.DisposeAsync();
+                Volatile.Write(ref cdpDisposed, SiteBrowserTokens.One);
+                cdpSettled = true;
             }
         }
         finally
         {
+            var httpSettled = false;
             try
             {
                 http.Dispose();
+                httpSettled = true;
             }
             finally
             {
-                await processOwner.StopAndDisposeAsync();
+                await processOwner.StopAndDisposeAsync(cdpSettled && httpSettled);
             }
         }
     }

@@ -12,10 +12,12 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictionary<string, string> images,
     bool configureCohort, bool requireHealthy, string? snapshotThresholdArgument, Guid diagnosticsWaveId,
-    RequestCqrsProbeFixture? controls, CancellationToken cancellationToken) : IAsyncDisposable
+    RequestCqrsProbeFixture? controls, string? physicalShardOverrideNode,
+    Guid? physicalShardOverrideId, CancellationToken cancellationToken) : IAsyncDisposable
 {
     private const string MissingWaveMessage = "The C1 Aspire wave did not transfer its owned resources.";
-    private readonly string[] args = CreateArguments(dataRoot, images, configureCohort, snapshotThresholdArgument, controls);
+    private const string IncompletePhysicalShardOverride = "The physical shard override requires both a node and identity.";
+    private readonly string[] args = RequestCqrsRf3WaveArguments.Create(dataRoot, images, configureCohort, snapshotThresholdArgument, controls);
     private DistributedApplication? application;
     private RequestCqrsRf3Diagnostics? diagnostics;
     private RequestCqrsRf3DiagnosticsSubscriberObserver? subscriberObserver;
@@ -24,11 +26,22 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
     internal static async Task<RequestCqrsRf3Wave> StartAsync(string dataRoot,
         IReadOnlyDictionary<string, string> images, bool configureCohort, bool requireHealthy,
         string? snapshotThresholdArgument, Guid diagnosticsWaveId, CancellationToken cancellationToken,
-        RequestCqrsProbeFixture? controls = null)
+        RequestCqrsProbeFixture? controls = null, string? physicalShardOverrideNode = null,
+        Guid? physicalShardOverrideId = null)
     {
         await using var startup = new RequestCqrsRf3WaveStartup(dataRoot, images, configureCohort,
-            requireHealthy, snapshotThresholdArgument, diagnosticsWaveId, controls, cancellationToken);
+            requireHealthy, snapshotThresholdArgument, diagnosticsWaveId, controls,
+            physicalShardOverrideNode, physicalShardOverrideId, cancellationToken);
         return await startup.RunAsync().ConfigureAwait(false);
+    }
+
+    private void ApplyPhysicalShardOverride(IDistributedApplicationTestingBuilder builder)
+    {
+        if (physicalShardOverrideNode is null && physicalShardOverrideId is null)
+        { return; }
+        if (physicalShardOverrideNode is null || physicalShardOverrideId is not { } identity)
+        { throw new ArgumentException(IncompletePhysicalShardOverride); }
+        ClusterFixturePhysicalShardIdentity.OverrideNode(builder, physicalShardOverrideNode, identity);
     }
 
     private async Task<RequestCqrsRf3Wave> RunAsync()
@@ -54,6 +67,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
     {
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
             cancellationToken).ConfigureAwait(false);
+        ApplyPhysicalShardOverride(builder);
         builder.Services.AddLogging(logging =>
         {
             logging.ClearProviders();
@@ -74,7 +88,8 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         await RequestCqrsRf3ImageProof.VerifyModelAsync(application, images, cancellationToken)
             .ConfigureAwait(false);
         await application.StartAsync(cancellationToken).ConfigureAwait(false);
-        await WaitForNodesAsync(application, requireHealthy, cancellationToken).ConfigureAwait(false);
+        await RequestCqrsRf3WaveReadiness.WaitForNodesAsync(application, requireHealthy,
+            controls?.CaptureDiscovery == true, cancellationToken).ConfigureAwait(false);
         var runtime = new ContainerRuntimeControl(application, containers,
             ClusterFixtureDiagnostics.FindRepositoryRoot().FullName);
         wave = RequestCqrsRf3Wave.TransferOwned(dataRoot, runtime, ref application, ref diagnostics);
@@ -158,54 +173,6 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         { subscriberObserver = null; }
     }
 
-    private static string[] CreateArguments(string dataRoot, IReadOnlyDictionary<string, string> images,
-        bool configureCohort, string? snapshotThresholdArgument, RequestCqrsProbeFixture? controls)
-    {
-        var args = new List<string>
-        {
-            RequestCqrsRf3Protocol.DataRootPrefix + dataRoot,
-            RequestCqrsRf3Protocol.Ephemeral
-        };
-        if (snapshotThresholdArgument is not null)
-        { args.Add(snapshotThresholdArgument); }
-        if (configureCohort)
-        {
-            args.Add(RequestCqrsRf3Protocol.CohortEnabled);
-            foreach (var node in Nodes())
-            { args.Add(RequestCqrsRf3Protocol.VoterPrefix + node + "=" + images[node]); }
-        }
-        if (controls is not null)
-        {
-            args.Add("--KeyLoadTests:RequestCqrsProbe:Enabled=true");
-            args.Add("--KeyLoadTests:RequestCqrsProbe:Root=" + controls.Root);
-            args.Add("--KeyLoadTests:RequestCqrsProbe:SessionId=" + controls.SessionId);
-        }
-        return [.. args];
-    }
-
-    private static async Task WaitForNodesAsync(DistributedApplication app, bool requireHealthy,
-        CancellationToken cancellationToken)
-    {
-        foreach (var node in Nodes())
-        {
-            if (requireHealthy)
-            {
-                await app.ResourceNotifications.WaitForResourceHealthyAsync(node, cancellationToken)
-                    .ConfigureAwait(false);
-                continue;
-            }
-            await app.ResourceNotifications.WaitForResourceAsync(node,
-                resource => resource.Snapshot.State?.Text == KnownResourceStates.Running
-                    || resource.Snapshot.State?.Text == KnownResourceStates.FailedToStart,
-                cancellationToken).ConfigureAwait(false);
-            if (!app.ResourceNotifications.TryGetCurrentState(node, out var state)
-                || state?.Snapshot.State?.Text != KnownResourceStates.Running)
-            {
-                throw new InvalidOperationException("An expected mixed-protocol Aspire node did not reach Running.");
-            }
-        }
-    }
-
     private static Dictionary<string, string> ContainerNames(IDistributedApplicationTestingBuilder builder)
         => builder.Resources.OfType<ContainerResource>()
             .Where(resource => IsNode(resource.Name))
@@ -215,9 +182,6 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
 
     private static ContainerResource[] NodeResources(IDistributedApplicationTestingBuilder builder)
         => builder.Resources.OfType<ContainerResource>().Where(resource => IsNode(resource.Name)).ToArray();
-
-    private static string[] Nodes()
-        => [RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2, RequestCqrsRf3Protocol.Node3];
 
     private static bool IsNode(string name) => name is RequestCqrsRf3Protocol.Node1
         or RequestCqrsRf3Protocol.Node2 or RequestCqrsRf3Protocol.Node3;

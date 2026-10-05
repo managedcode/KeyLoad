@@ -23,6 +23,8 @@ public sealed partial class DatabaseEngine
             OperationKind.Delivery => NormalizePayload<DeliveryCommand>(operation.PayloadJson),
             OperationKind.Processing => NormalizePayload<ProcessingRequest>(operation.PayloadJson),
             OperationKind.ConfigureResource => NormalizePayload<ConfigureResourceRequest>(operation.PayloadJson),
+            OperationKind.BootstrapPhysicalShardCatalog => NormalizePayload<BootstrapPhysicalShardCatalogRequest>(operation.PayloadJson),
+            OperationKind.BindAtomicPartitionPlacement => NormalizePayload<BindAtomicPartitionPlacementRequest>(operation.PayloadJson),
             OperationKind.ConfigurePrincipal => NormalizePayload<ConfigurePrincipalRequest>(operation.PayloadJson),
             OperationKind.ConfigureApiKey => NormalizePayload<ConfigureApiKeyRequest>(operation.PayloadJson),
             OperationKind.SetDispatch => NormalizePayload<bool>(operation.PayloadJson),

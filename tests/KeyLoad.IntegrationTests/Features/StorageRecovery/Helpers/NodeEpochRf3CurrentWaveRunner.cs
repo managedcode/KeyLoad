@@ -46,6 +46,8 @@ internal static class NodeEpochRf3CurrentWaveRunner
             NodeEpochRf3Protocol.ProfileFile), cancellationToken).ConfigureAwait(false);
         await Assert.That(current.Bytes.AsSpan().SequenceEqual(roots.ProfileBytes!)).IsTrue();
         await Assert.That(current.Sha256).IsEqualTo(roots.ProfileSha256);
+        await Assert.That(current.Profile.Version).IsEqualTo(ClusterProfileStore.CurrentVersion);
+        await Assert.That(current.Profile.PhysicalShardId).IsEqualTo(roots.Profile!.PhysicalShardId);
         await Assert.That(current.Profile.Incarnation).IsEqualTo(roots.Profile!.Incarnation);
     }
 

@@ -87,7 +87,6 @@ internal sealed class PackedAnnVectors
         var remaining = layout.Count;
         for (var index = 0; index < blocks.Length; index++)
         {
-            budget.Check();
             budget.Charge(1);
             var vectors = Math.Min(layout.VectorsPerBlock, remaining);
             blocks[index] = new float[checked(vectors * layout.Dimension)];

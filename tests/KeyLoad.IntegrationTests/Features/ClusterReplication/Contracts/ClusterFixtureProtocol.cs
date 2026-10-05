@@ -16,8 +16,11 @@ internal static class ClusterFixtureProtocol
     internal const string RootDirectoryPrefix = "keyload-cluster-";
     internal const string SolutionFileName = "KeyLoad.slnx";
     internal const string ProfileFileName = "local-profile.json";
+    internal const int MaximumProfileBytes = 8192;
     internal const string AdminKeyProperty = "AdminKey";
     internal const string PeerSecretProperty = "PeerSecret";
+    internal const string PhysicalShardIdProperty = "PhysicalShardId";
+    internal const string PhysicalShardIdSetting = "KeyLoad__PhysicalShardId";
     internal const string DataRootArgument = "--KeyLoad:DataRoot=";
     internal const string EphemeralArgument = "--KeyLoad:Ephemeral=true";
     internal const string SnapshotThresholdArgument = "--KeyLoad:SnapshotThreshold=16";

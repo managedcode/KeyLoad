@@ -2,15 +2,17 @@ using System.Security.Cryptography;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, byte[] ownerBytes)
+internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, byte[] ownerBytes,
+    RequestCqrsProbeDiscoveryPolicy discoveryPolicy)
 {
     private readonly Dictionary<Guid, (byte[] Bytes, RequestCqrsProbeArmRecord Record)> knownArms = [];
     private readonly HashSet<Guid> retiredArms = [];
     private readonly Dictionary<string, byte[]> observedControls = new(StringComparer.Ordinal);
+    private readonly List<RequestCqrsProbeDiscoveryRecord> discoveries = [];
 
     internal void ReadControl(string path, string name, List<RequestCqrsProbeLoadedArm> arms,
         List<RequestCqrsProbeReleaseRecord> releases, List<RequestCqrsProbeMarkerRecord> markers,
-        HashSet<string> presentControls)
+        HashSet<string> presentControls, List<RequestCqrsProbeDiscoveryRecord> loadedDiscoveries)
     {
         if (name == RequestCqrsProbeProtocol.OwnerFile)
         {
@@ -52,13 +54,46 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
             RegisterImmutable(name, bytes);
             presentControls.Add(name);
             markers.Add(marker);
+            return;
         }
+        if (name.StartsWith(RequestCqrsProbeProtocol.DiscoveryFilePrefix, StringComparison.Ordinal))
+        {
+            ReadDiscovery(name, bytes, presentControls, loadedDiscoveries);
+        }
+    }
+
+    private void ReadDiscovery(string name, byte[] bytes, HashSet<string> presentControls,
+        List<RequestCqrsProbeDiscoveryRecord> loadedDiscoveries)
+    {
+            var discovery = RequestCqrsProbeJson.ReadDiscovery(bytes);
+            discoveryPolicy.Validate(sessionId, voter, discovery);
+            var slot = discoveryPolicy.GetSlot(discovery.PeerVoterId);
+            if (name != RequestCqrsProbeFiles.DiscoveryName(slot))
+            { throw Invalid(); }
+            RegisterImmutable(name, bytes);
+            presentControls.Add(name);
+            loadedDiscoveries.Add(discovery);
     }
 
     internal void ValidatePresence(HashSet<string> presentControls)
     {
         if (observedControls.Keys.Any(name => !presentControls.Contains(name)))
         { throw Invalid(); }
+    }
+
+    internal void ValidateDiscoveryInventory(IReadOnlyList<RequestCqrsProbeDiscoveryRecord> loaded)
+    {
+        RequestCqrsProbeDiscoveryPolicy.ValidateInventory(loaded);
+        discoveries.Clear();
+        discoveries.AddRange(loaded);
+    }
+
+    internal int GetDiscoverySlot(string peer) => discoveryPolicy.GetSlot(peer);
+
+    internal void ValidateDiscoveryForWrite(RequestCqrsProbeDiscoveryRecord record)
+    {
+        discoveryPolicy.Validate(sessionId, voter, record);
+        RequestCqrsProbeDiscoveryPolicy.ValidateWrite(discoveries, record);
     }
 
     internal void ValidateInventory(IReadOnlyList<RequestCqrsProbeMarkerRecord> markers)

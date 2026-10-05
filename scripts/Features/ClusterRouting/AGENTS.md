@@ -11,6 +11,11 @@
 - The fixed image-source revision is377886f35928866f083806062b446056d64539e3. Require its exact tree/source/archive inventory and zero overlays, separately from the current producer's real Linux GitHub job identity.
 - Never invent GitHub environment, runtime image/manifest, native source, package, test or qualification evidence. Preserve secrets and report only controlled failure categories.
 
+## Physical-shard interface3→4 image evidence
+- ADR-099 and PhysicalShardCatalog.md additionally own prepare-interface3-server-image.mjs and verify-interface3-server-image.mjs, with interface3-server-source.mjs and interface3-server-proof.mjs. Freeze the actual prior source at1e8833c027cf232e35fe012cd3eed41c61a17f89: request alias keyload.request.v2, interface3, data epoch7 and peer envelope3. Keep RPC1/native5 pins and their original receipts unchanged.
+- Independently export and build the prior source with zero overlays in the real current Linux docker-rf3 job-owned registry. Verify the pinned Git tree in the real repository, the source inventory in the extracted build context and the retained archive after build; an extracted Git archive has no Git metadata.
+- Preserve separate prior-source and current-producer identities, actual config/manifest digests and all original artifacts. Authenticate every actual Aspire image before a cohort starts. Source/image evidence cannot qualify runtime; cold upgrade, signed mixed-cohort fencing and backup/restore use the native TUnit cases and complete owned cleanup.
+
 ## Commands, skills and risks
 - node --check validates script syntax only. Runtime script regression callers use TUnit through the root's actual Aspire unit entry; image production qualification runs in the real Linux docker-rf3 CI job.
 - No installed script-specific skill or tool installation is required. Follow the already applicable Aspire/Orleans guidance for root integration.

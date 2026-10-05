@@ -47,7 +47,11 @@ internal sealed class NodeEpochRf3Migration(string priorRoot, string currentRoot
         await Assert.That(currentProfile.Bytes.AsSpan().SequenceEqual(profileBytes)).IsTrue();
         await Assert.That(priorProfile.Sha256).IsEqualTo(expectedSha);
         await Assert.That(currentProfile.Sha256).IsEqualTo(expectedSha);
-        await Assert.That(priorProfile.Profile.Incarnation == profile.Incarnation
+        await Assert.That(priorProfile.Profile.Version == ClusterProfileStore.CurrentVersion
+            && currentProfile.Profile.Version == ClusterProfileStore.CurrentVersion
+            && priorProfile.Profile.PhysicalShardId == profile.PhysicalShardId
+            && currentProfile.Profile.PhysicalShardId == profile.PhysicalShardId
+            && priorProfile.Profile.Incarnation == profile.Incarnation
             && currentProfile.Profile.Incarnation == profile.Incarnation).IsTrue();
     }
 

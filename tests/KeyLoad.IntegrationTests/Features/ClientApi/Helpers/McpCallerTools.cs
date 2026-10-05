@@ -14,6 +14,7 @@ internal static class McpCallerTools
     internal const string ScheduleInspect = "keyload_schedule_inspect";
     internal const string SagaInspect = "keyload_saga_inspect";
     internal const string GraphTraverse = "keyload_graph_traverse";
+    internal const string GraphShortestPath = McpCallerProtocol.GraphShortestPath;
     internal const string SeriesRead = "keyload_series_read";
     internal const string SeriesLatest = "keyload_series_latest";
     internal const string SeriesAggregate = "keyload_series_aggregate";
@@ -21,6 +22,9 @@ internal static class McpCallerTools
     internal const string SeriesRetention = "keyload_series_retention";
     internal const string QueryExecute = "keyload_query_execute";
     internal const string QuerySearch = "keyload_query_search";
+    internal const string QueryGraphPath = McpCallerProtocol.QueryGraphPath;
+    internal const string AdminPartitionPlacementBind = McpCallerProtocol.AdminPartitionPlacementBind;
+    internal const string AdminPartitionPlacementRead = McpCallerProtocol.AdminPartitionPlacementRead;
     internal const string QueryAst = "keyload_query_ast";
     internal const string QueryCapabilities = "keyload_query_capabilities";
     internal const string ChangesRead = "keyload_changes_read";

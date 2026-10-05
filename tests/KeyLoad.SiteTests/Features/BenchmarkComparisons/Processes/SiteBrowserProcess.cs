@@ -6,13 +6,22 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal static class SiteBrowserProcess
 {
     public static async Task<SiteBrowserProcessStart> StartAsync(string browserPath, string profilePath,
-        CancellationToken cancellationToken)
+        SiteHeavyChildLease lease, CancellationToken cancellationToken)
     {
-        var version = await ReadVersion(browserPath, cancellationToken);
-        return SiteBrowserProcessStart.Start(browserPath, profilePath, version);
+        try
+        {
+            var version = await ReadVersion(browserPath, lease, cancellationToken);
+            return await SiteBrowserProcessStart.StartAsync(browserPath, profilePath, version, lease);
+        }
+        catch (Exception)
+        {
+            lease.Dispose();
+            throw;
+        }
     }
 
-    private static async Task<string> ReadVersion(string browserPath, CancellationToken cancellationToken)
+    private static async Task<string> ReadVersion(string browserPath, SiteHeavyChildLease lease,
+        CancellationToken cancellationToken)
     {
         var start = new ProcessStartInfo(browserPath)
         {
@@ -33,6 +42,7 @@ internal static class SiteBrowserProcess
         var stderr = SiteProcessOutput.ReadAsync(process.StandardError, SiteBrowserTokens.BrowserResponseExceeded, timeout.Token);
         try
         {
+            lease.MarkStarted(process);
             await process.WaitForExitAsync(timeout.Token);
             var output = await stdout;
             var error = await stderr;
@@ -41,20 +51,17 @@ internal static class SiteBrowserProcess
             {
                 throw new InvalidOperationException(SiteBrowserTokens.BrowserVersionMissing);
             }
+            if (!lease.CompleteIfSettled(stdout, stderr))
+            {
+                throw new InvalidOperationException(SiteBrowserTokens.BrowserVersionMissing);
+            }
+
             return output.Trim();
         }
         catch (Exception exception) when (exception is OperationCanceledException or IOException or
             InvalidOperationException or ObjectDisposedException or TimeoutException)
         {
-            try
-            { await SiteProcessCleanup.StopAsync(process); }
-            catch (Exception cleanupException) when (cleanupException is InvalidOperationException or Win32Exception or TimeoutException)
-            { /* Preserve the version or capture failure. */ }
-            try
-            { await SiteProcessCleanup.ObserveCapturesAsync(process, stdout, stderr); }
-            catch (Exception cleanupException) when (cleanupException is IOException or ObjectDisposedException or
-                OperationCanceledException or InvalidOperationException or TimeoutException)
-            { /* Preserve the version or capture failure. */ }
+            await SiteHeavyChildLease.StopAndObserveAsync(process, stdout, stderr, lease);
             throw;
         }
     }
@@ -63,18 +70,24 @@ internal static class SiteBrowserProcess
 internal sealed class SiteBrowserProcessStart : IAsyncDisposable
 {
     public Process Process { get; }
+    private readonly SiteHeavyChildLease lease;
     private int transferred;
     private int disposed;
+    private int started;
+    private int originalProcessExitObserved;
 
-    private SiteBrowserProcessStart(Process process, string version)
+    private SiteBrowserProcessStart(Process process, string version, SiteHeavyChildLease lease)
     {
         Process = process;
         Version = version;
+        this.lease = lease;
     }
 
     public string Version { get; }
+    internal bool OriginalProcessExitObserved => Volatile.Read(ref originalProcessExitObserved) == SiteBrowserTokens.One;
 
-    public static SiteBrowserProcessStart Start(string browserPath, string profilePath, string version)
+    public static async Task<SiteBrowserProcessStart> StartAsync(string browserPath, string profilePath, string version,
+        SiteHeavyChildLease lease)
     {
         var start = new ProcessStartInfo(browserPath)
         {
@@ -88,6 +101,7 @@ internal sealed class SiteBrowserProcessStart : IAsyncDisposable
         start.ArgumentList.Add(SiteBrowserTokens.NoDefaultBrowserArgument);
         start.ArgumentList.Add(SiteBrowserTokens.BlankUrl);
         var process = new Process { StartInfo = start, EnableRaisingEvents = true };
+        var owner = new SiteBrowserProcessStart(process, version, lease);
         try
         {
             if (!process.Start())
@@ -95,13 +109,28 @@ internal sealed class SiteBrowserProcessStart : IAsyncDisposable
                 throw new InvalidOperationException(SiteBrowserTokens.BrowserStartFailure);
             }
 
-            return new(process, version);
+            owner.MarkStarted();
+            return owner;
         }
         catch (Exception exception) when (exception is InvalidOperationException or Win32Exception or IOException)
         {
-            process.Dispose();
+            try
+            {
+                await owner.StopAndDisposeAsync();
+            }
+            catch (Exception cleanupException) when (cleanupException is InvalidOperationException or Win32Exception or
+                TimeoutException or ObjectDisposedException)
+            {
+                throw new AggregateException(exception, cleanupException);
+            }
             throw;
         }
+    }
+
+    private void MarkStarted()
+    {
+        Volatile.Write(ref started, SiteBrowserTokens.One);
+        lease.MarkStarted(Process);
     }
 
     public SiteBrowserProcessStart Transfer()
@@ -120,7 +149,7 @@ internal sealed class SiteBrowserProcessStart : IAsyncDisposable
         await StopAndDisposeAsync();
     }
 
-    public async ValueTask StopAndDisposeAsync()
+    public async ValueTask StopAndDisposeAsync(bool sessionResourcesSettled = true)
     {
         if (Interlocked.Exchange(ref disposed, SiteBrowserTokens.One) != SiteBrowserTokens.Zero)
         {
@@ -129,11 +158,26 @@ internal sealed class SiteBrowserProcessStart : IAsyncDisposable
 
         try
         {
-            await SiteProcessCleanup.StopAsync(Process);
+            if (Volatile.Read(ref started) == SiteBrowserTokens.One)
+            {
+                await SiteProcessCleanup.StopAsync(Process);
+                Volatile.Write(ref originalProcessExitObserved, Process.HasExited ? SiteBrowserTokens.One : SiteBrowserTokens.Zero);
+                if (sessionResourcesSettled)
+                {
+                    _ = lease.CompleteIfSettled(Task.CompletedTask, Task.CompletedTask);
+                }
+            }
         }
         finally
         {
-            Process.Dispose();
+            try
+            {
+                Process.Dispose();
+            }
+            finally
+            {
+                lease.Dispose();
+            }
         }
     }
 }

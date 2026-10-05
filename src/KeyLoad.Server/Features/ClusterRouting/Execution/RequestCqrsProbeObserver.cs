@@ -3,7 +3,7 @@ using KeyLoad.Replication;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAsyncDisposable
+internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IReplicaDiscoveryObservationSink, IAsyncDisposable
 {
     private readonly object disposeSync = new();
     private readonly RequestCqrsProbeFiles files;
@@ -30,6 +30,10 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         var files = RequestCqrsProbeFiles.Open(options, replica);
         return new(files, replica, address, applicationLifetime);
     }
+
+    public ValueTask ObserveIncompatibleAsync(string voterId, ReplicaDiscoveryObservation observation,
+        CancellationToken cancellationToken)
+        => RequestCqrsProbeDiscoveryObservation.Record(files, replica, voterId, observation, cancellationToken);
 
     public ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         IGrainContext context, CancellationToken cancellationToken)

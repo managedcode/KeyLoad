@@ -12,11 +12,11 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
     private readonly HashSet<string> completedResourceNames = new(StringComparer.Ordinal);
     private DistributedApplication? application;
     private RequestCqrsRf3Diagnostics? diagnostics;
+    private RequestCqrsRf3DiagnosticsIndependentConsumer? independentConsumer;
     private ContainerResource[] resources = [];
     private readonly RequestCqrsRf3DiagnosticsSubscriberObserver subscriberObserver = new();
     private string? dataRoot;
     private string? artifactPath;
-    private bool diagnosticsAcquired;
     private bool diagnosticsJoined;
     private bool applicationAcquired;
     private bool applicationDisposedSuccessfully;
@@ -28,8 +28,10 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
         ?? throw new InvalidOperationException("The diagnostics owner is absent.");
     internal string OwnedArtifactPath => artifactPath
         ?? throw new InvalidOperationException("The owned artifact path is absent.");
+    internal RequestCqrsRf3DiagnosticsIndependentConsumer IndependentConsumer => independentConsumer
+        ?? throw new InvalidOperationException("The native independent consumer is absent.");
 
-    internal async Task StartAsync(CancellationToken cancellationToken)
+    internal async Task StartAsync(CancellationToken cancellationToken, bool startIndependentConsumer = false)
     {
         var plannedDataRoot = RequestCqrsRf3DiagnosticsArtifactFiles.DataRootPath(WaveId);
         RequestCqrsRf3DiagnosticsArtifactFiles.CreateDataRootDirectory(plannedDataRoot);
@@ -46,8 +48,14 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
         var loggerService = ownedApplication.Services.GetRequiredService<ResourceLoggerService>();
         subscriberObserver.Initialize(loggerService, cancellationToken);
         diagnostics = RequestCqrsRf3Diagnostics.Start(WaveId, resources, loggerService);
-        diagnosticsAcquired = true;
         artifactPath = RequestCqrsRf3DiagnosticsArtifactFiles.ExpectedPath(WaveId);
+        if (startIndependentConsumer)
+        {
+            var resource = builder.Resources.OfType<ParameterResource>()
+                .Single(candidate => candidate.Name == "admin-key");
+            independentConsumer = new(loggerService, resource, cancellationToken);
+            await independentConsumer.StartAsync(cancellationToken).ConfigureAwait(false);
+        }
         await subscriberObserver.WaitForStateAsync(true).ConfigureAwait(false);
     }
 
@@ -80,7 +88,6 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
     internal async Task JoinOriginalSubscriptionsAsync()
     {
         CompleteResourceStreams();
-        await subscriberObserver.WaitForStateAsync(false).ConfigureAwait(false);
         await JoinDiagnosticsTwiceAsync().ConfigureAwait(false);
         await subscriberObserver.DisposeAsync().ConfigureAwait(false);
     }
@@ -89,6 +96,21 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
     {
         var failures = new List<Exception>();
         CompleteResourceStreams(failures);
+        if (independentConsumer is not null)
+        {
+            var ownedConsumer = independentConsumer;
+            try
+            { await independentConsumer.DisposeAsync().ConfigureAwait(false); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { failures.Add(error); }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { failures.Add(error); }
+            await ownedConsumer.RetryFailedCloseAsync(failures).ConfigureAwait(false);
+            if (ownedConsumer.IsJoined)
+            { independentConsumer = null; }
+            else
+            { failures.Add(new InvalidOperationException("The independent native consumer did not fully join.")); }
+        }
         if (!diagnosticsJoined && diagnostics is not null)
         {
             try
@@ -102,13 +124,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
             { failures.Add(error); }
         }
-        try
-        { await subscriberObserver.DisposeAsync().ConfigureAwait(false); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        await subscriberObserver.RetryFailedCloseAsync(failures).ConfigureAwait(false);
+        await DisposeSubscriberObserverAsync(failures).ConfigureAwait(false);
         await DisposeApplicationAsync(failures).ConfigureAwait(false);
         RequestCqrsRf3DiagnosticsArtifactFiles.DeleteOwned(artifactPath, failures);
         cleanupJoinFailed |= failures.Count != 0;
@@ -123,6 +139,17 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private async Task DisposeSubscriberObserverAsync(List<Exception> failures)
+    {
+        try
+        { await subscriberObserver.DisposeAsync().ConfigureAwait(false); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); }
+        await subscriberObserver.RetryFailedCloseAsync(failures).ConfigureAwait(false);
     }
 
     private async Task DisposeApplicationAsync(List<Exception> failures)
@@ -143,10 +170,12 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
     }
 
     private bool CanDeleteDataRoot(List<Exception> failures)
-        => dataRootOwned && dataRoot is not null && DiagnosticsSettled && subscriberObserver.IsJoined
-            && ApplicationSettled && !cleanupJoinFailed && failures.Count == 0 && Directory.Exists(dataRoot);
+        => dataRootOwned && dataRoot is not null && DiagnosticsSettled && IndependentConsumerSettled
+            && subscriberObserver.IsJoined && ApplicationSettled && !cleanupJoinFailed
+            && failures.Count == 0 && Directory.Exists(dataRoot);
 
-    private bool DiagnosticsSettled => !diagnosticsAcquired || diagnosticsJoined;
+    private bool DiagnosticsSettled => diagnostics is null || diagnosticsJoined;
+    private bool IndependentConsumerSettled => independentConsumer is null || independentConsumer.IsJoined;
     private bool ApplicationSettled => !applicationAcquired || applicationDisposedSuccessfully;
 
     private void CompleteResourceStreams()

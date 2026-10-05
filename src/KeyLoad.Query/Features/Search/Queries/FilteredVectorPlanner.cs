@@ -8,7 +8,6 @@ internal static class FilteredVectorPlanner
         int exactThreshold, int efSearch, int capacity, AnnWorkBudget budget)
     {
         ArgumentNullException.ThrowIfNull(budget);
-        budget.Check();
         budget.Charge(1);
         Validate(corpusCount, requestedCount, eligibleCount, exactThreshold, efSearch, capacity);
         var resultCount = Math.Min(requestedCount, eligibleCount);

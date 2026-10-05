@@ -17,7 +17,6 @@ internal static class PackedAnnLayerSearch
         var currentScore = Score(vectors, current, in similarity, dimension, budget);
         while (true)
         {
-            budget.Check();
             var next = current;
             var nextScore = currentScore;
             var count = graph.NeighborCount(current, layer, budget);

@@ -23,6 +23,10 @@ internal static class McpCatalogExpectations
         Read(McpCallerTools.ScheduleInspect, [McpDiscoveryProtocol.Lane, McpDiscoveryProtocol.ScheduleId]),
         Read(McpCallerTools.SagaInspect, [McpDiscoveryProtocol.Lane, McpDiscoveryProtocol.SagaId]),
         Read(McpCallerTools.GraphTraverse, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Graph, McpDiscoveryProtocol.Start]),
+        Read(McpCallerTools.GraphShortestPath, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Partition,
+            McpDiscoveryProtocol.Graph, McpDiscoveryProtocol.FromEntity, McpDiscoveryProtocol.To],
+            [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Found, McpDiscoveryProtocol.Hops,
+                McpDiscoveryProtocol.Vertices, McpDiscoveryProtocol.Edges, McpDiscoveryProtocol.CutPosition]),
         Read(McpCallerTools.SeriesRead, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set, McpDiscoveryProtocol.SeriesId, McpDiscoveryProtocol.From, McpDiscoveryProtocol.Until]),
         Read(McpCallerTools.SeriesLatest, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set, McpDiscoveryProtocol.SeriesId]),
         Read(McpCallerTools.SeriesAggregate, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set, McpDiscoveryProtocol.SeriesId, McpDiscoveryProtocol.From]),
@@ -32,6 +36,17 @@ internal static class McpCatalogExpectations
             McpDiscoveryProtocol.SeriesId]),
         Read(McpCallerTools.QueryExecute, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Sql]),
         Read(McpCallerTools.QuerySearch, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Query]),
+        Read(McpCallerTools.QueryGraphPath, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Query],
+            [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Found, McpDiscoveryProtocol.Hops,
+                McpDiscoveryProtocol.Vertices, McpDiscoveryProtocol.Edges, McpDiscoveryProtocol.CutPosition]),
+        new(McpCallerTools.AdminPartitionPlacementBind, false, true, false, McpExpectedBody.Object, true,
+            [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.ExpectedRevision, McpDiscoveryProtocol.Partition,
+                McpDiscoveryProtocol.PhysicalShardId]),
+        Read(McpCallerTools.AdminPartitionPlacementRead,
+            [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Partition],
+            [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.PhysicalShardId,
+                McpDiscoveryProtocol.Incarnation, McpDiscoveryProtocol.VoterIds, McpDiscoveryProtocol.PlacementEpoch,
+                McpDiscoveryProtocol.DirectoryRevision, McpDiscoveryProtocol.Revision, McpDiscoveryProtocol.IsFallback]),
         Read(McpCallerTools.QueryAst, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Query]),
         Empty(McpCallerTools.QueryCapabilities),
         Read(McpCallerTools.ChangesRead, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection]),
@@ -70,7 +85,9 @@ internal static class McpCatalogExpectations
             [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Sql])
     ];
 
-    private static McpToolExpectation Read(string name, ImmutableArray<string> fields) => new(name, true, true, false, McpExpectedBody.Object, false, fields);
+    private static McpToolExpectation Read(string name, ImmutableArray<string> fields,
+        ImmutableArray<string> resultFields = default)
+        => new(name, true, true, false, McpExpectedBody.Object, false, fields, resultFields);
     private static McpToolExpectation Empty(string name) => new(name, true, true, false, McpExpectedBody.None, false, []);
     private static McpToolExpectation Write(string name, ImmutableArray<string> fields) => new(name, false, true, true, McpExpectedBody.Object, false, fields);
     private static McpToolExpectation Header(string name, ImmutableArray<string> fields) => new(name, false, true, true, McpExpectedBody.Object, true, fields);

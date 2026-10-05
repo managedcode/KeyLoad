@@ -11,9 +11,11 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
     private readonly ReplicaCohortAdmission admission;
     private readonly ReplicaDiscoveryLifetime lifetime;
     private readonly TimeProvider clock;
+    private readonly IReplicaDiscoveryObservationSink? observationSink;
 
     internal ReplicaCohortDiscovery(ReplicaConfiguration configuration, ReplicaPeerOptions options,
-        ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock)
+        ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
+        IReplicaDiscoveryObservationSink? observationSink = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         options.Validate(configuration);
@@ -22,6 +24,7 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
         ArgumentNullException.ThrowIfNull(clock);
         this.configuration = configuration;
         this.clock = clock;
+        this.observationSink = observationSink;
         observations = new(configuration, local, clock);
         var ownedResources = new ReplicaDiscoveryResources(configuration, options, authentication, clock);
         resources = new(ownedResources);
@@ -106,7 +109,8 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
 
             observations.Remove(voterId);
             cancellationToken.ThrowIfCancellationRequested();
-            var discovered = await resources.DiscoverAsync(voterId, attempt.Token).ConfigureAwait(false);
+            var discovered = await DiscoverAndObserveAsync(voterId, attempt.Token, cancellationToken)
+                .ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             if (discovered is not null)
             {
@@ -115,15 +119,31 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
 
             return discovered;
         }
-        catch (OperationCanceledException error) when (!cancellationToken.IsCancellationRequested
-            && (attempt.IsCancellationRequested || error is TaskCanceledException))
-        {
-            return null;
-        }
         finally
         {
             resources.ReleaseDiscoveryGate();
         }
+    }
+
+    private async Task<ReplicaDiscoveryObservation?> DiscoverAndObserveAsync(string voterId,
+        CancellationToken attemptToken, CancellationToken cancellationToken)
+    {
+        ReplicaDiscoveryObservation? discovered;
+        try
+        {
+            discovered = await resources.DiscoverAsync(voterId, attemptToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException error) when (!cancellationToken.IsCancellationRequested
+            && (attemptToken.IsCancellationRequested || error is TaskCanceledException))
+        {
+            return null;
+        }
+        if (discovered is { ProtocolCompatible: false } && observationSink is not null)
+        {
+            await observationSink.ObserveIncompatibleAsync(voterId, discovered, attemptToken)
+                .ConfigureAwait(false);
+        }
+        return discovered;
     }
 
     public void Dispose()

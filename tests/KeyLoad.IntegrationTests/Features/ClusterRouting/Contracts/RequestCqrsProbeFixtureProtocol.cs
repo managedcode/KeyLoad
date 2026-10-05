@@ -17,6 +17,10 @@ internal static class RequestCqrsProbeFixtureProtocol
     internal const string ArmKind = "Arm";
     internal const string ReleaseKind = "Release";
     internal const string MarkerKind = "Marker";
+    internal const string DiscoveryFile0 = "discovery-00.json";
+    internal const string DiscoveryFile1 = "discovery-01.json";
+    internal const string DiscoveryKind = "DiscoveryObservation";
+    internal const int MaximumDiscoveryRecords = 2;
     internal const string VersionField = "Version";
     internal const string KindField = "Kind";
     internal const string SessionField = "SessionId";

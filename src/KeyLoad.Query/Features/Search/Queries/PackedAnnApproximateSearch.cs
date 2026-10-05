@@ -60,7 +60,6 @@ internal static class PackedAnnApproximateSearch
         var eligible = 0;
         for (var index = 0; index < found; index++)
         {
-            budget.Check();
             budget.Charge(1);
             if (PackedAnnExactSearch.IsEligible(buffers.Nodes[index], eligibility))
             {

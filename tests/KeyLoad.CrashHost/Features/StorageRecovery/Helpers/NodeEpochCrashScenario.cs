@@ -86,12 +86,15 @@ internal sealed class NodeEpochCrashBoundary(NodeFormatUpgradeStage requestedSta
 
 internal static class NodeEpochCrashSettings
 {
+    private static readonly Guid PhysicalShardId = Guid.Parse("a7c8e9b0-5162-4374-8a91-6d20e7f43519");
+
     internal static NodeOptions CreateOptions(EpochPriorNodeProfile profile, string destination)
         => new()
         {
             DataDirectory = destination,
             PublicEndpoint = profile.LocalId,
             Peers = profile.Voters,
+            PhysicalShardId = PhysicalShardId,
             Incarnation = profile.Incarnation,
             SigningKey = profile.SigningKey,
             PeerSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)),

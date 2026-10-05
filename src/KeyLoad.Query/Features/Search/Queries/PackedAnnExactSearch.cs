@@ -32,7 +32,6 @@ internal static class PackedAnnExactSearch
     {
         for (var ordinal = 0; ordinal < state.Count; ordinal++)
         {
-            budget.Check();
             budget.Charge(1);
             found = ScoreOrdinal(state, similarity, ordinal, candidates, found, budget);
         }
@@ -44,7 +43,6 @@ internal static class PackedAnnExactSearch
     {
         for (var wordIndex = 0; wordIndex < eligibility.Length; wordIndex++)
         {
-            budget.Check();
             budget.Charge(sizeof(ulong));
             var bits = eligibility[wordIndex];
             while (bits != 0)

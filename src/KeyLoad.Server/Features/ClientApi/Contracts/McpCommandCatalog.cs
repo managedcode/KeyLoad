@@ -14,6 +14,8 @@ internal static class McpCommandCatalog
         McpOperationFactory.HeaderCommand<ConfigureResourceRequest, ResourceDefinition>(McpToolNames.ResourcesConfigure, McpToolRoutes.ResourcesConfigure, OperationKind.ConfigureResource),
         McpOperationFactory.HeaderCommand<ConfigurePrincipalRequest, PrincipalRecord>(McpToolNames.PrincipalsConfigure, McpToolRoutes.PrincipalsConfigure, OperationKind.ConfigurePrincipal),
         McpOperationFactory.HeaderCommand<ConfigureApiKeyRequest, bool>(McpToolNames.CredentialsConfigure, McpToolRoutes.CredentialsConfigure, OperationKind.ConfigureApiKey),
-        McpOperationFactory.HeaderCommand<bool, bool>(McpToolNames.AdminDispatch, McpToolRoutes.AdminDispatch, OperationKind.SetDispatch)
+        McpOperationFactory.HeaderCommand<bool, bool>(McpToolNames.AdminDispatch, McpToolRoutes.AdminDispatch, OperationKind.SetDispatch),
+        McpOperationFactory.HeaderCommand<BindAtomicPartitionPlacementRequest, bool>(McpToolNames.AdminPartitionPlacementBind,
+            McpToolRoutes.AdminPartitionPlacementBind, OperationKind.BindAtomicPartitionPlacement)
     ];
 }

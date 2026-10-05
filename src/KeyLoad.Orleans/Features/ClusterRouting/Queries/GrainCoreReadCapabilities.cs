@@ -35,6 +35,8 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
             GrainReadKind.ChangeFeed => database.ReadChangeFeed(principal, GrainNativePayload.Read<ReadChangeFeedRequest>(payload)),
             GrainReadKind.OutboxStatus => database.GetOutboxStatus(principal, GrainNativePayload.Read<GetOutboxStatusRequest>(payload).Partition),
             GrainReadKind.ProjectionBatch => database.ReadProjectionBatch(principal, GrainNativePayload.Read<ReadProjectionBatchRequest>(payload)),
+            GrainReadKind.AtomicPartitionPlacement => database.ReadAtomicPartitionPlacement(principal,
+                GrainNativePayload.ReadPublicInput<AtomicPartitionPlacementReadRequest>(payload)),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }
@@ -44,7 +46,8 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
         or GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows
         or GrainReadKind.SampleRetention or GrainReadKind.AggregateReplay
         or GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt
-        or GrainReadKind.RecurringSchedule or GrainReadKind.Saga or GrainReadKind.GraphShortestPath;
+        or GrainReadKind.RecurringSchedule or GrainReadKind.Saga or GrainReadKind.GraphShortestPath
+        or GrainReadKind.AtomicPartitionPlacement;
 
     private StreamPage Stream(string principal, ReadStreamRequest request, CancellationToken cancellationToken)
         => database.ReadStream(principal, request.Stream, request.AfterRevision, request.Limit, cancellationToken);

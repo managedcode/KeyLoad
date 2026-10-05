@@ -7,9 +7,9 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 /// <summary>AC-MCP-002/003/005: canonical write identity and strict adapter arguments.</summary>
 internal sealed class McpCommandDecodeTests
 {
-    private const int CommandCount = 18;
+    private const int CommandCount = 19;
 
-    /// <summary>Exercises all eighteen actual command DTOs with their original identities and complete public fields.</summary>
+    /// <summary>Exercises all nineteen actual command DTOs with their original identities and complete public fields.</summary>
     [Test]
     public async Task AcMcp002EveryCommandPreservesItsCallerIdAndFullTypedPayload()
     {

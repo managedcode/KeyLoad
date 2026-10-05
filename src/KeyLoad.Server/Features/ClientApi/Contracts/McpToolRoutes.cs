@@ -53,4 +53,6 @@ internal static class McpToolRoutes
     internal const string ProjectionsCommit = "/v1/admin/projections/commit";
     internal const string ProjectionsRelease = "/v1/admin/projections/release";
     internal const string OutboxPurge = "/v1/admin/outbox/purge";
+    internal const string AdminPartitionPlacementBind = "/v1/admin/partition-placement/bind";
+    internal const string AdminPartitionPlacementRead = "/v1/admin/partition-placement/read";
 }

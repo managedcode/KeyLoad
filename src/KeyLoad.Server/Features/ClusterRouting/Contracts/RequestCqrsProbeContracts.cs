@@ -61,3 +61,14 @@ internal readonly record struct RequestCqrsProbeMarkerRecord(
     [property: JsonRequired] RequestCqrsProbeOutcome Outcome,
     [property: JsonRequired] string Voter,
     [property: JsonRequired] string SiloAddress);
+
+internal readonly record struct RequestCqrsProbeDiscoveryRecord(
+    [property: JsonRequired] int Version,
+    [property: JsonRequired] string Kind,
+    [property: JsonRequired] string SessionId,
+    [property: JsonRequired] string ObserverVoterId,
+    [property: JsonRequired] string PeerVoterId,
+    [property: JsonRequired] int ApplicationRpcVersion,
+    [property: JsonRequired] int PeerEnvelopeVersion,
+    [property: JsonRequired] bool TransportReady,
+    [property: JsonRequired] bool ProtocolCompatible);

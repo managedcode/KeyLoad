@@ -7,6 +7,10 @@ internal static class McpCallerProtocol
     internal const string Node1 = "node1";
     internal const string Node2 = "node2";
     internal const string Node3 = "node3";
+    internal const string GraphShortestPath = "keyload_graph_shortest_path";
+    internal const string QueryGraphPath = "keyload_query_graph_path";
+    internal const string AdminPartitionPlacementBind = "keyload_admin_partition_placement_bind";
+    internal const string AdminPartitionPlacementRead = "keyload_admin_partition_placement_read";
     internal const string HttpEndpoint = "http";
     internal const string Endpoint = "/mcp";
     internal const string ProtocolVersion = "2026-07-28";
@@ -32,7 +36,7 @@ internal static class McpCallerProtocol
     internal const string ProblemStatus = "status";
     internal const string ProblemDetail = "detail";
     internal const string ProblemCode = "errorCode";
-    internal const int ToolCount = 62;
+    internal const int ToolCount = 66;
     internal const int AstVersion = 1;
     internal const int FirstRevision = 1;
     internal const int EpochIncrement = 1;

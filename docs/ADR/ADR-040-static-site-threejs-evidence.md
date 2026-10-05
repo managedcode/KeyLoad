@@ -456,3 +456,114 @@ retain all raw/archive/freshness/native/browser/coverage gates and historical
 formats exactly. New aggregate formats cannot be published until coupled tooling,
 closed inventories, test evidence and actual provider/live receipt exist. Required
 TASK-ISO-006/010/011/012 ownership/stages/rollback and tests are inADR056; statusAccepted.
+
+
+## Accepted native Chrome session admission (2026-10-05)
+
+The following root-reviewed contract is accepted before source integration; runtime qualification remains pending.
+
+# Private candidate: ADR-040 / TASK-SITE-CHROME-ADMISSION
+
+## Decision
+
+Treat a complete real Chrome session as a native bounded test resource. Use a
+separate capacity-one admission instance for Chrome sessions in each TUnit
+process. Do not share the existing capacity-two Node child pool: isolated-site
+build/projection work can precede browser start, and a shared pool would couple
+the two resource lifetimes. Reuse the existing native FIFO/cancellation and
+fail-closed unsettled-child semantics only through a distinct browser pool and
+an ownership path that joins the Chrome process, CDP socket and instrumentation
+before completing its lease.
+
+The only current Chrome launch caller is
+`SiteBrowserChrome.StartAsync`; acquire before its version subprocess so every
+actual launch passes admission. Transfer the same lease with the original
+`SiteBrowserProcessStart` owner into the returned `SiteBrowserChrome`. Startup
+failure before process creation releases only after the original startup task
+and owned cleanup have settled. Once launched, only successful original CDP /
+coverage shutdown and observed original process exit settle the lease. Preserve
+the permit on cleanup failure/unjoined original work by poisoning the browser
+pool, which rejects queued sessions. Do not synthesize completion, detach an
+original task, or release on timeout.
+
+`SiteBrowserSession.CompleteAsync` already completes/stops native coverage
+before disposing Chrome. Preserve that order. On failed sessions the original
+owned Chrome process teardown closes its instrumentation before releasing the
+permit. Preserve all current report, keyboard, numeric, accessibility,
+provenance, source-coverage and renderer assertions.
+
+The real keyboard failure receives failure-only, strictly bounded observations
+from actual `Input.dispatchKeyEvent` acknowledgements and selected-control
+state after each known key. Do not record report values, payloads, query data or
+unbounded console/browser events. The assertion remains the same and the
+telemetry is diagnostic only.
+
+## Ordered task, ownership and tests
+
+`TASK-SITE-CHROME-ADMISSION` is tests/source work after root accepts this
+contract; root owns this ADR/feature edit, integration, full gates and final
+evidence.
+
+1. Source owner: add a browser-session-specific pool in
+   `tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Helpers/` with the
+   exact one-active/64-queued/20-minute contract. Reuse
+   `SiteHeavyChildAdmission` only as a separately instantiated pool, not its
+   shared Node instance. Update `Helpers/SiteHeavyChildLease.cs` only to permit
+   a new original child after the prior child and its output captures have
+   settled; reject overlapping unsettled children. The browser version probe
+   and Chrome child use the same reservation sequentially.
+2. Source owner: change only `Helpers/SiteBrowserChrome.cs` and
+   `Processes/SiteBrowserProcess.cs` to acquire before the version process,
+   track/settle its real output readers and original exit, transfer ownership
+   with the actual Chrome process owner, then complete coverage/socket teardown
+   and observe that same process before release. All failed/unjoined native
+   cleanup fails closed.
+3. Source owner: add one real Chrome TUnit admission/cancellation/lifecycle
+   case under `Cases/`; it uses the configured browser path and CDP, verifies
+   the queued/canceled original caller and successor start after native owner
+   settlement, with bounded task coordination and no sleep or synthetic
+   provider/process.
+4. Source owner: add fixed-size, failure-only safe evidence in
+   `Assertions/SiteIsolatedBrowserKeyboardAssertions.cs`, leaving ArrowUp,
+   Enter, the exact selected value and independent row oracle intact.
+5. Root reviews the complete packet and immutable hashes, joins it, then runs
+   the actual Aspire-owned strict build/format/governance and full TUnit/site /
+   Chrome / native coverage gates. Browser resource admission alone makes no
+   speed claim and does not diagnose the original keyboard miss.
+
+Rollback restores the owned helper/callers/test and their contract together;
+there is no product, persisted-data, dependency, website rendering, workflow or
+publication migration.
+
+# Proposed ADR-040 r2 amendment — original waiter withdrawal oracle
+
+Accepted candidate delta: REQ/AC-BC-CHROME-001 clarification and bounded
+waiter-membership oracle in `REQ-AC-r2-amendment.md`.
+
+The current native `SiteHeavyChildAdmission.Waiter` already stores the original
+caller token and the pending `LinkedList<Waiter>` is bounded to 64. Add only an
+internal read-only method that scans that list under its existing `_sync` lock
+for `CancellationToken.Equals` against the supplied unique linked token. The
+browser-specific `SiteBrowserSessionAdmission` wrapper is the only caller/API
+surface. The observation creates no new queue, registry, subscription, retained
+identity, timing mechanism or diagnostic output and does not change how waiters
+are admitted, cancelled, withdrawn, granted or rejected. The scan is bounded by
+the already enforced queue cap.
+
+The real Chrome test asserts that its exact token is in the pending queue
+before cancellation and absent after the actual canceled acquisition has
+settled with the original token. Preserve aggregate counts and all real Chrome,
+CDP, coverage and original-process ownership checks from r1. No global
+serialization or weakened acceptance is introduced.
+
+Implementation owns only the native helper, browser wrapper and existing
+browser lifecycle case enumerated in the feature amendment. Root owns review,
+join and actual Aspire/browser verification. Rollback removes only the
+observation and its exact test assertions. The observer proves membership and
+withdrawal for that token; it does not claim concurrent-launch performance,
+keyboard root cause or CI qualification.
+
+
+### Browser lease transfer at factory return
+
+The reviewed browser session factory admits one actual browser lease before the version child, endpoint/Chrome startup and CDP/coverage setup. Its lexical `using` owns all failure paths. Immediately before a successful return it marks that same lease transferred to the returned native process owner; only the factory's scope disposal consumes this transfer marker, leaving the actual lease held until the returned owner settles its original process, CDP and HTTP resources. Existing non-browser callers never set this marker. This is an ownership-transfer marker, not a readiness, exit or coverage proof. Failed setup follows the existing resource joins and bounded pool poison rule. AC-ISO-009's real cancellation/successor/native PID regression remains the evidence; the keyboard assertion retains its exact predicate and prints only bounded observed failure diagnostics through native TUnit output.

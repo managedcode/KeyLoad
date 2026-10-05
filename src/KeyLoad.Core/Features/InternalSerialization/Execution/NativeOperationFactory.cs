@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Features.InternalSerialization;
 
@@ -17,6 +18,10 @@ public sealed partial class DatabaseEngine
         DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload)
     {
         RequireNativeBudget(payload.Length);
+        if (kind == OperationKind.BootstrapPhysicalShardCatalog)
+        { PhysicalShardCatalogValidation.ValidateEncodedRequestLength(payload.Length); }
+        if (kind == OperationKind.BindAtomicPartitionPlacement)
+        { AtomicPartitionPlacementValidation.ValidateEncodedRequestLength(payload.Length); }
         payload = payload.ToArray();
         var identity = kind switch
         {
@@ -25,6 +30,8 @@ public sealed partial class DatabaseEngine
             OperationKind.Delivery => Identity<DeliveryCommand>(payload),
             OperationKind.Processing => Identity<ProcessingRequest>(payload),
             OperationKind.ConfigureResource => Identity<ConfigureResourceRequest>(payload),
+            OperationKind.BootstrapPhysicalShardCatalog => Identity<BootstrapPhysicalShardCatalogRequest>(payload),
+            OperationKind.BindAtomicPartitionPlacement => Identity<BindAtomicPartitionPlacementRequest>(payload),
             OperationKind.ConfigurePrincipal => Identity<ConfigurePrincipalRequest>(payload),
             OperationKind.ConfigureApiKey => Identity<ConfigureApiKeyRequest>(payload),
             OperationKind.SetDispatch => Identity<bool>(payload),

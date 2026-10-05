@@ -44,6 +44,14 @@ Always stop/dispose the owned AppHost. Forward native test output without
 rewriting results; retain original artifacts. Do not infer test success from
 AppHost startup or a container becoming healthy.
 
+Required CI suites explicitly set `KeyLoadTests:ReportTrx=true` at their
+Aspire caller. The optional setting still controls native child arguments;
+omitting it cannot qualify original TRX retention. The exact55 run
+37303831451 omitted it for full unit, scalar, recovery and RF3 execution,
+so those missing TRX receipts are not counted as evidence. Native TUnit JSON
+reports remain valid original test outcomes and are reviewed separately. Preserve failed native
+output/artifacts and require original per-suite reports on the next exact SHA.
+
 The AppHost project defaults to Release. The pinned Aspire CLI evaluates its
 native RunCommand/TargetPath without forwarding the outer dotnet-run configuration,
 so an implicit Debug default would launch stale or missing output after a Release

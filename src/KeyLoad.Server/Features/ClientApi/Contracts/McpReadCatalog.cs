@@ -49,6 +49,9 @@ internal static class McpReadCatalog
         McpOperationFactory.Read<GraphSearchRequest, GraphSearchResult>(McpToolNames.SearchGraph, McpToolRoutes.SearchGraph, GrainReadKind.GraphSearch),
         McpOperationFactory.Read<BackupReceipt>(McpToolNames.AdminBackup, McpToolRoutes.AdminBackup, GrainReadKind.Backup),
         McpOperationFactory.Read<NodeAdmissionStatus>(McpToolNames.AdminAdmission, McpToolRoutes.AdminAdmission, GrainReadKind.Admission),
-        McpOperationFactory.Read<NodeStatus>(McpToolNames.AdminStatus, McpToolRoutes.AdminStatus, GrainReadKind.NodeStatus)
+        McpOperationFactory.Read<NodeStatus>(McpToolNames.AdminStatus, McpToolRoutes.AdminStatus, GrainReadKind.NodeStatus),
+        McpOperationFactory.Read<AtomicPartitionPlacementReadRequest, AtomicPartitionPlacementResolution>(
+            McpToolNames.AdminPartitionPlacementRead, McpToolRoutes.AdminPartitionPlacementRead,
+            GrainReadKind.AtomicPartitionPlacement)
     ];
 }

@@ -14,10 +14,13 @@ internal static class RequestCqrsProbeProfileSettingsReader
     private const string TrueValue = "true";
     private const string FalseValue = "false";
     private const string GuidFormat = "N";
-    private const int MaximumSettings = 3;
+    private const int MaximumSettings = 4;
     private const string EnabledKey = "Enabled";
     private const string RootKey = "Root";
     private const string SessionKey = "SessionId";
+    private const string DiscoveryModeKey = "DiscoveryCaptureMode";
+    private const string DisabledMode = "disabled";
+    private const string MixedMode = "mixed-interface3-v1";
     private static readonly IReadOnlyList<string> Nodes = Array.AsReadOnly(new[] { "node1", "node2", "node3" });
 
     internal static IReadOnlyList<string> VoterNames => Nodes;
@@ -35,6 +38,8 @@ internal static class RequestCqrsProbeProfileSettingsReader
         string? enabledText = null;
         string? root = null;
         string? session = null;
+        var modeFound = false;
+        string? mode = null;
         foreach (var field in fields)
         {
             if (field.GetChildren().Take(1).Any() || field.Value is null)
@@ -53,6 +58,10 @@ internal static class RequestCqrsProbeProfileSettingsReader
                     sessionFound = true;
                     session = field.Value;
                     break;
+                case DiscoveryModeKey:
+                    modeFound = true;
+                    mode = field.Value;
+                    break;
                 default:
                     throw new InvalidOperationException(InvalidConfiguration);
             }
@@ -60,12 +69,19 @@ internal static class RequestCqrsProbeProfileSettingsReader
         var enabled = ReadEnabled(enabledFound, enabledText);
         if (!enabled)
         {
-            if (rootFound || (sessionFound && session is not { Length: 0 }))
-            { throw new InvalidOperationException(InvalidConfiguration); }
+            ValidateDisabledSettings(rootFound, sessionFound, session, modeFound, mode);
             return null;
         }
-        ValidateEnabledSettings(configuration, rootFound, root, sessionFound, session);
-        return new RequestCqrsProbeProfileSettings(root!, session!);
+        ValidateEnabledSettings(configuration, rootFound, root, sessionFound, session, modeFound, mode);
+        return new RequestCqrsProbeProfileSettings(root!, session!, mode ?? DisabledMode);
+    }
+
+    private static void ValidateDisabledSettings(bool rootFound, bool sessionFound, string? session,
+        bool modeFound, string? mode)
+    {
+        if (rootFound || (sessionFound && session is not { Length: 0 })
+            || modeFound && mode != DisabledMode)
+        { throw new InvalidOperationException(InvalidConfiguration); }
     }
 
     private static bool ReadEnabled(bool found, string? value)
@@ -80,12 +96,15 @@ internal static class RequestCqrsProbeProfileSettingsReader
     }
 
     private static void ValidateEnabledSettings(IConfiguration configuration, bool rootFound, string? root,
-        bool sessionFound, string? session)
+        bool sessionFound, string? session, bool modeFound, string? mode)
     {
+        var mixedMode = mode == MixedMode;
         if (!rootFound || string.IsNullOrWhiteSpace(root) || !sessionFound || !ValidSession(session)
+            || modeFound && mode is not (DisabledMode or MixedMode)
             || configuration[EphemeralSetting] != TrueValue
             || !string.IsNullOrWhiteSpace(configuration[TestSuiteSettings.SuiteSetting])
-            || HasBenchmarkSelection(configuration) || HasProtocolCohortOverride(configuration))
+            || HasBenchmarkSelection(configuration)
+            || HasProtocolCohortOverride(configuration) != mixedMode)
         { throw new InvalidOperationException(InvalidConfiguration); }
     }
 

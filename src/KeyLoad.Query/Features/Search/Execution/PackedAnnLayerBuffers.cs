@@ -35,7 +35,6 @@ internal sealed class PackedAnnLayerBuffers
         WorstHeapCount = 0;
         for (var index = 0; index < BestHeapPositions.Length; index++)
         {
-            budget.Check();
             budget.Charge(1);
             BestHeapPositions[index] = -1;
         }
@@ -77,7 +76,6 @@ internal sealed class PackedAnnLayerBuffers
         var bits = visitBitmap!;
         for (var index = 0; index < bits.Length; index++)
         {
-            budget.Check();
             budget.Charge(1);
             bits[index] = 0;
         }
@@ -88,7 +86,6 @@ internal sealed class PackedAnnLayerBuffers
         var values = marks!;
         for (var index = 0; index < values.Length; index++)
         {
-            budget.Check();
             budget.Charge(1);
             values[index] = 0;
         }

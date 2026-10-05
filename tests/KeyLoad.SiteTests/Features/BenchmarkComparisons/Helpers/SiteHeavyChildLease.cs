@@ -8,11 +8,20 @@ internal sealed class SiteHeavyChildLease(SiteHeavyChildAdmission admission) : I
     private SiteHeavyChildAdmission? _admission = admission;
     private Process? _process;
     private bool _settled;
+    private int transferredToCaller;
+
+    internal void TransferToCaller() => Interlocked.Exchange(ref transferredToCaller, SiteBrowserTokens.One);
 
     internal void MarkStarted(Process process)
     {
         ArgumentNullException.ThrowIfNull(process);
+        if (_process is not null && !_settled)
+        {
+            throw new InvalidOperationException(SiteHeavyChildTokens.UnsafeOwnership);
+        }
+
         _process = process;
+        _settled = false;
         _ = process.Id;
     }
 
@@ -52,6 +61,8 @@ internal sealed class SiteHeavyChildLease(SiteHeavyChildAdmission admission) : I
 
     public void Dispose()
     {
+        if (Interlocked.Exchange(ref transferredToCaller, SiteBrowserTokens.Zero) == SiteBrowserTokens.One)
+        { return; }
         var owner = Interlocked.Exchange(ref _admission, null);
         owner?.Finish(_process is null || _settled);
     }

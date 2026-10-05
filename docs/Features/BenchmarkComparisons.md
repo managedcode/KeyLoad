@@ -1026,3 +1026,118 @@ actual Aspire unit caller, then full normal/scalar gates as required. ADR-056
 records the implementation contract. No benchmark runner, native database,
 website, public contract or persisted data is changed; rollback restores the two
 original probes and removes the helper. Local tests remain development evidence.
+
+
+## Accepted native Chrome session admission (2026-10-05)
+
+The following root-reviewed contract is accepted before source integration; runtime qualification remains pending.
+
+# Private candidate: bounded native Chrome session admission
+
+This is an implementation contract proposal for root review. It is not joined
+to the KeyLoad checkout and does not qualify or explain the original keyboard
+failure.
+
+## Feature requirement
+
+`REQ-BC-CHROME-001`: Real Chrome work performed by one `KeyLoad.SiteTests`
+process is admitted through a bounded native-session owner. At most one real
+Chrome process may be active in that process. Admission is acquired before
+the Chrome version probe or original browser launch and remains owned until
+the real CDP socket and browser instrumentation/coverage are closed and the
+same original process is observed exited. A caller cancellation while queued
+withdraws that waiter with the original token. Incomplete or failed native
+cleanup poisons this browser-only admission pool; it cannot free capacity for a
+new launch.
+
+## Measurable acceptance
+
+`AC-BC-CHROME-001`: A genuine TUnit case using the workflow-provided Chrome and
+BCL CDP starts one native session, starts a second session while the first
+holds admission, observes that the second remains queued without launching,
+cancels it and verifies cancellation retains the exact caller token and removes
+that waiter. A successor session starts only after the first session's actual
+coverage completion/stop, CDP socket disposal and original process exit; the
+case verifies the distinct process identity and native exit observation. The
+pool has capacity one, at most 64 queued sessions, and the existing 20-minute
+cancellable admission bound. Existing browser assertions, page content,
+coverage inventory/thresholds, commands and startup/active deadlines remain
+unchanged. An unsafe/unjoined original process or teardown failure poisons the
+pool and rejects queued/future sessions.
+
+The existing keyboard-selection acceptance continues to require real ArrowUp
+and Enter actions, selected value `2`, and the independent rendered-row oracle.
+On a failed selection only, bounded evidence may report each actual CDP
+keyDown/keyUp acknowledgement plus a post-action snapshot containing only the
+active-control boolean, bounded select value and selected index. The record is
+fixed-size, truncated before formatting, and MUST NOT include result rows,
+projection/report bytes, query text or benchmark payload. This evidence records
+the observed interaction; it does not presume the cause of CI failure.
+
+Mapping: `REQ-BC-025` and `AC-BC-025` (real browser criteria), plus this focused
+admission acceptance. New TUnit source belongs to
+`tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/`; no site runtime,
+workflow, publication or measurement behavior changes.
+
+# Proposed r2 amendment — identify the original queued Chrome waiter
+
+This is a delta to the immutable private r1 candidate at
+`/private/tmp/keyload-site-chrome-admission-20261005`. The r1 files and hashes
+remain unchanged. The prior acceptance text requires waiter withdrawal but its
+`PendingCount >= baseline` assertion cannot identify which waiter remains when
+other work is queued.
+
+## REQ-BC-CHROME-001 clarification
+
+The admission implementation retains each actual queued waiter's original
+`CancellationToken` in the existing bounded waiter node. Add a read-only,
+internal membership observation over the existing pending list, performed
+under its existing lock, that reports whether the exact token has a currently
+queued waiter. The list is already capped at 64 waiters, so this observation is
+bounded O(64), retains no additional state, does not invoke callbacks, and does
+not alter admission, cancellation, FIFO, deadline, or cleanup behavior. Expose
+it only through `SiteBrowserSessionAdmission`; do not expose new product/API or
+log token values.
+
+## AC-BC-CHROME-001 clarification
+
+The genuine Chrome lifecycle case creates its unique linked cancellation token,
+starts the real second Chrome session while the first native session holds its
+lease, and asserts that the exact token is present in the actual admission
+waiter list before cancellation. It cancels that same token, awaits the
+original `OperationCanceledException`, verifies the exact original token on
+that exception, then asserts that this exact token is absent from the pending
+list. Preserve the existing aggregate queue-count assertions, no-start
+assertion, successor queueing, and all real coverage/CDP/process lifetime
+observations. This is a direct identity/removal oracle against the native
+bounded queue, not a mock queue, synthetic provider, timer, or inferred count.
+
+All existing capacity, queue, admission-deadline, Chrome process/CDP/coverage
+ownership, failure behavior, keyboard assertions, evidence limits, and other
+AC-BC-CHROME-001 checks remain unchanged. The test remains subject to existing
+TUnit scheduling and does not serialize unrelated tests globally.
+
+## Exact ownership and ordered stage
+
+1. Freeze this amendment against the immutable r1 source packet before source
+   edits.
+2. Modify `tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Helpers/
+   SiteHeavyChildAdmission.cs` only to add the bounded locked membership read
+   over its original-token waiter nodes. No Node admission behavior changes.
+3. Modify `.../Helpers/SiteBrowserSessionAdmission.cs` only to expose that
+   observation from its browser-only pool.
+4. Modify `.../Cases/SiteBrowserSessionAdmissionTests.cs` only to assert exact
+   token presence before cancellation and exact absence after awaiting the
+   original cancellation; retain every existing lifecycle and assertion.
+5. Root reviews the cumulative r1+r2 packet and exact hashes, joins it, and owns
+   the actual Aspire Site suite and native Chrome evidence. Worker performs no
+   build/test/browser/Git execution.
+
+Rollback removes the membership observer/wrapper/assertions and returns to the
+r1 code. Persistence, public product behavior, workflow, Node processes and
+website publication are N/A.
+
+
+### Browser lease transfer at factory return
+
+The reviewed browser session factory admits one actual browser lease before the version child, endpoint/Chrome startup and CDP/coverage setup. Its lexical `using` owns all failure paths. Immediately before a successful return it marks that same lease transferred to the returned native process owner; only the factory's scope disposal consumes this transfer marker, leaving the actual lease held until the returned owner settles its original process, CDP and HTTP resources. Existing non-browser callers never set this marker. This is an ownership-transfer marker, not a readiness, exit or coverage proof. Failed setup follows the existing resource joins and bounded pool poison rule. AC-ISO-009's real cancellation/successor/native PID regression remains the evidence; the keyboard assertion retains its exact predicate and prints only bounded observed failure diagnostics through native TUnit output.

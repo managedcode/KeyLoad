@@ -52,7 +52,7 @@ internal static class RequestCqrsAuthorityFaultCleanup
         if (mcpCall is not null)
         { await ServerFailureObserver.ObserveAsync(() => mcpCall, failures).ConfigureAwait(false); }
         await ObserveProducerDisposedAsync(controls, discovery, armId, originalStarted, failures, cancellationToken).ConfigureAwait(false);
-        if (controls is not null && armId != Guid.Empty)
+        if (controls is not null && armId != Guid.Empty && !controls.ArmFor(armId).Retired)
         { await ServerFailureObserver.ObserveAsync(() => controls.RetireArmAsync(armId, cancellationToken), failures).ConfigureAwait(false); }
     }
 

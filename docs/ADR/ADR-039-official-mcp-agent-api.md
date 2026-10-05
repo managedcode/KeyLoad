@@ -84,6 +84,16 @@ then the existing capability/partition grain with a reloaded persisted principal
 
 ## Frozen catalog and wire contract
 
+ADR-098 adds its direct and SQL graph-path tools as additive version-one reads;
+AC-MCP-001 independently verifies the complete 66-name catalog, typed schemas
+and effect hints. The two PMAP tools use strict generated request/result schemas:
+bind is `{ commandId, request }` with version, expectedRevision, complete
+partition and physicalShardId, while read is `{ request }` and returns the full
+same-view placement witness including ordered voters and both directory and row
+revisions. Persisted administrator authorization remains enforced by the existing
+request-grain path. Runtime RF3 confirmation remains pending.
+
+
 Outer arguments are strict: a body-bearing tool accepts only `request`; the four
 header-command-ID tools additionally require nonempty GUID `commandId`. No-body
 tools accept `{}`. Write identities inside canonical DTOs remain unchanged:
@@ -98,6 +108,10 @@ request.CommandId. MCP request IDs and Orleans actor IDs never replace them.
 | keyload_subscriptions_status | GetSubscriptionRequest | SubscriptionInfo | /v1/subscriptions/status; Subscription |
 | keyload_messages_inspect | InspectMessageRequest | MessageInspection or null | /v1/queues/inspect; Message |
 | keyload_graph_traverse | TraverseRequest | GraphTraversal | /v1/graph/traverse; Traverse |
+| keyload_graph_shortest_path | GraphShortestPathRequest | GraphShortestPathResult | /v1/graph/shortest-path; GraphShortestPath |
+| keyload_query_graph_path | SqlGraphPathRequest | GraphShortestPathResult | /v1/query/graph-path; SqlGraphPath |
+| keyload_admin_partition_placement_bind | BindAtomicPartitionPlacementRequest | bool | /v1/admin/partition-placement/bind; BindAtomicPartitionPlacement |
+| keyload_admin_partition_placement_read | AtomicPartitionPlacementReadRequest | AtomicPartitionPlacementResolution | /v1/admin/partition-placement/read; AtomicPartitionPlacement |
 | keyload_series_read | ReadSamplesRequest | SampleRecord array | /v1/series/read; Samples |
 | keyload_query_execute | QueryRequest | QueryPage | /v1/query; Query |
 | keyload_query_ast | AstQueryRequest | QueryPage | /v1/query/ast; AstQuery |

@@ -122,6 +122,12 @@ feature: internal CreateReadGrant(maximumBytes, maximumRecords) returns
 ReadExecutionBudgetReadGrant;
 accepted native bytes convert fixed reserved capacity before decode/copy.
 Core adds only KeyLoad.Query friend visibility and actual native regressions.
+The native grant cases are split by responsibility into
+ReadExecutionBudgetGrantPointTests, ReadExecutionBudgetGrantRangeTests,
+ReadExecutionBudgetGrantReservationTests and
+ReadExecutionBudgetGrantCancellationTests, sharing only the actual ZoneTree
+seed helper ReadExecutionBudgetGrantSeed. The original assertions and native
+read callbacks remain intact; the split satisfies the mandatory type-size limit.
 This ADR does not authorize fresh per-leaf deadlines, post-hoc accounting,
 changing public Q1 tie ordering or enlarging any configured limit.
 
@@ -130,3 +136,36 @@ callbacks; point misses and charged range lookahead count one each. The
 feature freezes the exact conservative retention constants/formula and the
 leaf-array transfer peak, with alias-aware candidate payload ownership. These
 model logical retained state and do not establish peak process RSS.
+
+The accepted local top-L implementation uses a custom L+1-reference binary
+heap for the internal partition leaf, with full EntityRef ties before selection.
+The public Q1 PriorityQueue path keeps its existing UTF-8 EntityId comparator.
+Reserve each exact candidate payload before heap insertion; rejection must
+leave prior heap/output unchanged. Reserve the final leaf array while scratch
+is still held, clear and relinquish the scratch container, then release its
+reservation. At most one callback-local temporary projection/order encoding
+is bounded by admitted raw bytes and document limits. Execution helpers,
+including retained-byte arithmetic, belong in QueryExecution/Execution.
+
+The narrow integration is an internal PartitionQueryExecution extension in
+QueryExecution/Execution plus one internal QueryEngine owner accessor. It
+reuses existing Bind/Project and the actual DatabaseEngine, keeping the shared
+QueryEngine within the mandatory type-size limit without a second dispatcher.
+Generated aliases use named constants with their exact frozen strings.
+
+
+## TASK-PQUERY-PUBLIC accepted implementation contract
+
+The linked DistributedQueryExecution feature freezes REQ/AC-PQUERY-001 through 006, public generated aliases/IDs, the exact bounded same-view metadata grant and conservative public mapping retention before code. Stage remains accepted, with implementation and qualification pending.
+
+1. Root joins the accepted PMAP public foundation and native command/read dispatch, then its complete SDK/MCP and independent oracle corpus. Existing aliases, numeric enum values and administrator gates remain unchanged.
+2. The Core agent owns only the authorized-query same-view resolver and actual ZoneTree grant/corruption regressions in ClusterRouting/Queries and the corresponding unit slice. It accepts the actual existing leaf grant and cannot open a second read view or bypass budget accounting.
+3. The Query agent owns feature-local generated public DTOs/aliases, strict request validation, same-owner execution overload, fresh leaf metadata checks, conservative public mapper and focused contract/budget/order/authorization cases. Existing internal local merge semantics and public Q1 ordering stay unchanged.
+4. Root owns the immutable server PhysicalShardRecord registration from configured PartitionHost/NodeOptions, DatabaseReadGrain/GrainQueryReadCapabilities join, append-only read kind, public route and SDK/MCP inventories, generated-native corpus and actual RF3 client regressions. The first public request can execute only after the existing successful catalog fence, and every leaf compares fresh SCAT/PMAP evidence with the immutable host tuple.
+5. Root runs required Release build, formatter/analyzers and Aspire-owned focused/full unit, scalar, recovery and RF3 suites. Remote fan-out, independent physical owners, SQL grammar, cursors, global cuts, movement and split/merge remain separate unqualified requirements.
+
+The wire addition is append-only and versioned; no committed storage-format change occurs. Rollout requires clients and servers with the typed new capability, and older servers reject it through the existing unsupported-capability path. Rollback removes exposure of the new route/kind from the deployment without changing retained committed SCAT/PMAP records or their corruption checks. Root serializes source integration and owns the complete-stage commit/push; agents prepare scoped immutable packets. The feature names exact automated acceptance cases and final evidence. This amendment does not mark the ADR implemented or KL-037 complete.
+
+Per-leaf PMAP directory/row revisions and fallback state are validated against that leaf's own same-view records. Bound and fallback partitions with the same physical owner remain valid together; their row revisions/fallback states can differ, and directory revisions can differ across the retained per-leaf cuts. Cross-leaf equality covers the full owner tuple plus existing node/incarnation/read-generation/policy witnesses, without a global snapshot.
+
+The same-view Core helper is static because it uses only the already authorized borrowed view, complete partition and actual leaf grant. This implementation modifier adds no API, authority, storage view or state.

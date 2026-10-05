@@ -95,7 +95,6 @@ internal static class PackedAnnCandidateHeaps
     {
         while (position > 0)
         {
-            budget.Check();
             var parent = (position - 1) >> 1;
             if (!IsBetter(buffers, buffers.BestHeapSlots[position], buffers.BestHeapSlots[parent], budget))
             {
@@ -111,7 +110,6 @@ internal static class PackedAnnCandidateHeaps
         var count = buffers.BestHeapCount;
         while (position < count / 2)
         {
-            budget.Check();
             var child = position * 2 + 1;
             var right = child + 1;
             if (right < count && IsBetter(buffers, buffers.BestHeapSlots[right],
@@ -132,7 +130,6 @@ internal static class PackedAnnCandidateHeaps
     {
         while (position > 0)
         {
-            budget.Check();
             var parent = (position - 1) >> 1;
             if (!IsWorse(buffers, buffers.WorstHeapSlots[position],
                     buffers.WorstHeapSlots[parent], budget))
@@ -149,7 +146,6 @@ internal static class PackedAnnCandidateHeaps
         var count = buffers.WorstHeapCount;
         while (position < count / 2)
         {
-            budget.Check();
             var child = position * 2 + 1;
             var right = child + 1;
             if (right < count && IsWorse(buffers, buffers.WorstHeapSlots[right],

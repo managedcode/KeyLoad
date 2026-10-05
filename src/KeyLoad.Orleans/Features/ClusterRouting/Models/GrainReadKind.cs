@@ -82,5 +82,7 @@ public enum GrainReadKind
     /// <summary>Read one authorized shortest graph path inside a committed partition cut.</summary>
     GraphShortestPath,
     /// <summary>Execute bounded SQL graph-path syntax through the canonical path reader.</summary>
-    SqlGraphPath
+    SqlGraphPath,
+    /// <summary>Read a persisted administrator-authorized atomic-partition placement witness.</summary>
+    AtomicPartitionPlacement
 }

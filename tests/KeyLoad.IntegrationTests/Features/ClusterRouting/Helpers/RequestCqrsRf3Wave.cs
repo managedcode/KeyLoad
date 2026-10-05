@@ -38,9 +38,12 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
 
     internal static Task<RequestCqrsRf3Wave> StartAsync(string dataRoot,
         IReadOnlyDictionary<string, string> images, bool configureCohort, bool requireHealthy,
-        Guid diagnosticsWaveId, CancellationToken cancellationToken)
+        Guid diagnosticsWaveId, CancellationToken cancellationToken,
+        string? physicalShardOverrideNode = null, Guid? physicalShardOverrideId = null,
+        RequestCqrsProbeFixture? controls = null)
         => RequestCqrsRf3WaveStartup.StartAsync(dataRoot, images, configureCohort, requireHealthy,
-            null, diagnosticsWaveId, cancellationToken);
+            null, diagnosticsWaveId, cancellationToken, controls, physicalShardOverrideNode: physicalShardOverrideNode,
+            physicalShardOverrideId: physicalShardOverrideId);
 
     internal static Task<RequestCqrsRf3Wave> StartPriorNative6Async(string dataRoot,
         IReadOnlyDictionary<string, string> images, bool configureCohort, bool requireHealthy,

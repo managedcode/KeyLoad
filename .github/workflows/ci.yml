@@ -42,7 +42,7 @@ jobs:
           dotnet build src/KeyLoad.AppHost --no-restore --configuration Release
           dotnet build tests/KeyLoad.Analyzers.Tests --no-restore --configuration Release
       - name: Run analyzer tests
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true
       - name: Save analyzer test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
@@ -102,7 +102,7 @@ jobs:
       - name: Check repository rules
         run: node scripts/Features/RepositoryGovernance/verify.mjs
       - name: Test code analyzers
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true
       - name: Test prompt termination on Aspire resource failures
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/AspireFailure*/*' --KeyLoadTests:ResultsDirectory=TestResults/aspire-failure --KeyLoadTests:ReportTrx=true
       - name: Test Aspire recovery prerequisite ownership
@@ -116,13 +116,13 @@ jobs:
       - name: Test Aspire workflow entry contracts
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/WorkflowLayoutAspireEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-workflow --KeyLoadTests:ReportTrx=true
       - name: Run unit tests
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit --KeyLoadTests:ReportTrx=true
       - name: Run unit tests without CPU intrinsics
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit-scalar
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit-scalar --KeyLoadTests:ReportTrx=true
       - name: Test recovery after process crashes
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery --KeyLoadTests:ReportTrx=true
       - name: Save test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
@@ -162,6 +162,9 @@ jobs:
       - name: Build the genuine epoch-six RPC1 KeyLoad server image
         id: rpc1-images
         run: node scripts/Features/ClusterRouting/prepare-rpc1-server-image.mjs
+      - name: Build the genuine epoch-seven interface-three KeyLoad server image
+        id: interface3-images
+        run: node scripts/Features/ClusterRouting/prepare-interface3-server-image.mjs
       - name: Configure Docker image references
         shell: bash
         env:
@@ -173,13 +176,21 @@ jobs:
           KEYLOAD_RPC1_SERVER_IMAGE: ${{ steps.rpc1-images.outputs.KEYLOAD_RPC1_SERVER_IMAGE }}
           KEYLOAD_RPC1_IMAGE_RECEIPT: ${{ steps.rpc1-images.outputs.KEYLOAD_RPC1_IMAGE_RECEIPT }}
           KEYLOAD_RPC1_SERVER_MANIFEST: ${{ steps.rpc1-images.outputs.KEYLOAD_RPC1_SERVER_MANIFEST }}
+          KEYLOAD_INTERFACE3_SERVER_IMAGE: ${{ steps.interface3-images.outputs.KEYLOAD_INTERFACE3_SERVER_IMAGE }}
+          KEYLOAD_INTERFACE3_IMAGE_RECEIPT: ${{ steps.interface3-images.outputs.KEYLOAD_INTERFACE3_IMAGE_RECEIPT }}
+          KEYLOAD_INTERFACE3_SERVER_MANIFEST: ${{ steps.interface3-images.outputs.KEYLOAD_INTERFACE3_SERVER_MANIFEST }}
+          KEYLOAD_INTERFACE3_SERVER_INVENTORY: ${{ steps.interface3-images.outputs.KEYLOAD_INTERFACE3_SERVER_INVENTORY }}
+          KEYLOAD_INTERFACE3_SERVER_ARCHIVE: ${{ steps.interface3-images.outputs.KEYLOAD_INTERFACE3_SERVER_ARCHIVE }}
         run: |
           test -n "$KEYLOAD_SERVER_IMAGE" && test -n "$KEYLOAD_RUNNER_IMAGE"
           test -n "$KEYLOAD_PRIOR_SERVER_IMAGE" && test -n "$KEYLOAD_PRIOR_IMAGE_RECEIPT" && test -n "$KEYLOAD_PRIOR_SERVER_MANIFEST"
           test -n "$KEYLOAD_RPC1_SERVER_IMAGE" && test -n "$KEYLOAD_RPC1_IMAGE_RECEIPT" && test -n "$KEYLOAD_RPC1_SERVER_MANIFEST"
+          test -n "$KEYLOAD_INTERFACE3_SERVER_IMAGE" && test -n "$KEYLOAD_INTERFACE3_IMAGE_RECEIPT" && test -n "$KEYLOAD_INTERFACE3_SERVER_MANIFEST"
+          test -n "$KEYLOAD_INTERFACE3_SERVER_INVENTORY" && test -n "$KEYLOAD_INTERFACE3_SERVER_ARCHIVE"
           printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
           printf 'KEYLOAD_PRIOR_SERVER_IMAGE=%s\nKEYLOAD_PRIOR_IMAGE_RECEIPT=%s\nKEYLOAD_PRIOR_SERVER_MANIFEST=%s\n' "$KEYLOAD_PRIOR_SERVER_IMAGE" "$KEYLOAD_PRIOR_IMAGE_RECEIPT" "$KEYLOAD_PRIOR_SERVER_MANIFEST" >> "$GITHUB_ENV"
           printf 'KEYLOAD_RPC1_SERVER_IMAGE=%s\nKEYLOAD_RPC1_IMAGE_RECEIPT=%s\nKEYLOAD_RPC1_SERVER_MANIFEST=%s\n' "$KEYLOAD_RPC1_SERVER_IMAGE" "$KEYLOAD_RPC1_IMAGE_RECEIPT" "$KEYLOAD_RPC1_SERVER_MANIFEST" >> "$GITHUB_ENV"
+          printf 'KEYLOAD_INTERFACE3_SERVER_IMAGE=%s\nKEYLOAD_INTERFACE3_IMAGE_RECEIPT=%s\nKEYLOAD_INTERFACE3_SERVER_MANIFEST=%s\nKEYLOAD_INTERFACE3_SERVER_INVENTORY=%s\nKEYLOAD_INTERFACE3_SERVER_ARCHIVE=%s\n' "$KEYLOAD_INTERFACE3_SERVER_IMAGE" "$KEYLOAD_INTERFACE3_IMAGE_RECEIPT" "$KEYLOAD_INTERFACE3_SERVER_MANIFEST" "$KEYLOAD_INTERFACE3_SERVER_INVENTORY" "$KEYLOAD_INTERFACE3_SERVER_ARCHIVE" >> "$GITHUB_ENV"
       - name: Find Chrome for admin tests
         shell: bash
         run: |
@@ -192,7 +203,7 @@ jobs:
       - name: Build three-node database tests
         run: dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release
       - name: Test three-node database with .NET and MCP clients
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=rf3
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=rf3 --KeyLoadTests:ReportTrx=true
       - name: Clean up Docker registry
         if: ${{ always() && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
         run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs

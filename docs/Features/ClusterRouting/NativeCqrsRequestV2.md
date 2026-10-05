@@ -775,6 +775,20 @@ failures with `ServerFailureObserver`; `SaveEvidence` remains fail-closed until
 the original joins have completed. Caller cancellation must not become a
 successful capture or erase its primary failure.
 
+REQ-CRS-DIAG-005 / AC-CRS-DIAG-005 refines the native completion oracle:
+`WatchAnySubscribersAsync` is used only to observe the required pre-start
+admission. Its global `AnySubscribers` changes are never proof that this wave's
+three captures have completed, because another native consumer may remain
+subscribed. After completing the three captured resource streams, join the same
+memoized diagnostics disposal and every original watcher task/enumerator before
+saving evidence. Dispose and join the subscriber observer afterward. The actual
+`ResourceLoggerService` regression keeps a separate consumer on an uncompleted
+real AppHost resource alive across the owned three-watcher join, delivers and
+observes a later native log line, then completes and joins that consumer during
+scope cleanup. Repeated disposal, fail-closed publication, original task
+settlement, cleanup and fatal/error preservation remain asserted. No parser,
+artifact shape, cap, topology or timeout is changed.
+
 TASK-CRS-DIAG-DRAIN stages: freeze this contract, privately implement subscriber
 admission in `RequestCqrsRf3WaveStartup.cs`, bounded live-record observation
 and native completion/drain in `RequestCqrsRf3Diagnostics.cs`, the thin wave
@@ -839,3 +853,18 @@ allowed fixed/numeric fields and preserving its original exception. Phase
 output alone does not establish the lock holder, repair AC-CRS-005 or qualify
 RF3. No product/data/transport migration; rollback removes these test-parent
 observations. ADR-082 remains Accepted.
+
+
+## Accepted TASK-CRS-C1-HELD-AUTHORITY cleanup amendment
+
+## REQ/AC linkage
+
+Amends the test-lifecycle implementation of TASK-CRS-C1-HELD-AUTHORITY under REQ/AC-CRS-004/005 in `docs/Features/ClusterRouting/NativeCqrsRequestV2.md` and ADR-082. It changes no public, persisted, authorization, protocol, timeout, or product behavior.
+
+## Frozen cleanup rule
+
+After cleanup has stopped private-control admission, released any still-open holds, joined each original SDK/MCP request and observed its actual `ProducerDisposed` terminal marker, cleanup must retire the owned arm on all three voters if and only if that actual arm is not already retired. The existing scenario path may have completed the same verified retirement before cleanup. Cleanup determines this from `RequestCqrsProbeFixture.ArmFor(armId).Retired`; it does not make retirement idempotent, infer retirement from a missing file, swallow a missing/invalid arm, or skip the original marker/producer join. A missing or invalid owned arm remains a cleanup failure. Preserve original, cleanup, and fatal failure ordering through `ServerFailureObserver`.
+
+## Regression and qualification
+
+The existing actual SDK held-revocation RF3 case is the focused regression: it reaches the authenticated held request, persisted revocation ACK, release, typed `Unauthenticated`, producer settlement, first retirement, no-effect checks and then common cleanup. The test was previously marked failed solely because common cleanup repeated the completed retirement. Do not add a fake-provider fixture test: the relevant state transition requires real signed phase markers and the actual original producer. Keep the MCP case and its independent startup status; the CI55 MCP failure occurred before revocation and remains an unresolved startup diagnostic. Root owns the full strict build and Aspire RF3 rerun.

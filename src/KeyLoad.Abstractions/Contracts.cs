@@ -341,7 +341,11 @@ public enum OperationKind
     /// <summary>Publishes a binary object revision tombstone.</summary>
     DeleteBlob,
     /// <summary>Reclaims eligible binary parts through a bounded command.</summary>
-    ReclaimBlob
+    ReclaimBlob,
+    /// <summary>Commits the initial physical shard placement catalog.</summary>
+    BootstrapPhysicalShardCatalog,
+    /// <summary>Commits an explicit atomic-partition assignment to its physical shard.</summary>
+    BindAtomicPartitionPlacement
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

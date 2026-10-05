@@ -18,8 +18,10 @@ committed reads, keys, persisted authority and native routing/lifecycle.
 Ordered stages and exact files/roles are in that contract: root freezes; private
 Luna Core/contracts packet; independently authored real-store tests; root SQL
 compile/parity; root Orleans/HTTP/SDK/official MCP and Aspire RF3 joins; full strict
-checks and original delivered-source Linux evidence. Root owns all shared/Git/
-acceptance joins. Workers cannot alter packages, shared configuration or formats.
+checks and original delivered-source Linux evidence. The official MCP join also
+updates ADR-039 and the independent ClientApi name/schema/hint oracle for both
+shortest-path tools (64 total) before real RF3 discovery qualification. Root owns all
+shared/Git/acceptance joins. Workers cannot alter packages, shared configuration or formats.
 Neither source presence nor focused passes complete KL-023; normal/scalar,
 recovery and full RF3/client gates, including failover/revocation, remain required.
 

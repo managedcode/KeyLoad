@@ -24,6 +24,21 @@ internal sealed class SiteHeavyChildAdmission(int capacity, int maximumQueued, T
         }
     }
 
+    internal bool HasPendingWaiter(CancellationToken token)
+    {
+        lock (_sync)
+        {
+            foreach (var waiter in _pending)
+            {
+                if (waiter.Token.Equals(token))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     internal async Task<SiteHeavyChildLease> AcquireAsync(CancellationToken token)
     {
         token.ThrowIfCancellationRequested();

@@ -27,10 +27,14 @@ internal static class McpCanonicalTestData
     private const string ApiKey = "key-record";
     private const string Verifier = "persisted-verifier";
     private const string Sql = "SELECT * FROM mcp-records";
+    private const string GraphPathSql = "SELECT * FROM GRAPH_SHORTEST_PATH('mcp-records', 'mcp-records', 'mcp-entity', 'mcp-records', 'mcp-entity', 16, 1000, 5000);";
+    private const int ContractVersion = 1;
+    private const string PlacementShardIdText = "79214e37-a89c-431f-b4e2-202d5d967883";
     private const long Generation = 1;
     private const long Position = 0;
     private const int Limit = 10;
     internal static readonly Guid StableId = Guid.Parse(StableIdText);
+    private static readonly Guid PlacementShardId = Guid.Parse(PlacementShardIdText);
     internal static readonly PartitionRef Partition = new(Tenant, Database, Domain, PartitionKey);
     internal static readonly EntityRef Reference = new(Partition, Resource, Entity);
     internal static readonly QueueLaneRef Lane = new(Partition, Resource);
@@ -66,7 +70,9 @@ internal static class McpCanonicalTestData
             new ProjectionConsumerDefinition(Generation, [Resource], [])), CommandKey),
         Case(McpCatalogExpectations.ProjectionsCommit, new CommitProjectionBatchRequest(StableId, Consumer, Token, Effects()), CommandKey),
         Case(McpCatalogExpectations.ProjectionsRelease, new ReleaseProjectionConsumerRequest(StableId, Consumer, Generation), CommandKey),
-        Case(McpCatalogExpectations.OutboxPurge, new PurgeOutboxRequest(StableId, Partition, Position), CommandKey)
+        Case(McpCatalogExpectations.OutboxPurge, new PurgeOutboxRequest(StableId, Partition, Position), CommandKey),
+        Case(McpCatalogExpectations.AdminPartitionPlacementBind,
+            new BindAtomicPartitionPlacementRequest(ContractVersion, 0, Partition, PlacementShardId), null)
     ];
 
     internal static ImmutableArray<McpDecodeCase> Reads() =>
@@ -83,6 +89,12 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.ScheduleInspect, new InspectRecurringScheduleRequest(Lane, StableId)),
         Read(McpCatalogExpectations.SagaInspect, new InspectSagaRequest(Lane, StableId)),
         Read(McpCatalogExpectations.GraphTraverse, new TraverseRequest(Partition, Resource, Reference)),
+        Read(McpCatalogExpectations.GraphShortestPath,
+            new GraphShortestPathRequest(ContractVersion, Partition, Resource, Reference, Reference)),
+        Read(McpCatalogExpectations.QueryGraphPath,
+            new SqlGraphPathRequest(ContractVersion, new QueryRequest(Partition, GraphPathSql, AllowFullScan: true))),
+        Read(McpCatalogExpectations.AdminPartitionPlacementRead,
+            new AtomicPartitionPlacementReadRequest(ContractVersion, Partition)),
         Read(McpCatalogExpectations.SeriesRead, new ReadSamplesRequest(Partition, Resource, Entity, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch)),
         Read(McpCatalogExpectations.QueryExecute, new QueryRequest(Partition, Sql)),
         Read(McpCatalogExpectations.QuerySearch, new SqlGraphSearchRequest(1, new(Partition, Sql))),

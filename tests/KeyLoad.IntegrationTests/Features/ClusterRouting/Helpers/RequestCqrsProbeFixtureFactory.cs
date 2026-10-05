@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Creates the fixture's fresh, exclusively owned voter-control roots.</summary>
 internal static class RequestCqrsProbeFixtureFactory
 {
-    internal static RequestCqrsProbeFixture Create(string dataRoot, Guid sessionId)
+    internal static RequestCqrsProbeFixture Create(string dataRoot, Guid sessionId, bool captureDiscovery = false)
     {
         if (sessionId == Guid.Empty)
         { throw new ArgumentException(InvalidArm, nameof(sessionId)); }
@@ -21,7 +21,7 @@ internal static class RequestCqrsProbeFixtureFactory
             CreateNode(root, session, RequestCqrsRf3Protocol.Node1, Node1Origin, directories, owners);
             CreateNode(root, session, RequestCqrsRf3Protocol.Node2, Node2Origin, directories, owners);
             CreateNode(root, session, RequestCqrsRf3Protocol.Node3, Node3Origin, directories, owners);
-            fixture = new RequestCqrsProbeFixture(root, session, directories, owners);
+            fixture = new RequestCqrsProbeFixture(root, session, directories, owners, captureDiscovery);
         }, failures);
         if (failures.Count > 0)
         {

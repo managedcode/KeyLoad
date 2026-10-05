@@ -1,5 +1,11 @@
 # TestInfrastructure
 
+AC-TEST-010 requires original per-suite MTP/TRX evidence from every required
+CI suite. Its Aspire caller explicitly enables `KeyLoadTests:ReportTrx=true`;
+an omitted report setting, absent report, cancelled suite or failed native
+runner cannot establish qualification. Run37303831451's missing full-suite
+TRX receipts are retained as an evidence gap, alongside its original artifacts.
+
 ## Unified Aspire test entry
 
 [ADR-074](../ADR/ADR-074-aspire-owned-test-entry.md) specifies the owner-required

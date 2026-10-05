@@ -8,26 +8,33 @@ internal sealed class RequestCqrsProbeFiles
 {
     private readonly object sync = new();
     private readonly string root;
+    internal string SessionId { get; }
     private readonly byte[] ownerBytes;
     private readonly RequestCqrsProbeRecords records;
+    private readonly bool captureDiscovery;
 
-    private RequestCqrsProbeFiles(string root, string sessionId, string voter, byte[] ownerBytes)
+    private RequestCqrsProbeFiles(string root, string sessionId, string voter, byte[] ownerBytes,
+        ReplicaConfiguration replica, bool captureDiscovery)
     {
         this.root = root;
+        SessionId = sessionId;
         this.ownerBytes = ownerBytes;
-        records = new RequestCqrsProbeRecords(sessionId, voter, ownerBytes);
+        this.captureDiscovery = captureDiscovery;
+        var discoveryPolicy = new RequestCqrsProbeDiscoveryPolicy(replica.VoterIds, voter, captureDiscovery);
+        records = new RequestCqrsProbeRecords(sessionId, voter, ownerBytes, discoveryPolicy);
     }
 
     internal static RequestCqrsProbeFiles Open(RequestCqrsProbeOptions options, ReplicaConfiguration replica)
     {
-        var root = RequireRoot(options);
-        RequireDirectory(root);
+        var root = RequestCqrsProbePaths.RequireRoot(options);
+        RequestCqrsProbePaths.RequireDirectory(root);
         var voter = replica.LocalId;
         var ownerBytes = ReadRecord(Path.Combine(root, RequestCqrsProbeProtocol.OwnerFile));
         var owner = RequestCqrsProbeJson.ReadOwner(ownerBytes);
         if (owner.SessionId != options.SessionId || owner.Voter != voter)
         { throw Invalid(); }
-        var files = new RequestCqrsProbeFiles(root, options.SessionId, voter, ownerBytes.ToArray());
+        var files = new RequestCqrsProbeFiles(root, options.SessionId, voter, ownerBytes.ToArray(), replica,
+            options.DiscoveryCaptureMode == RequestCqrsProbeProtocol.MixedInterface3Capture);
         _ = files.ReadSnapshot();
         return files;
     }
@@ -61,6 +68,21 @@ internal sealed class RequestCqrsProbeFiles
         }
     }
 
+    internal void WriteDiscovery(RequestCqrsProbeDiscoveryRecord discovery)
+    {
+        lock (sync)
+        {
+            if (!captureDiscovery)
+            { throw Invalid(); }
+            var snapshot = ReadSnapshotLocked();
+            records.ValidateDiscoveryForWrite(discovery);
+            if (snapshot.Discoveries.Any(existing => existing.PeerVoterId == discovery.PeerVoterId))
+            { return; }
+            var slot = records.GetDiscoverySlot(discovery.PeerVoterId);
+            WriteAtomic(Path.Combine(root, DiscoveryName(slot)), RequestCqrsProbeJson.WriteDiscovery(discovery));
+        }
+    }
+
     internal void WriteMarker(RequestCqrsProbeMarkerRecord marker, RequestCqrsProbeLoadedArm? producerClaim = null)
     {
         lock (sync)
@@ -76,7 +98,7 @@ internal sealed class RequestCqrsProbeFiles
 
     private RequestCqrsProbeSnapshot ReadSnapshotLocked()
     {
-        RequireDirectory(root);
+        RequestCqrsProbePaths.RequireDirectory(root);
         var currentOwner = ReadRecord(Path.Combine(root, RequestCqrsProbeProtocol.OwnerFile));
         if (!CryptographicOperations.FixedTimeEquals(ownerBytes, currentOwner))
         { throw Invalid(); }
@@ -86,6 +108,7 @@ internal sealed class RequestCqrsProbeFiles
         var arms = new List<RequestCqrsProbeLoadedArm>();
         var releases = new List<RequestCqrsProbeReleaseRecord>();
         var markers = new List<RequestCqrsProbeMarkerRecord>();
+        var discoveries = new List<RequestCqrsProbeDiscoveryRecord>();
         var presentControls = new HashSet<string>(StringComparer.Ordinal);
         long aggregateBytes = 0;
         foreach (var path in entries)
@@ -94,19 +117,20 @@ internal sealed class RequestCqrsProbeFiles
             aggregateBytes = checked(aggregateBytes + ValidateEntry(path, name));
             if (aggregateBytes > RequestCqrsProbeProtocol.MaximumAggregateBytes)
             { throw Invalid(); }
-            records.ReadControl(path, name, arms, releases, markers, presentControls);
+            records.ReadControl(path, name, arms, releases, markers, presentControls, discoveries);
         }
         records.ValidatePresence(presentControls);
         records.ValidateInventory(markers);
+        records.ValidateDiscoveryInventory(discoveries);
         records.ValidateCrossRecords(arms, releases, markers);
         records.CommitArmInventory(arms, releases, markers);
-        return new(arms, releases, markers, entries.Length, aggregateBytes);
+        return new(arms, releases, markers, discoveries, entries.Length, aggregateBytes);
     }
 
     private static long ValidateEntry(string path, string name)
     {
         var identity = OfflineRegularFile.Inspect(path);
-        RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateFileMode);
+        RequestCqrsProbePaths.RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateFileMode);
         var length = identity.Length;
         if (length > RequestCqrsProbeProtocol.MaximumRecordBytes || !KnownName(name))
         { throw Invalid(); }
@@ -146,7 +170,7 @@ internal sealed class RequestCqrsProbeFiles
     internal static byte[] ReadRecord(string path)
     {
         _ = OfflineRegularFile.Inspect(path);
-        RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateFileMode);
+        RequestCqrsProbePaths.RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateFileMode);
         using var stream = OfflineRegularFile.Open(path, FileAccess.Read, FileShare.Read, RequestCqrsProbeProtocol.ReadBufferBytes);
         var bytes = new byte[RequestCqrsProbeProtocol.ReadBufferBytes];
         var read = 0;
@@ -162,42 +186,11 @@ internal sealed class RequestCqrsProbeFiles
         return bytes.AsSpan(0, read).ToArray();
     }
 
-    private static void RequireDirectory(string path)
-    {
-        RequirePathAncestors(path);
-        var info = new DirectoryInfo(path);
-        if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != 0)
-        { throw Invalid(); }
-        RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateDirectoryMode);
-    }
-
-    private static void RequirePathAncestors(string path)
-    {
-        if (!Path.IsPathFullyQualified(path) || Path.GetFullPath(path) != RequestCqrsProbeProtocol.FixedRoot)
-        { throw Invalid(); }
-        var info = new DirectoryInfo(path);
-        if ((info.Attributes & FileAttributes.ReparsePoint) != 0)
-        { throw Invalid(); }
-    }
-
-    private static void RequirePrivateMode(string path, UnixFileMode expected)
-    {
-        if (OperatingSystem.IsWindows() || File.GetUnixFileMode(path) != expected)
-        { throw Invalid(); }
-    }
-
-    private static string RequireRoot(RequestCqrsProbeOptions options)
-    {
-        if (!options.Enabled || options.Root != RequestCqrsProbeProtocol.FixedRoot
-            || !RequestCqrsProbeOptionsReader.IsSessionId(options.SessionId))
-        { throw Invalid(); }
-        return options.Root;
-    }
-
     private static bool KnownName(string name) => name == RequestCqrsProbeProtocol.OwnerFile
         || IsGuidName(name, "arm-", ".json") || IsGuidName(name, "tmp-", ".tmp")
         || name.StartsWith("release-", StringComparison.Ordinal) && name.EndsWith(".json", StringComparison.Ordinal)
-        || name.StartsWith("marker-", StringComparison.Ordinal) && name.EndsWith(".json", StringComparison.Ordinal);
+        || name.StartsWith("marker-", StringComparison.Ordinal) && name.EndsWith(".json", StringComparison.Ordinal)
+        || name is RequestCqrsProbeProtocol.DiscoveryFileZero or RequestCqrsProbeProtocol.DiscoveryFileOne;
 
     private static bool IsGuidName(string name, string prefix, string suffix)
     {
@@ -210,6 +203,8 @@ internal sealed class RequestCqrsProbeFiles
     internal static string ArmName(RequestCqrsProbeArmRecord arm) => $"arm-{arm.ArmId:N}.json";
     internal static string ReleaseName(RequestCqrsProbeReleaseRecord release)
         => $"release-{release.ArmId:N}-{release.RequestId:N}.json";
+    internal static string DiscoveryName(int slot)
+        => slot is 0 or 1 ? $"discovery-{slot:D2}.json" : throw Invalid();
     internal static string MarkerName(RequestCqrsProbeMarkerRecord marker)
         => $"marker-{marker.ArmId:N}-{marker.RequestId:N}-{marker.Phase}-{marker.Outcome}.json";
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidFiles);

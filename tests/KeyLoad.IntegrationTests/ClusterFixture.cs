@@ -50,6 +50,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     /// <summary>Gets the administrator credential loaded from the private local profile.</summary>
     public string AdminKey { get; private set; } = "";
 
+    /// <summary>Gets the opaque physical-shard identity from the actual private shared V2 profile.</summary>
+    public Guid PhysicalShardId { get; private set; }
+
     /// <summary>Starts all three genuine Aspire resources and waits for their health concurrently.</summary>
     /// <returns>A task that completes when each of the three resources is healthy.</returns>
     public async Task InitializeAsync()
@@ -74,9 +77,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             await App.StartAsync(timeout.Token);
             ReadPrivateProfile();
 
-            await AspireStartupReadiness.WaitForHealthyAsync(App,
-                Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
-                    .Select(ClusterFixtureProtocol.NodeName), timeout.Token);
+            var readinessNodes = Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
+                .Select(ClusterFixtureProtocol.NodeName);
+            await AspireStartupReadiness.WaitForHealthyAsync(App, readinessNodes, timeout.Token);
         }
         catch (Exception startupFailure)
         {
@@ -241,10 +244,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
 
     private void ReadPrivateProfile()
     {
-        var profilePath = Path.Combine(Root, ClusterFixtureProtocol.ProfileFileName);
-        using var profile = System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(profilePath));
-        AdminKey = profile.RootElement.GetProperty(ClusterFixtureProtocol.AdminKeyProperty).GetString()!;
-        peerSecret = Convert.FromBase64String(profile.RootElement.GetProperty(ClusterFixtureProtocol.PeerSecretProperty).GetString()!);
+        var profile = ClusterFixturePhysicalShardIdentity.ReadProfile(Root);
+        AdminKey = profile.AdminKey;
+        peerSecret = Convert.FromBase64String(profile.PeerSecret);
+        PhysicalShardId = profile.PhysicalShardId;
     }
 
     private Task SaveFailureDiagnosticsAsync(CancellationToken cancellationToken) =>

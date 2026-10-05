@@ -19,6 +19,9 @@ internal sealed class McpCatalogTests
         await Assert.That(McpOperationCatalog.Entries.Length).IsEqualTo(McpCatalogExpectations.Count);
         await Assert.That(McpOperationCatalog.Entries.Select(entry => entry.Name).Distinct(StringComparer.Ordinal).Count())
             .IsEqualTo(McpCatalogExpectations.Count);
+        await Assert.That(McpCatalogExpectations.Entries.Length).IsEqualTo(McpCatalogExpectations.Count);
+        await Assert.That(McpCatalogExpectations.Entries.Select(entry => entry.Name).Distinct(StringComparer.Ordinal).Count())
+            .IsEqualTo(McpCatalogExpectations.Count);
         foreach (var expected in McpCatalogExpectations.Entries)
         {
             await Assert.That(McpOperationCatalog.TryGetTool(expected.Name, out var actual)).IsTrue();

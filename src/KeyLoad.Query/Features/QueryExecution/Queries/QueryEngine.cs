@@ -18,6 +18,7 @@ public sealed partial class QueryEngine
     private static readonly TimeSpan CursorLifetime = TimeSpan.FromMinutes(5);
     private readonly record struct CursorState(int Offset, long Cut, long SourceEpoch);
     private readonly DatabaseEngine database;
+    internal DatabaseEngine PartitionQueryOwner => database;
     private readonly SearchEngine graphSearch;
     private readonly LiveQueryExecutor liveQueries;
     private readonly ModelQueryExecutor modelQueries;
@@ -93,8 +94,7 @@ public sealed partial class QueryEngine
                 timeProvider ?? TimeProvider.System));
     }
 
-    internal static string QueryHash(AstQueryRequest request) => JsonData.Fingerprint(new
-    { request.Partition, Query = request.Query with { Explain = false }, request.Parameters, request.AllowFullScan, request.AstVersion });
+    internal static string QueryHash(AstQueryRequest request) => QueryRequestIdentity.Hash(request);
     internal void Bind(PrincipalRecord principal, ResourceDefinition resource, AstQueryRequest request)
     {
         foreach (var field in PredicateEvaluator.Fields(request.Query.Filter).Concat(request.Query.Order.Select(o => o.Path)))

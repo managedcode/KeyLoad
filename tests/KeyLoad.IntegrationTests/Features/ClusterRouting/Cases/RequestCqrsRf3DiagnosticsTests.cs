@@ -17,6 +17,10 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
         => RunAsync(VerifyPerNodeCapAsync);
 
     [Test]
+    public Task IndependentNativeResourceConsumerDoesNotBlockOwnedCaptureJoin()
+        => RunAsync(VerifyIndependentNativeConsumerAsync);
+
+    [Test]
     public Task SuccessEvidenceWaitsForOriginalSubscriptionsAndIsMemoized()
         => RunAsync(VerifySuccessEvidenceLifecycleAsync);
 
@@ -50,6 +54,21 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
         scope.EmitFortyValidLinesPerNode();
         var artifact = await scope.CompleteAndReadArtifactAsync(cancellationToken).ConfigureAwait(false);
         await RequestCqrsRf3DiagnosticsArtifactAssertions.AssertAsync(artifact, scope.WaveId, 32)
+            .ConfigureAwait(false);
+    }
+
+    private static async Task VerifyIndependentNativeConsumerAsync(RequestCqrsRf3DiagnosticsTestScope scope,
+        CancellationToken cancellationToken)
+    {
+        await scope.StartAsync(cancellationToken, startIndependentConsumer: true).ConfigureAwait(false);
+        scope.EmitMalformedThenOneValidPerNode();
+        await scope.Capture.DisposeAsync().ConfigureAwait(false);
+        await scope.IndependentConsumer.EmitAndObserveAsync("join-oracle-after-capture-join", cancellationToken)
+            .ConfigureAwait(false);
+        await scope.JoinOriginalSubscriptionsAsync().ConfigureAwait(false);
+        var artifact = await RequestCqrsRf3DiagnosticsArtifactFiles.WriteAndReadAsync(scope.Capture,
+            scope.OwnedArtifactPath, cancellationToken).ConfigureAwait(false);
+        await RequestCqrsRf3DiagnosticsArtifactAssertions.AssertAsync(artifact, scope.WaveId, 1)
             .ConfigureAwait(false);
     }
 

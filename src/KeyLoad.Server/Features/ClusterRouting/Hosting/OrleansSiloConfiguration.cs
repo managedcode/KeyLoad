@@ -51,7 +51,11 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(partition.Configuration, peers,
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), TimeProvider.System,
             logger: provider.GetService<ILogger<ReplicaEnvelopeAuthenticator>>(), canonicalDatabase: partition.Database));
-        services.AddSingleton<ReplicaSiloDiscoveryClient>();
+        services.AddSingleton<ReplicaSiloDiscoveryClient>(provider => new ReplicaSiloDiscoveryClient(
+            partition.Configuration, peers, provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<ReplicaEnvelopeAuthenticator>(), TimeProvider.System,
+            options.RequestCqrsProbe.DiscoveryCaptureMode == RequestCqrsProbeProtocol.MixedInterface3Capture
+                ? provider.GetRequiredService<IReplicaDiscoveryObservationSink>() : null));
         services.AddSingleton<ReplicaGrainServiceClient>();
         services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>, ReplicaTransportLifecycle>();
         services.AddSingleton<IMembershipTable>(new ReplicaMembershipTable(partition.Database, partition.Coordinator,
@@ -63,10 +67,13 @@ internal static class OrleansSiloConfiguration
     {
         if (options.RequestCqrsProbe.Enabled)
         {
-            services.AddSingleton<IGrainRequestPhaseObserver>(provider => RequestCqrsProbeObserverFactory.Create(
+            services.AddSingleton(provider => RequestCqrsProbeObserverFactory.Create(
                 options.RequestCqrsProbe, partition.Configuration, options.AllowPrivateNetworkHttp,
                 provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<IHostApplicationLifetime>())
                 ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions));
+            services.AddSingleton<IGrainRequestPhaseObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
+            if (options.RequestCqrsProbe.DiscoveryCaptureMode == RequestCqrsProbeProtocol.MixedInterface3Capture)
+            { services.AddSingleton<IReplicaDiscoveryObservationSink>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>()); }
         }
         services.AddSingleton(provider => new GrainRequestCodec(partition.Database, TimeProvider.System)
         {

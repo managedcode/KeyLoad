@@ -55,6 +55,29 @@ internal static class RequestCqrsProbeJson
         return value;
     }
 
+    internal static RequestCqrsProbeDiscoveryRecord ReadDiscovery(ReadOnlySpan<byte> bytes)
+    {
+        var value = Read(bytes, RequestCqrsProbeRecordFields.Discovery, Context.RequestCqrsProbeDiscoveryRecord);
+        if (value.Version != RequestCqrsProbeProtocol.Version
+            || value.Kind != RequestCqrsProbeProtocol.DiscoveryKind
+            || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId)
+            || string.IsNullOrWhiteSpace(value.ObserverVoterId)
+            || string.IsNullOrWhiteSpace(value.PeerVoterId)
+            || value.ObserverVoterId == value.PeerVoterId
+            || value.ApplicationRpcVersion < 0 || value.PeerEnvelopeVersion < 0
+            || value.ProtocolCompatible)
+        { throw Invalid(); }
+        return value;
+    }
+
+    internal static byte[] WriteDiscovery(RequestCqrsProbeDiscoveryRecord value)
+    {
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeDiscoveryRecord);
+        if (bytes.Length > MaximumRecordBytes)
+        { throw Invalid(); }
+        return bytes;
+    }
+
     internal static byte[] WriteMarker(RequestCqrsProbeMarkerRecord value)
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeMarkerRecord);

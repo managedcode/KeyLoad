@@ -6,7 +6,8 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 /// <summary>Streams one authorized access path through the shared read budget.</summary>
 internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
-    ResourceDefinition resource, AstQueryRequest request, ReadExecutionBudget budget, Action<DocumentRecord> accept)
+    ResourceDefinition resource, AstQueryRequest request, ReadExecutionBudget budget, Action<DocumentRecord> accept,
+    PartitionQueryLeafReadGrant? leafGrant = null)
 {
     private const string PointPath = "point";
     private const string IndexPathPrefix = "index:";
@@ -16,6 +17,7 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
     private const string IdentifierPath = "/@id";
     private const string CandidateLimitExceeded = "The query access path exceeds its candidate budget.";
     private const string FullScanDenied = "The query requires an index or explicit full-scan permission.";
+    private readonly PartitionQueryLeafReadGrant? leafGrant = leafGrant;
 
     internal string Visit()
     {
@@ -35,8 +37,8 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, FullScanDenied);
         }
-        var scan = budget.VisitRange(view, KeySpace.Partition(DocumentSpace, request.Partition, query.Collection),
-            database.Limits.MaxScanRecords, (_, value) =>
+        var scan = VisitRange(KeySpace.Partition(DocumentSpace, request.Partition, query.Collection),
+            (_, value) =>
             {
                 Candidate(value);
                 return true;
@@ -64,7 +66,7 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
             }
             var prefix = KeySpace.Partition(IndexSpace, request.Partition,
                 new object?[] { request.Query.Collection, index.Name }.Concat(values).ToArray());
-            var result = budget.VisitRange(view, prefix, database.Limits.MaxScanRecords, (_, value) =>
+            var result = VisitRange(prefix, (_, value) =>
             {
                 Read(NativeSerialization.Deserialize<string>(value));
                 return true;
@@ -90,8 +92,25 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
     private void Read(string id)
     {
         budget.Check();
-        view.ReadValue(KeySpace.Partition(DocumentSpace, request.Partition, request.Query.Collection, id), Candidate,
-            budget.ChargeBytes);
+        var key = KeySpace.Partition(DocumentSpace, request.Partition, request.Query.Collection, id);
+        if (leafGrant is null)
+        {
+            view.ReadValue(key, Candidate, budget.ChargeBytes);
+        }
+        else
+        {
+            leafGrant.ReadValue(view, key, Candidate);
+        }
+    }
+
+    private StorageScanResult VisitRange(byte[] prefix, StorageRecordVisitor visitor)
+    {
+        if (leafGrant is null)
+        {
+            return budget.VisitRange(view, prefix, database.Limits.MaxScanRecords, visitor);
+        }
+
+        return leafGrant.VisitRange(view, prefix, visitor);
     }
 
     private static IEnumerable<KeyValuePair<string, object?>> Equalities(Predicate? predicate,

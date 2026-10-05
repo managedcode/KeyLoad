@@ -27,6 +27,15 @@ internal static class McpDiscoveryAssertions
         await VerifyInputAsync(tool.InputSchema, expected);
         await Assert.That(tool.OutputSchema.HasValue).IsTrue();
         await VerifyOutputAsync(tool.OutputSchema!.Value);
+        if (tool.Name is McpCallerProtocol.GraphShortestPath or McpCallerProtocol.QueryGraphPath)
+        {
+            await McpGraphPathSchemaAssertions.VerifyAsync(tool.Name, tool.InputSchema, tool.OutputSchema!.Value,
+                expected.ResultFields);
+        }
+        if (tool.Name is McpCallerProtocol.AdminPartitionPlacementBind or McpCallerProtocol.AdminPartitionPlacementRead)
+        {
+            await McpPartitionPlacementSchemaAssertions.VerifyAsync(tool.Name, tool.InputSchema, tool.OutputSchema!.Value);
+        }
         await Assert.That(tool.Annotations is not null).IsTrue();
         await Assert.That(tool.Annotations!.ReadOnlyHint).IsEqualTo(expected.ReadOnly);
         await Assert.That(tool.Annotations.IdempotentHint).IsEqualTo(expected.Idempotent);

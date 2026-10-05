@@ -39,6 +39,8 @@ internal static class NodeEpochRf3OfflineUpgrade
         foreach (var key in start.Environment.Keys.Where(key => key.StartsWith(EnvironmentPrefix,
             StringComparison.OrdinalIgnoreCase)).ToArray())
         { _ = start.Environment.Remove(key); }
+        start.Environment[ClusterFixtureProtocol.PhysicalShardIdSetting]
+            = profile.PhysicalShardId.ToString("D", CultureInfo.InvariantCulture);
         start.Environment[EnvironmentPrefix + "Incarnation"] = profile.Incarnation.ToString("D", CultureInfo.InvariantCulture);
         start.Environment[EnvironmentPrefix + "ClusterId"] = "keyload-" + profile.Incarnation.ToString("N", CultureInfo.InvariantCulture);
         start.Environment[EnvironmentPrefix + "SigningKey"] = profile.SigningKey;

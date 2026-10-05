@@ -138,7 +138,7 @@ Orleans routing and physical catalog are N/A for this stage.
 | Owner | Exact owned paths |
 |---|---|
 | QueryExecution native values | `src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryPlanV1.cs`, `PartitionQueryLeafPlanV1.cs`, `PartitionQueryCandidateV1.cs`, `PartitionQueryLeafResultV1.cs`, `PartitionQueryResultV1.cs` |
-| Query validation and execution | QueryExecution feature-local `Validation/`, `Execution/`, `Models/` and the narrow `Queries/QueryEngine.PartitionQuery.cs` integration |
+| Query validation and execution | QueryExecution feature-local `Validation/` and `Execution/`, with `Execution/PartitionQueryExecution.cs` and one internal owner accessor in `Queries/QueryEngine.cs` |
 | Native regression cases | `tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQuery*Tests.cs`, with actual fixtures and assertions in their owning role folders |
 | Core grant dependency | Existing `src/KeyLoad.Core/ReadExecutionBudget.cs` and a ResourceExecution role-owned grant helper, only after its exact contract is separately frozen below |
 | Durable ADR | [ADR-100](../../ADR/ADR-100-local-partition-query-merge.md) |
@@ -163,7 +163,9 @@ KL-037 distributed stage before any public SDK or MCP route is delivered.
 returns the internal `ReadExecutionBudgetReadGrant`. Core exposes these only
 to its explicitly declared `KeyLoad.Query` friend assembly. The helper lives
 at `src/KeyLoad.Core/Features/ResourceExecution/Execution/ReadExecutionBudgetReadGrant.cs`;
-its genuine native tests are `ReadExecutionBudgetGrantTests` under UnitTests
+its genuine native tests are `ReadExecutionBudgetGrantPointTests`,
+`ReadExecutionBudgetGrantRangeTests`, `ReadExecutionBudgetGrantReservationTests`
+and `ReadExecutionBudgetGrantCancellationTests` under UnitTests
 ResourceExecution/Cases. No public budget API or transport is added.
 
 Every grant is reserved before any leaf starts. Nonnegative ceilings are
@@ -235,3 +237,88 @@ raw bytes and configured document limits; that transient bound is distinct
 from final retained accounting. This stage makes no peak-RSS claim. Exact and
 one-under tests compute the frozen retained formula independently from their
 scalar seeds, including Unicode, escaped JSON and redacted fields.
+
+The internal leaf top-L uses one custom binary heap backed by exactly L+1
+reference slots. It compares canonical order bytes and ordinal full EntityRef
+before admission; the public Q1 PriorityQueue and its existing UTF-8 EntityId
+tie contract remain unchanged. Compute and reserve the exact owned candidate
+payload before inserting it. Reservation failure leaves the previous heap and
+output unchanged. Before transferring candidates, reserve the final array
+while heap scratch is still held, clear and relinquish every heap reference,
+then release its scratch reservation. One callback-local temporary candidate
+is bounded by admitted raw bytes and document limits; it is not retained output.
+
+
+## TASK-PQUERY-PUBLIC: accepted same-owner SDK/MCP contract
+
+Status: contract accepted before implementation; source integration and all runtime qualification remain open. This stage does not complete KL-037 remote execution.
+
+This stage publishes a typed multi-partition request over the already implemented bounded local partition-leaf merge. It runs all leaves through one existing authenticated request grain, one local DatabaseReadGrain, and one node-local QueryEngine/ZoneTree owner. The RF3 peers remain replicas of one physical shard. The stage does not add placement, remote leaf fan-out, a global transaction snapshot, cursors, SQL grammar, or independent-shard qualification.
+
+## REQ/AC
+
+- REQ-PQUERY-001: expose a bounded generated request that carries only up to eight full atomic `PartitionRef`s, one existing `SelectQuery`, existing query parameters, full-scan opt-in, and AST version. AC-PQUERY-001: reject default/empty/over-eight or duplicate partitions, invalid AST version/shape, oversized request, cursor-bearing or otherwise unsupported query semantics, `Explain`, and non-null `ModelSource` before any storage read; do not accept caller identity, roles, cut, owner/catalog witness, read grant, physical placement, or deadline.
+- REQ-PQUERY-002: retain the native persisted-authority and catalog fence. AC-PQUERY-002: each SDK/MCP call follows signed request verification, native request identity validation, `NativeRequestWorkOwner` admission, the existing quorum `ReadBarrierAsync`, request freshness validation, persisted `GrainRequestAuthority.Reload`, and normal `GrainQueryReadCapabilities` execution. No admin-only `ReadPhysicalShardCatalog` or `ReadAtomicPartitionPlacement` public API is invoked for a non-admin. The node startup/per-request catalog admission fence remains the authority that the local server is a current member of the configured physical owner.
+- REQ-PQUERY-003: bind each authorized leaf to the canonical placement visible in that same leaf's native `Store.Read`. AC-PQUERY-003: call the internal placement view reader only *inside* the existing `WithQueryView` callback, after it has loaded persisted principal and passed `Authorization.Require(Query | DocumentsRead)` for that leaf's partition/collection. That internal helper reads and validates SCAT plus descriptive PMAP from the provided `IKeyValueView`, performs no principal/admin check and no separate `Store.Read`, and returns only an internal typed owner witness. Compare its full physical-shard ID, incarnation, exact ordered voters and placement epoch with the server-owned expected local physical-owner tuple supplied by the authenticated DatabaseReadGrain composition; validate each row/fallback revision against its own same-view directory and row; valid leaves may differ in row revision and fallback state. Same-tuple placement is supported. A valid assignment to another physical owner fails `UnsupportedCapability` in this stage; corrupt/inconsistent catalog/placement fails `Corruption`; a catalog tuple that no longer matches this node's expected owner fails `OwnershipLost`. No fallback or refresh of malformed/mismatched PMAP records.
+- REQ-PQUERY-004: reuse exact DQUERY r2 semantics and budgets. AC-PQUERY-004: one admission/normalization/compilation and one original `ReadExecutionBudget`/caller token/deadline cover all sequential leaves and merge. Reserve the complete 1–8 leaf grants before any read; each leaf rechecks persisted principal/resource/row/field policy, same-view SCAT+PMAP owner evidence, exact owner identity/read-generation, and policy epoch. Any later denial or witness mismatch returns no rows. Preserve separate per-leaf cut positions; never synthesize a scalar global cut. Keep the internal DQUERY exact comparator, full EntityRef tie-break, candidate/work/read/retained bounds and no partial result.
+- REQ-PQUERY-005: expose only complete typed replies through the existing native CQRS stream. AC-PQUERY-005: the one RequestGrain returns one typed `PartitionQueryPageV1` after all local leaves and merge settle; faults/cancellation dispose/join the actual stream under existing native lifecycle rules. SDK and official MCP logical results match; no second dispatcher, unbounded materialization, or partial-page mode.
+- REQ-PQUERY-006: qualify the public same-owner capability on the real AppHost Docker RF3 topology. AC-PQUERY-006: direct .NET SDK and official MCP cover independent ordered oracle, same textual IDs in distinct partitions, hidden sort fields, ties, empty/no-hit partitions, persisted denial/revocation on a later leaf, caller cancellation/limits with healthy follow-up, acknowledged write/read through a survivor, scoped supported leader loss/rejoin, and malformed/version/oversized input. Evidence does not claim independent physical owners, remote fan-out, or full KL-037 completion.
+
+## Public generated contracts
+
+All contracts live in `KeyLoad` alongside current query contracts; aliases are feature-local named constants in Abstractions `Features/QueryExecution/Serialization`, not a new global alias layer.
+
+- `PartitionQueryRequestV1`, alias `keyload.contract.partition-query-request.v1`: `[Id(0)] int Version` (must be 1); `[Id(1)] ImmutableArray<PartitionRef> Partitions`; `[Id(2)] SelectQuery Query`; `[Id(3)] Dictionary<string, JsonElement>? Parameters`; `[Id(4)] bool AllowFullScan`; `[Id(5)] int AstVersion` (must be 1). `SelectQuery.Limit` remains the sole row-limit field. Cursor, explanation, and model-source are absent/rejected. The server caps partitions at 8 and enforces the current configured query/result/body/read/scan/retention limits; no caller-settable work grant exists.
+- `PartitionQueryRowV1`, alias `keyload.contract.partition-query-row.v1`: `[Id(0)] EntityRef Reference`; `[Id(1)] QueryRow Row`. The full reference distinguishes equal textual IDs in different partitions. No canonical sort bytes or unprojected record is public.
+- `PartitionQueryLeafWitnessV1`, alias `keyload.contract.partition-query-leaf-witness.v1`: `[Id(0)] PartitionRef Partition`; `[Id(1)] long CutPosition`; `[Id(2)] long PolicyEpoch`; `[Id(3)] long SchemaVersion`; `[Id(4)] string AccessPath`. Owner NodeId/incarnation/read-generation and physical catalog/PMAP tuple are validated internally and are not exposed. These are per-leaf witnesses and can differ in cut/schema/access path; policy epoch and actual owner identity must agree.
+- `PartitionQueryPageV1`, alias `keyload.contract.partition-query-page.v1`: `[Id(0)] int Version`; `[Id(1)] ImmutableArray<PartitionQueryRowV1> Rows`; `[Id(2)] ImmutableArray<PartitionQueryLeafWitnessV1> Leaves`; `[Id(3)] bool Complete`. Every successful reply has `Complete=true`; all failure paths return no rows and there is no incomplete mode.
+
+## Concrete owner/read-view seam proposal
+
+PMAP r2 adds an admin-gated public reader and an internal overload that also performs the administrator check; those are not suitable for an ordinary query leaf. Add the Core-internal `ReadAtomicPartitionPlacementForAuthorizedQuery(IKeyValueView view, PartitionRef partition, ReadExecutionBudgetReadGrant grant)` seam specified below. Only the Query caller invokes it after persisted ordinary leaf authorization, and all three metadata reads consume that actual leaf grant.
+
+The DatabaseReadGrain composition passes a server-owned immutable expected-local-owner tuple into the Query capability from the already-fenced startup configuration (configured `PhysicalShardId`, actual ordered voter IDs, local incarnation, and configured/current placement epoch). It is never derived from request data. If exposing this tuple from the current host composition requires an exact additional internal interface or DI type, root must approve that single join before implementation. Do not call the public admin catalog methods to obtain it and do not add an alternate public capability.
+
+## Ordered ownership and joins
+
+1. Contract/ADR review freezes aliases/IDs/error map/response witnesses and explicitly says no global cut or multi-owner claim.
+2. Core owns only the internal same-view descriptive placement reader in its current `ClusterRouting/Queries` role folder and its real ZoneTree tests. It must not weaken PMAP/SCAT public admin checks.
+3. Query owns the public generated DTOs/aliases, bounded request validation, mapping to existing internal `PartitionQueryExecution`, per-leaf placement witness check inside the already-authorized `WithQueryView`, and projection from internal candidates to the complete public page. It retains the existing QueryEngine/one-budget path; no second admission/deadline.
+4. Root owns append-only `GrainReadKind.PartitionQuery` and `GrainQueryReadCapabilities` binding inside `DatabaseReadGrain`, existing request-envelope/payload validation and capability inventory; no second grain/dispatcher.
+5. Root owns HTTP `POST /v1/query/partitions`, SDK `PartitionQueryAsync(PartitionQueryRequestV1, CancellationToken)`, MCP `keyload_query_partitions` at `/v1/query/partitions` with read-only hints/catalog description, and typed response mapping, all through the normal signed read path.
+6. Add generated-native codec/strict public-input cases; real ZoneTree unit tests; then genuine AppHost RF3 .NET SDK + official MCP tests. Build/format/analyzers and complete unit/recovery/RF3 gates precede any acceptance claim.
+
+## Source-grounded current joins
+
+- `SelectQuery` is generated native Q1 and already owns `Limit` (IDs 0–7; `QueryAst.cs`); `AstQueryRequest` has one `Partition`, optional `Cursor`, and `AstVersion` (IDs 0–5). The proposed public request deliberately does not embed it.
+- `PartitionQueryExecution.ExecutePartitionQuery` is internal and already creates one `ReadExecutionBudget`, admits once, normalizes once, reserves all grants, executes sequential real local leaves and merges complete output.
+- `PartitionQueryLeafExecutor.Execute` calls existing `DatabaseEngine.WithQueryView`, whose callback runs only after persisted principal/resource authorization. It captures owner identity and per-leaf cut/policy/schema/access-path witnesses.
+- `DatabaseReadGrain` currently owns signed validation, native read admission, one quorum barrier, freshness and persisted authority reload before `GrainQueryReadCapabilities.ExecuteAsync`; the new kind must be appended without changing existing numeric enum values.
+- `PhysicalShardCatalogReader.ReadPhysicalShardCatalog` and `DatabaseEngine.ReadAtomicPartitionPlacement` are explicitly administrator-gated. They cannot be called as an ordinary query user's placement check. PMAP r2's internal resolution currently opens its own store read; the new authorized-query method must instead accept the existing view.
+- Existing transport joins are `QueryApi.Map`, `KeyLoadClient`, `McpReadCatalog`, `McpToolNames`, `McpToolRoutes`, `McpToolHints`, and `ApiGrainDispatch`. Root owns all of them.
+
+## Required same-view owner-check and public mapping amendments
+
+The PMAP prerequisite's ordinary APIs are intentionally administrator-gated. Query MUST NOT call those public methods, and no administrator identity or capability is added to ordinary reads.
+
+The same-view Core seam has this exact proposed signature:
+
+`internal static AtomicPartitionPlacementResolution ReadAtomicPartitionPlacementForAuthorizedQuery(IKeyValueView view, PartitionRef partition, ReadExecutionBudgetReadGrant grant)`
+
+The only Query caller invokes it within the existing `DatabaseEngine.WithQueryView` callback, which has already loaded the current persisted principal and passed the leaf's ordinary Query/DocumentsRead resource authorization. Core validates the full partition; reads and validates the SCAT catalog, PMAP directory, and assignment row from that exact view using the supplied actual native grant's bounded `ReadValue` calls (no `GetRecord` bypass, new Store.Read, admin gate, write, repair, fallback around corruption, or borrowed view escape); and returns the validated internal resolution. Existing mismatched row/DefaultShard owner tuples remain `Corruption`. Query compares the returned physical ID, incarnation, exact ordered voter IDs and placement epoch to the immutable internal `PhysicalShardRecord` supplied by the already-fenced native DatabaseReadGrain host composition. A mismatch between current catalog and this server's expected tuple is `OwnershipLost`. A valid different owner is `UnsupportedCapability` until native KL-037 remote fan-out is implemented. Directory/row/fallback revision is checked against each leaf's own same-view header/row. Valid row revisions and fallback states may differ between partitions; directory revisions may differ across the distinct scoped cuts. Only the full owner tuple and existing node/incarnation/read-generation/policy consistency are required across leaves, without a global snapshot. The three metadata point reads consume the same leaf grant's raw bytes and examined-attempt allowance before decode, leaving no uncharged metadata lookup. All authorization stays in the existing `WithQueryView` path and no caller-controlled tuple exists.
+
+The public mapper has this exact operation shape: `PartitionQueryPageV1 MapPublic(PartitionQueryResultV1 result, DatabaseLimits limits, ReadExecutionBudget budget)`. It computes and admits the checked public mapping retention *before allocating* page arrays, row wrappers, or witness records, while the internal candidate buffers and their sort keys are still held. The conservative logical additional charge is named and frozen as: page descriptor64; each returned-row array uses descriptor32 plus8 per reference and each new row wrapper costs32; each leaf-witness array uses descriptor32 plus8 per reference and each new witness wrapper costs64. `EntityRef`, `QueryRow`, their strings, and the existing partition/access-path values are references reused from the already owned internal result; no payload/sort-key/JSON bytes are copied by the mapper. Checked sum of `result.RetainedBytes` plus this additional mapping charge must remain ≤ configured `MaxBatchBytes` before allocation; otherwise throw typed `BudgetExceeded` with no page. After mapping, call the existing `budget.CheckResult(publicPage)` to enforce serialized response-byte bounds and cancellation. This is an intentional conservative overlap reservation while internal source buffers remain live; it makes no process-RSS claim, opens no second budget/deadline, and leaves the internal result unreachable after return.
+
+Root-owned native composition supplies the current `PhysicalShardRecord` only from the successfully fenced host startup state; it is an immutable server value, never derived from request or public catalog read. The expected-record source, lifetime, and stale-fence error path must be frozen at the Orleans join before code. The internal call receives the existing `ReadExecutionBudgetReadGrant` already assigned to the leaf, so the owner's SCAT/PMAP values are included in exact existing byte/attempt grants before native decode.
+
+The final public page field order is fixed as accepted: Version `[0]`, Rows `[1]`, Leaves `[2]`, Complete `[3]`. Exact aliases and IDs in the preceding tables remain unchanged.
+
+### Frozen native composition and acceptance evidence
+
+Root registers one immutable `PhysicalShardRecord` in `OrleansSiloConfiguration.RegisterBorrowedServices`, constructed only from `NodeOptions.PhysicalShardId`, `PartitionHost.Configuration.Incarnation`, an immutable copy of its exact ordered voter IDs, and `PhysicalShardCatalogStartupProtocol.InitialPlacementEpoch`. `DatabaseReadGrain` receives this server-owned singleton and passes it to `GrainQueryReadCapabilities`. Public execution remains behind the existing successful startup/per-request catalog admission fence; every authorized leaf validates fresh same-view committed SCAT/PMAP against this expected tuple and returns `OwnershipLost` on a stale host tuple. No separate provider, public request field, admin credential or public admin read supplies it.
+
+`PartitionQueryExecution.ExecutePartitionQuery` retains its existing internal calls unchanged and gains the typed expected-owner overload used by the public wrapper. Metadata checks run only in that overload; existing internal local primitive tests retain their stated local contract. Query's public entry accepts the server tuple as an explicit composition argument; neither the HTTP/SDK/MCP request nor native grain payload accepts that argument. Public normalization validates every requested partition first and uses the first canonical sorted partition as the server-generated `AstQueryRequest.Partition` anchor. All leaves remain in the plan and are authorized separately.
+
+REQ/AC-PQUERY-001/004/005 map to `PartitionQueryPublicContractTests`, `PartitionQueryPublicBudgetTests` and `PartitionQueryPublicMergeTests` under `tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/`; REQ/AC-PQUERY-002/003 map to real ZoneTree `AtomicPartitionPlacementQueryViewTests` under `tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/` and `PartitionQueryPublicAuthorizationTests`; AC-PQUERY-006 maps to `PartitionQueryPublicRf3Tests` under `tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/`. Root joins the append-only native read kind, persisted authority path, signed SDK/HTTP/MCP route and complete independent MCP inventory/schema/native-codec corpus. All of these tests use the Aspire-owned caller. A focused pass is development evidence; original full Linux unit/scalar/recovery/RF3/fault/endurance evidence remains required.
+
+The same-view Core helper is static because it uses only the already authorized borrowed view, complete partition and actual leaf grant. This implementation modifier adds no API, authority, storage view or state.

@@ -59,7 +59,6 @@ internal static class PackedAnnNeighborSelection
     {
         for (var index = 0; index < candidateCount && selected < maximum; index++)
         {
-            budget.Check();
             budget.Charge(1);
             var candidate = nodes[index];
             if (candidate == source || Contains(scratch.SelectedNeighbors, selected, candidate, budget))

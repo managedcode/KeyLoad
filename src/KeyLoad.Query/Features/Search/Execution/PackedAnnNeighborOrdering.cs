@@ -8,7 +8,6 @@ internal static class PackedAnnNeighborOrdering
         var selected = 0;
         for (var index = 0; index < candidateCount && selected < maximum; index++)
         {
-            budget.Check();
             budget.Charge(1);
             var candidate = nodes[index];
             if (candidate == source)

@@ -9,7 +9,7 @@ internal static class RequestCqrsProbeFileValidation
     internal const UnixFileMode PrivateDirectoryMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
     internal const UnixFileMode PrivateFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
 
-    internal static string[] ValidateContents(string directory)
+    internal static string[] ValidateContents(string directory, bool allowDiscoveryRecords = false)
     {
         ValidateDirectory(directory);
         var entries = new List<string>(RequestCqrsProbeFixtureProtocol.MaximumFilesPerVoter + 1);
@@ -25,7 +25,7 @@ internal static class RequestCqrsProbeFileValidation
         {
             var name = Path.GetFileName(path);
             var temporary = IsTemporaryName(name);
-            if (!IsAllowedFileName(name))
+            if (!IsAllowedFileName(name, allowDiscoveryRecords))
             { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
             if (!TryValidateLength(new FileInfo(path), temporary, out var length))
             { continue; }
@@ -54,7 +54,7 @@ internal static class RequestCqrsProbeFileValidation
         { throw new IOException(RequestCqrsProbeFixtureProtocol.ByteLimitExceeded); }
     }
 
-    internal static bool IsAllowedFileName(string name)
+    internal static bool IsAllowedFileName(string name, bool allowDiscoveryRecords = false)
     {
         if (name == RequestCqrsProbeFixtureProtocol.OwnerFileName)
         { return true; }
@@ -64,6 +64,9 @@ internal static class RequestCqrsProbeFileValidation
         { return true; }
         if (HasGuidFile(name, RequestCqrsProbeFixtureProtocol.ReleaseFilePrefix, 2))
         { return true; }
+        if (name == RequestCqrsProbeFixtureProtocol.DiscoveryFile0
+            || name == RequestCqrsProbeFixtureProtocol.DiscoveryFile1)
+        { return allowDiscoveryRecords; }
         return name.StartsWith(RequestCqrsProbeFixtureProtocol.MarkerFilePrefix, StringComparison.Ordinal)
             && name.EndsWith(JsonSuffix, StringComparison.Ordinal)
             && RequestCqrsProbeFileNames.IsMarkerName(name);

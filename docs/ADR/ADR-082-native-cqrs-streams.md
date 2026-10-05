@@ -134,6 +134,25 @@ Rollback removes the test-only lifecycle stage. Original failed artifacts
 remain evidence; mechanism tests and source review do not qualify real guard
 publication or the complete ADR.
 
+TASK-CRS-DIAG-JOIN-ORACLE implements REQ/AC-CRS-DIAG-005. Aspire 13.6
+`WatchAnySubscribersAsync` reports global subscriber changes and cannot certify
+that this wave's original resource watchers have settled. Keep it for admission
+before `AppHost.StartAsync`, then join the same memoized capture disposal and
+original `Task.WhenAll` watcher set after the actual resource `Complete` calls;
+only afterward dispose/join the admission observer or publish evidence. Add a
+real `ResourceLoggerService` test consumer on a separate actual model resource
+which remains live while the three captured resource streams complete, receives
+a fresh line afterward, and is then completed, drained and disposed. Preserve
+all current original cleanup assertions, private artifact conditions, bounds,
+existing deadlines and native fatal/ordinary failure priority. Root owns doc
+integration and gates; the private diagnostics worker owns only
+`RequestCqrsRf3DiagnosticsTestScope.cs`, its focused existing TUnit case file
+and one cohesive Helpers consumer if needed. No `RequestCqrsRf3Diagnostics`
+collector/parser or `RequestCqrsRf3DiagnosticsCleanup` changes are planned; the
+latter already completes its exact resources, awaits original capture tasks,
+provides memoized disposal and preserves cleanup errors. Rollback removes only
+the regression and scope change.
+
 ## C1 unit owner-probe phase observation, 2026-10-05
 
 TASK-CRS-C1-OWNER-PHASE implements REQ/AC-CRS-DIAG-004 in the linked
@@ -147,3 +166,18 @@ changes only bounded test-parent observation, with no public or persisted
 contract, dependency or topology change; rollback removes that observation.
 Root integrates and runs all required gates. Neither a phase record nor a
 local pass qualifies C1 or marks this ADR Implemented.
+
+
+## Accepted TASK-CRS-C1-HELD-AUTHORITY cleanup amendment
+
+## REQ/AC linkage
+
+Amends the test-lifecycle implementation of TASK-CRS-C1-HELD-AUTHORITY under REQ/AC-CRS-004/005 in `docs/Features/ClusterRouting/NativeCqrsRequestV2.md` and ADR-082. It changes no public, persisted, authorization, protocol, timeout, or product behavior.
+
+## Frozen cleanup rule
+
+After cleanup has stopped private-control admission, released any still-open holds, joined each original SDK/MCP request and observed its actual `ProducerDisposed` terminal marker, cleanup must retire the owned arm on all three voters if and only if that actual arm is not already retired. The existing scenario path may have completed the same verified retirement before cleanup. Cleanup determines this from `RequestCqrsProbeFixture.ArmFor(armId).Retired`; it does not make retirement idempotent, infer retirement from a missing file, swallow a missing/invalid arm, or skip the original marker/producer join. A missing or invalid owned arm remains a cleanup failure. Preserve original, cleanup, and fatal failure ordering through `ServerFailureObserver`.
+
+## Regression and qualification
+
+The existing actual SDK held-revocation RF3 case is the focused regression: it reaches the authenticated held request, persisted revocation ACK, release, typed `Unauthenticated`, producer settlement, first retirement, no-effect checks and then common cleanup. The test was previously marked failed solely because common cleanup repeated the completed retirement. Do not add a fake-provider fixture test: the relevant state transition requires real signed phase markers and the actual original producer. Keep the MCP case and its independent startup status; the CI55 MCP failure occurred before revocation and remains an unresolved startup diagnostic. Root owns the full strict build and Aspire RF3 rerun.

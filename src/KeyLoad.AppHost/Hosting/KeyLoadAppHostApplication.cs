@@ -1,4 +1,5 @@
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.AppHost.Features.ClusterReplication.Commands;
 using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 
@@ -9,6 +10,8 @@ internal static class KeyLoadAppHostApplication
 {
     internal static async Task<int> RunAsync(string[] args)
     {
+        if (ClusterProfileUpgradeCommand.Dispatch(args) is { } upgradeExitCode)
+        { return upgradeExitCode; }
         var requested = TestSuiteSettings.Requested(args);
         var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions
         {

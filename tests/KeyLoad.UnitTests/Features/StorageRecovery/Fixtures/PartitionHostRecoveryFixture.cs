@@ -44,6 +44,7 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
             DataDirectory = Path.Combine(directory, TargetDirectory),
             PublicEndpoint = VoterA,
             Peers = [VoterA, VoterB, VoterC],
+            PhysicalShardId = Guid.NewGuid(),
             Incarnation = Guid.NewGuid(),
             SigningKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)),
             PeerSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)),

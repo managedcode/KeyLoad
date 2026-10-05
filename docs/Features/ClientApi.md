@@ -6,9 +6,12 @@ discovery assertions only if the actual current canonical tool names are absent.
 Derive the exact count/names from the real server operation catalog, retain
 bounded paging, uniqueness, schema and annotation checks, and independently
 compare the complete declared catalog. Original run37242346547 observed62 tools
-against the obsolete56-count oracle. Do not infer a passing discovery result
-from editing that count. Existing ADR-039 remains sufficient; root reviews the
-exact diff and runs the official MCP client through the actual Aspire RF3 gate.
+against the obsolete56-count oracle. ADR-098 adds two accepted shortest-path tools,
+and ADR-101 adds the two typed placement administration tools, so the independent
+oracle now expects 66 names and verifies their exact request/result schemas and
+read-only/idempotent/non-destructive hints. Do not infer a passing discovery result
+from editing that count. Root reviews the exact diff and runs the official MCP
+client through the actual Aspire RF3 gate; this source update is not qualification.
 
 REQ-SQLC-003 / AC-SQLC-003P preserves AC-MCP-002/003 in the Accepted
 [ADR-065 public/native oracle stage](../ADR/ADR-065-full-sql-client-compatibility.md).
@@ -193,7 +196,7 @@ dependency patch, broad exception fallback, trusted caller role or timeout chang
 |---|---|---|
 | REQ-CLIENT-004: supported typed operations і capabilities дзеркалять canonical server contracts | AC-CLIENT-004: existing document/event/queue/group/graph/series/query/search/feed/admin calls повертають typed values/outcomes; unsupported capability/version дає явну помилку; equivalent query adapters дають однаковий result/authority | Existing `SqlJsonAndCSharpUseTheSameAuthorizedHttpQueryContract` у [ClusterTests](../../tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs), [QueryAdapterTests](../../tests/KeyLoad.UnitTests/QueryAdapterTests.cs); operation-manifest parity expansion PLANNED |
 | REQ-CLIENT-005: retry/error/cancellation зберігають stable command identity та unknown outcome | AC-CLIENT-005: transient disconnect після committed write не спричиняє другу logical operation; same ID/content replay стабільний, different payload conflict; typed errors, cancellation, bounded decode/disposal зберігають caller semantics без fabricated success | Existing `ReplicatedAtomicBatchSurvivesLeaderProcessKillAndMinorityRejectsWrites` у ClusterTests; transport edge/error cases з AC-MP-009 PLANNED/GitHub pending |
-| REQ-CLIENT-006: official MCP SDK adapter виконує ті самі authorized operations | AC-CLIENT-006 and AC-MCP-001–008: real official MCP C# SDK caller на Docker RF3 має operation/result/error/cancellation parity з .NET SDK; invalid/forged/revoked grants та unsupported calls fail before effects; search/storage coverage включено лише після owning capability implementation | Source IntegrationTests `Features/ClientApi/` MCP parity/adversarial suite; [ADR-039](../ADR/ADR-039-official-mcp-agent-api.md) accepted stateless `/mcp`, version-one 50-operation source catalog including ten ADR-038 BlobStorage operations, three read-only ADR-051 AdminDashboard operations and bounded admission contract; runtime pending |
+| REQ-CLIENT-006: official MCP SDK adapter виконує ті самі authorized operations | AC-CLIENT-006 and AC-MCP-001–008: real official MCP C# SDK caller на Docker RF3 має operation/result/error/cancellation parity з .NET SDK; AC-MCP-001 independently checks all 66 accepted names, exact schemas and hints, including both GraphPath tools and `keyload_admin_partition_placement_bind` / `keyload_admin_partition_placement_read`; invalid/forged/revoked grants та unsupported calls fail before effects; search/storage coverage включено лише після owning capability implementation | Source IntegrationTests `Features/ClientApi/` MCP parity/adversarial suite; [ADR-039](../ADR/ADR-039-official-mcp-agent-api.md) owns the versioned stateless `/mcp` catalog and bounded admission contract; runtime pending |
 | REQ-CLIENT-007: simple agent/worker API має bounded capability та processing contract | AC-CLIENT-007: PLANNED versioned agent calls користуються тим самим persisted principal, typed operations, quotas і outcome semantics; queue worker stale lease/duplicate handler, empty input та cancellation не дають unauthorized/duplicate effects | Existing processing semantics у [MessagingTests](../../tests/KeyLoad.UnitTests/MessagingTests.cs); agent surface tests PLANNED після ADR-039 acceptance |
 
 MCP і agent surface required; accepted contracts, exact names and wrappers are in

@@ -26,7 +26,9 @@ internal static class GrainPartitionResolver
         OperationKind.AbortBlobUpload => Route<AbortBlobUploadRequest>(request, value => (value.CommandId, value.Blob.Partition)),
         OperationKind.DeleteBlob => Route<DeleteBlobRequest>(request, value => (value.CommandId, value.Blob.Partition)),
         OperationKind.ReclaimBlob => Route<ReclaimBlobRequest>(request, value => (value.CommandId, value.Blob.Partition)),
-        OperationKind.ConfigureResource or OperationKind.SetDispatch => GrainRoutingProtocol.CatalogPartition,
+        OperationKind.ConfigureResource or OperationKind.SetDispatch or OperationKind.BootstrapPhysicalShardCatalog
+            or OperationKind.BindAtomicPartitionPlacement
+            => GrainRoutingProtocol.CatalogPartition,
         OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey => GrainRoutingProtocol.AuthorizationPartition,
         OperationKind.Membership => throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired),
         _ => throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest)

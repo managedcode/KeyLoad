@@ -18,6 +18,8 @@ internal sealed record NodeOptions
     public bool BenchmarkTopology { get; init; }
     /// <summary>Orleans cluster identity, shared by every voter.</summary>
     public string ClusterId { get; init; } = NodeDefaults.ClusterId;
+    /// <summary>Independent physical shard identity shared by every configured voter and stable across restart.</summary>
+    public Guid PhysicalShardId { get; init; }
     /// <summary>Database incarnation, stable across process restarts and snapshot catch-up.</summary>
     public Guid Incarnation { get; init; }
     /// <summary>Base64 database signing credential; stored only in the private node catalog.</summary>
@@ -52,7 +54,7 @@ internal sealed record NodeOptions
     public McpMemoryLimits McpMemory { get; init; } = new();
     /// <summary>Independent bounded authenticated nonce pools per fixed voter.</summary>
     public ReplicaReplayLimits ReplayAdmission { get; init; } = new();
-    internal RequestCqrsProbeOptions RequestCqrsProbe { get; init; } = new(false, null, string.Empty);
+    internal RequestCqrsProbeOptions RequestCqrsProbe { get; init; } = new(false, null, string.Empty, RequestCqrsProbeProtocol.DiscoveryCaptureDisabled);
 
     /// <summary>Rejects invalid identity, timing, transport and admission settings before opening files.</summary>
     public void Validate()
@@ -65,7 +67,8 @@ internal sealed record NodeOptions
         HttpAdmission.Validate();
         McpMemory.Validate();
         ValidatePeers();
-        if (Incarnation == Guid.Empty || SecretLength(SigningKey) != ReplicaTransportProtocol.SecretBytes
+        if (PhysicalShardId == Guid.Empty || Incarnation == Guid.Empty
+            || SecretLength(SigningKey) != ReplicaTransportProtocol.SecretBytes
             || SecretLength(PeerSecret) != ReplicaTransportProtocol.SecretBytes
             || AdminKey is null || AdminKey.Length < NodeDefaults.MinimumAdminCharacters
             || !AdminKey.StartsWith(NodeDefaults.AdminPrefix, StringComparison.Ordinal)

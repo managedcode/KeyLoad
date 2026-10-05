@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -9,12 +10,17 @@ public sealed class ReadExecutionBudget
 {
     private const string DeadlineExceeded = "The read execution deadline is exceeded.";
     private const string ReadBytesExceeded = "The read execution byte budget is exceeded.";
+    private const string ExaminedRecordsExceeded = "The read execution examined-record budget is exceeded.";
+    private const string GrantOwnerMismatch = "The read grant belongs to a different operation.";
     private const string TextTokensExceeded = "The search corpus token budget is exceeded.";
     private readonly DatabaseLimits limits;
     private readonly CancellationToken cancellationToken;
     private readonly TimeProvider clock;
     private readonly long started;
     private long bytes;
+    private long reservedReadGrantBytes;
+    private int examinedGrantRecords;
+    private int reservedGrantRecords;
     private long textTokens;
 
     /// <summary>Starts a budget for one operation; the clock does not alter the hosting runtime.</summary>
@@ -55,13 +61,61 @@ public sealed class ReadExecutionBudget
         }
     }
 
+    /// <summary>Reserves one non-borrowable raw-byte ceiling for a sequential query leaf.</summary>
+    /// <param name="maximumBytes">Maximum accepted native bytes reserved for that leaf.</param>
+    /// <param name="maximumRecords">Maximum native point attempts and range records reserved for that leaf.</param>
+    /// <returns>A reader sharing this operation's aggregate bytes, deadline and cancellation.</returns>
+    internal ReadExecutionBudgetReadGrant CreateReadGrant(long maximumBytes, int maximumRecords)
+    {
+        Check();
+        ArgumentOutOfRangeException.ThrowIfNegative(maximumBytes);
+        ArgumentOutOfRangeException.ThrowIfNegative(maximumRecords);
+        if (maximumBytes > limits.MaxQueryReadBytes - bytes - reservedReadGrantBytes)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded);
+        }
+        if (maximumRecords > limits.MaxScanRecords - examinedGrantRecords - reservedGrantRecords)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded);
+        }
+        reservedReadGrantBytes += maximumBytes;
+        reservedGrantRecords += maximumRecords;
+        return new(this, maximumBytes, maximumRecords);
+    }
+
+    internal void ChargeReadGrant(ReadExecutionBudgetReadGrant grant, long count)
+    {
+        Check();
+        ArgumentNullException.ThrowIfNull(grant);
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        if (!grant.BelongsTo(this))
+        {
+            throw new ArgumentException(GrantOwnerMismatch, nameof(grant));
+        }
+        if (count > grant.RemainingBytes || count > reservedReadGrantBytes
+            || count > limits.MaxQueryReadBytes - bytes)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded);
+        }
+        if (grant.RemainingRecords == 0 || reservedGrantRecords == 0
+            || examinedGrantRecords >= limits.MaxScanRecords)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded);
+        }
+        bytes += count;
+        reservedReadGrantBytes -= count;
+        examinedGrantRecords++;
+        reservedGrantRecords--;
+        grant.Accept(count);
+    }
+
     /// <summary>Accepts examined storage bytes before the consumer allocates or decodes them.</summary>
     /// <param name="count">Nonnegative key/value work, including matching scan lookahead.</param>
     public void ChargeBytes(long count)
     {
         Check();
         ArgumentOutOfRangeException.ThrowIfNegative(count);
-        if (count > limits.MaxQueryReadBytes - bytes)
+        if (count > limits.MaxQueryReadBytes - bytes - reservedReadGrantBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded);
         }

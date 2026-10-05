@@ -98,6 +98,7 @@ internal sealed class BenchmarkTopologyConfigurationTests
         [
             options with { Peers = [options.PublicEndpoint, options.PublicEndpoint] },
             options with { PublicEndpoint = BenchmarkTopologyConfigurationFixture.OutsideVoter },
+            options with { PhysicalShardId = Guid.Empty },
             options with { Incarnation = Guid.Empty },
             options with { SigningKey = string.Empty },
             options with { PeerSecret = string.Empty },
@@ -141,6 +142,7 @@ internal static class BenchmarkTopologyConfigurationFixture
         DataDirectory = Path.GetTempPath(),
         PublicEndpoint = PrimaryVoter,
         Peers = Voters(nodes),
+        PhysicalShardId = Guid.NewGuid(),
         Incarnation = Guid.NewGuid(),
         SigningKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)),
         PeerSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)),

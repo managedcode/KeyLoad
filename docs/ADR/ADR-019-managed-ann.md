@@ -148,3 +148,39 @@ development observations, strict checks and Aspire normal/scalar/full Linux
 gates. Rollback restores only the scan representation. Qualification remains
 pending until the original full quality, authorization, recovery and RF3 gates
 have evidence; this source-level work reduction is not a measured speedup claim.
+
+
+## Accepted ADR-019 amendment — ANN-016 adjacent budget check de-duplication
+
+Accepted bounded stage: REQ/AC-ANN-016 and TASK-ANN-DUPLICATE-BUDGET-CHECKS in `REQ-AC-ANN-016.md`.
+
+`AnnWorkBudget.Charge` begins by calling `Check`, then validates the charge and updates the existing work counter. In eight frozen Search source files, twelve sites call `Check` immediately before `Charge` with no intervening operation. Remove only those twelve calls. Retain every `Charge` and its original amount, so each charged action still observes cancellation/deadline immediately before its counter update. Preserve other explicit checks, particularly any path that can exit without reaching a charge.
+
+The Luna worker owns only the eight listed ANN source files in the private packet. Root owns exact-base review, integration, strict checks, and same-source genuine Aspire normal/scalar observations with no changes to the corpus, caps, deadline, test admission, or assertions. This is an equivalent-check-count optimization candidate, not a measured speedup, timeout diagnosis, or qualification. Rollback restores the eight source files. Persistence, public transport, storage, and migration are N/A.
+
+
+## Accepted ADR-019 amendment — charged ANN inner-loop check de-duplication
+
+Candidate stage REQ/AC-ANN-017 / TASK-ANN-INNERLOOP-CHECKS in
+`REQ-AC-ANN-017.md`.
+
+The 10k Build report records 165M work units, 4.37M distances and 12.41M edge
+visits, but does not attribute their per-method source or prove the original
+deadline cause. Actual source walks HNSW edge lists, scores unseen neighbors,
+performs heap comparisons and diversifies / repairs reciprocal neighborhoods.
+These counters remain exact and unchanged in this stage.
+
+In four binary-heap sift loops, a loop-entry `budget.Check()` is followed on
+every executed iteration by `IsBetter` / `IsWorse`, which calls
+`budget.Charge(1)` and therefore the same `ReadExecutionBudget.Check()` before
+its work update. In `Greedy`, each loop iteration similarly reaches charged
+`NeighborCount`. Remove only those five duplicated loop-entry checks. Preserve
+every comparison, distance, edge, mutation and charge. Keep the `SearchLayer`
+loop check because its `PopBest` sentinel may exit without charging; retain all
+other checks, cancellation/deadline paths and original bounds.
+
+The source owner is restricted to `PackedAnnCandidateHeaps.cs` and
+`PackedAnnLayerSearch.cs`. Root owns cumulative source join with pending ANN
+patches, review, normal/scalar unchanged-corpus observations, strict gates and
+qualification. This is an unmeasured repeated-check optimization candidate,
+not a deadline diagnosis or speed claim. Rollback restores the five checks.

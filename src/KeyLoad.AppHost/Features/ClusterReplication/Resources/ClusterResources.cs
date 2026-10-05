@@ -24,6 +24,7 @@ internal static class ClusterResources
     private const string DataEnvironment = "KeyLoad__DataDirectory";
     private const string ClusterEnvironment = "KeyLoad__ClusterId";
     private const string IncarnationEnvironment = "KeyLoad__Incarnation";
+    private const string PhysicalShardEnvironment = "KeyLoad__PhysicalShardId";
     private const string SigningEnvironment = "KeyLoad__SigningKey";
     private const string PeerEnvironment = "KeyLoad__PeerSecret";
     private const string AdminEnvironment = "KeyLoad__AdminKey";
@@ -57,6 +58,7 @@ internal static class ClusterResources
         var peer = builder.AddParameter(PeerParameter, profile.PeerSecret, secret: true);
         var admin = builder.AddParameter(AdminParameter, profile.AdminKey, secret: true);
         var incarnation = builder.AddParameter(IncarnationParameter, profile.Incarnation.ToString(GuidFormat), secret: true);
+        var physicalShardId = profile.PhysicalShardId.ToString(GuidFormat);
         var containerUser = ClusterContainerUser.Resolve(builder);
         var nodes = new IResourceBuilder<ContainerResource>[nodeNames.Length];
         for (var index = 0; index < nodes.Length; index++)
@@ -74,6 +76,7 @@ internal static class ClusterResources
                 .WithEndpoint(targetPort: SiloPort, name: SiloEndpoint, scheme: TcpScheme, isExternal: false, isProxied: false)
                 .WithEnvironment(DataEnvironment, ContainerDirectory)
                 .WithEnvironment(ClusterEnvironment, ClusterPrefix + profile.Incarnation.ToString(ClusterGuidFormat))
+                .WithEnvironment(PhysicalShardEnvironment, physicalShardId)
                 .WithEnvironment(IncarnationEnvironment, incarnation)
                 .WithEnvironment(SigningEnvironment, signing).WithEnvironment(PeerEnvironment, peer)
                 .WithEnvironment(AdminEnvironment, admin).WithEnvironment(PrivateHttpEnvironment, TrueValue)

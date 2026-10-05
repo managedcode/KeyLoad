@@ -52,7 +52,6 @@ internal static class PackedAnnBuilder
         long edgeOffset = 0;
         for (var ordinal = 0; ordinal < levels.Length; ordinal++)
         {
-            budget.Check();
             budget.Charge(1);
             var level = PackedAnnLevels.For(options.Seed, ordinal, options.Connections, options.MaxLevel, budget);
             levels[ordinal] = checked((byte)level);
@@ -147,7 +146,6 @@ internal static class PackedAnnBuilder
     {
         for (var ordinal = 1; ordinal < ids.Length; ordinal++)
         {
-            budget.Check();
             budget.Charge(checked((long)ids[ordinal - 1].Length + ids[ordinal].Length));
             if (StringComparer.Ordinal.Compare(ids[ordinal - 1], ids[ordinal]) >= 0)
             {

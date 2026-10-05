@@ -14,6 +14,7 @@ internal static class NodeEpochRf3OfflineOptions
         var options = new NodeOptions
         {
             DataDirectory = Path.GetFullPath(destination),
+            PhysicalShardId = profile.PhysicalShardId,
             Incarnation = profile.Incarnation,
             ClusterId = "keyload-" + profile.Incarnation.ToString("N", CultureInfo.InvariantCulture),
             SigningKey = profile.SigningKey,

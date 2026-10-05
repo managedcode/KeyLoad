@@ -3,16 +3,27 @@ using KeyLoad.Replication;
 namespace KeyLoad.Orleans;
 
 /// <summary>Discovers bounded authenticated runtime addresses without using the membership table.</summary>
-/// <param name="configuration">The local voter set, incarnation and cache freshness bound.</param>
-/// <param name="options">The fixed HTTP peer endpoints and cluster signing settings.</param>
-/// <param name="local">The local actual runtime generation used for self-resolution.</param>
-/// <param name="authentication">The shared request/reply and discovery verifier.</param>
-/// <param name="clock">The system clock and monotonic cache timer.</param>
-public sealed class ReplicaSiloDiscoveryClient(ReplicaConfiguration configuration, ReplicaPeerOptions options,
-    ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock)
-    : IDisposable, IAsyncDisposable
+public sealed class ReplicaSiloDiscoveryClient : IDisposable, IAsyncDisposable
 {
-    private readonly ReplicaCohortDiscovery cohort = new(configuration, options, local, authentication, clock);
+    private readonly ReplicaCohortDiscovery cohort;
+
+    /// <summary>Creates discovery without a private observation sink.</summary>
+    /// <param name="configuration">The local voter set, incarnation and cache freshness bound.</param>
+    /// <param name="options">The fixed HTTP peer endpoints and cluster signing settings.</param>
+    /// <param name="local">The local actual runtime generation used for self-resolution.</param>
+    /// <param name="authentication">The shared request/reply and discovery verifier.</param>
+    /// <param name="clock">The system clock and monotonic cache timer.</param>
+    public ReplicaSiloDiscoveryClient(ReplicaConfiguration configuration, ReplicaPeerOptions options,
+        ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock)
+        : this(configuration, options, local, authentication, clock, null)
+    { }
+
+    internal ReplicaSiloDiscoveryClient(ReplicaConfiguration configuration, ReplicaPeerOptions options,
+        ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
+        IReplicaDiscoveryObservationSink? observationSink)
+    {
+        cohort = new(configuration, options, local, authentication, clock, observationSink);
+    }
 
     /// <summary>Returns a current compatible silo generation, refreshing once under the caller's bounded deadline.</summary>
     /// <param name="voterId">The configured voter to resolve.</param>

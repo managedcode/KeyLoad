@@ -373,3 +373,101 @@ No worker may alter corpus, budgets, options, formulas, graph ordering, packages
 shared configuration, docs or Git. Escalate a missing seam or changed accounting.
 Rollback reverts computational joins only. Data/wire/public SDK/MCP/frontend
 changes are N/A; no persisted format or canonical authority changes.
+
+
+## Accepted narrow amendment: directly adjacent duplicate budget checks
+
+## REQ-ANN-016 / AC-ANN-016
+
+REQ-ANN-016: In Search-owned ANN paths, where `AnnWorkBudget.Check()` is immediately followed by `AnnWorkBudget.Charge(...)` with no intervening expression, branch, work, allocation, or early exit, remove only the redundant explicit `Check()`. `Charge` itself performs the same deadline/cancellation check before validating and adding the unchanged work amount. Do not remove checks anywhere else, including checks on loop/branch exits that may perform no charge. Preserve every charge amount, counter, evaluation, graph edge, allocation, score, ordering, output, cap, cancellation token, and deadline.
+
+AC-ANN-016: A source review identifies and removes only the 12 directly adjacent pairs present in the frozen base across the eight files listed in the task manifest. Each retained `Charge` still checks the same `ReadExecutionBudget` before its original work-counter update. No check is removed when execution may exit without charging. Result bytes/order/scores, work/distance/edge counts, admitted resources, cancellation/deadline/error outcomes, and normal/scalar behavior remain unchanged for identical inputs; root compares the same source and unchanged native corpus in both modes. This source-only change does not assert or claim lower elapsed time, fewer counted work units, an explanation for the SHA55 deadline observations, or qualification.
+
+Traceability: REQ-ANN-016 -> AC-ANN-016 -> ADR-019 amendment -> TASK-ANN-DUPLICATE-BUDGET-CHECKS -> exact-source diff review and root-owned same-source native normal/scalar observations. Unit, process-recovery, public API, storage, migration, and RF3 are N/A for this bounded internal-check change; existing full gates remain applicable to delivery.
+
+## Ordered implementation and ownership
+
+1. Freeze this amendment and ADR-019 addition against the exact base hashes in `../BASE-MANIFEST.sha256`.
+2. The private source packet removes the explicit `Check()` from only these base-adjacent pairs: `PackedAnnLayerBuffers` (three reset loops), `PackedAnnNeighborOrdering.SelectSimple`, `PackedAnnNeighborSelection.SelectDiverse`, `PackedAnnBuilder` (level assignment and ID-order validation loops), `PackedAnnApproximateSearch`, `FilteredVectorPlanner.Plan`, `PackedAnnVectors` block allocation, and `PackedAnnExactSearch` (corpus and bitmap loops).
+3. Root reviews every hunk and joins to its stable checkout. Root owns strict build, formatter, governance, unchanged-input Aspire normal/scalar execution, and delivery evidence. The private worker runs no gates.
+4. Rollback restores the eight original source files byte-for-byte. No data/public format migration exists.
+
+The workers do not own product documentation or shared files beyond this proposed private freeze; root performs the accepted specification/ADR join. Existing corpus, admission key, operation budgets, deadlines, options, tests, and acceptance thresholds are unchanged.
+
+
+## Accepted REQ/AC-ANN-017: remove duplicate budget checks in charged inner loops
+
+## Evidence and scope
+
+Exact SHA55 Build-only observations for the unchanged 10,000-row, 16-dimensional
+DotProduct corpus (seed `5423839510519694385`, Connections=16,
+EfConstruction=128, 30-second deadline) reported about 165 million work units,
+4.37 million distance evaluations and 12.41 million edge visits. These are
+observed aggregate counts; they do not attribute a count to one method or
+establish the cause of the deadline outcomes.
+
+Current source explains the counting path. `AnnWorkBudget.ChargeDistance(16)`
+adds 16 work units and one distance evaluation; `ChargeEdge` adds one work unit
+and one edge visit. During each HNSW insertion, `PackedAnnLayerSearch.Greedy`
+walks each upper-layer neighbor, while `SearchLayer` repeatedly pops retained
+candidates and `VisitNeighbors` charges every edge examined, including edges
+to already-visited nodes. Unseen nodes are scored. Neighbor diversification and
+full reciprocal-neighbor replacement also score vectors. These are actual
+algorithmic operations; the report does not reveal their per-method split.
+
+A distinct source-level hot path is duplicate deadline/cancellation observation
+inside charged inner loops. Each iteration of all four `PackedAnnCandidateHeaps`
+sift loops calls `budget.Check()` and then unconditionally calls `IsBetter` or
+`IsWorse`; those comparators immediately call `budget.Charge(1)`, which itself
+calls the same `ReadExecutionBudget.Check()` before updating work. Each
+`PackedAnnLayerSearch.Greedy` iteration likewise calls `budget.Check()` and
+then unconditionally calls `graph.NeighborCount`, which charges before reading
+the count. These sites repeat clock/cancellation checks without adding counted
+work or an uncharged exit path.
+
+## REQ-ANN-017 / AC-ANN-017
+
+REQ-ANN-017: Remove only the standalone explicit `budget.Check()` at the start
+of each iteration of `SiftBestUp`, `SiftBestDown`, `SiftWorstUp`,
+`SiftWorstDown`, and `PackedAnnLayerSearch.Greedy`. Retain the immediately
+following comparator/neighbor-count charged operation, which performs the same
+cancellation/deadline check before its existing work-counter update. Preserve
+all calls on paths that can exit without a charge, all charge amounts and
+counters, comparison/selection order, score computations, candidate contents,
+work/scratch/index caps, original deadline, caller token and portable normal /
+scalar semantics. Do not broaden this to the `SearchLayer` outer loop: `PopBest`
+can return an empty-heap sentinel without charging, so its explicit check is
+required and must remain.
+
+AC-ANN-017: A source diff removes exactly five loop-entry `budget.Check()`
+calls at the sites above and changes no other code. Root uses the existing
+`PackedAnnBuildObservationRunner` with the unchanged 10k corpus and options to
+compare each mode to its own pre-change observation (normal-to-normal and
+scalar-to-scalar): exact work, distance and edge counters must remain stable,
+and existing correctness output/oracles must pass. The native `AdaptiveFilteredPlannerTests.AcFilter004...`
+continues to check the independent scalar-cohort candidate oracle;
+`PackedAnnBudgetTests.AcAnn003...` continues to exercise real cancellation and
+deadline interruption; recall/filter/full existing tests retain their original
+coverage. No assertion, corpus, or test source changes are allowed. Measurements
+record actual elapsed/build observations but make no speedup claim unless
+same-source before/after data supports one. The prior SHA55 deadline failures
+remain evidence only; this change does not assert they are repaired or caused
+by duplicate checks.
+
+Traceability: REQ-ANN-017 -> AC-ANN-017 -> ADR-019 amendment ->
+TASK-ANN-INNERLOOP-CHECKS -> exact-source patch review and root-owned unchanged
+input normal/scalar observations. No new corpus, test seam, budget, deadline,
+workload, package, persistence, public API, migration, or RF3 change occurs.
+
+## Ordered ownership
+
+1. Root reviews and accepts this exact REQ/AC/ADR contract against the frozen
+   source hashes in `../SOURCE-BASE.tsv` before implementation.
+2. Private source owner edits only `PackedAnnCandidateHeaps.cs` (the four
+   sift-loop checks) and `PackedAnnLayerSearch.cs` (the one Greedy-loop check).
+3. Root owns cumulative joins with any earlier pending ANN-016 source packet,
+   strict build/format/governance, and identical-source normal/scalar Aspire
+   measurements and full required gates. The private worker runs no build,
+   test, benchmark, Git, or checkout edit.
+4. Rollback restores these five original checks. No persisted or public format
+   changes exist.

@@ -33,6 +33,10 @@ internal static class McpCatalogExpectations
     private const string GraphShortestPathRoute = "/v1/graph/shortest-path";
     internal const string QueryGraphPath = "keyload_query_graph_path";
     private const string QueryGraphPathRoute = "/v1/query/graph-path";
+    internal const string AdminPartitionPlacementBind = "keyload_admin_partition_placement_bind";
+    private const string AdminPartitionPlacementBindRoute = "/v1/admin/partition-placement/bind";
+    internal const string AdminPartitionPlacementRead = "keyload_admin_partition_placement_read";
+    private const string AdminPartitionPlacementReadRoute = "/v1/admin/partition-placement/read";
     internal const string SeriesRead = "keyload_series_read";
     private const string SeriesReadRoute = "/v1/series/read";
     internal const string SeriesLatest = "keyload_series_latest";
@@ -114,7 +118,7 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 64;
+    internal const int Count = 66;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
@@ -130,8 +134,8 @@ internal static class McpCatalogExpectations
         (GraphTraverse, GraphTraverseRoute, GrainReadKind.Traverse, null),
         (GraphShortestPath, GraphShortestPathRoute, GrainReadKind.GraphShortestPath, null),
         (QueryGraphPath, QueryGraphPathRoute, GrainReadKind.SqlGraphPath, null),
-        (GraphShortestPath, GraphShortestPathRoute, GrainReadKind.GraphShortestPath, null),
-        (QueryGraphPath, QueryGraphPathRoute, GrainReadKind.SqlGraphPath, null),
+        (AdminPartitionPlacementBind, AdminPartitionPlacementBindRoute, null, OperationKind.BindAtomicPartitionPlacement),
+        (AdminPartitionPlacementRead, AdminPartitionPlacementReadRoute, GrainReadKind.AtomicPartitionPlacement, null),
         (SeriesRead, SeriesReadRoute, GrainReadKind.Samples, null),
         (SeriesLatest, SeriesLatestRoute, GrainReadKind.LatestSample, null),
         (SeriesAggregate, SeriesAggregateRoute, GrainReadKind.AggregateSamples, null),

@@ -54,6 +54,8 @@ internal static class McpToolDescriptions
     private const string ProjectionsCommit = "Commit a projection batch acknowledgement and declared mutation effects with the original token.";
     private const string ProjectionsRelease = "Release an administrator-authorized projection consumer at its expected index generation.";
     private const string OutboxPurge = "Purge a bounded administrator-authorized outbox range. Existing retained data can be removed.";
+    private const string AdminPartitionPlacementBind = "Bind one atomic partition to the current physical shard using the expected placement directory revision; requires persisted cluster administrator authority.";
+    private const string AdminPartitionPlacementRead = "Read one atomic partition placement and the committed default-shard identity from one authorized view; requires persisted cluster administrator authority.";
 
     internal static string For(string name) => name switch
     {
@@ -79,9 +81,9 @@ internal static class McpToolDescriptions
         McpToolNames.ProjectionsRead => ProjectionsRead,
         McpToolNames.SearchExecute => SearchExecute,
         McpToolNames.SearchGraph => SearchGraph,
-        McpToolNames.AdminBackup => AdminBackup,
-        McpToolNames.AdminAdmission => AdminAdmission,
-        McpToolNames.AdminStatus => AdminStatus,
+        McpToolNames.AdminBackup or McpToolNames.AdminAdmission or McpToolNames.AdminStatus
+            or McpToolNames.AdminPartitionPlacementBind or McpToolNames.AdminPartitionPlacementRead
+            => AdminDescription(name),
         McpToolNames.DocumentsCommit => DocumentsCommit,
         McpToolNames.MessagesReceive => MessagesReceive,
         McpToolNames.MessagesComplete => MessagesComplete,
@@ -103,6 +105,16 @@ internal static class McpToolDescriptions
         AdminDashboardProtocol.SnapshotTool or AdminDashboardProtocol.ResourcesTool or AdminDashboardProtocol.QueueTool
             => AdminDashboardMcpCatalog.Description(name),
         _ => BlobMcpDescriptions.For(name)
+    };
+
+    private static string AdminDescription(string name) => name switch
+    {
+        McpToolNames.AdminBackup => AdminBackup,
+        McpToolNames.AdminAdmission => AdminAdmission,
+        McpToolNames.AdminStatus => AdminStatus,
+        McpToolNames.AdminPartitionPlacementBind => AdminPartitionPlacementBind,
+        McpToolNames.AdminPartitionPlacementRead => AdminPartitionPlacementRead,
+        _ => throw new ArgumentOutOfRangeException(nameof(name))
     };
 
     private static string SeriesDescription(string name) => name switch

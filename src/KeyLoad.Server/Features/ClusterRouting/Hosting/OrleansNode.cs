@@ -20,6 +20,7 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
     private IGrainFactory? grains;
     private Task? shutdown;
     private Task? startup;
+    private PhysicalShardCatalogStartup? physicalShardCatalog;
 
     /// <summary>Factory published only after native silo startup completes.</summary>
     public IGrainFactory? Grains => Volatile.Read(ref grains);
@@ -29,6 +30,8 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
 
     /// <summary>Early runtime discovery remains available during membership bootstrap.</summary>
     public ReplicaSiloDiscoveryState? Discovery => Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaSiloDiscoveryState>();
+
+    internal bool CatalogReady => Grains is not null && Volatile.Read(ref physicalShardCatalog)?.IsReady == true;
 
     /// <summary>Authenticator for exact discovery response bytes.</summary>
     public ReplicaEnvelopeAuthenticator? Authentication => Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaEnvelopeAuthenticator>();
@@ -54,6 +57,8 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
     private IServiceProvider RuntimeServices => Grains is not null && Volatile.Read(ref host) is { } running
         ? running.Services : throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
 
+    internal GrainRequestCodec CatalogRequestCodec() => RuntimeServices.GetRequiredService<GrainRequestCodec>();
+
     /// <summary>Starts the native transport before its quorum-backed membership provider initializes.</summary>
     /// <param name="cancellationToken">Application startup cancellation, shared with membership initialization.</param>
     public Task StartAsync(CancellationToken cancellationToken)
@@ -78,6 +83,10 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref grains, built.Services.GetRequiredService<IGrainFactory>());
+        var catalog = new PhysicalShardCatalogStartup(this, partition, options,
+            built.Services.GetRequiredService<TimeProvider>());
+        Volatile.Write(ref physicalShardCatalog, catalog);
+        await catalog.InitializeAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<IPAddress> ResolveAddressAsync(CancellationToken cancellationToken)
@@ -96,15 +105,33 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
     /// <param name="command">Server-derived command intent used only to classify an uncertain RPC outcome.</param>
     /// <param name="cancellationToken">Public request cancellation propagated through Orleans.</param>
     /// <returns>Exact bounded reply, throwing only the typed public safe error locally.</returns>
-    public async Task<GrainOperationReply> ExecuteAsync(Guid requestId, string signedRequest, bool command,
+    public Task<GrainOperationReply> ExecuteAsync(Guid requestId, string signedRequest, bool command,
         CancellationToken cancellationToken)
+        => ExecuteCoreAsync(requestId, signedRequest, command, requireCatalogAdmission: true, cancellationToken);
+
+    internal Task<GrainOperationReply> ExecutePhysicalShardStartupRequestAsync(Guid requestId,
+        string signedRequest, bool command, CancellationToken cancellationToken)
+        => ExecuteCoreAsync(requestId, signedRequest, command, requireCatalogAdmission: false, cancellationToken);
+
+    private async Task<GrainOperationReply> ExecuteCoreAsync(Guid requestId, string signedRequest, bool command,
+        bool requireCatalogAdmission, CancellationToken cancellationToken)
     {
         var factory = Grains ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         var services = RuntimeServices;
         var clock = services.GetRequiredService<TimeProvider>();
         using var deadline = new CancellationTokenSource(GrainRequestStreamProtocol.ExecutionLifetime, clock);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
+        var catalog = requireCatalogAdmission ? Volatile.Read(ref physicalShardCatalog) : null;
+        if (requireCatalogAdmission && (catalog is null || !catalog.IsReady))
+        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
         await EnsureCompatibleCohortAsync(execution.Token).ConfigureAwait(false);
+        if (requireCatalogAdmission)
+        {
+            catalog = Volatile.Read(ref physicalShardCatalog);
+            if (catalog is null || !catalog.IsReady)
+            { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
+            await catalog.EnsureAdmissionAsync(execution.Token).ConfigureAwait(false);
+        }
         GrainOperationReply reply;
         try
         {
@@ -131,6 +158,7 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
         {
             if (shutdown is null)
             {
+                Volatile.Read(ref physicalShardCatalog)?.CloseAdmission();
                 var registered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
                 shutdown = StopCoreAsync(registered.Task, startup);
                 registered.SetResult();
@@ -145,6 +173,7 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
         var drain = requestWork.DrainAsync();
         if (starting is not null)
         { await starting.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing); }
+        Volatile.Read(ref physicalShardCatalog)?.CloseAdmission();
         Volatile.Write(ref grains, null);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => drain, failures).ConfigureAwait(false);
@@ -190,6 +219,26 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
         { await asynchronous.DisposeAsync().ConfigureAwait(false); }
         else
         { stopping.Dispose(); }
+    }
+
+    internal Task EnsureCatalogAdmissionAsync(CancellationToken cancellationToken)
+    {
+        var catalog = Volatile.Read(ref physicalShardCatalog);
+        if (catalog is null || !catalog.IsReady)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
+        return catalog.EnsureAdmissionAsync(cancellationToken);
+    }
+
+    internal void OpenCatalogAdmission(PhysicalShardCatalogStartup catalog, string principalId,
+        CancellationToken cancellationToken)
+    {
+        lock (lifecycle)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (shutdown is not null || !ReferenceEquals(Volatile.Read(ref physicalShardCatalog), catalog))
+            { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
+            catalog.OpenAdmission(principalId);
+        }
     }
 
     /// <inheritdoc />

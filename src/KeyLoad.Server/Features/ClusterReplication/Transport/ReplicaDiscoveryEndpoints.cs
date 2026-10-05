@@ -35,14 +35,14 @@ internal static class ReplicaDiscoveryEndpoints
 
     private static async Task<IResult> ReadyAsync(PartitionHost partition, OrleansNode node, CancellationToken cancellationToken)
     {
-        if (node.Grains is null)
+        if (!node.CatalogReady)
         { return Results.StatusCode(StatusCodes.Status503ServiceUnavailable); }
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(ServerProtocol.ReadyTimeout);
         try
         {
             await node.EnsureCompatibleCohortAsync(deadline.Token).ConfigureAwait(false);
-            await partition.Coordinator.ReadBarrierAsync(deadline.Token).ConfigureAwait(false);
+            await node.EnsureCatalogAdmissionAsync(deadline.Token).ConfigureAwait(false);
             return Results.Ok(new ReadyReply(ServerProtocol.ReadyStatus, partition.Configuration.VoterIds.Length));
         }
         catch (Exception error) when (error is KeyLoadException or OperationCanceledException)
