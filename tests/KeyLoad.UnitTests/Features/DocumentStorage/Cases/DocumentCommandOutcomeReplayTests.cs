@@ -1,4 +1,3 @@
-
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
 
 internal sealed class DocumentCommandOutcomeReplayTests

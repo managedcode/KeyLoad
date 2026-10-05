@@ -5,7 +5,7 @@
   "runId": 37254939723,
   "attempt": 1,
   "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37254939723",
-  "conclusion": "in_progress_at_retrieval",
+  "conclusion": "failure",
   "observedUtc": "2026-10-05T03:02:03Z",
   "qualified": false,
   "acceptanceClosed": false,
@@ -224,5 +224,12 @@
     "Build and test KeyLoad (ubuntu-latest)": "cancelled",
     "Check website": "in_progress"
   },
-  "scope": "Unit3248/3248 native completion is real. Scalar3245/3248 and RF3115/118 are failures; cancelled whole job and absent recovery cannot qualify the required complete gate. These reports do not cover subsequent working-tree search-quality, identity, diagnostic or recovery changes."
+  "scope": "Unit3248/3248 native completion is real. Scalar3245/3248 and RF3115/118 are failures; cancelled whole job and absent recovery cannot qualify the required complete gate. These reports do not cover subsequent working-tree search-quality, identity, diagnostic or recovery changes.",
+  "finalRunState": {
+    "status": "completed",
+    "conclusion": "failure",
+    "updatedAt": "2026-10-05T03:08:07Z",
+    "observedUtc": "2026-10-05T03:45:14.313088+00:00",
+    "verification": "Authenticated gh run view 37254939723; exact source SHA unchanged"
+  }
 }

@@ -3,7 +3,7 @@ using System.Runtime.ExceptionServices;
 
 namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
 
-internal sealed class CommandIdempotencyProcessChild : IDisposable
+internal sealed class CommandIdempotencyProcessChild
 {
     private readonly int outputLimitCharacters;
     private readonly bool expectAcknowledgement;
@@ -126,7 +126,7 @@ internal sealed class CommandIdempotencyProcessChild : IDisposable
         CommandIdempotencyProcessFailureHandling.ThrowFailures(failures);
     }
 
-    public void Dispose()
+    internal void CloseNativeProcessAfterJoin()
     {
         if (IsDisposed)
         {
@@ -140,10 +140,7 @@ internal sealed class CommandIdempotencyProcessChild : IDisposable
         }
         process?.Dispose();
         IsDisposed = true;
-        GC.SuppressFinalize(this);
     }
-
-    internal void DisposeAfterJoin() => Dispose();
 
     private async Task JoinReadersForCleanupAsync(List<Exception> failures, CancellationToken cancellationToken)
     {

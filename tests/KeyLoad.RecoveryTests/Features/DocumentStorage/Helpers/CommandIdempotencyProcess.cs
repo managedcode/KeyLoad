@@ -27,7 +27,7 @@ internal static class CommandIdempotencyProcess
             await active.StopAndJoinAsync(timeout.Token);
             await KilledProcessFileReadiness.WaitAsync(root, timeout.Token);
             EpochUpgradeFileInventory.AssertNativeHandlesReleased(root);
-            active.DisposeAfterJoin();
+            active.CloseNativeProcessAfterJoin();
             active = null;
 
             active = CommandIdempotencyProcessChild.Create(OutputLimitCharacters, expectAcknowledgement: false);
@@ -41,7 +41,7 @@ internal static class CommandIdempotencyProcess
             await KilledProcessFileReadiness.WaitAsync(root, timeout.Token);
             EpochUpgradeFileInventory.AssertNativeHandlesReleased(root);
             await CommandIdempotencyRecoveryAssertions.AssertRecoveredStoreAsync(root, timeout.Token);
-            active.DisposeAfterJoin();
+            active.CloseNativeProcessAfterJoin();
             active = null;
         }
         catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
@@ -100,7 +100,7 @@ internal static class CommandIdempotencyProcess
         {
             try
             {
-                active.DisposeAfterJoin();
+                active.CloseNativeProcessAfterJoin();
             }
             catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
             {

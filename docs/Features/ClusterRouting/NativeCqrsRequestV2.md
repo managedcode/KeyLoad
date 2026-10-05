@@ -593,3 +593,66 @@ Query worker revises only its six private AppHost helper files from the reviewed
 R2 packet, with original base/post hashes, without checkout writes or gates.
 Actual no-follow/FIFO mechanisms and complete Aspire/RF3/Linux gates remain
 required; static source repair does not qualify a started topology.
+
+### Accepted C1 public phase interruption cases, 2026-10-05
+
+TASK-CRS-C1-PUBLIC-INTERRUPTION implements four genuine RF3 cases for
+AC-CRS-003/005, one SDK and one official MCP case at BeforeSubmit and
+SubmitReturned. Each case owns a fresh current-image Aspire RF3 wave, private
+profile/data/control roots, current signed discovery, one persisted non-admin
+synthetic principal whose ID starts c1-probe-, and one document with exact before
+and after strings. Configure that principal and resources through genuine public
+administrator operations. No caller-supplied role, reused control session or
+existing user's store may be used.
+
+Root owns the shared RequestCqrsRf3Wave.StartProbedAsync(dataRoot, images,
+RequestCqrsProbeFixture controls, CancellationToken) join. It adds only the frozen
+private probe configuration to the existing current-image wave startup, preserving
+immutable image proof, three physical voters, native uid:gid, readiness,
+diagnostics, shutdown and original failures. Helpers await root's actual reviewed
+Server/AppHost/fixture join; a private test packet is not RF3 evidence.
+
+For BeforeSubmit, arm Hold for the exact principal/command, retain the original
+real client Task, await the genuine signed phase marker, and prove the unchanged
+entity with a separate real administrator read before cancelling that original
+caller. Require the actual SDK UnknownWriteOutcome or actual official MCP safe
+unknown tool result/transport cancellation. Await the actual cancelled/released
+hold settlement and native ProducerDisposed marker for the claimed request,
+join the original caller, then retire the arm before retry. Retry the identical
+stable command/body with fresh signed requests through SDK and official MCP;
+require equal full receipts and exactly one document revision/effect.
+
+For SubmitReturned, await that exact marker and independently read the committed
+intended entity before cancelling. Require the same actual caller interruption,
+settlement/disposal and original joins; fresh SDK/MCP retries must return the
+complete already committed receipt and retain one revision advance. The probe
+request ID is compared with an actual MCP request ID when a validated tool result
+exists; transport failures must not invent an ID or tool response. These cases
+exercise actual phase cancellation, not remote-voter death; remote execution
+placement and death remain separately required.
+
+Each case has the existing parent/wave/cleanup bounds. Cleanup stops admission,
+cancels/joins every original caller, releases and joins admitted control gates,
+disposes actual public clients, stops/disposes the Aspire-owned resources and
+original diagnostics watchers, proves native file locks released, then removes
+only exclusively owned control/data roots. Preserve primary and every cleanup
+failure with ServerFailureObserver and fatal policy. A deadline observation or
+Task.IsCompleted test is not a replacement original join. Never delete controls
+before actual producer disposal/resources join; retain failure originals.
+
+Task graph: root freezes these requirements and shared joins; query_wave Luna/high
+owns only new IntegrationTests/ClusterRouting Cases/Helpers/Models files prefixed
+RequestCqrsPhaseFault, with existing real client, receipt, probe and profile helpers.
+It emits a private exact-base patch, complete source, hashes and self-review, with
+no checkout/shared/docs/package/Git edits or gates. Root reviews every line,
+implements the shared startup join, builds/formats/governs the full solution,
+runs the actual Aspire rf3 caller with four bounded development cases, retains
+native JSON/TRX/image/topology/phase evidence and follows exact-source Linux
+complete gates. Requirement mappings are the preceding AC-CRS-003/005 matrix;
+current-authority revocation, ordinary-fault privacy, migration, remote death,
+C2/C3 and full KL acceptance remain required separately.
+
+ADR-034/058 and the preceding accepted C1 control implementation contract already
+cover these private controls and public CQRS behavior. No public API, canonical
+format, credential contract or deployment topology changes; rollback removes
+the test entry points/private controls without migrating canonical data.

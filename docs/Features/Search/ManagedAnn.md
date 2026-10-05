@@ -246,3 +246,41 @@ Rollback reverts the computational joins; there is no data migration. Public
 SDK/MCP/frontend additions are N/A because this internal optimization preserves
 their existing exact operation contracts. Comparable GitHub measurements and
 remaining ANN projection/public/RF3 acceptance are still mandatory.
+
+## Accepted prepared-value construction join, 2026-10-05
+
+TASK-ANN-R1-CONSTRUCTION-VALUE extends the accepted finite-owned prepared value
+through packed construction traversal. The exact cb5 Linux scalar report retains
+two unchanged 10,000-row filtered-planner failures during the ordinary 30-second
+build deadline; it does not establish that allocations caused those timeouts.
+Construction currently creates a PreparedSimilarity reference per inserted row.
+Remove that reference allocation by using the already accepted readonly
+PreparedPackedSimilarity carrier. Keep one shared Greedy/SearchLayer/neighbor
+traversal implementation via an internal IPackedAnnSimilarity contract and
+constrained generic calls. Implement the contract explicitly on the existing
+sealed untrusted-query class and readonly owned value; no boxing, delegate,
+second traversal, vector copy, cached norm array or changed formula is allowed.
+
+REQ-ANN-011 / AC-ANN-011: for all three metrics, actual class and owned-value
+traversals over the same genuine finite packed graph return identical greedy
+nodes, ordered candidate ordinals and exact double scores with identical charged
+work/distance/edge counters. Preserve all untrusted/owned validation and existing
+zero-allocation value, independent similarity, graph adjacency, 10,000-row recall,
+filter, scalar, cancellation and deadline cases with their original limits.
+The construction join must use the value directly and constrained traversal must
+not box it; source review and a warmed zero-byte actual value traversal measurement
+cover that specific claim, with setup/assertions outside the measured interval.
+This does not claim improved elapsed time, full ANN qualification or deadline repair.
+
+Ordered graph: root freezes the contract and ADR, cluster_wave Luna/high prepares
+only PackedAnnConstruction, PackedAnnLayerSearch, PreparedSimilarity,
+SimilarityMetricMath and the new Search/Contracts/IPackedAnnSimilarity.cs in a
+private exact-base packet. Query's ordinary prepared-query public validation and
+all other product sources are unchanged. Independent tests are a separately
+assigned new PackedAnnConstructionValueTests and cohesive Search helpers against
+actual existing packed fixtures; root owns their later assignment, integration,
+full Release/format/governance and Aspire normal/scalar unchanged ANN gates.
+No worker may alter corpus, budgets, options, formulas, graph ordering, packages,
+shared configuration, docs or Git. Escalate a missing seam or changed accounting.
+Rollback reverts computational joins only. Data/wire/public SDK/MCP/frontend
+changes are N/A; no persisted format or canonical authority changes.

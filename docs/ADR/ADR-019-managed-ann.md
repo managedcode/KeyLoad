@@ -100,3 +100,14 @@ private Search test files; root owns review, Aspire normal/scalar/full gates,
 original evidence and all-code checkpoints. No physical generation, alias,
 format, public capability or canonical migration is accepted by this prerequisite;
 the complete native ZoneTree projection/recovery contract remains required.
+
+Root accepts TASK-ANN-R1-CONSTRUCTION-VALUE and REQ/AC-ANN-011 in the
+[construction join](../Features/Search/ManagedAnn.md#accepted-prepared-value-construction-join-2026-10-05).
+Use the existing finite-owned readonly value for construction, with one internal
+constrained generic traversal and explicit class/value contract implementations.
+Preserve every score, ordinal order, validation and work/deadline/cancellation
+charge. Root freezes and reviews the private implementation, joins independent
+class/value traversal and allocation tests, then retains full Release/static and
+Aspire native/scalar corpus evidence. Exact-source Linux and ANN lifecycle/RF3
+acceptance remain required. No persistence or public transport changes occur;
+rollback reverts these computational joins, with no store migration.

@@ -737,8 +737,19 @@
     "evidence": [
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
-      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
+      "docs/implementation/command-outcome-pin-development-2026-10-05.json"
+    ],
+    "runtimeQualified": false,
+    "allAcceptanceClosed": false,
+    "commandOutcomeDevelopment": {
+      "recovery": "one_actual_two_process_100_retry_case_passed",
+      "normal": "2_of2",
+      "scalar": "2_of2",
+      "receipt": "docs/implementation/command-outcome-pin-development-2026-10-05.json",
+      "partitionScopedOutcomeContract": "pending",
+      "qualified": false
+    }
   },
   "KL-013": {
     "title": "Query AST, planner і cursors",
@@ -1121,7 +1132,8 @@
       "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedReadBudgetTests.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedReservationTests.cs",
       "docs/implementation/runtime-qualification-37249197752.json",
-      "docs/implementation/ann-prepared-value-development-2026-10-05.json"
+      "docs/implementation/ann-prepared-value-development-2026-10-05.json",
+      "docs/implementation/command-outcome-pin-development-2026-10-05.json"
     ],
     "sourceStage": "R2A_bounded_historical_seed_9_source_12_tests_34_cases_full_static23_and_unchanged_actual_Aspire_normal34_scalar34_local_pass_persisted_projection_replay_and_delivered_Linux_RF3_pending",
     "runtimeQualified": false,
@@ -1136,6 +1148,13 @@
       "receipt": "docs/implementation/ann-prepared-value-development-2026-10-05.json",
       "qualified": false,
       "acceptanceClosed": false
+    },
+    "outboxPinDevelopment": {
+      "normal": "6_of6",
+      "scalar": "6_of6",
+      "receipt": "docs/implementation/command-outcome-pin-development-2026-10-05.json",
+      "durableGenerationAndOnlineProjection": "pending",
+      "qualified": false
     }
   },
   "KL-032": {

@@ -141,3 +141,34 @@ SQL/SDK/MCP contracts and new native aliases/formats are N/A for this proof.
 Root must still freeze native ZoneTree generation records/publication, owner locks,
 replay, combined reservations and real process recovery before R2 production
 implementation. Existing R2A and AC-ANN-007/008 qualification remain open.
+
+### Accepted native cancellation observer repair, 2026-10-05
+
+TASK-ASD-CANCELLATION-OBSERVER repairs the independent AC-ASD-004 test oracle.
+The original cb5 Linux scalar failure is retained: the asynchronous delay-based
+observer shares a busy ThreadPool with synchronous real capture, so the test did
+not establish cancellation before capture completion. This is not evidence that
+production ignored an already-cancelled token.
+
+Use one owned dedicated native Thread for observation, started and confirmed
+running before the original synchronous 10,000-record capture. Poll the real
+ReadExecutionBudget.ReadBytes with bounded native scheduling; after its first
+positive charge call the actual CancellationTokenSource.Cancel and retain an
+explicit cancellation-requested witness plus the original observer exception.
+The unchanged original capture must throw OperationCanceledException and return
+no seed. Require actual positive charged bytes and observed token cancellation,
+then a healthy unchanged 10,000-record following capture. Keep the original
+15-second observation/join bound, real clock, corpus and product budgets. No
+production pause, fake progress, synthetic cancelled result, repeat-until-pass,
+assertion waiver or ThreadPool worker substitutes for this native observer.
+
+Root freezes this refinement under ADR-019's existing AC-ASD-004 cancellation
+contract. Lifecycle worker Luna/high owns only AnnSeedCancellationTests and new
+cohesive Search test observer helpers as a private exact-base packet. Root joins
+and reviews startup, completion/error handshakes, cancellation and original
+Thread.Join on success and failure before disposing synchronization/token state;
+all primary and observer/cleanup failures remain observable, with fatal policy.
+No background thread or original capture is abandoned. Root runs full Release,
+static checks and actual Aspire normal/scalar cases and the unchanged complete
+seed suite, retaining original evidence. No product format or transport change;
+rollback removes the test scheduling repair, not a native cancellation check.
