@@ -1,9 +1,20 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 
 namespace KeyLoad.Replication;
 
-internal sealed class ReplicaRpcClient(ReplicaConfiguration configuration, CancellationToken stoppingToken)
+internal sealed class ReplicaRpcClient
 {
+    private readonly ReplicaConfiguration configuration;
+    private readonly CancellationToken stoppingToken;
+
+    internal ReplicaRpcClient(IOptions<ReplicaConfiguration> configurationOptions, CancellationToken stoppingToken)
+    {
+        ArgumentNullException.ThrowIfNull(configurationOptions);
+        configuration = configurationOptions.Value;
+        configuration.Validate();
+        this.stoppingToken = stoppingToken;
+    }
     private IReplicaTransport? transport;
     internal void Attach(IReplicaTransport value)
     {

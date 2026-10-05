@@ -51,9 +51,11 @@ public sealed record ProjectionConsumerDefinition([property: Orleans.Id(0)] long
 public sealed record ProjectionConsumerInfo([property: Orleans.Id(0)] ProjectionConsumerRef Consumer, [property: Orleans.Id(1)] ProjectionConsumerDefinition Definition,
     [property: Orleans.Id(2)] long Checkpoint, [property: Orleans.Id(3)] bool Released)
 {
+    private const int NoProgressReservationCut = -1;
+
     /// <summary>Gets the latest reserve-using commit cut recorded for this consumer.</summary>
     [Orleans.Id(4)]
-    public long LastProgressReservationCut { get; init; } = -1;
+    public long LastProgressReservationCut { get; init; } = NoProgressReservationCut;
 }
 
 /// <summary>Requests creation or replacement of a projection consumer.</summary>
@@ -72,7 +74,11 @@ public sealed record ConfigureProjectionConsumerRequest([property: Orleans.Id(0)
 /// <param name="MaxBytes">The maximum batch size in bytes.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ReadProjectionBatchRequest)]
-public sealed record ReadProjectionBatchRequest([property: Orleans.Id(0)] ProjectionConsumerRef Consumer, [property: Orleans.Id(1)] int Limit = 100, [property: Orleans.Id(2)] int MaxBytes = 4_194_304);
+public sealed record ReadProjectionBatchRequest([property: Orleans.Id(0)] ProjectionConsumerRef Consumer, [property: Orleans.Id(1)] int Limit = ReadProjectionBatchRequest.DefaultLimit, [property: Orleans.Id(2)] int MaxBytes = ReadProjectionBatchRequest.DefaultMaxBytes)
+{
+    private const int DefaultLimit = 100;
+    private const int DefaultMaxBytes = 4_194_304;
+}
 
 /// <summary>Contains outbox entries returned to a projection consumer.</summary>
 /// <param name="Consumer">The consumer status for this batch.</param>
@@ -117,7 +123,10 @@ public sealed record ReleaseProjectionConsumerRequest([property: Orleans.Id(0)] 
 /// <param name="Limit">The maximum number of entries to purge.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.PurgeOutboxRequest)]
-public sealed record PurgeOutboxRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] PartitionRef Partition, [property: Orleans.Id(2)] long ThroughSequence, [property: Orleans.Id(3)] int Limit = 1_000);
+public sealed record PurgeOutboxRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] PartitionRef Partition, [property: Orleans.Id(2)] long ThroughSequence, [property: Orleans.Id(3)] int Limit = PurgeOutboxRequest.DefaultLimit)
+{
+    private const int DefaultLimit = 1_000;
+}
 
 /// <summary>Reports the outbox head and configured projection consumers.</summary>
 /// <param name="Head">The outbox retention and storage summary.</param>
@@ -151,7 +160,11 @@ public enum ChangeFeedStart
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ReadChangeFeedRequest)]
 public sealed record ReadChangeFeedRequest([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Collection, [property: Orleans.Id(2)] string? Cursor = null,
-    [property: Orleans.Id(3)] ChangeFeedStart Start = ChangeFeedStart.Beginning, [property: Orleans.Id(4)] int Limit = 100, [property: Orleans.Id(5)] int MaxBytes = 4_194_304);
+    [property: Orleans.Id(3)] ChangeFeedStart Start = ChangeFeedStart.Beginning, [property: Orleans.Id(4)] int Limit = ReadChangeFeedRequest.DefaultLimit, [property: Orleans.Id(5)] int MaxBytes = ReadChangeFeedRequest.DefaultMaxBytes)
+{
+    private const int DefaultLimit = 100;
+    private const int DefaultMaxBytes = 4_194_304;
+}
 
 /// <summary>Describes a document change recorded in the system outbox.</summary>
 /// <param name="Sequence">The outbox sequence of the change.</param>
@@ -205,7 +218,11 @@ public sealed record LiveQuerySnapshot([property: Orleans.Id(0)] ImmutableArray<
 /// <remarks>Live query deltas are bounded and unordered; ordering and top-k use separate query profiles.</remarks>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ReadLiveQueryRequest)]
-public sealed record ReadLiveQueryRequest([property: Orleans.Id(0)] KeyLoad.Query.AstQueryRequest Query, [property: Orleans.Id(1)] string Cursor, [property: Orleans.Id(2)] int Limit = 100, [property: Orleans.Id(3)] int MaxBytes = 4_194_304);
+public sealed record ReadLiveQueryRequest([property: Orleans.Id(0)] KeyLoad.Query.AstQueryRequest Query, [property: Orleans.Id(1)] string Cursor, [property: Orleans.Id(2)] int Limit = ReadLiveQueryRequest.DefaultLimit, [property: Orleans.Id(3)] int MaxBytes = ReadLiveQueryRequest.DefaultMaxBytes)
+{
+    private const int DefaultLimit = 100;
+    private const int DefaultMaxBytes = 4_194_304;
+}
 
 /// <summary>Specifies how a row changed in a live query result.</summary>
 public enum LiveQueryChangeKind

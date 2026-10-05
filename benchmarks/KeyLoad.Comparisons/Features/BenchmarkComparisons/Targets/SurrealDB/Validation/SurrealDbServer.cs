@@ -1,4 +1,5 @@
 namespace KeyLoad.Comparisons.Targets;
+
 internal static class SurrealDbServer
 {
     private const string ExpectedVersion = "surrealdb-3.2.4";

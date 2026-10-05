@@ -4,6 +4,8 @@ namespace KeyLoad.Replication;
 
 internal sealed class ReplicaMaintenance(ReplicaState state, ReplicaElection election, ReplicaLeader leader, ILogger? logger)
 {
+    private const int BeforeFirstLogPosition = 0;
+
     private const string FailedMessage = "Node-owned replica maintenance failed; readiness is fenced.";
     private const int FailedEventId = 1;
     private static readonly Action<ILogger, Exception?> LogFailure = LoggerMessage.Define(LogLevel.Error,
@@ -62,7 +64,7 @@ internal sealed class ReplicaMaintenance(ReplicaState state, ReplicaElection ele
             return;
         }
         var cut = state.Materializer.Database.LastApplied;
-        if (cut - (state.Materializer.Snapshots.Current?.Index ?? 0) >= state.Configuration.SnapshotThreshold)
+        if (cut - (state.Materializer.Snapshots.Current?.Index ?? BeforeFirstLogPosition) >= state.Configuration.SnapshotThreshold)
         {
             checkpoint = state.Materializer.CreateCheckpointAsync(cancellationToken);
         }

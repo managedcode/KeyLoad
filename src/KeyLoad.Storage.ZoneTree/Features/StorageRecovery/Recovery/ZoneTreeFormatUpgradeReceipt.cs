@@ -17,6 +17,9 @@ internal sealed record ZoneTreeFormatUpgradeReceipt(
 
 internal static class ZoneTreeFormatUpgradeReceiptFile
 {
+    private const int NoFileAttributes = 0;
+    private const int HexCharactersPerByte = 2;
+
     private const string InvalidReceipt = "The offline format upgrade receipt is invalid.";
     private const int MaximumReceiptBytes = 65_536;
 
@@ -54,7 +57,7 @@ internal static class ZoneTreeFormatUpgradeReceiptFile
 
     internal static void VerifyRegularFile(string path)
     {
-        if (!File.Exists(path) || (File.GetAttributes(path) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != 0)
+        if (!File.Exists(path) || (File.GetAttributes(path) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != NoFileAttributes)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, InvalidReceipt);
         }
@@ -75,7 +78,7 @@ internal static class ZoneTreeFormatUpgradeReceiptFile
 
     private static bool IsDigest(string value)
     {
-        if (value is null || value.Length != SHA256.HashSizeInBytes * 2)
+        if (value is null || value.Length != SHA256.HashSizeInBytes * HexCharactersPerByte)
         {
             return false;
         }

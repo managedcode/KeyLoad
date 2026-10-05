@@ -13,7 +13,7 @@ internal sealed class SqlRf3CancellationTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await SqlRf3DeliveryScenario.CreateAsync(sdk, deadline.Token);
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
         await cancellation.CancelAsync();
@@ -30,7 +30,7 @@ internal sealed class SqlRf3CancellationTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await SqlRf3DeliveryScenario.CreateAsync(sdk, deadline.Token);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, fixture.AdminKey, deadline.Token);
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);

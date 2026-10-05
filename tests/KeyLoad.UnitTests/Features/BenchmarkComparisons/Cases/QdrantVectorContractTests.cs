@@ -6,6 +6,14 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 internal sealed class QdrantVectorContractTests
 {
+    private const string SearchParametersKey = "params";
+    private const string ExactSearchKey = "exact";
+    private const string IndexedOnlyKey = "indexed_only";
+    private const string SearchBreadthKey = "hnsw_ef";
+    private const string FilterKey = "filter";
+    private const string RequiredFilterKey = "must";
+    private const string PayloadFieldKey = "key";
+
     [Test]
     public async Task AcVq002ExactAndHnswNativeRequestsCarryActualMethodAndServerPredicate()
     {
@@ -14,11 +22,18 @@ internal sealed class QdrantVectorContractTests
             VectorIndexKind.Exact, VectorQueryMode.Filtered));
         using var hnsw = JsonSerializer.SerializeToDocument(QdrantVectorQueries.Request(query, 10,
             VectorIndexKind.Hnsw, VectorQueryMode.Mixed));
-        await Assert.That(exact.RootElement.GetProperty("params").GetProperty("exact").GetBoolean()).IsTrue();
-        await Assert.That(hnsw.RootElement.GetProperty("params").GetProperty("indexed_only").GetBoolean()).IsTrue();
-        await Assert.That(hnsw.RootElement.GetProperty("params").GetProperty("hnsw_ef").GetInt32()).IsEqualTo(200);
-        await Assert.That(exact.RootElement.GetProperty("filter").GetProperty("must")[0].GetProperty("key").GetString()).IsEqualTo("filtered");
-        await Assert.That(hnsw.RootElement.GetProperty("filter").GetProperty("must")[0].GetProperty("key").GetString()).IsEqualTo("mixed");
+        await Assert.That(exact.RootElement.GetProperty(SearchParametersKey).GetProperty(ExactSearchKey).GetBoolean()).IsTrue();
+        await Assert.That(hnsw.RootElement.GetProperty(SearchParametersKey).GetProperty(IndexedOnlyKey).GetBoolean()).IsTrue();
+        await Assert.That(hnsw.RootElement.GetProperty(SearchParametersKey).GetProperty(SearchBreadthKey).GetInt32()).IsEqualTo(200);
+        await Assert.That(exact.RootElement.GetProperty(FilterKey).GetProperty(RequiredFilterKey)[0].GetProperty(PayloadFieldKey).GetString()).IsEqualTo("filtered");
+        await Assert.That(hnsw.RootElement.GetProperty(FilterKey).GetProperty(RequiredFilterKey)[0].GetProperty(PayloadFieldKey).GetString()).IsEqualTo("mixed");
+        using var evidence = JsonSerializer.SerializeToDocument(QdrantVectorQueries.Evidence(
+            VectorIndexKind.Hnsw, VectorQueryMode.Mixed));
+        using var plainEvidence = JsonSerializer.SerializeToDocument(QdrantVectorQueries.Evidence(
+            VectorIndexKind.Hnsw, VectorQueryMode.Plain));
+        await Assert.That(evidence.RootElement.GetProperty(FilterKey).GetProperty(RequiredFilterKey)[0].GetProperty(PayloadFieldKey).GetString()).IsEqualTo("mixed");
+        await Assert.That(evidence.RootElement.GetProperty(SearchParametersKey).GetProperty(IndexedOnlyKey).GetBoolean()).IsTrue();
+        await Assert.That(plainEvidence.RootElement.GetProperty(FilterKey).ValueKind).IsEqualTo(JsonValueKind.Null);
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => QdrantVectorQueries.Request(query, 10,
             VectorIndexKind.IvfFlat, VectorQueryMode.Plain));
     }
@@ -30,7 +45,8 @@ internal sealed class QdrantVectorContractTests
         var input = corpus.Create(100);
         using var native = JsonSerializer.SerializeToDocument(new
         {
-            id = 101, vector = input.Embedding.ToArray(),
+            id = 101,
+            vector = input.Embedding.ToArray(),
             payload = new { id = input.Id, number = input.Number, document = input.Payload, filtered = true, mixed = true }
         });
         var actual = QdrantVectorReadback.Parse(native.RootElement);
@@ -39,7 +55,8 @@ internal sealed class QdrantVectorContractTests
         await Assert.That(actual.VectorSha256).IsEqualTo(VectorComparisonCorpus.HashVector(input.Embedding.Span));
         using var wrongIdentity = JsonSerializer.SerializeToDocument(new
         {
-            id = 102, vector = input.Embedding.ToArray(),
+            id = 102,
+            vector = input.Embedding.ToArray(),
             payload = new { id = input.Id, number = input.Number, document = input.Payload, filtered = true, mixed = true }
         });
         Assert.ThrowsExactly<ComparisonFailureException>(() => QdrantVectorReadback.Parse(wrongIdentity.RootElement));
@@ -62,8 +79,14 @@ internal sealed class QdrantVectorContractTests
     private static JsonDocument NativeState(int indexed, int m, string metric)
         => JsonSerializer.SerializeToDocument(new
         {
-            status = "green", optimizer_status = "ok", points_count = 100_000, indexed_vectors_count = indexed,
-            config = new { @params = new { vectors = new { size = 128, distance = metric } },
-                hnsw_config = new { m, ef_construct = 200, full_scan_threshold = 0 } }
+            status = "green",
+            optimizer_status = "ok",
+            points_count = 100_000,
+            indexed_vectors_count = indexed,
+            config = new
+            {
+                @params = new { vectors = new { size = 128, distance = metric } },
+                hnsw_config = new { m, ef_construct = 200, full_scan_threshold = 0 }
+            }
         });
 }

@@ -8,7 +8,7 @@ namespace KeyLoad.Server;
 
 internal static class ServerNodeUpgradeBuilder
 {
-    internal static ServerNodeUpgradeReceipt Build(ServerNodeUpgradePaths paths, NodeOptions options,
+    internal static ServerNodeUpgradeReceipt Build(ServerNodeUpgradePaths paths, ServerRuntimeOptions options,
         ServerNodeUpgradeInventory original, ServerNodeUpgradeOwner owner, Action<NodeFormatUpgradeStage>? observer)
     {
         var inputs = Path.Combine(paths.Stage, ServerNodeUpgradeProtocol.Inputs);
@@ -41,31 +41,32 @@ internal static class ServerNodeUpgradeBuilder
         return prepared;
     }
 
-    private static void ConvertStores(string inputs, string stage, NodeOptions options)
+    private static void ConvertStores(string inputs, string stage, ServerRuntimeOptions options)
     {
         foreach (var name in new[] { ServerNodeUpgradeProtocol.Canonical, ServerNodeUpgradeProtocol.Replica })
         {
             _ = ZoneTreeFormatUpgrade.Upgrade(Path.Combine(inputs, name),
-                ServerNodeUpgradeAuthority.StoreOptions(Path.Combine(stage, name), options));
+                ServerNodeUpgradeAuthority.StoreOptions(Path.Combine(stage, name), options), options.StorageExecution);
         }
     }
 
-    private static ServerNodeUpgradePreparation Preflight(ServerNodeUpgradePaths paths, NodeOptions options,
+    private static ServerNodeUpgradePreparation Preflight(ServerNodeUpgradePaths paths, ServerRuntimeOptions options,
         ServerNodeUpgradeInventory original, ServerNodeUpgradeOwner owner, int sourceDataEpoch)
         => ServerNodeUpgradeStores.Run(paths.Stage, options, stores =>
         {
-            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy());
-            var configuration = options.CreateReplicaConfiguration(paths.Stage);
+            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging);
+            var configuration = ServerNodeUpgradeConfiguration.Replica(options, paths.Stage);
             var plan = ReplicaSnapshotFormatUpgrade.Preflight(database, stores.Replica, configuration,
                 Path.Combine(paths.Source, ServerNodeUpgradeProtocol.Snapshots),
-                path => ZoneTreeSnapshotFormatUpgrade.VerifySource(path, options.Incarnation, sourceDataEpoch));
+                path => ZoneTreeSnapshotFormatUpgrade.VerifySource(path, options.Node.Value.Incarnation, sourceDataEpoch, options.StorageExecution),
+                options.OfflineRecovery, options.ReplicaExecution);
             using var log = new DurableReplicaLog(stores.Replica, configuration, canonicalDatabase: database);
             return new ServerNodeUpgradePreparation(plan,
                 CreateReceipt(paths, original, owner, database, stores.Replica, log.State, sourceDataEpoch));
         });
 
     private static Dictionary<string, StorageSnapshot> PrepareImages(ServerNodeUpgradePaths paths,
-        NodeOptions options, ServerNodeUpgradeInventory original, int sourceDataEpoch)
+        ServerRuntimeOptions options, ServerNodeUpgradeInventory original, int sourceDataEpoch)
     {
         var directory = Path.Combine(paths.Stage, ServerNodeUpgradeProtocol.PreparedImages);
         ServerNodeUpgradeFiles.CreatePrivateDirectory(directory);
@@ -75,25 +76,25 @@ internal static class ServerNodeUpgradeBuilder
         {
             var name = Path.GetFileName(image.Path);
             images.Add(name, ZoneTreeSnapshotFormatUpgrade.Upgrade(Path.Combine(paths.Source, image.Path),
-                Path.Combine(directory, name), options.Incarnation, sourceDataEpoch));
+                Path.Combine(directory, name), options.Node.Value.Incarnation, sourceDataEpoch, options.StorageExecution));
         }
         return images;
     }
 
-    private static void PublishImages(ReplicaSnapshotUpgradePlan plan, ServerNodeUpgradePaths paths, NodeOptions options,
+    private static void PublishImages(ReplicaSnapshotUpgradePlan plan, ServerNodeUpgradePaths paths, ServerRuntimeOptions options,
         Dictionary<string, StorageSnapshot> images)
         => ServerNodeUpgradeStores.Run(paths.Stage, options, stores =>
         {
-            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy());
+            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging);
             ReplicaSnapshotFormatUpgrade.Upgrade(plan, database, stores.Replica,
-                options.CreateReplicaConfiguration(paths.Stage), Path.Combine(paths.Stage, ServerNodeUpgradeProtocol.Snapshots),
+                ServerNodeUpgradeConfiguration.Replica(options, paths.Stage), Path.Combine(paths.Stage, ServerNodeUpgradeProtocol.Snapshots),
                 (source, destination) =>
                 {
                     var name = Path.GetFileName(source);
                     var cut = images[name];
                     File.Move(Path.Combine(paths.Stage, ServerNodeUpgradeProtocol.PreparedImages, name), destination);
                     return cut;
-                });
+                }, options.OfflineRecovery, options.ReplicaExecution);
             return true;
         });
 

@@ -26,6 +26,24 @@ escapes to feature execution. CLI/env names and malformed/unknown-setting failur
 contracts remain exact. Persisted authorization and RF3 membership cannot be
 configured away. Preserve serializer Id/Alias, native bytes and canonical digests.
 
+
+Persisted user policies (queue/subscription/retention) and explicit caller request
+parameters are domain data, not server execution configuration. Their stable
+public/serialized default values remain feature-owned named protocol constants;
+keep native generated Alias/Id contracts and bytes. Do not inject IOptions into
+payloads or mark arbitrary execution helpers as policy definitions. Host limits,
+implicit execution defaults and timing/admission/cache budgets still require their
+actual native options owner. Immutable RF3 membership cardinality and required
+qualification sample counts remain contract identities.
+
+AppHost resource observation binds native ScaleServerResourceOptions before graph
+composition and shares the same wrapper through collector/process/helper joins.
+Configured sampling, cleanup, file/output and work budgets must retain their actual
+values in observation evidence. Frozen native provenance options are populated only
+from original environment values at the central boundary; execution classes cannot
+read environment directly. Preserve original source/run/attempt/job authentication
+and never refresh published measurements from this refactor.
+
 DueCoordination first removes DispatchDeadlineSeconds/DispatchDeadline and the
 service PollInterval from arbitrary classes. A feature-owned options type supplies
 both grain and grain service via silo DI; central registration binds defaults and

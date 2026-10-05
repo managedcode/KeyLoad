@@ -22,13 +22,13 @@ internal sealed class ReplicaTermMetadataLifetimeTests
             var backup = Path.Combine(fixture.DirectoryPath, BackupDirectoryName);
             var restoredDirectory = Path.Combine(fixture.DirectoryPath, RestoredDirectoryName);
             await Assert.That(fixture.Store.CreateBackup(backup)).IsEqualTo(fixture.Store.Position);
-            var restoredIdentity = ZoneTreeStore.Restore(backup, restoredDirectory, originalIdentity.Incarnation);
+            var restoredIdentity = ZoneTreeStore.Restore(backup, restoredDirectory, RecoveryExecutionOptions.StorageExecution(), originalIdentity.Incarnation);
             await Assert.That(restoredIdentity.NodeId == originalIdentity.NodeId).IsFalse();
             await Assert.That(restoredIdentity.Incarnation).IsEqualTo(originalIdentity.Incarnation);
             var reopenedStore = fixture.Own(new ZoneTreeStore(new ZoneTreeStoreOptions(restoredDirectory)
             {
                 Incarnation = originalIdentity.Incarnation
-            }));
+            }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
             var reopenedLog = fixture.Own(new DurableReplicaLog(reopenedStore, RecoveryExecutionOptions.Configuration(fixture.Configuration with { Directory = restoredDirectory })));
             var reopenedBefore = reopenedStore.GetReadDiagnostics();
             await Assert.That(reopenedLog.TermAt(ReplicaIndex)).IsEqualTo(EntryTerm);

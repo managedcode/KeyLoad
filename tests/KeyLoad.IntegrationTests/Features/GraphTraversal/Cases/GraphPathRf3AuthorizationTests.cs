@@ -15,7 +15,7 @@ internal sealed class GraphPathRf3AuthorizationTests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var seed = await GraphPathRf3Scenario.CreateAsync(fixture, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, seed.Reader.Secret);
+        var sdk = new KeyLoadClient(http, seed.Reader.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             seed.Reader.Secret, deadline.Token);
         await VerifySourceAndTargetHidingAsync(seed, sdk, mcp, deadline.Token);
@@ -36,7 +36,7 @@ internal sealed class GraphPathRf3AuthorizationTests(ClusterFixture fixture)
         var seed = await GraphPathRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await GraphPathRf3Scenario.GrantLabelUseAsync(fixture, seed, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             identity.Secret, deadline.Token);
         var request = GraphPathRf3Scenario.Request(seed, labels: ImmutableArray.Create(GraphPathRf3Scenario.Label));

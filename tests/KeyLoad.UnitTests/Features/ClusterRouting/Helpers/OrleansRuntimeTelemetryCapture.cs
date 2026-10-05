@@ -9,9 +9,21 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
     private readonly System.Threading.Lock gate = new();
     private readonly List<OrleansActivityCapture> records = [];
     private int maximumRecords;
+    private bool truncated;
 
     internal void Configure(OrleansTelemetryCaptureOptions options)
         => maximumRecords = options.MaximumRecords;
+
+    internal bool WasTruncated
+    {
+        get
+        {
+            lock (gate)
+            {
+                return truncated;
+            }
+        }
+    }
 
     internal OrleansActivityCapture[] Snapshot()
     {
@@ -29,6 +41,7 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
             {
                 if (records.Count >= maximumRecords)
                 {
+                    truncated = true;
                     break;
                 }
 
@@ -45,9 +58,21 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
     private readonly System.Threading.Lock gate = new();
     private readonly List<OrleansMetricPointCapture> records = [];
     private int maximumRecords;
+    private bool truncated;
 
     internal void Configure(OrleansTelemetryCaptureOptions options)
         => maximumRecords = options.MaximumRecords;
+
+    internal bool WasTruncated
+    {
+        get
+        {
+            lock (gate)
+            {
+                return truncated;
+            }
+        }
+    }
 
     internal OrleansMetricPointCapture[] Snapshot()
     {
@@ -67,6 +92,7 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
                 {
                     if (records.Count >= maximumRecords)
                     {
+                        truncated = true;
                         return ExportResult.Success;
                     }
 

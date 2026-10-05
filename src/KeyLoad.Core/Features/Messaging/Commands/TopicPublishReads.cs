@@ -14,7 +14,6 @@ public sealed partial class DatabaseEngine
     private const string InvalidEventSchemaVersionMessage = "The event schema version is invalid.";
     private const string TopicQuotaExhaustedMessage = "The retained topic quota is exhausted.";
     private const string StaleSourceGenerationMessage = "The event source generation is stale.";
-    private const int MaximumTopicEventCount = 256;
 
     private static TopicHeadSnapshot ReadTopicHead(IKeyValueView view, EventSourceRef source)
     {
@@ -36,7 +35,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.DispatchPaused, PausedTopicMessage);
         }
-        if (events.Length is < 1 or > MaximumTopicEventCount)
+        if (events.Length < 1 || events.Length > messagingExecution.MaximumTopicEvents)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidTopicEventCountMessage);
         }

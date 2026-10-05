@@ -12,16 +12,20 @@ public sealed partial class DatabaseEngine
     /// <param name="limits">Centrally validated operation resource limits.</param>
     /// <param name="dueWorkOptions">Centrally validated node-local due discovery policy.</param>
     /// <param name="eventSourceOptions">Centrally validated event continuation policy.</param>
+    /// <param name="messagingOptions">Centrally validated topic, catch-up and retry work limits.</param>
     /// <param name="timeProvider">Optional business clock; hosting runtime time is unaffected.</param>
     public DatabaseEngine(IAtomicStore store, IAuthorizationPolicy authorization, IOptions<DatabaseLimits> limits,
         IOptions<DueWorkExecutionOptions> dueWorkOptions, IOptions<EventSourceExecutionOptions> eventSourceOptions,
-        TimeProvider? timeProvider = null)
+        IOptions<MessagingExecutionOptions> messagingOptions, TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(store);
         ArgumentNullException.ThrowIfNull(authorization);
         ArgumentNullException.ThrowIfNull(limits);
         ArgumentNullException.ThrowIfNull(dueWorkOptions);
         ArgumentNullException.ThrowIfNull(eventSourceOptions);
+        ArgumentNullException.ThrowIfNull(messagingOptions);
+        messagingExecution = messagingOptions.Value;
+        messagingExecution.Validate();
         var operationLimits = limits.Value;
         var dueSettings = dueWorkOptions.Value;
         var eventSettings = eventSourceOptions.Value;
@@ -37,6 +41,7 @@ public sealed partial class DatabaseEngine
         Durability = store.Identity.Durability;
     }
 
+    private readonly MessagingExecutionOptions messagingExecution;
     private readonly TimeSpan eventSourceCursorLifetime;
     private TimeProvider Clock { get; }
     internal TimeSpan DueDiscoveryDeadline { get; }

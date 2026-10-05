@@ -20,12 +20,12 @@ internal sealed class AggregateReplayInput(int maximumBytes, int maximumDepth)
     {
         if (json is null)
         {
-            throw new InvalidDataException("Replay input JSON is absent.");
+            throw new InvalidDataException(AggregateReplayMessages.MissingInput);
         }
         usedBytes += System.Text.Encoding.UTF8.GetByteCount(json);
         if (usedBytes > maximumBytes)
         {
-            throw new InvalidDataException("Combined replay state, payload and header bytes exceed the worker input limit.");
+            throw new InvalidDataException(AggregateReplayMessages.InputLimitExceeded);
         }
     }
 }

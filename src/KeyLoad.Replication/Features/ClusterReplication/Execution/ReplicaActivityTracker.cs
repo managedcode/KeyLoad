@@ -2,6 +2,8 @@ namespace KeyLoad.Replication;
 
 internal sealed class ReplicaActivityTracker
 {
+    private const int NoActiveOperations = 0;
+
     private readonly Lock gate = new();
     private readonly TaskCompletionSource drained = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private int active;
@@ -25,7 +27,7 @@ internal sealed class ReplicaActivityTracker
         lock (gate)
         {
             closed = true;
-            if (active == 0)
+            if (active == NoActiveOperations)
             {
                 drained.TrySetResult();
             }
@@ -38,7 +40,7 @@ internal sealed class ReplicaActivityTracker
         lock (gate)
         {
             active--;
-            if (closed && active == 0)
+            if (closed && active == NoActiveOperations)
             {
                 drained.TrySetResult();
             }

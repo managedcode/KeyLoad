@@ -4,6 +4,11 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeReadCutLeaseState
 {
+    private const int NoTraversalThreadId = 0;
+    private const int NoFailures = 0;
+    private const int SingleFailureCount = 1;
+    private const int FirstFailureIndex = 0;
+
     private const string ClosedMessage = "The native read-cut lease is closed.";
     private const string ConcurrentTraversalMessage = "A native read-cut lease permits only one active traversal.";
     private const string ReentrantDisposalMessage = "A native read-cut lease cannot be disposed from its visitor.";
@@ -68,7 +73,7 @@ internal sealed class ZoneTreeReadCutLeaseState
         lock (sync)
         {
             traversing = false;
-            traversalThread = 0;
+            traversalThread = NoTraversalThreadId;
             finished = traversalFinished;
         }
         finished?.TrySetResult();
@@ -152,7 +157,7 @@ internal sealed class ZoneTreeReadCutLeaseState
         lock (sync)
         {
             var errors = new List<Exception>();
-            if (failures.Count > 0 && operationFailure is not null)
+            if (failures.Count > NoFailures && operationFailure is not null)
             {
                 errors.Add(operationFailure);
             }
@@ -162,8 +167,8 @@ internal sealed class ZoneTreeReadCutLeaseState
             }
             var failure = errors.Count switch
             {
-                0 => null,
-                1 => errors[0],
+                NoFailures => null,
+                SingleFailureCount => errors[FirstFailureIndex],
                 _ => new AggregateException(errors)
             };
 

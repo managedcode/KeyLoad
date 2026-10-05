@@ -8,6 +8,13 @@ namespace KeyLoad.Replication;
 /// <summary>Node-owned metadata persisted by the supplied checksummed atomic store; the caller owns that store.</summary>
 public sealed class DurableReplicaLog : IDurableReplicaLog
 {
+    private const int ExclusiveProtocolPermit = 1;
+    private const int BeforeFirstLogPosition = 0;
+    private const int UnelectedTerm = 0;
+    private const int FirstElectionTerm = 1;
+    private const int EmptyEntryCount = 0;
+    private const int FirstEntryIndex = 0;
+
     private readonly IAtomicStore store;
     private readonly ReplicaConfiguration configuration;
     private readonly Action<ReplicaCrashBoundary>? faultObserver;
@@ -34,7 +41,7 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
         state = ReplicaLogValidation.Open(store, configuration, canonicalDatabase);
     }
     /// <inheritdoc />
-    public SemaphoreSlim ProtocolGate { get; } = new(1, 1);
+    public SemaphoreSlim ProtocolGate { get; } = new(ExclusiveProtocolPermit, ExclusiveProtocolPermit);
     /// <summary>Gets the externally owned canonical engine used to validate operation authority and semantic retries.</summary>
     public DatabaseEngine? CanonicalDatabase { get; }
     /// <inheritdoc />
@@ -49,7 +56,7 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
         lock (gate)
         {
             Check();
-            return index <= (state.Snapshot?.Index ?? 0) || index > state.LastIndex ? null : Load(index);
+            return index <= (state.Snapshot?.Index ?? BeforeFirstLogPosition) || index > state.LastIndex ? null : Load(index);
         }
     }
 
@@ -65,11 +72,11 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
 
     private long Term(long index)
     {
-        if (index == 0)
-        { return 0; }
+        if (index == BeforeFirstLogPosition)
+        { return UnelectedTerm; }
         if (state.Snapshot is { } snapshot && index == snapshot.Index)
         { return snapshot.Term; }
-        if (index < (state.Snapshot?.Index ?? 0) || index > state.LastIndex || index < 0)
+        if (index < (state.Snapshot?.Index ?? BeforeFirstLogPosition) || index > state.LastIndex || index < BeforeFirstLogPosition)
         {
             throw Errors.Fail(ErrorCode.NotFound, ReplicaPersistence.MissingEntry);
         }
@@ -83,7 +90,7 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
         var bytes = store.Read(view => view.ReadOwnedValue(ReplicaProtocol.EntryStorageKey(index)))
             ?? throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
         var entry = ReplicaProtocolCodec.DeserializeStored<ReplicaEntry>(bytes, configuration.MaxAppendEntries);
-        if (entry.Index != index || entry.Term <= 0 || entry.Term > state.Term)
+        if (entry.Index != index || entry.Term <= UnelectedTerm || entry.Term > state.Term)
         {
             throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
         }
@@ -106,7 +113,7 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
         lock (gate)
         {
             Check();
-            if (term < state.Term || term < 1 || votedFor is not null && !configuration.VoterIds.Contains(votedFor, StringComparer.Ordinal)
+            if (term < state.Term || term < FirstElectionTerm || votedFor is not null && !configuration.VoterIds.Contains(votedFor, StringComparer.Ordinal)
                 || term == state.Term && state.VotedFor is not null && votedFor is not null && state.VotedFor != votedFor)
             {
                 throw Errors.Fail(ErrorCode.Conflict, ReplicaPersistence.InvalidVote);
@@ -124,13 +131,13 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
         lock (gate)
         {
             Check();
-            if (entries.Count == 0)
+            if (entries.Count == EmptyEntryCount)
             { return; }
             var batch = ReplicaAppendCompiler.Validate(entries, state, configuration, Term, CanonicalDatabase);
             var next = ReplicaAppendCompiler.NextState(batch.Entries, state, Load, CanonicalDatabase);
             store.Commit((tx, _) =>
             {
-                for (var position = 0; position < batch.Entries.Length; position++)
+                for (var position = FirstEntryIndex; position < batch.Entries.Length; position++)
                 {
                     tx.Put(ReplicaProtocol.EntryStorageKey(batch.Entries[position].Index), batch.Encoded[position]);
                 }
@@ -168,7 +175,7 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
             {
                 Check();
                 ReplicaPersistence.ValidateSnapshot(snapshot, configuration);
-                if (snapshot.Index < (state.Snapshot?.Index ?? 0))
+                if (snapshot.Index < (state.Snapshot?.Index ?? BeforeFirstLogPosition))
                 {
                     throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
                 }

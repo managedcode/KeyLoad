@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Numerics;
 using System.Text;
 using static KeyLoad.Storage.KeyCodecReadPrimitives;
+using static KeyLoad.Storage.KeyCodecDecimalTokens;
 
 namespace KeyLoad.Storage;
 
@@ -14,46 +15,46 @@ internal static class KeyCodecDecimal
 
     internal static void Write(Stream stream, decimal value)
     {
-        stream.WriteByte(0x31);
-        if (value == 0)
+        stream.WriteByte(KeyCodecTokens.DecimalTag);
+        if (value == ZeroNumber)
         {
-            stream.WriteByte(1);
+            stream.WriteByte(ZeroSign);
             return;
         }
 
-        var negative = value < 0;
-        stream.WriteByte(negative ? (byte)0 : (byte)2);
+        var negative = value < ZeroNumber;
+        stream.WriteByte(negative ? (byte)NegativeSign : (byte)PositiveSign);
         var parts = decimal.GetBits(decimal.Abs(value));
-        var magnitude = (BigInteger)(uint)parts[0] | (BigInteger)(uint)parts[1] << 32 | (BigInteger)(uint)parts[2] << 64;
-        var scale = (parts[3] >> 16) & 0xFF;
+        var magnitude = (BigInteger)(uint)parts[LowWordIndex] | (BigInteger)(uint)parts[MiddleWordIndex] << MiddleWordShift | (BigInteger)(uint)parts[HighWordIndex] << HighWordShift;
+        var scale = (parts[FlagsWordIndex] >> ScaleShift) & ScaleMask;
         var digits = magnitude.ToString(CultureInfo.InvariantCulture);
         var exponent = digits.Length - scale;
-        digits = digits.TrimEnd('0');
-        WriteOrderedDigit(stream, negative, (byte)(exponent + 64));
+        digits = digits.TrimEnd(ZeroDigit);
+        WriteOrderedDigit(stream, negative, (byte)(exponent + ExponentBias));
         foreach (var digit in digits)
         {
-            WriteOrderedDigit(stream, negative, (byte)(digit - '0' + 1));
+            WriteOrderedDigit(stream, negative, (byte)(digit - ZeroDigit + DigitOffset));
         }
 
-        WriteOrderedDigit(stream, negative, 0);
+        WriteOrderedDigit(stream, negative, DigitTerminator);
     }
 
     internal static decimal Read(ReadOnlySpan<byte> key, ref int offset)
     {
         var sign = ReadByte(key, ref offset);
-        if (sign == 1)
+        if (sign == ZeroSign)
         {
-            return 0;
+            return ZeroNumber;
         }
 
-        if (sign is not (0 or 2))
+        if (sign is not (NegativeSign or PositiveSign))
         {
             throw BadKey();
         }
 
-        var exponent = ReadExponent(key, ref offset, sign) - 64;
+        var exponent = ReadExponent(key, ref offset, sign) - ExponentBias;
         var digits = ReadDigits(key, ref offset, sign);
-        if (digits[0] == '0' || digits[^1] == '0')
+        if (digits[FirstDigitIndex] == ZeroDigit || digits[^LastDigitFromEnd] == ZeroDigit)
         {
             throw BadKey();
         }
@@ -64,9 +65,9 @@ internal static class KeyCodecDecimal
             throw BadKey();
         }
 
-        var text = string.Create(CultureInfo.InvariantCulture, $"{(sign == 0 ? "-" : "")}{digits}e{exponent - digits.Length}");
+        var text = string.Create(CultureInfo.InvariantCulture, $"{(sign == NegativeSign ? NegativeSignText : string.Empty)}{digits}{ExponentSeparator}{exponent - digits.Length}");
         if (!decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
-            || value == 0 || !HasExpectedScaleAndSign(value, sign, Math.Max(0, scale)))
+            || value == ZeroNumber || !HasExpectedScaleAndSign(value, sign, Math.Max(MinimumScale, scale)))
         {
             throw BadKey();
         }
@@ -87,9 +88,9 @@ internal static class KeyCodecDecimal
             return true;
         }
 
-        for (var index = 0; index < MaximumCoefficient.Length; index++)
+        for (var index = FirstDigitIndex; index < MaximumCoefficient.Length; index++)
         {
-            var digit = index < digits.Length ? digits[index] : '0';
+            var digit = index < digits.Length ? digits[index] : ZeroDigit;
             if (digit != MaximumCoefficient[index])
             {
                 return digit < MaximumCoefficient[index];
@@ -101,44 +102,44 @@ internal static class KeyCodecDecimal
 
     private static bool HasExpectedScaleAndSign(decimal value, byte sign, int expectedScale)
     {
-        Span<int> parts = stackalloc int[4];
+        Span<int> parts = stackalloc int[DecimalWordCount];
         _ = decimal.GetBits(value, parts);
-        var actualScale = (parts[3] >> 16) & 0xFF;
-        var isNegative = (parts[3] & int.MinValue) != 0;
-        return actualScale == expectedScale && isNegative == (sign == 0);
+        var actualScale = (parts[FlagsWordIndex] >> ScaleShift) & ScaleMask;
+        var isNegative = (parts[FlagsWordIndex] & int.MinValue) != NoSignBits;
+        return actualScale == expectedScale && isNegative == (sign == NegativeSign);
     }
 
     private static byte ReadExponent(ReadOnlySpan<byte> key, ref int offset, byte sign)
     {
         var exponent = ReadByte(key, ref offset);
-        return sign == 0 ? (byte)~exponent : exponent;
+        return sign == NegativeSign ? (byte)~exponent : exponent;
     }
 
     private static string ReadDigits(ReadOnlySpan<byte> key, ref int offset, byte sign)
     {
-        var digits = new StringBuilder(29);
+        var digits = new StringBuilder(MaximumEncodedDigits);
         while (true)
         {
             var digit = ReadByte(key, ref offset);
-            if (sign == 0)
+            if (sign == NegativeSign)
             {
                 digit = (byte)~digit;
             }
 
-            if (digit == 0)
+            if (digit == DigitTerminator)
             {
                 break;
             }
 
-            if (digit > 10 || digits.Length == 29)
+            if (digit > MaximumEncodedDigit || digits.Length == MaximumEncodedDigits)
             {
                 throw BadKey();
             }
 
-            digits.Append((char)('0' + digit - 1));
+            digits.Append((char)(ZeroDigit + digit - DigitOffset));
         }
 
-        if (digits.Length == 0)
+        if (digits.Length == EmptyDigitCount)
         {
             throw BadKey();
         }

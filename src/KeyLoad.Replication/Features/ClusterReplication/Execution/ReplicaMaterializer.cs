@@ -7,10 +7,15 @@ namespace KeyLoad.Replication;
 /// <summary>Node-owned ordered apply worker; protocol RPCs do not await canonical snapshot IO under their term gate.</summary>
 public sealed class ReplicaMaterializer : IAsyncDisposable
 {
+    private const int ExclusiveApplyPermit = 1;
+    private const int FirstLogPosition = 1;
+    private const int BeforeFirstLogPosition = 0;
+
     private readonly int applyBatchSize;
-    private readonly Channel<bool> work = Channel.CreateBounded<bool>(new BoundedChannelOptions(1)
+    private const int CoalescedApplyWakeCapacity = 1;
+    private readonly Channel<bool> work = Channel.CreateBounded<bool>(new BoundedChannelOptions(CoalescedApplyWakeCapacity)
     { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropWrite });
-    private readonly SemaphoreSlim applyGate = new(1, 1);
+    private readonly SemaphoreSlim applyGate = new(ExclusiveApplyPermit, ExclusiveApplyPermit);
     private readonly Lock signals = new();
     private readonly CancellationTokenSource lifetime = new();
     private readonly Task worker;
@@ -185,7 +190,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         {
             Check();
             var cut = Database.LastApplied;
-            if (cut < 1 || cut <= (Snapshots.Current?.Index ?? 0))
+            if (cut < FirstLogPosition || cut <= (Snapshots.Current?.Index ?? BeforeFirstLogPosition))
             {
                 return Snapshots.Current;
             }

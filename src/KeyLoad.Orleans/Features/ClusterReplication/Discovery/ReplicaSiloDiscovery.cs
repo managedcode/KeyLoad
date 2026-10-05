@@ -1,4 +1,5 @@
 using KeyLoad.Replication;
+using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
@@ -11,6 +12,7 @@ namespace KeyLoad.Orleans;
 /// <param name="TransportReady">Whether the local node-owned endpoint has attached this silo transport.</param>
 /// <param name="ApplicationRpcVersion">The transient request interface version; missing fields are incompatible.</param>
 /// <param name="PeerEnvelopeVersion">The authenticated replica envelope version.</param>
+/// <param name="RuntimeJournalReaderContract">The verified node-local minimum native journal reader.</param>
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(ReplicaNativeWireContracts.DiscoveryAlias)]
 public sealed record ReplicaSiloDiscovery(
     [property: global::Orleans.Id(0)] string VoterId,
@@ -19,14 +21,16 @@ public sealed record ReplicaSiloDiscovery(
     [property: global::Orleans.Id(3)] string SiloAddress,
     [property: global::Orleans.Id(4)] bool TransportReady,
     [property: global::Orleans.Id(5)] int ApplicationRpcVersion = 0,
-    [property: global::Orleans.Id(6)] int PeerEnvelopeVersion = 0);
+    [property: global::Orleans.Id(6)] int PeerEnvelopeVersion = 0,
+    [property: global::Orleans.Id(7)] int RuntimeJournalReaderContract = StoreReaderContract.Legacy);
 
 /// <summary>Publishes the actual local Orleans runtime generation after early service initialization.</summary>
 /// <param name="configurationOptions">The local voter and current database incarnation.</param>
 /// <param name="peerOptions">The fixed cluster identity used in discovery documents.</param>
 /// <param name="localSilo">The Orleans runtime details containing the true silo generation.</param>
+/// <param name="runtimeJournalReaderContract">The evidence of both physical reader fences; legacy runtimes advertise zero.</param>
 public sealed class ReplicaSiloDiscoveryState(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerOptions,
-    ILocalSiloDetails localSilo)
+    ILocalSiloDetails localSilo, int runtimeJournalReaderContract = StoreReaderContract.Legacy)
 {
     private readonly ReplicaConfiguration configuration = configurationOptions.Value;
     private readonly ReplicaPeerOptions options = peerOptions.Value;
@@ -40,7 +44,7 @@ public sealed class ReplicaSiloDiscoveryState(IOptions<ReplicaConfiguration> con
     /// <returns>The local voter, cluster, incarnation, runtime address and readiness state.</returns>
     public ReplicaSiloDiscovery Read() => new(configuration.LocalId, options.ClusterId, configuration.Incarnation,
         RuntimeAddress, Volatile.Read(ref ready) != 0, GrainRoutingProtocol.RequestInterfaceVersion,
-        ReplicaTransportProtocol.Version);
+        ReplicaTransportProtocol.Version, runtimeJournalReaderContract);
 
     /// <summary>Marks the per-silo replica endpoint available without waiting for a quorum.</summary>
     /// <remarks>The node-local endpoint must already be attached before this state is published.</remarks>

@@ -34,16 +34,18 @@ internal sealed class PartitionHost : IAsyncDisposable
         options.Validate();
         DirectoryPath = Path.GetFullPath(options.DataDirectory);
         Configuration = replicaOptions.Value;
-        stores = new(runtimeOptions.Node, DirectoryPath);
+        stores = new(runtimeOptions.Node, DirectoryPath, runtimeOptions.StorageExecution, runtimeOptions.PointCache);
         ReplicaMaterializer? applying = null;
         DurableReplicaLog? openedLog = null;
         ITextProjection? openedText = null;
         try
         {
+            RuntimeJournalStorePreparation.Prepare(stores, runtimeOptions.Core.RuntimeJournal, runtimeOptions.StorageExecution);
             Database = new(stores.Canonical, authorization, runtimeOptions.Core.DatabaseLimits,
-                runtimeOptions.Core.DueWork, runtimeOptions.Core.EventSource);
+                runtimeOptions.Core.DueWork, runtimeOptions.Core.EventSource, runtimeOptions.Core.Messaging);
+            Database.ConfigureRuntimeJournal(runtimeOptions.Core.RuntimeJournal);
             log = openedLog = new(stores.Replica, replicaOptions, canonicalDatabase: Database);
-            var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions);
+            var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
             snapshots.Recover();
             new BlobStorageOperations(Database).NormalizeRestoredStore();
             BootstrapFreshNode(options);
@@ -73,6 +75,10 @@ internal sealed class PartitionHost : IAsyncDisposable
     public string DirectoryPath { get; }
     /// <summary>Fixed voter and incarnation scope of this replica group.</summary>
     public ReplicaConfiguration Configuration { get; }
+    internal bool RuntimeJournalStoresMarked
+        => stores.Canonical.Identity.MinimumReaderContract == KeyLoad.Storage.StoreReaderContract.RuntimeJournal
+            && stores.Replica.Identity.MinimumReaderContract == KeyLoad.Storage.StoreReaderContract.RuntimeJournal;
+
     /// <summary>Borrowed canonical engine; only this host disposes its underlying store.</summary>
     public DatabaseEngine Database { get; }
     /// <summary>Borrowed derived text projection; physical ownership remains in this host.</summary>

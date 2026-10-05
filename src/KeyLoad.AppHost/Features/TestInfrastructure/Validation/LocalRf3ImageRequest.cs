@@ -1,9 +1,13 @@
+using KeyLoad;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 
+[ConfigurationBinding]
 internal sealed record LocalRf3ImageRequest
 {
+    private const int HasProtocolCohortSelectorCountValue = 1;
+
     private const string EnabledValue = "true";
     private const string DisabledValue = "false";
     private const string LocalProvenance = "local-development";
@@ -108,9 +112,12 @@ internal sealed record LocalRf3ImageRequest
 
     private static void ValidateLocalSection(IConfiguration configuration)
     {
+        const int CountValue = 2;
+        const int BoundaryValue = 1;
+
         var localSection = configuration.GetSection(LocalSectionSetting);
-        var localChildren = localSection.GetChildren().Take(2).ToArray();
-        if (localSection.Value is not null || localChildren.Length > 1
+        var localChildren = localSection.GetChildren().Take(CountValue).ToArray();
+        if (localSection.Value is not null || localChildren.Length > BoundaryValue
             || localChildren.Any(child => child.Key != EnabledKey || child.GetChildren().Take(1).Any())
             || configuration.GetSection(EnabledSetting).GetChildren().Any())
         {
@@ -123,7 +130,7 @@ internal sealed record LocalRf3ImageRequest
             || HasValue(configuration, ProtocolNode1Setting)
             || HasValue(configuration, ProtocolNode2Setting)
             || HasValue(configuration, ProtocolNode3Setting)
-            || configuration.GetSection(ProtocolSectionSetting).GetChildren().Take(1).Any();
+            || configuration.GetSection(ProtocolSectionSetting).GetChildren().Take(HasProtocolCohortSelectorCountValue).Any();
 
     private static bool HasComparisonSelector(IConfiguration configuration)
         => HasValue(configuration, ComparisonEnabledSetting)

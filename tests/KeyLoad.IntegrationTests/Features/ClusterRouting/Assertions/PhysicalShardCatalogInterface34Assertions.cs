@@ -44,7 +44,7 @@ internal static class PhysicalShardCatalogInterface34Assertions
         using var response = await http.GetAsync(RequestCqrsRf3Protocol.ReadyUri, cancellationToken)
             .ConfigureAwait(false);
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable);
-        var sdk = new KeyLoadClient(http, profile.AdminKey);
+        var sdk = new KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
         var request = new CommandRequest(Guid.NewGuid(), workload.Partition,
             [new PutDocument(RequestCqrsRf3Protocol.AdminCollection, FirstDocumentId,
                 RequestCqrsRf3Protocol.ChangedDocumentJson, ExpectedRevision: ExistingRevision,

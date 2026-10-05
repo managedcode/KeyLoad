@@ -127,7 +127,8 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
 
     private static VectorComparisonProfile ParseVectorProfile(string id)
     {
-        try { return VectorComparisonProfile.Parse(id); }
+        try
+        { return VectorComparisonProfile.Parse(id); }
         catch (ArgumentOutOfRangeException) { throw new InvalidOperationException(InvalidSelection); }
     }
 

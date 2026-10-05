@@ -32,7 +32,7 @@ internal static class CrashHostApplication
         var mutationIndex = int.Parse(args[2], CultureInfo.InvariantCulture);
         var mode = args.Length > 3 ? args[3] : CrashFixtureValues.CommitMode;
         var boundary = new CanonicalCrashBoundary(stage, mutationIndex, mode == CrashFixtureValues.CommitMode);
-        using var store = new ZoneTreeStore(new(directory) { FaultObserver = boundary.Observe });
+        using var store = new ZoneTreeStore(new(directory) { FaultObserver = boundary.Observe }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         await RunScenarioAsync(directory, store, boundary, mode);
     }
 

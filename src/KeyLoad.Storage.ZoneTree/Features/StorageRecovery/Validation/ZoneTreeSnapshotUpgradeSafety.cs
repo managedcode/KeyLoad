@@ -2,17 +2,27 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeSnapshotUpgradeSafety
 {
+    private const int MinimumBudgetExclusive = 0;
+    private const int NoFileAttributes = 0;
+
     private const string InvalidOptionsMessage = "Snapshot upgrade budgets must be positive and within current defaults.";
     private const string InvalidPathMessage = "Snapshot upgrade paths must be distinct regular files without links.";
 
-    internal static ZoneTreeSnapshotUpgradeSettings ValidateOptions(ZoneTreeSnapshotUpgradeOptions? options)
+    internal static ZoneTreeSnapshotUpgradeSettings ValidateOptions(ZoneTreeSnapshotUpgradeOptions? options,
+        ZoneTreeStorageExecutionOptions policy)
     {
         var settings = options ?? new ZoneTreeSnapshotUpgradeOptions();
-        if (settings.MaxFrameBytes <= 0 || settings.MaxFrameBytes > ZoneTreePersistenceFormat.DefaultMaxFrameBytes
-            || settings.MaxSnapshotBytes <= 0 || settings.MaxSnapshotBytes > ZoneTreePersistenceFormat.DefaultMaxSnapshotBytes)
+        var frameBytes = settings.MaxFrameBytesOverride ?? policy.MaxFrameBytes;
+        var snapshotBytes = settings.MaxSnapshotBytesOverride ?? policy.MaxSnapshotBytes;
+        if (frameBytes <= MinimumBudgetExclusive || frameBytes > policy.MaxFrameBytes
+            || snapshotBytes <= MinimumBudgetExclusive || snapshotBytes > policy.MaxSnapshotBytes)
         { throw Errors.Fail(ErrorCode.Validation, InvalidOptionsMessage); }
 
-        return new(settings.MaxFrameBytes, settings.MaxSnapshotBytes, settings.FaultObserver);
+        var effective = policy with { MaxFrameBytes = frameBytes, MaxSnapshotBytes = snapshotBytes };
+        var descriptor = new ZoneTreeStoreOptions(string.Empty)
+        { MaxFrameBytes = frameBytes, MaxSnapshotBytes = snapshotBytes, FaultObserver = settings.FaultObserver }
+            .WithExecutionSnapshot(effective);
+        return new(frameBytes, snapshotBytes, settings.FaultObserver, descriptor);
     }
 
     internal static void ValidateIncarnation(Guid incarnation)
@@ -39,7 +49,7 @@ internal static class ZoneTreeSnapshotUpgradeSafety
     internal static void VerifySourcePath(string path)
     {
         var attributes = ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(path, allowMissingFinal: false);
-        if (attributes is null || (attributes.Value & FileAttributes.Directory) != 0)
+        if (attributes is null || (attributes.Value & FileAttributes.Directory) != NoFileAttributes)
         { throw Errors.Fail(ErrorCode.FormatUnsupported, InvalidPathMessage); }
     }
 
@@ -58,4 +68,4 @@ internal static class ZoneTreeSnapshotUpgradeSafety
 }
 
 internal sealed record ZoneTreeSnapshotUpgradeSettings(int MaxFrameBytes, long MaxSnapshotBytes,
-    Action<CommitStage, long, int>? FaultObserver);
+    Action<CommitStage, long, int>? FaultObserver, ZoneTreeStoreOptions Descriptor);

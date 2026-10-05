@@ -106,7 +106,7 @@ internal static class EpochPriorSourceProbe
             throw Errors.Fail(ErrorCode.FormatUnsupported, InvalidProbe);
         }
 
-        using var store = new ZoneTreeStore(new(request.Directory));
+        using var store = new ZoneTreeStore(new(request.Directory), CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         if (store.Identity.FormatVersion != expectedDataEpoch)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, InvalidProbe);

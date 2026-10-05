@@ -15,7 +15,7 @@ internal sealed class AggregateReplayRf3Tests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var scenario = await AggregateReplayRf3Scenario.CreateAsync(fixture, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, scenario.WorkerSecret);
+        var sdk = new KeyLoadClient(http, scenario.WorkerSecret, IntegrationClientOptions.Execution());
         var append = await scenario.AppendInitialAsync(sdk, Guid.NewGuid(), deadline.Token);
         await Assert.That(append.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         var snapshot = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(
@@ -54,7 +54,7 @@ internal sealed class AggregateReplayRf3Tests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var scenario = await AggregateReplayRf3Scenario.CreateAsync(fixture, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, scenario.WorkerSecret);
+        var sdk = new KeyLoadClient(http, scenario.WorkerSecret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             scenario.WorkerSecret, deadline.Token);
         var request = await VerifyPersistedRawGrantsAsync(scenario, sdk, mcp, deadline.Token);
@@ -101,7 +101,7 @@ internal sealed class AggregateReplayRf3Tests(ClusterFixture fixture)
             .IsEqualTo(AggregateReplayRf3Tokens.PrivateHeader);
         var restricted = await scenario.CreateMissingGrantWorkerAsync(fixture, cancellationToken);
         using var restrictedHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var restrictedSdk = new KeyLoadClient(restrictedHttp, restricted.Secret);
+        var restrictedSdk = new KeyLoadClient(restrictedHttp, restricted.Secret, IntegrationClientOptions.Execution());
         await using var restrictedMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             restricted.Secret, cancellationToken);
         var denied = await AggregateReplayRf3Assertions.ErrorAsync(restrictedSdk, restrictedMcp,

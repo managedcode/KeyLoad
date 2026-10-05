@@ -12,7 +12,7 @@ public sealed partial class KeyLoadClient
     public Task<Result<JsonElement>> ExecuteSqlAsync(SqlOperationRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var possibleWrite = SqlWriteClassifier.MayWrite(request.Sql, cancellationToken);
+        var possibleWrite = SqlWriteClassifier.MayWrite(request.Sql, cancellationToken, execution);
         return Send<JsonElement>(SqlOperationProtocol.Route, request, possibleWrite, null, cancellationToken);
     }
 }

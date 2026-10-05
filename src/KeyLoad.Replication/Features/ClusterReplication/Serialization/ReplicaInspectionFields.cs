@@ -10,6 +10,9 @@ namespace KeyLoad.Replication;
 
 internal static class ReplicaInspectionFields
 {
+    internal const int FirstFieldIdDelta = 0;
+    internal const int FollowingFieldIdDelta = 1;
+    private const int NullReferenceId = 0;
     // CodecProvider searches generic definitions, so closed profile codecs require explicit resolution.
     // This finite private dispatch shares the original session and never admits arbitrary codecs.
     private static readonly Dictionary<Type, Type> ProfileCodecs = new()
@@ -30,7 +33,7 @@ internal static class ReplicaInspectionFields
     ];
 
     internal static string Sender<TInput>(ref Reader<TInput> reader)
-        => ReplicaInspectionBuffers.For(reader.Session).Sender(Read<string, TInput>(ref reader, 0));
+        => ReplicaInspectionBuffers.For(reader.Session).Sender(Read<string, TInput>(ref reader, FirstFieldIdDelta));
 
     internal static T Read<T, TInput>(ref Reader<TInput> reader, uint delta)
     {
@@ -88,7 +91,7 @@ internal static class ReplicaInspectionFields
     {
         ReferenceCodec.MarkValueField(reader.Session);
         var reference = reader.ReadVarUInt32();
-        if (reference == 0)
+        if (reference == NullReferenceId)
         {
             return null;
         }

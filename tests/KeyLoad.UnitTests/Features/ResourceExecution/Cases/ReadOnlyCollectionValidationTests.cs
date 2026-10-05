@@ -71,7 +71,7 @@ internal sealed class ReadOnlyCollectionValidationTests
         var directory = Path.Combine(Path.GetTempPath(), "keyload-readonly-contract-" + Guid.NewGuid().ToString("N"));
         try
         {
-            using var store = new ZoneTreeStore(new(directory));
+            using var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             var key = Bytes("p/one");
             var value = Bytes("first");
             store.Commit((tx, _) => { tx.Put(key, value); return true; });

@@ -85,7 +85,7 @@ internal sealed class OrleansTelemetryPrivacyProcessor : BaseProcessor<Activity>
             return;
         }
 
-        ScrubTags(data);
+        OrleansTelemetryTagSanitizer.Scrub(data);
         data.DisplayName = data.Source.Name == OrleansTelemetryPolicy.ApplicationActivitySourceName
             ? OrleansTelemetryPolicy.ApplicationDisplayName
             : OrleansTelemetryPolicy.LifecycleDisplayName;
@@ -95,10 +95,10 @@ internal sealed class OrleansTelemetryPrivacyProcessor : BaseProcessor<Activity>
         }
     }
 
-    internal static MetricStreamConfiguration? ConfigureMetricView(Instrument instrument)
+    internal static MetricStreamConfiguration ConfigureMetricView(Instrument instrument)
         => string.Equals(instrument.Meter.Name, OrleansTelemetryPolicy.OrleansMeterName, StringComparison.Ordinal)
             ? new MetricStreamConfiguration { TagKeys = [] }
-            : null;
+            : null!;
 
     private static bool IsApprovedSource(string sourceName)
         => sourceName is OrleansTelemetryPolicy.ApplicationActivitySourceName
@@ -147,66 +147,6 @@ internal sealed class OrleansTelemetryPrivacyProcessor : BaseProcessor<Activity>
         using var tags = activityEvent.Tags.GetEnumerator();
         return !tags.MoveNext();
     }
-
-    private static void ScrubTags(Activity activity)
-    {
-        foreach (var (key, value) in activity.TagObjects.ToArray())
-        {
-            var normalized = NormalizeTag(key, value);
-            if (normalized is null)
-            {
-                activity.SetTag(key, null);
-            }
-            else if (!Equals(normalized, value))
-            {
-                activity.SetTag(key, normalized);
-            }
-        }
-    }
-
-    private static object? NormalizeTag(string key, object? value)
-    {
-        if (key == OrleansTelemetryPolicy.ExceptionEscapedTag && value is bool escaped)
-        {
-            return escaped;
-        }
-
-        if (value is not string text || text.Length is 0 or > 256)
-        {
-            return null;
-        }
-
-        return key switch
-        {
-            OrleansTelemetryPolicy.RpcSystemTag when string.Equals(text,
-                OrleansTelemetryPolicy.RpcSystemValue, StringComparison.Ordinal) => OrleansTelemetryPolicy.RpcSystemValue,
-            OrleansTelemetryPolicy.RpcServiceTag => OrleansTelemetryPolicy.RpcServiceValue,
-            OrleansTelemetryPolicy.RpcMethodTag => NormalizeMethod(text),
-            OrleansTelemetryPolicy.GrainTypeTag => OrleansTelemetryPolicy.GrainTypeValue,
-            OrleansTelemetryPolicy.ActivationCauseTag when string.Equals(text,
-                OrleansTelemetryPolicy.ActivationCauseNewValue, StringComparison.Ordinal)
-                => OrleansTelemetryPolicy.ActivationCauseNewValue,
-            OrleansTelemetryPolicy.ActivationCauseTag when string.Equals(text,
-                OrleansTelemetryPolicy.ActivationCauseRehydrateValue, StringComparison.Ordinal)
-                => OrleansTelemetryPolicy.ActivationCauseRehydrateValue,
-            OrleansTelemetryPolicy.ExceptionTypeTag => OrleansTelemetryPolicy.ExceptionTypeValue,
-            _ => null
-        };
-    }
-
-    private static string NormalizeMethod(string method)
-        => method switch
-        {
-            OrleansTelemetryPolicy.RequestStreamMethodName => OrleansTelemetryPolicy.RequestMethodValue,
-            OrleansTelemetryPolicy.CapabilityMethodName => OrleansTelemetryPolicy.CapabilityMethodValue,
-            _ when method.EndsWith(OrleansTelemetryPolicy.MethodNameSeparator
-                + OrleansTelemetryPolicy.RequestStreamMethodName, StringComparison.Ordinal)
-                => OrleansTelemetryPolicy.RequestMethodValue,
-            _ when method.EndsWith(OrleansTelemetryPolicy.MethodNameSeparator
-                + OrleansTelemetryPolicy.CapabilityMethodName, StringComparison.Ordinal)
-                => OrleansTelemetryPolicy.CapabilityMethodValue,
-            _ => OrleansTelemetryPolicy.GenericMethodValue
-        };
 
     private static void Suppress(Activity activity, string reason)
     {

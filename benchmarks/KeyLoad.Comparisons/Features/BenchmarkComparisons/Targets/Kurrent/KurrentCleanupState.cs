@@ -1,10 +1,12 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 using System.Runtime.ExceptionServices;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class KurrentCleanupState(int tracked)
+internal sealed class KurrentCleanupState(int tracked, IOptions<ComparisonLifecycleOptions> options)
 {
+    private readonly ComparisonLifecycleOptions settings = options.Value;
     private readonly System.Threading.Lock gate = new();
     private readonly Stopwatch clock = Stopwatch.StartNew();
     private int next, submitted, acknowledged, faulted, pending, peak, laterDisposals;
@@ -16,7 +18,7 @@ internal sealed class KurrentCleanupState(int tracked)
     private bool cancelled, deadlineExpired;
     private Task? cancellationCallbacks;
 
-    internal TimeSpan Remaining => TimeSpan.FromSeconds(KurrentConstants.CleanupHostTimeoutSeconds) - clock.Elapsed;
+    internal TimeSpan Remaining => settings.KurrentCleanupHostTimeout - clock.Elapsed;
 
     internal Task CancellationCallbacks
     {

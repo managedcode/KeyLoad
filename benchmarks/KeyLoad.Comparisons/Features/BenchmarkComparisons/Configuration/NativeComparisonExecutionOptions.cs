@@ -9,12 +9,15 @@ public sealed class NativeComparisonExecutionOptions
     private const int MinimumPositiveLimit = 0;
     private const string NativeComparisonOperationalLimitsMustBePresentPositive = "Native comparison operational limits must be present, positive and consistent.";
     private const string DurationFormat = "c";
+    private const int DefaultPostgresMinimumPoolSize = 10;
     /// <summary>The required source-controlled configuration section.</summary>
     public const string SectionName = "NativeComparisonExecution";
     /// <summary>The native operation deadline, equivalent to the frozen workload profile.</summary>
     public TimeSpan OperationTimeout { get; set; }
     /// <summary>The PostgreSQL connection pool capacity.</summary>
     public int PostgresMaxPoolSize { get; set; }
+    /// <summary>The retained minimum connection capacity for ordinary PostgreSQL workloads.</summary>
+    public int PostgresMinimumPoolSize { get; set; } = DefaultPostgresMinimumPoolSize;
     /// <summary>The PostgreSQL prepared statement cache capacity.</summary>
     public int PostgresMaxAutoPrepare { get; set; }
     /// <summary>The usage threshold for native PostgreSQL automatic preparation.</summary>
@@ -48,7 +51,7 @@ public sealed class NativeComparisonExecutionOptions
     /// <returns>This validated policy.</returns>
     public NativeComparisonExecutionOptions Validate()
     {
-        if (OperationTimeout <= TimeSpan.Zero || PostgresMaxPoolSize <= MinimumPositiveLimit || PostgresMaxAutoPrepare <= MinimumPositiveLimit || PostgresAutoPrepareMinUsages <= MinimumPositiveLimit || MaxResponseBytes <= MinimumPositiveLimit || ReadBufferBytes <= MinimumPositiveLimit || ReadBufferBytes > MaxResponseBytes || WriteBatchCapacity <= MinimumPositiveLimit || ReadbackBatchCapacity <= MinimumPositiveLimit || WriteBatchCapacity > MaxResponseBytes || ReadbackBatchCapacity > MaxResponseBytes || CleanupTimeout <= TimeSpan.Zero || IndexBuildTimeout <= TimeSpan.Zero || IndexPollInterval <= TimeSpan.Zero || IndexPollInterval >= IndexBuildTimeout)
+        if (OperationTimeout <= TimeSpan.Zero || PostgresMaxPoolSize <= MinimumPositiveLimit || PostgresMinimumPoolSize <= MinimumPositiveLimit || PostgresMaxAutoPrepare <= MinimumPositiveLimit || PostgresAutoPrepareMinUsages <= MinimumPositiveLimit || MaxResponseBytes <= MinimumPositiveLimit || ReadBufferBytes <= MinimumPositiveLimit || ReadBufferBytes > MaxResponseBytes || WriteBatchCapacity <= MinimumPositiveLimit || ReadbackBatchCapacity <= MinimumPositiveLimit || WriteBatchCapacity > MaxResponseBytes || ReadbackBatchCapacity > MaxResponseBytes || CleanupTimeout <= TimeSpan.Zero || IndexBuildTimeout <= TimeSpan.Zero || IndexPollInterval <= TimeSpan.Zero || IndexPollInterval >= IndexBuildTimeout)
         {
             throw new OptionsValidationException(SectionName, typeof(NativeComparisonExecutionOptions), [NativeComparisonOperationalLimitsMustBePresentPositive]);
         }
@@ -62,6 +65,7 @@ public sealed class NativeComparisonExecutionOptions
     {
         ArgumentNullException.ThrowIfNull(parameters);
         parameters[nameof(OperationTimeout)] = OperationTimeout.ToString(DurationFormat, CultureInfo.InvariantCulture);
+        parameters[nameof(PostgresMinimumPoolSize)] = PostgresMinimumPoolSize.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(PostgresMaxPoolSize)] = PostgresMaxPoolSize.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(PostgresMaxAutoPrepare)] = PostgresMaxAutoPrepare.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(PostgresAutoPrepareMinUsages)] = PostgresAutoPrepareMinUsages.ToString(CultureInfo.InvariantCulture);

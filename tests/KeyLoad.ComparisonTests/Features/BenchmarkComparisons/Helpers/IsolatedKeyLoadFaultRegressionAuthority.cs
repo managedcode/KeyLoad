@@ -10,7 +10,7 @@ internal static class IsolatedKeyLoadFaultRegressionAuthority
         IsolatedKeyLoadFaultRegressionSeed seed, CancellationToken token)
     {
         using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, node);
-        var sdk = new KeyLoadClient(http, admin);
+        var sdk = new KeyLoadClient(http, admin, ComparisonClientOptions.Execution());
         await IsolatedKeyLoadFaultRegressionAssertions.PersistedAsync(sdk, seed, token);
         await using var mcp = await IsolatedKeyLoadFaultRegressionCalls.ConnectAsync(app, node, admin, token);
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(seed.AckReceipt,
@@ -25,7 +25,7 @@ internal static class IsolatedKeyLoadFaultRegressionAuthority
         IsolatedKeyLoadFaultRegressionSeed seed, CancellationToken token)
     {
         using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, node);
-        var sdk = new KeyLoadClient(http, seed.Reader.Secret);
+        var sdk = new KeyLoadClient(http, seed.Reader.Secret, ComparisonClientOptions.Execution());
         await using var mcp = await IsolatedKeyLoadFaultRegressionCalls.ConnectAsync(app, node, seed.Reader.Secret, token);
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
             (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(

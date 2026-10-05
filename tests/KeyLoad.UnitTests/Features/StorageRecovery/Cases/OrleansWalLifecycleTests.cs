@@ -24,7 +24,7 @@ internal sealed class OrleansWalLifecycleTests
     {
         using var files = new WalFileFixture();
         StoreIdentity original;
-        using (var store = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var store = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             store.Commit((transaction, _) => { transaction.Put([0x10], [0x30]); return true; });
             original = store.Identity;
@@ -42,7 +42,7 @@ internal sealed class OrleansWalLifecycleTests
             await WalFileFixture.AssertPreservedIdentity(original, await files.ReadIdentityAsync());
         }
         files.RemoveMaterializedTree();
-        using var reopened = new ZoneTreeStore(new(files.DirectoryPath));
+        using var reopened = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await WalFileFixture.AssertPreservedIdentity(original, reopened.Identity);
         await Assert.That(reopened.Position).IsEqualTo(1L);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue([0x10])))
@@ -56,7 +56,7 @@ internal sealed class OrleansWalLifecycleTests
         using var targetFiles = new WalFileFixture();
         var incarnation = Guid.NewGuid();
         var signingKey = RandomNumberGenerator.GetBytes(SigningKeyBytes);
-        using var source = new ZoneTreeStore(new(sourceFiles.DirectoryPath) { Incarnation = incarnation, SigningKey = signingKey });
+        using var source = new ZoneTreeStore(new(sourceFiles.DirectoryPath) { Incarnation = incarnation, SigningKey = signingKey }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         source.Commit((transaction, _) =>
         {
             transaction.PutRecord(KeyCodec.Encode(SystemNamespace, LastAppliedKey), AppliedPosition);
@@ -66,7 +66,7 @@ internal sealed class OrleansWalLifecycleTests
         var snapshot = Path.Combine(sourceFiles.DirectoryPath, SnapshotFileName);
         source.CreateSnapshot(snapshot, AppliedPosition);
         StoreIdentity installedIdentity;
-        using (var target = new ZoneTreeStore(new(targetFiles.DirectoryPath) { Incarnation = incarnation, SigningKey = signingKey }))
+        using (var target = new ZoneTreeStore(new(targetFiles.DirectoryPath) { Incarnation = incarnation, SigningKey = signingKey }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             target.Commit((transaction, _) => { transaction.Put([0x20], [0x40]); return true; });
             var original = target.Identity;
@@ -77,7 +77,7 @@ internal sealed class OrleansWalLifecycleTests
             await WalFileFixture.AssertPreservedIdentity(installedIdentity, await targetFiles.ReadIdentityAsync());
             await Assert.That(target.Read(view => view.ReadOwnedValue([0x20]))).IsNull();
         }
-        using var reopened = new ZoneTreeStore(new(targetFiles.DirectoryPath));
+        using var reopened = new ZoneTreeStore(new(targetFiles.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await WalFileFixture.AssertPreservedIdentity(installedIdentity, reopened.Identity);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue([0x10]))).IsNotNull();
         await Assert.That(reopened.Read(view => view.ReadOwnedValue([0x10]))).IsEmpty();
@@ -90,17 +90,17 @@ internal sealed class OrleansWalLifecycleTests
         var backup = Path.Combine(files.DirectoryPath, BackupDirectoryName);
         var destination = Path.Combine(files.DirectoryPath, RestoreDirectoryName);
         StoreIdentity original;
-        using (var source = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var source = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             source.Commit((transaction, _) => { transaction.Put([0x10, 0xFF], [0x00, 0x80]); return true; });
             original = source.Identity;
             await Assert.That(source.CreateBackup(backup)).IsEqualTo(1L);
         }
-        var restored = ZoneTreeStore.Restore(backup, destination);
+        var restored = ZoneTreeStore.Restore(backup, destination, UnitExecutionOptions.StorageExecution());
         await Assert.That(restored.FormatVersion).IsEqualTo(WalFileFixture.CurrentIdentityVersion);
         await Assert.That(restored.NodeId == original.NodeId).IsFalse();
         await Assert.That(restored.DispatchPaused).IsTrue();
-        using var reopened = new ZoneTreeStore(new(destination));
+        using var reopened = new ZoneTreeStore(new(destination), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await WalFileFixture.AssertPreservedIdentity(restored, reopened.Identity);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue([0x10, 0xFF])))
             .IsEquivalentTo(new byte[] { 0x00, 0x80 }, CollectionOrdering.Matching);

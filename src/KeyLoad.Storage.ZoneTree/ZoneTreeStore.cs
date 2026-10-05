@@ -1,5 +1,6 @@
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using Microsoft.Extensions.Options;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
@@ -10,7 +11,14 @@ namespace KeyLoad.Storage.ZoneTree;
 /// </summary>
 public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
 {
+    private const int NextJournalSequenceIncrement = 1;
+    private const int NoMutations = 0;
+    private const string InvalidNativeReadCutContextMessage = "A native read cut must be captured inside this store's gated read callback.";
+
     private readonly ZoneTreeStoreRuntime runtime;
+    private readonly ZoneTreeStorageExecutionOptions? executionPolicy;
+    private readonly ZoneTreePointCacheExecutionOptions? cacheExecutionPolicy;
+    private const string CacheExecutionPolicyRequired = "A public native storage owner must configure point-cache execution policy before cache admission.";
 
     /// <summary>Gets the store's persisted identity with privately owned signing material.</summary>
     public StoreIdentity Identity => runtime.Identity;
@@ -19,12 +27,28 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
 
     /// <summary>Opens or creates a node-local store and replays its verified journal.</summary>
     /// <param name="options">Store directory, identity and persistence budgets.</param>
-    public ZoneTreeStore(ZoneTreeStoreOptions options)
+    /// <param name="executionOptions">Centrally validated storage execution policy, frozen before files are opened.</param>
+    /// <param name="cacheExecutionOptions">Centrally validated cache policy, frozen before any optional memory admission.</param>
+    public ZoneTreeStore(ZoneTreeStoreOptions options, IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
+        IOptions<ZoneTreePointCacheExecutionOptions> cacheExecutionOptions)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Directory);
         options.EmbeddedPointCache?.Validate();
-        runtime = new(options);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        executionPolicy = executionOptions.Value;
+        ArgumentNullException.ThrowIfNull(executionPolicy);
+        executionPolicy.Validate();
+        ArgumentNullException.ThrowIfNull(cacheExecutionOptions);
+        cacheExecutionPolicy = cacheExecutionOptions.Value;
+        ArgumentNullException.ThrowIfNull(cacheExecutionPolicy);
+        cacheExecutionPolicy.Validate();
+        var resolved = options.WithExecutionSnapshot(executionPolicy);
+        if (resolved.EmbeddedPointCache is { } embedded)
+        {
+            resolved = resolved with { EmbeddedPointCache = embedded.WithExecutionSnapshot(cacheExecutionPolicy) };
+        }
+        runtime = new(resolved);
     }
 
     internal ZoneTreeStore(ZoneTreeStoreRuntime runtime, Guid expectedNodeId)
@@ -69,10 +93,10 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
         {
             runtime.Check();
             var tx = new ZoneTreeTransaction(runtime);
-            var nextPosition = checked(runtime.Position + 1);
+            var nextPosition = checked(runtime.Position + NextJournalSequenceIncrement);
             var result = compile(tx, nextPosition);
             var changes = tx.PrepareChanges();
-            if (changes.Length == 0)
+            if (changes.Length == NoMutations)
             {
                 holdOutcome = DatabasePhaseOutcome.Completed;
                 return result;
@@ -93,7 +117,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     {
         if (!ReferenceEquals(view, this) || !runtime.Gate.IsReadLockHeld || runtime.Gate.IsWriteLockHeld)
         {
-            throw Errors.Fail(ErrorCode.Validation, "A native read cut must be captured inside this store's gated read callback.");
+            throw Errors.Fail(ErrorCode.Validation, InvalidNativeReadCutContextMessage);
         }
 
         return runtime.NativeReadCuts.Capture(runtime, limits, cancellationToken);
@@ -150,19 +174,34 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
         }
     }
 
+    /// <summary>Persists a monotonic minimum reader requirement under the exclusive physical owner.</summary>
+    /// <param name="minimumReaderContract">The supported native runtime journal reader contract.</param>
+    public void RequireReaderContract(int minimumReaderContract)
+        => ZoneTreeReaderContractPublication.Require(runtime, minimumReaderContract);
+
     /// <summary>Copies the canonical journal and identity into a private verified backup directory.</summary>
     /// <param name="directory">Destination directory that must be empty.</param>
     /// <returns>The captured local journal position.</returns>
     public long CreateBackup(string directory) => runtime.Backups.CreateBackup(directory);
 
+    /// <summary>Validates the original identity, checksums, native journal and committed cut of a backup.</summary>
+    /// <param name="directory">The private immutable backup directory.</param>
+    /// <param name="executionOptions">Validated native storage verification policy.</param>
+    /// <returns>The original persisted identity and verified local journal position.</returns>
+    public static (StoreIdentity Identity, long Position) VerifyBackup(string directory,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
+        => ZoneTreeBackupVerification.Verify(directory, executionOptions);
+
     /// <summary>Restores a verified backup under a new node identity with dispatch paused.</summary>
     /// <param name="backup">Directory containing the verified backup manifest and files.</param>
     /// <param name="destination">Empty private directory for the restored store.</param>
+    /// <param name="executionOptions">Centrally validated policy frozen before restore begins.</param>
     /// <param name="newIncarnation">Optional replacement authority incarnation.</param>
     /// <param name="newSigningKey">Optional caller-owned signing key copied into the restored identity.</param>
     /// <returns>The restored persisted identity.</returns>
-    public static StoreIdentity Restore(string backup, string destination, Guid? newIncarnation = null, byte[]? newSigningKey = null)
-        => ZoneTreeBackupRestore.Restore(backup, destination, newIncarnation, newSigningKey);
+    public static StoreIdentity Restore(string backup, string destination,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid? newIncarnation = null, byte[]? newSigningKey = null)
+        => ZoneTreeBackupRestore.Restore(backup, destination, executionOptions, newIncarnation, newSigningKey);
 
     /// <summary>Returns cumulative logical read work for this store's nonpersisted diagnostics session.</summary>
     /// <remarks>
@@ -188,7 +227,8 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(permit);
         options.Validate();
-        return runtime.CacheLifecycle.TryCreate(options, permit, out control);
+        var configured = cacheExecutionPolicy ?? throw new InvalidOperationException(CacheExecutionPolicyRequired);
+        return runtime.CacheLifecycle.TryCreate(options.WithExecutionSnapshot(configured), permit, out control);
     }
 
     /// <summary>Disables acceleration and retires entries, preserving charges held by active readers.</summary>

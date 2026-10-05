@@ -17,7 +17,7 @@ internal abstract class ReplicaImmutableArrayInspectionCodec<T>(IValueSerializer
     {
         field.EnsureWireTypeTagDelimited();
         ReferenceCodec.MarkValueField(reader.Session);
-        var values = ReplicaInspectionFields.Read<T[], TInput>(ref reader, 0)
+        var values = ReplicaInspectionFields.Read<T[], TInput>(ref reader, ReplicaInspectionFields.FirstFieldIdDelta)
             ?? throw Errors.Fail(ErrorCode.Corruption, ReplicaPersistence.InvalidEncoding);
         ReplicaInspectionFields.End(ref reader);
         return ImmutableArray.Create<T>(values);
@@ -37,8 +37,8 @@ internal sealed class ReplicaVotersInspectionCodec(IValueSerializer<ImmutableArr
 internal sealed class ReplicaEntryBatchInspectionCodec : ReplicaRecordInspectionCodec<ReplicaEntryBatch>
 {
     protected override ReplicaEntryBatch ReadFields<TInput>(ref Reader<TInput> reader)
-        => new(ReplicaInspectionFields.Read<ImmutableArray<ReplicaEntry>, TInput>(ref reader, 0));
+        => new(ReplicaInspectionFields.Read<ImmutableArray<ReplicaEntry>, TInput>(ref reader, ReplicaInspectionFields.FirstFieldIdDelta));
 
     protected override void WriteFields<TBufferWriter>(ref Writer<TBufferWriter> writer, ReplicaEntryBatch value)
-        => ReplicaInspectionFields.Write(ref writer, 0, value.Entries);
+        => ReplicaInspectionFields.Write(ref writer, ReplicaInspectionFields.FirstFieldIdDelta, value.Entries);
 }

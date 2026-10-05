@@ -28,7 +28,7 @@ internal sealed class TombstoneValueTests
         StorageSnapshot snapshot;
         try
         {
-            using (var store = new ZoneTreeStore(new(directory)))
+            using (var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 store.Commit((tx, _) =>
                 {
@@ -41,7 +41,7 @@ internal sealed class TombstoneValueTests
                 await AssertCommittedView(store, prefix, emptyKey, deletedKey, retainedKey);
             }
 
-            using (var replayed = new ZoneTreeStore(new(directory)))
+            using (var replayed = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 await AssertCommittedView(replayed, prefix, emptyKey, deletedKey, retainedKey);
                 snapshot = replayed.Compact();
@@ -49,7 +49,7 @@ internal sealed class TombstoneValueTests
                 await AssertCommittedView(replayed, prefix, emptyKey, deletedKey, retainedKey);
             }
 
-            using var reopened = new ZoneTreeStore(new(directory));
+            using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await AssertCommittedView(reopened, prefix, emptyKey, deletedKey, retainedKey);
             await Assert.That(reopened.Position).IsEqualTo(snapshot.Position);
         }
@@ -69,7 +69,7 @@ internal sealed class TombstoneValueTests
         try
         {
             var directory = Path.Combine(root, "exact");
-            using (var store = new ZoneTreeStore(new(directory) { MaxFrameBytes = payload.Length }))
+            using (var store = new ZoneTreeStore(new(directory) { MaxFrameBytes = payload.Length }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 store.Commit((tx, _) =>
                 {
@@ -84,7 +84,7 @@ internal sealed class TombstoneValueTests
             }
 
             using var tooSmall = new ZoneTreeStore(new(Path.Combine(root, "short"))
-            { MaxFrameBytes = payload.Length - 1 });
+            { MaxFrameBytes = payload.Length - 1 }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => tooSmall.Commit((tx, _) =>
             {
                 tx.Put(emptyKey, []);

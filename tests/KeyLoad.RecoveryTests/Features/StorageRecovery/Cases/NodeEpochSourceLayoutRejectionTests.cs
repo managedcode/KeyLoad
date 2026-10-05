@@ -23,7 +23,7 @@ internal sealed class NodeEpochSourceLayoutRejectionTests
             var original = await NodeEpochInventoryCapture.CaptureAsync(source, token);
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, options));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options)));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.FormatUnsupported);
             await Assert.That(Directory.Exists(destination)).IsFalse();

@@ -1,6 +1,8 @@
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Replication;
+using KeyLoad.Storage.ZoneTree;
+using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests;
@@ -9,16 +11,30 @@ namespace KeyLoad.IntegrationTests;
 internal static class IntegrationExecutionOptions
 {
     internal static IOptions<ReplicaConfiguration> ReplicaConfiguration(ReplicaConfiguration value)
-        {
+    {
         value.Validate();
         return Options.Create(value);
     }
 
     internal static IOptions<ReplicaExecutionOptions> ReplicaExecution(ReplicaExecutionOptions? value = null)
-        {
+    {
         var configured = value ?? new ReplicaExecutionOptions();
         configured.Validate();
         return Options.Create(configured);
+    }
+
+    internal static IOptions<ZoneTreeStorageExecutionOptions> StorageExecution(ZoneTreeStorageExecutionOptions? configured = null)
+    {
+        var value = configured ?? new ZoneTreeStorageExecutionOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
+    internal static IOptions<ZoneTreePointCacheExecutionOptions> PointCacheExecution(ZoneTreePointCacheExecutionOptions? configured = null)
+    {
+        var value = configured ?? new ZoneTreePointCacheExecutionOptions();
+        value.Validate();
+        return Options.Create(value);
     }
 
     internal static IOptions<DatabaseLimits> DatabaseLimits(DatabaseLimits? configured = null)
@@ -38,6 +54,13 @@ internal static class IntegrationExecutionOptions
     internal static IOptions<EventSourceExecutionOptions> EventSource(EventSourceExecutionOptions? configured = null)
     {
         var value = configured ?? new EventSourceExecutionOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
+    internal static IOptions<MessagingExecutionOptions> Messaging(MessagingExecutionOptions? configured = null)
+    {
+        var value = configured ?? new MessagingExecutionOptions();
         value.Validate();
         return Options.Create(value);
     }

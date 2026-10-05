@@ -4,6 +4,8 @@ namespace KeyLoad.Features.InternalSerialization;
 // member and required in another. Cached height also protects a later, deeper shared path.
 internal sealed class NativeGraphValidationState
 {
+    private const int LeafHeight = 0;
+    private const int SharedRootDepth = 1;
     private readonly HashSet<object> active = new(ReferenceEqualityComparer.Instance);
     private readonly Dictionary<NativeGraphKey, int> completed = new(NativeGraphKeyComparer.Instance);
     private int visits;
@@ -20,7 +22,7 @@ internal sealed class NativeGraphValidationState
 
     internal bool Enter(object value, bool tracked, NativeValueValidation? validation, int depth, out int height)
     {
-        height = 0;
+        height = LeafHeight;
         RequireDepth(depth);
         if (!tracked)
         {
@@ -32,7 +34,7 @@ internal sealed class NativeGraphValidationState
         }
         if (completed.TryGetValue(new(value, validation), out height))
         {
-            RequireDepth(checked(depth + height - 1));
+            RequireDepth(checked(depth + height - SharedRootDepth));
             return true;
         }
         _ = active.Add(value);

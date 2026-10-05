@@ -15,8 +15,8 @@ internal sealed class AggregateReplayWorkerParityTests
             [Event(stream, 2, "second", "{\"increment\":3}"), Event(stream, 3, "third", "{\"increment\":4}")]);
         var reducer = CounterReducer();
 
-        var allState = AggregateReplayReduction.Reduce(full, reducer);
-        var resumedState = AggregateReplayReduction.Reduce(resumed, reducer);
+        var allState = AggregateReplayReduction.Reduce(full, reducer, limitsOptions:UnitClientOptions.Replay());
+        var resumedState = AggregateReplayReduction.Reduce(resumed, reducer, limitsOptions:UnitClientOptions.Replay());
 
         await Assert.That(ReadInteger(allState, "total")).IsEqualTo(9);
         await Assert.That(resumedState).IsEqualTo(allState);
@@ -53,7 +53,7 @@ internal sealed class AggregateReplayWorkerParityTests
             return "{\"total\":7}";
         });
 
-        _ = AggregateReplayReduction.Reduce(page, reducer, upcasters);
+        _ = AggregateReplayReduction.Reduce(page, reducer, limitsOptions:UnitClientOptions.Replay(), upcasters);
 
         await Assert.That(reducedRecord!.Revision).IsEqualTo(original.Revision);
         await Assert.That(reducedRecord.EventSequence).IsEqualTo(original.EventSequence);

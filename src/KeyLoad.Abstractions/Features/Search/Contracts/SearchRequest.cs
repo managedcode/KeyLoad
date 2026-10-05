@@ -18,6 +18,12 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.SearchRequest)]
 public sealed record SearchRequest([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Collection, [property: Orleans.Id(2)] string? TextField = null, [property: Orleans.Id(3)] string? Text = null,
-    [property: Orleans.Id(4)] string? VectorField = null, [property: Orleans.Id(5)] ImmutableArray<float>? Vector = null, [property: Orleans.Id(6)] VectorSpace? Space = null, [property: Orleans.Id(7)] int Limit = 10,
-    [property: Orleans.Id(8)] double TextWeight = 1, [property: Orleans.Id(9)] double VectorWeight = 1, [property: Orleans.Id(10)] int FusionConstant = 60,
-    [property: Orleans.Id(11)] ImmutableArray<string>? AllowedIds = null);
+    [property: Orleans.Id(4)] string? VectorField = null, [property: Orleans.Id(5)] ImmutableArray<float>? Vector = null, [property: Orleans.Id(6)] VectorSpace? Space = null, [property: Orleans.Id(7)] int Limit = SearchRequest.DefaultLimit,
+    [property: Orleans.Id(8)] double TextWeight = SearchRequest.DefaultTextWeight, [property: Orleans.Id(9)] double VectorWeight = SearchRequest.DefaultVectorWeight, [property: Orleans.Id(10)] int FusionConstant = SearchRequest.DefaultFusionConstant,
+    [property: Orleans.Id(11)] ImmutableArray<string>? AllowedIds = null)
+{
+    private const int DefaultLimit = 10;
+    private const int DefaultTextWeight = 1;
+    private const int DefaultVectorWeight = 1;
+    private const int DefaultFusionConstant = 60;
+}

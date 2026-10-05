@@ -5,6 +5,10 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeFormatUpgradeBuilder
 {
+    private const int ObserverNonMutationIndex = 0;
+    private const int FileStartPosition = 0;
+    private const int InitialAppliedPosition = 0;
+
     internal static StoreIdentity Rebuild(ZoneTreeFormatUpgradeSource source, string stagePath,
         ZoneTreeStoreOptions destinationOptions)
     {
@@ -49,7 +53,7 @@ internal static class ZoneTreeFormatUpgradeBuilder
         var applied = ReadAppliedPosition(runtime);
         var snapshot = ZoneTreeCheckpointWriter.Write(checkpointPath, options, runtime.Identity,
             source.Position, applied, runtime.Tree);
-        options.FaultObserver?.Invoke(CommitStage.UpgradeCheckpointFlushed, source.Position, 0);
+        options.FaultObserver?.Invoke(CommitStage.UpgradeCheckpointFlushed, source.Position, ObserverNonMutationIndex);
         if (snapshot.Position != source.Position || snapshot.AppliedPosition != applied)
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointVerificationFailed);
@@ -66,17 +70,17 @@ internal static class ZoneTreeFormatUpgradeBuilder
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.BackupFileVerificationFailed);
         }
-        journal.Position = 0;
+        journal.Position = FileStartPosition;
         var position = ZoneTreeFormatUpgradeJournal.ReplaySource(journal, options, runtime,
             source.Identity.FormatVersion);
-        options.FaultObserver?.Invoke(CommitStage.UpgradeRecovered, position, 0);
+        options.FaultObserver?.Invoke(CommitStage.UpgradeRecovered, position, ObserverNonMutationIndex);
         return position;
     }
 
     private static long ReadAppliedPosition(ZoneTreeStoreRuntime runtime)
     {
         var key = KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey);
-        return runtime.View.ReadOwnedValue(key) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0;
+        return runtime.View.ReadOwnedValue(key) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : InitialAppliedPosition;
     }
 
     private static void DisposePreservingFailure(ZoneTreeStoreRuntime runtime, Exception? failure)
@@ -140,7 +144,8 @@ internal static class ZoneTreeFormatUpgradeBuilder
         ZoneTreeStoreOptions options, long expectedPosition)
     {
         _ = VerifyTarget(directory, sourceIdentity, options, expectedPosition);
-        using var store = new ZoneTreeStore(options);
+        var runtime = new ZoneTreeStoreRuntime(options);
+        using var store = new ZoneTreeStore(runtime, runtime.Identity.NodeId);
         VerifyIdentity(sourceIdentity, store.Identity, allowMaintenanceChanges: false);
         if (store.Position != expectedPosition)
         {

@@ -5,6 +5,10 @@ namespace KeyLoad.Replication;
 
 internal static class ReplicaPersistence
 {
+    private const int BeforeFirstLogPosition = 0;
+    private const int UnelectedTerm = 0;
+    private const int EmptySnapshotLength = 0;
+
     internal const string GuidFormat = "N";
     internal const string SystemKey = "system";
     internal const string AppliedKey = "last-applied";
@@ -14,8 +18,6 @@ internal static class ReplicaPersistence
     internal const string ReadLimit = "The replica entry exceeds the append byte budget.";
     internal const string CanonicalAhead = "The canonical applied position has no matching committed replica-log evidence.";
     internal const string InvalidEncoding = "The replica payload encoding is invalid or corrupt.";
-    internal const int FileBufferBytes = 65_536;
-    internal const int ManifestMaxBytes = 4_096;
     internal const int HashHexLength = 64;
 
     internal static T Decode<T>(byte[] bytes, int maximumEntries)
@@ -33,7 +35,7 @@ internal static class ReplicaPersistence
     internal static void ValidateSnapshot(ReplicaSnapshot snapshot, ReplicaConfiguration configuration)
     {
         if (snapshot.TransferId == Guid.Empty || snapshot.Incarnation != configuration.Incarnation
-            || snapshot.Index <= 0 || snapshot.Term <= 0 || snapshot.Length <= 0 || snapshot.Length > configuration.MaxSnapshotBytes
+            || snapshot.Index <= BeforeFirstLogPosition || snapshot.Term <= UnelectedTerm || snapshot.Length <= EmptySnapshotLength || snapshot.Length > configuration.MaxSnapshotBytes
             || snapshot.Sha256 is null || snapshot.Sha256.Length != HashHexLength
             || !snapshot.Sha256.All(char.IsAsciiHexDigit)
             || snapshot.FileName != snapshot.TransferId.ToString(GuidFormat) + ReplicaProtocol.SnapshotExtension)
@@ -43,7 +45,7 @@ internal static class ReplicaPersistence
     }
 
     internal static long AppliedPosition(IAtomicStore store) => store.Read(view =>
-        view.ReadOwnedValue(KeyCodec.Encode(SystemKey, AppliedKey)) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0);
+        view.ReadOwnedValue(KeyCodec.Encode(SystemKey, AppliedKey)) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : BeforeFirstLogPosition);
 
     internal static void VerifyImage(IAtomicStore store, string path, ReplicaSnapshot snapshot)
     {

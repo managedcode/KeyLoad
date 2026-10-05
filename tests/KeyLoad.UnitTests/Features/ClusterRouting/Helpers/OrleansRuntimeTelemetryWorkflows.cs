@@ -13,27 +13,29 @@ internal static class OrleansRuntimeTelemetryWorkflows
         var first = PersistPrincipal(fixture, "first");
         var second = PersistPrincipal(fixture, "second");
         var third = PersistPrincipal(fixture, "third");
-        var parents = new List<OrleansTelemetryOperationParent>();
-        parents.Add(await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Event));
-        parents.Add(await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Baggage));
-        parents.Add(await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Link));
-        parents.AddRange(await ReadRealDocumentAsync(fixture, telemetry, first));
+        await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Event);
+        await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Baggage);
+        await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Link);
+        await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.ErrorStatus);
+        var parentage = new List<OrleansTelemetryOperationParent>(await ReadRealDocumentAsync(fixture, telemetry, first));
         var concurrent = await Task.WhenAll(WriteWithParentAsync(fixture, telemetry, second),
             WriteWithParentAsync(fixture, telemetry, third));
         await Assert.That(concurrent[0].Reply.Error).IsNull();
         await Assert.That(concurrent[1].Reply.Error).IsNull();
         await Assert.That(concurrent[0].Parent.TraceId).IsNotEqualTo(concurrent[1].Parent.TraceId);
-        parents.AddRange(concurrent.Select(static operation => operation.Parent));
+        parentage.AddRange(concurrent.Select(static operation => operation.Parent));
         await FailRevokedWriteAsync(fixture, first);
         telemetry.Flush();
         var traces = telemetry.Activities.Snapshot();
         var metrics = telemetry.Metrics.Snapshot();
-        await OrleansRuntimeTelemetryAssertions.AssertTracePrivacyAsync(traces, first, second, third, parents,
-            []);
+        await Assert.That(telemetry.Activities.WasTruncated).IsFalse();
+        await Assert.That(telemetry.Metrics.WasTruncated).IsFalse();
+        await OrleansRuntimeTelemetryAssertions.AssertTracePrivacyAsync(traces, first, second, third, parentage,
+            telemetry.Options);
         await OrleansRuntimeTelemetryAssertions.AssertMetricPrivacyAsync(metrics);
     }
 
-    private static async Task<OrleansTelemetryOperationParent> WriteWithSentinelAsync(RequestCqrsClusterFixture fixture,
+    private static async Task WriteWithSentinelAsync(RequestCqrsClusterFixture fixture,
         OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal, OrleansRuntimeTelemetryMutation mutation)
     {
         using var sentinel = new OrleansRuntimeTelemetrySentinel(mutation,
@@ -49,7 +51,6 @@ internal static class OrleansRuntimeTelemetryWorkflows
         await Assert.That(reply.Error).IsNull();
         await Assert.That(sentinel.WasInjected).IsTrue();
         await AssertDocumentRevisionAsync(fixture, documentId, 1);
-        return new(parent.TraceId, parent.SpanId);
     }
 
     private static async Task<OrleansTelemetryOperationParent[]> ReadRealDocumentAsync(RequestCqrsClusterFixture fixture,
@@ -67,8 +68,10 @@ internal static class OrleansRuntimeTelemetryWorkflows
                 OrleansRuntimeTelemetryTokens.Collection, documentId))));
         var reply = await ReadAsync(fixture, principal, requestId, signed);
         await Assert.That(reply.Payload.IsEmpty).IsFalse();
-        await Assert.That(NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value)
-            .IsTypeOf<DocumentRecord>();
+        var record = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DocumentRecord;
+        await Assert.That(record).IsNotNull();
+        await Assert.That(record!.Reference.Id).IsEqualTo(documentId);
+        await Assert.That(record.Json).IsEqualTo(OrleansRuntimeTelemetryTokens.DocumentJson);
         return [createReply.Parent, new(parent.TraceId, parent.SpanId)];
     }
 

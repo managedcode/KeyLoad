@@ -8,6 +8,7 @@ using KeyLoad.Comparisons;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -20,8 +21,8 @@ internal static class ScaleServerCancellationProbe
     private const string KeyLoad = "KeyLoad";
     private const string Profile = "scaled-100k-c16";
     private const string Scenario = "DocumentWrite";
-    private const int CompletionSampleSeconds = ScaleServerResourceBounds.CadenceSeconds
-        * (ScaleServerResourceBounds.MinimumSamples + 1) + 5;
+    private const int AdditionalSampleCount = 1;
+    private const int SettlementPaddingSeconds = 5;
 
     internal static async Task VerifyAsync(DistributedApplication app, ContainerResource[] containers,
         ComparisonWorkerSelection selection, string root, CancellationToken token)
@@ -37,12 +38,15 @@ internal static class ScaleServerCancellationProbe
         File.Copy(Path.Combine(root, "reports", WorkerFile), Path.Combine(output, WorkerFile));
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
-        var collector = new ScaleServerResourceEvidenceCollector(selection, output, lifetime.ApplicationStopping);
+        var collector = new ScaleServerResourceEvidenceCollector(selection, output, lifetime.ApplicationStopping,
+            app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
+            app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>());
         var observation = collector.StartAsync(containers,
             readinessToken => ScaleServerResourceReadiness.WaitAsync(app, containers, readinessToken), caller.Token);
         try
         {
-            await Task.Delay(TimeSpan.FromSeconds(CompletionSampleSeconds), token);
+            await Task.Delay(app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>().Value.Cadence
+                * (ScaleServerResourceBounds.MinimumSamples + AdditionalSampleCount) + TimeSpan.FromSeconds(SettlementPaddingSeconds), token);
             caller.Cancel();
             var completion = collector.CompleteAsync(observation);
             await Assert.That(ReferenceEquals(completion, collector.CompleteAsync(observation))).IsTrue();
@@ -119,7 +123,9 @@ internal static class ScaleServerCancellationProbe
         Directory.CreateDirectory(Path.Combine(output, EvidenceFile));
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         var collector = new ScaleServerResourceEvidenceCollector(selection, output,
-            app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping);
+            app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
+            app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
+            app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>());
         var observation = collector.StartAsync(containers,
             readinessToken => ScaleServerResourceReadiness.WaitAsync(app, containers, readinessToken), caller.Token);
         var primary = await CancelNativeResourceWaitAsync(app, containers[0].Name, caller);

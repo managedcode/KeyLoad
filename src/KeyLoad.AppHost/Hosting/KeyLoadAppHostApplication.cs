@@ -12,6 +12,9 @@ internal static class KeyLoadAppHostApplication
 {
     internal static async Task<int> RunAsync(string[] args)
     {
+        const string MessageText = "An explicitly selected test suite must not be empty.";
+        const int EmptyResult = 0;
+
         if (ClusterProfileUpgradeCommand.Dispatch(args) is { } upgradeExitCode)
         { return upgradeExitCode; }
         var requested = TestSuiteSettings.Requested(args);
@@ -21,10 +24,10 @@ internal static class KeyLoadAppHostApplication
             DisableDashboard = requested
         });
         var runtimeOptions = AppHostOptionsRegistration.Get(builder);
-        var tests = TestSuiteSettings.Read(builder.Configuration, runtimeOptions.TestExecution);
+        var tests = runtimeOptions.Control.Value.Tests;
         if (requested && tests is null)
         {
-            throw new InvalidOperationException("An explicitly selected test suite must not be empty.");
+            throw new InvalidOperationException(MessageText);
         }
         AddKeyLoad(builder);
         var app = builder.Build();
@@ -36,21 +39,19 @@ internal static class KeyLoadAppHostApplication
         {
             await app.RunAsync().ConfigureAwait(false);
         }
-        return 0;
+        return EmptyResult;
     }
 
     /// <summary>Composes the simultaneous Docker RF3 cluster and optional comparison dependencies.</summary>
     internal static void AddKeyLoad(IDistributedApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        var twoRf3 = TwoRf3Profile.ValidateAndRead(builder.Configuration);
-        ProtocolCohortImages.ValidateMode(builder.Configuration);
-        RequestCqrsProbeProfile.ValidateMode(builder.Configuration);
+        var twoRf3 = runtimeOptions.Control.Value.TwoRf3;
         var runtimeOptions = AppHostOptionsRegistration.Get(builder);
-        var tests = TestSuiteSettings.Read(builder.Configuration, runtimeOptions.TestExecution);
-        var scaleSelected = builder.Configuration[KeyLoad.Comparisons.ComparisonWorkerSelection.ScaleProfileSetting] is not null;
+        var tests = runtimeOptions.Control.Value.Tests;
+        var scaleSelected = runtimeOptions.Control.Value.ScaleSelected;
         if (scaleSelected && (tests is not null
-            || builder.Configuration[KeyLoad.Comparisons.ComparisonWorkerSelection.TargetSetting] is null))
+            || !runtimeOptions.Control.Value.TargetSelected))
         {
             throw new InvalidOperationException(KeyLoad.Comparisons.ComparisonWorkerSelection.InvalidSelection);
         }
@@ -61,7 +62,7 @@ internal static class KeyLoadAppHostApplication
             TestSuiteResources.Add(builder, tests);
             return;
         }
-        if (builder.Configuration[KeyLoad.Comparisons.ComparisonWorkerSelection.TargetSetting] is not null)
+        if (runtimeOptions.Control.Value.TargetSelected)
         {
             IsolatedBenchmarkResources.Add(builder);
             return;

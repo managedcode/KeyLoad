@@ -17,7 +17,7 @@ internal sealed class McpDocumentCrudParityTests(ClusterFixture fixture)
         var identity = await McpPersistedIdentity.CreateAsync(fixture, source.Partition,
             Capability.DocumentsRead | Capability.DocumentsWrite, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
 
@@ -33,7 +33,7 @@ internal sealed class McpDocumentCrudParityTests(ClusterFixture fixture)
         var identity = await McpPersistedIdentity.CreateAsync(fixture, source.Partition,
             Capability.DocumentsRead | Capability.DocumentsWrite, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
 
@@ -49,7 +49,7 @@ internal sealed class McpDocumentCrudParityTests(ClusterFixture fixture)
         var identity = await McpPersistedIdentity.CreateAsync(fixture, source.Partition,
             Capability.DocumentsRead | Capability.DocumentsWrite, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             identity.Secret, deadline.Token);
 

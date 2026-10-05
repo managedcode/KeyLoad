@@ -11,7 +11,7 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     private readonly ReplicaConsensus replica;
     private readonly string configuredCluster;
     private readonly TimeProvider time;
-    private readonly CancellationToken startupCancellation;
+    private readonly ReplicaMembershipInitialization initialization;
     private readonly int maximumRows;
     private readonly OrleansMembershipOptions settings;
     private readonly TimeSpan requestTimeout;
@@ -44,12 +44,12 @@ public sealed class ReplicaMembershipTable : IMembershipTable
         ArgumentException.ThrowIfNullOrWhiteSpace(internalPrincipal);
         time = clock ?? throw new ArgumentNullException(nameof(clock));
         ArgumentOutOfRangeException.ThrowIfNegative(maximumRows);
-        this.startupCancellation = startupCancellation;
         this.maximumRows = maximumRows;
         settings = membershipOptions.Value;
         var execution = executionOptions.Value;
         requestTimeout = execution.CommandTimeout + execution.ReadBarrierTimeout;
         store = new(database, coordinator, endpoint, internalPrincipal, maximumRows);
+        initialization = new(store, replica, membershipOptions, time, maximumRows, startupCancellation);
     }
 
     /// <inheritdoc />
@@ -59,26 +59,8 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     /// <summary>Waits for early local transport, then acquires quorum within the startup lifetime.</summary>
     /// <param name="tryInitTableVersion">Native provider hint; persisted state remains authoritative.</param>
     /// <param name="cancellationToken">Native Orleans startup cancellation.</param>
-    public async Task InitializeMembershipTableAsync(bool tryInitTableVersion, CancellationToken cancellationToken)
-    {
-        using var deadline = new CancellationTokenSource(settings.StartupTimeout, time);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(startupCancellation, cancellationToken, deadline.Token);
-        await replica.TransportReady.WaitAsync(linked.Token).ConfigureAwait(false);
-        while (true)
-        {
-            linked.Token.ThrowIfCancellationRequested();
-            try
-            {
-                await store.ReadAsync(linked.Token).ConfigureAwait(false);
-                return;
-            }
-            catch (KeyLoadException error) when (error.Code is ErrorCode.OwnershipLost or ErrorCode.UnknownWriteOutcome
-                || maximumRows == ReplicaMembershipProtocol.UnboundedRows && error.Code == ErrorCode.ResourceExhausted)
-            {
-                await Task.Delay(settings.StartupRetryDelay, time, linked.Token).ConfigureAwait(false);
-            }
-        }
-    }
+    public Task InitializeMembershipTableAsync(bool tryInitTableVersion, CancellationToken cancellationToken)
+        => initialization.RunAsync(cancellationToken);
 
     /// <inheritdoc />
     public Task<MembershipTableData> ReadAll() => ReadAllAsync(CancellationToken.None);

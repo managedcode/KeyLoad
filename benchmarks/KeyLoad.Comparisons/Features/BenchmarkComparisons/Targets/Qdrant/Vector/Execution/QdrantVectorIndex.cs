@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -31,7 +31,8 @@ internal static class QdrantVectorIndex
         watch.Stop();
         var parameters = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            [QdrantVectorProtocol.Metric] = QdrantVectorProtocol.CosineMetric, [QdrantVectorProtocol.Connections] = profile.IndexKind == VectorIndexKind.Hnsw ? QdrantVectorProtocol.ConnectionsText : QdrantVectorProtocol.DisabledText,
+            [QdrantVectorProtocol.Metric] = QdrantVectorProtocol.CosineMetric,
+            [QdrantVectorProtocol.Connections] = profile.IndexKind == VectorIndexKind.Hnsw ? QdrantVectorProtocol.ConnectionsText : QdrantVectorProtocol.DisabledText,
             [QdrantVectorProtocol.QueryPlannerEvidence] = QdrantVectorProtocol.PlannerContract,
             [QdrantVectorProtocol.ExecutionPolicyKey] = JsonSerializer.Serialize(executionOptions.Value)
         };

@@ -128,25 +128,32 @@ internal static class ClusterProfileStore
 
     internal static byte[] ReadBoundedBytes(string path)
     {
+        const int StructuralValue = 1;
+        const int Step = 1;
+        const int TotalInitialValue = 0;
+        const int EmptyValue = 0;
+        const int MissingValue = -1;
+        const int StartValue = 0;
+
         RejectLinks(path);
         ClusterProfilePermissions.RequirePrivate(path);
         using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
         var initialLength = input.Length;
-        if (initialLength is < 1 or > MaximumProfileBytes)
+        if (initialLength is < StructuralValue or > MaximumProfileBytes)
         { throw new InvalidOperationException(InvalidProfile); }
-        var buffer = new byte[MaximumProfileBytes + 1];
-        var total = 0;
+        var buffer = new byte[MaximumProfileBytes + Step];
+        var total = TotalInitialValue;
         while (total < buffer.Length)
         {
             var read = input.Read(buffer.AsSpan(total));
-            if (read == 0)
+            if (read == EmptyValue)
             { break; }
             total += read;
         }
-        if (total is < 1 or > MaximumProfileBytes || initialLength != total || input.Length != total
-            || input.ReadByte() != -1 || input.Length != total)
+        if (total is < StructuralValue or > MaximumProfileBytes || initialLength != total || input.Length != total
+            || input.ReadByte() != MissingValue || input.Length != total)
         { throw new InvalidOperationException(InvalidProfile); }
-        return buffer.AsSpan(0, total).ToArray();
+        return buffer.AsSpan(StartValue, total).ToArray();
     }
 
     internal static void VerifyCopy(byte[] original, byte[] copy)
@@ -177,11 +184,13 @@ internal static class ClusterProfileStore
 
     internal static void RejectLinks(string path)
     {
+        const int EmptyValue = 0;
+
         for (var current = path; !string.IsNullOrEmpty(current); current = Path.GetDirectoryName(current))
         {
             try
             {
-                if ((File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
+                if ((File.GetAttributes(current) & FileAttributes.ReparsePoint) != EmptyValue)
                 { throw new InvalidOperationException(UnsafeProfilePath); }
             }
             catch (FileNotFoundException) { }

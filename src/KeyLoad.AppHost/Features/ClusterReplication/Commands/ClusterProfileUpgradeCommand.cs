@@ -6,6 +6,13 @@ namespace KeyLoad.AppHost.Features.ClusterReplication.Commands;
 /// <summary>Runs the explicitly requested, offline-only V1 profile conversion.</summary>
 internal static class ClusterProfileUpgradeCommand
 {
+    private const int ArgumentCount = 3;
+    private const int HasExactArgumentsFirstIndex = 0;
+    private const int HasExactArgumentsSecondIndex = 1;
+    private const int HasExactArgumentsElementIndex = 2;
+    private const char HasExactArgumentsNullCharacter = '\0';
+    private const string GetMessageMessageText = "The offline profile command message is missing.";
+
     internal const string UpgradeFlag = "--keyload-profile-upgrade-v1-to-v2";
     internal const string DataRootFlag = "--data-root";
     private const string UpgradePrefix = "--keyload-profile-upgrade";
@@ -21,6 +28,9 @@ internal static class ClusterProfileUpgradeCommand
     /// <summary>Returns null for ordinary AppHost invocations; a matched or malformed reserved command is handled here.</summary>
     internal static int? Dispatch(string[] args)
     {
+        const int ElementIndex = 2;
+        const int EmptyResult = 0;
+
         ArgumentNullException.ThrowIfNull(args);
         if (!ContainsReservedArgument(args))
         { return null; }
@@ -32,9 +42,9 @@ internal static class ClusterProfileUpgradeCommand
 
         try
         {
-            _ = ClusterProfileStore.UpgradeLegacyOffline(args[2]);
+            _ = ClusterProfileStore.UpgradeLegacyOffline(args[ElementIndex]);
             Console.WriteLine(GetMessage(SuccessMessage));
-            return 0;
+            return EmptyResult;
         }
         catch (Exception exception) when (IsExpectedFailure(exception))
         {
@@ -48,9 +58,9 @@ internal static class ClusterProfileUpgradeCommand
             || argument.StartsWith(DataRootFlag, StringComparison.Ordinal));
 
     private static bool HasExactArguments(string[] args)
-        => args.Length == 3 && args[0] == UpgradeFlag && args[1] == DataRootFlag
-            && args[2].Length <= MaximumPathLength && !args[2].Contains('\0', StringComparison.Ordinal)
-            && Path.IsPathFullyQualified(args[2]) && Directory.Exists(args[2]);
+        => args.Length == ArgumentCount && args[HasExactArgumentsFirstIndex] == UpgradeFlag && args[HasExactArgumentsSecondIndex] == DataRootFlag
+            && args[HasExactArgumentsElementIndex].Length <= MaximumPathLength && !args[HasExactArgumentsElementIndex].Contains(HasExactArgumentsNullCharacter, StringComparison.Ordinal)
+            && Path.IsPathFullyQualified(args[HasExactArgumentsElementIndex]) && Directory.Exists(args[HasExactArgumentsElementIndex]);
 
     private static bool IsExpectedFailure(Exception exception)
         => exception is ArgumentException or IOException or InvalidOperationException
@@ -58,5 +68,5 @@ internal static class ClusterProfileUpgradeCommand
 
     private static string GetMessage(string key)
         => Messages.GetString(key, CultureInfo.CurrentUICulture)
-            ?? throw new InvalidOperationException("The offline profile command message is missing.");
+            ?? throw new InvalidOperationException(GetMessageMessageText);
 }

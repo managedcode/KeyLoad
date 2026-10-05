@@ -17,7 +17,7 @@ internal sealed class ThreeWayHybridRf3Tests(ClusterFixture fixture)
         var scenario = await ThreeWayHybridRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, vectorGrant: true, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
         var directRequest = scenario.Request(expansion: true);
@@ -39,7 +39,7 @@ internal sealed class ThreeWayHybridRf3Tests(ClusterFixture fixture)
         var scenario = await ThreeWayHybridRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, vectorGrant: true, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
             identity.Secret, deadline.Token);
         var directRequest = scenario.Request(restricted: true, expansion: false);
@@ -68,8 +68,8 @@ internal sealed class ThreeWayHybridRf3Tests(ClusterFixture fixture)
         var denied = await scenario.CreateReaderAsync(fixture, vectorGrant: false, deadline.Token);
         using var allowedHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         using var deniedHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var allowedSdk = new KeyLoadClient(allowedHttp, allowed.Secret);
-        var deniedSdk = new KeyLoadClient(deniedHttp, denied.Secret);
+        var allowedSdk = new KeyLoadClient(allowedHttp, allowed.Secret, IntegrationClientOptions.Execution());
+        var deniedSdk = new KeyLoadClient(deniedHttp, denied.Secret, IntegrationClientOptions.Execution());
         await using var allowedMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             allowed.Secret, deadline.Token);
         await using var deniedMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
@@ -93,7 +93,7 @@ internal sealed class ThreeWayHybridRf3Tests(ClusterFixture fixture)
         var scenario = await ThreeWayHybridRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, vectorGrant: true, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             identity.Secret, deadline.Token);
         await AssertLabelUseDeniedAsync(sdk, mcp, scenario, deadline.Token);

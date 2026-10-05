@@ -2,8 +2,15 @@ namespace KeyLoad.Replication;
 
 internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender followers) : IDisposable
 {
+    private const int ExclusiveRoundPermit = 1;
+    private const int ContiguousIndexStep = 1;
+    private const int UnelectedTerm = 0;
+    private const int LocalAcknowledgementCount = 1;
+    private const int NoPendingFollowers = 0;
+    private const int MajorityArrayIndexAdjustment = 1;
+
     private const int HeartbeatAdmissionWaitMilliseconds = 0;
-    private readonly SemaphoreSlim rounds = new(1, 1);
+    private readonly SemaphoreSlim rounds = new(ExclusiveRoundPermit, ExclusiveRoundPermit);
 
     /// <inheritdoc />
     public void Dispose() => rounds.Dispose();
@@ -17,7 +24,7 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
             var entry = await state.LockedAsync(() =>
             {
                 state.RequireReadyLeader();
-                var next = new ReplicaEntry(checked(state.Log.State.LastIndex + 1), state.Log.State.Term,
+                var next = new ReplicaEntry(checked(state.Log.State.LastIndex + ContiguousIndexStep), state.Log.State.Term,
                     operation with { EvaluatedAt = state.Clock.GetUtcNow() });
                 state.Log.Append([next]);
                 return next;
@@ -69,8 +76,8 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
         try
         {
             var term = await state.LockedAsync(() =>
-            { return state.Role == ReplicaRole.Leader ? state.Log.State.Term : 0; }, cancellationToken).ConfigureAwait(false);
-            if (term > 0)
+            { return state.Role == ReplicaRole.Leader ? state.Log.State.Term : UnelectedTerm; }, cancellationToken).ConfigureAwait(false);
+            if (term > UnelectedTerm)
             {
                 await RoundAsync(term, ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
             }
@@ -82,8 +89,8 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
     {
         var pending = state.Configuration.VoterIds.Where(voter => voter != state.Configuration.LocalId)
             .Select(voter => followers.SynchronizeAsync(voter, term, purpose, cancellationToken)).ToList();
-        var acknowledgements = 1;
-        while (pending.Count > 0 && acknowledgements < state.Configuration.Majority)
+        var acknowledgements = LocalAcknowledgementCount;
+        while (pending.Count > NoPendingFollowers && acknowledgements < state.Configuration.Majority)
         {
             var completed = await Task.WhenAny(pending).WaitAsync(cancellationToken).ConfigureAwait(false);
             pending.Remove(completed);
@@ -97,7 +104,7 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
             state.RequireLeader(term);
             var matches = state.Configuration.VoterIds.Select(voter => voter == state.Configuration.LocalId
                 ? state.Log.State.LastIndex : state.Progress[voter].MatchedIndex).OrderDescending().ToArray();
-            var cut = matches[state.Configuration.Majority - 1];
+            var cut = matches[state.Configuration.Majority - MajorityArrayIndexAdjustment];
             if (cut > state.Log.State.CommittedIndex && state.Log.TermAt(cut) == term)
             {
                 state.Materializer.Commit(cut);

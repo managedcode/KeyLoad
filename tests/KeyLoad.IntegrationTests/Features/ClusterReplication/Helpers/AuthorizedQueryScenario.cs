@@ -85,7 +85,7 @@ internal static class AuthorizedQueryScenario
         await Assert.That(second.Rows.Single().EntityId).IsEqualTo("b");
         await Assert.That(second.Cursor).IsNull();
         await Assert.That(second.Rows[0].Json).DoesNotContain(Canary);
-        var typed = Success(await client.QueryAsync(KeyLoadQuery.From<QueryOrder>(partition, Collection)
+        var typed = Success(await client.QueryAsync(KeyLoadQuery.From<QueryOrder>(partition, Collection, IntegrationClientOptions.Translation())
             .Where(row => row.Status == "open").OrderBy(row => row.Number).Take(1), cancellationToken: cancellationToken));
         await Assert.That(JsonDefaults.Serialize(typed.Rows).SequenceEqual(JsonDefaults.Serialize(first.Rows))).IsTrue();
         return ast;

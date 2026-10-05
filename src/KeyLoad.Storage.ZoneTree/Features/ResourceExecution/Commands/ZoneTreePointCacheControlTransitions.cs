@@ -3,6 +3,8 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 /// <summary>Performs cold replacement and exact-receipt continuity under the caller's writer gate.</summary>
 internal static class ZoneTreePointCacheControlTransitions
 {
+    private const int NoActiveReaders = 0;
+
     internal static ZoneTreePointCacheControlResult ApplyUnderWrite(
         ZoneTreePointCacheControlState state, CacheReadPermitAcceptance receipt)
     {
@@ -106,7 +108,7 @@ internal static class ZoneTreePointCacheControlTransitions
         ZoneTreePointCache? candidate = null;
         try
         {
-            candidate = new ZoneTreePointCache(state.Options);
+            candidate = ZoneTreePointCache.CreateResolved(state.Options);
             var result = PublishCandidate(state, candidate, receipt, expectedBinding, out var published);
             if (published)
             {
@@ -157,7 +159,7 @@ internal static class ZoneTreePointCacheControlTransitions
     private static bool IsEligible(ZoneTreePointCacheControlState state,
         CacheReadPermitAcceptance receipt)
     {
-        return receipt.Revision > 0 && state.Permit.IsCurrentAcceptance(receipt);
+        return receipt.Revision > NoActiveReaders && state.Permit.IsCurrentAcceptance(receipt);
     }
 
     private static bool IsSameReadyBinding(ZoneTreePointCacheBinding? binding,

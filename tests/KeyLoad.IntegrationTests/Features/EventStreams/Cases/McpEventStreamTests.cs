@@ -16,7 +16,7 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var scenario = await McpEventStreamScenario.CreateAsync(fixture, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var command = scenario.AppendCommand(Guid.NewGuid());
         var original = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, deadline.Token));
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
@@ -45,7 +45,7 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var scenario = await McpEventStreamScenario.CreateAsync(fixture, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var appendReceipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(
             scenario.AppendCommand(Guid.NewGuid()), deadline.Token));
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
@@ -94,13 +94,13 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var scenario = await McpEventStreamScenario.CreateAsync(fixture, deadline.Token);
         using var administratorHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(administratorHttp, fixture.AdminKey);
+        var administrator = new KeyLoadClient(administratorHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         var appendReceipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(
             scenario.AppendCommand(Guid.NewGuid()), deadline.Token));
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             McpEventStreamTokens.StreamSet, Capability.EventsRead, deadline.Token);
         using var readerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(readerHttp, identity.Secret);
+        var sdk = new KeyLoadClient(readerHttp, identity.Secret, IntegrationClientOptions.Execution());
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
 

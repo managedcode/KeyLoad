@@ -43,7 +43,7 @@ internal static class PartitionQueryRf3Leadership
         CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var status = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         var leader = new Uri(status!.Leader!).Host;
@@ -58,7 +58,7 @@ internal static class PartitionQueryRf3Leadership
         var survivor = new[] { McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3 }
             .First(node => !string.Equals(node, leader, StringComparison.Ordinal));
         using var http = McpCallerHttp.Create(fixture, survivor);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await ClusterReplicationTestSupport.EventuallyAsync(async () =>
         {
             var status = await sdk.StatusAsync(cancellationToken).ConfigureAwait(false);
@@ -112,7 +112,7 @@ internal static class PartitionQueryRf3Leadership
         foreach (var node in new[] { McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3 })
         {
             using var http = McpCallerHttp.Create(fixture, node);
-            var sdk = new KeyLoadClient(http, fixture.AdminKey);
+            var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
             await ClusterReplicationTestSupport.EventuallyAsync(async () =>
             {
                 var status = await sdk.StatusAsync(cancellationToken).ConfigureAwait(false);

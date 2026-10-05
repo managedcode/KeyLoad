@@ -14,20 +14,26 @@ internal static class ScaleServerHostCpuParser
 
     internal static (string Vendor, int Family, int Model, int Stepping)? ParseCpu(string text)
     {
+        const char LineFeedCharacter = '\n';
+        const char ColonCharacter = ':';
+        const int BoundaryValue = 1;
+        const int SecondIndex = 1;
+        const char SpaceCharacter = ' ';
+
         string? vendor = null;
         string? family = null;
         string? model = null;
         string? stepping = null;
-        foreach (var line in text.Split('\n'))
+        foreach (var line in text.Split(LineFeedCharacter))
         {
-            var separator = line.IndexOf(':', StringComparison.Ordinal);
-            if (separator < 1)
+            var separator = line.IndexOf(ColonCharacter, StringComparison.Ordinal);
+            if (separator < BoundaryValue)
             {
                 continue;
             }
 
             var name = line[..separator].Trim();
-            var value = line[(separator + 1)..].Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            var value = line[(separator + SecondIndex)..].Trim().Split(SpaceCharacter, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
             if (value is null)
             {
                 continue;
@@ -66,12 +72,18 @@ internal static class ScaleServerHostCpuParser
 
     internal static string? ReadValue(string text, string name)
     {
-        foreach (var line in text.Split('\n'))
+        const char LineFeedCharacter = '\n';
+        const char ColonCharacter = ':';
+        const int BoundaryValue = 0;
+        const int SecondIndex = 1;
+        const char SpaceCharacter = ' ';
+
+        foreach (var line in text.Split(LineFeedCharacter))
         {
-            var separator = line.IndexOf(':', StringComparison.Ordinal);
-            if (separator > 0 && line[..separator].Trim().Equals(name, StringComparison.Ordinal))
+            var separator = line.IndexOf(ColonCharacter, StringComparison.Ordinal);
+            if (separator > BoundaryValue && line[..separator].Trim().Equals(name, StringComparison.Ordinal))
             {
-                return line[(separator + 1)..].Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                return line[(separator + SecondIndex)..].Trim().Split(SpaceCharacter, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
             }
         }
 
@@ -80,22 +92,31 @@ internal static class ScaleServerHostCpuParser
 
     internal static int CountOnline(string text)
     {
-        var total = 0;
-        foreach (var range in text.Trim().Split(','))
+        const int TotalInitialValue = 0;
+        const char SeparatorCharacter = ',';
+        const char CountOnlineSeparatorCharacter = '-';
+        const int FirstIndex = 0;
+        const int EmptyResult = 0;
+        const int RangeEndpointCount = 2;
+        const int SecondIndex = 1;
+        const int Step = 1;
+
+        var total = TotalInitialValue;
+        foreach (var range in text.Trim().Split(SeparatorCharacter))
         {
-            var ends = range.Split('-');
-            if (!int.TryParse(ends[0], out var first))
+            var ends = range.Split(CountOnlineSeparatorCharacter);
+            if (!int.TryParse(ends[FirstIndex], out var first))
             {
-                return 0;
+                return EmptyResult;
             }
 
             var last = first;
-            if (ends.Length == 2 && !int.TryParse(ends[1], out last))
+            if (ends.Length == RangeEndpointCount && !int.TryParse(ends[SecondIndex], out last))
             {
-                return 0;
+                return EmptyResult;
             }
 
-            total = checked(total + last - first + 1);
+            total = checked(total + last - first + Step);
         }
 
         return total;
@@ -103,12 +124,19 @@ internal static class ScaleServerHostCpuParser
 
     internal static (string Logical, string[] Physical) CoreMembership(string cpu)
     {
+        const char LineFeedCharacter = '\n';
+        const char ColonCharacter = ':';
+        const int BoundaryValue = 1;
+        const int SecondIndex = 1;
+        const int RangeEndpointCount = 0;
+        const char SeparatorCharacter = ',';
+
         var pairs = new HashSet<string>(StringComparer.Ordinal);
         var logical = new HashSet<string>(StringComparer.Ordinal);
         string? physical = null;
         string? core = null;
         string? processor = null;
-        foreach (var line in cpu.Split('\n').Append(string.Empty))
+        foreach (var line in cpu.Split(LineFeedCharacter).Append(string.Empty))
         {
             if (string.IsNullOrWhiteSpace(line))
             {
@@ -119,14 +147,14 @@ internal static class ScaleServerHostCpuParser
                 continue;
             }
 
-            var separator = line.IndexOf(':', StringComparison.Ordinal);
-            if (separator < 1)
+            var separator = line.IndexOf(ColonCharacter, StringComparison.Ordinal);
+            if (separator < BoundaryValue)
             {
                 continue;
             }
 
             var name = line[..separator].Trim();
-            var value = line[(separator + 1)..].Trim();
+            var value = line[(separator + SecondIndex)..].Trim();
             if (name == PhysicalIdField)
             {
                 physical = value;
@@ -143,16 +171,18 @@ internal static class ScaleServerHostCpuParser
             }
         }
 
-        return pairs.Count == 0 ? (string.Empty, []) :
-            (string.Join(',', logical.Order(StringComparer.Ordinal)), pairs.Order(StringComparer.Ordinal).ToArray());
+        return pairs.Count == RangeEndpointCount ? (string.Empty, []) :
+            (string.Join(SeparatorCharacter, logical.Order(StringComparer.Ordinal)), pairs.Order(StringComparer.Ordinal).ToArray());
     }
 
     private static void AddCoreMembership(HashSet<string> pairs, HashSet<string> logical,
         string? physical, string? core, string? processor)
     {
+        const string ItemText = ":";
+
         if (physical is not null && core is not null)
         {
-            pairs.Add(physical + ":" + core);
+            pairs.Add(physical + ItemText + core);
         }
 
         if (processor is not null)

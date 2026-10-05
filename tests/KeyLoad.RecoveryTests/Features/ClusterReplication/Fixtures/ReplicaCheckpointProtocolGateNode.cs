@@ -29,7 +29,7 @@ internal sealed class ReplicaCheckpointProtocolGateNode : IAsyncDisposable
         {
             Log = openedLog = new(stores.Replica, RecoveryExecutionOptions.Configuration(Configuration));
             Database = new(stores.Canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
-            Snapshots = new(stores.Canonical, Log, RecoveryExecutionOptions.Configuration(Configuration));
+            Snapshots = new(stores.Canonical, Log, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica());
             Materializer = new(Database, Log, Snapshots, RecoveryExecutionOptions.Replica());
         }
         catch (Exception error)

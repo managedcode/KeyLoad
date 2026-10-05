@@ -30,7 +30,7 @@ internal sealed class McpCredentialLifecycleTests(ClusterFixture fixture)
         var unusable = expire ? identity.Credential with { ExpiresAt = TimeProvider.System.GetUtcNow() - McpCallerProtocol.ExpiredOffset }
             : identity.Credential with { Revoked = true };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(), unusable, deadline.Token));
         var error = await Assert.ThrowsAsync<HttpRequestException>(() => session.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(scenario.Reference), deadline.Token));
@@ -38,7 +38,7 @@ internal sealed class McpCredentialLifecycleTests(ClusterFixture fixture)
         await Assert.That(error!.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
         await Assert.That(error!.Message.Contains(identity.Secret, StringComparison.Ordinal)).IsFalse();
         await McpUnauthorizedProbe.VerifyAsync(fixture, McpCallerProtocol.Node2, identity.Secret, deadline.Token);
-        var rejected = await new KeyLoadClient(http, identity.Secret).GetAsync(scenario.Reference, deadline.Token);
+        var rejected = await new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution()).GetAsync(scenario.Reference, deadline.Token);
         await Assert.That(rejected.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Unauthenticated));
         await Assert.That((await McpCallerAssertions.SdkSuccessAsync(await administrator.GetAsync(scenario.Reference, deadline.Token)))!.Revision)
             .IsEqualTo(McpCallerProtocol.FirstRevision);

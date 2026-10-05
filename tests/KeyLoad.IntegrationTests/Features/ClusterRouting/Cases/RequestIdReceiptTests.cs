@@ -21,7 +21,7 @@ internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
             BaseAddress = fixture.App.GetEndpoint("node1", "http"),
             Timeout = TimeSpan.FromSeconds(30)
         };
-        var client = new KeyLoadClient(http, fixture.AdminKey);
+        var client = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var partition = new PartitionRef($"integration-{Guid.NewGuid():N}", "database", "request-routing", Guid.NewGuid().ToString("N"));
         await ConfigureResourceAsync(client, partition, timeout.Token);
         await VerifyStableWriteRetryAsync(client, recorder, partition, timeout.Token);

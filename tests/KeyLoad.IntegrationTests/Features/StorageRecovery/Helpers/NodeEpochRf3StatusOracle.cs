@@ -92,7 +92,7 @@ internal static class NodeEpochRf3StatusOracle
             foreach (var node in new[] { NodeEpochRf3Protocol.Node1, NodeEpochRf3Protocol.Node2, NodeEpochRf3Protocol.Node3 })
             {
                 using var http = McpCallerHttp.Create(app, node);
-                var client = new KeyLoad.Client.KeyLoadClient(http, profile.AdminKey);
+                var client = new KeyLoad.Client.KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
                 var status = await client.StatusAsync(cancellationToken).ConfigureAwait(false);
                 allReady &= status.IsSuccess && status.Value!.RoutingReady && status.Value.Applied >= minimumApplied;
             }

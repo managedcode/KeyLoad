@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Extensions.Options;
 using KurrentDB.Client;
 using KurrentEventData = KurrentDB.Client.EventData;
 
@@ -7,6 +8,7 @@ namespace KeyLoad.Comparisons.Targets;
 /// <summary>Compares event-stream append and read operations against a KurrentDB cluster with pre-measurement topology evidence.</summary>
 public sealed class KurrentTarget : IComparisonTarget
 {
+    private readonly IOptions<ComparisonLifecycleOptions> lifecycleOptions;
     private readonly string connectionString;
     private readonly HttpClient[] nodeHttpClients;
     private readonly string runId;
@@ -26,11 +28,14 @@ public sealed class KurrentTarget : IComparisonTarget
     /// <param name="nodeClients">HTTP clients for the configured KurrentDB nodes; the target disposes these clients.</param>
     /// <param name="runId">Guid-formatted run identifier used to isolate benchmark stream names.</param>
     /// <param name="image">Pinned server image reference recorded in the target profile.</param>
+    /// <param name="lifecycleOptions">The validated native lifecycle policy.</param>
     /// <param name="topology">The one, two or three native members that cluster verification must establish.</param>
     public KurrentTarget(string connectionString, HttpClient[] nodeClients, string runId, string image,
-        ComparisonTopology topology)
+        ComparisonTopology topology, IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     {
         ArgumentNullException.ThrowIfNull(image);
+        lifecycleOptions.Value.Validate();
+        this.lifecycleOptions = lifecycleOptions;
         this.connectionString = connectionString;
         nodeHttpClients = nodeClients;
         this.runId = Guid.Parse(runId).ToString(KurrentConstants.GuidFormat);
@@ -63,7 +68,7 @@ public sealed class KurrentTarget : IComparisonTarget
             ownership = new KurrentStreamOwnership(dataset.Options);
             setupStage = KurrentSetupStage.MemberVerification;
             var timeout = TimeSpan.FromSeconds(dataset.Options.TimeoutSeconds);
-            var proof = await KurrentClusterVerifier.VerifyAsync(connectionString, nodeHttpClients, topology, timeout, cancellationToken);
+            var proof = await KurrentClusterVerifier.VerifyAsync(connectionString, nodeHttpClients, topology, timeout, cancellationToken, lifecycleOptions);
             nodeClients = proof.NodeClients;
             ownedClients.AddRange(nodeClients);
             // Native SDK construction eagerly discovers and caches a preferred live member.
@@ -84,7 +89,7 @@ public sealed class KurrentTarget : IComparisonTarget
             var probe = StreamName(KurrentConstants.ProbeStreamSuffix);
             var eventData = CreateProbeEvent();
             var evidence = await KurrentClusterVerifier.VerifyCopyAsync(RequireWriter(), nodeClients, nodeHttpClients,
-                topology, probe, eventData, ownership, timeout, cancellationToken);
+                topology, probe, eventData, ownership, timeout, cancellationToken, lifecycleOptions);
             Profile = Profile with { Cluster = evidence };
             initialized = true;
             setupStage = KurrentSetupStage.Complete;
@@ -113,7 +118,7 @@ public sealed class KurrentTarget : IComparisonTarget
     /// <returns>A value task that completes when cleanup and client disposal finish.</returns>
     public async ValueTask DisposeAsync()
     {
-        using var cleanup = new KurrentCleanupOperation(ownership?.SnapshotAcknowledged() ?? [], CancellationToken.None);
+        using var cleanup = new KurrentCleanupOperation(ownership?.SnapshotAcknowledged() ?? [], CancellationToken.None, lifecycleOptions);
         try
         {
             await cleanup.DeleteAsync(writer);

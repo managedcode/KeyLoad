@@ -19,7 +19,7 @@ internal static class DueFaultRf3IdentityWriter
         NodeEpochRf3Profile profile, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(app, RequestCqrsRf3Protocol.Node1);
-        var administrator = new KeyLoadClient(http, profile.AdminKey);
+        var administrator = new KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
         await ConfigureQueueAsync(administrator, partition, recurringLane.Queue, cancellationToken)
             .ConfigureAwait(false);
         await ConfigureQueueAsync(administrator, partition, sagaLane.Queue, cancellationToken)

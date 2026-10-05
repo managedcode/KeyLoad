@@ -16,6 +16,8 @@ internal static class IsolatedNativeDispatcher
 
     internal static void Add(IsolatedResourceContext context)
     {
+        const string MessageText = "IsolatedComparisonSelectionInvalid";
+
         switch (context.Selection.Target)
         {
             case KeyLoad:
@@ -52,7 +54,7 @@ internal static class IsolatedNativeDispatcher
                 IsolatedHelixDbResources.Add(context);
                 break;
             default:
-                throw new InvalidOperationException("IsolatedComparisonSelectionInvalid");
+                throw new InvalidOperationException(MessageText);
         }
     }
 }

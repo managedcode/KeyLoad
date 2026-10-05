@@ -6,6 +6,12 @@ namespace KeyLoad.AppHost.Features.ClusterReplication;
 /// <summary>Reads the explicit local-development image identity without weakening GitHub image parsing.</summary>
 internal sealed partial record LocalDevelopmentContainerImage(string Reference, string Tag, string ReceiptPath)
 {
+    private const int HasInvalidImageIdentityBoundaryValue = 256;
+    private const int HasInvalidImageIdentityStructuralValue = 0;
+    private const char HasInvalidImageIdentityBackslashCharacter = '\\';
+    private const int HasConflictingImageSelectorsCountValue = 1;
+    private const string LocalDevelopmentContainerImageMetadataName = "\\Akeyload/local-server:local-[a-f0-9]{32}\\z";
+
     private const string EnabledValue = "true";
 
     private const string GithubReceiptSetting = "KEYLOAD_IMAGE_RECEIPT";
@@ -31,6 +37,9 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
 
     internal static LocalDevelopmentContainerImage? Read(IDistributedApplicationBuilder builder)
     {
+        const char ColonCharacter = ':';
+        const int SecondIndex = 1;
+
         ArgumentNullException.ThrowIfNull(builder);
         var provenance = builder.Configuration[LocalRf3ImageExecution.ProvenanceEnvironment];
         var reference = builder.Configuration[ServerImageSetting];
@@ -47,7 +56,7 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
         }
 
         var acceptedReference = reference!;
-        var tag = acceptedReference[(acceptedReference.IndexOf(':', StringComparison.Ordinal) + 1)..];
+        var tag = acceptedReference[(acceptedReference.IndexOf(ColonCharacter, StringComparison.Ordinal) + SecondIndex)..];
         var invocation = tag[TagPrefix.Length..];
         var expectedReceipt = $"TestResults/rf3/local-images/image-{invocation}.json";
         if (!string.Equals(receiptPath, expectedReceipt, StringComparison.Ordinal))
@@ -65,9 +74,9 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
     private static bool HasInvalidImageIdentity(string? provenance, string? reference, string? receiptPath, string? child)
         => provenance != LocalRf3ImageExecution.Provenance || reference is null || receiptPath is null
             || child != EnabledValue
-            || reference!.Length > 256 || !ImageReference().IsMatch(reference)
-            || receiptPath!.Length is 0 or > MaximumReceiptPathCharacters
-            || Path.IsPathRooted(receiptPath) || receiptPath.Contains('\\', StringComparison.Ordinal);
+            || reference!.Length > HasInvalidImageIdentityBoundaryValue || !ImageReference().IsMatch(reference)
+            || receiptPath!.Length is HasInvalidImageIdentityStructuralValue or > MaximumReceiptPathCharacters
+            || Path.IsPathRooted(receiptPath) || receiptPath.Contains(HasInvalidImageIdentityBackslashCharacter, StringComparison.Ordinal);
 
     private static bool HasConflictingImageSelectors(IDistributedApplicationBuilder builder)
         => HasValue(builder, GithubReceiptSetting)
@@ -77,7 +86,7 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
             || HasValue(builder, ProtocolNode1Setting)
             || HasValue(builder, ProtocolNode2Setting)
             || HasValue(builder, ProtocolNode3Setting)
-            || builder.Configuration.GetSection(ProtocolSectionSetting).GetChildren().Take(1).Any()
+            || builder.Configuration.GetSection(ProtocolSectionSetting).GetChildren().Take(HasConflictingImageSelectorsCountValue).Any()
             || HasComparisonSelector(builder);
 
     private static bool HasComparisonSelector(IDistributedApplicationBuilder builder)
@@ -91,6 +100,6 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
     private static bool HasValue(IDistributedApplicationBuilder builder, string key)
         => !string.IsNullOrWhiteSpace(builder.Configuration[key]);
 
-    [GeneratedRegex("\\Akeyload/local-server:local-[a-f0-9]{32}\\z", RegexOptions.CultureInvariant, 100)]
+    [GeneratedRegex(LocalDevelopmentContainerImageMetadataName, RegexOptions.CultureInvariant, 100)]
     private static partial Regex ImageReference();
 }

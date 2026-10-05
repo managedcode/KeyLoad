@@ -11,6 +11,8 @@ internal static class ScaleServerCgroupEnvelopeReader
     internal static async Task<ScaleServerEnvelope?> ReadFromDirectoryAsync(string current, string root,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
+        const int DepthInitialValue = 0;
+
         if (!await ScaleServerCgroupHierarchy.IsSupportedRootAsync(root, budget, token))
         {
             return null;
@@ -20,7 +22,7 @@ internal static class ScaleServerCgroupEnvelopeReader
         long? memory = null;
         string? cpuSet = null;
         var directory = current;
-        for (var depth = 0; depth < ScaleServerResourceBounds.MaxCgroupAncestors; depth++)
+        for (var depth = DepthInitialValue; depth < budget.Settings.MaxCgroupAncestors; depth++)
         {
             var isRoot = directory == root;
             var inputs = await ReadAncestorInputsAsync(directory, isRoot, budget, token);
@@ -60,16 +62,18 @@ internal static class ScaleServerCgroupEnvelopeReader
     private static async Task<(string Cpu, string Memory, string CpuSet)?> ReadAncestorInputsAsync(
         string directory, bool isRoot, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
+        const string Path2Text = "cpuset.cpus.effective";
+
         var cpuPath = Path.Combine(directory, CpuMaximum);
         var memoryPath = Path.Combine(directory, MemoryMaximum);
         var cpuText = isRoot
             ? ScaleServerCgroupHierarchy.ReadRootLimit(cpuPath)
-            : await BoundedText.ReadAsync(cpuPath, ScaleServerResourceBounds.MaxFileBytes, token, budget);
+            : await BoundedText.ReadAsync(cpuPath, budget.Settings.MaxFileBytes, token, budget);
         var memoryText = isRoot
             ? ScaleServerCgroupHierarchy.ReadRootLimit(memoryPath)
-            : await BoundedText.ReadAsync(memoryPath, ScaleServerResourceBounds.MaxFileBytes, token, budget);
-        var setText = await BoundedText.ReadAsync(Path.Combine(directory, "cpuset.cpus.effective"),
-            ScaleServerResourceBounds.MaxFileBytes, token, budget);
+            : await BoundedText.ReadAsync(memoryPath, budget.Settings.MaxFileBytes, token, budget);
+        var setText = await BoundedText.ReadAsync(Path.Combine(directory, Path2Text),
+            budget.Settings.MaxFileBytes, token, budget);
         return cpuText is null || memoryText is null || string.IsNullOrWhiteSpace(setText)
             ? null : (cpuText, memoryText, setText);
     }

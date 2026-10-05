@@ -44,7 +44,7 @@ internal sealed record McpPersistedIdentity(PrincipalRecord Principal, ApiKeyRec
         var secret = keyId + Separator + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes));
         var credential = new ApiKeyRecord(keyId, id, Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), principal, cancellationToken));
         await Assert.That(persisted.Id).IsEqualTo(principal.Id);
         await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(), credential, cancellationToken))).IsTrue();

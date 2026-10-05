@@ -8,10 +8,15 @@ namespace KeyLoad;
 public sealed record GraphWalkSpec(
     [property: Orleans.Id(0)] string Graph,
     [property: Orleans.Id(1)] ImmutableArray<EntityRef> Seeds,
-    [property: Orleans.Id(2)] int MaxDepth = 3,
-    [property: Orleans.Id(3)] int MaxVertices = 1_000,
-    [property: Orleans.Id(4)] int MaxEdges = 5_000,
-    [property: Orleans.Id(5)] ImmutableArray<string>? Labels = null);
+    [property: Orleans.Id(2)] int MaxDepth = GraphWalkSpec.DefaultMaxDepth,
+    [property: Orleans.Id(3)] int MaxVertices = GraphWalkSpec.DefaultMaxVertices,
+    [property: Orleans.Id(4)] int MaxEdges = GraphWalkSpec.DefaultMaxEdges,
+    [property: Orleans.Id(5)] ImmutableArray<string>? Labels = null)
+{
+    private const int DefaultMaxDepth = 3;
+    private const int DefaultMaxVertices = 1_000;
+    private const int DefaultMaxEdges = 5_000;
+}
 
 /// <summary>Requires search hits to be reachable from the configured graph seeds.</summary>
 [Orleans.GenerateSerializer]
@@ -21,17 +26,25 @@ public sealed record GraphScope([property: Orleans.Id(0)] GraphWalkSpec Walk);
 /// <summary>Adds reachable search documents as an independent shortest-hop branch.</summary>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(GraphSearchContractAliases.GraphRetriever)]
-public sealed record GraphRetriever([property: Orleans.Id(0)] GraphWalkSpec Walk, [property: Orleans.Id(1)] double Weight = 1);
+public sealed record GraphRetriever([property: Orleans.Id(0)] GraphWalkSpec Walk, [property: Orleans.Id(1)] double Weight = GraphRetriever.DefaultWeight)
+{
+    private const int DefaultWeight = 1;
+}
 
 /// <summary>Expands selected search hits into bounded related-document context.</summary>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(GraphSearchContractAliases.GraphExpansion)]
 public sealed record GraphExpansion(
     [property: Orleans.Id(0)] string Graph,
-    [property: Orleans.Id(1)] int MaxDepth = 1,
-    [property: Orleans.Id(2)] int MaxVertices = 1_000,
-    [property: Orleans.Id(3)] int MaxEdges = 5_000,
-    [property: Orleans.Id(4)] ImmutableArray<string>? Labels = null);
+    [property: Orleans.Id(1)] int MaxDepth = GraphExpansion.DefaultMaxDepth,
+    [property: Orleans.Id(2)] int MaxVertices = GraphExpansion.DefaultMaxVertices,
+    [property: Orleans.Id(3)] int MaxEdges = GraphExpansion.DefaultMaxEdges,
+    [property: Orleans.Id(4)] ImmutableArray<string>? Labels = null)
+{
+    private const int DefaultMaxDepth = 1;
+    private const int DefaultMaxVertices = 1_000;
+    private const int DefaultMaxEdges = 5_000;
+}
 
 /// <summary>Combines standard search with versioned graph scope, retrieval and expansion operators.</summary>
 [Orleans.GenerateSerializer]

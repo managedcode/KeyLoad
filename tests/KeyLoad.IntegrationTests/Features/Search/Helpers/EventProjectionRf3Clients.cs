@@ -19,9 +19,9 @@ internal sealed class EventProjectionRf3Clients : IDisposable
         callerHttp = nodes.Select(node => McpCallerHttp.Create(fixture, node)).ToArray();
         readerHttp = nodes.Select(node => McpCallerHttp.Create(fixture, node)).ToArray();
         administratorHttp = nodes.Select(node => McpCallerHttp.Create(fixture, node)).ToArray();
-        Callers = callerHttp.Select(client => new KeyLoadClient(client, scenario.WorkerSecret)).ToArray();
-        Readers = readerHttp.Select(client => new KeyLoadClient(client, scenario.ReaderSecret)).ToArray();
-        Administrators = administratorHttp.Select(client => new KeyLoadClient(client, fixture.AdminKey)).ToArray();
+        Callers = callerHttp.Select(client => new KeyLoadClient(client, scenario.WorkerSecret, IntegrationClientOptions.Execution())).ToArray();
+        Readers = readerHttp.Select(client => new KeyLoadClient(client, scenario.ReaderSecret, IntegrationClientOptions.Execution())).ToArray();
+        Administrators = administratorHttp.Select(client => new KeyLoadClient(client, fixture.AdminKey, IntegrationClientOptions.Execution())).ToArray();
     }
 
     public void Dispose()

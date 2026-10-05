@@ -1,20 +1,20 @@
 using System.Buffers.Binary;
 using System.Text;
+using static KeyLoad.Storage.KeyCodecTokens;
 
 namespace KeyLoad.Storage;
 
 internal static class KeyCodecReadPrimitives
 {
     private const int UInt64Bytes = sizeof(ulong);
-    private const int SortableSignBit = 63;
     private const string InvalidEncodedKey = "Invalid encoded key.";
     private static readonly UTF8Encoding Utf8 = new(false, true);
 
     internal static double ReadDouble(ReadOnlySpan<byte> key, ref int offset)
     {
         var sortable = ReadUInt64(key, ref offset);
-        var bits = (sortable & (1UL << SortableSignBit)) == 0 ? ~sortable : sortable ^ (1UL << SortableSignBit);
-        if (bits == (1UL << SortableSignBit))
+        var bits = (sortable & SortableSignMask) == NoSetBits ? ~sortable : sortable ^ SortableSignMask;
+        if (bits == SortableSignMask)
         {
             throw BadKey();
         }
@@ -52,7 +52,7 @@ internal static class KeyCodecReadPrimitives
 
     internal static DateTimeOffset ReadTimestamp(ReadOnlySpan<byte> key, ref int offset)
     {
-        var ticks = unchecked((long)(ReadUInt64(key, ref offset) ^ (1UL << 63)));
+        var ticks = unchecked((long)(ReadUInt64(key, ref offset) ^ SortableSignMask));
         if (ticks < DateTimeOffset.MinValue.UtcTicks || ticks > DateTimeOffset.MaxValue.UtcTicks)
         {
             throw BadKey();
@@ -80,24 +80,24 @@ internal static class KeyCodecReadPrimitives
         while (offset < key.Length)
         {
             var value = ReadByte(key, ref offset);
-            if (value != 0)
+            if (value != EscapedZeroByte)
             {
                 bytes.WriteByte(value);
                 continue;
             }
 
             var escape = ReadByte(key, ref offset);
-            if (escape == 0)
+            if (escape == EscapedZeroByte)
             {
                 return bytes.ToArray();
             }
 
-            if (escape != 0xFF)
+            if (escape != ZeroEscapeMarker)
             {
                 throw BadKey();
             }
 
-            bytes.WriteByte(0);
+            bytes.WriteByte(EscapedZeroByte);
         }
 
         throw BadKey();

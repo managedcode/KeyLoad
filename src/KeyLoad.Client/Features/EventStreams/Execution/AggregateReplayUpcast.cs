@@ -4,11 +4,10 @@ namespace KeyLoad.Client;
 
 internal static class AggregateReplayUpcast
 {
-    private const int MaximumRegisteredUpcasters = 64;
-
     internal static Dictionary<int, EventUpcaster> BuildMap(
         IEnumerable<EventUpcaster>? upcasters,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        int maximumRegisteredUpcasters)
     {
         Dictionary<int, EventUpcaster> result = [];
         if (upcasters is null)
@@ -18,7 +17,7 @@ internal static class AggregateReplayUpcast
         foreach (var upcaster in upcasters)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            ValidateRegistration(upcaster, result);
+            ValidateRegistration(upcaster, result, maximumRegisteredUpcasters);
         }
         return result;
     }
@@ -30,15 +29,15 @@ internal static class AggregateReplayUpcast
     {
         if (sourceVersion > targetVersion)
         {
-            throw new InvalidDataException("An event schema is newer than the reducer schema.");
+            throw new InvalidDataException(AggregateReplayMessages.FutureEventSchema);
         }
         var path = ImmutableArray.CreateBuilder<EventUpcaster>();
         var version = sourceVersion;
         while (version < targetVersion)
         {
-            if (!upcasters.TryGetValue(version, out var next) || next.ToVersion != version + 1)
+            if (!upcasters.TryGetValue(version, out var next) || next.ToVersion != version + AggregateReplayProtocol.SchemaVersionStep)
             {
-                throw new InvalidDataException("No complete one-version upcast path reaches the reducer schema.");
+                throw new InvalidDataException(AggregateReplayMessages.MissingUpcastPath);
             }
             path.Add(next);
             version = next.ToVersion;
@@ -60,24 +59,25 @@ internal static class AggregateReplayUpcast
         foreach (var upcaster in path)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var changed = upcaster.Transform(current) ?? throw new InvalidDataException("An event upcaster returned null.");
+            var changed = upcaster.Transform(current) ?? throw new InvalidDataException(AggregateReplayMessages.NullUpcastResult);
             ValidateChange(current, changed, upcaster, limits);
             current = changed;
         }
         return record with { Data = current };
     }
 
-    private static void ValidateRegistration(EventUpcaster? upcaster, Dictionary<int, EventUpcaster> entries)
+    private static void ValidateRegistration(EventUpcaster? upcaster, Dictionary<int, EventUpcaster> entries,
+        int maximumRegisteredUpcasters)
     {
-        if (entries.Count >= MaximumRegisteredUpcasters)
+        if (entries.Count >= maximumRegisteredUpcasters)
         {
-            throw new InvalidDataException("The registered upcaster count exceeds 64.");
+            throw new InvalidDataException(AggregateReplayMessages.UpcasterLimitExceeded);
         }
-        if (upcaster is null || upcaster.FromVersion <= 0 || upcaster.FromVersion == int.MaxValue ||
-            upcaster.ToVersion != upcaster.FromVersion + 1 || upcaster.Transform is null ||
+        if (upcaster is null || upcaster.FromVersion <= AggregateReplayProtocol.InvalidSchemaVersion || upcaster.FromVersion == int.MaxValue ||
+            upcaster.ToVersion != upcaster.FromVersion + AggregateReplayProtocol.SchemaVersionStep || upcaster.Transform is null ||
             !entries.TryAdd(upcaster.FromVersion, upcaster))
         {
-            throw new InvalidDataException("Upcasters must form unique positive one-version transitions.");
+            throw new InvalidDataException(AggregateReplayMessages.InvalidUpcastTransition);
         }
     }
 
@@ -95,9 +95,9 @@ internal static class AggregateReplayUpcast
             !string.Equals(original.CorrelationId, changed.CorrelationId, StringComparison.Ordinal) ||
             !string.Equals(original.CausationId, changed.CausationId, StringComparison.Ordinal))
         {
-            throw new InvalidDataException("An event upcaster may change payload JSON and schema version only.");
+            throw new InvalidDataException(AggregateReplayMessages.InvalidUpcastMutation);
         }
         AggregateReplayJson.ValidateJson(changed.PayloadJson, limits.MaximumInputBytes,
-            limits.MaximumJsonDepth, "Upcast payload");
+            limits.MaximumJsonDepth, AggregateReplayMessages.UpcastPayload);
     }
 }

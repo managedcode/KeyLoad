@@ -6,4 +6,8 @@ namespace KeyLoad;
 /// <param name="Limit">The maximum number of records to return.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ReadStreamRequest)]
-public sealed record ReadStreamRequest([property: Orleans.Id(0)] StreamRef Stream, [property: Orleans.Id(1)] long AfterRevision = 0, [property: Orleans.Id(2)] int Limit = 100);
+public sealed record ReadStreamRequest([property: Orleans.Id(0)] StreamRef Stream, [property: Orleans.Id(1)] long AfterRevision = ReadStreamRequest.DefaultAfterRevision, [property: Orleans.Id(2)] int Limit = ReadStreamRequest.DefaultLimit)
+{
+    private const int DefaultAfterRevision = 0;
+    private const int DefaultLimit = 100;
+}

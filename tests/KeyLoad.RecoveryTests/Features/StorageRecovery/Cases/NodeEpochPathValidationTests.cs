@@ -47,7 +47,7 @@ internal sealed class NodeEpochPathValidationTests
                 TestContext.Current!.Execution.CancellationToken);
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, options));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options)));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Validation);
             await Assert.That(Directory.Exists(destination)).IsFalse();
@@ -72,7 +72,7 @@ internal sealed class NodeEpochPathValidationTests
         NodeEpochInventory inventory, CancellationToken cancellationToken)
     {
         var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
-        var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, options));
+        var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options)));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Validation);
         await NodeEpochInventoryCapture.AssertUnchangedAsync(source, inventory, cancellationToken);
     }

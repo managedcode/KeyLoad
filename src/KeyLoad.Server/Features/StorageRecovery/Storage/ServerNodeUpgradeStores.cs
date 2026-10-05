@@ -6,11 +6,11 @@ internal sealed class ServerNodeUpgradeStores : IDisposable
 {
     private Exception? primaryFailure;
 
-    private ServerNodeUpgradeStores(string directory, NodeOptions options)
+    private ServerNodeUpgradeStores(string directory, ServerRuntimeOptions options)
     {
-        Canonical = new(ServerNodeUpgradeAuthority.StoreOptions(Path.Combine(directory, ServerNodeUpgradeProtocol.Canonical), options));
+        Canonical = new(ServerNodeUpgradeAuthority.StoreOptions(Path.Combine(directory, ServerNodeUpgradeProtocol.Canonical), options), options.StorageExecution, options.PointCache);
         try
-        { Replica = new(ServerNodeUpgradeAuthority.StoreOptions(Path.Combine(directory, ServerNodeUpgradeProtocol.Replica), options)); }
+        { Replica = new(ServerNodeUpgradeAuthority.StoreOptions(Path.Combine(directory, ServerNodeUpgradeProtocol.Replica), options), options.StorageExecution, options.PointCache); }
         catch (Exception primary)
         {
             try
@@ -23,7 +23,7 @@ internal sealed class ServerNodeUpgradeStores : IDisposable
     internal ZoneTreeStore Canonical { get; }
     internal ZoneTreeStore Replica { get; }
 
-    internal static T Run<T>(string directory, NodeOptions options, Func<ServerNodeUpgradeStores, T> action)
+    internal static T Run<T>(string directory, ServerRuntimeOptions options, Func<ServerNodeUpgradeStores, T> action)
     {
         using var stores = new ServerNodeUpgradeStores(directory, options);
         try

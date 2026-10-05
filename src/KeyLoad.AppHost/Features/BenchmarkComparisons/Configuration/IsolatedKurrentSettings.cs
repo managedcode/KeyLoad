@@ -28,15 +28,18 @@ internal static class IsolatedKurrentSettings
 
     internal static void Configure(IResourceBuilder<ContainerResource> node, string name, string[] names)
     {
+        const int BoundaryValue = 1;
+        const char SeparatorCharacter = ',';
+
         node.WithEnvironment(ClusterSize, names.Length.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment(NodeIp, BindAll).WithEnvironment(NodePort, HttpPort)
             .WithEnvironment(ReplicationIp, BindAll).WithEnvironment(ReplicationPort, TcpPort)
             .WithEnvironment(NodeAdvertise, NativeHost(name)).WithEnvironment(ReplicationAdvertise, NativeHost(name))
             .WithEnvironment(Insecure, Enabled).WithEnvironment(DiscoverDns, Disabled)
             .WithEnvironment(Database, Data);
-        if (names.Length > 1)
+        if (names.Length > BoundaryValue)
         {
-            node.WithEnvironment(GossipSeeds, string.Join(',', names.Where(peer => peer != name)
+            node.WithEnvironment(GossipSeeds, string.Join(SeparatorCharacter, names.Where(peer => peer != name)
                 .Select(peer => NativeHost(peer) + PortSeparator + HttpPort)));
         }
     }

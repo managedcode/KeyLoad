@@ -6,20 +6,27 @@ namespace KeyLoad.Replication;
 /// <summary>Bounded canonical checkpoint transfer; canonical storage and replica-log lifetime remain with the node host.</summary>
 public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
 {
+    private const int BeforeFirstLogPosition = 0;
+    private const int PendingSnapshotLength = 1;
+    private const int BeforeFirstTransferByte = 0;
+    private const int MinimumChunkLength = 1;
+
     private readonly IAtomicStore canonical;
     private readonly IDurableReplicaLog log;
     private readonly ReplicaConfiguration configuration;
     private readonly Action<ReplicaCrashBoundary>? faultObserver;
     private readonly Lock gate = new();
     private readonly ReplicaSnapshotFiles files;
+    private readonly ReplicaIncomingTransfer incoming;
 
     /// <summary>Creates the bounded snapshot owner from one validated topology-bound configuration snapshot.</summary>
     /// <param name="canonical">Borrowed canonical store whose snapshot format is verified before installation.</param>
     /// <param name="log">Borrowed durable replica log publishing the verified snapshot cut.</param>
     /// <param name="configurationOptions">Centrally validated snapshot scope, private directory and transfer limits.</param>
+    /// <param name="executionOptions">Centrally validated replica IO budgets.</param>
     /// <param name="faultObserver">Optional observer invoked at durable transfer and installation boundaries.</param>
     public ReplicaSnapshotStore(IAtomicStore canonical, IDurableReplicaLog log, IOptions<ReplicaConfiguration> configurationOptions,
-        Action<ReplicaCrashBoundary>? faultObserver = null)
+        IOptions<ReplicaExecutionOptions> executionOptions, Action<ReplicaCrashBoundary>? faultObserver = null)
     {
         ArgumentNullException.ThrowIfNull(canonical);
         ArgumentNullException.ThrowIfNull(log);
@@ -29,11 +36,12 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
         this.canonical = canonical;
         this.log = log;
         this.faultObserver = faultObserver;
-        files = new(configuration);
+        files = new(configurationOptions, executionOptions);
+        incoming = new(files, configurationOptions, faultObserver);
     }
     /// <inheritdoc />
     public ReplicaSnapshot? Current => log.State.Snapshot;
-    private ReplicaIncomingTransfer Incoming => new(files, configuration, faultObserver);
+    private ReplicaIncomingTransfer Incoming => incoming;
 
     /// <inheritdoc />
     public void Recover()
@@ -48,7 +56,7 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
             }
             Incoming.Recover(canonical, Current, Complete);
             var applied = ReplicaPersistence.AppliedPosition(canonical);
-            if (applied > log.State.CommittedIndex || applied < (Current?.Index ?? 0))
+            if (applied > log.State.CommittedIndex || applied < (Current?.Index ?? BeforeFirstLogPosition))
             {
                 throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaPersistence.CanonicalAhead);
             }
@@ -71,12 +79,12 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
         lock (gate)
         {
             ValidateScope();
-            if (index <= 0 || index > log.State.CommittedIndex || log.TermAt(index) != term)
+            if (index <= BeforeFirstLogPosition || index > log.State.CommittedIndex || log.TermAt(index) != term)
             {
                 throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
             }
             var transferId = Guid.NewGuid();
-            var candidate = new ReplicaSnapshot(transferId, configuration.Incarnation, index, term, 1,
+            var candidate = new ReplicaSnapshot(transferId, configuration.Incarnation, index, term, PendingSnapshotLength,
                 string.Empty, transferId.ToString(ReplicaPersistence.GuidFormat) + ReplicaProtocol.SnapshotExtension);
             var temporary = files.TemporaryPath(candidate);
             try
@@ -85,7 +93,7 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
                 var snapshot = files.Describe(temporary, transferId, index, term);
                 ReplicaPersistence.ValidateSnapshot(snapshot, configuration);
                 ReplicaPersistence.VerifyImage(canonical, temporary, snapshot);
-                using (var image = ReplicaSnapshotFiles.OpenPrivate(temporary, FileMode.Open))
+                using (var image = files.OpenPrivate(temporary, FileMode.Open))
                 { image.Flush(true); }
                 File.Move(temporary, files.ImagePath(snapshot));
                 log.PublishSnapshot(snapshot);
@@ -168,7 +176,7 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
     private void ValidateCut(ReplicaSnapshot snapshot)
     {
         var state = log.State;
-        if (snapshot.Index < ReplicaPersistence.AppliedPosition(canonical) || snapshot.Index < (state.Snapshot?.Index ?? 0)
+        if (snapshot.Index < ReplicaPersistence.AppliedPosition(canonical) || snapshot.Index < (state.Snapshot?.Index ?? BeforeFirstLogPosition)
             || snapshot.Index <= state.CommittedIndex && log.TermAt(snapshot.Index) != snapshot.Term)
         {
             throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
@@ -194,7 +202,7 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
             {
                 throw Errors.Fail(ErrorCode.NotFound, ReplicaProtocol.SnapshotUnavailable);
             }
-            if (offset < 0 || offset > snapshot.Length || maxBytes < 1 || maxBytes > configuration.SnapshotChunkBytes)
+            if (offset < BeforeFirstTransferByte || offset > snapshot.Length || maxBytes < MinimumChunkLength || maxBytes > configuration.SnapshotChunkBytes)
             {
                 throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidSnapshot);
             }

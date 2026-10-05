@@ -31,7 +31,7 @@ internal sealed record McpDocumentScenario(PartitionRef Partition)
         var partition = new PartitionRef(McpDocumentProtocol.TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
             McpDocumentProtocol.Database, McpDocumentProtocol.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var definition = new ResourceDefinition(McpDocumentProtocol.Collection, ResourceKind.Collection, partition.TransactionDomainId)
         { FieldPolicies = policies };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
@@ -55,7 +55,7 @@ internal sealed record McpDocumentScenario(PartitionRef Partition)
     internal async Task SeedAsync(ClusterFixture fixture, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey).CommitAsync(
+        await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution()).CommitAsync(
             Command(Guid.NewGuid()), cancellationToken));
     }
 }

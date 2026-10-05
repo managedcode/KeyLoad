@@ -7,6 +7,9 @@ namespace KeyLoad.Features.InternalSerialization;
 // allocating the JSON output, including repeated strings shared between otherwise distinct nodes.
 internal sealed class NativeDomPreflight
 {
+    private const int RootDepth = 0;
+    private const int EmptyItemCount = 0;
+    private const int UnseparatedFirstItem = 1;
     private const int ContainerBytes = 2;
     private const int SeparatorBytes = 1;
     private const int StringFramingBytes = 2;
@@ -20,7 +23,7 @@ internal sealed class NativeDomPreflight
     private long bytes;
     private int work;
 
-    internal static void Validate(JsonTreeNode? root) => new NativeDomPreflight().Visit(root, 0);
+    internal static void Validate(JsonTreeNode? root) => new NativeDomPreflight().Visit(root, RootDepth);
 
     private void Visit(JsonTreeNode? node, int depth)
     {
@@ -59,7 +62,7 @@ internal sealed class NativeDomPreflight
 
     private void VisitArray(JsonTreeNode[] items, int depth)
     {
-        Charge(ContainerBytes + (long)Math.Max(0, items.Length - 1) * SeparatorBytes);
+        Charge(ContainerBytes + (long)Math.Max(EmptyItemCount, items.Length - UnseparatedFirstItem) * SeparatorBytes);
         foreach (var item in items)
         {
             Visit(item, depth);
@@ -68,7 +71,7 @@ internal sealed class NativeDomPreflight
 
     private void VisitObject(JsonTreeProperty[] properties, int depth)
     {
-        Charge(ContainerBytes + (long)Math.Max(0, properties.Length - 1) * SeparatorBytes);
+        Charge(ContainerBytes + (long)Math.Max(EmptyItemCount, properties.Length - UnseparatedFirstItem) * SeparatorBytes);
         foreach (var property in properties)
         {
             ChargeWork();

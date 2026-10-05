@@ -23,7 +23,7 @@ internal sealed class ReplicaTermMetadataBoundsTests
             var sourceStore = fixture.Own(new ZoneTreeStore(new ZoneTreeStoreOptions(sourceDirectory)
             {
                 Incarnation = fixture.Configuration.Incarnation
-            }));
+            }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
             var snapshot = ReplicaTermMetadataFixture.CreateVerifiedSnapshot(fixture, sourceStore,
                 fixture.Configuration with { Directory = sourceDirectory });
             fixture.Log.PublishSnapshot(snapshot);
@@ -46,7 +46,7 @@ internal sealed class ReplicaTermMetadataBoundsTests
             var sourceStore = fixture.Own(new ZoneTreeStore(new ZoneTreeStoreOptions(sourceDirectory)
             {
                 Incarnation = fixture.Configuration.Incarnation
-            }));
+            }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
             var verified = ReplicaTermMetadataFixture.CreateVerifiedSnapshot(fixture, sourceStore,
                 fixture.Configuration with { Directory = sourceDirectory });
             var invalid = verified with { Term = 0 };

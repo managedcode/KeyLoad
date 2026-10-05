@@ -15,7 +15,7 @@ internal static class NativeWireWalk
         // Scalar/value fields and references advance native reference IDs without becoming targets.
         var references = new List<Type?> { null, typeof(NativePayload), null };
         Consume(ref reader, root, root.FieldType, frames, references);
-        while (frames.Count > 0)
+        while (frames.Count > NativeWireIdentities.EmptyFrameCount)
         {
             var field = NativeFieldHeaderReader.Read(ref reader);
             var frame = frames.Peek();
@@ -59,7 +59,7 @@ internal static class NativeWireWalk
         references.Add(ReferenceTarget(field, actual));
         if (field.WireType == WireType.TagDelimited)
         {
-            NativeWireCheck.Require(frames.Count + 2 <= NativeSerializationLimits.WireDepth);
+            NativeWireCheck.Require(frames.Count + NativeWireIdentities.EnvelopeAndValueDepth <= NativeSerializationLimits.WireDepth);
             frames.Push(new NativeWireFrame(actual));
             return;
         }
@@ -82,8 +82,8 @@ internal static class NativeWireWalk
     private static void ConsumeReference<TInput>(ref Reader<TInput> reader, Type? expected, List<Type?> references)
     {
         var target = reader.ReadVarUInt32();
-        NativeWireCheck.Require(target == 0 || target < references.Count && references[(int)target] is not null);
-        if (target > 0 && expected is not null)
+        NativeWireCheck.Require(target == NativeWireIdentities.NullReferenceId || target < references.Count && references[(int)target] is not null);
+        if (target > NativeWireIdentities.NullReferenceId && expected is not null)
         {
             NativeWireCheck.Require(Nullable.GetUnderlyingType(expected) is null);
             NativeWireCheck.Require(references[(int)target] != typeof(OpaqueReference)
@@ -100,12 +100,12 @@ internal static class NativeWireWalk
                 _ = reader.ReadVarUInt64();
                 break;
             case WireType.Fixed32:
-                reader.EnsureAvailable(4);
-                reader.Skip(4);
+                reader.EnsureAvailable(NativeWireIdentities.Fixed32Bytes);
+                reader.Skip(NativeWireIdentities.Fixed32Bytes);
                 break;
             case WireType.Fixed64:
-                reader.EnsureAvailable(8);
-                reader.Skip(8);
+                reader.EnsureAvailable(NativeWireIdentities.Fixed64Bytes);
+                reader.Skip(NativeWireIdentities.Fixed64Bytes);
                 break;
             case WireType.LengthPrefixed:
                 ConsumeBytes(ref reader, type);

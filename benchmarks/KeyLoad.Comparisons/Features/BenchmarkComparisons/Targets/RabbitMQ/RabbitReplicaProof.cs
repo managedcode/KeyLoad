@@ -1,19 +1,17 @@
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal static class RabbitReplicaProof
 {
-    private const int ReadinessTimeoutSeconds = 60;
-
-    private const int PollMilliseconds = 250;
-    private static readonly TimeSpan ReadinessTimeout = TimeSpan.FromSeconds(ReadinessTimeoutSeconds);
-
     public static async Task<(string Version, ClusterEvidence Evidence)> VerifyAsync(HttpClient management,
-        string queue, ComparisonTopology topology, CancellationToken cancellationToken)
+        string queue, ComparisonTopology topology, CancellationToken cancellationToken,
+        IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     {
+        var lifecycle = lifecycleOptions.Value;
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(ReadinessTimeout);
+        deadline.CancelAfter(lifecycle.ReadinessTimeout);
         while (true)
         {
             try
@@ -27,7 +25,7 @@ internal static class RabbitReplicaProof
             catch (HttpRequestException) when (!deadline.IsCancellationRequested) { }
             catch (JsonException) when (!deadline.IsCancellationRequested) { }
             try
-            { await Task.Delay(PollMilliseconds, deadline.Token); }
+            { await Task.Delay(lifecycle.HttpReadinessPollInterval, deadline.Token); }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             { throw new ComparisonFailureException("RabbitReplicaReadinessTimeout"); }
         }

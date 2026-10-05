@@ -1,14 +1,12 @@
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal static class KeyLoadFailureDiagnostics
 {
-    private const int ObservationDeadlineSeconds = 2;
-
     private const string FailureCode = "KeyLoad:ResourceExhausted";
     private const string SetupPrefix = "setup:";
-    private static readonly TimeSpan ObservationDeadline = TimeSpan.FromSeconds(ObservationDeadlineSeconds);
 
     internal static bool IsEligible(ComparisonCase failed)
     {
@@ -50,10 +48,9 @@ internal static class KeyLoadFailureDiagnostics
     internal static bool IsRecoverableOutputFailure(Exception error)
         => error is IOException or InvalidOperationException or ArgumentException or NotSupportedException;
 
-    internal static TimeSpan Deadline => ObservationDeadline;
-
     internal static async Task ObserveAsync(global::KeyLoad.Client.KeyLoadClient client,
-        global::KeyLoad.PartitionRef partition, ComparisonCase failed, CancellationToken cancellationToken)
+        global::KeyLoad.PartitionRef partition, ComparisonCase failed, CancellationToken cancellationToken,
+        IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(partition);
@@ -67,7 +64,7 @@ internal static class KeyLoadFailureDiagnostics
         if (!cancellationToken.IsCancellationRequested)
         {
             using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            deadline.CancelAfter(Deadline);
+            deadline.CancelAfter(lifecycleOptions.Value.FailureObservationTimeout);
             try
             {
                 var result = await client.OutboxStatusAsync(partition, deadline.Token).ConfigureAwait(false);
@@ -90,5 +87,5 @@ public sealed partial class KeyLoadTarget : IComparisonFailureDiagnostics
 {
     /// <inheritdoc />
     Task IComparisonFailureDiagnostics.ObserveFailureAsync(ComparisonCase failed, CancellationToken cancellationToken)
-        => KeyLoadFailureDiagnostics.ObserveAsync(client, partition, failed, cancellationToken);
+        => KeyLoadFailureDiagnostics.ObserveAsync(client, partition, failed, cancellationToken, lifecycleOptions);
 }

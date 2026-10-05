@@ -199,7 +199,7 @@ internal static class NativeTextProjectionRecoveryAssertions
     {
         await AssertAuthorityFilesUnchangedAsync(source, receipt, cancellationToken);
         var indexDirectory = Path.Combine(source, "search-indexes");
-        using (var store = new ZoneTreeStore(new(source)))
+        using (var store = new ZoneTreeStore(new(source), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()))
         {
             await AssertCanonicalCutAsync(store, receipt);
             var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());

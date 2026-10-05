@@ -21,7 +21,7 @@ internal sealed class QueryAdapterContractTests
             new(), true, first.Cursor));
         var second = engine.ExecuteAst("root", json);
         await Assert.That(System.Linq.Enumerable.Single(second.Rows).EntityId).IsEqualTo("b");
-        var builder = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").Where(row => row.Number >= 2m)
+        var builder = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Where(row => row.Number >= 2m)
             .OrderBy(row => QueryFunctions.DocumentId(row)).Select(row => new { Id = QueryFunctions.DocumentId(row), row.Number }).Take(1);
         var third = engine.ExecuteAst("root", QueryAdapterTestSupport.RoundTrip(builder.ToRequest(true, second.Cursor)));
         await Assert.That(System.Linq.Enumerable.Single(third.Rows).EntityId).IsEqualTo("c");
@@ -37,13 +37,13 @@ internal sealed class QueryAdapterContractTests
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("reader", "tenant",
             [new("database", "orders", Capability.Query | Capability.DocumentsRead)], []))).Get<PrincipalRecord>();
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
-        var filter = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").Where(row => row.Secret == "CANARY").ToRequest(true);
-        var sort = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").OrderBy(row => row.Secret).ToRequest(true);
+        var filter = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Where(row => row.Secret == "CANARY").ToRequest(true);
+        var sort = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).OrderBy(row => row.Secret).ToRequest(true);
         foreach (var query in new[] { filter, sort })
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("reader", QueryAdapterTestSupport.RoundTrip(query))).Code).IsEqualTo(ErrorCode.PermissionDenied);
         }
-        var safe = engine.ExecuteAst("reader", QueryAdapterTestSupport.RoundTrip(KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").ToRequest(true)));
+        var safe = engine.ExecuteAst("reader", QueryAdapterTestSupport.RoundTrip(KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).ToRequest(true)));
         var sql = engine.Execute("reader", new(db.Partition, "SELECT * FROM orders", AllowFullScan: true));
         await QueryAdapterTestSupport.SameRows(sql, safe);
         await Assert.That(System.Linq.Enumerable.Single(safe.Rows).Json).DoesNotContain("CANARY");
@@ -60,7 +60,7 @@ internal sealed class QueryAdapterContractTests
         var set = new[] { "open", "hold" };
         Expression<Func<QueryAdapterOrder, bool>> filter = row => set.Contains(row.Status)
             && (QueryFunctions.IsMissing(row.Optional) || QueryFunctions.IsNull(row.Optional));
-        var query = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").Where(filter).OrderBy(row => QueryFunctions.DocumentId(row));
+        var query = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Where(filter).OrderBy(row => QueryFunctions.DocumentId(row));
         var actual = engine.ExecuteAst("root", QueryAdapterTestSupport.RoundTrip(query.ToRequest(true)));
         var sql = engine.Execute("root", new(db.Partition, "SELECT * FROM orders WHERE status IN ('open','hold') AND (n IS MISSING OR n IS NULL) ORDER BY id", AllowFullScan: true));
         await QueryAdapterTestSupport.SameRows(sql, actual);
@@ -70,7 +70,7 @@ internal sealed class QueryAdapterContractTests
     [Test]
     public async Task UnsupportedExpressionsNeverInvokeApplicationGettersOrDelegates()
     {
-        var query = KeyLoadQuery.From<QueryAdapterOrder>(new("tenant", "database", "domain", QueryAdapterTestTokens.Partition), "orders");
+        var query = KeyLoadQuery.From<QueryAdapterOrder>(new("tenant", "database", "domain", QueryAdapterTestTokens.Partition), "orders", UnitClientOptions.Translation());
         var constant = new QueryAdapterUnsafeConstant();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => query.Where(row => row.Status == constant.Value)).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(constant.Calls).IsEqualTo(0);
@@ -81,7 +81,7 @@ internal sealed class QueryAdapterContractTests
     [Test]
     public async Task BuilderBranchesHaveIndependentQueryContexts()
     {
-        var original = KeyLoadQuery.From<QueryAdapterOrder>(new("tenant", "database", "domain", QueryAdapterTestTokens.Partition), "orders");
+        var original = KeyLoadQuery.From<QueryAdapterOrder>(new("tenant", "database", "domain", QueryAdapterTestTokens.Partition), "orders", UnitClientOptions.Translation());
         var a = original.Where(row => row.Number > 3m).OrderBy(row => row.Number).Take(1);
         var b = original.Where(row => row.Status == "open").OrderByDescending(row => row.Status).Take(2);
         await Assert.That(original.ToRequest().Query.Filter).IsNull();

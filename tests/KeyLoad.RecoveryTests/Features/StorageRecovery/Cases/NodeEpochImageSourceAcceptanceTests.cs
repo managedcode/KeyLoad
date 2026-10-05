@@ -37,9 +37,9 @@ internal sealed class NodeEpochImageSourceAcceptanceTests
 
         var oldReader = await EpochPriorExecutableFixture.VerifySnapshotAsync(source, image, cancellationToken, dataEpoch);
         await AssertPriorReaderAsync(prior, oldReader);
-        var snapshot = ZoneTreeSnapshotFormatUpgrade.VerifySource(image, prior.Incarnation, dataEpoch);
+        var snapshot = ZoneTreeSnapshotFormatUpgrade.VerifySource(image, prior.Incarnation, dataEpoch, RecoveryExecutionOptions.StorageExecution());
         await AssertCurrentReader(prior, snapshot);
-        var convertedSnapshot = ZoneTreeSnapshotFormatUpgrade.Upgrade(image, converted, prior.Incarnation, dataEpoch);
+        var convertedSnapshot = ZoneTreeSnapshotFormatUpgrade.Upgrade(image, converted, prior.Incarnation, dataEpoch, RecoveryExecutionOptions.StorageExecution());
         await AssertCurrentReader(prior, convertedSnapshot);
         await AssertCurrentFileReader(root, converted, prior);
         var oldReaderRejectsCurrent = await EpochPriorExecutableFixture.VerifySnapshotAsync(source, converted,
@@ -74,7 +74,7 @@ internal sealed class NodeEpochImageSourceAcceptanceTests
     private static async Task AssertCurrentFileReader(string root, string path, EpochPriorProbeReceipt expected)
     {
         using var store = new ZoneTreeStore(new(Path.Combine(root, "current-verifier"))
-        { Incarnation = expected.Incarnation });
+        { Incarnation = expected.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var actual = store.VerifySnapshot(path);
         await AssertCurrentReader(expected, actual);
         _ = store.InstallSnapshot(path, expected.AppliedPosition);

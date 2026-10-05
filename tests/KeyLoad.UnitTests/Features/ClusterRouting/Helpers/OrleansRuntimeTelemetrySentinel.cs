@@ -6,7 +6,8 @@ internal enum OrleansRuntimeTelemetryMutation
 {
     Event,
     Baggage,
-    Link
+    Link,
+    ErrorStatus
 }
 
 internal sealed class OrleansRuntimeTelemetrySentinel : IDisposable
@@ -61,6 +62,9 @@ internal sealed class OrleansRuntimeTelemetrySentinel : IDisposable
                 var context = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(),
                     ActivityTraceFlags.Recorded);
                 activity.AddLink(new(context));
+                break;
+            case OrleansRuntimeTelemetryMutation.ErrorStatus:
+                activity.SetStatus(ActivityStatusCode.Error, OrleansRuntimeTelemetryTokens.SentinelValue);
                 break;
         }
     }

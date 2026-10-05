@@ -49,7 +49,7 @@ public static class KeyLoadServiceDefaultsExtensions
                 .AddHttpClientInstrumentation()
                 .AddSource(OrleansTelemetryPolicy.ApplicationActivitySourceName,
                     OrleansTelemetryPolicy.LifecycleActivitySourceName)
-                .AddProcessor(serviceProvider => ActivatorUtilities.CreateInstance<OrleansTelemetryPrivacyProcessor>(serviceProvider)));
+                .AddProcessor<OrleansTelemetryPrivacyProcessor>());
         builder.Logging.AddOpenTelemetry(options => { options.IncludeFormattedMessage = true; options.IncludeScopes = true; });
         if (!string.IsNullOrEmpty(builder.Configuration[OtlpExporterEndpointConfigurationKey]))
         {

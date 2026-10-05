@@ -17,7 +17,7 @@ internal sealed class MetadataBackupFixture : IDisposable
     {
         try
         {
-            using var store = new ZoneTreeStore(new(SourceDirectory));
+            using var store = new ZoneTreeStore(new(SourceDirectory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             OriginalIdentity = store.Identity;
             store.Commit((transaction, _) =>
             {

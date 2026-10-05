@@ -5,6 +5,11 @@ namespace KeyLoad.Replication;
 
 internal static class ReplicaLogValidation
 {
+    private const int ExistenceProbeEntryCount = 1;
+    private const int EmptyEntryCount = 0;
+    private const int UnelectedTerm = 0;
+    private const int BeforeFirstLogPosition = 0;
+
     internal static ReplicaHardState Open(IAtomicStore store, ReplicaConfiguration configuration, DatabaseEngine? canonicalDatabase)
     {
         ArgumentNullException.ThrowIfNull(store);
@@ -21,11 +26,11 @@ internal static class ReplicaLogValidation
         var state = metadata.State is { } bytes ? ReplicaPersistence.Decode<ReplicaHardState>(bytes, configuration.MaxAppendEntries) : null;
         if (state is null)
         {
-            if (store.Read(view => view.Scan(KeyCodec.Encode(ReplicaProtocol.EntryKey), 1).Records.Length) != 0)
+            if (store.Read(view => view.Scan(KeyCodec.Encode(ReplicaProtocol.EntryKey), ExistenceProbeEntryCount).Records.Length) != EmptyEntryCount)
             {
                 throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
             }
-            state = new(ReplicaProtocol.FormatVersion, configuration.Incarnation, 0, null, 0, 0, null);
+            state = new(ReplicaProtocol.FormatVersion, configuration.Incarnation, UnelectedTerm, null, BeforeFirstLogPosition, BeforeFirstLogPosition, null);
             store.Commit((tx, _) =>
             {
                 tx.Put(ReplicaProtocol.StateStorageKey, ReplicaProtocolCodec.Serialize(state));
@@ -44,10 +49,10 @@ internal static class ReplicaLogValidation
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, ReplicaProtocol.UnsupportedFormat);
         }
-        var snapshotIndex = state.Snapshot?.Index ?? 0;
+        var snapshotIndex = state.Snapshot?.Index ?? BeforeFirstLogPosition;
         if (state.Incarnation != configuration.Incarnation
-            || state.Term < 0 || state.LastIndex < snapshotIndex || state.CommittedIndex < snapshotIndex
-            || state.CommittedIndex > state.LastIndex || state.Term == 0 && (state.LastIndex != 0 || state.VotedFor is not null)
+            || state.Term < UnelectedTerm || state.LastIndex < snapshotIndex || state.CommittedIndex < snapshotIndex
+            || state.CommittedIndex > state.LastIndex || state.Term == UnelectedTerm && (state.LastIndex != BeforeFirstLogPosition || state.VotedFor is not null)
             || state.VotedFor is { } voter && !configuration.VoterIds.Contains(voter, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
@@ -70,8 +75,8 @@ internal static class ReplicaLogValidation
     private static void ValidateEntries(IAtomicStore store, ReplicaHardState state, ReplicaConfiguration configuration,
         DatabaseEngine? canonicalDatabase)
     {
-        var previousTerm = state.Snapshot?.Term ?? 0;
-        var index = state.Snapshot?.Index ?? 0;
+        var previousTerm = state.Snapshot?.Term ?? UnelectedTerm;
+        var index = state.Snapshot?.Index ?? BeforeFirstLogPosition;
         while (index < state.LastIndex)
         {
             index++;
@@ -81,7 +86,7 @@ internal static class ReplicaLogValidation
                 throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
             }
             var entry = ReplicaProtocolCodec.DeserializeStored<ReplicaEntry>(bytes, configuration.MaxAppendEntries);
-            if (entry.Index != index || entry.Term <= 0 || entry.Term > state.Term || entry.Term < previousTerm)
+            if (entry.Index != index || entry.Term <= UnelectedTerm || entry.Term > state.Term || entry.Term < previousTerm)
             {
                 throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
             }

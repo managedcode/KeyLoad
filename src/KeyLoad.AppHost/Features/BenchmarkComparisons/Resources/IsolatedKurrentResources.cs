@@ -27,6 +27,10 @@ internal static class IsolatedKurrentResources
 
     internal static void Add(IsolatedResourceContext context)
     {
+        const int StartValue = 1;
+        const int IndexInitialValue = 0;
+        const char SeparatorCharacter = ',';
+
         ArgumentNullException.ThrowIfNull(context);
         context.Selection.Validate();
         if (context.Selection.Target != Target)
@@ -34,9 +38,9 @@ internal static class IsolatedKurrentResources
             throw new InvalidOperationException(InvalidSelection);
         }
         var cell = Guid.NewGuid().ToString(GuidFormat);
-        var names = Enumerable.Range(1, context.Selection.NodeCount)
+        var names = Enumerable.Range(StartValue, context.Selection.NodeCount)
             .Select(index => NodePrefix + index.ToString(CultureInfo.InvariantCulture)).ToArray();
-        for (var index = 0; index < names.Length; index++)
+        for (var index = IndexInitialValue; index < names.Length; index++)
         {
             var name = names[index];
             var node = context.Builder.AddContainer(name, Image, Tag).WithImageSHA256(BenchmarkResources.KurrentDigest[DigestPrefixLength..])
@@ -46,7 +50,7 @@ internal static class IsolatedKurrentResources
             context.BindEndpoint(index, node, Http);
         }
         context.BindSetting(Connection, ConnectionPrefix +
-            string.Join(',', names.Select(name => IsolatedKurrentSettings.NativeHost(name) + NodePort)) + ConnectionOptions);
+            string.Join(SeparatorCharacter, names.Select(name => IsolatedKurrentSettings.NativeHost(name) + NodePort)) + ConnectionOptions);
         context.BindImage(Registry + Image + TagSeparator + Tag + DigestSeparator + BenchmarkResources.KurrentDigest);
     }
 }

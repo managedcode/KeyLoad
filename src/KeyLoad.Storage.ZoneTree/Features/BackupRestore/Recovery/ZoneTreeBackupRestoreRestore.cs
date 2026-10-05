@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Microsoft.Extensions.Options;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
@@ -7,9 +8,13 @@ internal static class ZoneTreeBackupRestoreRestore
 {
     private const string RestoreTemporaryPrefix = ".keyload-restore-";
 
-    internal static StoreIdentity Restore(string backup, string destination, Guid? newIncarnation,
-        byte[]? newSigningKey)
+    internal static StoreIdentity Restore(string backup, string destination,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid? newIncarnation, byte[]? newSigningKey)
     {
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        var policy = executionOptions.Value;
+        ArgumentNullException.ThrowIfNull(policy);
+        policy.Validate();
         EnsureDestinationIsEmpty(destination);
         var destinationPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(destination));
         var staging = Path.Combine(Path.GetDirectoryName(destinationPath)!,
@@ -17,10 +22,10 @@ internal static class ZoneTreeBackupRestoreRestore
         ZoneTreeStoreFiles.CreatePrivateDirectory(staging);
         try
         {
-            var identity = CreateRestoredIdentity(ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, staging),
+            var identity = CreateRestoredIdentity(ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, staging, policy),
                 newIncarnation, newSigningKey);
             ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), identity);
-            var restoredIdentity = ApplyRestoreAuthorityState(staging);
+            var restoredIdentity = ApplyRestoreAuthorityState(staging, policy);
             Publish(staging, destinationPath);
             return restoredIdentity;
         }
@@ -75,9 +80,10 @@ internal static class ZoneTreeBackupRestoreRestore
         };
     }
 
-    private static StoreIdentity ApplyRestoreAuthorityState(string destination)
+    private static StoreIdentity ApplyRestoreAuthorityState(string destination, ZoneTreeStorageExecutionOptions policy)
     {
-        using var restored = new ZoneTreeStore(new(destination));
+        var runtime = new ZoneTreeStoreRuntime(new ZoneTreeStoreOptions(destination).WithExecutionSnapshot(policy));
+        using var restored = new ZoneTreeStore(runtime, runtime.Identity.NodeId);
         restored.Commit((tx, _) =>
         {
             tx.Delete(KeyCodec.Encode(SystemNamespace, LastAppliedKey));

@@ -6,6 +6,8 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeReadCutLease : IDisposable
 {
+    private const int ValueMarkerOffset = 0;
+
     private const string InvalidValueHeaderMessage = "A native read-cut contains an invalid value header.";
     private readonly Action<ZoneTreeReadCutLease> release;
     private readonly CancellationTokenSource cancellation;
@@ -117,7 +119,7 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
 
             var rawValue = source.CurrentValue;
             work.ChargeRecord(key.Length, rawValue.Length, CancellationToken);
-            if (rawValue.IsEmpty || rawValue.Span[0] != LiveValueMarker)
+            if (rawValue.IsEmpty || rawValue.Span[ValueMarkerOffset] != LiveValueMarker)
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidValueHeaderMessage);
             }

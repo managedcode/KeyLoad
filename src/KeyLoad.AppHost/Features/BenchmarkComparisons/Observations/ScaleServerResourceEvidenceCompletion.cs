@@ -1,10 +1,12 @@
+using Microsoft.Extensions.Options;
 using System.Runtime.ExceptionServices;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
-internal sealed class ScaleServerResourceEvidenceCompletion
+internal sealed class ScaleServerResourceEvidenceCompletion(IOptions<ScaleServerResourceOptions> options)
 {
+    private readonly TimeSpan cleanupThreshold = options.Value.CleanupThreshold;
     private readonly Lock sync = new();
     private Task? original;
     private Task? completion;
@@ -12,16 +14,19 @@ internal sealed class ScaleServerResourceEvidenceCompletion
     internal Task CompleteAsync(Task observation, Task? expected, Func<Task> cancel,
         Action markMissing, Action dispose, Func<Task> write)
     {
+        const string MessageText = "The original server resource observation is required.";
+        const string CompleteAsyncMessageText = "A different server resource observation was supplied.";
+
         lock (sync)
         {
             if (expected is null || !ReferenceEquals(observation, expected))
             {
-                return Task.FromException(new InvalidOperationException("The original server resource observation is required."));
+                return Task.FromException(new InvalidOperationException(MessageText));
             }
 
             if (original is not null && !ReferenceEquals(original, observation))
             {
-                return Task.FromException(new InvalidOperationException("A different server resource observation was supplied."));
+                return Task.FromException(new InvalidOperationException(CompleteAsyncMessageText));
             }
 
             original = observation;
@@ -29,7 +34,7 @@ internal sealed class ScaleServerResourceEvidenceCompletion
         }
     }
 
-    private static async Task SettleAsync(Task observation, Func<Task> cancel,
+    private async Task SettleAsync(Task observation, Func<Task> cancel,
         Action markMissing, Action dispose, Func<Task> write)
     {
         var failures = new List<Exception>();
@@ -48,14 +53,14 @@ internal sealed class ScaleServerResourceEvidenceCompletion
         catch (Exception failure) when (HasFatal(failure)) { failures.Add(failure); }
     }
 
-    private static async Task JoinAsync(Task observation, Action markMissing, List<Exception> failures)
+    private async Task JoinAsync(Task observation, Action markMissing, List<Exception> failures)
     {
         CancellationTokenSource? thresholdCancellation = null;
         Task? threshold = null;
         try
         {
             thresholdCancellation = new CancellationTokenSource();
-            threshold = Task.Delay(TimeSpan.FromSeconds(ScaleServerResourceBounds.CleanupSeconds), thresholdCancellation.Token);
+            threshold = Task.Delay(cleanupThreshold, thresholdCancellation.Token);
             if (await Task.WhenAny(observation, threshold) != observation)
             {
                 Attempt(markMissing, failures);
@@ -141,12 +146,16 @@ internal sealed class ScaleServerResourceEvidenceCompletion
 
     private static void ThrowFailures(List<Exception> failures)
     {
-        if (failures.Count == 1)
+        const int SingleFailureCount = 1;
+        const int IndexValue = 0;
+        const int BoundaryValue = 1;
+
+        if (failures.Count == SingleFailureCount)
         {
-            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+            ExceptionDispatchInfo.Capture(failures[IndexValue]).Throw();
         }
 
-        if (failures.Count > 1)
+        if (failures.Count > BoundaryValue)
         {
             throw new AggregateException(failures);
         }

@@ -29,7 +29,7 @@ internal sealed class SqlRf3BlobParityTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await RelationalSqlRf3Scenario.CreateAsync(sdk, deadline.Token);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, fixture.AdminKey, deadline.Token);
         var request = new BlobMetadataRequest(new(scenario.Partition, RelationalSqlRf3Tokens.Blobs, RelationalSqlRf3Tokens.BlobId));
@@ -51,7 +51,7 @@ internal sealed class SqlRf3BlobParityTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await RelationalSqlRf3Scenario.CreateAsync(sdk, deadline.Token);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, fixture.AdminKey, deadline.Token);
         var blob = new BlobRef(scenario.Partition, RelationalSqlRf3Tokens.Blobs, RelationalSqlRf3Tokens.BlobId);

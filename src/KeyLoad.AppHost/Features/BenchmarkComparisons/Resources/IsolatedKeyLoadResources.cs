@@ -13,6 +13,8 @@ internal static class IsolatedKeyLoadResources
 
     internal static void Add(IsolatedResourceContext context)
     {
+        const int IndexInitialValue = 0;
+
         ArgumentNullException.ThrowIfNull(context);
         context.Selection.Validate();
         if (context.Selection.Target != Target)
@@ -28,7 +30,7 @@ internal static class IsolatedKeyLoadResources
             .Single(parameter => parameter.Name == AdminParameter));
         context.Runner.WithEnvironment(AdminEnvironment, admin);
         context.BindImage(image.Reference);
-        for (var index = 0; index < nodes.Length; index++)
+        for (var index = IndexInitialValue; index < nodes.Length; index++)
         {
             IsolatedKeyLoadAdmission.Apply(nodes[index]);
             context.BindEndpoint(index, nodes[index], HttpEndpoint);

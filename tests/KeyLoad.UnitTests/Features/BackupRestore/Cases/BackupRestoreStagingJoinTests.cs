@@ -42,7 +42,7 @@ internal sealed class BackupRestoreStagingJoinTests
         }
         var requestedDestination = trailingSeparator
             ? fixture.Destination + Path.DirectorySeparatorChar : fixture.Destination;
-        var identity = ZoneTreeStore.Restore(fixture.Backup, requestedDestination);
+        var identity = ZoneTreeStore.Restore(fixture.Backup, requestedDestination, UnitExecutionOptions.StorageExecution());
         await AssertRestoredDataAsync(fixture, identity);
         await AssertPublishedDirectoryAsync(fixture);
         await AssertBackupUnchangedAsync(fixture.Backup, original);
@@ -54,7 +54,7 @@ internal sealed class BackupRestoreStagingJoinTests
         await Assert.That(identity.Incarnation).IsNotEqualTo(fixture.Identity.Incarnation);
         await Assert.That(identity.SigningKey.Span.SequenceEqual(fixture.Identity.SigningKey.Span)).IsFalse();
         await Assert.That(identity.DispatchPaused).IsTrue();
-        using var restored = new ZoneTreeStore(new(fixture.Destination));
+        using var restored = new ZoneTreeStore(new(fixture.Destination), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(restored.Position).IsEqualTo(fixture.Position + RestoreAuthorityCommits);
         await Assert.That(restored.Read(view => NativeSerialization.Deserialize<string>(
                 view.ReadOwnedValue(MetadataBackupFixture.StoredKeyBytes)!)))

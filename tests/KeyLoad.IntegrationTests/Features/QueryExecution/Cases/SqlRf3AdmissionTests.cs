@@ -45,7 +45,7 @@ internal sealed class SqlRf3AdmissionTests
         CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, node);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, cancellationToken);
         await VerifySdkRejectionAsync(http, sdk, fixture.AdminKey, partition, cancellationToken);
         await VerifyOfficialRejectionAsync(mcp, partition, cancellationToken);

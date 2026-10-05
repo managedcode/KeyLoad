@@ -33,7 +33,7 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
             { ClusterAdministrator = true }, DatabaseEngine.Credential(Principal, Principal,
                     Convert.ToHexString(RandomNumberGenerator.GetBytes(CredentialBytes))));
             RecoveryPhysicalShardBootstrap.Bootstrap(Database, Principal, Configuration.VoterIds);
-            Materializer = openedMaterializer = new(Database, Log, new ReplicaSnapshotStore(stores.Canonical, Log, RecoveryExecutionOptions.Configuration(Configuration)), RecoveryExecutionOptions.Replica());
+            Materializer = openedMaterializer = new(Database, Log, new ReplicaSnapshotStore(stores.Canonical, Log, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica()), RecoveryExecutionOptions.Replica());
             Consensus = new(Materializer, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica(), TimeProvider.System);
         }
         catch (Exception error)

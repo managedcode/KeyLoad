@@ -8,17 +8,28 @@ internal static class TestSuiteResources
 {
     internal static void Add(IDistributedApplicationBuilder builder, TestSuiteSettings settings)
     {
-        var root = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "../.."));
-        if (!File.Exists(Path.Combine(root, "KeyLoad.slnx")))
+        const string Path2Text = "../..";
+        const string AddPath2Text = "KeyLoad.slnx";
+        const string MessageText = "The test AppHost must run from the KeyLoad source checkout.";
+        const string Path1Text = "TestResults";
+        const string CommandText = "dotnet";
+        const string EmptyText = "";
+        const string NameText = "KEYLOAD_LOCAL_RF3_IMAGE_CHILD";
+        const string ValueText = "true";
+        const string AddNameText = "KEYLOAD_IMAGE_RECEIPT";
+        const string AddValueText = "0";
+
+        var root = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, Path2Text));
+        if (!File.Exists(Path.Combine(root, AddPath2Text)))
         {
-            throw new InvalidOperationException("The test AppHost must run from the KeyLoad source checkout.");
+            throw new InvalidOperationException(MessageText);
         }
-        var resultsDirectory = ResolvePath(root, settings.ResultsDirectory ?? Path.Combine("TestResults", settings.Suite));
+        var resultsDirectory = ResolvePath(root, settings.ResultsDirectory ?? Path.Combine(Path1Text, settings.Suite));
         var arguments = BuildArguments(root, settings, resultsDirectory);
-        var runner = builder.AddExecutable(settings.ResourceName, "dotnet", root, arguments)
-            .WithEnvironment(TestSuiteSettings.SuiteEnvironment, "")
-            .WithEnvironment(TestSuiteSettings.ScaleProfileEnvironment, "")
-            .WithEnvironment(TestSuiteSettings.VectorProfileEnvironment, "");
+        var runner = builder.AddExecutable(settings.ResourceName, CommandText, root, arguments)
+            .WithEnvironment(TestSuiteSettings.SuiteEnvironment, EmptyText)
+            .WithEnvironment(TestSuiteSettings.ScaleProfileEnvironment, EmptyText)
+            .WithEnvironment(TestSuiteSettings.VectorProfileEnvironment, EmptyText);
         if (settings.LocalRf3ImageEnabled)
         {
             var execution = LocalRf3ImageExecution.Create(root);
@@ -27,9 +38,9 @@ internal static class TestSuiteResources
             runner.WithEnvironment(LocalRf3ImageExecution.ProvenanceEnvironment, LocalRf3ImageExecution.Provenance)
                 .WithEnvironment(LocalRf3ImageExecution.ImageReferenceEnvironment, execution.ImageReference)
                 .WithEnvironment(LocalRf3ImageExecution.ReceiptEnvironment, execution.ReceiptPath)
-                .WithEnvironment("KEYLOAD_LOCAL_RF3_IMAGE_CHILD", "true")
+                .WithEnvironment(NameText, ValueText)
                 .WithEnvironment(LocalRf3ImageRequest.EnabledEnvironment, string.Empty)
-                .WithEnvironment("KEYLOAD_IMAGE_RECEIPT", string.Empty)
+                .WithEnvironment(AddNameText, string.Empty)
                 .WithEnvironment("GITHUB_SHA", string.Empty)
                 .WithEnvironment("GITHUB_ACTIONS", string.Empty);
         }
@@ -56,25 +67,31 @@ internal static class TestSuiteResources
         }
         if (settings.Suite == TestSuiteProtocol.ScalarUnitSuite)
         {
-            runner.WithEnvironment("DOTNET_EnableHWIntrinsic", "0");
+            runner.WithEnvironment("DOTNET_EnableHWIntrinsic", AddValueText);
         }
     }
 
     private static string[] BuildArguments(string root, TestSuiteSettings settings, string resultsDirectory)
     {
+        const string ResultText = "test";
+        const string BuildArgumentsResultText = "--project";
+        const string Path2Text = "tests";
+        const string ItemText = "--report-trx";
+        const string BuildArgumentsItemText = "--coverage";
+
         var arguments = new List<string>
         {
-            "test", "--project", Path.Combine(root, "tests", settings.Project),
+            ResultText, BuildArgumentsResultText, Path.Combine(root, Path2Text, settings.Project),
             "--no-build", "--no-restore", "--configuration", "Release",
             "--results-directory", resultsDirectory
         };
         if (settings.ReportTrx)
         {
-            arguments.Add("--report-trx");
+            arguments.Add(ItemText);
         }
         if (settings.CoverageSettings is not null && settings.CoverageOutput is not null)
         {
-            arguments.Add("--coverage");
+            arguments.Add(BuildArgumentsItemText);
             arguments.Add("--coverage-settings");
             arguments.Add(ResolvePath(root, settings.CoverageSettings));
             arguments.Add("--coverage-output-format");

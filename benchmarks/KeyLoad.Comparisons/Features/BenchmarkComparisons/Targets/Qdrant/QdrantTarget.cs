@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -9,7 +9,6 @@ namespace KeyLoad.Comparisons.Targets;
 public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
 {
     private const string RunIdentityFormat = "N";
-    private const int CleanupTimeoutSeconds = 10;
 
     private const string CollectionPrefix = "keyload_benchmark_";
     private const string ResultProperty = "result";
@@ -28,10 +27,11 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     private bool collectionCreationAttempted;
     private int topK;
     private QdrantVectorOperations? vectorOperations;
-    private readonly IOptions<NativeComparisonExecutionOptions>? executionOptions;
+    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions;
+    private readonly IOptions<ComparisonLifecycleOptions> lifecycleOptions;
 
     private QdrantVectorOperations Vectors => vectorOperations ??= new(client, nodeClients, collection, image, topology,
-        executionOptions ?? throw new InvalidOperationException(QdrantVectorProtocol.MissingExecutionPolicy));
+        executionOptions, lifecycleOptions);
     string IVectorComparisonTarget.Name => QdrantVectorProtocol.TargetName;
     bool IVectorComparisonTarget.Supports(VectorIndexKind indexKind, VectorQueryMode queryMode)
         => indexKind is VectorIndexKind.Exact or VectorIndexKind.Hnsw && Enum.IsDefined(queryMode);
@@ -44,9 +44,12 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     async Task<VectorIndexReceipt> IVectorComparisonTarget.BuildIndexAsync(VectorComparisonProfile profile, CancellationToken token)
     {
         var receipt = await Vectors.BuildIndexAsync(profile, token);
-        Profile = Profile with { ReadContract = QdrantVectorProtocol.NativeReadPrefix + profile.IndexKind
+        Profile = Profile with
+        {
+            ReadContract = QdrantVectorProtocol.NativeReadPrefix + profile.IndexKind
             + QdrantVectorProtocol.CosineReadDescription + profile.QueryMode + QdrantVectorProtocol.PredicateReadDescription
-            + QdrantNativePolicy.ReadContract(topology) };
+            + QdrantNativePolicy.ReadContract(topology)
+        };
         return receipt;
     }
     IAsyncEnumerable<VectorReadback> IVectorComparisonTarget.ReadbackAsync(CancellationToken token) => Vectors.ReadbackAsync(token);
@@ -61,11 +64,18 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     /// <param name="http">The collection and query client; the target disposes it.</param>
     /// <param name="runId">Guid-formatted run identifier used to isolate the collection.</param>
     /// <param name="image">Qdrant image reference recorded after replica verification.</param>
+    /// <param name="executionOptions">Centrally registered native execution limits.</param>
+    /// <param name="lifecycleOptions">Centrally registered native lifecycle policy.</param>
     /// <param name="topology">The one-, two- or three-node native topology to configure and verify.</param>
     /// <param name="nodeClients">Optional clients for each Qdrant node used by replica verification; the target disposes distinct clients.</param>
     public QdrantTarget(HttpClient http, string runId, string image,
+        IOptions<NativeComparisonExecutionOptions> executionOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
         ComparisonTopology topology = ComparisonTopology.Standalone, HttpClient[]? nodeClients = null)
     {
+        ArgumentNullException.ThrowIfNull(lifecycleOptions);
+        lifecycleOptions.Value.Validate();
+        this.executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
+        this.lifecycleOptions = lifecycleOptions;
         client = http;
         this.image = image;
         this.topology = topology;
@@ -74,29 +84,17 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
         collection = CollectionPrefix + Guid.Parse(runId).ToString(RunIdentityFormat);
         this.nodeClients = nodeClients ?? [http];
         ownedClients = this.nodeClients.Prepend(http).Distinct<HttpClient>(ReferenceEqualityComparer.Instance).ToArray();
-        if (ownedClients.Length != this.nodeClients.Length + (this.nodeClients.Contains(http) ? 0 : 1))
+        if (ownedClients.Length != this.nodeClients.Length + (this.nodeClients.Contains(http)
+            ? QdrantControlProtocol.NoAdditionalClient : QdrantControlProtocol.OneAdditionalClient))
         {
-            throw new ComparisonFailureException("QdrantDuplicateClientOwnership");
+            throw new ComparisonFailureException(QdrantControlProtocol.DuplicateClientOwnership);
         }
     }
 
-    /// <summary>Creates a native target with centrally validated execution limits.</summary>
-    /// <param name="http">The collection HTTP client transferred to this target.</param>
-    /// <param name="runId">The isolated run identity.</param>
-    /// <param name="image">The pinned native image.</param>
-    /// <param name="topology">The actual native member topology.</param>
-    /// <param name="nodeClients">Clients for each configured native member.</param>
-    /// <param name="executionOptions">The centrally registered and validated execution policy.</param>
-    public QdrantTarget(HttpClient http, string runId, string image, ComparisonTopology topology,
-        HttpClient[]? nodeClients, IOptions<NativeComparisonExecutionOptions> executionOptions)
-        : this(http, runId, image, topology, nodeClients)
-    {
-        this.executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
-    }
-
     /// <summary>Gets the server version, native topology, write acknowledgement, exact-read, transport, and replica evidence.</summary>
-    public TargetProfile Profile { get; private set; } = new("Qdrant", "unverified", "unverified native topology",
-        "wait=true seed upserts; pre-timing copy verification", "exact=true query; seeded collection static during queries", "HTTP JSON", "Aspire API key; no row/field policy", null);
+    public TargetProfile Profile { get; private set; } = new(QdrantVectorProtocol.TargetName, QdrantVectorProtocol.Unverified,
+        QdrantControlProtocol.UnverifiedTopology, QdrantControlProtocol.InitialWriteContract,
+        QdrantControlProtocol.InitialReadContract, QdrantVectorProtocol.Transport, QdrantControlProtocol.Authentication, null);
     /// <summary>Reports support only for exact vector search.</summary>
     /// <param name="scenario">The comparison scenario to check.</param>
     /// <returns><see langword="true"/> only when <paramref name="scenario"/> is vector search.</returns>
@@ -111,19 +109,19 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
         ArgumentNullException.ThrowIfNull(corpus);
         if (corpus is not BenchmarkDataset dataset)
         {
-            throw new NotSupportedException("This target does not support the bounded scaled document corpus.");
+            throw new NotSupportedException(QdrantControlProtocol.UnsupportedDocumentCorpus);
         }
         topK = dataset.Options.TopK;
         QdrantReplicaProof.ValidateClients(nodeClients, topology);
         collectionCreationAttempted = true;
-        using (var create = await client.PutAsJsonAsync($"/collections/{collection}",
+        using (var create = await client.PutAsJsonAsync(QdrantVectorProtocol.CollectionPrefix + collection,
             QdrantNativePolicy.CreateCollection(dataset.Options.Dimensions, topology), cancellationToken))
         {
             create.EnsureSuccessStatusCode();
         }
 
         await SeedAsync(dataset, cancellationToken);
-        var proof = await QdrantReplicaProof.VerifyAsync(nodeClients, collection, dataset.Documents.Length, topology, cancellationToken);
+        var proof = await QdrantReplicaProof.VerifyAsync(nodeClients, collection, dataset.Documents.Length, topology, cancellationToken, lifecycleOptions);
         Profile = Profile with
         {
             Version = proof.Version,
@@ -137,15 +135,16 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
 
     private async Task SeedAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
     {
-        foreach (var batch in dataset.Documents.Chunk(64))
+        foreach (var batch in dataset.Documents.Chunk(executionOptions.Value.WriteBatchCapacity))
         {
             var points = batch.Select(document => new
             {
-                id = document.Number + 1,
+                id = document.Number + QdrantVectorProtocol.PointOrdinalOffset,
                 vector = document.Vector,
                 payload = new { id = document.Id, document = JsonSerializer.Deserialize<JsonElement>(document.Json) }
             });
-            using var response = await client.PutAsJsonAsync($"/collections/{collection}/points?wait=true{seedSuffix}",
+            using var response = await client.PutAsJsonAsync(QdrantVectorProtocol.CollectionPrefix + collection
+                + QdrantVectorProtocol.PointsPath + QdrantVectorProtocol.WaitForApply + seedSuffix,
                 new { points }, cancellationToken);
             response.EnsureSuccessStatusCode();
         }
@@ -161,7 +160,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     /// <returns>A value task that completes after collection cleanup and client disposal.</returns>
     public async ValueTask DisposeAsync()
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
+        using var timeout = new CancellationTokenSource(lifecycleOptions.Value.QdrantCleanupTimeout);
         try
         {
             if (vectorOperations is not null)
@@ -170,7 +169,8 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
             }
             if (collectionCreationAttempted)
             {
-                using var response = await client.DeleteAsync(new Uri($"/collections/{collection}", UriKind.RelativeOrAbsolute), timeout.Token);
+                using var response = await client.DeleteAsync(new Uri(QdrantVectorProtocol.CollectionPrefix + collection,
+                    UriKind.RelativeOrAbsolute), timeout.Token);
             }
         }
         finally
@@ -194,7 +194,8 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
                 throw new NotSupportedException();
             }
 
-            using var response = await target.client.PostAsJsonAsync($"/collections/{target.collection}/points/query{target.querySuffix}",
+            using var response = await target.client.PostAsJsonAsync(QdrantVectorProtocol.CollectionPrefix + target.collection
+                + QdrantVectorProtocol.QueryPath + target.querySuffix,
                 new { query = document.Vector, limit = target.topK, @params = new { exact = true }, with_payload = true, with_vector = false }, cancellationToken);
             response.EnsureSuccessStatusCode();
             using var result = await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken);

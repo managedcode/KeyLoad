@@ -76,7 +76,7 @@ internal sealed class RelationalAtomicityTests
         RelationalTestData.Configure(database);
         database.Commit(new PutDocument(RelationalTestData.Table, RelationalTestData.First, RelationalTestData.Row()));
         database.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(database.Directory));
+        using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var configured = reopened.Read(view => engine.Resource(view, database.Partition, RelationalTestData.Table));
         await Assert.That(configured.RelationalSchema!.PrimaryKey).IsEqualTo(RelationalTestData.Key);

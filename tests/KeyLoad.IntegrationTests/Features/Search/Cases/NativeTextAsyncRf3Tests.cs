@@ -21,15 +21,15 @@ internal sealed class NativeTextAsyncRf3Tests(ClusterFixture fixture)
         var scenario = await NativeTextRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, true, true, false, false, deadline.Token);
         using var callerHttp = McpCallerHttp.Create(fixture, FirstNode);
-        var caller = new KeyLoadClient(callerHttp, identity.Secret);
+        var caller = new KeyLoadClient(callerHttp, identity.Secret, IntegrationClientOptions.Execution());
         using var nodeOneHttp = McpCallerHttp.Create(fixture, FirstNode);
         using var nodeTwoHttp = McpCallerHttp.Create(fixture, SecondNode);
         using var nodeThreeHttp = McpCallerHttp.Create(fixture, ThirdNode);
         var administrators = new[]
         {
-            new KeyLoadClient(nodeOneHttp, fixture.AdminKey),
-            new KeyLoadClient(nodeTwoHttp, fixture.AdminKey),
-            new KeyLoadClient(nodeThreeHttp, fixture.AdminKey)
+            new KeyLoadClient(nodeOneHttp, fixture.AdminKey, IntegrationClientOptions.Execution()),
+            new KeyLoadClient(nodeTwoHttp, fixture.AdminKey, IntegrationClientOptions.Execution()),
+            new KeyLoadClient(nodeThreeHttp, fixture.AdminKey, IntegrationClientOptions.Execution())
         };
         await using var callerMcp = await McpOfficialClient.ConnectAsync(fixture, SecondNode,
             identity.Secret, deadline.Token);

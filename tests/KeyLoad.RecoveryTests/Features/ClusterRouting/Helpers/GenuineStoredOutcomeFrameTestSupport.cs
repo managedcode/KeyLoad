@@ -121,7 +121,7 @@ internal static class GenuineStoredOutcomeFrameTestSupport
         {
             try
             {
-                store = new ZoneTreeStore(new(path) { Incarnation = incarnation });
+                store = new ZoneTreeStore(new(path) { Incarnation = incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
                 await work(store);
             }
             catch (Exception failure)

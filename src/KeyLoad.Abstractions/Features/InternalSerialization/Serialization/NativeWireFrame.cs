@@ -32,12 +32,12 @@ internal sealed class NativeWireFrame
         {
             return NativeWireSchema.Member(type, scope, id);
         }
-        var countId = dictionary ? 1u : 0u;
-        if (dictionary && id == 0)
+        var countId = dictionary ? NativeWireIdentities.DictionaryCountId : NativeWireIdentities.SequenceCountId;
+        if (dictionary && id == NativeWireIdentities.DictionaryComparerId)
         {
             NativeWireCheck.Require(!comparer && count is null);
             comparer = true;
-            return typeof(IEqualityComparer<>).MakeGenericType(arguments[0]);
+            return typeof(IEqualityComparer<>).MakeGenericType(arguments[NativeWireIdentities.KeyTypeArgumentIndex]);
         }
         if (id == countId)
         {
@@ -45,35 +45,35 @@ internal sealed class NativeWireFrame
             consumed = true;
             return typeof(uint);
         }
-        NativeWireCheck.Require(id == countId + 1 && count is not null);
+        NativeWireCheck.Require(id == countId + NativeWireIdentities.CollectionItemDelta && count is not null);
         elements++;
-        NativeWireCheck.Require(elements <= (ulong)count!.Value * (dictionary ? 2u : 1u));
-        return dictionary ? arguments[(int)((elements - 1) % 2)] : type!.IsArray ? type.GetElementType() : arguments[0];
+        NativeWireCheck.Require(elements <= (ulong)count!.Value * (dictionary ? NativeWireIdentities.DictionaryFieldsPerItem : NativeWireIdentities.SequenceFieldsPerItem));
+        return dictionary ? arguments[(int)((elements - NativeWireIdentities.FirstElementOrdinal) % NativeWireIdentities.DictionaryArgumentCount)] : type!.IsArray ? type.GetElementType() : arguments[NativeWireIdentities.KeyTypeArgumentIndex];
     }
 
     internal void EndBase()
     {
         NativeWireCheck.Require(!collection);
         scope++;
-        id = 0;
+        id = NativeWireIdentities.FirstFieldId;
     }
 
     internal void Complete()
     {
         if (collection)
         {
-            NativeWireCheck.Require(elements == (ulong)(count ?? 0) * (dictionary ? 2u : 1u));
+            NativeWireCheck.Require(elements == (ulong)(count ?? NativeWireIdentities.EmptyCollectionCount) * (dictionary ? NativeWireIdentities.DictionaryFieldsPerItem : NativeWireIdentities.SequenceFieldsPerItem));
         }
     }
 
     private void ReadCount<TInput>(ref Reader<TInput> reader, Field field)
     {
-        NativeWireCheck.Require(count is null && elements == 0 && !field.IsReference
+        NativeWireCheck.Require(count is null && elements == NativeWireIdentities.EmptyElementCount && !field.IsReference
             && (field.FieldType is null || field.FieldType == typeof(uint)));
         count = UInt32Codec.ReadValue(ref reader, field);
         // Each item requires at least a native header and one byte of scalar/reference data.
         // Dictionary allocations additionally require both key and value fields per entry.
-        NativeWireCheck.Require(count <= int.MaxValue && count <= (ulong)reader.Remaining / (dictionary ? 4u : 2u));
+        NativeWireCheck.Require(count <= int.MaxValue && count <= (ulong)reader.Remaining / (dictionary ? NativeWireIdentities.MinimumDictionaryEntryBytes : NativeWireIdentities.MinimumSequenceItemBytes));
     }
 
     private static bool IsSequence(Type? type)

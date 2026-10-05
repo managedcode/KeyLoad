@@ -9,6 +9,7 @@ internal static class PooledJsonText
 {
     private const int MaximumRetainedArrayBytes = 262_144;
     private const int MaximumArraysPerBucket = 2;
+    private const int FirstWrittenByte = 0;
     private static readonly ArrayPool<byte> Buffers = ArrayPool<byte>.Create(
         MaximumRetainedArrayBytes, MaximumArraysPerBucket);
 
@@ -20,7 +21,7 @@ internal static class PooledJsonText
         try
         {
             var written = Encoding.UTF8.GetBytes(value.AsSpan(), buffer);
-            return JsonDefaults.Deserialize<T>(buffer.AsSpan(0, written));
+            return JsonDefaults.Deserialize<T>(buffer.AsSpan(FirstWrittenByte, written));
         }
         finally
         {

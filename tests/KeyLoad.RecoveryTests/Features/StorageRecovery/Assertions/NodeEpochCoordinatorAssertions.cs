@@ -43,13 +43,13 @@ internal static class NodeEpochCoordinatorAssertions
     {
         var canonicalPath = Path.Combine(destination, ServerNodeUpgradeProtocol.Canonical);
         var replicaPath = Path.Combine(destination, ServerNodeUpgradeProtocol.Replica);
-        using var canonical = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile, canonicalPath));
-        using var replica = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile, replicaPath));
+        using var canonical = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile, canonicalPath), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var replica = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile, replicaPath), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var configuration = new ReplicaConfiguration(profile.LocalId, [.. profile.Voters], destination,
             profile.Incarnation);
         using var log = new DurableReplicaLog(replica, RecoveryExecutionOptions.Configuration(configuration), canonicalDatabase: database);
-        var snapshots = new ReplicaSnapshotStore(canonical, log, RecoveryExecutionOptions.Configuration(configuration));
+        var snapshots = new ReplicaSnapshotStore(canonical, log, RecoveryExecutionOptions.Configuration(configuration), RecoveryExecutionOptions.Replica());
         await using var materializer = new ReplicaMaterializer(database, log, snapshots, RecoveryExecutionOptions.Replica());
         var resource = new ResourceDefinition(LaterResource, ResourceKind.Collection, LaterDomain);
         var request = new ConfigureResourceRequest(LaterTenant, LaterDatabase, resource);
@@ -65,9 +65,9 @@ internal static class NodeEpochCoordinatorAssertions
     internal static async Task AssertLaterResourceAsync(EpochPriorNodeProfile profile, string destination)
     {
         using var canonical = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile,
-            Path.Combine(destination, ServerNodeUpgradeProtocol.Canonical)));
+            Path.Combine(destination, ServerNodeUpgradeProtocol.Canonical)), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         using var replica = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile,
-            Path.Combine(destination, ServerNodeUpgradeProtocol.Replica)));
+            Path.Combine(destination, ServerNodeUpgradeProtocol.Replica)), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var configuration = new ReplicaConfiguration(profile.LocalId, [.. profile.Voters], destination,
             profile.Incarnation);
@@ -85,7 +85,7 @@ internal static class NodeEpochCoordinatorAssertions
         await Assert.That(prior.ErrorCode).IsNull();
         await Assert.That(prior.AppliedPosition).IsGreaterThan(0);
         var directory = Path.Combine(verifierRoot, "image-verifier-" + Guid.NewGuid().ToString("N"));
-        using var verifier = new ZoneTreeStore(new(directory) { Incarnation = prior.Incarnation });
+        using var verifier = new ZoneTreeStore(new(directory) { Incarnation = prior.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var current = verifier.VerifySnapshot(path);
         await Assert.That(current.Incarnation).IsEqualTo(prior.Incarnation);
         await Assert.That(current.Position).IsEqualTo(prior.Position);

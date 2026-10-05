@@ -20,7 +20,7 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         using var deadline = McpCallerDeadline.Create();
         var scenario = await PartitionQueryRf3Scenario.CreateAsync(fixture, deadline.Token).ConfigureAwait(false);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token).ConfigureAwait(false);
         await AssertFailureAsync(sdk, mcp, scenario.Request() with { Version = InvalidVersion },
@@ -51,7 +51,7 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         using var deadline = McpCallerDeadline.Create();
         var scenario = await PartitionQueryRf3Scenario.CreateAsync(fixture, deadline.Token).ConfigureAwait(false);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var oversized = CreateOversizedRequest(scenario);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token).ConfigureAwait(false);

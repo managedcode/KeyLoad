@@ -53,8 +53,15 @@ filters and recall threshold; the actual index/metric configuration is evidence.
 Native databases expose unsupported
 methods as unavailable; different ANN algorithms never silently reuse a label.
 Index build timing surrounds native build completion after ingestion and before
-warmup; exact uses an explicit zero build cost with no ANN index. Validation,
+warmup; exact uses an explicit zero build cost with no ANN index, while every
+ANN build receipt must have a strictly positive finite duration. Validation,
 ingestion, oracle computation and build time are excluded from query latency.
+Closed-loop query throughput includes common neighbor validation; writer duration
+includes post-acknowledgment native readback and validation. Ingestion, oracle,
+index preparation and warmup are outside both measured rates. Each native search,
+update and post-acknowledgment read awaits its original operation under a linked
+30-second policy deadline; failures cancel peers and all operations join before
+cleanup or failure reporting.
 
 Use a lazy corpus and bounded query/oracle/sample arrays; retain at most 4,096
 evenly sampled latencies and label p95/p99 as estimates. Bound native batches,
@@ -79,10 +86,10 @@ original Linux GitHub artifacts may populate website metrics.
 
 | Requirement | Measurable pass/fail criterion | Test/evidence mapping |
 |---|---|---|
-| REQ-VQ-001: complete real vector scale | AC-VQ-001: exact 24 closed profiles × applicable targets × 1/2/3 topology slots; 100k/1m actual record readback and ≥100k measured queries; invalid profiles/counts reject | Vector profile/corpus/plan TUnit flows; original native worker receipts |
-| REQ-VQ-002: native algorithms and quality | AC-VQ-002: exact/HNSW/IVFFlat metadata and actual PostgreSQL plans match requested method; independent expected IDs yield exact recall 1 and ANN ≥0.95; duplicate/filter/underfill failures reject | Vector oracle/recall TUnit cases; actual PostgreSQL comparison cases and plan receipts |
+| REQ-VQ-001: complete real vector scale | AC-VQ-001: exact 24 closed profiles × applicable targets × 1/2/3 topology slots; 100k/1m actual record readback and ≥100k measured queries; invalid profiles/counts reject | `VectorProfileContractTests`, `VectorCorpusContractTests`, `VectorSelectionContractTests`; original native worker receipts |
+| REQ-VQ-002: native algorithms and quality | AC-VQ-002: exact/HNSW/IVFFlat metadata and actual PostgreSQL plans match requested method; independent expected IDs yield exact recall 1 and ANN ≥0.95; duplicate/filter/underfill failures reject | `VectorCorpusContractTests`, `VectorResponseContractTests`, `VectorIndexContractTests`, `PostgresVectorPayloadContractTests`, `PostgresVectorQueryContractTests`, `QdrantVectorContractTests`; actual PostgreSQL comparison cases and plan receipts |
 | REQ-VQ-003: filters and updates | AC-VQ-003: native 1% filters and mixed stable-90% searches return only eligible IDs; 10k acknowledged updates are read back after genuinely overlapping queries/writes; failure/cancellation invalidates cell | Native filtered/mixed flow cases; timed original query/update receipts |
-| REQ-VQ-004: trustworthy costs | AC-VQ-004: query p95/p99 and useful rate exclude ingestion/oracle/build; native index build ms is observed; separately scoped whole-run server RAM/resource observations and client counters are emitted with actual bounds | Measurement/phase/resource TUnit flows, original cgroup/process sidecars |
+| REQ-VQ-004: trustworthy costs | AC-VQ-004: query p95/p99 and useful rate exclude ingestion/oracle/build; native index build ms is observed; separately scoped whole-run server RAM/resource observations and client counters are emitted with actual bounds | `VectorIndexContractTests`, `VectorExecutionPolicyContractTests`; native measurement/phase/resource flows, original cgroup/process sidecars |
 | REQ-VQ-005: new native engines | AC-VQ-005: SurrealDB and HelixDB use pinned real disk-backed native servers under Aspire; CRUD/vector/graph only where truly supported; readiness, loaded data, membership, ownership and teardown verified; unsupported native topology has null metrics/reason | Native comparison TUnit flows and image/source provenance; original Actions container logs |
 | REQ-VQ-006: same-family fairness | AC-VQ-006: corpus, query schedule, metric, filters, accuracy, resources and actual ACK/read contract match before rankings; controls remain explicitly small; unsupported capabilities never become zero-valued successes | Cross-engine corpus/contract validation, fairness review and original measured settings |
 | REQ-VQ-007: website-producing delivery | AC-VQ-007: readable isolated per-database groups feed strict complete source/run/attempt/profile/index-bound aggregation; missing/duplicate/mixed/fabricated results reject; site exposes scale/method/recall/build/p95/p99/server RAM and original evidence | Isolated plan/aggregate/admission/site browser TUnit tests; authentic Linux Benchmarks and Pages receipts |
@@ -101,6 +108,43 @@ they cannot cause fallback to a different algorithm, topology or prior cohort.
 Status: acceptance contract established; implementation and native qualification
 are pending. No new performance result is established by this document.
 
+## Source fairness review, 2026-10-06
+
+The active inventories contain two document scale profiles and 24 vector
+profiles, all limited to 100,000 or 1,000,000 records across the 11 engines.
+The 4,096-record control remains a separately labelled workload. Every measured
+vector adapter consumes the common corpus, query set, accuracy validator and
+concurrent update schedule. Native ingestion is checked by actual ordered
+record, payload and stored-vector readback; locally generated expected hashes
+cannot replace that check. Query throughput includes answer validation; update
+throughput includes native readback after acknowledgement and validation.
+
+PostgreSQL implements exact/HNSW/IVFFlat; Qdrant and SurrealDB implement
+exact/HNSW; HelixDB exposes its provider-native ANN mode. Other methods and
+unsupported native topologies retain explicit unavailable receipts. Scalar
+indexes used for ordered readback are setup costs, distinct from the subsequently
+timed ANN build. ANN receipts require positive observed build time and a completed
+native index lifecycle; exact has no ANN index and zero ANN build time.
+
+The current KeyLoad SDK cannot expose stored vector values or the required
+native numeric search predicate. Its new vector scale cells therefore remain
+explicitly unavailable, including plain exact, rather than weakening the shared
+readback contract. Existing small-control search support does not close this
+capability gap. Actual acknowledgement, read and server-resource contracts are
+shown with measurements; source review alone cannot establish cross-engine
+runtime equivalence or a performance winner.
+
+Qdrant query evidence retains the actual native filter as well as the forced
+exact/HNSW request parameters and observed collection state. It is explicitly
+labelled request/configuration evidence; Qdrant does not expose a PostgreSQL-style
+query plan through this adapter. `QdrantVectorContractTests` checks the distinct
+filtered/mixed predicates and the unfiltered request alongside index admission.
+
+Local inventory, JavaScript syntax, authored-asset bounds and governance checks
+pass. The final whole-solution Release build remains blocked by active shared
+runtime-policy diagnostics. The Aspire/TUnit suites and genuine Linux native
+scale runs have not qualified this source, and no new website figures are ready.
+
 ## Typed native execution policy join, 2026-10-06
 
 The current runtime-policy rule applies to native operation safety settings.
@@ -112,7 +156,9 @@ host composition owns binding from a source-controlled JSON section and rejects
 missing/invalid policy before target creation; target execution does not read
 configuration or the environment. Native adapters receive that typed policy,
 record effective limits with native index evidence, and await original operations
-and cleanup. Policy does not select a different corpus, algorithm, recall target
+and cleanup. Qdrant control ingestion also uses the configured native write-batch
+capacity, rather than a separate hardcoded batch size; its corpus and measured
+query schedule retain their existing control contract. Policy does not select a different corpus, algorithm, recall target
 or native topology.
 
 TASK-VQ-POLICY-001: native adapter worker owns the shared options type/validation,

@@ -30,17 +30,17 @@ internal static class NativePayloadSyntax
         var reader = Reader.Create(bytes, session);
         NativePayloadHeader.Validate(NativeFieldHeaderReader.Read(ref reader));
         var version = NativeFieldHeaderReader.Read(ref reader);
-        NativeWireCheck.Require(version.HasFieldId && version.FieldIdDelta == 0
+        NativeWireCheck.Require(version.HasFieldId && version.FieldIdDelta == NativeWireIdentities.VersionFieldDelta
             && (version.FieldType is null || version.FieldType == typeof(uint)));
         if (UInt32Codec.ReadValue(ref reader, version) != NativePayloadVersion.Current)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, NativePayloadVersion.UnsupportedVersion);
         }
         var value = NativeFieldHeaderReader.Read(ref reader);
-        NativeWireCheck.Require(value.HasFieldId && value.FieldIdDelta == 1 && value.FieldType is not null && !value.IsReference);
+        NativeWireCheck.Require(value.HasFieldId && value.FieldIdDelta == NativeWireIdentities.ValueFieldDelta && value.FieldType is not null && !value.IsReference);
         NativeWireCheck.Require(expectedRootType is null || (exactRoot ? value.FieldType == expectedRootType
             : NativeWireSchema.Compatible(expectedRootType, value.FieldType!)));
         NativeWireWalk.Validate(ref reader, value);
-        NativeWireCheck.Require(NativeFieldHeaderReader.Read(ref reader).IsEndObject && reader.Remaining == 0);
+        NativeWireCheck.Require(NativeFieldHeaderReader.Read(ref reader).IsEndObject && reader.Remaining == NativeWireIdentities.EmptyRemainingBytes);
     }
 }

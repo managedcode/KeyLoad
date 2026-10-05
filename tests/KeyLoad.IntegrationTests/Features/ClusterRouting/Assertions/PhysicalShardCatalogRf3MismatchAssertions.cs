@@ -47,7 +47,7 @@ internal static class PhysicalShardCatalogRf3MismatchAssertions
         CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(app, node);
-        var sdk = new KeyLoadClient(http, profile.AdminKey);
+        var sdk = new KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
         var result = await sdk.CommitAsync(denied.Command, cancellationToken).ConfigureAwait(false);
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.OwnershipLost));
@@ -84,7 +84,7 @@ internal static class PhysicalShardCatalogRf3MismatchAssertions
             || !IsTerminalState(snapshot?.Snapshot.State?.Text))
         { throw new InvalidOperationException("The Aspire node did not report a terminal state after its HTTP endpoint stopped."); }
         using var http = McpCallerHttp.Create(app, node);
-        var sdk = new KeyLoadClient(http, profile.AdminKey);
+        var sdk = new KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
         var unknown = await sdk.CommitAsync(denied.Command, cancellationToken).ConfigureAwait(false);
         await Assert.That(unknown.IsFailed).IsTrue();
         await Assert.That(unknown.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.UnknownWriteOutcome));

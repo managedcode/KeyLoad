@@ -45,7 +45,7 @@ internal static class PhysicalShardCatalogInterface34MixedAssertions
             || !IsTerminalState(current?.Snapshot.State?.Text))
         { throw new InvalidOperationException(InvalidNodeState); }
         using var http = McpCallerHttp.Create(app, RequestCqrsRf3Protocol.Node1);
-        var sdk = new KeyLoadClient(http, profile.AdminKey);
+        var sdk = new KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
         var unknown = await sdk.CommitAsync(denied.Command, cancellationToken).ConfigureAwait(false);
         await Assert.That(unknown.IsFailed).IsTrue();
         await Assert.That(unknown.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.UnknownWriteOutcome));
@@ -58,7 +58,7 @@ internal static class PhysicalShardCatalogInterface34MixedAssertions
         NodeEpochRf3Profile profile, DeniedWrite denied, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(app, RequestCqrsRf3Protocol.Node1);
-        var sdk = new KeyLoadClient(http, profile.AdminKey);
+        var sdk = new KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
         var result = await sdk.CommitAsync(denied.Command, cancellationToken).ConfigureAwait(false);
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.OwnershipLost));

@@ -53,7 +53,7 @@ internal static class HelixDbVectorStorage
             foreach (var row in rows.EnumerateArray())
             {
                 var result = Read(row);
-                if (result.Number <= after)
+                if (result.Number <= after || seen >= count)
                 {
                     throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbReadbackOrderingInvalid);
                 }

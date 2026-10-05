@@ -29,7 +29,7 @@ internal sealed class FixtureLifetimeTests
                 using var unexpected = new TestDatabase(new() { MaxConcurrentQueries = concurrency }, directory);
             });
             await Assert.That(Directory.Exists(directory)).IsFalse();
-            using var reopened = new ZoneTreeStore(new(directory));
+            using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await Assert.That(reopened.Position).IsEqualTo(0L);
         }
         finally
@@ -86,7 +86,7 @@ internal sealed class FixtureLifetimeTests
         var sentinel = Path.Combine(directory, SentinelFileName);
         try
         {
-            using var owner = new ZoneTreeStore(new(directory));
+            using var owner = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await File.WriteAllTextAsync(sentinel, SentinelContent);
             owner.Commit((transaction, _) =>
             {

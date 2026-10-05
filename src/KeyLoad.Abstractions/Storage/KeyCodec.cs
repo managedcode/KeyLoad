@@ -1,6 +1,7 @@
 using System.Buffers.Binary;
 using System.Text;
 using static KeyLoad.Storage.KeyCodecReadPrimitives;
+using static KeyLoad.Storage.KeyCodecTokens;
 
 namespace KeyLoad.Storage;
 
@@ -53,13 +54,13 @@ public static class KeyCodec
     /// <exception cref="KeyLoadException">The key is unsupported or malformed.</exception>
     public static object?[] Decode(ReadOnlySpan<byte> key)
     {
-        if (key.IsEmpty || key[0] != Version)
+        if (key.IsEmpty || key[VersionOffset] != Version)
         {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, "Unknown key codec version.");
+            throw Errors.Fail(ErrorCode.FormatUnsupported, UnknownVersion);
         }
 
         var values = new List<object?>();
-        var offset = 1;
+        var offset = VersionBytes;
         while (offset < key.Length)
         {
             if (values.Count == MaximumComponents)
@@ -70,15 +71,15 @@ public static class KeyCodec
             var tag = key[offset++];
             object? value = tag switch
             {
-                0x10 => MissingValue.Instance,
-                0x11 => null,
-                0x20 => ReadByte(key, ref offset) switch { 0 => false, 1 => true, _ => throw BadKey() },
-                0x30 => unchecked((long)(ReadUInt64(key, ref offset) ^ (1UL << 63))),
-                0x31 => KeyCodecDecimal.Read(key, ref offset),
-                0x32 => ReadDouble(key, ref offset),
-                0x40 => ReadTimestamp(key, ref offset),
-                0x50 => ReadText(key, ref offset),
-                0x60 => ReadEscaped(key, ref offset),
+                MissingTag => MissingValue.Instance,
+                NullTag => null,
+                BooleanTag => ReadByte(key, ref offset) switch { FalsePayload => false, TruePayload => true, _ => throw BadKey() },
+                Int64Tag => unchecked((long)(ReadUInt64(key, ref offset) ^ SortableSignMask)),
+                DecimalTag => KeyCodecDecimal.Read(key, ref offset),
+                DoubleTag => ReadDouble(key, ref offset),
+                TimestampTag => ReadTimestamp(key, ref offset),
+                TextTag => ReadText(key, ref offset),
+                BinaryTag => ReadEscaped(key, ref offset),
                 _ => throw BadKey()
             };
             values.Add(value);
@@ -91,10 +92,10 @@ public static class KeyCodec
         switch (value)
         {
             case MissingValue:
-                WriteMarker(stream, 0x10);
+                WriteMarker(stream, MissingTag);
                 break;
             case null:
-                WriteMarker(stream, 0x11);
+                WriteMarker(stream, NullTag);
                 break;
             case bool boolean:
                 WriteBoolean(stream, boolean);
@@ -124,7 +125,7 @@ public static class KeyCodec
                 Write(stream, id.ToString(GuidKeyFormat));
                 break;
             default:
-                throw Errors.Fail(ErrorCode.UnsupportedCapability, "This type is not supported by key codec v1.");
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedComponent);
         }
     }
 
@@ -132,15 +133,15 @@ public static class KeyCodec
 
     private static void WriteBoolean(Stream stream, bool value)
     {
-        stream.WriteByte(0x20);
-        stream.WriteByte(value ? (byte)1 : (byte)0);
+        stream.WriteByte(BooleanTag);
+        stream.WriteByte(value ? (byte)TruePayload : (byte)FalsePayload);
     }
 
     private static void WriteInt64(Stream stream, long value)
     {
         Span<byte> buffer = stackalloc byte[sizeof(ulong)];
-        stream.WriteByte(0x30);
-        BinaryPrimitives.WriteUInt64BigEndian(buffer, unchecked((ulong)value) ^ (1UL << 63));
+        stream.WriteByte(Int64Tag);
+        BinaryPrimitives.WriteUInt64BigEndian(buffer, unchecked((ulong)value) ^ SortableSignMask);
         stream.Write(buffer);
     }
 
@@ -148,27 +149,27 @@ public static class KeyCodec
     {
         if (!double.IsFinite(value))
         {
-            throw Errors.Fail(ErrorCode.Validation, "Indexed numbers must be finite.");
+            throw Errors.Fail(ErrorCode.Validation, NonfiniteNumber);
         }
 
         Span<byte> buffer = stackalloc byte[sizeof(ulong)];
-        stream.WriteByte(0x32);
-        var bits = BitConverter.DoubleToUInt64Bits(value == 0 ? 0 : value);
-        BinaryPrimitives.WriteUInt64BigEndian(buffer, (bits & (1UL << 63)) != 0 ? ~bits : bits ^ (1UL << 63));
+        stream.WriteByte(DoubleTag);
+        var bits = BitConverter.DoubleToUInt64Bits(value == ZeroNumber ? ZeroNumber : value);
+        BinaryPrimitives.WriteUInt64BigEndian(buffer, (bits & SortableSignMask) != NoSetBits ? ~bits : bits ^ SortableSignMask);
         stream.Write(buffer);
     }
 
     private static void WriteDateTimeOffset(Stream stream, DateTimeOffset value)
     {
         Span<byte> buffer = stackalloc byte[sizeof(ulong)];
-        stream.WriteByte(0x40);
-        BinaryPrimitives.WriteUInt64BigEndian(buffer, unchecked((ulong)value.UtcTicks) ^ (1UL << 63));
+        stream.WriteByte(TimestampTag);
+        BinaryPrimitives.WriteUInt64BigEndian(buffer, unchecked((ulong)value.UtcTicks) ^ SortableSignMask);
         stream.Write(buffer);
     }
 
     private static void WriteText(Stream stream, string value)
     {
-        stream.WriteByte(0x50);
+        stream.WriteByte(TextTag);
         try
         {
             WriteEscaped(stream, Utf8.GetBytes(value));
@@ -181,7 +182,7 @@ public static class KeyCodec
 
     private static void WriteBinary(Stream stream, byte[] value)
     {
-        stream.WriteByte(0x60);
+        stream.WriteByte(BinaryTag);
         WriteEscaped(stream, value);
     }
 
@@ -190,13 +191,13 @@ public static class KeyCodec
         foreach (var b in bytes)
         {
             stream.WriteByte(b);
-            if (b == 0)
+            if (b == EscapedZeroByte)
             {
-                stream.WriteByte(0xFF);
+                stream.WriteByte(ZeroEscapeMarker);
             }
         }
-        stream.WriteByte(0);
-        stream.WriteByte(0);
+        stream.WriteByte(EscapedZeroByte);
+        stream.WriteByte(EscapedZeroByte);
     }
 
 }

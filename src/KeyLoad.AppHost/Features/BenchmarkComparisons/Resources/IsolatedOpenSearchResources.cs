@@ -36,6 +36,9 @@ internal static class IsolatedOpenSearchResources
 
     internal static void Add(IsolatedResourceContext context)
     {
+        const int StartValue = 1;
+        const int IndexInitialValue = 0;
+
         ArgumentNullException.ThrowIfNull(context);
         context.Selection.Validate();
         if (context.Selection.Target != Target)
@@ -43,9 +46,9 @@ internal static class IsolatedOpenSearchResources
             throw new InvalidOperationException(InvalidSelection);
         }
         var cell = Guid.NewGuid().ToString(GuidFormat);
-        var names = Enumerable.Range(1, context.Selection.NodeCount)
+        var names = Enumerable.Range(StartValue, context.Selection.NodeCount)
             .Select(index => NodePrefix + index.ToString(CultureInfo.InvariantCulture)).ToArray();
-        for (var index = 0; index < names.Length; index++)
+        for (var index = IndexInitialValue; index < names.Length; index++)
         {
             var name = names[index];
             var node = context.Builder.AddContainer(name, Image, Tag).WithImageSHA256(BenchmarkResources.OpenSearchDigest[DigestPrefixLength..])
@@ -62,12 +65,15 @@ internal static class IsolatedOpenSearchResources
 
     private static void ConfigureDiscovery(IResourceBuilder<ContainerResource> node, string[] names)
     {
-        if (names.Length == 1)
+        const int SingleNodeCount = 1;
+        const char SeparatorCharacter = ',';
+
+        if (names.Length == SingleNodeCount)
         {
             node.WithEnvironment(DiscoveryType, Single);
             return;
         }
-        var seeds = string.Join(',', names);
+        var seeds = string.Join(SeparatorCharacter, names);
         node.WithEnvironment(Discovery, seeds).WithEnvironment(Managers, seeds);
     }
 }

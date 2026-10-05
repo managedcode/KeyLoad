@@ -35,7 +35,7 @@ internal sealed record FilteredSearchRf3Scenario(PartitionRef Partition)
             ]
         };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource), cancellationToken));
         await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(Seed(partition), cancellationToken));
@@ -72,7 +72,7 @@ internal sealed record FilteredSearchRf3Scenario(PartitionRef Partition)
             OwnerId = owner
         };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
             principal, cancellationToken));
         var keyId = "filtered-rf3-key-" + Guid.NewGuid().ToString("N");

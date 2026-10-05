@@ -29,7 +29,7 @@ internal sealed class ReplicaNativeSnapshotTests
         using var target = targetFiles.Open(CanonicalDirectory);
         var (sender, image) = CreateNativeSnapshot(source, sourceLog, sourceFiles.Configuration);
         target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode(ValueKey), OldValue); return true; });
-        var receiver = new ReplicaSnapshotStore(target, targetLog, UnitExecutionOptions.ReplicaConfiguration(targetFiles.Configuration));
+        var receiver = new ReplicaSnapshotStore(target, targetLog, UnitExecutionOptions.ReplicaConfiguration(targetFiles.Configuration), UnitExecutionOptions.ReplicaExecution());
         await Assert.That(receiver.Begin(image)).IsEqualTo(0);
         var first = sender.ReadChunk(image.TransferId, 0, FirstChunkBytes);
         await Assert.That(receiver.Append(image.TransferId, 0, first)).IsEqualTo(first.LongLength);
@@ -51,7 +51,7 @@ internal sealed class ReplicaNativeSnapshotTests
     private static async Task ResumeAndCompleteAsync(ReplicaSnapshotStore sender, ReplicaSnapshot image,
         IAtomicStore target, IDurableReplicaLog targetLog, ReplicaConfiguration configuration, long expectedOffset)
     {
-        var receiver = new ReplicaSnapshotStore(target, targetLog, UnitExecutionOptions.ReplicaConfiguration(configuration));
+        var receiver = new ReplicaSnapshotStore(target, targetLog, UnitExecutionOptions.ReplicaConfiguration(configuration), UnitExecutionOptions.ReplicaExecution());
         receiver.Recover();
         var offset = receiver.Begin(image);
         await Assert.That(offset).IsEqualTo(expectedOffset);
@@ -74,7 +74,7 @@ internal sealed class ReplicaNativeSnapshotTests
             tx.PutRecord(KeyCodec.Encode(ValueKey), NewValue);
             return true;
         });
-        var sender = new ReplicaSnapshotStore(source, log, UnitExecutionOptions.ReplicaConfiguration(configuration));
+        var sender = new ReplicaSnapshotStore(source, log, UnitExecutionOptions.ReplicaConfiguration(configuration), UnitExecutionOptions.ReplicaExecution());
         return (sender, sender.Create(1, 1));
     }
 

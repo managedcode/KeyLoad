@@ -24,7 +24,7 @@ internal static class ResourcePolicyUpdateRf3Assertions
         CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, node);
-        var sdk = new KeyLoadClient(http, reader.Secret);
+        var sdk = new KeyLoadClient(http, reader.Secret, IntegrationClientOptions.Execution());
         var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Reference, cancellationToken));
         await Assert.That(document!.Redacted).IsTrue();
         await Assert.That(document.Revision).IsEqualTo(scenario.DocumentRevision);
@@ -53,7 +53,7 @@ internal static class ResourcePolicyUpdateRf3Assertions
         McpOfficialClient readerMcp, ResourcePolicyUpdateRf3Scenario scenario, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var reader = new KeyLoadClient(http, scenario.Reader.Secret);
+        var reader = new KeyLoadClient(http, scenario.Reader.Secret, IntegrationClientOptions.Execution());
         var document = await McpCallerAssertions.SdkSuccessAsync(await reader.GetAsync(scenario.Reference, cancellationToken));
         await Assert.That(document!.Redacted).IsFalse();
         await Assert.That(document.Revision).IsEqualTo(scenario.DocumentRevision);
@@ -76,7 +76,7 @@ internal static class ResourcePolicyUpdateRf3Assertions
         CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, SecondNode);
-        var sdk = new KeyLoadClient(http, reader.Secret);
+        var sdk = new KeyLoadClient(http, reader.Secret, IntegrationClientOptions.Execution());
         var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Reference, cancellationToken));
         await Assert.That(document!.Redacted).IsFalse();
         await Assert.That(document.Revision).IsEqualTo(scenario.DocumentRevision);

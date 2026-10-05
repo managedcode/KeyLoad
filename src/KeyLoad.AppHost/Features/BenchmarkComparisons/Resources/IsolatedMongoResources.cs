@@ -33,6 +33,11 @@ internal static class IsolatedMongoResources
 
     internal static void Add(IsolatedResourceContext context)
     {
+        const int BoundaryValue = 1;
+        const int IndexInitialValue = 0;
+        const int Step = 1;
+        const char SeparatorCharacter = ',';
+
         ArgumentNullException.ThrowIfNull(context);
         context.Selection.Validate();
         if (context.Selection.Target != Target)
@@ -41,12 +46,12 @@ internal static class IsolatedMongoResources
         }
         var scripts = IsolatedMongoBootstrap.FindScripts(context);
         var password = Secret(context, PasswordName);
-        var key = context.Selection.NodeCount > 1 ? Secret(context, KeyName) : null;
+        var key = context.Selection.NodeCount > BoundaryValue ? Secret(context, KeyName) : null;
         var nodes = new List<IResourceBuilder<ContainerResource>>(context.Selection.NodeCount);
         var group = Guid.NewGuid().ToString(GroupFormat);
-        for (var index = 0; index < context.Selection.NodeCount; index++)
+        for (var index = IndexInitialValue; index < context.Selection.NodeCount; index++)
         {
-            var name = NodePrefix + (index + 1).ToString(CultureInfo.InvariantCulture);
+            var name = NodePrefix + (index + Step).ToString(CultureInfo.InvariantCulture);
             var node = context.Builder.AddContainer(name, Image, Tag).WithImageSHA256(BenchmarkResources.MongoDigest[DigestPrefixLength..])
                 .WithContainerName(name + GroupSeparator + group).WithContainerNetworkAlias(name)
                 .WithEndpoint(targetPort: Port, name: Tcp, scheme: Tcp);
@@ -54,7 +59,7 @@ internal static class IsolatedMongoResources
             nodes.Add(node);
             context.BindEndpoint(index, node, Tcp);
         }
-        var hosts = string.Join(',', nodes.Select(node => node.Resource.Name + NodePort));
+        var hosts = string.Join(SeparatorCharacter, nodes.Select(node => node.Resource.Name + NodePort));
         var replica = key is null ? string.Empty : ReplicaConnection;
         context.BindSetting(Connection, ReferenceExpression.Create(
             $"{MongoScheme}{User}{PasswordSeparator}{password}{CredentialsSeparator}{hosts}{ConnectionOptions}{replica}{RetryOptions}"));

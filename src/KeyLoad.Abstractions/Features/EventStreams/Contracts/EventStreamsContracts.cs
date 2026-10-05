@@ -9,7 +9,10 @@ namespace KeyLoad;
 /// <param name="Generation">Identifies the stream or delivery generation.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.StreamRef)]
-public sealed record StreamRef([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string StreamSet, [property: Orleans.Id(2)] string StreamId, [property: Orleans.Id(3)] long Generation = 1);
+public sealed record StreamRef([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string StreamSet, [property: Orleans.Id(2)] string StreamId, [property: Orleans.Id(3)] long Generation = StreamRef.DefaultGeneration)
+{
+    private const int DefaultGeneration = 1;
+}
 
 /// <summary>Describes the current tail, retention floor, and generation of a stream.</summary>
 /// <param name="TailRevision">Identifies the current stream tail.</param>
@@ -55,8 +58,10 @@ public enum ExpectedStreamState
 /// <param name="Revision">Identifies the document, stream, or edge revision.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ExpectedStreamRevision)]
-public sealed record ExpectedStreamRevision([property: Orleans.Id(0)] ExpectedStreamState State, [property: Orleans.Id(1)] long Revision = 0)
+public sealed record ExpectedStreamRevision([property: Orleans.Id(0)] ExpectedStreamState State, [property: Orleans.Id(1)] long Revision = ExpectedStreamRevision.DefaultRevision)
 {
+    private const int DefaultRevision = 0;
+
     /// <summary>Creates an exact-revision stream precondition.</summary>
     /// <returns>The requested value.</returns>
     public static ExpectedStreamRevision Exact(long revision) => new(ExpectedStreamState.Exact, revision);
@@ -77,8 +82,12 @@ public sealed record ExpectedStreamRevision([property: Orleans.Id(0)] ExpectedSt
 /// <param name="CausationId">Carries the optional causation identifier.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.EventData)]
-public sealed record EventData([property: Orleans.Id(0)] string EventId, [property: Orleans.Id(1)] string EventType, [property: Orleans.Id(2)] string PayloadJson, [property: Orleans.Id(3)] string HeadersJson = "{}",
-    [property: Orleans.Id(4)] int SchemaVersion = 1, [property: Orleans.Id(5)] DateTimeOffset? OccurredAt = null, [property: Orleans.Id(6)] string? CorrelationId = null, [property: Orleans.Id(7)] string? CausationId = null);
+public sealed record EventData([property: Orleans.Id(0)] string EventId, [property: Orleans.Id(1)] string EventType, [property: Orleans.Id(2)] string PayloadJson, [property: Orleans.Id(3)] string HeadersJson = EventData.DefaultHeadersJson,
+    [property: Orleans.Id(4)] int SchemaVersion = EventData.InitialSchemaVersion, [property: Orleans.Id(5)] DateTimeOffset? OccurredAt = null, [property: Orleans.Id(6)] string? CorrelationId = null, [property: Orleans.Id(7)] string? CausationId = null)
+{
+    private const string DefaultHeadersJson = "{}";
+    private const int InitialSchemaVersion = 1;
+}
 
 /// <summary>Appends events to a stream under an expected revision and generation.</summary>
 /// <param name="StreamSet">Identifies the event stream set.</param>
@@ -89,4 +98,7 @@ public sealed record EventData([property: Orleans.Id(0)] string EventId, [proper
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.AppendEvents)]
 public sealed record AppendEvents([property: Orleans.Id(0)] string StreamSet, [property: Orleans.Id(1)] string StreamId, [property: Orleans.Id(2)] ImmutableArray<EventData> Events,
-    [property: Orleans.Id(3)] ExpectedStreamRevision ExpectedRevision, [property: Orleans.Id(4)] long Generation = 1) : Mutation(StreamSet);
+    [property: Orleans.Id(3)] ExpectedStreamRevision ExpectedRevision, [property: Orleans.Id(4)] long Generation = AppendEvents.DefaultGeneration) : Mutation(StreamSet)
+{
+    private const int DefaultGeneration = 1;
+}

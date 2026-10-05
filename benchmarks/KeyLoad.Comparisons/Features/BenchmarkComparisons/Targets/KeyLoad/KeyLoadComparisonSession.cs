@@ -2,13 +2,36 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using KeyLoad.Client;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRef partition, VectorSpace space,
-    int topK, int graphDepth, int graphVertices, int graphEdges, int corpusCount) : IComparisonSession
+    int topK, int graphDepth, int graphVertices, int graphEdges, int corpusCount,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<QueryTranslationOptions> translationOptions)
+    : IComparisonSession, IOpenLoopCancellationHealthSession, IOpenLoopComparisonSession
 {
-    private const int ClaimPollMilliseconds = 1;
+    private readonly ComparisonLifecycleOptions lifecycle = lifecycleOptions.Value;
+
+    public async Task<OpenLoopSessionResult> ExecuteOpenLoopAsync(Scenario scenario,
+        BenchmarkDocument document, CancellationToken cancellationToken)
+    {
+        if (scenario == Scenario.PointRead)
+        {
+            var response = await client.GetAsync(new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id), cancellationToken)
+                .ConfigureAwait(false);
+            if (!response.IsSuccess)
+            {
+                return KeyLoadOpenLoopResults.RejectOrThrow(response.Problem?.ErrorCode);
+            }
+            var found = response.Value;
+            var result = found is null ? null : new FoundDocument(found.Reference.Id, found.Json);
+            return new(OpenLoopSessionDisposition.Succeeded, new(Document: result));
+        }
+
+        return await KeyLoadDocumentOperations.ExecuteOpenLoopAsync(client, partition, scenario,
+            document, cancellationToken).ConfigureAwait(false);
+    }
 
     public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document,
         CancellationToken cancellationToken)
@@ -44,7 +67,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         var observedCount = 0;
         do
         {
-            var query = KeyLoadQuery.From<CorpusQueryMarker>(partition, "documents")
+            var query = KeyLoadQuery.From<CorpusQueryMarker>(partition, OpenLoopProtocolIdentities.DocumentsCollection, translationOptions)
                 .OrderBy(row => QueryFunctions.DocumentId(row)).Take(256);
             var page = KeyLoadClientResults.Success(await client.QueryAsync(query, allowFullScan: true,
                 cursor: cursor, cancellationToken: cancellationToken), "ScaledCorpusReadback");
@@ -69,6 +92,17 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         {
             throw new ComparisonFailureException("ScaledCorpusReadbackCountMismatch");
         }
+    }
+
+    async Task<OpenLoopCancellationHealthRead> IOpenLoopCancellationHealthSession.ReadActualAsync(
+        BenchmarkDocument document, CancellationToken cancellationToken)
+    {
+        var requested = new EntityRef(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id);
+        var actual = KeyLoadClientResults.Success(await client.GetAsync(requested, cancellationToken)
+            .ConfigureAwait(false), OpenLoopProtocolIdentities.CancellationHealthyReadOperation);
+        return actual is null
+            ? throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationHealthyReadMissing)
+            : new(requested, actual);
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
@@ -116,11 +150,11 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         Delivery? delivery = null;
         while (delivery is null)
         {
-            delivery = KeyLoadClientResults.Success(await client.ReceiveAsync(new(Guid.NewGuid(), lane),
+            delivery = KeyLoadClientResults.Success(await client.ReceiveAsync(new(Guid.NewGuid(), lane, LeaseSeconds: checked((int)Math.Ceiling(lifecycle.QueueLeaseDuration.TotalSeconds))),
                 cancellationToken)).Deliveries.SingleOrDefault();
             if (delivery is null)
             {
-                await Task.Delay(ClaimPollMilliseconds, cancellationToken);
+                await Task.Delay(lifecycle.QueueClaimPollInterval, cancellationToken);
             }
         }
         var received = Stopwatch.GetTimestamp();

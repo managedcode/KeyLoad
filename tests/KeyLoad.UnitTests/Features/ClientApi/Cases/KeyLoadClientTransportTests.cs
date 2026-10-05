@@ -49,7 +49,7 @@ internal sealed class KeyLoadClientTransportTests
             }
         });
 
-        var result = await new KeyLoadClient(server.Client, ApiKey).StatusAsync();
+        var result = await new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution()).StatusAsync();
 
         await Assert.That(result.IsSuccess).IsTrue();
         await Assert.That(result.Value!.NodeId).IsEqualTo(expected.NodeId);
@@ -65,7 +65,7 @@ internal sealed class KeyLoadClientTransportTests
 
         using var cancellation = new CancellationTokenSource();
         using var nextRequestCancellation = new CancellationTokenSource();
-        var client = new KeyLoadClient(server.Client, ApiKey);
+        var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution());
         var pending = client.StatusAsync(cancellation.Token);
         Task? nextRequest = null;
         try
@@ -185,7 +185,7 @@ internal sealed class KeyLoadClientTransportTests
             }
         });
 
-        var client = new KeyLoadClient(server.Client, ApiKey);
+        var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution());
         await AssertBoundedErrorBodiesAsync(client);
 
         var commandId = Guid.NewGuid();

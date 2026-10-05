@@ -10,6 +10,8 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeTreeFactory
 {
+    private const int ValueMarkerOffset = 0;
+
     private const string OriginalTreeMissing = "Original store inspection requires the existing native tree directory.";
 
     internal static IZoneTree<Memory<byte>, Memory<byte>> Open(ZoneTreeStoreOptions options, bool requireExisting = false)
@@ -35,7 +37,7 @@ internal static class ZoneTreeTreeFactory
         => new ZoneTreeFactory<Memory<byte>, Memory<byte>>()
             .SetDataDirectory(directory).SetComparer(new KeyComparer())
             .SetKeySerializer(new ByteArraySerializer()).SetValueSerializer(new ByteArraySerializer())
-            .SetIsDeletedDelegate(static (in Memory<byte> key, in Memory<byte> value) => value.Span[0] == DeletedValueMarker)
+            .SetIsDeletedDelegate(static (in Memory<byte> key, in Memory<byte> value) => value.Span[ValueMarkerOffset] == DeletedValueMarker)
             .SetMarkValueDeletedDelegate(static (ref Memory<byte> value) => value = new byte[] { DeletedValueMarker })
             .ConfigureWriteAheadLogOptions(o =>
             {

@@ -2,18 +2,15 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeReadCutValidation
 {
-    internal const int MaximumRecords = 5_000_000;
-    internal const long MaximumExaminedBytes = 1_073_741_824;
-    private const int MaximumElapsedMinutes = 1;
-    internal static readonly TimeSpan MaximumElapsed = TimeSpan.FromMinutes(MaximumElapsedMinutes);
+    private const int MinimumPositiveBudget = 1;
     private const string InvalidLimitsMessage = "The native read-cut limits are invalid.";
 
-    internal static void Validate(ZoneTreeReadCutLimits limits)
+    internal static void Validate(ZoneTreeReadCutLimits limits, ZoneTreeStoreOptions policy)
     {
         ArgumentNullException.ThrowIfNull(limits);
-        if (limits.MaxRecords is < 1 or > MaximumRecords
-            || limits.MaxExaminedBytes is < 1 or > MaximumExaminedBytes
-            || limits.MaxElapsed <= TimeSpan.Zero || limits.MaxElapsed > MaximumElapsed)
+        if (limits.MaxRecords < MinimumPositiveBudget || limits.MaxRecords > policy.MaximumReadCutRecords
+            || limits.MaxExaminedBytes < MinimumPositiveBudget || limits.MaxExaminedBytes > policy.MaximumReadCutExaminedBytes
+            || limits.MaxElapsed <= TimeSpan.Zero || limits.MaxElapsed > policy.MaximumReadCutElapsed)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidLimitsMessage);
         }

@@ -1,5 +1,8 @@
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
+using KeyLoad.Storage.ZoneTree;
+using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -12,6 +15,17 @@ internal static class ServerRuntimeOptionsRegistration
     {
         CoreRuntimeOptionsRegistration.AddCoreRuntimeOptions(services, configuration);
         services.AddDueCoordinationOptions(configuration);
+        services.AddOptions<NativeDurableJobOptions>().Bind(configuration.GetSection(NativeDurableJobOptions.SectionName))
+            .Validate(options => options.IsValid(), NativeDurableJobOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<ZoneTreeStorageExecutionOptions>().Bind(configuration.GetSection(ZoneTreeStorageExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<ZoneTreePointCacheExecutionOptions>().Bind(configuration.GetSection(ZoneTreePointCacheExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<RequestProbeExecutionOptions>().Bind(configuration.GetSection(RequestProbeExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), RequestProbeExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<OfflineRecoveryExecutionOptions>()
+            .Bind(configuration.GetSection(OfflineRecoveryExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), OfflineRecoveryExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ReplicaExecutionOptions>()
             .Bind(configuration.GetSection(ReplicaExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ReplicaProtocol.InvalidLimits).ValidateOnStart();

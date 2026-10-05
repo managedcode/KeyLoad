@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -8,7 +9,9 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="runId">Stable run identifier used to isolate the benchmark database.</param>
 /// <param name="image">Server image recorded in comparison provenance.</param>
 /// <param name="topology">Requested one, two or three native members.</param>
-public sealed class MongoTarget(string connectionString, string runId, string image, ComparisonTopology topology) : IComparisonTarget
+/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+public sealed class MongoTarget(string connectionString, string runId, string image, ComparisonTopology topology,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions) : IComparisonTarget
 {
     private readonly string databaseName = MongoSchema.DatabasePrefix + Guid.Parse(runId).ToString(MongoSchema.InvariantFormat);
     private readonly List<IMongoClient> ownedClients = [];
@@ -63,7 +66,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
         {
             var proof = await MongoReplicaVerifier.VerifyAsync(connectionString,
                 primaryClient.GetDatabase(MongoSchema.AdminDatabase), database, documents,
-                topology, dataset, cancellationToken);
+                topology, dataset, cancellationToken, lifecycleOptions);
             ownedClients.AddRange(proof.SecondaryClients);
             profile = profile with { Cluster = proof.Evidence, Version = proof.Version };
         }
@@ -99,7 +102,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
         {
             return;
         }
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(MongoSchema.CleanupTimeoutSeconds));
+        using var cleanup = new CancellationTokenSource(lifecycleOptions.Value.MongoCleanupTimeout);
         try
         {
             await primaryClient.DropDatabaseAsync(databaseName, cleanup.Token);

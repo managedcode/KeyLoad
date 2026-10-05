@@ -4,7 +4,7 @@ internal sealed record ScaleServerResourceEvidence(
     string Schema, string SourceRevision, string WorkflowRunId, string RunAttempt, string JobId,
     string Target, int NodeCount, string Scenario, string Profile, string WorkerSha256,
     ScaleServerHardware? Hardware, ScaleServerEnvelope? AppHostEnvelope, ScaleServerContainer[] Containers,
-    string[] MissingEvidence, bool Qualified);
+    string[] MissingEvidence, bool Qualified, ScaleServerObservationPolicy? ObservationPolicy = null);
 
 internal sealed record ScaleServerHardware(string Kernel, string Architecture, string CpuVendor,
     int CpuFamily, int CpuModel, int CpuStepping, int LogicalCpuCount, int PhysicalCoreCount,

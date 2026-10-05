@@ -43,7 +43,7 @@ internal sealed class AtomicPartitionPlacementPublicRf3Workflow(ClusterFixture f
         CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture.App, RequestCqrsRf3Protocol.Node1);
-        var result = await new KeyLoadClient(http, fixture.AdminKey)
+        var result = await new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution())
             .BindAtomicPartitionPlacementAsync(commandId, request, cancellationToken).ConfigureAwait(false);
         await Assert.That(result.IsSuccess).IsTrue();
         await Assert.That(result.Value).IsTrue();
@@ -111,7 +111,7 @@ internal sealed class AtomicPartitionPlacementPublicRf3Workflow(ClusterFixture f
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, Capability.None, cancellationToken)
             .ConfigureAwait(false);
         using var http = McpCallerHttp.Create(fixture.App, RequestCqrsRf3Protocol.Node3);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         var read = await sdk.ReadAtomicPartitionPlacementAsync(new(RequestVersion, partition), cancellationToken)
             .ConfigureAwait(false);
         await Assert.That(read.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));

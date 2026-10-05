@@ -30,13 +30,18 @@ internal static class LiteralDeclarationOwnership
 
     internal static bool IsOptionsDefault(SyntaxNodeAnalysisContext context)
     {
-        var owner = context.Node.Ancestors().FirstOrDefault(static node =>
+        return IsOptionsDefault(context.Compilation, context.Node,
+            context.SemanticModel.GetEnclosingSymbol(context.Node.SpanStart, context.CancellationToken));
+    }
+
+    internal static bool IsOptionsDefault(Compilation compilation, SyntaxNode node, ISymbol? containingSymbol)
+    {
+        var owner = node.Ancestors().FirstOrDefault(static node =>
             node is FieldDeclarationSyntax or PropertyDeclarationSyntax or BaseMethodDeclarationSyntax);
         var isDefinition = owner is ConstructorDeclarationSyntax ||
             owner is FieldDeclarationSyntax field && field.Declaration.Variables.Any(variable =>
-                variable.Initializer?.Span.Contains(context.Node.Span) == true) ||
-            owner is PropertyDeclarationSyntax property && property.Initializer?.Span.Contains(context.Node.Span) == true;
-        return isDefinition && ConfigurationOwnership.IsWithinOptions(context.Compilation,
-            context.SemanticModel.GetEnclosingSymbol(context.Node.SpanStart, context.CancellationToken));
+                variable.Initializer?.Span.Contains(node.Span) == true) ||
+            owner is PropertyDeclarationSyntax property && property.Initializer?.Span.Contains(node.Span) == true;
+        return isDefinition && ConfigurationOwnership.IsWithinOptions(compilation, containingSymbol);
     }
 }

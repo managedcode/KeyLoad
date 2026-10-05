@@ -18,7 +18,7 @@ internal static class DueNoQuorumRf3IdentityWriter
         var resource = new ResourceDefinition(lane.Queue, ResourceKind.WorkQueue, partition.TransactionDomainId)
         { FieldPolicies = [policy], HeaderPolicies = [policy] };
         using var http = McpCallerHttp.Create(app, RequestCqrsRf3Protocol.Node1);
-        var administrator = new KeyLoadClient(http, profile.AdminKey);
+        var administrator = new KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
         var configured = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(
             Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, resource), cancellationToken).ConfigureAwait(false))
             .ConfigureAwait(false);

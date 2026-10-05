@@ -51,7 +51,7 @@ internal sealed class EpochStorageFixture : IDisposable
             throw new ArgumentOutOfRangeException(nameof(sourceEpoch));
         }
         StoreIdentity identity;
-        using (var store = new ZoneTreeStore(SourceOptions))
+        using (var store = new ZoneTreeStore(SourceOptions, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             store.Commit((transaction, position) =>
             {

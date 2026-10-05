@@ -55,7 +55,7 @@ internal sealed class NodeEpochReplicaSnapshotConversionTests
             .IsEquivalentTo(additionalSourceBytes);
         await Assert.That(Directory.EnumerateFiles(fixture.DestinationSnapshots).Select(path => Path.GetFileName(path)!))
             .IsEquivalentTo([originalPointer.FileName, AdditionalSourceImage]);
-        new ReplicaSnapshotStore(fixture.CanonicalStore, log, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration)).Recover();
+        new ReplicaSnapshotStore(fixture.CanonicalStore, log, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), UnitExecutionOptions.ReplicaExecution()).Recover();
     }
 
     private static async Task<(ImmutableArray<ReplicaEntry> Entries, byte[][] Bytes)> CaptureRetainedSuffixAsync(

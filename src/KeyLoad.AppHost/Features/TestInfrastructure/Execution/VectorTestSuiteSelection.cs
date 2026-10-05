@@ -1,13 +1,17 @@
+using KeyLoad;
 using System.Globalization;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
 
+[ConfigurationBinding]
 internal static class VectorTestSuiteSelection
 {
     internal static VectorComparisonProfile? Read(IConfiguration configuration, string suite, string? target, bool overrides)
     {
+        const string MessageText = "The vector-profile test selection is invalid.";
+
         var value = configuration[TestSuiteSettings.VectorProfileSetting];
         if (string.IsNullOrEmpty(value))
         {
@@ -27,7 +31,7 @@ internal static class VectorTestSuiteSelection
                 CultureInfo.InvariantCulture, out var nodes) || !IsolatedComparisonContract.Current.NodeCounts.Contains(nodes)
             || overrides)
         {
-            throw new InvalidOperationException("The vector-profile test selection is invalid.");
+            throw new InvalidOperationException(MessageText);
         }
 
         try
@@ -35,14 +39,14 @@ internal static class VectorTestSuiteSelection
             var profile = VectorComparisonProfile.Parse(value);
             if (configuration[ComparisonWorkerSelection.ProfileSetting] != profile.Id)
             {
-                throw new InvalidOperationException("The vector-profile test selection is invalid.");
+                throw new InvalidOperationException(MessageText);
             }
 
             return profile;
         }
         catch (ArgumentException)
         {
-            throw new InvalidOperationException("The vector-profile test selection is invalid.");
+            throw new InvalidOperationException(MessageText);
         }
     }
 }

@@ -23,7 +23,7 @@ internal sealed class OrleansWalSuccessorTests
         byte[] journal = [.. checkpoint, .. CreateSuccessorFrame(long.MaxValue)];
         await File.WriteAllBytesAsync(files.JournalPath, journal);
 
-        using (var recovered = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var recovered = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             await Assert.That(recovered.Position).IsEqualTo(long.MaxValue);
             await Assert.That(recovered.Read(view => view.ReadOwnedValue(BaselineKey)))
@@ -51,7 +51,7 @@ internal sealed class OrleansWalSuccessorTests
         // Keep the derived tree from the failed attempt: deleting it would hide
         // a premature apply of SuccessorKey before the corruption was reported.
         await File.WriteAllBytesAsync(files.JournalPath, checkpoint);
-        using (var recovered = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var recovered = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             await Assert.That(recovered.Position).IsEqualTo(long.MaxValue);
             await Assert.That(recovered.Read(view => view.ReadOwnedValue(BaselineKey)))
@@ -66,7 +66,7 @@ internal sealed class OrleansWalSuccessorTests
     private static async Task<byte[]> CreateCheckpointAsync(WalFileFixture files, long position)
     {
         StoreIdentity identity;
-        using (var seeded = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var seeded = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             seeded.Commit((transaction, _) =>
             {

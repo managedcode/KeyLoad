@@ -14,30 +14,39 @@ public sealed record QueueLaneRef([property: Orleans.Id(0)] PartitionRef Partiti
 [Orleans.Alias(NativeContractAliases.QueuePolicy)]
 public sealed record QueuePolicy
 {
+    private const int DefaultMaxAttempts = 5;
+    private const int DefaultMaxStoredMessages = 100_000;
+    private const int DefaultMaxStoredBytes = 1_073_741_824;
+    private const int DefaultMaxInFlightMessages = 1_000;
+    private const int DefaultMaxInFlightBytes = 67_108_864;
+    private const int DefaultMaxLeaseSeconds = 300;
+    private const int DefaultRetryBaseMilliseconds = 1_000;
+    private const int DefaultRetryMaxMilliseconds = 300_000;
+
     /// <summary>Gets or sets the max attempts value.</summary>
     [Orleans.Id(0)]
-    public int MaxAttempts { get; init; } = 5;
+    public int MaxAttempts { get; init; } = DefaultMaxAttempts;
     /// <summary>Gets or sets the max stored messages value.</summary>
     [Orleans.Id(1)]
-    public long MaxStoredMessages { get; init; } = 100_000;
+    public long MaxStoredMessages { get; init; } = DefaultMaxStoredMessages;
     /// <summary>Gets or sets the max stored bytes value.</summary>
     [Orleans.Id(2)]
-    public long MaxStoredBytes { get; init; } = 1_073_741_824;
+    public long MaxStoredBytes { get; init; } = DefaultMaxStoredBytes;
     /// <summary>Gets or sets the max in flight messages value.</summary>
     [Orleans.Id(3)]
-    public int MaxInFlightMessages { get; init; } = 1_000;
+    public int MaxInFlightMessages { get; init; } = DefaultMaxInFlightMessages;
     /// <summary>Gets or sets the max in flight bytes value.</summary>
     [Orleans.Id(4)]
-    public long MaxInFlightBytes { get; init; } = 67_108_864;
+    public long MaxInFlightBytes { get; init; } = DefaultMaxInFlightBytes;
     /// <summary>Gets or sets the max lease seconds value.</summary>
     [Orleans.Id(5)]
-    public int MaxLeaseSeconds { get; init; } = 300;
+    public int MaxLeaseSeconds { get; init; } = DefaultMaxLeaseSeconds;
     /// <summary>Gets or sets the retry base milliseconds value.</summary>
     [Orleans.Id(6)]
-    public int RetryBaseMilliseconds { get; init; } = 1_000;
+    public int RetryBaseMilliseconds { get; init; } = DefaultRetryBaseMilliseconds;
     /// <summary>Gets or sets the retry max milliseconds value.</summary>
     [Orleans.Id(7)]
-    public int RetryMaxMilliseconds { get; init; } = 300_000;
+    public int RetryMaxMilliseconds { get; init; } = DefaultRetryMaxMilliseconds;
 }
 
 /// <summary>Adds a message to a work queue with scheduling and ordering metadata.</summary>
@@ -50,8 +59,11 @@ public sealed record QueuePolicy
 /// <param name="OrderingKey">Groups messages that must retain their ordering.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.EnqueueMessage)]
-public sealed record EnqueueMessage([property: Orleans.Id(0)] string Queue, [property: Orleans.Id(1)] string MessageId, [property: Orleans.Id(2)] string PayloadJson, [property: Orleans.Id(3)] string HeadersJson = "{}",
-    [property: Orleans.Id(4)] DateTimeOffset? NotBefore = null, [property: Orleans.Id(5)] DateTimeOffset? ExpiresAt = null, [property: Orleans.Id(6)] string? OrderingKey = null) : Mutation(Queue);
+public sealed record EnqueueMessage([property: Orleans.Id(0)] string Queue, [property: Orleans.Id(1)] string MessageId, [property: Orleans.Id(2)] string PayloadJson, [property: Orleans.Id(3)] string HeadersJson = EnqueueMessage.DefaultHeadersJson,
+    [property: Orleans.Id(4)] DateTimeOffset? NotBefore = null, [property: Orleans.Id(5)] DateTimeOffset? ExpiresAt = null, [property: Orleans.Id(6)] string? OrderingKey = null) : Mutation(Queue)
+{
+    private const string DefaultHeadersJson = "{}";
+}
 
 /// <summary>Identifies the persisted lifecycle state of a queued message.</summary>
 public enum MessageState
@@ -98,8 +110,12 @@ public sealed record MessageBody([property: Orleans.Id(0)] string Id, [property:
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.MessageMetadata)]
 public sealed record MessageMetadata([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] MessageState State, [property: Orleans.Id(2)] int Attempts, [property: Orleans.Id(3)] long StateVersion, [property: Orleans.Id(4)] long ReadySequence,
-    [property: Orleans.Id(5)] DateTimeOffset? NotBefore, [property: Orleans.Id(6)] DateTimeOffset? ExpiresAt, [property: Orleans.Id(7)] string? LeaseOwner = null, [property: Orleans.Id(8)] long LeaseVersion = 0,
-    [property: Orleans.Id(9)] DateTimeOffset? LeaseUntil = null, [property: Orleans.Id(10)] long DeliveryGeneration = 1, [property: Orleans.Id(11)] string? SafeFailureCode = null);
+    [property: Orleans.Id(5)] DateTimeOffset? NotBefore, [property: Orleans.Id(6)] DateTimeOffset? ExpiresAt, [property: Orleans.Id(7)] string? LeaseOwner = null, [property: Orleans.Id(8)] long LeaseVersion = MessageMetadata.DefaultLeaseVersion,
+    [property: Orleans.Id(9)] DateTimeOffset? LeaseUntil = null, [property: Orleans.Id(10)] long DeliveryGeneration = MessageMetadata.DefaultDeliveryGeneration, [property: Orleans.Id(11)] string? SafeFailureCode = null)
+{
+    private const int DefaultLeaseVersion = 0;
+    private const int DefaultDeliveryGeneration = 1;
+}
 
 /// <summary>Reports queue storage and in-flight usage and the next ready sequence.</summary>
 /// <param name="StoredMessages">Specifies the stored messages value.</param>
@@ -133,8 +149,13 @@ public sealed record Delivery([property: Orleans.Id(0)] string Id, [property: Or
 /// <param name="LeaseSeconds">Requests the message lease duration.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ReceiveRequest)]
-public sealed record ReceiveRequest([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] QueueLaneRef Lane, [property: Orleans.Id(2)] int MaxMessages = 1,
-    [property: Orleans.Id(3)] int MaxBytes = 1_048_576, [property: Orleans.Id(4)] int LeaseSeconds = 30);
+public sealed record ReceiveRequest([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] QueueLaneRef Lane, [property: Orleans.Id(2)] int MaxMessages = ReceiveRequest.DefaultMaxMessages,
+    [property: Orleans.Id(3)] int MaxBytes = ReceiveRequest.DefaultMaxBytes, [property: Orleans.Id(4)] int LeaseSeconds = ReceiveRequest.DefaultLeaseSeconds)
+{
+    private const int DefaultMaxMessages = 1;
+    private const int DefaultMaxBytes = 1_048_576;
+    private const int DefaultLeaseSeconds = 30;
+}
 
 /// <summary>Returns leased deliveries and their committed receive token.</summary>
 /// <param name="RequestId">Identifies this receive request.</param>

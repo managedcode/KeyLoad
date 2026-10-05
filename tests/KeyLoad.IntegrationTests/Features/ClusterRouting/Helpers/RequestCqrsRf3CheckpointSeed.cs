@@ -18,7 +18,7 @@ internal static class RequestCqrsRf3CheckpointSeed
         RequestCqrsRf3Workload workload, NodeEpochRf3Profile profile, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(app, RequestCqrsRf3Protocol.Node1);
-        var sdk = new KeyLoadClient(http, profile.AdminKey);
+        var sdk = new KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
         await ConfigureCollectionAsync(sdk, workload.Partition, cancellationToken).ConfigureAwait(false);
         var receipts = await CommitRecordsAsync(sdk, workload.Partition, profile.Incarnation, cancellationToken)
             .ConfigureAwait(false);

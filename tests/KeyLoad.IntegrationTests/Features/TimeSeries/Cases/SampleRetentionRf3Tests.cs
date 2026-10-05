@@ -17,8 +17,8 @@ internal sealed class SampleRetentionRf3Tests(ClusterFixture fixture)
         var scenario = await PrepareAsync(deadline.Token);
         using var writerHttp = McpCallerHttp.Create(fixture, "node1");
         using var readerHttp = McpCallerHttp.Create(fixture, "node3");
-        var writer = new KeyLoadClient(writerHttp, fixture.AdminKey);
-        var reader = new KeyLoadClient(readerHttp, fixture.AdminKey);
+        var writer = new KeyLoadClient(writerHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
+        var reader = new KeyLoadClient(readerHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, "node2", fixture.AdminKey, deadline.Token);
         var cutoff = TimeSeriesRf3Scenario.Start.AddMinutes(3);
         var command = new CommandRequest(Guid.NewGuid(), scenario.Partition,
@@ -52,7 +52,7 @@ internal sealed class SampleRetentionRf3Tests(ClusterFixture fixture)
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             TimeSeriesRf3Scenario.Set, Capability.SeriesRead, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, "node3");
-        var reader = new KeyLoadClient(http, identity.Secret);
+        var reader = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, "node2", identity.Secret, deadline.Token);
         var command = new CommandRequest(Guid.NewGuid(), scenario.Partition,
             [new ExpireSamples(TimeSeriesRf3Scenario.Set, TimeSeriesRf3Scenario.Series,

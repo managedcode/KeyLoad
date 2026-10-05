@@ -69,7 +69,7 @@ internal static class SqlModelViewRf3AuthorizationAssertions
         var identity = await McpPersistedIdentity.CreateAsync(fixture,
             scenario.Partition, resource, onlyCapability, cancellationToken);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture,
             McpCallerProtocol.Node3, identity.Secret, cancellationToken);
         var result = await sdk.QueryAsync(request, cancellationToken);

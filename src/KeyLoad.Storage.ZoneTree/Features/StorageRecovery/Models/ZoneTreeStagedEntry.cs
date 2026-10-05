@@ -8,29 +8,33 @@ internal sealed record ZoneTreeStagedEntry(byte[] Key, byte[]? Value)
 
 internal sealed class ZoneTreeStagedEntryComparer : IComparer<ZoneTreeStagedEntry>
 {
+    private const int EqualKeys = 0;
+    private const int LowerKey = -1;
+    private const int HigherKey = 1;
+
     internal static ZoneTreeStagedEntryComparer Instance { get; } = new();
 
     public int Compare(ZoneTreeStagedEntry? left, ZoneTreeStagedEntry? right)
     {
         if (ReferenceEquals(left, right))
         {
-            return 0;
+            return EqualKeys;
         }
         if (left is null)
         {
-            return -1;
+            return LowerKey;
         }
         if (right is null)
         {
-            return 1;
+            return HigherKey;
         }
         if (left.IsHigh)
         {
-            return 1;
+            return HigherKey;
         }
         if (right.IsHigh)
         {
-            return -1;
+            return LowerKey;
         }
 
         return BinaryKeyComparer.Instance.Compare(left.Key, right.Key);

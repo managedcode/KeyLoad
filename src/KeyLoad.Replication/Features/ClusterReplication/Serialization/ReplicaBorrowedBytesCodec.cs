@@ -10,6 +10,8 @@ namespace KeyLoad.Replication;
 // reference marker instead of allocating the official reader's byte[] before admission.
 internal sealed class ReplicaBorrowedBytesCodec : IFieldCodec<ReadOnlyMemory<byte>>
 {
+    private const int NullReferenceId = 0;
+
     private readonly IFieldCodec<ReadOnlyMemory<byte>> writerCodec = new ReadOnlyMemoryOfByteCodec();
 
     public ReadOnlyMemory<byte> ReadValue<TInput>(ref Reader<TInput> reader, Field field)
@@ -18,7 +20,7 @@ internal sealed class ReplicaBorrowedBytesCodec : IFieldCodec<ReadOnlyMemory<byt
         {
             ReferenceCodec.MarkValueField(reader.Session);
             var reference = reader.ReadVarUInt32();
-            if (reference == 0)
+            if (reference == NullReferenceId)
             {
                 return default;
             }

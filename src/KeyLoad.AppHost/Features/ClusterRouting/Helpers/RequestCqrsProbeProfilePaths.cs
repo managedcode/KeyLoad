@@ -41,7 +41,9 @@ internal static class RequestCqrsProbeProfilePaths
 
     private static string CanonicalDirectory(string path)
     {
-        if (path.Length is 0 or > MaximumPathCharacters || !Path.IsPathFullyQualified(path))
+        const int StructuralValue = 0;
+
+        if (path.Length is StructuralValue or > MaximumPathCharacters || !Path.IsPathFullyQualified(path))
         { throw new InvalidOperationException(InvalidConfiguration); }
         var full = Path.GetFullPath(path);
         var trimmed = Path.TrimEndingDirectorySeparator(full);
@@ -60,12 +62,14 @@ internal static class RequestCqrsProbeProfilePaths
 
     private static void ValidateDirectoryAndAncestors(string path, UnixFileMode? expectedMode)
     {
+        const int OwnerEntryCount = 0;
+
         if (OperatingSystem.IsWindows())
         { throw new InvalidOperationException(InvalidConfiguration); }
         for (var current = path; current is not null; current = Path.GetDirectoryName(current))
         {
             var attributes = File.GetAttributes(current);
-            if ((attributes & FileAttributes.Directory) == 0 || (attributes & FileAttributes.ReparsePoint) != 0)
+            if ((attributes & FileAttributes.Directory) == OwnerEntryCount || (attributes & FileAttributes.ReparsePoint) != OwnerEntryCount)
             { throw new InvalidOperationException(InvalidConfiguration); }
             if (string.Equals(current, path, StringComparison.Ordinal) && expectedMode is { } mode
                 && File.GetUnixFileMode(current) != mode)
@@ -75,8 +79,10 @@ internal static class RequestCqrsProbeProfilePaths
 
     private static void ValidateRootEntries(string root)
     {
+        const int Step = 1;
+
         var voters = RequestCqrsProbeProfileSettingsReader.VoterNames;
-        var entries = Directory.EnumerateFileSystemEntries(root).Take(voters.Count + 1).ToArray();
+        var entries = Directory.EnumerateFileSystemEntries(root).Take(voters.Count + Step).ToArray();
         if (entries.Length != voters.Count
             || voters.Any(voter => !entries.Contains(Path.Combine(root, voter), StringComparer.Ordinal)))
         { throw new InvalidOperationException(InvalidConfiguration); }
@@ -84,8 +90,12 @@ internal static class RequestCqrsProbeProfilePaths
 
     private static void ValidateOwnerDirectory(string directory, string sessionId, string voter)
     {
-        var entries = Directory.EnumerateFileSystemEntries(directory).Take(2).ToArray();
-        if (entries.Length != 1 || !string.Equals(Path.GetFileName(entries[0]), OwnerFileName, StringComparison.Ordinal))
+        const int CountValue = 2;
+        const int OwnerEntryCount = 1;
+        const int FirstIndex = 0;
+
+        var entries = Directory.EnumerateFileSystemEntries(directory).Take(CountValue).ToArray();
+        if (entries.Length != OwnerEntryCount || !string.Equals(Path.GetFileName(entries[FirstIndex]), OwnerFileName, StringComparison.Ordinal))
         { throw new InvalidOperationException(InvalidConfiguration); }
         var ownerPath = Path.Combine(directory, OwnerFileName);
         var owner = RequestCqrsProbeOwnerReader.ReadFile(ownerPath);

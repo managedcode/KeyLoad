@@ -92,7 +92,7 @@ internal sealed class QueryAdapterValidationTests
         db.Configure("orders", ResourceKind.Collection);
         db.Commit(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}"));
         var engine = new QueryEngine(new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxScanRecords = 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()), UnitExecutionOptions.QueryExecution());
-        var request = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").ToRequest(true, "invalid-cursor");
+        var request = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).ToRequest(true, "invalid-cursor");
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", request)).Code).IsEqualTo(ErrorCode.CursorExpired);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", request with { Cursor = null })).Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
@@ -105,9 +105,9 @@ internal sealed class QueryAdapterValidationTests
         db.Commit(Enumerable.Range(0, 6).Select(index => (Mutation)new PutDocument("orders", "order-" + index,
             JsonSerializer.Serialize(new { status = "open", payload = new string('x', 500) }))).ToArray());
         var engine = new QueryEngine(new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = 1_500 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()), UnitExecutionOptions.QueryExecution());
-        var query = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").Where(row => row.Status == "open").ToRequest();
+        var query = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Where(row => row.Status == "open").ToRequest();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", query)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        var point = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").Where(row => QueryFunctions.DocumentId(row) == "order-0").ToRequest();
+        var point = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Where(row => QueryFunctions.DocumentId(row) == "order-0").ToRequest();
         await Assert.That(engine.ExecuteAst("root", point).Rows).HasSingleItem();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.StartLiveQuery("root", new(query))).Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
@@ -119,7 +119,7 @@ internal sealed class QueryAdapterValidationTests
         db.Configure("orders", ResourceKind.Collection, fields: [new("/secret", "pii")]);
         db.Commit(new PutDocument("orders", new string('a', 200), "{\"secret\":\"CANARY\"}"));
         var engine = new QueryEngine(new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = 100 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()), UnitExecutionOptions.QueryExecution());
-        var query = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").ToRequest(true);
+        var query = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).ToRequest(true);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", query)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
@@ -131,7 +131,7 @@ internal sealed class QueryAdapterValidationTests
         db.Configure("other", ResourceKind.Collection);
         db.Commit(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}"));
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
-        var request = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").Take(1).ToRequest(true);
+        var request = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Take(1).ToRequest(true);
         var first = engine.ExecuteAst("root", request);
         db.Submit(OperationKind.SetDispatch, true).Get<bool>();
         db.Commit(new PutDocument("other", "unrelated", "{}"));

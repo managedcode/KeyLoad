@@ -1,9 +1,11 @@
 using System.Runtime.CompilerServices;
 using StackExchange.Redis;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, string prefix, ComparisonTopology topology, int corpusCount)
+internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, string prefix, ComparisonTopology topology, int corpusCount,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     : IComparisonSession
 {
     private const string ClientCommand = "CLIENT";
@@ -14,7 +16,6 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
     private const string WaitAofFailed = "RedisWaitAofFailed";
     private const int RequiredLocalFsync = 1;
     private const int RequiredReplicaFsync = 1;
-    private const int ReceiptTimeoutMilliseconds = 3000;
     private readonly IDatabase database = connection.GetDatabase();
 
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
@@ -104,7 +105,8 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
         {
             throw new ComparisonFailureException(WriteConnectionReplaced);
         }
-        var arguments = new object[] { RequiredLocalFsync, RequiredReplicaFsync, ReceiptTimeoutMilliseconds };
+        var timeoutMilliseconds = checked((int)Math.Ceiling(lifecycleOptions.Value.RedisReceiptTimeout.TotalMilliseconds));
+        var arguments = new object[] { RequiredLocalFsync, RequiredReplicaFsync, timeoutMilliseconds };
         var reply = (RedisResult[])(await database.ExecuteAsync(WaitAofCommand, arguments, CommandFlags.DemandMaster).WaitAsync(token))!;
         if (reply.Length != 2 || (long)reply[0] < RequiredLocalFsync || (long)reply[1] < RequiredReplicaFsync)
         {

@@ -41,7 +41,7 @@ internal sealed record TimeSeriesRf3Scenario(PartitionRef Partition)
         var partition = new PartitionRef("series-tenant-" + Guid.NewGuid().ToString("N"), Database,
             TransactionDomain, Guid.NewGuid().ToString("N"));
         using var http = McpCallerHttp.Create(fixture, Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var definition = new ResourceDefinition(Set, ResourceKind.TimeSeries, partition.TransactionDomainId)
         {
             FieldPolicies = [new(SecretField, SecretClassification, SecretGrant)]
@@ -56,7 +56,7 @@ internal sealed record TimeSeriesRf3Scenario(PartitionRef Partition)
         ImmutableArray<SampleData> samples, string tags, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var command = new CommandRequest(Guid.NewGuid(), Partition,
             [new AppendSamples(Set, seriesId, samples, tags)]);
         await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(command, cancellationToken));

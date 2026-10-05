@@ -28,7 +28,7 @@ internal sealed class KeyCodecEnvelopeOwnershipTests
             Array.Fill(value, (byte)0x36);
             var expectedValue = value.ToArray();
             var envelope = NativeSerialization.Serialize(new[] { new StorageMutation(expectedKey, expectedValue) });
-            using (var store = new ZoneTreeStore(new(directory)))
+            using (var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 store.Commit((transaction, _) => StageAndMutateInputs(transaction, key, value));
                 returned = true;
@@ -42,7 +42,7 @@ internal sealed class KeyCodecEnvelopeOwnershipTests
             await Assert.That(mutations[0].Key.Span.SequenceEqual(expectedKey)).IsTrue();
             await Assert.That(mutations[0].Value!.Value.Span.SequenceEqual(expectedValue)).IsTrue();
 
-            using var reopened = new ZoneTreeStore(new(directory));
+            using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await Assert.That(reopened.Position).IsEqualTo(1L);
             await Assert.That(reopened.Read(view => view.ReadOwnedValue(expectedKey))!.SequenceEqual(expectedValue)).IsTrue();
         }

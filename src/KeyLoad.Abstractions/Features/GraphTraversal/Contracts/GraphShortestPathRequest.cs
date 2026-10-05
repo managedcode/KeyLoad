@@ -20,7 +20,12 @@ public sealed record GraphShortestPathRequest(
     [property: Orleans.Id(2)] string Graph,
     [property: Orleans.Id(3)] EntityRef From,
     [property: Orleans.Id(4)] EntityRef To,
-    [property: Orleans.Id(5)] int MaxDepth = 16,
-    [property: Orleans.Id(6)] int MaxVertices = 1_000,
-    [property: Orleans.Id(7)] int MaxEdges = 5_000,
-    [property: Orleans.Id(8)] ImmutableArray<string>? Labels = null);
+    [property: Orleans.Id(5)] int MaxDepth = GraphShortestPathRequest.DefaultMaxDepth,
+    [property: Orleans.Id(6)] int MaxVertices = GraphShortestPathRequest.DefaultMaxVertices,
+    [property: Orleans.Id(7)] int MaxEdges = GraphShortestPathRequest.DefaultMaxEdges,
+    [property: Orleans.Id(8)] ImmutableArray<string>? Labels = null)
+{
+    private const int DefaultMaxDepth = 16;
+    private const int DefaultMaxVertices = 1_000;
+    private const int DefaultMaxEdges = 5_000;
+}

@@ -36,15 +36,9 @@ internal static class ZoneTreePersistenceFormat
     internal const int MaximumBackupManifestBytes = 16_384;
     internal const int MaximumIdentityFileBytes = 4_096;
     internal const int SigningKeyBytes = 32;
-    internal const int CheckpointBatchBytes = 4_194_304;
-    internal const int CheckpointBatchRecords = 1_000;
     internal const int StorageValueHeaderBytes = 1;
     internal const byte DeletedValueMarker = 0;
     internal const byte LiveValueMarker = 1;
-    internal const int DefaultMaxFrameBytes = 33_554_432;
-    internal const long DefaultMaxSnapshotBytes = 4_294_967_296;
-    internal const int MaximumRangeRecords = 100_000;
-    internal const long MaximumRangeWorkBytes = 67_108_864;
     internal const string OwnerLockFileName = "owner.lock";
     internal const string IdentityFileName = "identity.json";
     internal const string JournalFileName = "commands.wal";

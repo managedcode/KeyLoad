@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 
@@ -5,12 +6,18 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeSnapshotUpgradeRunner
 {
+    private const int FileStartPosition = 0;
+
     private const int BufferBytes = ZoneTreePersistenceFormat.FileBufferBytes;
 
     internal static StorageSnapshot VerifySource(string sourcePath, Guid incarnation, int sourceDataEpoch,
-        ZoneTreeSnapshotUpgradeOptions? options)
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, ZoneTreeSnapshotUpgradeOptions? options)
     {
-        var settings = ZoneTreeSnapshotUpgradeSafety.ValidateOptions(options);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        var policy = executionOptions.Value;
+        ArgumentNullException.ThrowIfNull(policy);
+        policy.Validate();
+        var settings = ZoneTreeSnapshotUpgradeSafety.ValidateOptions(options, policy);
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
         ZoneTreeSnapshotUpgradeSafety.ValidateIncarnation(incarnation);
         ZoneTreeSnapshotUpgradeSafety.ValidateSourceEpoch(sourceDataEpoch);
@@ -29,9 +36,13 @@ internal static class ZoneTreeSnapshotUpgradeRunner
     }
 
     internal static StorageSnapshot Upgrade(string sourcePath, string destinationPath, Guid incarnation,
-        int sourceDataEpoch, ZoneTreeSnapshotUpgradeOptions? options)
+        int sourceDataEpoch, IOptions<ZoneTreeStorageExecutionOptions> executionOptions, ZoneTreeSnapshotUpgradeOptions? options)
     {
-        var settings = ZoneTreeSnapshotUpgradeSafety.ValidateOptions(options);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        var policy = executionOptions.Value;
+        ArgumentNullException.ThrowIfNull(policy);
+        policy.Validate();
+        var settings = ZoneTreeSnapshotUpgradeSafety.ValidateOptions(options, policy);
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
         ZoneTreeSnapshotUpgradeSafety.ValidateIncarnation(incarnation);
@@ -75,7 +86,7 @@ internal static class ZoneTreeSnapshotUpgradeRunner
         var outputSnapshot = ZoneTreeSnapshotUpgradeOutput.Write(destination, settings, firstPass.Snapshot,
             outputCreated, visitor =>
             {
-                input.Position = 0;
+                input.Position = FileStartPosition;
                 secondSnapshot = ReadSourceSnapshot(input,
                     ReaderOptions(source, settings), mutation =>
                     {
@@ -87,7 +98,7 @@ internal static class ZoneTreeSnapshotUpgradeRunner
         var secondDigest = ZoneTreeSnapshotUpgradeDigest.Finish(secondSemantic);
         VerifySamePass(firstPass, secondSnapshot, secondDigest);
         var verifiedOutput = ReadOutput(destination, settings, firstPass, outputSnapshot);
-        input.Position = 0;
+        input.Position = FileStartPosition;
         if (!ZoneTreeSnapshotUpgradeDigest.Equal(rawDigest,
                 ZoneTreeSnapshotUpgradeIO.DigestFile(input, settings.MaxSnapshotBytes)))
         { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.BackupFileVerificationFailed); }
@@ -122,7 +133,7 @@ internal static class ZoneTreeSnapshotUpgradeRunner
     private static ReadResult ReadSource(FileStream input, ZoneTreeSnapshotUpgradeSettings settings, Guid incarnation,
         int sourceDataEpoch)
     {
-        input.Position = 0;
+        input.Position = FileStartPosition;
         using var semantic = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var snapshot = ReadSourceSnapshot(input, ReaderOptions(input.Name, settings),
             mutation => ZoneTreeSnapshotUpgradeDigest.Append(semantic, mutation), incarnation, sourceDataEpoch);
@@ -137,15 +148,10 @@ internal static class ZoneTreeSnapshotUpgradeRunner
             : ZoneTreeCheckpointReader.ReadNative4ForUpgrade(input, options, apply, incarnation);
 
     private static ZoneTreeStoreOptions ReaderOptions(string directory, ZoneTreeSnapshotUpgradeSettings settings)
-        => new(directory) { MaxFrameBytes = settings.MaxFrameBytes, MaxSnapshotBytes = settings.MaxSnapshotBytes };
+        => settings.Descriptor with { Directory = directory, FaultObserver = null };
 
     private static ZoneTreeStoreOptions WriterOptions(string directory, ZoneTreeSnapshotUpgradeSettings settings)
-        => new(directory)
-        {
-            MaxFrameBytes = settings.MaxFrameBytes,
-            MaxSnapshotBytes = settings.MaxSnapshotBytes,
-            FaultObserver = settings.FaultObserver
-        };
+        => settings.Descriptor with { Directory = directory };
 
     internal static StorageSnapshot WriteOutput(FileStream output, string path,
         ZoneTreeSnapshotUpgradeSettings settings, StorageSnapshot snapshot,

@@ -58,8 +58,13 @@ public sealed record IndexDefinition([property: Orleans.Id(0)] string Name, [pro
 /// <param name="RequiredForProcessing">Requires this field for processing when true.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.SensitiveFieldPolicy)]
-public sealed record SensitiveFieldPolicy([property: Orleans.Id(0)] string Path, [property: Orleans.Id(1)] string Classification, [property: Orleans.Id(2)] string RawReadGrant = "pii.read",
-    [property: Orleans.Id(3)] string RawUseGrant = "pii.use", [property: Orleans.Id(4)] string WriteGrant = "pii.write", [property: Orleans.Id(5)] bool RequiredForProcessing = false);
+public sealed record SensitiveFieldPolicy([property: Orleans.Id(0)] string Path, [property: Orleans.Id(1)] string Classification, [property: Orleans.Id(2)] string RawReadGrant = SensitiveFieldPolicy.DefaultRawReadGrant,
+    [property: Orleans.Id(3)] string RawUseGrant = SensitiveFieldPolicy.DefaultRawUseGrant, [property: Orleans.Id(4)] string WriteGrant = SensitiveFieldPolicy.DefaultWriteGrant, [property: Orleans.Id(5)] bool RequiredForProcessing = false)
+{
+    private const string DefaultRawReadGrant = "pii.read";
+    private const string DefaultRawUseGrant = "pii.use";
+    private const string DefaultWriteGrant = "pii.write";
+}
 
 /// <summary>Defines a database resource and its transaction and feature policies.</summary>
 /// <param name="Name">Provides the resource or index name.</param>
@@ -69,6 +74,8 @@ public sealed record SensitiveFieldPolicy([property: Orleans.Id(0)] string Path,
 [Orleans.Alias(NativeContractAliases.ResourceDefinition)]
 public sealed record ResourceDefinition([property: Orleans.Id(0)] string Name, [property: Orleans.Id(1)] ResourceKind Kind, [property: Orleans.Id(2)] string TransactionDomainId)
 {
+    private const int InitialSchemaVersion = 1;
+
     /// <summary>Gets the indexes maintained for the resource.</summary>
     [Orleans.Id(3)]
     public ImmutableArray<IndexDefinition> Indexes { get; init; } = [];
@@ -89,7 +96,7 @@ public sealed record ResourceDefinition([property: Orleans.Id(0)] string Name, [
     public DocumentAuthority Authority { get; init; }
     /// <summary>Gets the resource schema version.</summary>
     [Orleans.Id(9)]
-    public long SchemaVersion { get; init; } = 1;
+    public long SchemaVersion { get; init; } = InitialSchemaVersion;
     /// <summary>Gets whether dispatch is paused.</summary>
     [Orleans.Id(10)]
     public bool Paused { get; init; }

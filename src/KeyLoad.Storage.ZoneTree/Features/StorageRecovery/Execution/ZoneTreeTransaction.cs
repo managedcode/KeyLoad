@@ -5,6 +5,9 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomicTransaction
 {
+    private const int NoValueBytes = 0;
+    private const int NoStagedBytes = 0;
+
     private StorageMutation[]? preparedChanges;
     private byte[]? preparedPayload;
     private long stagedBytes;
@@ -19,7 +22,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
             return runtime.View.ReadOwnedValue(key);
         }
 
-        runtime.ReadCounters.Point(owned: true, (long)key.Length + (entry!.Value?.Length ?? 0));
+        runtime.ReadCounters.Point(owned: true, (long)key.Length + (entry!.Value?.Length ?? NoValueBytes));
         return entry.Value?.ToArray();
     }
 
@@ -32,7 +35,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
             return runtime.View.ReadValue(key, reader, observer);
         }
 
-        var bytes = (long)key.Length + (staged!.Value?.Length ?? 0);
+        var bytes = (long)key.Length + (staged!.Value?.Length ?? NoValueBytes);
         runtime.ReadCounters.Point(owned: false, bytes);
         observer?.Invoke(bytes);
         if (staged.Value is null)
@@ -45,12 +48,12 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
     }
 
     private static long MutationBytes(byte[] key, byte[]? value)
-        => key.LongLength + (value?.LongLength ?? 0);
+        => key.LongLength + (value?.LongLength ?? NoStagedBytes);
 
     private void Stage(byte[] key, byte[]? value)
     {
         var replacing = Changes.TryGetValue(new(key, null), out var previous);
-        var bytes = stagedBytes - (replacing ? MutationBytes(key, previous!.Value) : 0)
+        var bytes = stagedBytes - (replacing ? MutationBytes(key, previous!.Value) : NoStagedBytes)
             + MutationBytes(key, value);
         if (bytes > runtime.Options.MaxFrameBytes)
         {
@@ -75,7 +78,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
     {
         preparedPayload = null;
         preparedChanges = null;
-        stagedBytes = 0;
+        stagedBytes = NoStagedBytes;
         Changes.Clear();
     }
 

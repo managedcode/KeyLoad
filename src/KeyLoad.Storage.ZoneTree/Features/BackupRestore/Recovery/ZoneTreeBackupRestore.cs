@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Storage.ZoneTree;
 
 /// <summary>Owns verified local backup and restore using one node-local store runtime.</summary>
@@ -17,7 +19,8 @@ internal sealed class ZoneTreeBackupRestore(ZoneTreeStoreRuntime runtime)
         }
     }
 
-    internal static StoreIdentity Restore(string backup, string destination, Guid? newIncarnation = null,
+    internal static StoreIdentity Restore(string backup, string destination,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid? newIncarnation = null,
         byte[]? newSigningKey = null) => ZoneTreeBackupRestoreRestore.Restore(
-            backup, destination, newIncarnation, newSigningKey);
+            backup, destination, executionOptions, newIncarnation, newSigningKey);
 }

@@ -8,15 +8,22 @@ internal static class DatabasePhaseArithmetic
     private const int InvalidBucket = -1;
     private const uint MicrosecondsPerSecond = 1_000_000;
     private static readonly int[] BoundaryMicroseconds =
-    [50, 100, 250, 500, 1_000, 2_000, 5_000, 10_000, 20_000, 50_000,
-        100_000, 250_000, 500_000, 1_000_000, 5_000_000];
+    [DatabasePhaseValues.FiftyMicroseconds, DatabasePhaseValues.OneHundredMicroseconds,
+        DatabasePhaseValues.TwoHundredFiftyMicroseconds, DatabasePhaseValues.FiveHundredMicroseconds,
+        DatabasePhaseValues.OneThousandMicroseconds, DatabasePhaseValues.TwoThousandMicroseconds,
+        DatabasePhaseValues.FiveThousandMicroseconds, DatabasePhaseValues.TenThousandMicroseconds,
+        DatabasePhaseValues.TwentyThousandMicroseconds, DatabasePhaseValues.FiftyThousandMicroseconds,
+        DatabasePhaseValues.OneHundredThousandMicroseconds,
+        DatabasePhaseValues.TwoHundredFiftyThousandMicroseconds,
+        DatabasePhaseValues.FiveHundredThousandMicroseconds,
+        DatabasePhaseValues.OneMillionMicroseconds, DatabasePhaseValues.FiveMillionMicroseconds];
 
     /// <summary>Precomputes inclusive threshold ticks with wide startup arithmetic.</summary>
     internal static long[] CreateBoundaries(long frequency)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(frequency);
         var boundaries = new long[BoundaryCount];
-        for (var index = 0; index < boundaries.Length; index++)
+        for (var index = DatabasePhaseValues.FirstBoundaryIndex; index < boundaries.Length; index++)
         {
             var numerator = (UInt128)(ulong)frequency * (uint)BoundaryMicroseconds[index];
             var ticks = numerator / MicrosecondsPerSecond;
@@ -29,7 +36,7 @@ internal static class DatabasePhaseArithmetic
     /// <summary>Maps elapsed Stopwatch ticks to one of sixteen inclusive buckets.</summary>
     internal static int BucketFor(long elapsed, long frequency)
     {
-        if (elapsed < 0 || frequency <= 0)
+        if (elapsed < DatabasePhaseValues.MinimumElapsedTicks || frequency <= DatabasePhaseValues.MinimumStopwatchFrequency)
         {
             return InvalidBucket;
         }
@@ -40,12 +47,12 @@ internal static class DatabasePhaseArithmetic
     /// <summary>Uses precomputed inclusive thresholds without hot-path arithmetic.</summary>
     internal static int BucketFor(long elapsed, ReadOnlySpan<long> boundaries)
     {
-        if (elapsed < 0 || boundaries.Length != BoundaryCount)
+        if (elapsed < DatabasePhaseValues.MinimumElapsedTicks || boundaries.Length != BoundaryCount)
         {
             return InvalidBucket;
         }
 
-        for (var index = 0; index < boundaries.Length; index++)
+        for (var index = DatabasePhaseValues.FirstBoundaryIndex; index < boundaries.Length; index++)
         {
             if (elapsed <= boundaries[index])
             {
@@ -59,15 +66,15 @@ internal static class DatabasePhaseArithmetic
     /// <summary>Attempts at most four compare-exchanges and never wraps a counter.</summary>
     internal static DatabaseProfileQuality TryIncrement(ref long counter)
     {
-        for (var attempt = 0; attempt < CasAttempts; attempt++)
+        for (var attempt = DatabasePhaseValues.FirstCasAttempt; attempt < CasAttempts; attempt++)
         {
             var observed = Interlocked.Read(ref counter);
-            if (observed == long.MaxValue || observed < 0)
+            if (observed == long.MaxValue || observed < DatabasePhaseValues.MinimumCounterValue)
             {
                 return DatabaseProfileQuality.SaturatedCounter;
             }
 
-            var incremented = observed + 1;
+            var incremented = observed + DatabasePhaseValues.CounterIncrement;
             if (Interlocked.CompareExchange(ref counter, incremented, observed) == observed)
             {
                 return incremented == long.MaxValue

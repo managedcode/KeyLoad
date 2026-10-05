@@ -105,7 +105,7 @@ internal sealed class ReplicaTermMetadataFixture : IDisposable
         log.Append([new(1, 1, null), new(2, 2, null)]);
         log.Commit(2);
         WriteAppliedCut(canonical, 2);
-        var snapshots = new ReplicaSnapshotStore(canonical, log, RecoveryExecutionOptions.Configuration(configuration));
+        var snapshots = new ReplicaSnapshotStore(canonical, log, RecoveryExecutionOptions.Configuration(configuration), RecoveryExecutionOptions.Replica());
         return snapshots.Create(2, 2);
     }
 

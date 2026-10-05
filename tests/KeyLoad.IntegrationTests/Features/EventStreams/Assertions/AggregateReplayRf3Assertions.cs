@@ -25,7 +25,7 @@ internal static class AggregateReplayRf3Assertions
         var reducer = new AggregateReplayReducer(AggregateReplayRf3Tokens.Reducer,
             AggregateReplayRf3Tokens.StateSchema, AggregateReplayRf3Tokens.EventSchema,
             "{\"" + AggregateReplayRf3Tokens.CountProperty + "\":0}", Apply);
-        var state = AggregateReplayReduction.Reduce(sdk, reducer);
+        var state = AggregateReplayReduction.Reduce(sdk, reducer, limitsOptions:IntegrationClientOptions.Replay());
         await Assert.That(state).IsEqualTo("{\"" + AggregateReplayRf3Tokens.CountProperty + "\":"
             + expectedCount.ToString(CultureInfo.InvariantCulture) + "}");
     }

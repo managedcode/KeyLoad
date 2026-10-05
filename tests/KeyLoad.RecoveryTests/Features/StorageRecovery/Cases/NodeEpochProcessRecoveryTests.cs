@@ -84,7 +84,7 @@ internal sealed class NodeEpochProcessRecoveryTests
         EpochPriorNodeProfile profile, EpochPriorProbeReceipt prior, NodeEpochInventory original,
         int dataEpoch, CancellationToken cancellationToken)
     {
-        var prepared = ServerNodeFormatUpgrade.Prepare(source, options);
+        var prepared = ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options));
         NativeNodeUpgradeLockProbe.Verify(source, NativeNodeUpgradeLockBoundary.AfterPrepare);
         await Assert.That(prepared.TargetEpoch).IsEqualTo(7);
         await Assert.That(prepared.CanonicalNodeId).IsEqualTo(prior.NodeId);
@@ -98,9 +98,9 @@ internal sealed class NodeEpochProcessRecoveryTests
         await Assert.That(oldSource.DataEpoch).IsEqualTo(prior.DataEpoch);
         await Assert.That(oldSource.NodeId).IsEqualTo(prior.NodeId);
         await Assert.That(oldSource.AppliedPosition).IsEqualTo(prior.AppliedPosition);
-        _ = ServerNodeFormatUpgrade.VerifyPrepared(source, options);
+        _ = ServerNodeFormatUpgrade.VerifyPrepared(source, RecoveryServerRuntimeOptions.Runtime(options));
         NativeNodeUpgradeLockProbe.Verify(source, NativeNodeUpgradeLockBoundary.AfterVerifyPrepared);
-        _ = ServerNodeFormatUpgrade.Publish(source, options);
+        _ = ServerNodeFormatUpgrade.Publish(source, RecoveryServerRuntimeOptions.Runtime(options));
         NativeNodeUpgradeLockProbe.Verify(source, NativeNodeUpgradeLockBoundary.AfterPublish);
         await Assert.That(Directory.Exists(destination)).IsTrue();
         await Assert.That(Directory.Exists(destination + ServerNodeUpgradeProtocol.StageSuffix)).IsFalse();
@@ -109,7 +109,7 @@ internal sealed class NodeEpochProcessRecoveryTests
         await NodeEpochCoordinatorAssertions.ApplyLaterOperationAsync(profile, destination,
             cancellationToken);
         var targetAfterWrite = await NodeEpochInventoryCapture.CaptureAsync(destination, cancellationToken);
-        var retry = ServerNodeFormatUpgrade.Prepare(source, options);
+        var retry = ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options));
         await Assert.That(retry.TargetEpoch).IsEqualTo(7);
         await NodeEpochInventoryCapture.AssertUnchangedAsync(destination, targetAfterWrite, cancellationToken);
         await NodeEpochInventoryCapture.AssertUnchangedAsync(source, original, cancellationToken);

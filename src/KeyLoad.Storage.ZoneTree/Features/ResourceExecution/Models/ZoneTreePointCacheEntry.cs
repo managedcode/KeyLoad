@@ -8,6 +8,9 @@ internal interface IZoneTreePointCacheCandidateOwner
 /// <summary>A privately owned positive value whose bytes remain charged while pinned.</summary>
 internal sealed class ZoneTreePointCacheEntry : IDisposable
 {
+    private const int NoActivePins = 0;
+    private const string LiveChargeReleaseMessage = "A live or pinned cache entry cannot release its charge.";
+
     private readonly IZoneTreePointCacheCandidateOwner _owner;
     private readonly byte[] _key;
     private readonly byte[] _buffer;
@@ -64,9 +67,9 @@ internal sealed class ZoneTreePointCacheEntry : IDisposable
             return;
         }
 
-        if (_ownsCharge && (!Retired || PinCount != 0))
+        if (_ownsCharge && (!Retired || PinCount != NoActivePins))
         {
-            throw new InvalidOperationException("A live or pinned cache entry cannot release its charge.");
+            throw new InvalidOperationException(LiveChargeReleaseMessage);
         }
 
         _disposed = true;
@@ -85,6 +88,10 @@ internal sealed class ZoneTreePointCacheEntry : IDisposable
 /// <summary>Owns a reserved key/fill charge until publication or idempotent disposal.</summary>
 internal sealed class ZoneTreePointCacheCandidate : IDisposable
 {
+    private const int PendingState = 0;
+    private const int AdoptedState = 1;
+    private const int ReleasedState = 2;
+
     private readonly IZoneTreePointCacheCandidateOwner _owner;
     private byte[]? _key;
     private ICacheMemoryReservation? _reservation;
@@ -112,7 +119,7 @@ internal sealed class ZoneTreePointCacheCandidate : IDisposable
 
     internal ICacheMemoryReservation? Reservation => _reservation;
 
-    internal bool IsPending => _state == 0;
+    internal bool IsPending => _state == PendingState;
 
     internal ZoneTreePointCacheEntry CreateEntry(IZoneTreePointCacheCandidateOwner owner,
         byte[] value, long generation)
@@ -132,19 +139,19 @@ internal sealed class ZoneTreePointCacheCandidate : IDisposable
 
     internal void MarkAdopted()
     {
-        _state = 1;
+        _state = AdoptedState;
         _key = null;
         _reservation = null;
     }
 
     internal ICacheMemoryReservation? MarkReleased()
     {
-        if (_state != 0)
+        if (_state != PendingState)
         {
             return null;
         }
 
-        _state = 2;
+        _state = ReleasedState;
         _key = null;
         var reservation = _reservation;
         _reservation = null;

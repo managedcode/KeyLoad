@@ -2,7 +2,7 @@
 
 Status: Accepted for per-method selection and audit; runtime/provider adoption
 pending. Date: 2026-10-05. Integration owner: KeyLoad lead.
-Requirements and acceptance: REQ/AC-ORL-001..012 in
+Requirements and acceptance: REQ/AC-ORL-001..013 in
 [ClusterRouting ExecutionPrimitives](../Features/ClusterRouting/ExecutionPrimitives.md).
 
 ## Context and decision
@@ -36,11 +36,11 @@ attributes grants CPU parallelism within one Orleans turn or moves file ownershi
 
 Evaluate native Durable Jobs for one-time persistent wake-ups with idempotent
 canonical effects. The repository pins Orleans 10.4.0, whose matching Durable
-Jobs package remains `10.4.0-alpha.1`. It is not registered in this source. The
-package and persistent journal/catalog provider, atomic enqueue/reconciliation,
-privacy, retry/admission and homogeneous rollout contracts must be frozen before
-integration. This ADR accepts their evaluation; it does not choose a provider or
-authorize replacing canonical ZoneTree schedule/saga state with a volatile queue.
+Jobs package remains `10.4.0-alpha.1`. The owner implementation approval now selects the bounded RF3-backed native
+journal provider frozen in [RuntimeJournal](../Features/ClusterRouting/RuntimeJournal.md),
+including private bootstrap, owner/content fencing, quotas, and already-due saga
+handoff. Runtime qualification remains pending. Canonical ZoneTree schedule/saga
+state and creator-authorized effects remain authoritative.
 
 Retain native GrainServices for per-silo/partitioned runtime support, borrowed
 silo-local DI owners and precise silo/activation lifecycle hooks. New loops
@@ -143,3 +143,12 @@ performed by this documentation stage.
 - [Durable Jobs v10.4.0 README](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.DurableJobs/README.md): native one-time at-least-once manager/handler and provider requirements.
 - [Durable Jobs v10.4.0 public API](https://github.com/dotnet/orleans/blob/v10.4.0/src/api/Orleans.DurableJobs/Orleans.DurableJobs.cs): native manager, handler, run context, registration and bounds.
 - [Orleans v10.4.0 release](https://github.com/dotnet/orleans/releases/tag/v10.4.0): matching prerelease Durable Jobs status.
+
+Native journal implementation stage, 2026-10-06: REQ/AC-ORL-013 in
+[RuntimeJournal](../Features/ClusterRouting/RuntimeJournal.md) owns the exact Core,
+Orleans and Server joins, ordered worker tasks, rollout/rollback, private identity
+and real recovery/RF3 acceptance. Scoped ORLEANSEXP005 is owner authorized. The
+native manager starts background work without awaiting its catalog at silo start;
+provider async calls wait on a separately canceled readiness gate until signed
+RF3 bootstrap and verification complete. The legacy epoch7 reader compatibility
+gate must be implemented and qualified before first journal admission.

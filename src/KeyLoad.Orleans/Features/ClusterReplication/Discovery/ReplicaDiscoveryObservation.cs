@@ -7,7 +7,8 @@ internal sealed class ReplicaDiscoveryObservation(
     int peerEnvelopeVersion,
     bool protocolCompatible,
     bool transportReady,
-    long observedTimestamp)
+    long observedTimestamp,
+    int runtimeJournalReaderContract = KeyLoad.Storage.StoreReaderContract.Legacy)
 {
     internal SiloAddress Address { get; } = address;
     internal int ApplicationRpcVersion { get; } = applicationRpcVersion;
@@ -15,5 +16,6 @@ internal sealed class ReplicaDiscoveryObservation(
     internal bool ProtocolCompatible { get; } = protocolCompatible;
     internal bool TransportReady { get; } = transportReady;
     internal long ObservedTimestamp { get; } = observedTimestamp;
+    internal int RuntimeJournalReaderContract { get; } = runtimeJournalReaderContract;
     internal bool Compatible => ProtocolCompatible && TransportReady;
 }

@@ -76,7 +76,7 @@ internal sealed class NativeMetadataFormatTests
     public async Task AcIs002NativeCheckpointDefectsRejectBeforeLiveStateAndOriginalInstalls(CheckpointDefect defect)
     {
         using var fixture = new MetadataBackupFixture();
-        using var store = new ZoneTreeStore(new(fixture.SourceDirectory));
+        using var store = new ZoneTreeStore(new(fixture.SourceDirectory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         store.CreateSnapshot(fixture.RestoredDirectory);
         var original = await File.ReadAllBytesAsync(fixture.RestoredDirectory);
         var length = BinaryPrimitives.ReadInt32LittleEndian(original.AsSpan(ZoneTreePersistenceFormat.PayloadLengthOffset));
@@ -180,7 +180,7 @@ internal sealed class NativeMetadataFormatTests
 
     private static async Task AssertRejectedRestore(MetadataBackupFixture fixture, ErrorCode expected)
     {
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(fixture.BackupDirectory, fixture.RestoredDirectory));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(fixture.BackupDirectory, fixture.RestoredDirectory, UnitExecutionOptions.StorageExecution()));
         await Assert.That(failure.Code).IsEqualTo(expected);
         await Assert.That(Directory.Exists(fixture.RestoredDirectory)).IsFalse();
     }

@@ -54,7 +54,7 @@ internal sealed record McpEventStreamScenario(PartitionRef Partition)
             + Guid.NewGuid().ToString(McpEventStreamTokens.GuidFormat), McpEventStreamTokens.Database,
             McpEventStreamTokens.Domain, Guid.NewGuid().ToString(McpEventStreamTokens.GuidFormat));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var client = new KeyLoadClient(http, fixture.AdminKey);
+        var client = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var definition = new ResourceDefinition(McpEventStreamTokens.StreamSet, ResourceKind.StreamSet,
             partition.TransactionDomainId);
         await McpCallerAssertions.SdkSuccessAsync(await client.ConfigureResourceAsync(Guid.NewGuid(),

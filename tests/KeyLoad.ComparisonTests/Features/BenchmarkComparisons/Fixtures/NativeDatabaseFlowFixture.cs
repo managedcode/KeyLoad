@@ -1,12 +1,12 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+using System.Net.Http.Headers;
+using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
-using System.Net.Http.Headers;
-using System.Text;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -23,19 +23,30 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
     private const int DeadlineMinutes = 5;
     private static readonly TimeSpan Deadline = TimeSpan.FromMinutes(DeadlineMinutes);
 
-    internal IOptions<NativeComparisonExecutionOptions> ExecutionOptions => NativeExecutionPolicyFixture.Read();
+    internal static IOptions<NativeComparisonExecutionOptions> ExecutionOptions => NativeExecutionPolicyFixture.Read();
     internal string Image => target == Surreal ? "docker.io/surrealdb/surrealdb:v3.2.4@" + BenchmarkResources.SurrealDbDigest : "ghcr.io/helixdb/helixdb:v0.0.10@" + BenchmarkResources.HelixDbDigest;
 
     internal static async Task<NativeDatabaseFlowFixture> CreateAsync(string target, CancellationToken token)
     {
         var root = Path.Combine(Path.GetTempPath(), "keyload-native-flow-" + Guid.NewGuid().ToString("N"));
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(["--KeyLoadTests:Suite=comparison"], token);
-        foreach (var runner in builder.Resources.OfType<ExecutableResource>().ToArray()) builder.Resources.Remove(runner);
+        foreach (var runner in builder.Resources.OfType<ExecutableResource>().ToArray())
+        {
+            builder.Resources.Remove(runner);
+        }
+
         var unusedRunner = builder.AddContainer("native-flow-anchor", "mcr.microsoft.com/dotnet/runtime", "10.0");
         var selection = new ComparisonWorkerSelection(target, 1, Scenario.PointRead, IsolatedComparisonContract.Current.Profile);
         var context = new IsolatedResourceContext(builder, selection, unusedRunner, root);
-        if (target == Surreal) IsolatedSurrealDbResources.Add(context);
-        else IsolatedHelixDbResources.Add(context);
+        if (target == Surreal)
+        {
+            IsolatedSurrealDbResources.Add(context);
+        }
+        else
+        {
+            IsolatedHelixDbResources.Add(context);
+        }
+
         builder.Resources.Remove(unusedRunner.Resource);
         var app = await builder.BuildAsync(token);
         try
@@ -47,7 +58,11 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
         catch (Exception)
         {
             await app.DisposeAsync();
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+
             throw;
         }
     }
@@ -66,6 +81,9 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
     public async ValueTask DisposeAsync()
     {
         await application.DisposeAsync();
-        if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+        if (Directory.Exists(root))
+        {
+            Directory.Delete(root, recursive: true);
+        }
     }
 }

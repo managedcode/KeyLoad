@@ -50,7 +50,7 @@ internal sealed class QueryAdapterTests
             var sql = $"SELECT d.id, d.number, d.status FROM orders d WHERE d.status = '{status}' AND d.number >= {minimumText} ORDER BY d.number DESC, d.id LIMIT {PageLimit}";
             var expected = engine.Execute("root", new(db.Partition, sql));
             var json = engine.ExecuteAst("root", QueryAdapterTestSupport.RoundTrip(new(db.Partition, new SqlParser(sql, new()).Parse())));
-            var csharp = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").Where(row => row.Status == status && row.Number >= minimum)
+            var csharp = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Where(row => row.Status == status && row.Number >= minimum)
                 .OrderByDescending(row => row.Number).ThenBy(row => QueryFunctions.DocumentId(row))
                 .Select(row => new { Id = QueryFunctions.DocumentId(row), row.Number, row.Status }).Take(PageLimit);
             var actual = engine.ExecuteAst("root", QueryAdapterTestSupport.RoundTrip(csharp.ToRequest()));

@@ -34,7 +34,7 @@ internal static class TwoRf3MembershipReadinessAssertions
         string adminKey, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(app, node);
-        var client = new KeyLoadClient(http, adminKey);
+        var client = new KeyLoadClient(http, adminKey, IntegrationClientOptions.Execution());
         var read = await client.QueryCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
         await RequireRejectedAsync(read.IsSuccess, read.Problem?.ErrorCode).ConfigureAwait(false);
         var partition = new PartitionRef("membership-stage1a", "database", "group-closure", node);

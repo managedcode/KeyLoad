@@ -1,4 +1,5 @@
 using Npgsql;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -14,9 +15,11 @@ internal static class PostgresSchemaInitialization
 
     internal static async Task InitializeAsync(NpgsqlConnection connection, IComparisonCorpus dataset,
         PostgresSchemaIdentity identity, Guid ownerGuid, ComparisonTopology topology, TargetProfile initialProfile,
-        Action<TargetProfile> updateProfile, Action markCommitAttempted, CancellationToken cancellationToken)
+        Action<TargetProfile> updateProfile, Action markCommitAttempted, CancellationToken cancellationToken,
+        IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     {
-        await PostgresTopology.ConfigureReplicationAsync(connection, topology, cancellationToken);
+        var nativeTopology = new PostgresTopology(lifecycleOptions);
+        await nativeTopology.ConfigureReplicationAsync(connection, topology, cancellationToken);
         await PostgresSchemaLifecycle.CreateAsync(connection, identity, ownerGuid, dataset.Settings.Dimensions,
             markCommitAttempted, cancellationToken);
         var profile = await VerifySettingsAsync(connection, initialProfile, updateProfile, cancellationToken);
@@ -27,7 +30,7 @@ internal static class PostgresSchemaInitialization
             await CopyEdgesAsync(connection, dataset, cancellationToken);
         }
         await AnalyzeAsync(connection, cancellationToken);
-        updateProfile(await PostgresTopology.ObserveCopiesAsync(connection, topology, profile, cancellationToken));
+        updateProfile(await nativeTopology.ObserveCopiesAsync(connection, topology, profile, cancellationToken));
     }
 
     private static async Task<TargetProfile> VerifySettingsAsync(NpgsqlConnection connection, TargetProfile profile,

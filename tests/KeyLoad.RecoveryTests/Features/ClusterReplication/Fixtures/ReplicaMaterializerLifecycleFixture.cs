@@ -41,7 +41,7 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
             openedLog = new(storeOwners.Replica, RecoveryExecutionOptions.Configuration(Configuration));
             Log = openedLog;
             Database = new(storeOwners.Canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
-            Materializer = new(Database, Log, new ReplicaSnapshotStore(storeOwners.Canonical, Log, RecoveryExecutionOptions.Configuration(Configuration)), RecoveryExecutionOptions.Replica());
+            Materializer = new(Database, Log, new ReplicaSnapshotStore(storeOwners.Canonical, Log, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica()), RecoveryExecutionOptions.Replica());
         }
         catch (Exception error)
         {
@@ -171,9 +171,9 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
     }
 
     private ZoneTreeStore OpenCanonicalStore() => new(new(CanonicalPath)
-    { Incarnation = Configuration.Incarnation, FaultObserver = Observe });
+    { Incarnation = Configuration.Incarnation, FaultObserver = Observe }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
 
-    private ZoneTreeStore OpenReplicaStore() => new(new(ReplicaPath) { Incarnation = Configuration.Incarnation });
+    private ZoneTreeStore OpenReplicaStore() => new(new(ReplicaPath) { Incarnation = Configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
 
     internal async Task AssertReopenedAsync(long cut)
     {
@@ -181,8 +181,8 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
         var failures = new List<Exception>();
         CloseOwners(failures);
         ReplicaMaterializerLifecycleErrors.Throw(failures);
-        using var reopenedCanonical = new ZoneTreeStore(new(CanonicalPath) { Incarnation = Configuration.Incarnation });
-        using var reopenedReplica = new ZoneTreeStore(new(ReplicaPath) { Incarnation = Configuration.Incarnation });
+        using var reopenedCanonical = new ZoneTreeStore(new(CanonicalPath) { Incarnation = Configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var reopenedReplica = new ZoneTreeStore(new(ReplicaPath) { Incarnation = Configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         using var reopenedLog = new DurableReplicaLog(reopenedReplica, RecoveryExecutionOptions.Configuration(Configuration));
         var database = new DatabaseEngine(reopenedCanonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         await Assert.That(database.LastApplied).IsEqualTo(cut);

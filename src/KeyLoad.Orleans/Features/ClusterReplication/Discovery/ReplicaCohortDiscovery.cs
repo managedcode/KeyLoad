@@ -74,6 +74,40 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
         await admission.EnsureCompatibleCohortAsync(request.Token).ConfigureAwait(false);
     }
 
+    internal async Task<bool> HasNativeJournalCohortAsync(CancellationToken cancellationToken)
+    {
+        using var operation = EnterOperation();
+        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, operation.ShutdownToken);
+        var local = observations.ReadLocal();
+        if (!SupportsNativeJournal(local))
+        {
+            return false;
+        }
+        foreach (var voterId in configuration.VoterIds)
+        {
+            request.Token.ThrowIfCancellationRequested();
+            if (voterId == configuration.LocalId)
+            {
+                continue;
+            }
+            var voter = await GetObservationAsync(voterId, true, request.Token).ConfigureAwait(false);
+            if (voter is not null && (!voter.ProtocolCompatible
+                || voter.RuntimeJournalReaderContract != KeyLoad.Storage.StoreReaderContract.RuntimeJournal))
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.IncompatibleCohort);
+            }
+            if (voter is null || !SupportsNativeJournal(voter))
+            {
+                return false;
+            }
+        }
+        request.Token.ThrowIfCancellationRequested();
+        return true;
+    }
+
+    private static bool SupportsNativeJournal(ReplicaDiscoveryObservation voter)
+        => voter.Compatible && voter.RuntimeJournalReaderContract == KeyLoad.Storage.StoreReaderContract.RuntimeJournal;
+
     private ReplicaDiscoveryLifetime.Operation EnterOperation()
         => lifetime.TryEnter() ?? throw new ObjectDisposedException(nameof(ReplicaSiloDiscoveryClient));
 

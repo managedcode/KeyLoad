@@ -47,7 +47,7 @@ internal static class GraphIncomingRf3Scenario
         var firstSource = Vertex(firstSourcePartition, SharedSourceId);
         var secondSource = Vertex(secondSourcePartition, SharedSourceId);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(http, fixture.AdminKey);
+        var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await ConfigurePartitionAsync(admin, targetPartition, cancellationToken).ConfigureAwait(false);
         await ConfigurePartitionAsync(admin, firstSourcePartition, cancellationToken).ConfigureAwait(false);
         await ConfigurePartitionAsync(admin, secondSourcePartition, cancellationToken).ConfigureAwait(false);

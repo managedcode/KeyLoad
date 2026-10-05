@@ -14,7 +14,7 @@ internal sealed class SqlModelViewRf3ValidationTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await SqlModelViewRf3Scenario.CreateAsync(administrator, deadline.Token);
 
         await AssertMissingAsync(scenario, Capability.EventsRead, scenario.EventSql(), deadline.Token);
@@ -28,7 +28,7 @@ internal sealed class SqlModelViewRf3ValidationTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await SqlModelViewRf3Scenario.CreateAsync(administrator, deadline.Token);
         await AssertStaleEventAsync(administrator, scenario, deadline.Token);
         await AssertSecondQueueLaneAsync(administrator, scenario, deadline.Token);

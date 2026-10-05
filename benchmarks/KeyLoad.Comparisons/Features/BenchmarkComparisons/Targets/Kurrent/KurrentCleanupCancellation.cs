@@ -1,11 +1,13 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class KurrentCleanupCancellation(CancellationToken token) : IDisposable
+internal sealed class KurrentCleanupCancellation(CancellationToken token, IOptions<ComparisonLifecycleOptions> options) : IDisposable
 {
     private Task originalCompletion = Task.CompletedTask;
 
     internal CancellationTokenSource Operations { get; } = CancellationTokenSource.CreateLinkedTokenSource(token);
-    internal CancellationTokenSource Deadline { get; } = new(TimeSpan.FromSeconds(KurrentConstants.CleanupTimeoutSeconds));
+    internal CancellationTokenSource Deadline { get; } = new(options.Value.KurrentCleanupTimeout);
 
     internal void CloseAfter(Task originalCompletion)
         => this.originalCompletion = Task.WhenAll(this.originalCompletion, originalCompletion);

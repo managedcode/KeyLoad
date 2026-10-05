@@ -36,7 +36,7 @@ internal static class GraphPathRf3Scenario
         var partition = new PartitionRef("graph-path-tenant-" + Guid.NewGuid().ToString("N"),
             "graph-path-database", "graph-path-domain", Guid.NewGuid().ToString("N"));
         using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey);
+        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         await ConfigureResourceAsync(admin, partition, CollectionA, ResourceKind.Collection, cancellationToken);
         await ConfigureResourceAsync(admin, partition, CollectionB, ResourceKind.Collection, cancellationToken);
         await ConfigureGraphAsync(admin, partition, cancellationToken);
@@ -80,7 +80,7 @@ internal static class GraphPathRf3Scenario
             PolicyEpoch = checked(seed.Reader.Principal.PolicyEpoch + 1)
         };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(http, fixture.AdminKey);
+        var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(
             Guid.NewGuid(), updated, cancellationToken));
         await Assert.That(persisted.PolicyEpoch).IsEqualTo(updated.PolicyEpoch);
@@ -98,7 +98,7 @@ internal static class GraphPathRf3Scenario
             PolicyEpoch = checked(identity.Principal.PolicyEpoch + 1)
         };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(http, fixture.AdminKey);
+        var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(
             Guid.NewGuid(), updated, cancellationToken));
         await Assert.That(persisted.PolicyEpoch).IsEqualTo(updated.PolicyEpoch);

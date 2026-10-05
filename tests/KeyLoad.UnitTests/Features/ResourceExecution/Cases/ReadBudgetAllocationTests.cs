@@ -141,7 +141,7 @@ internal sealed class ReadBudgetAllocationTests
     {
         private readonly string directory = Path.Combine(Path.GetTempPath(), TemporaryDirectoryPrefix + Guid.NewGuid().ToString("N"));
         public ZoneTreeStore Store { get; }
-        public StoreFixture() => Store = new(new(directory));
+        public StoreFixture() => Store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         public void Dispose()
         {
             Store.Dispose();

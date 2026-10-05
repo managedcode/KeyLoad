@@ -1,12 +1,13 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal static class MongoSeededCopies
 {
     internal static async Task VerifyAsync(IEnumerable<IMongoClient> clients, string databaseName,
-        IComparisonCorpus dataset, CancellationToken cancellationToken)
+        IComparisonCorpus dataset, CancellationToken cancellationToken, IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(TimeSpan.FromSeconds(dataset.Settings.TimeoutSeconds));
@@ -15,7 +16,7 @@ internal static class MongoSeededCopies
             foreach (var client in clients)
             {
                 await WaitForCopyAsync(client.GetDatabase(databaseName).GetCollection<BsonDocument>(MongoSchema.DocumentsCollection),
-                    dataset.Documents[0], dataset.Documents.Count, deadline.Token);
+                    dataset.Documents[0], dataset.Documents.Count, deadline.Token, lifecycleOptions.Value.MongoReadinessPollInterval);
             }
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
@@ -25,7 +26,7 @@ internal static class MongoSeededCopies
     }
 
     private static async Task WaitForCopyAsync(IMongoCollection<BsonDocument> collection, BenchmarkDocument expected,
-        long count, CancellationToken cancellationToken)
+        long count, CancellationToken cancellationToken, TimeSpan pollInterval)
     {
         while (true)
         {
@@ -39,7 +40,7 @@ internal static class MongoSeededCopies
                 }
                 return;
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(MongoSchema.ProbePollMilliseconds), cancellationToken);
+            await Task.Delay(pollInterval, cancellationToken);
         }
     }
 }

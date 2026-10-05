@@ -27,7 +27,7 @@ public sealed class DatabasePhaseBank
         _busyStripes = enabled ? new long[StripeCount][] : Array.Empty<long[]>();
         if (enabled)
         {
-            for (var stripe = 0; stripe < StripeCount; stripe++)
+            for (var stripe = DatabasePhaseValues.FirstStripeIndex; stripe < StripeCount; stripe++)
             {
                 _histogramStripes[stripe] = new long[HistogramLength];
                 _busyStripes[stripe] = new long[PhaseCount];
@@ -62,7 +62,7 @@ public sealed class DatabasePhaseBank
         }
 
         var finished = Stopwatch.GetTimestamp();
-        if (started < 0 || started > finished)
+        if (started < DatabasePhaseValues.MinimumStartTimestamp || started > finished)
         {
             MarkQuality(DatabaseProfileQuality.InvalidElapsed);
             return;
@@ -107,9 +107,9 @@ public sealed class DatabasePhaseBank
         {
             return new DatabasePhaseSnapshot(
                 false,
-                0,
-                0,
-                0,
+                DatabasePhaseValues.DisabledSnapshotFrequency,
+                DatabasePhaseValues.DisabledSnapshotMonotonicTimestamp,
+                DatabasePhaseValues.DisabledSnapshotMonotonicTimestamp,
                 DatabaseProfileQuality.None,
                 ImmutableArray<long>.Empty,
                 ImmutableArray<long>.Empty);
@@ -133,10 +133,10 @@ public sealed class DatabasePhaseBank
     private ImmutableArray<long> CaptureHistogram()
     {
         var values = ImmutableArray.CreateBuilder<long>(HistogramLength);
-        for (var lane = 0; lane < HistogramLength; lane++)
+        for (var lane = DatabasePhaseValues.FirstHistogramLane; lane < HistogramLength; lane++)
         {
-            long total = 0;
-            for (var stripe = 0; stripe < StripeCount; stripe++)
+            var total = DatabasePhaseValues.EmptyCounterTotal;
+            for (var stripe = DatabasePhaseValues.FirstStripeIndex; stripe < StripeCount; stripe++)
             {
                 total = DatabasePhaseArithmetic.AddSaturating(
                     total,
@@ -157,10 +157,10 @@ public sealed class DatabasePhaseBank
     private ImmutableArray<long> CaptureBusyAttempts()
     {
         var values = ImmutableArray.CreateBuilder<long>(PhaseCount);
-        for (var phase = 0; phase < PhaseCount; phase++)
+        for (var phase = DatabasePhaseValues.FirstPhaseIndex; phase < PhaseCount; phase++)
         {
-            long total = 0;
-            for (var stripe = 0; stripe < StripeCount; stripe++)
+            var total = DatabasePhaseValues.EmptyCounterTotal;
+            for (var stripe = DatabasePhaseValues.FirstStripeIndex; stripe < StripeCount; stripe++)
             {
                 total = DatabasePhaseArithmetic.AddSaturating(
                     total,
@@ -178,7 +178,7 @@ public sealed class DatabasePhaseBank
         return values.MoveToImmutable();
     }
 
-    private static int CurrentStripe() => Environment.CurrentManagedThreadId & (StripeCount - 1);
+    private static int CurrentStripe() => Environment.CurrentManagedThreadId & (StripeCount - DatabasePhaseValues.CounterIncrement);
 
     private void MarkQuality(DatabaseProfileQuality quality)
     {

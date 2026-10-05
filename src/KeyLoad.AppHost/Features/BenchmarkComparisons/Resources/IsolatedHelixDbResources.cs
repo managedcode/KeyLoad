@@ -15,9 +15,15 @@ internal static class IsolatedHelixDbResources
 
     internal static void Add(IsolatedResourceContext context)
     {
+        const int SupportedNodeCount = 1;
+        const int ElementIndex = 7;
+        const string PathText = "/readyz";
+        const string ResultText = "--user";
+        const int IndexValue = 0;
+
         ArgumentNullException.ThrowIfNull(context);
         context.Selection.Validate();
-        if (context.Selection.Target != Target || context.Selection.NodeCount != 1)
+        if (context.Selection.Target != Target || context.Selection.NodeCount != SupportedNodeCount)
         {
             throw new InvalidOperationException(Invalid);
         }
@@ -25,18 +31,18 @@ internal static class IsolatedHelixDbResources
         var directory = context.DataDirectory(Name);
         ClusterProfileStore.PrepareDirectory(directory);
         var node = context.Builder.AddContainer(Name, Image, ImageTag)
-            .WithImageSHA256(BenchmarkResources.HelixDbDigest[7..])
+            .WithImageSHA256(BenchmarkResources.HelixDbDigest[ElementIndex..])
             .WithContainerNetworkAlias(Name)
             .WithBindMount(directory, DataMount)
             .WithEnvironment(DataDirectorySetting, DataMount)
             .WithHttpEndpoint(targetPort: Port, name: Endpoint)
-            .WithHttpHealthCheck("/readyz");
+            .WithHttpHealthCheck(PathText);
         if (ClusterContainerUser.Resolve(context.Builder) is { } user)
         {
-            node.WithContainerRuntimeArgs("--user", user);
+            node.WithContainerRuntimeArgs(ResultText, user);
         }
 
-        context.BindEndpoint(0, node, Endpoint);
+        context.BindEndpoint(IndexValue, node, Endpoint);
         context.BindImage(ImageReference + BenchmarkResources.HelixDbDigest);
     }
 }

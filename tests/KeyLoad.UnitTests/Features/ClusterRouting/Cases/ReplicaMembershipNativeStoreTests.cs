@@ -77,10 +77,10 @@ internal sealed class ReplicaMembershipNativeStoreTests
             fixture.Store.Identity.Incarnation)
         { BenchmarkTopology = true };
         using var replica = new ZoneTreeStore(new(configuration.Directory)
-        { Incarnation = configuration.Incarnation, SigningKey = fixture.Store.Identity.SigningKey });
+        { Incarnation = configuration.Incarnation, SigningKey = fixture.Store.Identity.SigningKey }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         using var log = new DurableReplicaLog(replica, ReplicaExecutionTestOptions.Configuration(configuration), canonicalDatabase: fixture.Database);
         await using var materializer = new ReplicaMaterializer(fixture.Database, log, new ReplicaSnapshotStore(fixture.Store, log,
-            ReplicaExecutionTestOptions.Configuration(configuration)), ReplicaExecutionTestOptions.Execution());
+            ReplicaExecutionTestOptions.Configuration(configuration), ReplicaExecutionTestOptions.Execution()), ReplicaExecutionTestOptions.Execution());
         await using var consensus = new ReplicaConsensus(materializer, ReplicaExecutionTestOptions.Configuration(configuration),
             ReplicaExecutionTestOptions.Execution(), TimeProvider.System);
         await using var coordinator = new ClusterCoordinator(consensus, fixture.Database, new CommandAdmissionGovernor(UnitExecutionOptions.Validated(new CommandAdmissionLimits(), static settings => settings.Validate())), TimeProvider.System,
@@ -97,13 +97,21 @@ internal sealed class ReplicaMembershipNativeStoreTests
                 { if (!settings.IsValid()) throw new InvalidOperationException(OrleansMembershipOptions.ValidationMessage); }),
                 ReplicaExecutionTestOptions.Execution()));
         }).Build();
-        var options = new ReplicaPeerOptions(new() { [Voter] = new(Voter) }, fixture.Store.Identity.SigningKey, ClusterId);
-        var local = new ReplicaSiloDiscoveryState(configuration, options, host.Services.GetRequiredService<ILocalSiloDetails>());
-        using var authentication = new ReplicaEnvelopeAuthenticator(configuration, options, local, TimeProvider.System,
+        var configurationOptions = ReplicaExecutionTestOptions.Configuration(configuration);
+        var discoveryOptions = UnitExecutionOptions.Validated(new PeerDiscoveryOptions(), static settings => settings.Validate());
+        var peers = new ReplicaPeerOptions(new() { [Voter] = new(Voter) }, fixture.Store.Identity.SigningKey, ClusterId)
+        { ConnectTimeout = discoveryOptions.Value.ConnectTimeout };
+        var peerOptions = UnitExecutionOptions.Validated(peers, settings => settings.Validate(configuration));
+        var transportOptions = UnitExecutionOptions.Validated(new ReplicaTransportOptions(), static settings =>
+        { if (!settings.IsValid()) throw new InvalidOperationException(ReplicaTransportOptions.ValidationMessage); });
+        var local = new ReplicaSiloDiscoveryState(configurationOptions, peerOptions, host.Services.GetRequiredService<ILocalSiloDetails>());
+        using var authentication = new ReplicaEnvelopeAuthenticator(configurationOptions, peerOptions, local, TimeProvider.System,
+            transportOptions,
             canonicalDatabase: fixture.Database);
-        using var discovery = new ReplicaSiloDiscoveryClient(configuration, options, local, authentication, TimeProvider.System);
+        using var discovery = new ReplicaSiloDiscoveryClient(configurationOptions, peerOptions, local, authentication, TimeProvider.System,
+            discoveryOptions);
         await coordinator.StartAsync(linked.Token);
-        consensus.AttachTransport(new ReplicaGrainServiceClient(host.Services, configuration, discovery, authentication));
+        consensus.AttachTransport(new ReplicaGrainServiceClient(host.Services, configurationOptions, discovery, authentication));
         local.MarkTransportReady();
         await ReadyLeaderAsync(consensus, linked.Token);
         var store = new ReplicaMembershipStore(fixture.Database, coordinator, consensus, ClusterPrincipalPolicy.InternalPrincipalId);

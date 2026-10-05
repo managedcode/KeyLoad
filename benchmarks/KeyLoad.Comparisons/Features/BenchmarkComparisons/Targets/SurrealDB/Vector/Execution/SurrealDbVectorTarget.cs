@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Options;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 /// <summary>Runs SurrealDB's native brute-force and HNSW vector paths over its persistent RocksDB backend.</summary>
@@ -43,6 +43,8 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     private int corpusCount;
     private string databaseVersion = SurrealDbNativeTokens.TokenUnverified;
     private bool ownsData;
+    private string? readbackIndexDefinition;
+    private const string ReadbackIndexEvidence = "nativeReadbackNumberIndex";
     private bool ownsIndex;
     /// <inheritdoc/>
     public string Name => SurrealDbNativeTokens.TokenSurrealDB;
@@ -61,6 +63,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         await VerifyServerAsync(cancellationToken).ConfigureAwait(false);
         await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINETABLEIFNOTEXISTSSCHEMALESSFormat, table), Policy, cancellationToken).ConfigureAwait(false);
         ownsData = true;
+        readbackIndexDefinition = await SurrealDbReadbackIndex.CreateAsync(http, table, Policy, cancellationToken).ConfigureAwait(false);
         var batch = new List<VectorDocument>(Policy.WriteBatchCapacity);
         var count = EmptyResultCount;
         await foreach (var document in documents.WithCancellation(cancellationToken).ConfigureAwait(false))
@@ -104,9 +107,10 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         ProfileIndex = profile.IndexKind;
         if (profile.IndexKind == VectorIndexKind.Exact)
         {
-            var parameters = new Dictionary<string, string>();
-            Policy.RecordEvidence(parameters);
-            return new(VectorIndexKind.Exact, NoANNIndexSurrealDBBruteForceKNN, parameters, EmptyResultCount);
+            var exactParameters = new Dictionary<string, string>();
+            Policy.RecordEvidence(exactParameters);
+            exactParameters[ReadbackIndexEvidence] = readbackIndexDefinition ?? throw new InvalidOperationException(InvalidResponse);
+            return new(VectorIndexKind.Exact, NoANNIndexSurrealDBBruteForceKNN, exactParameters, EmptyResultCount);
         }
 
         if (profile.IndexKind != VectorIndexKind.Hnsw)
@@ -115,7 +119,12 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         }
 
         ownsIndex = true;
-        return await SurrealDbVectorIndex.BuildAsync(http, table, index, profile, Policy, cancellationToken).ConfigureAwait(false);
+        var receipt = await SurrealDbVectorIndex.BuildAsync(http, table, index, profile, Policy, cancellationToken).ConfigureAwait(false);
+        var parameters = new Dictionary<string, string>(receipt.Parameters, StringComparer.Ordinal)
+        {
+            [ReadbackIndexEvidence] = readbackIndexDefinition ?? throw new InvalidOperationException(InvalidResponse)
+        };
+        return receipt with { Parameters = parameters };
     }
 
     /// <inheritdoc/>
@@ -149,7 +158,13 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     public async Task UpdateAsync(VectorUpdate update, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(update);
-        await SurrealDbSqlTransport.ExecuteAsync(http, SurrealDbVectorProtocol.UpdateSql(table, update.Id, update.Embedding.Span), Policy, cancellationToken).ConfigureAwait(false);
+        using var response = await SurrealDbSqlTransport.QueryAsync(http,
+            SurrealDbVectorProtocol.UpdateSql(table, update.Id, update.Embedding.Span), Policy, cancellationToken).ConfigureAwait(false);
+        var updated = SurrealDbVectorProtocol.SingleResult(response.RootElement);
+        if (updated.ValueKind != JsonValueKind.Array || updated.GetArrayLength() != SingleResultCardinality)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.UpdateMissing);
+        }
     }
 
     /// <inheritdoc/>

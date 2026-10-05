@@ -21,7 +21,7 @@ internal sealed class McpDocumentParityTests(ClusterFixture fixture)
         var first = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await session.CallAsync(McpCallerTools.DocumentsCommit,
             command, deadline.Token));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var httpRetry = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, deadline.Token));
         var nativeRetry = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await session.CallAsync(McpCallerTools.DocumentsCommit,
             command, deadline.Token));
@@ -47,7 +47,7 @@ internal sealed class McpDocumentParityTests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var scenario = await McpDocumentScenario.CreateAsync(fixture, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var command = scenario.Command(Guid.NewGuid());
         var committed = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, deadline.Token));
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
@@ -81,7 +81,7 @@ internal sealed class McpDocumentParityTests(ClusterFixture fixture)
         var first = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await session.CallAsync(McpCallerTools.DocumentsGet, request, deadline.Token));
         var second = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await session.CallAsync(McpCallerTools.DocumentsGet, request, deadline.Token));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
-        var missing = await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey).GetAsync(scenario.Reference, deadline.Token));
+        var missing = await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution()).GetAsync(scenario.Reference, deadline.Token));
         await Assert.That(first.Value).IsNull();
         await Assert.That(second.Value).IsNull();
         await Assert.That(missing).IsNull();

@@ -20,11 +20,11 @@ internal sealed class RecurringSchedulePolicyRf3Tests(ClusterFixture fixture)
         var creator = await RecurringSagaRf3Support.CreateSchedulerAsync(fixture, scenario, deadline.Token);
         var caller = await RecurringSagaRf3Support.CreateSchedulerAsync(fixture, scenario, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, caller.Secret);
+        var sdk = new KeyLoadClient(http, caller.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             caller.Secret, deadline.Token);
         using var creatorHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var creatorSdk = new KeyLoadClient(creatorHttp, creator.Secret);
+        var creatorSdk = new KeyLoadClient(creatorHttp, creator.Secret, IntegrationClientOptions.Execution());
         var id = Guid.NewGuid();
         var firstDueAt = TimeProvider.System.GetUtcNow().AddSeconds(DueLeadSeconds);
         var definition = RecurringSagaRf3Support.Definition(scenario, id, firstDueAt);

@@ -1,4 +1,5 @@
 using Npgsql;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -6,8 +7,11 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="connectionString">The PostgreSQL connection string used to create the pooled data source.</param>
 /// <param name="runId">Guid-formatted run identifier used to isolate the schema name.</param>
 /// <param name="image">Database image reference recorded in the target profile.</param>
+/// <param name="executionOptions">Centrally validated native connection capacities.</param>
+/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="topology">The expected topology used by replication setup and copy observation.</param>
 public sealed class PostgresTarget(string connectionString, string runId, string image,
+    IOptions<NativeComparisonExecutionOptions> executionOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
     ComparisonTopology topology = ComparisonTopology.Standalone) : IComparisonTarget
 {
     private readonly PostgresSchemaIdentity schemaIdentity = PostgresSchemaIdentity.FromRunId(runId);
@@ -43,11 +47,12 @@ public sealed class PostgresTarget(string connectionString, string runId, string
             Profile = Profile with { ReadContract = "READ COMMITTED primary document reads; S1 keeps the native nullable embedding column NULL" };
         }
         corpusCount = dataset.Documents.Count;
+        var execution = executionOptions.Value;
         var settings = new NpgsqlConnectionStringBuilder(connectionString)
         {
-            MaxAutoPrepare = 32,
-            AutoPrepareMinUsages = 1,
-            MaxPoolSize = Math.Max(10, dataset.Settings.Concurrency),
+            MaxAutoPrepare = execution.PostgresMaxAutoPrepare,
+            AutoPrepareMinUsages = execution.PostgresAutoPrepareMinUsages,
+            MaxPoolSize = Math.Max(execution.PostgresMinimumPoolSize, dataset.Settings.Concurrency),
             SearchPath = schema + ",public"
         };
         source = NpgsqlDataSource.Create(settings.ConnectionString);
@@ -55,7 +60,7 @@ public sealed class PostgresTarget(string connectionString, string runId, string
         {
             await using var connection = await source.OpenConnectionAsync(cancellationToken);
             await PostgresSchemaInitialization.InitializeAsync(connection, dataset, schemaIdentity, ownerGuid,
-                topology, Profile, profile => Profile = profile, () => schemaCommitAttempted = true, cancellationToken);
+                topology, Profile, profile => Profile = profile, () => schemaCommitAttempted = true, cancellationToken, lifecycleOptions);
         }
         catch (Exception)
         {
@@ -79,7 +84,7 @@ public sealed class PostgresTarget(string connectionString, string runId, string
     /// <param name="cancellationToken">A token that cancels opening the session connection.</param>
     /// <returns>A session whose disposal returns its connection to the data source.</returns>
     public async Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
-        => new PostgresComparisonSession(await source.OpenConnectionAsync(cancellationToken), topK, graphDepth, corpusCount);
+        => new PostgresComparisonSession(await source.OpenConnectionAsync(cancellationToken), topK, graphDepth, corpusCount, lifecycleOptions);
 
     /// <summary>Drops only this target's marked schema and disposes its owned data source.</summary>
     /// <returns>A value task that completes after schema cleanup and data-source disposal.</returns>

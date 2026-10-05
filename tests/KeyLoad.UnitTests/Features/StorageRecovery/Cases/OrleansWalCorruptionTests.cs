@@ -34,7 +34,7 @@ internal sealed class OrleansWalCorruptionTests
 
         await files.AssertRejectedUnchanged(journal, identity, ErrorCode.Corruption);
         await File.WriteAllBytesAsync(files.JournalPath, []);
-        using var recovered = new ZoneTreeStore(new(files.DirectoryPath));
+        using var recovered = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(recovered.Position).IsEqualTo(0L);
         await Assert.That(recovered.Read(view => view.ReadOwnedValue([0x10]))).IsNull();
         await Assert.That(recovered.Read(view => view.ReadOwnedValue([0x20]))).IsNull();
@@ -69,7 +69,7 @@ internal sealed class OrleansWalCorruptionTests
     public async Task AcWal003TornFinalBinaryFrameTruncatesOnlyTailAndPreservesCommittedCut()
     {
         using var files = new WalFileFixture();
-        using (var store = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var store = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             store.Commit((transaction, _) => { transaction.Put([0x10], [0x30]); return true; });
         }
@@ -81,7 +81,7 @@ internal sealed class OrleansWalCorruptionTests
             await journal.WriteAsync(tail.AsMemory(0, tail.Length - 1));
         }
 
-        using var reopened = new ZoneTreeStore(new(files.DirectoryPath));
+        using var reopened = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Position).IsEqualTo(1L);
         await Assert.That(new FileInfo(files.JournalPath).Length).IsEqualTo((long)original.Length);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue([0x10]))!.SequenceEqual(new byte[] { 0x30 })).IsTrue();

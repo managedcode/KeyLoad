@@ -29,7 +29,7 @@ internal sealed class TimeSeriesRf3WindowTests(ClusterFixture fixture)
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             TimeSeriesRf3Scenario.Set, Capability.SeriesRead, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, TimeSeriesRf3Scenario.Node3);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, TimeSeriesRf3Scenario.Node2,
             identity.Secret, deadline.Token);
         var request = scenario.Windows(start.ToOffset(TimeSpan.FromHours(-6)), end.ToOffset(TimeSpan.FromHours(5)),

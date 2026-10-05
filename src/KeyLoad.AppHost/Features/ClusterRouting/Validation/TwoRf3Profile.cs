@@ -1,18 +1,22 @@
+using KeyLoad;
 using Microsoft.Extensions.Configuration;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 
 namespace KeyLoad.AppHost.Features.ClusterRouting;
 
+[ConfigurationBinding]
 internal static class TwoRf3Profile
 {
     private const string ProfileSetting = "Profile";
 
     internal static bool ValidateAndRead(IConfiguration configuration)
     {
+        const int BoundaryValue = 1;
+
         ArgumentNullException.ThrowIfNull(configuration);
         var section = configuration.GetSection(TwoRf3ProfileProtocol.Section);
         var children = section.GetChildren().ToArray();
-        if (children.Any(child => child.Key != ProfileSetting) || children.Length > 1)
+        if (children.Any(child => child.Key != ProfileSetting) || children.Length > BoundaryValue)
         { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
         var selected = configuration[TwoRf3ProfileProtocol.Setting];
         if (selected is null)

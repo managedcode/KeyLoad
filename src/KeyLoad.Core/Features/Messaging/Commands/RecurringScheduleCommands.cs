@@ -6,7 +6,6 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private const int MaximumOccurrenceCatchUp = 32;
     private const long MinimumIntervalTicks = TimeSpan.TicksPerSecond;
     private const long MaximumIntervalTicks = 365L * TimeSpan.TicksPerDay;
 
@@ -66,7 +65,7 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(request);
         ValidateScheduleScope(request.Lane, request.ScheduleId, partition);
-        if (request.MaxOccurrences is < 1 or > MaximumOccurrenceCatchUp)
+        if (request.MaxOccurrences < 1 || request.MaxOccurrences > messagingExecution.MaximumOccurrenceCatchUp)
         {
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
         }

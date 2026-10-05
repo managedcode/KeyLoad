@@ -6,27 +6,28 @@ namespace KeyLoad.Client.Features.ClientApi;
 
 internal static class BoundedProblemReader
 {
-    /// <summary>Maximum UTF-8 response body accepted when decoding an HTTP problem.</summary>
-    internal const int MaximumProblemBodyBytes = 64 * 1024;
+    private const int OverflowProbeBytes = 1;
+    private const int EmptyBodyLength = 0;
+    private const int BodyStart = 0;
 
     public static async Task<Problem?> ReadAsync(HttpContent content, JsonSerializerOptions options,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, int maximumProblemBodyBytes)
     {
-        if (content.Headers.ContentLength is > MaximumProblemBodyBytes)
+        if (content.Headers.ContentLength > maximumProblemBodyBytes)
         {
             return null;
         }
 
-        var buffer = ArrayPool<byte>.Shared.Rent(MaximumProblemBodyBytes + 1);
+        var buffer = ArrayPool<byte>.Shared.Rent(maximumProblemBodyBytes + OverflowProbeBytes);
         try
         {
             await using var body = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            var count = 0;
-            while (count <= MaximumProblemBodyBytes)
+            var count = EmptyBodyLength;
+            while (count <= maximumProblemBodyBytes)
             {
-                var read = await body.ReadAsync(buffer.AsMemory(count, MaximumProblemBodyBytes + 1 - count), cancellationToken)
+                var read = await body.ReadAsync(buffer.AsMemory(count, maximumProblemBodyBytes + OverflowProbeBytes - count), cancellationToken)
                     .ConfigureAwait(false);
-                if (read == 0)
+                if (read == EmptyBodyLength)
                 {
                     break;
                 }
@@ -34,14 +35,14 @@ internal static class BoundedProblemReader
                 count += read;
             }
 
-            if (count > MaximumProblemBodyBytes)
+            if (count > maximumProblemBodyBytes)
             {
                 return null;
             }
 
             try
             {
-                return JsonSerializer.Deserialize<Problem>(buffer.AsSpan(0, count), options);
+                return JsonSerializer.Deserialize<Problem>(buffer.AsSpan(BodyStart, count), options);
             }
             catch (JsonException)
             {

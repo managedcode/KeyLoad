@@ -5,6 +5,8 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeIdentityFile
 {
+    private const int NoFileAttributes = 0;
+
     internal static StoreIdentity Open(ZoneTreeStoreOptions options, FileStream ownership)
     {
         var path = Path.Combine(options.Directory, IdentityFileName);
@@ -32,8 +34,8 @@ internal static class ZoneTreeIdentityFile
         var ownerPath = Path.GetFullPath(Path.Combine(directory, OwnerLockFileName));
         if (!ownership.CanRead || !ownership.CanWrite
             || !string.Equals(ownership.Name, ownerPath, StringComparison.Ordinal)
-            || ownership.Length != 0
-            || (File.GetAttributes(ownerPath) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != 0)
+            || ownership.Length != NoFileAttributes
+            || (File.GetAttributes(ownerPath) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != NoFileAttributes)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
         }
@@ -86,13 +88,15 @@ internal static class ZoneTreeIdentityFile
 
     internal static StoreIdentity Read(ReadOnlySpan<byte> bytes)
     {
-        var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeIdentityEnvelope>(bytes, ZoneTreeMetadataBinary.IdentityMagic, IdentityFormatUnsupported);
+        var magic = ZoneTreeIdentityReaderContract.ReadMagic(bytes);
+        var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeIdentityEnvelope>(bytes, magic, IdentityFormatUnsupported);
         if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Checksum))
         {
             throw Errors.Fail(ErrorCode.Corruption, IdentityChecksumInvalid);
         }
 
         var identity = NativeSerialization.Deserialize<StoreIdentity>(envelope.Payload);
+        ZoneTreeIdentityReaderContract.Validate(identity, magic);
         if (identity.FormatVersion != CurrentDataEpoch || identity.KeyCodecVersion != KeyCodec.Version)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
@@ -109,7 +113,8 @@ internal static class ZoneTreeIdentityFile
     internal static void Write(string path, StoreIdentity identity)
     {
         var payload = NativeSerialization.Serialize(identity);
-        var bytes = ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)), ZoneTreeMetadataBinary.IdentityMagic);
+        var bytes = ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)),
+            ZoneTreeIdentityReaderContract.WriteMagic(identity));
         var temporary = path + TemporaryFileSuffix;
         using (var file = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None,
             IdentityBufferBytes, FileOptions.WriteThrough))

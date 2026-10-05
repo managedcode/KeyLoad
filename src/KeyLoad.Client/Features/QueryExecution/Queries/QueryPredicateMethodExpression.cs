@@ -5,23 +5,23 @@ namespace KeyLoad.Client;
 
 internal static class QueryPredicateMethodExpression
 {
-    internal static Predicate Translate(MethodCallExpression call, ParameterExpression parameter)
+    internal static Predicate Translate(MethodCallExpression call, ParameterExpression parameter, QueryTranslationContext context)
     {
         if (IsNullMarker(call))
         {
             var isMissing = call.Method.Name == nameof(QueryFunctions.IsMissing);
-            return new NullTest(QueryExpressions.Operand(call.Arguments[0], parameter), false, isMissing);
+            return new NullTest(context.Expressions.Operand(call.Arguments[QueryPredicateTokens.ParameterIndex], parameter), false, isMissing);
         }
 
         if (QueryPredicateInExpression.TryGetCollection(call, out var set, out var candidate))
         {
-            return QueryPredicateInExpression.Translate(set, candidate, parameter);
+            return QueryPredicateInExpression.Translate(set, candidate, parameter, context);
         }
 
         throw QueryExpressions.Unsupported();
     }
 
     private static bool IsNullMarker(MethodCallExpression call) => call.Method.DeclaringType == typeof(QueryFunctions)
-        && call.Arguments.Count == 1
+        && call.Arguments.Count == QueryPredicateTokens.MarkerArgumentCount
         && call.Method.Name is nameof(QueryFunctions.IsNull) or nameof(QueryFunctions.IsMissing);
 }

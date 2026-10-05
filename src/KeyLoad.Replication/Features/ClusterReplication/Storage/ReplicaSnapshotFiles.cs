@@ -1,10 +1,27 @@
+using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 
 namespace KeyLoad.Replication;
 
-internal sealed class ReplicaSnapshotFiles(ReplicaConfiguration configuration)
+internal sealed class ReplicaSnapshotFiles
 {
-    internal string DirectoryPath { get; } = PrepareDirectory(configuration);
+    private const int NoFileAttributeFlags = 0;
+
+    private readonly ReplicaConfiguration configuration;
+    private readonly ReplicaExecutionOptions execution;
+    internal string DirectoryPath { get; }
+
+    internal ReplicaSnapshotFiles(IOptions<ReplicaConfiguration> configurationOptions,
+        IOptions<ReplicaExecutionOptions> executionOptions)
+    {
+        ArgumentNullException.ThrowIfNull(configurationOptions);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        execution = executionOptions.Value;
+        execution.Validate();
+        configuration = configurationOptions.Value;
+        configuration.Validate();
+        DirectoryPath = PrepareDirectory(configuration);
+    }
     internal string ManifestPath => PathFor(ReplicaProtocol.IncomingManifest);
     internal string IncomingPath => PathFor(ReplicaProtocol.IncomingImage);
     internal string ImagePath(ReplicaSnapshot snapshot) => PathFor(snapshot.FileName);
@@ -38,7 +55,7 @@ internal sealed class ReplicaSnapshotFiles(ReplicaConfiguration configuration)
         {
             try
             {
-                if ((File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
+                if ((File.GetAttributes(current) & FileAttributes.ReparsePoint) != NoFileAttributeFlags)
                 {
                     throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot);
                 }
@@ -49,11 +66,11 @@ internal sealed class ReplicaSnapshotFiles(ReplicaConfiguration configuration)
         }
     }
 
-    internal static FileStream OpenPrivate(string path, FileMode mode)
+    internal FileStream OpenPrivate(string path, FileMode mode)
     {
         RejectLinks(path);
         var stream = new FileStream(path, mode, FileAccess.ReadWrite, FileShare.None,
-            ReplicaPersistence.FileBufferBytes, FileOptions.WriteThrough);
+            execution.FileBufferBytes, FileOptions.WriteThrough);
         try
         {
             if (!OperatingSystem.IsWindows())
@@ -72,7 +89,7 @@ internal sealed class ReplicaSnapshotFiles(ReplicaConfiguration configuration)
     internal void WriteManifest(ReplicaSnapshot snapshot)
     {
         var bytes = ReplicaProtocolCodec.Serialize(snapshot);
-        if (bytes.Length > ReplicaPersistence.ManifestMaxBytes)
+        if (bytes.Length > execution.MaximumManifestBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidSnapshot);
         }
@@ -91,7 +108,7 @@ internal sealed class ReplicaSnapshotFiles(ReplicaConfiguration configuration)
         if (!File.Exists(path))
         { return null; }
         using var file = File.OpenRead(path);
-        if (file.Length > ReplicaPersistence.ManifestMaxBytes)
+        if (file.Length > execution.MaximumManifestBytes)
         {
             throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot);
         }

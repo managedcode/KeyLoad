@@ -10,7 +10,7 @@ internal static class EventProjectionProcessRecoveryAssertions
     internal static async Task RecoverAndVerifyAsync(string root, CommitStage stage,
         CancellationToken cancellationToken)
     {
-        using var store = new ZoneTreeStore(new(root));
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var operation = NativeSerialization.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
             Path.Combine(root, EventProjectionCrashScenario.OperationFile), cancellationToken));

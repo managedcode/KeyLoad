@@ -99,7 +99,7 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
     {
         using (File.Create(OuterOwnerLockPath))
         { }
-        var nativeStore = new ZoneTreeStore(new ZoneTreeStoreOptions(DirectoryPath) { Incarnation = Incarnation });
+        var nativeStore = new ZoneTreeStore(new ZoneTreeStoreOptions(DirectoryPath) { Incarnation = Incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         store = nativeStore;
         var engine = new DatabaseEngine(nativeStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         InitializedDatabase = engine;

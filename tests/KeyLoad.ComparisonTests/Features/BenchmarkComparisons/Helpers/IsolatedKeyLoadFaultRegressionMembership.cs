@@ -32,7 +32,7 @@ internal sealed record IsolatedKeyLoadFaultRegressionMembership(int Index, strin
         {
             using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, index);
             using var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.AttemptSeconds, token);
-            var result = await new KeyLoadClient(http, admin).DashboardAsync(attempt.Token);
+            var result = await new KeyLoadClient(http, admin, ComparisonClientOptions.Execution()).DashboardAsync(attempt.Token);
             attempt.Token.ThrowIfCancellationRequested();
             if (!result.IsSuccess)
             {

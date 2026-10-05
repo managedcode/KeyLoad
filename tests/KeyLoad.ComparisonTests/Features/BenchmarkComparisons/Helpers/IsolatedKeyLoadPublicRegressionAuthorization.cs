@@ -12,7 +12,7 @@ internal static class IsolatedKeyLoadPublicRegressionAuthorization
         var identity = await IsolatedKeyLoadPublicRegressionIdentity.CreateAsync(administrator, scenario.Partition,
             scenario.Sentinel.Collection, Capability.DocumentsRead, token);
         using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, 1);
-        var reader = new KeyLoadClient(http, identity.Secret);
+        var reader = new KeyLoadClient(http, identity.Secret, ComparisonClientOptions.Execution());
         await using var mcp = await IsolatedKeyLoadPublicRegressionMcp.ConnectAsync(app, nodeCount, identity.Secret, token);
         var request = new GetDocumentRequest(scenario.Sentinel);
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(

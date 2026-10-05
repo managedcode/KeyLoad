@@ -20,9 +20,9 @@ internal sealed class RecurringDueRf3Tests(ClusterFixture fixture)
         var revokedCreator = await RecurringSagaRf3Support.CreateSchedulerAsync(fixture, scenario, deadline.Token);
         var healthyCreator = await RecurringSagaRf3Support.CreateSchedulerAsync(fixture, scenario, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, healthyCreator.Secret);
+        var sdk = new KeyLoadClient(http, healthyCreator.Secret, IntegrationClientOptions.Execution());
         using var revokedHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var revokedSdk = new KeyLoadClient(revokedHttp, revokedCreator.Secret);
+        var revokedSdk = new KeyLoadClient(revokedHttp, revokedCreator.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             healthyCreator.Secret, deadline.Token);
         var firstDueAt = TimeProvider.System.GetUtcNow().Add(DueRecurringRf3Protocol.DueLead);

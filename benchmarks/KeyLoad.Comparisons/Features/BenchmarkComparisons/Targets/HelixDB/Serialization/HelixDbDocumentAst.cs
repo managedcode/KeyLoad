@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 
 namespace KeyLoad.Comparisons.Targets;
+
 internal static class HelixDbDocumentAst
 {
     private const int SingleResultCardinality = 1;
@@ -10,10 +11,10 @@ internal static class HelixDbDocumentAst
     internal static JsonObject Add(string label, BenchmarkDocument document) => HelixDbProtocol.Node(HelixDbNativeTokens.TokenAddN, new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperties] = new JsonArray { new JsonArray(HelixDbNativeTokens.TokenId, HelixDbProtocol.Value(HelixDbNativeTokens.TokenString, document.Id)), new JsonArray(HelixDbNativeTokens.TokenNumber, HelixDbProtocol.Value(HelixDbNativeTokens.TokenI64, document.Number)), new JsonArray(HelixDbNativeTokens.TokenPayload, HelixDbProtocol.Value(HelixDbNativeTokens.TokenString, document.Json)) } });
     internal static JsonObject Update(string label, BenchmarkDocument document) => HelixDbProtocol.Node(HelixDbNativeTokens.TokenSetProperty, new() { [HelixDbNativeTokens.TokenInput] = Lookup(label, document.Id), [HelixDbNativeTokens.TokenName] = HelixDbNativeTokens.TokenPayload, [HelixDbNativeTokens.TokenValue] = HelixDbProtocol.Value(HelixDbNativeTokens.TokenString, document.Json) });
     internal static JsonObject Page(string label, int after, int capacity) => HelixDbProtocol.Project(HelixDbProtocol.Limit(HelixDbProtocol.Ordered(HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbNativeTokens.TokenGt, HelixDbNativeTokens.TokenNumber, HelixDbNativeTokens.TokenI64, after)), HelixDbNativeTokens.TokenNumber), capacity), HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenNumber, HelixDbNativeTokens.TokenPayload);
-    internal static JsonObject Index(string label, string property, bool range) => HelixDbProtocol.Node(HelixDbNativeTokens.TokenCreateIndex, new() { [HelixDbNativeTokens.TokenIfNotExists] = false, [HelixDbNativeTokens.TokenSpec] = HelixDbProtocol.Node(range ? HelixDbNativeTokens.TokenNodeRange : HelixDbNativeTokens.TokenNodeEquality, range ? new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperty] = property, [HelixDbNativeTokens.TokenDirection] = HelixDbNativeTokens.TokenAsc } : new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperty] = property, [HelixDbNativeTokens.TokenUnique] = true }) });
-    internal static JsonObject DropIndex(string label, string property, bool range)
+    internal static JsonObject Index(string label, string property, bool range, bool unique = true) => HelixDbProtocol.Node(HelixDbNativeTokens.TokenCreateIndex, new() { [HelixDbNativeTokens.TokenIfNotExists] = false, [HelixDbNativeTokens.TokenSpec] = HelixDbProtocol.Node(range ? HelixDbNativeTokens.TokenNodeRange : HelixDbNativeTokens.TokenNodeEquality, range ? new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperty] = property, [HelixDbNativeTokens.TokenDirection] = HelixDbNativeTokens.TokenAsc } : new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperty] = property, [HelixDbNativeTokens.TokenUnique] = unique }) });
+    internal static JsonObject DropIndex(string label, string property, bool range, bool unique = true)
     {
-        var fields = Index(label, property, range)[HelixDbNativeTokens.TokenCreateIndex]!.AsObject();
+        var fields = Index(label, property, range, unique)[HelixDbNativeTokens.TokenCreateIndex]!.AsObject();
         return HelixDbProtocol.Node(HelixDbNativeTokens.TokenDropIndex,
             new() { [HelixDbNativeTokens.TokenSpec] = fields[HelixDbNativeTokens.TokenSpec]!.DeepClone() });
     }

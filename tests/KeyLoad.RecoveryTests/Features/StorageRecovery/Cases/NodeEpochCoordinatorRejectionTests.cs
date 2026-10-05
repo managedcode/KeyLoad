@@ -16,7 +16,7 @@ internal sealed class NodeEpochCoordinatorRejectionTests
         await WithNodeAsync(async (root, source, destination, profile, sourceInventory, token) =>
         {
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
-            _ = ServerNodeFormatUpgrade.Prepare(source, options);
+            _ = ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options));
             var foreignPath = Path.Combine(destination + ServerNodeUpgradeProtocol.StageSuffix,
                 ServerNodeUpgradeProtocol.Canonical, "tree", "foreign.after-boundary");
             byte[] foreignBytes = [0x42, 0x00, 0x7A];
@@ -24,10 +24,10 @@ internal sealed class NodeEpochCoordinatorRejectionTests
             var stage = destination + ServerNodeUpgradeProtocol.StageSuffix;
             var stageInventory = await NodeEpochInventoryCapture.CaptureAsync(stage, token);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.VerifyPrepared(source, options));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.VerifyPrepared(source, RecoveryServerRuntimeOptions.Runtime(options)));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Corruption);
-            var retry = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, options));
+            var retry = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options)));
             await Assert.That(retry.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(Directory.Exists(destination)).IsFalse();
             await NodeEpochInventoryCapture.AssertUnchangedAsync(stage, stageInventory, token);
@@ -43,13 +43,13 @@ internal sealed class NodeEpochCoordinatorRejectionTests
         await WithNodeAsync(async (root, source, destination, profile, sourceInventory, token) =>
         {
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
-            _ = ServerNodeFormatUpgrade.Prepare(source, options);
+            _ = ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options));
             var stage = destination + ServerNodeUpgradeProtocol.StageSuffix;
             File.Delete(Path.Combine(stage, ServerNodeUpgradeProtocol.PreparedReceipt));
             await CorruptReceiptAsync(Path.Combine(stage, ServerNodeUpgradeProtocol.ProgressReceipt), token);
             var stageInventory = await NodeEpochInventoryCapture.CaptureAsync(stage, token);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, options));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options)));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(Directory.Exists(destination)).IsFalse();
@@ -64,12 +64,12 @@ internal sealed class NodeEpochCoordinatorRejectionTests
         await WithNodeAsync(async (root, source, destination, profile, sourceInventory, token) =>
         {
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
-            _ = ServerNodeFormatUpgrade.Prepare(source, options);
+            _ = ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options));
             var stage = destination + ServerNodeUpgradeProtocol.StageSuffix;
             await CorruptReceiptAsync(Path.Combine(stage, ServerNodeUpgradeProtocol.OwnerReceipt), token);
             var stageInventory = await NodeEpochInventoryCapture.CaptureAsync(stage, token);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.VerifyPrepared(source, options));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.VerifyPrepared(source, RecoveryServerRuntimeOptions.Runtime(options)));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(Directory.Exists(destination)).IsFalse();
@@ -86,7 +86,7 @@ internal sealed class NodeEpochCoordinatorRejectionTests
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
             var lockPath = Path.Combine(source, ServerNodeUpgradeProtocol.NodeOwner);
             using (var held = new FileStream(lockPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-            { _ = Assert.ThrowsExactly<IOException>(() => ServerNodeFormatUpgrade.Prepare(source, options)); }
+            { _ = Assert.ThrowsExactly<IOException>(() => ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options))); }
 
             await NodeEpochInventoryCapture.AssertUnchangedAsync(source, sourceInventory, token);
             await Assert.That(Directory.Exists(destination)).IsFalse();
@@ -106,7 +106,7 @@ internal sealed class NodeEpochCoordinatorRejectionTests
             var destinationInventory = await NodeEpochInventoryCapture.CaptureAsync(destination, token);
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, options));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options)));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Conflict);
             await NodeEpochInventoryCapture.AssertUnchangedAsync(destination, destinationInventory, token);

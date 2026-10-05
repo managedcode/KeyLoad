@@ -83,7 +83,7 @@ public static class NativeSerialization
             var field = reader.ReadFieldHeader();
             NativePayloadHeader.Validate(field);
             var payload = session.CodecProvider.GetCodec<NativePayload>().ReadValue(ref reader, field);
-            if (payload is null || reader.Remaining != 0)
+            if (payload is null || reader.Remaining != NativeWireIdentities.EmptyRemainingBytes)
             {
                 throw Errors.Fail(ErrorCode.Corruption, NativePayloadVersion.InvalidPayload);
             }
@@ -146,7 +146,7 @@ public static class NativeSerialization
         NativeContractValidation.Validate(value);
         using var buffer = new NativeCountingWriter();
         var writer = Writer.Create(buffer, session);
-        session.CodecProvider.GetCodec<NativePayload>().WriteField(ref writer, 0, typeof(NativePayload),
+        session.CodecProvider.GetCodec<NativePayload>().WriteField(ref writer, NativeWireIdentities.FirstFieldId, typeof(NativePayload),
             new NativePayload { Version = NativePayloadVersion.Current, Value = value });
         writer.Commit();
         return buffer.Length;

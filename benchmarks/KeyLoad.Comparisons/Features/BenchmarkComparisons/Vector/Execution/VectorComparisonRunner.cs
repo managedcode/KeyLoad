@@ -113,11 +113,13 @@ public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOpt
             null, null, measured.QuerySeconds, measured.QuerySuccesses / measured.QuerySeconds,
             measured.UpdateSeconds, measured.UpdateSeconds == VectorComparisonRunnerValues.FirstIndex ? VectorComparisonRunnerValues.FirstIndex : measured.UpdateSuccesses / measured.UpdateSeconds);
         var result = new ComparisonCase(target.Name, Scenario.VectorExact, VectorComparisonRunnerValues.FirstIndex, ComparisonStatuses.Measured,
-            null, null, []) { VectorMetrics = metrics };
+            null, null, [])
+        { VectorMetrics = metrics };
         var report = new ComparisonReport(VectorComparisonRunnerValues.ReportSchemaVersion, Guid.NewGuid(), started, null, datasetHash,
             VectorComparisonRunnerValues.ClosedLoopVectorQueryThroughputIncludes,
             RuntimeInformation.OSDescription, RuntimeInformation.ProcessArchitecture.ToString(), Environment.ProcessorCount,
-            RuntimeInformation.FrameworkDescription, storage, sourceRevision, [target.Profile], [result]) { VectorProfile = profile };
+            RuntimeInformation.FrameworkDescription, storage, sourceRevision, [target.Profile], [result])
+        { VectorProfile = profile };
         report.ValidateConfiguration();
         return report;
     }

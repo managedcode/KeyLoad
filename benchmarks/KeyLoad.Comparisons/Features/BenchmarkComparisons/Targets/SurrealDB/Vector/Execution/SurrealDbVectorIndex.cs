@@ -1,5 +1,5 @@
-using System.Globalization;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace KeyLoad.Comparisons.Targets;
 /// <summary>Observes native HNSW backfill completion and records its actual definition.</summary>
@@ -21,6 +21,7 @@ internal static class SurrealDbVectorIndex
     private const string IndexesField = "indexes";
     private const string ReadyState = "ready";
     private const string FailedState = "failed";
+    private const string AbortedState = "aborted";
     private const string ErrorState = "error";
     private const int Neighbors = 16;
     private const int ConstructionEf = 200;
@@ -90,7 +91,7 @@ internal static class SurrealDbVectorIndex
                 return;
             }
 
-            if (state is FailedState or ErrorState || TimeProvider.System.GetUtcNow() >= deadline)
+            if (state is FailedState or AbortedState or ErrorState || TimeProvider.System.GetUtcNow() >= deadline)
             {
                 throw new InvalidDataException(SurrealDbNativeTokens.TokenSurrealDbHnswBuildDidNotBecomeReady);
             }

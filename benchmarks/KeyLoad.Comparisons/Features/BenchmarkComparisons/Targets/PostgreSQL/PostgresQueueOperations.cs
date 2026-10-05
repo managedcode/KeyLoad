@@ -1,30 +1,31 @@
 using System.Diagnostics;
 using Npgsql;
 using NpgsqlTypes;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal static class PostgresQueueOperations
 {
-    private const int ClaimPollMilliseconds = 1;
 
     private const string EnqueueSql = "INSERT INTO queue(id,body) VALUES ($1,$2)";
     private const string ClaimSql = """
         WITH candidate AS (SELECT id FROM queue WHERE state='ready' OR (state='leased' AND lease_until < now())
             ORDER BY id FOR UPDATE SKIP LOCKED LIMIT 1)
-        UPDATE queue q SET state='leased',lease_owner=$1,lease_until=now()+interval '30 seconds',attempts=attempts+1
+        UPDATE queue q SET state='leased',lease_owner=$1,lease_until=now()+$2::interval,attempts=attempts+1
         FROM candidate c WHERE q.id=c.id RETURNING q.id,q.body::text
         """;
     private const string AcknowledgeSql = "UPDATE queue SET state='acked',lease_until=NULL WHERE id=$1 AND lease_owner=$2 AND state='leased' AND lease_until>now()";
     private const string LeaseFailure = "PostgresLeaseLost";
 
     internal static async Task<OperationResult> ExecuteAsync(NpgsqlConnection connection, BenchmarkDocument document,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     {
+        var lifecycle = lifecycleOptions.Value;
         var begin = Stopwatch.GetTimestamp();
         var enqueued = await EnqueueAsync(connection, document, cancellationToken);
         var lease = Guid.NewGuid();
-        var (message, received) = await ReceiveAsync(connection, lease, cancellationToken);
+        var (message, received) = await ReceiveAsync(connection, lease, cancellationToken, lifecycle.QueueClaimPollInterval, lifecycle.QueueLeaseDuration);
         await AcknowledgeAsync(connection, message, lease, cancellationToken);
         return new(Message: message, Queue: new(Stopwatch.GetElapsedTime(begin, enqueued).TotalMilliseconds,
             Stopwatch.GetElapsedTime(enqueued, received).TotalMilliseconds,
@@ -46,7 +47,7 @@ internal static class PostgresQueueOperations
     }
 
     private static async Task<(FoundDocument Message, long ReceivedAt)> ReceiveAsync(NpgsqlConnection connection, Guid lease,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, TimeSpan claimPollInterval, TimeSpan leaseDuration)
     {
         FoundDocument? message = null;
         while (message is null)
@@ -54,10 +55,11 @@ internal static class PostgresQueueOperations
             await using var claim = connection.CreateCommand();
             claim.CommandText = ClaimSql;
             claim.Parameters.AddWithValue(lease);
+            claim.Parameters.AddWithValue(leaseDuration);
             message = await ReadClaimAsync(claim, cancellationToken);
             if (message is null)
             {
-                await Task.Delay(ClaimPollMilliseconds, cancellationToken);
+                await Task.Delay(claimPollInterval, cancellationToken);
             }
         }
 

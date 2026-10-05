@@ -6,7 +6,6 @@ using System.Globalization;
 
 internal static class ClusterContainerUser
 {
-    private const string ConfigurationKey = "KeyLoad:ContainerUser";
     private const string IdExecutable = "/usr/bin/id";
     private const string UserArgument = "-u";
     private const string GroupArgument = "-g";
@@ -32,6 +31,8 @@ internal static class ClusterContainerUser
 
     private static async Task<string> ReadIdAsync(string argument, AppHostStartupOptions policy)
     {
+        const int EmptyValue = 0;
+
         using var deadline = new CancellationTokenSource(policy.ContainerIdentityLookupTimeout, TimeProvider.System);
         using var process = new Process
         {
@@ -45,7 +46,7 @@ internal static class ClusterContainerUser
             { throw new InvalidOperationException(LookupError); }
             var output = await ReadOutputAsync(process.StandardOutput, policy.ContainerIdentityOutputCharacters, deadline.Token);
             await process.WaitForExitAsync(deadline.Token);
-            if (process.ExitCode != 0 || !uint.TryParse(output.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var id))
+            if (process.ExitCode != EmptyValue || !uint.TryParse(output.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var id))
             { throw new InvalidOperationException(LookupError); }
             return id.ToString(CultureInfo.InvariantCulture);
         }
@@ -56,13 +57,17 @@ internal static class ClusterContainerUser
 
     private static async Task<string> ReadOutputAsync(StreamReader reader, int maximumCharacters, CancellationToken cancellationToken)
     {
+        const int LengthInitialValue = 0;
+        const int EmptyValue = 0;
+        const int StartIndexValue = 0;
+
         var output = new char[maximumCharacters];
-        var length = 0;
+        var length = LengthInitialValue;
         while (length < output.Length)
         {
             var count = await reader.ReadAsync(output.AsMemory(length), cancellationToken);
-            if (count == 0)
-            { return new(output, 0, length); }
+            if (count == EmptyValue)
+            { return new(output, StartIndexValue, length); }
             length += count;
         }
         throw new InvalidOperationException(LookupError);

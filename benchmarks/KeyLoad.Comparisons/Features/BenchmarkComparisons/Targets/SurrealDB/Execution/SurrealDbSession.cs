@@ -1,9 +1,10 @@
-using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
+
 internal sealed class SurrealDbSession(HttpClient http, string table, string edge, int count, int depth, int topK, IOptions<NativeComparisonExecutionOptions> executionOptions) : IComparisonSession
 {
     private NativeComparisonExecutionOptions Policy => executionOptions.Value;
@@ -11,7 +12,8 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
     private static readonly System.Text.CompositeFormat NativeSELECTKeyPayloadFROMFormat = System.Text.CompositeFormat.Parse(NativeSELECTKeyPayloadFROMFormatTemplate);
     private const int EmptyResultCount = 0;
     private const int SingleResultCardinality = 1;
-    private const string NativeSELECTKeyPayloadNumberFROMWHERENumberORDERFormatTemplate = "SELECT key, payload, number FROM {0} WHERE number > {1} ORDER BY number LIMIT {2};";
+    private const string InvalidPointReadCardinality = "SurrealDbPointReadCardinalityMismatch";
+    private const string NativeSELECTKeyPayloadNumberFROMWHERENumberORDERFormatTemplate = "SELECT key, payload, number FROM {0} WITH INDEX {3} WHERE number > {1} ORDER BY number LIMIT {2};";
     private static readonly System.Text.CompositeFormat NativeSELECTKeyPayloadNumberFROMWHERENumberORDERFormat = System.Text.CompositeFormat.Parse(NativeSELECTKeyPayloadNumberFROMWHERENumberORDERFormatTemplate);
     private const string NativeSELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormatTemplate = "SELECT key, payload FROM {0} WHERE embedding <|{1},COSINE|> {2} ORDER BY vector::distance::knn(), key LIMIT {3};";
     private static readonly System.Text.CompositeFormat NativeSELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormat = System.Text.CompositeFormat.Parse(NativeSELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormatTemplate);
@@ -19,6 +21,10 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
     {
         using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTKeyPayloadFROMFormat, table, SurrealDbDocumentSql.Key(document.Id)), Policy, cancellationToken).ConfigureAwait(false);
         var rows = SurrealDbVectorProtocol.SingleResult(response.RootElement);
+        if (rows.GetArrayLength() > SingleResultCardinality)
+        {
+            throw new InvalidDataException(InvalidPointReadCardinality);
+        }
         return rows.GetArrayLength() == EmptyResultCount ? null : Read(rows[EmptyResultCount]);
     }
 
@@ -28,7 +34,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
         var seen = EmptyResultCount;
         while (true)
         {
-            using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTKeyPayloadNumberFROMWHERENumberORDERFormat, table, after, Policy.ReadbackBatchCapacity), Policy, cancellationToken).ConfigureAwait(false);
+            using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTKeyPayloadNumberFROMWHERENumberORDERFormat, table, after, Policy.ReadbackBatchCapacity, SurrealDbReadbackIndex.Name(table)), Policy, cancellationToken).ConfigureAwait(false);
             var rows = SurrealDbVectorProtocol.SingleResult(response.RootElement);
             if (rows.GetArrayLength() == EmptyResultCount)
             {
@@ -38,7 +44,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
             foreach (var row in rows.EnumerateArray())
             {
                 var number = row.GetProperty(SurrealDbNativeTokens.TokenNumber).GetInt32();
-                if (number <= after)
+                if (number <= after || seen >= count)
                 {
                     throw new ComparisonFailureException(SurrealDbNativeTokens.TokenSurrealDbCorpusOrderMismatch);
                 }
@@ -86,7 +92,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     private async Task MutateAsync(Scenario scenario, BenchmarkDocument document, CancellationToken token)
     {
-        using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbDocumentSql.Mutation(table, scenario, document), Policy, token).ConfigureAwait(false);
+        using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbDocumentSql.Mutation(table, scenario, document), Policy, token, create: scenario == Scenario.DocumentWrite).ConfigureAwait(false);
         var result = SurrealDbVectorProtocol.SingleResult(response.RootElement);
         var affected = result.ValueKind == JsonValueKind.Object ? SingleResultCardinality : result.GetArrayLength();
         if (affected != SingleResultCardinality)

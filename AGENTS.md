@@ -171,6 +171,8 @@ Rule format:
 - Existing rules MUST remain present and mandatory; change or remove a rule only under explicit rule-specific owner direction, never as framework cleanup.
 
 ## Global Skills
+The owner's 2026-10-06 approval to implement the reviewed native DurableJobs path also authorizes its matching native Journaling API (`ORLEANSEXP005`). Confine that opt-in to the journal provider, native jobs integration and their registration/tests under ADR-110; do not use a global NoWarn or suppress unrelated diagnostics. Journal metadata remains RF3-authoritative and distinct from creator-authorized business effects.
+
 The explicit owner instruction to enable Orleans distributed directory and activation repartitioning is consent to those two native experimental APIs. Confine compiler opt-in ORLEANSEXP003/ORLEANSEXP001 to their two configuration calls, with ADR-034 evidence; it does not authorize global NoWarn, suppression of quality diagnostics or changing analyzer severity.
 
 - On 2026-10-05 the owner explicitly authorized installing the Managed Code `quality` bundle from https://skills.managed-code.com/bundles/quality/ and running KeyLoad complexity, CRAP and related code-quality analysis. Use the catalog's current bundle skill names and native installation command; this scoped permission supersedes the historical skill-installation prohibition and older `mcaf-*` naming requirement for this bundle only. Preserve existing quality thresholds and use the Aspire-owned entry point for coverage-producing tests.

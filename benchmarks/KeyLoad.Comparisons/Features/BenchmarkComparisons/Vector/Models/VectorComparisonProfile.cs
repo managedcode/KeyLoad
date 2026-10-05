@@ -91,10 +91,21 @@ public sealed record VectorComparisonProfile
         }
 
         var count = parts[VectorComparisonProfileValues.ScalePartIndex] switch { VectorProfileTokens.Scale100k => VectorComparisonProfileValues.Scale100kCount, VectorProfileTokens.Scale1m => VectorComparisonProfileValues.Scale1mCount, _ => VectorComparisonProfileValues.EmptyCount };
-        var kind = parts[VectorComparisonProfileValues.MethodPartIndex] switch { VectorProfileTokens.ExactMethod => VectorIndexKind.Exact, VectorProfileTokens.HnswMethod => VectorIndexKind.Hnsw,
-            VectorProfileTokens.IvfFlatMethod => VectorIndexKind.IvfFlat, VectorProfileTokens.NativeMethod => VectorIndexKind.NativeAnn, _ => (VectorIndexKind?)null };
-        var mode = parts[VectorComparisonProfileValues.ModePartIndex] switch { VectorProfileTokens.PlainMode => VectorQueryMode.Plain, VectorProfileTokens.FilteredMode => VectorQueryMode.Filtered,
-            VectorProfileTokens.MixedMode => VectorQueryMode.Mixed, _ => (VectorQueryMode?)null };
+        var kind = parts[VectorComparisonProfileValues.MethodPartIndex] switch
+        {
+            VectorProfileTokens.ExactMethod => VectorIndexKind.Exact,
+            VectorProfileTokens.HnswMethod => VectorIndexKind.Hnsw,
+            VectorProfileTokens.IvfFlatMethod => VectorIndexKind.IvfFlat,
+            VectorProfileTokens.NativeMethod => VectorIndexKind.NativeAnn,
+            _ => (VectorIndexKind?)null
+        };
+        var mode = parts[VectorComparisonProfileValues.ModePartIndex] switch
+        {
+            VectorProfileTokens.PlainMode => VectorQueryMode.Plain,
+            VectorProfileTokens.FilteredMode => VectorQueryMode.Filtered,
+            VectorProfileTokens.MixedMode => VectorQueryMode.Mixed,
+            _ => (VectorQueryMode?)null
+        };
         if (count == VectorComparisonProfileValues.EmptyCount || kind is null || mode is null)
         {
             throw new ArgumentOutOfRangeException(nameof(id), VectorComparisonProfileValues.UnknownVectorComparisonProfile);

@@ -25,7 +25,8 @@ internal static class OrleansSiloConfiguration
         builder.Services.AddSingleton(loggerFactory);
         runtimeOptions.RegisterBorrowed(builder.Services);
         RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, startupCancellation, runtimeOptions);
-        builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value));
+        builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value,
+            runtimeOptions.Core.RuntimeJournal, runtimeOptions.DurableJobs));
         return builder.Build();
     }
 
@@ -47,13 +48,17 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(requestWork);
         services.AddSingleton(administration);
         services.AddSingleton<QueryEngine>();
-        services.AddSingleton(_ => new SearchEngine(partition.Database, partition.TextProjection));
+        services.AddSingleton(_ => new SearchEngine(partition.Database, runtimeOptions.Core.QueryExecution, partition.TextProjection));
         RegisterRequestCodec(services, partition, options);
         services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestProgress).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
-        services.AddSingleton<ReplicaSiloDiscoveryState>();
+        services.AddSingleton(provider => new ReplicaSiloDiscoveryState(
+            provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
+            provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
+            provider.GetRequiredService<ILocalSiloDetails>(),
+            RuntimeJournalStorePreparation.ReaderEvidence(partition)));
         services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
             provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), TimeProvider.System,
@@ -115,8 +120,9 @@ internal static class OrleansSiloConfiguration
         if (options.RequestCqrsProbe.Enabled)
         {
             services.AddSingleton(provider => RequestCqrsProbeObserverFactory.Create(
-                options.RequestCqrsProbe, partition.Configuration, options.AllowPrivateNetworkHttp,
-                provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<IHostApplicationLifetime>())
+                options.RequestCqrsProbe, provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), options.AllowPrivateNetworkHttp,
+                provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<IHostApplicationLifetime>(),
+                provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>())
                 ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions));
             services.AddSingleton<IGrainRequestPhaseObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
             if (options.RequestCqrsProbe.DiscoveryCaptureMode == RequestCqrsProbeProtocol.MixedInterface3Capture)
@@ -130,7 +136,8 @@ internal static class OrleansSiloConfiguration
     }
 
     private static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica, IPAddress address,
-        OrleansMembershipOptions membershipOptions)
+        OrleansMembershipOptions membershipOptions, IOptions<RuntimeJournalOptions> journal,
+        IOptions<NativeDurableJobOptions> jobs)
     {
         silo.Configure<ClusterOptions>(cluster =>
         {
@@ -166,5 +173,6 @@ internal static class OrleansSiloConfiguration
             .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
             .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()
             .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And());
+        NativeRuntimeJournalRegistration.Register(silo, journal, jobs);
     }
 }

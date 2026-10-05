@@ -19,7 +19,7 @@ internal sealed class KeyLoadQueryFactoryTests
     {
         var partition = CreatePartition();
 
-        var request = KeyLoadQuery.From<FactoryRecord>(partition, CollectionName).ToRequest();
+        var request = KeyLoadQuery.From<FactoryRecord>(partition, CollectionName, UnitClientOptions.Translation()).ToRequest();
 
         await Assert.That(request.Partition).IsEqualTo(partition);
         await Assert.That(request.Query.Collection).IsEqualTo(CollectionName);
@@ -35,11 +35,11 @@ internal sealed class KeyLoadQueryFactoryTests
     {
         var partition = CreatePartition();
         await Assert.That(Assert.ThrowsExactly<ArgumentNullException>(() =>
-            KeyLoadQuery.From<FactoryRecord>(null!, CollectionName)).ParamName).IsEqualTo("partition");
+            KeyLoadQuery.From<FactoryRecord>(null!, CollectionName, UnitClientOptions.Translation())).ParamName).IsEqualTo("partition");
         await Assert.That(Assert.ThrowsExactly<ArgumentNullException>(() =>
-            KeyLoadQuery.From<FactoryRecord>(partition, null!)).ParamName).IsEqualTo("collection");
+            KeyLoadQuery.From<FactoryRecord>(partition, null!, UnitClientOptions.Translation())).ParamName).IsEqualTo("collection");
 
-        var query = KeyLoadQuery.From<FactoryRecord>(partition, CollectionName);
+        var query = KeyLoadQuery.From<FactoryRecord>(partition, CollectionName, UnitClientOptions.Translation());
         await Assert.That(Assert.ThrowsExactly<ArgumentNullException>(() => query.Where(null!)).ParamName)
             .IsEqualTo("expression");
         await Assert.That(Assert.ThrowsExactly<ArgumentNullException>(() => query.Select<FactoryRecord>(null!)).ParamName)

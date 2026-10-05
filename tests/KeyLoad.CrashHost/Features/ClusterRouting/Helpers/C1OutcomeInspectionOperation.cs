@@ -19,7 +19,7 @@ internal static class C1OutcomeInspectionOperation
         ServerFailureObserver.Observe(() =>
         {
             store = ZoneTreeExistingStore.Open(new(request.Directory)
-            { Incarnation = request.Incarnation }, request.ExpectedNodeId);
+            { Incarnation = request.Incarnation }, request.ExpectedNodeId, CrashExecutionOptions.StorageExecution());
             nodeId = store.Identity.NodeId;
             incarnation = store.Identity.Incarnation;
             formatVersion = store.Identity.FormatVersion;

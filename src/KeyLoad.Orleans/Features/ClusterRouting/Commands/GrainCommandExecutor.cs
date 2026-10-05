@@ -27,7 +27,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             stage = GrainFailureStage.Authorization;
             await ObserveAndValidateRequestAsync(request, GrainRequestPhase.AuthorizationReload, context,
                 operationToken).ConfigureAwait(true);
-            var principal = GrainRequestAuthority.Reload(database, envelope.PrincipalId!, clock);
+            var principal = GrainRequestAuthority.ReloadForRequest(database, envelope, clock);
             var kind = envelope.CommandKind ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             stage = GrainFailureStage.CapabilityExecution;
             await ObserveAndValidateRequestAsync(request, GrainRequestPhase.BeforeSubmit, context,

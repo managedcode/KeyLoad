@@ -94,9 +94,6 @@ internal static class KurrentConstants
     public const int ReadLimit = 2;
     public const ulong NativeFirstRevision = 0;
     public const int CanonicalFirstRevision = 1;
-    public const int CleanupTimeoutSeconds = 120;
-    public const int CleanupHostTimeoutSeconds = 180;
-    public const int CleanupConcurrency = 16;
     public const string CleanupIncomplete = "KurrentOwnedStreamCleanupIncomplete";
     public const string CleanupDrainFailed = "KurrentOwnedStreamCleanupDrainFailed";
     public const string CleanupInvalidDiagnostic = "KurrentOwnedStreamCleanupInvalidDiagnostic";
@@ -106,5 +103,4 @@ internal static class KurrentConstants
     public const string OwnershipTransitionRejected = "KurrentStreamOwnershipTransitionRejected";
     public const string OwnershipAlreadyInitialized = "KurrentStreamOwnershipAlreadyInitialized";
     public const string AppendAcknowledgementMissing = "KurrentStreamAppendAcknowledgementMissing";
-    public const int ProbeWaitMilliseconds = 100;
 }

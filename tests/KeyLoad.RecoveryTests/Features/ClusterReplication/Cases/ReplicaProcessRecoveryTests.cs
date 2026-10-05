@@ -74,10 +74,10 @@ internal sealed class ReplicaProcessRecoveryTests
         }
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var rejected = new ZoneTreeStore(new(directory) { Incarnation = trial.Incarnation });
+            using var rejected = new ZoneTreeStore(new(directory) { Incarnation = trial.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         }).Code).IsEqualTo(ErrorCode.Corruption);
         using var canonical = new ZoneTreeStore(new(ReplicaCrashNode.TargetStoreDirectories(trial.DirectoryPath)[0])
-        { Incarnation = trial.Incarnation });
+        { Incarnation = trial.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         await Assert.That(canonical.Identity.NodeId).IsEqualTo(trial.Ready.NodeId);
     }
 }

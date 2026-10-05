@@ -26,16 +26,16 @@ internal sealed class ReplicaCrashNode : IDisposable
     private ReplicaCrashNode(string directory, string voter, Guid incarnation, Action<ReplicaCrashBoundary>? observer)
     {
         Configuration = new(voter, [VoterA, VoterB, VoterC], directory, incarnation);
-        Canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation });
+        Canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         try
         {
-            replicaStore = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation });
+            replicaStore = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
             try
             {
                 Database = new(Canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource());
                 Log = new(replicaStore, CrashExecutionOptions.Configuration(Configuration), observer, canonicalDatabase: Database);
                 Bootstrap();
-                Snapshots = new(Canonical, Log, CrashExecutionOptions.Configuration(Configuration), observer);
+                Snapshots = new(Canonical, Log, CrashExecutionOptions.Configuration(Configuration), CrashExecutionOptions.Replica(), observer);
             }
             catch (Exception)
             {

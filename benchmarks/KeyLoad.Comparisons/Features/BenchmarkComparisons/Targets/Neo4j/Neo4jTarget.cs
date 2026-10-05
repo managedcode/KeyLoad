@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -9,10 +10,11 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="http">The authenticated Neo4j Query API client; the target disposes it.</param>
 /// <param name="runId">Guid-formatted run identifier used to isolate node labels and constraints.</param>
 /// <param name="image">Neo4j image reference recorded in the target profile.</param>
-public sealed class Neo4jTarget(HttpClient http, string runId, string image) : IComparisonTarget
+/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+public sealed class Neo4jTarget(HttpClient http, string runId, string image,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions) : IComparisonTarget
 {
     private const string RunIdentityFormat = "N";
-    private const int CleanupTimeoutSeconds = 15;
 
     private const string DataProperty = "data";
     private const string ValuesProperty = "values";
@@ -112,7 +114,7 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
     /// <returns>A value task that completes after cleanup.</returns>
     public async ValueTask DisposeAsync()
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
+        using var timeout = new CancellationTokenSource(lifecycleOptions.Value.Neo4jCleanupTimeout);
         try
         {
             if (ownsConstraint)

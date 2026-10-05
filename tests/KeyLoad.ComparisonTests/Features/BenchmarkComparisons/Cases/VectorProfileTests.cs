@@ -1,5 +1,6 @@
-using System.Text.Json;
+using System.Globalization;
 using System.Text;
+using System.Text.Json;
 using KeyLoad.Comparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -61,7 +62,7 @@ internal sealed class VectorProfileTests
         var expected = corpus.ExactNeighbors(query);
         await Assert.That(expected.Count).IsEqualTo(10);
         await Assert.That(expected.Select(item => item.Id).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(10);
-        await Assert.That(expected.All(item => int.Parse(item.Id.AsSpan(1)) % 100 == 0)).IsTrue();
+        await Assert.That(expected.All(item => int.Parse(item.Id.AsSpan(1), CultureInfo.InvariantCulture) % 100 == 0)).IsTrue();
         await Assert.That(expected.SequenceEqual(expected.OrderBy(item => item.Distance).ThenBy(item => item.Id, StringComparer.Ordinal))).IsTrue();
     }
 }

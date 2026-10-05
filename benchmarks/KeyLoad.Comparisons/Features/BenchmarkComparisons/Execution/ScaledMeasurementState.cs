@@ -55,6 +55,7 @@ internal sealed record ScaledMeasurementResult(OperationSample[] Samples, double
 internal sealed class ScaledOperationInputs(IComparisonCorpus corpus, Scenario scenario)
 {
     internal Scenario Scenario => scenario;
+    internal int PayloadBytes => corpus.Settings.PayloadBytes;
     internal BenchmarkDocument Create(int operation, bool warmup) => corpus.Input(scenario, 0, operation, warmup);
 }
 

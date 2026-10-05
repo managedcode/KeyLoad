@@ -65,7 +65,8 @@ function Resolve-FcEvidenceFile([string] $EvidenceRoot, [string] $Path) {
 
 function Invoke-FcPrepare([string] $Root, [string] $EvidenceRoot, [string] $ContractPath, [string] $TemplatePath) {
     $t = $script:FunctionalCoverage
-    foreach ($name in @($t.ManifestName,$t.ReportJsonName,$t.ReportMarkdownName,$t.SettingsCopyName)) {
+    foreach ($name in @($t.ManifestName,$t.ReportJsonName,$t.ReportMarkdownName,$t.SettingsCopyName,
+        $script:FcCoverageImages.TestManifestName)) {
         if ([IO.File]::Exists((Join-Path $EvidenceRoot $name))) { throw $t.ErrorStale }
     }
     foreach ($suite in @('unit','unit-scalar')) {
@@ -74,6 +75,8 @@ function Invoke-FcPrepare([string] $Root, [string] $EvidenceRoot, [string] $Cont
     $contract = Read-FcContract $ContractPath
     $sourceInventory = Get-FcSourceInventory $Root $contract
     $deployment = @(Get-FcDeploymentInventory $Root $contract)
+    $images = Get-FcPreparedImages $Root $contract @($sourceInventory)
+    $testImageBinding = Write-FcTestImageManifest $EvidenceRoot $images.tests
     $settingsPath = Join-Path $EvidenceRoot $t.SettingsCopyName
     Get-FcSettings $Root $TemplatePath $settingsPath $contract | Out-Null
     $manifest = [ordered]@{
@@ -85,6 +88,8 @@ function Invoke-FcPrepare([string] $Root, [string] $EvidenceRoot, [string] $Cont
         sources = @($sourceInventory)
         contributors = @(Get-FcContributorInventory $Root $contract)
         deployment = @($deployment)
+        compiledProduct = $images.product
+        compiledTestsManifest = $testImageBinding
         scripts = @(Get-FcScriptInventory)
         settingsTemplateSha256 = Get-FcHash $TemplatePath
         runtime = [Environment]::Version.ToString()
@@ -119,6 +124,7 @@ function Assert-FcManifest([string] $Root, [string] $EvidenceRoot, [string] $Con
         $currentDeployment -cne $preparedDeployment -or $currentScripts -cne $preparedScripts) {
         throw $t.ErrorDrift
     }
+    Assert-FcPreparedImages $Root $EvidenceRoot $contract $manifest @(Get-FcSourceInventory $Root $contract)
     $manifest
 }
 

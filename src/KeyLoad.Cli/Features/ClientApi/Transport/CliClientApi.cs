@@ -3,31 +3,31 @@ using System.Resources;
 using System.Text.Json;
 using KeyLoad.Client;
 using ManagedCode.Communication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Cli.Features.ClientApi;
 
 internal static class CliClientApi
 {
-    private const string AdminKeyPropertyName = "AdminKey";
-    private const string KeyEnvironmentVariableName = "KEYLOAD_API_KEY";
-    private const int StatusTimeoutSeconds = 30;
     private const string MessagesBaseName = "KeyLoad.Cli.Features.ClientApi.CliClientMessages";
     private const string HelpMessageKey = "Help";
-    private const string MissingCredentialMessageKey = "MissingCredential";
+    internal const string MissingCredentialMessageKey = "MissingCredential";
     private const string NodeUnavailableMessageKey = "NodeUnavailable";
     private static readonly ResourceManager Messages = new(
         MessagesBaseName,
         typeof(CliClientApi).Assembly);
 
-    public static async Task StatusAsync(string[] args)
+    public static async Task StatusAsync(IOptions<CliConnectionOptions> connectionOptions,
+        IOptions<CliExecutionOptions> executionOptions, IOptions<KeyLoadClientExecutionOptions> clientExecutionOptions)
     {
-        var key = GetCredential(args);
+        var connection = connectionOptions.Value;
+        var timeout = executionOptions.Value.StatusTimeout;
         using var http = new HttpClient
         {
-            BaseAddress = new Uri(args[1]),
-            Timeout = TimeSpan.FromSeconds(StatusTimeoutSeconds)
+            BaseAddress = connection.Endpoint,
+            Timeout = timeout
         };
-        var result = await new KeyLoadClient(http, key).StatusAsync();
+        var result = await new KeyLoadClient(http, connection.ApiKey, clientExecutionOptions).StatusAsync();
         if (result.IsFailed)
         {
             ThrowNodeFailure(result.Problem);
@@ -38,17 +38,6 @@ internal static class CliClientApi
 
     public static void Help() => Console.WriteLine(GetMessage(HelpMessageKey));
 
-    private static string GetCredential(string[] args) =>
-        Environment.GetEnvironmentVariable(KeyEnvironmentVariableName)
-        ?? (args.Length == 3 ? ProfileKey(args[2]) : null)
-        ?? throw Errors.Fail(ErrorCode.Unauthenticated, GetMessage(MissingCredentialMessageKey));
-
-    private static string ProfileKey(string path)
-    {
-        using var profile = JsonDocument.Parse(File.ReadAllBytes(path));
-        return profile.RootElement.GetProperty(AdminKeyPropertyName).GetString()!;
-    }
-
     private static void ThrowNodeFailure(Problem problem)
     {
         var code = Enum.TryParse<ErrorCode>(problem.ErrorCode, out var parsedCode)
@@ -57,5 +46,5 @@ internal static class CliClientApi
         throw Errors.Fail(code, problem.Detail ?? GetMessage(NodeUnavailableMessageKey));
     }
 
-    private static string GetMessage(string key) => Messages.GetString(key, CultureInfo.InvariantCulture)!;
+    internal static string GetMessage(string key) => Messages.GetString(key, CultureInfo.InvariantCulture)!;
 }

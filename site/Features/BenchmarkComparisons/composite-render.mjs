@@ -43,7 +43,7 @@ function profile(profile, vector) {
 export function renderCompositeResults(value) {
   if (value === null || value === undefined) return '<section id="scale-benchmarks"><h2>Native database scale tests</h2><p>The recorded historical run contains the small control workload. Measurements for 100,000 and 1,000,000 record document and vector profiles are unavailable in this run.</p></section>';
   return '<section id="scale-benchmarks" aria-labelledby="scale-benchmarks-title"><h2 id="scale-benchmarks-title">Native database scale tests</h2>' +
-    '<p>100,000 and 1,000,000 actual records. Independent Linux jobs use the same corpus, workload and resource contract. Failed or unsupported cells have no measurements. Match native nodes and acknowledgement/read contracts before comparing values.</p>' +
+    '<p>100,000 and 1,000,000 actual records. Independent Linux jobs use the same corpus and workload. Effective server resources are verified separately for each result. Failed or unsupported cells have no measurements. Match native nodes and acknowledgement/read contracts before comparing values.</p>' +
     '<h3>Document operations</h3>' + value.scaledProfiles.map(item => profile(item, false)).join('') +
     '<h3>Vector search, accuracy and index costs</h3>' + value.vectorProfiles.map(item => profile(item, true)).join('') + '</section>';
 }

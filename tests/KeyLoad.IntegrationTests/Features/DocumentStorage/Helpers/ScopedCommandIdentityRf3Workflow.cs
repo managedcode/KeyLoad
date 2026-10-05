@@ -25,7 +25,7 @@ internal static class ScopedCommandIdentityRf3Workflow
         CommitReceipt secondReceipt;
         using (var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1))
         {
-            var sdk = new KeyLoadClient(http, fixture.AdminKey);
+            var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
             await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
                 fixture.AdminKey, cancellationToken);
             firstReceipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(first, cancellationToken));
@@ -47,7 +47,7 @@ internal static class ScopedCommandIdentityRf3Workflow
 
         await RestartAllVotersAsync(fixture, cancellationToken);
         using var reopenedHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
-        var reopenedSdk = new KeyLoadClient(reopenedHttp, fixture.AdminKey);
+        var reopenedSdk = new KeyLoadClient(reopenedHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var reopenedMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             fixture.AdminKey, cancellationToken);
         await ScopedCommandIdentityRf3Assertions.AssertRetryAsync(reopenedMcp, first, firstReceipt, cancellationToken);

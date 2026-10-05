@@ -8,6 +8,8 @@
     <ProjectReference Include="../KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../KeyLoad.Security/KeyLoad.Security.csproj" />
     <PackageReference Include="Microsoft.Orleans.Server" />
+    <PackageReference Include="Microsoft.Orleans.Journaling" />
+    <PackageReference Include="Microsoft.Orleans.DurableJobs" />
     <PackageReference Include="ManagedCode.Communication.Orleans" />
     <PackageReference Include="ManagedCode.Orleans.Graph" />
     <PackageReference Include="ManagedCode.Orleans.Identity.Core" />

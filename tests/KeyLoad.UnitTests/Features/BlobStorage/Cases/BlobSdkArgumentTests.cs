@@ -37,7 +37,7 @@ internal sealed class BlobSdkArgumentTests
     {
         // A genuine client without a base address cannot reach the network if a guard regresses.
         using var http = new HttpClient();
-        var client = new KeyLoadClient(http, ApiKey);
+        var client = new KeyLoadClient(http, ApiKey, UnitClientOptions.Execution());
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         var failure = Assert.ThrowsExactly<ArgumentNullException>(() => _ = Invoke(operation, client, true, cancellationToken));
         await Assert.That(failure.ParamName).IsEqualTo("request");

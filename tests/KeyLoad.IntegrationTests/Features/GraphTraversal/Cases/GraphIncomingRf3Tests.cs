@@ -17,10 +17,10 @@ internal sealed class GraphIncomingRf3Tests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var seed = await GraphIncomingRf3Scenario.CreateAsync(fixture, deadline.Token);
         using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey);
+        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         await SeedAndDeliverAsync(admin, seed, deadline.Token);
         using var readerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var reader = new KeyLoadClient(readerHttp, seed.Reader.Secret);
+        var reader = new KeyLoadClient(readerHttp, seed.Reader.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             seed.Reader.Secret, deadline.Token);
         var request = GraphIncomingRf3Scenario.Request(seed, limit: 3);
@@ -45,11 +45,11 @@ internal sealed class GraphIncomingRf3Tests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var seed = await GraphIncomingRf3Scenario.CreateAsync(fixture, deadline.Token);
         using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey);
+        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         await SeedAndDeliverAsync(admin, seed, deadline.Token);
         var request = GraphIncomingRf3Scenario.Request(seed);
         using var sourceRestrictedHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sourceRestricted = new KeyLoadClient(sourceRestrictedHttp, seed.TargetOnlyReader.Secret);
+        var sourceRestricted = new KeyLoadClient(sourceRestrictedHttp, seed.TargetOnlyReader.Secret, IntegrationClientOptions.Execution());
         await using var sourceMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             seed.TargetOnlyReader.Secret, deadline.Token);
 
@@ -69,7 +69,7 @@ internal sealed class GraphIncomingRf3Tests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var seed = await GraphIncomingRf3Scenario.CreateAsync(fixture, deadline.Token);
         using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey);
+        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         await CreateLocalAndCrossEdgesAsync(admin, seed, deadline.Token);
         await GraphIncomingRf3Scenario.DeliverAsync(admin, seed.FirstSourcePartition, seed.Target,
             FirstEdgeId, 1, deadline.Token);
@@ -91,7 +91,7 @@ internal sealed class GraphIncomingRf3Tests(ClusterFixture fixture)
                 seed.Target, 2));
 
         using var readerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var reader = new KeyLoadClient(readerHttp, seed.Reader.Secret);
+        var reader = new KeyLoadClient(readerHttp, seed.Reader.Secret, IntegrationClientOptions.Execution());
         var afterDelete = await McpCallerAssertions.SdkSuccessAsync(await reader.IncomingEdgesAsync(
             GraphIncomingRf3Scenario.Request(seed), deadline.Token));
         await Assert.That(afterDelete.Rows.Any(row => row.Edge.From == seed.FirstSource)).IsFalse();
@@ -155,7 +155,7 @@ internal sealed class GraphIncomingRf3Tests(ClusterFixture fixture)
         GraphIncomingRf3Seed seed, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var reader = new KeyLoadClient(http, seed.Reader.Secret);
+        var reader = new KeyLoadClient(http, seed.Reader.Secret, IntegrationClientOptions.Execution());
         var page = await McpCallerAssertions.SdkSuccessAsync(await reader.IncomingEdgesAsync(
             GraphIncomingRf3Scenario.Request(seed), cancellationToken));
         await Assert.That(page.Rows.Any(row => row.Edge.From == seed.FirstSource)).IsFalse();
@@ -178,7 +178,7 @@ internal sealed class GraphIncomingRf3Tests(ClusterFixture fixture)
         var identity = await GraphIncomingRf3Scenario.CreateDocumentOnlyReaderAsync(admin, seed,
             cancellationToken);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var reader = new KeyLoadClient(http, identity.Secret);
+        var reader = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         var denied = await reader.IncomingEdgesAsync(request, cancellationToken);
         await GraphIncomingRf3Assertions.AssertFailureAsync(denied, ErrorCode.PermissionDenied);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,

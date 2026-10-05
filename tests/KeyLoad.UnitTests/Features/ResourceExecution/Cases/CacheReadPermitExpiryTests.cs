@@ -19,7 +19,7 @@ internal sealed class CacheReadPermitExpiryTests
         var grant = Guid.NewGuid();
         var stalePrepared = TimeProvider.System.GetTimestamp();
         await WaitForPreparedAgeAsync(TimeProvider.System, stalePrepared,
-            CacheReadPermitLimits.PrepareValidity + Margin, linked.Token);
+            UnitAdmissionOptions.Permit().Value.PrepareValidity + Margin, linked.Token);
 
         await Assert.That(permit.TryAccept(grant, 1, stalePrepared, out _)).IsFalse();
         await Assert.That(permit.TryCapture(out _)).IsFalse();
@@ -48,16 +48,16 @@ internal sealed class CacheReadPermitExpiryTests
 
         var ageAtReceipt = clock.GetElapsedTime(prepared, acceptStartedAt);
         await Assert.That(ageAtReceipt >= GrantPreparationDelay).IsTrue();
-        await Assert.That(ageAtReceipt < CacheReadPermitLimits.PrepareValidity).IsTrue();
-        await WaitForMeasuredAgeAsync(clock, prepared, CacheReadPermitLimits.LeaseValidity + Margin, linked.Token);
+        await Assert.That(ageAtReceipt < UnitAdmissionOptions.Permit().Value.PrepareValidity).IsTrue();
+        await WaitForMeasuredAgeAsync(clock, prepared, UnitAdmissionOptions.Permit().Value.LeaseValidity + Margin, linked.Token);
 
         var isCurrent = permit.IsCurrent(revision);
         var captured = permit.TryCapture(out var expiredRevision);
         var completedAt = clock.GetTimestamp();
         var prepareAge = clock.GetElapsedTime(prepared, completedAt);
         var receiptAge = clock.GetElapsedTime(acceptStartedAt, completedAt);
-        await Assert.That(prepareAge >= CacheReadPermitLimits.LeaseValidity).IsTrue();
-        await Assert.That(receiptAge < CacheReadPermitLimits.LeaseValidity).IsTrue();
+        await Assert.That(prepareAge >= UnitAdmissionOptions.Permit().Value.LeaseValidity).IsTrue();
+        await Assert.That(receiptAge < UnitAdmissionOptions.Permit().Value.LeaseValidity).IsTrue();
         await Assert.That(isCurrent).IsFalse();
         await Assert.That(captured).IsFalse();
         await Assert.That(expiredRevision).IsEqualTo(0);

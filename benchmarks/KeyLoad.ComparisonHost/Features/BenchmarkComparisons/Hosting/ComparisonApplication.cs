@@ -16,7 +16,10 @@ internal static class ComparisonApplication
         configuration.AddJsonFile(Path.Combine(AppContext.BaseDirectory, NativeComparisonExecutionRegistration.ConfigurationPath), optional: false);
         configuration.AddEnvironmentVariables();
         configuration.AddCommandLine(arguments);
-        var owner = new ComparisonTargetOwner(NativeComparisonExecutionRegistration.Read(configuration));
+        var owner = new ComparisonTargetOwner(NativeComparisonExecutionRegistration.Read(configuration),
+            NativeComparisonExecutionRegistration.ReadLifecycle(configuration),
+            NativeComparisonExecutionRegistration.ReadClient(configuration),
+            NativeComparisonExecutionRegistration.ReadTranslation(configuration));
         ComparisonCancellationLifetime? cancellationLifetime = null;
         try
         {

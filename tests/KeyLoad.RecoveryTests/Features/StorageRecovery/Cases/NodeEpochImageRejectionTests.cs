@@ -52,7 +52,7 @@ internal sealed class NodeEpochImageRejectionTests
             var wrongIncarnation = Guid.NewGuid();
 
             var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
-                ZoneTreeSnapshotFormatUpgrade.Upgrade(image, output, wrongIncarnation));
+                ZoneTreeSnapshotFormatUpgrade.Upgrade(image, output, wrongIncarnation, RecoveryExecutionOptions.StorageExecution()));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.TokenInvalidated);
             await Assert.That(wrongIncarnation).IsNotEqualTo(prior.Incarnation);
@@ -77,7 +77,7 @@ internal sealed class NodeEpochImageRejectionTests
             var options = new ZoneTreeSnapshotUpgradeOptions { MaxSnapshotBytes = originalImage.Length - 1 };
 
             var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
-                ZoneTreeSnapshotFormatUpgrade.Upgrade(image, output, prior.Incarnation, options));
+                ZoneTreeSnapshotFormatUpgrade.Upgrade(image, output, prior.Incarnation, RecoveryExecutionOptions.StorageExecution(), options));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.ResourceExhausted);
             await Assert.That(File.Exists(output)).IsFalse();
@@ -102,7 +102,7 @@ internal sealed class NodeEpochImageRejectionTests
     private static async Task AssertRejectedWithoutOutputAsync(string image, Guid incarnation, string output, ErrorCode code)
     {
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeSnapshotFormatUpgrade.Upgrade(image, output, incarnation));
+            ZoneTreeSnapshotFormatUpgrade.Upgrade(image, output, incarnation, RecoveryExecutionOptions.StorageExecution()));
         await Assert.That(rejected.Code).IsEqualTo(code);
         await Assert.That(File.Exists(output)).IsFalse();
     }

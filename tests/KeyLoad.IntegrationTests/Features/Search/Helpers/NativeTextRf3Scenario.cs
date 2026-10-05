@@ -46,7 +46,7 @@ internal sealed record NativeTextRf3Scenario(PartitionRef Partition, ResourceDef
             ]
         };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource), cancellationToken));
         await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(SeedCommand(partition), cancellationToken));
@@ -105,7 +105,7 @@ internal sealed record NativeTextRf3Scenario(PartitionRef Partition, ResourceDef
         PrincipalRecord principal, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
             principal, cancellationToken));
         var keyId = "native-text-key-" + Guid.NewGuid().ToString("N");

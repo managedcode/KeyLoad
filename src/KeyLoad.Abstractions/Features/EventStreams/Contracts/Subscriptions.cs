@@ -19,7 +19,10 @@ public enum EventSourceKind
 /// <param name="Generation">The source generation used to detect replacement.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.EventSourceRef)]
-public sealed record EventSourceRef([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Resource, [property: Orleans.Id(2)] EventSourceKind Kind, [property: Orleans.Id(3)] string? StreamId = null, [property: Orleans.Id(4)] long Generation = 1);
+public sealed record EventSourceRef([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Resource, [property: Orleans.Id(2)] EventSourceKind Kind, [property: Orleans.Id(3)] string? StreamId = null, [property: Orleans.Id(4)] long Generation = EventSourceRef.DefaultGeneration)
+{
+    private const int DefaultGeneration = 1;
+}
 
 /// <summary>Reports the retained range and current tail of an event source.</summary>
 /// <param name="TailPosition">The latest position assigned by the source.</param>
@@ -46,7 +49,11 @@ public sealed record SourceEventRecord([property: Orleans.Id(0)] EventSourceRef 
 /// <param name="Cursor">The continuation cursor for a prior page, if any.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ReadEventSourceRequest)]
-public sealed record ReadEventSourceRequest([property: Orleans.Id(0)] EventSourceRef Source, [property: Orleans.Id(1)] long AfterPosition = 0, [property: Orleans.Id(2)] int Limit = 100, [property: Orleans.Id(3)] string? Cursor = null);
+public sealed record ReadEventSourceRequest([property: Orleans.Id(0)] EventSourceRef Source, [property: Orleans.Id(1)] long AfterPosition = ReadEventSourceRequest.DefaultAfterPosition, [property: Orleans.Id(2)] int Limit = ReadEventSourceRequest.DefaultLimit, [property: Orleans.Id(3)] string? Cursor = null)
+{
+    private const int DefaultAfterPosition = 0;
+    private const int DefaultLimit = 100;
+}
 
 /// <summary>Contains a page of events and source continuation metadata.</summary>
 /// <param name="Source">The source that was read.</param>
@@ -65,12 +72,15 @@ public sealed record EventSourcePage([property: Orleans.Id(0)] EventSourceRef So
 [Orleans.Alias(NativeContractAliases.EventRetentionPolicy)]
 public sealed record EventRetentionPolicy
 {
+    private const int DefaultMaxEvents = 100_000;
+    private const int DefaultMaxBytes = 1_073_741_824;
+
     /// <summary>Gets or sets the maximum number of retained events.</summary>
     [Orleans.Id(0)]
-    public long MaxEvents { get; init; } = 100_000;
+    public long MaxEvents { get; init; } = DefaultMaxEvents;
     /// <summary>Gets or sets the maximum number of retained event bytes.</summary>
     [Orleans.Id(1)]
-    public long MaxBytes { get; init; } = 1_073_741_824;
+    public long MaxBytes { get; init; } = DefaultMaxBytes;
 }
 
 /// <summary>Publishes a batch of events to a topic.</summary>
@@ -79,7 +89,10 @@ public sealed record EventRetentionPolicy
 /// <param name="Generation">The topic generation expected by the operation.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.PublishTopic)]
-public sealed record PublishTopic([property: Orleans.Id(0)] string Topic, [property: Orleans.Id(1)] ImmutableArray<EventData> Events, [property: Orleans.Id(2)] long Generation = 1) : Mutation(Topic);
+public sealed record PublishTopic([property: Orleans.Id(0)] string Topic, [property: Orleans.Id(1)] ImmutableArray<EventData> Events, [property: Orleans.Id(2)] long Generation = PublishTopic.DefaultGeneration) : Mutation(Topic)
+{
+    private const int DefaultGeneration = 1;
+}
 
 /// <summary>Identifies one subscription group on an event source.</summary>
 /// <param name="Source">The subscribed event source.</param>
@@ -104,21 +117,27 @@ public enum SubscriptionStart
 [Orleans.Alias(NativeContractAliases.SubscriptionPolicy)]
 public sealed record SubscriptionPolicy
 {
+    private const int DefaultMaxWindow = 1_024;
+    private const int DefaultMaxLeaseSeconds = 300;
+    private const int DefaultMaxAttempts = 5;
+    private const int DefaultRetryBaseMilliseconds = 1_000;
+    private const int DefaultRetryMaxMilliseconds = 300_000;
+
     /// <summary>Gets or sets the maximum number of outstanding deliveries.</summary>
     [Orleans.Id(0)]
-    public int MaxWindow { get; init; } = 1_024;
+    public int MaxWindow { get; init; } = DefaultMaxWindow;
     /// <summary>Gets or sets the maximum lease duration in seconds.</summary>
     [Orleans.Id(1)]
-    public int MaxLeaseSeconds { get; init; } = 300;
+    public int MaxLeaseSeconds { get; init; } = DefaultMaxLeaseSeconds;
     /// <summary>Gets or sets the maximum delivery attempts.</summary>
     [Orleans.Id(2)]
-    public int MaxAttempts { get; init; } = 5;
+    public int MaxAttempts { get; init; } = DefaultMaxAttempts;
     /// <summary>Gets or sets the base delay between retries in milliseconds.</summary>
     [Orleans.Id(3)]
-    public int RetryBaseMilliseconds { get; init; } = 1_000;
+    public int RetryBaseMilliseconds { get; init; } = DefaultRetryBaseMilliseconds;
     /// <summary>Gets or sets the maximum delay between retries in milliseconds.</summary>
     [Orleans.Id(4)]
-    public int RetryMaxMilliseconds { get; init; } = 300_000;
+    public int RetryMaxMilliseconds { get; init; } = DefaultRetryMaxMilliseconds;
 }
 
 /// <summary>Defines the principal and event-type filter for a subscription.</summary>
@@ -189,8 +208,13 @@ public sealed record SubscriptionInfo([property: Orleans.Id(0)] SubscriptionRef 
 /// <param name="LeaseSeconds">The requested delivery lease duration in seconds.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ReceiveSubscriptionRequest)]
-public sealed record ReceiveSubscriptionRequest([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] SubscriptionRef Subscription, [property: Orleans.Id(2)] int MaxEvents = 1,
-    [property: Orleans.Id(3)] int MaxBytes = 1_048_576, [property: Orleans.Id(4)] int LeaseSeconds = 30);
+public sealed record ReceiveSubscriptionRequest([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] SubscriptionRef Subscription, [property: Orleans.Id(2)] int MaxEvents = ReceiveSubscriptionRequest.DefaultMaxEvents,
+    [property: Orleans.Id(3)] int MaxBytes = ReceiveSubscriptionRequest.DefaultMaxBytes, [property: Orleans.Id(4)] int LeaseSeconds = ReceiveSubscriptionRequest.DefaultLeaseSeconds)
+{
+    private const int DefaultMaxEvents = 1;
+    private const int DefaultMaxBytes = 1_048_576;
+    private const int DefaultLeaseSeconds = 30;
+}
 
 /// <summary>Represents one leased event delivery.</summary>
 /// <param name="Event">The delivered event.</param>

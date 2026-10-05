@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -6,15 +7,18 @@ using KeyLoad.Comparisons;
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceEvidenceCollector(
-    ComparisonWorkerSelection selection, string output, CancellationToken applicationStopping)
+    ComparisonWorkerSelection selection, string output, CancellationToken applicationStopping,
+    IOptions<ScaleServerResourceOptions> executionOptions, IOptions<BenchmarkProvenanceOptions> provenanceOptions)
 {
     private const string RunnerName = "comparisons";
     private const string BootstrapFragment = "bootstrap";
     private const string SidecarName = "server-resource-evidence.json";
-    private const string Schema = "server-resource-evidence.v1";
+    private const string Schema = "server-resource-evidence.v2";
+    private readonly ScaleServerResourceOptions _settings = executionOptions.Value;
+    private readonly BenchmarkProvenanceOptions _provenance = provenanceOptions.Value;
     private readonly CancellationTokenSource _stop = new();
     private readonly CancellationToken _applicationStopping = applicationStopping;
-    private readonly ScaleServerResourceEvidenceCompletion _completion = new();
+    private readonly ScaleServerResourceEvidenceCompletion _completion = new(executionOptions);
     private readonly HashSet<string> _missing = new(StringComparer.Ordinal);
     private ScaleServerResourceSampler[] _samplers = [];
     private ScaleServerHardware? _hardware;
@@ -23,14 +27,18 @@ internal sealed class ScaleServerResourceEvidenceCollector(
 
     internal Task StartAsync(IEnumerable<ContainerResource> resources, Func<CancellationToken, Task> readiness, CancellationToken cancellationToken)
     {
+        const string MessageText = "Server resource observation already started.";
+        const int Step = 1;
+        const int EmptyValue = 0;
+
         if (_observation is not null)
         {
-            throw new InvalidOperationException("Server resource observation already started.");
+            throw new InvalidOperationException(MessageText);
         }
 
         var native = resources.Where(resource => resource.Name != RunnerName
             && !resource.Name.Contains(BootstrapFragment, StringComparison.Ordinal))
-            .Take(ScaleServerResourceBounds.MaxContainers + 1).ToArray();
+            .Take(ScaleServerResourceBounds.MaxContainers + Step).ToArray();
         if (native.Length > ScaleServerResourceBounds.MaxContainers || native.Length != selection.NodeCount)
         {
             _missing.Add(ScaleServerResourceBounds.SamplingMissing);
@@ -46,15 +54,15 @@ internal sealed class ScaleServerResourceEvidenceCollector(
                 continue;
             }
             var mountTargets = resource.Annotations.OfType<ContainerMountAnnotation>()
-                .Where(mount => !mount.IsReadOnly).Take(ScaleServerResourceBounds.MaxMounts + 1)
+                .Where(mount => !mount.IsReadOnly).Take(_settings.MaxMounts + Step)
                 .Select(mount => mount.Target).ToArray();
-            if (mountTargets.Length > ScaleServerResourceBounds.MaxMounts || mountTargets.Length == 0)
+            if (mountTargets.Length > _settings.MaxMounts || mountTargets.Length == EmptyValue)
             {
                 _missing.Add(ScaleServerResourceBounds.StorageMissing);
             }
 
             samplers.Add(new ScaleServerResourceSampler(annotation.Name,
-                mountTargets.Length <= ScaleServerResourceBounds.MaxMounts ? mountTargets : []));
+                mountTargets.Length <= _settings.MaxMounts ? mountTargets : []));
         }
         _samplers = samplers.ToArray();
         _observation = ObserveAsync(readiness, cancellationToken);
@@ -68,7 +76,10 @@ internal sealed class ScaleServerResourceEvidenceCollector(
 
     private async Task ObserveAsync(Func<CancellationToken, Task> readiness, CancellationToken applicationToken)
     {
-        using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(ScaleServerResourceBounds.MaxObservationMinutes));
+        const int EmptyValue = 0;
+        const int SampleInitialValue = 0;
+
+        using var deadline = new CancellationTokenSource(_settings.MaximumObservation);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(
             applicationToken, _applicationStopping, _stop.Token, deadline.Token);
         var token = linked.Token;
@@ -87,7 +98,7 @@ internal sealed class ScaleServerResourceEvidenceCollector(
                 sampler.MarkReadyBoundary();
             }
 
-            (_hardware, _envelope) = await ScaleServerHostEvidence.ReadAsync(token);
+            (_hardware, _envelope) = await ScaleServerHostEvidence.ReadAsync(executionOptions, provenanceOptions, token);
             if (_hardware is null)
             {
                 _missing.Add(ScaleServerResourceBounds.HardwareMissing);
@@ -98,16 +109,16 @@ internal sealed class ScaleServerResourceEvidenceCollector(
                 _missing.Add(ScaleServerResourceBounds.EnvelopeMissing);
             }
 
-            if (_samplers.Length == 0)
+            if (_samplers.Length == EmptyValue)
             {
                 _missing.Add(ScaleServerResourceBounds.SamplingMissing);
             }
 
             var timer = Stopwatch.StartNew();
-            for (var sample = 0; sample < ScaleServerResourceBounds.MaxSamples; sample++)
+            for (var sample = SampleInitialValue; sample < _settings.MaxSamples; sample++)
             {
                 token.ThrowIfCancellationRequested();
-                var budget = new ScaleServerResourceSampleBudget(ScaleServerResourceBounds.MaxSampleMetadataBytes);
+                var budget = new ScaleServerResourceSampleBudget(executionOptions, provenanceOptions);
                 foreach (var sampler in _samplers)
                 {
                     await sampler.SampleAsync(budget, token);
@@ -116,12 +127,12 @@ internal sealed class ScaleServerResourceEvidenceCollector(
                         _missing.Add(ScaleServerResourceBounds.StorageMissing);
                     }
                 }
-                if (timer.Elapsed >= TimeSpan.FromMinutes(ScaleServerResourceBounds.MaxObservationMinutes))
+                if (timer.Elapsed >= _settings.MaximumObservation)
                 {
                     _missing.Add(ScaleServerResourceBounds.SamplingMissing);
                     return;
                 }
-                await Task.Delay(TimeSpan.FromSeconds(ScaleServerResourceBounds.CadenceSeconds), token);
+                await Task.Delay(_settings.Cadence, token);
             }
             _missing.Add(ScaleServerResourceBounds.SamplingMissing);
         }
@@ -151,13 +162,17 @@ internal sealed class ScaleServerResourceEvidenceCollector(
 
     private async Task WriteAsync(CancellationToken token)
     {
-        var workerPath = Path.Combine(output, "worker.json");
+        const string Path2Text = "worker.json";
+        const int EmptyValue = 0;
+        const string MessageText = "Server resource evidence exceeded its bound.";
+
+        var workerPath = Path.Combine(output, Path2Text);
         if (!File.Exists(workerPath))
         {
             _missing.Add(ScaleServerResourceBounds.SamplingMissing);
             return;
         }
-        if (new FileInfo(workerPath).Length > ScaleServerResourceBounds.MaxWorkerBytes)
+        if (new FileInfo(workerPath).Length > _settings.MaxWorkerBytes)
         {
             _missing.Add(ScaleServerResourceBounds.SamplingMissing);
             return;
@@ -175,52 +190,57 @@ internal sealed class ScaleServerResourceEvidenceCollector(
             _missing.Add(ScaleServerResourceBounds.SamplingMissing);
         }
 
-        if (records.Any(record => record.WritableMounts.Length == 0) || _samplers.Any(sampler => sampler.StorageUnavailable))
+        if (records.Any(record => record.WritableMounts.Length == EmptyValue) || _samplers.Any(sampler => sampler.StorageUnavailable))
         {
             _missing.Add(ScaleServerResourceBounds.StorageMissing);
         }
 
-        var document = new ScaleServerResourceEvidence(Schema, Environment.GetEnvironmentVariable("GITHUB_SHA") ?? string.Empty,
-            Environment.GetEnvironmentVariable("GITHUB_RUN_ID") ?? string.Empty,
-            Environment.GetEnvironmentVariable("GITHUB_RUN_ATTEMPT") ?? string.Empty,
-            Environment.GetEnvironmentVariable("KEYLOAD_COMPARISON_JOB_ID") ?? string.Empty,
+        var document = new ScaleServerResourceEvidence(Schema, _provenance.SourceRevision,
+            _provenance.WorkflowRunId,
+            _provenance.RunAttempt,
+            _provenance.JobId,
             selection.Target, selection.NodeCount, selection.Scenario.ToString(), selection.Profile, workerHash,
-            _hardware, _envelope, records, [.. _missing.Order(StringComparer.Ordinal)], _missing.Count == 0);
+            _hardware, _envelope, records, [.. _missing.Order(StringComparer.Ordinal)], _missing.Count == EmptyValue, ScaleServerObservationPolicySnapshot.Capture(executionOptions));
         var bytes = JsonSerializer.SerializeToUtf8Bytes(document, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        if (bytes.Length > ScaleServerResourceBounds.MaxSidecarBytes)
+        if (bytes.Length > _settings.MaxSidecarBytes)
         {
-            throw new InvalidDataException("Server resource evidence exceeded its bound.");
+            throw new InvalidDataException(MessageText);
         }
 
         Directory.CreateDirectory(output);
         await using var stream = new FileStream(Path.Combine(output, SidecarName), FileMode.CreateNew,
-            FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous | FileOptions.WriteThrough);
+            FileAccess.Write, FileShare.None, _settings.NativeReadBufferBytes, FileOptions.Asynchronous | FileOptions.WriteThrough);
         await stream.WriteAsync(bytes, token);
         await stream.FlushAsync(token);
     }
 
-    private static async Task<string> HashAsync(string path, CancellationToken token)
+    private async Task<string> HashAsync(string path, CancellationToken token)
     {
+        const int TotalInitialValue = 0;
+        const int EmptyValue = 0;
+        const string MessageText = "The isolated worker report exceeded its bound.";
+        const int OffsetValue = 0;
+
         await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
-            65536, FileOptions.Asynchronous | FileOptions.SequentialScan);
+            _settings.NativeReadBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        var buffer = new byte[4096];
-        long total = 0;
+        var buffer = new byte[_settings.NativeReadBufferBytes];
+        long total = TotalInitialValue;
         while (true)
         {
             var count = await stream.ReadAsync(buffer, token);
-            if (count == 0)
+            if (count == EmptyValue)
             {
                 break;
             }
 
-            if (total > ScaleServerResourceBounds.MaxWorkerBytes - count)
+            if (total > _settings.MaxWorkerBytes - count)
             {
-                throw new InvalidDataException("The isolated worker report exceeded its bound.");
+                throw new InvalidDataException(MessageText);
             }
 
             total += count;
-            hash.AppendData(buffer, 0, count);
+            hash.AppendData(buffer, OffsetValue, count);
         }
         return Convert.ToHexStringLower(hash.GetHashAndReset());
     }

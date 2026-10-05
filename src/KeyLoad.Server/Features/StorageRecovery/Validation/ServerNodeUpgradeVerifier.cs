@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 
 internal static class ServerNodeUpgradeVerifier
 {
-    internal static ReplicaHardState Verify(string directory, ServerNodeUpgradeReceipt receipt, NodeOptions options, bool published)
+    internal static ReplicaHardState Verify(string directory, ServerNodeUpgradeReceipt receipt, ServerRuntimeOptions options, bool published)
         => ServerNodeUpgradePrivateDirectory.Run(Path.GetDirectoryName(receipt.FinalDestination)!, verifier =>
         {
             ServerNodeUpgradeAuthority.CopyStore(directory, verifier, ServerNodeUpgradeProtocol.Canonical);
@@ -18,15 +18,15 @@ internal static class ServerNodeUpgradeVerifier
         });
 
     private static ReplicaHardState VerifyCopies(string original, string verifier, ServerNodeUpgradeReceipt receipt,
-        NodeOptions options, ServerNodeUpgradeAuthority authority, bool published)
+        ServerRuntimeOptions options, ServerNodeUpgradeAuthority authority, bool published)
         => ServerNodeUpgradeStores.Run(verifier, options, stores =>
         {
-            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy());
-            var configuration = options.CreateReplicaConfiguration(verifier);
+            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging);
+            var configuration = ServerNodeUpgradeConfiguration.Replica(options, verifier);
             ServerNodeUpgradeCurrentState.VerifyPersisted(stores.Replica);
             using var log = new DurableReplicaLog(stores.Replica, configuration, canonicalDatabase: database);
             ServerNodeUpgradeCurrentState.Verify(receipt, database, stores.Replica, log.State, authority, published);
-            ServerNodeUpgradeCurrentImages.Verify(original, stores.Canonical, log.State, configuration.MaxSnapshotBytes,
+            ServerNodeUpgradeCurrentImages.Verify(original, stores.Canonical, log.State, configuration.Value.MaxSnapshotBytes,
                 Path.Combine(verifier, "verified-images"));
             return log.State;
         });

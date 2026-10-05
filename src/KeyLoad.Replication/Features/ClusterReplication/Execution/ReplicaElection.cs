@@ -2,13 +2,22 @@ namespace KeyLoad.Replication;
 
 internal sealed class ReplicaElection(ReplicaState state, ReplicaRpcClient rpc)
 {
+    private const int FirstElectionTerm = 1;
+    private const int BeforeFirstLogPosition = 0;
+    private const int UnelectedTerm = 0;
+    private const int ElectionTermStep = 1;
+    private const int NoLeaderReadyPosition = 0;
+    private const int LocalVoterCount = 1;
+    private const int ContiguousIndexStep = 1;
+    private const int NoMatchedPosition = 0;
+
     internal Task<VoteReply> ReceiveAsync(VoteRequest request, CancellationToken cancellationToken)
         => state.LockedAsync(() => Receive(request), cancellationToken);
 
     private VoteReply Receive(VoteRequest request)
     {
-        if (request.Term < 1 || request.LastIndex < 0 || request.LastTerm < 0 || request.LastTerm > request.Term
-            || request.LastIndex == 0 && request.LastTerm != 0 || request.LastIndex > 0 && request.LastTerm == 0
+        if (request.Term < FirstElectionTerm || request.LastIndex < BeforeFirstLogPosition || request.LastTerm < UnelectedTerm || request.LastTerm > request.Term
+            || request.LastIndex == BeforeFirstLogPosition && request.LastTerm != UnelectedTerm || request.LastIndex > BeforeFirstLogPosition && request.LastTerm == UnelectedTerm
             || !state.Configuration.VoterIds.Contains(request.CandidateId, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidPeer);
@@ -34,10 +43,10 @@ internal sealed class ReplicaElection(ReplicaState state, ReplicaRpcClient rpc)
             {
                 return null;
             }
-            state.Log.SaveTermAndVote(checked(state.Log.State.Term + 1), state.Configuration.LocalId);
+            state.Log.SaveTermAndVote(checked(state.Log.State.Term + ElectionTermStep), state.Configuration.LocalId);
             state.Role = ReplicaRole.Candidate;
             state.LeaderId = null;
-            state.LeaderReadyIndex = 0;
+            state.LeaderReadyIndex = NoLeaderReadyPosition;
             state.ResetElection();
             var durable = state.Log.State;
             return new VoteRequest(state.Configuration.LocalId, durable.Term, durable.LastIndex, state.Log.TermAt(durable.LastIndex));
@@ -48,7 +57,7 @@ internal sealed class ReplicaElection(ReplicaState state, ReplicaRpcClient rpc)
         }
         var votes = await Task.WhenAll(state.Configuration.VoterIds.Where(voter => voter != state.Configuration.LocalId)
             .Select(voter => AskAsync(voter, request, cancellationToken))).ConfigureAwait(false);
-        await state.LockedAsync(() => Win(request.Term, votes.Count(granted => granted) + 1), cancellationToken).ConfigureAwait(false);
+        await state.LockedAsync(() => Win(request.Term, votes.Count(granted => granted) + LocalVoterCount), cancellationToken).ConfigureAwait(false);
     }
 
     private bool Win(long term, int votes)
@@ -59,11 +68,11 @@ internal sealed class ReplicaElection(ReplicaState state, ReplicaRpcClient rpc)
         }
         state.Role = ReplicaRole.Leader;
         state.LeaderId = state.Configuration.LocalId;
-        var next = checked(state.Log.State.LastIndex + 1);
+        var next = checked(state.Log.State.LastIndex + ContiguousIndexStep);
         state.Progress.Clear();
         foreach (var voter in state.Configuration.VoterIds)
         {
-            state.Progress[voter] = new(next, 0);
+            state.Progress[voter] = new(next, NoMatchedPosition);
         }
         state.Log.Append([new(next, term, null)]);
         state.LeaderReadyIndex = next;

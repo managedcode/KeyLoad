@@ -13,10 +13,10 @@ internal static class PostgresNativeVectorTargetValues
     internal const string TheNativeVectorIndexHasNot = "The native vector index has not been selected.";
     internal const string APostgreSQLVectorTargetCanIngest = "A PostgreSQL vector target can ingest once.";
     internal const int VectorDimensions = 128;
-    internal const int SingleElementOffset = 1;
-    internal const int VectorBoundaryCount = 2;
-    internal const int FirstIndex = 0;
-    internal const int ReportSchemaVersion = 3;
-    internal const int FloatByteCount = 4;
+    internal const int FsyncColumnOrdinal = 1;
+    internal const int SynchronousCommitColumnOrdinal = 2;
+    internal const int ServerVersionColumnOrdinal = 0;
+    internal const int PgvectorVersionColumnOrdinal = 3;
+    internal const int TlsColumnOrdinal = 4;
     internal const string NpgsqlPooledSQLTLS = "Npgsql pooled SQL/TLS";
 }

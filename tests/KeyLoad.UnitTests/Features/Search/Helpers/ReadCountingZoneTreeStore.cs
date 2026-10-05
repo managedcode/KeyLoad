@@ -22,7 +22,7 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
     internal ReadCountingZoneTreeStore()
     {
         directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
-        inner = new(new(directory));
+        inner = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Database = new(this, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         Database.Bootstrap(new(RootPrincipal, Tenant, [new("*", "*", Capability.All)], ["*"])
         { ClusterAdministrator = true }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));

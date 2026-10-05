@@ -1,9 +1,11 @@
 using System.Runtime.CompilerServices;
 using Npgsql;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int topK, int graphDepth, int corpusCount)
+internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int topK, int graphDepth, int corpusCount,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     : IComparisonSession
 {
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
@@ -53,7 +55,7 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
             case Scenario.VectorExact:
                 return new(Neighbors: await PostgresVectorOperations.SearchAsync(connection, document, topK, cancellationToken));
             case Scenario.QueueCycle:
-                return await PostgresQueueOperations.ExecuteAsync(connection, document, cancellationToken);
+                return await PostgresQueueOperations.ExecuteAsync(connection, document, cancellationToken, lifecycleOptions);
             case Scenario.GraphNeighbors:
             case Scenario.GraphTraverse:
                 return await PostgresGraphOperations.ExecuteAsync(connection, scenario, document, graphDepth, cancellationToken);

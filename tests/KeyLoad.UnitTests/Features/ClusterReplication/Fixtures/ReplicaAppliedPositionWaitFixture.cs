@@ -22,12 +22,12 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
         {
             Incarnation = Configuration.Incarnation,
             SigningKey = Canonical.Store.Identity.SigningKey
-        });
+        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var configuration = ReplicaExecutionTestOptions.Configuration(Configuration);
         var execution = ReplicaExecutionTestOptions.Execution();
         Log = new(replica, UnitExecutionOptions.ReplicaConfiguration(configuration), canonicalDatabase: Canonical.Database);
         Materializer = new(Canonical.Database, Log,
-            new ReplicaSnapshotStore(Canonical.Store, Log, UnitExecutionOptions.ReplicaConfiguration(configuration)), execution);
+            new ReplicaSnapshotStore(Canonical.Store, Log, UnitExecutionOptions.ReplicaConfiguration(configuration), UnitExecutionOptions.ReplicaExecution()), execution);
         Consensus = new(Materializer, UnitExecutionOptions.ReplicaConfiguration(configuration), UnitExecutionOptions.ReplicaExecution(), execution, TimeProvider.System);
     }
 

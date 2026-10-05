@@ -14,14 +14,17 @@ internal static class IsolatedQdrantBootstrap
 
     internal static void Configure(IResourceBuilder<QdrantServerResource> node, string name, int count, int ordinal)
     {
+        const int SingleNodeCount = 1;
+        const int BoundaryValue = 1;
+
         node.WithContainerNetworkAlias(name).WithEntrypoint(Entrypoint)
-            .WithEnvironment(EnabledSetting, count == 1 ? FalseValue : TrueValue);
-        if (count == 1)
+            .WithEnvironment(EnabledSetting, count == SingleNodeCount ? FalseValue : TrueValue);
+        if (count == SingleNodeCount)
         {
             return;
         }
         node.WithArgs(UriArgument, UriPrefix + name + PeerPort);
-        if (ordinal > 1)
+        if (ordinal > BoundaryValue)
         {
             node.WithArgs(BootstrapArgument, FirstPeer);
         }

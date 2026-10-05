@@ -21,7 +21,7 @@ internal sealed class NativeMissingIdentityTests
     public async Task AcIs004And008MissingIdentityPreservesActualTreeAndJournal(bool checkpoint)
     {
         using var files = new WalFileFixture();
-        using (var store = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var store = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             store.Commit((transaction, _) => { transaction.Put([0x10], [0x30]); return true; });
             if (checkpoint)
@@ -128,7 +128,7 @@ internal sealed class NativeMissingIdentityTests
         await Assert.That(File.Exists(files.IdentityPath)).IsTrue();
         await Assert.That(File.Exists(files.JournalPath)).IsTrue();
         await Assert.That(Directory.Exists(Path.Combine(files.DirectoryPath, TreeDirectoryName))).IsTrue();
-        using var reopened = new ZoneTreeStore(new(files.DirectoryPath));
+        using var reopened = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await WalFileFixture.AssertPreservedIdentity(identity, reopened.Identity);
         await Assert.That(reopened.Position).IsEqualTo(0);
     }
@@ -140,7 +140,7 @@ internal sealed class NativeMissingIdentityTests
             SearchOption.AllDirectories).ToArray();
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var attempted = new ZoneTreeStore(new(files.DirectoryPath));
+            using var attempted = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         });
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);

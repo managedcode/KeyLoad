@@ -23,7 +23,7 @@ internal static class IsolatedKeyLoadPublicRegression
             ?? throw new InvalidOperationException("The persisted administrator credential is missing.");
         await VerifyMembershipAsync(app, key, nodeCount, deadline.Token);
         using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, 1);
-        var sdk = new KeyLoadClient(http, key);
+        var sdk = new KeyLoadClient(http, key, ComparisonClientOptions.Execution());
         await using var mcp = await IsolatedKeyLoadPublicRegressionMcp.ConnectAsync(app, nodeCount, key, deadline.Token);
         var scenario = await IsolatedKeyLoadPublicRegressionScenario.CreateAsync(sdk, deadline.Token);
         await IsolatedKeyLoadPublicRegressionDocuments.VerifyAsync(sdk, mcp, scenario, deadline.Token);
@@ -39,7 +39,7 @@ internal static class IsolatedKeyLoadPublicRegression
         for (var node = 1; node <= nodeCount; node++)
         {
             using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, node);
-            var status = await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await new KeyLoadClient(http, key).StatusAsync(token));
+            var status = await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await new KeyLoadClient(http, key, ComparisonClientOptions.Execution()).StatusAsync(token));
             await Assert.That(status.Voters).IsEqualTo(nodeCount);
             await Assert.That(status.RoutingReady).IsTrue();
             await Assert.That(status.Incarnation).IsNotEqualTo(Guid.Empty);

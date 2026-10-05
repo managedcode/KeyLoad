@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 internal sealed record ServerNodeUpgradeAuthority(StoreIdentity Canonical, StoreIdentity Replica)
 {
     internal static ServerNodeUpgradeOwner Bind(ServerNodeUpgradePaths paths, ServerNodeUpgradeInventory original,
-        NodeOptions options)
+        ServerRuntimeOptions options)
     {
         if (original.Entries.Any(entry => entry.Path is ServerNodeUpgradeProtocol.CanonicalIdentityPath or ServerNodeUpgradeProtocol.ReplicaIdentityPath
             && entry.Length > 4_096))
@@ -29,12 +29,16 @@ internal sealed record ServerNodeUpgradeAuthority(StoreIdentity Canonical, Store
             canonical.FormatVersion, ServerNodeUpgradeProtocol.TargetEpoch);
     }
 
-    internal static ServerNodeUpgradeAuthority VerifyCopies(string input, NodeOptions options)
-        => new(ZoneTreeFormatUpgrade.VerifySource(StoreOptions(Path.Combine(input, ServerNodeUpgradeProtocol.Canonical), options)),
-            ZoneTreeFormatUpgrade.VerifySource(StoreOptions(Path.Combine(input, ServerNodeUpgradeProtocol.Replica), options)));
+    internal static ServerNodeUpgradeAuthority VerifyCopies(string input, ServerRuntimeOptions options)
+        => new(ZoneTreeFormatUpgrade.VerifySource(StoreOptions(Path.Combine(input, ServerNodeUpgradeProtocol.Canonical), options), options.StorageExecution),
+            ZoneTreeFormatUpgrade.VerifySource(StoreOptions(Path.Combine(input, ServerNodeUpgradeProtocol.Replica), options), options.StorageExecution));
 
-    internal static ZoneTreeStoreOptions StoreOptions(string directory, NodeOptions options)
-        => new(directory) { Incarnation = options.Incarnation, SigningKey = Convert.FromBase64String(options.SigningKey) };
+    internal static ZoneTreeStoreOptions StoreOptions(string directory, ServerRuntimeOptions options)
+        => new ZoneTreeStoreOptions(directory)
+        {
+            Incarnation = options.Node.Value.Incarnation,
+            SigningKey = Convert.FromBase64String(options.Node.Value.SigningKey)
+        }.ResolveExecutionOptions(options.StorageExecution);
 
     internal static void CopyInputs(string source, string inputs)
     {

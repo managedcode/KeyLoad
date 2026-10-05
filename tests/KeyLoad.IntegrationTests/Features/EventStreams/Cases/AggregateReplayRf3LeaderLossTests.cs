@@ -169,9 +169,9 @@ internal sealed class AggregateReplayRf3LeaderLossTests(ClusterFixture fixture)
         internal WorkerClients(ClusterFixture fixture, string secret, string[] nodes)
         {
             clients = nodes.Select(node => McpCallerHttp.Create(fixture, node)).ToArray();
-            Items = clients.Select(client => new KeyLoadClient(client, secret)).ToArray();
+            Items = clients.Select(client => new KeyLoadClient(client, secret, IntegrationClientOptions.Execution())).ToArray();
             adminClients = nodes.Select(node => McpCallerHttp.Create(fixture, node)).ToArray();
-            AdminItems = adminClients.Select(client => new KeyLoadClient(client, fixture.AdminKey)).ToArray();
+            AdminItems = adminClients.Select(client => new KeyLoadClient(client, fixture.AdminKey, IntegrationClientOptions.Execution())).ToArray();
         }
 
         public void Dispose()

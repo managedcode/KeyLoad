@@ -21,7 +21,7 @@ internal sealed class DueNoQuorumRf3Callers : IAsyncDisposable
         var http = McpCallerHttp.Create(app, node);
         try
         {
-            var sdk = new KeyLoadClient(http, credential);
+            var sdk = new KeyLoadClient(http, credential, IntegrationClientOptions.Execution());
             var mcp = await McpOfficialClient.ConnectAsync(app, node, credential, cancellationToken)
                 .ConfigureAwait(false);
             return new(http, sdk, mcp);

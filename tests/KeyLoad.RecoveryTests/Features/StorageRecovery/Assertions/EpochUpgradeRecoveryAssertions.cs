@@ -46,8 +46,8 @@ internal static class EpochUpgradeRecoveryAssertions
     internal static StoreIdentity UpgradeRetryAndVerify(string source, string target,
         EpochPriorProbeReceipt receipt)
     {
-        var identity = ZoneTreeFormatUpgrade.Upgrade(source, new ZoneTreeStoreOptions(target));
-        using var store = new ZoneTreeStore(new(target));
+        var identity = ZoneTreeFormatUpgrade.Upgrade(source, new ZoneTreeStoreOptions(target), RecoveryExecutionOptions.StorageExecution());
+        using var store = new ZoneTreeStore(new(target), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         AssertCurrentTarget(store, receipt);
         var snapshotPath = Path.Combine(Path.GetDirectoryName(target)!,
             "epoch-verify-" + Guid.NewGuid().ToString("N") + ".checkpoint");
@@ -72,7 +72,7 @@ internal static class EpochUpgradeRecoveryAssertions
     }
 
     internal static StoreIdentity RetryPublishedTarget(string source, string target)
-        => ZoneTreeFormatUpgrade.Upgrade(source, new(target));
+        => ZoneTreeFormatUpgrade.Upgrade(source, new(target), RecoveryExecutionOptions.StorageExecution());
 
     internal static async Task AssertIdentityAsync(StoreIdentity actual, EpochPriorProbeReceipt source)
     {
@@ -90,7 +90,7 @@ internal static class EpochUpgradeRecoveryAssertions
     internal static async Task<Dictionary<string, string>> WriteAndCaptureLaterTargetAsync(string target,
         EpochPriorProbeReceipt receipt, CancellationToken cancellationToken)
     {
-        using (var store = new ZoneTreeStore(new(target)))
+        using (var store = new ZoneTreeStore(new(target), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()))
         {
             AssertCurrentTarget(store, receipt);
             var next = store.Commit((transaction, position) =>
@@ -107,7 +107,7 @@ internal static class EpochUpgradeRecoveryAssertions
         Dictionary<string, string> expectedInventory, CancellationToken cancellationToken)
     {
         await EpochUpgradeFileInventory.AssertUnchangedAsync(target, expectedInventory, cancellationToken);
-        using var store = new ZoneTreeStore(new(target));
+        using var store = new ZoneTreeStore(new(target), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         await Assert.That(store.Position).IsEqualTo(receipt.Position + 1);
         AssertCurrentRecords(store, receipt);
         await Assert.That(store.Read(view => view.ReadOwnedValue(PostUpgradeKey)))
@@ -128,7 +128,7 @@ internal static class EpochUpgradeRecoveryAssertions
         CancellationToken cancellationToken)
     {
         var targetInventory = await EpochUpgradeFileInventory.CaptureAsync(target, cancellationToken);
-        using (var store = new ZoneTreeStore(new(target)))
+        using (var store = new ZoneTreeStore(new(target), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()))
         {
             AssertCurrentTarget(store, receipt);
             await AssertIdentityAsync(store.Identity, receipt);

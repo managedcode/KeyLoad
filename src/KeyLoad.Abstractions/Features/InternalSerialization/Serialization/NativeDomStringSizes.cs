@@ -5,6 +5,9 @@ namespace KeyLoad.Features.InternalSerialization;
 internal sealed class NativeDomStringSizes
 {
     private const int ChunkCharacters = 4_096;
+    private const long EmptyEncodedBytes = 0;
+    private const int FirstCharacterOffset = 0;
+    private const int LastCharacterOffset = 1;
     private readonly Dictionary<string, long> escaped = new(ReferenceEqualityComparer.Instance);
 
     internal long Escaped(string text)
@@ -23,12 +26,12 @@ internal sealed class NativeDomStringSizes
         {
             throw Errors.Fail(ErrorCode.Corruption, NativePayloadVersion.InvalidPayload);
         }
-        long bytes = 0;
-        var offset = 0;
+        var bytes = EmptyEncodedBytes;
+        var offset = FirstCharacterOffset;
         while (offset < text.Length)
         {
             var count = Math.Min(ChunkCharacters, text.Length - offset);
-            if (offset + count < text.Length && char.IsHighSurrogate(text[offset + count - 1]))
+            if (offset + count < text.Length && char.IsHighSurrogate(text[offset + count - LastCharacterOffset]))
             {
                 count--;
             }

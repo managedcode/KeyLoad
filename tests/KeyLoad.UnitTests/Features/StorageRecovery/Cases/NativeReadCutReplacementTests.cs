@@ -27,7 +27,7 @@ internal sealed class NativeReadCutReplacementTests
             {
                 Incarnation = incarnation,
                 FaultObserver = (_, _, _) => Interlocked.Increment(ref installCallbacks)
-            });
+            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             target.Commit((tx, _) =>
             {
                 tx.Put(AppliedKey, NativeSerialization.Serialize(7L));
@@ -63,7 +63,7 @@ internal sealed class NativeReadCutReplacementTests
 
     private static string CreateSnapshot(string root, Guid incarnation)
     {
-        using var source = new ZoneTreeStore(new(Path.Combine(root, "source")) { Incarnation = incarnation });
+        using var source = new ZoneTreeStore(new(Path.Combine(root, "source")) { Incarnation = incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         source.Commit((tx, _) =>
         {
             tx.Put(AppliedKey, NativeSerialization.Serialize(7L));

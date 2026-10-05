@@ -14,7 +14,7 @@ internal sealed class ArtifactTests
         Directory.CreateDirectory(root);
         try
         {
-            using (var store = new ZoneTreeStore(new(Path.Combine(root, "source"))))
+            using (var store = new ZoneTreeStore(new(Path.Combine(root, "source")), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 store.Commit((tx, _) => { tx.PutRecord(KeyLoad.Storage.KeyCodec.Encode("large"), new string('a', 10_000)); return true; });
                 store.Compact();
@@ -26,8 +26,8 @@ internal sealed class ArtifactTests
             await Assert.That(entries.Length).IsEqualTo(3);
             await Assert.That(entries.Single(e => e.Name == "commands.wal").Pieces > 1).IsTrue();
             BackupArtifact.Unpack(artifact, Path.Combine(root, "unpacked"));
-            ZoneTreeStore.Restore(Path.Combine(root, "unpacked"), Path.Combine(root, "restored"));
-            using var recovered = new ZoneTreeStore(new(Path.Combine(root, "restored")));
+            ZoneTreeStore.Restore(Path.Combine(root, "unpacked"), Path.Combine(root, "restored"), UnitExecutionOptions.StorageExecution());
+            using var recovered = new ZoneTreeStore(new(Path.Combine(root, "restored")), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await Assert.That(recovered.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyLoad.Storage.KeyCodec.Encode("large"))!).Length)).IsEqualTo(10_000);
             var copied = await ArtifactTransfer.CopyToFileStorageAsync(artifact, Path.Combine(root, "archive"), TestContext.Current!.Execution.CancellationToken);
             await Assert.That(copied.IsSuccess).IsTrue();

@@ -15,11 +15,12 @@ namespace KeyLoad.Orleans;
 /// <param name="clock">The shared UTC clock used for due discovery and bounded polling.</param>
 /// <param name="diagnostics">Safe operational diagnostics for rejected pages and dispatch outcomes.</param>
 /// <param name="options">The centrally validated dispatch and discovery scheduling settings.</param>
+/// <param name="journalAdmission">The native scheduling admission and early shutdown token.</param>
 public sealed class RecurringDueGrainService(GrainId id, Silo silo,
     Microsoft.Extensions.Logging.ILoggerFactory loggerFactory,
     DatabaseEngine database, ReplicaConsensus consensus, IGrainFactory grainFactory, TimeProvider clock,
     Microsoft.Extensions.Logging.ILogger<RecurringDueGrainService> diagnostics,
-    IOptions<DueCoordinationOptions> options)
+    IOptions<DueCoordinationOptions> options, RuntimeJournalAdmission journalAdmission)
     : GrainService(id, silo, loggerFactory), IRecurringDueGrainService
 {
     private readonly DueCoordinationOptions settings = options.Value;
@@ -52,8 +53,10 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
         await stopped.ConfigureAwait(true);
     }
 
-    private async Task RunAsync(CancellationToken cancellationToken)
+    private async Task RunAsync(CancellationToken stopped)
     {
+        using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(stopped, journalAdmission.SchedulingToken);
+        var cancellationToken = lifetime.Token;
         DueSweepCursor? cursor = null;
         try
         {

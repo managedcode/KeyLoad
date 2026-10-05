@@ -14,7 +14,7 @@ internal sealed class ScaleServerResourceBoundsTests
             return;
         }
 
-        var budget = new ScaleServerResourceSampleBudget(64);
+        var budget = UnitAppHostResourceOptions.Budget(64);
         await Assert.ThrowsExactlyAsync<InvalidDataException>(() => ScaleServerResourceProcess.RunAsync(
             UnboundedOutputProcess, [], TestContext.Current!.Execution.CancellationToken, budget));
     }

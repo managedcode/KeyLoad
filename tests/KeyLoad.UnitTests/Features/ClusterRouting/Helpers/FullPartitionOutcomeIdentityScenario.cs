@@ -122,7 +122,7 @@ internal static class FullPartitionOutcomeIdentityScenario
     {
         var directory = database.Directory;
         database.Store.Dispose();
-        using var reopenedStore = new ZoneTreeStore(new(directory));
+        using var reopenedStore = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var reopened = new DatabaseEngine(reopenedStore, new AuthorizationPolicy(),
             UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         PhysicalShardTestBootstrap.RequireExisting(reopened);

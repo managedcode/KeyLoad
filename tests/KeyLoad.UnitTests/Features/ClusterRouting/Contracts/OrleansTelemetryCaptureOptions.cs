@@ -4,11 +4,17 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 [KeyLoad.ConfigurationOptions]
 internal sealed class OrleansTelemetryCaptureOptions
 {
-    internal const string ValidationMessage = "The native telemetry capture capacity must be between one and one thousand records.";
+    internal const string ValidationMessage = "Native telemetry capture and flush bounds are outside their accepted range.";
     private const int DefaultMaximumRecords = 256;
+    private const int DefaultFlushTimeoutMilliseconds = 10_000;
     private const int MaximumAllowedRecords = 1_000;
+    private const int MinimumFlushTimeoutMilliseconds = 1_000;
+    private const int MaximumFlushTimeoutMilliseconds = 30_000;
 
     public int MaximumRecords { get; set; } = DefaultMaximumRecords;
 
-    public bool IsValid() => MaximumRecords is >= 1 and <= MaximumAllowedRecords;
+    public int FlushTimeoutMilliseconds { get; set; } = DefaultFlushTimeoutMilliseconds;
+
+    public bool IsValid() => MaximumRecords is >= 1 and <= MaximumAllowedRecords
+        && FlushTimeoutMilliseconds is >= MinimumFlushTimeoutMilliseconds and <= MaximumFlushTimeoutMilliseconds;
 }

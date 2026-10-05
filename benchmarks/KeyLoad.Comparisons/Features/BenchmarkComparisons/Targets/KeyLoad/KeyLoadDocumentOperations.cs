@@ -40,6 +40,25 @@ internal static class KeyLoadDocumentOperations
         }
 
         var receipt = KeyLoadClientResults.Success(result);
+        ValidateReceipt(receipt, scenario, document);
+        return new();
+    }
+
+    internal static async Task<OpenLoopSessionResult> ExecuteOpenLoopAsync(KeyLoadClient client,
+        PartitionRef partition, Scenario scenario, BenchmarkDocument document, CancellationToken token)
+    {
+        var response = await client.CommitAsync(new(Guid.NewGuid(), partition,
+            [CreateMutation(scenario, document)]), token).ConfigureAwait(false);
+        if (!response.IsSuccess)
+        {
+            return KeyLoadOpenLoopResults.RejectOrThrow(response.Problem?.ErrorCode);
+        }
+        ValidateReceipt(response.Value!, scenario, document);
+        return new(OpenLoopSessionDisposition.Succeeded, new());
+    }
+
+    private static void ValidateReceipt(CommitReceipt receipt, Scenario scenario, BenchmarkDocument document)
+    {
         var expectedRevision = scenario == Scenario.DocumentWrite ? 1 : 2;
         if (receipt.Durability != DurabilityProfile.QuorumProcessDurable)
         {
@@ -50,6 +69,5 @@ internal static class KeyLoadDocumentOperations
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
         }
-        return new();
     }
 }

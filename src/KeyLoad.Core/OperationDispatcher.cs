@@ -36,6 +36,7 @@ public sealed partial class DatabaseEngine
             OperationKind.ConfigurePrincipal => ExecuteConfigurePrincipal(transaction, operation),
             OperationKind.ConfigureApiKey => ExecuteConfigureApiKey(transaction, operation),
             OperationKind.Membership => ExecuteMembership(transaction, operation),
+            OperationKind.RuntimeJournal => Result(RuntimeJournal.Execute(transaction, principal, Payload<RuntimeJournalMutation>(operation))),
             OperationKind.SetDispatch => ExecuteDispatchState(transaction, operation),
             _ when BlobStorageOperations.Handles(operation.Kind)
                 => new BlobStorageOperations(this).Execute(transaction, principal, operation, position),

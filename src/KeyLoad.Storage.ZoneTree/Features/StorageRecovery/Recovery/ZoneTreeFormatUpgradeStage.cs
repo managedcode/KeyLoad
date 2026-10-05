@@ -2,6 +2,9 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeFormatUpgradeStage
 {
+    private const int NoFileAttributes = 0;
+    private const int FileStartPosition = 0;
+
     internal const string SourceCopyDirectory = ".upgrade-source";
     internal const string ReceiptFileName = "format-upgrade.bin";
     internal const string CheckpointTemporaryFileName = ".upgrade-checkpoint.tmp";
@@ -104,7 +107,7 @@ internal static class ZoneTreeFormatUpgradeStage
     {
         ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(path, allowMissingFinal: false);
         var info = new DirectoryInfo(path);
-        if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != 0)
+        if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != NoFileAttributes)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradeStageMismatch);
         }
@@ -117,7 +120,7 @@ internal static class ZoneTreeFormatUpgradeStage
         using var copy = new FileStream(destination, FileMode.Open, FileAccess.ReadWrite, FileShare.None,
             ZoneTreePersistenceFormat.FileBufferBytes, FileOptions.WriteThrough);
         copy.Flush(true);
-        copy.Position = 0;
+        copy.Position = FileStartPosition;
         var digest = Digest(copy);
         if (!string.Equals(digest, expectedDigest, StringComparison.Ordinal))
         {
@@ -177,11 +180,11 @@ internal static class ZoneTreeFormatUpgradeStage
         while (pending.TryPop(out var path))
         {
             var attributes = File.GetAttributes(path);
-            if ((attributes & FileAttributes.ReparsePoint) != 0)
+            if ((attributes & FileAttributes.ReparsePoint) != NoFileAttributes)
             {
                 throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradeStageMismatch);
             }
-            if ((attributes & FileAttributes.Directory) != 0)
+            if ((attributes & FileAttributes.Directory) != NoFileAttributes)
             {
                 foreach (var child in Directory.EnumerateFileSystemEntries(path))
                 {
@@ -199,7 +202,7 @@ internal static class ZoneTreeFormatUpgradeStage
             {
                 continue;
             }
-            if ((File.GetAttributes(entry) & FileAttributes.Directory) != 0)
+            if ((File.GetAttributes(entry) & FileAttributes.Directory) != NoFileAttributes)
             {
                 Directory.Delete(entry, recursive: true);
             }

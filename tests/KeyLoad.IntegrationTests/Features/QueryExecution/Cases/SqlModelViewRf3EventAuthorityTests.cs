@@ -14,12 +14,12 @@ internal sealed class SqlModelViewRf3EventAuthorityTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(adminHttp, fixture.AdminKey);
+        var administrator = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await SqlModelViewRf3Scenario.CreateAsync(administrator, deadline.Token);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             SqlModelViewRf3Scenario.StreamSet, Capability.Query | Capability.EventsRead, deadline.Token);
         using var readerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var reader = new KeyLoadClient(readerHttp, identity.Secret);
+        var reader = new KeyLoadClient(readerHttp, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
 

@@ -4,6 +4,8 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class IsolatedNeo4jResources
 {
+    private const string GetImageReferenceComparisonText = "@";
+
     private const string Target = "Neo4j";
     private const string Name = "neo4j";
     private const string Version = "2026.09.0";
@@ -27,13 +29,17 @@ internal static class IsolatedNeo4jResources
     private const int SecretBytes = 32;
     private const int HttpPort = 7474;
 
-    internal static string ImageReference => ImagePrefix + Version + "@" + BenchmarkResources.Neo4jDigest;
+    internal static string ImageReference => ImagePrefix + Version + GetImageReferenceComparisonText + BenchmarkResources.Neo4jDigest;
 
     internal static void Add(IsolatedResourceContext context)
     {
+        const int SupportedNodeCount = 1;
+        const int ElementIndex = 7;
+        const int IndexValue = 0;
+
         ArgumentNullException.ThrowIfNull(context);
         context.Selection.Validate();
-        if (context.Selection.Target != Target || context.Selection.NodeCount != 1)
+        if (context.Selection.Target != Target || context.Selection.NodeCount != SupportedNodeCount)
         {
             throw new InvalidOperationException(UnsupportedSelection);
         }
@@ -42,7 +48,7 @@ internal static class IsolatedNeo4jResources
         var password = context.Builder.AddParameter(PasswordParameter,
             Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)), secret: true);
         var node = context.Builder.AddContainer(Name, Image, Version)
-            .WithImageSHA256(BenchmarkResources.Neo4jDigest[7..]).WithContainerNetworkAlias(Name)
+            .WithImageSHA256(BenchmarkResources.Neo4jDigest[ElementIndex..]).WithContainerNetworkAlias(Name)
             .WithBindMount(directory, DataMount).WithHttpEndpoint(targetPort: HttpPort, name: HttpEndpoint)
             .WithEnvironment(AuthenticationEnvironment, ReferenceExpression.Create($"{Name}/{password}"))
             .WithEnvironment(InitialHeapEnvironment, InitialHeap).WithEnvironment(MaximumHeapEnvironment, MaximumHeap)
@@ -51,7 +57,7 @@ internal static class IsolatedNeo4jResources
         {
             node.WithContainerRuntimeArgs(UserArgument, user);
         }
-        context.BindEndpoint(0, node, HttpEndpoint);
+        context.BindEndpoint(IndexValue, node, HttpEndpoint);
         context.BindSetting(UserSetting, Name);
         context.BindSetting(PasswordSetting, password);
         context.BindImage(ImageReference);

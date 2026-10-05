@@ -24,13 +24,13 @@ internal sealed class NodeEpochCoordinatorAcceptanceTests
             var sourceInventory = await NodeEpochInventoryCapture.CaptureAsync(source, token);
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
 
-            var prepared = ServerNodeFormatUpgrade.Prepare(source, options);
+            var prepared = ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options));
             await AssertPreparedStateAsync(destination, prepared, prior);
-            var verified = ServerNodeFormatUpgrade.VerifyPrepared(source, options);
+            var verified = ServerNodeFormatUpgrade.VerifyPrepared(source, RecoveryServerRuntimeOptions.Runtime(options));
             await AssertReceiptAsync(verified, prior);
             await NodeEpochInventoryCapture.AssertUnchangedAsync(source, sourceInventory, token);
 
-            var published = ServerNodeFormatUpgrade.Publish(source, options);
+            var published = ServerNodeFormatUpgrade.Publish(source, RecoveryServerRuntimeOptions.Runtime(options));
             await AssertReceiptAsync(published, prior);
             await Assert.That(Directory.Exists(destination)).IsTrue();
             await Assert.That(Directory.Exists(destination + ServerNodeUpgradeProtocol.StageSuffix)).IsFalse();
@@ -39,7 +39,7 @@ internal sealed class NodeEpochCoordinatorAcceptanceTests
 
             await NodeEpochCoordinatorAssertions.ApplyLaterOperationAsync(profile, destination, token);
             var targetAfterWrite = await NodeEpochInventoryCapture.CaptureAsync(destination, token);
-            var retry = ServerNodeFormatUpgrade.Prepare(source, options);
+            var retry = ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options));
             await AssertReceiptAsync(retry, prior);
             await NodeEpochInventoryCapture.AssertUnchangedAsync(destination, targetAfterWrite, token);
             await NodeEpochInventoryCapture.AssertUnchangedAsync(source, sourceInventory, token);
@@ -62,7 +62,7 @@ internal sealed class NodeEpochCoordinatorAcceptanceTests
             var sourceInventory = await NodeEpochInventoryCapture.CaptureAsync(source, token);
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, options));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options)));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.RecoveryRequired);
             await Assert.That(Directory.Exists(destination)).IsFalse();
@@ -85,7 +85,7 @@ internal sealed class NodeEpochCoordinatorAcceptanceTests
             var sourceInventory = await NodeEpochInventoryCapture.CaptureAsync(source, token);
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, options));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options)));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.FormatUnsupported);
             await Assert.That(Directory.Exists(destination)).IsFalse();
@@ -106,14 +106,14 @@ internal sealed class NodeEpochCoordinatorAcceptanceTests
             _ = await EpochPriorExecutableFixture.CreateNodeAsync(source, profile, token);
             var sourceInventory = await NodeEpochInventoryCapture.CaptureAsync(source, token);
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
-            _ = ServerNodeFormatUpgrade.Prepare(source, options);
+            _ = ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options));
             var preparedReceipt = Path.Combine(stage, ServerNodeUpgradeProtocol.PreparedReceipt);
             var bytes = await File.ReadAllBytesAsync(preparedReceipt, token);
             bytes[^1] ^= 0x01;
             await File.WriteAllBytesAsync(preparedReceipt, bytes, token);
             var stageInventory = await NodeEpochInventoryCapture.CaptureAsync(stage, token);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.VerifyPrepared(source, options));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.VerifyPrepared(source, RecoveryServerRuntimeOptions.Runtime(options)));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(Directory.Exists(destination)).IsFalse();

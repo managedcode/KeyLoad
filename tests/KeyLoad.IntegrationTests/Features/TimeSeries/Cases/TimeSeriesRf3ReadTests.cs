@@ -39,7 +39,7 @@ internal sealed class TimeSeriesRf3ReadTests(ClusterFixture fixture)
             TimeSeriesRf3Scenario.Set, Capability.SeriesRead, deadline.Token);
         var request = scenario.Latest(atOrBefore: tie.ToOffset(TimeSpan.FromHours(-5)));
         using var http = McpCallerHttp.Create(fixture, TimeSeriesRf3Scenario.Node3);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, TimeSeriesRf3Scenario.Node2,
             identity.Secret, deadline.Token);
         var discovered = await mcp.Client.DiscoverKeyLoadToolAsync(McpCallerTools.SeriesLatest, deadline.Token);
@@ -81,7 +81,7 @@ internal sealed class TimeSeriesRf3ReadTests(ClusterFixture fixture)
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             TimeSeriesRf3Scenario.Set, Capability.SeriesRead, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, TimeSeriesRf3Scenario.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, TimeSeriesRf3Scenario.Node2,
             identity.Secret, deadline.Token);
         var request = scenario.Aggregate(start.ToOffset(TimeSpan.FromHours(4)), end.ToOffset(TimeSpan.FromHours(-2)));

@@ -1,11 +1,17 @@
+using KeyLoad;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.ClusterRouting;
 
 /// <summary>Reads the exact bounded trusted AppHost control settings and excludes incompatible modes.</summary>
+[ConfigurationBinding]
 internal static class RequestCqrsProbeProfileSettingsReader
 {
+    private const string NodesArrayText = "node1";
+    private const string NodesNodesArrayText = "node2";
+    private const int ValidSessionStructuralValue = 32;
+
     private const string EphemeralSetting = "KeyLoad:Ephemeral";
     private const string BenchmarkSetting = "Benchmarks:Enabled";
     private const string BenchmarkProfileSetting = "Benchmarks:Profile";
@@ -21,15 +27,18 @@ internal static class RequestCqrsProbeProfileSettingsReader
     private const string DiscoveryModeKey = "DiscoveryCaptureMode";
     private const string DisabledMode = "disabled";
     private const string MixedMode = "mixed-interface3-v1";
-    private static readonly IReadOnlyList<string> Nodes = Array.AsReadOnly(new[] { "node1", "node2", "node3" });
+    private static readonly IReadOnlyList<string> Nodes = Array.AsReadOnly(new[] { NodesArrayText, NodesNodesArrayText, "node3" });
 
     internal static IReadOnlyList<string> VoterNames => Nodes;
 
     internal static RequestCqrsProbeProfileSettings? Read(IConfiguration configuration)
     {
+        const int Step = 1;
+        const int CountValue = 1;
+
         ArgumentNullException.ThrowIfNull(configuration);
         var section = configuration.GetSection(RequestCqrsProbeProfile.Section);
-        var fields = section.GetChildren().Take(MaximumSettings + 1).ToArray();
+        var fields = section.GetChildren().Take(MaximumSettings + Step).ToArray();
         if (section.Value is not null || fields.Length > MaximumSettings)
         { throw new InvalidOperationException(InvalidConfiguration); }
         var enabledFound = false;
@@ -42,7 +51,7 @@ internal static class RequestCqrsProbeProfileSettingsReader
         string? mode = null;
         foreach (var field in fields)
         {
-            if (field.GetChildren().Take(1).Any() || field.Value is null)
+            if (field.GetChildren().Take(CountValue).Any() || field.Value is null)
             { throw new InvalidOperationException(InvalidConfiguration); }
             switch (field.Key)
             {
@@ -79,7 +88,9 @@ internal static class RequestCqrsProbeProfileSettingsReader
     private static void ValidateDisabledSettings(bool rootFound, bool sessionFound, string? session,
         bool modeFound, string? mode)
     {
-        if (rootFound || (sessionFound && session is not { Length: 0 })
+        const int StructuralValue = 0;
+
+        if (rootFound || (sessionFound && session is not { Length: StructuralValue })
             || modeFound && mode != DisabledMode)
         { throw new InvalidOperationException(InvalidConfiguration); }
     }
@@ -110,12 +121,14 @@ internal static class RequestCqrsProbeProfileSettingsReader
 
     private static bool HasBenchmarkSelection(IConfiguration configuration)
     {
+        const int CountValue = 1;
+
         var timeSeries = configuration.GetSection(TimeSeriesBenchmarkSection);
         return ReadBenchmark(configuration)
             || configuration[BenchmarkProfileSetting] is not null
             || configuration[Comparisons.ComparisonWorkerSelection.TargetSetting] is not null
             || configuration[Comparisons.ComparisonWorkerSelection.NodeCountSetting] is not null
-            || timeSeries.Value is not null || timeSeries.GetChildren().Take(1).Any();
+            || timeSeries.Value is not null || timeSeries.GetChildren().Take(CountValue).Any();
     }
 
     private static bool ReadBenchmark(IConfiguration configuration)
@@ -130,13 +143,15 @@ internal static class RequestCqrsProbeProfileSettingsReader
 
     private static bool HasProtocolCohortOverride(IConfiguration configuration)
     {
+        const int CountValue = 1;
+
         ProtocolCohortImages.ValidateMode(configuration);
         return configuration.GetSection(ProtocolCohortImages.EnabledSetting).Value is TrueValue
             || configuration.GetSection(ProtocolCohortImages.VotersSetting).Value is not null
-            || configuration.GetSection(ProtocolCohortImages.VotersSetting).GetChildren().Take(1).Any();
+            || configuration.GetSection(ProtocolCohortImages.VotersSetting).GetChildren().Take(CountValue).Any();
     }
 
     private static bool ValidSession(string? value)
-        => value is { Length: 32 } && Guid.TryParseExact(value, GuidFormat, out var session)
+        => value is { Length: ValidSessionStructuralValue } && Guid.TryParseExact(value, GuidFormat, out var session)
             && session != Guid.Empty && session.ToString(GuidFormat) == value;
 }

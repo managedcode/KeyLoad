@@ -24,6 +24,10 @@ internal static class HelixDbVectorAst
 
     internal static JsonObject Search(string label, ReadOnlySpan<float> vector, int count, VectorQueryMode mode)
     {
+        if (!Enum.IsDefined(mode))
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
         var fields = new JsonObject
         {
             [HelixDbNativeTokens.TokenLabel] = label,

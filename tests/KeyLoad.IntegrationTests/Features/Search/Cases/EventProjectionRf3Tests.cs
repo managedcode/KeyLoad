@@ -45,12 +45,12 @@ internal sealed class EventProjectionRf3Tests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var scenario = await EventProjectionRf3Scenario.CreateAsync(fixture, deadline.Token);
         using var workerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var worker = new KeyLoadClient(workerHttp, scenario.WorkerSecret);
+        var worker = new KeyLoadClient(workerHttp, scenario.WorkerSecret, IntegrationClientOptions.Execution());
         await McpCallerAssertions.SdkSuccessAsync(await worker.CommitAsync(scenario.ApplyCommand(), deadline.Token));
         var restricted = await EventProjectionRf3Scenario.CreateReaderAsync(fixture, scenario.Partition,
             true, EventProjectionRf3Scenario.TargetOwner, deadline.Token);
         using var callerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var caller = new KeyLoadClient(callerHttp, restricted.Secret);
+        var caller = new KeyLoadClient(callerHttp, restricted.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             restricted.Secret, deadline.Token);
         await EventProjectionRf3Assertions.VerifyVectorBothAsync(caller, mcp, scenario.VectorSearch(),

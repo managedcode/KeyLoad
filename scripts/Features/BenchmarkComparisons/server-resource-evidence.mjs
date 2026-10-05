@@ -2,6 +2,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { hashPattern, requireGitHub } from './isolated-github-contract.mjs';
 
 const schema = 'server-resource-evidence.v1';
+const configuredSchema = 'server-resource-evidence.v2';
 const maximumContainers = 3;
 const maximumSamples = 1680;
 const maximumMounts = 8;
@@ -135,7 +136,9 @@ function validCpuMax(value) {
 }
 
 export function validateServerResourceEvidence(value, sidecarSha256, workerSha256, cell, cohort, jobId, supported) {
-  requireGitHub(keys(value, rootFields) && value.schema === schema && hashPattern.test(sidecarSha256)
+  const configured = value?.schema === configuredSchema;
+  const expectedFields = configured ? [...rootFields, 'observationPolicy'] : rootFields;
+  requireGitHub(keys(value, expectedFields) && (configured || value.schema === schema) && hashPattern.test(sidecarSha256)
     && hashPattern.test(workerSha256) && value.workerSha256 === workerSha256 && value.sourceRevision === cohort.sourceRevision
     && value.workflowRunId === String(cohort.runId) && value.runAttempt === String(cohort.attempt)
     && value.jobId === String(jobId) && value.target === cell.target && value.nodeCount === cell.nodeCount
@@ -143,6 +146,7 @@ export function validateServerResourceEvidence(value, sidecarSha256, workerSha25
     && Array.isArray(value.missingEvidence) && value.missingEvidence.every(item => missingKinds.includes(item))
     && isDeepStrictEqual(value.missingEvidence, [...new Set(value.missingEvidence)].sort())
     && typeof value.qualified === 'boolean' && value.qualified === (value.missingEvidence.length === 0));
+  if (configured) requireGitHub(validObservationPolicy(value.observationPolicy));
   const hardwareMissing = value.missingEvidence.includes('hardwareClass');
   const envelopeMissing = value.missingEvidence.includes('effectiveServerResources');
   requireGitHub(hardwareMissing ? value.hardware === null : validHardware(value.hardware));
@@ -160,6 +164,7 @@ export function validateServerResourceEvidence(value, sidecarSha256, workerSha25
       && value.missingEvidence.includes('serverCpuRss'));
   }
   const comparison = supported && value.qualified ? {
+    ...(configured ? { observationPolicy: value.observationPolicy } : {}),
     hardware: value.hardware,
     appHostEnvelope: value.appHostEnvelope,
     containers: value.containers.map(item => ({ effectiveCpuQuota: item.effectiveCpuQuota,
@@ -176,6 +181,23 @@ export function validateServerResourceEvidence(value, sidecarSha256, workerSha25
   } : null;
   return { sha256: sidecarSha256, qualified: value.qualified, missingEvidence: value.missingEvidence,
     comparison, observedServerMemory };
+}
+
+function validObservationPolicy(value) {
+  const bounds = { maxProcesses: 128, maxMounts: 8, maxFileBytes: 4096, minimumCommandBytes: 4096,
+    maxHardwareBytes: 262144, maxSampleMetadataBytes: 262144, maxSidecarBytes: 65536, maxWorkerBytes: 67108864,
+    maxSamples: 1680, maxCgroupAncestors: 64, nativeReadBufferBytes: 4096, maxNativeOutputBytes: 4096 };
+  const timings = { cadenceMilliseconds: 60000, maximumObservationMilliseconds: 8400000,
+    cleanupThresholdMilliseconds: 30000, processSettlementMilliseconds: 30000 };
+  return keys(value, [...Object.keys(bounds), ...Object.keys(timings)])
+    && Object.entries(bounds).every(([name, maximum]) => Number.isSafeInteger(value[name])
+      && value[name] > 0 && value[name] <= maximum)
+    && Object.entries(timings).every(([name, maximum]) => Number.isFinite(value[name])
+      && value[name] > 0 && value[name] <= maximum)
+    && value.minimumCommandBytes >= 8 && value.minimumCommandBytes <= value.maxFileBytes
+    && value.maxSamples >= 2 && value.maxHardwareBytes <= value.maxSampleMetadataBytes
+    && value.nativeReadBufferBytes <= value.maxFileBytes
+    && value.cadenceMilliseconds < value.maximumObservationMilliseconds;
 }
 
 function ordinalCompare(left, right) { return left < right ? -1 : left > right ? 1 : 0; }

@@ -1,5 +1,6 @@
 using System.Net;
 using StackExchange.Redis;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -14,7 +15,6 @@ internal static class RedisReplicaProof
     private const string ErrorAof = "RedisAofAlwaysRequired";
     private const string SingleState = "single primary";
     private const string ReplicatedState = "single primary with verified native direct replicas";
-    private const int ProbeExpiryMinutes = 2;
 
     public static ConfigurationOptions CreateOptions(string connectionString)
     {
@@ -27,7 +27,8 @@ internal static class RedisReplicaProof
         => RedisNodeIdentity.ReadAsync(connection.GetServer(endpoint), CommandFlags.DemandMaster, token);
 
     public static async Task<ClusterEvidence> VerifyAsync(ConnectionMultiplexer primary, string[] replicaStrings,
-        ComparisonTopology topology, RedisNodeIdentity primaryIdentity, string probeKey, string payload, CancellationToken token)
+        ComparisonTopology topology, RedisNodeIdentity primaryIdentity, string probeKey, string payload, CancellationToken token,
+        IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     {
         var requiredReplicas = ComparisonTopologies.NodeCount(topology) - 1;
         var replicated = requiredReplicas > 0;
@@ -46,7 +47,7 @@ internal static class RedisReplicaProof
             return RedisNodeIdentity.SingleEvidence(primaryIdentity, SingleState);
         }
 
-        await primary.GetDatabase().StringSetAsync(probeKey, payload, TimeSpan.FromMinutes(ProbeExpiryMinutes), flags: CommandFlags.DemandMaster).WaitAsync(token);
+        await primary.GetDatabase().StringSetAsync(probeKey, payload, lifecycleOptions.Value.RedisProbeExpiry, flags: CommandFlags.DemandMaster).WaitAsync(token);
         var replicas = await ConnectReplicasAsync(replicaStrings, token);
         try
         {
@@ -55,7 +56,7 @@ internal static class RedisReplicaProof
             var allIdentities = new[] { primaryIdentity }.Concat(identities).ToArray();
             RedisNodeIdentity.RequireUniqueVersionedSet(allIdentities, primaryIdentity, requiredReplicas + 1);
             await RedisCopyObservation.VerifyDirectCopiesAsync(replicas, endpoints, primary.GetDatabase().Database,
-                probeKey, payload, token);
+                probeKey, payload, token, lifecycleOptions);
             for (var index = 0; index < replicas.Length; index++)
             {
                 await VerifyReplicaAsync(replicas[index].GetServer(endpoints[index]), endpoints[index], primaryEndpoint, token);

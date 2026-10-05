@@ -105,6 +105,8 @@ public sealed record ScopeGrant([property: Orleans.Id(0)] string Database, [prop
 [Orleans.Alias(NativeContractAliases.PrincipalRecord)]
 public sealed record PrincipalRecord([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] string TenantId, [property: Orleans.Id(2)] ImmutableArray<ScopeGrant> Grants, [property: Orleans.Id(3)] ImmutableArray<string> FieldGrants)
 {
+    private const int InitialPolicyEpoch = 1;
+
     /// <summary>Gets whether the principal has cluster administration rights.</summary>
     [Orleans.Id(4)]
     public bool ClusterAdministrator { get; init; }
@@ -125,7 +127,7 @@ public sealed record PrincipalRecord([property: Orleans.Id(0)] string Id, [prope
     public DateTimeOffset? ExpiresAt { get; init; }
     /// <summary>Gets the principal policy epoch.</summary>
     [Orleans.Id(10)]
-    public long PolicyEpoch { get; init; } = 1;
+    public long PolicyEpoch { get; init; } = InitialPolicyEpoch;
 }
 
 /// <summary>Persists an API key verifier and its principal and lifecycle state.</summary>

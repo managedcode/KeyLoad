@@ -20,10 +20,13 @@ internal static class OwnedProcessFailureObserver
 
     internal static async Task<Exception?> CaptureAsync(Task original)
     {
+        const int SingleFailureCount = 1;
+        const int IndexValue = 0;
+
         await original.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         if (original.Exception is { } error)
         {
-            return error.InnerExceptions.Count == 1 ? error.InnerExceptions[0] : error;
+            return error.InnerExceptions.Count == SingleFailureCount ? error.InnerExceptions[IndexValue] : error;
         }
         if (original.IsCanceled)
         {

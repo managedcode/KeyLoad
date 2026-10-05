@@ -92,7 +92,7 @@ internal sealed class OutboxPurgeTests
             new PurgeOutboxRequest(purgeId, database.Partition, 1), id: purgeId).Get<OutboxHead>();
 
         database.Store.Dispose();
-        using var reopenedStore = new ZoneTreeStore(new(database.Directory));
+        using var reopenedStore = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var reopenedDatabase = new DatabaseEngine(reopenedStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var recovered = reopenedDatabase.GetOutboxStatus("root", database.Partition).Head;
         await Assert.That(recovered).IsEqualTo(purged);

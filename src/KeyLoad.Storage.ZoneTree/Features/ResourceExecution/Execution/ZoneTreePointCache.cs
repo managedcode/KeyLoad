@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 
@@ -6,10 +7,24 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 internal sealed class ZoneTreePointCache : IDisposable, IZoneTreePointCacheCandidateOwner
 {
     private readonly ZoneTreePointCacheState _state;
+    private readonly ZoneTreePointCacheExecutionOptions? executionPolicy;
 
-    internal ZoneTreePointCache(ZoneTreePointCacheOptions options)
+    internal ZoneTreePointCache(ZoneTreePointCacheOptions options, IOptions<ZoneTreePointCacheExecutionOptions> executionOptions)
     {
-        _state = new ZoneTreePointCacheState(options);
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        executionPolicy = executionOptions.Value;
+        ArgumentNullException.ThrowIfNull(executionPolicy);
+        executionPolicy.Validate();
+        _state = new ZoneTreePointCacheState(options.WithExecutionSnapshot(executionPolicy));
+    }
+
+    private ZoneTreePointCache(ZoneTreePointCacheState resolvedState) => _state = resolvedState;
+
+    internal static ZoneTreePointCache CreateResolved(ZoneTreePointCacheOptions options)
+    {
+        _ = options.MaximumVictimAttempts;
+        return new(new ZoneTreePointCacheState(options));
     }
 
     internal bool TryPin(ReadOnlySpan<byte> key, long generation,

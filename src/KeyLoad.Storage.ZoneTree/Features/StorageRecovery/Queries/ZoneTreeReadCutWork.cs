@@ -4,6 +4,8 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeReadCutWork(ZoneTreeReadCutLimits limits)
 {
+    private const int SingleNativeAdvance = 1;
+
     private const string ElapsedExceededMessage = "The native read-cut lease exceeded its elapsed-time budget.";
     private const string RecordsExceededMessage = "The native read-cut lease exceeded its record budget.";
     private const string BytesExceededMessage = "The native read-cut lease exceeded its byte budget.";
@@ -35,7 +37,7 @@ internal sealed class ZoneTreeReadCutWork(ZoneTreeReadCutLimits limits)
     internal void BeforeAdvance(CancellationToken token)
     {
         Check(token);
-        advances = checked(advances + 1);
+        advances = checked(advances + SingleNativeAdvance);
     }
 
     internal void ChargeExaminedKey(int keyBytes, CancellationToken token)

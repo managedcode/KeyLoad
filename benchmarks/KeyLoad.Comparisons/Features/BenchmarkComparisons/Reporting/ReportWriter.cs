@@ -63,7 +63,7 @@ public static class ReportWriter
         else if (report.VectorProfile is { } vector)
         {
             text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.Run}{report.RunId}{ReportWriterValues.VectorProfile}{vector.Id}{ReportWriterValues.Seed}{vector.Seed}{ReportWriterValues.CorpusSHA256}{report.DatasetSha256}{ReportWriterValues.DigestCodeEnd}");
-            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.LineBreak}{vector.RecordCount}{ReportWriterValues.Vectors}{vector.Dimensions}{ReportWriterValues.Float32DimensionsCosineTop}{vector.TopK}{ReportWriterValues.ListSeparator}{vector.MeasuredQueries}{ReportWriterValues.MeasuredQueriesConcurrency}{vector.Concurrency}{ReportWriterValues.ClauseSeparator}{vector.IndexKind}{ReportWriterValues.AlgorithmModeSeparator}{vector.QueryMode}{ReportWriterValues.ClauseSeparator}{(vector.MinimumRecall).ToString(ReportWriterValues.P0Format,global::System.Globalization.CultureInfo.CurrentCulture)}{ReportWriterValues.MinimumRecall}");
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.LineBreak}{vector.RecordCount}{ReportWriterValues.Vectors}{vector.Dimensions}{ReportWriterValues.Float32DimensionsCosineTop}{vector.TopK}{ReportWriterValues.ListSeparator}{vector.MeasuredQueries}{ReportWriterValues.MeasuredQueriesConcurrency}{vector.Concurrency}{ReportWriterValues.ClauseSeparator}{vector.IndexKind}{ReportWriterValues.AlgorithmModeSeparator}{vector.QueryMode}{ReportWriterValues.ClauseSeparator}{(vector.MinimumRecall).ToString(ReportWriterValues.P0Format, global::System.Globalization.CultureInfo.CurrentCulture)}{ReportWriterValues.MinimumRecall}");
         }
         else
         {

@@ -23,7 +23,7 @@ internal sealed class McpPersistedAuthorizationTests(ClusterFixture fixture)
         var first = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(scenario.Reference), deadline.Token));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var restricted = identity.Principal with { Grants = [], PolicyEpoch = identity.Principal.PolicyEpoch + McpCallerProtocol.EpochIncrement };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), restricted, deadline.Token));
 
@@ -31,7 +31,7 @@ internal sealed class McpPersistedAuthorizationTests(ClusterFixture fixture)
         var deniedId = await McpCallerAssertions.ErrorAsync(denied, ErrorCode.PermissionDenied, dispatched: true);
         await Assert.That(deniedId).IsNotEqualTo(first.RequestId);
         await McpCallerAssertions.DoesNotDiscloseAsync(denied, identity.Secret, McpDocumentProtocol.PrivateValue);
-        var sdkDenied = await new KeyLoadClient(http, identity.Secret).GetAsync(scenario.Reference, deadline.Token);
+        var sdkDenied = await new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution()).GetAsync(scenario.Reference, deadline.Token);
         await Assert.That(sdkDenied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
     }
 

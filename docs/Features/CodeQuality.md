@@ -273,6 +273,14 @@ the existing complete unit/scalar/recovery/RF3 gates, then retain a final canoni
 build after all edits and formatting. Report source drift and missing coverage
 explicitly; concurrent unrelated feature implementation is preserved.
 
+The continuation also repairs the independently owned `KeyLoad.Diagnostics`
+literal diagnostics without changing its ADR-063 fixed histogram/counter schema,
+startup footprint, four-CAS bound, allocation behaviour or public signatures.
+A disjoint worker names immutable measurement boundaries and structural values in
+the existing ResourceExecution files; it introduces no operational configuration
+or telemetry feature. Existing real phase-bank regressions remain the behaviour
+contract, with a strict project build and final solution integration by the lead.
+
 - AC-CQ-018: the first contributor profile is exactly the functional
   `PartitionQuery*` TUnit cases in `unit` and `unit-scalar`, through the existing
   Aspire-owned entry and native MTP CodeCoverage 18.11.2. The profile includes
@@ -528,6 +536,15 @@ test runner, parser dependency or coverage framework. A Luna worker owns only a
 guarded private helper packet; root owns canonical Prepare/Verify joins and
 manifest integration. Existing reports remain immutable and cannot acquire
 this binding retrospectively.
+
+Prepare retains the bounded native test-image snapshot in the create-only
+`functional-coverage.test-image-manifest.json` and binds its filename/SHA-256 in
+the source manifest. The source manifest also records the actual Query compiled
+identity. Capture both images before writing collection settings; Verify rejects
+missing image bindings and reruns their native source/PDB checks, including all
+six central inputs, before admitting reports. Bind every identity-helper script
+through the existing script inventory. Publication cannot replace an existing
+test-image manifest; a failed preparation requires a fresh owned evidence root.
 
 Verification uses actual native DLL/PDB/source inspection and rejected stale
 source, foreign/missing PDB, missing central input and unsafe-link controls.

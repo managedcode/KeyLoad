@@ -12,7 +12,7 @@ internal static class AggregateReplayJson
     {
         if (json is null || Encoding.UTF8.GetByteCount(json) > maximumBytes)
         {
-            throw new InvalidDataException($"{name} is absent or exceeds its byte limit.");
+            throw new InvalidDataException(string.Concat(name, AggregateReplayMessages.ByteLimitSuffix));
         }
         try
         {
@@ -20,7 +20,7 @@ internal static class AggregateReplayJson
         }
         catch (JsonException exception)
         {
-            throw new InvalidDataException($"{name} must be valid bounded JSON.", exception);
+            throw new InvalidDataException(string.Concat(name, AggregateReplayMessages.JsonFormatSuffix), exception);
         }
     }
 }

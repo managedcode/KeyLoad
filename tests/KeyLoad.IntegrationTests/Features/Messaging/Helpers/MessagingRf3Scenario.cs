@@ -30,7 +30,7 @@ internal sealed record MessagingRf3Scenario(PartitionRef SourcePartition, Partit
         var source = new PartitionRef(tenant, Database, Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         var destination = new PartitionRef(tenant, Database, Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await ConfigureQueueAsync(administrator, new(source, SourceQueueName), cancellationToken);
         await ConfigureQueueAsync(administrator, new(source, TimeoutQueueName), cancellationToken);
         await ConfigureQueueAsync(administrator, new(destination, DestinationQueueName), cancellationToken);

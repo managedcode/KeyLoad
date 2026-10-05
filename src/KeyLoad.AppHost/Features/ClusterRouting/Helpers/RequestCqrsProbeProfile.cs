@@ -1,5 +1,6 @@
 using KeyLoad.AppHost.Features.ClusterReplication;
 using Microsoft.Extensions.Configuration;
+using KeyLoad.AppHost.Hosting;
 
 namespace KeyLoad.AppHost.Features.ClusterRouting;
 
@@ -33,7 +34,7 @@ internal sealed class RequestCqrsProbeProfile
         bool ephemeral, int? benchmarkNodeCount, IReadOnlyDictionary<string, RuntimeContainerImage> images)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        var settings = RequestCqrsProbeProfileSettingsReader.Read(builder.Configuration);
+        var settings = AppHostOptionsRegistration.Get(builder).Control.Value.RequestProbe;
         if (settings is null)
         { return null; }
         if (!ephemeral || benchmarkNodeCount is not null)
@@ -60,14 +61,17 @@ internal sealed class RequestCqrsProbeProfile
 
     private static void ValidateImages(IReadOnlyDictionary<string, RuntimeContainerImage> images, string discoveryCaptureMode)
     {
+        const int IndexValue = 0;
+        const int ValidateImagesIndexValue = 1;
+
         if (images.Count != RequestCqrsProbeProfileSettingsReader.VoterNames.Count
             || RequestCqrsProbeProfileSettingsReader.VoterNames.Any(node => !images.TryGetValue(node, out var image) || image is null))
         { throw new InvalidOperationException(InvalidConfiguration); }
         var voters = RequestCqrsProbeProfileSettingsReader.VoterNames;
-        var reference = images[voters[0]].Reference;
+        var reference = images[voters[IndexValue]].Reference;
         if (string.IsNullOrWhiteSpace(reference))
         { throw new InvalidOperationException(InvalidConfiguration); }
-        var second = images[voters[1]].Reference;
+        var second = images[voters[ValidateImagesIndexValue]].Reference;
         var third = images[voters[2]].Reference;
         var sameImage = string.Equals(second, reference, StringComparison.Ordinal)
             && string.Equals(third, reference, StringComparison.Ordinal);

@@ -3,8 +3,10 @@ using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeRangeWork(ZoneTreeReadCounters counters, StorageReadObserver? observer,
-    CancellationToken cancellationToken)
+    CancellationToken cancellationToken, int maximumRecords, long maximumWorkBytes)
 {
+    private const int NoMarkerBytes = 0;
+
     private long providerBytes;
     private int examinedEntries;
     internal long ReadBytes { get; private set; }
@@ -17,13 +19,13 @@ internal sealed class ZoneTreeRangeWork(ZoneTreeReadCounters counters, StorageRe
     {
         counters.RangeEntry(bytes, baseline: hasMarker, tombstone);
         Check();
-        if (++examinedEntries > MaximumRangeRecords)
+        if (++examinedEntries > maximumRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedRangeRecordsMessage);
         }
 
-        var providerCharge = bytes + (hasMarker ? StorageValueHeaderBytes : 0);
-        if (providerCharge > MaximumRangeWorkBytes - providerBytes)
+        var providerCharge = bytes + (hasMarker ? StorageValueHeaderBytes : NoMarkerBytes);
+        if (providerCharge > maximumWorkBytes - providerBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedRangeBytesMessage);
         }

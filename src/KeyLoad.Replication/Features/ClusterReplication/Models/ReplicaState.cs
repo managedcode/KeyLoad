@@ -1,20 +1,38 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 
 namespace KeyLoad.Replication;
 
-internal sealed class ReplicaState(ReplicaMaterializer materializer, ReplicaConfiguration configuration, TimeProvider clock)
+internal sealed class ReplicaState
 {
-    internal ReplicaMaterializer Materializer { get; } = materializer;
-    internal ReplicaConfiguration Configuration { get; } = configuration;
-    internal TimeProvider Clock { get; } = clock;
+    private const int FirstElectionTerm = 1;
+    private const int NoLeaderReadyPosition = 0;
+    private const int FirstLogPosition = 1;
+    private const int BeforeFirstLogPosition = 0;
+
+    private readonly ReplicaConfiguration configuration;
+    internal ReplicaMaterializer Materializer { get; }
+    internal ReplicaConfiguration Configuration => configuration;
+    internal TimeProvider Clock { get; }
+
+    internal ReplicaState(ReplicaMaterializer materializer, IOptions<ReplicaConfiguration> options, TimeProvider clock)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        configuration = options.Value;
+        configuration.Validate();
+        Materializer = materializer;
+        Clock = clock;
+        electionStarted = clock.GetTimestamp();
+        electionTimeout = ReplicaElectionTimeout.Select(configuration);
+    }
     internal IDurableReplicaLog Log => Materializer.Log;
     internal ReplicaRole Role { get; set; } = ReplicaRole.Follower;
     internal string? LeaderId { get; set; }
     internal long LeaderReadyIndex { get; set; }
     internal Dictionary<string, ReplicaProgress> Progress { get; } = new(StringComparer.Ordinal);
     internal volatile bool Ready;
-    private long electionStarted = clock.GetTimestamp();
-    private TimeSpan electionTimeout = ReplicaElectionTimeout.Select(configuration);
+    private long electionStarted;
+    private TimeSpan electionTimeout;
     private Exception? failure;
 
     internal async Task<T> LockedAsync<T>(Func<T> action, CancellationToken cancellationToken)
@@ -83,7 +101,7 @@ internal sealed class ReplicaState(ReplicaMaterializer materializer, ReplicaConf
         {
             return false;
         }
-        if (term < 1 || !Configuration.VoterIds.Contains(leader, StringComparer.Ordinal))
+        if (term < FirstElectionTerm || !Configuration.VoterIds.Contains(leader, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidPeer);
         }
@@ -97,7 +115,7 @@ internal sealed class ReplicaState(ReplicaMaterializer materializer, ReplicaConf
         }
         Role = ReplicaRole.Follower;
         LeaderId = leader;
-        LeaderReadyIndex = 0;
+        LeaderReadyIndex = NoLeaderReadyPosition;
         ResetElection();
         return true;
     }
@@ -111,7 +129,7 @@ internal sealed class ReplicaState(ReplicaMaterializer materializer, ReplicaConf
         Log.SaveTermAndVote(term, null);
         Role = ReplicaRole.Follower;
         LeaderId = null;
-        LeaderReadyIndex = 0;
+        LeaderReadyIndex = NoLeaderReadyPosition;
         ResetElection();
     }
 
@@ -126,7 +144,7 @@ internal sealed class ReplicaState(ReplicaMaterializer materializer, ReplicaConf
     internal void RequireReadyLeader()
     {
         RequireLeader();
-        if (LeaderReadyIndex < 1 || Log.State.CommittedIndex < LeaderReadyIndex)
+        if (LeaderReadyIndex < FirstLogPosition || Log.State.CommittedIndex < LeaderReadyIndex)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         }
@@ -136,7 +154,7 @@ internal sealed class ReplicaState(ReplicaMaterializer materializer, ReplicaConf
     {
         var log = Log.State;
         return new(Configuration.LocalId, LeaderId, Role, log.Term, log.LastIndex, log.CommittedIndex,
-            Materializer.Database.LastApplied, log.Snapshot?.Index ?? 0, Ready && Volatile.Read(ref failure) is null);
+            Materializer.Database.LastApplied, log.Snapshot?.Index ?? BeforeFirstLogPosition, Ready && Volatile.Read(ref failure) is null);
     }
 }
 

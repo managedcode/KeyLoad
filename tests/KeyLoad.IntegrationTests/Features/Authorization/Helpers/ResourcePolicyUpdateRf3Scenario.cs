@@ -21,7 +21,7 @@ internal sealed record ResourcePolicyUpdateRf3Scenario(PartitionRef Partition, E
         var definition = Definition(partition, ResourcePolicyUpdateRf3Protocol.ReadGrantV1,
             ResourcePolicyUpdateRf3Protocol.UseGrantV1);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(http, fixture.AdminKey);
+        var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var persistedDefinition = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, definition), cancellationToken));
         await McpCallerAssertions.SdkSuccessAsync(await admin.CommitAsync(Seed(partition), cancellationToken));
@@ -133,7 +133,7 @@ internal sealed record ResourcePolicyUpdateRf3Scenario(PartitionRef Partition, E
         ConfigureResourceRequest request, ResourceDefinition originalResult, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
-        var retry = await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey)
+        var retry = await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution())
             .ConfigureResourceAsync(commandId, request, cancellationToken));
         await ResourcePolicyUpdateRf3Assertions.AssertSameDefinitionAsync(originalResult, retry);
     }

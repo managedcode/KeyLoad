@@ -1,10 +1,11 @@
-using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
+
 internal sealed class HelixDbSession(HttpClient http, string label, int count, int depth, IOptions<NativeComparisonExecutionOptions> executionOptions) : IComparisonSession
 {
     private NativeComparisonExecutionOptions Policy => executionOptions.Value;
@@ -14,6 +15,10 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
     {
         using var response = await QueryAsync(HelixDbDocumentAst.Read(label, document.Id), false, cancellationToken).ConfigureAwait(false);
         var rows = HelixDbProtocol.Rows(response);
+        if (rows.GetArrayLength() > SingleResultCardinality)
+        {
+            throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbInvalidRows);
+        }
         return rows.GetArrayLength() == EmptyResultCount ? null : Read(rows[EmptyResultCount]);
     }
 
@@ -33,7 +38,7 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
             foreach (var row in rows.EnumerateArray())
             {
                 var number = row.GetProperty(HelixDbNativeTokens.TokenNumber).GetInt32();
-                if (number <= after)
+                if (number <= after || seen >= count)
                 {
                     throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbCorpusOrderMismatch);
                 }
@@ -86,8 +91,11 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
         {
             Scenario.DocumentWrite => HelixDbDocumentAst.Add(label, document),
             Scenario.DocumentUpdate => HelixDbDocumentAst.Update(label, document),
-            _ => throw new NotSupportedException()};
-        using var response = await QueryAsync(HelixDbProtocol.Node(HelixDbNativeTokens.TokenCount, new() { [HelixDbNativeTokens.TokenInput] = mutation }), true, token).ConfigureAwait(false);
+            _ => throw new NotSupportedException()
+        };
+        using var response = await HelixDbProtocol.QueryAsync(http,
+            HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenCount, new() { [HelixDbNativeTokens.TokenInput] = mutation }), true),
+            true, Policy, token, create: scenario == Scenario.DocumentWrite).ConfigureAwait(false);
         RequireOne(response.RootElement.GetProperty(HelixDbNativeTokens.TokenRows), scenario);
     }
 

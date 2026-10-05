@@ -1,4 +1,5 @@
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -14,6 +15,12 @@ public sealed partial class DatabaseEngine
     private AtomicPartitionPlacementResolution? AuthorizeOperation(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
     {
         ClusterPrincipalPolicy.RequireOperation(principal, operation.Kind);
+        RuntimeJournalIdentity.RequireOperation(principal, operation.Kind,
+            operation.Kind == OperationKind.RuntimeJournal ? Payload<RuntimeJournalMutation>(operation) : null);
+        if (operation.Kind == OperationKind.RuntimeJournal)
+        {
+            return null;
+        }
         if (BlobStorageOperations.Handles(operation.Kind))
         {
             new BlobStorageOperations(this).Authorize(view, principal, operation);

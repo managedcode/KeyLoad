@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Storage;
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 
 namespace KeyLoad.Core;
 
@@ -70,6 +71,7 @@ public static class ClusterPrincipalPolicy
     public static void RequireMutablePrincipal(string principalId)
     {
         ArgumentNullException.ThrowIfNull(principalId);
+        RuntimeJournalIdentity.RequireMutablePrincipal(principalId);
 
         if (principalId == InternalPrincipalId)
         {
@@ -84,6 +86,7 @@ public static class ClusterPrincipalPolicy
     public static void RequirePublicCredential(string principalId)
     {
         ArgumentNullException.ThrowIfNull(principalId);
+        RuntimeJournalIdentity.RequireMutablePrincipal(principalId);
 
         if (principalId == InternalPrincipalId)
         {

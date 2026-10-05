@@ -1,10 +1,14 @@
 using System.Diagnostics;
+using KeyLoad.Client;
+using KeyLoad.Comparisons;
+using Microsoft.Extensions.Options;
 using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Owns the TimeSeries target and HTTP client lifetimes while the comparison runs.</summary>
-internal sealed class TimeSeriesComparisonTargetOwner : IAsyncDisposable
+internal sealed class TimeSeriesComparisonTargetOwner(IOptions<KeyLoadClientExecutionOptions> clientOptions,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions) : IAsyncDisposable
 {
     private readonly List<ITimeSeriesPersistentTarget> targets = [];
     private readonly List<HttpClient> unownedClients = [];
@@ -13,10 +17,10 @@ internal sealed class TimeSeriesComparisonTargetOwner : IAsyncDisposable
     internal ITimeSeriesPersistentTarget[] CreateTargets(Uri endpoint, string adminKey, string connectionString,
         string timescaleImage, string keyLoadBuildIdentity)
     {
-        pendingTarget = new TimescaleTimeSeriesTarget(connectionString, timescaleImage);
+        pendingTarget = new TimescaleTimeSeriesTarget(connectionString, lifecycleOptions, timescaleImage);
         PublishPendingTarget();
         var client = CreateClient(endpoint);
-        pendingTarget = new KeyLoadTimeSeriesTarget(client, adminKey, keyLoadBuildIdentity);
+        pendingTarget = new KeyLoadTimeSeriesTarget(client, adminKey, clientOptions, keyLoadBuildIdentity);
         PublishPendingTarget(client);
         return [.. targets];
     }

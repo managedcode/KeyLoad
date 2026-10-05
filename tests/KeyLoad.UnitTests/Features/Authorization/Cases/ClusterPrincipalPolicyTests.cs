@@ -52,7 +52,7 @@ internal sealed class ClusterPrincipalPolicyTests
         {
             Incarnation = database.Store.Identity.Incarnation,
             SigningKey = database.Store.Identity.SigningKey
-        });
+        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         replica.InstallSnapshot(snapshotPath, expectedAppliedPosition: 0);
         var replicatedPrincipal = replica.Read(view => view.GetRecord<PrincipalRecord>(
             KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId)));

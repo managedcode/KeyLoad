@@ -232,7 +232,7 @@ selector and clears both outer harness selectors before its nested AppHost.
 The shared isolated host branches only at native measurement/report dispatch.
 Reuse its target owner, lazy corpus, native resources, readiness, original
 settlement and collector; do not create another resource harness. A separate
-`OpenLoopComparisonRunner(profile, rate, progress)` accepts the actual existing
+`OpenLoopComparisonRunner(profile, rate, executionOptions, progress)` accepts the actual existing
 `IsolatedComparisonWorker` and validates its SourceRevision/RunId/Attempt/JobId/
 Target/NodeCount/Scenario/Profile before acquisition, with actual membership
 validation after native initialization. The existing worker's Repository/Ref/
@@ -414,3 +414,59 @@ options; ordinary control/vector/closed-loop selection and their schemas remain
 unchanged. Acceptance maps to AC-SCALE-018/019/021 and AC-CQ-034/038. The worker
 returns a guarded source packet; required native Aspire cells, cancellation proof
 and exact-source Linux qualification remain open until actually executed.
+
+TASK-SCALE-OPENLOOP-HOST-001 freezes the host composition join. Resolve and
+validate native `IOptions<OpenLoopExecutionOptions>` before creating any selected
+target, including before publishing an unsupported native disposition. The
+marked binding helper owns the configuration access and disposes its native
+service provider. The isolated dispatch consumes a typed selection plus those
+resolved options. Absence of the rate preserves the existing control/vector and
+closed-loop routes; presence selects only the separate measured artifact or the
+closed native cancellation-proof boolean derived by the owning test case.
+Reject a proof without a rate and any proof outside KeyLoad/3/PointRead before
+target creation. Preserve the original worker provenance, target owner, fatal
+exceptions, exact foreign cancellation, original-task settlement and output
+ownership. Unsupported topologies retain their existing explicit unsupported
+worker envelope and do not acquire sessions or fabricate an open-loop result.
+
+The owning UnitTests operation flow uses the actual native comparison host with
+an unsupported community topology: a valid selected rate/policy publishes the
+immutable unsupported worker envelope, a differing policy/proof mixture leaves
+no envelope, and a corrected configuration then publishes its genuine follow-up.
+No property-only options test substitutes for this configuration-to-output flow.
+Actual measured/proof SDK runs still require Aspire's native owned topology.
+
+TASK-SCALE-OPENLOOP-NATIVE-001 freezes the remaining Aspire join for
+AC-SCALE-018/019/021. Root owns `IsolatedNativeCase` and the shared AppHost;
+workers may prepare guarded ComparisonTests Cases/Assertions/Helpers packets.
+Use an explicit typed case intent for closed-loop, measured open-loop and
+open-loop cancellation proof. Require intent/rate/proof/profile agreement before
+creating resources. Only the proof case derives the child proof boolean. Bind
+the selected scale profile and rate explicitly into the sole owned runner;
+ordinary cells must not inherit a proof request or publish measured proof data.
+
+The parent observes only the selected comparisons resource's bounded protocol
+marker. After matching source/cell/proof intent, publish the fixed control request
+by create-new, flushed, atomic file publication in that case's owned report
+directory. Cancel the original child lifetime and join the original runner,
+marker observer, resource observation and disposal tasks. Native assertions
+derive from actual artifact contents, SDK read-after-cancellation and original
+process exit; option construction and synthetic reports cannot qualify a case.
+
+Preserve the closed-loop `worker.json` and resource-evidence v2 contracts. For
+open-loop, write a distinct resource sidecar with schema
+`open-loop-server-resource-evidence.v1`, exact source/run/attempt/job/target/
+node/scenario/profile/rate and artifact kind/name/SHA256. Reuse the actual native
+hardware, cgroup, container/storage observations and consumed observation policy.
+Never put an open-loop hash into `WorkerSha256`. Proof and measured artifacts
+remain separate and are copied only after original observation settlement. An
+unsupported topology remains explicitly unavailable; it cannot count as a
+measured member of the792-cell cohort. Frozen control and closed-loop projection
+and genuine isolated Linux qualification remain unchanged and mandatory.
+
+Rollout adds the typed dispatch and evidence join before adding the independent
+792-cell workflow inventory and consumers. Rollback removes only this new route;
+original artifacts remain immutable. Required tests are actual native positive,
+rejection, cancellation and post-cancellation health flows through Aspire.
+Coverage excludes these load/proof cells; their test execution never substitutes
+for functional coverage or full product acceptance.

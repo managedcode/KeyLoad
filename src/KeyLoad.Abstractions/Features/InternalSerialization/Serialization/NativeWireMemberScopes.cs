@@ -7,6 +7,8 @@ namespace KeyLoad.Features.InternalSerialization;
 // Explicit property/field Ids are NONconstructor members in FieldIdAssignmentHelper10.3.1.
 internal static class NativeWireMemberScopes
 {
+    private const int FirstParameterIndex = 0;
+    private const int EmptyParameterCount = 0;
     private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
     private const string RecordCloneMethodName = "<Clone>$";
     private const string RecordPrintMembersMethodName = "PrintMembers";
@@ -38,7 +40,7 @@ internal static class NativeWireMemberScopes
             return;
         }
         var index = Array.FindIndex(parameters, parameter => parameter.Name == member.Name && parameter.ParameterType == memberType);
-        if (index >= 0 && member is PropertyInfo propertyInfo && IsGenerated(propertyInfo.GetMethod))
+        if (index >= FirstParameterIndex && member is PropertyInfo propertyInfo && IsGenerated(propertyInfo.GetMethod))
         {
             primary[parameters[index].GetCustomAttribute<Orleans.IdAttribute>()?.Id ?? (uint)index] = memberType;
         }
@@ -54,7 +56,7 @@ internal static class NativeWireMemberScopes
                 return option.TypedValue.Value is true;
             }
         }
-        return IsRecord(type) || PrimaryParameters(type).Length > 0;
+        return IsRecord(type) || PrimaryParameters(type).Length > EmptyParameterCount;
     }
 
     private static ParameterInfo[] PrimaryParameters(Type type)
@@ -65,7 +67,7 @@ internal static class NativeWireMemberScopes
             return constructors.FirstOrDefault(constructor => !IsGenerated(constructor))?.GetParameters() ?? [];
         }
         var properties = type.GetProperties(Flags);
-        return constructors.Select(constructor => constructor.GetParameters()).FirstOrDefault(parameters => parameters.Length > 0
+        return constructors.Select(constructor => constructor.GetParameters()).FirstOrDefault(parameters => parameters.Length > EmptyParameterCount
             && parameters.All(parameter => properties.Any(property => property.Name == parameter.Name && IsGenerated(property.GetMethod)))) ?? [];
     }
 

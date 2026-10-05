@@ -130,7 +130,11 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
             ValidateFreshRequest(request, requestId, cancellationToken);
         }
 
-        var principal = GrainRequestAuthority.Reload(localDatabase, request.Envelope.PrincipalId!, runtimeClock);
+        var principal = GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock);
+        if (RuntimeJournalRequestScope.Handles(kind))
+        {
+            return RuntimeJournalReadCapabilities.Execute(localDatabase, principal.Id, kind, request.Payload, cancellationToken);
+        }
         if (GrainAdminDashboardCapabilities.Handles(kind))
         {
             return await GrainAdminDashboardCapabilities.ExecuteAsync(localDatabase, administration, principal,

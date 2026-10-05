@@ -1,11 +1,12 @@
-using Microsoft.Extensions.Options;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nodes, string collection,
-    string image, ComparisonTopology topology, IOptions<NativeComparisonExecutionOptions> executionOptions) : IAsyncDisposable
+    string image, ComparisonTopology topology, IOptions<NativeComparisonExecutionOptions> executionOptions,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions) : IAsyncDisposable
 {
 
     private bool created;
@@ -28,20 +29,30 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
         created = true;
         using var receipt = await QdrantVectorHttp.SendAsync(client, HttpMethod.Put, Path, new
         {
-            vectors = new { size = QdrantVectorProtocol.VectorDimensions, distance = QdrantVectorProtocol.CosineMetric }, shard_number = QdrantVectorProtocol.SingleShard,
-            replication_factor = count, write_consistency_factor = count / QdrantVectorProtocol.QuorumDivisor + QdrantVectorProtocol.MajorityIncrement,
-            hnsw_config = new { m = QdrantVectorProtocol.DisabledIndex }, optimizers_config = new { indexing_threshold = QdrantVectorProtocol.DisabledIndex }
+            vectors = new { size = QdrantVectorProtocol.VectorDimensions, distance = QdrantVectorProtocol.CosineMetric },
+            shard_number = QdrantVectorProtocol.SingleShard,
+            replication_factor = count,
+            write_consistency_factor = count / QdrantVectorProtocol.QuorumDivisor + QdrantVectorProtocol.MajorityIncrement,
+            hnsw_config = new { m = QdrantVectorProtocol.DisabledIndex },
+            optimizers_config = new { indexing_threshold = QdrantVectorProtocol.DisabledIndex }
         }, executionOptions, token);
         var batch = new List<VectorDocument>(executionOptions.Value.WriteBatchCapacity);
         await foreach (var document in documents.WithCancellation(token))
         {
             batch.Add(document);
-            if (batch.Count == executionOptions.Value.WriteBatchCapacity) { await WriteBatchAsync(batch, token); loaded += batch.Count; batch.Clear(); }
+            if (batch.Count == executionOptions.Value.WriteBatchCapacity)
+            { await WriteBatchAsync(batch, token); loaded += batch.Count; batch.Clear(); }
         }
-        if (batch.Count > QdrantVectorProtocol.EmptyCount) { await WriteBatchAsync(batch, token); loaded += batch.Count; }
-        var proof = await QdrantReplicaProof.VerifyAsync(nodes, collection, loaded, topology, token);
-        Profile = Profile with { Version = proof.Version, Cluster = proof.Evidence,
-            Topology = QdrantNativePolicy.TopologyLabel(topology), WriteAcknowledgement = QdrantNativePolicy.WriteContract(topology) };
+        if (batch.Count > QdrantVectorProtocol.EmptyCount)
+        { await WriteBatchAsync(batch, token); loaded += batch.Count; }
+        var proof = await QdrantReplicaProof.VerifyAsync(nodes, collection, loaded, topology, token, lifecycleOptions);
+        Profile = Profile with
+        {
+            Version = proof.Version,
+            Cluster = proof.Evidence,
+            Topology = QdrantNativePolicy.TopologyLabel(topology),
+            WriteAcknowledgement = QdrantNativePolicy.WriteContract(topology)
+        };
         return loaded;
     }
 
@@ -49,9 +60,16 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
     {
         var points = batch.Select(document => new
         {
-            id = (long)document.Number + QdrantVectorProtocol.PointOrdinalOffset, vector = document.Embedding.ToArray(),
-            payload = new { id = document.Id, number = document.Number, document = document.Payload,
-                filtered = document.Number % QdrantVectorProtocol.FilterDivisor == QdrantVectorProtocol.EmptyCount, mixed = document.Number % QdrantVectorProtocol.MutableDivisor != QdrantVectorProtocol.MutableRemainder }
+            id = (long)document.Number + QdrantVectorProtocol.PointOrdinalOffset,
+            vector = document.Embedding.ToArray(),
+            payload = new
+            {
+                id = document.Id,
+                number = document.Number,
+                document = document.Payload,
+                filtered = document.Number % QdrantVectorProtocol.FilterDivisor == QdrantVectorProtocol.EmptyCount,
+                mixed = document.Number % QdrantVectorProtocol.MutableDivisor != QdrantVectorProtocol.MutableRemainder
+            }
         }).ToArray();
         using var receipt = await QdrantVectorHttp.SendAsync(client, HttpMethod.Put, Path + QdrantVectorProtocol.PointsPath + WriteSuffix, new { points }, executionOptions, token);
     }
@@ -120,8 +138,12 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
     internal async Task<string> ExplainAsync(VectorQueryMode mode, CancellationToken token)
     {
         using var native = await QdrantVectorHttp.SendAsync(client, HttpMethod.Get, Path, null, executionOptions, token);
-        return JsonSerializer.Serialize(new { collection = native.RootElement.GetProperty(QdrantVectorProtocol.Result),
-            query = QdrantVectorQueries.Parameters(kind, mode), observation = QdrantVectorProtocol.PlanObservation });
+        return JsonSerializer.Serialize(new
+        {
+            collection = native.RootElement.GetProperty(QdrantVectorProtocol.Result),
+            query = QdrantVectorQueries.Evidence(kind, mode),
+            observation = QdrantVectorProtocol.PlanObservation
+        });
     }
 
     internal async Task UpdateAsync(VectorUpdate update, CancellationToken token)

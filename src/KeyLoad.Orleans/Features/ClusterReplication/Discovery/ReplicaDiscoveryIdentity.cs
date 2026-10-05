@@ -17,7 +17,7 @@ internal static class ReplicaDiscoveryIdentity
         var compatible = discovered.ApplicationRpcVersion == GrainRoutingProtocol.RequestInterfaceVersion
             && discovered.PeerEnvelopeVersion == ReplicaTransportProtocol.Version;
         return new(address, discovered.ApplicationRpcVersion, discovered.PeerEnvelopeVersion,
-            compatible, discovered.TransportReady, clock.GetTimestamp());
+            compatible, discovered.TransportReady, clock.GetTimestamp(), discovered.RuntimeJournalReaderContract);
     }
 
     private static SiloAddress ValidateDiscovery(string voterId, ReplicaSiloDiscovery discovered,

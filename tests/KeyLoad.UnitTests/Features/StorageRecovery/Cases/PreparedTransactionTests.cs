@@ -31,7 +31,7 @@ internal sealed class PreparedTransactionTests
 
         try
         {
-            using (var store = new ZoneTreeStore(new(root)))
+            using (var store = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 store.Commit((transaction, _) =>
                 {
@@ -59,7 +59,7 @@ internal sealed class PreparedTransactionTests
                 await Assert.That(store.Read(view => view.ReadOwnedValue([0x50]))).IsNull();
             }
 
-            using var reopened = new ZoneTreeStore(new(root));
+            using var reopened = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await Assert.That(reopened.Position).IsEqualTo(1L);
             await Assert.That(reopened.Read(view => view.ReadOwnedValue([0x30]))).IsEquivalentTo(new byte[] { 0x40, 0x41, 0x42 }, CollectionOrdering.Matching);
             await Assert.That(reopened.Read(view => view.ReadOwnedValue([0x50]))).IsNull();
@@ -81,7 +81,7 @@ internal sealed class PreparedTransactionTests
 
         try
         {
-            using var store = new ZoneTreeStore(new(root) { MaxFrameBytes = expectedFrame.Length - HeaderLength });
+            using var store = new ZoneTreeStore(new(root) { MaxFrameBytes = expectedFrame.Length - HeaderLength }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             store.Commit((transaction, _) =>
             {
                 transaction.Put(key, value);
@@ -117,7 +117,7 @@ internal sealed class PreparedTransactionTests
         var root = CreateTemporaryDirectory();
         try
         {
-            using var store = new ZoneTreeStore(new(root));
+            using var store = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             store.Commit((transaction, _) =>
             {
                 transaction.Put([0x71], [0x72]);

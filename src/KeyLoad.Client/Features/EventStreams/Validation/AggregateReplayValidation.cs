@@ -6,22 +6,19 @@ internal static class AggregateReplayValidation
 {
     internal static void ValidateLimits(AggregateReplayWorkerLimits limits)
     {
-        if (limits.MaximumEvents is <= 0 or > 65_536 ||
-            limits.MaximumStateBytes is <= 0 or > 16_777_216 ||
-            limits.MaximumInputBytes is <= 0 or > 67_108_864 ||
-            limits.MaximumJsonDepth is <= 0 or > 64)
+        if (!limits.IsValid())
         {
-            throw new ArgumentOutOfRangeException(nameof(limits), "Replay worker limits must be positive and within their hard ceilings.");
+            throw new ArgumentOutOfRangeException(nameof(limits), AggregateReplayWorkerLimits.ValidationMessage);
         }
     }
 
     internal static void ValidateReducer(AggregateReplayReducer reducer)
     {
         ArgumentNullException.ThrowIfNull(reducer);
-        if (string.IsNullOrWhiteSpace(reducer.Version) || reducer.StateSchemaVersion <= 0 ||
-            reducer.EventSchemaVersion <= 0 || reducer.Apply is null)
+        if (string.IsNullOrWhiteSpace(reducer.Version) || reducer.StateSchemaVersion <= AggregateReplayProtocol.InvalidSchemaVersion ||
+            reducer.EventSchemaVersion <= AggregateReplayProtocol.InvalidSchemaVersion || reducer.Apply is null)
         {
-            throw new ArgumentException("The reducer identity, schema versions and callback must be valid.", nameof(reducer));
+            throw new ArgumentException(AggregateReplayMessages.InvalidReducer, nameof(reducer));
         }
     }
 
@@ -38,7 +35,7 @@ internal static class AggregateReplayValidation
         var initialState = page.Snapshot is { } snapshot
             ? ValidateSnapshot(page, snapshot, reducer, limits, input)
             : ValidateInitialState(page, reducer, limits, input);
-        var upcasterMap = AggregateReplayUpcast.BuildMap(upcasters, cancellationToken);
+        var upcasterMap = AggregateReplayUpcast.BuildMap(upcasters, cancellationToken, limits.MaximumRegisteredUpcasters);
         var paths = ValidateEvents(page, reducer, upcasterMap, limits, input, cancellationToken);
         return new(initialState, paths);
     }
@@ -49,11 +46,11 @@ internal static class AggregateReplayValidation
         AggregateReplayWorkerLimits limits,
         AggregateReplayInput input)
     {
-        if (page.Head.FirstAvailableRevision != 1)
+        if (page.Head.FirstAvailableRevision != AggregateReplayProtocol.FirstRetainedRevision)
         {
-            throw new InvalidDataException("A snapshot-free replay must contain complete retained history.");
+            throw new InvalidDataException(AggregateReplayMessages.IncompleteHistory);
         }
-        input.AddState(reducer.InitialStateJson, "Initial state", limits);
+        input.AddState(reducer.InitialStateJson, AggregateReplayMessages.InitialState, limits);
         return reducer.InitialStateJson;
     }
 
@@ -64,16 +61,16 @@ internal static class AggregateReplayValidation
         AggregateReplayWorkerLimits limits,
         AggregateReplayInput input)
     {
-        if (snapshot.SnapshotVersion <= 0 || snapshot.SourceRevision < 0 ||
+        if (snapshot.SnapshotVersion <= AggregateReplayProtocol.NoRevision || snapshot.SourceRevision < AggregateReplayProtocol.NoRevision ||
             snapshot.SourceRevision > page.Head.TailRevision ||
-            snapshot.SourceRevision < page.Head.FirstAvailableRevision - 1 ||
-            snapshot.StateSchemaVersion <= 0 ||
+            snapshot.SourceRevision < page.Head.FirstAvailableRevision - AggregateReplayProtocol.RevisionStep ||
+            snapshot.StateSchemaVersion <= AggregateReplayProtocol.InvalidSchemaVersion ||
             !string.Equals(snapshot.ReducerVersion, reducer.Version, StringComparison.Ordinal) ||
             snapshot.StateSchemaVersion != reducer.StateSchemaVersion)
         {
-            throw new InvalidDataException("The snapshot is incompatible with the reducer or replay head.");
+            throw new InvalidDataException(AggregateReplayMessages.IncompatibleSnapshot);
         }
-        input.AddState(snapshot.StateJson, "Snapshot state", limits);
+        input.AddState(snapshot.StateJson, AggregateReplayMessages.SnapshotState, limits);
         return snapshot.StateJson;
     }
 
@@ -81,19 +78,19 @@ internal static class AggregateReplayValidation
     {
         if (page.Stream is null || page.Stream.Partition is null || page.Head is null ||
             string.IsNullOrWhiteSpace(page.Stream.StreamSet) || string.IsNullOrWhiteSpace(page.Stream.StreamId) ||
-            page.Stream.Generation <= 0 || page.Head.Generation != page.Stream.Generation ||
-            page.Head.TailRevision < 0 || page.Head.FirstAvailableRevision <= 0 ||
-            page.Head.FirstAvailableRevision - 1 > page.Head.TailRevision || page.CutPosition < 0)
+            page.Stream.Generation <= AggregateReplayProtocol.MissingGeneration || page.Head.Generation != page.Stream.Generation ||
+            page.Head.TailRevision < AggregateReplayProtocol.NoRevision || page.Head.FirstAvailableRevision <= AggregateReplayProtocol.NoRevision ||
+            page.Head.FirstAvailableRevision - AggregateReplayProtocol.RevisionStep > page.Head.TailRevision || page.CutPosition < AggregateReplayProtocol.NoPosition)
         {
-            throw new InvalidDataException("Replay stream identity, head, floor or cut is invalid.");
+            throw new InvalidDataException(AggregateReplayMessages.InvalidHead);
         }
         if (page.Events.IsDefault)
         {
-            throw new InvalidDataException("Replay events must be an initialized immutable array.");
+            throw new InvalidDataException(AggregateReplayMessages.UninitializedEvents);
         }
         if (page.Snapshot is { } snapshot && snapshot.Stream != page.Stream)
         {
-            throw new InvalidDataException("The snapshot belongs to another stream generation.");
+            throw new InvalidDataException(AggregateReplayMessages.DifferentGeneration);
         }
     }
 
@@ -107,23 +104,23 @@ internal static class AggregateReplayValidation
     {
         if (page.Events.Length > limits.MaximumEvents)
         {
-            throw new InvalidDataException("The replay event count exceeds the worker limit.");
+            throw new InvalidDataException(AggregateReplayMessages.EventLimitExceeded);
         }
-        var sourceRevision = page.Snapshot?.SourceRevision ?? 0;
+        var sourceRevision = page.Snapshot?.SourceRevision ?? AggregateReplayProtocol.NoRevision;
         if (sourceRevision > page.Head.TailRevision || page.Head.TailRevision - sourceRevision != page.Events.Length)
         {
-            throw new InvalidDataException("Replay must contain the complete tail through the captured head.");
+            throw new InvalidDataException(AggregateReplayMessages.IncompleteTail);
         }
         Dictionary<int, ImmutableArray<EventUpcaster>> paths = [];
         HashSet<string> eventIds = new(StringComparer.Ordinal);
-        long priorSequence = 0;
-        for (var index = 0; index < page.Events.Length; index++)
+        long priorSequence = AggregateReplayProtocol.NoSequence;
+        for (var index = AggregateReplayProtocol.FirstEventIndex; index < page.Events.Length; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var record = page.Events[index] ?? throw new InvalidDataException("Replay contains a null event.");
+            var record = page.Events[index] ?? throw new InvalidDataException(AggregateReplayMessages.NullEvent);
             ValidateEventIdentity(record, page, sourceRevision, index, priorSequence, eventIds);
-            input.AddJson(record.Data.PayloadJson, "Event payload");
-            input.AddJson(record.Data.HeadersJson, "Event headers");
+            input.AddJson(record.Data.PayloadJson, AggregateReplayMessages.EventPayload);
+            input.AddJson(record.Data.HeadersJson, AggregateReplayMessages.EventHeaders);
             if (!paths.ContainsKey(record.Data.SchemaVersion))
             {
                 paths.Add(record.Data.SchemaVersion,
@@ -143,12 +140,12 @@ internal static class AggregateReplayValidation
         HashSet<string> eventIds)
     {
         var data = record.Data;
-        if (record.Stream != page.Stream || record.Revision != sourceRevision + index + 1 ||
-            record.EventSequence <= priorSequence || record.EventSequence <= 0 ||
+        if (record.Stream != page.Stream || record.Revision != sourceRevision + index + AggregateReplayProtocol.RevisionStep ||
+            record.EventSequence <= priorSequence || record.EventSequence <= AggregateReplayProtocol.NoSequence ||
             data is null || string.IsNullOrWhiteSpace(data.EventId) || string.IsNullOrWhiteSpace(data.EventType) ||
-            data.SchemaVersion <= 0 || !eventIds.Add(data.EventId))
+            data.SchemaVersion <= AggregateReplayProtocol.InvalidSchemaVersion || !eventIds.Add(data.EventId))
         {
-            throw new InvalidDataException("Replay event identity, position or ordering is invalid.");
+            throw new InvalidDataException(AggregateReplayMessages.InvalidEvent);
         }
     }
 

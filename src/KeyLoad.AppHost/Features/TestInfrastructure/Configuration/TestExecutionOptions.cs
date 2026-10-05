@@ -36,5 +36,5 @@ internal sealed class TestExecutionOptions
         && Bounded(ProcessSettlementTimeout) && Bounded(ProcessExitPollInterval)
         && CleanupOutputCharacters is >= MinimumOutputCharacters and <= MaximumOutputCharacters;
 
-    internal static bool Bounded(TimeSpan value) => value > TimeSpan.Zero && value <= TimeSpan.FromMinutes(MaximumMinutes);
+    internal static bool Bounded(TimeSpan value) => value > TimeSpan.Zero && value.Ticks <= MaximumMinutes * TimeSpan.TicksPerMinute;
 }

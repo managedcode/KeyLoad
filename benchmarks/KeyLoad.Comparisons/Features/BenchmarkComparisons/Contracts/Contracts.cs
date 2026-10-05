@@ -300,12 +300,18 @@ public sealed record ComparisonReport(int SchemaVersion, Guid RunId, DateTimeOff
     public GitHubProvenance? Provenance { get; init; }
     /// <summary>Gets or initializes the load-generator container image reference, when used.</summary>
     public string? LoadGeneratorImage { get; init; }
-    /// <summary>Validates that exactly one control or scaled configuration is present.</summary>
+    private const int AbsentConfigurationCount = 0;
+    private const int PresentConfigurationCount = 1;
+    private const string ExclusiveConfigurationRequired = "A comparison report must carry exactly one configuration.";
+
+    /// <summary>Validates that exactly one control, scaled or vector configuration is present.</summary>
     public void ValidateConfiguration()
     {
-        if ((Options is null ? 0 : 1) + (ScaledProfile is null ? 0 : 1) + (VectorProfile is null ? 0 : 1) != 1)
+        if ((Options is null ? AbsentConfigurationCount : PresentConfigurationCount)
+            + (ScaledProfile is null ? AbsentConfigurationCount : PresentConfigurationCount)
+            + (VectorProfile is null ? AbsentConfigurationCount : PresentConfigurationCount) != PresentConfigurationCount)
         {
-            throw new InvalidOperationException("A comparison report must carry exactly one configuration.");
+            throw new InvalidOperationException(ExclusiveConfigurationRequired);
         }
     }
     /// <summary>Gets the exact scaled profile when this report is not a materialized control run.</summary>

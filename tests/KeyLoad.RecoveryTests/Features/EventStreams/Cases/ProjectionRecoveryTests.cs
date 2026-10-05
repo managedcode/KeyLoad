@@ -32,7 +32,7 @@ internal sealed class ProjectionProcessRecoveryTests
             process.Kill();
             await process.WaitForExitAsync(timeout.Token);
             await StorageRecoveryProcessTests.WaitForKilledProcessFilesAsync(root, timeout.Token);
-            using var store = new ZoneTreeStore(new(root));
+            using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
             var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(new() { MaxOutboxRecords = 1 }), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
             await AssertRecoveredProcessCutAsync(database, stage);
             await RetryRecoveredCommandAsync(root, database, timeout.Token);

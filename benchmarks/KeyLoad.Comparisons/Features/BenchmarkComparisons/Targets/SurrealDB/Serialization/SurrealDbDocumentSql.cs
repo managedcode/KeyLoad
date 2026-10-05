@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 
 namespace KeyLoad.Comparisons.Targets;
+
 internal static class SurrealDbDocumentSql
 {
     private const int MinimumNativeIdentifierLength = 2;
@@ -37,7 +38,8 @@ internal static class SurrealDbDocumentSql
         Scenario.DocumentWrite => Create(table, document),
         Scenario.DocumentUpdate => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeUPDATESETPayloadRETURNAFTERFormat, table, Key(document.Id), JsonSerializer.Serialize(document.Json)),
         Scenario.DocumentDelete => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDELETERETURNBEFOREFormat, table, Key(document.Id)),
-        _ => throw new ArgumentOutOfRangeException(nameof(scenario))};
+        _ => throw new ArgumentOutOfRangeException(nameof(scenario))
+    };
     internal static string Graph(string table, string edge, string id, int depth)
     {
         var paths = Enumerable.Range(SingleResultCardinality, depth).Select(hops => string.Concat(Enumerable.Repeat(RelationTraversal + edge + RelationTraversal + table, hops)) + GraphKeyProjection);

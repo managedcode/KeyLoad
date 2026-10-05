@@ -155,3 +155,18 @@ control schema3,264 closed-loop cells and website projection remain unchanged.
 Rollback removes the new selection/cohort without rewriting original receipts.
 The actual1/3/6-node objective, two physical owners, skew/fanout and recovery/
 movement depend on their own contracts and remain open after this stage.
+
+TASK-SCALE-OPENLOOP-HOST-001 implements the frozen native host join from
+ScalingQualification: bind and validate the actual options before target or
+unsupported output, route typed open-loop selections to their independent
+measurement/proof writer, and retain existing control/vector/closed-loop dispatch.
+Root owns live host joins; workers may prepare guarded private configuration-to-
+output regressions. Native Aspire and authenticated Linux evidence remain open.
+
+TASK-SCALE-OPENLOOP-NATIVE-001 uses the exact typed case intent, owned marker
+control, original-task settlement and distinct artifact-bound resource sidecar
+contract frozen in ScalingQualification. Root owns native case/AppHost joins;
+workers own only guarded new test Cases/Assertions/Helpers. Preserve the current
+IOptions observation policy and closed resource schema v2. Native measured/proof
+execution and the independent792-cell Linux cohort remain unqualified until
+actually executed; source joins do not mark this ADR Implemented.

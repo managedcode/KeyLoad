@@ -88,5 +88,11 @@ public enum GrainReadKind
     /// <summary>Read one complete bounded query over same-owner atomic partitions.</summary>
     PartitionQuery,
     /// <summary>Read the bounded eventual reverse-adjacency projection for one visible graph target.</summary>
-    GraphIncomingEdges
+    GraphIncomingEdges,
+    /// <summary>Reads a private native runtime journal header.</summary>
+    RuntimeJournalHeader,
+    /// <summary>Reads one pinned private native runtime journal page.</summary>
+    RuntimeJournalPage,
+    /// <summary>Reads the complete admitted private native runtime journal catalog.</summary>
+    RuntimeJournalCatalog
 }

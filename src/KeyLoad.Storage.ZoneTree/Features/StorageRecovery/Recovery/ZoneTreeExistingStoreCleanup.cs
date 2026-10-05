@@ -5,6 +5,9 @@ namespace KeyLoad.Storage.ZoneTree;
 /// <summary>Retains original guarded failures and every independent registered-handle cleanup cause.</summary>
 internal static class ZoneTreeExistingStoreCleanup
 {
+    private const int FirstFailureIndex = 0;
+    private const int SingleFailureCount = 1;
+
     internal static void FailedConstruction(ZoneTreeStoreRuntime runtime, Exception original)
     {
         var failures = new List<Exception> { original };
@@ -36,17 +39,17 @@ internal static class ZoneTreeExistingStoreCleanup
         }
         catch (AggregateException failure)
         {
-            failures.Add(failure.InnerExceptions[0]);
+            failures.Add(failure.InnerExceptions[FirstFailureIndex]);
         }
     }
 
     internal static void ThrowFailures(List<Exception> failures)
     {
-        if (failures.Count == 1)
+        if (failures.Count == SingleFailureCount)
         {
-            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+            ExceptionDispatchInfo.Capture(failures[FirstFailureIndex]).Throw();
         }
-        if (failures.Count > 1)
+        if (failures.Count > SingleFailureCount)
         {
             throw new AggregateException(failures);
         }

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Storage.ZoneTree;
 
 /// <summary>Opens only original current-format stores inside the separately owned inspector process.</summary>
@@ -7,8 +9,15 @@ internal static class ZoneTreeExistingStore
     private const string InvalidDirectory = "Original store inspection requires an absolute existing canonical directory.";
     private const string InvalidOptions = "Original store inspection does not permit cache or commit observers.";
 
-    internal static ZoneTreeStore Open(ZoneTreeStoreOptions options, Guid expectedNodeId)
+    internal static ZoneTreeStore Open(ZoneTreeStoreOptions options, Guid expectedNodeId,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
     {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        var policy = executionOptions.Value;
+        ArgumentNullException.ThrowIfNull(policy);
+        policy.Validate();
+        options = options.WithExecutionSnapshot(policy);
         Validate(options, expectedNodeId);
         var runtime = new ZoneTreeStoreRuntime(options, expectedNodeId);
         try

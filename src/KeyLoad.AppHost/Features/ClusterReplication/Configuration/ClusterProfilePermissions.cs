@@ -11,10 +11,12 @@ internal static class ClusterProfilePermissions
 
     internal static void RequirePrivate(string path)
     {
+        const int EmptyValue = 0;
+
         if (OperatingSystem.IsWindows())
         { return; }
         var mode = File.GetUnixFileMode(path);
-        if ((mode & ~OwnerPermissions) != 0 || (mode & UnixFileMode.UserRead) == 0)
+        if ((mode & ~OwnerPermissions) != EmptyValue || (mode & UnixFileMode.UserRead) == EmptyValue)
         { throw new InvalidOperationException(ClusterProfileStore.InvalidProfile); }
     }
 

@@ -53,6 +53,7 @@ public sealed class SurrealDbTarget(HttpClient http, string runId, string image,
         topK = dataset.Settings.TopK;
         ownsData = true;
         await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormat, table, edge), Policy, cancellationToken).ConfigureAwait(false);
+        await SurrealDbReadbackIndex.CreateAsync(http, table, Policy, cancellationToken).ConfigureAwait(false);
         foreach (var batch in dataset.Documents.Chunk(Policy.WriteBatchCapacity))
         {
             var sql = string.Join(SqlStatementSeparator, batch.Select(document => SurrealDbDocumentSql.Create(table, document)));

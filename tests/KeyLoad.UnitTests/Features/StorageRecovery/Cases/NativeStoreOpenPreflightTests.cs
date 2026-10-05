@@ -39,7 +39,7 @@ internal sealed class NativeStoreOpenPreflightTests
         files.Compact();
         var snapshotBytes = new FileInfo(files.Source.JournalPath).Length;
         await files.AppendAsync(files.Frame());
-        using var store = new ZoneTreeStore(files.Source.Options with { MaxSnapshotBytes = snapshotBytes });
+        using var store = new ZoneTreeStore(files.Source.Options with { MaxSnapshotBytes = snapshotBytes }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(store.Position).IsEqualTo(NativeStoreOpenPreflightFiles.TailPosition);
         await Assert.That(store.Read(view => view.ReadOwnedValue(files.Source.Key)))
             .IsEquivalentTo(NativeStoreOpenPreflightFiles.TailValue, CollectionOrdering.Matching);
@@ -114,7 +114,7 @@ internal sealed class NativeStoreOpenPreflightTests
 
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var store = new ZoneTreeStore(files.Source.Options);
+            using var store = new ZoneTreeStore(files.Source.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         });
 
         await Assert.That(error.Code).IsEqualTo(ErrorCode.FormatUnsupported);
@@ -154,7 +154,7 @@ internal sealed class NativeStoreOpenPreflightTests
         }
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var store = new ZoneTreeStore(files.Source.Options);
+            using var store = new ZoneTreeStore(files.Source.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         });
         await Assert.That(error.Code).IsEqualTo(expected);
     }
@@ -177,7 +177,7 @@ internal sealed class NativeStoreOpenPreflightTests
             await Assert.That(receipt.Value).IsEquivalentTo(NativeStoreOpenPreflightFiles.TailValue, CollectionOrdering.Matching);
             return;
         }
-        using var store = new ZoneTreeStore(files.Source.Options);
+        using var store = new ZoneTreeStore(files.Source.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(store.Read(view => view.ReadOwnedValue(files.Source.Key)))
             .IsEquivalentTo(NativeStoreOpenPreflightFiles.TailValue, CollectionOrdering.Matching);

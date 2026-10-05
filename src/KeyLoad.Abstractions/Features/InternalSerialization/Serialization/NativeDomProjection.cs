@@ -4,9 +4,11 @@ namespace KeyLoad.Features.InternalSerialization;
 
 internal static class NativeDomProjection
 {
+    private const int RootDepth = 0;
+
     internal static JsonTreeNode Create(JsonElement value)
     {
-        var root = Project(value, 0);
+        var root = Project(value, RootDepth);
         NativeDomPreflight.Validate(root);
         return root;
     }

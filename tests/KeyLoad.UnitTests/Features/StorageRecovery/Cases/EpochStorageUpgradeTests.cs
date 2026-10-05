@@ -29,10 +29,10 @@ internal sealed class EpochStorageUpgradeTests
         using var fixture = new EpochStorageFixture();
         var original = await fixture.CreateNativeSourceAsync(checkpoint, sourceEpoch);
         var sourceFiles = await EpochStorageFixture.CaptureAsync(fixture.Source);
-        var upgraded = ZoneTreeFormatUpgrade.Upgrade(fixture.Source, fixture.DestinationOptions(original));
+        var upgraded = ZoneTreeFormatUpgrade.Upgrade(fixture.Source, fixture.DestinationOptions(original), UnitExecutionOptions.StorageExecution());
         await EpochStorageFixture.AssertIdentityPreservedAsync(original, upgraded);
         await Assert.That(upgraded.FormatVersion).IsEqualTo(EpochStorageFixture.CurrentEpoch);
-        using (var destination = new ZoneTreeStore(fixture.DestinationOptions(original)))
+        using (var destination = new ZoneTreeStore(fixture.DestinationOptions(original), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             await Assert.That(destination.Position).IsEqualTo(SourcePosition);
             var records = destination.Read(view => new[]
@@ -66,7 +66,7 @@ internal sealed class EpochStorageUpgradeTests
         var before = await EpochStorageFixture.CaptureAsync(fixture.Source);
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var store = new ZoneTreeStore(fixture.SourceOptions);
+            using var store = new ZoneTreeStore(fixture.SourceOptions, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         });
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await EpochStorageFixture.AssertUnchangedAsync(fixture.Source, before);
@@ -105,7 +105,7 @@ internal sealed class EpochStorageUpgradeTests
         var destinationBefore = Directory.Exists(fixture.Destination)
             ? await EpochStorageFixture.CaptureAsync(fixture.Destination) : null;
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeFormatUpgrade.Upgrade(fixture.Source, options));
+            ZoneTreeFormatUpgrade.Upgrade(fixture.Source, options, UnitExecutionOptions.StorageExecution()));
         await Assert.That(rejected.Code).IsEqualTo(expectedError);
         if (destinationBefore is null)
         {
@@ -127,8 +127,8 @@ internal sealed class EpochStorageUpgradeTests
     {
         using var fixture = new EpochStorageFixture();
         var original = await fixture.CreateNativeSourceAsync(checkpoint: true);
-        var first = ZoneTreeFormatUpgrade.Upgrade(fixture.Source, fixture.DestinationOptions(original));
-        using (var destination = new ZoneTreeStore(fixture.DestinationOptions(original)))
+        var first = ZoneTreeFormatUpgrade.Upgrade(fixture.Source, fixture.DestinationOptions(original), UnitExecutionOptions.StorageExecution());
+        using (var destination = new ZoneTreeStore(fixture.DestinationOptions(original), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             destination.Commit((transaction, _) =>
             {
@@ -136,9 +136,9 @@ internal sealed class EpochStorageUpgradeTests
                 return true;
             });
         }
-        var retried = ZoneTreeFormatUpgrade.Upgrade(fixture.Source, fixture.DestinationOptions(original));
+        var retried = ZoneTreeFormatUpgrade.Upgrade(fixture.Source, fixture.DestinationOptions(original), UnitExecutionOptions.StorageExecution());
         await EpochStorageFixture.AssertIdentityPreservedAsync(first, retried);
-        using var reopened = new ZoneTreeStore(fixture.DestinationOptions(original));
+        using var reopened = new ZoneTreeStore(fixture.DestinationOptions(original), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Position).IsEqualTo(SourcePosition + 1);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue([0x41, 0x00]))!)
             .IsEquivalentTo(new byte[] { 0x99, 0x10 }, CollectionOrdering.Matching);

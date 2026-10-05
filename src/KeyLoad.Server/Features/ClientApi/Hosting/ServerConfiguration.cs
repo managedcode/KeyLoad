@@ -6,6 +6,7 @@ using KeyLoad.Replication;
 using KeyLoad.Security;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.ServiceDefaults;
+using KeyLoad.Storage.ZoneTree;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
 
@@ -43,7 +44,7 @@ internal static class ServerConfiguration
         return app;
     }
 
-    internal static NodeOptions ReadOfflineNode(string destination)
+    internal static ServerRuntimeOptions ReadOfflineRuntimeOptions(string destination)
     {
         var builder = WebApplication.CreateBuilder([]);
         builder.Configuration[string.Join(ConfigurationPath.KeyDelimiter,
@@ -51,7 +52,22 @@ internal static class ServerConfiguration
         var services = new ServiceCollection();
         services.AddRuntimeOptions(builder.Configuration);
         using var provider = services.BuildServiceProvider();
-        return provider.GetRequiredService<IOptions<NodeOptions>>().Value;
+        var options = provider.GetRequiredService<ServerRuntimeOptions>();
+        options.ValidateBeforePhysicalOwnership();
+        return options;
+    }
+
+    internal static IOptions<ZoneTreeStorageExecutionOptions> ReadOfflineStorageExecution()
+    {
+        var builder = WebApplication.CreateBuilder([]);
+        var factory = new OptionsFactory<ZoneTreeStorageExecutionOptions>(
+            [new ConfigureFromConfigurationOptions<ZoneTreeStorageExecutionOptions>(
+                builder.Configuration.GetSection(ZoneTreeStorageExecutionOptions.SectionName))], [],
+            [new ValidateOptions<ZoneTreeStorageExecutionOptions>(Options.DefaultName,
+                options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage)]);
+        IOptions<ZoneTreeStorageExecutionOptions> configured = new OptionsManager<ZoneTreeStorageExecutionOptions>(factory);
+        _ = configured.Value;
+        return configured;
     }
 
     private static void ConfigureJson(System.Text.Json.JsonSerializerOptions options, int maximumDepth)

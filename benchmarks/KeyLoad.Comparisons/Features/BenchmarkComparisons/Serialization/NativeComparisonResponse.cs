@@ -1,6 +1,6 @@
 using System.Buffers;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
 
 namespace KeyLoad.Comparisons;
 /// <summary>Bounds actual native HTTP body consumption, including chunked responses.</summary>
@@ -41,7 +41,7 @@ public static class NativeComparisonResponse
         {
             while (true)
             {
-                var count = await input.ReadAsync(buffer, token).ConfigureAwait(false);
+                var count = await input.ReadAsync(buffer.AsMemory(EmptyResultCount, policy.ReadBufferBytes), token).ConfigureAwait(false);
                 if (count == EmptyResultCount)
                 {
                     break;

@@ -61,7 +61,7 @@ internal static class DueNoQuorumRf3Assertions
         using var http = McpCallerHttp.Create(app, survivor);
         using (var response = await http.GetAsync(RequestCqrsRf3Protocol.ReadyUri, cancellationToken).ConfigureAwait(false))
         { await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable); }
-        var sdk = new KeyLoadClient(http, seed.Creator.Secret);
+        var sdk = new KeyLoadClient(http, seed.Creator.Secret, IntegrationClientOptions.Execution());
         var result = await sdk.InspectRecurringScheduleAsync(new(seed.Lane, seed.ScheduleId), cancellationToken)
             .ConfigureAwait(false);
         await Assert.That(result.IsFailed).IsTrue();

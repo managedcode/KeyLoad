@@ -7,6 +7,10 @@ namespace KeyLoad.Replication;
 /// <summary>Fixed-voter node protocol hosted by Orleans; activation lifetime never owns canonical storage.</summary>
 public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
 {
+    private const int NoLeaderReadyPosition = 0;
+    private const int SingleShutdownFailure = 1;
+    private const int FirstShutdownFailureIndex = 0;
+
     private readonly ReplicaState state;
     private readonly ReplicaRpcClient rpc;
     private readonly ReplicaElection election;
@@ -46,15 +50,15 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         commandTimeout = settings.CommandTimeout;
         configuration.Validate();
         stoppingToken = lifetime.Token;
-        state = new(materializer, configuration, clock ?? TimeProvider.System);
-        rpc = new(configuration, stoppingToken);
+        state = new(materializer, configurationOptions, clock ?? TimeProvider.System);
+        rpc = new(configurationOptions, stoppingToken);
         election = new(state, rpc);
-        followers = new(state, rpc);
+        followers = new(state, rpc, settings.MaximumSnapshotChunksPerRound);
         leader = new(state, followers);
         appends = new(state);
         snapshots = new(state);
         maintenance = new(state, election, leader, logger);
-        dispatcher = new(election, appends, leader, snapshots, configuration);
+        dispatcher = new(election, appends, leader, snapshots, configurationOptions);
         reads = new(state, rpc, leader, activity, transportReady.Task, stoppingToken, settings.ReadBarrierTimeout);
     }
 
@@ -99,7 +103,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     public async Task<bool> IsLeaderAsync(CancellationToken cancellationToken)
     {
         using var active = activity.Enter();
-        return await state.LockedAsync(() => state.Role == ReplicaRole.Leader && state.LeaderReadyIndex > 0
+        return await state.LockedAsync(() => state.Role == ReplicaRole.Leader && state.LeaderReadyIndex > NoLeaderReadyPosition
             && state.Log.State.CommittedIndex >= state.LeaderReadyIndex, cancellationToken).ConfigureAwait(false);
     }
 
@@ -196,9 +200,9 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         await ReplicaShutdownStage.ObserveAsync(Task.WhenAll(drained, worker ?? Task.CompletedTask), failures);
         await ReplicaShutdownStage.ObserveAsync(Task.WhenAll(followers.DrainAsync(CancellationToken.None),
             snapshots.DrainAsync(CancellationToken.None), maintenance.DrainAsync(CancellationToken.None)), failures);
-        if (failures.Count == 1)
-        { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
-        if (failures.Count > 1)
+        if (failures.Count == SingleShutdownFailure)
+        { ExceptionDispatchInfo.Capture(failures[FirstShutdownFailureIndex]).Throw(); }
+        if (failures.Count > SingleShutdownFailure)
         { throw new AggregateException(failures); }
     }
 

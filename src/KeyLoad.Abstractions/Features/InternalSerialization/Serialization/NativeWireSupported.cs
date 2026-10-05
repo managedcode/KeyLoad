@@ -9,6 +9,9 @@ namespace KeyLoad.Features.InternalSerialization;
 // Other Orleans codecs/surrogates require their own schema and qualification before admission.
 internal static class NativeWireSupported
 {
+    private const int RootWireDepth = 1;
+    private const int ChildDepthStep = 1;
+    private const int VectorArrayRank = 1;
     private const string OwnedAssemblyPrefix = "KeyLoad.";
 
     internal static void Require(Type? type)
@@ -21,12 +24,12 @@ internal static class NativeWireSupported
         if (!normalizedRoot.ContainsGenericParameters && !normalizedRoot.IsGenericType
             && (normalizedRoot.IsPrimitive || normalizedRoot.IsEnum || IsScalar(normalizedRoot)))
         {
-            NativeWireCheck.Require(1 <= NativeSerializationLimits.WireDepth);
+            NativeWireCheck.Require(RootWireDepth <= NativeSerializationLimits.WireDepth);
             return;
         }
         var pending = new Stack<(Type Type, int Depth)>();
         var visited = new HashSet<Type>();
-        pending.Push((type, 1));
+        pending.Push((type, RootWireDepth));
         while (pending.TryPop(out var current))
         {
             var normalized = NativeWireSchema.Normalize(current.Type)!;
@@ -37,11 +40,11 @@ internal static class NativeWireSupported
             }
             if (normalized.IsArray)
             {
-                pending.Push((normalized.GetElementType()!, current.Depth + 1));
+                pending.Push((normalized.GetElementType()!, current.Depth + ChildDepthStep));
             }
             foreach (var argument in normalized.GenericTypeArguments)
             {
-                pending.Push((argument, current.Depth + 1));
+                pending.Push((argument, current.Depth + ChildDepthStep));
             }
         }
     }
@@ -58,7 +61,7 @@ internal static class NativeWireSupported
         }
         if (type.IsArray)
         {
-            return type.GetArrayRank() == 1 && type == type.GetElementType()!.MakeArrayType();
+            return type.GetArrayRank() == VectorArrayRank && type == type.GetElementType()!.MakeArrayType();
         }
         if (type.IsGenericType && IsCollection(type.GetGenericTypeDefinition()))
         {

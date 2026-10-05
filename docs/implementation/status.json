@@ -834,7 +834,8 @@
       "src/KeyLoad.Core/DatabaseEngine.cs",
       "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
       "docs/implementation/command-outcome-pin-development-2026-10-05.json",
-      "docs/implementation/scoped-outcome-functional-flow-source-2026-10-06.json"
+      "docs/implementation/scoped-outcome-functional-flow-source-2026-10-06.json",
+      "docs/implementation/functional-coverage-open-loop-source-2026-10-06.json"
     ],
     "runtimeQualified": false,
     "allAcceptanceClosed": false,
@@ -847,7 +848,8 @@
       "qualified": false
     },
     "sourceStage": "full_partition_scoped_v2_outcomes_authorization_order_and_actual_operation_flows_joined_current_native_gates_pending",
-    "scopedOutcomeSourceReceipt": "docs/implementation/scoped-outcome-functional-flow-source-2026-10-06.json"
+    "scopedOutcomeSourceReceipt": "docs/implementation/scoped-outcome-functional-flow-source-2026-10-06.json",
+    "fullPartitionIdentityFlows": "four_actual_scope_replay_conflict_close_reopen_cases_joined_current_native_gates_pending"
   },
   "KL-013": {
     "title": "Query AST, planner і cursors",
@@ -2198,9 +2200,10 @@
       "docs/Features/BenchmarkComparisons/ScalingQualification.md",
       "docs/ADR/ADR-103-scaled-fair-comparisons.md",
       "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/ScaledComparisonRunner.cs",
-      "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/IsolatedNativeTeardown.cs"
+      "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/IsolatedNativeTeardown.cs",
+      "docs/implementation/functional-coverage-open-loop-source-2026-10-06.json"
     ],
-    "sourceStage": "closed_loop_S1_two_active_dataset_profiles_retained_open_loop_private_R5_packet_and_validated_IOptions_cancellation_AppHost_integration_in_progress",
+    "sourceStage": "native_R8_options_open_loop_library_host_dispatch_and_nine_actual_host_flows_joined_Aspire_native_case_resource_sidecar_and_Linux_cohort_pending",
     "qualification": {
       "allAcceptanceClosed": false,
       "nativeCohortQualified": false,
@@ -2218,12 +2221,13 @@
       1000000
     ],
     "openLoopDevelopment": {
-      "sourcePacket": "R5_private_reviewed_not_yet_integrated",
-      "executionOptions": "native_validated_IOptions_amendment_in_progress",
-      "aspireSelection": "private_real_AppHost_model_flows_in_progress",
-      "originalCancellationProof": "authored_private_no_actual_native_run",
+      "sourcePacket": "R8_38_files_root_reviewed_and_live_joined",
+      "executionOptions": "native_validated_IOptions_host_binding_joined",
+      "aspireSelection": "corrected_private_R5_actual_CLI_model_flows_pending_join",
+      "originalCancellationProof": "native_library_authored_and_host_dispatch_joined_no_actual_native_run",
       "sourceQualified": false,
-      "runtimeQualified": false
+      "runtimeQualified": false,
+      "sourceReceipt": "docs/implementation/functional-coverage-open-loop-source-2026-10-06.json"
     }
   },
   "KL-076": {
@@ -4819,12 +4823,13 @@
       100000,
       1000000
     ],
-    "sourceStage": "native_adapters_vector_runner_and_website_pipeline_in_implementation",
+    "sourceStage": "native_adapters_shared_vector_validation_typed_policy_and_website_joins_prepared_verification_blocked",
     "canonicalBuildPassed": false,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
-      "Finish strict native workload/report/resource/website joins and all focused regressions",
+      "Verify prepared native workload/report/resource/website joins through fresh Aspire-owned focused regressions",
+      "KeyLoad vector scale cells are explicitly unavailable until persisted-vector readback and native numeric predicates exist",
       "Pass final canonical build, formatting and Aspire-owned required suites",
       "Retain actual complete authenticated Linux Benchmarks originals and website publication evidence"
     ]

@@ -24,6 +24,30 @@ internal static class OptionsSnapshotCapture
             HasCapture(compilation, reference.GetSyntax(cancellationToken), field, cancellationToken));
     }
 
+    internal static bool IsCaptured(Compilation compilation, IPropertySymbol property, CancellationToken cancellationToken)
+    {
+        if (property.IsStatic || property.SetMethod is not null)
+        {
+            return false;
+        }
+
+        return property.ContainingType.DeclaringSyntaxReferences.Any(reference =>
+            HasSingleConstructorCapture(compilation, reference.GetSyntax(cancellationToken), property, cancellationToken));
+    }
+
+    private static bool HasSingleConstructorCapture(Compilation compilation, SyntaxNode owner, IPropertySymbol property,
+        CancellationToken cancellationToken)
+    {
+        var model = compilation.GetSemanticModel(owner.SyntaxTree);
+        var assignments = owner.DescendantNodes().OfType<AssignmentExpressionSyntax>()
+            .Where(candidate => candidate.IsKind(SyntaxKind.SimpleAssignmentExpression) &&
+                SymbolEqualityComparer.Default.Equals(model.GetSymbolInfo(candidate.Left, cancellationToken).Symbol, property))
+            .ToArray();
+        return assignments.Length == ConfigurationMetadataNames.SingleSnapshotAssignment &&
+            assignments[0].Ancestors().Any(static ancestor => ancestor is ConstructorDeclarationSyntax) &&
+            model.GetOperation(assignments[0].Right, cancellationToken) is { } value && ContainsOptionsValue(compilation, value);
+    }
+
     private static bool HasCapture(Compilation compilation, SyntaxNode owner, IFieldSymbol field,
         CancellationToken cancellationToken)
     {

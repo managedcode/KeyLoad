@@ -20,10 +20,13 @@ internal static class RequestCqrsProbeOwnerReader
 
     internal static RequestCqrsProbeOwnerRecord ReadFile(string path)
     {
+        const int StructuralValue = 0;
+        const int MissingValue = -1;
+
         if (OperatingSystem.IsWindows())
         { throw new InvalidOperationException(InvalidConfiguration); }
         var identity = OfflineRegularFile.Inspect(path);
-        if (identity.Length is <= 0 or > MaximumOwnerBytes
+        if (identity.Length is <= StructuralValue or > MaximumOwnerBytes
             || File.GetUnixFileMode(path) != PrivateFileMode)
         { throw new InvalidOperationException(InvalidConfiguration); }
         using var input = OfflineRegularFile.OpenWithIdentity(path, identity, FileAccess.Read,
@@ -32,7 +35,7 @@ internal static class RequestCqrsProbeOwnerReader
         { throw new InvalidOperationException(InvalidConfiguration); }
         var bytes = new byte[checked((int)identity.Length)];
         input.ReadExactly(bytes);
-        if (input.ReadByte() != -1 || input.Length != identity.Length
+        if (input.ReadByte() != MissingValue || input.Length != identity.Length
             || OfflineRegularFile.Inspect(path) != identity)
         { throw new InvalidOperationException(InvalidConfiguration); }
         return Read(bytes);
@@ -40,13 +43,16 @@ internal static class RequestCqrsProbeOwnerReader
 
     internal static RequestCqrsProbeOwnerRecord Read(byte[] bytes)
     {
-        if (bytes.Length is <= 0 or > MaximumOwnerBytes)
+        const int StructuralValue = 0;
+        const int VersionInitialValue = 0;
+
+        if (bytes.Length is <= StructuralValue or > MaximumOwnerBytes)
         { throw new InvalidOperationException(InvalidConfiguration); }
         using var document = JsonDocument.Parse(bytes, new JsonDocumentOptions { MaxDepth = MaximumJsonDepth });
         if (document.RootElement.ValueKind != JsonValueKind.Object)
         { throw new InvalidOperationException(InvalidConfiguration); }
         var seen = new HashSet<string>(StringComparer.Ordinal);
-        var version = 0;
+        var version = VersionInitialValue;
         string? kind = null;
         string? session = null;
         string? ownerVoter = null;
@@ -86,9 +92,11 @@ internal static class RequestCqrsProbeOwnerReader
 
     private static string ReadString(JsonElement value)
     {
+        const int StructuralValue = 0;
+
         if (value.ValueKind != JsonValueKind.String)
         { throw new InvalidOperationException(InvalidConfiguration); }
-        return value.GetString() is { Length: > 0 } text
+        return value.GetString() is { Length: > StructuralValue } text
             ? text : throw new InvalidOperationException(InvalidConfiguration);
     }
 }

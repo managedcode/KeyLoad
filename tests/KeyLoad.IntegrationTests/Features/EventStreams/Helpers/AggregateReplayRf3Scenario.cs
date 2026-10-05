@@ -18,7 +18,7 @@ internal sealed record AggregateReplayRf3Scenario(PartitionRef Partition, Princi
             + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat), AggregateReplayRf3Tokens.Database,
             AggregateReplayRf3Tokens.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var resource = new ResourceDefinition(AggregateReplayRf3Tokens.StreamSet,
             ResourceKind.StreamSet, partition.TransactionDomainId)
         {
@@ -50,7 +50,7 @@ internal sealed record AggregateReplayRf3Scenario(PartitionRef Partition, Princi
         ClusterFixture fixture, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var principal = Worker with
         {
             Id = AggregateReplayRf3Tokens.RestrictedWorkerIdPrefix
@@ -94,7 +94,7 @@ internal sealed record AggregateReplayRf3Scenario(PartitionRef Partition, Princi
     internal async Task RevokeAsync(ClusterFixture fixture, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var revoked = Worker with { Revoked = true, PolicyEpoch = Worker.PolicyEpoch + 1 };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
             revoked, cancellationToken));

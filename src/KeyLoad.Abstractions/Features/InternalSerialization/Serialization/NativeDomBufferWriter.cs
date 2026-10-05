@@ -4,6 +4,7 @@ namespace KeyLoad.Features.InternalSerialization;
 
 internal sealed class NativeDomBufferWriter : IBufferWriter<byte>, IDisposable
 {
+    private const int UnspecifiedSizeHint = 0;
     private const int WriterGrowthAllowance = 4_096;
     private readonly ArrayBufferWriter<byte> buffer = new();
 
@@ -19,13 +20,13 @@ internal sealed class NativeDomBufferWriter : IBufferWriter<byte>, IDisposable
         buffer.Advance(count);
     }
 
-    public Memory<byte> GetMemory(int sizeHint = 0)
+    public Memory<byte> GetMemory(int sizeHint = UnspecifiedSizeHint)
     {
         RequireHint(sizeHint);
         return buffer.GetMemory(sizeHint);
     }
 
-    public Span<byte> GetSpan(int sizeHint = 0)
+    public Span<byte> GetSpan(int sizeHint = UnspecifiedSizeHint)
     {
         RequireHint(sizeHint);
         return buffer.GetSpan(sizeHint);

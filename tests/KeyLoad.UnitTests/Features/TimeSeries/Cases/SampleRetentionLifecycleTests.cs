@@ -168,7 +168,7 @@ internal sealed class SampleRetentionLifecycleTests
         ZoneTreeStore? store = null;
         try
         {
-            store = new(new ZoneTreeStoreOptions(path));
+            store = new(new ZoneTreeStoreOptions(path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             var first = Bootstrap(store);
             var start = SampleAggregateTestData.Start;
             var floor = start.AddSeconds(1);
@@ -178,7 +178,7 @@ internal sealed class SampleRetentionLifecycleTests
             store.Dispose();
             store = null;
 
-            store = new(new ZoneTreeStoreOptions(path));
+            store = new(new ZoneTreeStoreOptions(path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             var reopened = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
             PhysicalShardTestBootstrap.RequireExisting(reopened);
             var status = reopened.ReadSampleRetention(SampleAggregateTestData.RootPrincipal,

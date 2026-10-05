@@ -57,7 +57,7 @@ internal sealed class ReplicaExecutionOptionsTests
         await using var fixture = new ReplicaLifecycleFixture();
         var before = fixture.Log.State;
         var snapshots = new ReplicaSnapshotStore(fixture.Database.Store, fixture.Log,
-            ReplicaExecutionTestOptions.Configuration(fixture.Configuration));
+            ReplicaExecutionTestOptions.Configuration(fixture.Configuration), ReplicaExecutionTestOptions.Execution());
         var invalid = Options.Create(new ReplicaExecutionOptions { CommandTimeout = TimeSpan.Zero });
 
         Assert.ThrowsExactly<InvalidOperationException>(() =>

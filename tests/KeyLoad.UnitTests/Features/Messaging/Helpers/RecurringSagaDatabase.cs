@@ -41,7 +41,7 @@ internal sealed class RecurringSagaDatabase : IDisposable
     {
         limits = databaseLimits ?? new();
         directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
-        store = new(new(directory));
+        store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         Database.Bootstrap(new(RootPrincipal, TenantId, [new("*", "*", Capability.All)], ["*"])
         { ClusterAdministrator = true }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, Credential));
@@ -89,7 +89,7 @@ internal sealed class RecurringSagaDatabase : IDisposable
     internal void Reopen()
     {
         store.Dispose();
-        store = new(new(directory));
+        store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         PhysicalShardTestBootstrap.RequireExisting(Database);
     }

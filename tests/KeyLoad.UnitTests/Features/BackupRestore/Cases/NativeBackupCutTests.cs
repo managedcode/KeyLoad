@@ -118,10 +118,10 @@ internal sealed class NativeBackupCutTests
     public async Task AcIs004EmptyNativeBackupHasVerifiedZeroCut()
     {
         using var fixture = new NativeBackupCutFixture(empty: true);
-        var identity = ZoneTreeStore.Restore(fixture.Backup, fixture.Destination);
+        var identity = ZoneTreeStore.Restore(fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution());
         await Assert.That(identity.NodeId).IsNotEqualTo(fixture.Identity.NodeId);
         await Assert.That(identity.DispatchPaused).IsTrue();
-        using var restored = new ZoneTreeStore(new(fixture.Destination));
+        using var restored = new ZoneTreeStore(new(fixture.Destination), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(restored.Position).IsEqualTo(1L);
         await Assert.That(restored.Read(view => NativeSerialization.Deserialize<bool>(view.ReadOwnedValue(
             KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.DispatchPausedKey))!)))
@@ -135,13 +135,13 @@ internal sealed class NativeBackupCutTests
         Directory.CreateDirectory(fixture.Destination);
         var incarnation = Guid.NewGuid();
         var signingKey = Enumerable.Repeat((byte)1, ZoneTreePersistenceFormat.SigningKeyBytes).ToArray();
-        var restoredIdentity = ZoneTreeStore.Restore(fixture.Backup, fixture.Destination, incarnation, signingKey);
+        var restoredIdentity = ZoneTreeStore.Restore(fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution(), incarnation, signingKey);
         await Assert.That(restoredIdentity.NodeId).IsNotEqualTo(fixture.Identity.NodeId);
         await Assert.That(restoredIdentity.Incarnation).IsEqualTo(incarnation);
         await Assert.That(restoredIdentity.SigningKey.Span.SequenceEqual(signingKey)).IsTrue();
         await Assert.That(restoredIdentity.DispatchPaused).IsTrue();
         signingKey[0] ^= 1;
-        using var restored = new ZoneTreeStore(new(fixture.Destination));
+        using var restored = new ZoneTreeStore(new(fixture.Destination), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(restored.Position).IsEqualTo(fixture.Position + 1);
         await Assert.That(restored.Read(view => NativeSerialization.Deserialize<string>(
             view.ReadOwnedValue(MetadataBackupFixture.StoredKeyBytes)!))).IsEqualTo(MetadataBackupFixture.ExpectedValue);

@@ -17,7 +17,7 @@ internal sealed class MetadataBoundaryTests
         await MetadataTestFiles.PadWithTrailingBytesAsync(manifestPath,
             MetadataTestContract.ManifestLimitBytes + MetadataTestContract.OneByte);
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.ManifestOverLimitPath);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
         await MetadataRestoreAssertions.AssertUnsupported(failure, MetadataTestContract.ManifestUnsupportedDetail);
         await Assert.That(Directory.Exists(destination)).IsFalse();
         await File.WriteAllBytesAsync(manifestPath, original);
@@ -39,7 +39,7 @@ internal sealed class MetadataBoundaryTests
             MetadataTestContract.IdentityLimitBytes + MetadataTestContract.OneByte);
         await MetadataTestFiles.UpdateManifestFileAsync(fixture.BackupDirectory, MetadataTestContract.IdentityFileName);
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.IdentityOverLimitPath);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
         await MetadataRestoreAssertions.AssertUnsupported(failure, MetadataTestContract.IdentityFormatUnsupportedDetail);
         await Assert.That(Directory.Exists(destination)).IsFalse();
         await File.WriteAllBytesAsync(identityPath, original);
@@ -59,7 +59,7 @@ internal sealed class MetadataBoundaryTests
             MetadataTestContract.IdentityLimitBytes + MetadataTestContract.OneByte);
         await AssertStartupFailureReleasesLock(fixture, ErrorCode.FormatUnsupported);
         await File.WriteAllBytesAsync(identityPath, originalBytes);
-        using var reopened = new ZoneTreeStore(new(fixture.SourceDirectory));
+        using var reopened = new ZoneTreeStore(new(fixture.SourceDirectory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Identity.Incarnation).IsEqualTo(fixture.OriginalIdentity.Incarnation);
         await Assert.That(reopened.Read(view => NativeSerialization.Deserialize<string>(
                 view.ReadOwnedValue(MetadataBackupFixture.StoredKeyBytes)!)))
@@ -68,7 +68,7 @@ internal sealed class MetadataBoundaryTests
 
     private static async Task AssertCorruptRestore(MetadataBackupFixture fixture, string destination)
     {
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(Directory.Exists(destination)).IsFalse();
     }
@@ -77,7 +77,7 @@ internal sealed class MetadataBoundaryTests
     {
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var invalid = new ZoneTreeStore(new(fixture.SourceDirectory));
+            using var invalid = new ZoneTreeStore(new(fixture.SourceDirectory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         });
         await Assert.That(failure.Code).IsEqualTo(expected);
         if (expected == ErrorCode.FormatUnsupported)

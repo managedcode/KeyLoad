@@ -5,14 +5,21 @@ namespace KeyLoad.Replication;
 
 internal static class ReplicaSnapshotUpgradeInventory
 {
-    internal const int MaximumImages = 1_024;
-    internal const long MaximumTotalBytes = 68_719_476_736;
+    private const int NoInventoriedEntries = 0;
+    private const int NoInventoriedBytes = 0;
+    private const int EmptyImageInventory = 0;
+    private const int NoFileAttributeFlags = 0;
+    private const int EmptyImageLength = 0;
+    private const int BeforeFirstStoragePosition = 0;
+    private const int BeforeFirstAppliedPosition = 0;
+    private const int EmptyRecordCount = 0;
+
     private const string FormatError = "The replica snapshot inventory is unknown, linked or ambiguous.";
     private const string RecoveryError = "Pending replica snapshot transfer files must be settled by the matching executable.";
 
     internal static (string Path, List<ReplicaSnapshotUpgradeImage> Images) Read(string path,
         ReplicaConfiguration configuration, ReplicaSnapshot? pointer,
-        Func<string, StorageSnapshot> verifySourceImage)
+        Func<string, StorageSnapshot> verifySourceImage, int maximumImages, long maximumTotalBytes, int fileBufferBytes)
     {
         ArgumentNullException.ThrowIfNull(verifySourceImage);
         var fullPath = Path.GetFullPath(path);
@@ -26,24 +33,24 @@ internal static class ReplicaSnapshotUpgradeInventory
         RejectFixedPendingFiles(fullPath);
         var images = new List<ReplicaSnapshotUpgradeImage>();
         var names = Directory.EnumerateFileSystemEntries(fullPath);
-        var entries = 0;
-        long totalBytes = 0;
+        var entries = NoInventoriedEntries;
+        long totalBytes = NoInventoriedBytes;
         foreach (var entry in names)
         {
             var name = Path.GetFileName(entry);
             RejectLinks(entry);
             if (IsPending(name))
             { throw Errors.Fail(ErrorCode.RecoveryRequired, RecoveryError); }
-            if (++entries > MaximumImages)
+            if (++entries > maximumImages)
             { throw Errors.Fail(ErrorCode.ResourceExhausted, FormatError); }
-            var image = ReadImage(entry, name, configuration, totalBytes, verifySourceImage);
+            var image = ReadImage(entry, name, configuration, totalBytes, verifySourceImage, maximumTotalBytes, fileBufferBytes);
             totalBytes += image.Length;
             images.Add(image);
-            if (images.Count > MaximumImages)
+            if (images.Count > maximumImages)
             { throw Errors.Fail(ErrorCode.ResourceExhausted, FormatError); }
         }
         images.Sort(static (left, right) => StringComparer.Ordinal.Compare(left.FileName, right.FileName));
-        if (pointer is null ? images.Count != 0 : images.All(image => image.FileName != pointer.FileName))
+        if (pointer is null ? images.Count != EmptyImageInventory : images.All(image => image.FileName != pointer.FileName))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, FormatError); }
         if (pointer is not null)
         { ValidatePointer(pointer, images, configuration); }
@@ -51,29 +58,30 @@ internal static class ReplicaSnapshotUpgradeInventory
     }
 
     private static ReplicaSnapshotUpgradeImage ReadImage(string path, string name,
-        ReplicaConfiguration configuration, long totalBytes, Func<string, StorageSnapshot> verifySourceImage)
+        ReplicaConfiguration configuration, long totalBytes, Func<string, StorageSnapshot> verifySourceImage,
+        long maximumTotalBytes, int fileBufferBytes)
     {
         if (Directory.Exists(path) || !TryImageName(name))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, FormatError); }
         KeyLoad.Storage.IO.OfflineRegularFile.RequireRegular(path);
         var file = new FileInfo(path);
-        if (!file.Exists || (file.Attributes & FileAttributes.ReparsePoint) != 0)
+        if (!file.Exists || (file.Attributes & FileAttributes.ReparsePoint) != NoFileAttributeFlags)
         { throw Errors.Fail(ErrorCode.FormatUnsupported, FormatError); }
-        if (file.Length <= 0 || file.Length > configuration.MaxSnapshotBytes
-            || file.Length > MaximumTotalBytes - totalBytes)
+        if (file.Length <= EmptyImageLength || file.Length > configuration.MaxSnapshotBytes
+            || file.Length > maximumTotalBytes - totalBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, FormatError); }
-        var checksum = Digest(path, configuration.MaxSnapshotBytes);
+        var checksum = Digest(path, configuration.MaxSnapshotBytes, fileBufferBytes);
         var cut = verifySourceImage(path);
         ValidateCut(cut, configuration);
         return new(name, file.Length, checksum, cut);
     }
 
-    internal static string Digest(string path, long maximumBytes)
+    internal static string Digest(string path, long maximumBytes, int fileBufferBytes)
     {
         using var stream = KeyLoad.Storage.IO.OfflineRegularFile.Open(path, FileAccess.Read, FileShare.Read,
-            ReplicaPersistence.FileBufferBytes);
+            fileBufferBytes);
         var length = stream.Length;
-        if (length <= 0 || length > maximumBytes)
+        if (length <= EmptyImageLength || length > maximumBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, FormatError); }
         var digest = Convert.ToHexStringLower(SHA256.HashData(stream));
         if (stream.Position != length || stream.Length != length)
@@ -89,7 +97,7 @@ internal static class ReplicaSnapshotUpgradeInventory
             try
             {
                 if (new FileInfo(current).LinkTarget is not null || new DirectoryInfo(current).LinkTarget is not null
-                    || (File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
+                    || (File.GetAttributes(current) & FileAttributes.ReparsePoint) != NoFileAttributeFlags)
                 { throw Errors.Fail(ErrorCode.FormatUnsupported, FormatError); }
             }
             catch (FileNotFoundException) { }
@@ -149,8 +157,8 @@ internal static class ReplicaSnapshotUpgradeInventory
 
     private static void ValidateCut(StorageSnapshot cut, ReplicaConfiguration configuration)
     {
-        if (cut.Incarnation != configuration.Incarnation || cut.Position < 0 || cut.AppliedPosition < 0
-            || cut.RecordCount < 0)
+        if (cut.Incarnation != configuration.Incarnation || cut.Position < BeforeFirstStoragePosition || cut.AppliedPosition < BeforeFirstAppliedPosition
+            || cut.RecordCount < EmptyRecordCount)
         { throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot); }
     }
 }

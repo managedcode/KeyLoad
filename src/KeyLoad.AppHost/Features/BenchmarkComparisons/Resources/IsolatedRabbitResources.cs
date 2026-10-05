@@ -5,6 +5,8 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class IsolatedRabbitResources
 {
+    private const int SecretCountValue = 32;
+
     private const string Target = "RabbitMQ";
     private const string NodePrefix = "isolated-rabbit-";
     private const string UserName = "isolated-rabbit-user";
@@ -20,6 +22,11 @@ internal static class IsolatedRabbitResources
 
     internal static void Add(IsolatedResourceContext context)
     {
+        const int IndexInitialValue = 1;
+        const int ElementIndex = 7;
+        const int Step = 1;
+        const string ReferenceText = "@";
+
         ArgumentNullException.ThrowIfNull(context);
         context.Selection.Validate();
         if (context.Selection.Target != Target)
@@ -31,11 +38,11 @@ internal static class IsolatedRabbitResources
         var cookie = Secret(context, CookieName);
         var configuration = IsolatedRabbitBootstrap.Write(context);
         IResourceBuilder<RabbitMQServerResource>? first = null;
-        for (var index = 1; index <= context.Selection.NodeCount; index++)
+        for (var index = IndexInitialValue; index <= context.Selection.NodeCount; index++)
         {
             var name = NodePrefix + index.ToString(CultureInfo.InvariantCulture);
             var node = context.Builder.AddRabbitMQ(name, user, password).WithManagementPlugin()
-                .WithImageTag(ImageTag).WithImageSHA256(BenchmarkResources.RabbitDigest[7..])
+                .WithImageTag(ImageTag).WithImageSHA256(BenchmarkResources.RabbitDigest[ElementIndex..])
                 .WithDataBindMount(context.DataDirectory(name));
             IsolatedRabbitBootstrap.Configure(node, name, cookie, configuration);
             if (first is { } seed)
@@ -47,13 +54,13 @@ internal static class IsolatedRabbitResources
                 context.BindSetting(ConnectionSetting, node.Resource.ConnectionStringExpression);
             }
             first ??= node;
-            context.BindEndpoint(index - 1, node, ManagementEndpoint);
+            context.BindEndpoint(index - Step, node, ManagementEndpoint);
         }
         context.BindSetting(UserSetting, user);
         context.BindSetting(PasswordSetting, password);
-        context.BindImage(Image + "@" + BenchmarkResources.RabbitDigest);
+        context.BindImage(Image + ReferenceText + BenchmarkResources.RabbitDigest);
     }
 
     private static IResourceBuilder<ParameterResource> Secret(IsolatedResourceContext context, string name)
-        => context.Builder.AddParameter(name, Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)), secret: true);
+        => context.Builder.AddParameter(name, Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretCountValue)), secret: true);
 }

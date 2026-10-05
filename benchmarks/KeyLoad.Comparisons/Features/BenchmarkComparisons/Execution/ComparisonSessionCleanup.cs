@@ -1,3 +1,7 @@
+using System.Collections.Immutable;
+using System.Runtime.ExceptionServices;
+using ManagedCode.Communication.CQRS;
+
 namespace KeyLoad.Comparisons;
 
 internal static class ComparisonSessionCleanup
@@ -6,26 +10,92 @@ internal static class ComparisonSessionCleanup
 
     internal static async Task<bool> CloseAsync(IEnumerable<IComparisonSession> sessions, int timeoutSeconds)
     {
-        try
-        {
-            await Task.WhenAll(sessions.Select(session => CloseOneAsync(session, timeoutSeconds)));
-            return true;
-        }
-        catch (ComparisonFailureException)
-        {
-            return false;
-        }
+        var result = await CloseAndJoinAsync(sessions, timeoutSeconds).ConfigureAwait(false);
+        ThrowFatal(result.Failures);
+        return result.Failures.IsEmpty && !result.ThresholdExpired;
     }
 
-    private static async Task CloseOneAsync(IComparisonSession session, int timeoutSeconds)
+    internal static Task<ComparisonSessionCloseResult> CloseAndJoinAsync(
+        IEnumerable<IComparisonSession> sessions, int timeoutSeconds)
+    {
+        ArgumentNullException.ThrowIfNull(sessions);
+        ArgumentOutOfRangeException.ThrowIfLessThan(timeoutSeconds, 1);
+        return CloseAndJoinAsync(sessions, TimeSpan.FromSeconds(timeoutSeconds));
+    }
+
+    internal static async Task<ComparisonSessionCloseResult> CloseAndJoinAsync(
+        IEnumerable<IComparisonSession> sessions, TimeSpan timeout)
+    {
+        ArgumentNullException.ThrowIfNull(sessions);
+        if (timeout <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(timeout));
+        var closeTasks = StartDisposals(sessions);
+        var joined = Task.WhenAll(closeTasks);
+        using var deadlineSource = new CancellationTokenSource();
+        var deadline = Task.Delay(timeout, deadlineSource.Token);
+        var thresholdExpired = await Task.WhenAny(joined, deadline).ConfigureAwait(false) != joined;
+        if (!thresholdExpired)
+        {
+            await deadlineSource.CancelAsync().ConfigureAwait(false);
+            try
+            {
+                await deadline.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException error) when (error.CancellationToken == deadlineSource.Token
+                && deadlineSource.IsCancellationRequested)
+            {
+            }
+        }
+        var failures = await JoinOriginalsAsync(closeTasks).ConfigureAwait(false);
+        return new(thresholdExpired, failures);
+    }
+
+    private static List<Task> StartDisposals(IEnumerable<IComparisonSession> sessions)
+    {
+        var tasks = new List<Task>();
+        foreach (var session in sessions)
+        {
+            tasks.Add(StartDispose(session));
+        }
+        return tasks;
+    }
+
+    private static Task StartDispose(IComparisonSession session)
     {
         try
         {
-            await session.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(timeoutSeconds));
+            return session.DisposeAsync().AsTask();
         }
-        catch (Exception)
+        catch (Exception failure)
         {
-            throw new ComparisonFailureException(Failure);
+            return Task.FromException(failure);
+        }
+    }
+
+    private static async Task<ImmutableArray<Exception>> JoinOriginalsAsync(IEnumerable<Task> tasks)
+    {
+        var failures = ImmutableArray.CreateBuilder<Exception>();
+        foreach (var task in tasks)
+        {
+            try
+            {
+                await task.ConfigureAwait(false);
+            }
+            catch (Exception failure)
+            {
+                failures.Add(failure);
+            }
+        }
+        return failures.ToImmutable();
+    }
+
+    private static void ThrowFatal(ImmutableArray<Exception> failures)
+    {
+        if (failures.Any(failure => CqrsRuntimeFailures.FindFatal(failure) is not null))
+        {
+            var combined = OpenLoopFailure.Combine(null, failures)!;
+            ExceptionDispatchInfo.Capture(combined).Throw();
         }
     }
 }
+
+internal sealed record ComparisonSessionCloseResult(bool ThresholdExpired, ImmutableArray<Exception> Failures);

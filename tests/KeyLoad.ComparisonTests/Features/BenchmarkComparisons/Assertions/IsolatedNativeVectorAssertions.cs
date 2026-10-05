@@ -53,6 +53,10 @@ internal static class IsolatedNativeVectorAssertions
             await Assert.That(metrics.PerQueryRecall.All(value => value == 1)).IsTrue();
             await Assert.That(metrics.IndexBuildMilliseconds).IsEqualTo(0);
         }
+        else
+        {
+            await Assert.That(metrics.IndexBuildMilliseconds).IsGreaterThan(0);
+        }
         if (profile.UpdateCount == 0)
         {
             await Assert.That(metrics.UpdateElapsedSeconds).IsEqualTo(0);

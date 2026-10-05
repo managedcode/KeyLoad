@@ -8,6 +8,9 @@ namespace KeyLoad.Replication;
 /// <summary>Bounded node admission and stable-ID outcomes over the Orleans replica protocol.</summary>
 public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAsyncDisposable
 {
+    private const int DisposalClaimed = 1;
+    private const int DisposalUnclaimed = 0;
+
     private readonly ReplicaConsensus consensus;
     private readonly DatabaseEngine database;
     private readonly TimeProvider clock;
@@ -186,7 +189,7 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         finally
         {
             await commands.DisposeAsync().ConfigureAwait(false);
-            if (Interlocked.Exchange(ref disposed, 1) == 0)
+            if (Interlocked.Exchange(ref disposed, DisposalClaimed) == DisposalUnclaimed)
             { lifetime.Dispose(); }
         }
     }

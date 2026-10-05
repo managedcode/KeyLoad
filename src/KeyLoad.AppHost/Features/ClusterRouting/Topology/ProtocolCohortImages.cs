@@ -1,3 +1,4 @@
+using KeyLoad;
 using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
@@ -5,8 +6,12 @@ using Microsoft.Extensions.Configuration;
 namespace KeyLoad.AppHost.Features.ClusterRouting;
 
 /// <summary>Admits only explicit ephemeral RF3 protocol-test image overrides.</summary>
+[ConfigurationBinding]
 internal static class ProtocolCohortImages
 {
+    private const string VotersResultText = "node1";
+    private const string VotersVotersResultText = "node2";
+
     internal const string EnabledSetting = "KeyLoadTests:ProtocolCohort:Enabled";
     internal const string VotersSetting = "KeyLoadTests:ProtocolCohort:Voters";
     private const string SectionSetting = "KeyLoadTests:ProtocolCohort";
@@ -15,10 +20,12 @@ internal static class ProtocolCohortImages
     private const string InvalidConfiguration = "ProtocolCohortTestConfigurationInvalid";
     private const string EnabledKey = "Enabled";
     private const string VotersKey = "Voters";
-    private static readonly string[] Voters = ["node1", "node2", "node3"];
+    private static readonly string[] Voters = [VotersResultText, VotersVotersResultText, "node3"];
 
     internal static void ValidateMode(IConfiguration configuration)
     {
+        const int EmptyValue = 0;
+
         ArgumentNullException.ThrowIfNull(configuration);
         var section = ReadChildren(configuration.GetSection(SectionSetting), 2);
         if (section.Any(child => child.Key is not (EnabledKey or VotersKey))
@@ -30,7 +37,7 @@ internal static class ProtocolCohortImages
         var selected = ReadChildren(configuration.GetSection(VotersSetting), Voters.Length);
         if (!configuration.GetValue<bool>(EnabledSetting))
         {
-            if (selected.Length != 0)
+            if (selected.Length != EmptyValue)
             {
                 throw new InvalidOperationException(InvalidConfiguration);
             }
@@ -52,6 +59,8 @@ internal static class ProtocolCohortImages
     internal static IReadOnlyDictionary<string, RuntimeContainerImage> Read(
         IDistributedApplicationBuilder builder, bool ephemeral, int? benchmarkNodeCount)
     {
+        const string ConfigurationKeyText = ":";
+
         ArgumentNullException.ThrowIfNull(builder);
         ValidateMode(builder.Configuration);
         var enabled = builder.Configuration.GetValue<bool>(EnabledSetting);
@@ -63,13 +72,15 @@ internal static class ProtocolCohortImages
         var defaultImage = enabled ? null
             : RuntimeContainerImage.Read(builder, RuntimeContainerImage.ServerConfiguration);
         return Voters.ToDictionary(voter => voter,
-            voter => defaultImage ?? RuntimeContainerImage.Read(builder, VotersSetting + ":" + voter),
+            voter => defaultImage ?? RuntimeContainerImage.Read(builder, VotersSetting + ConfigurationKeyText + voter),
             StringComparer.Ordinal);
     }
 
     private static IConfigurationSection[] ReadChildren(IConfigurationSection section, int maximum)
     {
-        var children = section.GetChildren().Take(maximum + 1).ToArray();
+        const int Step = 1;
+
+        var children = section.GetChildren().Take(maximum + Step).ToArray();
         if (section.Value is not null || children.Length > maximum)
         {
             throw new InvalidOperationException(InvalidConfiguration);

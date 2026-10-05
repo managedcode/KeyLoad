@@ -15,7 +15,7 @@ internal sealed class ZoneTreeReadCutLifecycle
     internal ZoneTreeReadCutLease Capture(ZoneTreeStoreRuntime runtime, ZoneTreeReadCutLimits limits,
         CancellationToken cancellationToken)
     {
-        ZoneTreeReadCutValidation.Validate(limits);
+        ZoneTreeReadCutValidation.Validate(limits, runtime.Options);
         runtime.Check();
         ZoneTreeReadCutLease lease;
         lock (sync)

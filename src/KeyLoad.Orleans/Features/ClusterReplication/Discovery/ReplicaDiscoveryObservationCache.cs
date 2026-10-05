@@ -34,7 +34,8 @@ internal sealed class ReplicaDiscoveryObservationCache
         var protocolCompatible = current.ApplicationRpcVersion == GrainRoutingProtocol.RequestInterfaceVersion
             && current.PeerEnvelopeVersion == ReplicaTransportProtocol.Version;
         var observation = new ReplicaDiscoveryObservation(address, current.ApplicationRpcVersion,
-            current.PeerEnvelopeVersion, protocolCompatible, current.TransportReady, clock.GetTimestamp());
+            current.PeerEnvelopeVersion, protocolCompatible, current.TransportReady, clock.GetTimestamp(),
+            current.RuntimeJournalReaderContract);
         observations[configuration.LocalId] = observation;
         return observation;
     }

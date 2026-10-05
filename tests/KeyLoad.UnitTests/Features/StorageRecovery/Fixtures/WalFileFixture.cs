@@ -42,7 +42,7 @@ internal sealed class WalFileFixture : IDisposable
 
     internal StoreIdentity Initialize()
     {
-        using var store = new ZoneTreeStore(new(DirectoryPath));
+        using var store = new ZoneTreeStore(new(DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         return store.Identity;
     }
 
@@ -100,7 +100,7 @@ internal sealed class WalFileFixture : IDisposable
     {
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var attempted = new ZoneTreeStore(new(DirectoryPath));
+            using var attempted = new ZoneTreeStore(new(DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         });
         await Assert.That(failure.Code).IsEqualTo(expected);
         await Assert.That(await ReadJournalAsync()).IsEquivalentTo(journal, CollectionOrdering.Matching);

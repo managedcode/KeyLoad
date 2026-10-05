@@ -13,14 +13,19 @@ internal sealed class NativeDatabaseDocumentFlowTests
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var fixture = await NativeDatabaseFlowFixture.CreateAsync(name, token);
+        using var client = await fixture.ClientAsync(token);
         await using IComparisonTarget target = name == "SurrealDB"
-            ? new SurrealDbTarget(await fixture.ClientAsync(token), Guid.NewGuid().ToString(), fixture.Image, fixture.ExecutionOptions)
-            : new HelixDbTarget(await fixture.ClientAsync(token), Guid.NewGuid().ToString(), fixture.Image, fixture.ExecutionOptions);
+            ? new SurrealDbTarget(client, Guid.NewGuid().ToString(), fixture.Image, NativeDatabaseFlowFixture.ExecutionOptions)
+            : new HelixDbTarget(client, Guid.NewGuid().ToString(), fixture.Image, NativeDatabaseFlowFixture.ExecutionOptions);
         var corpus = new BenchmarkDataset(new() { Documents = 32, Dimensions = 128, GraphVertices = 16, GraphDepth = 3 });
         await target.InitializeAsync(corpus, token);
         await using var session = await target.OpenSessionAsync(token);
         var readback = new List<FoundDocument>();
-        await foreach (var row in session.ReadCorpusAsync(token)) readback.Add(row);
+        await foreach (var row in session.ReadCorpusAsync(token))
+        {
+            readback.Add(row);
+        }
+
         await Assert.That(readback.Select(row => row.Id)).IsEquivalentTo(corpus.Documents.Select(row => row.Id));
         await Assert.That(readback.All(row => BenchmarkDataset.SameJson(row.Json, corpus.Documents.Single(doc => doc.Id == row.Id).Json))).IsTrue();
         var first = corpus.Documents[0];
@@ -32,11 +37,27 @@ internal sealed class NativeDatabaseDocumentFlowTests
         var created = corpus.CreateDocument(400);
         await session.ExecuteAsync(Scenario.DocumentWrite, created, token);
         await Assert.That((await session.ReadAsync(created, token))!.Json).IsEqualTo(created.Json);
+        await RequireCreateConflictAsync(session, created, token);
+        await Assert.That((await session.ReadAsync(created, token))!.Json).IsEqualTo(created.Json);
         var initial = BenchmarkDataset.InitialMutationState(Scenario.DocumentUpdate, created);
         await session.ExecuteAsync(Scenario.DocumentUpdate, initial, token);
         await Assert.That((await session.ReadAsync(created, token))!.Json).IsEqualTo(initial.Json);
         await session.ExecuteAsync(Scenario.DocumentDelete, created, token);
         await Assert.That(await session.ReadAsync(created, token)).IsNull();
         await Assert.That(async () => await session.ExecuteAsync(Scenario.DocumentUpdate, created, token)).Throws<ComparisonFailureException>();
+    }
+
+    private static async Task RequireCreateConflictAsync(IComparisonSession session, BenchmarkDocument document, CancellationToken token)
+    {
+        string? failure = null;
+        try
+        {
+            await session.ExecuteAsync(Scenario.DocumentWrite, document, token);
+        }
+        catch (ComparisonFailureException error)
+        {
+            failure = error.Message;
+        }
+        await Assert.That(failure).IsEqualTo("DocumentCreateConflict");
     }
 }

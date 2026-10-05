@@ -18,6 +18,9 @@ public static class BlobIntegrity
     private const int LengthBytes = sizeof(int);
     private const int PartDigestOffset = DigestBytes + OrdinalBytes + LengthBytes;
     private const int ChainBytes = PartDigestOffset + DigestBytes;
+    private const int FirstPartOrdinal = 0;
+    private const int MinimumPartBytes = 1;
+    private const int MinimumBlobBytes = 0;
     private const char FirstDecimalDigit = '0';
     private const char LastDecimalDigit = '9';
     private const char FirstHexLetter = 'a';
@@ -33,7 +36,7 @@ public static class BlobIntegrity
     {
         ArgumentNullException.ThrowIfNull(blob);
         ArgumentNullException.ThrowIfNull(blob.Partition);
-        if (incarnation == Guid.Empty || uploadId == Guid.Empty || length is < 0 or > BlobLimits.MaximumBlobBytes)
+        if (incarnation == Guid.Empty || uploadId == Guid.Empty || length is < MinimumBlobBytes or > BlobLimits.MaximumBlobBytes)
         { throw Errors.Fail(ErrorCode.Validation, InvalidIntegrity); }
         var partition = blob.Partition;
         var preimage = KeyCodec.Encode(ChainDomain, incarnation.ToString(GuidFormat),
@@ -55,8 +58,8 @@ public static class BlobIntegrity
     /// <returns>The next canonical rolling hash.</returns>
     public static string NextHash(string previousHash, int ordinal, int length, string partSha256)
     {
-        if (ordinal < 0 || ordinal >= BlobLimits.MaximumBlobBytes / BlobLimits.RawPartBytes
-            || length is < 1 or > BlobLimits.RawPartBytes)
+        if (ordinal < FirstPartOrdinal || ordinal >= BlobLimits.MaximumBlobBytes / BlobLimits.RawPartBytes
+            || length is < MinimumPartBytes or > BlobLimits.RawPartBytes)
         { throw Errors.Fail(ErrorCode.Validation, InvalidIntegrity); }
         Span<byte> preimage = stackalloc byte[ChainBytes];
         Decode(previousHash).AsSpan().CopyTo(preimage);

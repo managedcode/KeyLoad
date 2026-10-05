@@ -26,7 +26,7 @@ internal sealed class TimeSeriesRf3AuthorizationTests(ClusterFixture fixture)
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             TimeSeriesRf3Scenario.Set, Capability.SeriesRead, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, TimeSeriesRf3Scenario.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, TimeSeriesRf3Scenario.Node2,
             identity.Secret, deadline.Token);
 
@@ -54,7 +54,7 @@ internal sealed class TimeSeriesRf3AuthorizationTests(ClusterFixture fixture)
         await Assert.That(healthy.Count).IsEqualTo(2L);
 
         var revoked = identity.Principal with { Revoked = true, PolicyEpoch = identity.Principal.PolicyEpoch + 1 };
-        await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey)
+        await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution())
             .ConfigurePrincipalAsync(Guid.NewGuid(), revoked, deadline.Token));
         await VerifyRevokedOperationsAsync(sdk, mcp, scenario, identity.Secret, deadline.Token);
     }

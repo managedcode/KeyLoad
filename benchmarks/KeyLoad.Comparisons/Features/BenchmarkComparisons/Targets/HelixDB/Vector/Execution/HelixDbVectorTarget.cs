@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Options;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 /// <summary>Runs the actual HelixDB opaque ANN API on one persistent local server.</summary>
@@ -31,6 +31,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     private int corpusCount;
     private int dimensions;
     private bool ownsData;
+    private readonly Dictionary<string, string> scalarIndexes = new(StringComparer.Ordinal);
     private bool ownsIndex;
     private string? indexDefinition;
     /// <inheritdoc/>
@@ -50,6 +51,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
         using var health = await http.GetAsync(new Uri(HelixDbNativeTokens.TokenReadyz, UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         health.EnsureSuccessStatusCode();
         ownsData = true;
+        await HelixDbVectorSetup.CreateAsync(http, label, scalarIndexes, Policy, cancellationToken).ConfigureAwait(false);
         corpusCount = await HelixDbVectorStorage.IngestAsync(http, label, documents, Policy, cancellationToken).ConfigureAwait(false);
         return corpusCount;
     }
@@ -67,7 +69,12 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
         ownsIndex = true;
         var receipt = await HelixDbIndexLifecycle.BuildAsync(http, label, dimensions, Policy, cancellationToken).ConfigureAwait(false);
         indexDefinition = receipt.Definition;
-        return receipt;
+        var parameters = new Dictionary<string, string>(receipt.Parameters, StringComparer.Ordinal);
+        foreach (var scalarIndex in scalarIndexes)
+        {
+            parameters[scalarIndex.Key] = scalarIndex.Value;
+        }
+        return receipt with { Parameters = parameters };
     }
 
     /// <inheritdoc/>
@@ -103,6 +110,10 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     {
         using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Read(label, id), false), false, Policy, cancellationToken).ConfigureAwait(false);
         var rows = HelixDbProtocol.Rows(response);
+        if (rows.GetArrayLength() > SingleResultCardinality)
+        {
+            throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbInvalidRows);
+        }
         return rows.GetArrayLength() == EmptyResultCount ? null : HelixDbVectorStorage.Read(rows[EmptyResultCount]);
     }
 
@@ -119,6 +130,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
 
             if (ownsData)
             {
+                await HelixDbVectorSetup.DropAsync(http, label, scalarIndexes.Keys, Policy, timeout.Token).ConfigureAwait(false);
                 using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new() { [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label) }), true), true, Policy, timeout.Token).ConfigureAwait(false);
             }
         }

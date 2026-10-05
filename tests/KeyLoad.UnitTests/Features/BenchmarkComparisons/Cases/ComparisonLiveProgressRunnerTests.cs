@@ -17,7 +17,7 @@ internal sealed class ComparisonLiveProgressRunnerTests
     public async Task AcBcLive001NativeSetupFailureRemainsFailedAndOnlyClosedProgressIsEmitted()
     {
         var lines = new List<string>();
-        await using var target = new RedisTarget(InvalidRedisConfiguration, Guid.NewGuid().ToString(), string.Empty);
+        await using var target = new RedisTarget(InvalidRedisConfiguration, Guid.NewGuid().ToString(), string.Empty, UnitBenchmarkOptions.Lifecycle());
         var report = await new ComparisonRunner(ComparisonHarnessInputs.Small, lines.Add)
             .RunAsync([target], null, TestContext.Current!.Execution.CancellationToken, scenario: Scenario.VectorExact);
         await Assert.That(lines[0].StartsWith(OracleMarker, StringComparison.Ordinal)).IsTrue();
@@ -51,7 +51,7 @@ internal sealed class ComparisonLiveProgressRunnerTests
                 cancellation.Cancel();
             }
         }
-        await using var target = new RedisTarget(InvalidRedisConfiguration, Guid.NewGuid().ToString(), string.Empty);
+        await using var target = new RedisTarget(InvalidRedisConfiguration, Guid.NewGuid().ToString(), string.Empty, UnitBenchmarkOptions.Lifecycle());
         await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => new ComparisonRunner(ComparisonHarnessInputs.Small, Observe)
             .RunAsync([target], null, cancellation.Token, scenario: Scenario.VectorExact));
         await Assert.That(lines.All(line => line.StartsWith(OracleMarker, StringComparison.Ordinal))).IsTrue();
@@ -64,7 +64,7 @@ internal sealed class ComparisonLiveProgressRunnerTests
         using var file = new ComparisonLiveProgressFile();
         var writer = new StreamWriter(file.Path);
         await writer.DisposeAsync();
-        await using var target = new RedisTarget(InvalidRedisConfiguration, Guid.NewGuid().ToString(), string.Empty);
+        await using var target = new RedisTarget(InvalidRedisConfiguration, Guid.NewGuid().ToString(), string.Empty, UnitBenchmarkOptions.Lifecycle());
         var report = await new ComparisonRunner(ComparisonHarnessInputs.Small, writer.WriteLine)
             .RunAsync([target], null, TestContext.Current!.Execution.CancellationToken, scenario: Scenario.VectorExact);
         await Assert.That(report.Cases.All(result => result.Status == ComparisonStatuses.Failed

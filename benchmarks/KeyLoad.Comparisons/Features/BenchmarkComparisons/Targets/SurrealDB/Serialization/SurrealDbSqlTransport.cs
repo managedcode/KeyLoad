@@ -14,7 +14,9 @@ internal static class SurrealDbSqlTransport
     private const string RequestFailed = "SurrealDbRequestFailed";
     private const string StatusKey = "status";
     private const string ResultKey = "result";
-    internal static async Task<JsonDocument> QueryAsync(HttpClient http, string sql, NativeComparisonExecutionOptions policy, CancellationToken cancellationToken)
+    private const string ExistingRecordPrefix = "Database record `";
+    private const string ExistingRecordSuffix = "` already exists";
+    internal static async Task<JsonDocument> QueryAsync(HttpClient http, string sql, NativeComparisonExecutionOptions policy, CancellationToken cancellationToken, bool create = false)
     {
         using var operationDeadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         operationDeadline.CancelAfter(policy.OperationTimeout);
@@ -36,7 +38,7 @@ internal static class SurrealDbSqlTransport
         try
         {
             document = await NativeComparisonResponse.ReadJsonAsync(response.Content, policy, cancellationToken).ConfigureAwait(false);
-            ValidateResponse(document.RootElement);
+            ValidateResponse(document.RootElement, create);
             return document;
         }
         catch (JsonException error)
@@ -56,7 +58,7 @@ internal static class SurrealDbSqlTransport
         using var response = await QueryAsync(http, sql, policy, cancellationToken).ConfigureAwait(false);
     }
 
-    private static void ValidateResponse(JsonElement root)
+    private static void ValidateResponse(JsonElement root, bool create)
     {
         if (root.ValueKind != JsonValueKind.Array || root.GetArrayLength() == EmptyResultCount)
         {
@@ -68,6 +70,14 @@ internal static class SurrealDbSqlTransport
             var status = SurrealDbVectorProtocol.ReadRequiredString(statement, StatusKey);
             if (!status.Equals(SuccessfulStatus, StringComparison.OrdinalIgnoreCase))
             {
+                var result = statement.GetProperty(ResultKey);
+                if (create && result.ValueKind == JsonValueKind.String
+                    && result.GetString() is { } error
+                    && error.StartsWith(ExistingRecordPrefix, StringComparison.Ordinal)
+                    && error.EndsWith(ExistingRecordSuffix, StringComparison.Ordinal))
+                {
+                    throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict);
+                }
                 throw new InvalidDataException(SurrealDbNativeTokens.TokenSurrealDbStatementFailed);
             }
 

@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using KeyLoad;
 using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -21,9 +22,16 @@ internal static class AppHostOptionsRegistration
             options => options.IsValid(), TestExecutionOptions.ValidationMessage);
         var startup = Bind<AppHostStartupOptions>(builder.Configuration, options => options.IsValid(),
             AppHostStartupOptions.ValidationMessage);
+        var resources = Bind<ScaleServerResourceOptions>(builder.Configuration.GetSection(ScaleServerResourceOptions.SectionName),
+            options => options.IsValid(), ScaleServerResourceOptions.ValidationMessage);
+        var provenance = BenchmarkProvenanceRegistration.Bind();
+        var control = AppHostControlOptionsRegistration.Bind(builder.Configuration, execution);
+        builder.Services.AddSingleton(control);
+        builder.Services.AddSingleton(resources);
+        builder.Services.AddSingleton(provenance);
         builder.Services.AddSingleton(execution);
         builder.Services.AddSingleton(startup);
-        return new(execution, startup);
+        return new(execution, startup, resources, provenance, control);
     }
 
     internal static IOptions<TestExecutionOptions> BindTestExecution(IConfiguration configuration) =>
@@ -40,4 +48,6 @@ internal static class AppHostOptionsRegistration
     }
 }
 
-internal sealed record AppHostRuntimeOptions(IOptions<TestExecutionOptions> TestExecution, IOptions<AppHostStartupOptions> Startup);
+internal sealed record AppHostRuntimeOptions(IOptions<TestExecutionOptions> TestExecution, IOptions<AppHostStartupOptions> Startup,
+    IOptions<ScaleServerResourceOptions> ServerResources, IOptions<BenchmarkProvenanceOptions> Provenance,
+    IOptions<AppHostControlOptions> Control);

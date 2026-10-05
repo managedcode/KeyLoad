@@ -11,7 +11,7 @@ internal sealed class ScopedRangeStoreFixture : IDisposable
 
     public ZoneTreeStore Store { get; }
 
-    public ScopedRangeStoreFixture() => Store = new(new(directory));
+    public ScopedRangeStoreFixture() => Store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
 
     public void Dispose()
     {

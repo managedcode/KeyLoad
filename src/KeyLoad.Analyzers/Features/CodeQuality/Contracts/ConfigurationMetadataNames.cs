@@ -3,9 +3,16 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 internal static class ConfigurationMetadataNames
 {
     internal const string OwnerAssembly = "KeyLoad.Abstractions";
+    internal const string NativeOrleansAssembly = "Orleans.Serialization.Abstractions";
+    internal const string OrleansAlias = "Orleans.AliasAttribute";
+    internal const int SingleSnapshotAssignment = 1;
     internal const string OptionsOwner = "KeyLoad.ConfigurationOptionsAttribute";
     internal const string BindingOwner = "KeyLoad.ConfigurationBindingAttribute";
     internal const string Options = "Microsoft.Extensions.Options.IOptions`1";
+    internal const string OptionsFactory = "Microsoft.Extensions.Options.OptionsFactory`1";
+    internal const string OptionsManager = "Microsoft.Extensions.Options.OptionsManager`1";
+    internal const string StaticOptions = "Microsoft.Extensions.Options.Options";
+    internal const string Create = "Create";
     internal const string Configuration = "Microsoft.Extensions.Configuration.IConfiguration";
     internal const string ConfigurationBinder = "Microsoft.Extensions.Configuration.ConfigurationBinder";
     internal const string ConfigurationExtensions = "Microsoft.Extensions.Configuration.ConfigurationExtensions";

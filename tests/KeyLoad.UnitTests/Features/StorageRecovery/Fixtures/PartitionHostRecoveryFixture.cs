@@ -83,7 +83,7 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         source.Log.Append([new(1, SnapshotTerm, null), new(SnapshotCut, SnapshotTerm, null)]);
         source.Log.Commit(SnapshotCut);
         Pending = source.Snapshots.Create(SnapshotCut, SnapshotTerm);
-        var incoming = new ReplicaSnapshotStore(target.Canonical, target.Log, UnitExecutionOptions.ReplicaConfiguration(target.Configuration), boundary =>
+        var incoming = new ReplicaSnapshotStore(target.Canonical, target.Log, UnitExecutionOptions.ReplicaConfiguration(target.Configuration), UnitExecutionOptions.ReplicaExecution(), boundary =>
         {
             if (boundary == ReplicaCrashBoundary.SnapshotVerified)
             { throw new VerifiedSnapshotInterruption(); }
@@ -140,7 +140,7 @@ internal sealed class HostReplicaStores : IDisposable
             {
                 Log = new(replica, UnitExecutionOptions.ReplicaConfiguration(Configuration));
                 Database = new(Canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
-                Snapshots = new(Canonical, Log, UnitExecutionOptions.ReplicaConfiguration(Configuration));
+                Snapshots = new(Canonical, Log, UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitExecutionOptions.ReplicaExecution());
             }
             catch (Exception) { replica.Dispose(); throw; }
         }
@@ -154,7 +154,7 @@ internal sealed class HostReplicaStores : IDisposable
     internal ReplicaSnapshotStore Snapshots { get; }
 
     private static ZoneTreeStore Open(NodeOptions options, string suffix) => new(new(Path.Combine(options.DataDirectory, suffix))
-    { Incarnation = options.Incarnation, SigningKey = Convert.FromBase64String(options.SigningKey) });
+    { Incarnation = options.Incarnation, SigningKey = Convert.FromBase64String(options.SigningKey) }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
 
     public void Dispose()
     {

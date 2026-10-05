@@ -142,6 +142,8 @@ internal static class IsolatedTimeSeriesBenchmarkResources
 
     private static void ValidatePrivateDirectoryIfExisting(string path)
     {
+        const int EmptyValue = 0;
+
         if (!Directory.Exists(path))
         {
             if (File.Exists(path))
@@ -153,7 +155,7 @@ internal static class IsolatedTimeSeriesBenchmarkResources
         if (!OperatingSystem.IsWindows())
         {
             var mode = File.GetUnixFileMode(path);
-            if ((mode & SharedDirectoryModes) != 0 || (mode & PrivateDirectoryMode) != PrivateDirectoryMode)
+            if ((mode & SharedDirectoryModes) != EmptyValue || (mode & PrivateDirectoryMode) != PrivateDirectoryMode)
             {
                 throw new InvalidOperationException(InvalidPath);
             }

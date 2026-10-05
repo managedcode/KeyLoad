@@ -128,7 +128,7 @@ internal sealed class CommandOutcomePartitionScopeTests
 
         var path = database.Directory;
         database.Store.Dispose();
-        using var reopenedStore = new ZoneTreeStore(new(path));
+        using var reopenedStore = new ZoneTreeStore(new(path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var reopened = new DatabaseEngine(reopenedStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         PhysicalShardTestBootstrap.RequireExisting(reopened);
         await Assert.That(reopened.ResolveOutcome(first).Get<CommitReceipt>().Token)

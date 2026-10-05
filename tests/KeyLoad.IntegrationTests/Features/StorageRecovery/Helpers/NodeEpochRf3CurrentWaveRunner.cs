@@ -109,7 +109,7 @@ internal static class NodeEpochRf3CurrentWaveRunner
         await wave.KillAsync(follower, FollowerLossScenario, cancellationToken).ConfigureAwait(false);
         using var http = McpCallerHttp.Create(wave.App, writer);
         http.Timeout = Timeout.InfiniteTimeSpan;
-        var client = new KeyLoadClient(http, profile.AdminKey);
+        var client = new KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
         var expected = await NodeEpochRf3CurrentWorkload.AppendWhileFollowerStoppedAsync(workload,
             client, cancellationToken).ConfigureAwait(false);
         var status = await McpCallerAssertions.SdkSuccessAsync(await client.StatusAsync(cancellationToken)

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using RabbitMQ.Client;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -9,14 +10,15 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="connectionString">AMQP connection URI used to create the broker connection.</param>
 /// <param name="runId">Guid-formatted run identifier used to isolate the queue name.</param>
 /// <param name="image">Broker image reference recorded in the verified profile.</param>
+/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="topology">The expected one-, two- or three-member quorum queue topology.</param>
 /// <param name="management">Optional management API client for broker membership verification; initialization requires it, and the target disposes it.</param>
 public sealed class RabbitTarget(string connectionString, string runId, string image,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions,
     ComparisonTopology topology = ComparisonTopology.Standalone, HttpClient? management = null) : IComparisonTarget
 {
     private const string RunIdentityFormat = "N";
     private const string TlsScheme = "amqps";
-    private const int ClaimPollMilliseconds = 1;
 
     private const string QueuePrefix = "keyload_benchmark_";
     private readonly string brokerConnectionString = connectionString;
@@ -55,7 +57,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
             throw new ComparisonFailureException("RabbitManagementClientRequired");
         }
 
-        var proof = await RabbitReplicaProof.VerifyAsync(managementClient, queue, configuredTopology, cancellationToken);
+        var proof = await RabbitReplicaProof.VerifyAsync(managementClient, queue, configuredTopology, cancellationToken, lifecycleOptions);
         await ProbeQueueAsync(cancellationToken);
         Profile = Profile with
         {
@@ -89,7 +91,8 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     /// <param name="cancellationToken">A token that cancels creation of the session channel.</param>
     /// <returns>A session that owns and later disposes its channel.</returns>
     public async Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
-        => new Session(await connection!.CreateChannelAsync(new CreateChannelOptions(true, true), cancellationToken), queue);
+        => new Session(await connection!.CreateChannelAsync(new CreateChannelOptions(true, true), cancellationToken), queue,
+            lifecycleOptions.Value.QueueClaimPollInterval);
 
     /// <summary>Deletes the run-specific queue, then disposes the broker connection and management client.</summary>
     /// <returns>A value task that completes after target cleanup.</returns>
@@ -106,7 +109,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     }
 
     /// <summary>Measures one persistent publish, manual receive, and acknowledgement cycle on its owned channel.</summary>
-    private sealed class Session(IChannel channel, string queue) : IComparisonSession
+    private sealed class Session(IChannel channel, string queue, TimeSpan claimPollInterval) : IComparisonSession
     {
         public Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken) => throw new NotSupportedException();
 
@@ -128,7 +131,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
                 delivery = await channel.BasicGetAsync(queue, autoAck: false, cancellationToken);
                 if (delivery is null)
                 {
-                    await Task.Delay(ClaimPollMilliseconds, cancellationToken);
+                    await Task.Delay(claimPollInterval, cancellationToken);
                 }
             }
             var received = Stopwatch.GetTimestamp();

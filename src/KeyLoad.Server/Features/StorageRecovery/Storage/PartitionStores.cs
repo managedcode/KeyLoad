@@ -1,5 +1,6 @@
 using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -10,7 +11,8 @@ internal sealed class PartitionStores : IDisposable
     private readonly FileStream ownership;
     private int disposed;
 
-    internal PartitionStores(IOptions<NodeOptions> nodeOptions, string directory)
+    internal PartitionStores(IOptions<NodeOptions> nodeOptions, string directory,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions)
     {
         var options = nodeOptions.Value;
         Directory.CreateDirectory(directory);
@@ -30,8 +32,8 @@ internal sealed class PartitionStores : IDisposable
         ZoneTreeStore? canonical = null;
         try
         {
-            Canonical = canonical = Open(options, Path.Combine(directory, PartitionStoreProtocol.CanonicalDirectory));
-            Replica = Open(options, Path.Combine(directory, ReplicaProtocol.ReplicaDirectory));
+            Canonical = canonical = Open(options, Path.Combine(directory, PartitionStoreProtocol.CanonicalDirectory), executionOptions, cacheOptions);
+            Replica = Open(options, Path.Combine(directory, ReplicaProtocol.ReplicaDirectory), executionOptions, cacheOptions);
         }
         catch (Exception error)
         {
@@ -48,11 +50,12 @@ internal sealed class PartitionStores : IDisposable
     internal ZoneTreeStore Canonical { get; }
     internal ZoneTreeStore Replica { get; }
 
-    private static ZoneTreeStore Open(NodeOptions options, string directory) => new(new(directory)
+    private static ZoneTreeStore Open(NodeOptions options, string directory,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions) => new(new(directory)
     {
         Incarnation = options.Incarnation,
         SigningKey = Convert.FromBase64String(options.SigningKey)
-    });
+    }, executionOptions, cacheOptions);
 
     public void Dispose()
     {

@@ -191,8 +191,8 @@ internal sealed class NativeTextRf3LeaderLossTests(ClusterFixture fixture)
             Secret = secret;
             callerHttp = nodes.Select(node => McpCallerHttp.Create(fixture, node)).ToArray();
             adminHttp = nodes.Select(node => McpCallerHttp.Create(fixture, node)).ToArray();
-            Callers = callerHttp.Select(client => new KeyLoadClient(client, secret)).ToArray();
-            Administrators = adminHttp.Select(client => new KeyLoadClient(client, fixture.AdminKey)).ToArray();
+            Callers = callerHttp.Select(client => new KeyLoadClient(client, secret, IntegrationClientOptions.Execution())).ToArray();
+            Administrators = adminHttp.Select(client => new KeyLoadClient(client, fixture.AdminKey, IntegrationClientOptions.Execution())).ToArray();
         }
 
         public void Dispose()

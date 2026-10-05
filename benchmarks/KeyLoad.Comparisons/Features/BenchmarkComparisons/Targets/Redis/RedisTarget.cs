@@ -1,4 +1,5 @@
 using StackExchange.Redis;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -7,9 +8,11 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="connectionString">Connection settings for the single configured primary endpoint.</param>
 /// <param name="runId">Guid-formatted run identifier used to isolate benchmark keys.</param>
 /// <param name="image">Redis image reference recorded after initialization and replica verification.</param>
+/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="topology">The expected single-primary or direct-replica topology; replicated mode does not imply sharding or failover.</param>
 /// <param name="replicas">Optional direct replica endpoints checked for the replicated durability receipt.</param>
 public sealed class RedisTarget(string connectionString, string runId, string image,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions,
     ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null) : IComparisonTarget
 {
     private const string RunIdentityFormat = "N";
@@ -80,7 +83,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
 
         var probeKey = prefix + Guid.NewGuid().ToString(RunIdentityFormat);
         var evidence = await RedisReplicaProof.VerifyAsync(connection, replicaEndpoints, configuredTopology, primaryIdentity, probeKey,
-            dataset.Documents[0].Json, cancellationToken);
+            dataset.Documents[0].Json, cancellationToken, lifecycleOptions);
         Profile = Profile with
         {
             Version = primaryIdentity.Version,
@@ -111,7 +114,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         try
         { await RedisReplicaProof.VerifyWorkerPrimaryAsync(workerConnection, configuredTopology, cancellationToken); }
         catch (Exception) { await workerConnection.DisposeAsync(); throw; }
-        return new RedisComparisonSession(workerConnection, prefix, configuredTopology, corpusCount);
+        return new RedisComparisonSession(workerConnection, prefix, configuredTopology, corpusCount, lifecycleOptions);
     }
 
     /// <summary>Closes and disposes the target-owned Redis connection.</summary>

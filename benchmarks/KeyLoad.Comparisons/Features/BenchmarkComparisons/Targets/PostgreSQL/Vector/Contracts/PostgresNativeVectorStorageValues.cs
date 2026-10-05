@@ -20,7 +20,7 @@ internal static class PostgresNativeVectorStorageValues
     internal const int PayloadBytes = 1024;
     internal const string TheVectorDocumentViolatesItsFrozen = "The vector document violates its frozen dimension or payload length.";
     internal const int PayloadPropertyCount = 3;
-            internal const int FieldCountColumnOrdinal = 6;
+    internal const int FieldCountColumnOrdinal = 6;
     internal const int IdTypeColumnOrdinal = 7;
     internal const int NumberTypeColumnOrdinal = 8;
     internal const int PaddingTypeColumnOrdinal = 9;

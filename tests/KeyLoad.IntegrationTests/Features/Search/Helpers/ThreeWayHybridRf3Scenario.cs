@@ -44,7 +44,7 @@ internal sealed record ThreeWayHybridRf3Scenario(PartitionRef Partition)
         var partition = new PartitionRef("three-way-tenant-" + Guid.NewGuid().ToString("N"),
             "three-way-database", "three-way-domain", Guid.NewGuid().ToString("N"));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(http, fixture.AdminKey);
+        var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await ConfigureAsync(admin, partition, DocumentsResource(), cancellationToken);
         await ConfigureAsync(admin, partition, new(Projects, ResourceKind.Collection, partition.TransactionDomainId), cancellationToken);
         await ConfigureAsync(admin, partition, GraphResource(), cancellationToken);
@@ -125,7 +125,7 @@ internal sealed record ThreeWayHybridRf3Scenario(PartitionRef Partition)
             new(Partition.DatabaseId, ExpansionGraph, Capability.GraphRead)
         ], grants.ToImmutable());
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(http, fixture.AdminKey);
+        var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(),
             principal, cancellationToken));
         var keyId = "three-way-key-" + Guid.NewGuid().ToString("N");
@@ -141,7 +141,7 @@ internal sealed record ThreeWayHybridRf3Scenario(PartitionRef Partition)
     {
         var revoked = identity.Principal with { Revoked = true, PolicyEpoch = identity.Principal.PolicyEpoch + 1 };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var admin = new KeyLoadClient(http, fixture.AdminKey);
+        var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(), revoked,
             cancellationToken));
     }

@@ -21,7 +21,7 @@ internal sealed class OrleansWalUpgradeTests
     {
         using var files = new WalFileFixture();
         StoreIdentity original;
-        using (var store = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var store = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             if (checkpoint)
             {
@@ -94,7 +94,7 @@ internal sealed class OrleansWalUpgradeTests
     {
         using var files = new WalFileFixture();
         StoreIdentity identity;
-        using (var store = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var store = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             store.Commit((transaction, _) => { transaction.Put([0x10], [0x30]); return true; });
             store.Compact();
@@ -124,7 +124,7 @@ internal sealed class OrleansWalUpgradeTests
     {
         using var files = new WalFileFixture();
         StoreIdentity identity;
-        using (var store = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var store = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             store.Commit((transaction, _) => { transaction.Put([0x10], [0x30]); return true; });
             store.Compact();

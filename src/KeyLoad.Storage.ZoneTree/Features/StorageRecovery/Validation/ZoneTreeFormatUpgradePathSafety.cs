@@ -2,6 +2,8 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeFormatUpgradePathSafety
 {
+    private const int NoFileAttributes = 0;
+
     internal static FileAttributes? VerifyNoLinks(string path, bool allowMissingFinal)
     {
         var fullPath = Path.GetFullPath(path);
@@ -18,8 +20,8 @@ internal static class ZoneTreeFormatUpgradePathSafety
                 continue;
             }
 
-            if ((attributes.Value & FileAttributes.ReparsePoint) != 0
-                || !final && (attributes.Value & FileAttributes.Directory) == 0)
+            if ((attributes.Value & FileAttributes.ReparsePoint) != NoFileAttributes
+                || !final && (attributes.Value & FileAttributes.Directory) == NoFileAttributes)
             {
                 throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradePathLinkOrAncestor);
             }

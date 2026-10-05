@@ -124,7 +124,7 @@ internal sealed class DatabaseCompositionFlowTests
                 new QueueToGraph(Graph, Queue, "rollback-")));
 
             db.Store.Dispose();
-            using var reopened = new ZoneTreeStore(new(db.Directory));
+            using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             var committed = reopened.Read(view => view.GetRecord<EdgeRecord>(
                 KeySpace.Partition(EdgeSpace, db.Partition, Graph, EdgePrefix + Message)));
             var rejected = reopened.Read(view => view.GetRecord<EdgeRecord>(

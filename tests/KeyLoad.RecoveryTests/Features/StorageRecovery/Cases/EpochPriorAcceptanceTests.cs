@@ -20,7 +20,7 @@ internal sealed class EpochPriorAcceptanceTests
             var target = Path.Combine(root, "target");
             var original = await EpochPriorExecutableFixture.CreateAsync(source, false, token, dataEpoch);
             var sourceFiles = await EpochUpgradeFileInventory.CaptureAsync(source, token);
-            _ = ZoneTreeFormatUpgrade.Upgrade(source, new(target));
+            _ = ZoneTreeFormatUpgrade.Upgrade(source, new(target), RecoveryExecutionOptions.StorageExecution());
             var targetFiles = await EpochUpgradeFileInventory.CaptureAsync(target, token);
 
             var rejected = await EpochPriorExecutableFixture.InspectAsync(target, token, dataEpoch);
@@ -46,9 +46,9 @@ internal sealed class EpochPriorAcceptanceTests
             var initialInspection = await EpochPriorExecutableFixture.InspectAsync(source, token, dataEpoch);
             await AssertSameOriginalIdentityAsync(initialInspection, original);
 
-            _ = ZoneTreeFormatUpgrade.Upgrade(source, new(target));
+            _ = ZoneTreeFormatUpgrade.Upgrade(source, new(target), RecoveryExecutionOptions.StorageExecution());
             var checkpoint = Path.Combine(target, "current-checkpoint5.bin");
-            using (var current = new ZoneTreeStore(new(target)))
+            using (var current = new ZoneTreeStore(new(target), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()))
             {
                 _ = current.CreateSnapshot(checkpoint, original.AppliedPosition);
             }
@@ -76,7 +76,7 @@ internal sealed class EpochPriorAcceptanceTests
 
             var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
             {
-                using var unexpected = new ZoneTreeStore(new(source));
+                using var unexpected = new ZoneTreeStore(new(source), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
             });
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.FormatUnsupported);
             await EpochUpgradeFileInventory.AssertUnchangedAsync(source, sourceFiles, token);

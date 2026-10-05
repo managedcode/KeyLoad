@@ -14,14 +14,14 @@ internal sealed class RelationalSqlRf3AuthorizationTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(adminHttp, fixture.AdminKey);
+        var administrator = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await RelationalSqlRf3Scenario.CreateAsync(administrator, deadline.Token);
         await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(scenario.Command(new PutDocument(
             RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.FirstId, RelationalSqlRf3Tokens.FirstRow)), deadline.Token));
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition, RelationalSqlRf3Tokens.Table,
             Capability.DocumentsRead | Capability.Query, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, identity.Secret, deadline.Token);
         var select = new SqlOperationRequest(scenario.Partition, SqlRf3Protocol.TableSelect);
         var read = await SqlRf3Protocol.SdkAsync<QueryPage>(sdk, select, deadline.Token);

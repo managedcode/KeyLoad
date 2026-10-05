@@ -22,12 +22,6 @@ internal static class PostgresNativeVectorIndex
     private const string VectorParamLists = "lists";
     private const string VectorParamProbes = "probes";
     private const string VectorParamIterativeScan = "iterativeScan";
-    private const string SearchPlainSql = "SELECT id,distance FROM (SELECT id,embedding <=> $1::vector AS distance FROM documents ORDER BY embedding <=> $1::vector LIMIT $2) AS candidates ORDER BY distance,id";
-    private const string SearchFilteredSql = "SELECT id,distance FROM (SELECT id,embedding <=> $1::vector AS distance FROM documents WHERE vector_number % 100 = 0 ORDER BY embedding <=> $1::vector LIMIT $2) AS candidates ORDER BY distance,id";
-    private const string SearchMixedSql = "SELECT id,distance FROM (SELECT id,embedding <=> $1::vector AS distance FROM documents WHERE vector_number % 10 <> 9 ORDER BY embedding <=> $1::vector LIMIT $2) AS candidates ORDER BY distance,id";
-    private const string ExplainPlainSql = "EXPLAIN (FORMAT TEXT) SELECT id,distance FROM (SELECT id,embedding <=> $1::vector AS distance FROM documents ORDER BY embedding <=> $1::vector LIMIT 10) AS candidates ORDER BY distance,id";
-    private const string ExplainFilteredSql = "EXPLAIN (FORMAT TEXT) SELECT id,distance FROM (SELECT id,embedding <=> $1::vector AS distance FROM documents WHERE vector_number % 100 = 0 ORDER BY embedding <=> $1::vector LIMIT 10) AS candidates ORDER BY distance,id";
-    private const string ExplainMixedSql = "EXPLAIN (FORMAT TEXT) SELECT id,distance FROM (SELECT id,embedding <=> $1::vector AS distance FROM documents WHERE vector_number % 10 <> 9 ORDER BY embedding <=> $1::vector LIMIT 10) AS candidates ORDER BY distance,id";
 
     internal static async Task<VectorIndexReceipt> BuildAsync(NpgsqlDataSource source,
         VectorComparisonProfile profile, NativeComparisonExecutionOptions execution, CancellationToken cancellationToken)
@@ -65,7 +59,7 @@ internal static class PostgresNativeVectorIndex
         await using var connection = await source.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await ConfigureSearchAsync(connection, profile, cancellationToken).ConfigureAwait(false);
         await using var command = connection.CreateCommand();
-        SelectSearch(command, mode);
+        PostgresNativeVectorQueries.SelectSearch(command, profile.IndexKind, mode);
         command.Parameters.AddWithValue(PostgresNativeVectorStorage.VectorLiteral(query.Span));
         command.Parameters.AddWithValue(NpgsqlDbType.Integer, topK);
         var results = new List<VectorNeighbor>(topK);
@@ -89,7 +83,7 @@ internal static class PostgresNativeVectorIndex
             await force.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
         await using var command = connection.CreateCommand();
-        SelectExplain(command, mode);
+        PostgresNativeVectorQueries.SelectExplain(command, profile.IndexKind, mode);
         command.Parameters.AddWithValue(PostgresNativeVectorStorage.VectorLiteral(query.Span));
         var lines = new List<string>();
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
@@ -107,28 +101,6 @@ internal static class PostgresNativeVectorIndex
         return plan;
     }
 
-    private static void SelectSearch(NpgsqlCommand command, VectorQueryMode mode)
-    {
-        switch (mode)
-        {
-            case VectorQueryMode.Plain: command.CommandText = SearchPlainSql; break;
-            case VectorQueryMode.Filtered: command.CommandText = SearchFilteredSql; break;
-            case VectorQueryMode.Mixed: command.CommandText = SearchMixedSql; break;
-            default: throw new ArgumentOutOfRangeException(nameof(mode));
-        }
-    }
-
-    private static void SelectExplain(NpgsqlCommand command, VectorQueryMode mode)
-    {
-        switch (mode)
-        {
-            case VectorQueryMode.Plain: command.CommandText = ExplainPlainSql; break;
-            case VectorQueryMode.Filtered: command.CommandText = ExplainFilteredSql; break;
-            case VectorQueryMode.Mixed: command.CommandText = ExplainMixedSql; break;
-            default: throw new ArgumentOutOfRangeException(nameof(mode));
-        }
-    }
-
     private static Dictionary<string, string> Parameters(VectorComparisonProfile profile)
     {
         if (profile.IndexKind == VectorIndexKind.Hnsw)
@@ -136,9 +108,13 @@ internal static class PostgresNativeVectorIndex
             return new() { [VectorParamM] = PostgresNativeVectorIndexValues.HnswNeighborsSetting, [VectorParamEfConstruction] = PostgresNativeVectorIndexValues.HnswEffortSetting, [VectorParamEfSearch] = PostgresNativeVectorIndexValues.HnswEffortSetting };
         }
         var lists = Math.Max(PostgresNativeVectorIndexValues.SingleElementOffset, (int)Math.Sqrt(profile.RecordCount));
-        var probes = Math.Min(lists, (int)Math.Ceiling(Math.Sqrt(lists)) * PostgresNativeVectorIndexValues.FloatByteCount);
-        return new() { [VectorParamLists] = lists.ToString(CultureInfo.InvariantCulture),
-            [VectorParamProbes] = probes.ToString(CultureInfo.InvariantCulture), [VectorParamIterativeScan] = PostgresNativeVectorIndexValues.RelaxedOrder };
+        var probes = Math.Min(lists, (int)Math.Ceiling(Math.Sqrt(lists)) * PostgresNativeVectorIndexValues.IvfProbeExpansionFactor);
+        return new()
+        {
+            [VectorParamLists] = lists.ToString(CultureInfo.InvariantCulture),
+            [VectorParamProbes] = probes.ToString(CultureInfo.InvariantCulture),
+            [VectorParamIterativeScan] = PostgresNativeVectorIndexValues.RelaxedOrder
+        };
     }
 
     private static async Task CreateIndexAsync(NpgsqlConnection connection, VectorComparisonProfile profile,
@@ -177,7 +153,7 @@ internal static class PostgresNativeVectorIndex
         else if (profile.IndexKind == VectorIndexKind.IvfFlat)
         {
             var lists = Math.Max(PostgresNativeVectorIndexValues.SingleElementOffset, (int)Math.Sqrt(profile.RecordCount));
-            var probes = Math.Min(lists, (int)Math.Ceiling(Math.Sqrt(lists)) * PostgresNativeVectorIndexValues.FloatByteCount);
+            var probes = Math.Min(lists, (int)Math.Ceiling(Math.Sqrt(lists)) * PostgresNativeVectorIndexValues.IvfProbeExpansionFactor);
             await using (var probe = connection.CreateCommand())
             {
                 probe.CommandText = IvfProbeSql;

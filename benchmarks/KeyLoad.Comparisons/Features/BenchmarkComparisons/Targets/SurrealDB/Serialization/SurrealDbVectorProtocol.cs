@@ -15,11 +15,11 @@ internal static class SurrealDbVectorProtocol
     private const string Embedding = ", embedding = ";
     private const string Payload = ", payload = ";
     private const char NativeCharacter59 = ';';
-    private const string NativeSELECTNumberIdEmbeddingPayloadFROMWHERENumberFormatTemplate = "SELECT number, id, embedding, payload FROM {0} WHERE number > {1} ORDER BY number LIMIT {2};";
+    private const string NativeSELECTNumberIdEmbeddingPayloadFROMWHERENumberFormatTemplate = "SELECT number, id, embedding, payload FROM {0} WITH INDEX {3} WHERE number > {1} ORDER BY number LIMIT {2};";
     private static readonly System.Text.CompositeFormat NativeSELECTNumberIdEmbeddingPayloadFROMWHERENumberFormat = System.Text.CompositeFormat.Parse(NativeSELECTNumberIdEmbeddingPayloadFROMWHERENumberFormatTemplate);
     private const string NativeSELECTNumberIdEmbeddingPayloadFROMFormatTemplate = "SELECT number, id, embedding, payload FROM {0}:{1};";
     private static readonly System.Text.CompositeFormat NativeSELECTNumberIdEmbeddingPayloadFROMFormat = System.Text.CompositeFormat.Parse(NativeSELECTNumberIdEmbeddingPayloadFROMFormatTemplate);
-    private const string NativeUPDATESETEmbeddingFormatTemplate = "UPDATE {0}:{1} SET embedding = {2};";
+    private const string NativeUPDATESETEmbeddingFormatTemplate = "UPDATE {0}:{1} SET embedding = {2} RETURN AFTER;";
     private static readonly System.Text.CompositeFormat NativeUPDATESETEmbeddingFormat = System.Text.CompositeFormat.Parse(NativeUPDATESETEmbeddingFormatTemplate);
     private const string NativeEmptyTextFormatTemplate = "{0}, {1}";
     private static readonly System.Text.CompositeFormat NativeEmptyTextFormat = System.Text.CompositeFormat.Parse(NativeEmptyTextFormatTemplate);
@@ -107,7 +107,7 @@ internal static class SurrealDbVectorProtocol
         return sql.ToString();
     }
 
-    internal static string ReadbackSql(string table, int after, int limit) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTNumberIdEmbeddingPayloadFROMWHERENumberFormat, table, after, limit);
+    internal static string ReadbackSql(string table, int after, int limit) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTNumberIdEmbeddingPayloadFROMWHERENumberFormat, table, after, limit, SurrealDbReadbackIndex.Name(table));
     internal static string ReadOneSql(string table, string id) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTNumberIdEmbeddingPayloadFROMFormat, table, RecordKey(id));
     internal static string UpdateSql(string table, string id, ReadOnlySpan<float> vector) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeUPDATESETEmbeddingFormat, table, RecordKey(id), FormatVector(vector));
     internal static string SearchSql(string table, ReadOnlySpan<float> vector, int topK, VectorQueryMode mode, VectorIndexKind index, int ef)
@@ -123,7 +123,8 @@ internal static class SurrealDbVectorProtocol
         VectorQueryMode.Plain => string.Empty,
         VectorQueryMode.Filtered => ANDNumber,
         VectorQueryMode.Mixed => ANDNumber2,
-        _ => throw new ArgumentOutOfRangeException(nameof(mode))};
+        _ => throw new ArgumentOutOfRangeException(nameof(mode))
+    };
     private static string FormatVector(ReadOnlySpan<float> vector)
     {
         var result = new StringBuilder(vector.Length * VectorComponentTextCapacity + VectorArrayDelimiterWidth).Append(VectorArrayStart);

@@ -45,7 +45,9 @@ internal static class AspireTerminalResource
 
     internal static void RequireCompletions(HashSet<string> pending)
     {
-        if (pending.Count != 0)
+        const int EmptyValue = 0;
+
+        if (pending.Count != EmptyValue)
         {
             throw new DistributedApplicationException(string.Format(CultureInfo.InvariantCulture, FailureTemplate,
                 pending.First(), CompletionPending, MissingExit));

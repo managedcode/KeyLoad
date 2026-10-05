@@ -1,7 +1,7 @@
+using System.Text;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 using Microsoft.Extensions.Options;
-using System.Text;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 

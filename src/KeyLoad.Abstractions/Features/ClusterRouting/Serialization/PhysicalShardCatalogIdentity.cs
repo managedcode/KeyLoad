@@ -8,7 +8,9 @@ public static class PhysicalShardCatalogIdentity
 {
     private const string BootstrapCommandDomain = "KeyLoad.PhysicalShardCatalog.Bootstrap.v1";
     private const string EmptyIdentity = "The physical shard identity is empty.";
-    private static readonly byte[] DomainBytes = Encoding.ASCII.GetBytes(BootstrapCommandDomain + "\0");
+    private const string DomainTerminator = "\0";
+    private const int GuidBytes = 16;
+    private static readonly byte[] DomainBytes = Encoding.ASCII.GetBytes(BootstrapCommandDomain + DomainTerminator);
 
     /// <summary>Derives the stable bootstrap command identity from the explicit shard identity.</summary>
     /// <param name="physicalShardId">The configured, opaque shard identifier.</param>
@@ -18,11 +20,11 @@ public static class PhysicalShardCatalogIdentity
     {
         if (physicalShardId == Guid.Empty)
         { throw new ArgumentException(EmptyIdentity, nameof(physicalShardId)); }
-        Span<byte> input = stackalloc byte[DomainBytes.Length + 16];
+        Span<byte> input = stackalloc byte[DomainBytes.Length + GuidBytes];
         DomainBytes.AsSpan().CopyTo(input);
         physicalShardId.TryWriteBytes(input[DomainBytes.Length..], bigEndian: true, out _);
-        Span<byte> digest = stackalloc byte[32];
+        Span<byte> digest = stackalloc byte[SHA256.HashSizeInBytes];
         SHA256.HashData(input, digest);
-        return new Guid(digest[..16], bigEndian: true);
+        return new Guid(digest[..GuidBytes], bigEndian: true);
     }
 }

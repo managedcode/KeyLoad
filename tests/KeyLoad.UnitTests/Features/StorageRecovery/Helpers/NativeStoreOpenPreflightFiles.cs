@@ -16,7 +16,7 @@ internal sealed class NativeStoreOpenPreflightFiles : IDisposable
 
     internal void Compact()
     {
-        using var store = new ZoneTreeStore(Source.Options);
+        using var store = new ZoneTreeStore(Source.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         store.Compact();
     }
 

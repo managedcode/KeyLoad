@@ -4,6 +4,9 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeCheckpointReclaimer
 {
+    private const int TemporarySeparatorWidth = 1;
+    private const int NoFileAttributes = 0;
+
     internal static void Reclaim(string directory)
     {
         foreach (var path in Directory.EnumerateFileSystemEntries(directory))
@@ -14,7 +17,7 @@ internal static class ZoneTreeCheckpointReclaimer
             var temporary = (name.StartsWith(CheckpointTemporaryPrefix, StringComparison.Ordinal)
                 || name.StartsWith(InstallTemporaryPrefix, StringComparison.Ordinal))
                 && name.EndsWith(TemporaryFileSuffix, StringComparison.Ordinal)
-                && Guid.TryParseExact(name[(name.IndexOf(TemporaryNameSeparator, StringComparison.Ordinal) + 1)..^TemporaryFileSuffix.Length],
+                && Guid.TryParseExact(name[(name.IndexOf(TemporaryNameSeparator, StringComparison.Ordinal) + TemporarySeparatorWidth)..^TemporaryFileSuffix.Length],
                     GuidFormat, out _);
             if (!retired && !temporary)
             {
@@ -29,7 +32,7 @@ internal static class ZoneTreeCheckpointReclaimer
     {
         try
         {
-            if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+            if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != NoFileAttributes)
             {
                 return;
             }

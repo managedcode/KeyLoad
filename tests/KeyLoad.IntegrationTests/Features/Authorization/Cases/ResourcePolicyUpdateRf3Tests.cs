@@ -20,7 +20,7 @@ internal sealed class ResourcePolicyUpdateRf3Tests(ClusterFixture fixture)
         await using var readerMcp = await McpOfficialClient.ConnectAsync(fixture,
             McpCallerProtocol.Node3, scenario.Reader.Secret, deadline.Token);
         using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey);
+        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         await VerifyInitialAccessAsync(fixture, readerMcp, scenario, deadline.Token);
         var cursors = await CaptureCursorsAsync(admin, administratorMcp, scenario, deadline.Token);
         var versionTwo = await UpdateThroughMcpAsync(administratorMcp, scenario,
@@ -83,7 +83,7 @@ internal sealed class ResourcePolicyUpdateRf3Tests(ClusterFixture fixture)
         ResourcePolicyUpdateRf3Scenario scenario, CancellationToken cancellationToken)
     {
         using var readerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var reader = new KeyLoadClient(readerHttp, scenario.Reader.Secret);
+        var reader = new KeyLoadClient(readerHttp, scenario.Reader.Secret, IntegrationClientOptions.Execution());
         var stale = scenario.Request(ResourcePolicyUpdateRf3Protocol.StaleGrant,
             ResourcePolicyUpdateRf3Protocol.StaleGrant, ResourcePolicyUpdateRf3Protocol.InitialSchemaVersion);
         var staleResult = await admin.ConfigureResourceAsync(Guid.NewGuid(), stale, cancellationToken);

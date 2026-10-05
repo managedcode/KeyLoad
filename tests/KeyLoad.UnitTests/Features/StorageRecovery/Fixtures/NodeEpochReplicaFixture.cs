@@ -70,7 +70,7 @@ internal sealed class NodeEpochReplicaFixture : IDisposable
 
     private ZoneTreeStore Open(string name)
         => new(new(Path.Combine(root, name))
-        { Incarnation = Configuration.Incarnation, SigningKey = RandomNumberGenerator.GetBytes(SigningKeyBytes) });
+        { Incarnation = Configuration.Incarnation, SigningKey = RandomNumberGenerator.GetBytes(SigningKeyBytes) }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
 
     private StorageSnapshot CreateSourceMetadataAndPointer()
     {

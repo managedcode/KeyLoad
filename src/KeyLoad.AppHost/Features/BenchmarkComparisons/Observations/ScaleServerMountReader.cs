@@ -4,28 +4,34 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class ScaleServerMountReader
 {
+    private const int ReadNonnegativeBoundaryValue = 0;
+
+    private const string TargetField = "target";
     private const string Docker = "docker";
     private const string Findmnt = "findmnt";
-    private const string DockerHostEnvironment = "DOCKER_HOST";
-    private const string DockerContextEnvironment = "DOCKER_CONTEXT";
     private const string UnixPrefix = "unix://";
     private const string MountSeparator = ";";
     private const string FieldSeparator = "~";
-    private const int MaxNativeOutputBytes = 4096;
     private const string ContextFormat = "{{.Endpoints.docker.Host}}";
     private const string FindmntOutput = "TARGET,FSTYPE,SIZE,AVAIL";
 
     internal static async Task<ScaleServerMount[]> ReadAsync(string text, string[] expectedTargets,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
+        const int SingleFilesystemCount = 0;
+        const int MountFieldCount = 3;
+        const int FirstIndex = 0;
+        const int ElementIndex = 2;
+        const int SecondIndex = 1;
+
         token.ThrowIfCancellationRequested();
         var expected = new HashSet<string>(expectedTargets, StringComparer.Ordinal);
-        if (expected.Count != expectedTargets.Length || expectedTargets.Length > ScaleServerResourceBounds.MaxMounts)
+        if (expected.Count != expectedTargets.Length || expectedTargets.Length > budget.Settings.MaxMounts)
         {
             return [];
         }
 
-        if (expected.Count == 0)
+        if (expected.Count == SingleFilesystemCount)
         {
             return [];
         }
@@ -42,14 +48,14 @@ internal static class ScaleServerMountReader
             foreach (var row in text.Split(MountSeparator, StringSplitOptions.RemoveEmptyEntries))
             {
                 var fields = row.Split(FieldSeparator, StringSplitOptions.None);
-                if (fields.Length != 3 || !Path.IsPathFullyQualified(fields[0]) || fields[2].Length == 0
-                    || mounts.Count >= ScaleServerResourceBounds.MaxMounts || !expected.Contains(fields[1])
-                    || !observed.Add(fields[1]))
+                if (fields.Length != MountFieldCount || !Path.IsPathFullyQualified(fields[FirstIndex]) || fields[ElementIndex].Length == SingleFilesystemCount
+                    || mounts.Count >= budget.Settings.MaxMounts || !expected.Contains(fields[SecondIndex])
+                    || !observed.Add(fields[SecondIndex]))
                 {
                     return [];
                 }
 
-                var mount = await ReadActualMountAsync(fields[0], fields[1], fields[2], budget, token);
+                var mount = await ReadActualMountAsync(fields[FirstIndex], fields[SecondIndex], fields[ElementIndex], budget, token);
                 if (mount is null)
                 {
                     return [];
@@ -70,20 +76,30 @@ internal static class ScaleServerMountReader
 
     private static async Task<bool> IsLocalDockerAsync(ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        if (Environment.GetEnvironmentVariable(DockerHostEnvironment) is not null
-            || Environment.GetEnvironmentVariable(DockerContextEnvironment) is not null)
+        const string ArgumentsText = "context";
+        const string IsLocalDockerAsyncArgumentsText = "inspect";
+
+        if (budget.Provenance.DockerHost is not null || budget.Provenance.DockerContext is not null)
         {
             return false;
         }
 
         var endpoint = await ScaleServerResourceProcess.RunAsync(Docker,
-            ["context", "inspect", "--format", ContextFormat], token, budget, MaxNativeOutputBytes);
+            [ArgumentsText, IsLocalDockerAsyncArgumentsText, "--format", ContextFormat], token, budget, budget.Settings.MaxNativeOutputBytes);
         return endpoint?.Trim().StartsWith(UnixPrefix, StringComparison.Ordinal) == true;
     }
 
     private static async Task<ScaleServerMount?> ReadActualMountAsync(string source, string containerPath,
         string mountType, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
+        const string ArgumentsText = "--json";
+        const string ReadActualMountAsyncArgumentsText = "--bytes";
+        const string PropertyNameText = "filesystems";
+        const int SingleFilesystemCount = 1;
+        const int IndexValue = 0;
+        const string ReadActualMountAsyncPropertyNameText = "fstype";
+        const int BoundaryValue = 0;
+
         string canonicalSource;
         try
         { canonicalSource = Path.GetFullPath(source); }
@@ -94,8 +110,8 @@ internal static class ScaleServerMountReader
         }
 
         var json = await ScaleServerResourceProcess.RunAsync(Findmnt,
-            ["--json", "--bytes", "--target", canonicalSource, "--output", FindmntOutput], token, budget,
-            MaxNativeOutputBytes);
+            [ArgumentsText, ReadActualMountAsyncArgumentsText, "--target", canonicalSource, "--output", FindmntOutput], token, budget,
+            budget.Settings.MaxNativeOutputBytes);
         if (json is null)
         {
             return null;
@@ -104,24 +120,24 @@ internal static class ScaleServerMountReader
         try
         {
             using var document = JsonDocument.Parse(json);
-            if (!document.RootElement.TryGetProperty("filesystems", out var rows)
-                || rows.ValueKind != JsonValueKind.Array || rows.GetArrayLength() != 1)
+            if (!document.RootElement.TryGetProperty(PropertyNameText, out var rows)
+                || rows.ValueKind != JsonValueKind.Array || rows.GetArrayLength() != SingleFilesystemCount)
             {
                 return null;
             }
 
-            var row = rows[0];
+            var row = rows[IndexValue];
             if (!HasExactMountFields(row))
             {
                 return null;
             }
 
-            var target = Path.GetFullPath(row.GetProperty("target").GetString() ?? string.Empty);
-            var fileSystem = row.GetProperty("fstype").GetString();
+            var target = Path.GetFullPath(row.GetProperty(TargetField).GetString() ?? string.Empty);
+            var fileSystem = row.GetProperty(ReadActualMountAsyncPropertyNameText).GetString();
             var capacity = ReadNonnegative(row.GetProperty("size"));
             var available = ReadNonnegative(row.GetProperty("avail"));
             if (!IsPathWithin(canonicalSource, target) || string.IsNullOrWhiteSpace(fileSystem)
-                || capacity <= 0 || available < 0 || available > capacity)
+                || capacity <= BoundaryValue || available < BoundaryValue || available > capacity)
             {
                 return null;
             }
@@ -137,17 +153,20 @@ internal static class ScaleServerMountReader
 
     private static bool HasExactMountFields(JsonElement value)
     {
+        const string OtherText = "avail";
+        const string HasExactMountFieldsOtherText = "fstype";
+
         if (value.ValueKind != JsonValueKind.Object)
         {
             return false;
         }
 
         var names = value.EnumerateObject().Select(item => item.Name).Order(StringComparer.Ordinal).ToArray();
-        return names.SequenceEqual(["avail", "fstype", "size", "target"], StringComparer.Ordinal);
+        return names.SequenceEqual([OtherText, HasExactMountFieldsOtherText, "size", "target"], StringComparer.Ordinal);
     }
 
     private static long ReadNonnegative(JsonElement value)
-        => value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out var number) && number >= 0
+        => value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out var number) && number >= ReadNonnegativeBoundaryValue
             ? number : throw new FormatException();
 
     private static bool IsPathWithin(string path, string directory)

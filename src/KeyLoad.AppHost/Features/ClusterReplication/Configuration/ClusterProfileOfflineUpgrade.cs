@@ -10,6 +10,8 @@ internal static class ClusterProfileOfflineUpgrade
 
     internal static LocalProfile Run(string dataRoot)
     {
+        const int VersionValue = 2;
+
         ArgumentException.ThrowIfNullOrWhiteSpace(dataRoot);
         var root = Path.GetFullPath(dataRoot);
         ClusterProfileStore.RejectLinks(root);
@@ -24,7 +26,7 @@ internal static class ClusterProfileOfflineUpgrade
         var fileMode = ClusterProfilePermissions.ReadMode(path);
         var originalBytes = ClusterProfileStore.ReadBoundedBytes(path);
         var legacy = DeserializeLegacy(originalBytes);
-        var profile = new LocalProfile(2, Guid.NewGuid(), legacy.Incarnation,
+        var profile = new LocalProfile(VersionValue, Guid.NewGuid(), legacy.Incarnation,
             legacy.SigningKey, legacy.PeerSecret, legacy.AdminKey);
         ClusterProfileStore.Validate(profile);
         return Publish(path, backupPath, originalBytes, profile, fileMode);

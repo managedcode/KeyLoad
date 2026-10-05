@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
@@ -16,17 +17,21 @@ internal static class ScaleServerHostEvidence
     private const int Kilobytes = 1024;
 
     internal static async Task<(ScaleServerHardware? Hardware, ScaleServerEnvelope? Envelope)> ReadAsync(
-        CancellationToken token)
+        IOptions<ScaleServerResourceOptions> settings, IOptions<BenchmarkProvenanceOptions> provenance, CancellationToken token)
     {
+        const string ArgumentsText = "-r";
+        const int BoundaryValue = 1;
+        const char SeparatorCharacter = ',';
+
         if (!OperatingSystem.IsLinux())
         {
             return (null, null);
         }
 
-        var budget = new ScaleServerResourceSampleBudget(ScaleServerResourceBounds.MaxSampleMetadataBytes);
-        var cpu = await BoundedText.ReadAsync(CpuInfo, ScaleServerResourceBounds.MaxHardwareBytes, token, budget);
-        var memory = await BoundedText.ReadAsync(MemoryInfo, ScaleServerResourceBounds.MaxFileBytes, token, budget);
-        var online = await BoundedText.ReadAsync(CpuOnline, ScaleServerResourceBounds.MaxFileBytes, token, budget);
+        var budget = new ScaleServerResourceSampleBudget(settings, provenance);
+        var cpu = await BoundedText.ReadAsync(CpuInfo, budget.Settings.MaxHardwareBytes, token, budget);
+        var memory = await BoundedText.ReadAsync(MemoryInfo, budget.Settings.MaxFileBytes, token, budget);
+        var online = await BoundedText.ReadAsync(CpuOnline, budget.Settings.MaxFileBytes, token, budget);
         if (cpu is null || memory is null || online is null)
         {
             return (null, null);
@@ -39,7 +44,7 @@ internal static class ScaleServerHostEvidence
             return (null, null);
         }
 
-        var kernel = await ScaleServerResourceProcess.RunAsync(KernelExecutable, ["-r"], token, budget);
+        var kernel = await ScaleServerResourceProcess.RunAsync(KernelExecutable, [ArgumentsText], token, budget);
         if (string.IsNullOrWhiteSpace(kernel))
         {
             return (null, null);
@@ -48,7 +53,7 @@ internal static class ScaleServerHostEvidence
         var logical = ScaleServerHostCpuParser.CountOnline(online);
         var cores = ScaleServerHostCpuParser.CoreMembership(cpu);
         var envelope = await ReadEnvelopeAsync(budget, token);
-        if (logical < 1 || cores.Physical.Length < 1 || cores.Logical.Split(',').Length != logical)
+        if (logical < BoundaryValue || cores.Physical.Length < BoundaryValue || cores.Logical.Split(SeparatorCharacter).Length != logical)
         {
             return (null, envelope);
         }
@@ -62,13 +67,18 @@ internal static class ScaleServerHostEvidence
     internal static async Task<ScaleServerEnvelope?> ReadCgroupEnvelopeAsync(string cgroupPath,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        if (!OperatingSystem.IsLinux() || cgroupPath.Length == 0 || cgroupPath[0] != '/')
+        const int EmptyValue = 0;
+        const int IndexValue = 0;
+        const char SlashCharacter = '/';
+        const string PathText = "/sys/fs/cgroup";
+
+        if (!OperatingSystem.IsLinux() || cgroupPath.Length == EmptyValue || cgroupPath[IndexValue] != SlashCharacter)
         {
             return null;
         }
 
-        var root = Path.GetFullPath("/sys/fs/cgroup");
-        var current = Path.GetFullPath(Path.Combine(root, cgroupPath.TrimStart('/')));
+        var root = Path.GetFullPath(PathText);
+        var current = Path.GetFullPath(Path.Combine(root, cgroupPath.TrimStart(SlashCharacter)));
         if (current != root && !current.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {
             return null;
@@ -80,8 +90,15 @@ internal static class ScaleServerHostEvidence
     private static async Task<ScaleServerEnvelope?> ReadEnvelopeAsync(ScaleServerResourceSampleBudget budget,
         CancellationToken token)
     {
-        var membership = await BoundedText.ReadAsync("/proc/self/cgroup", ScaleServerResourceBounds.MaxFileBytes, token, budget);
-        var row = membership?.Split('\n').FirstOrDefault(line => line.StartsWith(UnifiedMembershipPrefix, StringComparison.Ordinal));
+        const string PathText = "/proc/self/cgroup";
+        const char LineFeedCharacter = '\n';
+        const string Path1Text = "/sys/fs/cgroup";
+        const int ElementIndex = 3;
+        const char SlashCharacter = '/';
+        const string ReadEnvelopeAsyncPathText = "/sys/fs/cgroup";
+
+        var membership = await BoundedText.ReadAsync(PathText, budget.Settings.MaxFileBytes, token, budget);
+        var row = membership?.Split(LineFeedCharacter).FirstOrDefault(line => line.StartsWith(UnifiedMembershipPrefix, StringComparison.Ordinal));
         if (row is null)
         {
             return null;
@@ -92,8 +109,8 @@ internal static class ScaleServerHostEvidence
             return null;
         }
 
-        var current = Path.GetFullPath(Path.Combine("/sys/fs/cgroup", row[3..].TrimStart('/')));
-        var root = Path.GetFullPath("/sys/fs/cgroup");
+        var current = Path.GetFullPath(Path.Combine(Path1Text, row[ElementIndex..].TrimStart(SlashCharacter)));
+        var root = Path.GetFullPath(ReadEnvelopeAsyncPathText);
         if (current != root && !current.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {
             return null;
@@ -106,20 +123,25 @@ internal static class ScaleServerHostEvidence
 internal static class BoundedText
 {
     internal static async Task<string?> ReadAsync(string path, int maximum, CancellationToken token,
-        ScaleServerResourceSampleBudget? budget = null)
+        ScaleServerResourceSampleBudget budget)
     {
+        const int BoundaryValue = 1;
+        const int TotalInitialValue = 0;
+        const int IndexValue = 0;
+        const int EmptyValue = 0;
+
         try
         {
             await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite,
-                4096, FileOptions.Asynchronous | FileOptions.SequentialScan);
+                budget.Settings.NativeReadBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
             var limit = budget is null ? maximum : Math.Min(maximum, budget.Remaining);
-            if (limit < 1 || !stream.CanSeek || stream.Length > limit)
+            if (limit < BoundaryValue || !stream.CanSeek || stream.Length > limit)
             {
                 return null;
             }
 
             var buffer = new byte[limit];
-            var total = 0;
+            var total = TotalInitialValue;
             while (true)
             {
                 if (total == limit)
@@ -130,13 +152,13 @@ internal static class BoundedText
                     }
 
                     budget?.Charge(total);
-                    return System.Text.Encoding.UTF8.GetString(buffer, 0, total);
+                    return System.Text.Encoding.UTF8.GetString(buffer, IndexValue, total);
                 }
                 var count = await stream.ReadAsync(buffer.AsMemory(total, buffer.Length - total), token);
-                if (count == 0)
+                if (count == EmptyValue)
                 {
                     budget?.Charge(total);
-                    return System.Text.Encoding.UTF8.GetString(buffer, 0, total);
+                    return System.Text.Encoding.UTF8.GetString(buffer, IndexValue, total);
                 }
                 total += count;
                 if (total > limit)

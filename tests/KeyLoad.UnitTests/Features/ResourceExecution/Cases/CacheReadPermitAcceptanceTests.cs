@@ -53,17 +53,17 @@ internal sealed class CacheReadPermitAcceptanceTests
 
         var acceptedPrepareAge = clock.GetElapsedTime(prepared, beforeAccept);
         await Assert.That(acceptedPrepareAge >= TimeSpan.FromSeconds(2)).IsTrue();
-        await Assert.That(acceptedPrepareAge < CacheReadPermitLimits.PrepareValidity).IsTrue();
+        await Assert.That(acceptedPrepareAge < UnitAdmissionOptions.Permit().Value.PrepareValidity).IsTrue();
         await WaitForPrepareAgeAsync(clock, prepared,
-            CacheReadPermitLimits.LeaseValidity + TimeSpan.FromMilliseconds(50), linked.Token);
+            UnitAdmissionOptions.Permit().Value.LeaseValidity + TimeSpan.FromMilliseconds(50), linked.Token);
 
         var current = permit.IsCurrentAcceptance(receipt);
         var captured = permit.TryCapture(out var expiredRevision);
         var completion = clock.GetTimestamp();
         var prepareAge = clock.GetElapsedTime(prepared, completion);
         var observationAge = clock.GetElapsedTime(beforeAccept, completion);
-        await Assert.That(prepareAge >= CacheReadPermitLimits.LeaseValidity).IsTrue();
-        await Assert.That(observationAge < CacheReadPermitLimits.LeaseValidity).IsTrue();
+        await Assert.That(prepareAge >= UnitAdmissionOptions.Permit().Value.LeaseValidity).IsTrue();
+        await Assert.That(observationAge < UnitAdmissionOptions.Permit().Value.LeaseValidity).IsTrue();
         await Assert.That(current).IsFalse();
         await Assert.That(captured).IsFalse();
         await Assert.That(expiredRevision).IsEqualTo(0);

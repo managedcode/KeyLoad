@@ -17,7 +17,10 @@ public sealed record StoreAggregateSnapshot([property: Orleans.Id(0)] string Str
     [property: Orleans.Id(1)] string StreamId, [property: Orleans.Id(2)] long SourceRevision,
     [property: Orleans.Id(3)] string ReducerVersion, [property: Orleans.Id(4)] int StateSchemaVersion,
     [property: Orleans.Id(5)] string StateJson, [property: Orleans.Id(6)] long ExpectedSnapshotVersion,
-    [property: Orleans.Id(7)] long Generation = 1) : Mutation(StreamSet);
+    [property: Orleans.Id(7)] long Generation = StoreAggregateSnapshot.DefaultGeneration) : Mutation(StreamSet)
+{
+    private const int DefaultGeneration = 1;
+}
 
 /// <summary>Contains an exact-versioned, checksummed latest aggregate snapshot.</summary>
 /// <param name="Stream">The complete stream generation.</param>
@@ -43,8 +46,12 @@ public sealed record AggregateSnapshotState([property: Orleans.Id(0)] StreamRef 
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ReadAggregateReplayRequest)]
 public sealed record ReadAggregateReplayRequest([property: Orleans.Id(0)] StreamRef Stream,
-    [property: Orleans.Id(1)] string ReducerVersion, [property: Orleans.Id(2)] int StateSchemaVersion = 1,
-    [property: Orleans.Id(3)] bool FromBeginning = false, [property: Orleans.Id(4)] int MaximumEvents = 100);
+    [property: Orleans.Id(1)] string ReducerVersion, [property: Orleans.Id(2)] int StateSchemaVersion = ReadAggregateReplayRequest.DefaultStateSchemaVersion,
+    [property: Orleans.Id(3)] bool FromBeginning = false, [property: Orleans.Id(4)] int MaximumEvents = ReadAggregateReplayRequest.DefaultMaximumEvents)
+{
+    private const int DefaultStateSchemaVersion = 1;
+    private const int DefaultMaximumEvents = 100;
+}
 
 /// <summary>Returns the exact-compatible snapshot and complete tail from one committed cut.</summary>
 /// <param name="Stream">The complete stream generation.</param>

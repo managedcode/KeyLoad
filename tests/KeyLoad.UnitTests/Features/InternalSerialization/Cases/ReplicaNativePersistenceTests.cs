@@ -171,8 +171,8 @@ internal sealed class ReplicaNativeFiles : IDisposable
         SigningKey = signingKey?.ToArray() ?? RandomNumberGenerator.GetBytes(SigningKeyBytes);
     }
 
-    internal ZoneTreeStore Open() => new(new(Configuration.Directory) { Incarnation = Configuration.Incarnation, SigningKey = SigningKey });
+    internal ZoneTreeStore Open() => new(new(Configuration.Directory) { Incarnation = Configuration.Incarnation, SigningKey = SigningKey }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
     internal ZoneTreeStore Open(string name) => new(new(Path.Combine(directory, name))
-    { Incarnation = Configuration.Incarnation, SigningKey = SigningKey });
+    { Incarnation = Configuration.Incarnation, SigningKey = SigningKey }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
     public void Dispose() => Directory.Delete(directory, true);
 }

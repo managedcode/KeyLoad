@@ -42,7 +42,7 @@ internal sealed class MetadataFormatFailureTests
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.MissingFileRestorePath);
 
         var failure = Assert.ThrowsExactly<FileNotFoundException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
 
         await Assert.That(failure).IsNotNull();
         await Assert.That(Directory.Exists(destination)).IsFalse();
@@ -54,7 +54,7 @@ internal sealed class MetadataFormatFailureTests
             MetadataTestContract.ManifestFileName), content);
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.NullManifestRestorePath);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(Directory.Exists(destination)).IsFalse();
@@ -66,7 +66,7 @@ internal sealed class MetadataFormatFailureTests
             MetadataTestContract.ManifestFileName), content);
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.MalformedManifestRestorePath);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(Directory.Exists(destination)).IsFalse();

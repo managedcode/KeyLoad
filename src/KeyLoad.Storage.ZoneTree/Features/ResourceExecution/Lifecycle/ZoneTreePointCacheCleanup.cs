@@ -5,6 +5,9 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 /// <summary>Retains admission-close and independent physical/cache cleanup failures.</summary>
 internal static class ZoneTreePointCacheCleanup
 {
+    private const int SingleFailureCount = 1;
+    private const int FirstFailureIndex = 0;
+
     internal static void Capture(Action action, List<Exception> failures)
     {
         try
@@ -19,11 +22,11 @@ internal static class ZoneTreePointCacheCleanup
 
     internal static void ThrowFailures(List<Exception> failures)
     {
-        if (failures.Count == 1)
+        if (failures.Count == SingleFailureCount)
         {
-            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+            ExceptionDispatchInfo.Capture(failures[FirstFailureIndex]).Throw();
         }
-        if (failures.Count > 1)
+        if (failures.Count > SingleFailureCount)
         {
             throw new AggregateException(failures);
         }

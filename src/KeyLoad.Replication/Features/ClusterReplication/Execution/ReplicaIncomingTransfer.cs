@@ -1,10 +1,26 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Replication;
 
-internal sealed class ReplicaIncomingTransfer(ReplicaSnapshotFiles files, ReplicaConfiguration configuration,
-    Action<ReplicaCrashBoundary>? faultObserver = null)
+internal sealed class ReplicaIncomingTransfer
 {
+    private const int BeforeFirstLogPosition = 0;
+    private const int BeforeFirstTransferByte = 0;
+
+    private readonly ReplicaSnapshotFiles files;
+    private readonly Action<ReplicaCrashBoundary>? faultObserver;
+    private readonly ReplicaConfiguration configuration;
+
+    internal ReplicaIncomingTransfer(ReplicaSnapshotFiles files, IOptions<ReplicaConfiguration> configurationOptions,
+        Action<ReplicaCrashBoundary>? faultObserver = null)
+    {
+        ArgumentNullException.ThrowIfNull(configurationOptions);
+        configuration = configurationOptions.Value;
+        configuration.Validate();
+        this.files = files;
+        this.faultObserver = faultObserver;
+    }
     internal ReplicaSnapshot? Descriptor => files.ReadManifest();
 
     internal void Recover(IAtomicStore canonical, ReplicaSnapshot? published, Func<Guid, ReplicaSnapshot> complete)
@@ -19,7 +35,7 @@ internal sealed class ReplicaIncomingTransfer(ReplicaSnapshotFiles files, Replic
         }
         if (pending is null)
         { return; }
-        if (pending.Index < ReplicaPersistence.AppliedPosition(canonical) || pending.Index < (published?.Index ?? 0))
+        if (pending.Index < ReplicaPersistence.AppliedPosition(canonical) || pending.Index < (published?.Index ?? BeforeFirstLogPosition))
         {
             files.DiscardIncoming(pending, published);
             return;
@@ -50,7 +66,7 @@ internal sealed class ReplicaIncomingTransfer(ReplicaSnapshotFiles files, Replic
             var path = files.TransferImage(snapshot);
             if (File.Exists(path))
             {
-                using var existingImage = ReplicaSnapshotFiles.OpenPrivate(path, FileMode.Open);
+                using var existingImage = files.OpenPrivate(path, FileMode.Open);
                 existingImage.Flush(true);
             }
             return Length(snapshot);
@@ -62,16 +78,16 @@ internal sealed class ReplicaIncomingTransfer(ReplicaSnapshotFiles files, Replic
         // An image without a durable descriptor was never acknowledged; restarting can safely discard it.
         File.Delete(files.IncomingPath);
         files.WriteManifest(snapshot);
-        using var image = ReplicaSnapshotFiles.OpenPrivate(files.IncomingPath, FileMode.CreateNew);
+        using var image = files.OpenPrivate(files.IncomingPath, FileMode.CreateNew);
         image.Flush(true);
-        return 0;
+        return BeforeFirstTransferByte;
     }
 
     internal long Length(ReplicaSnapshot snapshot)
     {
         var path = files.TransferImage(snapshot);
         if (!File.Exists(path))
-        { return 0; }
+        { return BeforeFirstTransferByte; }
         var length = new FileInfo(path).Length;
         if (length > snapshot.Length)
         { throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot); }
@@ -81,12 +97,12 @@ internal sealed class ReplicaIncomingTransfer(ReplicaSnapshotFiles files, Replic
     internal long Append(Guid transferId, long offset, ReadOnlySpan<byte> bytes)
     {
         var snapshot = Required(transferId);
-        if (offset < 0 || bytes.IsEmpty || bytes.Length > configuration.SnapshotChunkBytes
+        if (offset < BeforeFirstTransferByte || bytes.IsEmpty || bytes.Length > configuration.SnapshotChunkBytes
             || offset > snapshot.Length || bytes.Length > snapshot.Length - offset)
         {
             throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidSnapshot);
         }
-        using var image = ReplicaSnapshotFiles.OpenPrivate(files.IncomingPath, FileMode.OpenOrCreate);
+        using var image = files.OpenPrivate(files.IncomingPath, FileMode.OpenOrCreate);
         if (offset > image.Length)
         { throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.SnapshotUnavailable); }
         if (offset < image.Length)

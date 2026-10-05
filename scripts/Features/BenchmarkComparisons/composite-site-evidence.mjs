@@ -7,6 +7,7 @@ import { validateAggregateProof } from './aggregate-proof.mjs';
 import { validateWorkerEnvelope, requireWorkerJobAgreement } from './aggregate-validation.mjs';
 import { validateServerResourceEvidence } from './server-resource-evidence.mjs';
 import { createScaleCohortReceipt } from './scaled-cohort-receipt.mjs';
+import { validateCompositePlan } from './scaled-isolated-plan.mjs';
 import { compositeSitePlans, familyRoot } from './composite-site-contract.mjs';
 import { retainCommonFacts } from '../../../site/Features/BenchmarkComparisons/isolated-report-validation.mjs';
 
@@ -78,6 +79,8 @@ async function validateFamily(input, provider, plan, receiptWorkers, expectedIma
 // Caller authenticates the provider archives and passes their original selected worker identities.
 export async function validateCompositeSiteEvidence({ input, provider, receiptWorkers, images }) {
   const plans = compositeSitePlans();
+  validateCompositePlan(await json(path.join(provider, 'composite-plan.json')));
+  for (const plan of plans) check(isDeepStrictEqual(await json(path.join(provider, 'plans', `${plan.profile}.json`)), plan));
   const controlBytes = await readBytes(path.join(input, 'aggregate.json'), AGGREGATE.metadataBytes);
   const control = parseBytes(controlBytes);
   const controlProof = validateAggregateProof(await json(path.join(provider, 'proof.json')), plans[0]);

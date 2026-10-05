@@ -3,12 +3,14 @@ using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.Extensions.Options;
 using KeyLoad.Comparisons;
+using KeyLoad.Client;
 using KeyLoad.Comparisons.Targets;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Owns target construction and each client until its target takes ownership.</summary>
-internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOptions> executionOptions) : IAsyncDisposable
+internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOptions> executionOptions,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<QueryTranslationOptions> translationOptions) : IAsyncDisposable
 {
     private readonly List<IComparisonTarget> targets = new(ComparisonHostConstants.TargetCount);
     private readonly List<HttpClient> unownedClients = new(ComparisonHostConstants.HttpClientCount);
@@ -27,22 +29,22 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
         var neo4jClient = CreateClient(settings.Neo4jEndpoint);
         neo4jClient.DefaultRequestHeaders.Authorization = CreateNeo4jAuthorization(settings.Neo4jPassword);
 
-        pendingTarget = new KeyLoadTarget(keyLoadClient, settings.AdminKey, settings.RunId,
+        pendingTarget = new KeyLoadTarget(keyLoadClient, settings.AdminKey, settings.RunId, lifecycleOptions, clientOptions, translationOptions,
             image: settings.ExecutionIdentity?.KeyLoadImage, peers: keyLoadClients);
         PublishPendingTarget(keyLoadClients);
-        pendingTarget = new PostgresTarget(settings.PostgresConnection, settings.RunId, settings.PostgresImage);
+        pendingTarget = new PostgresTarget(settings.PostgresConnection, settings.RunId, settings.PostgresImage, executionOptions, lifecycleOptions);
         PublishPendingTarget();
-        pendingTarget = new QdrantTarget(qdrantClient, settings.RunId, settings.QdrantImage, settings.Options.Topology, null, executionOptions);
+        pendingTarget = new QdrantTarget(qdrantClient, settings.RunId, settings.QdrantImage, executionOptions, lifecycleOptions, settings.Options.Topology, null);
         PublishPendingTarget(qdrantClient);
         var rabbitManagementClient = CreateClient(settings.RabbitManagementEndpoint);
         rabbitManagementClient.DefaultRequestHeaders.Authorization =
             ComparisonEndpointBindings.CreateRabbitAuthorization(settings.RabbitUser, settings.RabbitPassword);
-        pendingTarget = new RabbitTarget(settings.RabbitConnection, settings.RunId, settings.RabbitImage,
+        pendingTarget = new RabbitTarget(settings.RabbitConnection, settings.RunId, settings.RabbitImage, lifecycleOptions,
             management: rabbitManagementClient);
         PublishPendingTarget(rabbitManagementClient);
-        pendingTarget = new RedisTarget(settings.RedisConnection, settings.RunId, settings.RedisImage);
+        pendingTarget = new RedisTarget(settings.RedisConnection, settings.RunId, settings.RedisImage, lifecycleOptions);
         PublishPendingTarget();
-        pendingTarget = new Neo4jTarget(neo4jClient, settings.RunId, settings.Neo4jImage);
+        pendingTarget = new Neo4jTarget(neo4jClient, settings.RunId, settings.Neo4jImage, lifecycleOptions);
         PublishPendingTarget(neo4jClient);
         return [.. targets];
     }

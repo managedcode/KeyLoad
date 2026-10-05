@@ -8,12 +8,15 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeStoreRuntime : IDisposable
 {
+    private const int ValueMarkerOffset = 0;
+
     private bool disposed;
     private long position;
     private readonly bool guarded;
 
     internal ZoneTreeStoreRuntime(ZoneTreeStoreOptions options, Guid? expectedNodeId = null)
     {
+        _ = options.MaximumReadCutElapsed;
         Options = options;
         guarded = expectedNodeId.HasValue;
         if (expectedNodeId is not { } nodeId)
@@ -50,6 +53,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
     }
 
     internal ZoneTreeStoreOptions Options { get; }
+
     internal ReaderWriterLockSlim Gate { get; } = new();
     internal ZoneTreeReadCutLifecycle NativeReadCuts { get; } = new();
     internal FileStream Ownership { get; set; } = null!;
@@ -92,7 +96,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
             {
                 var logicalValue = mutation.Value.Value;
                 var value = new byte[logicalValue.Length + StorageValueHeaderBytes];
-                value[0] = LiveValueMarker;
+                value[ValueMarkerOffset] = LiveValueMarker;
                 logicalValue.Span.CopyTo(value.AsSpan(StorageValueHeaderBytes));
                 Tree.Upsert(key, value);
             }
@@ -190,7 +194,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
 
         try
         {
-            return new(options);
+            return ZoneTreePointCache.CreateResolved(options);
         }
         catch (Exception)
         {

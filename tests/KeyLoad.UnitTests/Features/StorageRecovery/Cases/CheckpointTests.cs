@@ -12,7 +12,7 @@ internal sealed class CheckpointTests
         var root = Path.Combine(Path.GetTempPath(), "keyload-compact-" + Guid.NewGuid().ToString("N"));
         try
         {
-            using (var store = new ZoneTreeStore(new(root)))
+            using (var store = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 for (var n = 0; n < 100; n++)
                 {
@@ -34,7 +34,7 @@ internal sealed class CheckpointTests
                 });
                 await Assert.That(next).IsEqualTo(101);
             }
-            using var reopened = new ZoneTreeStore(new(root));
+            using var reopened = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await Assert.That(reopened.Position).IsEqualTo(101);
             await Assert.That(reopened.Identity.FormatVersion).IsEqualTo(ZoneTreePersistenceFormat.CurrentDataEpoch);
             await Assert.That(reopened.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("value"))!))).EndsWith("99");
@@ -57,11 +57,11 @@ internal sealed class CheckpointTests
         var signing = RandomNumberGenerator.GetBytes(32);
         try
         {
-            using var source = new ZoneTreeStore(new(Path.Combine(root, "source")) { Incarnation = incarnation, SigningKey = signing });
+            using var source = new ZoneTreeStore(new(Path.Combine(root, "source")) { Incarnation = incarnation, SigningKey = signing }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             source.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("system", "last-applied"), 7L); tx.PutRecord(KeyCodec.Encode("new"), "value"); return true; });
             var snapshot = Path.Combine(root, "snapshot");
             source.CreateSnapshot(snapshot, 7);
-            using var target = new ZoneTreeStore(new(Path.Combine(root, "target")) { Incarnation = incarnation, SigningKey = signing });
+            using var target = new ZoneTreeStore(new(Path.Combine(root, "target")) { Incarnation = incarnation, SigningKey = signing }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("obsolete"), "old"); return true; });
             var identity = target.Identity;
             var installed = target.InstallSnapshot(snapshot, 7);
@@ -72,7 +72,7 @@ internal sealed class CheckpointTests
             await Assert.That(target.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("new"))!))).IsEqualTo("value");
             target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("system", "last-applied"), 8L); return true; });
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => target.InstallSnapshot(snapshot, 7)).Code).IsEqualTo(ErrorCode.OwnershipLost);
-            using var outsider = new ZoneTreeStore(new(Path.Combine(root, "outsider")));
+            using var outsider = new ZoneTreeStore(new(Path.Combine(root, "outsider")), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => outsider.InstallSnapshot(snapshot, 7)).Code).IsEqualTo(ErrorCode.TokenInvalidated);
         }
         finally { Directory.Delete(root, true); }
@@ -84,7 +84,7 @@ internal sealed class CheckpointTests
         Directory.CreateDirectory(root);
         try
         {
-            using var store = new ZoneTreeStore(new(Path.Combine(root, "database")));
+            using var store = new ZoneTreeStore(new(Path.Combine(root, "database")), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             store.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("key"), "safe"); return true; });
             var snapshot = Path.Combine(root, "snapshot");
             store.CreateSnapshot(snapshot);

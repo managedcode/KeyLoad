@@ -22,7 +22,7 @@ internal static class ExistingStoreInspectorOperation
         {
             ZoneTreeExistingStoreCleanup.Capture(() =>
             {
-                store = ZoneTreeExistingStore.Open(inputs.CreateOptions()!, inputs.NodeId);
+                store = ZoneTreeExistingStore.Open(inputs.CreateOptions()!, inputs.NodeId, CrashExecutionOptions.StorageExecution());
                 nodeId = store.Identity.NodeId;
                 incarnation = store.Identity.Incarnation;
                 format = store.Identity.FormatVersion;

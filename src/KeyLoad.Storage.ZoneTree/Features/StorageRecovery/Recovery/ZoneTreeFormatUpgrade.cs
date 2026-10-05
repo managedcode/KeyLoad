@@ -1,16 +1,24 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Storage.ZoneTree;
 
 /// <summary>Copies one stopped native5 or native6 store into a separately published native7 store.</summary>
 public static class ZoneTreeFormatUpgrade
 {
+    private const int ObserverNonMutationIndex = 0;
+    private const int NoFileAttributes = 0;
+    private const string StagingDirectorySuffix = ".upgrade";
+
     private const string CurrentDirectorySegment = ".";
     private const string ParentDirectorySegment = "..";
     /// <summary>Validates a private stopped native5 or native6 authority copy without opening or rebuilding its tree.</summary>
     /// <param name="sourceOptions">Private copied source and exact configured authority and finite budgets.</param>
     /// <returns>The actual verified source identity; signing credentials remain private to the caller.</returns>
-    public static StoreIdentity VerifySource(ZoneTreeStoreOptions sourceOptions)
+    public static StoreIdentity VerifySource(ZoneTreeStoreOptions sourceOptions,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
     {
         ArgumentNullException.ThrowIfNull(sourceOptions);
+        sourceOptions = sourceOptions.ResolveExecutionOptions(executionOptions);
         ValidateOptions(sourceOptions);
         using var source = ZoneTreeFormatUpgradeSource.Open(sourceOptions.Directory, sourceOptions);
         source.VerifyUnchanged();
@@ -20,10 +28,12 @@ public static class ZoneTreeFormatUpgrade
     /// <summary>Validates the existing native receipt for a converted store owned by an exact source copy.</summary>
     /// <param name="source">Private original native5 or native6 authority copy.</param>
     /// <param name="destinationOptions">Matching converted target and configured source authority.</param>
-    public static void VerifyOwnedReceipt(string source, ZoneTreeStoreOptions destinationOptions)
+    public static void VerifyOwnedReceipt(string source, ZoneTreeStoreOptions destinationOptions,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentNullException.ThrowIfNull(destinationOptions);
+        destinationOptions = destinationOptions.ResolveExecutionOptions(executionOptions);
         ValidateOptions(destinationOptions);
         var paths = NormalizePaths(source, destinationOptions.Directory);
         using var lease = ZoneTreeFormatUpgradeSource.Open(paths.Source, destinationOptions);
@@ -34,9 +44,10 @@ public static class ZoneTreeFormatUpgrade
     /// <summary>Removes only the verified nested receipt after its owning node has captured complete authority.</summary>
     /// <param name="source">Private original native5 or native6 authority copy retained until node verification.</param>
     /// <param name="destinationOptions">The verified converted target.</param>
-    public static void RemoveOwnedReceipt(string source, ZoneTreeStoreOptions destinationOptions)
+    public static void RemoveOwnedReceipt(string source, ZoneTreeStoreOptions destinationOptions,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
     {
-        VerifyOwnedReceipt(source, destinationOptions);
+        VerifyOwnedReceipt(source, destinationOptions, executionOptions);
         File.Delete(Path.Combine(destinationOptions.Directory, ZoneTreeFormatUpgradeStage.ReceiptFileName));
     }
 
@@ -44,18 +55,24 @@ public static class ZoneTreeFormatUpgrade
     /// <param name="source">Existing source store directory, held under its canonical owner lock.</param>
     /// <param name="destinationOptions">Separate target directory, matching source authority and storage budgets.</param>
     /// <returns>The new current-format identity after verified atomic publication.</returns>
-    public static StoreIdentity Upgrade(string source, ZoneTreeStoreOptions destinationOptions)
+    public static StoreIdentity Upgrade(string source, ZoneTreeStoreOptions destinationOptions,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentNullException.ThrowIfNull(destinationOptions);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        var policy = executionOptions.Value;
+        ArgumentNullException.ThrowIfNull(policy);
+        policy.Validate();
+        destinationOptions = destinationOptions.WithExecutionSnapshot(policy);
         ValidateOptions(destinationOptions);
         var paths = NormalizePaths(source, destinationOptions.Directory);
         using var sourceLease = ZoneTreeFormatUpgradeSource.Open(paths.Source, destinationOptions);
         var receipt = CreateReceipt(paths, sourceLease);
-        destinationOptions.FaultObserver?.Invoke(CommitStage.UpgradeSourceVerified, sourceLease.Position, 0);
+        destinationOptions.FaultObserver?.Invoke(CommitStage.UpgradeSourceVerified, sourceLease.Position, ObserverNonMutationIndex);
         if (ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(paths.Destination, allowMissingFinal: true) is { } destinationAttributes)
         {
-            if ((destinationAttributes & FileAttributes.Directory) == 0)
+            if ((destinationAttributes & FileAttributes.Directory) == NoFileAttributes)
             {
                 throw Errors.Fail(ErrorCode.Conflict, ZoneTreePersistenceFormat.RestoreDestinationNotEmpty);
             }
@@ -70,21 +87,21 @@ public static class ZoneTreeFormatUpgrade
             }
         }
         if (ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(paths.Staging, allowMissingFinal: true) is { } stagingAttributes
-            && (stagingAttributes & FileAttributes.Directory) == 0)
+            && (stagingAttributes & FileAttributes.Directory) == NoFileAttributes)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradePathAmbiguous);
         }
 
         ZoneTreeFormatUpgradeStage.CreateOrReset(paths.Staging, receipt);
         ZoneTreeFormatUpgradeStage.CopySources(sourceLease, paths.Staging);
-        destinationOptions.FaultObserver?.Invoke(CommitStage.UpgradePrepared, sourceLease.Position, 0);
+        destinationOptions.FaultObserver?.Invoke(CommitStage.UpgradePrepared, sourceLease.Position, ObserverNonMutationIndex);
         var stageOptions = TargetOptions(destinationOptions, paths.Staging, sourceLease.Identity);
         var identity = ZoneTreeFormatUpgradeBuilder.Rebuild(sourceLease, paths.Staging, stageOptions);
         ZoneTreeFormatUpgradeStage.RemoveSourceCopies(paths.Staging);
         ZoneTreeFormatUpgradeStage.VerifyPublishable(paths.Staging, receipt);
         sourceLease.VerifyUnchanged();
         ZoneTreeFormatUpgradeStage.Publish(paths.Staging, paths.Destination);
-        destinationOptions.FaultObserver?.Invoke(CommitStage.UpgradePublished, sourceLease.Position, 0);
+        destinationOptions.FaultObserver?.Invoke(CommitStage.UpgradePublished, sourceLease.Position, ObserverNonMutationIndex);
         return identity;
     }
 
@@ -129,7 +146,7 @@ public static class ZoneTreeFormatUpgrade
     {
         var sourcePath = Normalize(source);
         var destinationPath = Normalize(destination);
-        var stagingPath = destinationPath + ".upgrade";
+        var stagingPath = destinationPath + StagingDirectorySuffix;
         var parent = Path.GetDirectoryName(destinationPath);
         if (parent is null || !Directory.Exists(parent) || IsSameOrNested(sourcePath, destinationPath)
             || IsSameOrNested(destinationPath, sourcePath) || IsSameOrNested(sourcePath, stagingPath)
@@ -142,7 +159,7 @@ public static class ZoneTreeFormatUpgrade
         var stagingAttributes = ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(stagingPath, allowMissingFinal: true);
         if (stagingAttributes is { } attributes)
         {
-            if ((attributes & FileAttributes.Directory) == 0)
+            if ((attributes & FileAttributes.Directory) == NoFileAttributes)
             {
                 throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradePathAmbiguous);
             }

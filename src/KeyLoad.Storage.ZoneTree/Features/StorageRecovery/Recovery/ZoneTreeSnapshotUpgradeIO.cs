@@ -4,6 +4,10 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeSnapshotUpgradeIO
 {
+    private const int FileStartPosition = 0;
+    private const int FirstBufferByte = 0;
+    private const int EndOfStreamRead = 0;
+
     private const int BufferBytes = ZoneTreePersistenceFormat.FileBufferBytes;
 
     internal static T WithSource<T>(string path, long maximumBytes, Func<FileStream, T> operation)
@@ -24,14 +28,14 @@ internal static class ZoneTreeSnapshotUpgradeIO
     internal static byte[] DigestFile(FileStream input, long maximumBytes)
     {
         RequireSnapshotSize(input, maximumBytes);
-        input.Position = 0;
+        input.Position = FileStartPosition;
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var buffer = new byte[BufferBytes];
         int read;
-        while ((read = input.Read(buffer, 0, buffer.Length)) != 0)
-        { digest.AppendData(buffer, 0, read); }
+        while ((read = input.Read(buffer, FirstBufferByte, buffer.Length)) != EndOfStreamRead)
+        { digest.AppendData(buffer, FirstBufferByte, read); }
 
-        input.Position = 0;
+        input.Position = FileStartPosition;
         return digest.GetHashAndReset();
     }
 

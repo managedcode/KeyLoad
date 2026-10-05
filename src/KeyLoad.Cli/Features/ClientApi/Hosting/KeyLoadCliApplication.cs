@@ -6,6 +6,12 @@ using KeyLoad.Cli.Features.ClientApi;
 
 internal static class KeyLoadCliApplication
 {
+    private const int NoArguments = 0;
+    private const int CommandArgumentIndex = 0;
+    private const int OneOperandArguments = 2;
+    private const int TwoOperandArguments = 3;
+    private const int InvalidCommandExitCode = InvalidCommandExitCode;
+    private const int FailedOperationExitCode = FailedOperationExitCode;
     private const string StatusCommand = "status";
     private const string BackupCommand = "backup";
     private const string CompactCommand = "compact";
@@ -19,7 +25,7 @@ internal static class KeyLoadCliApplication
     {
         try
         {
-            if (args.Length == 0)
+            if (args.Length == NoArguments)
             {
                 CliClientApi.Help();
                 return;
@@ -28,7 +34,7 @@ internal static class KeyLoadCliApplication
             if (!TryGetCommand(args, out var command))
             {
                 CliClientApi.Help();
-                Environment.ExitCode = 2;
+                Environment.ExitCode = InvalidCommandExitCode;
                 return;
             }
 
@@ -38,22 +44,22 @@ internal static class KeyLoadCliApplication
         {
             var problem = JsonSerializer.Serialize(exception.ToProblem(), JsonDefaults.Options);
             await Console.Error.WriteLineAsync(problem);
-            Environment.ExitCode = 1;
+            Environment.ExitCode = FailedOperationExitCode;
         }
     }
 
     private static bool TryGetCommand(string[] args, out CliCommand command)
     {
-        command = args[0] switch
+        command = args[CommandArgumentIndex] switch
         {
-            StatusCommand when args.Length is 2 or 3 => CliCommand.Status,
-            BackupCommand when args.Length == 3 => CliCommand.Backup,
-            CompactCommand when args.Length == 2 => CliCommand.Compact,
-            RestoreCommand when args.Length == 3 => CliCommand.Restore,
-            PackBackupCommand when args.Length == 3 => CliCommand.PackBackup,
-            InspectArtifactCommand when args.Length == 2 => CliCommand.InspectArtifact,
-            CopyArtifactCommand when args.Length == 3 => CliCommand.CopyArtifact,
-            UnpackBackupCommand when args.Length == 3 => CliCommand.UnpackBackup,
+            StatusCommand when args.Length is OneOperandArguments or TwoOperandArguments => CliCommand.Status,
+            BackupCommand when args.Length == TwoOperandArguments => CliCommand.Backup,
+            CompactCommand when args.Length == OneOperandArguments => CliCommand.Compact,
+            RestoreCommand when args.Length == TwoOperandArguments => CliCommand.Restore,
+            PackBackupCommand when args.Length == TwoOperandArguments => CliCommand.PackBackup,
+            InspectArtifactCommand when args.Length == OneOperandArguments => CliCommand.InspectArtifact,
+            CopyArtifactCommand when args.Length == TwoOperandArguments => CliCommand.CopyArtifact,
+            UnpackBackupCommand when args.Length == TwoOperandArguments => CliCommand.UnpackBackup,
             _ => CliCommand.None
         };
 
@@ -62,12 +68,24 @@ internal static class KeyLoadCliApplication
 
     private static Task DispatchAsync(CliCommand command, string[] args) => command switch
     {
-        CliCommand.Status => CliClientApi.StatusAsync(args),
+        CliCommand.Status => RunStatusAsync(args),
         CliCommand.Backup or CliCommand.Compact or CliCommand.Restore or
         CliCommand.PackBackup or CliCommand.InspectArtifact or CliCommand.CopyArtifact or
-        CliCommand.UnpackBackup => CliBackupRestore.RunAsync(command, args),
+        CliCommand.UnpackBackup => RunBackupRestoreAsync(command, args),
         _ => throw new UnreachableException()
     };
+
+    private static Task RunStatusAsync(string[] args)
+    {
+        var options = CliClientConfiguration.Read(args);
+        return CliClientApi.StatusAsync(options.Connection, options.Execution, options.ClientExecution);
+    }
+
+    private static Task RunBackupRestoreAsync(CliCommand command, string[] args)
+    {
+        var options = CliStorageConfiguration.Read();
+        return CliBackupRestore.RunAsync(command, args, options.Storage, options.PointCache);
+    }
 
     internal enum CliCommand
     {

@@ -5,6 +5,9 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class IsolatedRedisResources
 {
+    private const string NodeNamesResultText = "replica1";
+    private const string NodeNamesNodeNamesResultText = "replica2";
+
     private const string Target = "Redis";
     private const string Version = "8.4.0";
     private const string ImagePrefix = "docker.io/library/redis:";
@@ -23,10 +26,15 @@ internal static class IsolatedRedisResources
     private const string InvalidSelection = "IsolatedRedisSelectionInvalid";
     private const string MissingBootstrap = "IsolatedRedisBootstrapMissing";
     private const int SecretBytes = 32;
-    private static readonly string[] NodeNames = [Primary, "replica1", "replica2"];
+    private static readonly string[] NodeNames = [Primary, NodeNamesResultText, NodeNamesNodeNamesResultText];
 
     internal static void Add(IsolatedResourceContext context)
     {
+        const int IndexInitialValue = 0;
+        const int EmptyValue = 0;
+        const int Step = 1;
+        const string ReferenceText = "@";
+
         ArgumentNullException.ThrowIfNull(context);
         context.Selection.Validate();
         if (context.Selection.Target != Target)
@@ -42,10 +50,10 @@ internal static class IsolatedRedisResources
             Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)), secret: true);
         var user = ClusterContainerUser.Resolve(context.Builder);
         IResourceBuilder<RedisResource>? primary = null;
-        for (var index = 0; index < context.Selection.NodeCount; index++)
+        for (var index = IndexInitialValue; index < context.Selection.NodeCount; index++)
         {
             var node = AddNode(context, index, password, script, user);
-            if (index == 0)
+            if (index == EmptyValue)
             {
                 primary = node;
                 context.BindSetting(ConnectionSetting, node.Resource.ConnectionStringExpression);
@@ -53,22 +61,24 @@ internal static class IsolatedRedisResources
             else
             {
                 node.WithEnvironment(PrimaryEnvironment, NativePrimaryHost).WaitFor(primary!);
-                context.BindSetting(ReplicaSettingPrefix + (index - 1).ToString(CultureInfo.InvariantCulture),
+                context.BindSetting(ReplicaSettingPrefix + (index - Step).ToString(CultureInfo.InvariantCulture),
                     node.Resource.ConnectionStringExpression);
             }
             context.BindEndpoint(index, node, node.Resource.PrimaryEndpoint.EndpointName);
         }
-        context.BindImage(ImagePrefix + Version + "@" + BenchmarkResources.RedisDigest);
+        context.BindImage(ImagePrefix + Version + ReferenceText + BenchmarkResources.RedisDigest);
     }
 
     private static IResourceBuilder<RedisResource> AddNode(IsolatedResourceContext context, int index,
         IResourceBuilder<ParameterResource> password, string script, string? user)
     {
+        const int ElementIndex = 7;
+
         var name = NodeNames[index];
         var directory = context.DataDirectory(name);
         ClusterProfileStore.PrepareDirectory(directory);
         var node = UseNativeTcp(context.Builder.AddRedis(name, password: password))
-            .WithImageTag(Version).WithImageSHA256(BenchmarkResources.RedisDigest[7..])
+            .WithImageTag(Version).WithImageSHA256(BenchmarkResources.RedisDigest[ElementIndex..])
             .WithContainerNetworkAlias(name).WithDataBindMount(directory)
             .WithBindMount(script, ScriptTarget, isReadOnly: true).WithEntrypoint(Shell)
             .WithEnvironment(PasswordEnvironment, password)

@@ -13,4 +13,7 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.NodeStatus)]
 public sealed record NodeStatus([property: Orleans.Id(0)] string NodeId, [property: Orleans.Id(1)] Guid Incarnation, [property: Orleans.Id(2)] long Applied, [property: Orleans.Id(3)] string? Leader, [property: Orleans.Id(4)] int Voters, [property: Orleans.Id(5)] DurabilityProfile Durability, [property: Orleans.Id(6)] bool RoutingReady, [property: Orleans.Id(7)] int ProcessId,
-    [property: Orleans.Id(8)] long ReadGeneration = 0);
+    [property: Orleans.Id(8)] long ReadGeneration = NodeStatus.DefaultReadGeneration)
+{
+    private const int DefaultReadGeneration = 0;
+}

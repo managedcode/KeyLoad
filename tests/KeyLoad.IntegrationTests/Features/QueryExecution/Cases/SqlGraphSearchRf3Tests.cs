@@ -16,7 +16,7 @@ internal sealed class SqlGraphSearchRf3Tests(ClusterFixture fixture)
         var scenario = await GraphSearchRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
         var sqlRequest = SqlGraphSearchRf3Scenario.Request(scenario.Partition);
@@ -38,7 +38,7 @@ internal sealed class SqlGraphSearchRf3Tests(ClusterFixture fixture)
         var scenario = await GraphSearchRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
             identity.Secret, deadline.Token);
         var deniedRequest = SqlGraphSearchRf3Scenario.Request(scenario.Partition,

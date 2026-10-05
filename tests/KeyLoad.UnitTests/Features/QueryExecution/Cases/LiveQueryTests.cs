@@ -10,7 +10,7 @@ internal sealed class LiveQueryTests
     private sealed record LiveQueryOrder(decimal Number, string Status);
     private sealed record LiveQueryExpectation(bool Changed, LiveQueryChangeKind Kind);
 
-    private static AstQueryRequest Query(TestDatabase db) => KeyLoadQuery.From<LiveQueryOrder>(db.Partition, "orders")
+    private static AstQueryRequest Query(TestDatabase db) => KeyLoadQuery.From<LiveQueryOrder>(db.Partition, "orders", UnitClientOptions.Translation())
         .Where(order => order.Status == "open").Take(100).ToRequest(true);
     private static void Apply(Dictionary<string, QueryRow> rows, LiveQueryPage page)
     {

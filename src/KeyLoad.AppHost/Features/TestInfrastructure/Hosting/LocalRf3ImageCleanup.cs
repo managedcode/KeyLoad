@@ -13,9 +13,16 @@ internal sealed class LocalRf3ImageCleanup(LocalRf3ImageExecution execution, str
 
     internal async Task CleanupAsync(CancellationToken cancellationToken)
     {
+        const string FileNameText = "node";
+        const string ItemText = "cleanup";
+        const string MessageText = "Local RF3 image cleanup process could not start.";
+        const int EmptyValue = 0;
+        const string CleanupAsyncMessageText = "Local RF3 image cleanup failed.";
+        const int SingleFailureCount = 1;
+
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(policy.ImageCleanupTimeout);
-        var start = new ProcessStartInfo("node")
+        var start = new ProcessStartInfo(FileNameText)
         {
             WorkingDirectory = execution.Root,
             RedirectStandardOutput = true,
@@ -24,11 +31,11 @@ internal sealed class LocalRf3ImageCleanup(LocalRf3ImageExecution execution, str
             CreateNoWindow = true,
         };
         start.ArgumentList.Add(scriptPath);
-        start.ArgumentList.Add("cleanup");
+        start.ArgumentList.Add(ItemText);
         start.ArgumentList.Add(execution.Tag);
         start.ArgumentList.Add(execution.ReceiptPath);
         using var process = Process.Start(start)
-            ?? throw new InvalidOperationException("Local RF3 image cleanup process could not start.");
+            ?? throw new InvalidOperationException(MessageText);
 
         var output = LocalRf3OwnedProcessLifetime.ReadBoundedAsync(process.StandardOutput, policy.CleanupOutputCharacters);
         var error = LocalRf3OwnedProcessLifetime.ReadBoundedAsync(process.StandardError, policy.CleanupOutputCharacters);
@@ -36,9 +43,9 @@ internal sealed class LocalRf3ImageCleanup(LocalRf3ImageExecution execution, str
         try
         {
             await LocalRf3OwnedProcessLifetime.ObserveAsync(exit, output, error, timeout.Token).ConfigureAwait(false);
-            if (process.ExitCode != 0)
+            if (process.ExitCode != EmptyValue)
             {
-                throw new InvalidOperationException("Local RF3 image cleanup failed.");
+                throw new InvalidOperationException(CleanupAsyncMessageText);
             }
         }
         catch (Exception primary)
@@ -46,7 +53,7 @@ internal sealed class LocalRf3ImageCleanup(LocalRf3ImageExecution execution, str
             var failures = new List<Exception> { primary };
             await LocalRf3OwnedProcessLifetime.TerminateAndJoinAsync(process, exit, output, error, failures, options)
                 .ConfigureAwait(false);
-            if (failures.Count == 1)
+            if (failures.Count == SingleFailureCount)
             {
                 throw;
             }

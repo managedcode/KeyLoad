@@ -11,23 +11,23 @@ internal static class SqlWriteClassifier
     private const char Underscore = '_';
     private const char Dollar = '$';
     private const char Parameter = '@';
-    private static readonly DatabaseLimits Bounds = new();
+    private const int SqlStartOffset = 0;
 
-    internal static bool MayWrite(string? sql, CancellationToken cancellationToken)
+    internal static bool MayWrite(string? sql, CancellationToken cancellationToken, KeyLoadClientExecutionOptions bounds)
     {
-        if (sql is null || sql.Length > Bounds.MaxQueryBytes
-            || Encoding.UTF8.GetByteCount(sql) > Bounds.MaxQueryBytes)
+        if (sql is null || sql.Length > bounds.MaximumSqlInspectionBytes
+            || Encoding.UTF8.GetByteCount(sql) > bounds.MaximumSqlInspectionBytes)
         { return true; }
-        var offset = 0;
-        if (!SkipTrivia(sql, ref offset, cancellationToken))
+        var offset = SqlStartOffset;
+        if (!SkipTrivia(sql, ref offset, cancellationToken, bounds.MaximumSqlInspectionDepth))
         { return true; }
         if (Keyword(sql, ref offset, Select, cancellationToken))
         { return false; }
-        return !Keyword(sql, ref offset, Explain, cancellationToken) || !SkipTrivia(sql, ref offset, cancellationToken)
+        return !Keyword(sql, ref offset, Explain, cancellationToken) || !SkipTrivia(sql, ref offset, cancellationToken, bounds.MaximumSqlInspectionDepth)
             || !Keyword(sql, ref offset, Select, cancellationToken);
     }
 
-    private static bool SkipTrivia(ReadOnlySpan<char> sql, ref int offset, CancellationToken cancellationToken)
+    private static bool SkipTrivia(ReadOnlySpan<char> sql, ref int offset, CancellationToken cancellationToken, int maximumDepth)
     {
         var state = new SqlTriviaState();
         var end = cancellationToken.IsCancellationRequested
@@ -37,7 +37,7 @@ internal static class SqlWriteClassifier
         SqlTriviaStatus status;
         do
         {
-            status = SqlTriviaReader.Read(sql[..end], ref offset, ref state, Bounds.MaxQueryDepth);
+            status = SqlTriviaReader.Read(sql[..end], ref offset, ref state, maximumDepth);
             if (status == SqlTriviaStatus.More && cancellationToken.IsCancellationRequested)
             { return false; }
         } while (status == SqlTriviaStatus.More);

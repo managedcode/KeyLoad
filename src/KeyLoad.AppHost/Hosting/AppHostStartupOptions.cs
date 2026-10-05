@@ -7,30 +7,38 @@ namespace KeyLoad.AppHost.Hosting;
 [ConfigurationOptions]
 internal sealed class AppHostStartupOptions
 {
+    private const string ContainerUserKey = "KeyLoad:ContainerUser";
+    private const string ContainerIdentityLookupTimeoutKey = "KeyLoad:ContainerIdentityLookupTimeout";
+    private const string ContainerIdentityOutputCharactersKey = "KeyLoad:ContainerIdentityOutputCharacters";
+    private const string BenchmarkModeKey = "Benchmarks:Enabled";
+    private const string BenchmarkProfileKey = "Benchmarks:Profile";
+    private const string BenchmarkRootKey = "Benchmarks:DataRoot";
+    private const string DataRootKey = "KeyLoad:DataRoot";
+    private const string EphemeralKey = "KeyLoad:Ephemeral";
     private const int DefaultLookupSeconds = 5;
     private const int MaximumLookupSeconds = 60;
     private const int DefaultLookupCharacters = 32;
     private const int MaximumLookupCharacters = 4_096;
     private const int MinimumLookupCharacters = 1;
     internal const string ValidationMessage = "Container identity lookup settings exceed supported bounds.";
-    [ConfigurationKeyName("KeyLoad:ContainerUser")]
+    [ConfigurationKeyName(ContainerUserKey)]
     public string? ContainerUser { get; set; }
-    [ConfigurationKeyName("KeyLoad:ContainerIdentityLookupTimeout")]
+    [ConfigurationKeyName(ContainerIdentityLookupTimeoutKey)]
     public TimeSpan ContainerIdentityLookupTimeout { get; set; } = TimeSpan.FromSeconds(DefaultLookupSeconds);
-    [ConfigurationKeyName("KeyLoad:ContainerIdentityOutputCharacters")]
+    [ConfigurationKeyName(ContainerIdentityOutputCharactersKey)]
     public int ContainerIdentityOutputCharacters { get; set; } = DefaultLookupCharacters;
-    [ConfigurationKeyName("Benchmarks:Enabled")]
+    [ConfigurationKeyName(BenchmarkModeKey)]
     public bool BenchmarkMode { get; set; }
-    [ConfigurationKeyName("Benchmarks:Profile")]
+    [ConfigurationKeyName(BenchmarkProfileKey)]
     public string BenchmarkProfile { get; set; } = global::AppHostConfiguration.GeneralBenchmarkProfile;
-    [ConfigurationKeyName("Benchmarks:DataRoot")]
+    [ConfigurationKeyName(BenchmarkRootKey)]
     public string? BenchmarkRoot { get; set; }
-    [ConfigurationKeyName("KeyLoad:DataRoot")]
+    [ConfigurationKeyName(DataRootKey)]
     public string? DataRoot { get; set; }
-    [ConfigurationKeyName("KeyLoad:Ephemeral")]
+    [ConfigurationKeyName(EphemeralKey)]
     public bool? Ephemeral { get; set; }
 
     internal bool IsValid() => ContainerIdentityLookupTimeout > TimeSpan.Zero
-        && ContainerIdentityLookupTimeout <= TimeSpan.FromSeconds(MaximumLookupSeconds)
+        && ContainerIdentityLookupTimeout.Ticks <= MaximumLookupSeconds * TimeSpan.TicksPerSecond
         && ContainerIdentityOutputCharacters is >= MinimumLookupCharacters and <= MaximumLookupCharacters;
 }

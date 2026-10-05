@@ -6,6 +6,13 @@ internal static class OperationalPolicyMetadataNames
     internal const string BoundedChannel = "System.Threading.Channels.BoundedChannelOptions";
     internal const string CreateBounded = "CreateBounded";
     internal const string Capacity = "Capacity";
+    internal const string ChannelFullMode = "System.Threading.Channels.BoundedChannelFullMode";
+    internal const string FullMode = "FullMode";
+    internal const string DropWrite = "DropWrite";
+    internal const string SingleReader = "SingleReader";
+    internal const string CancellationToken = "System.Threading.CancellationToken";
+    internal const int NonblockingWaitMilliseconds = 0;
+    internal const int WakeSignalCapacity = 1;
     internal const string HttpClient = "System.Net.Http.HttpClient";
     internal const string HttpClientHandler = "System.Net.Http.HttpClientHandler";
     internal const string SocketsHttpHandler = "System.Net.Http.SocketsHttpHandler";
@@ -28,4 +35,5 @@ internal static class OperationalPolicyMetadataNames
     internal const string MaxRetryAttempts = "MaxRetryAttempts";
     internal const string Delay = "Delay";
     internal const int MutexPermits = 1;
+    internal const int MutexConstructorArguments = 2;
 }

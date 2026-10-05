@@ -2,12 +2,14 @@ using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.Extensions.Options;
 using KeyLoad.Comparisons;
+using KeyLoad.Client;
 using KeyLoad.Comparisons.Targets;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Owns only one native target and tracks partial HTTP construction until ownership transfers.</summary>
-internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecutionOptions> executionOptions) : IAsyncDisposable
+internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecutionOptions> executionOptions,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<QueryTranslationOptions> translationOptions) : IAsyncDisposable
 {
     private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
     private NativeComparisonExecutionOptions Policy => execution.Value;
@@ -29,14 +31,14 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
             IsolatedHostConstants.KeyLoad => CreateKeyLoad(settings, native),
             IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(native, 0), settings.RunId, native.Image, executionOptions),
             IsolatedHostConstants.HelixDb => new HelixDbTarget(CreateClient(native, 0), settings.RunId, native.Image, executionOptions),
-            IsolatedHostConstants.Postgres => new PostgresTarget(native.Connection!, settings.RunId, native.Image, topology),
+            IsolatedHostConstants.Postgres => new PostgresTarget(native.Connection!, settings.RunId, native.Image, executionOptions, lifecycleOptions, topology),
             IsolatedHostConstants.Qdrant => CreateQdrant(settings, native),
-            IsolatedHostConstants.Rabbit => new RabbitTarget(native.Connection!, settings.RunId, native.Image, topology, CreateClient(native, 0)),
-            IsolatedHostConstants.Redis => new RedisTarget(native.Connection!, settings.RunId, native.Image, topology, [.. native.Replicas]),
-            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(native, 0), settings.RunId, native.Image),
-            IsolatedHostConstants.Mongo => new MongoTarget(native.Connection!, settings.RunId, native.Image, topology),
-            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(native, 0), settings.RunId, native.Image, topology),
-            IsolatedHostConstants.Kurrent => new KurrentTarget(native.Connection!, CreateClients(native), settings.RunId, native.Image, topology),
+            IsolatedHostConstants.Rabbit => new RabbitTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, CreateClient(native, 0)),
+            IsolatedHostConstants.Redis => new RedisTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, [.. native.Replicas]),
+            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(native, 0), settings.RunId, native.Image, lifecycleOptions),
+            IsolatedHostConstants.Mongo => new MongoTarget(native.Connection!, settings.RunId, native.Image, topology, lifecycleOptions),
+            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(native, 0), settings.RunId, native.Image, topology, lifecycleOptions),
+            IsolatedHostConstants.Kurrent => new KurrentTarget(native.Connection!, CreateClients(native), settings.RunId, native.Image, topology, lifecycleOptions),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
         };
         unownedClients.Clear();
@@ -53,9 +55,9 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         var native = settings.Native ?? throw new InvalidOperationException(IsolatedHostConstants.Failure);
         vectorTarget = settings.Selection.Target switch
         {
-            IsolatedHostConstants.Postgres => new PostgresNativeVectorTarget(native.Connection!, settings.RunId, native.Image, settings.Selection.Options.Topology, executionOptions),
-            IsolatedHostConstants.Qdrant => new QdrantTarget(CreateClient(native, 0), settings.RunId, native.Image,
-                settings.Selection.Options.Topology, CreateClients(native), executionOptions),
+            IsolatedHostConstants.Postgres => new PostgresNativeVectorTarget(native.Connection!, settings.RunId, native.Image, settings.Selection.Options.Topology, executionOptions, lifecycleOptions),
+            IsolatedHostConstants.Qdrant => new QdrantTarget(CreateClient(native, 0), settings.RunId, native.Image, executionOptions, lifecycleOptions,
+                settings.Selection.Options.Topology, CreateClients(native)),
             IsolatedHostConstants.SurrealDb => new SurrealDbVectorTarget(CreateClient(native, 0), native.Image, settings.RunId, executionOptions),
             IsolatedHostConstants.HelixDb => new HelixDbVectorTarget(CreateClient(native, 0), native.Image, settings.RunId, executionOptions),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
@@ -67,14 +69,14 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
     private KeyLoadTarget CreateKeyLoad(IsolatedHostSettings settings, IsolatedHostNativeSettings native)
     {
         var clients = CreateClients(native);
-        return new(clients[0], native.AdminKey!, settings.RunId, native.Image, clients, settings.Selection.NodeCount)
+        return new(clients[0], native.AdminKey!, settings.RunId, lifecycleOptions, clientOptions, translationOptions, native.Image, clients, settings.Selection.NodeCount)
         { RequireIsolatedAdmission = true };
     }
 
     private QdrantTarget CreateQdrant(IsolatedHostSettings settings, IsolatedHostNativeSettings native)
     {
         var clients = CreateClients(native);
-        return new(clients[0], settings.RunId, native.Image, settings.Selection.Options.Topology, clients, executionOptions);
+        return new(clients[0], settings.RunId, native.Image, executionOptions, lifecycleOptions, settings.Selection.Options.Topology, clients);
     }
 
     private HttpClient[] CreateClients(IsolatedHostNativeSettings native)

@@ -6,6 +6,8 @@ namespace KeyLoad.Replication;
 
 internal static class ReplicaCanonicalApply
 {
+    private const int ContiguousIndexStep = 1;
+
     private static readonly byte[] AppliedStorageKey = KeySpace.Applied.ToArray();
 
     internal static void ApplyBatch(DatabaseEngine database, IDurableReplicaLog log, int batchSize)
@@ -15,7 +17,7 @@ internal static class ReplicaCanonicalApply
         try
         {
             var cut = Math.Min(log.State.CommittedIndex, checked(database.LastApplied + batchSize));
-            for (var index = database.LastApplied + 1; index <= cut; index++)
+            for (var index = database.LastApplied + ContiguousIndexStep; index <= cut; index++)
             {
                 var entry = log.ReadEntry(index) ?? throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
                 if (entry.Operation is { } operation)

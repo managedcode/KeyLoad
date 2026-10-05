@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 using System.Runtime.ExceptionServices;
 using KeyLoad.Core;
@@ -7,12 +8,22 @@ namespace KeyLoad.Replication;
 
 internal static class ReplicaSnapshotUpgradeExecution
 {
+    private const int NoInventoriedBytes = 0;
+    private const int EmptyImageLength = 0;
+    private const int SnapshotPointerCommitCount = 1;
+    private const int NoSnapshotPointerCommitCount = 0;
+    private const int NoInventoriedEntries = 0;
+    private const int EmptyExpectedInventory = 0;
+    private const string UnownedCleanupArtifacts = "The private snapshot destination contains unowned cleanup artifacts.";
+    private const string CleanupIncomplete = "Replica snapshot upgrade failed and cleanup was incomplete.";
+
     internal const string DestinationConflict = "The replica snapshot conversion destination must be absent.";
     private const string InvalidOutput = "The converted replica image does not preserve its source logical cut.";
 
     internal static void ConvertAndPublish(ReplicaSnapshotUpgradePlan plan, DatabaseEngine canonical,
         IAtomicStore replica, ReplicaConfiguration configuration, string destination,
-        Func<string, string, StorageSnapshot> convertImage)
+        Func<string, string, StorageSnapshot> convertImage, IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaExecutionOptions> executionOptions,
+        int maximumImages, long maximumTotalBytes, int fileBufferBytes)
     {
         Directory.CreateDirectory(destination);
         var created = new List<string>();
@@ -22,13 +33,13 @@ internal static class ReplicaSnapshotUpgradeExecution
         var preserve = false;
         try
         {
-            ConvertImages(plan, canonical, configuration, destination, convertImage, created);
-            VerifyOutputInventory(destination, plan.Images);
-            ReplicaSnapshotUpgradeValidation.Revalidate(plan, canonical, replica, configuration);
+            ConvertImages(plan, canonical, configuration, destination, convertImage, created, maximumTotalBytes);
+            VerifyOutputInventory(destination, plan.Images, maximumImages);
+            ReplicaSnapshotUpgradeValidation.Revalidate(plan, canonical, replica, configuration, maximumImages, maximumTotalBytes, fileBufferBytes);
             preserve = plan.HardState.Snapshot is not null;
-            PublishPointer(plan, canonical, replica, configuration, destination, beforeReplicaPosition);
-            using var log = new DurableReplicaLog(replica, configuration, canonicalDatabase: canonical);
-            new ReplicaSnapshotStore(canonical.Store, log, configuration).Recover();
+            PublishPointer(plan, canonical, replica, configuration, destination, beforeReplicaPosition, configurationOptions, fileBufferBytes);
+            using var log = new DurableReplicaLog(replica, configurationOptions, canonicalDatabase: canonical);
+            new ReplicaSnapshotStore(canonical.Store, log, configurationOptions, executionOptions).Recover();
             VerifyPostState(plan, canonical, replica, log, beforeReplicaPosition, beforeCanonicalPosition, beforeApplied);
         }
         catch (Exception primary)
@@ -52,9 +63,9 @@ internal static class ReplicaSnapshotUpgradeExecution
 
     private static void ConvertImages(ReplicaSnapshotUpgradePlan plan, DatabaseEngine canonical,
         ReplicaConfiguration configuration, string destination, Func<string, string, StorageSnapshot> convertImage,
-        List<string> created)
+        List<string> created, long maximumTotalBytes)
     {
-        long totalBytes = 0;
+        long totalBytes = NoInventoriedBytes;
         foreach (var image in plan.Images)
         {
             var source = Path.Combine(plan.SourceSnapshots, image.FileName);
@@ -63,7 +74,7 @@ internal static class ReplicaSnapshotUpgradeExecution
             created.Add(output);
             VerifyOutput(canonical, output, configuration, image, reported);
             var length = new FileInfo(output).Length;
-            if (length > ReplicaSnapshotUpgradeInventory.MaximumTotalBytes - totalBytes)
+            if (length > maximumTotalBytes - totalBytes)
             { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidOutput); }
             totalBytes += length;
         }
@@ -74,7 +85,7 @@ internal static class ReplicaSnapshotUpgradeExecution
     {
         ReplicaSnapshotUpgradeInventory.RejectLinks(output);
         var info = new FileInfo(output);
-        if (!info.Exists || info.Length <= 0 || info.Length > configuration.MaxSnapshotBytes
+        if (!info.Exists || info.Length <= EmptyImageLength || info.Length > configuration.MaxSnapshotBytes
             || !SameCut(image.Snapshot, reported))
         { throw Errors.Fail(ErrorCode.Corruption, InvalidOutput); }
         var verified = canonical.Store.VerifySnapshot(output);
@@ -83,7 +94,8 @@ internal static class ReplicaSnapshotUpgradeExecution
     }
 
     private static void PublishPointer(ReplicaSnapshotUpgradePlan plan, DatabaseEngine canonical,
-        IAtomicStore replica, ReplicaConfiguration configuration, string destination, long beforePosition)
+        IAtomicStore replica, ReplicaConfiguration configuration, string destination, long beforePosition,
+        IOptions<ReplicaConfiguration> configurationOptions, int fileBufferBytes)
     {
         if (plan.HardState.Snapshot is not { } source)
         { return; }
@@ -91,13 +103,13 @@ internal static class ReplicaSnapshotUpgradeExecution
         var snapshot = source with
         {
             Length = new FileInfo(path).Length,
-            Sha256 = ReplicaSnapshotUpgradeInventory.Digest(path, configuration.MaxSnapshotBytes)
+            Sha256 = ReplicaSnapshotUpgradeInventory.Digest(path, configuration.MaxSnapshotBytes, fileBufferBytes)
         };
         if (snapshot.Length == source.Length && snapshot.Sha256 == source.Sha256)
         { throw Errors.Fail(ErrorCode.Corruption, InvalidOutput); }
-        using var log = new DurableReplicaLog(replica, configuration, canonicalDatabase: canonical);
+        using var log = new DurableReplicaLog(replica, configurationOptions, canonicalDatabase: canonical);
         log.PublishSnapshot(snapshot);
-        if (replica.Position != checked(beforePosition + 1)
+        if (replica.Position != checked(beforePosition + SnapshotPointerCommitCount)
             || log.State != (plan.HardState with { Snapshot = snapshot }))
         { throw Errors.Fail(ErrorCode.Corruption, InvalidOutput); }
     }
@@ -107,7 +119,7 @@ internal static class ReplicaSnapshotUpgradeExecution
         long beforeApplied)
     {
         var expected = plan.HardState;
-        var expectedPosition = checked(beforeReplicaPosition + (expected.Snapshot is null ? 0 : 1));
+        var expectedPosition = checked(beforeReplicaPosition + (expected.Snapshot is null ? NoSnapshotPointerCommitCount : SnapshotPointerCommitCount));
         var replicaBinding = ReplicaSnapshotUpgradeValidation.Bind(replica);
         var expectedReplica = plan.Replica with { Position = expectedPosition };
         if (replicaBinding != expectedReplica || ReplicaSnapshotUpgradeValidation.Bind(canonical.Store) != plan.Canonical
@@ -133,19 +145,19 @@ internal static class ReplicaSnapshotUpgradeExecution
     }
 
     private static void VerifyOutputInventory(string destination,
-        ImmutableArray<ReplicaSnapshotUpgradeImage> images)
+        ImmutableArray<ReplicaSnapshotUpgradeImage> images, int maximumImages)
     {
         var expected = images.Select(image => image.FileName).ToHashSet(StringComparer.Ordinal);
-        var entries = 0;
+        var entries = NoInventoriedEntries;
         foreach (var path in Directory.EnumerateFileSystemEntries(destination))
         {
-            if (++entries > ReplicaSnapshotUpgradeInventory.MaximumImages)
+            if (++entries > maximumImages)
             { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidOutput); }
             ReplicaSnapshotUpgradeInventory.RejectLinks(path);
             if (Directory.Exists(path) || !expected.Remove(Path.GetFileName(path)))
             { throw Errors.Fail(ErrorCode.FormatUnsupported, InvalidOutput); }
         }
-        if (expected.Count != 0)
+        if (expected.Count != EmptyExpectedInventory)
         { throw Errors.Fail(ErrorCode.Corruption, InvalidOutput); }
     }
 
@@ -162,11 +174,11 @@ internal static class ReplicaSnapshotUpgradeExecution
             if (Directory.Exists(destination))
             {
                 if (Directory.EnumerateFileSystemEntries(destination).Any())
-                { throw new IOException("The private snapshot destination contains unowned cleanup artifacts."); }
+                { throw new IOException(UnownedCleanupArtifacts); }
                 Directory.Delete(destination);
             }
         }
         catch (Exception cleanup)
-        { throw new AggregateException("Replica snapshot upgrade failed and cleanup was incomplete.", primary, cleanup); }
+        { throw new AggregateException(CleanupIncomplete, primary, cleanup); }
     }
 }

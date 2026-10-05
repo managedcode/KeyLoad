@@ -1,30 +1,29 @@
 using System.Net;
 using StackExchange.Redis;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal static class RedisCopyObservation
 {
-    private const int ReplicaProbeTimeoutSeconds = 60;
-
     private const string GetCommand = "GET";
     private const string LinkDown = "down";
     private const string ErrorReplicaCopy = "RedisDirectReplicaProbeFailed";
-    private const int PollMilliseconds = 200;
-    private static readonly TimeSpan ReplicaProbeTimeout = TimeSpan.FromSeconds(ReplicaProbeTimeoutSeconds);
 
     internal static async Task VerifyDirectCopiesAsync(ConnectionMultiplexer[] replicas, EndPoint[] endpoints,
-        int database, string key, string payload, CancellationToken token)
+        int database, string key, string payload, CancellationToken token,
+        IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     {
+        var lifecycle = lifecycleOptions.Value;
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(ReplicaProbeTimeout);
+        deadline.CancelAfter(lifecycle.ReadinessTimeout);
         while (true)
         {
             if (await AllCopiesPresentAsync(replicas, endpoints, database, key, payload, deadline.Token))
             {
                 return;
             }
-            await DelayUntilNextProbeAsync(deadline.Token, token);
+            await DelayUntilNextProbeAsync(deadline.Token, token, lifecycle.RedisReadinessPollInterval);
         }
     }
 
@@ -63,11 +62,11 @@ internal static class RedisCopyObservation
         };
     }
 
-    private static async Task DelayUntilNextProbeAsync(CancellationToken deadline, CancellationToken caller)
+    private static async Task DelayUntilNextProbeAsync(CancellationToken deadline, CancellationToken caller, TimeSpan pollInterval)
     {
         try
         {
-            await Task.Delay(PollMilliseconds, deadline);
+            await Task.Delay(pollInterval, deadline);
         }
         catch (OperationCanceledException) when (!caller.IsCancellationRequested)
         {

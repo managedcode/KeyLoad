@@ -2,9 +2,30 @@ namespace KeyLoad.Client;
 
 internal static class QueryPredicateTokens
 {
-    internal const int MaximumDepth = 32;
-    internal const int MaximumInItems = 256;
-    internal const int MaximumConstantArrayItems = 256;
+    internal const int FirstDepth = 1;
+    internal const int DepthIncrement = 1;
+    internal const int ParameterIndex = 0;
+    internal const int MarkerArgumentCount = 1;
+    internal const int CollectionArgumentIndex = 0;
+    internal const int CandidateArgumentIndex = 1;
+    internal const int ContainsArgumentCount = 2;
+    internal const int EmptyCount = 0;
+    internal const int MinimumQueryLimit = 1;
+    internal const int MinimumArrayOrdinal = 0;
+    internal const int ByteWidth = 8;
+    internal const int ShortWidth = 16;
+    internal const int IntWidth = 32;
+    internal const int LongWidth = 64;
+    internal const string PositiveLimitMessage = "The query limit must be positive.";
+    internal const string MarkerExecutionMessage = "This marker is only supported inside a KeyLoad query expression.";
+    internal const string PathSeparator = "/";
+    internal const char PathSeparatorCharacter = '/';
+    internal const string EscapeMarker = "~";
+    internal const string EscapedMarker = "~0";
+    internal const string EscapedSeparator = "~1";
+    internal const string Wildcard = "*";
+    internal const string IdentifierName = "id";
+    internal const string RevisionName = "revision";
 
     internal const string UnsupportedExpressionMessage = "This expression is outside the supported Q1 C# subset.";
     internal const string PredicateDepthExceededMessage = "The C# query predicate exceeds its depth budget.";

@@ -15,23 +15,32 @@ internal static class TimeSeriesBenchmarkResources
     internal static void Add(IDistributedApplicationBuilder builder, IResourceBuilder<ContainerResource>[] nodes,
         IResourceBuilder<ParameterResource> admin, string benchmarkRoot)
     {
+        const string ResultText = "-c";
+        const string AddResultText = "synchronous_commit=on";
+        const string ComparisonText = "docker.io/";
+        const string AddComparisonText = ":";
+        const string NameText = "Benchmarks__Profile";
+        const string AddNameText = "Benchmarks__EvidenceProfile";
+        const int FirstIndex = 0;
+        const string ValueText = "TimescaleDB single-node container; no cross-run persistent volume";
+
         var database = builder.AddPostgres(TimescaleName)
             .WithImage(TimescaleImage)
             .WithImageTag(TimescaleImageTag)
             .WithImageSHA256(TimescaleDigest[DigestPrefixLength..])
-            .WithArgs("-c", "synchronous_commit=on")
+            .WithArgs(ResultText, AddResultText)
             .AddDatabase(DatabaseName);
-        var imageReference = "docker.io/" + TimescaleImage + ":" + TimescaleImageTag + "@" + TimescaleDigest;
+        var imageReference = ComparisonText + TimescaleImage + AddComparisonText + TimescaleImageTag + "@" + TimescaleDigest;
         var output = Path.GetFullPath(builder.Configuration[OutputSetting]
             ?? Path.Combine(benchmarkRoot, DefaultOutputDirectory));
         var runner = BenchmarkRunnerContainer.Create(builder, output)
             .WithReference(database)
             .WaitFor(database)
-            .WithEnvironment("Benchmarks__Profile", AppHostConfiguration.TimeSeriesBenchmarkProfile)
-            .WithEnvironment("Benchmarks__EvidenceProfile", AppHostConfiguration.TimeSeriesBenchmarkProfile)
-            .WithEnvironment("Benchmarks__KeyLoadEndpoint", nodes[0].GetEndpoint("http"))
+            .WithEnvironment(NameText, AppHostConfiguration.TimeSeriesBenchmarkProfile)
+            .WithEnvironment(AddNameText, AppHostConfiguration.TimeSeriesBenchmarkProfile)
+            .WithEnvironment("Benchmarks__KeyLoadEndpoint", nodes[FirstIndex].GetEndpoint("http"))
             .WithEnvironment("Benchmarks__AdminKey", admin)
-            .WithEnvironment("Benchmarks__Storage", "TimescaleDB single-node container; no cross-run persistent volume")
+            .WithEnvironment("Benchmarks__Storage", ValueText)
             .WithEnvironment(TimescaleImageSetting, imageReference);
         foreach (var node in nodes)
         {

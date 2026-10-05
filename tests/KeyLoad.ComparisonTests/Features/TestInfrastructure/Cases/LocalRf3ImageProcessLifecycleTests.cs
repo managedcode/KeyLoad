@@ -19,7 +19,8 @@ internal sealed class LocalRf3ImageProcessLifecycleTests
             var terminated = Path.Combine(root, "terminated");
             await File.WriteAllTextAsync(script, OverflowProgram(terminated));
             var execution = new LocalRf3ImageExecution(root, Tag, Receipt);
-            var cleanup = new LocalRf3ImageCleanup(execution, script);
+            var cleanup = new LocalRf3ImageCleanup(execution, script,
+                AppHostOptionsRegistration.BindTestExecution(new ConfigurationBuilder().Build()));
             var failure = await CaptureFailureAsync(cleanup.CleanupAsync(CancellationToken.None));
 
             await Assert.That(ContainsMessage(failure, OverflowMessage)).IsTrue();

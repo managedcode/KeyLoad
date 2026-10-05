@@ -27,7 +27,8 @@ internal static class TimeSeriesComparisonApplication
         _ = Required(configuration, StorageSetting);
         var executionIdentity = ComparisonExecutionIdentity.ReadTimeSeries(configuration, sourceRevision);
 
-        await using var owner = new TimeSeriesComparisonTargetOwner();
+        await using var owner = new TimeSeriesComparisonTargetOwner(NativeComparisonExecutionRegistration.ReadClient(configuration),
+            NativeComparisonExecutionRegistration.ReadLifecycle(configuration));
         var targets = owner.CreateTargets(endpoint, adminKey, connectionString, image, keyLoadBuildIdentity);
         return await TimeSeriesComparisonRunner.RunAsync(targets, sourceRevision, output, cancellationToken,
             executionIdentity?.Provenance, executionIdentity?.LoadGeneratorImage);

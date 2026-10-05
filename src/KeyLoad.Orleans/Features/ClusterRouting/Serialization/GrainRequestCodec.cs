@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Orleans;
 
 /// <summary>Issues and verifies database-signed authority while preserving bounded exact native payload bytes.</summary>
-public sealed class GrainRequestCodec
+public sealed partial class GrainRequestCodec
 {
     private const int SignatureBytes = 32;
     private const int SeparatorCharacters = 1;

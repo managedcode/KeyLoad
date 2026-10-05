@@ -57,7 +57,7 @@ internal sealed class FrameBudgetTests
         StorageMutation[] final = [new(valueKey, last), new(tombstoneKey, null)];
         var payload = ZoneTreeJournalCodec.Serialize(final, int.MaxValue);
         var directory = Path.Combine(root, trial.ToString(System.Globalization.CultureInfo.InvariantCulture));
-        using var store = new ZoneTreeStore(new(directory) { MaxFrameBytes = payload.Length });
+        using var store = new ZoneTreeStore(new(directory) { MaxFrameBytes = payload.Length }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         CommitBoundaryMutations(store, valueKey, first, last, tombstoneKey);
         await VerifyOneByteShortLimit(root, trial, payload, valueKey, first, last, tombstoneKey);
 
@@ -86,7 +86,7 @@ internal sealed class FrameBudgetTests
     {
         var directory = Path.Combine(root,
             trial.ToString(System.Globalization.CultureInfo.InvariantCulture) + OneByteShortDirectorySuffix);
-        using var store = new ZoneTreeStore(new(directory) { MaxFrameBytes = payload.Length - 1 });
+        using var store = new ZoneTreeStore(new(directory) { MaxFrameBytes = payload.Length - 1 }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             CommitBoundaryMutations(store, valueKey, first, last, tombstoneKey));
 

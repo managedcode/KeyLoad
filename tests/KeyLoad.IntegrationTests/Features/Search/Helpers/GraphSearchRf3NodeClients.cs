@@ -18,8 +18,8 @@ internal sealed class GraphSearchRf3NodeClients : IDisposable
         ReaderSecret = readerSecret;
         adminHttp = nodes.Select(node => McpCallerHttp.Create(fixture, node)).ToArray();
         readerHttp = nodes.Select(node => McpCallerHttp.Create(fixture, node)).ToArray();
-        Administrators = adminHttp.Select(http => new KeyLoadClient(http, fixture.AdminKey)).ToArray();
-        Readers = readerHttp.Select(http => new KeyLoadClient(http, readerSecret)).ToArray();
+        Administrators = adminHttp.Select(http => new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution())).ToArray();
+        Readers = readerHttp.Select(http => new KeyLoadClient(http, readerSecret, IntegrationClientOptions.Execution())).ToArray();
     }
 
     public void Dispose()

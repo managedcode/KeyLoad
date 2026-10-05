@@ -4,6 +4,9 @@ namespace KeyLoad.Features.QueryExecution;
 internal static class SqlTriviaReader
 {
     internal const int MaximumChunkCharacters = 256;
+    private const int LastPairCharacterOffset = 1;
+    private const int NoOpenBlocks = 0;
+    private const int InitialBlockDepth = 1;
 
     internal static SqlTriviaStatus Read(ReadOnlySpan<char> sql, ref int offset, ref SqlTriviaState state, int maximumDepth)
     {
@@ -15,9 +18,9 @@ internal static class SqlTriviaReader
                 ReadLine(sql, ref offset, ref state);
                 continue;
             }
-            if (offset + 1 == end && end < sql.Length)
+            if (offset + LastPairCharacterOffset == end && end < sql.Length)
             { return SqlTriviaStatus.More; }
-            if (state.BlockDepth > 0)
+            if (state.BlockDepth > NoOpenBlocks)
             {
                 ReadBlock(sql, ref offset, ref state);
             }
@@ -29,7 +32,7 @@ internal static class SqlTriviaReader
             { return SqlTriviaStatus.DepthLimitExceeded; }
         }
         return offset < sql.Length ? SqlTriviaStatus.More
-            : state.BlockDepth > 0 ? SqlTriviaStatus.UnterminatedComment : SqlTriviaStatus.Complete;
+            : state.BlockDepth > NoOpenBlocks ? SqlTriviaStatus.UnterminatedComment : SqlTriviaStatus.Complete;
     }
 
     private static void ReadLine(ReadOnlySpan<char> sql, ref int offset, ref SqlTriviaState state)
@@ -58,11 +61,11 @@ internal static class SqlTriviaReader
         if (!line && !block)
         { return false; }
         state.InLineComment = line;
-        state.BlockDepth = block ? 1 : 0;
+        state.BlockDepth = block ? InitialBlockDepth : NoOpenBlocks;
         offset += SqlTriviaSyntax.PairCharacters;
         return true;
     }
 
     private static bool IsPair(ReadOnlySpan<char> sql, int offset, char first, char second)
-        => offset + 1 < sql.Length && sql[offset] == first && sql[offset + 1] == second;
+        => offset + LastPairCharacterOffset < sql.Length && sql[offset] == first && sql[offset + LastPairCharacterOffset] == second;
 }

@@ -115,7 +115,7 @@ internal sealed class ChangeFeedReadTests
         var original = Complete(db, consumer, batch, new PutDocument("projection", "a", "{}", 0));
         db.Store.Compact();
         db.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(db.Directory));
+        using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         await Assert.That(engine.GetOutboxStatus("root", db.Partition).Consumers.Single().Checkpoint).IsEqualTo(1);
         await Assert.That(engine.ReadChangeFeed("root", new(db.Partition, "orders")).Changes).HasSingleItem();

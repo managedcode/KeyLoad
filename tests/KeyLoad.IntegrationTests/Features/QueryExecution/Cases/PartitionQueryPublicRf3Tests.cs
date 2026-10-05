@@ -15,7 +15,7 @@ internal sealed class PartitionQueryPublicRf3Tests(ClusterFixture fixture)
         var scenario = await PartitionQueryRf3Scenario.CreateAsync(fixture, deadline.Token).ConfigureAwait(false);
         var request = scenario.Request();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var sdkPage = await McpCallerAssertions.SdkSuccessAsync(await sdk.PartitionQueryAsync(request, deadline.Token)
             .ConfigureAwait(false)).ConfigureAwait(false);
         await PartitionQueryRf3Assertions.AssertOracleAsync(sdkPage!, scenario, scenario.Partitions)

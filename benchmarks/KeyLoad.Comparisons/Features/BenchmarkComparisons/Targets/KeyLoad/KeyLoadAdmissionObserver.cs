@@ -1,11 +1,12 @@
 using KeyLoad.Client;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal static class KeyLoadAdmissionObserver
 {
     internal static async Task<string[]> ObserveAsync(bool required, HttpClient[] peers, string credential,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IOptions<KeyLoadClientExecutionOptions> clientOptions)
     {
         if (!required)
         {
@@ -14,7 +15,7 @@ internal static class KeyLoadAdmissionObserver
         var observations = new List<string>(peers.Length);
         foreach (var peer in peers)
         {
-            var reader = new KeyLoadClient(peer, credential);
+            var reader = new KeyLoadClient(peer, credential, clientOptions);
             var status = KeyLoadClientResults.Success(await reader.AdmissionStatusAsync(cancellationToken), "Admission");
             IsolatedKeyLoadAdmissionProfile.Verify(status.Http);
             var limits = status.Http!.Limits;

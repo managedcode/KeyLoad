@@ -3,10 +3,11 @@ using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
 using ManagedCode.Communication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
-internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, string? image = null)
+internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> clientOptions, string? image = null)
     : ITimeSeriesPersistentTarget
 {
     private const string TargetName = "KeyLoad TimeSeries";
@@ -15,7 +16,7 @@ internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, st
     private const int ReadLimit = 1_000;
     private const string ConfigureCommandPurpose = "configure-resource";
     private const string SeedCommandPurpose = "seed-samples";
-    private readonly KeyLoadClient client = new(http, apiKey);
+    private readonly KeyLoadClient client = new(http, apiKey, clientOptions);
 
     public TimeSeriesTargetMetadata Metadata { get; } = new(TargetName, "Persisted RF3 time-series",
         StorageGuarantee, AcknowledgementGuarantee, image, null);

@@ -3,13 +3,8 @@ using KeyLoad.AppHost.Hosting;
 internal sealed record AppHostConfiguration(bool BenchmarkMode, string BenchmarkProfile, string BenchmarkRoot,
     string DataRoot, bool Ephemeral)
 {
-    private const string BenchmarkEnabled = "Benchmarks:Enabled";
-    private const string BenchmarkProfileConfiguration = "Benchmarks:Profile";
     internal const string GeneralBenchmarkProfile = "general";
     internal const string TimeSeriesBenchmarkProfile = "timeseries";
-    private const string BenchmarkDataRoot = "Benchmarks:DataRoot";
-    private const string ClusterDataRoot = "KeyLoad:DataRoot";
-    private const string EphemeralConfiguration = "KeyLoad:Ephemeral";
     private const string DefaultBenchmarkRoot = "../../artifacts/comparisons";
     private const string DefaultDataRoot = "../../data/cluster";
     private const string BenchmarkClusterDirectory = "cluster";
@@ -18,13 +13,15 @@ internal sealed record AppHostConfiguration(bool BenchmarkMode, string Benchmark
 
     internal static AppHostConfiguration Read(IDistributedApplicationBuilder builder)
     {
+        const string MessageText = "The configured benchmark profile is not supported.";
+
         var options = AppHostOptionsRegistration.Get(builder).Startup.Value;
         var benchmark = options.BenchmarkMode;
         var benchmarkProfile = options.BenchmarkProfile.Trim();
         if (benchmark && !string.Equals(benchmarkProfile, GeneralBenchmarkProfile, StringComparison.OrdinalIgnoreCase)
             && !string.Equals(benchmarkProfile, TimeSeriesBenchmarkProfile, StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("The configured benchmark profile is not supported.");
+            throw new InvalidOperationException(MessageText);
         }
         var benchmarkRoot = Path.GetFullPath(options.BenchmarkRoot
             ?? Path.Combine(builder.AppHostDirectory, DefaultBenchmarkRoot, Guid.NewGuid().ToString(GuidFormat)));

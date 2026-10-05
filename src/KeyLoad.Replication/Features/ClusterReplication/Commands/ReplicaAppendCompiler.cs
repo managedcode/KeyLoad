@@ -4,6 +4,14 @@ namespace KeyLoad.Replication;
 
 internal static class ReplicaAppendCompiler
 {
+    private const int EmptyEntryCount = 0;
+    private const int FirstEntryIndex = 0;
+    private const int BeforeFirstLogPosition = 0;
+    private const int ContiguousIndexStep = 1;
+    private const long TailOffsetWide = 1L;
+    private const int UnelectedTerm = 0;
+    private const int LastEntryFromEnd = 1;
+
     internal static ReplicaAppendBatch Validate(IReadOnlyList<ReplicaEntry> entries, ReplicaHardState state, ReplicaConfiguration configuration,
         Func<long, long> termAt, DatabaseEngine? canonicalDatabase)
     {
@@ -18,26 +26,26 @@ internal static class ReplicaAppendCompiler
     private static ReplicaEntry[] OwnEntries(IReadOnlyList<ReplicaEntry> entries, ReplicaHardState state,
         ReplicaConfiguration configuration, Func<long, long> termAt, DatabaseEngine? canonicalDatabase)
     {
-        if (entries.Count == 0 || entries.Count > configuration.MaxAppendEntries)
+        if (entries.Count == EmptyEntryCount || entries.Count > configuration.MaxAppendEntries)
         {
             throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidAppend);
         }
         var owned = entries.ToArray();
-        if (owned.Length == 0 || owned.Length > configuration.MaxAppendEntries || owned[0] is not { } firstEntry)
+        if (owned.Length == EmptyEntryCount || owned.Length > configuration.MaxAppendEntries || owned[FirstEntryIndex] is not { } firstEntry)
         {
             throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidAppend);
         }
         var first = firstEntry.Index;
-        if (first <= (state.Snapshot?.Index ?? 0)
-            || first > state.LastIndex && first - state.LastIndex != 1 || owned.Length - 1L > long.MaxValue - first)
+        if (first <= (state.Snapshot?.Index ?? BeforeFirstLogPosition)
+            || first > state.LastIndex && first - state.LastIndex != ContiguousIndexStep || owned.Length - TailOffsetWide > long.MaxValue - first)
         {
             throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidAppend);
         }
-        var previousTerm = termAt(first - 1);
-        for (var position = 0; position < owned.Length; position++)
+        var previousTerm = termAt(first - ContiguousIndexStep);
+        for (var position = FirstEntryIndex; position < owned.Length; position++)
         {
             var entry = owned[position];
-            if (entry is null || entry.Index != first + position || entry.Term <= 0 || entry.Term > state.Term || entry.Term < previousTerm)
+            if (entry is null || entry.Index != first + position || entry.Term <= UnelectedTerm || entry.Term > state.Term || entry.Term < previousTerm)
             {
                 throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidAppend);
             }
@@ -50,7 +58,7 @@ internal static class ReplicaAppendCompiler
     private static byte[][] Encode(ReplicaEntry[] entries, int maximumBytes)
     {
         var encoded = new byte[entries.Length][];
-        for (var position = 0; position < entries.Length; position++)
+        for (var position = FirstEntryIndex; position < entries.Length; position++)
         {
             encoded[position] = ReplicaProtocolCodec.Serialize(entries[position]);
             if (encoded[position].Length > maximumBytes)
@@ -76,7 +84,7 @@ internal static class ReplicaAppendCompiler
                 conflict = true;
             }
         }
-        return state with { LastIndex = conflict ? entries[^1].Index : state.LastIndex };
+        return state with { LastIndex = conflict ? entries[^LastEntryFromEnd].Index : state.LastIndex };
     }
 }
 

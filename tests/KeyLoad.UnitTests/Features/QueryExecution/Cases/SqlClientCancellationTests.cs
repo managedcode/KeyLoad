@@ -40,7 +40,7 @@ internal sealed class SqlClientCancellationTests
             return context.Response.WriteAsync(SuccessReply, context.RequestAborted);
         });
         using var cancellation = new CancellationTokenSource();
-        var client = new KeyLoadClient(server.Client, ApiKey);
+        var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution());
         var request = new SqlOperationRequest(new(Tenant, Database, Domain, Partition), sql);
         var pending = client.ExecuteSqlAsync(request, cancellation.Token);
         Exception? failure = null;

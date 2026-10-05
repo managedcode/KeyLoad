@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 
 namespace KeyLoad.Comparisons.Targets;
+
 internal static class HelixDbDocumentStorage
 {
     private const char IdentitySeparator = '-';

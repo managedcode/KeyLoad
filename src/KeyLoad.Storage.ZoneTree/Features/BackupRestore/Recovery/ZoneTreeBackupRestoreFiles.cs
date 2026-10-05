@@ -5,6 +5,15 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeBackupRestoreFiles
 {
+    private const int FirstSourceFileIndex = 0;
+    private const int InitialJournalPosition = 0;
+    private const int FileStartPosition = 0;
+    private const int NoFileAttributes = 0;
+    private const int NoRemainingBytes = 0;
+    private const int FirstBufferByte = 0;
+    private const int NoReadBytes = 0;
+    private const int EndOfStream = -1;
+
     private static readonly string[] SourceFiles = [IdentityFileName, JournalFileName];
 
     internal static long Create(ZoneTreeStoreRuntime runtime, string directory)
@@ -17,7 +26,7 @@ internal static class ZoneTreeBackupRestoreFiles
         ZoneTreeStoreFiles.CreatePrivateDirectory(directory);
         runtime.Journal.Flush(true);
         var files = new ZoneTreeBackupRestoreManifestFile[SourceFiles.Length];
-        for (var index = 0; index < SourceFiles.Length; index++)
+        for (var index = FirstSourceFileIndex; index < SourceFiles.Length; index++)
         {
             files[index] = CopyAndDescribe(runtime.Options.Directory, directory, SourceFiles[index]);
         }
@@ -26,12 +35,16 @@ internal static class ZoneTreeBackupRestoreFiles
         return runtime.Position;
     }
 
-    internal static StoreIdentity ReadAndVerify(string backup, string staging)
+    internal static StoreIdentity ReadAndVerify(string backup, string staging, ZoneTreeStorageExecutionOptions policy)
+        => ReadAndVerify(backup, staging, policy, out _);
+
+    internal static StoreIdentity ReadAndVerify(string backup, string staging, ZoneTreeStorageExecutionOptions policy,
+        out long position)
     {
         var manifestBytes = ZoneTreeMetadataFile.Read(Path.Combine(backup, BackupManifestFileName),
             MaximumBackupManifestBytes, BackupManifestUnsupported);
         var manifest = ZoneTreeMetadataBinary.Read<ZoneTreeBackupRestoreManifest>(manifestBytes.Span, ZoneTreeMetadataBinary.BackupMagic, BackupManifestUnsupported);
-        if (manifest.Version != BackupManifestVersion || manifest.Position < 0 || manifest.Files.Length != SourceFiles.Length
+        if (manifest.Version != BackupManifestVersion || manifest.Position < InitialJournalPosition || manifest.Files.Length != SourceFiles.Length
             || !manifest.Files.Select(file => file.Name).Order().SequenceEqual(SourceFiles.Order()))
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, BackupManifestUnsupported);
@@ -50,9 +63,10 @@ internal static class ZoneTreeBackupRestoreFiles
             }
         }
 
+        position = manifest.Position;
         var identity = ZoneTreeIdentityFile.Read(identityBytes.Span);
         using var journal = File.OpenRead(Path.Combine(staging, JournalFileName));
-        ZoneTreeBackupJournalValidation.Verify(journal, identity, manifest.Position);
+        ZoneTreeBackupJournalValidation.Verify(journal, identity, manifest.Position, policy);
         return identity;
     }
 
@@ -64,7 +78,7 @@ internal static class ZoneTreeBackupRestoreFiles
         File.Copy(source, destination, false);
         using var copied = new FileStream(destination, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
         copied.Flush(true);
-        copied.Position = 0;
+        copied.Position = FileStartPosition;
         return new(name, copied.Length, Convert.ToHexStringLower(SHA256.HashData(copied)));
     }
 
@@ -79,7 +93,7 @@ internal static class ZoneTreeBackupRestoreFiles
     private static void CopyAndVerifyJournal(string backup, string staging, ZoneTreeBackupRestoreManifestFile item)
     {
         var source = Path.Combine(backup, item.Name);
-        if ((File.GetAttributes(source) & FileAttributes.ReparsePoint) != 0)
+        if ((File.GetAttributes(source) & FileAttributes.ReparsePoint) != NoFileAttributes)
         {
             throw Errors.Fail(ErrorCode.Corruption, BackupFileIsLink);
         }
@@ -93,7 +107,7 @@ internal static class ZoneTreeBackupRestoreFiles
             FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
         CopyExactBytes(sourceFile, file, item.Length);
         file.Flush(true);
-        file.Position = 0;
+        file.Position = FileStartPosition;
         if (file.Length != item.Length
             || !string.Equals(Convert.ToHexStringLower(SHA256.HashData(file)), item.Checksum, StringComparison.Ordinal))
         {
@@ -104,17 +118,17 @@ internal static class ZoneTreeBackupRestoreFiles
     private static void CopyExactBytes(FileStream source, FileStream destination, long remaining)
     {
         var buffer = new byte[FileBufferBytes];
-        while (remaining > 0)
+        while (remaining > NoRemainingBytes)
         {
-            var read = source.Read(buffer.AsSpan(0, (int)Math.Min(remaining, buffer.Length)));
-            if (read == 0)
+            var read = source.Read(buffer.AsSpan(FirstBufferByte, (int)Math.Min(remaining, buffer.Length)));
+            if (read == NoReadBytes)
             {
                 throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);
             }
-            destination.Write(buffer.AsSpan(0, read));
+            destination.Write(buffer.AsSpan(FirstBufferByte, read));
             remaining -= read;
         }
-        if (source.ReadByte() != -1)
+        if (source.ReadByte() != EndOfStream)
         {
             throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);
         }
@@ -124,7 +138,7 @@ internal static class ZoneTreeBackupRestoreFiles
         ZoneTreeBackupRestoreManifestFile item)
     {
         var source = Path.Combine(backup, item.Name);
-        if ((File.GetAttributes(source) & FileAttributes.ReparsePoint) != 0)
+        if ((File.GetAttributes(source) & FileAttributes.ReparsePoint) != NoFileAttributes)
         {
             throw Errors.Fail(ErrorCode.Corruption, BackupFileIsLink);
         }

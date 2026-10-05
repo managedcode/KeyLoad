@@ -35,7 +35,7 @@ internal static class PhysicalShardCatalogRf3Assertions
         string adminKey, string node, EntityRef reference, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(app, node);
-        var sdk = new KeyLoadClient(http, adminKey);
+        var sdk = new KeyLoadClient(http, adminKey, IntegrationClientOptions.Execution());
         await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false)).IsNull();
         await using var mcp = await McpOfficialClient.ConnectAsync(app, node, adminKey, cancellationToken)
@@ -51,7 +51,7 @@ internal static class PhysicalShardCatalogRf3Assertions
     {
         await VerifyReadyAsync(app, node, cancellationToken).ConfigureAwait(false);
         using var http = McpCallerHttp.Create(app, node);
-        var sdk = new KeyLoadClient(http, adminKey);
+        var sdk = new KeyLoadClient(http, adminKey, IntegrationClientOptions.Execution());
         var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         await AssertDocumentAsync(document, expectedJson).ConfigureAwait(false);

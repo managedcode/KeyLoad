@@ -1,18 +1,18 @@
 using System.Collections.Immutable;
 using Npgsql;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
-internal sealed class TimescaleTimeSeriesTarget(string connectionString, string? image = null)
+internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
+    string? image = null)
     : ITimeSeriesPersistentTarget, ITimeSeriesAggregationTarget
 {
-    private const int CleanupTimeoutSeconds = 15;
-
     private const string TargetName = "TimescaleDB TimeSeries";
     private const string StorageGuarantee =
         "Container-lifetime single-node TimescaleDB hypertable; no cross-run volume and no replica guarantee";
     private const string AcknowledgementGuarantee = "PostgreSQL transaction commit acknowledged by one server";
-    private static readonly TimeSpan CleanupTimeout = TimeSpan.FromSeconds(CleanupTimeoutSeconds);
+    private readonly ComparisonLifecycleOptions settings = lifecycleOptions.Value;
     private readonly Guid ownerId = Guid.NewGuid();
     private string schemaName = string.Empty;
     private int ownsSchema;
@@ -96,7 +96,7 @@ internal sealed class TimescaleTimeSeriesTarget(string connectionString, string?
             return;
         }
 
-        using var timeout = new CancellationTokenSource(CleanupTimeout);
+        using var timeout = new CancellationTokenSource(settings.TimescaleCleanupTimeout);
         try
         {
             await TimescaleSchemaLifecycle.DropOwnedSchemaAsync(connectionString, schemaName, ownerId, timeout.Token)

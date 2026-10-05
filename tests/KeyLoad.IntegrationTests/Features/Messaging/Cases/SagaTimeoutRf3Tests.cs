@@ -17,7 +17,7 @@ internal sealed class SagaTimeoutRf3Tests(ClusterFixture fixture)
         var scenario = await MessagingRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await RecurringSagaRf3Support.CreateSchedulerAsync(fixture, scenario, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
         var sagaId = Guid.NewGuid();

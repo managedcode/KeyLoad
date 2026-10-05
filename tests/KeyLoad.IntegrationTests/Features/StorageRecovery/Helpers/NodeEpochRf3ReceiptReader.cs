@@ -12,7 +12,7 @@ internal static class NodeEpochRf3ReceiptReader
         NodeEpochRf3Profile profile, string nodeName)
     {
         var options = NodeEpochRf3OfflineOptions.Create(destination, profile, nodeName);
-        var receipt = ServerNodeFormatUpgrade.VerifyPrepared(source, options);
+        var receipt = ServerNodeFormatUpgrade.VerifyPrepared(source, IntegrationServerRuntimeOptions.Runtime(options));
         ServerNodeUpgradeLocks? sourceLocks = null;
         ServerNodeUpgradeLocks? targetLocks = null;
         Exception? primary = null;

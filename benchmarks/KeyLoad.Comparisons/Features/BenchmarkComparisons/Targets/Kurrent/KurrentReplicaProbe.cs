@@ -1,4 +1,5 @@
 using KurrentDB.Client;
+using Microsoft.Extensions.Options;
 using KurrentEventData = KurrentDB.Client.EventData;
 
 namespace KeyLoad.Comparisons.Targets;
@@ -10,7 +11,7 @@ internal static class KurrentReplicaProbe
     public static async Task<ClusterEvidence> VerifyCopyAsync(KurrentDBClient writer, KurrentDBClient[] nodeClients,
         HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData,
         KurrentStreamOwnership ownership, TimeSpan timeout,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IOptions<ComparisonLifecycleOptions> options)
     {
         var cut = await AppendAndCaptureCutAsync(writer, ownership, stream, eventData, cancellationToken);
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -20,12 +21,12 @@ internal static class KurrentReplicaProbe
             while (true)
             {
                 var evidence = await TryCreateCopyEvidenceAsync(nodeClients, httpClients, topology, stream,
-                    eventData, cut, timeout, limit.Token);
+                    eventData, cut, timeout, limit.Token, options);
                 if (evidence is not null)
                 {
                     return evidence;
                 }
-                await Task.Delay(KurrentConstants.ProbeWaitMilliseconds, limit.Token);
+                await Task.Delay(options.Value.KurrentReadinessPollInterval, limit.Token);
             }
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
@@ -36,15 +37,15 @@ internal static class KurrentReplicaProbe
 
     private static async Task<ClusterEvidence?> TryCreateCopyEvidenceAsync(KurrentDBClient[] nodeClients,
         HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData,
-        KurrentAppendCut cut, TimeSpan timeout, CancellationToken cancellationToken)
+        KurrentAppendCut cut, TimeSpan timeout, CancellationToken cancellationToken, IOptions<ComparisonLifecycleOptions> options)
     {
-        var views = await KurrentClusterVerifier.ReadReadyViewsAsync(httpClients, topology, timeout, cancellationToken);
+        var views = await KurrentClusterVerifier.ReadReadyViewsAsync(httpClients, topology, timeout, cancellationToken, options);
         if (!await AllCopiesAtCutAsync(nodeClients, views, stream, eventData, cut, cancellationToken))
         {
             return null;
         }
 
-        var finalViews = await KurrentClusterVerifier.ReadReadyViewsAsync(httpClients, topology, timeout, cancellationToken);
+        var finalViews = await KurrentClusterVerifier.ReadReadyViewsAsync(httpClients, topology, timeout, cancellationToken, options);
         RequireSameLocalMembers(views, finalViews);
         return await AllCopiesAtCutAsync(nodeClients, finalViews, stream, eventData, cut, cancellationToken)
             ? KurrentClusterVerifier.CreateEvidence(finalViews, topology, cut)

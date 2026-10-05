@@ -14,12 +14,12 @@ internal sealed class NativeTargetArgumentTests
     public async Task AcMp010RedisAndPostgresRejectMissingDatasetBeforeDriverSetup()
     {
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
-        await using var redis = new RedisTarget(InvalidRedisConnection, RunId, Image);
+        await using var redis = new RedisTarget(InvalidRedisConnection, RunId, Image, UnitBenchmarkOptions.Lifecycle());
         var redisError = await Assert.ThrowsExactlyAsync<ArgumentNullException>(() =>
             redis.InitializeAsync(null!, cancellationToken));
         await Assert.That(redisError!.ParamName).IsEqualTo(DatasetParameter);
 
-        await using var postgres = new PostgresTarget(InvalidPostgresConnection, RunId, Image);
+        await using var postgres = new PostgresTarget(InvalidPostgresConnection, RunId, Image, UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Lifecycle());
         var postgresError = await Assert.ThrowsExactlyAsync<ArgumentNullException>(() =>
             postgres.InitializeAsync(null!, cancellationToken));
         await Assert.That(postgresError!.ParamName).IsEqualTo(DatasetParameter);
@@ -28,9 +28,9 @@ internal sealed class NativeTargetArgumentTests
     [Test]
     public async Task AcMp012UninitializedNativeTargetsDisposeWithoutOpeningConnections()
     {
-        var redis = new RedisTarget(InvalidRedisConnection, RunId, Image);
-        var rabbit = new RabbitTarget("amqp://invalid", RunId, Image);
-        var postgres = new PostgresTarget(InvalidPostgresConnection, RunId, Image);
+        var redis = new RedisTarget(InvalidRedisConnection, RunId, Image, UnitBenchmarkOptions.Lifecycle());
+        var rabbit = new RabbitTarget("amqp://invalid", RunId, Image, UnitBenchmarkOptions.Lifecycle());
+        var postgres = new PostgresTarget(InvalidPostgresConnection, RunId, Image, UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Lifecycle());
 
         await redis.DisposeAsync();
         await rabbit.DisposeAsync();

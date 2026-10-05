@@ -10,7 +10,7 @@ internal static class AtomicPartitionPlacementRf3Assertions
         CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(app, node);
-        var sdk = new KeyLoadClient(http, key);
+        var sdk = new KeyLoadClient(http, key, IntegrationClientOptions.Execution());
         var result = await sdk.ReadAtomicPartitionPlacementAsync(request, cancellationToken).ConfigureAwait(false);
         await Assert.That(result.IsSuccess).IsTrue();
         return result.Value!;

@@ -27,12 +27,12 @@ internal static class NodeEpochCrashScenario
         var boundary = new NodeEpochCrashBoundary(stage);
         if (stage == NodeFormatUpgradeStage.Published)
         {
-            _ = ServerNodeFormatUpgrade.Prepare(args[SourceArgument], options);
-            _ = ServerNodeFormatUpgrade.Publish(args[SourceArgument], options, boundary.Observe);
+            _ = ServerNodeFormatUpgrade.Prepare(args[SourceArgument], CrashServerRuntimeOptions.Runtime(options));
+            _ = ServerNodeFormatUpgrade.Publish(args[SourceArgument], CrashServerRuntimeOptions.Runtime(options), boundary.Observe);
         }
         else
         {
-            _ = ServerNodeFormatUpgrade.Prepare(args[SourceArgument], options, boundary.Observe);
+            _ = ServerNodeFormatUpgrade.Prepare(args[SourceArgument], CrashServerRuntimeOptions.Runtime(options), boundary.Observe);
         }
         if (!boundary.Observed)
         { throw new InvalidOperationException("The requested node-upgrade boundary was not reached."); }

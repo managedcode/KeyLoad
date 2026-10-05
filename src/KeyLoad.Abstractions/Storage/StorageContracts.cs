@@ -103,7 +103,10 @@ public interface IAtomicTransaction : IKeyValueView
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.StoreIdentity)]
 public sealed record StoreIdentity([property: Orleans.Id(0)] int FormatVersion, [property: Orleans.Id(1)] int KeyCodecVersion, [property: Orleans.Id(2)] Guid NodeId, [property: Orleans.Id(3)] Guid Incarnation,
-    [property: Orleans.Id(4)] ReadOnlyMemory<byte> SigningKey, [property: Orleans.Id(5)] DurabilityProfile Durability, [property: Orleans.Id(6)] bool DispatchPaused = false, [property: Orleans.Id(7)] long ReadGeneration = 0);
+    [property: Orleans.Id(4)] ReadOnlyMemory<byte> SigningKey, [property: Orleans.Id(5)] DurabilityProfile Durability, [property: Orleans.Id(6)] bool DispatchPaused = false, [property: Orleans.Id(7)] long ReadGeneration = StoreIdentity.DefaultReadGeneration)
+{
+    private const int DefaultReadGeneration = 0;
+}
 /// <summary>Owns durable records, store gates and snapshot/backup publication.</summary>
 /// <remarks>
 /// Inside a read callback, Position and the scalar Identity fields describe the same protected cut as the view.

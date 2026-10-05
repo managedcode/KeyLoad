@@ -90,7 +90,7 @@ internal sealed class SqlClientOutcomeTests
             await context.Response.WriteAsync(first ? NullReply : SuccessReply, context.RequestAborted);
         });
         using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds));
-        var client = new KeyLoadClient(server.Client, ApiKey);
+        var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution());
         var partition = new PartitionRef(Tenant, Database, Domain, Partition);
         var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {

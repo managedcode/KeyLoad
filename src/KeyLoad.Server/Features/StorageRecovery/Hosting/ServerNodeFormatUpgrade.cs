@@ -3,7 +3,7 @@ namespace KeyLoad.Server;
 /// <summary>Prepares and separately publishes one fully stopped physical native5 node.</summary>
 internal static class ServerNodeFormatUpgrade
 {
-    internal static ServerNodeUpgradeReceipt Prepare(string source, NodeOptions destinationOptions,
+    internal static ServerNodeUpgradeReceipt Prepare(string source, ServerRuntimeOptions destinationOptions,
         Action<NodeFormatUpgradeStage>? observer = null)
     {
         var paths = Validate(source, destinationOptions);
@@ -21,7 +21,7 @@ internal static class ServerNodeFormatUpgrade
         return receipt;
     }
 
-    internal static ServerNodeUpgradeReceipt VerifyPrepared(string source, NodeOptions destinationOptions)
+    internal static ServerNodeUpgradeReceipt VerifyPrepared(string source, ServerRuntimeOptions destinationOptions)
     {
         var paths = Validate(source, destinationOptions);
         using var sourceLocks = ServerNodeUpgradeLocks.Acquire(paths.Source);
@@ -34,7 +34,7 @@ internal static class ServerNodeFormatUpgrade
         return receipt;
     }
 
-    internal static ServerNodeUpgradeReceipt Publish(string source, NodeOptions destinationOptions,
+    internal static ServerNodeUpgradeReceipt Publish(string source, ServerRuntimeOptions destinationOptions,
         Action<NodeFormatUpgradeStage>? observer = null)
     {
         var paths = Validate(source, destinationOptions);
@@ -52,11 +52,11 @@ internal static class ServerNodeFormatUpgrade
         return receipt;
     }
 
-    private static ServerNodeUpgradePaths Validate(string source, NodeOptions options)
+    private static ServerNodeUpgradePaths Validate(string source, ServerRuntimeOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        options.Validate();
-        return ServerNodeUpgradePaths.Create(source, options.DataDirectory);
+        options.ValidateBeforePhysicalOwnership();
+        return ServerNodeUpgradePaths.Create(source, options.Node.Value.DataDirectory);
     }
 
     private static ServerNodeUpgradeInventory ReadSource(string source, ServerNodeUpgradeLocks locks)
@@ -66,7 +66,7 @@ internal static class ServerNodeFormatUpgrade
         return inventory;
     }
 
-    private static ServerNodeUpgradeReceipt VerifyPublished(ServerNodeUpgradePaths paths, NodeOptions options,
+    private static ServerNodeUpgradeReceipt VerifyPublished(ServerNodeUpgradePaths paths, ServerRuntimeOptions options,
         ServerNodeUpgradeInventory original, ServerNodeUpgradeOwner owner, ServerNodeUpgradeLocks sourceLocks)
     {
         ServerNodeUpgradeStage.RequireOwnedPublishedTarget(paths.Destination, owner);
@@ -76,21 +76,21 @@ internal static class ServerNodeFormatUpgrade
     }
 
     private static ServerNodeUpgradeReceipt VerifyPreparedTarget(string directory, ServerNodeUpgradeOwner owner,
-        NodeOptions options, bool published)
+        ServerRuntimeOptions options, bool published)
     {
         using var locks = ServerNodeUpgradeLocks.Acquire(directory);
         return VerifyLockedTarget(directory, owner, options, locks, published);
     }
 
     private static ServerNodeUpgradeReceipt VerifyLockedTarget(string directory, ServerNodeUpgradeOwner owner,
-        NodeOptions options, ServerNodeUpgradeLocks locks, bool published)
+        ServerRuntimeOptions options, ServerNodeUpgradeLocks locks, bool published)
     {
         var original = ServerNodeUpgradeInventory.Capture(directory, locks.Held);
         ServerNodeUpgradeLayout.VerifyTarget(original, allowInputs: false);
         if (ServerNodeUpgradeStage.ReadOwner(directory) != owner)
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
         var receipt = ServerNodeUpgradeStage.ReadPrepared(directory);
-        ServerNodeUpgradeReceiptValidation.Verify(owner, receipt, options);
+        ServerNodeUpgradeReceiptValidation.Verify(owner, receipt, options.Node.Value);
         ServerNodeUpgradeProgressFile.VerifyCompleted(directory, owner);
         if (!published && ServerNodeUpgradeInventory.Capture(directory, locks.Held, excludePreparedReceipt: true).Sha256
             != receipt.PreparedTargetInventorySha256)

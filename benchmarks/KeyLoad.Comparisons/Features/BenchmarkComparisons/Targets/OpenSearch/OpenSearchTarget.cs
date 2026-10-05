@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Comparisons.Targets;
 
 /// <summary>Runs document CRUD and exact-vector comparisons against an isolated OpenSearch index.</summary>
@@ -5,7 +7,9 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="runId">Guid-formatted run identifier used to isolate the index name.</param>
 /// <param name="image">Pinned OpenSearch image reference checked during initialization and recorded in the profile.</param>
 /// <param name="topology">The expected one, two or three native nodes verified against the created index.</param>
-public sealed class OpenSearchTarget(HttpClient client, string runId, string image, ComparisonTopology topology) : IComparisonTarget
+/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+public sealed class OpenSearchTarget(HttpClient client, string runId, string image, ComparisonTopology topology,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions) : IComparisonTarget
 {
     private readonly string index = OpenSearchNames.IndexNamePrefix + Guid.Parse(runId).ToString(OpenSearchNames.GuidFormat);
     private readonly int expectedCopies = ComparisonTopologies.NodeCount(topology);
@@ -88,7 +92,7 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
         {
             if (indexCreated)
             {
-                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(OpenSearchNames.CleanupTimeoutSeconds));
+                using var timeout = new CancellationTokenSource(lifecycleOptions.Value.OpenSearchCleanupTimeout);
                 using var response = await client.DeleteAsync(
                     new Uri(OpenSearchNames.PathSeparator + index + OpenSearchNames.DeleteIndexSuffix, UriKind.RelativeOrAbsolute), timeout.Token);
                 response.EnsureSuccessStatusCode();

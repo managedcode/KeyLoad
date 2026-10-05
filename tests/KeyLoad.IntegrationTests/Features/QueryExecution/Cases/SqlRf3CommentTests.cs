@@ -23,7 +23,7 @@ internal sealed class SqlRf3CommentTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await RelationalSqlRf3Scenario.CreateAsync(sdk, deadline.Token);
         var command = scenario.LinkedModelsCommand();
         var plain = SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.DocumentsCommit, command);
@@ -43,7 +43,7 @@ internal sealed class SqlRf3CommentTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await RelationalSqlRf3Scenario.CreateAsync(sdk, deadline.Token);
         var command = scenario.LinkedModelsCommand();
         var request = SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.DocumentsCommit, command);

@@ -7,6 +7,9 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeJournalPublication
 {
+    private const int ObserverNonMutationIndex = 0;
+    private const int FirstMutationIndex = 0;
+
     internal static void Publish(ZoneTreeStoreRuntime runtime, ZoneTreeTransaction transaction,
         StorageMutation[] changes, long nextPosition)
     {
@@ -15,8 +18,8 @@ internal static class ZoneTreeJournalPublication
         try
         {
             WriteAndFlushJournal(runtime, header, payload, nextPosition);
-            runtime.Options.FaultObserver?.Invoke(CommitStage.JournalFlushed, nextPosition, 0);
-            for (var i = 0; i < changes.Length; i++)
+            runtime.Options.FaultObserver?.Invoke(CommitStage.JournalFlushed, nextPosition, ObserverNonMutationIndex);
+            for (var i = FirstMutationIndex; i < changes.Length; i++)
             {
                 runtime.Apply(changes[i]);
                 runtime.Options.FaultObserver?.Invoke(CommitStage.MutationApplied, nextPosition, i);
@@ -39,9 +42,9 @@ internal static class ZoneTreeJournalPublication
         try
         {
             runtime.Journal.Write(header);
-            runtime.Options.FaultObserver?.Invoke(CommitStage.HeaderWritten, nextPosition, 0);
+            runtime.Options.FaultObserver?.Invoke(CommitStage.HeaderWritten, nextPosition, ObserverNonMutationIndex);
             runtime.Journal.Write(payload);
-            runtime.Options.FaultObserver?.Invoke(CommitStage.PayloadWritten, nextPosition, 0);
+            runtime.Options.FaultObserver?.Invoke(CommitStage.PayloadWritten, nextPosition, ObserverNonMutationIndex);
             runtime.Journal.Flush(true);
         }
         catch (Exception)

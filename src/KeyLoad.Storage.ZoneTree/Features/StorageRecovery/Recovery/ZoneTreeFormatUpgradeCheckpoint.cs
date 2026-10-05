@@ -4,6 +4,9 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeFormatUpgradeCheckpoint
 {
+    private const int InitialJournalPosition = 0;
+    private const int FileStartPosition = 0;
+
     internal static long ReadSource(FileStream journal, ZoneTreeStoreOptions options, Guid expectedIncarnation,
         int sourceDataEpoch)
         => ReadSource(journal, options, static _ => { }, expectedIncarnation, sourceDataEpoch);
@@ -11,13 +14,13 @@ internal static class ZoneTreeFormatUpgradeCheckpoint
     internal static long ReadSource(FileStream journal, ZoneTreeStoreOptions options,
         Action<StorageMutation> apply, Guid expectedIncarnation, int sourceDataEpoch)
     {
-        if (journal.Length == 0)
-        { return 0; }
+        if (journal.Length == InitialJournalPosition)
+        { return InitialJournalPosition; }
         if (journal.Length < sizeof(ulong))
         { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.JournalSequenceInvalid); }
         Span<byte> magicBytes = stackalloc byte[sizeof(ulong)];
         journal.ReadExactly(magicBytes);
-        journal.Position = 0;
+        journal.Position = FileStartPosition;
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(magicBytes);
         if (sourceDataEpoch == ZoneTreePersistenceFormat.Native5DataEpoch
             && magic == ZoneTreePersistenceFormat.SourceCheckpointMagic)
@@ -32,19 +35,19 @@ internal static class ZoneTreeFormatUpgradeCheckpoint
                 expectedIncarnation).Position;
         }
         if (magic == ZoneTreePersistenceFormat.JournalMagic)
-        { return 0; }
+        { return InitialJournalPosition; }
         throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.JournalFormatUpgradeRequired);
     }
 
     internal static long ReadCurrent(FileStream journal, ZoneTreeStoreOptions options, Guid expectedIncarnation)
     {
-        if (journal.Length == 0)
-        { return 0; }
+        if (journal.Length == InitialJournalPosition)
+        { return InitialJournalPosition; }
         if (journal.Length < sizeof(ulong))
         { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.JournalSequenceInvalid); }
         Span<byte> magicBytes = stackalloc byte[sizeof(ulong)];
         journal.ReadExactly(magicBytes);
-        journal.Position = 0;
+        journal.Position = FileStartPosition;
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(magicBytes);
         if (magic == ZoneTreePersistenceFormat.CheckpointMagic)
         {
@@ -54,7 +57,7 @@ internal static class ZoneTreeFormatUpgradeCheckpoint
             return checkpoint.Position;
         }
         if (magic == ZoneTreePersistenceFormat.JournalMagic)
-        { return 0; }
+        { return InitialJournalPosition; }
         throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.JournalFormatUpgradeRequired);
     }
 }

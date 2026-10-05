@@ -47,7 +47,7 @@ internal sealed class NativeReadCutFixture : IDisposable
 
     private ZoneTreeStore Open()
     {
-        var store = new ZoneTreeStore(new(DirectoryPath));
+        var store = new ZoneTreeStore(new(DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         opened.Add(store);
         return store;
     }

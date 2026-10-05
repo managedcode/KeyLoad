@@ -73,7 +73,7 @@ public static class VectorResponseValidator
         {
             throw new InvalidDataException(VectorResponseValidatorValues.ANativeVectorResponseContainsMissing);
         }
-        if (neighbor.Id.Length != VectorResponseValidatorValues.MutableGroupWidth || neighbor.Id[VectorResponseValidatorValues.FirstIndex] != VectorResponseValidatorValues.VectorIdPrefixCharacter
+        if (neighbor.Id.Length != VectorResponseValidatorValues.IdCharacterCount || neighbor.Id[VectorResponseValidatorValues.FirstIndex] != VectorResponseValidatorValues.VectorIdPrefixCharacter
             || !int.TryParse(neighbor.Id.AsSpan(VectorResponseValidatorValues.SingleElementOffset), System.Globalization.NumberStyles.None,
                 System.Globalization.CultureInfo.InvariantCulture, out var number)
             || (uint)number >= (uint)corpus.Profile.RecordCount || !corpus.Eligible(number))

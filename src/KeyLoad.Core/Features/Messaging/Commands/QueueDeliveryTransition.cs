@@ -6,7 +6,6 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private const int DefaultRenewalSeconds = 30;
-    private const int MaximumRetryExponent = 20;
 
     private CommitReceipt ApplyDeliveryTransition(IAtomicTransaction tx, DeliveryCommand command,
         ResourceDefinition resource, ValidatedQueueLease lease, DateTimeOffset now, long position)
@@ -42,7 +41,7 @@ public sealed partial class DatabaseEngine
             [new(command.Action.ToString(), command.Lane.Queue, metadata.Id, updated.StateVersion)], Durability);
     }
 
-    private static MessageMetadata CompleteDeliveryAction(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
+    private MessageMetadata CompleteDeliveryAction(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
         DeliveryAction action, MessageMetadata metadata, long bodyBytes, DateTimeOffset now, ref QueueCounters counters)
     {
         if (action == DeliveryAction.Ack)
@@ -74,7 +73,7 @@ public sealed partial class DatabaseEngine
             };
         }
         var delay = Math.Min(policy.RetryMaxMilliseconds,
-            policy.RetryBaseMilliseconds * Math.Pow(2, Math.Min(metadata.Attempts - 1, MaximumRetryExponent)));
+            policy.RetryBaseMilliseconds * Math.Pow(2, Math.Min(metadata.Attempts - 1, messagingExecution.MaximumRetryExponent)));
         var available = now.AddMilliseconds(delay);
         tx.PutRecord(QueueKey(ScheduledQueueSpace, lane, available, metadata.Id), metadata.Id);
         return metadata with

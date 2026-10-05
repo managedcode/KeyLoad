@@ -33,7 +33,7 @@ internal sealed class ZoneTreeExistingStoreFixture : IDisposable
         using (File.Create(OuterOwnerPath))
         { }
         Options = new(DirectoryPath) { Incarnation = Guid.NewGuid() };
-        using var original = new ZoneTreeStore(Options);
+        using var original = new ZoneTreeStore(Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Identity = original.Identity;
         original.Commit((transaction, _) => { transaction.Put(Key, Value); return true; });
     }

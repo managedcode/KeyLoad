@@ -15,6 +15,8 @@ internal static class BenchmarkCallerBindings
     internal static void Apply(IResourceBuilder<ContainerResource> runner,
         IResourceBuilder<ContainerResource>[] nodes, IResourceBuilder<RabbitMQServerResource> rabbit)
     {
+        const int IndexInitialValue = 0;
+
         ArgumentNullException.ThrowIfNull(runner);
         ArgumentNullException.ThrowIfNull(nodes);
         ArgumentNullException.ThrowIfNull(rabbit);
@@ -23,7 +25,7 @@ internal static class BenchmarkCallerBindings
             throw new ArgumentException(InvalidNodeCount, nameof(nodes));
         }
 
-        for (var index = 0; index < nodes.Length; index++)
+        for (var index = IndexInitialValue; index < nodes.Length; index++)
         {
             runner.WithEnvironment(PeerSettingPrefix + index.ToString(CultureInfo.InvariantCulture),
                 nodes[index].GetEndpoint(HttpEndpoint));

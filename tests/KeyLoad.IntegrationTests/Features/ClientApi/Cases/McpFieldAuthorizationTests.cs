@@ -23,7 +23,7 @@ internal sealed class McpFieldAuthorizationTests(ClusterFixture fixture)
         var before = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(scenario.Reference), deadline.Token));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         var httpBefore = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Reference, deadline.Token));
         await Assert.That(before.Value.Redacted).IsTrue();
         await Assert.That(before.Value.RedactedFields).Contains(McpDocumentProtocol.ProtectedPath);
@@ -40,7 +40,7 @@ internal sealed class McpFieldAuthorizationTests(ClusterFixture fixture)
         var after = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(scenario.Reference), deadline.Token));
         await Assert.That(JsonDefaults.Serialize(before.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(after.Value))).IsTrue();
-        var original = await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey)
+        var original = await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution())
             .GetAsync(scenario.Reference, deadline.Token));
         await Assert.That(original!.Revision).IsEqualTo(McpCallerProtocol.FirstRevision);
         await Assert.That(original.Json.Contains(McpDocumentProtocol.PrivateValue, StringComparison.Ordinal)).IsTrue();

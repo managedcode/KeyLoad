@@ -50,7 +50,7 @@ internal sealed class TransactionProtocolTests
         try
         {
             Guid rejectedId;
-            using (var store = new ZoneTreeStore(new(root) { MaxFrameBytes = 4_096 }))
+            using (var store = new ZoneTreeStore(new(root) { MaxFrameBytes = 4_096 }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
                 database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
@@ -73,7 +73,7 @@ internal sealed class TransactionProtocolTests
                 await Assert.That(database.LastApplied).IsEqualTo(4);
                 await Assert.That(database.GetOutboxStatus("root", partition).Head.Tail).IsEqualTo(1);
             }
-            using var reopened = new ZoneTreeStore(new(root) { MaxFrameBytes = 4_096 });
+            using var reopened = new ZoneTreeStore(new(root) { MaxFrameBytes = 4_096 }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             var recovered = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
             PhysicalShardTestBootstrap.RequireExisting(recovered);
             await Assert.That(recovered.LastApplied).IsEqualTo(4);

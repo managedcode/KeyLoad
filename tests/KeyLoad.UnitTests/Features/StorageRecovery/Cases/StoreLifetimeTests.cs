@@ -20,7 +20,7 @@ internal sealed class StoreLifetimeTests
     public async Task AcSq001FacadeImplementsStoreAndViewAndReadReceivesTheSameFacade()
     {
         using var directory = new StoreDirectoryFixture();
-        using var store = new ZoneTreeStore(new(directory.Path));
+        using var store = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var key = Encoding.UTF8.GetBytes(StoreKeyText);
         var expected = Encoding.UTF8.GetBytes(StoreValueText);
 
@@ -37,7 +37,7 @@ internal sealed class StoreLifetimeTests
         using var directory = new StoreDirectoryFixture();
         var key = Encoding.UTF8.GetBytes(StoreKeyText);
         var expected = Encoding.UTF8.GetBytes(StoreValueText);
-        using var store = new ZoneTreeStore(new(directory.Path));
+        using var store = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var identity = store.Identity;
         store.Commit((transaction, _) =>
         {
@@ -48,13 +48,13 @@ internal sealed class StoreLifetimeTests
         await Assert.That(File.Exists(Path.Combine(directory.Path, OwnerLockFileName))).IsTrue();
         var lockFailure = Assert.ThrowsExactly<IOException>(() =>
         {
-            using var attempted = new ZoneTreeStore(new(directory.Path));
+            using var attempted = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         });
         await Assert.That(lockFailure).IsNotNull();
 
         store.Dispose();
         store.Dispose();
-        using var reopened = new ZoneTreeStore(new(directory.Path));
+        using var reopened = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await AssertIdentityMatches(identity, reopened.Identity);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(key)))
             .IsEquivalentTo(expected, CollectionOrdering.Matching);
@@ -66,7 +66,7 @@ internal sealed class StoreLifetimeTests
     {
         using var directory = new StoreDirectoryFixture();
         StoreIdentity originalIdentity;
-        using (var initial = new ZoneTreeStore(new(directory.Path)))
+        using (var initial = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             originalIdentity = initial.Identity;
         }
@@ -75,7 +75,7 @@ internal sealed class StoreLifetimeTests
         await File.WriteAllBytesAsync(journalPath, new byte[CanonicalJournalHeaderBytes]);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var attempted = new ZoneTreeStore(new(directory.Path));
+            using var attempted = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         });
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
 
@@ -86,7 +86,7 @@ internal sealed class StoreLifetimeTests
 
         await Task.Run(() => TruncateJournalAndFlushToDisk(journalPath));
 
-        using var reopened = new ZoneTreeStore(new(directory.Path));
+        using var reopened = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await AssertIdentityMatches(originalIdentity, reopened.Identity);
         var key = Encoding.UTF8.GetBytes(StoreKeyText);
         var expected = Encoding.UTF8.GetBytes(StoreValueText);

@@ -4,6 +4,13 @@ namespace KeyLoad.Replication;
 
 internal sealed class ReplicaAppendReceiver(ReplicaState state)
 {
+    private const int ContiguousIndexStep = 1;
+    private const int BeforeFirstLogPosition = 0;
+    private const int UnelectedTerm = 0;
+    private const int FirstEntryIndex = 0;
+    private const long ContiguousIndexStepWide = 1L;
+    private const int NoMatchedPosition = 0;
+
     internal Task<AppendReply> ReceiveAsync(AppendRequest request, CancellationToken cancellationToken)
         => state.LockedAsync(() => Receive(request), cancellationToken);
 
@@ -13,22 +20,22 @@ internal sealed class ReplicaAppendReceiver(ReplicaState state)
         request = OwnEntries(request);
         if (!state.ObserveLeader(request.Term, request.LeaderId))
         {
-            return Reject(log.State.LastIndex + 1);
+            return Reject(log.State.LastIndex + ContiguousIndexStep);
         }
-        if (request.PreviousIndex < 0 || request.PreviousTerm < 0 || request.CommittedIndex < 0 || request.Entries.IsDefault
+        if (request.PreviousIndex < BeforeFirstLogPosition || request.PreviousTerm < UnelectedTerm || request.CommittedIndex < BeforeFirstLogPosition || request.Entries.IsDefault
             || request.Entries.Length > state.Configuration.MaxAppendEntries)
         {
             throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidAppend);
         }
         var durable = log.State;
-        var snapshotCut = durable.Snapshot?.Index ?? 0;
+        var snapshotCut = durable.Snapshot?.Index ?? BeforeFirstLogPosition;
         if (request.PreviousIndex < snapshotCut)
         {
-            return Reject(snapshotCut + 1);
+            return Reject(snapshotCut + ContiguousIndexStep);
         }
         if (request.PreviousIndex > durable.LastIndex)
         {
-            return Reject(durable.LastIndex + 1);
+            return Reject(durable.LastIndex + ContiguousIndexStep);
         }
         if (log.TermAt(request.PreviousIndex) != request.PreviousTerm)
         {
@@ -42,7 +49,7 @@ internal sealed class ReplicaAppendReceiver(ReplicaState state)
         {
             state.Materializer.Commit(committed);
         }
-        return new(log.State.Term, true, matched, checked(matched + 1));
+        return new(log.State.Term, true, matched, checked(matched + ContiguousIndexStep));
     }
 
     private AppendRequest OwnEntries(AppendRequest request)
@@ -65,10 +72,10 @@ internal sealed class ReplicaAppendReceiver(ReplicaState state)
 
     private void ValidateEntries(AppendRequest request)
     {
-        for (var position = 0; position < request.Entries.Length; position++)
+        for (var position = FirstEntryIndex; position < request.Entries.Length; position++)
         {
             var incoming = request.Entries[position];
-            if (incoming.Index != checked(request.PreviousIndex + position + 1L) || incoming.Term > request.Term)
+            if (incoming.Index != checked(request.PreviousIndex + position + ContiguousIndexStepWide) || incoming.Term > request.Term)
             {
                 throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidAppend);
             }
@@ -83,14 +90,14 @@ internal sealed class ReplicaAppendReceiver(ReplicaState state)
 
     private long FirstConflict(long index)
     {
-        var cut = state.Log.State.Snapshot?.Index ?? 0;
+        var cut = state.Log.State.Snapshot?.Index ?? BeforeFirstLogPosition;
         var term = state.Log.TermAt(index);
-        while (index > cut + 1 && state.Log.TermAt(index - 1) == term)
+        while (index > cut + ContiguousIndexStep && state.Log.TermAt(index - ContiguousIndexStep) == term)
         {
             index--;
         }
-        return Math.Max(cut + 1, index);
+        return Math.Max(cut + ContiguousIndexStep, index);
     }
 
-    private AppendReply Reject(long next) => new(state.Log.State.Term, false, 0, next);
+    private AppendReply Reject(long next) => new(state.Log.State.Term, false, NoMatchedPosition, next);
 }

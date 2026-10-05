@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -7,15 +8,21 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="http">The primary HTTP client used by the KeyLoad SDK client; target disposal disposes it.</param>
 /// <param name="apiKey">The credential passed to the KeyLoad SDK client for authenticated operations.</param>
 /// <param name="runId">Run identifier used to derive the isolated benchmark partition.</param>
+/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+/// <param name="clientOptions">Centrally validated SDK transport budget.</param>
+/// <param name="translationOptions">Centrally validated SDK expression budgets.</param>
 /// <param name="image">Optional database image reference included in the initial target profile.</param>
 /// <param name="peers">Optional peer HTTP clients used to observe replica copies; the target disposes distinct clients.</param>
 /// <param name="expectedNodes">Actual fixed benchmark voter count; the default retains the required RF3 contract.</param>
-public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string runId, string? image = null,
+public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string runId,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions,
+    IOptions<QueryTranslationOptions> translationOptions, string? image = null,
     HttpClient[]? peers = null, int expectedNodes = 3) : IComparisonTarget
 {
     private const string TransactionDomainId = "shared";
+    private readonly ComparisonLifecycleOptions lifecycle = lifecycleOptions.Value;
     private readonly int expectedNodeCount = ValidateExpectedNodes(expectedNodes);
-    private readonly KeyLoadClient client = new(http, apiKey);
+    private readonly KeyLoadClient client = new(http, apiKey, clientOptions);
     private readonly HttpClient[] peerClients = peers is null
         ? [http]
         : peers.Contains(http, ReferenceEqualityComparer.Instance) ? peers : [.. peers, http];
@@ -42,7 +49,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     {
         ArgumentNullException.ThrowIfNull(dataset);
         admissionObservations = await KeyLoadAdmissionObserver.ObserveAsync(RequireIsolatedAdmission,
-            peerClients, credential, cancellationToken).ConfigureAwait(false);
+            peerClients, credential, cancellationToken, clientOptions).ConfigureAwait(false);
         var status = KeyLoadClientResults.Success(await client.StatusAsync(cancellationToken), "Status");
         if (status.Voters != expectedNodeCount || status.Durability != DurabilityProfile.QuorumProcessDurable)
         {
@@ -120,7 +127,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     /// <returns>A comparison session bound to this target and its benchmark partition.</returns>
     public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
         => Task.FromResult<IComparisonSession>(new KeyLoadComparisonSession(client, partition, space, topK,
-            graphDepth, graphVertices, graphEdges, expectedCorpusCount));
+            graphDepth, graphVertices, graphEdges, expectedCorpusCount, lifecycleOptions, translationOptions));
     /// <summary>Disposes the distinct HTTP clients owned by this target.</summary>
     /// <returns>A value task that completes after client disposal.</returns>
     public ValueTask DisposeAsync()

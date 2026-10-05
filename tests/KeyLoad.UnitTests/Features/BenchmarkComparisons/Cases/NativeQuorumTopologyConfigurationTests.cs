@@ -44,11 +44,11 @@ internal sealed class NativeQuorumTopologyConfigurationTests
         var topology = (ComparisonTopology)value;
         await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(async () =>
         {
-            await using var target = new QdrantTarget(http, T.RunId, T.Image, topology);
+            await using var target = new QdrantTarget(http, T.RunId, T.Image, UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Lifecycle(), topology);
         });
         await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(async () =>
         {
-            await using var target = new RabbitTarget(T.BrokerConnection, T.RunId, T.Image, topology);
+            await using var target = new RabbitTarget(T.BrokerConnection, T.RunId, T.Image, UnitBenchmarkOptions.Lifecycle(), topology);
         });
     }
 

@@ -92,6 +92,7 @@ public enum ErrorCode
 /// <summary>Represents a safe, caller-visible KeyLoad failure with its domain code and HTTP status.</summary>
 public sealed class KeyLoadException : Exception
 {
+    private const string DefaultSafeDetail = "A KeyLoad operation failed.";
     /// <summary>Initializes a KeyLoad exception with the supplied domain code, safe detail, and HTTP status.</summary>
     /// <param name="code">Identifies the domain error.</param>
     /// <param name="safeDetail">Provides safe caller-visible detail.</param>
@@ -102,7 +103,7 @@ public sealed class KeyLoadException : Exception
     }
 
     /// <summary>Initializes a validation exception with a standard safe detail.</summary>
-    public KeyLoadException() : this(ErrorCode.Validation, "A KeyLoad operation failed.", Errors.Status(ErrorCode.Validation), null)
+    public KeyLoadException() : this(ErrorCode.Validation, DefaultSafeDetail, Errors.Status(ErrorCode.Validation), null)
     {
     }
 
@@ -141,19 +142,20 @@ public sealed class KeyLoadException : Exception
 /// <summary>Creates standard status mappings, problem details, and KeyLoad exceptions.</summary>
 public static class Errors
 {
+    private const string ProblemTypePrefix = "urn:keyload:error:";
     /// <summary>Returns the HTTP status code associated with an error code.</summary>
     /// <param name="code">Specifies the code value.</param>
     /// <returns>The requested value.</returns>
     public static int Status(ErrorCode code) => code switch
     {
-        ErrorCode.NotFound => 404,
-        ErrorCode.PermissionDenied => 403,
-        ErrorCode.Unauthenticated => 401,
-        ErrorCode.Conflict or ErrorCode.RevisionConflict or ErrorCode.DuplicateEventId or ErrorCode.StaleLease => 409,
-        ErrorCode.ResourceExhausted or ErrorCode.BudgetExceeded => 429,
-        ErrorCode.UnsupportedCapability => 422,
-        ErrorCode.UnknownWriteOutcome or ErrorCode.RecoveryRequired or ErrorCode.OwnershipLost or ErrorCode.ClockUncertain => 503,
-        _ => 400
+        ErrorCode.NotFound => (int)System.Net.HttpStatusCode.NotFound,
+        ErrorCode.PermissionDenied => (int)System.Net.HttpStatusCode.Forbidden,
+        ErrorCode.Unauthenticated => (int)System.Net.HttpStatusCode.Unauthorized,
+        ErrorCode.Conflict or ErrorCode.RevisionConflict or ErrorCode.DuplicateEventId or ErrorCode.StaleLease => (int)System.Net.HttpStatusCode.Conflict,
+        ErrorCode.ResourceExhausted or ErrorCode.BudgetExceeded => (int)System.Net.HttpStatusCode.TooManyRequests,
+        ErrorCode.UnsupportedCapability => (int)System.Net.HttpStatusCode.UnprocessableEntity,
+        ErrorCode.UnknownWriteOutcome or ErrorCode.RecoveryRequired or ErrorCode.OwnershipLost or ErrorCode.ClockUncertain => (int)System.Net.HttpStatusCode.ServiceUnavailable,
+        _ => (int)System.Net.HttpStatusCode.BadRequest
     };
     /// <summary>Creates a problem detail with the standard status for an error code.</summary>
     /// <param name="code">Identifies the domain error code.</param>
@@ -161,7 +163,7 @@ public static class Errors
     /// <returns>The standard problem details for the error code.</returns>
     public static Problem Problem(ErrorCode code, string detail) => new()
     {
-        Type = $"urn:keyload:error:{code}",
+        Type = $"{ProblemTypePrefix}{code}",
         Title = code.ToString(),
         ErrorCode = code.ToString(),
         Detail = detail,
@@ -290,7 +292,10 @@ public abstract record Mutation([property: Orleans.Id(0)] string Resource);
 /// <param name="OwnershipEpoch">Identifies the active ownership epoch.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.CommandRequest)]
-public sealed record CommandRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] PartitionRef Partition, [property: Orleans.Id(2)] ImmutableArray<Mutation> Mutations, [property: Orleans.Id(3)] long OwnershipEpoch = 1);
+public sealed record CommandRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] PartitionRef Partition, [property: Orleans.Id(2)] ImmutableArray<Mutation> Mutations, [property: Orleans.Id(3)] long OwnershipEpoch = CommandRequest.DefaultOwnershipEpoch)
+{
+    private const int DefaultOwnershipEpoch = 1;
+}
 
 // Only the trusted server constructs this envelope. Caller roles and timestamps never come from public JSON.
 /// <summary>Identifies a trusted operation recorded in the replicated command envelope.</summary>
@@ -349,7 +354,9 @@ public enum OperationKind
     /// <summary>Commits the initial physical shard placement catalog.</summary>
     BootstrapPhysicalShardCatalog,
     /// <summary>Commits an explicit atomic-partition assignment to its physical shard.</summary>
-    BindAtomicPartitionPlacement
+    BindAtomicPartitionPlacement,
+    /// <summary>Changes private native runtime journal infrastructure through RF3.</summary>
+    RuntimeJournal
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

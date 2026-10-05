@@ -18,14 +18,14 @@ internal sealed class NativePayloadInspectionCodec(Type expectedRoot) : IFieldCo
         NativePayloadHeader.Validate(field);
         var reference = ReferenceCodec.CreateRecordPlaceholder(reader.Session);
         var versionField = reader.ReadFieldHeader();
-        RequireField(versionField, 0, typeof(uint));
+        RequireField(versionField, NativeWireIdentities.VersionFieldDelta, typeof(uint));
         var version = UInt32Codec.ReadValue(ref reader, versionField);
         if (version != NativePayloadVersion.Current)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, NativePayloadVersion.UnsupportedVersion);
         }
         var valueField = reader.ReadFieldHeader();
-        RequireField(valueField, 1, null);
+        RequireField(valueField, NativeWireIdentities.ValueFieldDelta, null);
         if (valueField.FieldType != expectedRoot || valueField.IsReference)
         {
             throw Errors.Fail(ErrorCode.Corruption, NativePayloadVersion.InvalidPayload);
@@ -58,7 +58,7 @@ internal static class NativePayloadHeader
 {
     internal static void Validate(Field field)
     {
-        if (!field.HasFieldId || field.FieldIdDelta != 0 || field.WireType != WireType.TagDelimited
+        if (!field.HasFieldId || field.FieldIdDelta != NativeWireIdentities.FirstFieldId || field.WireType != WireType.TagDelimited
             || field.FieldType is not null && field.FieldType != typeof(NativePayload))
         {
             throw Errors.Fail(ErrorCode.Corruption, NativePayloadVersion.InvalidPayload);

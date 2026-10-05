@@ -1,3 +1,4 @@
+using KeyLoad.AppHost.Hosting;
 using System.Globalization;
 using System.Text;
 using KeyLoad.AppHost.Features.ClusterReplication;
@@ -5,6 +6,9 @@ using KeyLoad.AppHost.Features.ClusterRouting;
 
 internal static class ClusterResources
 {
+    private const string NodeNamesResultText = "node1";
+    private const string NodeNamesNodeNamesResultText = "node2";
+
     private const string ContainerDirectory = "/data";
     private const string HttpEndpoint = "http";
     private const string SiloEndpoint = "silo";
@@ -40,12 +44,14 @@ internal static class ClusterResources
     private const int SiloPort = 11111;
     private const int FirstPublicPort = 5101;
     private const int MinimumBenchmarkNodes = 1;
-    private static readonly string[] NodeNames = ["node1", "node2", "node3"];
+    private static readonly string[] NodeNames = [NodeNamesResultText, NodeNamesNodeNamesResultText, "node3"];
 
     /// <summary>Adds RF3 Docker nodes, or an explicitly selected benchmark fixed group, with independent storage.</summary>
     internal static IResourceBuilder<ContainerResource>[] Add(IDistributedApplicationBuilder builder,
         LocalProfile profile, string dataRoot, bool ephemeral, int? benchmarkNodeCount = null)
     {
+        const int IndexInitialValue = 0;
+
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentException.ThrowIfNullOrWhiteSpace(dataRoot);
         var nodeNames = ReadNodeNames(benchmarkNodeCount);
@@ -60,7 +66,7 @@ internal static class ClusterResources
         var physicalShardId = profile.PhysicalShardId.ToString(GuidFormat);
         var containerUser = ClusterContainerUser.Resolve(builder);
         var nodes = new IResourceBuilder<ContainerResource>[nodeNames.Length];
-        for (var index = 0; index < nodes.Length; index++)
+        for (var index = IndexInitialValue; index < nodes.Length; index++)
         {
             var name = nodeNames[index];
             var directory = PrepareVoterDirectory(root, name);
@@ -99,17 +105,20 @@ internal static class ClusterResources
         ReadImagesAndProbes(IDistributedApplicationBuilder builder, string root, bool ephemeral,
             int? benchmarkNodeCount)
     {
+        const string MessageText = "Local RF3 image mode requires the ordinary ephemeral RF3 topology.";
+        const string ReadImagesAndProbesMessageText = "Local RF3 image mode cannot be combined with a protocol probe.";
+
         var localImage = LocalDevelopmentContainerImage.Read(builder);
         if (localImage is not null && (!ephemeral || benchmarkNodeCount is not null))
         {
-            throw new InvalidOperationException("Local RF3 image mode requires the ordinary ephemeral RF3 topology.");
+            throw new InvalidOperationException(MessageText);
         }
         var images = localImage is null ? ProtocolCohortImages.Read(builder, ephemeral, benchmarkNodeCount) : null;
         var probes = localImage is null
             ? RequestCqrsProbeProfile.Read(builder, root, ephemeral, benchmarkNodeCount, images!)
-            : RequestCqrsProbeProfileSettingsReader.Read(builder.Configuration) is null
+            : AppHostOptionsRegistration.Get(builder).Control.Value.RequestProbe is null
                 ? null
-                : throw new InvalidOperationException("Local RF3 image mode cannot be combined with a protocol probe.");
+                : throw new InvalidOperationException(ReadImagesAndProbesMessageText);
         return (localImage, images, probes);
     }
 
@@ -133,11 +142,13 @@ internal static class ClusterResources
 
     private static void ApplyPeers(IResourceBuilder<ContainerResource> resource, string[] nodeNames, bool benchmark)
     {
+        const int IndexInitialValue = 0;
+
         if (benchmark)
         {
             resource.WithEnvironment(BenchmarkTopologyEnvironment, TrueValue);
         }
-        for (var index = 0; index < nodeNames.Length; index++)
+        for (var index = IndexInitialValue; index < nodeNames.Length; index++)
         {
             resource.WithEnvironment(PeerEnvironmentPrefix + index.ToString(CultureInfo.InvariantCulture), Origin(nodeNames[index]));
         }

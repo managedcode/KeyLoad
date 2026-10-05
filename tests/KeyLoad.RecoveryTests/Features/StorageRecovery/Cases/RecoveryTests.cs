@@ -84,7 +84,7 @@ internal sealed class StorageRecoveryProcessTests
 
     private static int[] ReadRecoveredValues(string root)
     {
-        using var store = new ZoneTreeStore(new(root));
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         return store.Read(view => Enumerable.Range(0, 3)
             .Select(i => NativeSerialization.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("item", (long)i))!)).ToArray());
     }
@@ -216,7 +216,7 @@ internal sealed class StoragePublicationRecoveryTests
 
     private static async Task AssertCheckpointRecoveryGenerationAsync(string root, string mode, CommitStage stage)
     {
-        using var store = new ZoneTreeStore(new(root));
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var values = ReadCheckpointValues(store);
         var installed = IsCheckpointGenerationInstalled(mode, stage);
         foreach (var value in values)
@@ -281,7 +281,7 @@ internal sealed class StoragePublicationRecoveryTests
         var root = Path.Combine(Path.GetTempPath(), "keyload-corruption-" + Guid.NewGuid().ToString("N"));
         try
         {
-            using (var store = new ZoneTreeStore(new(root)))
+            using (var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()))
             {
                 store.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("key"), "value"); return true; });
             }
@@ -309,13 +309,13 @@ internal sealed class StoragePublicationRecoveryTests
         try
         {
             Guid previous;
-            using (var store = new ZoneTreeStore(new(root)))
+            using (var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()))
             {
                 previous = store.Identity.Incarnation;
                 store.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("key"), "value"); return true; });
                 store.CreateBackup(backup);
             }
-            var identity = ZoneTreeStore.Restore(backup, restored);
+            var identity = ZoneTreeStore.Restore(backup, restored, RecoveryExecutionOptions.StorageExecution());
             await Assert.That(identity.Incarnation).IsNotEqualTo(previous);
             await Assert.That(identity.DispatchPaused).IsTrue();
             if (!OperatingSystem.IsWindows())
@@ -324,12 +324,12 @@ internal sealed class StoragePublicationRecoveryTests
                 await Assert.That(File.GetUnixFileMode(backup)).IsEqualTo(privateMode);
                 await Assert.That(File.GetUnixFileMode(restored)).IsEqualTo(privateMode);
             }
-            using var recovered = new ZoneTreeStore(new(restored));
+            using var recovered = new ZoneTreeStore(new(restored), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
             await Assert.That(recovered.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("key"))!))).IsEqualTo("value");
             var tampered = await File.ReadAllBytesAsync(Path.Combine(backup, "commands.wal"));
             tampered[^1] ^= 1;
             await File.WriteAllBytesAsync(Path.Combine(backup, "commands.wal"), tampered);
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(backup, restored + "-bad")).Code).IsEqualTo(ErrorCode.Corruption);
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(backup, restored + "-bad", RecoveryExecutionOptions.StorageExecution())).Code).IsEqualTo(ErrorCode.Corruption);
         }
         finally
         {
@@ -345,7 +345,7 @@ internal sealed class StoragePublicationRecoveryTests
 
     private static void OpenCorruptStore(string root)
     {
-        using var rejected = new ZoneTreeStore(new(root));
+        using var rejected = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
     }
 
 }

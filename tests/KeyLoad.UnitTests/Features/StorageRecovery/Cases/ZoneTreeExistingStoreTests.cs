@@ -51,7 +51,7 @@ internal sealed class ZoneTreeExistingStoreTests
         await Assert.That(result.Stderr).Contains(ExistingStoreInspectorProcess.ReadyMarker);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
         await files.AssertOwnerAvailableAsync();
-        using var reopened = new ZoneTreeStore(files.Options);
+        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key))).IsEquivalentTo(files.Value, CollectionOrdering.Matching);
     }
 
@@ -87,7 +87,7 @@ internal sealed class ZoneTreeExistingStoreTests
         }
 
         await files.AssertStoreEntriesUnchangedAsync(originalFiles);
-        using var reopened = new ZoneTreeStore(files.Options);
+        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key))).IsEquivalentTo(files.Value, CollectionOrdering.Matching);
     }
 
@@ -134,7 +134,7 @@ internal sealed class ZoneTreeExistingStoreTests
         var result = await files.InspectAsync();
         await ExistingStoreInspectionAssertions.SucceededAsync(result, files.Identity, files.Value, CommittedPosition);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
-        using var reopened = new ZoneTreeStore(files.Options);
+        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Position).IsEqualTo(CommittedPosition);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key))).IsEquivalentTo(files.Value, CollectionOrdering.Matching);
     }
@@ -165,7 +165,7 @@ internal sealed class ZoneTreeExistingStoreTests
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
         await files.AssertOwnerAvailableAsync();
         await File.WriteAllBytesAsync(files.JournalPath, journalBytes);
-        using var reopened = new ZoneTreeStore(files.Options);
+        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Position).IsEqualTo(CommittedPosition);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key))).IsEquivalentTo(files.Value, CollectionOrdering.Matching);
     }
@@ -190,7 +190,7 @@ internal sealed class ZoneTreeExistingStoreValueBoundaryTests
         await ExistingStoreInspectionAssertions.SucceededAsync(result, files.Identity, expectedValue, UpdatedPosition);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
         await Assert.That(await File.ReadAllBytesAsync(files.JournalPath)).IsEquivalentTo(journalBytes, CollectionOrdering.Matching);
-        using var reopened = new ZoneTreeStore(files.Options);
+        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Position).IsEqualTo(UpdatedPosition);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key))).IsEquivalentTo(expectedValue, CollectionOrdering.Matching);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
@@ -210,7 +210,7 @@ internal sealed class ZoneTreeExistingStoreValueBoundaryTests
         await Assert.That(result.Receipt!.Value).IsNull();
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
         await Assert.That(await File.ReadAllBytesAsync(files.JournalPath)).IsEquivalentTo(journalBytes, CollectionOrdering.Matching);
-        using var reopened = new ZoneTreeStore(files.Options);
+        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Position).IsEqualTo(UpdatedPosition);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key))).IsEquivalentTo(expectedValue, CollectionOrdering.Matching);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
@@ -219,7 +219,7 @@ internal sealed class ZoneTreeExistingStoreValueBoundaryTests
 
     private static void CommitValue(ZoneTreeExistingStoreFixture files, byte[] value)
     {
-        using var store = new ZoneTreeStore(files.Options);
+        using var store = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         store.Commit((transaction, _) => { transaction.Put(files.Key, value); return true; });
     }
 

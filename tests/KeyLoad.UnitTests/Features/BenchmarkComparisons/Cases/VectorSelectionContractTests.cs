@@ -29,7 +29,7 @@ internal sealed class VectorSelectionContractTests
         })
         {
             using var configuration = Selection("vector-100k-exact-plain-c16");
-            configuration["Benchmarks:" + setting] = setting == "ScaleProfile" ? "scale-100k-c16" : "1";
+            configuration["Benchmarks:" + setting] = setting == "ScaleProfile" ? "scaled-100k-c16" : "1";
             await Assert.That(() => ComparisonWorkerSelection.Read(configuration)).Throws<InvalidOperationException>();
         }
     }

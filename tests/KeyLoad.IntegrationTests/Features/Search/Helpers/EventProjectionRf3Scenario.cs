@@ -48,7 +48,7 @@ internal sealed record EventProjectionRf3Scenario(PartitionRef Partition, Stream
             "event-projection-database", "event-projection-domain", Guid.NewGuid().ToString("N"));
         var stream = new StreamRef(partition, StreamSet, StreamId, Generation);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await ConfigureResourcesAsync(administrator, partition, cancellationToken);
         var worker = await ConfigureWorkerAsync(administrator, partition, cancellationToken);
         var reader = await ConfigureReaderAsync(administrator, partition, false, null, cancellationToken);
@@ -71,7 +71,7 @@ internal sealed record EventProjectionRf3Scenario(PartitionRef Partition, Stream
         PartitionRef partition, bool restrictRows, string? owner, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        return await ConfigureReaderAsync(new KeyLoadClient(http, fixture.AdminKey), partition,
+        return await ConfigureReaderAsync(new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution()), partition,
             restrictRows, owner, cancellationToken);
     }
 
@@ -79,7 +79,7 @@ internal sealed record EventProjectionRf3Scenario(PartitionRef Partition, Stream
         CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var resource = Resource(partition, ChangedSourceClass) with { SchemaVersion = 2 };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource) { ExpectedSchemaVersion = 1 }, cancellationToken));

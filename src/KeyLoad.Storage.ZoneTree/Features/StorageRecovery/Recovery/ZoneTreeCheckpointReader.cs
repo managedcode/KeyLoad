@@ -4,6 +4,13 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeCheckpointReader
 {
+    private const int InitialRecordCount = 0;
+    private const int InitialAppliedPosition = 0;
+    private const int InitialSnapshotPosition = 0;
+    private const int EmptyRecordCount = 0;
+    private const int EmptyKeyLength = 0;
+    private const int EqualKeys = 0;
+
     internal static StorageSnapshot Read(
         FileStream input,
         ZoneTreeStoreOptions options,
@@ -38,8 +45,8 @@ internal static class ZoneTreeCheckpointReader
 
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         ZoneTreeCheckpointMetadata? metadata = null;
-        long count = 0;
-        long applied = 0;
+        long count = InitialRecordCount;
+        long applied = InitialAppliedPosition;
         ReadOnlyMemory<byte>? previousKey = null;
         var appliedKey = KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey);
         while (true)
@@ -89,7 +96,7 @@ internal static class ZoneTreeCheckpointReader
             throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.SnapshotFormatUnsupported);
         }
 
-        if (metadata.Position < 0 || metadata.AppliedPosition < 0 || metadata.Incarnation == Guid.Empty
+        if (metadata.Position < InitialSnapshotPosition || metadata.AppliedPosition < InitialSnapshotPosition || metadata.Incarnation == Guid.Empty
             || frame.Position != metadata.Position)
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointCutInvalid);
@@ -127,18 +134,18 @@ internal static class ZoneTreeCheckpointReader
         var records = NativeSerialization.Deserialize<StorageMutation[]>(payload);
         var lastKey = previousKey;
         var nextApplied = applied;
-        if (records.Length == 0)
+        if (records.Length == EmptyRecordCount)
         { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid); }
         foreach (var mutation in records)
         {
-            if (mutation is null || mutation.Key.Length == 0 || mutation.Value is null
-                || lastKey is { } priorKey && priorKey.Span.SequenceCompareTo(mutation.Key.Span) >= 0)
+            if (mutation is null || mutation.Key.Length == EmptyKeyLength || mutation.Value is null
+                || lastKey is { } priorKey && priorKey.Span.SequenceCompareTo(mutation.Key.Span) >= EqualKeys)
             { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid); }
             lastKey = mutation.Key;
             if (mutation.Key.Span.SequenceEqual(appliedKey.Span))
             {
                 nextApplied = NativeSerialization.Deserialize<long>(mutation.Value.Value.Span);
-                if (nextApplied < 0)
+                if (nextApplied < InitialAppliedPosition)
                 { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid); }
             }
         }

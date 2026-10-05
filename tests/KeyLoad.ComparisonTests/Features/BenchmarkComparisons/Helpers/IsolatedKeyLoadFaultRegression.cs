@@ -59,7 +59,7 @@ internal static class IsolatedKeyLoadFaultRegression
             .Single(item => item.Name == IsolatedKeyLoadFaultRegressionProtocol.Admin).GetValueAsync(token);
         IsolatedKeyLoadFaultRegressionProtocol.Require(!string.IsNullOrWhiteSpace(admin));
         using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, 1);
-        var sdk = new KeyLoadClient(http, admin!);
+        var sdk = new KeyLoadClient(http, admin!, ComparisonClientOptions.Execution());
         var seed = await IsolatedKeyLoadFaultRegressionSeed.CreateAsync(sdk, token);
         await IsolatedKeyLoadFaultRegressionAuthority.VerifyAsync(app, 1, admin!, seed, token);
         evidence.Baseline = await IsolatedKeyLoadFaultRegressionMembership.WaitAsync(app, nodes, admin!, seed.AckReceipt.Token.Position, token);

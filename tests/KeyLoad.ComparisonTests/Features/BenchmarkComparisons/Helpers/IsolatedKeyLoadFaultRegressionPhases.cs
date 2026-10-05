@@ -35,7 +35,7 @@ internal static class IsolatedKeyLoadFaultRegressionPhases
         var stop = await native.KillAsync(killed, token);
         var live = nodes == 1 ? 1 : killed == 1 ? 2 : 1;
         using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, live);
-        var sdk = new KeyLoadClient(http, admin);
+        var sdk = new KeyLoadClient(http, admin, ComparisonClientOptions.Execution());
         evidence.Stage = "quorumAssertions";
         var committed = await WhileStoppedAsync(app, nodes, live, admin, sdk, seed, command, reference, receipt, token);
         evidence.Stage = "nativeRestart";
@@ -43,7 +43,7 @@ internal static class IsolatedKeyLoadFaultRegressionPhases
         evidence.Stage = "publicRecovery";
         await IsolatedKeyLoadFaultRegressionMembership.WaitAsync(app, nodes, admin, seed.AckReceipt.Token.Position, token);
         using var recoveredHttp = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, live);
-        var recoveredSdk = new KeyLoadClient(recoveredHttp, admin);
+        var recoveredSdk = new KeyLoadClient(recoveredHttp, admin, ComparisonClientOptions.Execution());
         committed = await ResolveAsync(recoveredSdk, nodes, command, reference, committed, token);
         receipt.ResolvedPosition = committed.Token.Position;
         await RecoveredAsync(app, nodes, killed, admin, seed, command, committed, reference, before, receipt, token);
@@ -94,7 +94,7 @@ internal static class IsolatedKeyLoadFaultRegressionPhases
         for (var index = 1; index <= nodes; index++)
         {
             using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, index);
-            var sdk = new KeyLoadClient(http, admin);
+            var sdk = new KeyLoadClient(http, admin, ComparisonClientOptions.Execution());
             await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
                 (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
                     attempt => sdk.GetAsync(reference, attempt), token)))!,

@@ -2,7 +2,7 @@ namespace KeyLoad.Server;
 
 internal static class ServerNodeUpgradeStage
 {
-    internal static void CreateOrReset(ServerNodeUpgradePaths paths, ServerNodeUpgradeOwner owner, NodeOptions options)
+    internal static void CreateOrReset(ServerNodeUpgradePaths paths, ServerNodeUpgradeOwner owner, ServerRuntimeOptions options)
     {
         if (File.Exists(paths.Stage))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
@@ -11,7 +11,7 @@ internal static class ServerNodeUpgradeStage
             var existing = ReadOwner(paths.Stage);
             if (existing != owner)
             { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
-            ServerNodeUpgradeStageValidation.VerifyReset(paths.Stage, owner, options);
+            ServerNodeUpgradeStageValidation.VerifyReset(paths.Stage, owner, options.Node.Value);
             Directory.Delete(paths.Stage, recursive: true);
         }
         ServerNodeUpgradeFiles.CreatePrivateDirectory(paths.Stage);
@@ -28,14 +28,14 @@ internal static class ServerNodeUpgradeStage
         => ServerNodeUpgradeReceiptFile.Read<ServerNodeUpgradeReceipt>(
             Path.Combine(directory, ServerNodeUpgradeProtocol.PreparedReceipt), ServerNodeUpgradeProtocol.PreparedMagic);
 
-    internal static void RemoveInputs(string stage, ServerNodeUpgradeOwner owner, NodeOptions options)
+    internal static void RemoveInputs(string stage, ServerNodeUpgradeOwner owner, ServerRuntimeOptions options)
     {
         var inputs = Path.Combine(stage, ServerNodeUpgradeProtocol.Inputs);
         ServerNodeUpgradeInputValidation.Verify(inputs, owner);
         foreach (var name in new[] { ServerNodeUpgradeProtocol.Canonical, ServerNodeUpgradeProtocol.Replica })
         {
             KeyLoad.Storage.ZoneTree.ZoneTreeFormatUpgrade.RemoveOwnedReceipt(Path.Combine(inputs, name),
-                ServerNodeUpgradeAuthority.StoreOptions(Path.Combine(stage, name), options));
+                ServerNodeUpgradeAuthority.StoreOptions(Path.Combine(stage, name), options), options.StorageExecution);
         }
         Directory.Delete(inputs, recursive: true);
     }

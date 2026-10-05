@@ -89,11 +89,11 @@ internal sealed class GrainRequestCodecTests
         {
             GrainRequestMutation.Purpose => envelope with { Purpose = WrongPurpose },
             GrainRequestMutation.Incarnation => envelope with { Incarnation = Guid.NewGuid() },
-            GrainRequestMutation.Expired => envelope with { ExpiresAt = TimeProvider.System.GetUtcNow() - GrainRoutingProtocol.RequestLifetime },
+            GrainRequestMutation.Expired => envelope with { ExpiresAt = TimeProvider.System.GetUtcNow() - UnitRoutingOptions.Routing().Value.RequestLifetime },
             GrainRequestMutation.Future => envelope with
             {
                 ExpiresAt = TimeProvider.System.GetUtcNow()
-                + GrainRoutingProtocol.MaximumFuture + GrainRoutingProtocol.RequestLifetime
+                + UnitRoutingOptions.Routing().Value.MaximumFuture + UnitRoutingOptions.Routing().Value.RequestLifetime
             },
             GrainRequestMutation.BothKinds => envelope with { CommandKind = OperationKind.Batch, CommandId = Guid.NewGuid() },
             GrainRequestMutation.NoKind => envelope with { ReadKind = null },

@@ -3,6 +3,12 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 /// <summary>Maintains owner and shared-budget accounting for fills and published entries.</summary>
 internal static class ZoneTreePointCacheLedger
 {
+    private const long IndexBaseChargeBytes = 1_024L;
+    private const long IndexEntryChargeBytes = 64L;
+    internal static long IndexCharge(int entries) => IndexBaseChargeBytes + IndexEntryChargeBytes * entries;
+    private const long EightByteAlignmentPadding = 7L;
+    private const long EightByteAlignmentMask = ~7L;
+
     internal static bool HasCapacity(ZoneTreePointCacheState state, long charge)
     {
         return state.ChargedEntries < state.Options.MaxEntries
@@ -63,6 +69,6 @@ internal static class ZoneTreePointCacheLedger
 
     private static long RoundToEight(int length)
     {
-        return (length + 7L) & ~7L;
+        return (length + EightByteAlignmentPadding) & EightByteAlignmentMask;
     }
 }

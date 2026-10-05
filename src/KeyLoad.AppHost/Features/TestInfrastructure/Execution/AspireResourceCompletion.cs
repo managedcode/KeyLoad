@@ -63,8 +63,10 @@ internal static class AspireResourceCompletion
 
     private static int ResolveRunnerExit(string resourceName, CustomResourceSnapshot snapshot, HashSet<string> pending)
     {
+        const int EmptyValue = 0;
+
         var exit = AspireTerminalResource.RunnerExit(resourceName, snapshot);
-        if (exit == 0)
+        if (exit == EmptyValue)
         {
             AspireTerminalResource.RequireCompletions(pending);
         }

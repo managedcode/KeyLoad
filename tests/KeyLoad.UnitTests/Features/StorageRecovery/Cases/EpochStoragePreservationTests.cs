@@ -13,7 +13,7 @@ internal sealed class EpochStoragePreservationTests
     {
         using var fixture = new EpochStorageFixture();
         StorageSnapshot snapshot;
-        using (var store = new ZoneTreeStore(fixture.SourceOptions))
+        using (var store = new ZoneTreeStore(fixture.SourceOptions, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             store.Commit((transaction, position) =>
             {
@@ -36,9 +36,9 @@ internal sealed class EpochStoragePreservationTests
             store.CreateBackup(fixture.Backup);
         }
 
-        var restoredIdentity = ZoneTreeStore.Restore(fixture.Backup, fixture.Restored);
+        var restoredIdentity = ZoneTreeStore.Restore(fixture.Backup, fixture.Restored, UnitExecutionOptions.StorageExecution());
         await AssertEpoch7Async(restoredIdentity);
-        using var restored = new ZoneTreeStore(new(fixture.Restored));
+        using var restored = new ZoneTreeStore(new(fixture.Restored), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await AssertEpoch7Async(restored.Identity);
         await AssertValuesAsync(restored, fixture);
     }

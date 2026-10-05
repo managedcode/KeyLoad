@@ -20,7 +20,7 @@ internal sealed class NativeBackupCutFixture : IDisposable
 
     internal NativeBackupCutFixture(bool checkpoint = false, bool empty = false)
     {
-        using var store = new ZoneTreeStore(new(Source));
+        using var store = new ZoneTreeStore(new(Source), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Identity = store.Identity;
         if (empty)
         {
@@ -73,7 +73,7 @@ internal sealed class NativeBackupCutFixture : IDisposable
             Directory.CreateDirectory(Destination);
         }
         var before = await CaptureBackupAsync();
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(Backup, Destination));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(Backup, Destination, UnitExecutionOptions.StorageExecution()));
         await Assert.That(failure.Code).IsEqualTo(expected);
         await Assert.That(Directory.Exists(Destination)).IsEqualTo(existingEmpty);
         if (existingEmpty)

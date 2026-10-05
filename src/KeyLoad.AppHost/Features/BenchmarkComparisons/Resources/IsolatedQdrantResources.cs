@@ -16,19 +16,25 @@ internal static class IsolatedQdrantResources
 
     internal static void Add(IsolatedResourceContext context)
     {
+        const int CountValue = 32;
+        const int IndexInitialValue = 1;
+        const int ElementIndex = 7;
+        const int Step = 1;
+        const string ReferenceText = "@";
+
         ArgumentNullException.ThrowIfNull(context);
         context.Selection.Validate();
         if (context.Selection.Target != Target)
         {
             throw new InvalidOperationException(InvalidSelection);
         }
-        var key = context.Builder.AddParameter(KeyName, Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)), secret: true);
+        var key = context.Builder.AddParameter(KeyName, Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(CountValue)), secret: true);
         IResourceBuilder<QdrantServerResource>? first = null;
-        for (var index = 1; index <= context.Selection.NodeCount; index++)
+        for (var index = IndexInitialValue; index <= context.Selection.NodeCount; index++)
         {
             var name = NodePrefix + index.ToString(CultureInfo.InvariantCulture);
             var node = context.Builder.AddQdrant(name, key)
-                .WithImageTag(ImageTag).WithImageSHA256(BenchmarkResources.QdrantDigest[7..])
+                .WithImageTag(ImageTag).WithImageSHA256(BenchmarkResources.QdrantDigest[ElementIndex..])
                 .WithDataBindMount(context.DataDirectory(name));
             IsolatedQdrantBootstrap.Configure(node, name, context.Selection.NodeCount, index);
             if (first is { } seed)
@@ -36,9 +42,9 @@ internal static class IsolatedQdrantResources
                 node.WaitFor(seed);
             }
             first ??= node;
-            context.BindEndpoint(index - 1, node, HttpEndpoint);
+            context.BindEndpoint(index - Step, node, HttpEndpoint);
         }
         context.BindSetting(KeySetting, key);
-        context.BindImage(Image + "@" + BenchmarkResources.QdrantDigest);
+        context.BindImage(Image + ReferenceText + BenchmarkResources.QdrantDigest);
     }
 }

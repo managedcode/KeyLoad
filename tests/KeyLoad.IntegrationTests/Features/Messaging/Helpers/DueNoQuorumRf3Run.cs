@@ -87,11 +87,11 @@ internal static class DueNoQuorumRf3Run
             seed.Creator.Secret, cancellationToken).ConfigureAwait(false);
         await DueNoQuorumRf3Assertions.WaitForOrdinalOneAsync(restored, seed, cancellationToken).ConfigureAwait(false);
         using var recoveryHttp = McpCallerHttp.Create(app, plan.RecoveryNode);
-        var recoveryAdmin = new KeyLoad.Client.KeyLoadClient(recoveryHttp, profile.AdminKey);
+        var recoveryAdmin = new KeyLoad.Client.KeyLoadClient(recoveryHttp, profile.AdminKey, IntegrationClientOptions.Execution());
         var status = await McpCallerAssertions.SdkSuccessAsync(await recoveryAdmin.StatusAsync(cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         using var survivorHttp = McpCallerHttp.Create(app, plan.Survivor);
-        var survivorSdk = new KeyLoad.Client.KeyLoadClient(survivorHttp, profile.AdminKey);
+        var survivorSdk = new KeyLoad.Client.KeyLoadClient(survivorHttp, profile.AdminKey, IntegrationClientOptions.Execution());
         var survivorStatus = await McpCallerAssertions.SdkSuccessAsync(await survivorSdk.StatusAsync(cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(status.RoutingReady).IsTrue();

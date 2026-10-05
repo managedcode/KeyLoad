@@ -7,6 +7,10 @@ namespace KeyLoad.Replication;
 
 internal static class PeerDiscoverySignature
 {
+    private const int SingleHeaderValue = 1;
+    private const int FirstHeaderValueIndex = 0;
+    private const int EmptyHeaderValueLength = 0;
+
     internal static byte[] Compute(ReadOnlySpan<byte> secret, string method, string authority, string path, string timestamp, string nonce)
     {
         var message = string.Join(PeerDiscoveryProtocol.Separator, PeerDiscoveryProtocol.Purpose, method, authority, path, timestamp, nonce);
@@ -32,6 +36,6 @@ internal static class PeerDiscoverySignature
     private static string Single(HttpRequest request, string header, int maximum)
     {
         var values = request.Headers[header];
-        return values.Count == 1 && values[0] is { Length: > 0 } value && value.Length <= maximum ? value : string.Empty;
+        return values.Count == SingleHeaderValue && values[FirstHeaderValueIndex] is { Length: > EmptyHeaderValueLength } value && value.Length <= maximum ? value : string.Empty;
     }
 }

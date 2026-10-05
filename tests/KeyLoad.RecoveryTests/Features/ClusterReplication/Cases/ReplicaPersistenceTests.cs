@@ -175,7 +175,7 @@ internal sealed class ReplicaPersistenceTests
     private const int MaximumCommandBytes = 8_388_608;
     private static string NewDirectory() => ReplicaFixturePaths.NewDirectory(Prefix);
     private static ReplicaConfiguration Configuration(string directory) => new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid());
-    private static ZoneTreeStore Store(string directory, Guid incarnation) => new(new(directory) { Incarnation = incarnation });
+    private static ZoneTreeStore Store(string directory, Guid incarnation) => new(new(directory) { Incarnation = incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
 }
 
 /// <summary>AC-REP-004: rejection and interruption regressions for real canonical snapshot transfers.</summary>
@@ -352,13 +352,13 @@ internal sealed class ReplicaSnapshotTrial : IDisposable
             return true;
         });
         Target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode(ValueKey), OldValue); return true; });
-        Sender = new(source, sourceLog, RecoveryExecutionOptions.Configuration(Configuration with { Directory = Path.Combine(directory, SourceDirectory) }));
+        Sender = new(source, sourceLog, RecoveryExecutionOptions.Configuration(Configuration with { Directory = Path.Combine(directory, SourceDirectory) }), RecoveryExecutionOptions.Replica());
         Image = Sender.Create(1, 1);
     }
 
-    private ZoneTreeStore Store(string name) => new(new(Path.Combine(directory, name)) { Incarnation = Configuration.Incarnation });
+    private ZoneTreeStore Store(string name) => new(new(Path.Combine(directory, name)) { Incarnation = Configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
     internal ReplicaSnapshotStore Receiver(Action<ReplicaCrashBoundary>? observer = null)
-        => new(Target, TargetLog, RecoveryExecutionOptions.Configuration(Configuration with { Directory = Path.Combine(directory, TargetDirectory) }), observer);
+        => new(Target, TargetLog, RecoveryExecutionOptions.Configuration(Configuration with { Directory = Path.Combine(directory, TargetDirectory) }), RecoveryExecutionOptions.Replica(), observer);
     internal void Transfer(ReplicaSnapshotStore receiver, ReplicaSnapshot? image = null)
     {
         var snapshot = image ?? Image;

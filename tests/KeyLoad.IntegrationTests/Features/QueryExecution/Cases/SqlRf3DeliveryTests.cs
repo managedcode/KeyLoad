@@ -15,7 +15,7 @@ internal sealed class SqlRf3DeliveryTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey);
+        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await SqlRf3DeliveryScenario.CreateAsync(sdk, deadline.Token);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, fixture.AdminKey, deadline.Token);
         var receive = scenario.Receive(Guid.NewGuid());
@@ -63,7 +63,7 @@ internal sealed class SqlRf3DeliveryTests(ClusterFixture fixture)
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition, SqlRf3DeliveryScenario.Queue,
             Capability.QueueAck, cancellationToken);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var foreignSdk = new KeyLoadClient(http, identity.Secret);
+        var foreignSdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var foreignMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             identity.Secret, cancellationToken);
         var command = new DeliveryCommand(Guid.NewGuid(), scenario.Lane, delivery.Token, DeliveryAction.Ack);

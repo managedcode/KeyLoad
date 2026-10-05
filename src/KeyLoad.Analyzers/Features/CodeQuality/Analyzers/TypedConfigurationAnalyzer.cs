@@ -44,12 +44,25 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
 
         if (ConfigurationReadOperations.IsRawRead(context.Compilation, context.Operation) &&
                 !ConfigurationOwnership.IsWithinBinding(context.Compilation, context.ContainingSymbol) ||
-            !ConfigurationOwnership.IsWithinOptions(context.Compilation, context.ContainingSymbol) &&
+            ConfigurationReadOperations.IsOptionsFactory(context.Compilation, context.Operation) &&
+                !ConfigurationOwnership.IsWithinBinding(context.Compilation, context.ContainingSymbol) ||
+            !IsDefaultConstruction(context) &&
             IsUnownedPolicy(context))
         {
             Report(context.ReportDiagnostic, context.Operation.Syntax.GetLocation(), context.Operation.Syntax.ToString());
         }
     }
+
+    private static bool IsDefaultConstruction(OperationAnalysisContext context) =>
+        LiteralDeclarationOwnership.IsOptionsDefault(context.Compilation, context.Operation.Syntax, context.ContainingSymbol) &&
+        context.Operation switch
+        {
+            IInvocationOperation invocation => MagicRuntimeOperations.IsNativeType(context.Compilation,
+                invocation.TargetMethod.ContainingType, MagicRuntimeMetadataNames.TimeSpan),
+            IObjectCreationOperation creation => MagicRuntimeOperations.IsNativeType(context.Compilation,
+                creation.Type, MagicRuntimeMetadataNames.TimeSpan) || ConfigurationOwnership.IsOptionsType(context.Compilation, creation.Type),
+            _ => false
+        };
 
     private static bool IsUnownedPolicy(OperationAnalysisContext context) => context.Operation switch
     {
@@ -58,9 +71,11 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
         IObjectCreationOperation { Constructor: { } constructor } creation when
             HardcodedDurationPolicy.IsDurationMethod(context.Compilation, constructor) ||
             OperationalPolicyBindings.IsCapacityMethod(context.Compilation, constructor, creation.Arguments) =>
+            !OperationalPolicyBindings.IsCoalescedWakeSignal(context.Compilation, creation) &&
             creation.Arguments.Any(argument => HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
         IInvocationOperation invocation when HardcodedDurationPolicy.IsDurationMethod(context.Compilation, invocation.TargetMethod) ||
             OperationalPolicyBindings.IsCapacityMethod(context.Compilation, invocation.TargetMethod, invocation.Arguments) =>
+            !OperationalPolicyBindings.IsNonblockingWait(context.Compilation, invocation) &&
             invocation.Arguments.Any(argument => HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
         ISimpleAssignmentOperation { Target: IPropertyReferenceOperation property } assignment when
             OperationalPolicyBindings.IsOperationalProperty(context.Compilation, property.Property) =>
@@ -80,6 +95,11 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
 
         if (context.Symbol is IMethodSymbol { MethodKind: MethodKind.Constructor } constructor)
         {
+            if (SerializedOptionsSnapshotContract.IsDataConstructor(context.Compilation, constructor, context.CancellationToken))
+            {
+                return;
+            }
+
             foreach (var parameter in constructor.Parameters.Where(parameter =>
                 ConfigurationOwnership.IsOptionsType(context.Compilation, parameter.Type) ||
                 ConfigurationOwnership.IsConfiguration(context.Compilation, parameter.Type)))
@@ -89,12 +109,19 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
         }
         else if (context.Symbol is IFieldSymbol field && ConfigurationOwnership.IsOptionsType(context.Compilation, field.Type) &&
             !OptionsSnapshotCapture.IsCaptured(context.Compilation, field, context.CancellationToken) ||
-            context.Symbol is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public } property &&
-            ConfigurationOwnership.IsOptionsType(context.Compilation, property.Type))
+            context.Symbol is IPropertySymbol { DeclaredAccessibility: Accessibility.Public } property &&
+            ConfigurationOwnership.IsOptionsType(context.Compilation, property.Type) &&
+            IsInjectedProperty(context, property))
         {
             ReportSymbol(context, context.Symbol);
         }
     }
+
+    private static bool IsInjectedProperty(SymbolAnalysisContext context, IPropertySymbol property) =>
+        property.DeclaringSyntaxReferences.Any(reference =>
+            reference.GetSyntax(context.CancellationToken) is PropertyDeclarationSyntax) &&
+        (property.SetMethod?.DeclaredAccessibility == Accessibility.Public ||
+         property.SetMethod is null && !OptionsSnapshotCapture.IsCaptured(context.Compilation, property, context.CancellationToken));
 
     private static void ReportSymbol(SymbolAnalysisContext context, ISymbol symbol)
     {

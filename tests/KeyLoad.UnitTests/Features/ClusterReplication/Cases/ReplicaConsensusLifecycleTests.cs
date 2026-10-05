@@ -88,14 +88,14 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
         {
             Configuration = Configuration with { MaxAppendEntries = maximum };
         }
-        canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = Configuration.Incarnation });
-        replica = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = Configuration.Incarnation });
+        canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = Configuration.Incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        replica = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = Configuration.Incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Log = new(replica, ReplicaExecutionTestOptions.Configuration(Configuration));
         Database = new(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var execution = ReplicaExecutionTestOptions.Execution(executionSettings);
         Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log,
-            ReplicaExecutionTestOptions.Configuration(Configuration)), execution);
+            ReplicaExecutionTestOptions.Configuration(Configuration), execution), execution);
         Consensus = new(Materializer, ReplicaExecutionTestOptions.Configuration(Configuration), execution, TimeProvider.System);
     }
 

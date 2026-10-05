@@ -1,8 +1,25 @@
+using Microsoft.Extensions.Options;
 namespace KeyLoad.Replication;
 
-internal sealed class ReplicaRequestDispatcher(ReplicaElection election, ReplicaAppendReceiver appends,
-    ReplicaLeader leader, ReplicaSnapshotReceiver snapshots, ReplicaConfiguration configuration)
+internal sealed class ReplicaRequestDispatcher
 {
+    private readonly ReplicaElection election;
+    private readonly ReplicaAppendReceiver appends;
+    private readonly ReplicaLeader leader;
+    private readonly ReplicaSnapshotReceiver snapshots;
+    private readonly ReplicaConfiguration configuration;
+
+    internal ReplicaRequestDispatcher(ReplicaElection election, ReplicaAppendReceiver appends,
+        ReplicaLeader leader, ReplicaSnapshotReceiver snapshots, IOptions<ReplicaConfiguration> configurationOptions)
+    {
+        ArgumentNullException.ThrowIfNull(configurationOptions);
+        configuration = configurationOptions.Value;
+        configuration.Validate();
+        this.election = election;
+        this.appends = appends;
+        this.leader = leader;
+        this.snapshots = snapshots;
+    }
     private Func<ReplicatedOperation, CancellationToken, Task<OperationResult>>? forwarded;
 
     internal void ConfigureForwarding(Func<ReplicatedOperation, CancellationToken, Task<OperationResult>> accept)

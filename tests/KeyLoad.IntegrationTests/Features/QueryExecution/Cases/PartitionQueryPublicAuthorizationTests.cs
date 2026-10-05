@@ -18,7 +18,7 @@ internal sealed class PartitionQueryPublicAuthorizationTests(ClusterFixture fixt
             PartitionQueryRf3Protocol.Collection, Capability.DocumentsRead | Capability.Query, deadline.Token)
             .ConfigureAwait(false);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var reader = new KeyLoadClient(http, identity.Secret);
+        var reader = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         var request = scenario.Request();
         var denied = await reader.PartitionQueryAsync(request, deadline.Token).ConfigureAwait(false);
         await Assert.That(denied.IsSuccess).IsFalse();
@@ -35,7 +35,7 @@ internal sealed class PartitionQueryPublicAuthorizationTests(ClusterFixture fixt
         PartitionQueryRf3Scenario scenario, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var request = scenario.Request([scenario.Partitions[0]]);
         var result = await McpCallerAssertions.SdkSuccessAsync(await administrator.PartitionQueryAsync(request,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);

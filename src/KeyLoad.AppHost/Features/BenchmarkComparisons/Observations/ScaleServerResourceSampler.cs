@@ -4,6 +4,8 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceSampler(string resourceName, string[] expectedMountTargets)
 {
+    private const int ToRecordEmptyValue = 0;
+
     private const string RunningContainerState = "running";
 
     private const string CgroupRoot = "/sys/fs/cgroup";
@@ -42,26 +44,34 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
 
     internal async Task<bool> SampleAsync(ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
+        const char SeparatorCharacter = '|';
+        const int InspectFieldCount = 6;
+        const int ElementIndex = 2;
+        const int BoundaryValue = 0;
+        const int FirstIndex = 0;
+        const int SecondIndex = 1;
+        const int SampleAsyncElementIndex = 3;
+
         var text = await ScaleServerResourceProcess.InspectAsync(resourceName, budget, token);
         if (text is null)
         {
             return InvalidateAfterStart();
         }
 
-        var fields = text.Split('|', StringSplitOptions.None);
-        if (fields.Length != 6 || !int.TryParse(fields[2], out var initPid) || initPid <= 0)
+        var fields = text.Split(SeparatorCharacter, StringSplitOptions.None);
+        if (fields.Length != InspectFieldCount || !int.TryParse(fields[ElementIndex], out var initPid) || initPid <= BoundaryValue)
         {
             return InvalidateAfterStart();
         }
 
-        if (_containerId is not null && (_containerId != fields[0] || _imageId != fields[1] || _startedAt != fields[3]))
+        if (_containerId is not null && (_containerId != fields[FirstIndex] || _imageId != fields[SecondIndex] || _startedAt != fields[SampleAsyncElementIndex]))
         {
             return InvalidateAfterStart();
         }
 
-        _containerId = fields[0];
-        _imageId = fields[1];
-        _startedAt = fields[3];
+        _containerId = fields[FirstIndex];
+        _imageId = fields[SecondIndex];
+        _startedAt = fields[SampleAsyncElementIndex];
         _state = fields[4];
         if (_state != RunningContainerState)
         {
@@ -74,6 +84,9 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
     private async Task<bool> SampleRunningAsync(int initPid, string mountDescriptor,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
+        const char SlashCharacter = '/';
+        const int InspectFieldCount = 0;
+
         _path = await ReadCgroupPathAsync(initPid, budget, token);
         if (_path is null)
         {
@@ -87,7 +100,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         }
 
         _effectiveEnvelope = effectiveEnvelope;
-        var directory = Path.GetFullPath(Path.Combine(CgroupRoot, _path.TrimStart('/')));
+        var directory = Path.GetFullPath(Path.Combine(CgroupRoot, _path.TrimStart(SlashCharacter)));
         if (!directory.StartsWith(CgroupRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {
             return InvalidateAfterStart();
@@ -99,7 +112,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         }
 
         var pids = await ReadPidsAsync(Path.Combine(directory, CgroupFile), budget, token);
-        if (pids is null || pids.Length is 0 or > ScaleServerResourceBounds.MaxProcesses)
+        if (pids is null || pids.Length == InspectFieldCount || pids.Length > budget.Settings.MaxProcesses)
         {
             return InvalidateAfterStart();
         }
@@ -129,10 +142,13 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
     private async Task<bool> CommitSampleAsync(string directory, string mountDescriptor, long rss,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        var cpuLimit = await BoundedText.ReadAsync(Path.Combine(directory, CpuLimitFile), ScaleServerResourceBounds.MaxFileBytes, token, budget);
-        var memoryLimit = await BoundedText.ReadAsync(Path.Combine(directory, MemoryLimitFile), ScaleServerResourceBounds.MaxFileBytes, token, budget);
-        var cpuStats = await BoundedText.ReadAsync(Path.Combine(directory, CpuStatsFile), ScaleServerResourceBounds.MaxFileBytes, token, budget);
-        var memoryCurrent = await BoundedText.ReadAsync(Path.Combine(directory, MemoryCurrentFile), ScaleServerResourceBounds.MaxFileBytes, token, budget);
+        const int BoundaryValue = 0;
+        const int InspectFieldCount = 0;
+
+        var cpuLimit = await BoundedText.ReadAsync(Path.Combine(directory, CpuLimitFile), budget.Settings.MaxFileBytes, token, budget);
+        var memoryLimit = await BoundedText.ReadAsync(Path.Combine(directory, MemoryLimitFile), budget.Settings.MaxFileBytes, token, budget);
+        var cpuStats = await BoundedText.ReadAsync(Path.Combine(directory, CpuStatsFile), budget.Settings.MaxFileBytes, token, budget);
+        var memoryCurrent = await BoundedText.ReadAsync(Path.Combine(directory, MemoryCurrentFile), budget.Settings.MaxFileBytes, token, budget);
         if (cpuLimit is null || memoryLimit is null || cpuStats is null || memoryCurrent is null)
         {
             return InvalidateAfterStart();
@@ -140,12 +156,12 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
 
         if (!TryUsage(cpuStats, out var usage)
             || !long.TryParse(memoryCurrent, NumberStyles.None, CultureInfo.InvariantCulture, out var currentMemory)
-            || _samples > 0 && usage < _lastCpuUsec)
+            || _samples > BoundaryValue && usage < _lastCpuUsec)
         {
             return InvalidateAfterStart();
         }
 
-        if (_samples == 0)
+        if (_samples == InspectFieldCount)
         {
             _firstCpuUsec = usage;
         }
@@ -179,7 +195,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
             return InvalidateAfterStart();
         }
         _samples++;
-        return _mounts.Length > 0 || InvalidateAfterStart();
+        return _mounts.Length > BoundaryValue || InvalidateAfterStart();
     }
 
     private bool InvalidateAfterStart()
@@ -193,7 +209,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
     }
 
     internal ScaleServerContainer? ToRecord()
-        => _samples == 0 || _containerId is null || _imageId is null || _startedAt is null || _state is null
+        => _samples == ToRecordEmptyValue || _containerId is null || _imageId is null || _startedAt is null || _state is null
             || _cpuLimit is null || _memoryLimit is null ? null
             : new(resourceName, _containerId, _imageId, _startedAt, _state, _cpuLimit, _memoryLimit,
                 _effectiveEnvelope!.CpuQuota, _effectiveEnvelope.CpuSet, _effectiveEnvelope.MemoryLimitBytes,
@@ -201,21 +217,25 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
 
     private static async Task<string?> ReadCgroupPathAsync(int pid, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        var text = await BoundedText.ReadAsync($"/proc/{pid}/cgroup", ScaleServerResourceBounds.MaxFileBytes, token, budget);
-        var row = text?.Split('\n').FirstOrDefault(line => line.StartsWith(UnifiedCgroupMarker, StringComparison.Ordinal));
+        const char LineFeedCharacter = '\n';
+
+        var text = await BoundedText.ReadAsync($"/proc/{pid}/cgroup", budget.Settings.MaxFileBytes, token, budget);
+        var row = text?.Split(LineFeedCharacter).FirstOrDefault(line => line.StartsWith(UnifiedCgroupMarker, StringComparison.Ordinal));
         return row?[UnifiedCgroupMarker.Length..].Trim();
     }
 
     private static async Task<int[]?> ReadPidsAsync(string path, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        var text = await BoundedText.ReadAsync(path, ScaleServerResourceBounds.MaxFileBytes, token, budget);
+        const char LineFeedCharacter = '\n';
+
+        var text = await BoundedText.ReadAsync(path, budget.Settings.MaxFileBytes, token, budget);
         if (text is null)
         {
             return null;
         }
 
         var values = new List<int>();
-        foreach (var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+        foreach (var line in text.Split(LineFeedCharacter, StringSplitOptions.RemoveEmptyEntries))
         {
             if (!int.TryParse(line, NumberStyles.None, CultureInfo.InvariantCulture, out var pid))
             {
@@ -223,7 +243,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
             }
 
             values.Add(pid);
-            if (values.Count > ScaleServerResourceBounds.MaxProcesses)
+            if (values.Count > budget.Settings.MaxProcesses)
             {
                 return null;
             }
@@ -234,11 +254,13 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
     private static async Task<long?> ReadRssAsync(int[] pids, string expectedCgroup,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        long total = 0;
+        const int TotalInitialValue = 0;
+
+        long total = TotalInitialValue;
         foreach (var pid in pids)
         {
             var before = await ProcessIdentity.ReadAsync(pid, expectedCgroup, budget, token);
-            var status = await BoundedText.ReadAsync($"/proc/{pid}/status", ScaleServerResourceBounds.MaxFileBytes, token, budget);
+            var status = await BoundedText.ReadAsync($"/proc/{pid}/status", budget.Settings.MaxFileBytes, token, budget);
             var after = await ProcessIdentity.ReadAsync(pid, expectedCgroup, budget, token);
             if (before is null || after is null || before != after || !TryRss(status, out var rss))
             {
@@ -252,16 +274,24 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
 
     private static bool TryRss(string? status, out long bytes)
     {
-        bytes = 0;
-        var row = status?.Split('\n').FirstOrDefault(line => line.StartsWith(RssPrefix, StringComparison.Ordinal));
-        var value = row?[RssPrefix.Length..].Trim().Split(' ').FirstOrDefault();
+        const int StructuralValue = 0;
+        const char LineFeedCharacter = '\n';
+        const char SpaceCharacter = ' ';
+        const int ScaleFactor = 1024;
+        const int BoundaryValue = 0;
+
+        bytes = StructuralValue;
+        var row = status?.Split(LineFeedCharacter).FirstOrDefault(line => line.StartsWith(RssPrefix, StringComparison.Ordinal));
+        var value = row?[RssPrefix.Length..].Trim().Split(SpaceCharacter).FirstOrDefault();
         return long.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var kb)
-            && (bytes = checked(kb * 1024)) >= 0;
+            && (bytes = checked(kb * ScaleFactor)) >= BoundaryValue;
     }
 
     private static bool TryUsage(string stats, out long usage)
     {
-        var row = stats.Split('\n').FirstOrDefault(line => line.StartsWith(UsagePrefix, StringComparison.Ordinal));
+        const char LineFeedCharacter = '\n';
+
+        var row = stats.Split(LineFeedCharacter).FirstOrDefault(line => line.StartsWith(UsagePrefix, StringComparison.Ordinal));
         return long.TryParse(row?[UsagePrefix.Length..], NumberStyles.None, CultureInfo.InvariantCulture, out usage);
     }
 
@@ -276,16 +306,25 @@ internal static class ProcessIdentity
 
     internal static async Task<string?> ReadAsync(int pid, string expectedCgroup, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        var cgroup = await BoundedText.ReadAsync(Proc + "/" + pid + Cgroup, ScaleServerResourceBounds.MaxFileBytes, token, budget);
-        var row = cgroup?.Split('\n').FirstOrDefault(line => line.StartsWith(Unified, StringComparison.Ordinal));
-        var stat = await BoundedText.ReadAsync(Proc + "/" + pid + Stat, ScaleServerResourceBounds.MaxFileBytes, token, budget);
+        const string PathText = "/";
+        const char LineFeedCharacter = '\n';
+        const char ValueCharacter = ')';
+        const int BoundaryValue = 0;
+        const int SecondIndex = 1;
+        const char SpaceCharacter = ' ';
+        const int ReadAsyncBoundaryValue = 19;
+        const int ElementIndex = 19;
+
+        var cgroup = await BoundedText.ReadAsync(Proc + PathText + pid + Cgroup, budget.Settings.MaxFileBytes, token, budget);
+        var row = cgroup?.Split(LineFeedCharacter).FirstOrDefault(line => line.StartsWith(Unified, StringComparison.Ordinal));
+        var stat = await BoundedText.ReadAsync(Proc + PathText + pid + Stat, budget.Settings.MaxFileBytes, token, budget);
         if (row is null || row[Unified.Length..].Trim() != expectedCgroup || stat is null)
         {
             return null;
         }
 
-        var close = stat.LastIndexOf(')');
-        var fields = close < 0 ? [] : stat[(close + 1)..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return fields.Length <= 19 ? null : fields[19];
+        var close = stat.LastIndexOf(ValueCharacter);
+        var fields = close < BoundaryValue ? [] : stat[(close + SecondIndex)..].Split(SpaceCharacter, StringSplitOptions.RemoveEmptyEntries);
+        return fields.Length <= ReadAsyncBoundaryValue ? null : fields[ElementIndex];
     }
 }

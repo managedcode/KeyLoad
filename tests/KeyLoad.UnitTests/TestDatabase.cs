@@ -35,7 +35,7 @@ internal sealed class TestDatabase : IDisposable
         ZoneTreeStore? acquired = null;
         try
         {
-            Store = acquired = new(new(Directory));
+            Store = acquired = new(new(Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits),
                 UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
             Database.Bootstrap(new(RootPrincipalId, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard]) { ClusterAdministrator = true },

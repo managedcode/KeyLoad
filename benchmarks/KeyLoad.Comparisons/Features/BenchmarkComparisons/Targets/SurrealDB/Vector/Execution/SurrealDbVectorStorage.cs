@@ -4,10 +4,12 @@ using System.Text;
 using System.Text.Json;
 
 namespace KeyLoad.Comparisons.Targets;
+
 internal static class SurrealDbVectorStorage
 {
     private const int SingleResultCardinality = 1;
     private const int EmptyResultCount = 0;
+    private const string InvalidReadbackOrder = "SurrealDbReadbackOrderingInvalid";
     private const string InvalidResponse = "SurrealDbInvalidResponse";
     private const string NumberKey = "number";
     private const string IdKey = "id";
@@ -35,6 +37,10 @@ internal static class SurrealDbVectorStorage
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var number = row.GetProperty(NumberKey).GetInt32();
+                if (number <= after || seen >= corpusCount)
+                {
+                    throw new ComparisonFailureException(InvalidReadbackOrder);
+                }
                 var id = SurrealDbVectorProtocol.ReadRecordId(table, row.GetProperty(IdKey));
                 var embedding = SurrealDbVectorProtocol.ReadVector(row.GetProperty(EmbeddingKey));
                 var payload = SurrealDbVectorProtocol.ReadRequiredString(row, PayloadKey);
@@ -54,7 +60,11 @@ internal static class SurrealDbVectorStorage
     {
         using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbVectorProtocol.ReadOneSql(table, id), policy, cancellationToken).ConfigureAwait(false);
         var result = SurrealDbVectorProtocol.SingleResult(response.RootElement);
-        if (result.ValueKind != JsonValueKind.Array || result.GetArrayLength() == EmptyResultCount)
+        if (result.ValueKind != JsonValueKind.Array || result.GetArrayLength() > SingleResultCardinality)
+        {
+            throw new InvalidDataException(InvalidResponse);
+        }
+        if (result.GetArrayLength() == EmptyResultCount)
         {
             return null;
         }

@@ -1,4 +1,5 @@
 using KeyLoad.Comparisons;
+using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
@@ -30,6 +31,7 @@ internal static class IsolatedHostApplication
         {
             cancellationToken.ThrowIfCancellationRequested();
             var settings = IsolatedHostSettings.Read(configuration);
+            var openLoop = IsolatedOpenLoopSettings.Read(configuration, settings.Selection);
             IsolatedHostReportWriter.ValidateDestination(settings.OutputDirectory);
             if (settings.UnsupportedReason is { } reason)
             {
@@ -39,9 +41,16 @@ internal static class IsolatedHostApplication
                 return ComparisonHostConstants.SuccessfulExitCode;
             }
             var policy = NativeComparisonExecutionRegistration.Read(configuration);
-            return await RunNativeAsync(settings, policy, cancellationToken);
+            return await RunNativeAsync(settings, policy,
+                NativeComparisonExecutionRegistration.ReadLifecycle(configuration),
+                NativeComparisonExecutionRegistration.ReadClient(configuration),
+                NativeComparisonExecutionRegistration.ReadTranslation(configuration), openLoop, cancellationToken);
         }
         catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
         {
             throw;
         }
@@ -51,9 +60,18 @@ internal static class IsolatedHostApplication
         }
     }
 
-    private static async Task<int> RunNativeAsync(IsolatedHostSettings settings, Microsoft.Extensions.Options.IOptions<NativeComparisonExecutionOptions> policy, CancellationToken cancellationToken)
+    private static async Task<int> RunNativeAsync(IsolatedHostSettings settings,
+        Microsoft.Extensions.Options.IOptions<NativeComparisonExecutionOptions> policy,
+        Microsoft.Extensions.Options.IOptions<ComparisonLifecycleOptions> lifecycleOptions,
+        Microsoft.Extensions.Options.IOptions<KeyLoad.Client.KeyLoadClientExecutionOptions> clientOptions,
+        Microsoft.Extensions.Options.IOptions<KeyLoad.Client.QueryTranslationOptions> translationOptions,
+        IsolatedOpenLoopSettings? openLoop, CancellationToken cancellationToken)
     {
-        await using var owner = new IsolatedHostTargetOwner(policy);
+        await using var owner = new IsolatedHostTargetOwner(policy, lifecycleOptions, clientOptions, translationOptions);
+        if (openLoop is not null)
+        {
+            return await IsolatedOpenLoopHostApplication.RunAsync(owner, settings, openLoop, cancellationToken);
+        }
         if (settings.Selection.VectorProfile is not null)
         {
             return await IsolatedVectorHostApplication.RunAsync(owner, settings, cancellationToken);

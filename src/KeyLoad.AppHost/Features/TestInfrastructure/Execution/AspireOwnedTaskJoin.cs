@@ -8,8 +8,10 @@ internal static class AspireOwnedTaskJoin
 
     internal static async Task<Task> FirstFailureOrAllAsync(Task[] tasks)
     {
+        const int SingleFailureCount = 0;
+
         var pending = tasks.ToList();
-        while (pending.Count != 0)
+        while (pending.Count != SingleFailureCount)
         {
             var settled = await Task.WhenAny(pending).ConfigureAwait(false);
             if (!settled.IsCompletedSuccessfully)
@@ -58,11 +60,15 @@ internal static class AspireOwnedTaskJoin
 
     private static void ThrowFailures(List<Exception> failures)
     {
-        if (failures.Count == 1)
+        const int SingleFailureCount = 1;
+        const int IndexValue = 0;
+        const int BoundaryValue = 1;
+
+        if (failures.Count == SingleFailureCount)
         {
-            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+            ExceptionDispatchInfo.Capture(failures[IndexValue]).Throw();
         }
-        if (failures.Count > 1)
+        if (failures.Count > BoundaryValue)
         {
             throw new AggregateException(MultipleFailures, failures);
         }

@@ -62,11 +62,108 @@ internal sealed class TypedConfigurationInjectionTests
         const string source = """
             using Microsoft.Extensions.Options;
             [KeyLoad.ConfigurationOptions]
-            internal sealed class Policy { public int RetryLimit { get; set; } }
+            internal sealed class Policy
+            {
+                public int RetryLimit { get; set; } = 3;
+                internal void Validate() => System.ArgumentOutOfRangeException.ThrowIfNegativeOrZero(RetryLimit);
+            }
             [KeyLoad.ConfigurationBinding]
             internal static class Composition
             {
-                internal static IOptions<Policy> Bind() => Options.Create(new Policy());
+                internal static IOptions<Policy> Bind()
+                {
+                    var policy = new Policy();
+                    policy.Validate();
+                    return Options.Create(policy);
+                }
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertConfigurationAsync(source);
+    }
+
+    [Test]
+    public async Task NativeOptionsCreateCannotHideAnUnownedPolicySnapshotAsync()
+    {
+        const string source = """
+            [KeyLoad.ConfigurationOptions]
+            internal sealed class Policy { public int RetryLimit { get; set; } }
+            internal static class Subject
+            {
+                internal static Microsoft.Extensions.Options.IOptions<Policy> Execute(Policy supplied) =>
+                    [|Microsoft.Extensions.Options.Options.Create(supplied)|];
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertConfigurationAsync(source);
+    }
+
+    [Test]
+    public async Task NativeFactoryAndManagerRemainOwnedByActualBindingAsync()
+    {
+        const string source = """
+            [KeyLoad.ConfigurationOptions]
+            internal sealed class Policy { public int RetryLimit { get; set; } }
+            internal static class Subject
+            {
+                internal static Microsoft.Extensions.Options.IOptions<Policy> Execute()
+                {
+                    var factory = [|new Microsoft.Extensions.Options.OptionsFactory<Policy>([], [])|];
+                    return [|new Microsoft.Extensions.Options.OptionsManager<Policy>(factory)|];
+                }
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertConfigurationAsync(source);
+    }
+
+    [Test]
+    public async Task GetOnlyPropertyCapturesTheActualOptionsValueOnceAsync()
+    {
+        const string source = """
+            [KeyLoad.ConfigurationOptions]
+            internal sealed class Policy { public System.TimeSpan Deadline { get; set; } }
+            internal sealed class Subject
+            {
+                public Policy Snapshot { get; }
+                internal Subject(Microsoft.Extensions.Options.IOptions<Policy> options) { Snapshot = options.Value; }
+                internal System.Threading.Tasks.Task Execute() => System.Threading.Tasks.Task.Delay(Snapshot.Deadline);
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertConfigurationAsync(source);
+    }
+
+    [Test]
+    public async Task UnprovenGetOnlyPropertyRemainsBareInjectionAsync()
+    {
+        const string source = """
+            [KeyLoad.ConfigurationOptions]
+            internal sealed class Policy { public int RetryLimit { get; set; } }
+            internal sealed class Subject
+            {
+                public [|Policy|] Snapshot { get; }
+                internal Subject([|Policy|] supplied) { Snapshot = supplied; }
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertConfigurationAsync(source);
+    }
+
+    [Test]
+    public async Task ReassigningAGetOnlyPropertyDoesNotProveASingleFrozenSnapshotAsync()
+    {
+        const string source = """
+            [KeyLoad.ConfigurationOptions]
+            internal sealed class Policy { public int RetryLimit { get; set; } }
+            internal sealed class Subject
+            {
+                public [|Policy|] Snapshot { get; }
+                internal Subject(Microsoft.Extensions.Options.IOptions<Policy> options)
+                {
+                    Snapshot = options.Value;
+                    Snapshot = options.Value;
+                }
             }
             """;
 

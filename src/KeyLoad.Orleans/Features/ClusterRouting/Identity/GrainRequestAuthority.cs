@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 
 namespace KeyLoad.Orleans;
 
@@ -16,6 +17,18 @@ internal static class GrainRequestAuthority
             GrainFailureDiagnostics.Mark(error, GrainFailureStage.Authorization);
             throw;
         }
+    }
+
+    internal static PrincipalRecord ReloadForRequest(DatabaseEngine database, GrainRequestEnvelope envelope, TimeProvider clock)
+    {
+        if (envelope.Purpose != GrainNativeContracts.RuntimeJournalPurpose
+            || envelope.PrincipalId != RuntimeJournalIdentity.ProtectedPrincipalId)
+        {
+            return Reload(database, envelope.PrincipalId!, clock);
+        }
+        var principal = database.Store.Read(view => database.Principal(view, envelope.PrincipalId, clock.GetUtcNow()));
+        RuntimeJournalIdentity.RequireProtected(principal);
+        return principal;
     }
 
     internal static PrincipalRecord Authenticate(DatabaseEngine database, ReadOnlyMemory<byte> payload, TimeProvider clock)

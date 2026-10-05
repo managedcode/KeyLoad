@@ -110,7 +110,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
         {
             pending = RequireApp().CreateHttpClient(node, ClusterFixtureProtocol.HttpEndpointName);
             pending.Timeout = ClusterFixtureProtocol.ClientTimeout;
-            var client = new KeyLoadClient(pending, key ?? AdminKey);
+            var client = new KeyLoadClient(pending, key ?? AdminKey, IntegrationClientOptions.Execution());
             pending = null;
             return client;
         }

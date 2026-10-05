@@ -45,7 +45,7 @@ internal static class NativeTextCrashScenario
         {
             throw new ArgumentOutOfRangeException(nameof(stageText), stageText, "The native text crash stage is unsupported.");
         }
-        using var store = new ZoneTreeStore(new(directory));
+        using var store = new ZoneTreeStore(new(directory), CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         var database = CrashDatabase.Create(store);
         var partition = CreatePartition();
         SeedDatabase(database, partition);

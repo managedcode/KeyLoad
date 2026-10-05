@@ -17,7 +17,7 @@ internal sealed class GraphPathRf3ParityTests(ClusterFixture fixture)
         var seed = await GraphPathRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await GraphPathRf3Scenario.GrantLabelUseAsync(fixture, seed, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
         var direct = GraphPathRf3Scenario.Request(seed, labels: ImmutableArray.Create(GraphPathRf3Scenario.Label));
@@ -45,7 +45,7 @@ internal sealed class GraphPathRf3ParityTests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var seed = await GraphPathRf3Scenario.CreateAsync(fixture, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, seed.Reader.Secret);
+        var sdk = new KeyLoadClient(http, seed.Reader.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
             seed.Reader.Secret, deadline.Token);
         var direct = GraphPathRf3Scenario.Request(seed);
@@ -84,7 +84,7 @@ internal sealed class GraphPathRf3ParityTests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var seed = await GraphPathRf3Scenario.CreateAsync(fixture, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, seed.Reader.Secret);
+        var sdk = new KeyLoadClient(http, seed.Reader.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             seed.Reader.Secret, deadline.Token);
         var request = GraphPathRf3Scenario.Request(seed);

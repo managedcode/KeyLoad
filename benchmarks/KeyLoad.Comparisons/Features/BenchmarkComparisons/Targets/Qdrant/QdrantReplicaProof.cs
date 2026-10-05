@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -7,7 +8,6 @@ internal sealed record QdrantReplicaResult(string Version, ClusterEvidence Evide
 
 internal static class QdrantReplicaProof
 {
-    private const int ReadinessTimeoutSeconds = 60;
 
     private const string ClusterPath = "/cluster";
     private const string CollectionClusterSuffix = "/cluster";
@@ -15,22 +15,22 @@ internal static class QdrantReplicaProof
     private const string ResultField = "result";
     private const string StatusField = "status";
     private const string DisabledState = "disabled";
-    private const int PollMilliseconds = 250;
-    private static readonly TimeSpan ReadinessTimeout = TimeSpan.FromSeconds(ReadinessTimeoutSeconds);
 
     public static async Task<QdrantReplicaResult> VerifyAsync(HttpClient[] clients, string collection,
-        int expectedPoints, ComparisonTopology topology, CancellationToken cancellationToken)
+        int expectedPoints, ComparisonTopology topology, CancellationToken cancellationToken,
+        IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     {
+        var lifecycle = lifecycleOptions.Value;
         var required = ComparisonTopologies.NodeCount(topology);
         ValidateClients(clients, topology);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(ReadinessTimeout);
+        deadline.CancelAfter(lifecycle.ReadinessTimeout);
         while (true)
         {
             try
             {
                 var proof = topology == ComparisonTopology.Standalone
-                    ? await ReadStandaloneAndDelayAsync(clients[0], collection, expectedPoints, deadline.Token)
+                    ? await ReadStandaloneAndDelayAsync(clients[0], collection, expectedPoints, deadline.Token, lifecycle.HttpReadinessPollInterval)
                     : await ReadReplicatedAsync(clients, collection, expectedPoints, required, topology, deadline.Token);
                 if (proof is not null)
                 {
@@ -44,7 +44,7 @@ internal static class QdrantReplicaProof
             catch (HttpRequestException) when (!deadline.IsCancellationRequested) { }
             catch (JsonException) when (!deadline.IsCancellationRequested) { }
             try
-            { await Task.Delay(PollMilliseconds, deadline.Token); }
+            { await Task.Delay(lifecycle.HttpReadinessPollInterval, deadline.Token); }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             { throw new ComparisonFailureException("QdrantReplicaReadinessTimeout"); }
         }
@@ -61,12 +61,12 @@ internal static class QdrantReplicaProof
     }
 
     private static async Task<QdrantReplicaResult?> ReadStandaloneAndDelayAsync(HttpClient client, string collection,
-        int expectedPoints, CancellationToken token)
+        int expectedPoints, CancellationToken token, TimeSpan pollInterval)
     {
         var proof = await ReadStandaloneAsync(client, collection, expectedPoints, token);
         if (proof is null)
         {
-            await Task.Delay(PollMilliseconds, token);
+            await Task.Delay(pollInterval, token);
         }
 
         return proof;

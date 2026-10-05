@@ -57,7 +57,10 @@ public sealed record EmitRecurringOccurrences(
     [property: global::Orleans.Id(0)] QueueLaneRef Lane,
     [property: global::Orleans.Id(1)] Guid ScheduleId,
     [property: global::Orleans.Id(2)] long ExpectedGeneration,
-    [property: global::Orleans.Id(3)] int MaxOccurrences = 1) : Mutation(Lane?.Queue!);
+    [property: global::Orleans.Id(3)] int MaxOccurrences = EmitRecurringOccurrences.DefaultMaxOccurrences) : Mutation(Lane?.Queue!)
+{
+    private const int DefaultMaxOccurrences = 1;
+}
 
 /// <summary>Cancels one schedule revision without discarding its occurrence watermark.</summary>
 [global::Orleans.GenerateSerializer]

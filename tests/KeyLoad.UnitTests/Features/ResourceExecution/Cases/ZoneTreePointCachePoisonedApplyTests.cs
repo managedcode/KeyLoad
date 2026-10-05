@@ -28,7 +28,7 @@ internal sealed class ZoneTreePointCachePoisonedApplyTests
                             throw new InvalidOperationException("Intentional apply observer failure.");
                         }
                     }
-                });
+                }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
                 Put(store, ValueA);
                 Warm(store);
                 var before = store.GetPointCacheDiagnostics();
@@ -57,7 +57,7 @@ internal sealed class ZoneTreePointCachePoisonedApplyTests
         using var reopened = new ZoneTreeStore(new ZoneTreeStoreOptions(directory)
         {
             EmbeddedPointCache = new ZoneTreePointCacheOptions(budget)
-        });
+        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var cold = reopened.GetPointCacheDiagnostics();
         AssertValue(reopened, [44]);
         var recovered = reopened.GetPointCacheDiagnostics();

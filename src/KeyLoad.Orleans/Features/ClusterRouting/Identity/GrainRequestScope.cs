@@ -6,7 +6,7 @@ internal static class GrainRequestScope
 {
     internal static void Validate(GrainRequestEnvelope request, Guid incarnation, DateTimeOffset now, TimeSpan maximumFuture)
     {
-        if (request.Purpose != GrainNativeContracts.RequestPurpose || request.Incarnation != incarnation
+        if (request.Incarnation != incarnation
             || request.RequestId == Guid.Empty || request.ExpiresAt <= now || request.ExpiresAt > now + maximumFuture
             || (request.ReadKind is null) == (request.CommandKind is null) || request.Payload.IsEmpty)
         {
@@ -18,6 +18,8 @@ internal static class GrainRequestScope
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
+
+        RuntimeJournalRequestScope.Validate(request);
 
         if (request.CommandKind == OperationKind.Membership || request.PrincipalId == ClusterPrincipalPolicy.InternalPrincipalId)
         {

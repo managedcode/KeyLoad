@@ -38,7 +38,7 @@ internal static class NodeEpochRegularFileScenario
         var options = NodeEpochCrashSettings.CreateOptions(profile, args[DestinationArgument]);
         try
         {
-            _ = ServerNodeFormatUpgrade.Prepare(args[SourceArgument], options);
+            _ = ServerNodeFormatUpgrade.Prepare(args[SourceArgument], CrashServerRuntimeOptions.Runtime(options));
             await Console.Out.WriteLineAsync(UnexpectedSuccess);
         }
         catch (KeyLoadException failure)
@@ -57,7 +57,7 @@ internal static class NodeEpochRegularFileScenario
     {
         try
         {
-            _ = ZoneTreeSnapshotFormatUpgrade.Upgrade(source, destination, incarnation);
+            _ = ZoneTreeSnapshotFormatUpgrade.Upgrade(source, destination, incarnation, CrashExecutionOptions.StorageExecution());
             Console.Out.WriteLine("UnexpectedSuccess");
         }
         catch (KeyLoadException failure)

@@ -3,6 +3,8 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 /// <summary>Detaches indexed entries while preserving charges held by active readers.</summary>
 internal static class ZoneTreePointCacheRetirement
 {
+    private const int NoActivePins = 0;
+
     internal static bool TryRetireVictim(ZoneTreePointCacheState state)
     {
         var victim = state.LeastRecentlyUsed?.Last?.Value;
@@ -33,7 +35,7 @@ internal static class ZoneTreePointCacheRetirement
             ZoneTreePointCacheState.Increment(ref state.Evictions);
         }
 
-        if (entry.PinCount == 0)
+        if (entry.PinCount == NoActivePins)
         {
             ReleaseEntry(state, entry);
         }

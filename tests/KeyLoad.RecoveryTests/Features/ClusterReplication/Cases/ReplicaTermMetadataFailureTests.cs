@@ -98,7 +98,7 @@ internal sealed class ReplicaTermMetadataFailureTests
             var sourceStore = fixture.Own(new ZoneTreeStore(new ZoneTreeStoreOptions(sourceDirectory)
             {
                 Incarnation = fixture.Configuration.Incarnation
-            }));
+            }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
             var sourceLog = fixture.Own(new DurableReplicaLog(sourceStore, RecoveryExecutionOptions.Configuration(fixture.Configuration with { Directory = sourceDirectory })));
             ReplicaTermMetadataFixture.PrepareLog(fixture.Log, EntryTerm, LogTerm);
             ReplicaTermMetadataFixture.PrepareLog(sourceLog, EntryTerm, LogTerm);

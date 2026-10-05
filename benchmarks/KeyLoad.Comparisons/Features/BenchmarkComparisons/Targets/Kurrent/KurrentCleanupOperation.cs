@@ -1,11 +1,13 @@
 using KurrentDB.Client;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class KurrentCleanupOperation(string[] streams, CancellationToken token) : IDisposable
+internal sealed class KurrentCleanupOperation(string[] streams, CancellationToken token, IOptions<ComparisonLifecycleOptions> options) : IDisposable
 {
-    private readonly KurrentCleanupState state = new(streams.Length);
-    private readonly KurrentCleanupCancellation cancellation = new(token);
+    private readonly KurrentCleanupState state = new(streams.Length, options);
+    private readonly KurrentCleanupCancellation cancellation = new(token, options);
+    private readonly ComparisonLifecycleOptions settings = options.Value;
     private Task[] workers = [];
     private Task deletion = Task.CompletedTask;
 
@@ -16,7 +18,7 @@ internal sealed class KurrentCleanupOperation(string[] streams, CancellationToke
             token.ThrowIfCancellationRequested();
             if (writer is not null)
             {
-                workers = Enumerable.Range(0, Math.Min(KurrentConstants.CleanupConcurrency, streams.Length))
+                workers = Enumerable.Range(0, Math.Min(settings.KurrentCleanupConcurrency, streams.Length))
                     .Select(_ => DeleteWorkerAsync(writer)).ToArray();
                 deletion = Task.WhenAll(workers);
                 await deletion.WaitAsync(cancellation.Deadline.Token);

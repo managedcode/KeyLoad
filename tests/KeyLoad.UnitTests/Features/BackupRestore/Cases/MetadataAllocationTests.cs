@@ -49,7 +49,7 @@ internal sealed class MetadataAllocationTests
     {
         try
         {
-            ZoneTreeStore.Restore(backup, destination);
+            ZoneTreeStore.Restore(backup, destination, UnitExecutionOptions.StorageExecution());
         }
         catch (KeyLoadException error)
         {

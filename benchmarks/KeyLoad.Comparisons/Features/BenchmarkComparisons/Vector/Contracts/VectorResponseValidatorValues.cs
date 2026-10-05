@@ -11,7 +11,7 @@ internal static class VectorResponseValidatorValues
     internal const double CosineTolerance = 0.000001d;
     internal const double MaximumCosineWithTolerance = 2.000001d;
     internal const string ANativeVectorResponseContainsMissing = "A native vector response contains missing IDs or invalid cosine distances.";
-    internal const int MutableGroupWidth = 10;
+    internal const int IdCharacterCount = 10;
     internal const char VectorIdPrefixCharacter = 'v';
     internal const int SingleElementOffset = 1;
     internal const string ANativeVectorResponseIncludedAn = "A native vector response included an unknown or ineligible document.";

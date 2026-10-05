@@ -32,7 +32,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheFileFixture : IDisposable
             options = options with { EmbeddedPointCache = CreateOptions(maxEntries) };
         }
 
-        var store = new ZoneTreeStore(options);
+        var store = new ZoneTreeStore(options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         stores.Add((directory, store));
         return store;
     }
@@ -66,7 +66,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheFileFixture : IDisposable
         }
 
         var directory = stores[index].Directory;
-        var reopened = new ZoneTreeStore(new ZoneTreeStoreOptions(directory));
+        var reopened = new ZoneTreeStore(new ZoneTreeStoreOptions(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         stores[index] = (directory, reopened);
         return reopened;
     }

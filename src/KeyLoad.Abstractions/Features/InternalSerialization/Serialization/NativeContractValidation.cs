@@ -8,6 +8,11 @@ namespace KeyLoad.Features.InternalSerialization;
 
 internal static class NativeContractValidation
 {
+    private const int RootGraphDepth = 1;
+    private const int LeafHeight = 0;
+    private const int ChildDepthStep = 1;
+    private const int DictionaryKeyIndex = 0;
+    private const int DictionaryValueIndex = 1;
     private static readonly ConcurrentDictionary<Type, NativeMemberValidation[]> Members = new();
     private static readonly ConcurrentDictionary<Type, PropertyInfo> CollectionDefaults = new();
 
@@ -19,7 +24,7 @@ internal static class NativeContractValidation
         }
         if (!IsScalar(value))
         {
-            _ = Visit(value, new NativeGraphValidationState(), null, profile, 1);
+            _ = Visit(value, new NativeGraphValidationState(), null, profile, RootGraphDepth);
         }
     }
 
@@ -33,12 +38,12 @@ internal static class NativeContractValidation
             {
                 throw Errors.Fail(ErrorCode.Corruption, NativePayloadVersion.InvalidPayload);
             }
-            return 0;
+            return LeafHeight;
         }
         var type = value.GetType();
         if (IsScalar(value))
         {
-            return 0;
+            return LeafHeight;
         }
         var tracked = !type.IsValueType;
         if (state.Enter(value, tracked, validation, depth, out var completedHeight))
@@ -47,7 +52,7 @@ internal static class NativeContractValidation
         }
         try
         {
-            var height = checked(1 + VisitChildren(value, type, state, validation, profile, depth + 1));
+            var height = checked(ChildDepthStep + VisitChildren(value, type, state, validation, profile, depth + ChildDepthStep));
             state.Complete(value, tracked, validation, height);
             return height;
         }
@@ -61,7 +66,7 @@ internal static class NativeContractValidation
         NativeValueValidation? validation, NativeValidationProfile profile, int depth)
     {
         ValidateCollection(value, type);
-        var height = 0;
+        var height = LeafHeight;
         if (value is IDictionary dictionary)
         {
             foreach (DictionaryEntry entry in dictionary)
@@ -101,10 +106,10 @@ internal static class NativeContractValidation
         var members = Members.GetOrAdd(type, GetMembers);
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
         {
-            return Math.Max(Visit(members[0].Read(value), state, validation?.DictionaryKey, profile, depth),
-                Visit(members[1].Read(value), state, validation?.DictionaryValue, profile, depth));
+            return Math.Max(Visit(members[DictionaryKeyIndex].Read(value), state, validation?.DictionaryKey, profile, depth),
+                Visit(members[DictionaryValueIndex].Read(value), state, validation?.DictionaryValue, profile, depth));
         }
-        var height = 0;
+        var height = LeafHeight;
         foreach (var member in members)
         {
             height = Math.Max(height, Visit(member.Read(value), state, member.Value, profile, depth));
@@ -156,6 +161,10 @@ internal sealed record NativeMemberValidation(Func<object, object?> Read, Native
 internal sealed record NativeValueValidation(bool Required, NativeValueValidation? Element,
     NativeValueValidation? DictionaryKey = null, NativeValueValidation? DictionaryValue = null)
 {
+    private const int DictionaryArgumentCount = 2;
+    private const int SequenceArgumentCount = 1;
+    private const int FirstTypeArgumentIndex = 0;
+    private const int ValueTypeArgumentIndex = 1;
     internal static NativeValueValidation Create(NullabilityInfo info)
     {
         var required = !info.Type.IsValueType && info.ReadState == NullabilityState.NotNull;
@@ -166,11 +175,11 @@ internal sealed record NativeValueValidation(bool Required, NativeValueValidatio
         // NullabilityInfo keeps Nullable<T> as Type, but its generic metadata already describes T.
         var arguments = info.GenericTypeArguments;
         var type = Nullable.GetUnderlyingType(info.Type) ?? info.Type;
-        if (arguments.Length == 2 && (IsKeyValuePair(type) || IsDictionary(type) || type.GetInterfaces().Any(IsDictionary)))
+        if (arguments.Length == DictionaryArgumentCount && (IsKeyValuePair(type) || IsDictionary(type) || type.GetInterfaces().Any(IsDictionary)))
         {
-            return new(required, null, Create(arguments[0]), Create(arguments[1]));
+            return new(required, null, Create(arguments[FirstTypeArgumentIndex]), Create(arguments[ValueTypeArgumentIndex]));
         }
-        return new(required, arguments.Length == 1 ? Create(arguments[0]) : null);
+        return new(required, arguments.Length == SequenceArgumentCount ? Create(arguments[FirstTypeArgumentIndex]) : null);
     }
 
     private static bool IsDictionary(Type type)

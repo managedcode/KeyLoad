@@ -76,8 +76,8 @@ internal sealed class KeyLoadTimeSeriesIntensiveTopologyTests
     {
         using var firstHttp = new HttpClient();
         using var secondHttp = new HttpClient();
-        var firstClient = new KeyLoadClient(firstHttp, string.Empty);
-        var secondClient = new KeyLoadClient(secondHttp, string.Empty);
+        var firstClient = new KeyLoadClient(firstHttp, string.Empty, UnitClientOptions.Execution());
+        var secondClient = new KeyLoadClient(secondHttp, string.Empty, UnitClientOptions.Execution());
         var first = new KeyLoadTimeSeriesIntensivePeer(1, "voter-1", new("http://127.0.0.1:7101"), firstClient);
         var second = new KeyLoadTimeSeriesIntensivePeer(2, "voter-2", new("http://127.0.0.1:7102"), secondClient);
         var partition = new PartitionRef("tenant", "database", "domain", PartitionKey);

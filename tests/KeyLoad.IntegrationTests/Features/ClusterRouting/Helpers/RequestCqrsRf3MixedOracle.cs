@@ -28,7 +28,7 @@ internal static class RequestCqrsRf3MixedOracle
         using var http = McpCallerHttp.Create(app, node);
         using var response = await http.GetAsync(RequestCqrsRf3Protocol.ReadyUri, cancellationToken).ConfigureAwait(false);
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable);
-        var sdk = new KeyLoadClient(http, profile.AdminKey);
+        var sdk = new KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
         var reference = new EntityRef(workload.Partition, RequestCqrsRf3Protocol.AdminCollection, "document-00");
         var result = await sdk.GetAsync(reference, cancellationToken).ConfigureAwait(false);
         await Assert.That(result.IsFailed).IsTrue();

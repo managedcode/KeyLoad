@@ -8,13 +8,14 @@ namespace KeyLoad;
 public static class JsonDefaults
 {
     private const string MissingRecordMessage = "A persisted record has no value.";
+    private const int CanonicalJsonDepth = 64;
     /// <summary>Gets the canonical serializer options.</summary>
     public static JsonSerializerOptions Options { get; } = Create();
     private static JsonSerializerOptions Create()
     {
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
-            MaxDepth = 64,
+            MaxDepth = CanonicalJsonDepth,
             PropertyNameCaseInsensitive = false,
             UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
             RespectNullableAnnotations = true,

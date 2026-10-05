@@ -41,11 +41,11 @@ internal static class ServerOfflineFormatUpgrade
     {
         if (operation == Command)
         {
-            _ = ZoneTreeFormatUpgrade.Upgrade(source, new(destination));
+            _ = ZoneTreeFormatUpgrade.Upgrade(source, new(destination), ServerConfiguration.ReadOfflineStorageExecution());
             await Console.Out.WriteLineAsync(Complete).ConfigureAwait(false);
             return;
         }
-        var options = ServerConfiguration.ReadOfflineNode(destination);
+        var options = ServerConfiguration.ReadOfflineRuntimeOptions(destination);
         _ = operation switch
         {
             PrepareNode => ServerNodeFormatUpgrade.Prepare(source, options),

@@ -169,3 +169,5 @@ Any new control/provider contract needs an explicit versioned rollout. Disable a
 candidate only after joining admitted work; retain canonical due sweeps/receipts
 so disposable hints/workers cannot strand effects. Persistent job rollback must
 reconcile queued jobs and canonical generations before removing its provider.
+
+REQ-ORL-013 and AC-ORL-013: the accepted [replicated runtime journal](RuntimeJournal.md) contract owns native Journaling/DurableJobs, private RF3 identity, bounded storage, bootstrap, owner fencing and creator-authorized saga expiry. Its real SDK/MCP, restart and fault gates remain open.

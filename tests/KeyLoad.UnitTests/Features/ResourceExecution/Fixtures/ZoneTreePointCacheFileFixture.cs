@@ -89,7 +89,7 @@ internal sealed class ZoneTreePointCacheFileFixture : IDisposable
                 MaxValueBytes = maxValueBytes,
                 MaxPinsPerEntry = maxPinsPerEntry
             }
-        });
+        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         stores.Add((directory, store));
         return store;
     }

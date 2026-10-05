@@ -104,7 +104,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
             await Assert.That(permit.TryAccept(Guid.NewGuid(), 1, prepared, out var receipt)).IsTrue();
             var acceptanceAge = clock.GetElapsedTime(prepared, beforeAccept);
             await Assert.That(acceptanceAge >= GrantPreparationDelay).IsTrue();
-            await Assert.That(acceptanceAge < CacheReadPermitLimits.PrepareValidity).IsTrue();
+            await Assert.That(acceptanceAge < UnitAdmissionOptions.Permit().Value.PrepareValidity).IsTrue();
             await Assert.That(control.TryApply(receipt)).IsEqualTo(ZoneTreePointCacheControlResult.Applied);
             _ = store.Read(view => view.ReadOwnedValue(Key));
             var warm = control.GetDiagnostics();
@@ -116,8 +116,8 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
             var after = control.GetDiagnostics();
             var completed = clock.GetTimestamp();
 
-            await Assert.That(clock.GetElapsedTime(prepared, completed) >= CacheReadPermitLimits.LeaseValidity).IsTrue();
-            await Assert.That(clock.GetElapsedTime(beforeAccept, completed) < CacheReadPermitLimits.LeaseValidity).IsTrue();
+            await Assert.That(clock.GetElapsedTime(prepared, completed) >= UnitAdmissionOptions.Permit().Value.LeaseValidity).IsTrue();
+            await Assert.That(clock.GetElapsedTime(beforeAccept, completed) < UnitAdmissionOptions.Permit().Value.LeaseValidity).IsTrue();
             await Assert.That(acceptanceCurrent).IsFalse();
             await Assert.That(captured).IsFalse();
             await Assert.That(expiredRevision).IsEqualTo(0);
@@ -132,7 +132,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
     private static async Task WaitUntilPreparedLeaseEndsAsync(TimeProvider clock, long prepared,
         CancellationToken cancellationToken)
     {
-        await WaitForPreparedAgeAsync(clock, prepared, CacheReadPermitLimits.LeaseValidity + ExpiryMargin,
+        await WaitForPreparedAgeAsync(clock, prepared, UnitAdmissionOptions.Permit().Value.LeaseValidity + ExpiryMargin,
             cancellationToken);
     }
 

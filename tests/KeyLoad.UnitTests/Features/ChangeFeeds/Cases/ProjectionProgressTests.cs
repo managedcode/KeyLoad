@@ -189,7 +189,7 @@ internal sealed class ProjectionProgressTests
         var original = Complete(db, consumer, first, new PutDocument("derived", "a", "{}", 0)).Get<ProjectionBatchResult>();
         db.Store.Compact();
         db.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(db.Directory));
+        using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         await Assert.That(engine.GetOutboxStatus("root", db.Partition).Consumers.Single().LastProgressReservationCut).IsEqualTo(1);
         OperationResult Submit(ProjectionBatch batch, Mutation[] effects)

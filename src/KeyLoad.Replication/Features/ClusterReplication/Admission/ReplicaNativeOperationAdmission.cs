@@ -6,6 +6,8 @@ namespace KeyLoad.Replication;
 // Synchronous borrowed admission only. Never return proxy strings as executable operations.
 internal static class ReplicaNativeOperationAdmission
 {
+    private const int NoEntryPayloads = 0;
+
     internal const string SenderMismatch = "The replica command identity does not match its authenticated sender.";
     private const string InvalidOperation = "The native replica operation is invalid or unauthenticated.";
 
@@ -20,7 +22,7 @@ internal static class ReplicaNativeOperationAdmission
             throw Errors.Fail(ErrorCode.Corruption, InvalidOperation);
         }
         var principal = Identity(inspected, operation.PrincipalId);
-        var wrapper = ReplicaNativeInspection.InspectNative<NativeCommandPayload>(operation.NativePayload, maximumEntries: 0);
+        var wrapper = ReplicaNativeInspection.InspectNative<NativeCommandPayload>(operation.NativePayload, maximumEntries: NoEntryPayloads);
         var value = wrapper.Value;
         var detail = Detail(wrapper, value.SafeDetail);
         database.VerifyNativeAuthority(operation.Id, operation.Kind, principal, inspected.Utf8(operation.PayloadJson).Span,

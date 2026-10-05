@@ -23,7 +23,7 @@ internal sealed class FilteredSearchRf3Tests(ClusterFixture fixture)
         var scenario = await FilteredSearchRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, true, true, false, null, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
 
@@ -49,8 +49,8 @@ internal sealed class FilteredSearchRf3Tests(ClusterFixture fixture)
             FilteredSearchRf3Scenario.OwnerA, deadline.Token);
         using var callerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
         using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var caller = new KeyLoadClient(callerHttp, restricted.Secret);
-        var administrator = new KeyLoadClient(adminHttp, fixture.AdminKey);
+        var caller = new KeyLoadClient(callerHttp, restricted.Secret, IntegrationClientOptions.Execution());
+        var administrator = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             restricted.Secret, deadline.Token);
         var visible = ImmutableArray.Create("a", "b", "missing", "b");
@@ -82,7 +82,7 @@ internal sealed class FilteredSearchRf3Tests(ClusterFixture fixture)
         var scenario = await FilteredSearchRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, false, true, false, null, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
         var request = scenario.Text(Needle, ImmutableArray<string>.Empty);
@@ -103,7 +103,7 @@ internal sealed class FilteredSearchRf3Tests(ClusterFixture fixture)
         var scenario = await FilteredSearchRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, true, true, false, null, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
         var oversized = Enumerable.Range(0, 10_001).Select(index => "record-" + index.ToString(

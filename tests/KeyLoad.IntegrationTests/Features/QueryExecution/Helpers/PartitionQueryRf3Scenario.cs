@@ -23,7 +23,7 @@ internal sealed record PartitionQueryRf3Scenario(
         var partitions = CreatePartitions();
         var inputs = CreateInputs(partitions);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await ConfigureResourcesAsync(administrator, partitions, cancellationToken).ConfigureAwait(false);
         await CommitInputsAsync(administrator, inputs, cancellationToken).ConfigureAwait(false);
         await BindFirstPartitionAsync(administrator, fixture, partitions[0], cancellationToken).ConfigureAwait(false);
@@ -43,7 +43,7 @@ internal sealed record PartitionQueryRf3Scenario(
             new PartitionQueryRf3InputRow(partitions[0], "authorized-row", 1, "authorized"),
             new PartitionQueryRf3InputRow(partitions[1], "denied-row", 1, "denied"));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await ConfigureResourcesAsync(administrator, partitions, cancellationToken).ConfigureAwait(false);
         await CommitInputsAsync(administrator, inputs, cancellationToken).ConfigureAwait(false);
         return new(partitions, inputs, CreateQuery());

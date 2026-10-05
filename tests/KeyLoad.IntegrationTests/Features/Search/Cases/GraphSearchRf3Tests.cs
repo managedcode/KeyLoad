@@ -21,7 +21,7 @@ internal sealed class GraphSearchRf3Tests(ClusterFixture fixture)
         var scenario = await GraphSearchRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, deadline.Token);
         using var sdkHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(sdkHttp, identity.Secret);
+        var sdk = new KeyLoadClient(sdkHttp, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
         var request = GraphSearchRf3Scenario.Request(scenario.Partition, limit: 2) with
@@ -43,7 +43,7 @@ internal sealed class GraphSearchRf3Tests(ClusterFixture fixture)
         var scenario = await GraphSearchRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, deadline.Token);
         using var sdkHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(sdkHttp, identity.Secret);
+        var sdk = new KeyLoadClient(sdkHttp, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             identity.Secret, deadline.Token);
         var baseRequest = GraphSearchRf3Scenario.Request(scenario.Partition);
@@ -59,7 +59,7 @@ internal sealed class GraphSearchRf3Tests(ClusterFixture fixture)
         await AssertEmptyAsync(sdk, mcp, emptyAllowed, deadline.Token);
 
         using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
-        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey);
+        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         await scenario.AddReachableDocumentAsync(admin, deadline.Token);
         var updated = await McpCallerAssertions.SdkSuccessAsync(await sdk.GraphSearchAsync(labeled, deadline.Token));
         await GraphSearchRf3Assertions.AssertHitsAsync(updated,

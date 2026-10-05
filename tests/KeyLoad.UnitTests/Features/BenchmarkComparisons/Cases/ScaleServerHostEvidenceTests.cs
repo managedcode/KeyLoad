@@ -8,7 +8,7 @@ internal sealed class ScaleServerHostEvidenceTests
     public async Task AcScale016ReadsActualBoundedLinuxHardwareAndCgroupEnvelope()
     {
         var (hardware, envelope) = await ScaleServerHostEvidence.ReadAsync(
-            TestContext.Current!.Execution.CancellationToken);
+            UnitAppHostResourceOptions.Execution(), UnitAppHostResourceOptions.Provenance(), TestContext.Current!.Execution.CancellationToken);
         if (!OperatingSystem.IsLinux())
         {
             await Assert.That(hardware).IsNull();

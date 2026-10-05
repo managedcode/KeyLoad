@@ -23,7 +23,7 @@ internal sealed class ComparisonHarnessTests
     {
         using var handler = new QueryFailureHandler();
         using var http = new HttpClient(handler, disposeHandler: false) { BaseAddress = new Uri("http://localhost/") };
-        await using var target = new Neo4jTarget(http, Guid.NewGuid().ToString("N"), "test-image");
+        await using var target = new Neo4jTarget(http, Guid.NewGuid().ToString("N"), "test-image", UnitBenchmarkOptions.Lifecycle());
         var error = await Assert.ThrowsExactlyAsync<ComparisonFailureException>(() => target.InitializeAsync(new BenchmarkDataset(Small), TestContext.Current!.Execution.CancellationToken));
         await Assert.That(error!.Message).IsEqualTo("Neo4j:Neo.ClientError.Statement.SyntaxError");
         await Assert.That(error!.Message).DoesNotContain("sensitive-query");

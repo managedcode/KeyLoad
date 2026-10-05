@@ -16,4 +16,7 @@ public enum ModelQuerySourceKind
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ModelQuerySource)]
 public sealed record ModelQuerySource([property: Orleans.Id(0)] ModelQuerySourceKind Kind,
-    [property: Orleans.Id(1)] string Item, [property: Orleans.Id(2)] long Generation = 1);
+    [property: Orleans.Id(1)] string Item, [property: Orleans.Id(2)] long Generation = ModelQuerySource.DefaultGeneration)
+{
+    private const int DefaultGeneration = 1;
+}

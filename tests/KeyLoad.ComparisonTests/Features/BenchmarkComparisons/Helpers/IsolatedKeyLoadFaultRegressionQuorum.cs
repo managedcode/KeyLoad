@@ -11,7 +11,7 @@ internal static class IsolatedKeyLoadFaultRegressionQuorum
         IsolatedKeyLoadFaultRegressionSeed seed, CommandRequest command, bool hasSurvivor, CancellationToken token)
     {
         using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, liveNode);
-        var sdk = new KeyLoadClient(http, admin);
+        var sdk = new KeyLoadClient(http, admin, ComparisonClientOptions.Execution());
         string? writeCode;
         using (var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.AttemptSeconds, token))
         {

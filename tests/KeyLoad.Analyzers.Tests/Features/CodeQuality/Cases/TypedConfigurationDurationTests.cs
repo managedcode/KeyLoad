@@ -4,6 +4,46 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 internal sealed class TypedConfigurationDurationTests
 {
     [Test]
+    public async Task ACanonicalOptionsDefaultMarkerDoesNotGrantRuntimeExecutionPolicyAsync()
+    {
+        const string source = """
+            [KeyLoad.ConfigurationOptions]
+            internal sealed class Policy
+            {
+                private const int HiddenDeadlineSeconds = 15;
+                public System.TimeSpan Deadline { get; set; } = System.TimeSpan.FromSeconds(HiddenDeadlineSeconds);
+                internal System.Threading.Tasks.Task Execute()
+                {
+                    var deadline = [|System.TimeSpan.FromSeconds(HiddenDeadlineSeconds)|];
+                    return [|System.Threading.Tasks.Task.Delay(HiddenDeadlineSeconds)|];
+                }
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertConfigurationAsync(source);
+    }
+
+    [Test]
+    public async Task ACanonicalOptionsConstructorCannotExecuteAHardcodedDeadlineAsync()
+    {
+        const string source = """
+            [KeyLoad.ConfigurationOptions]
+            internal sealed class Policy
+            {
+                private const int HiddenDeadlineMilliseconds = 15;
+                public System.TimeSpan Deadline { get; set; }
+                internal Policy()
+                {
+                    Deadline = System.TimeSpan.FromMilliseconds(HiddenDeadlineMilliseconds);
+                    [|System.Threading.Tasks.Task.Delay(HiddenDeadlineMilliseconds)|];
+                }
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertConfigurationAsync(source);
+    }
+
+    [Test]
     public async Task ScreenshotConstAndStaticReadonlyDeadlineRemainHardcodedAsync()
     {
         const string source = """

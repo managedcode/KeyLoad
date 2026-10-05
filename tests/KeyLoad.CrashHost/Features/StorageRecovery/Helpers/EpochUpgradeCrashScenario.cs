@@ -39,7 +39,7 @@ internal static class EpochUpgradeCrashScenario
         {
             FaultObserver = (stage, _, _) => boundary.Observe(stage)
         };
-        _ = ZoneTreeFormatUpgrade.Upgrade(sourceDirectory, options);
+        _ = ZoneTreeFormatUpgrade.Upgrade(sourceDirectory, options, CrashExecutionOptions.StorageExecution());
         if (!boundary.Observed)
         {
             throw new InvalidOperationException(UnexpectedStageMessage);

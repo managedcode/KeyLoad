@@ -21,7 +21,7 @@ internal sealed class NodeEpochRf3Callers : IAsyncDisposable
         var sdkHttp = McpCallerHttp.Create(app, sdkNode);
         try
         {
-            var sdk = new KeyLoadClient(sdkHttp, key);
+            var sdk = new KeyLoadClient(sdkHttp, key, IntegrationClientOptions.Execution());
             var mcp = await McpOfficialClient.ConnectAsync(app, mcpNode, key, cancellationToken).ConfigureAwait(false);
             return new(sdkHttp, sdk, mcp);
         }

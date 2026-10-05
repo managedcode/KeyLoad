@@ -2,7 +2,7 @@
 
 ## Purpose and entry points
 - Owns TUnit comparison-harness checks and the CI comparison workload entry point.
-- Main suite: `Features/BenchmarkComparisons/Cases/ComparisonTests.cs`; project: `KeyLoad.Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/Features/BenchmarkComparisons/Cases/ComparisonTests.csproj`.
+- Main suite: `Features/BenchmarkComparisons/Cases/ComparisonTests.cs`; project: `KeyLoad.ComparisonTests.csproj`.
 
 ## Ownership and boundaries
 - Tests and comparison artifacts belong to the `BenchmarkComparisons` slice and matching `docs/Features/BenchmarkComparisons.md`.

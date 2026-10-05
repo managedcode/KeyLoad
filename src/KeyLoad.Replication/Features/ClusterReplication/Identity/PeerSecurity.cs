@@ -8,6 +8,9 @@ namespace KeyLoad.Replication;
 /// <summary>Authenticates only bounded, bodyless silo discovery; replica commands use native signed Orleans envelopes.</summary>
 public sealed class PeerSecurity : IDisposable
 {
+    private const int DisposalUnclaimed = 0;
+    private const int DisposalClaimed = 1;
+
     private readonly byte[] secret;
     private readonly TimeProvider clock;
     private readonly TimeSpan connectTimeout;
@@ -99,12 +102,12 @@ public sealed class PeerSecurity : IDisposable
         request.Headers.Add(header, value);
     }
 
-    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != 0, this);
+    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != DisposalUnclaimed, this);
 
     /// <summary>Clears the owned credential after the owner has joined every active borrower.</summary>
     public void Dispose()
     {
-        if (Interlocked.Exchange(ref disposed, 1) == 0)
+        if (Interlocked.Exchange(ref disposed, DisposalClaimed) == DisposalUnclaimed)
         {
             CryptographicOperations.ZeroMemory(secret);
         }

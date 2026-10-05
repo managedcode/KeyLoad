@@ -22,6 +22,10 @@ internal sealed record TestSuiteSettings(
     bool LocalRf3ImageEnabled,
     ScaledComparisonProfile? ScaleProfile)
 {
+    private const string WorkloadOverrideNamesResultText = "Documents";
+    private const string WorkloadOverrideNamesWorkloadOverrideNamesResultText = "Operations";
+    private const string GetResourceNameComparisonText = "tests-";
+
     internal VectorComparisonProfile? VectorProfile { get; init; }
     internal const string VectorProfileSetting = "KeyLoadTests:VectorProfile";
     internal const string VectorProfileEnvironment = "KeyLoadTests__VectorProfile";
@@ -38,33 +42,39 @@ internal sealed record TestSuiteSettings(
     private const string CoverageOutputSetting = "KeyLoadTests:CoverageOutput";
     private const int MaximumFilterLength = 4096;
     private static readonly string[] WorkloadOverrideNames =
-        ["Documents", "Operations", "Warmup", "Repetitions", "Concurrency", "PayloadBytes", "Seed", "Dimensions",
+        [WorkloadOverrideNamesResultText, WorkloadOverrideNamesWorkloadOverrideNamesResultText, "Warmup", "Repetitions", "Concurrency", "PayloadBytes", "Seed", "Dimensions",
             "TopK", "TimeoutSeconds", "GraphVertices", "GraphFanOut", "GraphDepth"];
     private const int MaximumPathLength = 4096;
 
-    internal string ResourceName => "tests-" + Suite;
+    internal string ResourceName => GetResourceNameComparisonText + Suite;
 
     internal static bool Requested(string[] args)
     {
-        var vectorArgument = "--" + VectorProfileSetting + "=";
-        if (args.Any(argument => argument == "--" + VectorProfileSetting || argument == vectorArgument))
+        const string ComparisonText = "--";
+        const string RequestedComparisonText = "=";
+        const string PredicateText = "--";
+        const string MessageText = "The vector-profile test selection is invalid.";
+        const string RequestedMessageText = "The scale-profile test selection is invalid.";
+
+        var vectorArgument = ComparisonText + VectorProfileSetting + RequestedComparisonText;
+        if (args.Any(argument => argument == PredicateText + VectorProfileSetting || argument == vectorArgument))
         {
-            throw new InvalidOperationException("The vector-profile test selection is invalid.");
+            throw new InvalidOperationException(MessageText);
         }
-        var scaleArgument = "--" + ScaleProfileSetting + "=";
-        if (args.Any(argument => argument == "--" + ScaleProfileSetting || argument == scaleArgument))
+        var scaleArgument = ComparisonText + ScaleProfileSetting + RequestedComparisonText;
+        if (args.Any(argument => argument == PredicateText + ScaleProfileSetting || argument == scaleArgument))
         {
-            throw new InvalidOperationException("The scale-profile test selection is invalid.");
+            throw new InvalidOperationException(RequestedMessageText);
         }
 
         return !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(SuiteEnvironment))
             || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(VectorProfileEnvironment))
             || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(ScaleProfileEnvironment))
-            || args.Any(argument => argument == "--" + SuiteSetting
+            || args.Any(argument => argument == PredicateText + SuiteSetting
                 || argument.StartsWith(TestSuiteProtocol.ArgumentPrefix + SuiteSetting + TestSuiteProtocol.ArgumentValueSeparator, StringComparison.Ordinal)
-                || argument == "--" + ScaleProfileSetting
+                || argument == PredicateText + ScaleProfileSetting
                 || argument.StartsWith(scaleArgument, StringComparison.Ordinal)
-                || argument == "--" + VectorProfileSetting
+                || argument == PredicateText + VectorProfileSetting
                 || argument.StartsWith(vectorArgument, StringComparison.Ordinal));
     }
 
@@ -73,24 +83,29 @@ internal sealed record TestSuiteSettings(
 
     internal static TestSuiteSettings? Read(IConfiguration configuration, IOptions<TestExecutionOptions> execution)
     {
+        const string MessageText = "The scale-profile test selection is invalid.";
+        const string ReadMessageText = "The vector-profile test selection is invalid.";
+        const string ResultText = "KeyLoad.Analyzers.Tests";
+        const string ReadResultText = "KeyLoad.UnitTests";
+
         var suite = configuration[SuiteSetting];
         if (string.IsNullOrWhiteSpace(suite))
         {
             _ = LocalRf3ImageRequest.ReadEnabled(configuration, suite, configuration[FilterSetting]);
             if (!string.IsNullOrEmpty(configuration[ScaleProfileSetting]))
             {
-                throw new InvalidOperationException("The scale-profile test selection is invalid.");
+                throw new InvalidOperationException(MessageText);
             }
             if (!string.IsNullOrEmpty(configuration[VectorProfileSetting]))
             {
-                throw new InvalidOperationException("The vector-profile test selection is invalid.");
+                throw new InvalidOperationException(ReadMessageText);
             }
             return null;
         }
         var project = suite switch
         {
-            TestSuiteProtocol.AnalyzersSuite => "KeyLoad.Analyzers.Tests",
-            TestSuiteProtocol.UnitSuite or TestSuiteProtocol.ScalarUnitSuite => "KeyLoad.UnitTests",
+            TestSuiteProtocol.AnalyzersSuite => ResultText,
+            TestSuiteProtocol.UnitSuite or TestSuiteProtocol.ScalarUnitSuite => ReadResultText,
             TestSuiteProtocol.RecoverySuite => "KeyLoad.RecoveryTests",
             TestSuiteProtocol.Rf3Suite => "KeyLoad.IntegrationTests",
             TestSuiteProtocol.ComparisonSuite => "KeyLoad.ComparisonTests",
@@ -140,6 +155,8 @@ internal sealed record TestSuiteSettings(
 
     private static ScaledComparisonProfile? ReadScaleProfile(IConfiguration configuration, string suite, string? target)
     {
+        const string MessageText = "The scale-profile test selection is invalid.";
+
         var value = configuration[ScaleProfileSetting];
         if (string.IsNullOrEmpty(value))
         {
@@ -155,20 +172,20 @@ internal sealed record TestSuiteSettings(
             || !HasValidScaleWorkload(configuration)
             || HasWorkloadOverride(configuration))
         {
-            throw new InvalidOperationException("The scale-profile test selection is invalid.");
+            throw new InvalidOperationException(MessageText);
         }
         try
         {
             var profile = ScaledComparisonProfileParser.Parse(value);
             if (!string.Equals(profile.Id, evidenceProfile, StringComparison.Ordinal))
             {
-                throw new InvalidOperationException("The scale-profile test selection is invalid.");
+                throw new InvalidOperationException(MessageText);
             }
             return profile;
         }
         catch (ArgumentOutOfRangeException)
         {
-            throw new InvalidOperationException("The scale-profile test selection is invalid.");
+            throw new InvalidOperationException(MessageText);
         }
     }
 
@@ -193,9 +210,11 @@ internal sealed record TestSuiteSettings(
 
     private static bool HasWorkloadOverride(IConfiguration configuration)
     {
+        const string KeyText = "Benchmarks:";
+
         foreach (var name in WorkloadOverrideNames)
         {
-            if (configuration["Benchmarks:" + name] is not null)
+            if (configuration[KeyText + name] is not null)
             {
                 return true;
             }
@@ -205,11 +224,13 @@ internal sealed record TestSuiteSettings(
 
     private static void ValidateBoundedValue(string? value, int maximumLength, string message, bool allowBlank = false)
     {
+        const char NullCharacter = '\0';
+
         if (value is null)
         {
             return;
         }
-        if (value.Length > maximumLength || value.Contains('\0', StringComparison.Ordinal) || !allowBlank && string.IsNullOrWhiteSpace(value))
+        if (value.Length > maximumLength || value.Contains(NullCharacter, StringComparison.Ordinal) || !allowBlank && string.IsNullOrWhiteSpace(value))
         {
             throw new InvalidOperationException(message);
         }

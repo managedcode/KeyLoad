@@ -33,7 +33,7 @@ internal sealed class BenchmarkTopologyMembershipFixture : IDisposable
         { BenchmarkTopology = benchmark };
 
     internal ZoneTreeStore Open(Action<CommitStage, long, int>? observer = null)
-        => new(new(DirectoryPath) { Incarnation = Incarnation, FaultObserver = observer });
+        => new(new(DirectoryPath) { Incarnation = Incarnation, FaultObserver = observer }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
 
     internal static byte[]? Membership(ZoneTreeStore store)
         => store.Read(view => view.ReadOwnedValue(MembershipKey));

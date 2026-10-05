@@ -5,6 +5,9 @@ namespace KeyLoad.Replication;
 internal sealed class ReplicaReadRoundExecutor(ReplicaState state, ReplicaRpcClient rpc, ReplicaLeader leader,
     ReplicaActivityTracker activity, Task transportReady, CancellationToken lifetime, TimeSpan readBarrierTimeout)
 {
+    private const int FirstCommittedPosition = 1;
+    private const int FirstElectionTerm = 1;
+
     internal async Task ExecuteAsync(ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
     {
         using var active = activity.Enter();
@@ -40,7 +43,7 @@ internal sealed class ReplicaReadRoundExecutor(ReplicaState state, ReplicaRpcCli
         var method = purpose == ReplicaReadRoundPurpose.Control ? ReplicaRpc.ControlReadBarrier : ReplicaRpc.ReadBarrier;
         var barrier = await rpc.InvokeAsync<string, ReadBarrierReceipt>(route.LeaderId, method,
             string.Empty, request.Token).ConfigureAwait(false);
-        if (barrier.Incarnation != state.Configuration.Incarnation || barrier.Position < 1 || barrier.Term < 1)
+        if (barrier.Incarnation != state.Configuration.Incarnation || barrier.Position < FirstCommittedPosition || barrier.Term < FirstElectionTerm)
         {
             throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidPeer);
         }

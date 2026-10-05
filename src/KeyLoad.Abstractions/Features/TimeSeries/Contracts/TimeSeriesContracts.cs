@@ -17,7 +17,10 @@ public sealed record SampleData([property: Orleans.Id(0)] string EventId, [prope
 /// <param name="TagsJson">Contains the sample tags as JSON.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.AppendSamples)]
-public sealed record AppendSamples([property: Orleans.Id(0)] string SeriesSet, [property: Orleans.Id(1)] string SeriesId, [property: Orleans.Id(2)] ImmutableArray<SampleData> Samples, [property: Orleans.Id(3)] string TagsJson = "{}") : Mutation(SeriesSet);
+public sealed record AppendSamples([property: Orleans.Id(0)] string SeriesSet, [property: Orleans.Id(1)] string SeriesId, [property: Orleans.Id(2)] ImmutableArray<SampleData> Samples, [property: Orleans.Id(3)] string TagsJson = AppendSamples.DefaultTagsJson) : Mutation(SeriesSet)
+{
+    private const string DefaultTagsJson = "{}";
+}
 
 /// <summary>Represents a stored time-series sample and its sequence and tags.</summary>
 /// <param name="SeriesId">Identifies the time series.</param>

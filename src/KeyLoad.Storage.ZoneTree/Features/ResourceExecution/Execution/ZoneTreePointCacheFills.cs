@@ -3,6 +3,11 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 /// <summary>Bounded fill admission and generation-checked candidate publication.</summary>
 internal static class ZoneTreePointCacheFills
 {
+    private const string ForeignCandidateMessage = "The fill candidate belongs to a different owner.";
+    private const string ReservedLengthMismatchMessage = "The published value length must match its reserved length.";
+    private const int NoEvictionAttempts = 0;
+    private const int SingleEntryReservation = 1;
+
     internal static ZoneTreePointCacheCandidate? TryPrepare(ZoneTreePointCacheState state,
         IZoneTreePointCacheCandidateOwner owner, ReadOnlySpan<byte> key, int valueLength, long generation)
     {
@@ -46,13 +51,13 @@ internal static class ZoneTreePointCacheFills
         ArgumentNullException.ThrowIfNull(candidate);
         if (!candidate.IsOwnedBy(owner))
         {
-            throw new ArgumentException("The fill candidate belongs to a different owner.", nameof(candidate));
+            throw new ArgumentException(ForeignCandidateMessage, nameof(candidate));
         }
 
         if (value.Length != candidate.ValueLength)
         {
             candidate.Dispose();
-            throw new ArgumentException("The published value length must match its reserved length.", nameof(value));
+            throw new ArgumentException(ReservedLengthMismatchMessage, nameof(value));
         }
 
         PublishOwnedValue(state, owner, candidate, value, generation);
@@ -78,15 +83,15 @@ internal static class ZoneTreePointCacheFills
     private static ICacheMemoryReservation? TryReserveWithEviction(ZoneTreePointCacheState state,
         long charge)
     {
-        for (var attempts = 0; attempts <= ZoneTreePointCacheState.MaximumVictimAttempts; attempts++)
+        for (var attempts = NoEvictionAttempts; attempts <= state.Options.MaximumVictimAttempts; attempts++)
         {
             if (ZoneTreePointCacheLedger.HasCapacity(state, charge)
-                && state.Options.MemoryBudget.TryReserve(charge, 1, out var reservation))
+                && state.Options.MemoryBudget.TryReserve(charge, SingleEntryReservation, out var reservation))
             {
                 return reservation;
             }
 
-            if (attempts == ZoneTreePointCacheState.MaximumVictimAttempts
+            if (attempts == state.Options.MaximumVictimAttempts
                 || !ZoneTreePointCacheRetirement.TryRetireVictim(state))
             {
                 return null;

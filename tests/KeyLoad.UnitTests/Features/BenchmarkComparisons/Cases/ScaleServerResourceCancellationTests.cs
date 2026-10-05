@@ -16,7 +16,7 @@ internal sealed class ScaleServerResourceCancellationTests
         }
 
         using var cancellation = new CancellationTokenSource();
-        var probe = ScaleServerResourceProcess.RunAsync(Sleep, [Duration], cancellation.Token);
+        var probe = ScaleServerResourceProcess.RunAsync(Sleep, [Duration], cancellation.Token, UnitAppHostResourceOptions.Budget());
         await cancellation.CancelAsync();
         await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => probe);
     }

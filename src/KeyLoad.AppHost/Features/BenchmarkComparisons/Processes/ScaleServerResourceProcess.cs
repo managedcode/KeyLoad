@@ -8,7 +8,8 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static partial class ScaleServerResourceProcess
 {
-    private const int ProcessSettlementSeconds = 1;
+    private const string ScaleServerResourceProcessMetadataName = "libc";
+    private const string ScaleServerResourceProcessScaleServerResourceProcessMetadataName = "kill";
 
     private const string Docker = "docker";
     private const string InspectFormat = "{{.Id}}|{{.Image}}|{{.State.Pid}}|{{.State.StartedAt}}|{{.State.Status}}|{{range .Mounts}}{{if .RW}}{{.Source}}~{{.Destination}}~{{.Type}};{{end}}{{end}}";
@@ -16,19 +17,29 @@ internal static partial class ScaleServerResourceProcess
 
     internal static async Task<string?> InspectAsync(string container, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        var output = await RunAsync(Docker, ["inspect", "--format", InspectFormat, container], token, budget);
+        const string ArgumentsText = "inspect";
+        const string InspectAsyncArgumentsText = "--format";
+        const char CarriageReturnCharacter = '\r';
+        const char LineFeedCharacter = '\n';
+        const int InspectFieldCount = 6;
+
+        var output = await RunAsync(Docker, [ArgumentsText, InspectAsyncArgumentsText, InspectFormat, container], token, budget);
         if (output is null)
         {
             return null;
         }
 
-        var fields = output.TrimEnd('\r', '\n').Split(Separator, StringSplitOptions.None);
-        return fields.Length == 6 ? output.TrimEnd('\r', '\n') : null;
+        var fields = output.TrimEnd(CarriageReturnCharacter, LineFeedCharacter).Split(Separator, StringSplitOptions.None);
+        return fields.Length == InspectFieldCount ? output.TrimEnd(CarriageReturnCharacter, LineFeedCharacter) : null;
     }
 
     internal static async Task<string?> RunAsync(string executable, string[] arguments, CancellationToken token,
-        ScaleServerResourceSampleBudget? budget = null, int maximumOutputBytes = ScaleServerResourceBounds.MaxHardwareBytes)
+        ScaleServerResourceSampleBudget budget, int? maximumOutputBytes = null)
     {
+        const string MessageText = "Server resource sample exceeded its bound.";
+        const int InspectFieldCount = 0;
+        const string RunAsyncMessageText = "Server resource process cancellation cleanup failed.";
+
         using var process = new Process
         {
             StartInfo = new ProcessStartInfo(executable)
@@ -44,16 +55,16 @@ internal static partial class ScaleServerResourceProcess
             process.StartInfo.ArgumentList.Add(argument);
         }
 
-        var limit = Math.Min(budget?.Remaining ?? ScaleServerResourceBounds.MaxHardwareBytes, maximumOutputBytes);
-        if (limit < ScaleServerResourceBounds.MinimumCommandBytes)
+        var limit = Math.Min(budget.Remaining, maximumOutputBytes ?? budget.Settings.MaxHardwareBytes);
+        if (limit < budget.Settings.MinimumCommandBytes)
         {
-            throw new InvalidDataException("Server resource sample exceeded its bound.");
+            throw new InvalidDataException(MessageText);
         }
 
-        var errorLimit = Math.Min(ScaleServerResourceBounds.MaxFileBytes, Math.Max(1, limit / 8));
+        var errorLimit = Math.Min(budget.Settings.MaxFileBytes, Math.Max(1, limit / 8));
         var outputLimit = limit - errorLimit;
         process.Start();
-        var output = ReadBoundedAsync(process.StandardOutput.BaseStream, outputLimit, token);
+        var output = ReadBoundedAsync(process.StandardOutput.BaseStream, outputLimit, budget.Settings.NativeReadBufferBytes, token);
         var error = DrainBoundedAsync(process.StandardError.BaseStream, errorLimit, token);
         try
         {
@@ -68,16 +79,16 @@ internal static partial class ScaleServerResourceProcess
             await readers;
             var bytes = await output;
             budget?.Charge(bytes.Length + error.Result);
-            return process.ExitCode == 0 ? Encoding.UTF8.GetString(bytes) : null;
+            return process.ExitCode == InspectFieldCount ? Encoding.UTF8.GetString(bytes) : null;
         }
         catch (OperationCanceledException failure)
         {
             try
-            { await TerminateAndJoinAsync(process, output, error); }
+            { await TerminateAndJoinAsync(process, output, error, budget.Settings.ProcessSettlement); }
             catch (Exception cleanupFailure) when (SharesTerminalFailure(failure, cleanupFailure)) { }
             catch (Exception cleanupFailure)
             {
-                throw new AggregateException("Server resource process cancellation cleanup failed.", failure, cleanupFailure);
+                throw new AggregateException(RunAsyncMessageText, failure, cleanupFailure);
             }
             ExceptionDispatchInfo.Capture(failure).Throw();
             throw;
@@ -85,7 +96,7 @@ internal static partial class ScaleServerResourceProcess
         catch (Exception failure)
         {
             try
-            { await TerminateAndJoinAsync(process, output, error); }
+            { await TerminateAndJoinAsync(process, output, error, budget.Settings.ProcessSettlement); }
             catch (Exception cleanupFailure) when (SharesTerminalFailure(failure, cleanupFailure)) { }
             catch (Exception cleanupFailure)
             {
@@ -101,17 +112,19 @@ internal static partial class ScaleServerResourceProcess
             || failure is OperationCanceledException original && cleanupFailure is OperationCanceledException cleanup
                 && original.CancellationToken == cleanup.CancellationToken;
 
-    private static async Task TerminateAndJoinAsync(Process process, Task<byte[]> output, Task error)
+    private static async Task TerminateAndJoinAsync(Process process, Task<byte[]> output, Task error, TimeSpan settlement)
     {
+        const int SignalValue = 15;
+
         if (!process.HasExited)
         {
             if (OperatingSystem.IsLinux())
             {
-                _ = SendSignal(process.Id, 15);
+                _ = SendSignal(process.Id, SignalValue);
             }
 
             var exited = process.WaitForExitAsync(CancellationToken.None);
-            if (await Task.WhenAny(exited, Task.Delay(TimeSpan.FromSeconds(ProcessSettlementSeconds))) != exited)
+            if (await Task.WhenAny(exited, Task.Delay(settlement)) != exited)
             {
                 try
                 { process.Kill(entireProcessTree: true); }
@@ -123,48 +136,60 @@ internal static partial class ScaleServerResourceProcess
         await Task.WhenAll(output, error);
     }
 
-    [LibraryImport("libc", EntryPoint = "kill", SetLastError = true)]
+    [LibraryImport(ScaleServerResourceProcessMetadataName, EntryPoint = ScaleServerResourceProcessScaleServerResourceProcessMetadataName, SetLastError = true)]
     private static partial int SendSignal(int processId, int signal);
 
-    private static async Task<byte[]> ReadBoundedAsync(Stream stream, int maximum, CancellationToken token)
+    private static async Task<byte[]> ReadBoundedAsync(Stream stream, int maximum, int chunkBytes, CancellationToken token)
     {
-        if (maximum < 1)
+        const int BoundaryValue = 1;
+        const string MessageText = "Server resource sample exceeded its bound.";
+        const int InspectFieldCount = 0;
+        const int OffsetValue = 0;
+
+        if (maximum < BoundaryValue)
         {
-            throw new InvalidDataException("Server resource sample exceeded its bound.");
+            throw new InvalidDataException(MessageText);
         }
 
         using var buffer = new MemoryStream();
-        var chunk = new byte[Math.Min(4096, maximum)];
+        var chunk = new byte[Math.Min(chunkBytes, maximum)];
         while (true)
         {
             var count = await stream.ReadAsync(chunk, token);
-            if (count == 0)
+            if (count == InspectFieldCount)
             {
                 return buffer.ToArray();
             }
 
             if (buffer.Length + count >= maximum)
             {
-                throw new InvalidDataException("Server resource sample exceeded its bound.");
+                throw new InvalidDataException(MessageText);
             }
 
-            buffer.Write(chunk, 0, count);
+            buffer.Write(chunk, OffsetValue, count);
         }
     }
 
     private static async Task<int> DrainBoundedAsync(Stream stream, int maximum, CancellationToken token)
     {
-        if (maximum < 1)
+        const int BoundaryValue = 1;
+        const string MessageText = "Server resource sample exceeded its bound.";
+        const int TotalInitialValue = 0;
+        const int StartValue = 0;
+        const int InspectFieldCount = 0;
+        const string DrainBoundedAsyncMessageText = "Server resource diagnostic exceeded its bound.";
+
+        if (maximum < BoundaryValue)
         {
-            throw new InvalidDataException("Server resource sample exceeded its bound.");
+            throw new InvalidDataException(MessageText);
         }
 
         var buffer = new byte[maximum];
-        var total = 0;
+        var total = TotalInitialValue;
         while (true)
         {
-            var count = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length - total), token);
-            if (count == 0)
+            var count = await stream.ReadAsync(buffer.AsMemory(StartValue, buffer.Length - total), token);
+            if (count == InspectFieldCount)
             {
                 return total;
             }
@@ -172,7 +197,7 @@ internal static partial class ScaleServerResourceProcess
             total += count;
             if (total >= maximum)
             {
-                throw new InvalidDataException("Server resource diagnostic exceeded its bound.");
+                throw new InvalidDataException(DrainBoundedAsyncMessageText);
             }
         }
     }

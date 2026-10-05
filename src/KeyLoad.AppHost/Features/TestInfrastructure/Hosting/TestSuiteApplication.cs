@@ -10,6 +10,11 @@ internal static class TestSuiteApplication
 {
     internal static async Task<int> RunAsync(DistributedApplication app, TestSuiteSettings settings)
     {
+        const int SingleFailureCount = 1;
+        const int IndexValue = 0;
+        const int BoundaryValue = 1;
+        const string MessageText = "Aspire test execution or cleanup failed.";
+
         var policy = app.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value;
         var failures = new List<Exception>();
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(
@@ -36,13 +41,13 @@ internal static class TestSuiteApplication
             await CollectAsync(() => output, failures).ConfigureAwait(false);
             await CollectAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
-        if (failures.Count == 1)
+        if (failures.Count == SingleFailureCount)
         {
-            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+            ExceptionDispatchInfo.Capture(failures[IndexValue]).Throw();
         }
-        if (failures.Count > 1)
+        if (failures.Count > BoundaryValue)
         {
-            throw new AggregateException("Aspire test execution or cleanup failed.", failures);
+            throw new AggregateException(MessageText, failures);
         }
         return await execution.ConfigureAwait(false);
     }

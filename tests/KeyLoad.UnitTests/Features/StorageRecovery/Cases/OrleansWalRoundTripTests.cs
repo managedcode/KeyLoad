@@ -24,7 +24,7 @@ internal sealed class OrleansWalRoundTripTests
         byte[] deletedKey = [0x20, 0xFF];
         byte[] binaryValue = [0x00, 0xFF, 0x80, 0xFE];
         long secondFrameOffset;
-        using (var store = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var store = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             store.Commit((transaction, _) => { transaction.Put(deletedKey, binaryValue); return true; });
             secondFrameOffset = new FileInfo(files.JournalPath).Length;
@@ -40,7 +40,7 @@ internal sealed class OrleansWalRoundTripTests
 
         await AssertRawFrame(files.JournalPath, secondFrameOffset, binaryKey, binaryValue, emptyKey, deletedKey);
         files.RemoveMaterializedTree();
-        using var reopened = new ZoneTreeStore(new(files.DirectoryPath));
+        using var reopened = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Position).IsEqualTo(CommittedPosition);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(binaryKey)))
             .IsEquivalentTo(binaryValue, CollectionOrdering.Matching);
@@ -55,7 +55,7 @@ internal sealed class OrleansWalRoundTripTests
         using var files = new WalFileFixture();
         byte[] key = [0x00, 0xFF, 0x80];
         var value = RandomNumberGenerator.GetBytes(RepresentativeValueBytes);
-        using (var store = new ZoneTreeStore(new(files.DirectoryPath)))
+        using (var store = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             store.Commit((transaction, _) => { transaction.Put(key, value); return true; });
         }

@@ -7,11 +7,13 @@ namespace KeyLoad.Replication;
 
 internal static class ReplicaSnapshotUpgradeValidation
 {
+    private const int BeforeFirstLogPosition = 0;
+
     internal const string MissingState = "A persisted replica hard state is required for snapshot conversion.";
     internal const string InvalidAuthority = "The replica snapshot conversion scope changed after preflight.";
 
     internal static void Revalidate(ReplicaSnapshotUpgradePlan plan, DatabaseEngine canonical,
-        IAtomicStore replica, ReplicaConfiguration configuration)
+        IAtomicStore replica, ReplicaConfiguration configuration, int maximumImages, long maximumTotalBytes, int fileBufferBytes)
     {
         var state = ReadHardState(replica, configuration);
         if (!MatchesConfiguration(plan.Configuration, configuration) || plan.Canonical != Bind(canonical.Store)
@@ -20,7 +22,7 @@ internal static class ReplicaSnapshotUpgradeValidation
             || plan.CanonicalAppliedPosition != ReadAppliedPosition(canonical.Store))
         { throw Errors.Fail(ErrorCode.Conflict, InvalidAuthority); }
         var current = ReplicaSnapshotUpgradeInventory.Read(plan.SourceSnapshots, configuration,
-            plan.HardState.Snapshot, path => SourceCut(plan, path));
+            plan.HardState.Snapshot, path => SourceCut(plan, path), maximumImages, maximumTotalBytes, fileBufferBytes);
         if (current.Images.Count != plan.Images.Length
             || current.Images.Where((image, index) => image != plan.Images[index]).Any())
         { throw Errors.Fail(ErrorCode.Conflict, InvalidAuthority); }
@@ -86,7 +88,7 @@ internal static class ReplicaSnapshotUpgradeValidation
 
     internal static void ValidateAppliedCut(long applied, ReplicaHardState state)
     {
-        if (applied < (state.Snapshot?.Index ?? 0) || applied > state.CommittedIndex)
+        if (applied < (state.Snapshot?.Index ?? BeforeFirstLogPosition) || applied > state.CommittedIndex)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaPersistence.CanonicalAhead); }
     }
 

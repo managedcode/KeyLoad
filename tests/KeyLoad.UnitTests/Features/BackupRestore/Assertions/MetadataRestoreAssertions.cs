@@ -6,12 +6,12 @@ internal static class MetadataRestoreAssertions
 {
     internal static async Task AssertRestored(MetadataBackupFixture fixture, string destination)
     {
-        var restoredIdentity = ZoneTreeStore.Restore(fixture.BackupDirectory, destination);
+        var restoredIdentity = ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution());
         await Assert.That(restoredIdentity.Incarnation).IsNotEqualTo(fixture.OriginalIdentity.Incarnation);
         await Assert.That(restoredIdentity.SigningKey.Span.SequenceEqual(fixture.OriginalIdentity.SigningKey.Span)).IsFalse();
         await Assert.That(restoredIdentity.DispatchPaused).IsTrue();
 
-        using var reopened = new ZoneTreeStore(new(destination));
+        using var reopened = new ZoneTreeStore(new(destination), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Read(view => NativeSerialization.Deserialize<string>(
                 view.ReadOwnedValue(MetadataBackupFixture.StoredKeyBytes)!)))
             .IsEqualTo(MetadataBackupFixture.ExpectedValue);

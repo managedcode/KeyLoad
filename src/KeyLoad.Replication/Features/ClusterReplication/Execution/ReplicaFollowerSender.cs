@@ -1,10 +1,17 @@
 namespace KeyLoad.Replication;
 
-internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient rpc) : IDisposable
+internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient rpc, int maximumSnapshotChunksPerRound) : IDisposable
 {
+    private const int ExclusiveSynchronizationPermit = 1;
+    private const int ContiguousIndexStep = 1;
+    private const int EmptyEntryCount = 0;
+    private const int FirstLogPosition = 1;
+    private const int FirstRoundChunk = 0;
+    private const int BeforeFirstTransferByte = 0;
+
     private const int SynchronizationAdmissionWaitMilliseconds = 0;
     private readonly Dictionary<string, SemaphoreSlim> gates = state.Configuration.VoterIds.ToDictionary(
-        voter => voter, _ => new SemaphoreSlim(1, 1), StringComparer.Ordinal);
+        voter => voter, _ => new SemaphoreSlim(ExclusiveSynchronizationPermit, ExclusiveSynchronizationPermit), StringComparer.Ordinal);
 
     internal async Task<bool> SynchronizeAsync(string voter, long term, ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
     {
@@ -34,9 +41,9 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
         {
             return (null, snapshot);
         }
-        next = Math.Min(next, checked(durable.LastIndex + 1));
+        next = Math.Min(next, checked(durable.LastIndex + ContiguousIndexStep));
         var entries = state.Log.Read(next, state.Configuration.MaxAppendEntries, state.Configuration.MaxAppendBytes);
-        return (new(state.Configuration.LocalId, term, next - 1, state.Log.TermAt(next - 1), durable.CommittedIndex, entries), null);
+        return (new(state.Configuration.LocalId, term, next - ContiguousIndexStep, state.Log.TermAt(next - ContiguousIndexStep), durable.CommittedIndex, entries), null);
     }
 
     private async Task<bool> AppendAsync(string voter, long term, AppendRequest request, ReplicaReadRoundPurpose purpose,
@@ -47,7 +54,7 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
         {
             reply = await rpc.InvokeAsync<AppendRequest, AppendReply>(voter, AppendMethod(request, purpose), request, cancellationToken).ConfigureAwait(false);
         }
-        catch (KeyLoadException error) when (error.Code == ErrorCode.ResourceExhausted && request.Entries.Length > 0)
+        catch (KeyLoadException error) when (error.Code == ErrorCode.ResourceExhausted && request.Entries.Length > EmptyEntryCount)
         {
             // A read-generated fallback remains in application admission; native control retains its reserve.
             request = request with { Entries = [] };
@@ -62,19 +69,19 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
                 return false;
             }
             var through = checked(request.PreviousIndex + request.Entries.Length);
-            if (reply.Accepted && (reply.MatchedIndex != through || reply.NextIndex != through + 1))
+            if (reply.Accepted && (reply.MatchedIndex != through || reply.NextIndex != through + ContiguousIndexStep))
             {
                 throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidPeer);
             }
             var old = state.Progress[voter];
             state.Progress[voter] = reply.Accepted ? new(reply.NextIndex, Math.Max(old.MatchedIndex, through))
-                : new(Math.Clamp(reply.NextIndex, 1, state.Log.State.LastIndex + 1), old.MatchedIndex);
+                : new(Math.Clamp(reply.NextIndex, FirstLogPosition, state.Log.State.LastIndex + ContiguousIndexStep), old.MatchedIndex);
             return reply.Accepted;
         }, cancellationToken).ConfigureAwait(false);
     }
 
     private static ReplicaRpc AppendMethod(AppendRequest request, ReplicaReadRoundPurpose purpose)
-        => purpose == ReplicaReadRoundPurpose.Application && request.Entries.Length == 0 ? ReplicaRpc.ReadProbe : ReplicaRpc.Append;
+        => purpose == ReplicaReadRoundPurpose.Application && request.Entries.Length == EmptyEntryCount ? ReplicaRpc.ReadProbe : ReplicaRpc.Append;
 
     private async Task<bool> SnapshotAsync(string voter, long term, ReplicaSnapshot snapshot, CancellationToken cancellationToken)
     {
@@ -85,7 +92,7 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
             return false;
         }
         var offset = reply.Offset;
-        for (var chunk = 0; !reply.Installed && offset < snapshot.Length && chunk < ReplicaProtocol.SnapshotChunksPerRound; chunk++)
+        for (var chunk = FirstRoundChunk; !reply.Installed && offset < snapshot.Length && chunk < maximumSnapshotChunksPerRound; chunk++)
         {
             var bytes = state.Materializer.Snapshots.ReadChunk(snapshot.TransferId, offset, state.Configuration.SnapshotChunkBytes);
             reply = await rpc.InvokeAsync<SnapshotChunkRequest, SnapshotReply>(voter, ReplicaRpc.SnapshotChunk,
@@ -117,14 +124,14 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
         {
             return false;
         }
-        if (reply.Offset < 0 || reply.Offset > snapshot.Length || reply.Installed && (reply.Index != snapshot.Index || reply.Offset != snapshot.Length))
+        if (reply.Offset < BeforeFirstTransferByte || reply.Offset > snapshot.Length || reply.Installed && (reply.Index != snapshot.Index || reply.Offset != snapshot.Length))
         {
             throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot);
         }
         if (reply.Installed)
         {
             var old = state.Progress[voter];
-            state.Progress[voter] = new(snapshot.Index + 1, Math.Max(old.MatchedIndex, snapshot.Index));
+            state.Progress[voter] = new(snapshot.Index + ContiguousIndexStep, Math.Max(old.MatchedIndex, snapshot.Index));
         }
         return true;
     }, cancellationToken);

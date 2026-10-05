@@ -88,13 +88,13 @@ internal static class EpochUpgradeFixture
         if (!OperatingSystem.IsWindows())
         { File.SetUnixFileMode(owner.Name, UnixFileMode.UserRead | UnixFileMode.UserWrite); }
         using var canonical = new ZoneTreeStore(new(Path.Combine(directory, "database"))
-        { Incarnation = profile.Incarnation, SigningKey = signing });
+        { Incarnation = profile.Incarnation, SigningKey = signing }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         using var replica = new ZoneTreeStore(new(Path.Combine(directory, "replica"))
-        { Incarnation = profile.Incarnation, SigningKey = signing });
+        { Incarnation = profile.Incarnation, SigningKey = signing }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource());
         BootstrapNode(database, profile.AdminKey);
         using var log = new DurableReplicaLog(replica, CrashExecutionOptions.Configuration(configuration), canonicalDatabase: database);
-        var snapshots = new ReplicaSnapshotStore(canonical, log, CrashExecutionOptions.Configuration(configuration));
+        var snapshots = new ReplicaSnapshotStore(canonical, log, CrashExecutionOptions.Configuration(configuration), CrashExecutionOptions.Replica());
         await using var materializer = new ReplicaMaterializer(database, log, snapshots, CrashExecutionOptions.Replica());
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         log.SaveTermAndVote(1, profile.LocalId);

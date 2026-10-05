@@ -1,11 +1,11 @@
 using Npgsql;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal static class PostgresTopology
+internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> lifecycleOptions)
 {
-    private const int ReadinessTimeoutSeconds = 60;
-    private const int ReadinessPollMilliseconds = 200;
+    private readonly ComparisonLifecycleOptions lifecycle = lifecycleOptions.Value;
 
     private const string ConfigureQuorum = "ALTER SYSTEM SET synchronous_standby_names TO 'ANY 1 (\"benchmark_standby1\", \"benchmark_standby2\")'";
     private const string ConfigureTwoNodeQuorum = "ALTER SYSTEM SET synchronous_standby_names TO 'ANY 1 (\"benchmark_standby1\")'";
@@ -33,7 +33,7 @@ internal static class PostgresTopology
     private const string MemberObservation = "Native standby identities=";
     private const string IdentitySeparator = "@";
 
-    internal static async Task ConfigureReplicationAsync(NpgsqlConnection connection, ComparisonTopology topology,
+    internal async Task ConfigureReplicationAsync(NpgsqlConnection connection, ComparisonTopology topology,
         CancellationToken cancellationToken)
     {
         if (ComparisonTopologies.NodeCount(topology) == 1)
@@ -42,14 +42,14 @@ internal static class PostgresTopology
         }
 
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(ReadinessTimeoutSeconds));
+        deadline.CancelAfter(lifecycle.ReadinessTimeout);
         await WaitForMembersAsync(connection, topology, false, deadline.Token);
         await ConfigureQuorumAsync(connection, topology, deadline.Token);
         await ReloadAsync(connection, deadline.Token);
         await WaitForMembersAsync(connection, topology, true, deadline.Token);
     }
 
-    internal static async Task<TargetProfile> ObserveCopiesAsync(NpgsqlConnection connection,
+    internal async Task<TargetProfile> ObserveCopiesAsync(NpgsqlConnection connection,
         ComparisonTopology topology, TargetProfile profile, CancellationToken cancellationToken)
     {
         if (topology == ComparisonTopology.Standalone)
@@ -78,7 +78,7 @@ internal static class PostgresTopology
         }
     }
 
-    private static async Task<ReplicaMembers> WaitForMembersAsync(NpgsqlConnection connection, ComparisonTopology topology, bool requireQuorum,
+    private async Task<ReplicaMembers> WaitForMembersAsync(NpgsqlConnection connection, ComparisonTopology topology, bool requireQuorum,
         CancellationToken cancellationToken)
     {
         while (true)
@@ -90,7 +90,7 @@ internal static class PostgresTopology
                 return observation;
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(ReadinessPollMilliseconds), cancellationToken);
+            await Task.Delay(lifecycle.PostgresReadinessPollInterval, cancellationToken);
         }
     }
 
@@ -151,13 +151,13 @@ internal static class PostgresTopology
         }
     }
 
-    private static async Task<TargetProfile> ObserveReplicatedCopiesAsync(NpgsqlConnection connection,
+    private async Task<TargetProfile> ObserveReplicatedCopiesAsync(NpgsqlConnection connection,
         ComparisonTopology topology, TargetProfile profile, CancellationToken cancellationToken)
     {
         await using var current = new NpgsqlCommand(CurrentWal, connection);
         var wal = (string)(await current.ExecuteScalarAsync(cancellationToken))!;
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(ReadinessTimeoutSeconds));
+        deadline.CancelAfter(lifecycle.ReadinessTimeout);
         await WaitForCopiesAsync(connection, topology, wal, deadline.Token);
         var members = await WaitForMembersAsync(connection, topology, true, deadline.Token);
         await VerifyQuorumConfigurationAsync(connection, topology, deadline.Token);
@@ -182,7 +182,7 @@ internal static class PostgresTopology
         }
     }
 
-    private static async Task WaitForCopiesAsync(NpgsqlConnection connection, ComparisonTopology topology, string wal,
+    private async Task WaitForCopiesAsync(NpgsqlConnection connection, ComparisonTopology topology, string wal,
         CancellationToken cancellationToken)
     {
         while (true)
@@ -194,7 +194,7 @@ internal static class PostgresTopology
                 return;
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(ReadinessPollMilliseconds), cancellationToken);
+            await Task.Delay(lifecycle.PostgresReadinessPollInterval, cancellationToken);
         }
     }
 

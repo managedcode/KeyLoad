@@ -3,6 +3,9 @@ namespace KeyLoad.Storage.ZoneTree;
 /// <summary>Constant-cardinality, process-local logical read counters for one store opening.</summary>
 internal sealed class ZoneTreeReadCounters
 {
+    private const int SingleReadEvent = 1;
+    private const int NoCounterIncrement = 0;
+
     private readonly Guid sessionId = Guid.NewGuid();
     private long ownedPointLookups;
     private long borrowedPointLookups;
@@ -48,11 +51,11 @@ internal sealed class ZoneTreeReadCounters
         Interlocked.Read(ref rangeLimitLookaheads),
         Interlocked.Read(ref rangeExaminedBytes));
 
-    private static void SaturatingIncrement(ref long counter) => SaturatingAdd(ref counter, 1);
+    private static void SaturatingIncrement(ref long counter) => SaturatingAdd(ref counter, SingleReadEvent);
 
     private static void SaturatingAdd(ref long counter, long amount)
     {
-        if (amount == 0)
+        if (amount == NoCounterIncrement)
         {
             return;
         }

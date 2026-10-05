@@ -21,14 +21,18 @@ internal static class IsolatedRabbitBootstrap
 
     internal static string Write(IsolatedResourceContext context)
     {
+        const int OrdinalInitialValue = 1;
+        const string ItemText = " = ";
+        const char LineFeedCharacter = '\n';
+
         var lines = new List<string> { Discovery, Disc };
-        for (var ordinal = 1; ordinal <= context.Selection.NodeCount; ordinal++)
+        for (var ordinal = OrdinalInitialValue; ordinal <= context.Selection.NodeCount; ordinal++)
         {
             var index = ordinal.ToString(CultureInfo.InvariantCulture);
-            lines.Add(PeerPrefix + index + " = " + RabbitPrefix + NodePrefix + index);
+            lines.Add(PeerPrefix + index + ItemText + RabbitPrefix + NodePrefix + index);
         }
         var path = Path.Combine(context.DataDirectory(DirectoryName), FileName);
-        File.WriteAllText(path, string.Join('\n', lines) + '\n');
+        File.WriteAllText(path, string.Join(LineFeedCharacter, lines) + LineFeedCharacter);
         return path;
     }
 

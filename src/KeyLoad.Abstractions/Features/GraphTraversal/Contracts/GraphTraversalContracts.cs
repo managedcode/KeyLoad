@@ -11,7 +11,10 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.UpsertEdge)]
 public sealed record UpsertEdge([property: Orleans.Id(0)] string Graph, [property: Orleans.Id(1)] string EdgeId, [property: Orleans.Id(2)] EntityRef From, [property: Orleans.Id(3)] EntityRef To, [property: Orleans.Id(4)] string Label,
-    [property: Orleans.Id(5)] string AttributesJson = "{}", [property: Orleans.Id(6)] long? ExpectedRevision = null) : Mutation(Graph);
+    [property: Orleans.Id(5)] string AttributesJson = UpsertEdge.DefaultAttributesJson, [property: Orleans.Id(6)] long? ExpectedRevision = null) : Mutation(Graph)
+{
+    private const string DefaultAttributesJson = "{}";
+}
 
 /// <summary>Deletes a graph edge, optionally conditional on its revision.</summary>
 /// <param name="Graph">Identifies the graph.</param>

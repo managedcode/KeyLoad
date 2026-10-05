@@ -27,7 +27,7 @@ internal sealed record MessagingRf3Identity(PrincipalRecord Principal, ApiKeyRec
         var credential = new ApiKeyRecord(credentialId, principalId,
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), principal,
             cancellationToken));
         await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(
@@ -39,7 +39,7 @@ internal sealed record MessagingRf3Identity(PrincipalRecord Principal, ApiKeyRec
         CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), updated,
             cancellationToken));
     }

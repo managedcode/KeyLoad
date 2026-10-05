@@ -12,12 +12,12 @@ internal sealed class NodeEpochPublishedProgressTests
             _root, source, destination, profile, sourceInventory, token) =>
         {
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
-            _ = ServerNodeFormatUpgrade.Prepare(source, options);
-            _ = ServerNodeFormatUpgrade.Publish(source, options);
+            _ = ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options));
+            _ = ServerNodeFormatUpgrade.Publish(source, RecoveryServerRuntimeOptions.Runtime(options));
             File.Delete(ProgressPath(destination));
             var targetInventory = await NodeEpochInventoryCapture.CaptureAsync(destination, token);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, options));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options)));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.FormatUnsupported);
             await NodeEpochInventoryCapture.AssertUnchangedAsync(destination, targetInventory, token);
@@ -32,12 +32,12 @@ internal sealed class NodeEpochPublishedProgressTests
             _root, source, destination, profile, sourceInventory, token) =>
         {
             var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
-            _ = ServerNodeFormatUpgrade.Prepare(source, options);
-            _ = ServerNodeFormatUpgrade.Publish(source, options);
+            _ = ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options));
+            _ = ServerNodeFormatUpgrade.Publish(source, RecoveryServerRuntimeOptions.Runtime(options));
             await CorruptAsync(ProgressPath(destination), token);
             var targetInventory = await NodeEpochInventoryCapture.CaptureAsync(destination, token);
 
-            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, options));
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => ServerNodeFormatUpgrade.Prepare(source, RecoveryServerRuntimeOptions.Runtime(options)));
 
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Corruption);
             await NodeEpochInventoryCapture.AssertUnchangedAsync(destination, targetInventory, token);

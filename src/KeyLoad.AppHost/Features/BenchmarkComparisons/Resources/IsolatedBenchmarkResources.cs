@@ -1,5 +1,6 @@
 using System.Globalization;
 using KeyLoad.Comparisons;
+using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -45,7 +46,8 @@ internal static class IsolatedBenchmarkResources
         {
             builder.Services.AddSingleton(serviceProvider => new ScaleServerResourceEvidenceCollector(selection,
                 builder.Configuration[OutputSetting] ?? Path.Combine(root, ReportsDirectory),
-                serviceProvider.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping));
+                serviceProvider.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
+                AppHostOptionsRegistration.Get(builder).ServerResources, AppHostOptionsRegistration.Get(builder).Provenance));
         }
         if (IsolatedComparisonContract.Current.UnsupportedTopologies.Any(item =>
                 item.Target == selection.Target && item.NodeCounts.Contains(selection.NodeCount)))

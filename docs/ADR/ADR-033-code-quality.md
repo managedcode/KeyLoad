@@ -712,6 +712,17 @@ separate generated/unbound documents. No product/public/persistence format or
 dependency change occurs; tooling rollback restores a coherent verifier while
 retaining reports. Neither static inspection nor unbound coverage closes any gate.
 
+TASK-CQ-FUNCTIONAL-TEST-IDENTITY-001B then binds the actual UnitTests PE/portable
+PDB to every non-generated project C# source and the six frozen central build
+inputs in CodeQuality. A Luna worker prepares only the new bounded
+`functional-coverage.test-identity.ps1` helper privately; root reviews and joins
+its data into the existing Prepare/Verify manifest after the native compiled
+identity prerequisite. Root verifies real stale-source/foreign-PDB/missing-input
+and unsafe-link rejection before fresh Aspire normal/scalar collection. Full
+test-image source identity does not admit excluded tests as contributors or
+qualify sixteen-module/RF3-server coverage. Existing reports cannot be relabelled
+with this new proof; rollback preserves them and restores coherent tooling.
+
 REQ-CQ-009 / AC-CQ-018..021 in CodeQuality implement the owner's mandatory
 functional-only coverage and complete-operation testing correction. Preserve every
 existing analyzer/site contract, native test gate and 80/70/90/no-decrease rule.
@@ -755,6 +766,15 @@ delivery and final review. No worker runs gates, changes shared code or installs
 tools for the first profile. No runtime persistence/public API migration occurs;
 rollback restores coherent tooling and retains originals without reducing gates.
 ADR remains Accepted until the required complete implementation and evidence exist.
+
+TASK-CQ-FUNCTIONAL-TEST-IDENTITY-001B joins the native Query and UnitTests
+DLL/PDB/source identities into Prepare/Verify. Prepare writes a separate bounded,
+create-only `functional-coverage.test-image-manifest.json`, binds its actual hash
+and fixed filename in the source manifest, and records Query's compiled identity.
+Verify rejects missing bindings and recomputes native identities before admitting
+reports. All six frozen central build inputs and every actual UnitTests project
+source are identity inputs; excluded test cases remain excluded contributors.
+Existing original reports are immutable and cannot receive these bindings later.
 
 ```mermaid
 flowchart LR

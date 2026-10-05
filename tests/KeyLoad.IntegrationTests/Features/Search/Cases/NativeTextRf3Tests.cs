@@ -26,7 +26,7 @@ internal sealed class NativeTextRf3Tests(ClusterFixture fixture)
         var scenario = await NativeTextRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, true, true, false, false, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             identity.Secret, deadline.Token);
         await VerifyRanksAsync(sdk, mcp, scenario.Text(Needle),
@@ -56,7 +56,7 @@ internal sealed class NativeTextRf3Tests(ClusterFixture fixture)
         var scenario = await NativeTextRf3Scenario.CreateAsync(fixture, deadline.Token);
         var identity = await scenario.CreateReaderAsync(fixture, true, true, false, true, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             identity.Secret, deadline.Token);
         var restricted = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(
@@ -72,9 +72,9 @@ internal sealed class NativeTextRf3Tests(ClusterFixture fixture)
         await VerifyMissingFieldGrantAsync(scenario, fixture, true, deadline.Token);
         using var administratorHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         await VerifyFreshnessAsync(scenario, sdk, mcp,
-            new KeyLoadClient(administratorHttp, fixture.AdminKey), deadline.Token);
+            new KeyLoadClient(administratorHttp, fixture.AdminKey, IntegrationClientOptions.Execution()), deadline.Token);
         var revoked = identity.Principal with { Revoked = true, PolicyEpoch = identity.Principal.PolicyEpoch + 1 };
-        await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey)
+        await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution())
             .ConfigurePrincipalAsync(Guid.NewGuid(), revoked, deadline.Token));
         await AssertSdkUnauthenticatedAsync(await sdk.SearchAsync(scenario.Text(Needle), deadline.Token));
         var unauthorized = await Assert.ThrowsAsync<HttpRequestException>(() => mcp.CallAsync(
@@ -88,7 +88,7 @@ internal sealed class NativeTextRf3Tests(ClusterFixture fixture)
     {
         var identity = await scenario.CreateReaderAsync(fixture, textGrant, !textGrant, false, false, cancellationToken);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
-        var sdk = new KeyLoadClient(http, identity.Secret);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         var request = textGrant ? scenario.Hybrid() : scenario.Text(Needle);
         var denied = await sdk.SearchAsync(request, cancellationToken);
         await AssertSdkFailureAsync(denied, ErrorCode.PermissionDenied);

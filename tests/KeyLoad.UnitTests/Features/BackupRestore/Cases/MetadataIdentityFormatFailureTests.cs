@@ -42,7 +42,7 @@ internal sealed class MetadataIdentityFormatFailureTests
         await PrepareIdentity(fixture, content);
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.IdentityJsonRestorePath);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(Directory.Exists(destination)).IsFalse();
@@ -53,7 +53,7 @@ internal sealed class MetadataIdentityFormatFailureTests
         await PrepareIdentity(fixture, content);
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.IdentityJsonRestorePath);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(Directory.Exists(destination)).IsFalse();

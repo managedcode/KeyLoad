@@ -13,8 +13,6 @@ public static class ReplicaProtocol
     public const int MaximumDetailCharacters = 4_096;
     /// <summary>Existing safe rejection detail for a peer payload byte-budget failure.</summary>
     public const string PayloadExceeded = "The replica payload exceeds its transport byte budget.";
-    /// <summary>Maximum snapshot chunks sent to one follower in a maintenance round.</summary>
-    public const int SnapshotChunksPerRound = 4;
     /// <summary>Persisted replica metadata format.</summary>
     public const int FormatVersion = 2;
     /// <summary>Fixed little-endian replica format fence, identifying native version two.</summary>

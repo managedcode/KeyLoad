@@ -43,8 +43,8 @@ internal sealed class ReplicaTermMetadataLifetime : IDisposable
             var configuration = new ReplicaConfiguration(ReplicaTermMetadataFixture.VoterA,
                 [ReplicaTermMetadataFixture.VoterA, ReplicaTermMetadataFixture.VoterB, ReplicaTermMetadataFixture.VoterC],
                 Path.Combine(directory, ReplicaDirectory), Guid.NewGuid());
-            replica = new(new(configuration.Directory) { Incarnation = configuration.Incarnation, FaultObserver = observer });
-            canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = configuration.Incarnation });
+            replica = new(new(configuration.Directory) { Incarnation = configuration.Incarnation, FaultObserver = observer }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+            canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
             var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
             log = new(replica, RecoveryExecutionOptions.Configuration(configuration), canonicalDatabase: database);
             return new(replica, canonical, database, log, configuration);

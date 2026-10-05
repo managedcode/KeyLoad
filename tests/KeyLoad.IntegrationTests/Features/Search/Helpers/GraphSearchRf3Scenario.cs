@@ -33,7 +33,7 @@ internal sealed record GraphSearchRf3Scenario(PartitionRef Partition)
         var partition = new PartitionRef("graph-rf3-tenant-" + Guid.NewGuid().ToString("N"),
             "graph-rf3-database", "graph-rf3-domain", Guid.NewGuid().ToString("N"));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(http, fixture.AdminKey);
+        var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await ConfigureResourceAsync(admin, partition, Documents, ResourceKind.Collection, cancellationToken);
         await ConfigureResourceAsync(admin, partition, Projects, ResourceKind.Collection, cancellationToken);
         await ConfigureGraphAsync(admin, partition, cancellationToken);
@@ -74,7 +74,7 @@ internal sealed record GraphSearchRf3Scenario(PartitionRef Partition)
             PolicyEpoch = identity.Principal.PolicyEpoch + 1
         };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(http, fixture.AdminKey);
+        var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(),
             updated, cancellationToken));
         await Assert.That(persisted.PolicyEpoch).IsEqualTo(updated.PolicyEpoch);
@@ -141,7 +141,7 @@ internal sealed record GraphSearchRf3Scenario(PartitionRef Partition)
         PrincipalRecord principal, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(http, fixture.AdminKey);
+        var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(),
             principal, cancellationToken));
         var keyId = "graph-rf3-key-" + Guid.NewGuid().ToString("N");

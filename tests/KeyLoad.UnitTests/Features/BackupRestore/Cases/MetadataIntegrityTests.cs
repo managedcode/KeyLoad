@@ -39,7 +39,7 @@ internal sealed class MetadataIntegrityTests
             MetadataTestContract.IdentityInnerChecksumRestorePath);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(failure.Message).IsEqualTo(MetadataTestContract.IdentityChecksumInvalidDetail);
@@ -62,7 +62,7 @@ internal sealed class MetadataIntegrityTests
             MetadataTestContract.VerificationOrderRestorePath);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(failure.Message).IsEqualTo(MetadataTestContract.BackupFileVerificationFailedDetail);
@@ -79,7 +79,7 @@ internal sealed class MetadataIntegrityTests
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.LinkRestorePath);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(failure.Message).IsEqualTo(MetadataTestContract.BackupFileLinkDetail);
@@ -99,7 +99,7 @@ internal sealed class MetadataIntegrityTests
         await File.WriteAllTextAsync(existingPath, MetadataTestContract.PreservedFileContents);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(failure.Message).IsEqualTo(MetadataTestContract.RestoreDestinationNotEmptyDetail);
@@ -118,7 +118,7 @@ internal sealed class MetadataIntegrityTests
             MetadataTestContract.UnsupportedVersionRestorePath);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(failure.Message).IsEqualTo(MetadataTestContract.ManifestUnsupportedDetail);
@@ -129,7 +129,7 @@ internal sealed class MetadataIntegrityTests
     {
         var destination = Path.Combine(fixture.BackupDirectory, suffix);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination));
+            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(failure.Message).IsEqualTo(MetadataTestContract.BackupFileVerificationFailedDetail);
