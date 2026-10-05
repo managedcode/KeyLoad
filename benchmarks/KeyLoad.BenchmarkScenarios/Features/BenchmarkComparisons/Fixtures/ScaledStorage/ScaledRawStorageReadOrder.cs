@@ -7,7 +7,7 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 internal sealed class ScaledRawStorageReadOrder
 {
     private const int MinimumRecordCount = 1;
-    private const int MaximumRecordCount = 5_000_000;
+    private const int MaximumRecordCount = 1_000_000;
     private const int CancellationCheckStride = 256;
     private const int EncodedIndexBytes = sizeof(int);
     private const ulong InitialState = 1729;

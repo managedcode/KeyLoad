@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-004: verifies all twelve diagnostic contracts with real compiler fixtures.</summary>
+/// <summary>AC-CQ-004: verifies all thirteen diagnostic contracts with real compiler fixtures.</summary>
 internal sealed class DiagnosticContractTests
 {
     private const string MachineKeyId = "KLD0001";
@@ -18,10 +18,11 @@ internal sealed class DiagnosticContractTests
     private const string AggregateTypeCodeLineCountId = "KLD0031";
     private const string ExecutableUnitCodeLineCountId = "KLD0032";
     private const string ControlFlowNestingId = "KLD0033";
+    private const string TypedSynchronizationId = "KLD0034";
 
-    /// <summary>Verifies all twelve rules have unique enabled ids and expected severities.</summary>
+    /// <summary>Verifies all thirteen rules have unique enabled ids and expected severities.</summary>
     [Test]
-    public async Task AllTwelveRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync()
+    public async Task AllThirteenRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync()
     {
         // AC-CQ-004: public rule inventory is stable for compiler and SARIF consumers.
         var expected = new Dictionary<string, DiagnosticSeverity>(StringComparer.Ordinal)
@@ -37,7 +38,8 @@ internal sealed class DiagnosticContractTests
             [FileCodeLineCountId] = DiagnosticSeverity.Error,
             [AggregateTypeCodeLineCountId] = DiagnosticSeverity.Error,
             [ExecutableUnitCodeLineCountId] = DiagnosticSeverity.Error,
-            [ControlFlowNestingId] = DiagnosticSeverity.Error
+            [ControlFlowNestingId] = DiagnosticSeverity.Error,
+            [TypedSynchronizationId] = DiagnosticSeverity.Error
         };
         var analyzers = typeof(LiteralMachineKeyAnalyzer).Assembly.GetTypes()
             .Where(static type => !type.IsAbstract &&

@@ -11,7 +11,7 @@ internal sealed class PartitionHost : IAsyncDisposable
 {
     private readonly PartitionStores stores;
     private readonly DurableReplicaLog log;
-    private readonly object lifecycle = new();
+    private readonly Lock lifecycle = new();
     private Task? shutdown;
 
     /// <summary>Opens the private node directory and recovers durable state before exposing the protocol.</summary>

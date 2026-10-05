@@ -44,14 +44,15 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
             throw new InvalidOperationException(Invalid);
         }
 
-        var tag = reference![(reference.IndexOf(':', StringComparison.Ordinal) + 1)..];
+        var acceptedReference = reference!;
+        var tag = acceptedReference[(acceptedReference.IndexOf(':', StringComparison.Ordinal) + 1)..];
         var invocation = tag[TagPrefix.Length..];
         var expectedReceipt = $"TestResults/rf3/local-images/image-{invocation}.json";
         if (!string.Equals(receiptPath, expectedReceipt, StringComparison.Ordinal))
         {
             throw new InvalidOperationException(Invalid);
         }
-        return new(reference!, tag, receiptPath!);
+        return new(acceptedReference, tag, receiptPath!);
     }
 
     private static bool HasInvalidLocalImageRequest(IDistributedApplicationBuilder builder, string? provenance,

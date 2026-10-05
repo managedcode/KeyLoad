@@ -4,6 +4,7 @@ import { requireWorkerJobAgreement, validateAggregateProof, validateWorkerEnvelo
 import { createStage, hashBytes, parseBytes, publishStage, rawFile, rawPath, readBytes, removeStage,
   retainBytes, validateInventory, validatePaths } from './aggregate-files.mjs';
 import { validateScaledPlan } from './scaled-isolated-plan.mjs';
+import { validateVectorPlan } from './vector-isolated-plan.mjs';
 
 function retainCommonFacts(common, report) {
   if (report === null) return;
@@ -45,10 +46,11 @@ export async function aggregateEvidence({ input, output, plan, proof }) {
   await validatePaths({ input, output, plan, proof });
   const contract = readIsolatedContract();
   const requestedPlan = parseBytes(await readBytes(plan, AGGREGATE.metadataBytes));
-  const inventory = requestedPlan?.profile === contract.profile
-    ? validateIsolatedPlan(requestedPlan, contract) : validateScaledPlan(requestedPlan, contract);
+  const inventory = requestedPlan?.profile === contract.profile ? validateIsolatedPlan(requestedPlan, contract)
+    : requestedPlan?.profile?.startsWith('vector-') ? validateVectorPlan(requestedPlan, contract)
+      : validateScaledPlan(requestedPlan, contract);
   const profileContract = inventory.profile === contract.profile ? contract
-    : { ...contract, profile: inventory.profile, options: inventory.profileSettings };
+    : { ...contract, profile: inventory.profile, options: inventory.profileSettings ?? null };
   const evidence = validateAggregateProof(parseBytes(await readBytes(proof, AGGREGATE.metadataBytes)), inventory);
   await validateInventory(input, inventory.cells);
   const byId = new Map(evidence.cells.map(cell => [cell.id, cell]));
@@ -62,7 +64,10 @@ export async function aggregateEvidence({ input, output, plan, proof }) {
     const manifest = inventory.profileSettings === undefined
       ? { schemaVersion: AGGREGATE.version, cohort: evidence.cohort, profile: inventory.profile,
         options: inventory.options, datasetSha256: common.datasetSha256 ?? null, workers }
-      : { schemaVersion: AGGREGATE.version, cohort: evidence.cohort, profile: inventory.profile,
+      : inventory.profile.startsWith('vector-')
+        ? { schemaVersion: AGGREGATE.version, cohort: evidence.cohort, profile: inventory.profile,
+          vectorProfile: inventory.profileSettings, datasetSha256: common.datasetSha256 ?? null, workers }
+        : { schemaVersion: AGGREGATE.version, cohort: evidence.cohort, profile: inventory.profile,
         profileSettings: inventory.profileSettings, datasetSha256: common.datasetSha256 ?? null, workers };
     await publishStage(stage, output, manifest);
     return manifest;

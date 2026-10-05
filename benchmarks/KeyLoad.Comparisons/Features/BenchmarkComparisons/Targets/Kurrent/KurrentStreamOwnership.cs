@@ -2,7 +2,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class KurrentStreamOwnership
 {
-    private readonly object gate = new();
+    private readonly System.Threading.Lock gate = new();
     private readonly Dictionary<string, KurrentStreamOwnershipEntry> entries = new(StringComparer.Ordinal);
 
     internal KurrentStreamOwnership(ComparisonOptions options)

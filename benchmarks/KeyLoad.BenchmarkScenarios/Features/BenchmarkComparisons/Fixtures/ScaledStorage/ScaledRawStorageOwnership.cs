@@ -3,7 +3,7 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 /// <summary>Roots the one scaled fixture and serializes its actual close attempts.</summary>
 internal static class ScaledRawStorageOwnership
 {
-    private static readonly object Gate = new();
+    private static readonly System.Threading.Lock Gate = new();
     private static ScaledRawStorageFixture? _fixture;
     private static bool _failedConstruction;
     private static bool _closeInProgress;

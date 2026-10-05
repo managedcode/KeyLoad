@@ -21,7 +21,8 @@ internal static class ReplicaMembershipAuthorityHttpBody
         while (received < buffer.Length)
         {
             var count = await body.ReadAsync(buffer.AsMemory(received), cancellationToken).ConfigureAwait(false);
-            if (count == 0) { break; }
+            if (count == 0)
+            { break; }
             received = checked(received + count);
         }
         return received;

@@ -14,7 +14,10 @@ internal sealed class IsolatedNativeTeardownFailures(Exception? primary)
     internal void Record(string stage, Exception failure)
     {
         stages.Add(stage);
-        if (!cleanup.Any(existing => ReferenceEquals(existing, failure))) cleanup.Add(failure);
+        if (!cleanup.Any(existing => ReferenceEquals(existing, failure)))
+        {
+            cleanup.Add(failure);
+        }
     }
 
     internal byte[] CreateReceipt()
@@ -28,7 +31,11 @@ internal sealed class IsolatedNativeTeardownFailures(Exception? primary)
     internal void ThrowIfAny()
     {
         var failures = OrderedFailures();
-        if (failures.Count == 0) return;
+        if (failures.Count == 0)
+        {
+            return;
+        }
+
         var fatal = FindFatal(failures);
         if (fatal is not null)
         {
@@ -42,7 +49,11 @@ internal sealed class IsolatedNativeTeardownFailures(Exception? primary)
     private List<Exception> OrderedFailures()
     {
         var ordered = new List<Exception>();
-        if (primary is not null) ordered.Add(primary);
+        if (primary is not null)
+        {
+            ordered.Add(primary);
+        }
+
         AddDistinct(ordered, cleanup);
         return ordered;
     }
@@ -52,7 +63,10 @@ internal sealed class IsolatedNativeTeardownFailures(Exception? primary)
         foreach (var failure in failures)
         {
             var fatal = CqrsRuntimeFailures.FindFatal(failure);
-            if (fatal is not null) return fatal;
+            if (fatal is not null)
+            {
+                return fatal;
+            }
         }
         return null;
     }
@@ -61,13 +75,20 @@ internal sealed class IsolatedNativeTeardownFailures(Exception? primary)
     {
         foreach (var addition in additions)
         {
-            if (!target.Any(existing => ReferenceEquals(existing, addition))) target.Add(addition);
+            if (!target.Any(existing => ReferenceEquals(existing, addition)))
+            {
+                target.Add(addition);
+            }
         }
     }
 
     private static void Throw(List<Exception> failures)
     {
-        if (failures.Count == 1) ExceptionDispatchInfo.Capture(failures[0]).Throw();
+        if (failures.Count == 1)
+        {
+            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+        }
+
         throw new AggregateException(Failure, failures);
     }
 }

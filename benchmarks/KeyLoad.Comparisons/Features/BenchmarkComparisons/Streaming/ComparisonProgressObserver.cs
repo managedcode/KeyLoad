@@ -10,7 +10,7 @@ internal sealed class ComparisonProgressObserver : IAsyncDisposable
     private const string LineFormat = "KeyLoadBenchmarkProgress phase={0} repetition={1} completed={2} total={3} failed={4} elapsedSeconds={5:F3}";
     private static readonly CompositeFormat ProgressFormat = CompositeFormat.Parse(LineFormat);
     private readonly Action<string>? _progress;
-    private readonly object _outputGate = new();
+    private readonly System.Threading.Lock _outputGate = new();
     private readonly Stopwatch _elapsed = Stopwatch.StartNew();
     private readonly CancellationTokenSource _lifetime = new();
     private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(HeartbeatSeconds));

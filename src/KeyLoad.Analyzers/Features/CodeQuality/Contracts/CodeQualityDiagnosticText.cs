@@ -40,6 +40,10 @@ internal static class CodeQualityDiagnosticText
     public const string UntypedCatchTitle = "Declare the caught exception type";
     public const string UntypedCatchMessage = "Declare an exception type, such as catch (Exception), instead of an untyped catch";
     public const string UntypedCatchDescription = "Catch clauses must explicitly declare System.Exception or a more specific exception type.";
+
+    public const string TypedSynchronizationTitle = "Use typed synchronization outside grain-owned state";
+    public const string TypedSynchronizationMessage = "Use System.Threading.Lock for short shared-service critical sections and Orleans turn scheduling for activation-owned state instead of '{0}'";
+    public const string TypedSynchronizationDescription = "Object-typed locks and Monitor calls are prohibited. Orleans activations use turn scheduling; shared asynchronous work uses cancellation-aware SemaphoreSlim.WaitAsync.";
 }
 
 internal static class CodeQualitySourceNames

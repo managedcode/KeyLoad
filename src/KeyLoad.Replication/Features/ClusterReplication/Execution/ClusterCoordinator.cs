@@ -12,7 +12,7 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     private readonly TimeProvider clock;
     private readonly AdmittedCommandInbox commands;
     private readonly CancellationTokenSource lifetime = new();
-    private readonly object lifecycle = new();
+    private readonly Lock lifecycle = new();
     private Task? worker;
     private Task? shutdown;
     private int disposed;

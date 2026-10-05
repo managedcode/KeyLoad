@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -15,7 +15,11 @@ internal static partial class ScaleServerResourceProcess
     internal static async Task<string?> InspectAsync(string container, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         var output = await RunAsync(Docker, ["inspect", "--format", InspectFormat, container], token, budget);
-        if (output is null) return null;
+        if (output is null)
+        {
+            return null;
+        }
+
         var fields = output.TrimEnd('\r', '\n').Split(Separator, StringSplitOptions.None);
         return fields.Length == 6 ? output.TrimEnd('\r', '\n') : null;
     }
@@ -27,13 +31,23 @@ internal static partial class ScaleServerResourceProcess
         {
             StartInfo = new ProcessStartInfo(executable)
             {
-                RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false, CreateNoWindow = true
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
             }
         };
-        foreach (var argument in arguments) process.StartInfo.ArgumentList.Add(argument);
+        foreach (var argument in arguments)
+        {
+            process.StartInfo.ArgumentList.Add(argument);
+        }
+
         var limit = Math.Min(budget?.Remaining ?? ScaleServerResourceBounds.MaxHardwareBytes, maximumOutputBytes);
         if (limit < ScaleServerResourceBounds.MinimumCommandBytes)
+        {
             throw new InvalidDataException("Server resource sample exceeded its bound.");
+        }
+
         var errorLimit = Math.Min(ScaleServerResourceBounds.MaxFileBytes, Math.Max(1, limit / 8));
         var outputLimit = limit - errorLimit;
         process.Start();
@@ -43,7 +57,11 @@ internal static partial class ScaleServerResourceProcess
         {
             var exit = process.WaitForExitAsync(token);
             var readers = Task.WhenAll(output, error);
-            if (await Task.WhenAny(exit, readers) == readers) await readers;
+            if (await Task.WhenAny(exit, readers) == readers)
+            {
+                await readers;
+            }
+
             await exit;
             await readers;
             var bytes = await output;
@@ -52,7 +70,8 @@ internal static partial class ScaleServerResourceProcess
         }
         catch (OperationCanceledException failure)
         {
-            try { await TerminateAndJoinAsync(process, output, error); }
+            try
+            { await TerminateAndJoinAsync(process, output, error); }
             catch (Exception cleanupFailure) when (SharesTerminalFailure(failure, cleanupFailure)) { }
             catch (Exception cleanupFailure)
             {
@@ -63,7 +82,8 @@ internal static partial class ScaleServerResourceProcess
         }
         catch (Exception failure)
         {
-            try { await TerminateAndJoinAsync(process, output, error); }
+            try
+            { await TerminateAndJoinAsync(process, output, error); }
             catch (Exception cleanupFailure) when (SharesTerminalFailure(failure, cleanupFailure)) { }
             catch (Exception cleanupFailure)
             {
@@ -83,11 +103,16 @@ internal static partial class ScaleServerResourceProcess
     {
         if (!process.HasExited)
         {
-            if (OperatingSystem.IsLinux()) _ = SendSignal(process.Id, 15);
+            if (OperatingSystem.IsLinux())
+            {
+                _ = SendSignal(process.Id, 15);
+            }
+
             var exited = process.WaitForExitAsync(CancellationToken.None);
             if (await Task.WhenAny(exited, Task.Delay(TimeSpan.FromSeconds(1))) != exited)
             {
-                try { process.Kill(entireProcessTree: true); }
+                try
+                { process.Kill(entireProcessTree: true); }
                 catch (InvalidOperationException) { }
                 catch (Win32Exception) { }
             }
@@ -101,31 +126,52 @@ internal static partial class ScaleServerResourceProcess
 
     private static async Task<byte[]> ReadBoundedAsync(Stream stream, int maximum, CancellationToken token)
     {
-        if (maximum < 1) throw new InvalidDataException("Server resource sample exceeded its bound.");
+        if (maximum < 1)
+        {
+            throw new InvalidDataException("Server resource sample exceeded its bound.");
+        }
+
         using var buffer = new MemoryStream();
         var chunk = new byte[Math.Min(4096, maximum)];
         while (true)
         {
             var count = await stream.ReadAsync(chunk, token);
-            if (count == 0) return buffer.ToArray();
+            if (count == 0)
+            {
+                return buffer.ToArray();
+            }
+
             if (buffer.Length + count >= maximum)
+            {
                 throw new InvalidDataException("Server resource sample exceeded its bound.");
+            }
+
             buffer.Write(chunk, 0, count);
         }
     }
 
     private static async Task<int> DrainBoundedAsync(Stream stream, int maximum, CancellationToken token)
     {
-        if (maximum < 1) throw new InvalidDataException("Server resource sample exceeded its bound.");
+        if (maximum < 1)
+        {
+            throw new InvalidDataException("Server resource sample exceeded its bound.");
+        }
+
         var buffer = new byte[maximum];
         var total = 0;
         while (true)
         {
             var count = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length - total), token);
-            if (count == 0) return total;
+            if (count == 0)
+            {
+                return total;
+            }
+
             total += count;
             if (total >= maximum)
+            {
                 throw new InvalidDataException("Server resource diagnostic exceeded its bound.");
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
 {
     private readonly TimescaleTimeSeriesIntensiveContext context;
     private readonly TimescaleTimeSeriesIntensiveSession session;
-    private readonly object disposeGate = new();
+    private readonly System.Threading.Lock disposeGate = new();
     private Task? disposeTask;
     private int closed;
     private int initialized;

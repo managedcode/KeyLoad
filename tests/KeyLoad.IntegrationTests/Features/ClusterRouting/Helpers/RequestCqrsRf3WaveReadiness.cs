@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 

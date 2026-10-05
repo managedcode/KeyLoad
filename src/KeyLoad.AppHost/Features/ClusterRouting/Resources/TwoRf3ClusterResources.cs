@@ -1,6 +1,7 @@
 using System.Globalization;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
-using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.ClusterReplication;
 
 namespace KeyLoad.AppHost.Features.ClusterRouting;
@@ -10,7 +11,7 @@ internal static class TwoRf3ClusterResources
     private const string Data = "/data";
     private const string Http = "http";
     private const string Silo = "silo";
-    private const string OriginFormat = "http://{0}:8080";
+    private static readonly CompositeFormat OriginFormat = CompositeFormat.Parse("http://{0}:8080");
     private const string ClusterPrefix = "keyload-";
     private const string ParameterPrefix = "membership-";
     private const string DataRootEnvironment = "KeyLoad__DataDirectory";
@@ -84,8 +85,10 @@ internal static class TwoRf3ClusterResources
                 .WithEnvironment(DataRootEnvironment, Data)
                 .WithEnvironment(ClusterEnvironment, clusterId);
             if (groupA)
-            { resource.WithEnvironment(PhysicalEnvironment, physical.ToString("D"))
-                .WithEnvironment(IncarnationEnvironment, incarnation.ToString("D")); }
+            {
+                resource.WithEnvironment(PhysicalEnvironment, physical.ToString("D"))
+                .WithEnvironment(IncarnationEnvironment, incarnation.ToString("D"));
+            }
             else
             { resource.WithEnvironment(PhysicalEnvironment, physicalB).WithEnvironment(IncarnationEnvironment, incarnationB); }
             resource
@@ -144,7 +147,7 @@ internal static class TwoRf3ClusterResources
         ArgumentNullException.ThrowIfNull(builder);
         ClusterProfileStore.Validate(profile);
         if (!builder.Configuration.GetValue<bool>(TwoRf3ProfileProtocol.EphemeralSetting)
-            || builder.Configuration.GetValue<bool>("Benchmarks:Enabled")
+            || builder.Configuration.GetValue<bool>(TwoRf3ProfileProtocol.BenchmarksEnabledSetting)
             || LocalDevelopmentContainerImage.Read(builder) is not null
             || builder.Configuration.GetValue<bool>(ProtocolCohortImages.EnabledSetting)
             || RequestCqrsProbeProfileSettingsReader.Read(builder.Configuration) is not null)
@@ -156,7 +159,8 @@ internal static class TwoRf3ClusterResources
     private static string RandomSecret()
     {
         var bytes = RandomNumberGenerator.GetBytes(32);
-        try { return Convert.ToBase64String(bytes); }
+        try
+        { return Convert.ToBase64String(bytes); }
         finally { CryptographicOperations.ZeroMemory(bytes); }
     }
 }

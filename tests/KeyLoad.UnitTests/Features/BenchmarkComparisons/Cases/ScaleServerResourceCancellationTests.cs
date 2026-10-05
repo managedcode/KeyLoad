@@ -10,7 +10,11 @@ internal sealed class ScaleServerResourceCancellationTests
     [Test]
     public async Task AcScale016CancellationStopsAndJoinsTheOwnedNativeProbe()
     {
-        if (!OperatingSystem.IsLinux()) return;
+        if (!OperatingSystem.IsLinux())
+        {
+            return;
+        }
+
         using var cancellation = new CancellationTokenSource();
         var probe = ScaleServerResourceProcess.RunAsync(Sleep, [Duration], cancellation.Token);
         await cancellation.CancelAsync();

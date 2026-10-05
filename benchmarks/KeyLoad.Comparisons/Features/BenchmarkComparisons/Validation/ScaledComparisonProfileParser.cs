@@ -10,7 +10,6 @@ public static class ScaledComparisonProfileParser
     {
         "scaled-100k-c16" => new(id, 100_000),
         "scaled-1m-c16" => new(id, 1_000_000),
-        "scaled-5m-c16" => new(id, 5_000_000),
         _ => throw new ArgumentOutOfRangeException(nameof(id), "Unknown scaled comparison profile.")
     };
 }

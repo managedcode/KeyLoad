@@ -97,7 +97,7 @@ internal static class GraphCrossPartitionValidation
             || intent.SourcePartition is null || HasNullPartitionPart(intent.SourcePartition)
             || intent.Destination != destination || intent.Destination.Partition is null
             || HasNullPartitionPart(intent.Destination.Partition) || intent.Destination.Collection is null
-            || intent.Destination.Id is null || intent.Revision <= 0
+            || intent.Destination.Id is null || intent.Revision <= 0 || intent.Edge is null
             || intent.SourcePartition == intent.Destination.Partition;
 
     private static bool HasInvalidIntentPolicy(GraphCrossPartitionDeliveryIntentV1 intent)
@@ -106,7 +106,7 @@ internal static class GraphCrossPartitionValidation
 
     private static bool HasInvalidIntentEdge(GraphCrossPartitionDeliveryIntentV1 intent,
         PartitionRef source, string edgeId, EntityRef destination)
-        => intent.Edge is null || intent.Edge.Id != edgeId
+        => intent.Edge.Id != edgeId
             || intent.Edge.From?.Partition != source || intent.Edge.To != destination
             || intent.Edge.Revision != intent.Revision;
 

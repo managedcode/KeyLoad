@@ -6,16 +6,17 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 internal sealed class IsolatedPlanCliTests
 {
     [Test]
-    public async Task AcIso002AndBcGroup001CliRetainsFullPlanAndEmitsNineDatabaseMatrices()
+    public async Task AcIso002AndBcGroup001CliRetainsFullPlanAndEmitsElevenDatabaseMatrices()
     {
         using var directory = new IsolatedPlanDirectory();
         var planPath = directory.PathFor("case plan.json");
         var scalePath = directory.PathFor("scale plan.json");
+        var vectorPath = directory.PathFor("vector plan.json");
         var compositePath = directory.PathFor("composite plan.json");
         var githubPath = directory.PathFor("github output.txt");
         var token = TestContext.Current!.Execution.CancellationToken;
         await File.WriteAllTextAsync(githubPath, "sentinel=preserved\n", token);
-        var result = await IsolatedPlanNodeProcess.CliAsync($"--output={planPath}", $"--scale-output={scalePath}",
+        var result = await IsolatedPlanNodeProcess.CliAsync($"--output={planPath}", $"--scale-output={scalePath}", $"--vector-output={vectorPath}",
             $"--composite-output={compositePath}", $"--github-output={githubPath}");
         await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Error);
         await Assert.That(result.Error).IsEmpty();
@@ -27,16 +28,20 @@ internal sealed class IsolatedPlanCliTests
         var scales = JsonNode.Parse(await File.ReadAllTextAsync(scalePath, token))!.AsArray();
         var expectedScales = (await IsolatedPlanNodeProcess.ProbeAsync("create-scales"))[IsolatedPlanFields.Value]!;
         await Assert.That(JsonNode.DeepEquals(scales, expectedScales)).IsTrue();
+        var vectors = JsonNode.Parse(await File.ReadAllTextAsync(vectorPath, token))!.AsArray();
+        var expectedVectors = (await IsolatedPlanNodeProcess.ProbeAsync("create-vectors"))[IsolatedPlanFields.Value]!;
+        await Assert.That(JsonNode.DeepEquals(vectors, expectedVectors)).IsTrue();
         var composite = JsonNode.Parse(await File.ReadAllTextAsync(compositePath, token))!;
-        await Assert.That(composite["schemaVersion"]!.GetValue<int>()).IsEqualTo(2);
+        await Assert.That(composite["schemaVersion"]!.GetValue<int>()).IsEqualTo(3);
         await Assert.That(JsonNode.DeepEquals(composite["control"], plan)).IsTrue();
         await Assert.That(JsonNode.DeepEquals(composite["scaledProfiles"], scales)).IsTrue();
+        await Assert.That(JsonNode.DeepEquals(composite["vectorProfiles"], vectors)).IsTrue();
         var lines = await File.ReadAllLinesAsync(githubPath, token);
         await Assert.That(lines.Length).IsEqualTo(2);
         await Assert.That(lines[0]).IsEqualTo("sentinel=preserved");
         const string prefix = "database_matrices=";
         await Assert.That(lines[1].StartsWith(prefix, StringComparison.Ordinal)).IsTrue();
-        await IsolatedDatabaseMatrixAssertions.VerifyAsync(JsonNode.Parse(lines[1][prefix.Length..])!.AsObject(), plan, scales);
+        await IsolatedDatabaseMatrixAssertions.VerifyAsync(JsonNode.Parse(lines[1][prefix.Length..])!.AsObject(), plan, scales, vectors);
     }
 
     [Test]

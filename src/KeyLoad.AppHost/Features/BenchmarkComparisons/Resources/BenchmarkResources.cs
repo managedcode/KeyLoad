@@ -16,6 +16,11 @@ internal static class BenchmarkResources
     internal const string MongoDigest = "sha256:81a1c8842a09589fc8d5f285266f3340bf4abdf66700ba22988f14cc9b2b3118";
     internal const string OpenSearchDigest = "sha256:b5dd1512af2a99748c942cfbbd7f32162623336b210667d0fc6333c6321f171d";
     internal const string KurrentDigest = "sha256:ef49a58bab8bc4d7b08cd218f1bb85cf230b03edf5d136e98d6e86a3e5100b6a";
+    // Official multi-platform Docker Hub index for SurrealDB v3.2.4.
+    internal const string SurrealDbDigest = "sha256:51baed8709f57f67dcf04b30e3177db846803fa9342dae2be58c6fa5f8d59843";
+    // Official GHCR linux/amd64 image digest for HelixDB v0.0.8. Its local-server documentation currently names v0.0.10,
+    // but this is the latest immutable package version published by the official GHCR package at this revision.
+    internal const string HelixDbDigest = "sha256:1bd2b9f91fe63190a4cb2c7058e680eef635e9fa9df67a4fcfcc210d3fe1f68a";
 
     public static void Add(IDistributedApplicationBuilder builder, IResourceBuilder<ContainerResource>[] nodes,
         IResourceBuilder<ParameterResource> admin, string root)

@@ -28,6 +28,8 @@ internal static class IsolatedHostConstants
     internal const string Mongo = "MongoDB";
     internal const string OpenSearch = "OpenSearch";
     internal const string Kurrent = "KurrentDB";
+    internal const string SurrealDb = "SurrealDB";
+    internal const string HelixDb = "HelixDB";
     internal const string Http = "http";
     internal const string Https = "https";
     internal const string RootPath = "/";

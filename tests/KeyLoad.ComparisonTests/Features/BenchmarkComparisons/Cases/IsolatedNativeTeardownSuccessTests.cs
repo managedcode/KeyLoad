@@ -31,7 +31,11 @@ internal sealed class IsolatedNativeTeardownSuccessTests
         }
         finally
         {
-            if (!settled && fixture is not null) await fixture.DisposeAsync();
+            if (!settled && fixture is not null)
+            {
+                await fixture.DisposeAsync();
+            }
+
             directory.Delete(recursive: true);
         }
     }

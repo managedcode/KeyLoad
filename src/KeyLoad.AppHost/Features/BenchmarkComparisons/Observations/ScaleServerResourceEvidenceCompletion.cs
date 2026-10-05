@@ -5,7 +5,7 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceEvidenceCompletion
 {
-    private readonly object sync = new();
+    private readonly Lock sync = new();
     private Task? original;
     private Task? completion;
 
@@ -15,9 +15,15 @@ internal sealed class ScaleServerResourceEvidenceCompletion
         lock (sync)
         {
             if (expected is null || !ReferenceEquals(observation, expected))
+            {
                 return Task.FromException(new InvalidOperationException("The original server resource observation is required."));
+            }
+
             if (original is not null && !ReferenceEquals(original, observation))
+            {
                 return Task.FromException(new InvalidOperationException("A different server resource observation was supplied."));
+            }
+
             original = observation;
             return completion ??= SettleAsync(observation, cancel, markMissing, dispose, write);
         }
@@ -36,7 +42,8 @@ internal sealed class ScaleServerResourceEvidenceCompletion
 
     private static async Task CancelAsync(Func<Task> cancel, List<Exception> failures)
     {
-        try { await cancel(); }
+        try
+        { await cancel(); }
         catch (Exception failure) when (IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (HasFatal(failure)) { failures.Add(failure); }
     }
@@ -49,7 +56,10 @@ internal sealed class ScaleServerResourceEvidenceCompletion
         {
             thresholdCancellation = new CancellationTokenSource();
             threshold = Task.Delay(TimeSpan.FromSeconds(ScaleServerResourceBounds.CleanupSeconds), thresholdCancellation.Token);
-            if (await Task.WhenAny(observation, threshold) != observation) Attempt(markMissing, failures);
+            if (await Task.WhenAny(observation, threshold) != observation)
+            {
+                Attempt(markMissing, failures);
+            }
         }
         catch (Exception failure) when (IsNonFatal(failure))
         {
@@ -65,10 +75,17 @@ internal sealed class ScaleServerResourceEvidenceCompletion
         {
             CancelThreshold(thresholdCancellation, failures);
             if (threshold is not null && thresholdCancellation is not null)
+            {
                 await JoinThresholdAsync(threshold, thresholdCancellation.Token, failures);
-            if (thresholdCancellation is not null) Attempt(thresholdCancellation.Dispose, failures);
+            }
+
+            if (thresholdCancellation is not null)
+            {
+                Attempt(thresholdCancellation.Dispose, failures);
+            }
         }
-        try { await observation; }
+        try
+        { await observation; }
         catch (Exception failure) when (IsNonFatal(failure))
         {
             Attempt(markMissing, failures);
@@ -83,7 +100,8 @@ internal sealed class ScaleServerResourceEvidenceCompletion
 
     private static void CancelThreshold(CancellationTokenSource? cancellation, List<Exception> failures)
     {
-        try { cancellation?.Cancel(); }
+        try
+        { cancellation?.Cancel(); }
         catch (Exception failure) when (IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (HasFatal(failure)) { failures.Add(failure); }
     }
@@ -91,32 +109,47 @@ internal sealed class ScaleServerResourceEvidenceCompletion
     private static async Task JoinThresholdAsync(Task threshold, CancellationToken expectedToken,
         List<Exception> failures)
     {
-        try { await threshold; }
+        try
+        { await threshold; }
         catch (OperationCanceledException failure) when (failure.CancellationToken == expectedToken
-            && expectedToken.IsCancellationRequested) { }
+            && expectedToken.IsCancellationRequested)
+        { }
         catch (Exception failure) when (IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (HasFatal(failure)) { failures.Add(failure); }
     }
 
     private static void Attempt(Action? action, List<Exception> failures)
     {
-        if (action is null) return;
-        try { action(); }
+        if (action is null)
+        {
+            return;
+        }
+
+        try
+        { action(); }
         catch (Exception failure) when (IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (HasFatal(failure)) { failures.Add(failure); }
     }
 
     private static async Task WriteAsync(Func<Task> write, List<Exception> failures)
     {
-        try { await write(); }
+        try
+        { await write(); }
         catch (Exception failure) when (IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (HasFatal(failure)) { failures.Add(failure); }
     }
 
     private static void ThrowFailures(List<Exception> failures)
     {
-        if (failures.Count == 1) ExceptionDispatchInfo.Capture(failures[0]).Throw();
-        if (failures.Count > 1) throw new AggregateException(failures);
+        if (failures.Count == 1)
+        {
+            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+        }
+
+        if (failures.Count > 1)
+        {
+            throw new AggregateException(failures);
+        }
     }
 
     private static bool IsNonFatal(Exception failure) => CqrsRuntimeFailures.FindFatal(failure) is null;

@@ -2,6 +2,7 @@ import { AGGREGATE, KEYS, exactKeys, matches, positive, requireValue, validateCo
 import { readIsolatedContract, validateIsolatedPlan } from './isolated-plan.mjs';
 import { isolatedEvidenceJobName, matchesIsolatedJobName } from './isolated-github-contract.mjs';
 import { validateScaledPlan } from './scaled-isolated-plan.mjs';
+import { validateVectorPlan } from './vector-isolated-plan.mjs';
 import { validateScaleResourceProof } from './server-resource-evidence.mjs';
 
 const ERROR = AGGREGATE.errors.proof;
@@ -32,22 +33,23 @@ function validateArtifact(artifact, cell, identities) {
 
 export function validateAggregateProof(value, plan) {
   const contract = readIsolatedContract();
-  const canonical = plan?.profile === contract.profile ? validateIsolatedPlan(plan, contract) : validateScaledPlan(plan, contract);
+  const canonical = plan?.profile === contract.profile ? validateIsolatedPlan(plan, contract)
+    : plan?.profile?.startsWith('vector-') ? validateVectorPlan(plan, contract) : validateScaledPlan(plan, contract);
   requireValue(canonical.profile === plan.profile, ERROR);
   requireValue(exactKeys(value, KEYS.proof) && value.schemaVersion === AGGREGATE.proofVersion &&
     Array.isArray(value.cells) && value.cells.length === plan.cells.length, ERROR);
   validateCohort(value.cohort, plan.profile);
-  const scaled = canonical.profile !== contract.profile;
+  const needsResource = canonical.profile !== contract.profile;
   const expected = new Map(plan.cells.map(cell => [cell.id, cell]));
   const seen = new Set();
   const jobs = new Set();
   const artifacts = new Set();
   for (const item of value.cells) {
     const cell = expected.get(item.id);
-    requireValue(exactKeys(item, scaled ? KEYS.scaleProofCell : KEYS.proofCell)
+    requireValue(exactKeys(item, needsResource ? KEYS.scaleProofCell : KEYS.proofCell)
       && cell !== undefined && !seen.has(item.id) && matches(AGGREGATE.digest, item.workerSha256), ERROR);
     seen.add(item.id);
-    if (scaled) {
+    if (needsResource) {
       const unsupported = contract.unsupportedTopologies.some(entry => entry.target === cell.target
         && entry.nodeCounts.includes(cell.nodeCount));
       validateScaleResourceProof(item.serverResource, !unsupported);

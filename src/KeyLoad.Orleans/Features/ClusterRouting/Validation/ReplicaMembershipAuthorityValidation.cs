@@ -48,6 +48,15 @@ internal static class ReplicaMembershipAuthorityValidation
     internal static void Reply(ReplicaMembershipAuthorityReplyV1 reply)
     {
         ArgumentNullException.ThrowIfNull(reply);
+        ValidateReplyEnvelope(reply);
+        ValidateReplyRows(reply);
+        ValidateReplyOutcome(reply);
+        if (NativeSerialization.Measure(reply) > ReplicaMembershipAuthorityProtocol.MaximumReplyBytes)
+        { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidReply); }
+    }
+
+    private static void ValidateReplyEnvelope(ReplicaMembershipAuthorityReplyV1 reply)
+    {
         if (reply.Version != ReplicaMembershipAuthorityProtocol.Version || reply.AuthorityPhysicalShardId == Guid.Empty
             || reply.AuthorityIncarnation == Guid.Empty || reply.RequestId == Guid.Empty
             || !ValidNonceText(reply.RequestNonce) || !Enum.IsDefined((ReplicaMembershipAuthorityResultKind)reply.ResultKind)
@@ -56,47 +65,75 @@ internal static class ReplicaMembershipAuthorityValidation
             || reply.TableVersionETag is null
             || reply.Rows.IsDefault || reply.Rows.Length > ReplicaMembershipAuthorityProtocol.MaximumRows)
         { throw Errors.Fail(ErrorCode.Corruption, InvalidReply); }
+    }
+
+    private static void ValidateReplyRows(ReplicaMembershipAuthorityReplyV1 reply)
+    {
         foreach (var row in reply.Rows)
         { Entry(row); }
+    }
+
+    private static void ValidateReplyOutcome(ReplicaMembershipAuthorityReplyV1 reply)
+    {
         var failed = (ReplicaMembershipAuthorityResultKind)reply.ResultKind == ReplicaMembershipAuthorityResultKind.Failed;
         if (failed && (reply.ErrorCode is null || reply.ErrorDetailCode == 0 || reply.Applied || !reply.Rows.IsEmpty
                 || reply.TableVersion != 0 || reply.TableVersionETag.Length != 0)
             || !failed && (reply.ErrorCode is not null || reply.ErrorDetailCode != 0))
         { throw Errors.Fail(ErrorCode.Corruption, InvalidReply); }
-        if (NativeSerialization.Measure(reply) > ReplicaMembershipAuthorityProtocol.MaximumReplyBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidReply); }
     }
 
     private static void ValidateOperation(ReplicaMembershipAuthorityOperation operation, ReplicaMembershipAuthorityCallV1 call)
     {
         var defaults = call.ExpectedTableVersion >= 0 && call.CleanupBeforeUtcTicks >= 0;
-        var valid = defaults && (operation switch
-        {
-            ReplicaMembershipAuthorityOperation.ReadAll => call.TargetSiloAddress is null && call.CandidateEntry is null
-                && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
-                && call.CleanupBeforeUtcTicks == 0,
-            ReplicaMembershipAuthorityOperation.ReadRow => call.TargetSiloAddress is not null && call.CandidateEntry is null
-                && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
-                && call.CleanupBeforeUtcTicks == 0,
-            ReplicaMembershipAuthorityOperation.InsertRow => call.TargetSiloAddress is null && call.CandidateEntry is not null
-                && ValidTableVersion(call) && call.ExpectedRowETag is null && call.CleanupBeforeUtcTicks == 0,
-            ReplicaMembershipAuthorityOperation.UpdateRow => call.TargetSiloAddress is not null && call.CandidateEntry is not null
-                && ValidTableVersion(call) && call.ExpectedRowETag is not null
-                && call.ExpectedRowETag == call.CandidateEntry.RowETag && call.CleanupBeforeUtcTicks == 0,
-            ReplicaMembershipAuthorityOperation.UpdateIAmAlive => call.TargetSiloAddress is null && call.CandidateEntry is not null
-                && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
-                && call.CleanupBeforeUtcTicks == 0,
-            ReplicaMembershipAuthorityOperation.CleanupDefunct => call.CandidateEntry is null && call.TargetSiloAddress is null
-                && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
-                && IsValidCleanupCutoff(call.CleanupBeforeUtcTicks),
-            _ => false
-        });
+        var valid = defaults && ValidateOperationShape(operation, call);
         if (!valid)
         { throw Errors.Fail(ErrorCode.Validation, InvalidRequest); }
         if ((operation is ReplicaMembershipAuthorityOperation.InsertRow or ReplicaMembershipAuthorityOperation.UpdateIAmAlive)
             && call.CandidateEntry!.RowETag != "0")
         { throw Errors.Fail(ErrorCode.Validation, InvalidRequest); }
     }
+
+    private static bool ValidateOperationShape(ReplicaMembershipAuthorityOperation operation,
+        ReplicaMembershipAuthorityCallV1 call)
+        => operation switch
+        {
+            ReplicaMembershipAuthorityOperation.ReadAll => IsValidReadAll(call),
+            ReplicaMembershipAuthorityOperation.ReadRow => IsValidReadRow(call),
+            ReplicaMembershipAuthorityOperation.InsertRow => IsValidInsertRow(call),
+            ReplicaMembershipAuthorityOperation.UpdateRow => IsValidUpdateRow(call),
+            ReplicaMembershipAuthorityOperation.UpdateIAmAlive => IsValidUpdateIAmAlive(call),
+            ReplicaMembershipAuthorityOperation.CleanupDefunct => IsValidCleanupDefunct(call),
+            _ => false
+        };
+
+    private static bool IsValidReadAll(ReplicaMembershipAuthorityCallV1 call)
+        => call.TargetSiloAddress is null && call.CandidateEntry is null
+            && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
+            && call.CleanupBeforeUtcTicks == 0;
+
+    private static bool IsValidReadRow(ReplicaMembershipAuthorityCallV1 call)
+        => call.TargetSiloAddress is not null && call.CandidateEntry is null
+            && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
+            && call.CleanupBeforeUtcTicks == 0;
+
+    private static bool IsValidInsertRow(ReplicaMembershipAuthorityCallV1 call)
+        => call.TargetSiloAddress is null && call.CandidateEntry is not null
+            && ValidTableVersion(call) && call.ExpectedRowETag is null && call.CleanupBeforeUtcTicks == 0;
+
+    private static bool IsValidUpdateRow(ReplicaMembershipAuthorityCallV1 call)
+        => call.TargetSiloAddress is not null && call.CandidateEntry is not null
+            && ValidTableVersion(call) && call.ExpectedRowETag is not null
+            && call.ExpectedRowETag == call.CandidateEntry.RowETag && call.CleanupBeforeUtcTicks == 0;
+
+    private static bool IsValidUpdateIAmAlive(ReplicaMembershipAuthorityCallV1 call)
+        => call.TargetSiloAddress is null && call.CandidateEntry is not null
+            && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
+            && call.CleanupBeforeUtcTicks == 0;
+
+    private static bool IsValidCleanupDefunct(ReplicaMembershipAuthorityCallV1 call)
+        => call.CandidateEntry is null && call.TargetSiloAddress is null
+            && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
+            && IsValidCleanupCutoff(call.CleanupBeforeUtcTicks);
 
     private static bool ValidTableVersion(ReplicaMembershipAuthorityCallV1 call)
         => call.ExpectedTableVersionETag is { Length: > 0 } value

@@ -1,4 +1,3 @@
-using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -18,7 +17,8 @@ internal static class IsolatedNativeTeardownNativeSupport
     {
         var original = AspireResourceCompletion.WaitForExitAsync(fixture.Application, IsolatedResourceTopologyFixture.RunnerName, owner.Token);
         owner.Cancel();
-        try { await original; }
+        try
+        { await original; }
         catch (OperationCanceledException failure) { return failure; }
         throw new InvalidOperationException("The actual Aspire runner wait did not observe caller cancellation.");
     }

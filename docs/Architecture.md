@@ -1,5 +1,11 @@
 # KeyLoad architecture and ownership map
 
+[ADR-108](ADR/ADR-108-typed-synchronization.md) and CodeQuality REQ-CQ-010 require
+native Orleans turn scheduling for activation state and System.Threading.Lock for
+necessary synchronous node-local/service gates. Awaited exclusion uses
+SemaphoreSlim.WaitAsync. Compiler rule KLD0034 rejects object/Monitor gates;
+storage/apply ownership and RF3 durability contracts remain unchanged.
+
 Owner clarification 2026-10-03 makes composition the core product:
 **one database for AI agents**, where documents, typed tables, graphs, blobs,
 queues, events, vectors/search and time series coexist and reference one another.
@@ -118,6 +124,14 @@ Read the root and nearest project-local AGENTS.md before changing this solution.
 The [documentation index](README.md) is the complete entry point for 22 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) records decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
 
 Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
+
+Native Orleans execution/scheduling choices are mapped per grain and method in
+[ClusterRouting ExecutionPrimitives](Features/ClusterRouting/ExecutionPrimitives.md)
+and [ADR-110](ADR/ADR-110-native-orleans-execution-primitives.md). Bounded
+interchangeable workers, advisory OneWay hints, selective operation-control
+interleaving and persistent one-time jobs are candidate joins; existing unique
+request grains and reliable serial partition/due paths remain the current source.
+Runtime/provider/fault and matched performance evidence are pending.
 
 Owner direction2026-10-05 accepts [ClientApi ToolDiscovery](Features/ClientApi/ToolDiscovery.md)
 under [ADR-104](ADR/ADR-104-mcp-gateway-tool-discovery.md). The official MCP host
@@ -926,7 +940,7 @@ classDiagram
     class IAtomicStore
     class ZoneTreeStore
     PartitionHost --> DurableReplicaLog : physical owner
-    DurableReplicaLog --> ReplicaTermObservation : one scalar cell under monitor
+    DurableReplicaLog --> ReplicaTermObservation : one scalar cell under typed Lock
     DurableReplicaLog --> IAtomicStore : gated read and durable commit
     ZoneTreeStore ..|> IAtomicStore
 ```

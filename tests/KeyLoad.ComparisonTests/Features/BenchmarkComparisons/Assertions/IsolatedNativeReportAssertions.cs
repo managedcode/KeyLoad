@@ -1,6 +1,6 @@
 using System.Globalization;
-using System.Text.Json;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
@@ -22,6 +22,7 @@ internal static partial class IsolatedNativeReportAssertions
     private const string Mongo = "MongoDB";
     private const string UnsupportedTopology = "unsupportedTopology";
     private const string Measured = "measured";
+    private const string Unsupported = "unsupported";
     private const string SolutionFile = "KeyLoad.slnx";
 
     internal static string EvidenceDirectory()
@@ -86,6 +87,13 @@ internal static partial class IsolatedNativeReportAssertions
             await Assert.That(envelope.Report).IsNull();
             return;
         }
+        if (selection.VectorProfile is { } vector && !SupportsVector(selection.Target, vector.IndexKind))
+        {
+            await Assert.That(envelope.Disposition).IsEqualTo(Unsupported);
+            await Assert.That(envelope.Reason).IsEqualTo($"{selection.Target} does not implement {vector.IndexKind}/{vector.QueryMode} natively.");
+            await Assert.That(envelope.Report).IsNull();
+            return;
+        }
         await Assert.That(envelope.Disposition).IsEqualTo(Measured);
         await Assert.That(envelope.Reason).IsNull();
         await RequireMeasurementsAsync(envelope.Report!, selection);
@@ -93,6 +101,40 @@ internal static partial class IsolatedNativeReportAssertions
 
     private static async Task RequireMeasurementsAsync(ComparisonReport report, ComparisonWorkerSelection selection)
     {
+        if (selection.VectorProfile is { } vector)
+        {
+            await Assert.That(report.Options).IsNull();
+            await Assert.That(report.ScaledProfile).IsNull();
+            await Assert.That(report.VectorProfile).IsEqualTo(vector);
+            await Assert.That(Regex.IsMatch(report.DatasetSha256, "^[a-f0-9]{64}$", RegexOptions.CultureInvariant)).IsTrue();
+            var vectorTarget = report.Targets.Single();
+            await Assert.That(vectorTarget.Name).IsEqualTo(selection.Target);
+            await Assert.That(vectorTarget.Cluster!.Nodes).IsEqualTo(selection.NodeCount);
+            await Assert.That(vectorTarget.Cluster.DataCopies).IsEqualTo(selection.NodeCount);
+            await Assert.That(vectorTarget.Cluster.Observations.IsDefaultOrEmpty).IsFalse();
+            var vectorCase = report.Cases.Single();
+            await Assert.That(vectorCase.Repetition).IsEqualTo(0);
+            await Assert.That(vectorCase.Target).IsEqualTo(selection.Target);
+            await Assert.That(vectorCase.Scenario).IsEqualTo(Scenario.VectorExact);
+            await Assert.That(vectorCase.Status).IsEqualTo(ComparisonStatuses.Measured);
+            await Assert.That(vectorCase.Measurement).IsNull();
+            await Assert.That(vectorCase.Samples).IsEmpty();
+            var vectorMetrics = vectorCase.VectorMetrics!;
+            await Assert.That(vectorMetrics.RecordCount).IsEqualTo(vector.RecordCount);
+            await Assert.That(vectorMetrics.LoadedRecordCount).IsEqualTo(vector.RecordCount);
+            await Assert.That(vectorMetrics.QueryAttempts).IsEqualTo(vector.MeasuredQueries);
+            await Assert.That(vectorMetrics.QuerySuccesses).IsEqualTo(vector.MeasuredQueries);
+            await Assert.That(vectorMetrics.UpdateAttempts).IsEqualTo(vector.UpdateCount);
+            await Assert.That(vectorMetrics.UpdateSuccesses).IsEqualTo(vector.UpdateCount);
+            await Assert.That(vectorMetrics.RecallSamples).IsEqualTo(vector.MeasuredQueries);
+            await Assert.That(vectorMetrics.PerQueryRecall.Length).IsEqualTo(vector.MeasuredQueries);
+            await Assert.That(vectorMetrics.MinimumRecall).IsGreaterThanOrEqualTo(vector.MinimumRecall);
+            await Assert.That(vectorMetrics.LatencyP99Ms).IsGreaterThanOrEqualTo(vectorMetrics.LatencyP95Ms);
+            await Assert.That(vectorMetrics.IndexKind).IsEqualTo(vector.IndexKind.ToString());
+            await Assert.That(vectorMetrics.ServerMemoryBytes).IsNull();
+            await Assert.That(vectorMetrics.ServerMemorySamplingIntervalMs).IsNull();
+            return;
+        }
         await Assert.That(report.Options).IsEqualTo(selection.Options);
         await Assert.That(report.DatasetSha256).IsEqualTo(new BenchmarkDataset(selection.Options).Sha256);
         var target = report.Targets.Single();
@@ -117,6 +159,15 @@ internal static partial class IsolatedNativeReportAssertions
             }
         }
     }
+
+    private static bool SupportsVector(string target, VectorIndexKind kind) => target switch
+    {
+        "PostgreSQL + pgvector" => kind is VectorIndexKind.Exact or VectorIndexKind.Hnsw or VectorIndexKind.IvfFlat,
+        "Qdrant" => kind is VectorIndexKind.Exact or VectorIndexKind.Hnsw,
+        "SurrealDB" => kind is VectorIndexKind.Exact or VectorIndexKind.Hnsw,
+        "HelixDB" => kind == VectorIndexKind.NativeAnn,
+        _ => false
+    };
 
     internal static async Task VerifyServerResourceEvidenceAsync(string output, ComparisonWorkerSelection selection,
         CancellationToken cancellationToken)
@@ -168,7 +219,10 @@ internal static partial class IsolatedNativeReportAssertions
         foreach (var name in new[] { WorkerFile, ServerResourceFile })
         {
             var file = Path.Combine(output, name);
-            if (File.Exists(file)) File.Copy(file, Path.Combine(evidence, name), overwrite: false);
+            if (File.Exists(file))
+            {
+                File.Copy(file, Path.Combine(evidence, name), overwrite: false);
+            }
         }
     }
 

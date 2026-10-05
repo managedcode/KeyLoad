@@ -2,7 +2,7 @@ namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeTextProjectionPhysicalGate
 {
-    private readonly object sync = new();
+    private readonly Lock sync = new();
 
     internal T Run<T>(Func<T> operation)
     {

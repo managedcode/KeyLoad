@@ -186,9 +186,11 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         if (!observer.IsJoined)
         { await observer.RetryFailedCloseAsync(failures, FailureObserver).ConfigureAwait(false); }
         if (!observer.IsJoined)
-        { RequestCqrsLifecycleFailureObserver.Append(failures,
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures,
             new InvalidOperationException("The Aspire subscriber observer did not join its original stream."),
-            FailureObserver, RequestCqrsLifecycleStage.ObserverJoin); }
+            FailureObserver, RequestCqrsLifecycleStage.ObserverJoin);
+        }
         if (observer.IsJoined)
         { subscriberObserver = null; }
     }

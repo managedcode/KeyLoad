@@ -19,6 +19,9 @@ internal sealed record StreamedComparisonReport(int SchemaVersion, Guid RunId, D
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public ScaledComparisonProfile? ScaledProfile { get; init; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public VectorComparisonProfile? VectorProfile { get; init; }
+
     internal static StreamedComparisonReport Create(ComparisonReport report)
     {
         ArgumentNullException.ThrowIfNull(report);
@@ -35,7 +38,8 @@ internal sealed record StreamedComparisonReport(int SchemaVersion, Guid RunId, D
         {
             Provenance = report.Provenance,
             LoadGeneratorImage = report.LoadGeneratorImage,
-            ScaledProfile = report.ScaledProfile
+            ScaledProfile = report.ScaledProfile,
+            VectorProfile = report.VectorProfile
         };
     }
 }

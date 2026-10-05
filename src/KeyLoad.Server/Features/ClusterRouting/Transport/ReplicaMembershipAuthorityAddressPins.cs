@@ -57,6 +57,7 @@ internal sealed class ReplicaMembershipAuthorityAddressPins : IDisposable
 
     public void Dispose()
     {
-        foreach (var gate in gates) { gate.Dispose(); }
+        foreach (var gate in gates)
+        { gate.Dispose(); }
     }
 }

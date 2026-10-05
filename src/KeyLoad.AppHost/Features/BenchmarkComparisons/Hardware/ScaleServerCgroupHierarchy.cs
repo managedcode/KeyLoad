@@ -12,8 +12,8 @@ internal static class ScaleServerCgroupHierarchy
     private const string RootMount = "/";
     private const string CgroupV2 = "cgroup2";
 
-    internal static async Task<bool> IsSupportedRootAsync(string root, CancellationToken token,
-        ScaleServerResourceSampleBudget budget)
+    internal static async Task<bool> IsSupportedRootAsync(string root, ScaleServerResourceSampleBudget budget,
+        CancellationToken token)
     {
         var mounts = await BoundedText.ReadAsync(MountInfoPath, ScaleServerResourceBounds.MaxFileBytes, token, budget);
         var controllers = await BoundedText.ReadAsync(Path.Combine(root, ControllerFile),
@@ -40,15 +40,35 @@ internal static class ScaleServerCgroupHierarchy
         foreach (var line in mountInfo.Split('\n'))
         {
             var separator = line.IndexOf(" - ", StringComparison.Ordinal);
-            if (separator < 0) continue;
+            if (separator < 0)
+            {
+                continue;
+            }
+
             var before = line[..separator].Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var after = line[(separator + 3)..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (before.Length < 5 || after.Length < 1 || after[0] != CgroupV2) continue;
+            if (before.Length < 5 || after.Length < 1 || after[0] != CgroupV2)
+            {
+                continue;
+            }
+
             var mountRoot = DecodePath(before[3]);
             var mountPoint = DecodePath(before[4]);
-            if (mountRoot is null || mountPoint is null) return false;
-            if (mountPoint != root) continue;
-            if (mountRoot != RootMount) return false;
+            if (mountRoot is null || mountPoint is null)
+            {
+                return false;
+            }
+
+            if (mountPoint != root)
+            {
+                continue;
+            }
+
+            if (mountRoot != RootMount)
+            {
+                return false;
+            }
+
             count++;
         }
         return count == 1;
@@ -64,7 +84,11 @@ internal static class ScaleServerCgroupHierarchy
                 decoded.Append(value[index]);
                 continue;
             }
-            if (index + 3 >= value.Length || !TryOctal(value.AsSpan(index + 1, 3), out var code)) return null;
+            if (index + 3 >= value.Length || !TryOctal(value.AsSpan(index + 1, 3), out var code))
+            {
+                return null;
+            }
+
             decoded.Append((char)code);
             index += 3;
         }
@@ -76,7 +100,11 @@ internal static class ScaleServerCgroupHierarchy
         value = 0;
         foreach (var digit in digits)
         {
-            if (digit is < '0' or > '7') return false;
+            if (digit is < '0' or > '7')
+            {
+                return false;
+            }
+
             value = checked(value * 8 + digit - '0');
         }
         return true;

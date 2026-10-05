@@ -64,9 +64,9 @@ internal sealed record ComparisonExecutionIdentity(
     /// <param name="scaledProfileId">The exact scaled profile identity, or null for the existing control.</param>
     /// <returns>The validated native image and GitHub provenance.</returns>
     internal static ComparisonExecutionIdentity? ReadIsolated(IConfiguration configuration, string sourceRevision,
-        ComparisonTopology topology, string? scaledProfileId = null)
+        ComparisonTopology topology, string? scaledProfileId = null, string? vectorProfileId = null)
         => ReadIdentity(configuration, sourceRevision, topology, isTimeSeries: false, isIsolated: true,
-            isolatedScaleProfileId: scaledProfileId);
+            isolatedScaleProfileId: scaledProfileId, isolatedVectorProfileId: vectorProfileId);
 
     /// <summary>Requires the separate intensive TimeSeries family identity.</summary>
     internal static ComparisonExecutionIdentity ReadTimeSeriesIntensive(IConfiguration configuration, string sourceRevision)
@@ -75,7 +75,7 @@ internal sealed record ComparisonExecutionIdentity(
 
     private static ComparisonExecutionIdentity? ReadIdentity(IConfiguration configuration, string? sourceRevision,
         ComparisonTopology? topology, bool isTimeSeries, bool isIsolated = false, bool isIntensiveTimeSeries = false,
-        string? isolatedScaleProfileId = null)
+        string? isolatedScaleProfileId = null, string? isolatedVectorProfileId = null)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         var loadGeneratorImage = configuration[LoadGeneratorImageSetting];
@@ -104,8 +104,11 @@ internal sealed record ComparisonExecutionIdentity(
             || (isIsolated && isolatedScaleProfileId is not null
                 && !string.Equals(configuration[ComparisonWorkerSelection.ScaleProfileSetting], isolatedScaleProfileId,
                     StringComparison.Ordinal))
+            || (isIsolated && isolatedVectorProfileId is not null
+                && !string.Equals(configuration[ComparisonWorkerSelection.VectorProfileSetting], isolatedVectorProfileId,
+                    StringComparison.Ordinal))
             || !IsAcceptedExecutionProfile(profile, topology, isTimeSeries, isIsolated, isIntensiveTimeSeries,
-                isolatedScaleProfileId))
+                isolatedScaleProfileId, isolatedVectorProfileId))
         {
             throw InvalidIdentity();
         }
@@ -115,14 +118,29 @@ internal sealed record ComparisonExecutionIdentity(
     }
 
     private static bool IsAcceptedExecutionProfile(string profile, ComparisonTopology? topology,
-        bool isTimeSeries, bool isIsolated, bool isIntensiveTimeSeries, string? isolatedScaleProfileId)
+        bool isTimeSeries, bool isIsolated, bool isIntensiveTimeSeries, string? isolatedScaleProfileId,
+        string? isolatedVectorProfileId)
         => isIntensiveTimeSeries
             ? profile == TimeSeriesIntensiveFamilyContract.Current.EvidenceProfile
             : isIsolated ? topology is { } selected && Enum.IsDefined(selected)
-                && (isolatedScaleProfileId is null
-                    ? profile == IsolatedComparisonContract.Current.Profile
-                    : profile == isolatedScaleProfileId && IsExactScaledProfile(isolatedScaleProfileId))
+                && (isolatedScaleProfileId is not null
+                    ? profile == isolatedScaleProfileId && IsExactScaledProfile(isolatedScaleProfileId)
+                    : isolatedVectorProfileId is not null
+                        ? profile == isolatedVectorProfileId && IsExactVectorProfile(isolatedVectorProfileId)
+                        : profile == IsolatedComparisonContract.Current.Profile)
                 : IsAcceptedProfile(profile, topology, isTimeSeries);
+
+    private static bool IsExactVectorProfile(string profile)
+    {
+        try
+        {
+            return VectorComparisonProfile.Parse(profile).Id == profile;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return false;
+        }
+    }
 
     private static bool IsExactScaledProfile(string profile)
     {

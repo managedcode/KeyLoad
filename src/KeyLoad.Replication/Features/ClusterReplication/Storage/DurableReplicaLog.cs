@@ -14,7 +14,7 @@ namespace KeyLoad.Replication;
 public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration configuration,
     Action<ReplicaCrashBoundary>? faultObserver = null, DatabaseEngine? canonicalDatabase = null) : IDurableReplicaLog
 {
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private ReplicaHardState state = ReplicaLogValidation.Open(store, configuration, canonicalDatabase);
     private ReplicaTermObservation? termObservation;
     private bool disposed;

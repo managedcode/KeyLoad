@@ -90,3 +90,32 @@ Any backfill is a separate explicit ADR-011 offline, quiescent, writer-excluded 
 No physical partition movement, copy/catch-up, source/destination barrier, owner CAS/switch, restartable phase persistence, rollback, or cleanup endpoint is introduced. The current `AtomicPartitionPlacementV1` validator requires row owner tuple and epoch equal the single default physical shard; startup accepts only the initial epoch. Current requests beyond Batch carry no ownership epoch, so a trusted versioned epoch-bearing operation envelope is required before all write paths can be fenced. Old/global outcome authority remains nonmovable without cross-group global dedup/authorization ownership. No translation between independent replica-log positions exists. KL-071 and KL-072 remain open until those contracts and actual RF3 process-cut gates are delivered.
 
 Public SDK/MCP, frontend and SQL surfaces: N/A for this native commit/metadata stage. No new public operation, token field, movement command or client role is introduced. Actual movement remains subject to its future RF3 and process-cut qualification.
+
+## Accepted scoped identity follow-up, 2026-10-05
+
+The association requirements above describe the completed source boundary of
+the first stage; their sole-global-key/public Outcome references are superseded
+for the next implementation by REQ/AC-DSTORE-009 in
+[DocumentStorage](../DocumentStorage.md) and the exact accepted
+[ADR-011 outcome-v2 matrix](../../ADR/ADR-011-format-upgrades.md).
+New fully resolved Partition/Global identities write their exact v2 outcome and
+v2 locator, while verified retained v1 rows/locators stay byte-preserved and
+prior Unknown remains an ambiguity barrier. New Unknown errors use the distinct
+explicit nonmovable outcome-v2/unknown key without a locator, so a later malformed
+request cannot shadow an existing resolved-scope result. No new write uses v1.
+The same normalized operation, existing
+view, authorization and fingerprint govern resolution. Remove the public
+unscoped constructors/accessor; both bounded locator families validate exact
+canonical keys in PartitionRecordFamilies. No mover may guess global/Unknown
+authority or treat a partition hash as physical placement.
+
+AC-MTOKEN-005/006 retain the exact immutable native6 ConfigureResource producer,
+source/driver/binary receipts and raw old bytes. Their current consumer uses
+operation-aware ResolveOutcome with the original operation and real persisted
+authorization, plus internal same-view raw-format assertions; it cannot replace
+that actual operation with a property-only decode test. Unknown/null native
+defaults and no v2 shadow/no rewrite remain required. The prior producer's raw
+old key is historical bytes, not an active public key API. Root owns the shared
+contract/join; the DSTORE worker updates only current callers and scoped inventory,
+preserving the prior immutable provider/serializer and every existing negative
+fixture. All genuine prior-process, recovery and RF3 gates remain open until run.

@@ -32,7 +32,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     private const int ShutdownSeconds = 30;
     private const int StartupSeconds = 30;
     private const string RequestWorkNotJoined = "The fixture request work has not joined.";
-    private readonly object disposalGate = new();
+    private readonly System.Threading.Lock disposalGate = new();
     private Task? disposal;
     private NativeRequestWorkOwner? requestWork;
     private static RequestCqrsClusterFixture? ActiveFixture { get; set; }

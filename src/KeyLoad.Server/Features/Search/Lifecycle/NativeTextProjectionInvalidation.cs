@@ -1,6 +1,6 @@
 namespace KeyLoad.Server.Features.Search;
 
-internal sealed class NativeTextProjectionInvalidation(object sync, NativeTextProjectionSlotSet slots)
+internal sealed class NativeTextProjectionInvalidation(Lock sync, NativeTextProjectionSlotSet slots)
 {
     internal bool Begin(NativeTextGeneration generation)
     {

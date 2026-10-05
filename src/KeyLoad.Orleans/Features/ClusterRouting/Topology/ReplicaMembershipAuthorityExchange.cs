@@ -166,10 +166,12 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
 
     public void Dispose()
     {
-        try { http.Dispose(); }
+        try
+        { http.Dispose(); }
         finally
         {
-            try { requestMac.Dispose(); }
+            try
+            { requestMac.Dispose(); }
             finally { replyMac.Dispose(); }
         }
     }

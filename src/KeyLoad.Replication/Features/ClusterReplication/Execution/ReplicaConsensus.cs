@@ -17,7 +17,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     private readonly CancellationTokenSource lifetime = new();
     private readonly TaskCompletionSource transportReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly ReplicaActivityTracker activity = new();
-    private readonly object lifecycle = new();
+    private readonly Lock lifecycle = new();
     private readonly CancellationToken stoppingToken;
     private readonly ReplicaRequestDispatcher dispatcher;
     private readonly ReplicaReadRoundExecutor reads;

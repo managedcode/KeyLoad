@@ -3,6 +3,7 @@ using System.Text.Json;
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
 /// <summary>AC-CQ-009 and AC-BC-027: verify exact module, pipeline, overflow and coverage boundaries.</summary>
+[NotInParallel(SiteAnalyzerCoverageTokens.ProcessIsolationKey)]
 internal sealed class SiteAnalyzerCoverageThresholdTests
 {
     [Test]

@@ -17,7 +17,8 @@ internal static class TestSuiteResources
         var arguments = BuildArguments(root, settings, resultsDirectory);
         var runner = builder.AddExecutable(settings.ResourceName, "dotnet", root, arguments)
             .WithEnvironment(TestSuiteSettings.SuiteEnvironment, "")
-            .WithEnvironment(TestSuiteSettings.ScaleProfileEnvironment, "");
+            .WithEnvironment(TestSuiteSettings.ScaleProfileEnvironment, "")
+            .WithEnvironment(TestSuiteSettings.VectorProfileEnvironment, "");
         if (settings.LocalRf3ImageEnabled)
         {
             var execution = LocalRf3ImageExecution.Create(root);
@@ -48,6 +49,10 @@ internal static class TestSuiteResources
         if (settings.ScaleProfile is not null)
         {
             runner.WithEnvironment("Benchmarks__ScaleProfile", settings.ScaleProfile.Id);
+        }
+        if (settings.VectorProfile is not null)
+        {
+            runner.WithEnvironment("Benchmarks__VectorProfile", settings.VectorProfile.Id);
         }
         if (settings.Suite == "unit-scalar")
         {

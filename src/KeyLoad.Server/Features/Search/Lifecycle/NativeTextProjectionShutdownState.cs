@@ -1,6 +1,6 @@
 namespace KeyLoad.Server.Features.Search;
 
-internal sealed class NativeTextProjectionShutdownState(object sync, NativeTextProjectionWork work,
+internal sealed class NativeTextProjectionShutdownState(Lock sync, NativeTextProjectionWork work,
     NativeTextProjectionSlotSet slots)
 {
     internal bool Closing { get; private set; }

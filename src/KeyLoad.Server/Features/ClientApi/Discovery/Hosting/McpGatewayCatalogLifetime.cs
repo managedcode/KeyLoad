@@ -10,7 +10,7 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
     private const string IndexUnavailable = "The canonical MCP metadata index is unavailable.";
     private readonly Func<CancellationToken, Task<IMcpGatewayInstance>> _createInstance;
     private readonly Action _releaseLease;
-    private readonly object _sync = new();
+    private readonly Lock _sync = new();
     private IMcpGatewayInstance? _instance;
     private Task? _initialization;
     private Task? _disposal;
@@ -60,7 +60,7 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
     private async Task InitializeCoreAsync(CancellationToken cancellationToken)
     {
         var instance = await _createInstance(cancellationToken).ConfigureAwait(false);
-        var rejected = false;
+        bool rejected;
         lock (_sync)
         {
             rejected = _closing;

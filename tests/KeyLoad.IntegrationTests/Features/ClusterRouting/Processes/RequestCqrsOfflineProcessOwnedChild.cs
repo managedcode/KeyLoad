@@ -9,7 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
 {
-    private readonly object disposalGate = new();
+    private readonly System.Threading.Lock disposalGate = new();
     private readonly ProcessStartInfo start;
     private readonly CancellationTokenSource cancellation;
     private readonly Task<NodeEpochRf3OfflineResult> operation;

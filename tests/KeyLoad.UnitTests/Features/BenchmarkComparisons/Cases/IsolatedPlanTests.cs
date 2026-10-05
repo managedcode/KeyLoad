@@ -14,12 +14,12 @@ internal sealed class IsolatedPlanTests
         var contract = JsonNode.Parse(await File.ReadAllTextAsync(IsolatedPlanNodeProcess.ContractPath,
             TestContext.Current!.Execution.CancellationToken))!.AsObject();
         await Assert.That(plan[IsolatedPlanFields.SchemaVersion]!.GetValue<int>()).IsEqualTo(1);
-        await Assert.That(plan[IsolatedPlanFields.WorkerSchemaVersion]!.GetValue<int>()).IsEqualTo(4);
+        await Assert.That(plan[IsolatedPlanFields.WorkerSchemaVersion]!.GetValue<int>()).IsEqualTo(5);
         await Assert.That(JsonNode.DeepEquals(plan[IsolatedPlanFields.Options], contract[IsolatedPlanFields.Options])).IsTrue();
         await Assert.That(plan[IsolatedPlanFields.Profile]!.GetValue<string>()).IsEqualTo(contract[IsolatedPlanFields.Profile]!.GetValue<string>());
         var cells = plan[IsolatedPlanFields.Cells]!.AsArray();
-        await Assert.That(cells.Count).IsEqualTo(270);
-        await Assert.That(cells.Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(270);
+        await Assert.That(cells.Count).IsEqualTo(330);
+        await Assert.That(cells.Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(330);
         await VerifyDimensionsAsync(cells, contract);
         var validated = await IsolatedPlanNodeProcess.ProbeAsync("validate", plan);
         await Assert.That(validated[IsolatedPlanFields.Ok]!.GetValue<bool>()).IsTrue();
@@ -37,7 +37,7 @@ internal sealed class IsolatedPlanTests
         await Assert.That(specialized.Count).IsEqualTo(162);
         await Assert.That(crud.Count < 256 && specialized.Count < 256).IsTrue();
         var all = crud.Concat(specialized).Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).ToArray();
-        await Assert.That(all.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(270);
+        await Assert.That(all.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(330);
         await Assert.That(all.Order(StringComparer.Ordinal)).IsEquivalentTo(
             plan[IsolatedPlanFields.Cells]!.AsArray().Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Order(StringComparer.Ordinal),
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -81,7 +81,7 @@ internal sealed class IsolatedPlanTests
         }
     }
 
-    private static bool IsSafeId(string id) => id.Length is > 0 and <= 96
+    private static bool IsSafeId(string id) => id.Length is > 0 and <= 120
         && id.All(character => character is >= 'a' and <= 'z' or >= '0' and <= '9' or '-')
         && !id.StartsWith('-') && !id.EndsWith('-') && !id.Contains("--", StringComparison.Ordinal);
 }

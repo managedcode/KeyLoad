@@ -1,7 +1,6 @@
-using KeyLoad.Orleans;
-using KeyLoad.Server;
-using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
+using KeyLoad.Orleans;
+using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -20,8 +19,10 @@ internal static class RequestCqrsAuthorityFaultCleanup
         var cleanup = new List<Exception>();
         var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
         if (operationDeadline is not null)
-        { await ObserveAsync(operationDeadline.CancelAsync, cleanup, failureObserver,
-            RequestCqrsLifecycleStage.AuthorityDeadlineCancellation).ConfigureAwait(false); }
+        {
+            await ObserveAsync(operationDeadline.CancelAsync, cleanup, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityDeadlineCancellation).ConfigureAwait(false);
+        }
         await ReleaseAndJoinAsync(controls, discovery, sdkCall, mcpCall, armId, originalStarted,
             cleanup, deadline.Token, failureObserver).ConfigureAwait(false);
         await DisposeCallersAsync(caller, administrator, cleanup, failureObserver).ConfigureAwait(false);
@@ -37,16 +38,22 @@ internal static class RequestCqrsAuthorityFaultCleanup
         RequestCqrsLifecycleFailureObserver.Observe(() => operationDeadline?.Dispose(), cleanup,
             failureObserver, RequestCqrsLifecycleStage.AuthorityDeadlineDispose);
         if (rootCreated && waveStopped && cleanup.Count == 0)
-        { RequestCqrsLifecycleFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup,
-            failureObserver, RequestCqrsLifecycleStage.AuthorityRootDelete); }
+        {
+            RequestCqrsLifecycleFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup,
+            failureObserver, RequestCqrsLifecycleStage.AuthorityRootDelete);
+        }
         try
         { deadline.Dispose(); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(cleanup, error, failureObserver,
-            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(cleanup, error, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(cleanup, error, failureObserver,
-            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(cleanup, error, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose);
+        }
         failures.AddRange(cleanup);
     }
 
@@ -61,20 +68,28 @@ internal static class RequestCqrsAuthorityFaultCleanup
             RequestCqrsLifecycleFailureObserver.Observe(controls.StopAdmission, failures, failureObserver,
                 RequestCqrsLifecycleStage.AuthorityAdmissionRelease);
             if (discovery is not null)
-            { await ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cancellationToken), failures,
-                failureObserver, RequestCqrsLifecycleStage.AuthorityAdmissionRelease).ConfigureAwait(false); }
+            {
+                await ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cancellationToken), failures,
+                failureObserver, RequestCqrsLifecycleStage.AuthorityAdmissionRelease).ConfigureAwait(false);
+            }
         }
         if (sdkCall is not null)
-        { await ObserveAsync(() => sdkCall, failures, failureObserver,
-            RequestCqrsLifecycleStage.AuthoritySdkJoin).ConfigureAwait(false); }
+        {
+            await ObserveAsync(() => sdkCall, failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthoritySdkJoin).ConfigureAwait(false);
+        }
         if (mcpCall is not null)
-        { await ObserveAsync(() => mcpCall, failures, failureObserver,
-            RequestCqrsLifecycleStage.AuthorityMcpJoin).ConfigureAwait(false); }
+        {
+            await ObserveAsync(() => mcpCall, failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityMcpJoin).ConfigureAwait(false);
+        }
         await ObserveProducerDisposedAsync(controls, discovery, armId, originalStarted, failures,
             cancellationToken, failureObserver).ConfigureAwait(false);
         if (controls is not null && armId != Guid.Empty)
-        { await ObserveAsync(() => RetireArmIfOpenAsync(controls, armId, cancellationToken), failures,
-            failureObserver, RequestCqrsLifecycleStage.AuthorityArmRetire).ConfigureAwait(false); }
+        {
+            await ObserveAsync(() => RetireArmIfOpenAsync(controls, armId, cancellationToken), failures,
+            failureObserver, RequestCqrsLifecycleStage.AuthorityArmRetire).ConfigureAwait(false);
+        }
     }
 
     private static async Task ObserveProducerDisposedAsync(RequestCqrsProbeFixture? controls,
@@ -97,11 +112,15 @@ internal static class RequestCqrsAuthorityFaultCleanup
         Action<RequestCqrsLifecycleStage>? failureObserver)
     {
         if (caller is not null)
-        { await ObserveAsync(() => caller.DisposeAsync().AsTask(), failures, failureObserver,
-            RequestCqrsLifecycleStage.AuthorityCallerDispose).ConfigureAwait(false); }
+        {
+            await ObserveAsync(() => caller.DisposeAsync().AsTask(), failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityCallerDispose).ConfigureAwait(false);
+        }
         if (administrator is not null)
-        { await ObserveAsync(() => administrator.DisposeAsync().AsTask(), failures, failureObserver,
-            RequestCqrsLifecycleStage.AuthorityAdministratorDispose).ConfigureAwait(false); }
+        {
+            await ObserveAsync(() => administrator.DisposeAsync().AsTask(), failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityAdministratorDispose).ConfigureAwait(false);
+        }
     }
 
     private static async Task<bool> StopWaveAsync(RequestCqrsRf3Wave? wave, bool startupAttempted,
@@ -119,8 +138,10 @@ internal static class RequestCqrsAuthorityFaultCleanup
         List<Exception> failures, Action<RequestCqrsLifecycleStage>? failureObserver)
     {
         if (controls is not null && waveStopped)
-        { await ObserveAsync(controls.DisposeAfterResourcesJoinedAsync, failures, failureObserver,
-            RequestCqrsLifecycleStage.AuthorityControlsDispose).ConfigureAwait(false); }
+        {
+            await ObserveAsync(controls.DisposeAfterResourcesJoinedAsync, failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityControlsDispose).ConfigureAwait(false);
+        }
     }
 
     private static Task ObserveAsync(Func<Task> operation, List<Exception> failures,

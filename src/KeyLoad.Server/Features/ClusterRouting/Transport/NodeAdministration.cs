@@ -14,7 +14,7 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
     private const string BackupDirectory = "backups";
     private const string BackupBusy = "The node already has a backup in progress.";
     private const string AdministrationStopping = "Node administration is stopping.";
-    private readonly object lifecycle = new();
+    private readonly Lock lifecycle = new();
     private Task<BackupReceipt>? backup;
     private Task? shutdown;
 

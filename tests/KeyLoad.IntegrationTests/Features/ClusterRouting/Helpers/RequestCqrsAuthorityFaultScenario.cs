@@ -1,9 +1,8 @@
+using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Assertions;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
-using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Orleans;
-using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
 
@@ -17,7 +16,6 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
     private string root = string.Empty;
     private bool rootCreated;
     private bool waveStartupAttempted;
-    private readonly List<Exception> failures = [];
     private string dataRoot = string.Empty;
     private RequestCqrsProbeFixture? controls;
     private RequestCqrsRf3Wave? wave;
@@ -38,7 +36,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
     internal static Task RunAsync(bool officialMcp, CancellationToken cancellationToken)
         => RequestCqrsAuthorityFaultLifecycleRunner.RunAsync(officialMcp, cancellationToken);
 
-    internal List<Exception> Failures => failures;
+    internal List<Exception> Failures { get; } = [];
 
     internal async Task ExecuteObservedAsync(CancellationToken parentToken)
     {
@@ -54,7 +52,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
     internal Task CleanupAsync()
         => RequestCqrsAuthorityFaultCleanup.RunAsync(root, rootCreated, waveStartupAttempted,
             controls, wave, caller, administrator, discovery, operationDeadline, sdkCall, mcpCall,
-            armId, originalStarted, outcomeOracle, commandId, failures, lifecycle.RecordOwnerFailure);
+            armId, originalStarted, outcomeOracle, commandId, Failures, lifecycle.RecordOwnerFailure);
 
     private async Task ExecuteAsync(CancellationToken parentToken)
     {
@@ -151,7 +149,6 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
             cancellationToken).ConfigureAwait(false);
         await VerifyNoEffectAsync(cancellationToken).ConfigureAwait(false);
     }
-
 
     private async Task JoinOriginalAndAssertDeniedAsync()
     {

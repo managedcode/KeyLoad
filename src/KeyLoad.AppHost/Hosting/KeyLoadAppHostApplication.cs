@@ -52,7 +52,8 @@ internal static class KeyLoadAppHostApplication
         }
         if (tests is not null)
         {
-            if (twoRf3) { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
+            if (twoRf3)
+            { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
             TestSuiteResources.Add(builder, tests);
             return;
         }

@@ -2,7 +2,7 @@
 export const ISOLATED = Object.freeze({
   projectionVersion: 1, catalogVersion: 1, aggregateVersion: 4, reportVersion: 3,
   profile: 'intensive-1k-c16', repository: 'managedcode/KeyLoad', ref: 'refs/heads/main', workflow: 'Benchmarks',
-  targets: Object.freeze(['KeyLoad', 'PostgreSQL + pgvector', 'Qdrant', 'RabbitMQ', 'Redis', 'Neo4j', 'MongoDB', 'OpenSearch', 'KurrentDB']),
+  targets: Object.freeze(['KeyLoad', 'PostgreSQL + pgvector', 'Qdrant', 'RabbitMQ', 'Redis', 'Neo4j', 'MongoDB', 'OpenSearch', 'KurrentDB', 'SurrealDB', 'HelixDB']),
   nodes: Object.freeze([1, 2, 3]),
   crud: Object.freeze(['PointRead', 'DocumentWrite', 'DocumentUpdate', 'DocumentDelete']),
   specialized: Object.freeze(['VectorExact', 'QueueCycle', 'GraphNeighbors', 'GraphTraverse', 'StreamAppend', 'StreamRead']),
@@ -12,7 +12,7 @@ export const ISOLATED = Object.freeze({
     reason: 'Neo4j Community does not provide native clustering; Enterprise licensing is excluded.' }]),
   topology: Object.freeze({ 1: 'Single', 2: 'TwoNode', 3: 'Replicated' }),
   steps: Object.freeze(['Run database workload', 'Save benchmark results']),
-  catalogBytes: 65_536, projectionBytes: 4_194_304, workers: 270,
+  catalogBytes: 65_536, projectionBytes: 4_194_304, workers: 330,
   rawLocation: 'githubActionsArtifacts', aggregatePath: 'isolated/aggregate.json', projectionPath: 'isolated/projection.json',
   sha: /^[a-f0-9]{40}$/, hash: /^[a-f0-9]{64}$/, image: /@sha256:[a-f0-9]{64}$/,
   guid: /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i,
@@ -39,6 +39,16 @@ export const WIRE = Object.freeze({
   target: ['name', 'version', 'topology', 'writeAcknowledgement', 'readContract', 'transport', 'authorization', 'image', 'cluster'],
   cluster: ['nodes', 'dataCopies', 'state', 'observations'],
   case: ['target', 'scenario', 'repetition', 'status', 'detail', 'measurement'],
+  vectorReport: ['schemaVersion', 'runId', 'startedAt', 'options', 'datasetSha256', 'loadModel', 'hostOs', 'architecture',
+    'logicalProcessors', 'runtime', 'storage', 'sourceRevision', 'targets', 'cases', 'provenance', 'loadGeneratorImage', 'vectorProfile'],
+  vectorCase: ['target', 'scenario', 'repetition', 'status', 'detail', 'measurement', 'samples', 'vectorMetrics'],
+  vectorProfile: ['id', 'recordCount', 'indexKind', 'queryMode', 'dimensions', 'metric', 'topK', 'seed', 'payloadBytes',
+    'queryVectorCount', 'warmupQueries', 'measuredQueries', 'concurrency', 'timeoutSeconds', 'latencySampleCount',
+    'repetitions', 'minimumRecall', 'updateCount'],
+  vectorMetrics: ['recordCount', 'loadedRecordCount', 'queryAttempts', 'querySuccesses', 'updateAttempts', 'updateSuccesses',
+    'exactRecall', 'minimumRecall', 'recallSamples', 'perQueryRecall', 'latencyP95Ms', 'latencyP99Ms', 'indexBuildMilliseconds', 'indexKind',
+    'nativeIndexDefinition', 'nativeQueryPlan', 'indexParameters', 'serverMemoryBytes', 'serverMemorySamplingIntervalMs',
+    'queryElapsedSeconds', 'queryUsefulOperationsPerSecond', 'updateElapsedSeconds', 'updateUsefulOperationsPerSecond'],
   measurement: ['attempts', 'successes', 'failures', 'elapsedSeconds', 'usefulOperationsPerSecond', 'latency',
     'uniqueCompletedMessages', 'enqueue', 'receive', 'ack', 'clientResources'],
   latency: ['p50Ms', 'p95Ms', 'p99Ms'],
@@ -52,6 +62,8 @@ export const SUPPORT = Object.freeze({
   MongoDB: [...ISOLATED.crud, 'GraphNeighbors', 'GraphTraverse', 'StreamAppend', 'StreamRead'],
   OpenSearch: [...ISOLATED.crud, 'VectorExact'], Qdrant: ['VectorExact'], RabbitMQ: ['QueueCycle'],
   KurrentDB: ['StreamAppend', 'StreamRead'],
+  SurrealDB: [...ISOLATED.crud, 'GraphNeighbors', 'GraphTraverse', 'VectorExact'],
+  HelixDB: [...ISOLATED.crud, 'GraphNeighbors', 'GraphTraverse'],
 });
 
 export const DOM = Object.freeze({

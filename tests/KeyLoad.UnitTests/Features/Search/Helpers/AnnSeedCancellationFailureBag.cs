@@ -2,7 +2,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class AnnSeedCancellationFailureBag
 {
-    private readonly object gate = new();
+    private readonly System.Threading.Lock gate = new();
     private readonly List<Exception> failures = [];
 
     internal void Add(Exception failure)

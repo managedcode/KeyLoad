@@ -4,7 +4,6 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -38,8 +37,10 @@ internal static class TwoRf3MembershipFingerprintOracle
         }
         finally
         {
-            if (firstSecret is not null) { CryptographicOperations.ZeroMemory(firstSecret); }
-            if (secondSecret is not null) { CryptographicOperations.ZeroMemory(secondSecret); }
+            if (firstSecret is not null)
+            { CryptographicOperations.ZeroMemory(firstSecret); }
+            if (secondSecret is not null)
+            { CryptographicOperations.ZeroMemory(secondSecret); }
         }
     }
 

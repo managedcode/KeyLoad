@@ -172,9 +172,11 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
         if (ownedConsumer.IsJoined)
         { independentConsumer = null; }
         else
-        { RequestCqrsLifecycleFailureObserver.Append(failures,
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures,
             new InvalidOperationException("The independent native consumer did not fully join."),
-            lifecycle.RecordOwnerFailure, RequestCqrsLifecycleStage.IndependentJoin); }
+            lifecycle.RecordOwnerFailure, RequestCqrsLifecycleStage.IndependentJoin);
+        }
     }
 
     private async Task DisposeDiagnosticsAsync(List<Exception> failures)
@@ -193,7 +195,6 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
         }
     }
 
-
     private async Task DisposeApplicationAsync(List<Exception> failures)
     {
         var ownedApplication = application;
@@ -211,6 +212,5 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
         else
         { cleanupJoinFailed = true; }
     }
-
 
 }

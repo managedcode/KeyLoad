@@ -11,6 +11,8 @@ internal static class IsolatedNativeDispatcher
     private const string Mongo = "MongoDB";
     private const string OpenSearch = "OpenSearch";
     private const string Kurrent = "KurrentDB";
+    private const string SurrealDb = "SurrealDB";
+    private const string HelixDb = "HelixDB";
 
     internal static void Add(IsolatedResourceContext context)
     {
@@ -42,6 +44,12 @@ internal static class IsolatedNativeDispatcher
                 break;
             case Kurrent:
                 IsolatedKurrentResources.Add(context);
+                break;
+            case SurrealDb:
+                IsolatedSurrealDbResources.Add(context);
+                break;
+            case HelixDb:
+                IsolatedHelixDbResources.Add(context);
                 break;
             default:
                 throw new InvalidOperationException("IsolatedComparisonSelectionInvalid");

@@ -8,8 +8,7 @@ internal static class BlobPersistedHeadMutation
     private const long ExcessiveLength = long.MaxValue;
     private const string InvalidHash = "not-a-sha256-chain";
 
-    internal static BlobHead Apply(BlobHead head, BlobPersistedHeadCase testCase, BlobRef blob,
-        Guid incarnation)
+    internal static BlobHead Apply(BlobHead head, BlobPersistedHeadCase testCase, Guid incarnation)
     {
         var metadata = head.Metadata;
         metadata = testCase switch
@@ -26,7 +25,7 @@ internal static class BlobPersistedHeadMutation
             BlobPersistedHeadCase.PublishedInvalidHash => metadata with { IntegrityHash = InvalidHash },
             BlobPersistedHeadCase.MissingAccess => metadata with { Access = null! },
             BlobPersistedHeadCase.InvalidAccess => metadata with { Access = new("invalid owner!", null) },
-            BlobPersistedHeadCase.UnpublishedLength => metadata with { Length = 1 },
+            BlobPersistedHeadCase.UnpublishedLength => metadata with { Length = 1, PartCount = 1 },
             BlobPersistedHeadCase.UnpublishedPartCount => metadata with { PartCount = 1 },
             BlobPersistedHeadCase.UnpublishedHash => metadata with { IntegrityHash = InvalidHash },
             BlobPersistedHeadCase.UnpublishedLiveRevision => metadata with { Revision = 1 },

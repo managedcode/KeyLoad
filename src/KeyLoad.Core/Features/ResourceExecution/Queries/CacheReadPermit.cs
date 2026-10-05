@@ -6,7 +6,7 @@ public sealed class CacheReadPermit : ICacheReadPermit, IDisposable
     private sealed record Lease(Guid GrantId, CacheReadPermitAcceptance Acceptance, long PreparedTimestamp);
     private sealed record State(Lease? Lease, long LastSequence, bool Closed);
 
-    private readonly object writer = new();
+    private readonly Lock writer = new();
     private readonly TimeProvider clock;
     private State state = new(null, 0, false);
 

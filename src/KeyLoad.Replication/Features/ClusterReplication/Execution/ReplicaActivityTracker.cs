@@ -2,7 +2,7 @@ namespace KeyLoad.Replication;
 
 internal sealed class ReplicaActivityTracker
 {
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly TaskCompletionSource drained = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private int active;
     private bool closed;

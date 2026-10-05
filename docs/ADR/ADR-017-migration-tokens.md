@@ -104,3 +104,21 @@ delivery. Rollback joins authorization/issuance/outbox callers coherently and
 cannot restore an invented epoch or discard scoped outcomes; recover forward if
 acknowledged metadata already exists. No movement-created epoch or acceleration
 claim follows from source/counter changes alone.
+
+## Accepted independent outcome identity follow-up, 2026-10-05
+
+The earlier additive association stage preserved global dedup identity; it did
+not implement ADR-002's independent full-partition scope. REQ/AC-DSTORE-009,
+[DocumentStorage](../Features/DocumentStorage.md) and the accepted
+[ADR-011 outcome-v2 matrix](ADR-011-format-upgrades.md) now authorize that exact
+key/locator and operation-aware lookup completion before source work. Stable
+native aliases/IDs, original legacy bytes and same-view epoch witnesses remain
+unchanged. The later scoped contract governs dedup identity and both retained
+locator generations; prior-stage global-key statements are historical scope,
+not permission for new ambiguous public access or dual writes. TokenMigrationLineage
+distinguishes new explicit nonmovable Unknown-v2 identities from retained old
+Unknown ambiguity barriers; no new write uses an old key. TokenMigrationLineage
+records the matching inventory/prior-reader amendment. Root owns these joins and
+qualification; Luna owns the guarded private Core/caller/test packet. Cold
+homogeneous backup/reopen rollout and unsupported old-writer downgrade remain
+mandatory. No physical movement, token translation or partition backfill follows.

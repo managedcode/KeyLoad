@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal enum RequestCqrsLifecycleStage

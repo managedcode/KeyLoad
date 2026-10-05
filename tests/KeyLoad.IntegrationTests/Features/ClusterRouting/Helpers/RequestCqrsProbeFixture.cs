@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Owns one bounded private control session, not the AppHost or its database roots.</summary>
 internal sealed class RequestCqrsProbeFixture
 {
-    private readonly object sync = new();
+    private readonly System.Threading.Lock sync = new();
     private readonly Dictionary<string, string> nodeDirectories = new(StringComparer.Ordinal);
     private readonly Dictionary<string, byte[]> ownerRecords = new(StringComparer.Ordinal);
     private readonly Dictionary<Guid, RequestCqrsProbeArmState> arms = [];

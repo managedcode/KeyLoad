@@ -30,7 +30,8 @@ internal static class ReplicaMembershipAuthorityHttpHeaders
                 || Encoding.UTF8.GetByteCount(value) > ReplicaMembershipAuthorityProtocol.MaximumHeaderValueBytes)
             { return false; }
             total = checked(total + Encoding.UTF8.GetByteCount(Names[index]) + Encoding.UTF8.GetByteCount(value));
-            if (total > ReplicaMembershipAuthorityProtocol.MaximumHeaderBytes) { return false; }
+            if (total > ReplicaMembershipAuthorityProtocol.MaximumHeaderBytes)
+            { return false; }
             values[index] = value;
         }
         headers = new(values[0], values[1], values[2], values[3], values[4], values[5], values[6],

@@ -5,7 +5,7 @@ namespace KeyLoad.Orleans;
 /// <summary>Stops admission, cancels admitted work and releases resources after the last owner exits.</summary>
 internal sealed class ReplicaDiscoveryLifetime : IAsyncDisposable
 {
-    private readonly object sync = new();
+    private readonly Lock sync = new();
     private readonly CancellationToken stoppingToken;
     private readonly Func<Task> cancelStopping;
     private readonly Action? releaseResources;

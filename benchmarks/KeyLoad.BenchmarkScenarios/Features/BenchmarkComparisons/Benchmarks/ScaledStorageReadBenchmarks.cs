@@ -18,8 +18,7 @@ public class ScaledStorageReadBenchmarks : IDisposable
     private const int LargePayloadBytes = 1024;
     private const int HundredThousand = 100_000;
     private const int OneMillion = 1_000_000;
-    private const int FiveMillion = 5_000_000;
-    private const int ReadsPerInvocation = 5_000_000;
+    private const int ReadsPerInvocation = 1_000_000;
     private const int LaunchCount = 1;
     private const int WarmupCount = 8;
     private const int IterationCount = 10;
@@ -62,7 +61,7 @@ public class ScaledStorageReadBenchmarks : IDisposable
         }
 
         ValidateEngine(Engine);
-        if (RecordCount is not (HundredThousand or OneMillion or FiveMillion))
+        if (RecordCount is not (HundredThousand or OneMillion))
         {
             throw new ArgumentOutOfRangeException(nameof(RecordCount), InvalidCountMessage);
         }
@@ -70,7 +69,7 @@ public class ScaledStorageReadBenchmarks : IDisposable
         _fixture = new ScaledRawStorageFixture(RecordCount, PayloadBytes);
     }
 
-    /// <summary>Consumes five million checked sequential actual record identities.</summary>
+    /// <summary>Consumes one million checked sequential actual record identities.</summary>
     [Benchmark(OperationsPerInvoke = ReadsPerInvocation)]
     public ulong SequentialRead()
     {
@@ -90,7 +89,7 @@ public class ScaledStorageReadBenchmarks : IDisposable
         return ValidateChecksum(checksum);
     }
 
-    /// <summary>Consumes five million checked shuffled actual record identities.</summary>
+    /// <summary>Consumes one million checked shuffled actual record identities.</summary>
     [Benchmark(OperationsPerInvoke = ReadsPerInvocation)]
     public ulong RandomRead()
     {
@@ -163,7 +162,7 @@ public class ScaledStorageReadBenchmarks : IDisposable
 
         if (int.TryParse(configured, System.Globalization.NumberStyles.None,
                 System.Globalization.CultureInfo.InvariantCulture, out var count)
-            && count is HundredThousand or OneMillion or FiveMillion)
+            && count is HundredThousand or OneMillion)
         {
             return count;
         }

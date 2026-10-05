@@ -1,6 +1,6 @@
 using System.Globalization;
-using KeyLoad.Comparisons;
 using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
+using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
@@ -18,6 +18,9 @@ internal sealed record TestSuiteSettings(
     bool LocalRf3ImageEnabled,
     ScaledComparisonProfile? ScaleProfile)
 {
+    internal VectorComparisonProfile? VectorProfile { get; init; }
+    internal const string VectorProfileSetting = "KeyLoadTests:VectorProfile";
+    internal const string VectorProfileEnvironment = "KeyLoadTests__VectorProfile";
     internal const string SuiteSetting = "KeyLoadTests:Suite";
     internal const string SuiteEnvironment = "KeyLoadTests__Suite";
     internal const string ScaleProfileSetting = "KeyLoadTests:ScaleProfile";
@@ -40,15 +43,26 @@ internal sealed record TestSuiteSettings(
 
     internal static bool Requested(string[] args)
     {
+        var vectorArgument = "--" + VectorProfileSetting + "=";
+        if (args.Any(argument => argument == "--" + VectorProfileSetting || argument == vectorArgument))
+        {
+            throw new InvalidOperationException("The vector-profile test selection is invalid.");
+        }
         var scaleArgument = "--" + ScaleProfileSetting + "=";
         if (args.Any(argument => argument == "--" + ScaleProfileSetting || argument == scaleArgument))
+        {
             throw new InvalidOperationException("The scale-profile test selection is invalid.");
+        }
+
         return !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(SuiteEnvironment))
+            || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(VectorProfileEnvironment))
             || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(ScaleProfileEnvironment))
             || args.Any(argument => argument == "--" + SuiteSetting
                 || argument.StartsWith("--" + SuiteSetting + "=", StringComparison.Ordinal)
                 || argument == "--" + ScaleProfileSetting
-                || argument.StartsWith(scaleArgument, StringComparison.Ordinal));
+                || argument.StartsWith(scaleArgument, StringComparison.Ordinal)
+                || argument == "--" + VectorProfileSetting
+                || argument.StartsWith(vectorArgument, StringComparison.Ordinal));
     }
 
     internal static TestSuiteSettings? Read(IConfiguration configuration)
@@ -60,6 +74,10 @@ internal sealed record TestSuiteSettings(
             if (!string.IsNullOrEmpty(configuration[ScaleProfileSetting]))
             {
                 throw new InvalidOperationException("The scale-profile test selection is invalid.");
+            }
+            if (!string.IsNullOrEmpty(configuration[VectorProfileSetting]))
+            {
+                throw new InvalidOperationException("The vector-profile test selection is invalid.");
             }
             return null;
         }
@@ -75,6 +93,11 @@ internal sealed record TestSuiteSettings(
         };
         var comparisonTarget = configuration[ComparisonWorkerSelection.TargetSetting];
         var scaleProfile = ReadScaleProfile(configuration, suite, comparisonTarget);
+        var vectorProfile = VectorTestSuiteSelection.Read(configuration, suite, comparisonTarget, HasWorkloadOverride(configuration));
+        if (scaleProfile is not null && vectorProfile is not null)
+        {
+            throw new InvalidOperationException("Scale and vector test profiles cannot be combined.");
+        }
         if (configuration.GetValue<bool>(BenchmarkEnabledSetting)
             || comparisonTarget is not null && suite != "comparison")
         {
@@ -83,7 +106,7 @@ internal sealed record TestSuiteSettings(
         var filter = configuration[FilterSetting];
         ValidateBoundedValue(filter, MaximumFilterLength, "The test filter is invalid.", allowBlank: true);
         var localRf3ImageEnabled = LocalRf3ImageRequest.ReadEnabled(configuration, suite, filter);
-        if (localRf3ImageEnabled && scaleProfile is not null)
+        if (localRf3ImageEnabled && (scaleProfile is not null || vectorProfile is not null))
         {
             throw new InvalidOperationException("Test and benchmark modes cannot be combined.");
         }
@@ -97,12 +120,12 @@ internal sealed record TestSuiteSettings(
         {
             throw new InvalidOperationException("Coverage settings and output must be configured together.");
         }
-        var minutes = configuration.GetValue(TimeoutSetting, scaleProfile is not null ? 140 : suite is "rf3" or "comparison" ? 60 : 30);
+        var minutes = configuration.GetValue(TimeoutSetting, scaleProfile is not null || vectorProfile is not null ? 140 : suite is "rf3" or "comparison" ? 60 : 30);
         ArgumentOutOfRangeException.ThrowIfLessThan(minutes, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(minutes, 180);
         return new(suite, project, filter, TimeSpan.FromMinutes(minutes), resultsDirectory,
             configuration.GetValue<bool>(ReportTrxSetting), coverageSettings, coverageOutput, comparisonTarget,
-            localRf3ImageEnabled, scaleProfile);
+            localRf3ImageEnabled, scaleProfile) { VectorProfile = vectorProfile };
     }
 
     private static ScaledComparisonProfile? ReadScaleProfile(IConfiguration configuration, string suite, string? target)
@@ -143,10 +166,18 @@ internal sealed record TestSuiteSettings(
     {
         if (!int.TryParse(configuration[ComparisonWorkerSelection.NodeCountSetting], NumberStyles.None,
                 CultureInfo.InvariantCulture, out var nodeCount)
-            || !IsolatedComparisonContract.Current.NodeCounts.Contains(nodeCount)) return false;
+            || !IsolatedComparisonContract.Current.NodeCounts.Contains(nodeCount))
+        {
+            return false;
+        }
+
         var text = configuration[ComparisonWorkerSelection.ScenarioSetting];
         if (!Enum.TryParse<Scenario>(text, out var scenario) || !Enum.IsDefined(scenario)
-            || !string.Equals(text, scenario.ToString(), StringComparison.Ordinal)) return false;
+            || !string.Equals(text, scenario.ToString(), StringComparison.Ordinal))
+        {
+            return false;
+        }
+
         return scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete;
     }
 

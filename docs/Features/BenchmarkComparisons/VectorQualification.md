@@ -1,0 +1,96 @@
+# BenchmarkComparisons: native vector qualification
+
+This contract implements the owner's 2026-10-05 request under
+[ADR-109](../../ADR/ADR-109-native-vector-comparisons.md). The Benchmarks producer
+and website consumer are in scope, including SurrealDB and HelixDB. Product SQL,
+storage, licensing and unrelated changes are outside this task.
+
+```mermaid
+flowchart LR
+    Corpus[Deterministic float32 corpus] --> Native[Native database ingestion]
+    Corpus --> Oracle[Independent exact top k]
+    Native --> Index[Observed native index build]
+    Index --> Workload[Same queries filters and update schedule]
+    Oracle --> Recall[Validate actual neighbor IDs]
+    Workload --> Recall
+    Recall --> Evidence[Source-bound metrics and server observations]
+    Evidence --> Website[Authenticated website comparisons]
+```
+
+## Closed workload and evidence contracts
+
+Vector profiles are `vector-{100k|1m}-{exact|hnsw|ivfflat|native}-{plain|filtered|mixed}-c16`.
+All use actual N records, 128 float32 dimensions, cosine distance, top k 10,
+seed 1729, 1,024-byte canonical document payload, 64 distinct deterministic
+non-corpus query vectors, 256 warmups, 100,000 measured queries, concurrency 16,
+one repetition, and a 30-second per-request timeout. The finite query set and
+closed-loop load model are disclosed; operation counts are not record counts.
+
+Each query is compared with independently computed canonical exact top k.
+Distance ties use ordinal document ID. Recall is intersection count divided by
+the expected k (or eligible cardinality if smaller); duplicate/unexpected IDs,
+incorrect filters, non-finite vectors or underfilled exact responses fail.
+Exact recall must be 1; approximate aggregate recall must be at least 0.95.
+Emit per-query/aggregate recall and the measured minimum; do not call a lower
+accuracy cell a comparable performance success.
+
+`filtered` selects `number % 100 == 0` (1% selectivity) in the native query.
+`mixed` searches the stable 90% (`number % 10 != 9`) while a separately bounded
+writer applies 10,000 deterministic embedding changes to the remaining 10%.
+Gate the writer and readers together, verify every acknowledged update by native
+readback, and record search/update counts and their timing separately. This is
+concurrent index maintenance with stable eligible ground truth; it does not
+claim snapshot accuracy for changing eligible vectors. No client-side filtering.
+
+HNSW parameters: m=16, construction ef=200, search ef=200. IVFFlat uses
+`lists=max(1,floor(sqrt(N)))`, `probes=min(lists,ceil(sqrt(lists))*4)`; parameters
+are recorded, not inferred. PostgreSQL must prove the actual requested index is
+present and the measured query plan uses it. `native` denotes an explicitly recorded provider ANN implementation when its public
+API does not expose a named HNSW/IVFFlat contract. It uses the same cosine corpus,
+filters and recall threshold; the actual index/metric configuration is evidence.
+Native databases expose unsupported
+methods as unavailable; different ANN algorithms never silently reuse a label.
+Index build timing surrounds native build completion after ingestion and before
+warmup; exact uses an explicit zero build cost with no ANN index. Validation,
+ingestion, oracle computation and build time are excluded from query latency.
+
+Use a lazy corpus and bounded query/oracle/sample arrays; retain at most 4,096
+evenly sampled latencies and label p95/p99 as estimates. Bound native batches,
+result sizes and update concurrency. Verify actual loaded record count and
+canonical fields/digest with ordered bounded native readback before timing.
+Native vector readback must additionally confirm the stored dimensions/values;
+a count or expected digest generated locally is not readback proof.
+
+Each applicable engine sees the same profile, corpus, filters, schedule and
+accuracy threshold. Show actual node count, read/write acknowledgment and
+effective CPU/RAM/storage limits with every comparison; compare winners only
+within compatible contracts. Native server container/process RAM is distinct
+from generator RSS. Retain original phase/resource observations and sampling
+interval; never derive server use from the client's counters. Only authenticated
+original Linux GitHub artifacts may populate website metrics.
+
+## Requirements, acceptance and tests
+
+| Requirement | Measurable pass/fail criterion | Test/evidence mapping |
+|---|---|---|
+| REQ-VQ-001: complete real vector scale | AC-VQ-001: exact 24 closed profiles × applicable targets × 1/2/3 topology slots; 100k/1m actual record readback and ≥100k measured queries; invalid profiles/counts reject | Vector profile/corpus/plan TUnit flows; original native worker receipts |
+| REQ-VQ-002: native algorithms and quality | AC-VQ-002: exact/HNSW/IVFFlat metadata and actual PostgreSQL plans match requested method; independent expected IDs yield exact recall 1 and ANN ≥0.95; duplicate/filter/underfill failures reject | Vector oracle/recall TUnit cases; actual PostgreSQL comparison cases and plan receipts |
+| REQ-VQ-003: filters and updates | AC-VQ-003: native 1% filters and mixed stable-90% searches return only eligible IDs; 10k acknowledged updates are read back after genuinely overlapping queries/writes; failure/cancellation invalidates cell | Native filtered/mixed flow cases; timed original query/update receipts |
+| REQ-VQ-004: trustworthy costs | AC-VQ-004: query p95/p99 and useful rate exclude ingestion/oracle/build; native index build ms is observed; separately scoped server RAM/resource phases and client counters are emitted with actual bounds | Measurement/phase/resource TUnit flows, original cgroup/process sidecars |
+| REQ-VQ-005: new native engines | AC-VQ-005: SurrealDB and HelixDB use pinned real disk-backed native servers under Aspire; CRUD/vector/graph only where truly supported; readiness, loaded data, membership, ownership and teardown verified; unsupported native topology has null metrics/reason | Native comparison TUnit flows and image/source provenance; original Actions container logs |
+| REQ-VQ-006: same-family fairness | AC-VQ-006: corpus, query schedule, metric, filters, accuracy, resources and actual ACK/read contract match before rankings; controls remain explicitly small; unsupported capabilities never become zero-valued successes | Cross-engine corpus/contract validation, fairness review and original measured settings |
+| REQ-VQ-007: website-producing delivery | AC-VQ-007: readable isolated per-database groups feed strict complete source/run/attempt/profile/index-bound aggregation; missing/duplicate/mixed/fabricated results reject; site exposes scale/method/recall/build/p95/p99/server RAM and original evidence | Isolated plan/aggregate/admission/site browser TUnit tests; authentic Linux Benchmarks and Pages receipts |
+
+All test sources retain canonical `Features/BenchmarkComparisons/<Role>/`.
+Manual evidence exception: external provider timing, membership, disk durability
+claims, original artifact authority and Pages publication require the genuine
+Actions run and provider receipt; local tests cannot establish those claims.
+
+Run governance, restore, Release build, then the owning Aspire suites (`unit`,
+`comparison`, `site`), formatting and the final solution build. Native workloads
+run in separate Linux jobs and the AppHost owns all resources and cleanup.
+Unexpected native errors and timeouts retain safe diagnostics and null metrics;
+they cannot cause fallback to a different algorithm, topology or prior cohort.
+
+Status: acceptance contract established; implementation and native qualification
+are pending. No new performance result is established by this document.

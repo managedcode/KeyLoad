@@ -17,10 +17,11 @@ internal sealed record IsolatedHostNativeSettings(string Image, string? Connecti
             ? IsolatedHostSettings.Required(configuration, IsolatedHostConstants.Connection) : null;
         var endpoints = target is IsolatedHostConstants.KeyLoad or IsolatedHostConstants.Qdrant or IsolatedHostConstants.Rabbit
             or IsolatedHostConstants.Neo4j or IsolatedHostConstants.OpenSearch or IsolatedHostConstants.Kurrent
+            or IsolatedHostConstants.SurrealDb or IsolatedHostConstants.HelixDb
             ? ReadEndpoints(configuration, selection.NodeCount) : ImmutableArray<Uri>.Empty;
         var replicas = target == IsolatedHostConstants.Redis
             ? ReadArray(configuration, IsolatedHostConstants.ReplicaConnections, selection.NodeCount - 1) : ImmutableArray<string>.Empty;
-        var authenticated = target is IsolatedHostConstants.Rabbit or IsolatedHostConstants.Neo4j;
+        var authenticated = target is IsolatedHostConstants.Rabbit or IsolatedHostConstants.Neo4j or IsolatedHostConstants.SurrealDb;
         var user = authenticated ? IsolatedHostSettings.Required(configuration, IsolatedHostConstants.User)
             : target == IsolatedHostConstants.OpenSearch ? configuration[IsolatedHostConstants.User] : null;
         var password = authenticated ? IsolatedHostSettings.Required(configuration, IsolatedHostConstants.Password)

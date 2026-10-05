@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace KeyLoad.Comparisons.Targets;
 
 /// <summary>Compares exact vector search against a run-specific Qdrant collection and verifies its configured native peers.</summary>
-public sealed class QdrantTarget : IComparisonTarget
+public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
 {
     private const string CollectionPrefix = "keyload_benchmark_";
     private const string ResultProperty = "result";
@@ -23,6 +23,32 @@ public sealed class QdrantTarget : IComparisonTarget
     private readonly string querySuffix;
     private bool collectionCreationAttempted;
     private int topK;
+    private QdrantVectorOperations? vectorOperations;
+
+    private QdrantVectorOperations Vectors => vectorOperations ??= new(client, nodeClients, collection, image, topology);
+    string IVectorComparisonTarget.Name => "Qdrant";
+    bool IVectorComparisonTarget.Supports(VectorIndexKind indexKind, VectorQueryMode queryMode)
+        => indexKind is VectorIndexKind.Exact or VectorIndexKind.Hnsw && Enum.IsDefined(queryMode);
+    async Task<int> IVectorComparisonTarget.IngestAsync(IAsyncEnumerable<VectorDocument> documents, CancellationToken token)
+    {
+        var loaded = await Vectors.IngestAsync(documents, token);
+        Profile = Vectors.Profile;
+        return loaded;
+    }
+    async Task<VectorIndexReceipt> IVectorComparisonTarget.BuildIndexAsync(VectorComparisonProfile profile, CancellationToken token)
+    {
+        var receipt = await Vectors.BuildIndexAsync(profile, token);
+        Profile = Profile with { ReadContract = $"native {profile.IndexKind} cosine; hnsw_ef=200; native {profile.QueryMode} predicate; "
+            + (ComparisonTopologies.NodeCount(topology) > 1 ? "consistency=majority" : "single primary") };
+        return receipt;
+    }
+    IAsyncEnumerable<VectorReadback> IVectorComparisonTarget.ReadbackAsync(CancellationToken token) => Vectors.ReadbackAsync(token);
+    Task<IReadOnlyList<VectorNeighbor>> IVectorComparisonTarget.SearchAsync(ReadOnlyMemory<float> query, int count, VectorQueryMode mode, CancellationToken token)
+        => Vectors.SearchAsync(query, count, mode, token);
+    Task<string> IVectorComparisonTarget.ExplainAsync(ReadOnlyMemory<float> query, VectorQueryMode mode, CancellationToken token)
+        => Vectors.ExplainAsync(mode, token);
+    Task IVectorComparisonTarget.UpdateAsync(VectorUpdate update, CancellationToken token) => Vectors.UpdateAsync(update, token);
+    Task<VectorReadback?> IVectorComparisonTarget.ReadAsync(string id, CancellationToken token) => Vectors.ReadAsync(id, token);
 
     /// <summary>Creates a Qdrant vector-search target and records the HTTP clients it owns for disposal.</summary>
     /// <param name="http">The collection and query client; the target disposes it.</param>
@@ -117,6 +143,10 @@ public sealed class QdrantTarget : IComparisonTarget
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         try
         {
+            if (vectorOperations is not null)
+            {
+                await vectorOperations.DisposeAsync();
+            }
             if (collectionCreationAttempted)
             {
                 using var response = await client.DeleteAsync(new Uri($"/collections/{collection}", UriKind.RelativeOrAbsolute), timeout.Token);

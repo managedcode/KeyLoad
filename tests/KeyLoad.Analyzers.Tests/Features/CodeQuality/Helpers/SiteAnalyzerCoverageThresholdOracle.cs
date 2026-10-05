@@ -8,12 +8,12 @@ internal static class SiteAnalyzerCoverageThresholdOracle
     private const int EndpointPipelineIndex = 1;
     private static readonly string[] PipelineIds = [
         "KLD0001", SiteAnalyzerCoverageTokens.CriticalPipelineId, "KLD0014", "KLD0020", "KLD0021", "KLD0022",
-        "KLD0023", "KLD0024", "KLD0030", "KLD0031", "KLD0032", "KLD0033"];
-    private static readonly long[] PipelineLineTotals = [40, 10, 10, 20, 20, 10, 40, 10, 30, 50, 40, 40];
+        "KLD0023", "KLD0024", "KLD0030", "KLD0031", "KLD0032", "KLD0033", "KLD0034"];
+    private static readonly long[] PipelineLineTotals = [40, 10, 10, 20, 20, 10, 40, 10, 30, 50, 40, 40, 10];
     internal static readonly long[] FullPipelineCounts = PipelineLineTotals;
-    internal static readonly long[] BelowLinePipelineCounts = [40, 10, 10, 10, 20, 0, 17, 0, 30, 50, 40, 40];
-    internal static readonly long[] ExactLinePipelineCounts = [40, 10, 10, 10, 20, 0, 20, 0, 30, 50, 40, 40];
-    internal static readonly long[] AboveLinePipelineCounts = [40, 10, 10, 10, 20, 0, 22, 0, 30, 50, 40, 40];
+    internal static readonly long[] BelowLinePipelineCounts = [30, 10, 10, 20, 10, 10, 30, 0, 20, 30, 30, 30, 5];
+    internal static readonly long[] ExactLinePipelineCounts = [30, 10, 10, 20, 10, 10, 30, 0, 20, 30, 30, 30, 8];
+    internal static readonly long[] AboveLinePipelineCounts = [30, 10, 10, 20, 10, 10, 30, 0, 20, 30, 30, 30, 10];
 
     internal static async Task AssertModuleAsync(
         SiteAnalyzerCoverageTestScope scope,

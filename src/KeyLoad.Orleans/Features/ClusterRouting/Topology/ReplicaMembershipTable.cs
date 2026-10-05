@@ -31,10 +31,10 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(coordinator);
-        this.replica = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
-        this.configuredCluster = ReplicaMembershipProtocol.ClusterIdentity(clusterId);
+        replica = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
+        configuredCluster = ReplicaMembershipProtocol.ClusterIdentity(clusterId);
         ArgumentException.ThrowIfNullOrWhiteSpace(internalPrincipal);
-        this.time = clock ?? throw new ArgumentNullException(nameof(clock));
+        time = clock ?? throw new ArgumentNullException(nameof(clock));
         ArgumentOutOfRangeException.ThrowIfNegative(maximumRows);
         this.startupCancellation = startupCancellation;
         this.maximumRows = maximumRows;

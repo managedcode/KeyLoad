@@ -74,7 +74,8 @@ internal static class TwoRf3MembershipFingerprintAssertions
         {
             token.ThrowIfCancellationRequested();
             var read = await stream.ReadAsync(buffer.AsMemory(count), token).ConfigureAwait(false);
-            if (read == 0) { break; }
+            if (read == 0)
+            { break; }
             count += read;
         }
         if (count > MaximumHealthBytes || response.Content.Headers.ContentLength is { } length && length != count)
@@ -84,7 +85,8 @@ internal static class TwoRf3MembershipFingerprintAssertions
 
     private static bool IsLowerHex(string? value)
     {
-        if (value is null || value.Length != 64) { return false; }
+        if (value is null || value.Length != 64)
+        { return false; }
         foreach (var character in value)
         { if (character is not (>= '0' and <= '9') and not (>= 'a' and <= 'f')) { return false; } }
         return true;

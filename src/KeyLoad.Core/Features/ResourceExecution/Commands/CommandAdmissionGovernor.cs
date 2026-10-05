@@ -3,7 +3,7 @@ namespace KeyLoad.Core;
 /// <summary>Reserves bounded node, tenant, principal, and retained-byte capacity for commands.</summary>
 public sealed class CommandAdmissionGovernor
 {
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly Dictionary<(bool Control, string Id), int> tenants = [];
     private readonly Dictionary<(bool Control, string Id), int> principals = [];
     private int commands;

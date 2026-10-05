@@ -4,7 +4,7 @@ namespace KeyLoad.Server;
 
 internal sealed class AdminHttpMetrics(TimeProvider? clock = null)
 {
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly TimeProvider time = clock ?? TimeProvider.System;
     private readonly DateTimeOffset startedAt = (clock ?? TimeProvider.System).GetUtcNow();
     private readonly Guid processInstance = Guid.NewGuid();

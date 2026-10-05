@@ -11,7 +11,10 @@ internal sealed class IsolatedNativeOwnedWork
     internal Task StartSettlement()
     {
         if (Collector is null || Observation is null)
+        {
             throw new InvalidOperationException("Server resource observation is not owned.");
+        }
+
         return CollectorSettlement ??= Collector.CompleteAsync(Observation);
     }
 }

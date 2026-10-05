@@ -23,8 +23,8 @@ internal sealed class ComparisonResourceDiagnostics(ResourceNotificationService 
 
     private readonly CancellationTokenSource lifetime = new();
     private readonly ComparisonLifecycleRecord?[] records = new ComparisonLifecycleRecord?[MaximumRecords];
-    private readonly object recordsGate = new();
-    private readonly object lifecycleGate = new();
+    private readonly System.Threading.Lock recordsGate = new();
+    private readonly System.Threading.Lock lifecycleGate = new();
     private Task? capture;
     private Task? disposal;
     private int nextRecord;

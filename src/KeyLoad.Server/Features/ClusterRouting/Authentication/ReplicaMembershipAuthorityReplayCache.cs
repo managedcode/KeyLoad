@@ -4,7 +4,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed class ReplicaMembershipAuthorityReplayCache(TimeProvider clock) : IDisposable
 {
-    private readonly object sync = new();
+    private readonly Lock sync = new();
     private readonly Dictionary<string, long> live = new(StringComparer.Ordinal);
 
     internal bool TryUse(string nonce)
@@ -24,6 +24,7 @@ internal sealed class ReplicaMembershipAuthorityReplayCache(TimeProvider clock) 
 
     public void Dispose()
     {
-        lock (sync) { live.Clear(); }
+        lock (sync)
+        { live.Clear(); }
     }
 }

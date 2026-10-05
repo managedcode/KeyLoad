@@ -5,7 +5,7 @@ public sealed class HttpAdmissionLease : IDisposable
 {
     private const string AlreadyBoundDetail = "The HTTP request is already bound to its verified principal.";
 
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly CommandAdmissionLease nodeLease;
     private readonly CommandAdmissionGovernor scopes;
     private readonly OperationKind kind;

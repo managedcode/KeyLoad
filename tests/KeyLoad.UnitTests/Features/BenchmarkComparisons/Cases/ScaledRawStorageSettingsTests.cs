@@ -17,8 +17,6 @@ internal sealed class ScaledRawStorageSettingsTests
     [Arguments(HundredThousand, LargePayloadBytes)]
     [Arguments(OneMillion, SmallPayloadBytes)]
     [Arguments(OneMillion, LargePayloadBytes)]
-    [Arguments(FiveMillion, SmallPayloadBytes)]
-    [Arguments(FiveMillion, LargePayloadBytes)]
     public async Task AcScale003CapacityIncludesTheCompleteRetainedZoneTreeCorpusAndHeadroom(
         int recordCount, int payloadBytes)
     {
@@ -38,7 +36,9 @@ internal sealed class ScaledRawStorageSettingsTests
     public async Task AcScale003CapacityRejectsUnsupportedSizeAndPayloadBeforeStorageOpen()
     {
         await Assert.That(() => ValidateCapacity(0, SmallPayloadBytes)).Throws<ArgumentOutOfRangeException>();
-        await Assert.That(() => ValidateCapacity(FiveMillion + 1, SmallPayloadBytes))
+        await Assert.That(() => ValidateCapacity(OneMillion + 1, SmallPayloadBytes))
+            .Throws<ArgumentOutOfRangeException>();
+        await Assert.That(() => ValidateCapacity(FiveMillion, SmallPayloadBytes))
             .Throws<ArgumentOutOfRangeException>();
         await Assert.That(() => ValidateCapacity(HundredThousand, InvalidPayloadBytes))
             .Throws<ArgumentOutOfRangeException>();

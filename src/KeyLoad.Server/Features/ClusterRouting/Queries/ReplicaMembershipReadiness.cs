@@ -30,7 +30,8 @@ internal static class ReplicaMembershipReadiness
         SiloAddress localAddress, CancellationToken token)
     {
         var expected = await ExpectedEndpointsAsync(options, token).ConfigureAwait(false);
-        if (expected.Count != ExpectedActiveSilos) { return null; }
+        if (expected.Count != ExpectedActiveSilos)
+        { return null; }
         var view = await table.ReadAllAsync(token).ConfigureAwait(false);
         var active = view.Members.Where(member => member.Item1.Status == SiloStatus.Active).ToArray();
         if (view.Members.Count is < ExpectedActiveSilos or > MaximumRows
@@ -42,14 +43,16 @@ internal static class ReplicaMembershipReadiness
         {
             var address = active[index].Item1.SiloAddress;
             var canonical = address.ToParsableString();
-            if (SiloAddress.FromParsableString(canonical).ToParsableString() != canonical) { return null; }
+            if (SiloAddress.FromParsableString(canonical).ToParsableString() != canonical)
+            { return null; }
             if (canonical.Length == 0 || Encoding.UTF8.GetByteCount(canonical) > MaximumAddressBytes
                 || !expected.Contains(EndpointKey(address.Endpoint.Address, address.Endpoint.Port))
                 || !observedEndpoints.Add(EndpointKey(address.Endpoint.Address, address.Endpoint.Port)))
             { return null; }
             addresses[index] = canonical;
         }
-        if (!observedEndpoints.SetEquals(expected)) { return null; }
+        if (!observedEndpoints.SetEquals(expected))
+        { return null; }
         var fingerprint = ReplicaMembershipFingerprint.Compute(addresses);
         return new(1, ExpectedActiveSilos, view.Members.Count, fingerprint);
     }

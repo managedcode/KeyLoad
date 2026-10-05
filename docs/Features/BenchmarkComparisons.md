@@ -1,5 +1,10 @@
 # BenchmarkComparisons
 
+The owner-directed [native vector qualification](BenchmarkComparisons/VectorQualification.md)
+under [ADR-109](../ADR/ADR-109-native-vector-comparisons.md) adds SurrealDB/HelixDB
+and scaled exact/HNSW/IVFFlat, filtered and concurrent-update evidence to the
+website-producing pipeline. Implementation and genuine qualification are pending.
+
 [Live progress repair](BenchmarkComparisons/LiveProgress.md) under ADR-085 owns
 bounded Actions visibility and cancellation diagnostics for native workloads.
 

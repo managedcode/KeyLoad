@@ -1,5 +1,4 @@
 using KeyLoad.Orleans;
-using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 
@@ -11,11 +10,15 @@ internal static class RequestCqrsRf3DiagnosticsObserverCleanup
         try
         { await observer.DisposeAsync().ConfigureAwait(false); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-            RequestCqrsLifecycleStage.ObserverJoin); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+            RequestCqrsLifecycleStage.ObserverJoin);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-            RequestCqrsLifecycleStage.ObserverJoin); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+            RequestCqrsLifecycleStage.ObserverJoin);
+        }
         await observer.RetryFailedCloseAsync(failures, failureObserver).ConfigureAwait(false);
     }
 }

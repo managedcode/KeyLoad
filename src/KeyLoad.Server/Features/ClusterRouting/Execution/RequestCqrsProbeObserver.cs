@@ -5,7 +5,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IReplicaDiscoveryObservationSink, IAsyncDisposable
 {
-    private readonly object disposeSync = new();
+    private readonly Lock disposeSync = new();
     private readonly RequestCqrsProbeFiles files;
     private readonly RequestCqrsProbeLifecycle lifecycle = new();
     private readonly ReplicaConfiguration replica;

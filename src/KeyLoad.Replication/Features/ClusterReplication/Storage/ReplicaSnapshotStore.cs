@@ -10,7 +10,7 @@ namespace KeyLoad.Replication;
 public sealed class ReplicaSnapshotStore(IAtomicStore canonical, IDurableReplicaLog log, ReplicaConfiguration configuration,
     Action<ReplicaCrashBoundary>? faultObserver = null) : IReplicaSnapshotStore
 {
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly ReplicaSnapshotFiles files = new(configuration);
     /// <inheritdoc />
     public ReplicaSnapshot? Current => log.State.Snapshot;

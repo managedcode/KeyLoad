@@ -5,7 +5,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class KurrentCleanupState(int tracked)
 {
-    private readonly object gate = new();
+    private readonly System.Threading.Lock gate = new();
     private readonly Stopwatch clock = Stopwatch.StartNew();
     private int next, submitted, acknowledged, faulted, pending, peak, laterDisposals;
     private ExceptionDispatchInfo? primary;

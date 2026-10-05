@@ -12,7 +12,7 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
     internal const int MaximumLineCharacters = 4_096;
     internal const int MaximumRecords = 32;
 
-    private readonly object gate = new();
+    private readonly System.Threading.Lock gate = new();
     private readonly List<RequestCqrsRf3McpRejectionRecord> records = [];
     private TaskCompletionSource<bool> changed = NewChangeSignal();
     private bool completed;

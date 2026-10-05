@@ -75,7 +75,26 @@ internal sealed class SiteAnalyzerCoverageTestScope : IDisposable
             arguments.Add(Path.Combine(evidenceRoot, SiteAnalyzerCoverageTokens.InputName));
         }
 
-        return SiteAnalyzerCoverageProcess.RunAsync(arguments, sourceRepository, environmentOverrides);
+        return SiteAnalyzerCoverageProcess.RunAsync(arguments, sourceRepository, CreateProcessEnvironment(environmentOverrides));
+    }
+
+    private static Dictionary<string, string?> CreateProcessEnvironment(
+        IReadOnlyDictionary<string, string?>? environmentOverrides)
+    {
+        var environment = new Dictionary<string, string?>
+        {
+            [SiteAnalyzerCoverageTokens.SiteRevisionVariable] = null,
+            [SiteAnalyzerCoverageTokens.GitHubRevisionVariable] = SiteAnalyzerCoverageTokens.TriggerRevisionB
+        };
+        if (environmentOverrides is not null)
+        {
+            foreach (var (name, value) in environmentOverrides)
+            {
+                environment[name] = value;
+            }
+        }
+
+        return environment;
     }
 
     private void CopyContractSources()

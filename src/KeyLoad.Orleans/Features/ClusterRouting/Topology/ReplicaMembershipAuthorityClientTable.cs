@@ -76,8 +76,11 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
         ReplicaMembershipProtocol.ValidateEntry(entry);
         ArgumentNullException.ThrowIfNull(tableVersion);
         var call = NewCall(ReplicaMembershipAuthorityOperation.InsertRow) with
-        { CandidateEntry = ReplicaMembershipAuthorityMapping.ToWire(entry, "0"), ExpectedTableVersion = tableVersion.Version,
-            ExpectedTableVersionETag = tableVersion.VersionEtag };
+        {
+            CandidateEntry = ReplicaMembershipAuthorityMapping.ToWire(entry, "0"),
+            ExpectedTableVersion = tableVersion.Version,
+            ExpectedTableVersionETag = tableVersion.VersionEtag
+        };
         return (await SendAsync(call, cancellationToken).ConfigureAwait(false)).Applied;
     }
 
@@ -92,9 +95,13 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
         ArgumentNullException.ThrowIfNull(tableVersion);
         var address = entry.SiloAddress.ToParsableString();
         var call = NewCall(ReplicaMembershipAuthorityOperation.UpdateRow) with
-        { TargetSiloAddress = address, CandidateEntry = ReplicaMembershipAuthorityMapping.ToWire(entry, etag),
-            ExpectedRowETag = etag, ExpectedTableVersion = tableVersion.Version,
-            ExpectedTableVersionETag = tableVersion.VersionEtag };
+        {
+            TargetSiloAddress = address,
+            CandidateEntry = ReplicaMembershipAuthorityMapping.ToWire(entry, etag),
+            ExpectedRowETag = etag,
+            ExpectedTableVersion = tableVersion.Version,
+            ExpectedTableVersionETag = tableVersion.VersionEtag
+        };
         return (await SendAsync(call, cancellationToken).ConfigureAwait(false)).Applied;
     }
 

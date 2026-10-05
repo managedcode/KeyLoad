@@ -5,17 +5,17 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 /// <summary>AC-SCALE-014/015: independent exact profile and composite identity oracles.</summary>
 internal sealed class ScaledIsolatedPlanTests
 {
-    private static readonly string[] ProfileIds = ["scaled-100k-c16", "scaled-1m-c16", "scaled-5m-c16"];
-    private static readonly int[] RecordCounts = [100_000, 1_000_000, 5_000_000];
+    private static readonly string[] ProfileIds = ["scaled-100k-c16", "scaled-1m-c16"];
+    private static readonly int[] RecordCounts = [100_000, 1_000_000];
     private static readonly string[] Scenarios = ["PointRead", "DocumentWrite", "DocumentUpdate", "DocumentDelete"];
 
     [Test]
-    public async Task AcScale014PlansAreExactlyTheThreeBoundedCrudProfiles()
+    public async Task AcScale014PlansAreExactlyTheTwoBoundedCrudProfiles()
     {
         var response = await IsolatedPlanNodeProcess.ProbeAsync("create-scales");
         await Assert.That(response[IsolatedPlanFields.Ok]!.GetValue<bool>()).IsTrue();
         var plans = response[IsolatedPlanFields.Value]!.AsArray();
-        await Assert.That(plans.Count).IsEqualTo(3);
+        await Assert.That(plans.Count).IsEqualTo(2);
         for (var index = 0; index < ProfileIds.Length; index++)
         {
             var plan = plans[index]!.AsObject();
@@ -49,7 +49,7 @@ internal sealed class ScaledIsolatedPlanTests
 
         var accepted = await IsolatedPlanNodeProcess.ProbeAsync("validate-scales", plans);
         await Assert.That(accepted[IsolatedPlanFields.Ok]!.GetValue<bool>()).IsTrue();
-        plans[2]![IsolatedPlanFields.ProfileSettings]![IsolatedPlanFields.Documents] = 4_000_000;
+        plans[1]![IsolatedPlanFields.ProfileSettings]![IsolatedPlanFields.Documents] = 4_000_000;
         var rejected = await IsolatedPlanNodeProcess.ProbeAsync("validate-scales", plans);
         await Assert.That(rejected[IsolatedPlanFields.Ok]!.GetValue<bool>()).IsFalse();
     }
@@ -59,16 +59,19 @@ internal sealed class ScaledIsolatedPlanTests
     {
         var control = (await IsolatedPlanNodeProcess.ProbeAsync("create"))[IsolatedPlanFields.Value]!.AsObject();
         var composite = (await IsolatedPlanNodeProcess.ProbeAsync("create-composite"))[IsolatedPlanFields.Value]!.AsObject();
-        await Assert.That(composite[IsolatedPlanFields.SchemaVersion]!.GetValue<int>()).IsEqualTo(2);
+        await Assert.That(composite[IsolatedPlanFields.SchemaVersion]!.GetValue<int>()).IsEqualTo(3);
         await Assert.That(JsonNode.DeepEquals(composite["control"], control)).IsTrue();
-        await Assert.That(control[IsolatedPlanFields.Cells]!.AsArray().Count).IsEqualTo(270);
+        await Assert.That(control[IsolatedPlanFields.Cells]!.AsArray().Count).IsEqualTo(330);
         var scales = composite[IsolatedPlanFields.ScaledProfiles]!.AsArray();
-        await Assert.That(scales.Count).IsEqualTo(3);
+        await Assert.That(scales.Count).IsEqualTo(2);
+        var vectors = composite["vectorProfiles"]!.AsArray();
+        await Assert.That(vectors.Count).IsEqualTo(24);
         var ids = control[IsolatedPlanFields.Cells]!.AsArray()
             .Concat(scales.SelectMany(profile => profile![IsolatedPlanFields.Cells]!.AsArray()))
+            .Concat(vectors.SelectMany(profile => profile![IsolatedPlanFields.Cells]!.AsArray()))
             .Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).ToArray();
-        await Assert.That(ids.Length).IsEqualTo(594);
-        await Assert.That(ids.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(594);
+        await Assert.That(ids.Length).IsEqualTo(330 + 264 + 792);
+        await Assert.That(ids.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(ids.Length);
         await Assert.That(ids.Contains("keyload-n1-point-read-scaled-100k-c16", StringComparer.Ordinal)).IsTrue();
     }
 }

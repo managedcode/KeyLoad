@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsOfflineProcessTestScope : IAsyncDisposable
 {
-    private readonly object disposalGate = new();
+    private readonly System.Threading.Lock disposalGate = new();
     private readonly string root;
     private readonly CancellationToken cancellationToken;
     private readonly List<RequestCqrsOfflineProcessOwnedChild> children = [];

@@ -1,4 +1,20 @@
 {
+  "ORLEANS-PRIMITIVES-001": {
+    "title": "Native Orleans workers, advisory signals, interleaving and one-time jobs",
+    "status": "in_progress",
+    "feature": "docs/Features/ClusterRouting/ExecutionPrimitives.md",
+    "decision": "docs/ADR/ADR-110-native-orleans-execution-primitives.md",
+    "sourceStage": "per_method_audit_and_selection_contract_runtime_unchanged",
+    "contractValidated": true,
+    "runtimeQualified": false,
+    "fullTaskComplete": false,
+    "remaining": [
+      "Freeze concrete interchangeable computation and bounded worker keys/quotas before native worker adoption",
+      "Freeze actual long-operation control and disposable hint methods before selective interleaving or OneWay adoption",
+      "Resolve versioned native Durable Jobs persistent provider and atomic enqueue/reconciliation contract",
+      "Real operation Aspire unit/scalar/recovery/RF3 and exact-source Linux fault/resource/performance evidence"
+    ]
+  },
   "NUGET-REFRESH-001": {
     "title": "All published NuGet versions refreshed on 2026-10-05",
     "status": "in_progress",
@@ -4739,5 +4755,21 @@
       "docs/implementation/vertical-slice-layout-2026-10-04.json"
     ],
     "qualificationStatus": "Structural reference build/formatter and 47/47 targeted AppHost regressions pass locally. Complete unit suite remains unqualified after controlled cancellation; website suite lacks authenticated source/archive preconditions; shared checkout build fails in concurrent code; Linux RF3/fault/endurance gates pending."
+  },
+  "TYPED-SYNC-001": {
+    "title": "Typed .NET synchronization and Orleans activation ownership",
+    "status": "in_progress",
+    "feature": "docs/Features/CodeQuality.md",
+    "decision": "docs/ADR/ADR-108-typed-synchronization.md",
+    "receipt": "docs/implementation/typed-synchronization-2026-10-05.json",
+    "sourceStage": "typed_Lock_migration_and_KLD0034_implemented_unqualified",
+    "canonicalBuildPassed": false,
+    "runtimeQualified": false,
+    "fullTaskComplete": false,
+    "remaining": [
+      "Resolve concurrent source prerequisites in their owning chats, then canonical build and formatter",
+      "Complete Aspire unit/scalar/recovery/RF3 and full analyzer/coverage gates",
+      "Exact delivered-source Linux qualification"
+    ]
   }
 }

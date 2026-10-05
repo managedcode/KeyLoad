@@ -3,6 +3,7 @@ using System.Xml.Linq;
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
 /// <summary>AC-CQ-009 and AC-BC-027: validate native branch spellings and physical source-line bounds.</summary>
+[NotInParallel(SiteAnalyzerCoverageTokens.ProcessIsolationKey)]
 internal sealed class SiteAnalyzerCoverageInputSemanticsTests
 {
     [Test]

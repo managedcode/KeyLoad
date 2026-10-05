@@ -17,7 +17,10 @@ internal sealed class ScaleServerHostEvidenceTests
         }
         await Assert.That(hardware).IsNotNull();
         if (hardware is null || envelope is null)
+        {
             throw new InvalidOperationException("Supported Linux host evidence was unavailable.");
+        }
+
         await Assert.That(hardware.LogicalCpuCount > 0 && hardware.PhysicalCoreCount > 0
             && hardware.MemoryBytes > 0 && hardware.LogicalCpuMembership.Length > 0
             && hardware.PhysicalCoreMembership.Length == hardware.PhysicalCoreCount).IsTrue();

@@ -8,6 +8,7 @@ public sealed class ComparisonRunner
 {
     private readonly ComparisonOptions options = null!;
     private readonly ScaledComparisonProfile? scaledProfile;
+    private readonly VectorComparisonProfile? vectorProfile;
     private readonly Action<string>? progress;
 
     /// <summary>Creates a runner for the unchanged materialized control workload.</summary>
@@ -25,12 +26,31 @@ public sealed class ComparisonRunner
         this.progress = progress;
     }
 
+    private ComparisonRunner(VectorComparisonProfile vectorProfile, Action<string>? progress)
+    {
+        this.vectorProfile = vectorProfile;
+        this.progress = progress;
+    }
+
     /// <summary>Creates a runner for one exact typed scaled profile without manufacturing control options.</summary>
     /// <param name="profile">The closed accepted scaled profile.</param>
     /// <param name="progress">Optional progress observer.</param>
     /// <returns>The shared comparison runner with its bounded scale path selected.</returns>
     public static ComparisonRunner ForScaled(ScaledComparisonProfile profile, Action<string>? progress = null)
         => new(profile ?? throw new ArgumentNullException(nameof(profile)), progress);
+
+    /// <summary>Creates a runner for one exact native vector profile.</summary>
+    public static ComparisonRunner ForVector(VectorComparisonProfile profile, Action<string>? progress = null)
+        => new(profile ?? throw new ArgumentNullException(nameof(profile)), progress);
+
+    /// <summary>Runs the vector-specific workload against its already Aspire-owned native target.</summary>
+    public Task<ComparisonReport> RunAsync(IVectorComparisonTarget target, string? sourceRevision,
+        CancellationToken cancellationToken, string storage = UnrecordedStorage)
+    {
+        if (vectorProfile is null || scaledProfile is not null || options is not null)
+            throw new InvalidOperationException("A vector profile must be selected to run a native vector target.");
+        return new VectorComparisonRunner(vectorProfile).RunAsync(target, sourceRevision, storage, cancellationToken);
+    }
 
     private const string SetupPrefix = "setup:";
     private const string PreviousSetupFailure = "PreviousSetupFailure";
@@ -48,6 +68,8 @@ public sealed class ComparisonRunner
     public async Task<ComparisonReport> RunAsync(IComparisonTarget[] targets, string? sourceRevision, CancellationToken cancellationToken,
         string storage = UnrecordedStorage, Scenario? scenario = null)
     {
+        if (vectorProfile is not null)
+            throw new InvalidOperationException("A vector profile requires the native vector target interface.");
         if (scaledProfile is { } profile)
         {
             return await new ScaledComparisonRunner(profile, progress).RunAsync(targets, sourceRevision,

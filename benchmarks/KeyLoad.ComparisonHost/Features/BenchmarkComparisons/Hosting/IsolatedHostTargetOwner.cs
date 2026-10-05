@@ -10,6 +10,7 @@ internal sealed class IsolatedHostTargetOwner : IAsyncDisposable
 {
     private readonly List<HttpClient> unownedClients = [];
     private IComparisonTarget? target;
+    private IVectorComparisonTarget? vectorTarget;
 
     internal IComparisonTarget Create(IsolatedHostSettings settings)
     {
@@ -34,6 +35,26 @@ internal sealed class IsolatedHostTargetOwner : IAsyncDisposable
         };
         unownedClients.Clear();
         return target;
+    }
+
+    internal IVectorComparisonTarget CreateVector(IsolatedHostSettings settings)
+    {
+        if (target is not null || vectorTarget is not null)
+        {
+            throw new InvalidOperationException(IsolatedHostConstants.Failure);
+        }
+
+        var native = settings.Native ?? throw new InvalidOperationException(IsolatedHostConstants.Failure);
+        vectorTarget = settings.Selection.Target switch
+        {
+            IsolatedHostConstants.Postgres => new PostgresNativeVectorTarget(native.Connection!, settings.RunId, native.Image),
+            IsolatedHostConstants.Qdrant => new QdrantTarget(CreateClient(native, 0), settings.RunId, native.Image,
+                settings.Selection.Options.Topology, CreateClients(native)),
+            IsolatedHostConstants.SurrealDb => new SurrealDbVectorTarget(CreateClient(native, 0), native.Image, settings.RunId),
+            _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
+        };
+        unownedClients.Clear();
+        return vectorTarget;
     }
 
     private KeyLoadTarget CreateKeyLoad(IsolatedHostSettings settings, IsolatedHostNativeSettings native)
@@ -79,12 +100,19 @@ internal sealed class IsolatedHostTargetOwner : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var ownedTarget = target;
+        var ownedVectorTarget = vectorTarget;
         target = null;
+        vectorTarget = null;
         try
         {
             if (ownedTarget is not null)
             {
                 await DisposeTargetAsync(ownedTarget);
+            }
+            if (ownedVectorTarget is not null)
+            {
+                var cleanup = ownedVectorTarget.DisposeAsync().AsTask();
+                await cleanup.WaitAsync(TimeSpan.FromSeconds(IsolatedHostConstants.CleanupTimeoutSeconds));
             }
         }
         finally

@@ -27,7 +27,11 @@ internal static class ScaleServerCancellationProbe
         ComparisonWorkerSelection selection, string root, CancellationToken token)
     {
         if (!OperatingSystem.IsLinux() || selection.Target != KeyLoad || selection.NodeCount != 1
-            || selection.Profile != Profile || selection.Scenario.ToString() != Scenario) return;
+            || selection.Profile != Profile || selection.Scenario.ToString() != Scenario)
+        {
+            return;
+        }
+
         var output = Path.Combine(root, ProbeDirectory);
         Directory.CreateDirectory(output);
         File.Copy(Path.Combine(root, "reports", WorkerFile), Path.Combine(output, WorkerFile));
@@ -67,10 +71,12 @@ internal static class ScaleServerCancellationProbe
         ScaleServerResourceEvidenceCollector collector, Task observation)
     {
         var failures = new List<Exception> { primary };
-        try { caller.Cancel(); }
+        try
+        { caller.Cancel(); }
         catch (Exception failure) when (IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (HasFatal(failure)) { failures.Add(failure); }
-        try { await collector.CompleteAsync(observation); }
+        try
+        { await collector.CompleteAsync(observation); }
         catch (Exception failure) when (IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (HasFatal(failure)) { failures.Add(failure); }
         ThrowFailures(failures);
@@ -80,12 +86,23 @@ internal static class ScaleServerCancellationProbe
     {
         var fatal = failures.Select(CqrsRuntimeFailures.FindFatal).FirstOrDefault(item => item is not null);
         var ordered = new List<Exception>();
-        if (fatal is not null) ordered.Add(fatal);
+        if (fatal is not null)
+        {
+            ordered.Add(fatal);
+        }
+
         foreach (var failure in failures)
         {
-            if (!ordered.Any(existing => ReferenceEquals(existing, failure))) ordered.Add(failure);
+            if (!ordered.Any(existing => ReferenceEquals(existing, failure)))
+            {
+                ordered.Add(failure);
+            }
         }
-        if (ordered.Count == 1) ExceptionDispatchInfo.Capture(ordered[0]).Throw();
+        if (ordered.Count == 1)
+        {
+            ExceptionDispatchInfo.Capture(ordered[0]).Throw();
+        }
+
         throw new AggregateException(ordered);
     }
 
@@ -125,7 +142,8 @@ internal static class ScaleServerCancellationProbe
     {
         var original = AspireResourceCompletion.WaitForExitAsync(app, resourceName, caller.Token);
         caller.Cancel();
-        try { await original; }
+        try
+        { await original; }
         catch (OperationCanceledException failure) { return failure; }
         throw new InvalidOperationException("The actual Aspire resource wait did not observe caller cancellation.");
     }
@@ -133,14 +151,16 @@ internal static class ScaleServerCancellationProbe
     private static async Task<AggregateException> CaptureSettlementFailureAsync(Exception primary,
         CancellationTokenSource caller, ScaleServerResourceEvidenceCollector collector, Task observation)
     {
-        try { await SettleFailureAsync(primary, caller, collector, observation); }
+        try
+        { await SettleFailureAsync(primary, caller, collector, observation); }
         catch (AggregateException failure) { return failure; }
         throw new InvalidOperationException("Cancellation and native sidecar writer failures were not retained together.");
     }
 
     private static async Task<Exception> CaptureWriteFailureAsync(Task completion)
     {
-        try { await completion; }
+        try
+        { await completion; }
         catch (IOException failure) { return failure; }
         catch (UnauthorizedAccessException failure) { return failure; }
         throw new InvalidOperationException("The native resource-evidence writer accepted a directory as its sidecar.");

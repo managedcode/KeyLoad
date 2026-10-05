@@ -1,5 +1,4 @@
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.BlobStorage;
 
@@ -16,7 +15,7 @@ internal static class BlobPersistedCorruptionFixtureFactory
     private const string StateBlobId = "persisted-state-under-test";
     private const string HeadBlobId = "persisted-head-under-test";
     private const string HealthyBlobId = "persisted-healthy-peer";
-    private const string PrincipalId = "root";
+    private const string HealthyResourceName = "healthy-blobs";
     private const int PartOrdinal = 0;
     private const long InitialRevision = 0;
     private static readonly byte[] Payload = [0x31, 0x32, 0x33, 0x34];
@@ -29,7 +28,8 @@ internal static class BlobPersistedCorruptionFixtureFactory
         var uploadId = Guid.NewGuid();
         BlobStorageTestSupport.Begin(database, blob, uploadId, Payload.Length, InitialRevision);
         var published = testCase == BlobPersistedStateCase.CompletePartCount;
-        if (testCase != BlobPersistedStateCase.InitialHashMismatch)
+        if (testCase is not (BlobPersistedStateCase.InitialHashMismatch
+            or BlobPersistedStateCase.ActiveReservation or BlobPersistedStateCase.InactiveReservation))
         {
             BlobStorageTestSupport.Write(database, blob, uploadId, PartOrdinal, Payload);
         }
@@ -71,7 +71,12 @@ internal static class BlobPersistedCorruptionFixtureFactory
 
     private static (BlobRef Blob, BlobMetadata Metadata) Publish(TestDatabase database, string id)
     {
-        var blob = BlobStorageTestSupport.Blob(database, id);
+        var definition = new ResourceDefinition(HealthyResourceName, ResourceKind.BlobStore,
+            database.Partition.TransactionDomainId);
+        database.Submit(OperationKind.ConfigureResource,
+            new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition))
+            .Get<ResourceDefinition>();
+        var blob = new BlobRef(database.Partition, HealthyResourceName, id);
         var uploadId = Guid.NewGuid();
         BlobStorageTestSupport.Begin(database, blob, uploadId, Payload.Length, InitialRevision);
         BlobStorageTestSupport.Write(database, blob, uploadId, PartOrdinal, Payload);

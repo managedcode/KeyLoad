@@ -23,7 +23,7 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
     private readonly Guid waveId;
     private readonly RequestCqrsRf3McpRejectionNodeCapture[] nodes;
     private readonly RequestCqrsRf3DiagnosticsCleanup cleanup;
-    private readonly object disposalGate = new();
+    private readonly System.Threading.Lock disposalGate = new();
     private Task? disposalTask;
     private string? artifactPath;
 

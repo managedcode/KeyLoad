@@ -2,7 +2,7 @@ namespace KeyLoad.Replication;
 
 internal sealed class PeerDiscoveryReplay(int capacity)
 {
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly HashSet<Guid> nonces = [];
     private readonly PriorityQueue<Guid, long> expirations = new();
 

@@ -93,8 +93,10 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
     {
         var active = lifetime;
         if (active is not null)
-        { await RequestCqrsLifecycleFailureObserver.ObserveAsync(active.CancelAsync, failures,
-            failureObserver, RequestCqrsLifecycleStage.ObserverCancellation).ConfigureAwait(false); }
+        {
+            await RequestCqrsLifecycleFailureObserver.ObserveAsync(active.CancelAsync, failures,
+            failureObserver, RequestCqrsLifecycleStage.ObserverCancellation).ConfigureAwait(false);
+        }
     }
 
     private async Task JoinPendingMoveAsync(List<Exception> failures)
@@ -118,11 +120,15 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
         try
         { await active.DisposeAsync().ConfigureAwait(false); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
-            RequestCqrsLifecycleStage.ObserverEnumeratorDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.ObserverEnumeratorDispose);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
-            RequestCqrsLifecycleStage.ObserverEnumeratorDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.ObserverEnumeratorDispose);
+        }
         if (failures.Count == before)
         { enumerator = null; }
     }
@@ -138,11 +144,15 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
             lifetime = null;
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
-            RequestCqrsLifecycleStage.ObserverLifetimeDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.ObserverLifetimeDispose);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
-            RequestCqrsLifecycleStage.ObserverLifetimeDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.ObserverLifetimeDispose);
+        }
     }
 
     private static bool IsNode(string name) => name is RequestCqrsRf3Protocol.Node1

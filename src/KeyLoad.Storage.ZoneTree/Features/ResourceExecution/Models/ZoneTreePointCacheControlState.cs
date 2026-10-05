@@ -3,7 +3,7 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 /// <summary>Owns exact local cache bindings; callers provide the real store writer boundary.</summary>
 internal sealed class ZoneTreePointCacheControlState
 {
-    internal readonly object TransitionGate = new();
+    internal readonly Lock TransitionGate = new();
     internal readonly ZoneTreePointCacheOptions Options;
     internal readonly ICacheReadPermit Permit;
     internal ZoneTreePointCache? MaintenanceCacheValue;

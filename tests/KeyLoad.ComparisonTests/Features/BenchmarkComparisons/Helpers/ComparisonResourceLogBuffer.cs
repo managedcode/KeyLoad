@@ -4,7 +4,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class ComparisonResourceLogBuffer(int maximumLines, int maximumBytes, int maximumLineBytes)
 {
-    private readonly object gate = new();
+    private readonly System.Threading.Lock gate = new();
     private readonly LinkedList<RetainedLine> lines = new();
     private readonly LinkedListNode<RetainedLine>?[] protectedLines = new LinkedListNode<RetainedLine>?[ComparisonReplayDiagnosticLog.SlotCount];
     private long retainedBytes;

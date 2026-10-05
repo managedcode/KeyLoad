@@ -31,8 +31,11 @@ internal static class IsolatedNativeTeardown
         var applicationDisposed = await IsolatedNativeOriginalTaskSettlement.RunAsync(
             () => app.DisposeAsync().AsTask(), "app-dispose", failures);
         if (collectorSettled && captureSettled && captureDisposed && stopped && applicationDisposed)
+        {
             await IsolatedNativeOriginalTaskSettlement.RunAsync(
                 () => IsolatedNativeDataCleanup.DeleteAsync(root, containers), "data", failures);
+        }
+
         await IsolatedNativeOriginalTaskSettlement.RunAsync(
             () => WriteReceiptAsync(evidence, failures), "receipt", failures);
         failures.ThrowIfAny();
@@ -41,7 +44,11 @@ internal static class IsolatedNativeTeardown
     private static async Task<bool> SettleCollectorAsync(IsolatedNativeOwnedWork work,
         IsolatedNativeTeardownFailures failures)
     {
-        if (work.Collector is null && work.Observation is null) return true;
+        if (work.Collector is null && work.Observation is null)
+        {
+            return true;
+        }
+
         if (work.Collector is null || work.Observation is null)
         {
             failures.Record("server-resource", new InvalidOperationException("Server resource task ownership was incomplete."));

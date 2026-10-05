@@ -11,6 +11,13 @@ full exact-SHA RF3 qualification remains required.
 
 Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 
+Owner direction 2026-10-05 adds the native Orleans per-method selection contract
+in [ExecutionPrimitives](ClusterRouting/ExecutionPrimitives.md) under
+[ADR-110](../ADR/ADR-110-native-orleans-execution-primitives.md), REQ/AC-ORL-001..006.
+It audits StatelessWorker, OneWay, Durable Jobs and selective interleaving against
+actual request/read/partition/due grains. Candidate runtime/provider adoption and
+real-operation RF3/resource/performance qualification remain pending.
+
 TASK-PLACEMENT-DISCOVERY advances original KL-036/069/070/071/072 toward the
 freeze required by ADR-016/017 and AC-ROUTE-004/005, AC-REP-004. Luna
 cluster_wave reads the actual node-local host, generated identity/token contracts,

@@ -110,7 +110,8 @@ internal static class ScaledComparisonCaseRunner
             measured.Samples.Length, SampleCapacity - measured.Samples.Length);
         var failed = measured.Failures != 0 || accounting.Unfinished != 0 || accounting.MissingSamples != 0 || cancelled;
         return new(target.Profile.Name, scenario, 0, failed ? ComparisonStatuses.Failed : ComparisonStatuses.Measured,
-            failed ? FailureDetail : null, measurement, measured.Samples.ToImmutableArray()) { Scaled = accounting };
+            failed ? FailureDetail : null, measurement, measured.Samples.ToImmutableArray())
+        { Scaled = accounting };
     }
 
     private static ComparisonCase Failed(IComparisonTarget target, Scenario scenario, string detail,

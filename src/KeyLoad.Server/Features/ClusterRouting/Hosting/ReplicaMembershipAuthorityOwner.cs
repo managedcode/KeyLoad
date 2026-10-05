@@ -4,7 +4,7 @@ namespace KeyLoad.Server;
 
 internal sealed class ReplicaMembershipAuthorityOwner : IAsyncDisposable
 {
-    private readonly object sync = new();
+    private readonly Lock sync = new();
     private readonly CancellationTokenSource stopping = new();
     private readonly TaskCompletionSource drained = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource startShutdown = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -82,7 +82,8 @@ internal sealed class ReplicaMembershipAuthorityOwner : IAsyncDisposable
     internal async Task StopAdmissionJoinAndClearProviderAsync(List<Exception> failures)
     {
         await ServerFailureObserver.ObserveAsync(StopAdmissionAndJoinAsync, failures).ConfigureAwait(false);
-        try { ClearProvider(); }
+        try
+        { ClearProvider(); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
     }
@@ -91,11 +92,13 @@ internal sealed class ReplicaMembershipAuthorityOwner : IAsyncDisposable
     {
         var failures = new List<Exception>();
         await StopAdmissionJoinAndClearProviderAsync(failures).ConfigureAwait(false);
-        try { stopping.Dispose(); }
+        try
+        { stopping.Dispose(); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);
-        lock (sync) { disposed = true; }
+        lock (sync)
+        { disposed = true; }
     }
 
     private async Task StopCoreAsync()

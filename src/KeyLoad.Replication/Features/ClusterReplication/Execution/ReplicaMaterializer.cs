@@ -10,7 +10,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     private readonly Channel<bool> work = Channel.CreateBounded<bool>(new BoundedChannelOptions(1)
     { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropWrite });
     private readonly SemaphoreSlim applyGate = new(1, 1);
-    private readonly object signals = new();
+    private readonly Lock signals = new();
     private readonly CancellationTokenSource lifetime = new();
     private readonly Task worker;
     private Task? shutdown;

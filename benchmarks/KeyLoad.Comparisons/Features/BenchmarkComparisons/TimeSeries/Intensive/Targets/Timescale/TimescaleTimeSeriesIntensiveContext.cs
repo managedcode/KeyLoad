@@ -12,7 +12,7 @@ internal sealed class TimescaleTimeSeriesIntensiveContext
         OwnerId = Guid.NewGuid();
     }
 
-    private readonly object lifetimeGate = new();
+    private readonly System.Threading.Lock lifetimeGate = new();
     private TaskCompletionSource drained = CompletedSource();
     private int activeOperations;
     private bool closing;

@@ -7,7 +7,7 @@ internal sealed class ZoneTreeReadCutLeaseState
     private const string ClosedMessage = "The native read-cut lease is closed.";
     private const string ConcurrentTraversalMessage = "A native read-cut lease permits only one active traversal.";
     private const string ReentrantDisposalMessage = "A native read-cut lease cannot be disposed from its visitor.";
-    private readonly object sync = new();
+    private readonly Lock sync = new();
     private readonly TaskCompletionSource captureFinished = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private IZoneTreeIterator<Memory<byte>, Memory<byte>>? iterator;
     private ZoneTreeNativeReadCut? cut;

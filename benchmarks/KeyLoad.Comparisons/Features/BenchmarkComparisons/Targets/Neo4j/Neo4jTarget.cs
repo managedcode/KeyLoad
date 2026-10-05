@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
-using System.Runtime.CompilerServices;
 
 namespace KeyLoad.Comparisons.Targets;
 

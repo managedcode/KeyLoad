@@ -5,7 +5,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedKurrentVolumeRegressionFailureCollector
 {
-    private readonly object gate = new();
+    private readonly System.Threading.Lock gate = new();
     private ExceptionDispatchInfo? first;
     private ExceptionDispatchInfo? fatal;
     private int cleanupFailureCount;

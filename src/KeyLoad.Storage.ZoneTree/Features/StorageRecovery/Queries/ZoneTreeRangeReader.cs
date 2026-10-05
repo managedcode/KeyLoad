@@ -60,30 +60,30 @@ internal static class ZoneTreeRangeReader
         ZoneTreeStagedCursor staged, ZoneTreeRangeWork work, int comparison, int maxRecords,
         StorageRecordVisitor visitor, ref int delivered)
     {
-            var useStaged = comparison >= 0;
-            var key = useStaged ? staged.Key.AsSpan() : baseline.Key.Span;
-            var value = useStaged ? staged.Value : null;
-            if (useStaged)
+        var useStaged = comparison >= 0;
+        var key = useStaged ? staged.Key.AsSpan() : baseline.Key.Span;
+        var value = useStaged ? staged.Value : null;
+        if (useStaged)
+        {
+            work.ChargeStaged((long)staged.Key.Length + (value?.Length ?? 0), value is null);
+        }
+
+        var live = !useStaged || value is not null;
+        if (live)
+        {
+            if (delivered == maxRecords)
             {
-                work.ChargeStaged((long)staged.Key.Length + (value?.Length ?? 0), value is null);
+                work.CountLookahead();
+                return new(delivered, true, false, work.ReadBytes);
             }
 
-            var live = !useStaged || value is not null;
-            if (live)
+            var keepGoing = useStaged ? visitor(key, value!) : visitor(key, baseline.Value.Span);
+            delivered++;
+            if (!keepGoing)
             {
-                if (delivered == maxRecords)
-                {
-                    work.CountLookahead();
-                    return new(delivered, true, false, work.ReadBytes);
-                }
-
-                var keepGoing = useStaged ? visitor(key, value!) : visitor(key, baseline.Value.Span);
-                delivered++;
-                if (!keepGoing)
-                {
-                    return new(delivered, false, true, work.ReadBytes);
-                }
+                return new(delivered, false, true, work.ReadBytes);
             }
+        }
         return null;
     }
 

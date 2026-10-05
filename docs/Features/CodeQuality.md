@@ -107,6 +107,7 @@ the build; never disable these rules merely to declare a green migration.
 | KLD0031 | Nongenerated aggregate type code lines at most200 | Error |
 | KLD0032 | Executable unit code lines at most50 | Error |
 | KLD0033 | Executable control-flow nesting at most3 | Error |
+| KLD0034 | Typed synchronization outside Orleans activation-owned state | Error |
 
 Excluded Prostir-specific rules: ProductCommandContract and ServerOwnedIdentity
 assume Prostir's typed product command/Studio lifecycle; EfCoreCosmosTopLevelAny
@@ -154,6 +155,35 @@ in named constants. Add valid/invalid real-compilation TUnit cases in the matchi
 test slice with precise diagnostic ID, severity and source location assertions.
 Run the development build to collect findings; CI owns regression execution.
 Update this catalog and acceptance traceability when adding or changing a rule.
+
+## Typed synchronization correction, 2026-10-05
+
+[ADR-108](../ADR/ADR-108-typed-synchronization.md) owns REQ-CQ-010 and
+TASK-CQ-SYNC-001..004. The owner prohibits object/Monitor synchronization gates.
+Scope is all KeyLoad-owned C# runtime, infrastructure, benchmark and test code;
+public signatures, persisted bytes, RF3 topology and authorization stay unchanged.
+Plain object identity sentinels are outside this rule because they are not locks.
+
+- REQ-CQ-010 / AC-CQ-025: compiling an object-typed lock, a Monitor call or a
+  synchronous lock in a Grain-derived activation emits KLD0034 at the offending
+  expression. Real Roslyn compilations verify diagnostics, locations, aliases,
+  inherited grains, generated-code exclusion and permitted non-grain Lock gates.
+- AC-CQ-026: necessary short synchronous shared-service critical sections use
+  System.Threading.Lock; asynchronous mutual exclusion uses cancellable
+  SemaphoreSlim.WaitAsync and finally-release. No object/Monitor gates remain.
+  Real lifecycle/cache/replica regressions must preserve repeated/concurrent
+  disposal, shutdown, admitted work settlement and storage reopen behavior.
+- AC-CQ-027: activation state relies on Orleans scheduling. Review actual lock
+  owners and their callbacks/reentrancy; do not remove shared node-local storage,
+  journal, apply or resource ownership gates merely because callers are grains.
+  Existing real request-grain and RF3 SDK/MCP tests cover those boundaries.
+
+Verification uses the strict complete Release build, formatter, governance,
+Aspire-owned analyzers/unit/unit-scalar/recovery/rf3 suites and retained original
+reports. Local checks are development evidence; source review alone cannot close
+runtime or Linux qualification. Before implementation, existing unrelated dirty
+work includes OrleansNode and storage/Blob/Graph/documentation repairs; preserve
+it. Baseline runtime outcomes are unmeasured until the Aspire suites execute.
 
 ## Source, target and failure boundaries
 
@@ -207,6 +237,13 @@ are reviewed individually; their raw count is not a confirmed defect count.
   error and unchanged canonical state. Native functional coverage must meet the
   existing90% critical-flow line and70% branch thresholds for changed validation;
   retain exact source/DLL/PDB identities and the original reports.
+- AC-CQ-028: site-coverage process fixtures supply their controlled source
+  revision explicitly, independently of the caller environment. Serialize the
+  affected real PowerShell test cases through native TUnit scheduling so shared
+  admission does not exhaust another case's subprocess budget. Preserve the
+  existing process concurrency, timeout, cleanup and output bounds and all
+  positive/negative parser, revision, inventory and threshold assertions. These
+  controlled parser fixtures are tests, never published coverage evidence.
 
 Execution: disjoint workers own the existing Orleans membership compiler repairs,
 comparison-library compiler repairs and exact high-complexity source files. The

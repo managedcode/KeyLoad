@@ -123,11 +123,15 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
         try
         { await enumerator!.DisposeAsync().ConfigureAwait(false); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
-            RequestCqrsLifecycleStage.IndependentEnumeratorDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.IndependentEnumeratorDispose);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
-            RequestCqrsLifecycleStage.IndependentEnumeratorDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.IndependentEnumeratorDispose);
+        }
         if (failures.Count == before)
         { enumerator = null; }
     }
@@ -142,11 +146,15 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
             lifetimeDisposed = true;
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
-            RequestCqrsLifecycleStage.IndependentLifetimeDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.IndependentLifetimeDispose);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
-            RequestCqrsLifecycleStage.IndependentLifetimeDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.IndependentLifetimeDispose);
+        }
     }
 
     private static void ThrowWithNativeFatalPriority(List<Exception> failures)

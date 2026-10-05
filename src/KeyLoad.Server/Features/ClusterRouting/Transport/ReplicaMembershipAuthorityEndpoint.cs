@@ -86,7 +86,8 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
         try
         {
             call = await ReadAuthenticatedCallAsync(context, headers, token).ConfigureAwait(false);
-            if (call is null) { return; }
+            if (call is null)
+            { return; }
             var voter = AuthenticateCaller(headers, out var address);
             await addressPins!.PinCallerAsync(voter, address, token).ConfigureAwait(false);
             var reply = await operations.ExecuteAsync(operation.Provider, call, token).ConfigureAwait(false);
@@ -99,7 +100,8 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
         { await WriteUnavailableAsync(context, headers, call).ConfigureAwait(false); }
         catch (KeyLoadException error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            if (call is null) { context.Response.StatusCode = StatusCodes.Status400BadRequest; }
+            if (call is null)
+            { context.Response.StatusCode = StatusCodes.Status400BadRequest; }
             else
             { await operations.WriteReplyAsync(context, call, headers.Nonce, operations.Failed(call, headers.Nonce, error)).ConfigureAwait(false); }
         }
@@ -185,7 +187,8 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
 
     public void Dispose()
     {
-        if (Interlocked.CompareExchange(ref disposalState, 1, 0) != 0) { return; }
+        if (Interlocked.CompareExchange(ref disposalState, 1, 0) != 0)
+        { return; }
         callerMac.Dispose();
         authorityMac.Dispose();
         addressPins?.Dispose();

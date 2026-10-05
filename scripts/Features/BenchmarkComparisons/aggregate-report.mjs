@@ -1,7 +1,8 @@
 import { isDeepStrictEqual } from 'node:util';
-import { AGGREGATE, KEYS, SUPPORT, exactKeys, matches, positive, requireValue, text } from './aggregate-contracts.mjs';
+import { AGGREGATE, KEYS, SUPPORT, VECTOR_SUPPORT, exactKeys, matches, positive, requireValue, text } from './aggregate-contracts.mjs';
 import { validateMeasurement } from './sample-metrics.mjs';
 import { scaleProfileSettings } from './scaled-isolated-plan.mjs';
+import { vectorProfileSettings } from './vector-isolated-plan.mjs';
 
 const ERROR = AGGREGATE.errors.report;
 const PLATFORM_FIELDS = Object.freeze(['loadModel', 'hostOs', 'architecture', 'runtime', 'storage']);
@@ -40,6 +41,55 @@ function validateCase(item, cell, options, repetitions, scaled = false) {
   requireValue(item.status === AGGREGATE.measured && item.detail === null, ERROR);
   if (scaled) validateScaledMeasuredCase(item, cell.scenario);
   else validateMeasuredCase(item, options, cell.scenario);
+}
+
+function validateVectorMetrics(metrics, profile) {
+  requireValue(exactKeys(metrics, KEYS.vectorMetrics) && metrics.recordCount === profile.recordCount &&
+    metrics.loadedRecordCount === profile.recordCount && metrics.queryAttempts === profile.measuredQueries &&
+    metrics.querySuccesses === profile.measuredQueries && metrics.updateAttempts === profile.updateCount &&
+    metrics.updateSuccesses === profile.updateCount && metrics.indexKind === profile.indexKind &&
+    metrics.recallSamples === profile.measuredQueries && Array.isArray(metrics.perQueryRecall) &&
+    metrics.perQueryRecall.length === profile.measuredQueries &&
+    metrics.perQueryRecall.every(value => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1) &&
+    Number.isFinite(metrics.exactRecall) && metrics.exactRecall >= 0 && metrics.exactRecall <= 1 &&
+    Number.isFinite(metrics.minimumRecall) && metrics.minimumRecall >= profile.minimumRecall &&
+    metrics.minimumRecall <= metrics.exactRecall && metrics.perQueryRecall.every(value => value >= profile.minimumRecall) &&
+    Number.isFinite(metrics.latencyP95Ms) && metrics.latencyP95Ms > 0 && Number.isFinite(metrics.latencyP99Ms) &&
+    metrics.latencyP99Ms >= metrics.latencyP95Ms && Number.isFinite(metrics.indexBuildMilliseconds) &&
+    metrics.indexBuildMilliseconds >= 0 && text(metrics.nativeIndexDefinition) && text(metrics.nativeQueryPlan) &&
+    metrics.indexParameters !== null && typeof metrics.indexParameters === 'object' && !Array.isArray(metrics.indexParameters) &&
+    Object.values(metrics.indexParameters).every(text) && metrics.serverMemoryBytes === null &&
+    metrics.serverMemorySamplingIntervalMs === null && Number.isFinite(metrics.queryElapsedSeconds) &&
+    metrics.queryElapsedSeconds > 0 && Number.isFinite(metrics.queryUsefulOperationsPerSecond) &&
+    metrics.queryUsefulOperationsPerSecond > 0 && Number.isFinite(metrics.updateElapsedSeconds) &&
+    metrics.updateElapsedSeconds >= 0 && Number.isFinite(metrics.updateUsefulOperationsPerSecond) &&
+    metrics.updateUsefulOperationsPerSecond >= 0, ERROR);
+  const average = metrics.perQueryRecall.reduce((total, value) => total + value, 0) / metrics.perQueryRecall.length;
+  const minimum = Math.min(...metrics.perQueryRecall);
+  const close = (left, right) => Math.abs(left - right) <= Math.max(1e-8, Math.abs(right) * 1e-8);
+  requireValue(close(metrics.exactRecall, average) && close(metrics.minimumRecall, minimum), ERROR);
+  if (profile.indexKind === 'Exact') requireValue(metrics.exactRecall === 1 && metrics.indexBuildMilliseconds === 0, ERROR);
+  if (profile.indexKind === 'Hnsw') requireValue(/hnsw/iu.test(metrics.nativeIndexDefinition)
+    && /hnsw/iu.test(metrics.nativeQueryPlan), ERROR);
+  if (profile.indexKind === 'IvfFlat') requireValue(/ivfflat/iu.test(metrics.nativeIndexDefinition)
+    && /ivfflat/iu.test(metrics.nativeQueryPlan), ERROR);
+  if (profile.updateCount === 0) requireValue(metrics.updateElapsedSeconds === 0
+    && metrics.updateUsefulOperationsPerSecond === 0, ERROR);
+  else requireValue(metrics.updateElapsedSeconds > 0 && metrics.updateUsefulOperationsPerSecond > 0, ERROR);
+}
+
+function validateVectorCase(item, cell, profile, repetitions) {
+  requireValue(exactKeys(item, KEYS.vectorCase) && item.target === cell.target && item.scenario === 'VectorExact' &&
+    item.repetition === 0 && !repetitions.has(item.repetition), ERROR);
+  repetitions.add(item.repetition);
+  if (!VECTOR_SUPPORT[cell.target].includes(profile.indexKind)) {
+    requireValue(item.status === AGGREGATE.unsupported && text(item.detail) && item.measurement === null &&
+      Array.isArray(item.samples) && item.samples.length === 0 && item.vectorMetrics === null, ERROR);
+    return;
+  }
+  requireValue(item.status === AGGREGATE.measured && item.detail === null && item.measurement === null &&
+    Array.isArray(item.samples) && item.samples.length === 0, ERROR);
+  validateVectorMetrics(item.vectorMetrics, profile);
 }
 
 function validScaledSample(sample, index, scenario) {
@@ -100,8 +150,9 @@ function validateMeasuredCase(item, options, scenario) {
 }
 
 export function validateReport(report, cell, cohort, contract) {
-  const scaled = cell.profile !== readControlProfile();
-  const reportFields = scaled ? KEYS.scaledReport : KEYS.report;
+  const vector = cell.profile.startsWith('vector-');
+  const scaled = !vector && cell.profile !== readControlProfile();
+  const reportFields = vector ? KEYS.vectorReport : scaled ? KEYS.scaledReport : KEYS.report;
   requireValue(exactKeys(report, reportFields) && report.schemaVersion === AGGREGATE.reportVersion &&
     matches(AGGREGATE.guid, report.runId) && matches(DATE, report.startedAt) && Number.isFinite(Date.parse(report.startedAt)) &&
     report.sourceRevision === cohort.sourceRevision && matches(AGGREGATE.digest, report.datasetSha256) &&
@@ -109,7 +160,10 @@ export function validateReport(report, cell, cohort, contract) {
     positive(report.logicalProcessors) && matches(AGGREGATE.image, report.loadGeneratorImage), ERROR);
   requireValue(exactKeys(report.provenance, KEYS.provenance) &&
     KEYS.provenance.every(key => report.provenance[key] === cohort[key]), ERROR);
-  if (scaled) {
+  const vectorProfile = vector ? vectorProfileSettings(cell.profile) : null;
+  if (vector) {
+    requireValue(report.options === null && isDeepStrictEqual(report.vectorProfile, vectorProfile), ERROR);
+  } else if (scaled) {
     requireValue(report.options === null && isDeepStrictEqual(report.scaledProfile, scaleProfileSettings(cell.profile)), ERROR);
   } else {
     validateOptions(report.options, cell, contract);
@@ -117,10 +171,13 @@ export function validateReport(report, cell, cohort, contract) {
   requireValue(Array.isArray(report.targets) && report.targets.length === 1, ERROR);
   validateTarget(report.targets[0], cell);
   const profileSettings = scaled ? scaleProfileSettings(cell.profile) : null;
-  const repeatCount = scaled ? profileSettings.repetitions : contract.options.repetitions;
+  const repeatCount = vector ? vectorProfile.repetitions : scaled ? profileSettings.repetitions : contract.options.repetitions;
   requireValue(Array.isArray(report.cases) && report.cases.length === repeatCount, ERROR);
   const seenRepetitions = new Set();
-  for (const item of report.cases) validateCase(item, cell, scaled ? profileSettings : report.options, seenRepetitions, scaled);
+  for (const item of report.cases) {
+    if (vector) validateVectorCase(item, cell, vectorProfile, seenRepetitions);
+    else validateCase(item, cell, scaled ? profileSettings : report.options, seenRepetitions, scaled);
+  }
   return report;
 }
 

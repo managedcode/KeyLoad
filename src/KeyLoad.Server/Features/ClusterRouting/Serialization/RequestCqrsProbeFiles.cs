@@ -6,7 +6,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed class RequestCqrsProbeFiles
 {
-    private readonly object sync = new();
+    private readonly Lock sync = new();
     private readonly string root;
     internal string SessionId { get; }
     private readonly byte[] ownerBytes;

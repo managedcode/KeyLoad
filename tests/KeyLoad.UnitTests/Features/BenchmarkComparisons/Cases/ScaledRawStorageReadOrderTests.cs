@@ -11,7 +11,7 @@ internal sealed class ScaledRawStorageReadOrderTests
     private const int FullRecordCount = 100_000;
     private const int EncodedIndexBytes = 4;
     private const int InvalidOrderCount = 0;
-    private const int MaximumOrderCount = 5_000_000;
+    private const int MaximumOrderCount = 1_000_000;
     private const string ExpectedPermutationDigest = "27a19d3c4c492309aae1b627b59e84e68ef78f9b61ccab21a60813ae69d33789";
     private static readonly int[] ExpectedTenOrder = [3, 5, 0, 1, 2, 4, 8, 9, 7, 6];
 

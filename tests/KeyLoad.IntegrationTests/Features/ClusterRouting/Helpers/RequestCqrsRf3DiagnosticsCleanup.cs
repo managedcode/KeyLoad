@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Owns and joins the actual native resource subscriptions for one C1 wave.</summary>
 internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
 {
-    private readonly object gate = new();
+    private readonly System.Threading.Lock gate = new();
     private readonly CancellationTokenSource lifetime = new();
     private readonly CancellationTokenSource cleanupDeadline = new();
     private readonly ResourceLoggerService logger;
@@ -79,11 +79,15 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
                 failures, failureObserver, RequestCqrsLifecycleStage.CaptureDrain).ConfigureAwait(false);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-            RequestCqrsLifecycleStage.CaptureDrain); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+            RequestCqrsLifecycleStage.CaptureDrain);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-            RequestCqrsLifecycleStage.CaptureDrain); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+            RequestCqrsLifecycleStage.CaptureDrain);
+        }
         finally
         {
             if (!drain.IsCompleted)
@@ -97,19 +101,27 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
             try
             { lifetime.Dispose(); }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-                RequestCqrsLifecycleStage.CaptureLifetimeDispose); }
+            {
+                RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+                RequestCqrsLifecycleStage.CaptureLifetimeDispose);
+            }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-                RequestCqrsLifecycleStage.CaptureLifetimeDispose); }
+            {
+                RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+                RequestCqrsLifecycleStage.CaptureLifetimeDispose);
+            }
             try
             { cleanupDeadline.Dispose(); }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-                RequestCqrsLifecycleStage.CaptureDeadlineDispose); }
+            {
+                RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+                RequestCqrsLifecycleStage.CaptureDeadlineDispose);
+            }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-                RequestCqrsLifecycleStage.CaptureDeadlineDispose); }
+            {
+                RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+                RequestCqrsLifecycleStage.CaptureDeadlineDispose);
+            }
         }
         ThrowWithNativeFatalPriority(failures);
     }

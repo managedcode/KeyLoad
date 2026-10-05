@@ -9,7 +9,7 @@ public sealed class AdmittedCommandInbox(CommandAdmissionGovernor governor) : IA
     private const string StoppedDetail = "The node command queue has stopped accepting operations.";
     private const string ConcurrentReaderDetail = "The command inbox supports only one active reader.";
 
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly CommandInboxLanes lanes = new();
     private readonly SemaphoreSlim available = new(0);
     private readonly TaskCompletionSource disposalCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);

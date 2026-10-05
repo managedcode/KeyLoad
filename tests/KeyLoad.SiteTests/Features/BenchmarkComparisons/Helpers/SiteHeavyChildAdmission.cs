@@ -2,7 +2,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed class SiteHeavyChildAdmission(int capacity, int maximumQueued, TimeSpan admissionDeadline)
 {
-    private readonly object _sync = new();
+    private readonly System.Threading.Lock _sync = new();
     private readonly LinkedList<Waiter> _pending = new();
     private readonly int _capacity = RequirePositive(capacity);
     private readonly int _maximumQueued = RequirePositive(maximumQueued);

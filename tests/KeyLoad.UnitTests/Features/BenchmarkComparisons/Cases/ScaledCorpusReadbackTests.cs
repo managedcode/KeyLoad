@@ -75,7 +75,11 @@ internal sealed class ScaledCorpusReadbackTests
                 {
                     var document = corpus.CreateDocument(number);
                     yield return new(document.Id, document.Json);
-                    if (number == 2) source.Cancel();
+                    if (number == 2)
+                    {
+                        source.Cancel();
+                    }
+
                     await Task.Yield();
                 }
             }

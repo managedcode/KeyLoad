@@ -3,6 +3,7 @@ using System.Text.Json;
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
 /// <summary>AC-BC-027 and AC-CQ-009: native display precision never replaces integer branch evidence.</summary>
+[NotInParallel(SiteAnalyzerCoverageTokens.ProcessIsolationKey)]
 internal sealed class SiteAnalyzerCoverageBranchDisplayTests
 {
     private const string DefaultCoveragePair = "70% (70/100)";

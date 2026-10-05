@@ -22,7 +22,6 @@ internal sealed class IsolatedResourceTopologyRouteTests
     [Test]
     [Arguments("scaled-100k-c16")]
     [Arguments("scaled-1m-c16")]
-    [Arguments("scaled-5m-c16")]
     public async Task ScaledSelectionForwardsExactProfileAndPreservesNativeCell(string profile)
     {
         await using var model = new IsolatedResourceTopologyApplication();

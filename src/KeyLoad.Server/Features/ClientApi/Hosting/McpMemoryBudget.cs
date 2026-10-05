@@ -6,7 +6,7 @@ internal sealed class McpMemoryBudget
     private const string CapacityDetail = "The MCP retained-memory budget is exhausted.";
     private const string ShrinkDetail = "An MCP retained-memory reservation cannot shrink.";
 
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly long[] limits;
     private readonly long[] retained;
 

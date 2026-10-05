@@ -1,5 +1,12 @@
 # Scaling qualification and fair deployment arms
 
+
+Owner correction 2026-10-05 supersedes the earlier three-scale inventory: only
+100k and 1m remain active for every database and workload. SurrealDB/HelixDB
+increase the active inventory to 11 engines; the closed-loop CRUD family has
+264 identities. Historical original artifacts retain their initial settings.
+[ADR-109](../../ADR/ADR-109-native-vector-comparisons.md) governs the vector/site
+extension.
 Status: accepted new scaling implementation contract; current intensive comparison remains a separate control. Canonical slice: BenchmarkComparisons. Requirements: REQ-SCALE-009..015. Acceptance: AC-SCALE-009..015. Implementation contract: ADR-103.
 
 ## Purpose and bounded first stage
@@ -12,17 +19,16 @@ Three exact profiles are introduced:
 |---|---:|---:|---:|---|
 | `scaled-100k-c16` | 100,000 | 100,000 | 1,024 bytes | 256 / 1 / 16 |
 | `scaled-1m-c16` | 1,000,000 | 100,000 | 1,024 bytes | 256 / 1 / 16 |
-| `scaled-5m-c16` | 5,000,000 | 100,000 | 1,024 bytes | 256 / 1 / 16 |
 
 Seed is fixed at 1729. Applicable common scenarios are exactly `PointRead`, `DocumentWrite`, `DocumentUpdate`, and `DocumentDelete`. `PointRead` is reported as the existing public point lookup operation; this stage does not claim SQL range-query or complex-query scale where an equivalent adapter is absent. All new cells are steady-state closed-loop. Existing actual topology counts `[1,2,3]` and target native adapters are reused. KeyLoad uses a genuinely configured native RF1/RF2/RF3 member count for each cell, with independent native endpoint/status and ACK validation. An external target is eligible only when that exact native member count and write ACK mode are supported; unsupported cells remain explicit. A single PostgreSQL process is never described as distributed.
 
-The complete planned cohort identity is target × actual node count × profile × applicable scenario (9 × 3 × 3 × 4 = 324 cells, preserving explicit unsupported topology dispositions). Every eligible cell is one isolated Linux GitHub runner/job, uses exact source/run/attempt/job and target image receipts, seeds and verifies all N records, then performs exactly100,000 caller operations. A missing, failed, unsupported-but-required, duplicated, timed-out or mismatched cell invalidates cohort completeness; no partial result is publishable.
+The complete planned cohort identity is target × actual node count × profile × applicable scenario (9 × 3 × 3 × 4 = 264 cells, preserving explicit unsupported topology dispositions). Every eligible cell is one isolated Linux GitHub runner/job, uses exact source/run/attempt/job and target image receipts, seeds and verifies all N records, then performs exactly100,000 caller operations. A missing, failed, unsupported-but-required, duplicated, timed-out or mismatched cell invalidates cohort completeness; no partial result is publishable.
 
 ## Bounded dataset and runner behavior
 
 ```mermaid
 flowchart LR
-    profiles[100K, 1M and 5M record profiles] --> jobs[324 isolated database and topology cell identities]
+    profiles[100K and 1M record profiles] --> jobs[264 isolated database and topology cell identities]
     jobs --> corpus[Stream full native load and independent readback]
     corpus --> measure[100K validated calls with bounded concurrency and samples]
     measure --> json[Original cell JSON and actual resource manifest]
@@ -30,7 +36,7 @@ flowchart LR
     aggregate --> publication[Public metrics only after every required gate]
 ```
 
-Do not set the old materialized corpus count to five million. The existing `BenchmarkDataset` builds per-record JSON and float vectors, and the current measurer builds arrays of all operation inputs, outputs and samples; this would retain multiple gigabytes in the client before target storage.
+Do not substitute the old materialized corpus for the lazy scaled corpus. The existing `BenchmarkDataset` builds per-record JSON and float vectors, and the current measurer builds arrays of all operation inputs, outputs and samples; this would retain multiple gigabytes in the client before target storage.
 
 The scaled runner path uses the existing profile/target/topology/report ownership but generates deterministic records by integer identity on demand. It retains no per-record JSON/vector object table and no duplicate payload corpus. Full target initialization writes all N actual records from the generator and independently verifies all N identities, exact payloads and a full native readback digest before measurement. Operation inputs are generated on demand by a fixed deterministic sequence. Update/delete preparation also streams through the generator.
 
@@ -38,11 +44,11 @@ During the measured stage the runner caps concurrent calls at 16, validates each
 
 ## Fairness and provenance admission
 
-The exact public library corpus/settings/readback/report seam and deterministic digest and latency-sample rules are frozen in [ADR-103](../../ADR/ADR-103-scaled-fair-comparisons.md#accepted-bounded-corpus-and-report-seam). The old materialized `ComparisonOptions` cap stays unchanged; only the closed typed scale profile represents five million records. A scale report carries that exact profile and null control options, and is never eligible for the original control-only publication admission. Actual native ordered readback is a bounded `IAsyncEnumerable<FoundDocument>` setup operation, independent of generated expectations.
+The exact public library corpus/settings/readback/report seam and deterministic digest and latency-sample rules are frozen in [ADR-103](../../ADR/ADR-103-scaled-fair-comparisons.md#accepted-bounded-corpus-and-report-seam). The old materialized `ComparisonOptions` cap stays unchanged; only the closed typed scale profile represents the independently bounded lazy corpus. A scale report carries that exact profile and null control options, and is never eligible for the original control-only publication admission. Actual native ordered readback is a bounded `IAsyncEnumerable<FoundDocument>` setup operation, independent of generated expectations.
 
 Every report binds exact profile/scenario, N, payload/schema/seed, corpus digest, requested and completed operations, operation-mix identity, target/version/image, requested and observed native node count, target read contract and ACK/durability, source SHA, workflow/run/attempt/job/artifact identity, Linux runner image, an ephemeral runner-instance identifier for provenance, and a stable actual hardware-class fingerprint.
 
-It records actual host CPU model/family/count and memory, effective cgroup CPU quota and memory limit, every database resource's configured and observed CPU/memory envelope, persistent-storage class/capacity, and total per-cell process/container CPU/RSS peaks. Cells must match on stable hardware-class fingerprint and effective resource limits, not ephemeral runner-instance ID or observed peak values. Observed peaks remain measurements and must be finite and within their declared effective envelopes; providers need not consume identical CPU or memory to be compared. The S1 shard-key distribution is fixed `uniform-v1`; query fanout is explicitly `not-applicable` to this point-read/CRUD matrix; recovery and movement are `not-run/unsupported`. Missing or changed required equality fields fail closed; no unknown field is treated as a match. The full 324-cell cohort must have a complete independently verified artifact set before provider comparison or website aggregation. Root-owned workflow/AppHost/resource/provenance/aggregation joins are part of acceptance; authored source and parser fixtures are not measurement evidence.
+It records actual host CPU model/family/count and memory, effective cgroup CPU quota and memory limit, every database resource's configured and observed CPU/memory envelope, persistent-storage class/capacity, and total per-cell process/container CPU/RSS peaks. Cells must match on stable hardware-class fingerprint and effective resource limits, not ephemeral runner-instance ID or observed peak values. Observed peaks remain measurements and must be finite and within their declared effective envelopes; providers need not consume identical CPU or memory to be compared. The S1 shard-key distribution is fixed `uniform-v1`; query fanout is explicitly `not-applicable` to this point-read/CRUD matrix; recovery and movement are `not-run/unsupported`. Missing or changed required equality fields fail closed; no unknown field is treated as a match. The full 264-cell cohort must have a complete independently verified artifact set before provider comparison or website aggregation. Root-owned workflow/AppHost/resource/provenance/aggregation joins are part of acceptance; authored source and parser fixtures are not measurement evidence.
 
 Existing matrix grouping stays one named GitHub job group per database and each database/scenario/topology/scale cell stays isolated on its own runner. RF3 never shares a runner or native stores with a comparison database. Single-node PostgreSQL is not a distributed comparator. Community-only unsupported clustering is retained as an exact explicit disposition and is excluded from unsupported comparative claims, not converted to a fallback.
 
@@ -50,26 +56,26 @@ Existing matrix grouping stays one named GitHub job group per database and each 
 
 | Requirement | Acceptance and test evidence |
 |---|---|
-| REQ-SCALE-009: exact real-scale profiles | AC-SCALE-009: strict profile reader accepts only the three exact profile/count pairs, fixed seed/payload and 100K operation count; profile count mismatch, unsupported scenario, extra profile, wrong node count and non-Linux execution reject before native acquisition. Literal vectors in `ScaledComparisonProfileTests`; actual acquisition proof in isolated provider jobs. |
+| REQ-SCALE-009: exact real-scale profiles | AC-SCALE-009: strict profile reader accepts only the two exact profile/count pairs, fixed seed/payload and 100K operation count; profile count mismatch, unsupported scenario, extra profile, wrong node count and non-Linux execution reject before native acquisition. Literal vectors in `ScaledComparisonProfileTests`; actual acquisition proof in isolated provider jobs. |
 | REQ-SCALE-010: bounded deterministic data and measurement | AC-SCALE-010: lazy generator matches independent literal values/IDs/digest at boundary and random positions without retaining all records; real measured path writes/verifies exact N, performs exact100K calls, caps concurrency, retains only declared sample and exact counters, validates results, and settles all calls on cancellation. `ScaledComparisonDatasetTests`, `ScaledComparisonRunnerTests`; real native corpus required for each profile. |
 | REQ-SCALE-011: actual topology and equivalent provider contract | AC-SCALE-011: each provider proves exact native1/2/3 membership, node-local stores and ACK/durability per cell; target reports are rejected for unexpected membership, target mismatch, single-node mislabeled distributed, or unsupported topology fallback. `ScaledTopologyAssertions` plus existing genuine target/container qualification. |
-| REQ-SCALE-012: complete hardware/resource/workload manifest | AC-SCALE-012: independent validator rejects every missing or changed hardware-class/cgroup/resource/storage/durability/corpus/operation-mix/distribution/fanout-applicability field; equality applies to stable hardware class and effective limits, not ephemeral runner IDs or requested YAML alone. Observed peaks are finite and within limit, and remain actual per-cell output values. Exact cohort test proves all324 identities required and preserves failure/unsupported/missing states. `ScaledFairnessManifestTests` and real GitHub originals. |
-| REQ-SCALE-013: publication and downstream scope | AC-SCALE-013: current 270 control schema and website remain unchanged; scaled cohort cannot publish until authenticated complete originals and root-owned aggregation verify exact source/run/attempt/job/artifact hashes and equality. Report explicitly marks closed-loop S1, with open-loop, shard-skew, fanout-stress, recovery/movement, endurance and power-loss qualification open/unsupported. `ScaledPublicationEligibilityTests`; actual aggregation source/CI provenance required. |
+| REQ-SCALE-012: complete hardware/resource/workload manifest | AC-SCALE-012: independent validator rejects every missing or changed hardware-class/cgroup/resource/storage/durability/corpus/operation-mix/distribution/fanout-applicability field; equality applies to stable hardware class and effective limits, not ephemeral runner IDs or requested YAML alone. Observed peaks are finite and within limit, and remain actual per-cell output values. Exact cohort test proves all264 identities required and preserves failure/unsupported/missing states. `ScaledFairnessManifestTests` and real GitHub originals. |
+| REQ-SCALE-013: publication and downstream scope | AC-SCALE-013: current control workload remains unchanged; ADR-109 extends inventory and projection; scaled cohort cannot publish until authenticated complete originals and root-owned aggregation verify exact source/run/attempt/job/artifact hashes and equality. Report explicitly marks closed-loop S1, with open-loop, shard-skew, fanout-stress, recovery/movement, endurance and power-loss qualification open/unsupported. `ScaledPublicationEligibilityTests`; actual aggregation source/CI provenance required. |
 
-| REQ-SCALE-014: exact isolated scale routing | AC-SCALE-014: `Benchmarks:ScaleProfile` admits only `scaled-100k-c16`, `scaled-1m-c16`, or `scaled-5m-c16` when `Enabled=true`, the existing isolated target/node/scenario tuple is complete, and `EvidenceProfile` equals the exact scale ID. Reject unknown/case-mismatched/mixed/test-suite/control-override combinations before any scale resource starts. Without the selector, the current control route, 270 cell identities, reports and artifacts remain unchanged. Existing AppHost selector and ComparisonHost profile tests plus the literal profile parser tests. |
-| REQ-SCALE-015: complete exact-source scale accounting | AC-SCALE-015: one workflow run/attempt accounts for the existing 270 control cells plus 324 scale identities (3 profiles × 9 targets × 3 actual node counts × 4 CRUD scenarios), in the existing nine database job groups and one aggregator invocation after all nine settle. Each row is validated against its exact profile and native target/topology contract. Only an exact declared unsupported topology/family disposition counts as identity coverage, never as measured success. A complete authenticated set with declared failed scale rows preserves the canonical failed/null rows and emits a receipt with `qualified=false` plus sorted safe failed IDs; it cannot claim successful full scale qualification. This does not gate, weaken, or change the existing ADR-080 control aggregate/publication behavior: a complete authenticated scale set with failures leaves the 270 control output and current publication semantics unchanged. Missing, duplicate, corrupt, or provenance/identity-mismatched scale artifacts fail active composite accounting without older fallback. The control `aggregate.json`/report/site JSON remains byte and meaning unchanged; scale submanifests/receipt are internal and no new site projection is emitted. Independent plan/matrix/proof/receipt TUnit cases and exact-source GitHub originals. |
+| REQ-SCALE-014: exact isolated scale routing | AC-SCALE-014: `Benchmarks:ScaleProfile` admits only `scaled-100k-c16` or `scaled-1m-c16` when `Enabled=true`, the existing isolated target/node/scenario tuple is complete, and `EvidenceProfile` equals the exact scale ID. Reject unknown/case-mismatched/mixed/test-suite/control-override combinations before any scale resource starts. Without the selector, the current control route, 330 cell identities, reports and artifacts remain unchanged. Existing AppHost selector and ComparisonHost profile tests plus the literal profile parser tests. |
+| REQ-SCALE-015: complete exact-source scale accounting | AC-SCALE-015: one workflow run/attempt accounts for the existing 330 control cells plus 264 scale identities (2 profiles × 11 targets × 3 actual node counts × 4 CRUD scenarios), in the existing eleven database job groups and one aggregator invocation after all eleven settle. Each row is validated against its exact profile and native target/topology contract. Only an exact declared unsupported topology/family disposition counts as identity coverage, never as measured success. A complete authenticated set with declared failed scale rows preserves the canonical failed/null rows and emits a receipt with `qualified=false` plus sorted safe failed IDs; it cannot claim successful full scale qualification. This does not gate, weaken, or change the existing ADR-080 control aggregate/publication behavior: a complete authenticated scale set with failures leaves the 330 control output and current publication semantics unchanged. Missing, duplicate, corrupt, or provenance/identity-mismatched scale artifacts fail active composite accounting without older fallback. The existing control workload retains its meaning; ADR-109 extends the live catalog and scale/vector site projection with authenticated source-bound evidence. Independent plan/matrix/proof/receipt TUnit cases and exact-source GitHub originals. |
 
-Scale cell IDs append `-<profileId>` to the existing target/node/scenario base ID. Control cell IDs and job/artifact names remain exact. Scale job/artifact names include the full profile-qualified ID; every worker/proof/report is independently admitted against its matching exact profile. The scale receipt is internal qualification evidence and does not change ADR-080 control failed/null publication or add a site projection.
+Scale cell IDs append `-<profileId>` to the existing target/node/scenario base ID. Control cell IDs and job/artifact names remain exact. Scale job/artifact names include the full profile-qualified ID; every worker/proof/report is independently admitted against its matching exact profile. The scale receipt preserves qualification and failed/null evidence; ADR-109 adds its authenticated site projection.
 
 ## Explicit limits and later stages
 
 This first stage is closed-loop, steady-state, CRUD plus the current point-read query only. It does not prove offered-load behavior or overload recovery. A later open-loop stage needs an exact arrival schedule, drain horizon, queue/rejection/unfinished denominators and tail-latency treatment. Shard-skew/fanout, replica recovery and physical movement require actual native workloads/fault harnesses and their own measured phases. They cannot be marked passed using descriptive metadata. Full SQL query comparisons and all cross-model Q1 workloads require a separate semantically equivalent target matrix. None of these omissions changes the existing benchmark or website claims.
 
-Backend product API: N/A. Frontend: N/A until authenticated complete comparison evidence has a separately approved projection. Internal scale worker credentials remain external; no new package or database dependency is introduced.
+Backend product API: N/A. Frontend: the owner-approved scale/vector projection is governed by ADR-109 and VectorQualification; only authenticated evidence can populate it. Internal scale worker credentials remain external; no new package or database dependency is introduced.
 
 ## Accepted scale resource evidence and Aspire forwarding, 2026-10-05
 
-REQ/AC-SCALE-016 (new) and ADR-103 stage 10 (new). This accepted contract precedes private code; durable docs join before its live source. Only the three exact scaled profiles use the new sidecar. The original 270 controls and website aggregate schema remain unchanged.
+REQ/AC-SCALE-016 (new) and ADR-103 stage 10 (new). This accepted contract precedes private code; durable docs join before its live source. Only the two exact scaled profiles use the new sidecar. The historical 270 controls and website aggregate schema remain unchanged.
 
 One AppHost-owned collector observes the exact selected native target ContainerResources and lifecycle, never the load generator. It writes server-resource-evidence.v1 in a separate server-resource-evidence.json beside the original worker.json only after runner settlement; it binds exact source/run/attempt/job/target/nodeCount/scenario/profile and SHA256 of original worker bytes. AppHost/test teardown must await this original collector before reports are copied and app ownership is released. Failed/unavailable observation never changes workload timing/results or invents successful qualification.
 
@@ -145,10 +151,10 @@ settlement or qualification for a detached original task.
 ## Accepted next stage: fixed-rate open-loop S1
 
 REQ-SCALE-018 requires an independent fixed-arrival measurement over the same
-real native targets and lazy 100K/1M/5M corpora. TASK-SCALE-OPEN-LOOP owns
+real native targets and lazy 100K/1M corpora. TASK-SCALE-OPEN-LOOP owns
 AC-SCALE-018..021 below. It does not close the original KL-075 six-node,
 shard-skew, cross-owner fanout, recovery or movement requirements. Existing270
-control and324 closed-loop identities, report schema3 and website projections
+control and264 closed-loop identities, report schema3 and website projections
 remain unchanged. Open-loop results are a separate internal cohort.
 
 - AC-SCALE-018: each cell binds target, actual1/2/3-node topology, exact dataset,
@@ -193,7 +199,7 @@ remain unchanged. Open-loop results are a separate internal cohort.
   service time separately, with P50/P95/P99, useful successful throughput and
   explicit denominators/missing samples. Keep per-cell worker bytes/hash and a
   bounded versioned `open-loop-evidence.v1.json` tied to the exact source/run/
-  attempt/job/target/topology/dataset/scenario/rate. The independent972-cell
+  attempt/job/target/topology/dataset/scenario/rate. The independent792-cell
   inventory rejects missing/duplicate/corrupt/mixed-source originals and compares
   actual hardware, effective resource/storage limits, native membership and ACK
   contracts within each matched workload tuple. Unsupported native topology is
@@ -210,3 +216,102 @@ Scripts own new feature-local open-loop plan/receipt tooling. No test-owned
 database or load/comparison run contributes to functional coverage. Rollout adds
 new internal selectors and artifacts; rollback removes them without rewriting
 old results or weakening mandatory closed-loop and original KL-075 gates.
+
+### Exact open-loop worker join
+
+The optional native selector is `Benchmarks:OpenLoopRate`, exposed as nullable
+`ComparisonWorkerSelection.OpenLoopRate`. It requires the exact scaled profile,
+existing complete target/node/scenario/provenance selection and one exact decimal
+rate 250, 1000 or 4000, rejecting blank, leading-zero, unknown and mixed control
+values before resource acquisition. Absence preserves the existing native path.
+The test-owned selector is `KeyLoadTests:OpenLoopRate` alongside the existing
+`KeyLoadTests:ScaleProfile`, only for Suite=comparison and exact
+`/*/*/IsolatedNativeOpenLoopComparisonTests/*`. The runner receives the native
+selector and clears both outer harness selectors before its nested AppHost.
+
+The shared isolated host branches only at native measurement/report dispatch.
+Reuse its target owner, lazy corpus, native resources, readiness, original
+settlement and collector; do not create another resource harness. A separate
+`OpenLoopComparisonRunner(profile, rate, progress)` accepts the actual existing
+`IsolatedComparisonWorker` and validates its SourceRevision/RunId/Attempt/JobId/
+Target/NodeCount/Scenario/Profile before acquisition, with actual membership
+validation after native initialization. The existing worker's Repository/Ref/
+Workflow remain its exact provenance. Missing identity is rejected, never invented.
+Write only the separately versioned open-loop evidence in its own cell output;
+its collector binds those actual worker bytes/hash. Root freezes any collector,
+writer and script consumer join before implementing that integration. Existing
+330 controls, 264 closed-loop cells and their reports remain unchanged.
+
+### Native completion observation for cancellation evidence
+
+REQ-SCALE-018 and AC-SCALE-020 also require cancellation during actual measured
+native work, after setup. The runner constructor may append the optional
+`Action<OpenLoopProgressV1>? nativeProgress` argument after its existing string
+progress callback. `OpenLoopProgressV1` carries only nonnegative bounded `long`
+Completed/Planned/Started counters, the exact `int` OfferedRatePerSecond and the
+existing closed scenario identity. Planned is the fixed 100,000 arrival count;
+Completed counts observed terminal native calls, including native failures, and
+never synthetic queued or unfinished dispositions. Completed <= Started <=
+Planned. No entity, request, credential or user payload enters this event.
+
+Emit at most one snapshot for each 1,024 observed terminal native calls, after
+committing the actual accounting and outside its state lock. Do not retain an
+event queue or invoke the callback during seeding. A callback failure is a
+harness-primary failure: cancel the original work owner, join the original
+producer, workers and disposals, and preserve SCALE-017 failure objects and fatal
+ordering. The callback does not turn unfinished calls into completed work.
+
+The live Aspire case cancels its parent-owned caller CTS at the first actual
+Completed >= 1,024 milestone. It proves the original calls and sessions settled,
+the exact completed/unfinished accounting remains consistent, and a healthy
+persisted point read still succeeds. Pre-cancellation proves only pre-admission
+behavior; timers, fake targets, replacement tasks and invented completion events
+cannot establish this acceptance. This observation seam adds no SQL/SDK/MCP wire
+contract and does not change the report or existing control route.
+
+### Aspire child-process cancellation proof
+
+The runner executes inside the existing Aspire-owned `comparisons` child.
+TASK-SCALE-OPENLOOP-CANCEL-001 therefore carries the parent cancellation across
+that actual process boundary. A separate
+`IsolatedNativeOpenLoopCancellationTests` class reuses `IsolatedNativeCase` with
+an explicit cancellation-proof intent. Its exact test filter is
+`/*/*/IsolatedNativeOpenLoopCancellationTests/*`; it requires KeyLoad, three
+native members, PointRead and the existing exact scale/rate selection. The normal
+open-loop class remains the only measured-cell route. No fault-proof case may
+produce a successful performance cell or enter the 792-cell cohort.
+
+Root forwards the closed boolean `Benchmarks:OpenLoopCancellationProof=true`
+only for this proof. The child derives the fixed `open-loop-cancel.v1.request`
+path from its already-owned fresh output directory; callers cannot supply another
+control path. Reject an existing control/pending file, links, another workload,
+missing scale/rate or conflicting selectors before native acquisition. A parent
+CTS callback creates `.open-loop-cancel.v1.pending` with FileMode.CreateNew,
+writes exactly the ten UTF-8 bytes `cancel-v1` plus LF, flushes and closes the
+original stream, then performs a same-directory no-overwrite atomic move to the
+request filename. The child reads at most eleven bytes and admits exactly those
+ten; malformed, oversized or linked controls are harness failures, never normal
+cancellation. This file is test-owned and carries no credential or user payload.
+
+Only after the 1,024th actual terminal native call, the child emits a closed
+`OpenLoopNativeCompletionV1` marker with the bounded typed snapshot and exact
+profile/scenario/rate from the accepted progress seam. TUnit waits for that marker
+from the owned comparisons resource and cancels its original parent CTS; its
+bounded synchronous callback publishes the control file. A child-owned watcher
+checks at 100ms cadence and cancels the exact original caller CTS passed to the
+runner. It owns a separate stop token, is cancelled and its original task joined
+before child exit, and cannot outlive the AppHost. No timer establishes a native
+completion, no database is stopped, and no replacement measurement task is used.
+
+After all producer/native-call/session-disposal originals settle, the child uses
+the still-live target and an uncancelled host-lifetime token for one genuine SDK
+point read and verifies the literal corpus identity/content; its follow-up
+session also settles. Write a separate bounded
+`open-loop-cancellation-proof.v1.json` containing the actual accounting, native
+milestone, original settlement and healthy-read oracle, without raw payload.
+Use the host token for proof export, never the cancelled runner token. The parent
+checks original proof identity, callerCancelled, exact accounting and closure,
+then the existing collector, app and owned-file teardown settle as usual. Failure
+objects, cleanup failures and fatal precedence retain SCALE-017. Root owns shared
+settings/host/collector joins; private feature-local lifetime, case and assertion
+helpers may be authored against this frozen contract before those joins.

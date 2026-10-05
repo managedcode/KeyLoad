@@ -269,6 +269,10 @@ public sealed record ComparisonCase(string Target, Scenario Scenario, int Repeti
     /// <summary>Gets exact scaled-run request accounting, omitted for existing control cases.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public ScaledOperationAccounting? Scaled { get; init; }
+
+    /// <summary>Gets actual native vector qualification metrics for a vector profile case.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public VectorMetrics? VectorMetrics { get; init; }
 }
 
 /// <summary>Contains the configuration, environment, targets, and cases for one comparison run.</summary>
@@ -299,7 +303,7 @@ public sealed record ComparisonReport(int SchemaVersion, Guid RunId, DateTimeOff
     /// <summary>Validates that exactly one control or scaled configuration is present.</summary>
     public void ValidateConfiguration()
     {
-        if ((Options is null) == (ScaledProfile is null))
+        if ((Options is null ? 0 : 1) + (ScaledProfile is null ? 0 : 1) + (VectorProfile is null ? 0 : 1) != 1)
         {
             throw new InvalidOperationException("A comparison report must carry exactly one configuration.");
         }
@@ -307,6 +311,10 @@ public sealed record ComparisonReport(int SchemaVersion, Guid RunId, DateTimeOff
     /// <summary>Gets the exact scaled profile when this report is not a materialized control run.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public ScaledComparisonProfile? ScaledProfile { get; init; }
+
+    /// <summary>Gets the exact vector qualification profile when this is a vector run.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public VectorComparisonProfile? VectorProfile { get; init; }
 }
 
 /// <summary>Identifies the GitHub Actions workflow run and selected comparison profile.</summary>

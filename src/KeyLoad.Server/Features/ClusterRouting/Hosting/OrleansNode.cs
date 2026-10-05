@@ -12,10 +12,11 @@ namespace KeyLoad.Server;
 /// <param name="options">Validated fixed-voter silo settings.</param>
 /// <param name="administration">Borrowed node administration guarded by read actors.</param>
 /// <param name="loggerFactory">Shared process diagnostics, owned by the outer application.</param>
+/// <param name="membershipAuthority">Borrowed discovery authority, drained before the native silo stops.</param>
 internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, INodeAdministration administration,
     ILoggerFactory loggerFactory, ReplicaMembershipAuthorityOwner membershipAuthority) : IAsyncDisposable
 {
-    private readonly object lifecycle = new();
+    private readonly Lock lifecycle = new();
     private readonly NativeRequestWorkOwner requestWork = new();
     private IHost? host;
     private IGrainFactory? grains;

@@ -1,5 +1,5 @@
-using StackExchange.Redis;
 using System.Runtime.CompilerServices;
+using StackExchange.Redis;
 
 namespace KeyLoad.Comparisons.Targets;
 

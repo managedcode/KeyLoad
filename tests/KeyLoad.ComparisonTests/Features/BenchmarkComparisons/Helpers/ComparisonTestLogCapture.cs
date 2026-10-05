@@ -19,7 +19,7 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     private readonly ConcurrentDictionary<string, Task> logCaptures = new(StringComparer.Ordinal);
     private readonly Task capture;
     private readonly ComparisonProgressFile? progress;
-    private readonly object stopGate = new();
+    private readonly System.Threading.Lock stopGate = new();
     private Task? stopping;
     private int disposed;
 

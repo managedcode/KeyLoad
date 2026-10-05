@@ -10,7 +10,8 @@ internal static class IsolatedNativeOriginalTaskSettlement
         IsolatedNativeTeardownFailures failures, Func<Task>? escalate = null)
     {
         Task original;
-        try { original = start(); }
+        try
+        { original = start(); }
         catch (Exception failure) when (IsNonFatal(failure))
         {
             failures.Record(stage, failure);
@@ -36,7 +37,10 @@ internal static class IsolatedNativeOriginalTaskSettlement
         {
             failures.Record(stage, threshold);
             if (!original.IsCompleted && escalate is not null)
+            {
                 await RunAsync(escalate, stage, failures);
+            }
+
             return await JoinAfterThresholdAsync(original, stage, failures);
         }
         catch (Exception failure) when (IsNonFatal(failure))

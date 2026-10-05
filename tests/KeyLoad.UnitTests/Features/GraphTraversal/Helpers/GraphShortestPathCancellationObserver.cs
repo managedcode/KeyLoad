@@ -15,7 +15,7 @@ internal sealed class GraphShortestPathCancellationObserver
     private readonly CancellationTokenSource cancellation;
     private readonly ManualResetEventSlim started;
     private readonly long minimumReadBytes;
-    private readonly object failureGate = new();
+    private readonly System.Threading.Lock failureGate = new();
     private readonly List<Exception> observerFailures = [];
     private readonly Thread thread;
     private int cancellationRequested;

@@ -59,6 +59,11 @@ public static class ReportWriter
             text.AppendLine(CultureInfo.CurrentCulture, $"Run: {report.RunId}. Profile: {scaled.Id}. Seed: {scaled.Seed}. Corpus SHA256: `{report.DatasetSha256}`.");
             text.AppendLine(CultureInfo.CurrentCulture, $"\n{scaled.Documents} native documents, {scaled.PayloadBytes} UTF-8 bytes/document, {scaled.Operations} measured operations/case, concurrency {scaled.Concurrency}; closed-loop S1.");
         }
+        else if (report.VectorProfile is { } vector)
+        {
+            text.AppendLine(CultureInfo.CurrentCulture, $"Run: {report.RunId}. Vector profile: {vector.Id}. Seed: {vector.Seed}. Corpus SHA256: `{report.DatasetSha256}`.");
+            text.AppendLine(CultureInfo.CurrentCulture, $"\n{vector.RecordCount} vectors, {vector.Dimensions} float32 dimensions, cosine top-{vector.TopK}, {vector.MeasuredQueries} measured queries, concurrency {vector.Concurrency}; {vector.IndexKind}/{vector.QueryMode}; {vector.MinimumRecall:P0} minimum recall.");
+        }
         else
         {
             throw new InvalidOperationException("A comparison report must carry exactly one configuration.");

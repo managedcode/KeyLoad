@@ -1,11 +1,11 @@
 import { isDeepStrictEqual } from 'node:util';
-import { createIsolatedPlan, readIsolatedContract } from './isolated-plan.mjs';
+import { createIsolatedPlan, readIsolatedContract, validateIsolatedPlan } from './isolated-plan.mjs';
 import { isolatedPlanLimits, requireIsolatedPlan } from './isolated-plan-contract.mjs';
+import { createVectorPlans, validateVectorPlans } from './vector-isolated-plan.mjs';
 
 export const SCALED_PROFILES = Object.freeze([
   Object.freeze({ id: 'scaled-100k-c16', documents: 100_000 }),
   Object.freeze({ id: 'scaled-1m-c16', documents: 1_000_000 }),
-  Object.freeze({ id: 'scaled-5m-c16', documents: 5_000_000 }),
 ]);
 
 const settings = Object.freeze({ operations: 100_000, warmup: 256, repetitions: 1, concurrency: 16,
@@ -30,7 +30,7 @@ function createCells(contract, profile) {
       requireIsolatedPlan(id.length <= isolatedPlanLimits.idLength && idPattern.test(id));
       return { id, target, nodeCount, scenario, profile: profile.id, family: 'crud' };
     })));
-  requireIsolatedPlan(cells.length === 108 && new Set(cells.map(cell => cell.id)).size === cells.length);
+  requireIsolatedPlan(cells.length === 132 && new Set(cells.map(cell => cell.id)).size === cells.length);
   return cells;
 }
 
@@ -47,14 +47,15 @@ export function createScaledPlans(contract = readIsolatedContract()) {
   return SCALED_PROFILES.map(profile => createProfilePlan(contract, profile));
 }
 
-export function createCompositePlan(controlPlan = createIsolatedPlan(), scaledPlans = createScaledPlans()) {
+export function createCompositePlan(controlPlan = createIsolatedPlan(), scaledPlans = createScaledPlans(), vectorPlans = createVectorPlans()) {
   const control = validateIsolatedPlan(controlPlan);
   const scales = validateScaledPlans(scaledPlans);
-  return { schemaVersion: 2, control, scaledProfiles: scales };
+  const vectors = validateVectorPlans(vectorPlans);
+  return { schemaVersion: 3, control, scaledProfiles: scales, vectorProfiles: vectors };
 }
 
 export function validateCompositePlan(value, contract = readIsolatedContract()) {
-  const expected = createCompositePlan(createIsolatedPlan(contract), createScaledPlans(contract));
+  const expected = createCompositePlan(createIsolatedPlan(contract), createScaledPlans(contract), createVectorPlans(contract));
   requireIsolatedPlan(isDeepStrictEqual(value, expected));
   return structuredClone(expected);
 }

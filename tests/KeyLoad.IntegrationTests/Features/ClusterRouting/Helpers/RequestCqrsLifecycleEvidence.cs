@@ -1,6 +1,6 @@
 using System.Text;
-using KeyLoad.Server;
 using KeyLoad.Orleans;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 
@@ -16,7 +16,6 @@ internal sealed class RequestCqrsLifecycleEvidence
         RequestCqrsNodeReadinessOutcome.NotObserved
     ];
     private RequestCqrsLifecycleStage stage = RequestCqrsLifecycleStage.Scenario;
-    private RequestCqrsLifecycleSnapshot? firstFailure;
     private RequestCqrsLifecycleSnapshot? terminal;
     private RequestCqrsRf3Diagnostics? diagnostics;
     private RequestCqrsRf3DiagnosticsSubscriberObserver? observer;
@@ -48,7 +47,6 @@ internal sealed class RequestCqrsLifecycleEvidence
         readiness[index] = outcome;
     }
 
-
     internal RequestCqrsLifecycleSnapshot Snapshot()
     {
         var capture = diagnostics?.ReadLifecycleSnapshot();
@@ -65,9 +63,9 @@ internal sealed class RequestCqrsLifecycleEvidence
     }
 
     internal void RecordFirstFailure()
-    { firstFailure ??= Snapshot(); }
+    { FirstFailureSnapshot ??= Snapshot(); }
 
-    internal RequestCqrsLifecycleSnapshot? FirstFailureSnapshot => firstFailure;
+    internal RequestCqrsLifecycleSnapshot? FirstFailureSnapshot { get; private set; }
 
     internal void RecordOwnerFailure(RequestCqrsLifecycleStage ownerStage)
     {
@@ -86,7 +84,7 @@ internal sealed class RequestCqrsLifecycleEvidence
 
     internal string FormatBoundedContext()
     {
-        var first = Format(firstFailure ?? Snapshot());
+        var first = Format(FirstFailureSnapshot ?? Snapshot());
         var last = Format(terminal ?? Snapshot());
         var context = ContextPrefix + "first{" + first + "} terminal{" + last + "}";
         if (Encoding.UTF8.GetByteCount(context) > MaximumContextBytes)

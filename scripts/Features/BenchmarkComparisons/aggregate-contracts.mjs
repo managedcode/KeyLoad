@@ -27,17 +27,28 @@ export const KEYS = Object.freeze({
     'logicalProcessors', 'runtime', 'storage', 'sourceRevision', 'targets', 'cases', 'provenance', 'loadGeneratorImage'],
   scaledReport: ['schemaVersion', 'runId', 'startedAt', 'options', 'datasetSha256', 'loadModel', 'hostOs', 'architecture',
     'logicalProcessors', 'runtime', 'storage', 'sourceRevision', 'targets', 'cases', 'provenance', 'loadGeneratorImage', 'scaledProfile'],
+  vectorReport: ['schemaVersion', 'runId', 'startedAt', 'options', 'datasetSha256', 'loadModel', 'hostOs', 'architecture',
+    'logicalProcessors', 'runtime', 'storage', 'sourceRevision', 'targets', 'cases', 'provenance', 'loadGeneratorImage', 'vectorProfile'],
   provenance: ['runId', 'attempt', 'repository', 'ref', 'workflow', 'profile'],
   target: ['name', 'version', 'topology', 'writeAcknowledgement', 'readContract', 'transport', 'authorization', 'image', 'cluster'],
   cluster: ['nodes', 'dataCopies', 'state', 'observations'],
   case: ['target', 'scenario', 'repetition', 'status', 'detail', 'measurement', 'samples'],
   scaledCase: ['target', 'scenario', 'repetition', 'status', 'detail', 'measurement', 'samples', 'scaled'],
+  vectorCase: ['target', 'scenario', 'repetition', 'status', 'detail', 'measurement', 'samples', 'vectorMetrics'],
   sample: ['operation', 'worker', 'startedMs', 'completedMs', 'success', 'error', 'payloadBytes', 'completedMessageId', 'queue', 'latencyMs'],
   measurement: ['attempts', 'successes', 'failures', 'elapsedSeconds', 'usefulOperationsPerSecond', 'latency',
     'uniqueCompletedMessages', 'enqueue', 'receive', 'ack', 'clientResources'],
   latency: ['p50Ms', 'p95Ms', 'p99Ms'], queue: ['enqueueMs', 'receiveMs', 'ackMs'],
   scaledProfile: ['id', 'documents', 'operations', 'warmup', 'repetitions', 'concurrency', 'payloadBytes', 'seed',
     'dimensions', 'topK', 'timeoutSeconds', 'graphVertices', 'graphFanOut', 'graphDepth'],
+  vectorProfile: ['id', 'recordCount', 'indexKind', 'queryMode', 'dimensions', 'metric', 'topK', 'seed', 'payloadBytes',
+    'queryVectorCount', 'warmupQueries', 'measuredQueries', 'concurrency', 'timeoutSeconds', 'latencySampleCount',
+    'repetitions', 'minimumRecall', 'updateCount'],
+  vectorMetrics: ['recordCount', 'loadedRecordCount', 'queryAttempts', 'querySuccesses', 'updateAttempts', 'updateSuccesses',
+    'exactRecall', 'minimumRecall', 'recallSamples', 'perQueryRecall', 'latencyP95Ms', 'latencyP99Ms', 'indexBuildMilliseconds',
+    'indexKind', 'nativeIndexDefinition', 'nativeQueryPlan', 'indexParameters', 'serverMemoryBytes',
+    'serverMemorySamplingIntervalMs', 'queryElapsedSeconds', 'queryUsefulOperationsPerSecond', 'updateElapsedSeconds',
+    'updateUsefulOperationsPerSecond'],
   scaledCaseAccounting: ['requested', 'attempted', 'successes', 'failures', 'deadlineTimeouts', 'rejections', 'unfinished',
     'samplingAlgorithm', 'sampleCapacity', 'collectedSamples', 'missingSamples', 'latencyQuantileMethod'],
 });
@@ -50,6 +61,12 @@ export const SUPPORT = Object.freeze({
   'PostgreSQL + pgvector': [...CRUD, ...GRAPH, ...EVENTS, 'VectorExact', 'QueueCycle'],
   Redis: CRUD, Neo4j: [...CRUD, ...GRAPH], MongoDB: [...CRUD, ...GRAPH, ...EVENTS],
   OpenSearch: [...CRUD, 'VectorExact'], Qdrant: ['VectorExact'], RabbitMQ: ['QueueCycle'], KurrentDB: EVENTS,
+});
+
+export const VECTOR_SUPPORT = Object.freeze({
+  KeyLoad: [], 'PostgreSQL + pgvector': ['Exact', 'Hnsw', 'IvfFlat'], Qdrant: ['Exact', 'Hnsw'],
+  RabbitMQ: [], Redis: [], Neo4j: [], MongoDB: [], OpenSearch: [], KurrentDB: [],
+  SurrealDB: ['Exact', 'Hnsw'], HelixDB: ['NativeAnn'],
 });
 
 export function reject(code) {

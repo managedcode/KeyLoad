@@ -6,7 +6,7 @@ public sealed class CacheMemoryBudget : ICacheMemoryBudget, IDisposable
     private const string InvalidBytes = "A cache reservation must charge positive modeled bytes.";
     private const string InvalidEntries = "A cache reservation cannot charge a negative entry count.";
     private const string AccountingInvariantFailed = "The cache memory reservation accounting is inconsistent.";
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly long maxRetainedBytes;
     private readonly int maxRetainedEntries;
     private long retainedBytes;

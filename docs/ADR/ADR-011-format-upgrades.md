@@ -1,7 +1,7 @@
 # ADR-011: Persisted format upgrade policy
 
-Status: Accepted for the exact offline BlobStorage v1 additions and restore
-normalization below. Other format migrations and mixed-version rolling writes
+Status: Accepted for the exact offline BlobStorage v1 additions, restore
+normalization and scoped outcome-v2 transition below. Other format migrations and mixed-version rolling writes
 remain unapproved. Source: architecture sections4–6/18/36, ADR-002/005/008/038.
 Owner: KeyLoad integrator. Implementation and exact-SHA qualification pending.
 
@@ -10,8 +10,9 @@ Owner: KeyLoad integrator. Implementation and exact-SHA qualification pending.
 Unknown or corrupt mandatory records fail closed. Accepted transition:
 current KeyCodec/storage format1 nonblob store -> same canonical format1 plus
 BlobStorage feature format1. Existing nonblob keys, records, outcomes and wire JSON
-are byte-preserved. No compatibility reader, dual write, legacy fallback, general
-in-place re-encoding or mixed old/new executable writers is authorized.
+are byte-preserved. The separately enumerated outcome-v2 reader below is the only
+additional accepted retained-format path. No general compatibility reader, dual
+write, legacy fallback, in-place re-encoding or mixed executable writers is authorized.
 
 | Source | Target | Authorized mode and boundary |
 |---|---|---|
@@ -20,6 +21,44 @@ in-place re-encoding or mixed old/new executable writers is authorized.
 | Verified native backup containing BlobStorage1 | New store incarnation, BlobStorage1 | Offline resumable Core-owned normalization, staged invalidation and authority rebind before serving blobs; content hash provenance is preserved |
 | Unknown blob/stamp/restore marker version or inconsistent initialized state | None | FormatUnsupported/Corruption; no reset, reinterpretation or writable fallback |
 | BlobStorage1 after first feature write | Preblob binary | Unsupported downgrade; use compatible binary or explicit complete prefeature backup rollback |
+| Native outcome at exact legacy principal/ID key, with v1 locator when scope is known | Scoped outcome-v2 writes plus exact retained-format reader | Cold writer-stopped homogeneous upgrade with verified complete pre-upgrade backup; preserve all existing keys/values; valid known scope remains authoritative for its scope, Unknown remains an ambiguity barrier; no automatic backfill or dual write |
+| Store after first outcome-v2 write | Legacy-key-only binary | Unsupported downgrade; recover forward or explicitly approved complete pre-upgrade backup rollback with its data-loss scope |
+
+## Exact scoped outcome key transition, 2026-10-05
+
+REQ/AC-DSTORE-009 and TASK-DSTORE-SCOPED-OUTCOMES-001..004 in
+[DocumentStorage](../Features/DocumentStorage.md) freeze the complete key, lookup,
+negative/restart/RF3 acceptance and source ownership contract. Partition keys use
+the complete PartitionRef under outcome-v2; Global has an explicit global key.
+New Unknown errors use the explicit nonmovable `outcome-v2/unknown` key; only
+retained old Unknown rows are ambiguity barriers. No new write uses an old key.
+The v2 locator stores the exact matching partition outcome key. Keep KeyCodec v1,
+StoredOutcome alias/IDs 0..7 and canonical fingerprints unchanged. New success
+and persisted errors share the existing effects/watermark/clock transaction.
+Unknown has no locator and no inferred partition. Its separate new identity
+cannot shadow existing scoped results or require a cross-partition presence scan.
+
+The native same-view resolver validates v2 and retained v1 authority before
+replay or apply. Known different legacy scope permits a distinct v2 identity;
+Unknown blocks a different fingerprint. Same-scope duplicates, bad scope/locator
+or malformed bytes are Corruption, without preference, repair or rewrite.
+Remove public unscoped key/result APIs and update their actual callers. The
+internal legacy format helper exists only for this retained-data contract and
+raw forensic tests; it is not a public compatibility alias or second execution
+path. There is no temporary dual writer to remove. Never delete acknowledged
+outcomes to simplify this upgrade. Missing partition fields in genuine native5/6
+frames cannot be recovered from a one-way fingerprint or receipt partition hash;
+any future backfill needs complete verified canonical history and a separately
+accepted offline migration. Without that history preserve Unknown and fence
+movement, rather than inventing scope.
+
+Root owns the pre-code contract and shared integration; Luna owns the private
+Core and actual caller/regression packet. Rollout stops every old writer, verifies
+the full backup, installs homogeneous binaries and reopens before API admission.
+An old binary has no claimed fence against a marker it does not understand.
+Original native6 bytes, generated-serializer goldens and all existing BlobStorage
+transitions remain mandatory. Unit/scalar/recovery and Docker/Aspire SDK/MCP
+RF3 plus exact-source Linux evidence must pass before qualification.
 
 ## Exact additive outcome and lifetime format
 

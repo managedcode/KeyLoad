@@ -1,8 +1,8 @@
-using KeyLoad.Orleans;
-using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using Aspire.Hosting;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
+using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -147,11 +147,15 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
         try
         { deadline.Dispose(); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, FailureObserver,
-            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, FailureObserver,
+            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RequestCqrsLifecycleFailureObserver.Append(failures, error, FailureObserver,
-            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose); }
+        {
+            RequestCqrsLifecycleFailureObserver.Append(failures, error, FailureObserver,
+            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose);
+        }
         var ownedDiagnostics = diagnostics;
         if (ownedDiagnostics is not null && failures.Count > 0)
         {

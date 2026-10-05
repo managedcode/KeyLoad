@@ -11,8 +11,7 @@ internal sealed class NativeTextProjection : ITextProjection
     private readonly NativeTextProjectionLifecycle lifecycle;
     private readonly Func<string, ulong> tokenHash;
     private readonly Action<NativeTextFaultStage>? faultObserver;
-    private readonly object disposeSync = new();
-    private bool disposeRunning;
+    private readonly Lock disposeSync = new();
 
     internal NativeTextProjection(string directory, DatabaseLimits limits, Guid sourceNodeId,
         Func<string, ulong>? tokenHash = null, Action<NativeTextFaultStage>? faultObserver = null)
@@ -57,25 +56,10 @@ internal sealed class NativeTextProjection : ITextProjection
     {
         lock (disposeSync)
         {
-            while (disposeRunning)
-            {
-                Monitor.Wait(disposeSync);
-            }
-            disposeRunning = true;
-        }
-        state.BeginShutdown();
-        try
-        {
+            // Lease settlement uses independent state/physical gates, so it can join while disposal is serialized.
+            state.BeginShutdown();
             state.WaitForQuiet();
             lifecycle.Shutdown(state.SnapshotSlots());
-        }
-        finally
-        {
-            lock (disposeSync)
-            {
-                disposeRunning = false;
-                Monitor.PulseAll(disposeSync);
-            }
         }
     }
 

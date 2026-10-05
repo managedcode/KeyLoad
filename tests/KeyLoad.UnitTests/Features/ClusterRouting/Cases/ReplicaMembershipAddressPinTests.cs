@@ -1,5 +1,4 @@
 using System.Net;
-using KeyLoad.Core;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;

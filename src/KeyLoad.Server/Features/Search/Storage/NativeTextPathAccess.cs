@@ -2,7 +2,7 @@ namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeTextPathAccess(string root, string leaf, Guid sourceNodeId)
 {
-    private readonly object gate = new();
+    private readonly Lock gate = new();
 
     internal string Resolve(string path)
     {

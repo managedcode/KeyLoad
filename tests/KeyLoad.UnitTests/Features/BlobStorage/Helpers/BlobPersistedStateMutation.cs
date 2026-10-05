@@ -56,8 +56,19 @@ internal static class BlobPersistedStateMutation
     internal static BlobQuota Apply(BlobQuota quota, BlobPersistedStateCase testCase)
         => testCase switch
         {
-            BlobPersistedStateCase.MissingQuotaObject => quota with { ObjectKeys = 0 },
-            BlobPersistedStateCase.MissingQuotaVersion => quota with { Versions = 0 },
+            BlobPersistedStateCase.MissingQuotaObject => quota with
+            {
+                ObjectKeys = 0,
+                Versions = 0,
+                ReservedBytes = 0,
+                Uploads = 0
+            },
+            BlobPersistedStateCase.MissingQuotaVersion => quota with
+            {
+                Versions = 0,
+                ReservedBytes = 0,
+                Uploads = 0
+            },
             BlobPersistedStateCase.MissingQuotaReservation => quota with { ReservedBytes = 0 },
             BlobPersistedStateCase.MissingQuotaUpload => quota with { Uploads = 0 },
             _ => throw new ArgumentOutOfRangeException(nameof(testCase), testCase, null)

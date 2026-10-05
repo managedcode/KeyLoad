@@ -1,5 +1,4 @@
 using Aspire.Hosting;
-using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
@@ -16,10 +15,9 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     private bool nodeLocksReleased;
     private bool cleanupFailed;
 
-    private NodeEpochRf3Profile? profile;
-
-    internal NodeEpochRf3Profile Profile => profile
-        ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+    internal NodeEpochRf3Profile Profile { get => field
+        ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); private set;
+    }
     internal DistributedApplication Application => application
         ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
 
@@ -29,7 +27,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => wave.StartCoreAsync(cancellationToken), failures)
             .ConfigureAwait(false);
-        if (failures.Count == 0) { return wave; }
+        if (failures.Count == 0)
+        { return wave; }
         await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
@@ -38,7 +37,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     private async Task StartCoreAsync(CancellationToken cancellationToken)
     {
         var root = CreateOwnedRoot();
-        profile = (await NodeEpochRf3Profile.CreatePriorAsync(root, cancellationToken).ConfigureAwait(false)).Profile;
+        Profile = (await NodeEpochRf3Profile.CreatePriorAsync(root, cancellationToken).ConfigureAwait(false)).Profile;
         var reference = await ClusterFixtureImageIdentity.ReadVerifiedReferenceAsync(cancellationToken).ConfigureAwait(false);
         var args = new[] { TwoRf3MembershipProtocol.DataRootPrefix + root,
             TwoRf3MembershipProtocol.EphemeralArgument, TwoRf3MembershipProtocol.ProfileArgument };
@@ -70,7 +69,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         {
             var root = dataRoot!;
             ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
-            if (failures.Count == 0) { dataRoot = null; dataRootOwned = false; }
+            if (failures.Count == 0)
+            { dataRoot = null; dataRootOwned = false; }
         }
         cleanupFailed |= failures.Count > 0;
         ServerFailureObserver.ThrowIfAny(failures);
@@ -79,14 +79,16 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     private async Task DisposeApplicationAsync(List<Exception> failures)
     {
         var owned = application;
-        if (owned is null) { return; }
+        if (owned is null)
+        { return; }
         var before = failures.Count;
         using var deadline = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline);
         await ServerFailureObserver.ObserveAsync(() => owned.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         if (failures.Count == before)
         { application = null; applicationDisposed = true; }
-        else { cleanupFailed = true; }
+        else
+        { cleanupFailed = true; }
     }
 
     private bool CanCheckLocks => startAttempted && applicationDisposed && !nodeLocksReleased

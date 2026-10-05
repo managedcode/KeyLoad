@@ -346,3 +346,32 @@ Root registers one immutable `PhysicalShardRecord` in `OrleansSiloConfiguration.
 REQ/AC-PQUERY-001/004/005 map to `PartitionQueryPublicContractTests`, `PartitionQueryPublicBudgetTests` and `PartitionQueryPublicMergeTests` under `tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/`; REQ/AC-PQUERY-002/003 map to real ZoneTree `AtomicPartitionPlacementQueryViewTests` under `tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/` and `PartitionQueryPublicAuthorizationTests`; AC-PQUERY-006 maps to `PartitionQueryPublicRf3Tests` under `tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/`. Root joins the append-only native read kind, persisted authority path, signed SDK/HTTP/MCP route and complete independent MCP inventory/schema/native-codec corpus. All of these tests use the Aspire-owned caller. A focused pass is development evidence; original full Linux unit/scalar/recovery/RF3/fault/endurance evidence remains required.
 
 The same-view Core helper is static because it uses only the already authorized borrowed view, complete partition and actual leaf grant. This implementation modifier adds no API, authority, storage view or state.
+
+### Complete-flow contract regressions, 2026-10-05
+
+TASK-PQUERY-FUNCTIONAL-CONTRACT-001 strengthens the existing seven
+`PartitionQueryMcpContractTests` under REQ/AC-PQUERY-001/005 and
+REQ-CQ-009/AC-CQ-021. Each positive test configures an actual persisted collection,
+commits a literal document to genuine ZoneTree, decodes the real native/public
+request, executes `QueryEngine.QueryPartitions`, and checks the full returned
+reference, projected content, persisted revision, leaf witness and unchanged
+committed state. Alias/field-ID, schema/effect-hint and writer equality checks
+remain additional assertions inside those operations. Page serialization consumes
+the actual returned page, never a constructed successful reply.
+
+The canonical MCP request without full-scan permission executes and rejects with
+`UnsupportedCapability`, preserving the stored document and position. Decode a
+request with explicit permission through the same catalog and execute a healthy
+follow-up on that same store. Invalid envelope/AST versions retain their actual
+pre-storage rejection, exact errors, zero storage reads and unchanged position.
+Keep the existing test names and normal/scalar contributor identity. These local
+native-codec flows do not replace the official MCP/SDK RF3 AC-PQUERY-006 cases.
+
+Ownership: existing ClientApi/Cases/PartitionQueryMcpContractTests.cs and
+ClientApi/Helpers/PartitionQueryMcpTestData.cs in the QueryExecution test slice;
+production contracts, aliases, field IDs and execution paths are unchanged.
+ADR: the existing ADR-100 public-query contract is sufficient; no new boundary,
+data format or transport is introduced. First complete source review and the
+strict Release build, then run the normal/scalar functional profile through
+Aspire with fresh source/DLL/PDB/contributor guards and retain its original native
+reports. Actual collection and complete mandatory suites remain acceptance gates.

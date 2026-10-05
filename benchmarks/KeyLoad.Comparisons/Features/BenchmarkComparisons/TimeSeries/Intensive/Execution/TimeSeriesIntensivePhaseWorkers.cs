@@ -6,7 +6,7 @@ internal sealed class TimeSeriesIntensivePhaseWorkers(CancellationToken cellCanc
     private readonly TaskCompletionSource ready = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource start = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly Task[] tasks = new Task[TimeSeriesIntensiveProfile.Concurrency];
-    private readonly object closeGate = new();
+    private readonly System.Threading.Lock closeGate = new();
     private int count;
     private int workersStarted;
     private Task? joined;

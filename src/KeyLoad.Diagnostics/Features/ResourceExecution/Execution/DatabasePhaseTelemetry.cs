@@ -4,7 +4,7 @@ namespace KeyLoad.Diagnostics.Features.ResourceExecution;
 public static class DatabasePhaseTelemetry
 {
     private const string ConflictingMode = "Database phase profiling mode was already initialized differently.";
-    private static readonly object InitializationGate = new();
+    private static readonly Lock InitializationGate = new();
     private static DatabasePhaseBank bank = new(false);
     private static bool initialized;
 

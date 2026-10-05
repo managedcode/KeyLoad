@@ -5,7 +5,7 @@ internal sealed class ZoneTreePointCacheState : IDisposable
 {
     internal const int MaximumVictimAttempts = 16;
     internal const long EntryMetadataBytes = 320;
-    internal readonly object Gate = new();
+    internal readonly Lock Gate = new();
     internal readonly ZoneTreePointCacheOptions Options;
     internal Dictionary<byte[], ZoneTreePointCacheEntry>? Entries;
     internal LinkedList<ZoneTreePointCacheEntry>? LeastRecentlyUsed;

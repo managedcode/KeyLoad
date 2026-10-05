@@ -3,13 +3,17 @@ import { GH, isolatedEvidenceJobName, requireGitHub, timestamp } from './isolate
 import { uniqueNamed, validateArtifact, validateSuccessfulJob, validateWorkerJob } from './isolated-github-validation.mjs';
 import { contextForProfile } from './isolated-github-context.mjs';
 import { createScaledPlans } from './scaled-isolated-plan.mjs';
+import { createVectorPlans } from './vector-isolated-plan.mjs';
 
-export function selectCompletedEvidence(capture, context, plan, scaledPlans = []) {
+export function selectCompletedEvidence(capture, context, plan, scaledPlans = [], vectorPlans = []) {
   const { jobs, artifacts, run } = capture;
-  const hasScaleEvidence = jobs.some(job => / \/ scaled-(?:100k|1m|5m)-c16$/u.test(job.name)) ||
-    artifacts.some(item => /-scaled-(?:100k|1m|5m)-c16$/u.test(item.name));
+  const hasScaleEvidence = jobs.some(job => / \/ scaled-(?:100k|1m)-c16$/u.test(job.name)) ||
+    artifacts.some(item => /-scaled-(?:100k|1m)-c16$/u.test(item.name));
   const verifiedScales = scaledPlans.length > 0 ? scaledPlans : hasScaleEvidence ? createScaledPlans() : [];
-  const profilePlans = [plan, ...verifiedScales];
+  const hasVectorEvidence = jobs.some(job => / \/ vector-(?:100k|1m)-(?:exact|hnsw|ivfflat|native)-(?:plain|filtered|mixed)-c16$/u.test(job.name)) ||
+    artifacts.some(item => /-vector-(?:100k|1m)-(?:exact|hnsw|ivfflat|native)-(?:plain|filtered|mixed)-c16$/u.test(item.name));
+  const verifiedVectors = vectorPlans.length > 0 ? vectorPlans : hasVectorEvidence ? createVectorPlans() : [];
+  const profilePlans = [plan, ...verifiedScales, ...verifiedVectors];
   const cells = profilePlans.flatMap(item => item.cells);
   const groupedNames = new Set(cells.map(cell => isolatedEvidenceJobName(cell)));
   const grouped = jobs.some(job => groupedNames.has(job.name));
@@ -35,7 +39,7 @@ export function selectCompletedEvidence(capture, context, plan, scaledPlans = []
   const job = validateSuccessfulJob(uniqueNamed(jobs, GH.imageJob), context.cohort, GH.imageJob, GH.imageSteps);
   requireGitHub(timestamp(job.started_at) >= timestamp(run.run_started_at));
   const artifact = validateArtifact(uniqueNamed(artifacts, GH.imageArtifact), run, job, GH.imageArtifact, GH.imageZipBytes);
-  const returnedProfiles = new Set([plan.profile, ...scaledPlans.map(item => item.profile)]);
+  const returnedProfiles = new Set([plan.profile, ...verifiedScales.map(item => item.profile), ...verifiedVectors.map(item => item.profile)]);
   return { cells: selectedCells.filter(item => returnedProfiles.has(item.cell.profile)), image: { job, artifact } };
 }
 

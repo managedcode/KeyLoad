@@ -4,7 +4,9 @@
     "REQ-CQ-006",
     "AC-CQ-009",
     "REQ-BC-027",
-    "AC-BC-027"
+    "AC-BC-027",
+    "REQ-CQ-010",
+    "AC-CQ-025"
   ],
   "module": "KeyLoad.Analyzers",
   "collectorVersion": "18.11.2",
@@ -129,6 +131,14 @@
     {
       "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/UntypedCatchAnalyzer.cs",
       "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Contracts/ThreadingMetadataNames.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/TypedSynchronizationAnalyzer.cs",
+      "classification": "executable"
     }
   ],
   "configuration": [
@@ -237,6 +247,12 @@
         "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ControlFlowNestingWalker.cs",
         "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ExecutableUnitSyntax.cs",
         "src/KeyLoad.Analyzers/Features/CodeQuality/Contracts/NumericQualityRuleDescriptors.cs"
+      ]
+    },
+    {
+      "diagnostic": "KLD0034",
+      "sources": [
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/TypedSynchronizationAnalyzer.cs"
       ]
     }
   ],

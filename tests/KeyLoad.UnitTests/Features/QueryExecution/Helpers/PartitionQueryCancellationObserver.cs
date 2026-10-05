@@ -16,7 +16,7 @@ internal sealed class PartitionQueryCancellationObserver
     private readonly CancellationTokenSource cancellation;
     private readonly ManualResetEventSlim armed;
     private readonly ManualResetEventSlim querySettled;
-    private readonly object failureGate = new();
+    private readonly System.Threading.Lock failureGate = new();
     private readonly List<Exception> failures = [];
     private readonly Thread thread;
     private int cancellationRequested;

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+  <IncludeTestAssembly>False</IncludeTestAssembly>
+  <ExcludeAssembliesWithoutSources>None</ExcludeAssembliesWithoutSources>
+  <DoesNotReturnAttribute>None</DoesNotReturnAttribute>
+  <CodeCoverage>
+    <ModulePaths>
+      <Include>
+        <ModulePath>{{QUERY_MODULE_PATH_REGEX}}</ModulePath>
+      </Include>
+    </ModulePaths>
+    <SkipAutoProperties>False</SkipAutoProperties>
+    <EnableDynamicManagedInstrumentation>False</EnableDynamicManagedInstrumentation>
+    <EnableStaticManagedInstrumentation>True</EnableStaticManagedInstrumentation>
+    <EnableDynamicNativeInstrumentation>False</EnableDynamicNativeInstrumentation>
+    <EnableStaticNativeInstrumentation>False</EnableStaticNativeInstrumentation>
+  </CodeCoverage>
+</Configuration>

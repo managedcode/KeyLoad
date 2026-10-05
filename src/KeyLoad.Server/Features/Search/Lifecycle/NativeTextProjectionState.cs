@@ -4,7 +4,7 @@ namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeTextProjectionState
 {
-    private readonly object sync = new();
+    private readonly Lock sync = new();
     private readonly NativeTextProjectionWork work = new();
     private readonly NativeTextProjectionSlotSet slots = new();
     private readonly NativeTextProjectionInvalidation invalidation;

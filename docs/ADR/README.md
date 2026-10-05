@@ -14,6 +14,11 @@ exact versions і pure SDK upcasting. Implementation/runtime qualification pendi
 
 ## Decision inventory
 
+[ADR-110 native Orleans execution and scheduling primitives](ADR-110-native-orleans-execution-primitives.md)
+records the per-method audit, bounded worker/advisory/control/job candidates and
+required real-operation tests. Selection is Accepted; runtime/provider adoption
+and qualification remain pending.
+
 [ADR-107 Business Source License 1.1](ADR-107-business-source-license.md) records
 the owner's licensing choice, Apache 2.0 Change License and distribution metadata contract.
 
@@ -183,3 +188,7 @@ repairs. Both retain source/runtime and exact-source Linux qualification gates.
 owned Aspire resource failures, preserving original outcomes, dependency
 completion, planned fault injection and independent comparison jobs. Native
 notification regressions and delivered-source qualification remain pending.
+
+[ADR-108](ADR-108-typed-synchronization.md) accepts typed .NET Lock gates for
+necessary shared-service synchronization, native Orleans scheduling for activation
+state and source-owned KLD0034 enforcement. Full verification remains pending.

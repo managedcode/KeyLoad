@@ -22,7 +22,8 @@ internal static class TwoRf3MembershipSignedDiscovery
         security.Sign(request);
         var nonce = ReadNonce(request);
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
-        if (response.StatusCode != HttpStatusCode.OK) { throw new InvalidOperationException(Invalid); }
+        if (response.StatusCode != HttpStatusCode.OK)
+        { throw new InvalidOperationException(Invalid); }
         var payload = await ReadPayloadAsync(response, token).ConfigureAwait(false);
         VerifyMac(response, node, clusterId, incarnation, nonce, secret, payload);
         return ReadNative(clusterId, incarnation, node, payload);
@@ -33,7 +34,8 @@ internal static class TwoRf3MembershipSignedDiscovery
         if (!request.Headers.TryGetValues(ReplicaTransportProtocol.HttpNonceHeader, out var values))
         { throw new InvalidOperationException(Invalid); }
         using var iterator = values.GetEnumerator();
-        if (!iterator.MoveNext()) { throw new InvalidOperationException(Invalid); }
+        if (!iterator.MoveNext())
+        { throw new InvalidOperationException(Invalid); }
         var value = iterator.Current;
         if (iterator.MoveNext() || !Guid.TryParseExact(value, ReplicaTransportProtocol.NonceFormat, out var nonce)
             || nonce == Guid.Empty)
@@ -53,7 +55,8 @@ internal static class TwoRf3MembershipSignedDiscovery
         {
             token.ThrowIfCancellationRequested();
             var read = await stream.ReadAsync(payload.AsMemory(count), token).ConfigureAwait(false);
-            if (read == 0) { break; }
+            if (read == 0)
+            { break; }
             count += read;
         }
         if (count > maximum || response.Content.Headers.ContentLength is { } expected && expected != count)
@@ -67,11 +70,14 @@ internal static class TwoRf3MembershipSignedDiscovery
         if (!response.Headers.TryGetValues(ReplicaTransportProtocol.DiscoverySignatureHeader, out var values))
         { throw new InvalidOperationException(Invalid); }
         using var iterator = values.GetEnumerator();
-        if (!iterator.MoveNext()) { throw new InvalidOperationException(Invalid); }
+        if (!iterator.MoveNext())
+        { throw new InvalidOperationException(Invalid); }
         var text = iterator.Current;
-        if (iterator.MoveNext() || text.Length != SignatureLength) { throw new InvalidOperationException(Invalid); }
+        if (iterator.MoveNext() || text.Length != SignatureLength)
+        { throw new InvalidOperationException(Invalid); }
         byte[] supplied;
-        try { supplied = Convert.FromHexString(text); }
+        try
+        { supplied = Convert.FromHexString(text); }
         catch (FormatException) { throw new InvalidOperationException(Invalid); }
         using var mac = new ReplicaMessageMac(secret, clusterId);
         var expected = mac.Discovery(incarnation, Voter(node), nonce, payload);

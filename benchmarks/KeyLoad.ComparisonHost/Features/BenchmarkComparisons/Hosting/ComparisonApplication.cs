@@ -73,7 +73,7 @@ internal static class ComparisonApplication
 
     private sealed class ComparisonCancellationLifetime : IDisposable
     {
-        private readonly object gate = new();
+        private readonly System.Threading.Lock gate = new();
         private readonly CancellationTokenSource source = new(TimeSpan.FromHours(ComparisonHostConstants.LifetimeHours));
         private readonly ConsoleCancelEventHandler handler;
         private readonly CancellationToken token;

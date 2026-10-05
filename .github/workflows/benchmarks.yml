@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Plan all benchmark scenarios
         id: plan
-        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json" --github-output="$GITHUB_OUTPUT"
+        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --vector-output="$RUNNER_TEMP/vector-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json" --github-output="$GITHUB_OUTPUT"
       - name: Save benchmark plan
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
@@ -54,6 +54,7 @@ jobs:
           path: |
             ${{ runner.temp }}/isolated-plan.json
             ${{ runner.temp }}/scaled-plan.json
+            ${{ runner.temp }}/vector-plan.json
             ${{ runner.temp }}/composite-plan.json
           if-no-files-found: error
           retention-days: 90
@@ -209,6 +210,7 @@ jobs:
       Benchmarks__NodeCount: ${{ matrix.nodeCount }}
       Benchmarks__Scenario: ${{ matrix.scenario }}
       Benchmarks__EvidenceProfile: ${{ matrix.profile }}
+      Benchmarks__VectorProfile: ${{ matrix.vectorProfile }}
     steps: &database-steps
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -341,9 +343,31 @@ jobs:
       matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).kurrentdb }}
     env: *database-environment
     steps: *database-steps
+  comparison-surrealdb:
+    name: SurrealDB / ${{ matrix.label }}
+    needs: [comparison-plan, comparison-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions: {contents: read, actions: read}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).surrealdb }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-helixdb:
+    name: HelixDB / ${{ matrix.label }}
+    needs: [comparison-plan, comparison-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions: {contents: read, actions: read}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).helixdb }}
+    env: *database-environment
+    steps: *database-steps
   comparison-aggregate:
     name: Combine benchmark results
-    needs: [comparison-build, comparison-plan, comparison-images, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb]
+    needs: [comparison-build, comparison-plan, comparison-images, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb]
     if: ${{ always() && !cancelled() && needs.comparison-plan.result == 'success' && needs.comparison-images.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -354,12 +378,12 @@ jobs:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Verify benchmark plan
-        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json"
+        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --vector-output="$RUNNER_TEMP/vector-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json"
       - name: Download benchmark results
-        run: node scripts/Features/BenchmarkComparisons/isolated-github-collect.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --scale-plan="$RUNNER_TEMP/scaled-plan.json" --input="$RUNNER_TEMP/isolated-capture"
+        run: node scripts/Features/BenchmarkComparisons/isolated-github-collect.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --scale-plan="$RUNNER_TEMP/scaled-plan.json" --vector-plan="$RUNNER_TEMP/vector-plan.json" --input="$RUNNER_TEMP/isolated-capture"
       - name: Check control and complete scale accounting
         id: composite-aggregate
-        run: node scripts/Features/BenchmarkComparisons/scaled-cohort-aggregate-cli.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --scale-plan="$RUNNER_TEMP/scaled-plan.json" --composite-plan="$RUNNER_TEMP/composite-plan.json" --input="$RUNNER_TEMP/isolated-capture" --proof-root="$RUNNER_TEMP/isolated-capture/github" --output="$RUNNER_TEMP/isolated-aggregate" --scale-output="$RUNNER_TEMP/scale-cohort"
+        run: node scripts/Features/BenchmarkComparisons/scaled-cohort-aggregate-cli.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --scale-plan="$RUNNER_TEMP/scaled-plan.json" --vector-plan="$RUNNER_TEMP/vector-plan.json" --composite-plan="$RUNNER_TEMP/composite-plan.json" --input="$RUNNER_TEMP/isolated-capture" --proof-root="$RUNNER_TEMP/isolated-capture/github" --output="$RUNNER_TEMP/isolated-aggregate" --scale-output="$RUNNER_TEMP/scale-cohort"
       - name: Save combined benchmark results
         if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

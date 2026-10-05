@@ -6,7 +6,7 @@ namespace KeyLoad.Comparisons;
 internal sealed class ClientResourceSampler : IAsyncDisposable
 {
     private const int IntervalMs = 50;
-    private readonly object gate = new();
+    private readonly System.Threading.Lock gate = new();
     private readonly Process process = Process.GetCurrentProcess();
     private readonly CancellationTokenSource lifetime = new();
     private readonly TimeSpan cpu;

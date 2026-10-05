@@ -8,7 +8,7 @@ internal sealed class ZoneTreeReadCutLifecycle
     private const string ClosedMessage = "The native read-cut runtime is closing.";
     private const string SlotBusyMessage = "The runtime already owns a native read-cut lease.";
     private const string TreeReplacementMessage = "The native tree cannot be replaced while a read-cut lease is active.";
-    private readonly object sync = new();
+    private readonly Lock sync = new();
     private ZoneTreeReadCutLease? active;
     private bool closed;
 

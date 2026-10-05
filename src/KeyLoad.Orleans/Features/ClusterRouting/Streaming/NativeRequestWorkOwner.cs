@@ -3,7 +3,7 @@ namespace KeyLoad.Orleans;
 /// <summary>Owns bounded active native request producers and verified capability frames for one silo.</summary>
 public sealed class NativeRequestWorkOwner : IAsyncDisposable
 {
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly CancellationTokenSource shutdown = new();
     private readonly CancellationToken shutdownToken;
     private readonly Dictionary<(Guid RequestId, NativeRequestWorkKind Kind), NativeRequestWorkLease> active = [];

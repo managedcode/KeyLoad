@@ -4,7 +4,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed class RequestCqrsProbeLifecycle
 {
-    private readonly object sync = new();
+    private readonly Lock sync = new();
     private readonly Dictionary<Guid, RequestCqrsProbeClaim> claims = [];
     private TaskCompletionSource drained = Completed();
     private int activeCallbacks;

@@ -4,7 +4,6 @@ internal static class ScaledRawStorageSettings
 {
     private const int HundredThousand = 100_000;
     private const int OneMillion = 1_000_000;
-    private const int FiveMillion = 5_000_000;
     private const int SmallPayloadBytes = 32;
     private const int LargePayloadBytes = 1024;
     private const long FourteenGiB = 15_032_385_536L;
@@ -18,7 +17,7 @@ internal static class ScaledRawStorageSettings
 
     internal static void ValidateInput(int recordCount, int payloadBytes)
     {
-        if (recordCount is <= 0 or > FiveMillion)
+        if (recordCount is <= 0 or > OneMillion)
         {
             throw new ArgumentOutOfRangeException(nameof(recordCount), InvalidCountMessage);
         }
@@ -36,7 +35,7 @@ internal static class ScaledRawStorageSettings
         var projectedCeiling = checked(ScaledRawStorageProcessMemory.ReadPeakBytes(process)
             + CapacityBound(recordCount, payloadBytes));
         var available = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
-        var qualificationCount = recordCount is HundredThousand or OneMillion or FiveMillion;
+        var qualificationCount = recordCount is HundredThousand or OneMillion;
         if (qualificationCount && available < FourteenGiB)
         {
             throw new InvalidOperationException(InsufficientMemoryMessage);

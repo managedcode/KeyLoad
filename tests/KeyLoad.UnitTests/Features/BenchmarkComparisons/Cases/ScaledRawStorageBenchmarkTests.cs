@@ -8,7 +8,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
-/// <summary>Checks genuine generated metadata and both real five-million-read methods.</summary>
+/// <summary>Checks genuine generated metadata and both real one-million-read methods.</summary>
 [NotInParallel]
 internal sealed class ScaledRawStorageBenchmarkTests
 {
@@ -23,9 +23,8 @@ internal sealed class ScaledRawStorageBenchmarkTests
     private const int SimpleJobCount = 1;
     private const int HundredThousandRecords = 100_000;
     private const int OneMillionRecords = 1_000_000;
-    private const int FiveMillionRecords = 5_000_000;
     private const int UnsupportedRecordCount = 200_000;
-    private const int ReadsPerInvocation = 5_000_000;
+    private const int ReadsPerInvocation = 1_000_000;
     private const int InvocationCount = 1;
     private const int UnrollFactor = 1;
     private const int LaunchCount = 1;
@@ -60,7 +59,7 @@ internal sealed class ScaledRawStorageBenchmarkTests
     }
 
     [Test]
-    public async Task AcScale004BothMethodsConsumeExactFiveMillionZoneTreeReadIdentities()
+    public async Task AcScale004BothMethodsConsumeExactOneMillionZoneTreeReadIdentities()
     {
         await ScaledRawStorageTestLifetime.RunAsync(
             () => new ScaledStorageReadBenchmarks
@@ -173,7 +172,7 @@ internal sealed class ScaledRawStorageBenchmarkTests
         }
 
         if (int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var count)
-            && count is HundredThousandRecords or OneMillionRecords or FiveMillionRecords)
+            && count is HundredThousandRecords or OneMillionRecords)
         {
             return count;
         }

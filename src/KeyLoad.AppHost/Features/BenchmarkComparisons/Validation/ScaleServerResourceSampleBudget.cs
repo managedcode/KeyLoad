@@ -8,7 +8,11 @@ internal sealed class ScaleServerResourceSampleBudget(int maximum)
     internal void Charge(int bytes)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(bytes);
-        if (bytes > Remaining) throw new InvalidDataException("Server resource sample exceeded its bound.");
+        if (bytes > Remaining)
+        {
+            throw new InvalidDataException("Server resource sample exceeded its bound.");
+        }
+
         _used += bytes;
     }
 }

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "workerSchemaVersion": 4,
+  "workerSchemaVersion": 5,
   "profile": "intensive-1k-c16",
-  "targets": ["KeyLoad", "PostgreSQL + pgvector", "Qdrant", "RabbitMQ", "Redis", "Neo4j", "MongoDB", "OpenSearch", "KurrentDB"],
+  "targets": ["KeyLoad", "PostgreSQL + pgvector", "Qdrant", "RabbitMQ", "Redis", "Neo4j", "MongoDB", "OpenSearch", "KurrentDB", "SurrealDB", "HelixDB"],
   "nodeCounts": [1, 2, 3],
   "crudScenarios": ["PointRead", "DocumentWrite", "DocumentUpdate", "DocumentDelete"],
   "specializedScenarios": ["VectorExact", "QueueCycle", "GraphNeighbors", "GraphTraverse", "StreamAppend", "StreamRead"],
@@ -21,5 +21,9 @@
     "graphDepth": 3,
     "timeoutSeconds": 30
   },
-  "unsupportedTopologies": [{"target":"Neo4j","nodeCounts":[2,3],"reason":"Neo4j Community does not provide native clustering; Enterprise licensing is excluded."}]
+  "unsupportedTopologies": [
+    {"target":"Neo4j","nodeCounts":[2,3],"reason":"Neo4j Community does not provide native clustering; Enterprise licensing is excluded."},
+    {"target":"SurrealDB","nodeCounts":[2,3],"reason":"SurrealDB Community's experimental TiKV clustering is outside the qualified native topology; only the persistent standalone server is measured."},
+    {"target":"HelixDB","nodeCounts":[2,3],"reason":"The self-hosted HelixDB server is standalone; managed cloud high availability is outside this native comparison."}
+  ]
 }

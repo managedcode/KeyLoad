@@ -13,7 +13,9 @@ internal static class WorkflowDatabaseGroups
         ("neo4j", "Neo4j"),
         ("mongodb", "MongoDB"),
         ("opensearch", "OpenSearch"),
-        ("kurrentdb", "KurrentDB")
+        ("kurrentdb", "KurrentDB"),
+        ("surrealdb", "SurrealDB"),
+        ("helixdb", "HelixDB")
     ];
 
     internal static string[] JobIds => Entries.Select(static entry => "comparison-" + entry.Key).ToArray();

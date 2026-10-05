@@ -7,7 +7,7 @@ internal sealed class ScaledRawStorageCorpus
 {
     private const int KeyBytes = 16;
     private const int MinimumRecordCount = 1;
-    private const int MaximumRecordCount = 5_000_000;
+    private const int MaximumRecordCount = 1_000_000;
     private const int SmallValueBytes = 32;
     private const int LargeValueBytes = 1024;
     private const int CancellationCheckStride = 256;

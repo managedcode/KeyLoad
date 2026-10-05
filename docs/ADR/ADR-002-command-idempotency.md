@@ -76,3 +76,29 @@ flowchart LR
     Lookup -->|new command| Effects[Apply effects and outcome atomically]
     Effects --> Commit[Ordered commit]
 ```
+
+## Accepted scoped-key completion, 2026-10-05
+
+REQ/AC-DSTORE-009 and TASK-DSTORE-SCOPED-OUTCOMES-001..004 in
+[DocumentStorage](../Features/DocumentStorage.md) now freeze the independent
+full-partition identity missing from the earlier test-only matrix. The exact
+[ADR-011 outcome-v2 matrix](ADR-011-format-upgrades.md) accepts cold homogeneous
+writes to scoped v2 keys while retaining and validating original native outcome
+bytes. Existing fingerprint/authorization/incarnation/error/atomicity semantics
+remain required. Remove public principal/ID-only result/key access; every active
+lookup carries its original normalized operation. No SDK/HTTP/MCP endpoint
+replacement is needed because none exposes that removed Core API.
+
+Ordered stages and exact file/test ownership are in the feature contract. Root
+joins its contract before Luna implements Core keys/locator inventory and the
+existing commit/resolution path, then updates all actual callers and adds real
+unit/scalar/prior-process/restart/RF3 scenarios. Root reviews, qualifies and
+delivers the full joined stage. Wrong/missing locator, contradictory scope,
+same-scope old/new duplicates and malformed frames fail closed without rewrite.
+Unknown prior scope blocks ambiguous reuse, never hash-derived backfill. New
+Unknown failures have a distinct explicit nonmovable v2 identity and cannot
+install an old-key barrier over a prior Global/Partition success; every new
+write is v2, with bounded point resolution and no shared reservation protocol.
+After the first v2 write recover forward; a legacy-only downgrade requires the
+verified full pre-upgrade backup and explicit accepted data-loss scope. The
+accepted contract does not close any original KL-012 acceptance gate by itself.

@@ -4,7 +4,7 @@ namespace KeyLoad.Orleans.Features.ResourceExecution;
 
 internal sealed class CacheControlAuthenticator(ReadOnlySpan<byte> peerKey, CacheControlDigest trustedScope) : IDisposable
 {
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private readonly CacheControlDigest scope = trustedScope;
     private readonly byte[] key = CacheControlKey.Derive(peerKey, trustedScope);
     private bool disposed;

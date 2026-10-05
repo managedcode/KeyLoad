@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal sealed class RequestIdResponseRecorder(HttpMessageHandler innerHandler) : DelegatingHandler(innerHandler)
 {
     private const int MaximumReceipts = 64;
-    private readonly object gate = new();
+    private readonly System.Threading.Lock gate = new();
     private readonly List<RequestIdReceipt> receipts = [];
     private bool OverflowedValue { get; set; }
 

@@ -16,20 +16,20 @@ export async function collectWorkerEvidence(captureRoot, dataRoot, selected, ima
   const archive = path.join(captureRoot, 'archives', `${cell.id}.zip`);
   await downloadArtifact(artifact, archive, GH.workerZipBytes, context);
   await validateDownloadedArchive(archive, artifact, GH.workerZipBytes);
-  const scaled = plan.profile !== readIsolatedContract().profile;
-  const entries = scaled ? ['worker.json', 'server-resource-evidence.json'] : ['worker.json'];
+  const requiresResource = plan.profile !== readIsolatedContract().profile;
+  const entries = requiresResource ? ['worker.json', 'server-resource-evidence.json'] : ['worker.json'];
   await inspectNativeZip(archive, entries, path.join(captureRoot, 'github', `${cell.id}-zip-inventory.txt`), context);
   const directory = await createDirectory(path.join(dataRoot, 'workers', cell.id));
   const target = path.join(directory, 'worker.json');
   const raw = await extractNativeEntry(archive, 'worker.json', target, GH.workerRawBytes, context);
   const canonical = readIsolatedContract();
   const profileContract = plan.profile === canonical.profile ? canonical : { ...canonical,
-    profile: plan.profile, options: plan.profileSettings };
+    profile: plan.profile, options: plan.profileSettings ?? null };
   const envelope = validateWorkerEnvelope(await readJson(target, GH.workerRawBytes), cell, context.cohort, profileContract);
   requireGitHub(envelope.worker.jobId === job.id);
   requireWorkerJobAgreement(envelope, job);
   requireWorkerImages(envelope, images);
-  if (!scaled) return projectWorkerProof(job, artifact, cell, context.cohort, raw.sha256);
+  if (!requiresResource) return projectWorkerProof(job, artifact, cell, context.cohort, raw.sha256);
   const resourcePath = path.join(directory, 'server-resource-evidence.json');
   const resourceRaw = await extractNativeEntry(archive, 'server-resource-evidence.json', resourcePath,
     GH.serverResourceBytes, context);

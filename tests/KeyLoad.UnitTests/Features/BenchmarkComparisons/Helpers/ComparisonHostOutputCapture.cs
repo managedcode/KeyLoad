@@ -12,7 +12,7 @@ internal sealed class ComparisonHostOutputCapture
     private const string MissingQdrantMarker = "Missing benchmark setting: Benchmarks:QdrantEndpoint";
     private const string InvalidDimensionsMarker = "The benchmark configuration exceeds its budgets.";
 
-    private readonly object _sync = new();
+    private readonly System.Threading.Lock _sync = new();
     private readonly StringBuilder _text = new();
     private ComparisonHostCaptureState _state = ComparisonHostCaptureState.Unavailable;
 
