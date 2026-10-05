@@ -1133,7 +1133,8 @@
       "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedReservationTests.cs",
       "docs/implementation/runtime-qualification-37249197752.json",
       "docs/implementation/ann-prepared-value-development-2026-10-05.json",
-      "docs/implementation/command-outcome-pin-development-2026-10-05.json"
+      "docs/implementation/command-outcome-pin-development-2026-10-05.json",
+      "docs/implementation/ann-construction-development-2026-10-05.json"
     ],
     "sourceStage": "R2A_bounded_historical_seed_9_source_12_tests_34_cases_full_static23_and_unchanged_actual_Aspire_normal34_scalar34_local_pass_persisted_projection_replay_and_delivered_Linux_RF3_pending",
     "runtimeQualified": false,
@@ -1155,6 +1156,16 @@
       "receipt": "docs/implementation/command-outcome-pin-development-2026-10-05.json",
       "durableGenerationAndOnlineProjection": "pending",
       "qualified": false
+    },
+    "constructionValueDevelopment": {
+      "normal": "194_of194_Search_slice",
+      "scalar": "194_of194_Search_slice",
+      "newConstructionCases": "4_of4_each_mode",
+      "seedCancellation": "2_of2_each_mode",
+      "adaptivePlanner": "6_of6_each_mode",
+      "receipt": "docs/implementation/ann-construction-development-2026-10-05.json",
+      "qualified": false,
+      "acceptanceClosed": false
     }
   },
   "KL-032": {
@@ -1884,15 +1895,26 @@
       "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricValidationTests.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricGoldenTests.cs",
       "docs/implementation/performance-source-r11.json",
-      "docs/implementation/keycodec-crud-development-2026-10-04.json"
+      "docs/implementation/keycodec-crud-development-2026-10-04.json",
+      "docs/implementation/ann-construction-development-2026-10-05.json"
     ],
     "simd": {
       "ownerDirection": "confirmed_SIMD_dotNET_intrinsics_first_Rust_after_profiling",
       "stage": "portable_Vector_finite_validation_only_existing_scoring_accumulation_unchanged",
       "baseline": "five_public_metric_and_actual_store_tests_pass_each_OS_exactc486",
-      "candidate": "full_hardware_disabled_unit_suite_added_to_all3_OS_CI_own_SHA_execution_pending",
+      "candidate": "Linux_only_full_hardware_disabled_suite_CB5_failed3; current_local_Search194_passes; full_delivered_source_Linux_pending",
       "measuredGain": "not_qualified",
       "rust": "no_native_bridge_without_profile_evidence"
+    },
+    "constructionValueDevelopment": {
+      "normal": "194_of194_Search_slice",
+      "scalar": "194_of194_Search_slice",
+      "newConstructionCases": "4_of4_each_mode",
+      "seedCancellation": "2_of2_each_mode",
+      "adaptivePlanner": "6_of6_each_mode",
+      "receipt": "docs/implementation/ann-construction-development-2026-10-05.json",
+      "qualified": false,
+      "acceptanceClosed": false
     }
   },
   "KL-078": {

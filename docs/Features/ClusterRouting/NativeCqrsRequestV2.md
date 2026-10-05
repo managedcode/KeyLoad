@@ -656,3 +656,30 @@ ADR-034/058 and the preceding accepted C1 control implementation contract alread
 cover these private controls and public CQRS behavior. No public API, canonical
 format, credential contract or deployment topology changes; rollback removes
 the test entry points/private controls without migrating canonical data.
+
+### Accepted C1 held current-authority cases, 2026-10-05
+
+TASK-CRS-C1-HELD-AUTHORITY implements two real RF3 write cases, SDK and official
+MCP, for AC-CRS-004/005. Reuse the exact accepted fresh-wave, private control,
+public persisted non-admin identity, signed marker, client, receipt and original
+cleanup contracts of TASK-CRS-C1-PUBLIC-INTERRUPTION. Arm Hold at the actual
+AuthorizationReload phase, which precedes GrainRequestAuthority.Reload. Await
+its signed physical voter/request marker. While that original request is held,
+revoke its persisted principal through a separate real administrator command
+and independently observe the revocation ACK and unchanged document. Release
+the exact original request without cancelling it. Its actual public SDK/MCP
+result must be the actual typed Unauthenticated, with no committed document/revision, outcome or
+outbox effect; no trusted caller role may override that result. Await genuine
+hold settlement and ProducerDisposed, join the original caller, and retire the
+arm across all voters. A fresh genuine administrator command with a new ID must
+then commit successfully; the revoked original principal remains rejected.
+
+lifecycle_wave Luna/high owns only new IntegrationTests ClusterRouting
+Cases/Helpers/Models prefixed RequestCqrsAuthorityFault, emitted as private
+exact-base source and patch with complete hashes and self-review. Root owns
+shared StartProbedAsync and all runtime/Git joins. Do not duplicate controls or
+clients, edit production/shared sources, weaken bounds, synthesize replies,
+claim log privacy from filtered diagnostics or report remote-voter death.
+Root runs the two actual Aspire RF3 cases and required exact-source Linux gates;
+source alone cannot close these criteria. Existing ADR-034/058 and C1 control
+contracts cover this test surface without public/format/topology changes.

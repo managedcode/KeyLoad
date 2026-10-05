@@ -105,7 +105,7 @@ internal static class SimilarityMetricMath
     }
 }
 
-internal readonly struct PreparedPackedSimilarity
+internal readonly struct PreparedPackedSimilarity : IPackedAnnSimilarity
 {
     private const string InvalidVector = "Vector dimensions or values are invalid.";
     private const int MaxDimension = 4_096;
@@ -137,4 +137,7 @@ internal readonly struct PreparedPackedSimilarity
         }
         return SimilarityMetricMath.Score(query.Span, vectors.Span(ordinal), metric, queryNorm);
     }
+
+    double IPackedAnnSimilarity.ScorePacked(PackedAnnVectors vectors, int ordinal)
+        => Score(vectors, ordinal);
 }

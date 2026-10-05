@@ -2,25 +2,19 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class PackedAnnLayerSearch
 {
-    internal static double Score(PackedAnnVectors vectors, int node, PreparedSimilarity similarity,
-        int dimension, AnnWorkBudget budget)
+    internal static double Score<TSimilarity>(PackedAnnVectors vectors, int node, in TSimilarity similarity,
+        int dimension, AnnWorkBudget budget) where TSimilarity : IPackedAnnSimilarity
     {
         budget.ChargeDistance(dimension);
         return similarity.ScorePacked(vectors, node);
     }
 
-    internal static double Score(PackedAnnVectors vectors, int node, PreparedPackedSimilarity similarity,
-        int dimension, AnnWorkBudget budget)
-    {
-        budget.ChargeDistance(dimension);
-        return similarity.Score(vectors, node);
-    }
-
-    internal static int Greedy(PackedAnnGraph graph, PackedAnnVectors vectors,
-        PreparedSimilarity similarity, int start, int layer, int dimension, AnnWorkBudget budget)
+    internal static int Greedy<TSimilarity>(PackedAnnGraph graph, PackedAnnVectors vectors,
+        in TSimilarity similarity, int start, int layer, int dimension, AnnWorkBudget budget)
+        where TSimilarity : IPackedAnnSimilarity
     {
         var current = start;
-        var currentScore = Score(vectors, current, similarity, dimension, budget);
+        var currentScore = Score(vectors, current, in similarity, dimension, budget);
         while (true)
         {
             budget.Check();
@@ -31,7 +25,7 @@ internal static class PackedAnnLayerSearch
             {
                 budget.ChargeEdge();
                 var candidate = graph.Neighbor(current, layer, offset);
-                var score = Score(vectors, candidate, similarity, dimension, budget);
+                var score = Score(vectors, candidate, in similarity, dimension, budget);
                 if (Better(score, candidate, nextScore, next, budget))
                 {
                     next = candidate;
@@ -47,15 +41,16 @@ internal static class PackedAnnLayerSearch
         }
     }
 
-    internal static int SearchLayer(PackedAnnGraph graph, PackedAnnVectors vectors,
-        PreparedSimilarity similarity, int entry, int layer, int ef, int dimension,
+    internal static int SearchLayer<TSimilarity>(PackedAnnGraph graph, PackedAnnVectors vectors,
+        in TSimilarity similarity, int entry, int layer, int ef, int dimension,
         PackedAnnLayerBuffers buffers, AnnWorkBudget budget)
+        where TSimilarity : IPackedAnnSimilarity
     {
         buffers.BeginVisitPass(budget);
         var count = 1;
         budget.Charge(2);
         buffers.Nodes[0] = entry;
-        buffers.Scores[0] = Score(vectors, entry, similarity, dimension, budget);
+        buffers.Scores[0] = Score(vectors, entry, in similarity, dimension, budget);
         PackedAnnCandidateHeaps.AddRetained(buffers, 0, budget);
         buffers.MarkVisited(entry);
         while (true)
@@ -66,16 +61,17 @@ internal static class PackedAnnLayerSearch
             {
                 break;
             }
-            count = VisitNeighbors(graph, vectors, similarity, layer, dimension,
+            count = VisitNeighbors(graph, vectors, in similarity, layer, dimension,
                 buffers, budget, best, count, ef);
         }
         SortCandidates(buffers, count, budget);
         return count;
     }
 
-    private static int VisitNeighbors(PackedAnnGraph graph, PackedAnnVectors vectors,
-        PreparedSimilarity similarity, int layer, int dimension, PackedAnnLayerBuffers buffers,
+    private static int VisitNeighbors<TSimilarity>(PackedAnnGraph graph, PackedAnnVectors vectors,
+        in TSimilarity similarity, int layer, int dimension, PackedAnnLayerBuffers buffers,
         AnnWorkBudget budget, int slot, int count, int ef)
+        where TSimilarity : IPackedAnnSimilarity
     {
         var node = buffers.Nodes[slot];
         var neighborCount = graph.NeighborCount(node, layer, budget);
@@ -88,7 +84,7 @@ internal static class PackedAnnLayerSearch
                 continue;
             }
             buffers.MarkVisited(candidate);
-            var score = Score(vectors, candidate, similarity, dimension, budget);
+            var score = Score(vectors, candidate, in similarity, dimension, budget);
             count = AddCandidate(buffers, count, ef, candidate, score, budget);
         }
         return count;

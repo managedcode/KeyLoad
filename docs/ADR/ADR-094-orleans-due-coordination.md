@@ -58,3 +58,15 @@ sequenceDiagram
   Host-->>Coordinator: Native CQRS terminal outcome
   Coordinator-->>Service: Joined settlement or explicit failure
 ```
+
+Accepted TASK-DUE-FRESH-ATTEMPT repair,2026-10-05: a coordinator dispatch chooses
+one fresh command GUID after canonical barrier/creator reload, retaining it
+across its one unknown-result retry. Later sweeps get fresh IDs; the old internal
+v1 hint-to-command hash and obsolete hash-only test are removed. This fixes the
+original durable-denial replay trap without changing command outcome caching,
+canonical occurrence IDs, monotonic schedule state, saga revision CAS, serializer
+aliases/Ids, reader epochs or stored data. Exact scope, regression oracles, agent
+roles, ordered integration, rollout and remaining RF3 gates are in the accepted
+DueCoordination implementation contract. A caller retry of an actual existing
+command ID still replays that original terminal receipt. No automatic migration
+or reconstruction of historical command IDs is performed.

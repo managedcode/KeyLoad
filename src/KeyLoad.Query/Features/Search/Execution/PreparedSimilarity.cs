@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace KeyLoad.Query.Features.Search;
 
-internal sealed class PreparedSimilarity
+internal sealed class PreparedSimilarity : IPackedAnnSimilarity
 {
     private const string InvalidVector = "Vector dimensions or values are invalid.";
     private const int MaxDimension = 4_096;
@@ -51,6 +51,9 @@ internal sealed class PreparedSimilarity
         var candidate = vectors.Memory(ordinal);
         return ScoreCore(candidate);
     }
+
+    double IPackedAnnSimilarity.ScorePacked(PackedAnnVectors vectors, int ordinal)
+        => ScorePacked(vectors, ordinal);
 
     private double ScoreCore(ReadOnlyMemory<float> candidate)
         => SimilarityMetricMath.Score(query.Span, candidate.Span, metric, queryNorm);

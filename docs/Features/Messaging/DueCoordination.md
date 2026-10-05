@@ -146,13 +146,16 @@ write authority and does not call DatabaseEngine.Apply or SubmitNativeAsync.
 
 The coordinator creates one Batch containing EmitRecurringOccurrences(max1) or
 ExpireSaga(expected revision), preserving full identity and current creator.
-Its command identity is SHA256 over the existing canonical KeyCodec encoding of
-`keyload-due-command-v1`, kind as Int64 (schedule0, saga1), full tenant/database/
-transaction-domain/partition/queue, item GUID in N format, revision, generation
-and ordinal. The GUID uses the first16 hash bytes; if empty, use the last16.
-Saga hints pin generation0 and ordinal0. This identity remains independent of
-request GUIDs; a public retry with the same creator, mutation and command ID
-converges with a service attempt under the existing canonical receipt contract.
+Each newly admitted ProcessDueAsync dispatch owns a fresh nonempty command GUID,
+chosen once after the real barrier and persisted creator reload. Keep that GUID
+and payload unchanged across its one uncertainty retry; each native request still
+uses a fresh request GUID. Later scans and post-restart dispatches are new attempts
+and use new command GUIDs, including after a definite denied or not-yet-due result.
+The canonical schedule generation, logged due time, monotonically advanced ordinal
+and occurrence message identity, and saga Waiting/revision CAS remain the durable
+effect authority. An identical external retry using the actual service-attempt
+command GUID, creator and body keeps the existing canonical receipt semantics.
+No public deterministic command-ID derivation from a hint is promised.
 For each attempt it creates a fresh IRequestGrain GUID, sets the existing bounded
 native request state and subject-only claims, signs via GrainRequestCodec, and
 drains the existing native CQRS stream. One5second dispatch deadline includes
@@ -263,3 +266,32 @@ flowchart LR
   Request --> Apply[Current authorization and logged-time RF3 apply]
   Apply --> Canonical[Atomic watermark or Waiting CAS plus enqueue]
 ```
+
+### Accepted definite-outcome retry repair, 2026-10-05
+
+TASK-DUE-FRESH-ATTEMPT maps REQ/AC-DUE-002..004 to the concrete original CB5
+recurring revocation/restoration failure. The former deterministic v1 hint hash
+reused a durable PermissionDenied forever after authority restoration. It also
+retained a successful no-op if leader-logged time preceded the hinted due instant.
+Replace only that active internal attempt selection with one fresh Guid.NewGuid
+per newly admitted coordinator dispatch. Remove its obsolete deterministic
+helper and hash-only unit case; do not retain a runtime compatibility dispatcher.
+The existing original command outcomes and frozen canonical entity/occurrence
+digests are unchanged. No stored record, alias, Id, public mutation, codec or
+reader-format version changes. Old command receipts remain addressable by their
+original IDs through unchanged replay; no live store is rewritten.
+
+cluster_wave Luna/high owns only the coordinator's one command-ID selection,
+removal of DueWorkCommandIdentity and its obsolete test, and new Messaging
+Cases/Helpers demonstrating on actual ZoneTree that a denied original command
+remains durably denied after current persisted grant restoration while a fresh
+command emits one exact canonical occurrence. Include a repeated original/fresh
+retry and original schedule/queue/outbox state oracle; do not weaken outcome
+caching or call direct Apply from Orleans. Root owns the docs/shared joins and
+actual Aspire gates. The unchanged full RF3 recurring autonomous case must pass
+without manual Emit, service disabling, fake time, threshold or wait increases.
+Real lost-ACK/native service retry, no-quorum/restart and complete Linux evidence
+remain mandatory separately; source or Core regression alone does not close S2.
+Rollout is homogeneous current capable nodes, retaining all original outcomes,
+watermarks and native recovery journals. Rollback of this repair reintroduces the
+denied-result retry defect and cannot be described as restoring correctness.
