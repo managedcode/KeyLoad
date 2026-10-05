@@ -1,3 +1,4 @@
+#pragma warning disable ORLEANSEXP005
 using System.Runtime.CompilerServices;
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
@@ -68,3 +69,4 @@ internal sealed class RuntimeJournalStorageProvider : IJournalStorageProvider, I
             && (minimum is null || string.CompareOrdinal(name, minimum) >= 0)
             && (maximum is null || string.CompareOrdinal(name, maximum) <= 0);
 }
+#pragma warning restore ORLEANSEXP005

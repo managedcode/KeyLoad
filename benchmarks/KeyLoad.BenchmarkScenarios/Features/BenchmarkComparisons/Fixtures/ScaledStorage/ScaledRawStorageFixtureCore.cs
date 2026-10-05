@@ -1,10 +1,13 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 internal sealed class ScaledRawStorageFixtureCore
 {
     private const string InitializedMessage = "The scaled fixture core initialization is one-shot.";
+    private readonly ScaledStorageExecutionOptions settings;
+    private readonly IOptions<ScaledStorageExecutionOptions> executionOptions;
     private readonly CancellationToken _token;
     private readonly long _deadlineStart;
     private readonly long _processMemoryCeilingBytes;
@@ -30,8 +33,10 @@ internal sealed class ScaledRawStorageFixtureCore
     private bool _disposed;
 
     internal ScaledRawStorageFixtureCore(int recordCount, int payloadBytes,
-        long deadlineStart, long processMemoryCeilingBytes, CancellationToken token)
+        long deadlineStart, long processMemoryCeilingBytes, CancellationToken token, IOptions<ScaledStorageExecutionOptions> executionOptions)
     {
+        settings = executionOptions.Value;
+        this.executionOptions = executionOptions;
         _token = token;
         _deadlineStart = deadlineStart;
         _processMemoryCeilingBytes = processMemoryCeilingBytes;
@@ -63,12 +68,12 @@ internal sealed class ScaledRawStorageFixtureCore
         }
 
         _initializeStarted = true;
-        ScaledRawStoragePreparationGuard.Check(_deadlineStart, _token);
-        var engine = new ScaledRawStorageZoneTreeEngine(_corpus, _arena, _readScratch, _deadlineStart, _token);
+        ScaledRawStoragePreparationGuard.Check(_deadlineStart, _token, settings.PreparationTimeout);
+        var engine = new ScaledRawStorageZoneTreeEngine(_corpus, _arena, _readScratch, _deadlineStart, _token, executionOptions);
         _engine = engine;
         engine.Initialize();
         _seedElapsedTicks = ScaledRawStorageSeedRunner.Run(_corpus, engine, _seedScratch,
-            RecordCount, _deadlineStart, ref _seedAttempts, ref _successfulSeedWrites, _token);
+            RecordCount, _deadlineStart, ref _seedAttempts, ref _successfulSeedWrites, _token, settings.PreparationTimeout);
         VerifyAllCore(enforceBudget: true);
         _initialized = true;
     }
@@ -112,7 +117,7 @@ internal sealed class ScaledRawStorageFixtureCore
         using var process = Process.GetCurrentProcess();
         var peak = ScaledRawStorageProcessMemory.ReadPeakBytes(process);
         var available = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
-        ScaledRawStorageMemoryGuard.ValidateObserved(peak, available, _processMemoryCeilingBytes);
+        ScaledRawStorageMemoryGuard.ValidateObserved(peak, available, _processMemoryCeilingBytes, settings.RequiredHeadroomBytes);
         return ScaledRawStorageSnapshotFactory.Create(this, native, peak, process.WorkingSet64, available);
     }
 
@@ -175,16 +180,16 @@ internal sealed class ScaledRawStorageFixtureCore
     {
         var result = ScaledRawStorageVerification.Run(_corpus, _engine!, _expectedScratch,
             RecordCount, ref _nativeReadCalls, enforceBudget ? _deadlineStart : 0L,
-            enforceBudget, enforceBudget ? _token : CancellationToken.None);
+            enforceBudget, enforceBudget ? _token : CancellationToken.None, settings.PreparationTimeout);
         _ = _engine!.Capture();
         if (enforceBudget)
         {
-            ScaledRawStoragePreparationGuard.Check(_deadlineStart, _token);
+            ScaledRawStoragePreparationGuard.Check(_deadlineStart, _token, settings.PreparationTimeout);
         }
 
         using var process = Process.GetCurrentProcess();
         ScaledRawStorageMemoryGuard.ValidateObserved(ScaledRawStorageProcessMemory.ReadPeakBytes(process),
-            GC.GetGCMemoryInfo().TotalAvailableMemoryBytes, _processMemoryCeilingBytes);
+            GC.GetGCMemoryInfo().TotalAvailableMemoryBytes, _processMemoryCeilingBytes, settings.RequiredHeadroomBytes);
         _verifiedRecords = result.VerifiedRecords;
         _verificationPasses++;
         _fullValueDigest = result.Digest;

@@ -21,7 +21,7 @@ internal static class ServerNodeUpgradeVerifier
         ServerRuntimeOptions options, ServerNodeUpgradeAuthority authority, bool published)
         => ServerNodeUpgradeStores.Run(verifier, options, stores =>
         {
-            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging);
+            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution);
             var configuration = ServerNodeUpgradeConfiguration.Replica(options, verifier);
             ServerNodeUpgradeCurrentState.VerifyPersisted(stores.Replica);
             using var log = new DurableReplicaLog(stores.Replica, configuration, canonicalDatabase: database);

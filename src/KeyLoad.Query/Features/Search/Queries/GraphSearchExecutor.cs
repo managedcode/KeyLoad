@@ -11,7 +11,7 @@ internal static class GraphSearchExecutor
         string principalId, GraphSearchRequest request, ReadExecutionBudget budget)
     {
         budget.Check();
-        GraphSearchValidation.Validate(request, database.Limits, budget);
+        GraphSearchValidation.Validate(request, database.Limits, budget, database.GraphExecution);
         FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
         FilteredSearchEligibility.ValidateRequest(request.Search.AllowedIds, database.Limits, budget);
         var similarity = request.Search.Vector is { } vector

@@ -10,11 +10,9 @@ internal static class GraphSearchValidation
     private const string InvalidRequest = "The graph search request is invalid.";
     private const string InvalidWalk = "The graph walk specification is invalid.";
     private const int VersionOne = 1;
-    private const int MaximumDepth = 16;
-    private const int MaximumVertices = 10_000;
-    private const int MaximumEdges = 50_000;
 
-    internal static void Validate(GraphSearchRequest request, DatabaseLimits limits, ReadExecutionBudget budget)
+    internal static void Validate(GraphSearchRequest request, DatabaseLimits limits, ReadExecutionBudget budget,
+        GraphExecutionOptions execution)
     {
         if (request.Version != VersionOne)
         {
@@ -31,22 +29,22 @@ internal static class GraphSearchValidation
         SearchRequestValidation.Validate(request.Search, limits, request.Retriever is not null);
         DatabaseEngine.ValidatePartition(request.Search.Partition);
         JsonData.Identifier(request.Search.Collection);
-        ValidateScope(request.Scope, request.Search.Partition, limits, budget);
-        ValidateRetriever(request.Retriever, request.Search.Partition, limits, budget);
-        ValidateExpansion(request.Expansion);
+        ValidateScope(request.Scope, request.Search.Partition, limits, budget, execution);
+        ValidateRetriever(request.Retriever, request.Search.Partition, limits, budget, execution);
+        ValidateExpansion(request.Expansion, execution);
     }
 
     private static void ValidateScope(GraphScope? scope, PartitionRef partition, DatabaseLimits limits,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, GraphExecutionOptions execution)
     {
         if (scope is not null)
         {
-            ValidateWalk(scope.Walk, partition, limits, budget);
+            ValidateWalk(scope.Walk, partition, limits, budget, execution);
         }
     }
 
     private static void ValidateRetriever(GraphRetriever? retriever, PartitionRef partition, DatabaseLimits limits,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, GraphExecutionOptions execution)
     {
         if (retriever is null)
         {
@@ -56,17 +54,17 @@ internal static class GraphSearchValidation
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidWalk);
         }
-        ValidateWalk(retriever.Walk, partition, limits, budget);
+        ValidateWalk(retriever.Walk, partition, limits, budget, execution);
     }
 
-    private static void ValidateExpansion(GraphExpansion? expansion)
+    private static void ValidateExpansion(GraphExpansion? expansion, GraphExecutionOptions execution)
     {
         if (expansion is null)
         {
             return;
         }
-        if (expansion.MaxDepth is < 0 or > MaximumDepth
-            || expansion.MaxVertices is < 1 or > MaximumVertices || expansion.MaxEdges is < 1 or > MaximumEdges)
+        if (expansion.MaxDepth < 0 || expansion.MaxDepth > execution.MaximumDepth
+            || expansion.MaxVertices < 1 || expansion.MaxVertices > execution.MaximumVertices || expansion.MaxEdges < 1 || expansion.MaxEdges > execution.MaximumEdges)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidWalk);
         }
@@ -75,10 +73,10 @@ internal static class GraphSearchValidation
     }
 
     private static void ValidateWalk(GraphWalkSpec? walk, PartitionRef partition, DatabaseLimits limits,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, GraphExecutionOptions execution)
     {
-        if (walk is null || walk.Seeds.IsDefaultOrEmpty || walk.MaxDepth is < 0 or > MaximumDepth
-            || walk.MaxVertices is < 1 or > MaximumVertices || walk.MaxEdges is < 1 or > MaximumEdges
+        if (walk is null || walk.Seeds.IsDefaultOrEmpty || walk.MaxDepth < 0 || walk.MaxDepth > execution.MaximumDepth
+            || walk.MaxVertices < 1 || walk.MaxVertices > execution.MaximumVertices || walk.MaxEdges < 1 || walk.MaxEdges > execution.MaximumEdges
             || walk.Seeds.Length > walk.MaxVertices || walk.Seeds.Length > limits.MaxScanRecords)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidWalk);

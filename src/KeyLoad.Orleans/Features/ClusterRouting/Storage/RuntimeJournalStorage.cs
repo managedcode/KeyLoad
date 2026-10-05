@@ -1,3 +1,4 @@
+#pragma warning disable ORLEANSEXP005
 using System.Buffers;
 using System.Collections.Immutable;
 using KeyLoad.Core;
@@ -216,3 +217,4 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
         }
     }
 }
+#pragma warning restore ORLEANSEXP005

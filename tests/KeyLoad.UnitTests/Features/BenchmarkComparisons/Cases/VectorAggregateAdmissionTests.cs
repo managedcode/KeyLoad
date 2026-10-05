@@ -5,6 +5,14 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 /// <summary>AC-VQ-007: native capability and failed-worker admission preserve null numerical data.</summary>
 internal sealed class VectorAggregateAdmissionTests
 {
+    private const string AcceptedKey = "accepted";
+    private const string RejectsInventedReasonKey = "rejectsInventedReason";
+    private const string RejectsInventedMeasurementKey = "rejectsInventedMeasurement";
+    private const string AcceptsFailedKey = "acceptsFailed";
+    private const string RejectsMixedProfileKey = "rejectsMixedProfile";
+    private const string AcceptsHelixUnsupportedKey = "acceptsHelixUnsupported";
+    private const string AcceptsSurrealTopologyKey = "acceptsSurrealTopology";
+    private const string RejectsHelixSyntheticKey = "rejectsHelixSynthetic";
     private const string Probe = """
         import {pathToFileURL} from 'node:url';
         const load=async file=>import(pathToFileURL(file).href);
@@ -46,6 +54,9 @@ internal sealed class VectorAggregateAdmissionTests
             IsolatedAggregateNodeProcess.Module("aggregate-validation.mjs")], TestContext.Current!.Execution.CancellationToken);
         await Assert.That(response.ExitCode).IsEqualTo(0).Because(response.Error);
         using var document = JsonDocument.Parse(response.Output);
-        await Assert.That(document.RootElement.EnumerateObject().All(item => item.Value.GetBoolean())).IsTrue();
+        string[] expectedKeys = [AcceptedKey, RejectsInventedReasonKey, RejectsInventedMeasurementKey, AcceptsFailedKey, RejectsMixedProfileKey, AcceptsHelixUnsupportedKey, AcceptsSurrealTopologyKey, RejectsHelixSyntheticKey];
+        await Assert.That(document.RootElement.EnumerateObject().Select(item => item.Name))
+            .IsEquivalentTo(expectedKeys);
+        await Assert.That(expectedKeys.All(key => document.RootElement.GetProperty(key).GetBoolean())).IsTrue();
     }
 }

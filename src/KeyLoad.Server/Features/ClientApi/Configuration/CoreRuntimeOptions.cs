@@ -10,6 +10,7 @@ internal sealed record CoreRuntimeOptions(
     IOptions<DueWorkExecutionOptions> DueWork,
     IOptions<EventSourceExecutionOptions> EventSource,
     IOptions<MessagingExecutionOptions> Messaging,
+    IOptions<GraphExecutionOptions> GraphExecution,
     IOptions<QueryExecutionOptions> QueryExecution,
     IOptions<CacheMemoryLimits> CacheMemory,
     IOptions<CacheReadPermitOptions> CacheReadPermit,
@@ -21,6 +22,7 @@ internal sealed record CoreRuntimeOptions(
         _ = DueWork.Value;
         _ = EventSource.Value;
         _ = Messaging.Value;
+        _ = GraphExecution.Value;
         _ = QueryExecution.Value;
         _ = CacheMemory.Value;
         _ = CacheReadPermit.Value;
@@ -33,6 +35,7 @@ internal sealed record CoreRuntimeOptions(
         services.AddSingleton(DueWork);
         services.AddSingleton(EventSource);
         services.AddSingleton(Messaging);
+        services.AddSingleton(GraphExecution);
         services.AddSingleton(QueryExecution);
         services.AddSingleton(CacheMemory);
         services.AddSingleton(CacheReadPermit);

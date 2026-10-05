@@ -65,6 +65,13 @@ internal static class IntegrationExecutionOptions
         return Options.Create(value);
     }
 
+    internal static IOptions<GraphExecutionOptions> GraphExecution(GraphExecutionOptions? configured = null)
+    {
+        var value = configured ?? new GraphExecutionOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
     internal static IOptions<QueryExecutionOptions> QueryExecution(QueryExecutionOptions? configured = null)
     {
         var value = configured ?? new QueryExecutionOptions();

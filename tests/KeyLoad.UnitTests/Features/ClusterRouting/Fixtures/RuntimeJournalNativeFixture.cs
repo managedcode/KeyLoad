@@ -1,3 +1,4 @@
+#pragma warning disable ORLEANSEXP005
 using KeyLoad.Core;
 using KeyLoad.Orleans;
 using ManagedCode.Communication.CQRS;
@@ -26,6 +27,7 @@ internal sealed class RuntimeJournalNativeDataSourceAttribute : DataSourceGenera
             SharedType.PerTestSession, metadata, null, static () => new RuntimeJournalNativeFixture());
     }
 }
+#pragma warning restore ORLEANSEXP005
 
 internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDisposable
 {

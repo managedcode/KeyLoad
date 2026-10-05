@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 using ZoneTree;
 using ZoneTree.Comparers;
 using ZoneTree.Options;
@@ -11,11 +12,11 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
     private const string DirectoryPrefix = "keyload-scaled-zonetree-";
     private const string GuidFormat = "N";
     private const int MutableSegmentSlackRecords = 2;
-    private const int MinimumMutableSegmentRecords = 1000;
     private const string LengthMessage = "ZoneTree returned a value with an unexpected length.";
     private const string SeedLengthMessage = "The generated seed length differs from the immutable value arena.";
     private const string DeadlineMessage = "The scaled preparation deadline expired.";
     private const string ResidenceMessage = "ZoneTree moved scaled records outside the bounded mutable segment.";
+    private readonly ScaledStorageExecutionOptions settings;
     private readonly ScaledRawStorageCorpus _corpus;
     private readonly ScaledRawStorageValueArena _arena;
     private readonly byte[] _readScratch;
@@ -25,8 +26,9 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
     private IZoneTree<Memory<byte>, Memory<byte>>? _tree;
 
     internal ScaledRawStorageZoneTreeEngine(ScaledRawStorageCorpus corpus, ScaledRawStorageValueArena arena,
-        byte[] readScratch, long deadlineStart, CancellationToken token)
+        byte[] readScratch, long deadlineStart, CancellationToken token, IOptions<ScaledStorageExecutionOptions> executionOptions)
     {
+        settings = executionOptions.Value;
         _corpus = corpus;
         _arena = arena;
         _readScratch = readScratch;
@@ -39,7 +41,7 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
         var directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         _directory = directory;
         CheckPreparation();
-        var mutableBound = Math.Max(MinimumMutableSegmentRecords,
+        var mutableBound = Math.Max(settings.MinimumMutableSegmentRecords,
             checked(_corpus.RecordCount + MutableSegmentSlackRecords));
         _tree = CreateTree(directory, mutableBound).OpenOrCreate();
     }
@@ -114,7 +116,7 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
     private void CheckPreparation()
     {
         _token.ThrowIfCancellationRequested();
-        if (Stopwatch.GetElapsedTime(_deadlineStart) >= ScaledRawStorageFixture.PreparationLimit)
+        if (Stopwatch.GetElapsedTime(_deadlineStart) >= settings.PreparationTimeout)
         {
             throw new TimeoutException(DeadlineMessage);
         }

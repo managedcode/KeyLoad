@@ -48,7 +48,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(requestWork);
         services.AddSingleton(administration);
         services.AddSingleton<QueryEngine>();
-        services.AddSingleton(_ => new SearchEngine(partition.Database, runtimeOptions.Core.QueryExecution, partition.TextProjection));
+        services.AddSingleton(_ => new SearchEngine(partition.Database, partition.TextProjection));
         RegisterRequestCodec(services, partition, options);
         services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestProgress).Assembly)

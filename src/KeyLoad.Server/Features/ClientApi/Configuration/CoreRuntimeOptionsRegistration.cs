@@ -17,6 +17,8 @@ internal static class CoreRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), EventSourceExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<MessagingExecutionOptions>().Bind(configuration.GetSection(MessagingExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), MessagingExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<GraphExecutionOptions>().Bind(configuration.GetSection(GraphExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), GraphExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<QueryExecutionOptions>().Bind(configuration.GetSection(QueryExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), QueryExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<CacheMemoryLimits>().Bind(configuration.GetSection(CacheMemoryLimits.SectionName))

@@ -6,7 +6,6 @@ internal static class ScaledRawStorageSettings
     private const int OneMillion = 1_000_000;
     private const int SmallPayloadBytes = 32;
     private const int LargePayloadBytes = 1024;
-    private const long FourteenGiB = 15_032_385_536L;
     private const int KeyBytes = 16;
     private const int ReservedMissKeyCount = 1;
     private const int OrderBytes = sizeof(int);
@@ -28,21 +27,21 @@ internal static class ScaledRawStorageSettings
         }
     }
 
-    internal static long ValidateFixtureCapacity(int recordCount, int payloadBytes)
+    internal static long ValidateFixtureCapacity(int recordCount, int payloadBytes, ScaledStorageExecutionOptions settings)
     {
         ValidateInput(recordCount, payloadBytes);
         using var process = System.Diagnostics.Process.GetCurrentProcess();
         var projectedCeiling = checked(ScaledRawStorageProcessMemory.ReadPeakBytes(process)
-            + CapacityBound(recordCount, payloadBytes));
+            + CapacityBound(recordCount, payloadBytes, settings.RequiredHeadroomBytes));
         var available = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
         var qualificationCount = recordCount is HundredThousand or OneMillion;
-        if (qualificationCount && available < FourteenGiB)
+        if (qualificationCount && available < settings.MinimumQualificationCapacityBytes)
         {
             throw new InvalidOperationException(InsufficientMemoryMessage);
         }
 
-        var ceiling = qualificationCount ? ScaledRawStorageMemoryGuard.MaximumProcessBytes : projectedCeiling;
-        if (projectedCeiling > ScaledRawStorageMemoryGuard.MaximumProcessBytes || ceiling > available)
+        var ceiling = qualificationCount ? settings.MaximumProcessBytes : projectedCeiling;
+        if (projectedCeiling > settings.MaximumProcessBytes || ceiling > available)
         {
             throw new InvalidOperationException(InsufficientMemoryMessage);
         }
@@ -50,14 +49,14 @@ internal static class ScaledRawStorageSettings
         return ceiling;
     }
 
-    internal static long CapacityBound(int recordCount, int payloadBytes)
+    internal static long CapacityBound(int recordCount, int payloadBytes, long requiredHeadroomBytes)
     {
         var keysAndOrder = checked(((long)recordCount + ReservedMissKeyCount) * KeyBytes
             + ((long)recordCount * OrderBytes));
         var values = checked((long)recordCount * payloadBytes);
         var scratch = checked((long)payloadBytes * ScratchCopies);
         return checked(keysAndOrder + values + scratch
-            + ScaledRawStorageMemoryGuard.RequiredHeadroomBytes);
+            + requiredHeadroomBytes);
     }
 
 }

@@ -11,10 +11,6 @@ internal static class GraphShortestPathValidation
     private const int MinimumDepth = 0;
     private const int MinimumVertices = 1;
     private const int MinimumEdges = 1;
-    private const int MaximumDepth = 16;
-    private const int MaximumVertices = 10_000;
-    private const int MaximumEdges = 50_000;
-    private const int MaximumLabels = 64;
     private const string AdjacencySpace = "adjacency";
     private const string OutDirection = "out";
     private const string InvalidRequest = "The graph shortest-path request is invalid.";
@@ -23,14 +19,14 @@ internal static class GraphShortestPathValidation
     private const string InvalidAdjacency = "A graph adjacency record is inconsistent with its canonical edge.";
 
     internal static string[]? Validate(GraphShortestPathRequest request, DatabaseLimits limits,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, GraphExecutionOptions execution)
     {
         ValidateShape(request);
         MeasureRequest(request, limits.MaxQueryBytes, budget);
         ValidateIdentifiers(request, budget);
-        if (request.MaxDepth is < MinimumDepth or > MaximumDepth
-            || request.MaxVertices is < MinimumVertices or > MaximumVertices
-            || request.MaxEdges is < MinimumEdges or > MaximumEdges)
+        if (request.MaxDepth < MinimumDepth || request.MaxDepth > execution.MaximumDepth
+            || request.MaxVertices < MinimumVertices || request.MaxVertices > execution.MaximumVertices
+            || request.MaxEdges < MinimumEdges || request.MaxEdges > execution.MaximumEdges)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidBudget);
         }
@@ -38,7 +34,7 @@ internal static class GraphShortestPathValidation
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, ForeignEndpoint);
         }
-        return Labels(request.Labels, budget);
+        return Labels(request.Labels, budget, execution.MaximumLabels);
     }
 
     private static void ValidateShape(GraphShortestPathRequest request)
@@ -119,13 +115,13 @@ internal static class GraphShortestPathValidation
         JsonData.Identifier(entity.Id);
     }
 
-    private static string[]? Labels(ImmutableArray<string>? labels, ReadExecutionBudget budget)
+    private static string[]? Labels(ImmutableArray<string>? labels, ReadExecutionBudget budget, int maximumLabels)
     {
         if (labels is null || labels.Value.IsEmpty)
         {
             return labels is null ? null : [];
         }
-        if (labels.Value.Length > MaximumLabels)
+        if (labels.Value.Length > maximumLabels)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }

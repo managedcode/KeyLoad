@@ -25,7 +25,12 @@ internal static class IsolatedNativeVectorAssertions
         await Assert.That(item.Status).IsEqualTo(ComparisonStatuses.Measured);
         await Assert.That(item.Measurement).IsNull();
         await Assert.That(item.Samples).IsEmpty();
-        var metrics = item.VectorMetrics!;
+        await VerifyCountersAndRecallAsync(item.VectorMetrics!, profile);
+        await VerifyNativeMetricsAsync(item.VectorMetrics!, profile);
+    }
+
+    private static async Task VerifyCountersAndRecallAsync(VectorMetrics metrics, VectorComparisonProfile profile)
+    {
         await Assert.That(metrics.RecordCount).IsEqualTo(profile.RecordCount);
         await Assert.That(metrics.LoadedRecordCount).IsEqualTo(profile.RecordCount);
         await Assert.That(metrics.QueryAttempts).IsEqualTo(profile.MeasuredQueries);
@@ -38,6 +43,10 @@ internal static class IsolatedNativeVectorAssertions
         await Assert.That(metrics.ExactRecall).IsEqualTo(metrics.PerQueryRecall.Average());
         await Assert.That(metrics.MinimumRecall).IsEqualTo(metrics.PerQueryRecall.Min());
         await Assert.That(metrics.ExactRecall).IsGreaterThanOrEqualTo(profile.MinimumRecall);
+    }
+
+    private static async Task VerifyNativeMetricsAsync(VectorMetrics metrics, VectorComparisonProfile profile)
+    {
         await Assert.That(double.IsFinite(metrics.LatencyP95Ms) && metrics.LatencyP95Ms > 0).IsTrue();
         await Assert.That(metrics.LatencyP99Ms).IsGreaterThanOrEqualTo(metrics.LatencyP95Ms);
         await Assert.That(metrics.IndexKind).IsEqualTo(profile.IndexKind.ToString());

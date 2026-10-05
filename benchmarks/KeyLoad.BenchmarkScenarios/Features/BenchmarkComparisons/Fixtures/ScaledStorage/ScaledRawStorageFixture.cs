@@ -1,12 +1,11 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 using System.Runtime.ExceptionServices;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 internal sealed class ScaledRawStorageFixture : IDisposable
 {
-    private const int PreparationLimitMinutes = 20;
-    internal static readonly TimeSpan PreparationLimit = TimeSpan.FromMinutes(PreparationLimitMinutes);
     private readonly CancellationTokenSource _lifetime;
     private ScaledRawStorageFixtureCore? _core;
     private bool _closing;
@@ -14,14 +13,16 @@ internal sealed class ScaledRawStorageFixture : IDisposable
     private const string InactiveMessage = "The scaled native fixture is not initialized.";
     private const string DeadlineMessage = "The scaled fixture preparation deadline expired.";
 
-    internal ScaledRawStorageFixture(int recordCount, int payloadBytes,
+    internal ScaledRawStorageFixture(int recordCount, int payloadBytes, IOptions<ScaledStorageExecutionOptions> executionOptions,
         CancellationToken cancellationToken = default)
     {
+        var settings = executionOptions.Value;
+        settings.Validate();
         ScaledRawStorageSettings.ValidateInput(recordCount, payloadBytes);
         cancellationToken.ThrowIfCancellationRequested();
         var deadlineStart = Stopwatch.GetTimestamp();
-        var processMemoryCeiling = ScaledRawStorageSettings.ValidateFixtureCapacity(recordCount, payloadBytes);
-        var remaining = PreparationLimit - Stopwatch.GetElapsedTime(deadlineStart);
+        var processMemoryCeiling = ScaledRawStorageSettings.ValidateFixtureCapacity(recordCount, payloadBytes, settings);
+        var remaining = settings.PreparationTimeout - Stopwatch.GetElapsedTime(deadlineStart);
         if (remaining <= TimeSpan.Zero)
         {
             throw new TimeoutException(DeadlineMessage);
@@ -52,7 +53,7 @@ internal sealed class ScaledRawStorageFixture : IDisposable
         try
         {
             _core = new ScaledRawStorageFixtureCore(recordCount, payloadBytes,
-                deadlineStart, processMemoryCeiling, _lifetime.Token);
+                deadlineStart, processMemoryCeiling, _lifetime.Token, executionOptions);
             _core.Initialize();
         }
         catch (Exception primary) when (RawStorageFixtureFailures.IsNonFatal(primary))

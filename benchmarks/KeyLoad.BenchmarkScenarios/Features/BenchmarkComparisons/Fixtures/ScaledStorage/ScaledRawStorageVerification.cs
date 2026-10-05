@@ -13,14 +13,14 @@ internal static class ScaledRawStorageVerification
 
     internal static ScaledRawStorageVerificationResult Run(ScaledRawStorageCorpus corpus,
         ScaledRawStorageZoneTreeEngine engine, byte[] expectedScratch, int recordCount, ref long readCalls,
-        long deadlineStart, bool enforceBudget, CancellationToken token)
+        long deadlineStart, bool enforceBudget, CancellationToken token, TimeSpan preparationTimeout)
     {
         var started = Stopwatch.GetTimestamp();
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var verified = 0L;
         for (var index = 0; index < recordCount; index++)
         {
-            CheckBoundary(index, deadlineStart, enforceBudget, token);
+            CheckBoundary(index, deadlineStart, enforceBudget, token, preparationTimeout);
             readCalls++;
             if (!engine.TryRead(index, out var actual))
             {
@@ -37,21 +37,21 @@ internal static class ScaledRawStorageVerification
             verified++;
         }
 
-        CheckBoundary(recordCount, deadlineStart, enforceBudget, token);
+        CheckBoundary(recordCount, deadlineStart, enforceBudget, token, preparationTimeout);
         readCalls++;
         if (engine.TryRead(recordCount, out _))
         {
             throw new InvalidOperationException(PresentMessage);
         }
 
-        CheckCompletion(deadlineStart, enforceBudget, token);
+        CheckCompletion(deadlineStart, enforceBudget, token, preparationTimeout);
         return new ScaledRawStorageVerificationResult(
             verified,
             Convert.ToHexStringLower(digest.GetHashAndReset()),
             Stopwatch.GetTimestamp() - started);
     }
 
-    private static void CheckBoundary(int operation, long deadlineStart, bool enforceBudget, CancellationToken token)
+    private static void CheckBoundary(int operation, long deadlineStart, bool enforceBudget, CancellationToken token, TimeSpan preparationTimeout)
     {
         if (!enforceBudget || operation % CancellationCheckStride != 0)
         {
@@ -59,13 +59,13 @@ internal static class ScaledRawStorageVerification
         }
 
         token.ThrowIfCancellationRequested();
-        if (Stopwatch.GetElapsedTime(deadlineStart) >= ScaledRawStorageFixture.PreparationLimit)
+        if (Stopwatch.GetElapsedTime(deadlineStart) >= preparationTimeout)
         {
             throw new TimeoutException(DeadlineMessage);
         }
     }
 
-    private static void CheckCompletion(long deadlineStart, bool enforceBudget, CancellationToken token)
+    private static void CheckCompletion(long deadlineStart, bool enforceBudget, CancellationToken token, TimeSpan preparationTimeout)
     {
         if (!enforceBudget)
         {
@@ -73,7 +73,7 @@ internal static class ScaledRawStorageVerification
         }
 
         token.ThrowIfCancellationRequested();
-        if (Stopwatch.GetElapsedTime(deadlineStart) >= ScaledRawStorageFixture.PreparationLimit)
+        if (Stopwatch.GetElapsedTime(deadlineStart) >= preparationTimeout)
         {
             throw new TimeoutException(DeadlineMessage);
         }

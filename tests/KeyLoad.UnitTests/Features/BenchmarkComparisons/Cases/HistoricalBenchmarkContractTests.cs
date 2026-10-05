@@ -5,6 +5,15 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 /// <summary>AC-VQ-007: historical contracts require their original source/blob bytes and cannot satisfy current scale claims.</summary>
 internal sealed class HistoricalBenchmarkContractTests
 {
+    private const string CountKey = "count";
+    private const string TargetsKey = "targets";
+    private const string WorkerSchemaKey = "workerSchema";
+    private const string VectorsKey = "vectors";
+    private const string ScalesKey = "scales";
+    private const string RejectsBytesKey = "rejectsBytes";
+    private const string RejectsBlobKey = "rejectsBlob";
+    private const string RejectsSourceKey = "rejectsSource";
+    private const string RejectsPlanKey = "rejectsPlan";
     private const string Probe = """
         import {readFileSync} from 'node:fs';
         import {pathToFileURL} from 'node:url';
@@ -36,14 +45,14 @@ internal sealed class HistoricalBenchmarkContractTests
         await Assert.That(response.ExitCode).IsEqualTo(0).Because(response.Error);
         using var document = JsonDocument.Parse(response.Output);
         var value = document.RootElement;
-        await Assert.That(value.GetProperty("count").GetInt32()).IsEqualTo(270);
-        await Assert.That(value.GetProperty("targets").GetInt32()).IsEqualTo(9);
-        await Assert.That(value.GetProperty("workerSchema").GetInt32()).IsEqualTo(4);
-        await Assert.That(value.GetProperty("vectors").GetInt32()).IsEqualTo(0);
-        await Assert.That(value.GetProperty("scales").GetInt32()).IsEqualTo(0);
-        await Assert.That(value.GetProperty("rejectsBytes").GetBoolean()).IsTrue();
-        await Assert.That(value.GetProperty("rejectsBlob").GetBoolean()).IsTrue();
-        await Assert.That(value.GetProperty("rejectsSource").GetBoolean()).IsTrue();
-        await Assert.That(value.GetProperty("rejectsPlan").GetBoolean()).IsTrue();
+        await Assert.That(value.GetProperty(CountKey).GetInt32()).IsEqualTo(270);
+        await Assert.That(value.GetProperty(TargetsKey).GetInt32()).IsEqualTo(9);
+        await Assert.That(value.GetProperty(WorkerSchemaKey).GetInt32()).IsEqualTo(4);
+        await Assert.That(value.GetProperty(VectorsKey).GetInt32()).IsEqualTo(0);
+        await Assert.That(value.GetProperty(ScalesKey).GetInt32()).IsEqualTo(0);
+        await Assert.That(value.GetProperty(RejectsBytesKey).GetBoolean()).IsTrue();
+        await Assert.That(value.GetProperty(RejectsBlobKey).GetBoolean()).IsTrue();
+        await Assert.That(value.GetProperty(RejectsSourceKey).GetBoolean()).IsTrue();
+        await Assert.That(value.GetProperty(RejectsPlanKey).GetBoolean()).IsTrue();
     }
 }

@@ -9,7 +9,8 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 /// <summary>Holds the validated native snapshots borrowed by an embedded benchmark owner.</summary>
 internal sealed record EmbeddedBenchmarkRuntimeOptions(IOptions<DatabaseLimits> Database,
     IOptions<DueWorkExecutionOptions> DueWork, IOptions<EventSourceExecutionOptions> EventSource,
-    IOptions<MessagingExecutionOptions> Messaging, IOptions<ZoneTreeStorageExecutionOptions> Storage,
+    IOptions<MessagingExecutionOptions> Messaging, IOptions<GraphExecutionOptions> GraphExecution,
+    IOptions<ZoneTreeStorageExecutionOptions> Storage,
     IOptions<ZoneTreePointCacheExecutionOptions> PointCache);
 
 /// <summary>Binds the actual generated runner's environment to native fixture policies.</summary>
@@ -28,6 +29,8 @@ internal static class EmbeddedBenchmarkRuntimeRegistration
                 settings => settings.IsValid(), EventSourceExecutionOptions.ValidationMessage),
             BenchmarkScenarioOptionsRegistration.Read<MessagingExecutionOptions>(configuration, MessagingExecutionOptions.SectionName,
                 settings => settings.IsValid(), MessagingExecutionOptions.ValidationMessage),
+            BenchmarkScenarioOptionsRegistration.Read<GraphExecutionOptions>(configuration, GraphExecutionOptions.SectionName,
+                settings => settings.IsValid(), GraphExecutionOptions.ValidationMessage),
             BenchmarkScenarioOptionsRegistration.Read<ZoneTreeStorageExecutionOptions>(configuration, ZoneTreeStorageExecutionOptions.SectionName,
                 settings => settings.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage),
             BenchmarkScenarioOptionsRegistration.Read<ZoneTreePointCacheExecutionOptions>(configuration, ZoneTreePointCacheExecutionOptions.SectionName,

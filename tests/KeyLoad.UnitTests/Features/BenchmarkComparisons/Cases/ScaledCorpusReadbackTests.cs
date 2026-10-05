@@ -73,6 +73,7 @@ internal sealed class ScaledCorpusReadbackTests
             {
                 for (var number = 0; number < 100; number++)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     var document = corpus.CreateDocument(number);
                     yield return new(document.Id, document.Json);
                     if (number == 2)
@@ -93,6 +94,7 @@ internal sealed class ScaledCorpusReadbackTests
     private static async IAsyncEnumerable<FoundDocument> DuplicatedFirst(IComparisonCorpus corpus,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var first = corpus.CreateDocument(0);
         yield return new(first.Id, first.Json);
         yield return new(first.Id, first.Json);
@@ -102,6 +104,7 @@ internal sealed class ScaledCorpusReadbackTests
     private static async IAsyncEnumerable<FoundDocument> ChangedFirst(IComparisonCorpus corpus,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var first = corpus.CreateDocument(0);
         yield return new(first.Id, "{\"id\":\"wrong\"}");
         await Task.CompletedTask;

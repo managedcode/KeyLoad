@@ -42,7 +42,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         {
             RuntimeJournalStorePreparation.Prepare(stores, runtimeOptions.Core.RuntimeJournal, runtimeOptions.StorageExecution);
             Database = new(stores.Canonical, authorization, runtimeOptions.Core.DatabaseLimits,
-                runtimeOptions.Core.DueWork, runtimeOptions.Core.EventSource, runtimeOptions.Core.Messaging);
+                runtimeOptions.Core.DueWork, runtimeOptions.Core.EventSource, runtimeOptions.Core.Messaging, runtimeOptions.Core.GraphExecution);
             Database.ConfigureRuntimeJournal(runtimeOptions.Core.RuntimeJournal);
             log = openedLog = new(stores.Replica, replicaOptions, canonicalDatabase: Database);
             var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);

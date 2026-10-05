@@ -125,7 +125,7 @@ public class EmbeddedBenchmarks : IDisposable
         {
             store = new(new(directory), options.Storage, options.PointCache);
             database = new(store, new AuthorizationPolicy(), options.Database, options.DueWork, options.EventSource,
-                options.Messaging);
+                options.Messaging, options.GraphExecution);
             database.Bootstrap(new(PrincipalId, PrincipalScope,
                 [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true },

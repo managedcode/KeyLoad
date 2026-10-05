@@ -13,10 +13,12 @@ public sealed partial class DatabaseEngine
     /// <param name="dueWorkOptions">Centrally validated node-local due discovery policy.</param>
     /// <param name="eventSourceOptions">Centrally validated event continuation policy.</param>
     /// <param name="messagingOptions">Centrally validated topic, catch-up and retry work limits.</param>
+    /// <param name="graphOptions">Centrally validated shared graph traversal limits.</param>
     /// <param name="timeProvider">Optional business clock; hosting runtime time is unaffected.</param>
     public DatabaseEngine(IAtomicStore store, IAuthorizationPolicy authorization, IOptions<DatabaseLimits> limits,
         IOptions<DueWorkExecutionOptions> dueWorkOptions, IOptions<EventSourceExecutionOptions> eventSourceOptions,
-        IOptions<MessagingExecutionOptions> messagingOptions, TimeProvider? timeProvider = null)
+        IOptions<MessagingExecutionOptions> messagingOptions, IOptions<GraphExecutionOptions> graphOptions,
+        TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(store);
         ArgumentNullException.ThrowIfNull(authorization);
@@ -26,6 +28,11 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(messagingOptions);
         messagingExecution = messagingOptions.Value;
         messagingExecution.Validate();
+        ArgumentNullException.ThrowIfNull(graphOptions);
+        graphExecution = graphOptions.Value;
+        graphExecution.Validate();
+        OperationLimitsOptions = limits;
+        GraphOptions = graphOptions;
         var operationLimits = limits.Value;
         var dueSettings = dueWorkOptions.Value;
         var eventSettings = eventSourceOptions.Value;
@@ -42,6 +49,10 @@ public sealed partial class DatabaseEngine
     }
 
     private readonly MessagingExecutionOptions messagingExecution;
+    private readonly GraphExecutionOptions graphExecution;
+    internal IOptions<DatabaseLimits> OperationLimitsOptions { get; }
+    internal IOptions<GraphExecutionOptions> GraphOptions { get; }
+    internal GraphExecutionOptions GraphExecution => graphExecution;
     private readonly TimeSpan eventSourceCursorLifetime;
     private TimeProvider Clock { get; }
     internal TimeSpan DueDiscoveryDeadline { get; }

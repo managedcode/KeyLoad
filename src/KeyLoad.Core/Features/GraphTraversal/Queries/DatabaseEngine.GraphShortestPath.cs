@@ -29,7 +29,7 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
-        var labels = GraphShortestPathValidation.Validate(request, Limits, budget);
+        var labels = GraphShortestPathValidation.Validate(request, Limits, budget, graphExecution);
         return Store.Read(view =>
         {
             var budgetedView = budget.CreateView(view);

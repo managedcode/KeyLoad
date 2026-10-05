@@ -41,10 +41,10 @@ internal static class ScaledRawStoragePreparationGuard
 {
     private const string DeadlineMessage = "The scaled fixture preparation deadline expired.";
 
-    internal static void Check(long deadlineStart, CancellationToken token)
+    internal static void Check(long deadlineStart, CancellationToken token, TimeSpan preparationTimeout)
     {
         token.ThrowIfCancellationRequested();
-        if (Stopwatch.GetElapsedTime(deadlineStart) >= ScaledRawStorageFixture.PreparationLimit)
+        if (Stopwatch.GetElapsedTime(deadlineStart) >= preparationTimeout)
         {
             throw new TimeoutException(DeadlineMessage);
         }
@@ -57,14 +57,14 @@ internal static class ScaledRawStorageSeedRunner
 
     internal static long Run(ScaledRawStorageCorpus corpus, ScaledRawStorageZoneTreeEngine engine,
         byte[] scratch, int recordCount, long deadlineStart, ref long attempts,
-        ref long successfulWrites, CancellationToken token)
+        ref long successfulWrites, CancellationToken token, TimeSpan preparationTimeout)
     {
         var started = Stopwatch.GetTimestamp();
         for (var index = 0; index < recordCount; index++)
         {
             if (index % CancellationCheckStride == 0)
             {
-                ScaledRawStoragePreparationGuard.Check(deadlineStart, token);
+                ScaledRawStoragePreparationGuard.Check(deadlineStart, token, preparationTimeout);
             }
 
             corpus.WriteValue(index, scratch);
@@ -73,7 +73,7 @@ internal static class ScaledRawStorageSeedRunner
             successfulWrites++;
         }
 
-        ScaledRawStoragePreparationGuard.Check(deadlineStart, token);
+        ScaledRawStoragePreparationGuard.Check(deadlineStart, token, preparationTimeout);
         return Stopwatch.GetTimestamp() - started;
     }
 }

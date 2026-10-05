@@ -5,6 +5,18 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 /// <summary>AC-VQ-007: closed original-file inventory includes every profile and resource sidecar.</summary>
 internal sealed class CompositeSiteContractTests
 {
+    private const string PlansKey = "plans";
+    private const string CellsKey = "cells";
+    private const string SuiteKey = "suite";
+    private const string ProviderKey = "provider";
+    private const string UniqueSuiteKey = "uniqueSuite";
+    private const string UniqueProviderKey = "uniqueProvider";
+    private const string SidecarsKey = "sidecars";
+    private const string RawKey = "raw";
+    private const string VectorProfilesKey = "vectorProfiles";
+    private const string ScalesKey = "scales";
+    private const string HasFiveMillionKey = "hasFiveMillion";
+    private const string OutsideKey = "outside";
     private const string Probe = """
         import {pathToFileURL} from 'node:url';
         const inventory=await import(pathToFileURL(process.argv[1]).href);
@@ -30,18 +42,18 @@ internal sealed class CompositeSiteContractTests
         await Assert.That(response.ExitCode).IsEqualTo(0).Because(response.Error);
         using var document = JsonDocument.Parse(response.Output);
         var result = document.RootElement;
-        await Assert.That(result.GetProperty("plans").GetInt32()).IsEqualTo(27);
-        await Assert.That(result.GetProperty("cells").GetInt32()).IsEqualTo(1386);
-        await Assert.That(result.GetProperty("suite").GetInt32()).IsEqualTo(2470);
-        await Assert.That(result.GetProperty("provider").GetInt32()).IsEqualTo(60);
-        await Assert.That(result.GetProperty("uniqueSuite").GetInt32()).IsEqualTo(2470);
-        await Assert.That(result.GetProperty("uniqueProvider").GetInt32()).IsEqualTo(60);
-        await Assert.That(result.GetProperty("sidecars").GetInt32()).IsEqualTo(1056);
-        await Assert.That(result.GetProperty("raw").GetInt32()).IsEqualTo(1386);
-        await Assert.That(result.GetProperty("vectorProfiles").GetInt32()).IsEqualTo(24);
-        await Assert.That(result.GetProperty("scales").EnumerateArray().Select(item => item.GetInt32()))
+        await Assert.That(result.GetProperty(PlansKey).GetInt32()).IsEqualTo(27);
+        await Assert.That(result.GetProperty(CellsKey).GetInt32()).IsEqualTo(1386);
+        await Assert.That(result.GetProperty(SuiteKey).GetInt32()).IsEqualTo(2470);
+        await Assert.That(result.GetProperty(ProviderKey).GetInt32()).IsEqualTo(60);
+        await Assert.That(result.GetProperty(UniqueSuiteKey).GetInt32()).IsEqualTo(2470);
+        await Assert.That(result.GetProperty(UniqueProviderKey).GetInt32()).IsEqualTo(60);
+        await Assert.That(result.GetProperty(SidecarsKey).GetInt32()).IsEqualTo(1056);
+        await Assert.That(result.GetProperty(RawKey).GetInt32()).IsEqualTo(1386);
+        await Assert.That(result.GetProperty(VectorProfilesKey).GetInt32()).IsEqualTo(24);
+        await Assert.That(result.GetProperty(ScalesKey).EnumerateArray().Select(item => item.GetInt32()))
             .IsEquivalentTo(new[] { 100_000, 1_000_000 }, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(result.GetProperty("hasFiveMillion").GetBoolean()).IsFalse();
-        await Assert.That(result.GetProperty("outside").GetBoolean()).IsFalse();
+        await Assert.That(result.GetProperty(HasFiveMillionKey).GetBoolean()).IsFalse();
+        await Assert.That(result.GetProperty(OutsideKey).GetBoolean()).IsFalse();
     }
 }
