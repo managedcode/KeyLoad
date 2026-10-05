@@ -1,4 +1,5 @@
 using System.Globalization;
+using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.CrashHost.Features.DocumentStorage;
 using KeyLoad.CrashHost.Features.Search;
 using KeyLoad.Storage.ZoneTree;
@@ -18,7 +19,7 @@ internal static class CrashHostApplication
         {
             return;
         }
-        if (await ExistingStoreInspector.TryRunAsync(args))
+        if (await C1OutcomeInspection.TryRunAsync(args) || await ExistingStoreInspector.TryRunAsync(args))
         {
             return;
         }

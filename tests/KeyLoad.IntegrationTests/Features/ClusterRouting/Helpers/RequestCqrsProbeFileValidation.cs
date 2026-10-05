@@ -81,6 +81,8 @@ internal static class RequestCqrsProbeFileValidation
 
     private static bool TryValidateLength(FileInfo info, bool temporary, out long length)
     {
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
         length = 0;
         try
         {
@@ -115,6 +117,8 @@ internal static class RequestCqrsProbeFileValidation
 
     internal static void ValidateDirectory(string path)
     {
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
         var attributes = File.GetAttributes(path);
         if ((attributes & FileAttributes.Directory) == 0 || (attributes & FileAttributes.ReparsePoint) != 0
             || File.GetUnixFileMode(path) != PrivateDirectoryMode)

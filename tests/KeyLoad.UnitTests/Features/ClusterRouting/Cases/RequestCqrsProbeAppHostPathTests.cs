@@ -18,8 +18,8 @@ internal sealed class RequestCqrsProbeAppHostPathTests
             foreach (var voter in new[] { "node1", "node2", "node3" })
             {
                 await Assert.That(nodes[voter]).IsEqualTo(fixture.Node(voter));
-                await Assert.That(File.GetUnixFileMode(fixture.Node(voter))).IsEqualTo(PrivateDirectory);
-                await Assert.That(File.GetUnixFileMode(fixture.Owner(voter))).IsEqualTo(PrivateFile);
+                await Assert.That(RequestCqrsProbeAppHostNativeFiles.GetMode(fixture.Node(voter))).IsEqualTo(PrivateDirectory);
+                await Assert.That(RequestCqrsProbeAppHostNativeFiles.GetMode(fixture.Owner(voter))).IsEqualTo(PrivateFile);
             }
         });
     }
@@ -36,7 +36,7 @@ internal sealed class RequestCqrsProbeAppHostPathTests
             await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.Parent));
             var extra = Path.Combine(fixture.Root, "extra");
             Directory.CreateDirectory(extra);
-            File.SetUnixFileMode(extra, PrivateDirectory);
+            RequestCqrsProbeAppHostNativeFiles.SetMode(extra, PrivateDirectory);
             await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
             Directory.Delete(extra);
         });
@@ -50,11 +50,11 @@ internal sealed class RequestCqrsProbeAppHostPathTests
             var owner = fixture.Owner("node3");
             File.Delete(owner);
             var outside = Path.Combine(fixture.Parent, "outside-owner.json");
-            File.WriteAllText(outside, "{}");
+            await File.WriteAllTextAsync(outside, "{}", CancellationToken.None);
             File.CreateSymbolicLink(owner, outside);
             await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
             File.Delete(owner);
-            File.CreateDirectory(owner);
+            Directory.CreateDirectory(owner);
             await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
             Directory.Delete(owner);
             RequestCqrsProbeAppHostNativeFiles.CreateFifo(owner);
@@ -69,9 +69,9 @@ internal sealed class RequestCqrsProbeAppHostPathTests
         await RequestCqrsProbeAppHostFileFixture.WithFixtureAsync(async fixture =>
         {
             var node = fixture.Node("node2");
-            File.SetUnixFileMode(node, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            RequestCqrsProbeAppHostNativeFiles.SetMode(node, UnixFileMode.UserRead | UnixFileMode.UserWrite);
             await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
-            File.SetUnixFileMode(node, PrivateDirectory);
+            RequestCqrsProbeAppHostNativeFiles.SetMode(node, PrivateDirectory);
             fixture.WriteOwner("node2", session: "00000000000000000000000000000001");
             await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
             fixture.WriteOwner("node2", ownerVoter: "http://other:8080");
@@ -88,11 +88,12 @@ internal sealed class RequestCqrsProbeAppHostPathTests
             File.Delete(owner);
             await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
             fixture.WriteOwner("node1");
-            File.SetUnixFileMode(owner, UnixFileMode.UserRead);
+            RequestCqrsProbeAppHostNativeFiles.SetMode(owner, UnixFileMode.UserRead);
             await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            RequestCqrsProbeAppHostNativeFiles.SetMode(owner, PrivateFile);
             fixture.WriteOwner("node1");
-            File.WriteAllText(owner, "{} {} ");
-            File.SetUnixFileMode(owner, PrivateFile);
+            await File.WriteAllTextAsync(owner, "{} {} ", CancellationToken.None);
+            RequestCqrsProbeAppHostNativeFiles.SetMode(owner, PrivateFile);
             await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
         });
     }

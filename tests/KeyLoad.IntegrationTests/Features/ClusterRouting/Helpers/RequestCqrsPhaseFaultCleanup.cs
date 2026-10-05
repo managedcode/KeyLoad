@@ -1,6 +1,4 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -18,17 +16,16 @@ internal static class RequestCqrsPhaseFaultCleanup
         Task<RequestCqrsFaultMcpObservation>? mcpCall, Guid armId, List<Exception> failures)
     {
         var cleanup = new List<Exception>();
-        var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
-        await StopAdmissionAndReleaseAsync(controls, discovery, callerCancellation, deadline.Token, cleanup)
+        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
+        await StopAdmissionAndReleaseAsync(controls, discovery, callerCancellation, cleanup, deadline.Token)
             .ConfigureAwait(false);
         await JoinOriginalCallsAsync(sdkCall, mcpCall, cleanup).ConfigureAwait(false);
-        await JoinProducerDisposalAsync(controls, discovery, armId, deadline.Token, cleanup).ConfigureAwait(false);
+        await JoinProducerDisposalAsync(controls, discovery, armId, cleanup, deadline.Token).ConfigureAwait(false);
         await DisposeClientsAsync(caller, administrator, cleanup).ConfigureAwait(false);
         var waveStopped = await StopWaveAsync(wave, waveStartupAttempted, cleanup).ConfigureAwait(false);
         await DisposeControlsAsync(controls, waveStopped, cleanup).ConfigureAwait(false);
         ServerFailureObserver.Observe(() => callerCancellation?.Dispose(), cleanup);
         ServerFailureObserver.Observe(() => scenarioDeadline?.Dispose(), cleanup);
-        ServerFailureObserver.Observe(deadline.Dispose, cleanup);
         if (rootOwned && waveStopped && cleanup.Count == 0)
         { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup); }
         failures.AddRange(cleanup);
@@ -36,10 +33,11 @@ internal static class RequestCqrsPhaseFaultCleanup
 
     private static async Task StopAdmissionAndReleaseAsync(RequestCqrsProbeFixture? controls,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, CancellationTokenSource? callerCancellation,
-        CancellationToken cancellationToken, List<Exception> failures)
+        List<Exception> failures, CancellationToken cancellationToken)
     {
         ServerFailureObserver.Observe(() => controls?.StopAdmission(), failures);
-        ServerFailureObserver.Observe(() => callerCancellation?.Cancel(), failures);
+        if (callerCancellation is not null)
+        { await ServerFailureObserver.ObserveAsync(callerCancellation.CancelAsync, failures).ConfigureAwait(false); }
         if (controls is not null && discovery is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cancellationToken),
@@ -57,8 +55,8 @@ internal static class RequestCqrsPhaseFaultCleanup
     }
 
     private static async Task JoinProducerDisposalAsync(RequestCqrsProbeFixture? controls,
-        IReadOnlyList<ReplicaSiloDiscovery>? discovery, Guid armId, CancellationToken cancellationToken,
-        List<Exception> failures)
+        IReadOnlyList<ReplicaSiloDiscovery>? discovery, Guid armId, List<Exception> failures,
+        CancellationToken cancellationToken)
     {
         if (controls is null || discovery is null || armId == Guid.Empty)
         { return; }
@@ -87,7 +85,7 @@ internal static class RequestCqrsPhaseFaultCleanup
         if (wave is null)
         { return !startupAttempted; }
         var previous = failures.Count;
-        await ServerFailureObserver.ObserveAsync(() => wave.StopAsync(), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(wave.StopAsync, failures).ConfigureAwait(false);
         return failures.Count == previous;
     }
 

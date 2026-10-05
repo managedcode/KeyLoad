@@ -49,7 +49,7 @@ internal sealed class PackedAnnBudgetTests
         await Assert.That(second.EdgeVisits).IsEqualTo(sharedBudget.EdgeVisits - edgesBeforeSecond);
     }
 
-    [Test]
+    [Test, NotInParallel(PackedAnnBuildResources.AdmissionKey)]
     public async Task AcAnn003RealCancellationAndDeadlineInterruptWideCanonicalSearchAndAllowHealthySearch()
     {
         using var database = new TestDatabase();
@@ -60,8 +60,9 @@ internal sealed class PackedAnnBudgetTests
         await Assert.That(records.Length).IsEqualTo(PackedAnnTestData.QualityRecordCount);
         var space = PackedAnnTestData.Space(DistanceMetric.DotProduct, PackedAnnTestData.QualityDimension);
         var options = new PackedAnnOptions { ExactThreshold = 0, EfSearch = 4_096 };
-        var index = PackedAnnIndexTestSupport.Build(space, records, options,
-            PackedAnnIndexTestSupport.Budget(database));
+        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.WideSearchSetup,
+            space, records, options, budget);
         var query = PackedAnnTestData.Vector(41, space.Dimension, PackedAnnTestData.CorpusSeed);
         await Assert.That(index.Count).IsEqualTo(PackedAnnTestData.QualityRecordCount);
 

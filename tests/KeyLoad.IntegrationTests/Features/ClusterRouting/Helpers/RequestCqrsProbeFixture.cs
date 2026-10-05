@@ -119,6 +119,10 @@ internal sealed class RequestCqrsProbeFixture
         return marker;
     }
 
+    internal Task WaitForSettlementAsync(Guid armId, IReadOnlyList<ReplicaSiloDiscovery> signedDiscovery,
+        CancellationToken cancellationToken)
+        => RequestCqrsProbeMarkerReader.WaitForSettlementAsync(this, armId, signedDiscovery, cancellationToken);
+
     internal Task RetireArmAsync(Guid armId, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

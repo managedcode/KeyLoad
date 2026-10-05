@@ -19,8 +19,8 @@ internal static class RequestCqrsProbeMarkerReader
         {
             cancellationToken.ThrowIfCancellationRequested();
             var match = FindMarker(fixture, armId, phase, outcome, null, signedDiscovery);
-            if (match is not null)
-            { return match; }
+            if (match is { } marker)
+            { return marker; }
             await Task.Delay(PollInterval, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -49,28 +49,39 @@ internal static class RequestCqrsProbeMarkerReader
         RequestCqrsProbeMarkerRecord? match = null;
         foreach (var node in Nodes)
         {
-            var owned = fixture.NodeFor(node);
-            var directory = owned.Directory;
-            RequestCqrsProbeFileStore.VerifyOwnerFile(directory, owned.OwnerBytes);
-            var entries = RequestCqrsProbeFileValidation.ValidateContents(directory);
-            foreach (var path in entries)
-            {
-                var primaryMatch = Matches(path, armId, phase, outcome);
-                var alternateMatch = alternate is { } alternateOutcome
-                    && Matches(path, armId, phase, alternateOutcome);
-                var matchedOutcome = primaryMatch ? outcome : alternateMatch ? alternate : null;
-                if (matchedOutcome is null)
-                { continue; }
-                if (match is not null)
-                { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
-                var marker = RequestCqrsProbeJson.ReadMarker(RequestCqrsProbeFileStore.ReadRecord(path));
-                if (marker.ArmId != armId || marker.Phase != phase || marker.Outcome != matchedOutcome
-                    || Path.GetFileName(path) != RequestCqrsProbeFileNames.Marker(marker))
-                { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
-                ValidateMarkerCount(fixture, node, armId, marker.RequestId);
-                fixture.RecordMarker(marker, node, phase.ToString(), matchedOutcome!.Value.ToString(), signedDiscovery);
-                match = marker;
-            }
+            var observed = FindNodeMarker(fixture, node, armId, phase, outcome, alternate, signedDiscovery);
+            if (observed is null)
+            { continue; }
+            if (match is not null)
+            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+            match = observed;
+        }
+        return match;
+    }
+
+    private static RequestCqrsProbeMarkerRecord? FindNodeMarker(RequestCqrsProbeFixture fixture, string node,
+        Guid armId, RequestCqrsProbePhase phase, RequestCqrsProbeOutcome outcome, RequestCqrsProbeOutcome? alternate,
+        IReadOnlyList<ReplicaSiloDiscovery> signedDiscovery)
+    {
+        var owned = fixture.NodeFor(node);
+        RequestCqrsProbeFileStore.VerifyOwnerFile(owned.Directory, owned.OwnerBytes);
+        RequestCqrsProbeMarkerRecord? match = null;
+        foreach (var path in RequestCqrsProbeFileValidation.ValidateContents(owned.Directory))
+        {
+            var primaryMatch = Matches(path, armId, phase, outcome);
+            var alternateMatch = alternate is { } alternateOutcome && Matches(path, armId, phase, alternateOutcome);
+            var matchedOutcome = primaryMatch ? outcome : alternateMatch ? alternate : null;
+            if (matchedOutcome is null)
+            { continue; }
+            if (match is not null)
+            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+            var marker = RequestCqrsProbeJson.ReadMarker(RequestCqrsProbeFileStore.ReadRecord(path));
+            if (marker.ArmId != armId || marker.Phase != phase || marker.Outcome != matchedOutcome
+                || Path.GetFileName(path) != RequestCqrsProbeFileNames.Marker(marker))
+            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+            ValidateMarkerCount(fixture, node, armId, marker.RequestId);
+            fixture.RecordMarker(marker, node, phase.ToString(), matchedOutcome.Value.ToString(), signedDiscovery);
+            match = marker;
         }
         return match;
     }
@@ -114,4 +125,3 @@ internal static class RequestCqrsProbeMarkerReader
         { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
     }
 }
-

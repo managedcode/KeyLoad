@@ -1,0 +1,30 @@
+# ADR-098: Bounded authorized shortest paths
+
+Status: Accepted; implementation and qualification pending, 2026-10-05.
+
+KL-023 requires unweighted shortest paths and batched frontiers beyond existing
+reachability. Select one versioned directed same-partition path operator over
+native node-local ZoneTree adjacency in one current authorized committed cut.
+Explicit depth frontiers batch local work without per-edge RPC. Orleans retains
+one request grain and native ManagedCode CQRS; storage handles remain node-local.
+
+The implementation contract is [ShortestPath](../Features/GraphTraversal/ShortestPath.md),
+REQ-GRAPH-007..010, AC-GRAPH-006..009, TASK-KL023-PATH. It freezes new version1
+aliases/IDs, deterministic BFS ties, empty/zero-hop results, conservative metadata
+retention, real read/time/cancellation caps, Q1.GraphPath.v1 literal/parameter
+grammar and shared deadline. Existing ADR-004/005/010/014/034/082 continue to own
+committed reads, keys, persisted authority and native routing/lifecycle.
+
+Ordered stages and exact files/roles are in that contract: root freezes; private
+Luna Core/contracts packet; independently authored real-store tests; root SQL
+compile/parity; root Orleans/HTTP/SDK/official MCP and Aspire RF3 joins; full strict
+checks and original delivered-source Linux evidence. Root owns all shared/Git/
+acceptance joins. Workers cannot alter packages, shared configuration or formats.
+Neither source presence nor focused passes complete KL-023; normal/scalar,
+recovery and full RF3/client gates, including failover/revocation, remain required.
+
+No canonical data, existing alias/ID, journal, placement or acknowledgement
+changes occur. There is no data migration. Rollout adds explicit v1 capabilities;
+unknown versions fail closed. Rollback removes new read registration without
+rewriting acknowledged data. Weighted/cross-partition paths, full SQL/protocol
+and measured performance leadership remain separate mandatory workstreams.

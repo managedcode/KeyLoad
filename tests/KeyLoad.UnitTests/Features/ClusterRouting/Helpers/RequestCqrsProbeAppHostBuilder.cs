@@ -1,5 +1,6 @@
 using Aspire.Hosting;
 using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.ClusterRouting;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;

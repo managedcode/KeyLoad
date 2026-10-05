@@ -2,6 +2,8 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
+using KeyLoad.Orleans;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,20 +12,24 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictionary<string, string> images,
     bool configureCohort, bool requireHealthy, string? snapshotThresholdArgument, Guid diagnosticsWaveId,
-    CancellationToken cancellationToken, RequestCqrsProbeFixture? controls)
+    RequestCqrsProbeFixture? controls, CancellationToken cancellationToken) : IAsyncDisposable
 {
     private const string MissingWaveMessage = "The C1 Aspire wave did not transfer its owned resources.";
     private readonly string[] args = CreateArguments(dataRoot, images, configureCohort, snapshotThresholdArgument, controls);
     private DistributedApplication? application;
     private RequestCqrsRf3Diagnostics? diagnostics;
+    private RequestCqrsRf3DiagnosticsSubscriberObserver? subscriberObserver;
     private RequestCqrsRf3Wave? wave;
 
-    internal static Task<RequestCqrsRf3Wave> StartAsync(string dataRoot,
+    internal static async Task<RequestCqrsRf3Wave> StartAsync(string dataRoot,
         IReadOnlyDictionary<string, string> images, bool configureCohort, bool requireHealthy,
         string? snapshotThresholdArgument, Guid diagnosticsWaveId, CancellationToken cancellationToken,
         RequestCqrsProbeFixture? controls = null)
-        => new RequestCqrsRf3WaveStartup(dataRoot, images, configureCohort, requireHealthy,
-            snapshotThresholdArgument, diagnosticsWaveId, cancellationToken, controls).RunAsync();
+    {
+        await using var startup = new RequestCqrsRf3WaveStartup(dataRoot, images, configureCohort,
+            requireHealthy, snapshotThresholdArgument, diagnosticsWaveId, controls, cancellationToken);
+        return await startup.RunAsync().ConfigureAwait(false);
+    }
 
     private async Task<RequestCqrsRf3Wave> RunAsync()
     {
@@ -32,9 +38,16 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => StartCoreAsync(deadline.Token), failures)
             .ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => CleanupAsync(failures), failures).ConfigureAwait(false);
+        if (failures.Count == 0 && wave is { } startedWave)
+        {
+            wave = null;
+            return startedWave;
+        }
+        if (failures.Count == 0)
+        { failures.Add(new InvalidOperationException(MissingWaveMessage)); }
+        await ServerFailureObserver.ObserveAsync(() => DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
-        return wave ?? throw new InvalidOperationException(MissingWaveMessage);
+        throw new InvalidOperationException(MissingWaveMessage);
     }
 
     private async Task StartCoreAsync(CancellationToken cancellationToken)
@@ -50,8 +63,14 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         var containers = ContainerNames(builder);
         var nodeResources = NodeResources(builder);
         application = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
-        diagnostics = RequestCqrsRf3Diagnostics.Start(diagnosticsWaveId, nodeResources,
-            application.Services.GetRequiredService<ResourceLoggerService>());
+        var loggerService = application.Services.GetRequiredService<ResourceLoggerService>();
+        subscriberObserver = new RequestCqrsRf3DiagnosticsSubscriberObserver();
+        subscriberObserver.Initialize(loggerService, cancellationToken);
+        diagnostics = RequestCqrsRf3Diagnostics.Start(diagnosticsWaveId, nodeResources, loggerService);
+        await subscriberObserver.WaitForStateAsync(true).ConfigureAwait(false);
+        var observerFailures = new List<Exception>();
+        await DisposeSubscriberObserverAsync(observerFailures).ConfigureAwait(false);
+        ServerFailureObserver.ThrowIfAny(observerFailures);
         await RequestCqrsRf3ImageProof.VerifyModelAsync(application, images, cancellationToken)
             .ConfigureAwait(false);
         await application.StartAsync(cancellationToken).ConfigureAwait(false);
@@ -61,22 +80,82 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         wave = RequestCqrsRf3Wave.TransferOwned(dataRoot, runtime, ref application, ref diagnostics);
     }
 
-    private async Task CleanupAsync(List<Exception> failures)
+    public async ValueTask DisposeAsync()
     {
-        var app = application;
-        var ownedDiagnostics = diagnostics;
-        application = null;
-        diagnostics = null;
-        if (app is not null)
+        var failures = new List<Exception>();
+        if (subscriberObserver is not null)
         {
-            await RequestCqrsRf3Wave.CompleteAsync(app, ownedDiagnostics, failures).ConfigureAwait(false);
+            try
+            { await subscriberObserver.DisposeAsync().ConfigureAwait(false); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { failures.Add(error); }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { failures.Add(error); }
         }
-        else if (ownedDiagnostics is not null)
+        await ServerFailureObserver.ObserveAsync(() => JoinSubscriberObserverAsync(failures), failures)
+            .ConfigureAwait(false);
+        if (wave is not null)
         {
-            await ServerFailureObserver.ObserveAsync(() => ownedDiagnostics.DisposeAsync().AsTask(), failures)
+            try
+            { await wave.DisposeAsync().ConfigureAwait(false); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { failures.Add(error); }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { failures.Add(error); }
+            wave = null;
+        }
+        if (application is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(
+                () => RequestCqrsRf3Wave.CompleteAsync(application, diagnostics, failures), failures)
                 .ConfigureAwait(false);
-            RequestCqrsRf3Wave.SaveFailureEvidence(ownedDiagnostics, failures);
+            application = null;
         }
+        if (diagnostics is not null)
+        {
+            try
+            { await diagnostics.DisposeAsync().ConfigureAwait(false); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { RecordDiagnosticsFailure(error, failures); }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { RecordDiagnosticsFailure(error, failures); }
+            RequestCqrsRf3Wave.SaveFailureEvidence(diagnostics, failures);
+            diagnostics = null;
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static void RecordDiagnosticsFailure(Exception error, List<Exception> failures)
+    {
+        var terminal = error is AggregateException aggregate ? aggregate.InnerExceptions : [error];
+        foreach (var failure in terminal)
+        {
+            if (!failures.Contains(failure))
+            { failures.Add(failure); }
+        }
+    }
+
+    private async Task DisposeSubscriberObserverAsync(List<Exception> failures)
+    {
+        var observer = subscriberObserver;
+        if (observer is null)
+        { return; }
+        await ServerFailureObserver.ObserveAsync(() => observer.DisposeAsync().AsTask(), failures)
+            .ConfigureAwait(false);
+        await JoinSubscriberObserverAsync(failures).ConfigureAwait(false);
+    }
+
+    private async Task JoinSubscriberObserverAsync(List<Exception> failures)
+    {
+        var observer = subscriberObserver;
+        if (observer is null)
+        { return; }
+        if (!observer.IsJoined)
+        { await observer.RetryFailedCloseAsync(failures).ConfigureAwait(false); }
+        if (!observer.IsJoined)
+        { failures.Add(new InvalidOperationException("The Aspire subscriber observer did not join its original stream.")); }
+        if (observer.IsJoined)
+        { subscriberObserver = null; }
     }
 
     private static string[] CreateArguments(string dataRoot, IReadOnlyDictionary<string, string> images,

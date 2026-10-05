@@ -1,5 +1,3 @@
-using KeyLoad.Core.Features.Messaging;
-
 namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed class DueFreshAttemptTests
@@ -52,20 +50,20 @@ internal sealed class DueFreshAttemptTests
         var fresh = DueFreshAttemptAssertions.Emit(fixture, scheduleId, freshId);
         var committed = DueFreshAttemptAssertions.Apply(fixture, fresh, freshId,
             RecurringSagaDatabase.Epoch.AddSeconds(FreshAttemptSeconds));
-        await DueFreshAttemptAssertions.AssertOneEmissionAsync(fixture, scheduleId, firstDue,
+        var committedOutbox = await DueFreshAttemptAssertions.AssertOneEmissionAsync(fixture, scheduleId, firstDue,
             committed, outbox);
 
         var originalAgain = DueFreshAttemptAssertions.Apply(fixture, original, originalId,
             RecurringSagaDatabase.Epoch.AddSeconds(OriginalReplaySeconds));
         await DueFreshAttemptAssertions.AssertDeniedAsync(fixture, originalId, originalAgain);
         await DueFreshAttemptAssertions.AssertOneEmissionAsync(fixture, scheduleId, firstDue,
-            committed, outbox);
+            committed, outbox, committedOutbox);
 
         var freshReplay = DueFreshAttemptAssertions.Apply(fixture, fresh, freshId,
             RecurringSagaDatabase.Epoch.AddSeconds(FreshReplaySeconds));
         await DueFreshAttemptAssertions.AssertReplayAsync(committed, freshReplay);
         await DueFreshAttemptAssertions.AssertOneEmissionAsync(fixture, scheduleId, firstDue,
-            freshReplay, outbox);
+            freshReplay, outbox, committedOutbox);
     }
 
     private static async Task SeedScheduleAsync(RecurringSagaDatabase fixture, Guid scheduleId,

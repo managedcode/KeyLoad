@@ -1,5 +1,4 @@
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -13,19 +12,25 @@ internal static class RequestCqrsAuthorityFaultCleanup
         RequestCqrsRf3Callers? caller, RequestCqrsRf3Callers? administrator,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, CancellationTokenSource? operationDeadline,
         Task<Result<CommitReceipt>>? sdkCall, Task<RequestCqrsFaultMcpObservation>? mcpCall,
-        Guid armId, bool originalStarted, List<Exception> failures)
+        Guid armId, bool originalStarted, RequestCqrsAuthorityOutcomeOracle? outcomeOracle,
+        Guid heldCommandId, List<Exception> failures)
     {
         var cleanup = new List<Exception>();
-        var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
+        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
         if (operationDeadline is not null)
         { await ServerFailureObserver.ObserveAsync(operationDeadline.CancelAsync, cleanup).ConfigureAwait(false); }
         await ServerFailureObserver.ObserveAsync(() => ReleaseAndJoinAsync(controls, discovery, sdkCall,
-            mcpCall, armId, originalStarted, deadline.Token, cleanup), cleanup).ConfigureAwait(false);
+            mcpCall, armId, originalStarted, cleanup, deadline.Token), cleanup).ConfigureAwait(false);
         await DisposeCallersAsync(caller, administrator, cleanup).ConfigureAwait(false);
         var waveStopped = await StopWaveAsync(wave, waveStartupAttempted, cleanup).ConfigureAwait(false);
         await DisposeControlsAsync(controls, waveStopped, cleanup).ConfigureAwait(false);
+        if (waveStopped && cleanup.Count == 0 && outcomeOracle is { ReadyToInspect: true })
+        {
+            await ServerFailureObserver.ObserveAsync(
+                () => outcomeOracle.InspectAfterWaveJoinedAsync(heldCommandId, deadline.Token), cleanup)
+                .ConfigureAwait(false);
+        }
         ServerFailureObserver.Observe(() => operationDeadline?.Dispose(), cleanup);
-        ServerFailureObserver.Observe(deadline.Dispose, cleanup);
         if (rootCreated && waveStopped && cleanup.Count == 0)
         { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup); }
         failures.AddRange(cleanup);
@@ -34,7 +39,7 @@ internal static class RequestCqrsAuthorityFaultCleanup
     private static async Task ReleaseAndJoinAsync(RequestCqrsProbeFixture? controls,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, Task<Result<CommitReceipt>>? sdkCall,
         Task<RequestCqrsFaultMcpObservation>? mcpCall, Guid armId, bool originalStarted,
-        CancellationToken cancellationToken, List<Exception> failures)
+        List<Exception> failures, CancellationToken cancellationToken)
     {
         if (controls is not null)
         {
@@ -46,14 +51,14 @@ internal static class RequestCqrsAuthorityFaultCleanup
         { await ServerFailureObserver.ObserveAsync(() => sdkCall, failures).ConfigureAwait(false); }
         if (mcpCall is not null)
         { await ServerFailureObserver.ObserveAsync(() => mcpCall, failures).ConfigureAwait(false); }
-        await ObserveProducerDisposedAsync(controls, discovery, armId, originalStarted, cancellationToken, failures).ConfigureAwait(false);
+        await ObserveProducerDisposedAsync(controls, discovery, armId, originalStarted, failures, cancellationToken).ConfigureAwait(false);
         if (controls is not null && armId != Guid.Empty)
         { await ServerFailureObserver.ObserveAsync(() => controls.RetireArmAsync(armId, cancellationToken), failures).ConfigureAwait(false); }
     }
 
     private static async Task ObserveProducerDisposedAsync(RequestCqrsProbeFixture? controls,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, Guid armId, bool originalStarted,
-        CancellationToken cancellationToken, List<Exception> failures)
+        List<Exception> failures, CancellationToken cancellationToken)
     {
         if (controls is null || armId == Guid.Empty || !originalStarted
             || controls.ArmFor(armId).ProducerDisposedSeen || discovery is null)

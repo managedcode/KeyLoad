@@ -750,3 +750,41 @@ RF3 status capture, positive-control/cleanup ordering and the parent-call join.
 Workers must not edit the checkout or start builds/tests/processes/Git; deliver
 complete private source, patch, hashes and self-review. Root reads every byte,
 integrates, runs the gates and commits the complete stage scope.
+
+## Accepted C1 native resource-log lifecycle, 2026-10-05
+
+REQ-CRS-DIAG-003 / AC-CRS-DIAG-003 extends DIAG-001/002: initialize the actual
+native subscriber observer, start the three original resource watchers and
+observe subscriber admission for all three actual RF3 resources before
+`DistributedApplication.StartAsync`. The real malformed MCP call retains its
+400 Validation assertion, then awaits the original node1
+`BodyMethodMismatch/ToolsCall` record under the existing wave cancellation
+deadline before the healthy SDK/official MCP follow-up. Use an event-driven
+bounded waiter; no delay, fabricated record or additional raw log retention.
+Keep the unchanged parser, V1 artifact, closed enums, 32-record-per-node and
+16-KiB artifact caps. Stream completion before the expected record is a visible
+failure. This lifecycle repair is a test-infrastructure stage, not evidence
+that the original empty captures had one proven cause.
+
+After actual AppHost stop, complete the three native resource log streams and
+drain/join their original watcher tasks before writing either success or
+failure evidence. Cancellation is only a bounded cleanup fallback after
+completion/drain failure; it cannot replace an original task join. Preserve
+stop, observer, completion, watcher, cancellation, disposal, artifact and fatal
+failures with `ServerFailureObserver`; `SaveEvidence` remains fail-closed until
+the original joins have completed. Caller cancellation must not become a
+successful capture or erase its primary failure.
+
+TASK-CRS-DIAG-DRAIN stages: freeze this contract, privately implement subscriber
+admission in `RequestCqrsRf3WaveStartup.cs`, bounded live-record observation
+and native completion/drain in `RequestCqrsRf3Diagnostics.cs`, the thin wave
+join in `RequestCqrsRf3Wave.cs`, and the real-call wait in
+`RequestCqrsRf3McpGuardEvidenceScenario.cs`. Keep these under IntegrationTests
+`Features/ClusterRouting/Helpers/`; additional populated Helpers files may
+separate watcher/waiter responsibilities without adding a second collector.
+Reuse `RequestCqrsRf3DiagnosticsSubscriberObserver` and the pinned Aspire
+13.6.0 native APIs. Root owns docs, packet review/join, strict build, format,
+Aspire mechanism cases and genuine exact-source Linux current-image RF3
+`AcCrsDiag002` acceptance. No product/public/persisted contract or dependency
+changes; rollback removes only the test lifecycle addition. ADR-082 remains
+Accepted until its complete qualification gates pass.

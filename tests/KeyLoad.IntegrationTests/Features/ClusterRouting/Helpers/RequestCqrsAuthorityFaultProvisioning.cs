@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 

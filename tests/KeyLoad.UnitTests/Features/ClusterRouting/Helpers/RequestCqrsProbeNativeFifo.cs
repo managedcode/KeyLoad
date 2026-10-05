@@ -16,6 +16,7 @@ internal static partial class RequestCqrsProbeNativeFifo
         { throw new IOException("The owned private FIFO fixture could not be created.", new Win32Exception(Marshal.GetLastPInvokeError())); }
     }
 
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     [LibraryImport("libc", EntryPoint = "mkfifo", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
     private static partial int MakeFifo(string path, uint mode);
 }

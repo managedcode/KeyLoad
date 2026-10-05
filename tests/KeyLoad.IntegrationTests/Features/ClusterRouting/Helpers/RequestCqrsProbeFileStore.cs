@@ -36,6 +36,8 @@ internal static class RequestCqrsProbeFileStore
 
     private static void WriteTemporary(string path, ReadOnlySpan<byte> bytes)
     {
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
         var options = new FileStreamOptions
         {
             Mode = FileMode.CreateNew,
@@ -83,6 +85,8 @@ internal static class RequestCqrsProbeFileStore
 
     internal static byte[] ReadRecord(string path)
     {
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
         var identity = OfflineRegularFile.Inspect(path);
         if (identity.Length is <= 0 or > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes)
         { throw new IOException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded); }
@@ -124,16 +128,7 @@ internal static class RequestCqrsProbeFileStore
                 || !string.Equals(Path.GetFullPath(node), expectedPath, StringComparison.Ordinal))
             { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
             RequestCqrsProbeFileValidation.ValidateDirectory(node);
-            if (ownerRecords.TryGetValue(pair.Key, out var expectedOwner))
-            {
-                var ownerPath = Path.Combine(node, RequestCqrsProbeFixtureProtocol.OwnerFileName);
-                if (File.Exists(ownerPath))
-                { VerifyOwnerFile(node, expectedOwner); }
-                else if (requireAllOwners)
-                { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged); }
-            }
-            else if (requireAllOwners)
-            { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged); }
+            VerifyNodeOwner(node, pair.Key, ownerRecords, requireAllOwners);
             var files = RequestCqrsProbeFileValidation.ValidateContents(node);
             foreach (var file in files)
             { File.Delete(file); }
@@ -142,5 +137,18 @@ internal static class RequestCqrsProbeFileStore
         if (Directory.EnumerateFileSystemEntries(root).Take(1).Any())
         { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
         Directory.Delete(root, recursive: false);
+    }
+
+    private static void VerifyNodeOwner(string node, string nodeName,
+        IReadOnlyDictionary<string, byte[]> ownerRecords, bool requireAllOwners)
+    {
+        if (ownerRecords.TryGetValue(nodeName, out var expectedOwner)
+            && File.Exists(Path.Combine(node, RequestCqrsProbeFixtureProtocol.OwnerFileName)))
+        {
+            VerifyOwnerFile(node, expectedOwner);
+            return;
+        }
+        if (requireAllOwners)
+        { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged); }
     }
 }

@@ -1,5 +1,3 @@
-using KeyLoad.Client;
-
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal sealed record RequestCqrsAuthorityFaultIdentity(

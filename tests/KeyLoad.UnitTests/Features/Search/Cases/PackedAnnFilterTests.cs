@@ -55,7 +55,7 @@ internal sealed class PackedAnnFilterTests
         }
     }
 
-    [Test]
+    [Test, NotInParallel(PackedAnnBuildResources.AdmissionKey)]
     public async Task AcAnn004InsufficientFilteredCandidatesFallBackToCompleteExactEligibleTopK()
     {
         using var database = new TestDatabase();
@@ -72,7 +72,9 @@ internal sealed class PackedAnnFilterTests
             ExactThreshold = 0,
             Seed = PackedAnnTestData.CorpusSeed
         };
-        var index = PackedAnnIndexTestSupport.Build(space, records, options, PackedAnnIndexTestSupport.Budget(database));
+        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.FilteredFallback,
+            space, records, options, budget);
         var selected = Enumerable.Range(0, records.Length).Where(ordinal => ordinal % 100 == 0).ToArray();
         var bitmap = Bits(records.Length, selected);
         var query = PackedAnnTestData.Vector(901, space.Dimension, PackedAnnTestData.CorpusSeed);

@@ -1,7 +1,6 @@
 using Aspire.Hosting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 

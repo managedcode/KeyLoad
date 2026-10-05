@@ -1,5 +1,5 @@
-using static KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsProbeFixtureProtocol;
 using KeyLoad.Server;
+using static KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsProbeFixtureProtocol;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -33,7 +33,7 @@ internal static class RequestCqrsProbeFixtureFactory
     }
 
     private static void CreateNode(string root, string session, string node, string voter,
-        IDictionary<string, string> directories, IDictionary<string, byte[]> owners)
+        Dictionary<string, string> directories, Dictionary<string, byte[]> owners)
     {
         var created = RequestCqrsProbeFixtureOperations.PrepareNode(root, session, node, voter);
         directories.Add(node, created.Directory);
@@ -43,6 +43,8 @@ internal static class RequestCqrsProbeFixtureFactory
 
     private static string CreateRoot(string dataRoot, string sessionId)
     {
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException(PrivatePermissionsUnsupported); }
         var root = Path.Combine(Path.GetTempPath(), RootPrefix + sessionId);
         var fullRoot = Path.GetFullPath(root);
         var fullDataRoot = Path.GetFullPath(dataRoot);

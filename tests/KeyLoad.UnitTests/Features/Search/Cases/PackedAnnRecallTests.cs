@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class PackedAnnRecallTests
 {
-    [Test]
+    [Test, NotInParallel(PackedAnnBuildResources.AdmissionKey)]
     public async Task AcAnn005TenThousandCanonicalRowsMeetRecallForEveryMetricFilterAndCorrelationCell()
     {
         using var database = new TestDatabase();
@@ -23,8 +23,9 @@ internal sealed class PackedAnnRecallTests
             var records = PackedAnnTestData.Load(database, metric);
             await Assert.That(records.Length).IsEqualTo(PackedAnnTestData.QualityRecordCount);
             var space = PackedAnnTestData.Space(metric, PackedAnnTestData.QualityDimension);
-            var index = PackedAnnIndexTestSupport.Build(space, records, options,
-                PackedAnnIndexTestSupport.Budget(database));
+            var budget = PackedAnnIndexTestSupport.Budget(database);
+            var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.RecallMetric,
+                space, records, options, budget);
             await Assert.That(index.Count).IsEqualTo(PackedAnnTestData.QualityRecordCount);
             foreach (var cell in PackedAnnRecallSupport.Cells)
             {

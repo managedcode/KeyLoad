@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -15,6 +16,12 @@ internal static class DueFreshAttemptAssertions
     private const string OccurrencePrefix = "recurring-";
     private const string GuidFormat = "N";
     private const string OrdinalFormat = "x16";
+    private const string OutboxSpace = "outbox";
+    private const int FirstMutationOrdinal = 0;
+    private const long FirstGeneration = 1;
+    private const int OneOccurrence = 1;
+    private const int FirstDueSeconds = 1;
+    private const int FreshCommittedSeconds = 5;
 
     internal static PrincipalRecord Creator() => new(CreatorId, RecurringSagaDatabase.TenantId,
         [new(RecurringSagaDatabase.DatabaseId, RecurringSagaDatabase.QueueName,
@@ -57,8 +64,8 @@ internal static class DueFreshAttemptAssertions
             fixture.Partition).Head).IsEqualTo(expectedOutbox);
     }
 
-    internal static async Task AssertOneEmissionAsync(RecurringSagaDatabase fixture, Guid scheduleId,
-        DateTimeOffset firstDue, OperationResult result, OutboxHead expectedOutbox)
+    internal static async Task<byte[]> AssertOneEmissionAsync(RecurringSagaDatabase fixture, Guid scheduleId,
+        DateTimeOffset firstDue, OperationResult result, OutboxHead expectedOutbox, byte[]? storedSnapshot = null)
     {
         await Assert.That(result.Error).IsNull();
         var receipt = result.Get<CommitReceipt>();
@@ -89,8 +96,52 @@ internal static class DueFreshAttemptAssertions
         await AssertOccurrenceAsync(fixture, scheduleId, firstDue);
         await Assert.That(fixture.Database.InspectMessage(RecurringSagaDatabase.RootPrincipal, fixture.Queue,
             OccurrenceId(scheduleId, 1))).IsNull();
+        return await AssertOneOutboxEntryAsync(fixture, scheduleId, firstDue, receipt, expectedOutbox,
+            storedSnapshot);
+    }
+
+    private static async Task<byte[]> AssertOneOutboxEntryAsync(RecurringSagaDatabase fixture, Guid scheduleId,
+        DateTimeOffset firstDue, CommitReceipt receipt, OutboxHead before, byte[]? storedSnapshot)
+    {
+        var sequence = checked(before.Tail + OneOccurrence);
+        var entry = new OutboxEntry(sequence, FirstMutationOrdinal, receipt.Token,
+            firstDue.AddSeconds(FreshCommittedSeconds - FirstDueSeconds),
+            new EmitRecurringOccurrences(fixture.Queue, scheduleId, FirstGeneration, OneOccurrence),
+            new MutationReceipt(EmitMutationKind, RecurringSagaDatabase.QueueName,
+                scheduleId.ToString(GuidFormat), FirstGeneration));
+        var actualBytes = fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition(OutboxSpace,
+            fixture.Partition, sequence)));
+        await Assert.That(actualBytes).IsNotNull();
+        await AssertOutboxFieldsAsync(NativeSerialization.Deserialize<OutboxEntry>(actualBytes), entry);
+        if (storedSnapshot is not null)
+        {
+            await Assert.That(actualBytes.AsSpan().SequenceEqual(storedSnapshot)).IsTrue();
+        }
+        var expectedHead = before with
+        {
+            Tail = sequence,
+            StoredRecords = checked(before.StoredRecords + OneOccurrence),
+            StoredBytes = checked(before.StoredBytes + actualBytes!.Length)
+        };
         await Assert.That(fixture.Database.GetOutboxStatus(RecurringSagaDatabase.RootPrincipal,
-            fixture.Partition).Head).IsEqualTo(expectedOutbox);
+            fixture.Partition).Head).IsEqualTo(expectedHead);
+        return actualBytes!;
+    }
+
+    private static async Task AssertOutboxFieldsAsync(OutboxEntry actual, OutboxEntry expected)
+    {
+        await Assert.That(actual.Sequence).IsEqualTo(expected.Sequence);
+        await Assert.That(actual.Ordinal).IsEqualTo(expected.Ordinal);
+        await Assert.That(actual.Commit).IsEqualTo(expected.Commit);
+        await Assert.That(actual.CommittedAt).IsEqualTo(expected.CommittedAt);
+        await Assert.That(actual.Mutation).IsEqualTo(expected.Mutation);
+        await Assert.That(actual.Receipt.Kind).IsEqualTo(expected.Receipt.Kind);
+        await Assert.That(actual.Receipt.Resource).IsEqualTo(expected.Receipt.Resource);
+        await Assert.That(actual.Receipt.Id).IsEqualTo(expected.Receipt.Id);
+        await Assert.That(actual.Receipt.Revision).IsEqualTo(expected.Receipt.Revision);
+        await Assert.That(actual.Receipt.CompositionReferences).IsEmpty();
+        await Assert.That(actual.Before).IsNull();
+        await Assert.That(actual.After).IsNull();
     }
 
     internal static async Task AssertReplayAsync(OperationResult original, OperationResult replay)

@@ -45,7 +45,8 @@ internal static class RequestCqrsPhaseFaultProvisioning
     {
         var principal = new PrincipalRecord(principalId, partition.TenantId,
             [new(partition.DatabaseId, RequestCqrsRf3Protocol.AdminCollection,
-                Capability.DocumentsRead | Capability.DocumentsWrite)], []) { ClusterAdministrator = false };
+                Capability.DocumentsRead | Capability.DocumentsWrite)], [])
+        { ClusterAdministrator = false };
         var credential = new ApiKeyRecord(credentialId, principalId,
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
         var definition = new ResourceDefinition(RequestCqrsRf3Protocol.AdminCollection, ResourceKind.Collection,

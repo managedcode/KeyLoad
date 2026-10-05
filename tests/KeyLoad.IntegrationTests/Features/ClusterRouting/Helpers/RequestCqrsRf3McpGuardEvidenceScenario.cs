@@ -1,6 +1,6 @@
-using Aspire.Hosting;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -17,7 +17,7 @@ internal static class RequestCqrsRf3McpGuardEvidenceScenario
         await RequestCqrsRf3Epoch7WaveRunner.RunAsync(root, images, false, true, async wave =>
         {
             completedWave = wave;
-            await ExecuteInWaveAsync(wave.App, profile, cancellationToken).ConfigureAwait(false);
+            await ExecuteInWaveAsync(wave, profile, cancellationToken).ConfigureAwait(false);
         }, cancellationToken).ConfigureAwait(false);
         return (completedWave ?? throw new InvalidOperationException(MissingWaveMessage)).SaveDiagnosticsEvidence();
     }
@@ -32,12 +32,15 @@ internal static class RequestCqrsRf3McpGuardEvidenceScenario
         return path;
     }
 
-    private static async Task ExecuteInWaveAsync(DistributedApplication app, NodeEpochRf3Profile profile,
+    private static async Task ExecuteInWaveAsync(RequestCqrsRf3Wave wave, NodeEpochRf3Profile profile,
         CancellationToken cancellationToken)
     {
+        var app = wave.App;
         var workload = await RequestCqrsRf3Workload.SeedAsync(app, profile, cancellationToken).ConfigureAwait(false);
         await RequestCqrsRf3McpGuardEvidenceCall.SendMalformedAsync(app, Node1, profile.AdminKey,
             cancellationToken).ConfigureAwait(false);
+        await wave.WaitForRejectionAsync(Node1, McpTransportStage.BodyMethodMismatch,
+            McpTransportMethodCategory.ToolsCall, cancellationToken).ConfigureAwait(false);
         await workload.VerifyPreservedAsync(app, profile, cancellationToken).ConfigureAwait(false);
     }
 

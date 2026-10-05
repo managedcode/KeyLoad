@@ -2,7 +2,6 @@ using System.Net;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
 

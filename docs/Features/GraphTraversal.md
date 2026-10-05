@@ -1,5 +1,10 @@
 # GraphTraversal
 
+The accepted [ShortestPath](GraphTraversal/ShortestPath.md) contract and
+[ADR-098](../ADR/ADR-098-bounded-graph-paths.md) add the missing KL-023 unweighted
+path/frontier and shared SQL/SDK/MCP stages. Implementation and full qualification
+are pending; the reachability oracle does not close those requirements.
+
 Status: bounded same-partition graph mutation and traversal are present in Core source; broader graph/search integration and GitHub qualification remain pending. The target design is summarized in [sections 8, 26, 28, and 35](../design/architecture-v0.3.uk.md).
 
 ## Purpose, actors, and entry points
@@ -51,6 +56,33 @@ reads; hidden downstream paths remain excluded. Cover cycle/label/global edge
 count, exact envelope/output overflow, cancellation/unchanged position and a healthy
 following call. Preserve existing assertions; no doubles/local test run. GitHub
 TUnit then RF3 SDK/MCP and node resource artifacts own qualification.
+
+## Accepted KL-023 independent reachability oracle stage, 2026-10-05
+
+REQ-GRAPH-006 / AC-GRAPH-005: compare the current directed traversal with an
+independent test-owned graph model backed by genuine `TestDatabase`/ZoneTree
+fixtures. Compute minimum hop distances independently from the production
+reader, native keys and returned result; compare complete vertex/edge membership
+and ordinal public order for directed cycles, converging equal-depth paths,
+shorter direct paths, shuffled insertion and hidden intermediate vertices.
+For each requested depth, expand only visible permitted targets and prove that
+vertices beyond that depth are absent. Depth is a successful bounded query
+boundary; a shallower depth must not be reclassified as a budget error.
+An exact distinct-visible-vertex or examined-edge cap succeeds, while one less
+than the required count returns `BudgetExceeded` without a partial result.
+Count outgoing candidates before label/visibility filtering. Preserve the
+existing cancellation/deadline and healthy-follow-up cases.
+
+TASK-KL023-ORACLE owns only
+`tests/KeyLoad.UnitTests/Features/GraphTraversal/Assertions/GraphTraversalReferenceBfsOracle.cs`
+and `Cases/GraphTraversalReferenceOracleTests.cs`. Root freezes this contract,
+reviews and joins the private packet, and runs Aspire normal/scalar followed by
+exact-source Linux and real SDK/official MCP RF3 qualification. Existing
+ADR-004/010/014 define the unchanged read, budget and persisted authorization
+boundaries; no additional architecture decision is needed for this test-only
+stage. It adds no runtime/data/public contract or dependency; rollback removes
+the unused test files. Public shortest-path results, batched frontier execution
+and the complete KL-023 acceptance remain open.
 
 ## Current source behavior
 

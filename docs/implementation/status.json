@@ -819,7 +819,8 @@
       "docs/implementation/native-text-development-2026-10-05.json",
       "docs/implementation/runtime-qualification-37249197752.json",
       "docs/implementation/node-work-development-2026-10-05.json",
-      "docs/implementation/native-cqrs-cancel-join-delivery-2026-10-05.json"
+      "docs/implementation/native-cqrs-cancel-join-delivery-2026-10-05.json",
+      "docs/implementation/c1-due-ann-development-2026-10-05.json"
     ],
     "nativeRequestCqrs": {
       "status": "implementation_checkpoint_with_local_unit_pass_RF3_and_exact_source_qualification_pending",
@@ -875,6 +876,14 @@
         "nativeFullUnitExit": 2,
         "qualified": false,
         "acceptanceClosed": false
+      },
+      "developmentStage80": {
+        "receipt": "docs/implementation/c1-due-ann-development-2026-10-05.json",
+        "c1Outcome": "11_of11",
+        "c1Probe": "20_of20",
+        "sourceBuildFormatterGovernance": "passed",
+        "nativeDiagnosticsRF3": "pending",
+        "allAcceptanceClosed": false
       }
     }
   },
@@ -1104,7 +1113,8 @@
       "docs/Features/Search/ManagedAnn.md",
       "src/KeyLoad.Query/Features/Search/Execution/PackedAnnIndex.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnRecallTests.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs"
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs",
+      "docs/implementation/c1-due-ann-development-2026-10-05.json"
     ],
     "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
     "qualification": {
@@ -1231,8 +1241,35 @@
   },
   "KL-036": {
     "title": "Controlled partition movement",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "src/KeyLoad.Core/Features/ClusterRouting/Contracts/PartitionRecordFamilies.cs",
+      "src/KeyLoad.Core/Features/ClusterRouting/Contracts/PartitionRecordPage.cs",
+      "src/KeyLoad.Core/Features/ClusterRouting/Queries/PartitionRecordPageReader.cs",
+      "src/KeyLoad.Core/Features/ClusterRouting/Validation/PartitionRecordValidation.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PartitionRecordInventoryTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PartitionRecordPageTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PartitionRecordPageBoundsTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PartitionRecordValidationTests.cs"
+    ],
+    "decision": "docs/ADR/ADR-016-atomic-physical-placement.md",
+    "feature": "docs/Features/ClusterRouting/PartitionTransfer.md",
+    "sourceStage": "bounded_native_partition_family_pages_with_owned_exclusive_continuation",
+    "qualification": {
+      "runtimeQualified": false,
+      "localDevelopment": {
+        "pageCasesPassed": 9,
+        "originalReport": "TestResults/unit-79s-20261005/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "fullSuiteOutcome": "test_host_crashed_partial3193_executed3188_passed5_failed_no_TUnit_JSON",
+        "sourceAndRuntimeUnchangedDuringRun": true
+      },
+      "remaining": [
+        "deterministic_cancellation_during_native_traversal",
+        "partition_outcome_and_shared_catalog_quota_transfer_contract",
+        "fenced_prepare_copy_catchup_validate_switch_release_protocol",
+        "real_process_interruption_and_exact_source_Docker_Aspire_RF3_SDK_MCP_acceptance"
+      ]
+    }
   },
   "KL-037": {
     "title": "Distributed query execution",
@@ -1706,7 +1743,8 @@
       "docs/Features/Search/ManagedAnn.md",
       "src/KeyLoad.Query/Features/Search/Execution/PackedAnnIndex.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnRecallTests.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs"
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs",
+      "docs/implementation/c1-due-ann-development-2026-10-05.json"
     ],
     "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
     "qualification": {
@@ -1722,7 +1760,15 @@
       "artifacts/qualification/managed-ann-r1-development-20261004/focused06-originals/manifest.json",
       "artifacts/qualification/managed-ann-r1-development-20261004/scalar07-originals/manifest.json",
       "artifacts/qualification/native-dependencies-static17-development-20261004/originals/manifest.json"
-    ]
+    ],
+    "buildObservationDevelopment": {
+      "receipt": "docs/implementation/c1-due-ann-development-2026-10-05.json",
+      "actualWideCorpus": 10000,
+      "dimension": 16,
+      "actualWideCase": "passed",
+      "fullScalarLinux": "not_qualified",
+      "allAcceptanceClosed": false
+    }
   },
   "KL-060": {
     "title": "Adaptive filtered retrieval",
@@ -2248,8 +2294,15 @@
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
       "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
-      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "docs/implementation/c1-due-ann-development-2026-10-05.json"
+    ],
+    "dueFreshAttemptDevelopment": {
+      "receipt": "docs/implementation/c1-due-ann-development-2026-10-05.json",
+      "dueCases": "13_of13",
+      "rf3AuthorityRestoration": "pending_exact_source_Linux",
+      "allAcceptanceClosed": false
+    }
   },
   "KL-103": {
     "title": "Eventing adversarial security suite",

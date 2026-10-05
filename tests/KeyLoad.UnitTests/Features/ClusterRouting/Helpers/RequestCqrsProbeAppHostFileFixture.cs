@@ -22,6 +22,8 @@ internal sealed class RequestCqrsProbeAppHostFileFixture : IDisposable
 
     private void Initialize()
     {
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException("Private mode fixtures require a Unix host."); }
         if (Directory.Exists(Parent) || File.Exists(Parent))
         { throw new IOException("The private AppHost fixture root already exists."); }
         Directory.CreateDirectory(Parent);
@@ -43,7 +45,7 @@ internal sealed class RequestCqrsProbeAppHostFileFixture : IDisposable
     internal string Parent { get; }
     internal string Root { get; }
     internal string DataRoot { get; }
-    internal string SessionId => Session;
+    internal string SessionId { get; } = Session;
 
     private static RequestCqrsProbeAppHostFileFixture Create()
         => new(Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N")));
@@ -53,6 +55,8 @@ internal sealed class RequestCqrsProbeAppHostFileFixture : IDisposable
 
     internal void WriteOwner(string voter, string? session = null, string? ownerVoter = null, int bytes = 0)
     {
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException("Private mode fixtures require a Unix host."); }
         var path = Owner(voter);
         var text = OwnerJson(session ?? Session, ownerVoter ?? ClusterResources.Origin(voter));
         var content = Encoding.UTF8.GetBytes(text);
@@ -92,4 +96,5 @@ internal sealed class RequestCqrsProbeAppHostFileFixture : IDisposable
     private static string OwnerJson(string session, string voter)
         => "{\"Version\":1,\"Kind\":\"Owner\",\"SessionId\":\"" + session
             + "\",\"Voter\":\"" + voter + "\"}";
+
 }

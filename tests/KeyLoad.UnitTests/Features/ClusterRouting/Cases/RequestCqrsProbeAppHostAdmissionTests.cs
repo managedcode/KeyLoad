@@ -13,6 +13,16 @@ internal sealed class RequestCqrsProbeAppHostAdmissionTests
     private const string BenchmarkProfileKey = "Benchmarks:Profile";
     private const string ComparisonTargetKey = "Benchmarks:Target";
     private const string ComparisonNodesKey = "Benchmarks:NodeCount";
+    private const string CohortEnabledKey = "KeyLoadTests:ProtocolCohort:Enabled";
+    private const string CohortNode1Key = "KeyLoadTests:ProtocolCohort:Voters:node1";
+    private const string CohortNode2Key = "KeyLoadTests:ProtocolCohort:Voters:node2";
+    private const string CohortNode3Key = "KeyLoadTests:ProtocolCohort:Voters:node3";
+    private const string TestImageNode1Key = "TestImages:node1";
+    private const string TestImageNode2Key = "TestImages:node2";
+    private const string TestImageNode3Key = "TestImages:node3";
+    private const string Node1 = "node1";
+    private const string Node2 = "node2";
+    private const string Node3 = "node3";
 
     [Test]
     public async Task ExactEphemeralThreeVoterEqualDigestProfileIsAdmitted()
@@ -49,16 +59,16 @@ internal sealed class RequestCqrsProbeAppHostAdmissionTests
                          ComparisonTargetKey, ComparisonNodesKey })
             {
                 var value = setting == SuiteKey ? "unit" : setting == BenchmarkProfileKey ? "micro" : "true";
-                var builder = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture, new(setting, value));
+                var builder = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture, new KeyValuePair<string, string?>(setting, value));
                 var error = Assert.ThrowsExactly<InvalidOperationException>(() =>
                     RequestCqrsProbeProfile.Read(builder, fixture.DataRoot, true, null, images));
                 await Assert.That(error.Message).IsEqualTo(InvalidConfiguration);
             }
             var cohort = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture,
-                new("KeyLoadTests:ProtocolCohort:Enabled", "true"),
-                new("KeyLoadTests:ProtocolCohort:Voters:node1", "old"),
-                new("KeyLoadTests:ProtocolCohort:Voters:node2", "old"),
-                new("KeyLoadTests:ProtocolCohort:Voters:node3", "old"));
+                new KeyValuePair<string, string?>(CohortEnabledKey, "true"),
+                new KeyValuePair<string, string?>(CohortNode1Key, "old"),
+                new KeyValuePair<string, string?>(CohortNode2Key, "old"),
+                new KeyValuePair<string, string?>(CohortNode3Key, "old"));
             var cohortError = Assert.ThrowsExactly<InvalidOperationException>(() =>
                 RequestCqrsProbeProfile.Read(cohort, fixture.DataRoot, true, null, images));
             await Assert.That(cohortError.Message).IsEqualTo(InvalidConfiguration);
@@ -79,20 +89,20 @@ internal sealed class RequestCqrsProbeAppHostAdmissionTests
         await RequestCqrsProbeAppHostFileFixture.WithFixtureAsync(async fixture =>
         {
             var builder = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture,
-                new("TestImages:node1", RequestCqrsProbeAppHostBuilder.ValidImage),
-                new("TestImages:node2", RequestCqrsProbeAppHostBuilder.ValidImage),
-                new("TestImages:node3", "ghcr.io/managedcode/keyload:other@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
+                new KeyValuePair<string, string?>(TestImageNode1Key, RequestCqrsProbeAppHostBuilder.ValidImage),
+                new KeyValuePair<string, string?>(TestImageNode2Key, RequestCqrsProbeAppHostBuilder.ValidImage),
+                new KeyValuePair<string, string?>(TestImageNode3Key, "ghcr.io/managedcode/keyload:other@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
             var unequal = new Dictionary<string, RuntimeContainerImage>(StringComparer.Ordinal)
             {
-                ["node1"] = RuntimeContainerImage.Read(builder, "TestImages:node1"),
-                ["node2"] = RuntimeContainerImage.Read(builder, "TestImages:node2"),
-                ["node3"] = RuntimeContainerImage.Read(builder, "TestImages:node3")
+                [Node1] = RuntimeContainerImage.Read(builder, TestImageNode1Key),
+                [Node2] = RuntimeContainerImage.Read(builder, TestImageNode2Key),
+                [Node3] = RuntimeContainerImage.Read(builder, TestImageNode3Key)
             };
             var error = Assert.ThrowsExactly<InvalidOperationException>(() =>
                 RequestCqrsProbeProfile.Read(builder, fixture.DataRoot, true, null, unequal));
             await Assert.That(error.Message).IsEqualTo(InvalidConfiguration);
             var missing = new Dictionary<string, RuntimeContainerImage>(unequal, StringComparer.Ordinal);
-            missing.Remove("node3");
+            missing.Remove(Node3);
             var missingError = Assert.ThrowsExactly<InvalidOperationException>(() =>
                 RequestCqrsProbeProfile.Read(builder, fixture.DataRoot, true, null, missing));
             await Assert.That(missingError.Message).IsEqualTo(InvalidConfiguration);

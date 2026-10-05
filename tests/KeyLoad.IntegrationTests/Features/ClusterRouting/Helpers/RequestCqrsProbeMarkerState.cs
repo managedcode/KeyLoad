@@ -43,7 +43,8 @@ internal static class RequestCqrsProbeMarkerState
     {
         for (var index = 0; index < arm.MarkerRecordCount; index++)
         {
-            var previous = arm.MarkerRecords[index]!;
+            var previous = arm.MarkerRecords[index]
+                ?? throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
             if (previous.ArmId == marker.ArmId && previous.RequestId == marker.RequestId
                 && previous.Phase == marker.Phase && previous.Outcome == marker.Outcome && previous.Voter == marker.Voter)
             {
@@ -66,8 +67,10 @@ internal static class RequestCqrsProbeMarkerState
         { return; }
         if (marker.Outcome == RequestCqrsProbeOutcome.Observed
             && (arm.GateVoter is not null || activeGates[node] >= RequestCqrsProbeFixtureProtocol.MaximumActiveGatesPerVoter))
-        { throw new InvalidOperationException(arm.GateVoter is null
-            ? RequestCqrsProbeFixtureProtocol.GateLimitExceeded : RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+        {
+            throw new InvalidOperationException(arm.GateVoter is null
+            ? RequestCqrsProbeFixtureProtocol.GateLimitExceeded : RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+        }
         if ((marker.Outcome is RequestCqrsProbeOutcome.Released or RequestCqrsProbeOutcome.Cancelled)
             && (arm.Settled || arm.GateVoter != node))
         { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }

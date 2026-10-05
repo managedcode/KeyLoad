@@ -1,8 +1,6 @@
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -25,6 +23,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
     private RequestCqrsAuthorityFaultIdentity? identity;
     private IReadOnlyList<ReplicaSiloDiscovery>? discovery;
     private OutboxHead? beforeOutbox;
+    private RequestCqrsAuthorityOutcomeOracle? outcomeOracle;
     private RequestCqrsProbeMarkerRecord? heldMarker;
     private CancellationTokenSource? operationDeadline;
     private Task<Result<CommitReceipt>>? sdkCall;
@@ -43,7 +42,8 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
         await RequestCqrsAuthorityFaultCleanup.RunAsync(scenario.root, scenario.rootCreated,
             scenario.waveStartupAttempted, scenario.controls, scenario.wave,
             scenario.caller, scenario.administrator, scenario.discovery, scenario.operationDeadline,
-            scenario.sdkCall, scenario.mcpCall, scenario.armId, scenario.originalStarted, scenario.failures).ConfigureAwait(false);
+            scenario.sdkCall, scenario.mcpCall, scenario.armId, scenario.originalStarted,
+            scenario.outcomeOracle, scenario.commandId, scenario.failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(scenario.failures);
     }
 
@@ -56,6 +56,9 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
         await PrepareAsync(operationDeadline.Token).ConfigureAwait(false);
         await RevokeWhileHeldAsync(operationDeadline.Token).ConfigureAwait(false);
         await VerifyAdminAndRevokedCallerAsync(operationDeadline.Token).ConfigureAwait(false);
+        await (outcomeOracle ?? throw new InvalidOperationException(MissingOwner)).CaptureAsync(
+            (wave ?? throw new InvalidOperationException(MissingOwner)).App, operationDeadline.Token)
+            .ConfigureAwait(false);
     }
 
     private async Task PrepareAsync(CancellationToken cancellationToken)
@@ -76,6 +79,8 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
             administrator.Sdk, cancellationToken).ConfigureAwait(false);
         caller = await RequestCqrsRf3Callers.ConnectAsync(app, RequestCqrsRf3Protocol.Node2,
             identity.Secret, cancellationToken).ConfigureAwait(false);
+        outcomeOracle = await RequestCqrsAuthorityOutcomeOracle.SeedAsync(dataRoot, profile, identity, caller,
+            cancellationToken).ConfigureAwait(false);
         await RequestCqrsAuthorityFaultAssertions.VerifyDocumentAsync(administrator, identity,
             RequestCqrsAuthorityFaultAssertions.InitialJson, 1, cancellationToken).ConfigureAwait(false);
         var status = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.OutboxStatusAsync(
@@ -183,7 +188,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(ErrorCode.Unauthenticated.ToString());
         await RequestCqrsAuthorityFaultAssertions.VerifyMcpCredentialRejectedAsync(
-            (caller ?? throw new InvalidOperationException(MissingOwner)).Mcp, activeIdentity.Secret,
+            caller.Mcp, activeIdentity.Secret,
             reference, cancellationToken).ConfigureAwait(false);
     }
 
@@ -195,8 +200,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
             identity ?? throw new InvalidOperationException(MissingOwner),
             RequestCqrsAuthorityFaultAssertions.InitialJson, 1, cancellationToken).ConfigureAwait(false);
         await RequestCqrsAuthorityFaultAssertions.VerifyOutboxUnchangedAsync(
-            (administrator ?? throw new InvalidOperationException(MissingOwner)).Sdk,
-            (identity ?? throw new InvalidOperationException(MissingOwner)).Partition, expectedHead,
+            administrator.Sdk, identity.Partition, expectedHead,
             cancellationToken).ConfigureAwait(false);
     }
 }

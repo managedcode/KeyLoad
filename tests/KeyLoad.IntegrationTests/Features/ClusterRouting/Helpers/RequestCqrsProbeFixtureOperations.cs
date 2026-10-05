@@ -1,6 +1,5 @@
-using KeyLoad.Orleans;
-using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server;
+using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -22,6 +21,8 @@ internal static class RequestCqrsProbeFixtureOperations
 
     private static string CreateNodeDirectory(string root, string node)
     {
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
         if (node is not (RequestCqrsRf3Protocol.Node1 or RequestCqrsRf3Protocol.Node2 or RequestCqrsRf3Protocol.Node3))
         { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
         var path = Path.Combine(root, node);

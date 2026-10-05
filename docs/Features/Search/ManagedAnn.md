@@ -272,6 +272,66 @@ not box it; source review and a warmed zero-byte actual value traversal measurem
 cover that specific claim, with setup/assertions outside the measured interval.
 This does not claim improved elapsed time, full ANN qualification or deadline repair.
 
+## Accepted native test-resource admission, 2026-10-05
+
+The original fb586 Linux scalar report contains3260/3263 passes and three fresh
+30-second construction-deadline errors before the filter/cancellation assertions.
+Its testcase spans reach16 concurrent cases. Contention is a hypothesis; these
+observations do not prove a production algorithm defect or performance gain.
+
+REQ-ANN-013 / AC-ANN-013: heavyweight10,000-row packed ANN fixture builds share
+one native keyed TUnit admission resource. The same complete normal/scalar suites
+retain all cases,10,000-row corpora,100-query quality cells, construction options,
+30-second operation deadlines, work/memory bounds and independent assertions.
+The key governs these test fixtures only; it changes no product admission,
+parallel execution contract, default or measured performance claim.
+
+TASK-ANN-TEST-ADMISSION: root owns this freeze and ADR-019 join; the Luna worker
+owns only a new UnitTests Search/Helpers/PackedAnnBuildResources.cs named key and
+native NotInParallel attributes on the two10,000-row AdaptiveFilteredPlanner
+methods, the wide PackedAnnBudget method, and the10,000-row PackedAnnRecall and
+PackedAnnFilter methods. Existing test bodies remain byte-identical. Production,
+shared fixtures, AppHost, global concurrency, budgets, packages and CI receive no
+worker edits. Root verifies the private base/post-hash packet, then full strict
+build/format/governance and actual Aspire normal/scalar suites. Exact-source Linux
+originals determine whether construction and the previously unreached assertions
+pass. Failure retains the original diagnostics and calls for actual profiling;
+raising deadlines or shrinking corpora is not a fallback. Rollback removes the
+key and its attributes; API/data migration and frontend are N/A for this test-only
+resource contract.
+
+## Accepted construction observation contract, 2026-10-05
+
+REQ-ANN-014 / AC-ANN-014: all seven existing synchronous 10,000-row, 16-component
+packed builds emit a bounded test-scoped observation after that same call settles,
+including failed builds. Retain the caller's actual `AnnWorkBudget`, unchanged
+corpus, options, work cap, deadline, admission key and assertions. Invoke Build
+exactly once on the same thread; return its original index or preserve its
+original failure. Capture Stopwatch ticks and current-thread allocated bytes
+immediately around Build, excluding formatting, output, loading and assertions.
+Report only fixed scenario/phase, declared record count/dimension/metric/options,
+safe outcome/code, and actual work/distance/edge counters. Never print vector or
+document values, IDs, principals, paths or exception text. These observations
+are development diagnostics, not BenchmarkDotNet or performance qualification.
+
+TASK-ANN-BUILD-OBSERVATION owns four existing Search/Cases files:
+AdaptiveFilteredPlannerTests, PackedAnnBudgetTests, PackedAnnRecallTests and
+PackedAnnFilterTests; add only Models/PackedAnnBuildObservation.cs and
+Helpers/PackedAnnBuildObservationRunner.cs. The model holds data only. The
+synchronous helper owns measurement and TUnit output, not caller inputs/budgets.
+The original Build failure remains primary if diagnostic output also fails;
+preserve native fatal priority and retain nonfatal secondary errors through the
+existing CQRS failure contract. Do not retry, launch tasks, add timeouts, change
+global concurrency, or continue later assertions after a failed Build.
+
+Root freezes this contract and ADR-019 before the Luna worker prepares a private
+base/post-hash packet. Root reviews, joins, builds strictly and runs actual Aspire
+normal/scalar cases before recording exact-source Linux evidence. AC-ANN-014
+requires all seven real call sites and unchanged original outcomes, plus source
+review of the single-call/measurement/privacy/failure boundaries. API, storage,
+frontend, SDK/MCP and migration are N/A for this test-only diagnostic stage.
+Rollback removes the observations and restores direct unchanged Build calls.
+
 Ordered graph: root freezes the contract and ADR, cluster_wave Luna/high prepares
 only PackedAnnConstruction, PackedAnnLayerSearch, PreparedSimilarity,
 SimilarityMetricMath and the new Search/Contracts/IPackedAnnSimilarity.cs in a

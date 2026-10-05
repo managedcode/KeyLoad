@@ -8,7 +8,7 @@ internal sealed class AdaptiveFilteredPlannerTests
     private const int RecordCount = PackedAnnTestData.QualityRecordCount;
     private const int TopCount = PackedAnnTestData.TopK;
 
-    [Test]
+    [Test, NotInParallel(PackedAnnBuildResources.AdmissionKey)]
     public async Task AcFilter004SelectivityPlanAndPackedSearchMatchIndependentScalarCohortOracles()
     {
         using var database = new TestDatabase();
@@ -18,8 +18,9 @@ internal sealed class AdaptiveFilteredPlannerTests
         PackedAnnTestData.Seed(database, RecordCount, space.Dimension, metric);
         var records = PackedAnnTestData.Load(database, metric);
         var options = new PackedAnnOptions { ExactThreshold = 32, Seed = PackedAnnTestData.CorpusSeed };
-        var index = PackedAnnIndexTestSupport.Build(space, records, options,
-            PackedAnnIndexTestSupport.Budget(database));
+        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.AdaptiveSelectivity,
+            space, records, options, budget);
         var query = PackedAnnTestData.Vector(31_337, space.Dimension, PackedAnnTestData.CorpusSeed);
 
         foreach (var cohort in AdaptiveFilteredPlannerOracle.Cohorts(records, query))
@@ -83,7 +84,7 @@ internal sealed class AdaptiveFilteredPlannerTests
         await Assert.That(empty.ExpansionPasses).IsEqualTo(0);
     }
 
-    [Test]
+    [Test, NotInParallel(PackedAnnBuildResources.AdmissionKey)]
     public async Task AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch()
     {
         using var database = new TestDatabase();
@@ -92,8 +93,10 @@ internal sealed class AdaptiveFilteredPlannerTests
         var space = PackedAnnTestData.Space(metric, PackedAnnTestData.QualityDimension);
         PackedAnnTestData.Seed(database, RecordCount, space.Dimension, metric);
         var records = PackedAnnTestData.Load(database, metric);
-        var index = PackedAnnIndexTestSupport.Build(space, records,
-            new PackedAnnOptions { ExactThreshold = 0, EfSearch = 1 }, PackedAnnIndexTestSupport.Budget(database));
+        var options = new PackedAnnOptions { ExactThreshold = 0, EfSearch = 1 };
+        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.AdaptiveFallback,
+            space, records, options, budget);
         var query = PackedAnnTestData.Vector(22_917, space.Dimension, PackedAnnTestData.CorpusSeed);
         var bottom = AdaptiveFilteredPlannerOracle.Rank(records, query,
             Enumerable.Range(0, records.Length).ToArray()).TakeLast(100).Select(item => item.SourceOrdinal).ToArray();

@@ -85,6 +85,10 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
 
     internal string SaveDiagnosticsEvidence() => diagnostics.SaveEvidence();
 
+    internal Task WaitForRejectionAsync(string node, McpTransportStage stage,
+        McpTransportMethodCategory methodCategory, CancellationToken cancellationToken)
+        => diagnostics.WaitForRecordAsync(node, stage, methodCategory, cancellationToken);
+
     internal Task RestartAsync(string node, CancellationToken cancellationToken)
         => runtime.RestartAsync(node, cancellationToken);
 
@@ -112,7 +116,10 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
         using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
         await ServerFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         if (diagnostics is not null)
-        { await ServerFailureObserver.ObserveAsync(() => diagnostics.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(
+                () => diagnostics.CompleteAndDrainAsync(deadline.Token), failures).ConfigureAwait(false);
+        }
         await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         SaveFailureEvidence(diagnostics, failures);
     }

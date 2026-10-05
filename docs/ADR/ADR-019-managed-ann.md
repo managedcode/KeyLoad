@@ -2,6 +2,16 @@
 
 Status: Accepted for the bounded first-party managed HNSW candidate stage on 2026-10-04. Online projection, persisted index format and public ANN capability remain unqualified and gated by later contracts.
 
+The accepted 2026-10-05 test-resource stage is REQ/AC-ANN-013 in
+[ManagedAnn](../Features/Search/ManagedAnn.md). Root freezes/reviews/joins; a Luna
+worker adds only the named Search test resource and native keyed TUnit attributes
+on the specified five heavyweight fixture methods. Test bodies, corpus sizes,
+product execution budgets and global runner concurrency remain unchanged. Verify
+the private base/post packet, full strict build/format/governance, Aspire normal
+and scalar suites and exact-source Linux originals before any qualification
+claim. Rollback removes only the resource key and attributes; there is no data,
+dependency, public API or production admission migration.
+
 ## Context and decision
 
 Exact vector scans are the correctness oracle and current public source path. The product prefers a managed-first ANN implementation; a native provider adds deployment, license, persistence, concurrency, deletion, and memory-ownership risks. Root selects an independently authored KeyLoad-owned packed managed HNSW candidate for the first computational stage, with no new package, native binary or project. This decision approves implementation of the bounded candidate and its independent real-store tests; it does not qualify recall, an online projection, a persisted format or a public capability.
@@ -111,3 +121,17 @@ class/value traversal and allocation tests, then retains full Release/static and
 Aspire native/scalar corpus evidence. Exact-source Linux and ANN lifecycle/RF3
 acceptance remain required. No persistence or public transport changes occur;
 rollback reverts these computational joins, with no store migration.
+
+## Accepted unchanged-build observations, 2026-10-05
+
+REQ/AC-ANN-014 and TASK-ANN-BUILD-OBSERVATION are frozen in
+[ManagedAnn](../Features/Search/ManagedAnn.md#accepted-construction-observation-contract-2026-10-05).
+The Luna worker owns only the four existing heavy Search case files and two new
+feature-local model/helper files in that contract; root owns review, join, strict
+checks, actual Aspire normal/scalar evidence and all-code commits. Measure the
+single existing synchronous Build after retaining its original budget. Emit
+safe counters, elapsed ticks and current-thread allocations only after it settles,
+with original/fatal failure priority. Preserve every original resource limit,
+input, assertion and admission setting. No dependency, production, data or wire
+change occurs; rollback removes only the diagnostic wrappers. This stage measures
+failure context without claiming a cause, deadline repair or performance gain.

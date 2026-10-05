@@ -119,3 +119,17 @@ Accepted before delegated writes: TASK-CRS-C1-BOUNDARY applies the existing REQ/
 Accepted before delegated implementation: TASK-CRS-C1-PHASE/CONTROL/FAULT use the exact native seams, optional silo-only observer, finite private AppHost controls, SDK/official-MCP outcome distinctions, authority/receipt/privacy oracles and worker scopes in NativeCqrsRequestV2. No public fault transport, canonical format, extra dispatcher or storage owner is added. Producer disposal is observed synchronously before deactivation scheduling, with every cleanup failure preserved. Migration of the stable command-partition activation still requires a separately frozen native scheduling/membership join and actual changed activation/silo evidence; a request activation's routine deactivation is not migration. Root owns control schema, AppHost/Server registration, fixture integration, original artifacts and final gates. Ordinary operation has no probe allocations or retained control state. Rollback disables the explicitly enabled ephemeral test profile; native request protocol/data contracts remain unchanged. This ADR remains Accepted until its full product and Linux qualification criteria pass.
 
 The exact private Version1 Owner/Arm/Release/Marker schema, file/memory bounds, disabled-mode contract, silo-only registration and ordered Server/AppHost/fixture integration are accepted in NativeCqrsRequestV2's "Accepted private phase-control schema and join" section before worker writes. Native migration is excluded from that schema. Private patches and local unit passes do not establish actual RF3 or delivered-source acceptance.
+
+## C1 native resource-log lifecycle contract, 2026-10-05
+
+TASK-CRS-DIAG-DRAIN implements REQ/AC-CRS-DIAG-003 in NativeCqrsRequestV2:
+native subscriber admission precedes actual AppHost startup, the real malformed
+guard call awaits its exact sanitized live record, and actual stop is followed
+by native stream completion and original-watcher drain before artifact write.
+The feature freezes ordered stages, precise IntegrationTests helper ownership,
+bounded waiter/storage, cancellation and fatal/cleanup failure preservation,
+root-only joins and genuine current-image Linux RF3 verification. No parser,
+assertion, public contract, canonical data, topology or dependency is changed.
+Rollback removes the test-only lifecycle stage. Original failed artifacts
+remain evidence; mechanism tests and source review do not qualify real guard
+publication or the complete ADR.

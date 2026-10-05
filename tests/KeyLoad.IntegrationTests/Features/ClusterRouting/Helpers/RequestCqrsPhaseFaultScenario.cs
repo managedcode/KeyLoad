@@ -1,8 +1,6 @@
 using Aspire.Hosting;
-using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -92,7 +90,7 @@ internal sealed class RequestCqrsPhaseFaultScenario(bool useMcp, RequestCqrsProb
         commandId = Guid.NewGuid();
         var activeCommand = RequestCqrsPhaseFaultProvisioning.UpdateCommand(persistedIdentity, commandId);
         command = activeCommand;
-        armId = (controls ?? throw new InvalidOperationException(MissingWave)).WriteArm(
+        armId = controls.WriteArm(
             persistedIdentity.PrincipalId, commandId, null, phase, RequestCqrsProbeAction.Hold);
         var originalCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         callerCancellation = originalCancellation;
@@ -114,7 +112,7 @@ internal sealed class RequestCqrsPhaseFaultScenario(bool useMcp, RequestCqrsProb
             identity ?? throw new InvalidOperationException(MissingWave),
             beforeSubmit ? RequestCqrsRf3Protocol.DocumentJson : RequestCqrsRf3Protocol.ChangedDocumentJson,
             beforeSubmit ? 1 : 2, cancellationToken).ConfigureAwait(false);
-        (callerCancellation ?? throw new InvalidOperationException(MissingTask)).Cancel();
+        await (callerCancellation ?? throw new InvalidOperationException(MissingTask)).CancelAsync().ConfigureAwait(false);
     }
 
     private async Task VerifySettledOutcomeAndRetryAsync(CancellationToken cancellationToken)

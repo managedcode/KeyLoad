@@ -1,4 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -23,9 +24,12 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
     {
         using var deadline = new CancellationTokenSource(TestDeadline);
         var failures = new List<Exception>();
-        var scope = new RequestCqrsRf3DiagnosticsTestScope(Guid.NewGuid());
-        await ServerFailureObserver.ObserveAsync(() => scenario(scope, deadline.Token), failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => scope.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await using var scope = new RequestCqrsRf3DiagnosticsTestScope(Guid.NewGuid());
+            await ServerFailureObserver.ObserveAsync(() => scenario(scope, deadline.Token), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => scope.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

@@ -24,6 +24,11 @@ this discovery does not choose the still-proposed token format, migrate a store,
 change a public API or satisfy runtime acceptance. The join requires concrete
 current file/method evidence and an ordered, disjoint implementation graph.
 
+The first concrete page stage is frozen in
+[PartitionTransfer](ClusterRouting/PartitionTransfer.md), TASK-PMOVE-PAGES and
+TASK-PMOVE-PAGE-ORACLES. Exact canonical pages retain an owned native cut;
+complete ownership, installation, token and RF3 gates remain explicit.
+
 The owner2026-10-04 native CQRS/result/long-operation requirement is specified in
 [NativeCqrs](ClusterRouting/NativeCqrs.md) and [ADR-082](../ADR/ADR-082-native-cqrs-streams.md).
 Only the real Graph/native-enumeration compatibility test stage is accepted for

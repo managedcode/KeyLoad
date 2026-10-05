@@ -14,6 +14,8 @@ internal sealed class RequestCqrsProbeRecordFileTests
     [Test]
     public async Task AcCrs004ReadsOwned0600RegularRecordBytesExactly()
     {
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException("Private file mode tests require a Unix host."); }
         using var directory = RequestCqrsProbeRecordFileFixture.Create();
         var path = directory.CreateRegular(RequestCqrsProbeRecordFileFixture.RecordName, [0x00, 0x71, 0xFF, 0x18]);
         var identity = OfflineRegularFile.Inspect(path);
@@ -104,7 +106,7 @@ internal sealed class RequestCqrsProbeRecordFileTests
     }
 
     private static async Task JoinReadAsync(Task<byte[]> read)
-        => await read.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        => await ((Task)read).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 
     private static async Task AssertRejectedWithoutDisclosureAsync(string path)
     {

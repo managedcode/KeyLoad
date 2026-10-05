@@ -10,14 +10,14 @@ internal sealed class RequestCqrsProbeRecordFileFixture : IDisposable
     internal const string OversizedName = "oversized.json";
     internal const string MaximumName = "maximum.json";
     internal const UnixFileMode PrivateFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
-    private readonly string root;
+    private RequestCqrsProbeRecordFileFixture(string root) => Root = root;
 
-    private RequestCqrsProbeRecordFileFixture(string root) => this.root = root;
-
-    internal string Root => root;
+    internal string Root { get; }
 
     internal static RequestCqrsProbeRecordFileFixture Create()
     {
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException("Private mode fixtures require a Unix host."); }
         var root = Path.Combine(Path.GetTempPath(), $"keyload-c1-probe-unit-{Guid.NewGuid():N}");
         Directory.CreateDirectory(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
         return new RequestCqrsProbeRecordFileFixture(root);
@@ -25,7 +25,9 @@ internal sealed class RequestCqrsProbeRecordFileFixture : IDisposable
 
     internal string CreateRegular(string name, ReadOnlySpan<byte> bytes)
     {
-        var path = Path.Combine(root, name);
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException("Private mode fixtures require a Unix host."); }
+        var path = Path.Combine(Root, name);
         using var stream = new FileStream(path, new FileStreamOptions
         {
             Mode = FileMode.CreateNew,
@@ -38,5 +40,6 @@ internal sealed class RequestCqrsProbeRecordFileFixture : IDisposable
         return path;
     }
 
-    public void Dispose() => Directory.Delete(root, recursive: true);
+    public void Dispose() => Directory.Delete(Root, recursive: true);
+
 }

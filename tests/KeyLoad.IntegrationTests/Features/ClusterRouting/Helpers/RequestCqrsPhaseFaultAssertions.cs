@@ -1,6 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;

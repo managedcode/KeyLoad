@@ -13,7 +13,7 @@ internal static class RequestCqrsProbeJsonWriter
         => Encode(writer =>
         {
             writer.WriteStartObject();
-            writer.WriteNumber(VersionField, Version);
+            writer.WriteNumber(VersionField, RequestCqrsProbeFixtureProtocol.Version);
             writer.WriteString(KindField, OwnerKind);
             writer.WriteString(SessionField, sessionId);
             writer.WriteString(VoterField, voter);
@@ -25,7 +25,7 @@ internal static class RequestCqrsProbeJsonWriter
         => Encode(writer =>
         {
             writer.WriteStartObject();
-            writer.WriteNumber(VersionField, Version);
+            writer.WriteNumber(VersionField, RequestCqrsProbeFixtureProtocol.Version);
             writer.WriteString(KindField, ArmKind);
             writer.WriteString(SessionField, sessionId);
             writer.WriteString(ArmIdField, armId);
@@ -44,7 +44,7 @@ internal static class RequestCqrsProbeJsonWriter
         => Encode(writer =>
         {
             writer.WriteStartObject();
-            writer.WriteNumber(VersionField, Version);
+            writer.WriteNumber(VersionField, RequestCqrsProbeFixtureProtocol.Version);
             writer.WriteString(KindField, ReleaseKind);
             writer.WriteString(SessionField, sessionId);
             writer.WriteString(ArmIdField, armId);

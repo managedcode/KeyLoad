@@ -295,3 +295,19 @@ remain mandatory separately; source or Core regression alone does not close S2.
 Rollout is homogeneous current capable nodes, retaining all original outcomes,
 watermarks and native recovery journals. Rollback of this repair reintroduces the
 denied-result retry defect and cannot be described as restoring correctness.
+
+The fresh-attempt unit oracle distinguishes denied/no-op effects from a real
+successful Batch. Denial and denied replay leave the captured outbox head
+unchanged. A successful one-mutation emission appends exactly one canonical
+OutboxEntry containing the original typed EmitRecurringOccurrences, receipt,
+commit token and committed timestamp. Compare every typed field, including empty
+composition references, independently; capture that first native stored byte
+snapshot and require byte-for-byte stability on original/fresh replay, with exact
+stored-byte counter delta. Generated record equality includes private/default
+ImmutableArray backing identity and is not a semantic receipt oracle. Native
+object-reference encoding is not an independent canonical byte encoding for a
+newly constructed equivalent object graph. Original/fresh replay cannot append
+a second entry. Root owns the
+DueFreshAttemptAssertions correction and tests through Aspire. This preserves
+the existing committed projection contract and strengthens the first source
+fixture, whose unchanged-head success assertion was incorrect.
